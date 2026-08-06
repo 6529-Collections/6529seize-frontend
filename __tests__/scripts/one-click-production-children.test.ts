@@ -5,6 +5,7 @@ const {
   classifyWorkflowRun,
   canonicalJson,
   computeDisplayTitles,
+  expectedDisplayTitle,
   expectedSelectionArtifactName,
   selectTrustedWorkflowRun,
   validateArtifactMetadata,
@@ -21,6 +22,7 @@ const {
     operationId: string;
     targetSha: string;
   }) => Record<string, unknown>;
+  expectedDisplayTitle: (input: Record<string, unknown>) => string;
   expectedSelectionArtifactName: (
     targetSha: string,
     verifierRunAttempt: number
@@ -57,6 +59,24 @@ const SELECTION_ARTIFACT_NAME = expectedSelectionArtifactName(
   TARGET_SHA,
   VERIFIER_RUN_ATTEMPT
 );
+const SOURCE_ARTIFACT = {
+  run_id: "7001",
+  run_attempt: 1,
+  id: "8001",
+  name: TARGET_ARTIFACT,
+  api_digest: ARTIFACT_DIGEST,
+  workflow_sha: LATER_MAIN_SHA,
+};
+
+function verifierTitle(sourceOverrides: Record<string, unknown> = {}) {
+  return expectedDisplayTitle({
+    workflowPath: VERIFIER_WORKFLOW_PATH,
+    operationId: OPERATION_ID,
+    targetSha: TARGET_SHA,
+    sourceArtifact: { ...SOURCE_ARTIFACT, ...sourceOverrides },
+  });
+}
+
 const SELECTION_ARTIFACT_DIGEST = `sha256:${"f".repeat(64)}`;
 
 function titles() {
@@ -149,7 +169,7 @@ function verifierRun(overrides: Record<string, unknown> = {}) {
     conclusion: "success",
     head_branch: "main",
     head_sha: VERIFIER_HEAD_SHA,
-    display_title: titles().verifier_display_title,
+    display_title: verifierTitle(),
     repository: { full_name: EXPECTED_REPOSITORY },
     head_repository: { full_name: EXPECTED_REPOSITORY },
     ...overrides,
@@ -164,6 +184,7 @@ function selectedVerifierRun(overrides: Record<string, unknown> = {}) {
     workflowId: VERIFIER_WORKFLOW_ID,
     operationId: OPERATION_ID,
     targetSha: TARGET_SHA,
+    sourceArtifact: SOURCE_ARTIFACT,
   }).run;
   if (!selected || typeof selected !== "object") {
     throw new Error("test fixture did not select a verifier run");
@@ -278,6 +299,13 @@ describe("one-click production child identity", () => {
       builder_display_title: `Build production artifact ${TARGET_SHA} [${OPERATION_ID}]`,
       verifier_display_title: `Verify production artifact ${TARGET_SHA} [${OPERATION_ID}]`,
     });
+  });
+
+  it("binds the verifier display title to the complete builder artifact identity", () => {
+    expect(verifierTitle()).toContain(
+      `builder 7001/1 8001 ${ARTIFACT_DIGEST} ${LATER_MAIN_SHA}`
+    );
+    expect(verifierTitle()).not.toBe(titles().verifier_display_title);
   });
 
   it.each([
@@ -445,6 +473,27 @@ describe("one-click production child run selection", () => {
         })
       )
     ).toThrow(/ambiguous eligible/);
+  });
+
+  it.each([
+    { run_id: "7002" },
+    { run_attempt: 2 },
+    { id: "8002" },
+    { api_digest: `sha256:${"0".repeat(64)}` },
+    { workflow_sha: FOREIGN_SHA },
+  ])("does not select a verifier bound to a different artifact: %j", (source) => {
+    const stale = verifierRun({ display_title: verifierTitle(source) });
+    expect(
+      selectTrustedWorkflowRun({
+        workflowRunsJson: { workflow_runs: [stale] },
+        repository: EXPECTED_REPOSITORY,
+        workflowPath: VERIFIER_WORKFLOW_PATH,
+        workflowId: VERIFIER_WORKFLOW_ID,
+        operationId: OPERATION_ID,
+        targetSha: TARGET_SHA,
+        sourceArtifact: SOURCE_ARTIFACT,
+      })
+    ).toMatchObject({ result: "absent", reason: "no_exact_identity_match" });
   });
 });
 

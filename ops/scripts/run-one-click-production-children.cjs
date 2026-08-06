@@ -565,6 +565,7 @@ function childSelection({
   workflowId,
   operationId,
   targetSha,
+  artifact,
 }) {
   return selectTrustedWorkflowRun({
     workflowRunsJson: workflowRuns,
@@ -573,6 +574,7 @@ function childSelection({
     workflowId,
     operationId,
     targetSha,
+    sourceArtifact: artifact,
   });
 }
 
@@ -622,6 +624,7 @@ async function dispatchChild({
           artifact_id: artifact.id,
           artifact_api_digest: artifact.api_digest,
           artifact_name: artifact.name,
+          artifact_workflow_sha: artifact.workflow_sha,
         };
   await postJson(
     client,
@@ -730,6 +733,7 @@ async function resolveChild({
       workflowId,
       operationId,
       targetSha,
+      artifact,
     });
 
     if (

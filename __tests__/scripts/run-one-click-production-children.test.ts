@@ -9,6 +9,7 @@ const {
   VERIFIER_WORKFLOW_PATH,
   canonicalJson,
   computeDisplayTitles,
+  expectedDisplayTitle,
   sha256Buffer,
 } = require("../../ops/scripts/one-click-production-children.cjs") as {
   BUILDER_WORKFLOW_PATH: string;
@@ -19,6 +20,7 @@ const {
     operationId: string;
     targetSha: string;
   }) => Record<string, unknown>;
+  expectedDisplayTitle: (input: Record<string, unknown>) => string;
   sha256Buffer: (value: Buffer) => string;
 };
 
@@ -60,10 +62,28 @@ const SELECTION_ARTIFACT_DIGEST = `sha256:${"e".repeat(64)}`;
 const BUILDER_ARTIFACT_NAME = `production-frontend-${TARGET_SHA}-${OPERATION_ID}`;
 const SELECTION_ARTIFACT_NAME = `one-click-production-selection-${TARGET_SHA}-a${VERIFIER_RUN_ATTEMPT}`;
 
+const BUILDER_SOURCE_ARTIFACT = {
+  run_id: BUILDER_RUN_ID,
+  run_attempt: BUILDER_RUN_ATTEMPT,
+  id: BUILDER_ARTIFACT_ID,
+  name: BUILDER_ARTIFACT_NAME,
+  api_digest: BUILDER_ARTIFACT_DIGEST,
+  workflow_sha: LATER_MAIN_SHA,
+};
+
 function titles() {
   return computeDisplayTitles({
     operationId: OPERATION_ID,
     targetSha: TARGET_SHA,
+  });
+}
+
+function verifierTitle(sourceOverrides: Record<string, unknown> = {}) {
+  return expectedDisplayTitle({
+    workflowPath: VERIFIER_WORKFLOW_PATH,
+    operationId: OPERATION_ID,
+    targetSha: TARGET_SHA,
+    sourceArtifact: { ...BUILDER_SOURCE_ARTIFACT, ...sourceOverrides },
   });
 }
 
@@ -96,7 +116,7 @@ function workflowRun({
     head_branch: "main",
     head_sha: headSha,
     display_title: verifier
-      ? titles().verifier_display_title
+      ? verifierTitle()
       : titles().builder_display_title,
     repository: { full_name: EXPECTED_REPOSITORY },
     head_repository: { full_name: EXPECTED_REPOSITORY },
@@ -485,6 +505,7 @@ describe("run-one-click-production-children", () => {
         artifact_id: BUILDER_ARTIFACT_ID,
         artifact_api_digest: BUILDER_ARTIFACT_DIGEST,
         artifact_name: BUILDER_ARTIFACT_NAME,
+        artifact_workflow_sha: LATER_MAIN_SHA,
       },
     });
     expect(OUTPUT_FIELDS).toContain("selection_digest");

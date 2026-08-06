@@ -112,6 +112,7 @@ describe("isolated production artifact verifier", () => {
       "artifact_id",
       "artifact_api_digest",
       "artifact_name",
+      "artifact_workflow_sha",
     ];
 
     for (const input of requiredInputs) {
@@ -133,6 +134,8 @@ describe("isolated production artifact verifier", () => {
     );
     expect(source).toContain("actions/artifacts/${ARTIFACT_ID}/zip");
     expect(source).toContain("github.run_attempt");
+    expect(source).toContain("ARTIFACT_WORKFLOW_SHA");
+    expect(source).toContain("builder ${{ inputs.artifact_run_id }}");
     expect(source).toContain("sha256sum -c SHA256SUMS");
     expect(source).toContain("unzip -Z1");
     expect(source).toContain("validate-archive-members");

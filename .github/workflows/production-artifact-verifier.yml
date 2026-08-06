@@ -31,6 +31,10 @@ on:
         type: string
         required: true
         description: Exact target-and-operation-bound builder artifact name.
+      artifact_workflow_sha:
+        type: string
+        required: true
+        description: Exact builder workflow head SHA bound to the artifact.
     outputs:
       selection_artifact_run_id:
         description: Workflow run containing the immutable selection artifact.
@@ -80,12 +84,16 @@ on:
         type: string
         required: true
         description: Exact target-and-operation-bound builder artifact name.
+      artifact_workflow_sha:
+        type: string
+        required: true
+        description: Exact builder workflow head SHA bound to the artifact.
 
 permissions:
   actions: read
   contents: read
 
-run-name: Verify production artifact ${{ inputs.target_sha }} [${{ inputs.operation_id }}]
+run-name: Verify production artifact ${{ inputs.target_sha }} [${{ inputs.operation_id }}] [builder ${{ inputs.artifact_run_id }}/${{ inputs.artifact_run_attempt }} ${{ inputs.artifact_id }} ${{ inputs.artifact_api_digest }} ${{ inputs.artifact_workflow_sha }}]
 
 concurrency:
   group: one-click-production-verifier-${{ inputs.operation_id || github.run_id }}
@@ -128,6 +136,7 @@ jobs:
           ARTIFACT_NAME: ${{ inputs.artifact_name }}
           ARTIFACT_RUN_ATTEMPT: ${{ inputs.artifact_run_attempt }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          ARTIFACT_WORKFLOW_SHA: ${{ inputs.artifact_workflow_sha }}
           OPERATION_ID: ${{ inputs.operation_id }}
           REPOSITORY: ${{ github.repository }}
           TARGET_SHA: ${{ inputs.target_sha }}
@@ -143,6 +152,7 @@ jobs:
             --artifact-api-digest "$ARTIFACT_API_DIGEST" \
             --artifact-name "$ARTIFACT_NAME" \
             --repository "$REPOSITORY" >/dev/null
+          [[ "$ARTIFACT_WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$GITHUB_REF" = refs/heads/main
 
       - name: Read exact builder run and artifact metadata

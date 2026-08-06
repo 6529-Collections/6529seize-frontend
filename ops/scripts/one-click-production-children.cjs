@@ -195,13 +195,63 @@ function computeDisplayTitles({ operationId, targetSha }) {
   });
 }
 
-function expectedDisplayTitle({ workflowPath, operationId, targetSha }) {
+function expectedVerifierDisplayTitle({ operationId, targetSha, sourceArtifact }) {
+  const binding = validateOperationBinding({ operationId, targetSha });
+  const source = requirePlainObject(
+    sourceArtifact,
+    "verifier source artifact identity"
+  );
+  const runId = requireRunId(source.run_id, "verifier source artifact run ID");
+  const runAttempt = requireRunAttempt(
+    source.run_attempt,
+    "verifier source artifact run attempt"
+  );
+  const artifactId = requirePositiveId(
+    source.id,
+    "verifier source artifact ID"
+  );
+  const artifactName = requireString(
+    source.name,
+    "verifier source artifact name"
+  );
+  const expectedArtifactName = `production-frontend-${binding.target_sha}-${binding.operation_id}`;
+  if (artifactName !== expectedArtifactName) {
+    throw new Error(
+      "verifier source artifact name is not bound to the target and operation"
+    );
+  }
+  const artifactApiDigest = requireString(
+    source.api_digest,
+    "verifier source artifact API digest"
+  );
+  if (!DIGEST_PATTERN.test(artifactApiDigest)) {
+    throw new Error(
+      "verifier source artifact API digest must be sha256:<64 lowercase hex>"
+    );
+  }
+  const artifactWorkflowSha = requireSha(
+    source.workflow_sha,
+    "verifier source artifact workflow SHA"
+  );
+  return `${VERIFIER_TITLE_PREFIX} ${binding.target_sha} [${binding.operation_id}] [builder ${runId}/${runAttempt} ${artifactId} ${artifactApiDigest} ${artifactWorkflowSha}]`;
+}
+
+function expectedDisplayTitle({
+  workflowPath,
+  operationId,
+  targetSha,
+  sourceArtifact,
+}) {
   const titles = computeDisplayTitles({ operationId, targetSha });
   if (workflowPath === BUILDER_WORKFLOW_PATH) {
     return titles.builder_display_title;
   }
   if (workflowPath === VERIFIER_WORKFLOW_PATH) {
-    return titles.verifier_display_title;
+    return expectedVerifierDisplayTitle({
+      operationId,
+      targetSha,
+      sourceArtifact,
+    });
   }
   throw new Error(
     `workflowPath is not a supported child workflow: ${workflowPath}`
@@ -367,6 +417,7 @@ function selectTrustedWorkflowRun({
   workflowId,
   operationId,
   targetSha,
+  sourceArtifact,
   allowedStates,
 }) {
   const normalizedRepository = requireRepository(repository);
@@ -377,6 +428,7 @@ function selectTrustedWorkflowRun({
     workflowPath: normalizedWorkflowPath,
     operationId: binding.operation_id,
     targetSha: binding.target_sha,
+    sourceArtifact,
   });
   const allowed = normalizeAllowedStates(allowedStates);
   const matches = [];
@@ -778,6 +830,12 @@ function normalizeSelectionRequest(options) {
       "source artifact name is not bound to the target and operation"
     );
   }
+  const expectedDisplayTitleValue = expectedDisplayTitle({
+    workflowPath,
+    operationId: binding.operation_id,
+    targetSha: binding.target_sha,
+    sourceArtifact: source,
+  });
   return {
     repository,
     workflowPath,
@@ -793,11 +851,7 @@ function normalizeSelectionRequest(options) {
       repository,
       workflowPath,
       workflowId,
-      displayTitle: expectedDisplayTitle({
-        workflowPath,
-        operationId: binding.operation_id,
-        targetSha: binding.target_sha,
-      }),
+      displayTitle: expectedDisplayTitleValue,
     },
   };
 }
