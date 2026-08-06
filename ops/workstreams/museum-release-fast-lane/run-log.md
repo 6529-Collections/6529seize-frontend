@@ -711,3 +711,12 @@
   the observed concrete count, rejects a count above 500, and requires all six
   removed declaration route families to remain request-time dynamic. Exact
   source contributor accounting remains a separate deterministic gate.
+
+## 2026-08-06 - PR 5 hosted Knip correction
+
+- Exact-head run 31075858896 reached the parallel quality lane and found two
+  unused compatibility aliases introduced on the current base by PR #3630.
+  Repository search confirmed that neither alias had a consumer. The aliases
+  were removed from `helpers/Helpers.ts`; the canonical UTF-16 limit exports in
+  `helpers/waves/drop-content-limits.ts` remain unchanged. This restores the
+  protected Linux Knip contract without changing Stream or Museum behavior.
