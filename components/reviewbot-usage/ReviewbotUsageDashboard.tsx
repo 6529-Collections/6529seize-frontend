@@ -74,7 +74,7 @@ export default function ReviewbotUsageDashboard({
         <>
           <span className="tw-sr-only" role="status">
             {t(locale, "reviewbotUsage.status.loaded", {
-              dailyRows: summary.byDay.length,
+              dailyRows: formatInteger(summary.byDay.length),
               reviewRuns: formatInteger(summary.totals.reviewRuns),
             })}
           </span>
