@@ -12,6 +12,15 @@ export const CONTENT_PAGE_SECTION_HEADING_CLASS =
 export const CONTENT_PAGE_CONTAINER_CLASS =
   "tw-px-5 tw-pb-20 tw-pt-5 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
 
+export const ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME =
+  "tw-px-4 sm:tw-px-6 lg:tw-px-8";
+
+export const ABOUT_PAGE_SURFACE_CLASS_NAME =
+  "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]";
+
+export const ABOUT_TEXT_PAGE_CONTAINER_CLASS =
+  "tw-px-5 tw-pb-4 tw-pt-4 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
+
 // Reclaims AboutCol's mobile `tw-px-3` gutter for full-bleed feature surfaces.
 // Keep the negative margin and added width paired with that column padding.
 export const ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS =
