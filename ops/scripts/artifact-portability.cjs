@@ -92,6 +92,16 @@ function sha256File(filePath, label) {
   return sha256(fs.readFileSync(filePath));
 }
 
+function normalizePackageSymlinkTarget(rawTarget, realTarget, realRoot) {
+  if (!path.isAbsolute(rawTarget)) {
+    return rawTarget.replaceAll(path.sep, "/");
+  }
+  const packageRelativeTarget = path
+    .relative(realRoot, realTarget)
+    .replaceAll(path.sep, "/");
+  return packageRelativeTarget ? `/${packageRelativeTarget}` : "/";
+}
+
 function recordPackageSymlink({
   absolutePath,
   relativePath,
@@ -116,10 +126,15 @@ function recordPackageSymlink({
     `Package symlink target must be a regular file or directory: ${absolutePath}`
   );
   walkState.symlinks.push({ absolutePath, realTarget });
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- The candidate comes from a closed walk beneath the validated package root.
+  const rawTarget = fs.readlinkSync(absolutePath);
   return {
     path: relativePath.replaceAll(path.sep, "/"),
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The candidate comes from a closed walk beneath the validated package root.
-    symlink_target: fs.readlinkSync(absolutePath).replaceAll(path.sep, "/"),
+    symlink_target: normalizePackageSymlinkTarget(
+      rawTarget,
+      realTarget,
+      realRoot
+    ),
   };
 }
 

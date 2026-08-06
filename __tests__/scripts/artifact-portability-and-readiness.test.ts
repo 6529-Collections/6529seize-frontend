@@ -680,6 +680,23 @@ describe("artifact-portability.v1", () => {
     );
   });
 
+  it("normalizes absolute internal symlinks across extraction roots", () => {
+    const left = makeArtifactFixture("staging");
+    const right = makeArtifactFixture("staging");
+    fixtures.push(left, right);
+    for (const fixture of [left, right]) {
+      fs.symlinkSync(
+        path.join(fixture.extractedRoot, ".next", "server"),
+        path.join(fixture.extractedRoot, "server-link"),
+        process.platform === "win32" ? "junction" : "dir"
+      );
+    }
+
+    expect(left.build().package_scan.tree_sha256).toBe(
+      right.build().package_scan.tree_sha256
+    );
+  });
+
   it("rejects package symlinks that escape the extracted artifact", () => {
     const fixture = makeArtifactFixture("staging");
     fixtures.push(fixture);

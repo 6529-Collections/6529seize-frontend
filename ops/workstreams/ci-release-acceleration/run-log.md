@@ -258,5 +258,6 @@
   files. A completed-real-path index proves that each target was reached and
   scanned through its canonical non-symlink path. The walker fails closed on
   broken links, targets outside the extracted artifact, uncovered targets, and
-  non-file/non-directory targets. Curated source content roots retain their
-  stricter no-symlink policy.
+  non-file/non-directory targets. Absolute internal targets are recorded as
+  package-root-relative paths so equivalent extractions produce the same tree
+  digest. Curated source content roots retain their stricter no-symlink policy.
