@@ -94,6 +94,19 @@ describe("Museum page source projection", () => {
     ],
     ["/museum/network/about", "docs/open-museum.md"],
     [
+      "/museum/network/rights",
+      "records/institutional-practice/rights-and-licenses.md",
+    ],
+    [
+      "/museum/network/rights/artists",
+      "records/institutional-practice/rights-for-artists.md",
+    ],
+    [
+      "/museum/network/rights/collectors",
+      "records/institutional-practice/rights-for-collectors.md",
+    ],
+    ["/museum/network/rights/cc-by-nc-4.0", "docs/rights/registry.json"],
+    [
       "/museum/network/stories/source-and-chronology",
       "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md",
     ],
@@ -233,6 +246,23 @@ describe("Museum page source projection", () => {
     ]);
   });
 
+  it("joins a rights entry to its exact legal-code snapshot", () => {
+    const source = resolveMuseumPageSource(
+      "/museum/network/rights/cc-by-nc-4.0",
+      buildMuseumPageSourceCatalog(publication)
+    );
+
+    expect(source).toEqual({
+      primaryPath: "docs/rights/registry.json",
+      relatedSources: [
+        {
+          path: "docs/rights/legal-texts/cc-by-nc-4.0.txt",
+          label: "legalCode",
+        },
+      ],
+    });
+  });
+
   it("covers every rendered static route and every current dynamic route", () => {
     const catalog = buildMuseumPageSourceCatalog(publication);
     const renderedStaticRoutes = [
@@ -244,6 +274,9 @@ describe("Museum page source projection", () => {
       "/museum/network/governance",
       "/museum/network/methodology",
       "/museum/network/programs",
+      "/museum/network/rights",
+      "/museum/network/rights/artists",
+      "/museum/network/rights/collectors",
       "/museum/network/stories",
       "/museum/network/stories/source-and-chronology",
       "/museum/network/stories/a-field-of-practice",
@@ -278,6 +311,10 @@ describe("Museum page source projection", () => {
           (family) =>
             `/museum/network/${family}/${encodeURIComponent(artwork.id)}`
         )
+      ),
+      ...publication.rightsHandbook.expressions.map(
+        (expression) =>
+          `/museum/network/rights/${encodeURIComponent(expression.id)}`
       ),
       "/museum/network/programs/6529NM-AP-01",
       ...Array.from(

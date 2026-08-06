@@ -338,6 +338,7 @@ export enum Period {
 
 export enum WsMessageType {
   DROP_UPDATE = "DROP_UPDATE",
+  DROP_UPDATE_REF = "DROP_UPDATE_REF",
   DROP_DELETE = "DROP_DELETE",
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
@@ -368,6 +369,65 @@ export interface WsDropUpdateMessage {
   data: ApiDrop;
   reason?: WsDropUpdateReason;
 }
+
+/**
+ * Compact reference emitted when a full DROP_UPDATE would exceed the
+ * application WebSocket frame ceiling. It deliberately carries no mutable
+ * drop content; clients must refetch the canonical drop through the feed API.
+ */
+export interface WsDropUpdateRefData {
+  readonly drop_id: string;
+  readonly wave_id: string;
+  readonly author_id: string;
+  readonly serial_no: number;
+  readonly update_type: WsDropUpdateRefUpdateType;
+  readonly reason?: string;
+}
+
+export type WsDropUpdateRefUpdateType =
+  | WsMessageType.DROP_UPDATE
+  | WsMessageType.DROP_RATING_UPDATE
+  | WsMessageType.DROP_REACTION_UPDATE;
+
+export interface WsDropUpdateRefMessage {
+  readonly type: WsMessageType.DROP_UPDATE_REF;
+  readonly data: WsDropUpdateRefData;
+}
+
+const isNonEmptyWebSocketId = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const isWsDropUpdateRefUpdateType = (
+  value: unknown
+): value is WsDropUpdateRefUpdateType =>
+  value === WsMessageType.DROP_UPDATE ||
+  value === WsMessageType.DROP_RATING_UPDATE ||
+  value === WsMessageType.DROP_REACTION_UPDATE;
+
+/**
+ * Runtime validation for the untrusted compact WebSocket payload.
+ * Number.isSafeInteger also excludes NaN, infinities, fractions, and values
+ * that cannot be represented exactly by the feed cursor.
+ */
+export const isWsDropUpdateRefData = (
+  value: unknown
+): value is WsDropUpdateRefData => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as Partial<WsDropUpdateRefData>;
+  return (
+    isNonEmptyWebSocketId(candidate.drop_id) &&
+    isNonEmptyWebSocketId(candidate.wave_id) &&
+    isNonEmptyWebSocketId(candidate.author_id) &&
+    typeof candidate.serial_no === "number" &&
+    Number.isSafeInteger(candidate.serial_no) &&
+    candidate.serial_no >= 0 &&
+    isWsDropUpdateRefUpdateType(candidate.update_type) &&
+    (candidate.reason === undefined || isNonEmptyWebSocketId(candidate.reason))
+  );
+};
 
 export interface WsDropDeleteMessage {
   type: WsMessageType.DROP_DELETE;

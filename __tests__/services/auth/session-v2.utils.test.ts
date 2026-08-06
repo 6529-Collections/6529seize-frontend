@@ -1,5 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import * as Sentry from "@sentry/nextjs";
+import { TokenRefreshCancelledError } from "@/errors/authentication";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "@/services/auth/auth.utils";
 import {
@@ -262,6 +263,43 @@ describe("session-v2.utils", () => {
       undefined,
       { authSessionVersion: "v2" }
     );
+  });
+
+  it("does not activate a native session after auth changes during secure storage persistence", async () => {
+    let finishSecureStorageWrite!: () => void;
+    const secureStorageWrite = new Promise<void>((resolve) => {
+      finishSecureStorageWrite = resolve;
+    });
+    let isCurrentAuthState = true;
+    (setNativeRefreshToken as jest.Mock).mockReturnValueOnce(
+      secureStorageWrite
+    );
+
+    const persistence = persistSessionResponse(
+      {
+        client_type: "native",
+        address: "0xabc",
+        role: null,
+        access_token: "stale-access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "stale-native-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      },
+      { shouldPersist: () => isCurrentAuthState }
+    );
+
+    expect(setNativeRefreshToken).toHaveBeenCalledWith({
+      address: "0xabc",
+      refreshToken: "stale-native-refresh-token",
+    });
+    isCurrentAuthState = false;
+    finishSecureStorageWrite();
+
+    await expect(persistence).rejects.toBeInstanceOf(
+      TokenRefreshCancelledError
+    );
+    expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
   it("marks persisted web auth as session v2", async () => {

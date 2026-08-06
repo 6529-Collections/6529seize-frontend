@@ -42,6 +42,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "@/errors/wallet";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { hasPendingInlineImageUploadMarkdown } from "@/helpers/waves/inline-image-upload.helpers";
+import {
+  MAX_DROP_STORM_UTF16_UNITS,
+  isDropPartWithinLimits,
+} from "@/helpers/waves/drop-content-limits";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -49,7 +53,7 @@ export enum CreateDropScreenType {
 }
 
 export interface CreateDropWrapperHandles {
-  requestDrop: () => CreateDropConfig;
+  requestDrop: () => CreateDropConfig | null;
   getDropSnapshot: () => CreateDropConfig;
 }
 
@@ -399,9 +403,21 @@ const CreateDropWrapper = forwardRef<
       return true;
     };
 
+    const getIsDropLimit = () =>
+      (drop?.parts.reduce(
+        (acc, part) => acc + (part.content?.length ?? 0),
+        getMarkdown()?.length ?? 0
+      ) ?? 0) > MAX_DROP_STORM_UTF16_UNITS;
+
+    const getIsPartLimit = () =>
+      !isDropPartWithinLimits(getMarkdown() ?? "") ||
+      !!drop?.parts.some((part) => !isDropPartWithinLimits(part.content ?? ""));
+
     const getCanSubmit = () =>
       !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
       !getHasPendingInlineImageUpload() &&
+      !getIsDropLimit() &&
+      !getIsPartLimit() &&
       !missingMedia.length &&
       !missingMetadata.length &&
       !!(drop?.parts.length ? getCanSubmitStorm() : true);
@@ -409,25 +425,11 @@ const CreateDropWrapper = forwardRef<
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
     const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
-    const getIsDropLimit = () =>
-      (drop?.parts.reduce(
-        (acc, part) => acc + (part.content?.length ?? 0),
-        getMarkdown()?.length ?? 0
-      ) ?? 0) >= 24000;
-
-    const getIsCharsLimit = () => {
-      const markDown = getMarkdown();
-      if (!!markDown?.length && markDown.length > 240) {
-        return true;
-      }
-      return false;
-    };
-
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&
       !getHasPendingInlineImageUpload() &&
       !getIsDropLimit() &&
-      !getIsCharsLimit();
+      !getIsPartLimit();
     const [canAddPart, setCanAddPart] = useState(getCanAddPart());
     useEffect(() => {
       setCanSubmit(getCanSubmit());
@@ -560,12 +562,15 @@ const CreateDropWrapper = forwardRef<
       };
     };
 
-    const onDropPart = (): CreateDropConfig => {
+    const onDropPart = (): CreateDropConfig | null => {
       if (loading) {
         return getDropSnapshot();
       }
       if (getHasPendingInlineImageUpload()) {
         return getDropSnapshot();
+      }
+      if (getIsDropLimit() || getIsPartLimit()) {
+        return null;
       }
       const currentDrop = getDropSnapshot();
       setDrop(currentDrop);
@@ -580,6 +585,9 @@ const CreateDropWrapper = forwardRef<
         return;
       }
       const currentDrop = onDropPart();
+      if (!currentDrop) {
+        return;
+      }
       onSubmitDrop(currentDrop);
     };
 
@@ -590,11 +598,14 @@ const CreateDropWrapper = forwardRef<
       if (getHasPendingInlineImageUpload()) {
         return getDropSnapshot();
       }
+      if (getIsDropLimit() || getIsPartLimit()) {
+        return null;
+      }
       setIsStormMode(true);
       return onDropPart();
     };
 
-    const requestDrop = (): CreateDropConfig => onDropPart();
+    const requestDrop = (): CreateDropConfig | null => onDropPart();
 
     useImperativeHandle(ref, () => ({
       getDropSnapshot,

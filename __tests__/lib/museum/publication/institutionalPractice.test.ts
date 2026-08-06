@@ -68,10 +68,8 @@ describe("institutional-practice publication aggregate", () => {
       )
     ).toBe(true);
     expect(
-      publication.documents.filter(
-        (document) =>
-          document.sourcePath.startsWith("records/institutional-practice/") ||
-          document.sourcePath === "docs/curatorial-publication-standard.md"
+      publication.documents.filter((document) =>
+        documents.some((expected) => expected.id === document.id)
       )
     ).toEqual(documents);
     for (const document of documents) {
