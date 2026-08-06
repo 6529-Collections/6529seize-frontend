@@ -149,6 +149,31 @@ describe("PublicReviewShell", () => {
     window.history.replaceState(null, "", window.location.pathname);
   });
 
+  it("can replace the generic overview paths with a review-specific guide", () => {
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Editorial title"
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
+        sections={[]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback form</div>}
+        showAudiencePaths={false}
+        source={ACTIVE_REVIEW_VERSION.source}
+      />
+    );
+
+    expect(
+      screen.queryByRole("heading", { name: "Choose a reading path" })
+    ).not.toBeInTheDocument();
+  });
+
   it("uses the exact resolved source identity instead of the active default", () => {
     const overview = ACTIVE_REVIEW_VERSION.pages[0];
     if (!overview) {

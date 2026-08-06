@@ -255,8 +255,9 @@
   extraction assertions; the portability scanner alone rejected the links.
 - The package scan now accepts only relative symbolic links whose resolved
   targets remain inside the asserted extraction root and resolve to a regular
-  file or directory. It skips the alias because the canonical target is walked
-  separately, avoiding duplicate scans and cycles. Absolute, broken, escaping,
+  file or directory. It traverses accepted aliases to retain and validate their
+  visible file projections while reading and charging each canonical file's
+  bytes once. Canonical ancestry prevents cycles. Absolute, broken, escaping,
   and unsupported-target links fail closed. Source-content roots continue to
   reject every symbolic link.
 - Review tightened that boundary further: both the immediate lexical target and
@@ -272,3 +273,9 @@
   and repeated real directories in one traversal ancestry fail closed as a
   symbolic-link cycle. The tree digest retains the link metadata and commits
   the alias-visible file projection.
+- Canonical-file accounting now de-duplicates reads, byte totals, and file
+  counts while applying the cached match result to every alias-visible path.
+  Symlink entries also retain a SHA-256 commitment to the exact raw link-target
+  bytes before their separately validated UTF-8 path text is normalized for
+  the human-readable fields. The extracted package root itself remains subject
+  to the pre-existing real-directory/no-symlink assertion.

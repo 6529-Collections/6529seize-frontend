@@ -111,6 +111,7 @@ type PortabilityInventory = MutablePortabilityInventory & {
     inputs: Array<Record<string, unknown>>;
     scan_complete: boolean;
     scan_mode: string;
+    total_bytes: number;
     [key: string]: unknown;
   };
   portability: {
@@ -791,6 +792,7 @@ describe("artifact-portability.v1", () => {
       path.join(targetDirectory, "runtime.js"),
       `globalThis.__API__=${JSON.stringify(FIXTURE_RUNTIME.API_ENDPOINT)};\n`
     );
+    const canonicalInventory = fixture.build();
     fs.symlinkSync(
       path.relative(path.dirname(linkDirectory), targetDirectory),
       linkDirectory,
@@ -800,6 +802,12 @@ describe("artifact-portability.v1", () => {
     const inventory = fixture.build();
 
     expect(inventory.package_scan.scan_complete).toBe(true);
+    expect(inventory.package_scan.file_count).toBe(
+      canonicalInventory.package_scan.file_count
+    );
+    expect(inventory.package_scan.total_bytes).toBe(
+      canonicalInventory.package_scan.total_bytes
+    );
     expect(inventory.package_scan.inputs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

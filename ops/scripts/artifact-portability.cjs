@@ -4,6 +4,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { TextDecoder } = require("node:util");
 const { parseArgs } = require("./cli-args.cjs");
 const {
   BAKED_INPUTS,
@@ -92,17 +93,29 @@ function sha256File(filePath, label) {
   return sha256(fs.readFileSync(filePath));
 }
 
+function decodeUtf8(buffer, label) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+  } catch {
+    throw new Error(`${label} is not valid UTF-8`);
+  }
+}
+
 function validateContainedPackageSymlink(root, absolutePath) {
-  let linkTarget;
+  let linkTargetBytes;
   let realTarget;
   try {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path is a directory entry from the closed extracted-package walk.
-    linkTarget = fs.readlinkSync(absolutePath);
+    linkTargetBytes = fs.readlinkSync(absolutePath, { encoding: "buffer" });
   } catch (error) {
     throw new Error(
       `Cannot read extracted-package symbolic link: ${absolutePath}: ${error.message}`
     );
   }
+  const linkTarget = decodeUtf8(
+    linkTargetBytes,
+    `Extracted package symbolic link target: ${absolutePath}`
+  );
   invariant(
     !path.isAbsolute(linkTarget),
     `Extracted package contains an absolute symbolic link: ${absolutePath}`
@@ -144,6 +157,7 @@ function validateContainedPackageSymlink(root, absolutePath) {
   );
   return {
     linkTarget,
+    linkTargetSha256: sha256(linkTargetBytes),
     realTarget,
     targetType: targetStats.isDirectory() ? "directory" : "file",
   };
@@ -162,6 +176,7 @@ function walkContainedPackageSymlink({
   const symlinkEntry = {
     path: normalizedPath,
     symlink_target: symlink.linkTarget.replaceAll(path.sep, "/"),
+    symlink_target_sha256: symlink.linkTargetSha256,
     target_path: path
       .relative(realRoot, symlink.realTarget)
       .replaceAll(path.sep, "/"),
@@ -174,7 +189,7 @@ function walkContainedPackageSymlink({
     );
     return {
       entries: [symlinkEntry],
-      scanFiles: [{ path: normalizedPath, absolutePath: symlink.realTarget }],
+      scanFiles: [{ path: normalizedPath, realPath: symlink.realTarget }],
     };
   }
 
@@ -237,7 +252,10 @@ function walkDirectory(root, relativeDirectory = "", options = {}) {
         path: normalizedPath,
         sha256: sha256File(absolutePath, "content file"),
       });
-      scanFiles.push({ path: normalizedPath, absolutePath });
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- The file is a regular entry under the asserted or validated contained directory.
+      const realPath = fs.realpathSync(absolutePath);
+      assertRealPathWithin(realRoot, realPath, "scanned file");
+      scanFiles.push({ path: normalizedPath, realPath });
     } else if (child.isSymbolicLink() && options.allowContainedSymlinks) {
       const walked = walkContainedPackageSymlink({
         root,
@@ -300,16 +318,26 @@ function scanExtractedPackage(extractedRoot, baked) {
   });
   const treeEntries = walked.entries;
   const files = walked.scanFiles;
+  const canonicalFiles = new Map();
   let totalBytes = 0;
 
   for (const file of files) {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Every scanned path is a regular file returned by the closed directory walk.
-    const bytes = fs.readFileSync(file.absolutePath);
-    totalBytes += bytes.length;
-    for (const [name, patterns] of patternsByName) {
-      if (patterns.some((pattern) => bytes.includes(pattern))) {
-        matchesByName.get(name).add(file.path);
+    let canonicalFile = canonicalFiles.get(file.realPath);
+    if (!canonicalFile) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- Every real path is a contained regular file returned by the closed directory walk.
+      const bytes = fs.readFileSync(file.realPath);
+      const matchedNames = [];
+      totalBytes += bytes.length;
+      for (const [name, patterns] of patternsByName) {
+        if (patterns.some((pattern) => bytes.includes(pattern))) {
+          matchedNames.push(name);
+        }
       }
+      canonicalFile = { matchedNames };
+      canonicalFiles.set(file.realPath, canonicalFile);
+    }
+    for (const name of canonicalFile.matchedNames) {
+      matchesByName.get(name).add(file.path);
     }
   }
 
@@ -333,7 +361,7 @@ function scanExtractedPackage(extractedRoot, baked) {
     scan_mode: "all_regular_files_exact_utf8_and_json_literals",
     scan_complete: true,
     tree_sha256: digestJson(treeEntries),
-    file_count: files.length,
+    file_count: canonicalFiles.size,
     total_bytes: totalBytes,
     input_count: inputs.length,
     present_input_count: inputs.filter((input) => input.present).length,
