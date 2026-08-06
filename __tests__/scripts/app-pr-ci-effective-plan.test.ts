@@ -80,6 +80,7 @@ describe("effective App PR CI plan", () => {
   it.each([
     ".github/workflows/deploy-staging.yml",
     "ops/scripts/deploy-staging-artifact.sh",
+    "ops/scripts/artifact-portability-report-source.cjs",
     "scripts/museum-release-tier.cjs",
     "ops/testing-strategy/museum-surface-registry.v1.json",
     "tests/packs.manifest.cjs",
@@ -87,6 +88,14 @@ describe("effective App PR CI plan", () => {
     "__tests__/components/museum/MuseumNetworkProposition.test.tsx",
   ])("requires Release Bus contracts for %s", (file) => {
     expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
+  });
+
+  it("rejects malformed portability paths without ambiguous backtracking", () => {
+    const malformed = `ops/scripts/artifact-portability-${"--".repeat(5_000)}.cjs`;
+
+    expect(executePlan([malformed]).checks.release_bus_contract.required).toBe(
+      false
+    );
   });
 
   it.each([
