@@ -83,6 +83,50 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const browserExtensionWalletRejectionMessage = "User rejected the request.";
+  const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+  const browserExtensionWalletBridgeFrames = [
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "o",
+      lineno: 12,
+      colno: 50420,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce.dispose",
+      lineno: 1,
+      colno: 30025,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce._dispose",
+      lineno: 1,
+      colno: 28455,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Object.userRejectedRequest",
+      lineno: 1,
+      colno: 15879,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "a",
+      lineno: 1,
+      colno: 16591,
+      in_app: true,
+    },
+  ];
   const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
@@ -363,6 +407,25 @@ describe("instrumentation-client", () => {
             type: browserUnhandledRejectionMechanismType,
             handled: false,
           },
+        },
+      ],
+    },
+  });
+
+  const createBrowserExtensionWalletRejectionEvent = (
+    frames: Array<Record<string, unknown>> = browserExtensionWalletBridgeFrames
+  ) => ({
+    ...createUnhandledRejectionEvent(browserExtensionWalletRejectionMessage),
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: browserExtensionWalletRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: { frames },
         },
       ],
     },
@@ -2334,6 +2397,27 @@ describe("instrumentation-client", () => {
     const result = beforeSend(noiseFilterFixtures.threeV);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the exact browser-extension wallet rejection bridge stack", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createBrowserExtensionWalletRejectionEvent());
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps a browser-extension wallet rejection with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const frames = browserExtensionWalletBridgeFrames.map((frame, index) =>
+      index === 4 ? { ...frame, colno: 16592 } : frame
+    );
+
+    const result = beforeSend(
+      createBrowserExtensionWalletRejectionEvent(frames)
+    );
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {
