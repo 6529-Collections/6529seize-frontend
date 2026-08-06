@@ -156,13 +156,19 @@ jobs:
                .repository.full_name == $repository and
                .head_repository.full_name == $repository and
                .status == "completed" and
-                 (.conclusion | IN("failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale")) and
+                 (.conclusion | IN("success", "failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale")) and
                 (.head_sha | test("^[a-f0-9]{40}$")) and
                 (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
               ' "$workflow_file" >/dev/null
 
             target_sha="$(jq -er '.head_sha' "$workflow_file")"
             deploy_attempt="$(jq -er '.run_attempt | numbers' "$workflow_file")"
+            deploy_conclusion="$(jq -er '.conclusion' "$workflow_file")"
+            if [ "$deploy_conclusion" = success ]; then
+              echo "Successful deployment remains bound until automatic Production E2E."
+              echo "action=ignore" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             jobs_file="$proof_dir/failure-jobs.json"
             gh api \
               "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/attempts/${deploy_attempt}/jobs?per_page=100" \

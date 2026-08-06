@@ -95,6 +95,12 @@ describe("one-click production authority completion", () => {
       '.display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]")'
     );
     expect(completionSource).toContain(
+      'if [ "$deploy_conclusion" = success ]; then'
+    );
+    expect(completionSource).toContain(
+      "Successful deployment remains bound until automatic Production E2E."
+    );
+    expect(completionSource).toContain(
       '"one-click-production-operation-${deploy_run_id}"'
     );
     expect(completionSource).toContain(
