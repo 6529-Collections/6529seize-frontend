@@ -62,9 +62,9 @@ export default function CodeExample({ code }: CodeExampleProps) {
       >
         {copied ? "Copied!" : "Copy"}
       </button>
-      <span role="status" aria-atomic="true" className="tw-sr-only">
+      <output aria-atomic="true" className="tw-sr-only">
         {copied ? "Copied!" : ""}
-      </span>
+      </output>
       <Tooltip
         id={tooltipId}
         place="top"

@@ -367,12 +367,11 @@ export default function SubscriptionsReportComponent() {
   function renderEmptyState(loading: boolean, type: string) {
     if (loading) {
       return (
-        <span
-          role="status"
+        <output
           className="tw-animate-pulse tw-text-sm tw-text-iron-400 motion-reduce:tw-animate-none"
         >
           Loading {type} drops...
-        </span>
+        </output>
       );
     }
     return <>No Subscriptions Found</>;
