@@ -1,0 +1,233 @@
+name: Report artifact portability
+
+on:
+  workflow_dispatch:
+    inputs:
+      staging_run_id:
+        description: GitHub Actions run containing the staging artifact
+        required: true
+        type: string
+      staging_artifact_name:
+        description: Exact staging artifact name
+        required: true
+        type: string
+      staging_expected_run_head_sha:
+        description: Exact source workflow run head SHA
+        required: true
+        type: string
+      staging_expected_source_sha:
+        description: Exact source SHA declared by the staging artifact
+        required: true
+        type: string
+      staging_expected_workflow_path:
+        description: Trusted staging artifact producer
+        required: true
+        type: choice
+        options:
+          - .github/workflows/release-bus-v2-preflight.yml
+          - .github/workflows/deploy-staging.yml
+      production_run_id:
+        description: GitHub Actions run containing the production artifact
+        required: true
+        type: string
+      production_artifact_name:
+        description: Exact production artifact name
+        required: true
+        type: string
+      production_expected_run_head_sha:
+        description: Exact source workflow run head SHA
+        required: true
+        type: string
+      production_expected_source_sha:
+        description: Exact source SHA declared by the production artifact
+        required: true
+        type: string
+      production_expected_workflow_path:
+        description: Trusted production artifact producer
+        required: true
+        type: choice
+        options:
+          - .github/workflows/release-bus-v2-preflight.yml
+          - .github/workflows/production-build-artifact.yml
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: artifact-portability-report
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: Compare baked-input inventories (report only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Check out the exact workflow source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            ops/scripts/artifact-portability.cjs
+            ops/scripts/artifact-portability-contract.cjs
+            ops/scripts/artifact-portability-report-source.cjs
+            ops/scripts/cli-args.cjs
+          sparse-checkout-cone-mode: false
+
+      - name: Validate report inputs
+        env:
+          STAGING_RUN_ID: ${{ inputs.staging_run_id }}
+          STAGING_ARTIFACT_NAME: ${{ inputs.staging_artifact_name }}
+          STAGING_RUN_HEAD_SHA: ${{ inputs.staging_expected_run_head_sha }}
+          STAGING_SOURCE_SHA: ${{ inputs.staging_expected_source_sha }}
+          PRODUCTION_RUN_ID: ${{ inputs.production_run_id }}
+          PRODUCTION_ARTIFACT_NAME: ${{ inputs.production_artifact_name }}
+          PRODUCTION_RUN_HEAD_SHA: ${{ inputs.production_expected_run_head_sha }}
+          PRODUCTION_SOURCE_SHA: ${{ inputs.production_expected_source_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$STAGING_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$PRODUCTION_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$STAGING_ARTIFACT_NAME" =~ ^[A-Za-z0-9._-]{1,180}$ ]]
+          [[ "$PRODUCTION_ARTIFACT_NAME" =~ ^[A-Za-z0-9._-]{1,180}$ ]]
+          [[ "$STAGING_RUN_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$STAGING_SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$PRODUCTION_RUN_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$PRODUCTION_SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+
+      - name: Fetch and verify exact source workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAGING_RUN_ID: ${{ inputs.staging_run_id }}
+          STAGING_ARTIFACT_NAME: ${{ inputs.staging_artifact_name }}
+          STAGING_RUN_HEAD_SHA: ${{ inputs.staging_expected_run_head_sha }}
+          STAGING_SOURCE_SHA: ${{ inputs.staging_expected_source_sha }}
+          STAGING_WORKFLOW_PATH: ${{ inputs.staging_expected_workflow_path }}
+          PRODUCTION_RUN_ID: ${{ inputs.production_run_id }}
+          PRODUCTION_ARTIFACT_NAME: ${{ inputs.production_artifact_name }}
+          PRODUCTION_RUN_HEAD_SHA: ${{ inputs.production_expected_run_head_sha }}
+          PRODUCTION_SOURCE_SHA: ${{ inputs.production_expected_source_sha }}
+          PRODUCTION_WORKFLOW_PATH: ${{ inputs.production_expected_workflow_path }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${STAGING_RUN_ID}" > staging-run.json
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PRODUCTION_RUN_ID}" > production-run.json
+          gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${STAGING_RUN_ID}/artifacts?per_page=100" |
+            jq '{artifacts: [.[].artifacts[]]}' > staging-artifact-metadata.json
+          gh api --paginate --slurp \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${PRODUCTION_RUN_ID}/artifacts?per_page=100" |
+            jq '{artifacts: [.[].artifacts[]]}' > production-artifact-metadata.json
+          node ops/scripts/artifact-portability.cjs verify-run \
+            --role staging \
+            --repository "$GITHUB_REPOSITORY" \
+            --expected-run-id "$STAGING_RUN_ID" \
+            --expected-run-head-sha "$STAGING_RUN_HEAD_SHA" \
+            --expected-source-sha "$STAGING_SOURCE_SHA" \
+            --expected-workflow-path "$STAGING_WORKFLOW_PATH" \
+            --artifact-name "$STAGING_ARTIFACT_NAME" \
+            --run-json staging-run.json \
+            --output staging-run-provenance.json
+          node ops/scripts/artifact-portability.cjs verify-run \
+            --role production \
+            --repository "$GITHUB_REPOSITORY" \
+            --expected-run-id "$PRODUCTION_RUN_ID" \
+            --expected-run-head-sha "$PRODUCTION_RUN_HEAD_SHA" \
+            --expected-source-sha "$PRODUCTION_SOURCE_SHA" \
+            --expected-workflow-path "$PRODUCTION_WORKFLOW_PATH" \
+            --artifact-name "$PRODUCTION_ARTIFACT_NAME" \
+            --run-json production-run.json \
+            --output production-run-provenance.json
+
+      - name: Download exact staging artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.staging_run_id }}
+          name: ${{ inputs.staging_artifact_name }}
+          path: staging-artifact
+
+      - name: Download exact production artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.production_run_id }}
+          name: ${{ inputs.production_artifact_name }}
+          path: production-artifact
+
+      - name: Verify immutable inventory inputs
+        env:
+          STAGING_RUN_ID: ${{ inputs.staging_run_id }}
+          STAGING_ARTIFACT_NAME: ${{ inputs.staging_artifact_name }}
+          STAGING_RUN_HEAD_SHA: ${{ inputs.staging_expected_run_head_sha }}
+          STAGING_SOURCE_SHA: ${{ inputs.staging_expected_source_sha }}
+          STAGING_WORKFLOW_PATH: ${{ inputs.staging_expected_workflow_path }}
+          PRODUCTION_RUN_ID: ${{ inputs.production_run_id }}
+          PRODUCTION_ARTIFACT_NAME: ${{ inputs.production_artifact_name }}
+          PRODUCTION_RUN_HEAD_SHA: ${{ inputs.production_expected_run_head_sha }}
+          PRODUCTION_SOURCE_SHA: ${{ inputs.production_expected_source_sha }}
+          PRODUCTION_WORKFLOW_PATH: ${{ inputs.production_expected_workflow_path }}
+        run: |
+          set -euo pipefail
+          test -f staging-artifact/SHA256SUMS
+          test -f staging-artifact/artifact-portability.json
+          test -f production-artifact/SHA256SUMS
+          test -f production-artifact/artifact-portability.json
+          node ops/scripts/artifact-portability.cjs verify-report-source \
+            --role staging \
+            --repository "$GITHUB_REPOSITORY" \
+            --expected-run-id "$STAGING_RUN_ID" \
+            --expected-run-head-sha "$STAGING_RUN_HEAD_SHA" \
+            --expected-source-sha "$STAGING_SOURCE_SHA" \
+            --expected-workflow-path "$STAGING_WORKFLOW_PATH" \
+            --artifact-name "$STAGING_ARTIFACT_NAME" \
+            --run-json staging-run.json \
+            --artifact-metadata-json staging-artifact-metadata.json \
+            --artifact-root staging-artifact \
+            --output staging-source-provenance.json
+          node ops/scripts/artifact-portability.cjs verify-report-source \
+            --role production \
+            --repository "$GITHUB_REPOSITORY" \
+            --expected-run-id "$PRODUCTION_RUN_ID" \
+            --expected-run-head-sha "$PRODUCTION_RUN_HEAD_SHA" \
+            --expected-source-sha "$PRODUCTION_SOURCE_SHA" \
+            --expected-workflow-path "$PRODUCTION_WORKFLOW_PATH" \
+            --artifact-name "$PRODUCTION_ARTIFACT_NAME" \
+            --run-json production-run.json \
+            --artifact-metadata-json production-artifact-metadata.json \
+            --artifact-root production-artifact \
+            --output production-source-provenance.json
+
+      - name: Compare staging and production baked inputs (report only)
+        run: |
+          set -euo pipefail
+          node ops/scripts/artifact-portability.cjs compare \
+            --staging staging-artifact/artifact-portability.json \
+            --production production-artifact/artifact-portability.json \
+            --output artifact-portability-comparison.json
+          jq -e '
+            .schema_version == "artifact-portability-comparison.v1" and
+            .contract == "artifact-portability-comparison-v1" and
+            .mode == "report_only" and
+            .decision.portable == false and
+            .decision.reuse_authorized == false and
+            .decision.promotion_authorized == false
+          ' artifact-portability-comparison.json >/dev/null
+
+      - name: Upload report-only evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: artifact-portability-report-${{ github.run_id }}
+          path: |
+            artifact-portability-comparison.json
+            staging-source-provenance.json
+            production-source-provenance.json
+            staging-artifact-metadata.json
+            production-artifact-metadata.json
+          if-no-files-found: error
+          retention-days: 90

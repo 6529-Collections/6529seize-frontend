@@ -623,6 +623,18 @@ jobs:
                   aggregate_digest:(if $aggregate_evidence_digest == "" then null else $aggregate_evidence_digest end)
                 }
               }' > release-bus-artifact/manifest.json
+            node ops/scripts/artifact-portability.cjs inventory \
+              --manifest release-bus-artifact/manifest.json \
+              --package release-bus-artifact/target/package.zip \
+              --extracted-root release-bus-artifact/bundle \
+              --runtime-config release-bus-artifact/bundle/.next/PUBLIC_RUNTIME.json \
+              --assets-flag release-bus-artifact/bundle/.next/ASSETS_FROM_S3 \
+              --source-root . \
+              --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+              --environment "$ARTIFACT_ENVIRONMENT" \
+              --node-version "$(node --version)" \
+              --pnpm-version "$(pnpm --version)" \
+              --output release-bus-artifact/artifact-portability.json
           else
             # Bounded rollout bridge only. Old reconcilers do not send the v3
             # contract input and older deploy workflows understand only this
@@ -642,6 +654,20 @@ jobs:
               --arg production_digest "$production_digest" \
               '{schema_version:2,repository:"frontend",train_id:$train_id,source_sha:$source_sha,environment:"dual",reused_exact_pr_artifact:false,profiles:{staging:{package_sha256:$staging_digest},production:{package_sha256:$production_digest}}}' \
               > release-bus-artifact/manifest.json
+            for profile in staging production; do
+              node ops/scripts/artifact-portability.cjs inventory \
+                --manifest release-bus-artifact/manifest.json \
+                --package "release-bus-artifact/profiles/$profile/target/package.zip" \
+                --extracted-root "release-bus-artifact/profiles/$profile/bundle" \
+                --runtime-config "release-bus-artifact/profiles/$profile/bundle/.next/PUBLIC_RUNTIME.json" \
+                --assets-flag "release-bus-artifact/profiles/$profile/bundle/.next/ASSETS_FROM_S3" \
+                --source-root . \
+                --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+                --environment "$profile" \
+                --node-version "$(node --version)" \
+                --pnpm-version "$(pnpm --version)" \
+                --output "release-bus-artifact/profiles/$profile/artifact-portability.json"
+            done
           fi
           (cd release-bus-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"

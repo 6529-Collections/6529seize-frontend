@@ -3,6 +3,12 @@ import type { HTMLAttributes, TableHTMLAttributes } from "react";
 
 import styles from "./AboutLayout.module.css";
 
+export const ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME =
+  "tw-px-4 sm:tw-px-6 lg:tw-px-8";
+
+export const ABOUT_PAGE_SURFACE_CLASS_NAME =
+  "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]";
+
 export const ABOUT_TEXT_PAGE_CONTAINER_CLASS =
   "tw-px-5 tw-pb-4 tw-pt-4 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
 
