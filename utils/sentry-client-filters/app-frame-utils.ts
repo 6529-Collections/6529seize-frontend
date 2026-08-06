@@ -518,6 +518,19 @@ export function hasLikelyAppOwnedFrame(
   );
 }
 
+export function hasAppOwnedStackEvidence(
+  event: SentryClientEvent,
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  return (
+    hasLikelyAppOwnedFrame(frames) ||
+    hasAppOwnedStackPath(serializedStack) ||
+    hasAppOwnedStackPath(getHintExceptionStack(hint))
+  );
+}
+
 function normalizeStackPath(value: string): string {
   const webpackPrefix = "webpack-internal:///";
   const webpackSourcePrefix = "webpack://_n_e/./";

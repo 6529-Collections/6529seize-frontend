@@ -375,7 +375,8 @@ describe("instrumentation-client", () => {
   });
 
   const createRabbyChromeUserRejectedEvent = (
-    exceptionValueOverrides: Record<string, unknown> = {}
+    exceptionValueOverrides: Record<string, unknown> = {},
+    serializedStack = rabbyChromeUserRejectedStack
   ) => ({
     event_id: "rabby-chrome-user-rejected",
     exception: {
@@ -395,7 +396,7 @@ describe("instrumentation-client", () => {
       __serialized__: {
         code: 4001,
         message: "User rejected the request.",
-        stack: rabbyChromeUserRejectedStack,
+        stack: serializedStack,
       },
     },
   });
@@ -985,6 +986,21 @@ describe("instrumentation-client", () => {
         ],
       },
     });
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps Rabby Chrome user rejections with app-owned serialized frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyChromeUserRejectedEvent(
+      {},
+      [
+        rabbyChromeUserRejectedStack,
+        "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+      ].join("\n")
+    );
 
     const result = beforeSend(event);
 

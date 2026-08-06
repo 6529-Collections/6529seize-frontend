@@ -137,8 +137,9 @@ export const rabbyMobileStackContextPattern = "rabbymobile";
 export const rabbyMobileUserRejectedStackPattern = "userrejectedrequest";
 export const rabbyChromeUserRejectedCode = 4001;
 export const rabbyChromeUserRejectedMessage = "User rejected the request.";
-export const rabbyChromeUserRejectedStackHeader =
-  `Error: ${rabbyChromeUserRejectedMessage}`;
+export const rabbyChromeUserRejectedStackHeader = `Error: ${rabbyChromeUserRejectedMessage}`;
+// Rabby's pinned source maps this extension ID to its Chrome Web Store listing:
+// https://github.com/RabbyHub/Rabby/blob/606cd9c641a79aff335ee992ebe7fa8d8982c0bd/src/ui/utils/webapi.tsx#L63-L70
 export const rabbyChromeExtensionContentScriptUrlPrefix =
   "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:";
 export const rabbyChromeUserRejectedStackFunction =

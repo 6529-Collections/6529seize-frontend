@@ -7964,6 +7964,28 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it.each([
+    ["a trailing newline", `${rabbyChromeUserRejectedStack}\n`],
+    ["CRLF line endings", rabbyChromeUserRejectedStack.replace(/\n/g, "\r\n")],
+  ])("filters the Rabby Chrome rejection with %s", (_caseName, stack) => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "User rejected the request.",
+          stack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters production RabbyMobile Android user-rejected object rejections from user-agent context", () => {
     // Arrange
     const event = createRabbyMobileUserRejectedRequestEvent({
