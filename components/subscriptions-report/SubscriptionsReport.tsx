@@ -49,14 +49,14 @@ import {
   SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "@/components/about/aboutSubscriptionsStyles";
+import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
 const REPORT_SECTION_HEADING_CLASS_NAME =
   SUBSCRIPTIONS_SECTION_HEADING_CLASS;
-const REPORT_TABLE_HEADER_CLASS_NAME =
-  "tw-hidden tw-gap-4 tw-bg-iron-950 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-grid";
+const REPORT_TABLE_HEADER_CLASS_NAME = `tw-hidden tw-gap-4 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 sm:tw-grid sm:tw-px-6 sm:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 
 type MemeCalendarCurrentResponse = {
   readonly status: string;
@@ -471,7 +471,7 @@ export default function SubscriptionsReportComponent() {
             className="tw-pt-3"
             data-testid="subscriptions-report-active-drop"
           >
-            <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-overflow-hidden`}>
+            <div>
               <span className="tw-sr-only">
                 Active meme card subscribed and airdropped subscription counts
               </span>
@@ -484,7 +484,6 @@ export default function SubscriptionsReportComponent() {
                 <span className="tw-text-center">Airdropped</span>
               </div>
               <ActiveSubscriptionRow
-                className="tw-bg-iron-900"
                 count={activeDrop}
                 subscribedCount={activeSubscribedCount}
               />
@@ -506,9 +505,7 @@ export default function SubscriptionsReportComponent() {
         <div>
           {upcomingRows.length > 0 ? (
             <>
-              <div
-                className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-overflow-hidden`}
-              >
+              <div>
                 <span className="tw-sr-only">
                   Upcoming meme card subscription counts
                 </span>
@@ -531,12 +528,7 @@ export default function SubscriptionsReportComponent() {
                           ref={
                             index === animateFromIndex ? firstNewRowRef : null
                           }
-                          className={[
-                            index % 2 === 0
-                              ? "tw-bg-iron-900"
-                              : "tw-bg-iron-950",
-                            isNew ? styles["upcomingRowNew"] : "",
-                          ].join(" ")}
+                          className={isNew ? styles["upcomingRowNew"] : ""}
                           date={date}
                           count={count}
                         />
@@ -591,9 +583,7 @@ export default function SubscriptionsReportComponent() {
       <div className="tw-pt-3" data-testid="subscriptions-report-past-drops">
         <div>
           {redeemedCounts?.length > 0 ? (
-            <div
-              className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-overflow-hidden`}
-            >
+            <div>
               <span className="tw-sr-only">
                 Past meme card subscription redemptions
               </span>
@@ -605,12 +595,9 @@ export default function SubscriptionsReportComponent() {
                 <span className="tw-text-center">Subscriptions</span>
               </div>
               <div>
-                {redeemedCounts.map((count, index) => (
+                {redeemedCounts.map((count) => (
                   <RedeemedSubscriptionRow
                     key={getMemeTokenIdKey(count.token_id)}
-                    className={
-                      index % 2 === 0 ? "tw-bg-iron-900" : "tw-bg-iron-950"
-                    }
                     count={count}
                   />
                 ))}

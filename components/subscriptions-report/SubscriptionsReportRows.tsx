@@ -15,17 +15,18 @@ import {
   areMemeTokenIdsEqual,
   getMemeTokenIdLabel,
 } from "./SubscriptionsReport.utils";
+import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableStyles";
 
 export const ACTIVE_REPORT_GRID_CLASS_NAME =
   "sm:tw-grid-cols-[minmax(0,2fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)]";
 export const STANDARD_REPORT_GRID_CLASS_NAME =
   "sm:tw-grid-cols-[minmax(0,3fr)_minmax(6rem,1fr)]";
 
-const REPORT_ROW_LINK_CLASS_NAME =
-  "tw-grid tw-w-full tw-items-center tw-gap-3 tw-border-t tw-border-iron-800/60 tw-px-4 tw-py-4 tw-text-iron-100 tw-no-underline tw-transition hover:tw-bg-iron-800 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300 sm:tw-gap-4 sm:tw-px-6";
+const REPORT_ROW_LINK_CLASS_NAME = `tw-grid tw-w-full tw-items-center tw-gap-3 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-iron-100 tw-no-underline tw-transition hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300 sm:tw-gap-4 sm:tw-px-6 ${DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}`;
 const REPORT_ROW_TITLE_CLASS_NAME =
-  "tw-text-sm tw-leading-5 tw-text-iron-100 sm:tw-text-base";
-const REPORT_ROW_META_CLASS_NAME = "tw-text-sm tw-leading-5 tw-text-iron-400";
+  "tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-text-sm";
+const REPORT_ROW_META_CLASS_NAME =
+  "tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-text-sm";
 
 function formatVisibleSubscriptionCount(count: number): string {
   return `x${count > 0 ? count.toLocaleString() : "0"}`;
@@ -49,7 +50,7 @@ const ReportRowLink = forwardRef<
   Readonly<{
     href: string;
     gridClassName: string;
-    className: string;
+    className?: string;
     ariaLabel: string;
     children: ReactNode;
   }>
@@ -61,7 +62,7 @@ const ReportRowLink = forwardRef<
     <Link
       ref={ref}
       href={href}
-      className={`${REPORT_ROW_LINK_CLASS_NAME} ${gridClassName} ${className}`}
+      className={`${REPORT_ROW_LINK_CLASS_NAME} ${gridClassName} ${className ?? ""}`}
       aria-label={ariaLabel}
     >
       {children}
@@ -83,7 +84,7 @@ function MemeCardSummary(
     <div
       className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 ${props.className ?? ""}`}
     >
-      <div className="tw-relative tw-flex tw-h-12 tw-w-12 tw-shrink-0 tw-items-center tw-justify-center sm:tw-h-[50px] sm:tw-w-[50px]">
+      <div className="tw-relative tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center">
         <Image
           fill
           unoptimized
@@ -139,7 +140,7 @@ function ReportCountStat(
         </span>
       ) : null}
       <span
-        className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 sm:tw-text-base sm:tw-font-normal"
+        className="tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-text-sm"
         aria-hidden="true"
       >
         {props.value}
@@ -150,7 +151,6 @@ function ReportCountStat(
 
 export function ActiveSubscriptionRow(
   props: Readonly<{
-    className: string;
     count: RedeemedSubscriptionCounts;
     subscribedCount: SubscriptionCounts | null;
   }>
@@ -171,7 +171,6 @@ export function ActiveSubscriptionRow(
     <ReportRowLink
       href={`/the-memes/${tokenId}`}
       gridClassName={`tw-grid-cols-2 ${ACTIVE_REPORT_GRID_CLASS_NAME}`}
-      className={props.className}
       ariaLabel={getMemeCardAriaLabel(props.count)}
     >
       <MemeCardSummary
@@ -237,7 +236,6 @@ export const SubscriptionDayRow = forwardRef<
 
 export function RedeemedSubscriptionRow(
   props: Readonly<{
-    className: string;
     count: RedeemedSubscriptionCounts;
   }>
 ) {
@@ -247,7 +245,6 @@ export function RedeemedSubscriptionRow(
     <ReportRowLink
       href={`/the-memes/${tokenId}`}
       gridClassName={`tw-grid-cols-[minmax(0,1fr)_auto] ${STANDARD_REPORT_GRID_CLASS_NAME}`}
-      className={props.className}
       ariaLabel={getMemeCardAriaLabel(props.count)}
     >
       <MemeCardSummary count={props.count} />
