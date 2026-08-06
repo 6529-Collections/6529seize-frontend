@@ -3,7 +3,7 @@
 const {
   EXPECTED_REPOSITORY,
   normalizeTrustedManifest,
-} = require("./deploy-hub-shadow.cjs");
+} = require("./deploy-hub-manifest.cjs");
 const {
   createGitClient,
   createGithubClient,

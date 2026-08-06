@@ -1,4 +1,4 @@
-const { EXPECTED_REPOSITORY } = require("./deploy-hub-shadow.cjs");
+const { EXPECTED_REPOSITORY } = require("./deploy-hub-manifest.cjs");
 
 const OPERATION_ID_SOURCE = "[A-Za-z0-9][A-Za-z0-9._-]{0,79}";
 const OPERATION_ID_PATTERN = new RegExp(`^${OPERATION_ID_SOURCE}$`);

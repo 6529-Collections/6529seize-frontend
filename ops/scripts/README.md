@@ -14,9 +14,12 @@ wrapper expects that location.
   `ops/docs`.
 - `deployment-bus.cjs`: deployment bus manifest, validation, heartbeat,
   production-preflight, and GitHub Deployment status helper.
-- `deploy-hub-shadow.cjs`: validates exact frontend PR manifests, partitions
-  adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
-  status phases for the Deploy Hub pilot.
+- `deploy-hub-dry-run.cjs`: exercises the real frontend authority, exact-head,
+  cohort, production-readiness, and local merge/conflict planning paths while
+  lacking permission to push branches or dispatch deployment workflows. It
+  publishes clearly labelled dry-run statuses only.
+- `deploy-hub-manifest.cjs`: owns the small shared exact-request manifest and
+  adjacent-cohort contract used by both dry-run and live controllers.
 - `deploy-hub-operation.cjs`: runs the finite frontend-only Deploy Hub control
   flow, including forward-only staging removal, while canonical workflows
   retain deployment and E2E ownership. Staging composition is carried in each

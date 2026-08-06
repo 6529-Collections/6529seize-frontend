@@ -1,7 +1,7 @@
 const {
   normalizeManifest,
   partitionCohorts,
-} = require("./deploy-hub-shadow.cjs");
+} = require("./deploy-hub-manifest.cjs");
 const { addRequests } = require("./deploy-hub-staging-composition.cjs");
 const {
   assert,

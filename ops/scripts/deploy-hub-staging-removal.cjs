@@ -1,4 +1,4 @@
-const { normalizeManifest } = require("./deploy-hub-shadow.cjs");
+const { normalizeManifest } = require("./deploy-hub-manifest.cjs");
 const { removeRequest } = require("./deploy-hub-staging-composition.cjs");
 const {
   assert,

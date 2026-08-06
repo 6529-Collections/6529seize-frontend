@@ -1,6 +1,6 @@
-name: Deploy Hub - FE Shadow
+name: Deploy Hub - FE Dry Run
 
-run-name: Deploy Hub shadow ${{ inputs.operation_id }} (${{ inputs.scenario }})
+run-name: Deploy Hub shadow ${{ inputs.operation_id }} (dry-run)
 
 on:
   workflow_dispatch:
@@ -13,38 +13,20 @@ on:
         description: Ordered JSON array of exact frontend PR requests
         required: true
         type: string
-      scenario:
-        description: Deterministic shadow outcome
-        required: true
-        default: success
-        type: choice
-        options:
-          - success
-          - product-failure
-          - infrastructure-failure
-          - pre-mutation-stop
-          - post-mutation-stop
-          - stale
-      phase_delay_seconds:
-        description: Delay between fake phases for UI observation
-        required: true
-        default: "0"
-        type: choice
-        options:
-          - "0"
-          - "5"
 
 permissions:
+  checks: read
   contents: read
   pull-requests: read
   statuses: write
 
 jobs:
   shadow:
-    name: Simulate exact frontend request
+    name: Validate exact frontend deployment plan
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      checks: read
       contents: read
       pull-requests: read
       statuses: write
@@ -57,24 +39,28 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF" = "$EXPECTED_REF"
 
-      - name: Check out immutable shadow runner
+      - name: Check out immutable dry-run controller
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ github.workflow_sha }}
+          fetch-depth: 0
           persist-credentials: false
-          sparse-checkout: ops/scripts/deploy-hub-shadow.cjs
+          sparse-checkout: ops/scripts
           sparse-checkout-cone-mode: false
 
-      - name: Run permission-limited shadow operation
+      - name: Configure local merge planner
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run permission-limited dry run
         env:
           DEPLOY_HUB_ACTOR: ${{ github.actor }}
           DEPLOY_HUB_API_URL: ${{ github.api_url }}
           DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
           DEPLOY_HUB_MANIFEST: ${{ inputs.manifest }}
           DEPLOY_HUB_OPERATION_ID: ${{ inputs.operation_id }}
-          DEPLOY_HUB_PHASE_DELAY_SECONDS: ${{ inputs.phase_delay_seconds }}
           DEPLOY_HUB_REPOSITORY: ${{ github.repository }}
           DEPLOY_HUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          DEPLOY_HUB_SCENARIO: ${{ inputs.scenario }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: node ops/scripts/deploy-hub-shadow.cjs >> "$GITHUB_STEP_SUMMARY"
+        run: node ops/scripts/deploy-hub-dry-run.cjs >> "$GITHUB_STEP_SUMMARY"

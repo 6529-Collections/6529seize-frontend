@@ -38,7 +38,7 @@ const {
 } = require("../../ops/scripts/deploy-hub-staging-composition.cjs");
 const {
   EXPECTED_REPOSITORY,
-} = require("../../ops/scripts/deploy-hub-shadow.cjs");
+} = require("../../ops/scripts/deploy-hub-manifest.cjs");
 
 const ACTOR = "prxt6529";
 const SHA_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
