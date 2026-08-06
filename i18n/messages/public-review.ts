@@ -121,33 +121,44 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.overviewGuide.journey.heading":
     "How one artwork moves through Stream",
   "publicReview.overviewGuide.journey.description":
-    "See the main steps an artwork follows in Stream, from the artist's plan to sales, payments, preservation, and its final record.",
+    "See the main steps an artwork follows in Stream, from the artist's plan through sales and payments to keeping its records clear over time and marking it as final.",
   "publicReview.overviewGuide.journey.prepare.title": "Plan the artwork",
+  "publicReview.overviewGuide.journey.prepare.linkLabel": "Artist guide",
   "publicReview.overviewGuide.journey.prepare.description":
-    "The artist chooses what the artwork is, how many editions to make, and how to sell it. This happens before the artwork is added to Stream.",
+    "First, the artwork, number of editions, and sale are planned. The result may be decided by the artist, a community vote, or another review process.",
   "publicReview.overviewGuide.journey.approve.title":
     "Create the artwork records",
+  "publicReview.overviewGuide.journey.approve.linkLabel":
+    "Artwork lifecycle",
   "publicReview.overviewGuide.journey.approve.description":
-    "Stream creates a record for the artwork. The record includes its description, file links, and other details.",
+    "The artwork's contract records are created. These include its details and the wallets and percentages used to split sale money.",
   "publicReview.overviewGuide.journey.authorize.title":
-    "Authorize a specific sale",
+    "Create the permission",
+  "publicReview.overviewGuide.journey.authorize.linkLabel":
+    "Permission details",
   "publicReview.overviewGuide.journey.authorize.description":
-    "Stream's contract administrators register a specific wallet as the wallet allowed to approve sales. For each sale, that wallet signs the token, recipient, price or auction rules, and deadline. The contract rejects the sale if another wallet signed it or if any signed detail has changed.",
-  "publicReview.overviewGuide.journey.sell.title": "Mint and sell",
+    "A registered signer wallet creates permission for one exact mint or auction. Nothing happens yet.",
+  "publicReview.overviewGuide.journey.sell.title": "Use the permission",
+  "publicReview.overviewGuide.journey.sell.linkLabel":
+    "Mint and auction details",
   "publicReview.overviewGuide.journey.sell.description":
-    "At a fixed price, the sale specifies which wallet pays the set price and which wallet receives the token. It can be the same wallet. In an auction, people bid and the winner claims the token.",
+    "The permission is submitted to the contract. If it passes the checks, the contract mints the token or starts the auction, then marks the permission as used.",
   "publicReview.overviewGuide.journey.pay.title":
     "Distribute the payment",
+  "publicReview.overviewGuide.journey.pay.linkLabel": "Payment details",
   "publicReview.overviewGuide.journey.pay.description":
-    "The contract divides the sale money between the people listed for that sale, using shares chosen beforehand.",
+    "The contract splits the sale money according to the artwork's recorded payment settings: which wallets receive a share and how large each share is.",
   "publicReview.overviewGuide.journey.preserve.title":
-    "Close and lock the collection",
+    "Close and freeze the collection",
+  "publicReview.overviewGuide.journey.preserve.linkLabel": "Freeze details",
   "publicReview.overviewGuide.journey.preserve.description":
-    "When no more tokens should be created, Stream's contract administrators can close the collection. This stops new minting, prevents existing tokens from being destroyed, and permanently locks the collection's main rules. Existing tokens can still be transferred, and new preservation records can still be added.",
+    "An authorized wallet can close the collection when minting ends. This stops new tokens, blocks token destruction, and freezes the main settings.",
   "publicReview.overviewGuide.journey.finality.title":
     "Mark the artwork as complete",
+  "publicReview.overviewGuide.journey.finality.linkLabel":
+    "Finality details",
   "publicReview.overviewGuide.journey.finality.description":
-    "Later, Stream can record that the artwork is complete and its protected parts should no longer change. Before this record becomes permanent, there is a waiting period so a safety guardian can stop it if something looks wrong. For artwork linked to an artist, Stream's ADRs also require the artist's approval.",
+    "An authorized wallet starts the final step. If no guardian stops it during the waiting period and any required artist approval exists, the protected records become permanent.",
   "publicReview.overviewGuide.readPage": "Read {page}",
   "publicReview.overviewGuide.audiences.heading": "Choose what matters to you",
   "publicReview.overviewGuide.audiences.description":

@@ -76,24 +76,61 @@ describe("StreamReviewOverviewGuide", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "See the main steps an artwork follows in Stream, from the artist's plan to sales, payments, preservation, and its final record."
+        "See the main steps an artwork follows in Stream, from the artist's plan through sales and payments to keeping its records clear over time and marking it as final."
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Read Curation and TDH Authorization" })
-    ).toHaveAttribute(
+    const permissionLink = screen.getByRole("link", {
+      name: "Read Curation and TDH Authorization",
+    });
+    expect(permissionLink).toHaveAttribute(
       "href",
       "/reviews/6529-stream/curation-and-tdh-authorization"
     );
+    expect(permissionLink).toHaveTextContent("Permission details");
+    expect(
+      screen.getByRole("link", { name: "Read For Artists" })
+    ).toHaveTextContent("Artist guide");
+    const artworkLifecycleLink = screen.getByRole("link", {
+      name: "Read Artwork Lifecycle",
+    });
+    expect(artworkLifecycleLink).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/artwork-lifecycle"
+    );
+    expect(artworkLifecycleLink).toHaveTextContent("Artwork lifecycle");
+    expect(
+      screen.getByRole("link", {
+        name: "Read Fixed-Price Sales and Auctions",
+      })
+    ).toHaveTextContent("Mint and auction details");
+    expect(
+      screen.getByRole("link", {
+        name: "Read Revenue, Splits, and Royalties",
+      })
+    ).toHaveTextContent("Payment details");
+    const completionLinks = screen.getAllByRole("link", {
+      name: "Read Freezing, Preservation, and Artwork Finality",
+    });
+    expect(completionLinks).toHaveLength(2);
+    expect(completionLinks[0]).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/freezing-preservation-and-artwork-finality#core-freeze-fixes-a-defined-boundary"
+    );
+    expect(completionLinks[0]).toHaveTextContent("Freeze details");
+    expect(completionLinks[1]).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/freezing-preservation-and-artwork-finality#terminal-finality-is-delayed-for-a-reason"
+    );
+    expect(completionLinks[1]).toHaveTextContent("Finality details");
     expect(
       screen.getByText(
-        "Stream's contract administrators register a specific wallet as the wallet allowed to approve sales. For each sale, that wallet signs the token, recipient, price or auction rules, and deadline. The contract rejects the sale if another wallet signed it or if any signed detail has changed."
+        "A registered signer wallet creates permission for one exact mint or auction. Nothing happens yet."
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Plan the artwork")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The artist chooses what the artwork is, how many editions to make, and how to sell it. This happens before the artwork is added to Stream."
+        "First, the artwork, number of editions, and sale are planned. The result may be decided by the artist, a community vote, or another review process."
       )
     ).toBeInTheDocument();
     expect(
@@ -101,29 +138,28 @@ describe("StreamReviewOverviewGuide", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Stream creates a record for the artwork. The record includes its description, file links, and other details."
+        "The artwork's contract records are created. These include its details and the wallets and percentages used to split sale money."
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Authorize a specific sale")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Create the permission")).toBeInTheDocument();
+    expect(screen.getByText("Use the permission")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "At a fixed price, the sale specifies which wallet pays the set price and which wallet receives the token. It can be the same wallet. In an auction, people bid and the winner claims the token."
+        "The permission is submitted to the contract. If it passes the checks, the contract mints the token or starts the auction, then marks the permission as used."
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Distribute the payment")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The contract divides the sale money between the people listed for that sale, using shares chosen beforehand."
+        "The contract splits the sale money according to the artwork's recorded payment settings: which wallets receive a share and how large each share is."
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Close and lock the collection")
+      screen.getByText("Close and freeze the collection")
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "When no more tokens should be created, Stream's contract administrators can close the collection. This stops new minting, prevents existing tokens from being destroyed, and permanently locks the collection's main rules. Existing tokens can still be transferred, and new preservation records can still be added."
+        "An authorized wallet can close the collection when minting ends. This stops new tokens, blocks token destruction, and freezes the main settings."
       )
     ).toBeInTheDocument();
     expect(
@@ -131,7 +167,7 @@ describe("StreamReviewOverviewGuide", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Later, Stream can record that the artwork is complete and its protected parts should no longer change. Before this record becomes permanent, there is a waiting period so a safety guardian can stop it if something looks wrong. For artwork linked to an artist, Stream's ADRs also require the artist's approval."
+        "An authorized wallet starts the final step. If no guardian stops it during the waiting period and any required artist approval exists, the protected records become permanent."
       )
     ).toBeInTheDocument();
     expect(

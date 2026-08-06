@@ -9,6 +9,8 @@ import type { PublicReviewPageDefinition } from "@/lib/public-review/publicRevie
 
 type LinkedOverviewItem = {
   readonly pageId: string;
+  readonly sectionId?: string;
+  readonly linkLabelKey?: MessageKey;
   readonly titleKey: MessageKey;
   readonly descriptionKey: MessageKey;
 };
@@ -46,43 +48,52 @@ const ARTWORK_PARTS = [
   },
 ] as const satisfies readonly OverviewCopyItem[];
 
-const ARTWORK_JOURNEY = [
+const ARTWORK_JOURNEY: readonly LinkedOverviewItem[] = [
   {
     pageId: "for-artists",
+    linkLabelKey: "publicReview.overviewGuide.journey.prepare.linkLabel",
     titleKey: "publicReview.overviewGuide.journey.prepare.title",
     descriptionKey: "publicReview.overviewGuide.journey.prepare.description",
   },
   {
-    pageId: "metadata-scripts-and-dependencies",
+    pageId: "artwork-lifecycle",
+    linkLabelKey: "publicReview.overviewGuide.journey.approve.linkLabel",
     titleKey: "publicReview.overviewGuide.journey.approve.title",
     descriptionKey: "publicReview.overviewGuide.journey.approve.description",
   },
   {
     pageId: "curation-and-tdh-authorization",
+    linkLabelKey: "publicReview.overviewGuide.journey.authorize.linkLabel",
     titleKey: "publicReview.overviewGuide.journey.authorize.title",
     descriptionKey: "publicReview.overviewGuide.journey.authorize.description",
   },
   {
     pageId: "fixed-price-sales-and-auctions",
+    linkLabelKey: "publicReview.overviewGuide.journey.sell.linkLabel",
     titleKey: "publicReview.overviewGuide.journey.sell.title",
     descriptionKey: "publicReview.overviewGuide.journey.sell.description",
   },
   {
     pageId: "revenue-splits-and-royalties",
+    linkLabelKey: "publicReview.overviewGuide.journey.pay.linkLabel",
     titleKey: "publicReview.overviewGuide.journey.pay.title",
     descriptionKey: "publicReview.overviewGuide.journey.pay.description",
   },
   {
     pageId: "freezing-preservation-and-artwork-finality",
+    sectionId: "core-freeze-fixes-a-defined-boundary",
+    linkLabelKey: "publicReview.overviewGuide.journey.preserve.linkLabel",
     titleKey: "publicReview.overviewGuide.journey.preserve.title",
     descriptionKey: "publicReview.overviewGuide.journey.preserve.description",
   },
   {
     pageId: "freezing-preservation-and-artwork-finality",
+    sectionId: "terminal-finality-is-delayed-for-a-reason",
+    linkLabelKey: "publicReview.overviewGuide.journey.finality.linkLabel",
     titleKey: "publicReview.overviewGuide.journey.finality.title",
     descriptionKey: "publicReview.overviewGuide.journey.finality.description",
   },
-] as const satisfies readonly LinkedOverviewItem[];
+];
 
 const AUDIENCE_PATHS = [
   {
@@ -203,10 +214,14 @@ export function StreamReviewOverviewGuide({
             if (!page) {
               return null;
             }
+            const pageHref = getStreamReviewPageHref({ page });
+            const stepHref = step.sectionId
+              ? `${pageHref}#${step.sectionId}`
+              : pageHref;
             return (
               <li
                 key={step.titleKey}
-                className="tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 tw-py-5 sm:tw-grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:tw-items-center sm:tw-gap-5"
+                className="tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 tw-py-5 sm:tw-grid-cols-[2.5rem_minmax(0,1fr)] sm:tw-gap-5"
               >
                 <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/10 tw-font-mono tw-text-xs tw-font-semibold tw-text-primary-300">
                   {formatInteger(DEFAULT_LOCALE, index + 1)}
@@ -218,19 +233,26 @@ export function StreamReviewOverviewGuide({
                   <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
                     {t(DEFAULT_LOCALE, step.descriptionKey)}
                   </p>
+                  <Link
+                    aria-label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.overviewGuide.readPage",
+                      {
+                        page: t(DEFAULT_LOCALE, page.titleKey),
+                      }
+                    )}
+                    href={stepHref}
+                    className="tw-group tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                  >
+                    {step.linkLabelKey
+                      ? t(DEFAULT_LOCALE, step.linkLabelKey)
+                      : t(DEFAULT_LOCALE, page.titleKey)}
+                    <ArrowRightIcon
+                      aria-hidden="true"
+                      className="tw-size-3.5 tw-flex-none tw-text-iron-600 tw-transition-colors group-hover:tw-text-primary-300"
+                    />
+                  </Link>
                 </div>
-                <Link
-                  href={getStreamReviewPageHref({ page })}
-                  className="tw-group tw-col-start-2 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-justify-self-start tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-col-start-auto sm:tw-justify-self-end"
-                >
-                  {t(DEFAULT_LOCALE, "publicReview.overviewGuide.readPage", {
-                    page: t(DEFAULT_LOCALE, page.titleKey),
-                  })}
-                  <ArrowRightIcon
-                    aria-hidden="true"
-                    className="tw-size-3.5 tw-flex-none tw-text-iron-600 tw-transition-colors group-hover:tw-text-primary-300"
-                  />
-                </Link>
               </li>
             );
           })}
