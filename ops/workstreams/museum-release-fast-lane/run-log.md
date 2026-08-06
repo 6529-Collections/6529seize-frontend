@@ -734,6 +734,7 @@
   absent from both concrete and dynamic entries in `prerender-manifest.json`.
   It still enforces the 500-concrete-route ceiling. Tests reject a missing app
   route, a route that re-enters prerendering, and a 501-route regression.
+
 ## 2026-08-06 - PR 5 source-drift gate correction
 
 - Rebasing onto main `d27148d1dfd85ed8cdaa50239d59ac1e524afdc9`
@@ -894,3 +895,19 @@ disabled pending the migration proof in the implementation document.
   ownership idioms were updated without changing accepted input boundaries.
 - These changes do not alter the release authorization boundary: inventory
   status remains `NOT_PORTABLE`, and reuse and promotion remain disabled.
+
+## 2026-08-06 - PR 5 merge and PR 6 restack
+
+- The Storm owner cleared the frontend serialization hold after Production E2E
+  run 31089652308 passed both the read-only product job and the clean isolated
+  verifier against the qualified Storm deployment.
+- PR #3642 passed every exact-head check with no unresolved review thread and
+  merged as `c807f6da8efea7e39405fba8185de153096bf95d`.
+- PR #3643 was replayed as its three PR6-only commits over that exact squash
+  merge, re-signed, force-pushed with an exact lease, and retargeted to `main`.
+  The only rebase conflict was the append-only workstream log; PR5 and PR6
+  chronology were both preserved.
+- Post-restack local verification passed 105 focused tests across six suites,
+  changed-source lint, changed TypeScript for 1,381 files, the complete Jest
+  typecheck ratchet, and the Playwright typecheck. Fresh exact-head hosted
+  review and CI remain the merge authority.

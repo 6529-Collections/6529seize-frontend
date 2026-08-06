@@ -371,3 +371,26 @@ actionlint, and `codex-diff-check` also pass after extracting report-source
 validation into its own module and documenting the two canonical-path security
 boundaries. The PR6 artifact remains explicitly `NOT_PORTABLE`, report-only,
 and without deploy authority.
+
+## 2026-08-06 authoritative train state
+
+This section supersedes earlier implementation-checkpoint statements about
+publication status.
+
+- PRs 1-5 are merged. PR #3642 passed its complete exact-head gate and merged
+  as `c807f6da8efea7e39405fba8185de153096bf95d`.
+- PR #3643 has been reduced to its three PR6-only commits, replayed and signed
+  over the PR #3642 squash merge, and retargeted to `main`. Fresh exact-head
+  review and CI are required before merge.
+- PR 6 local validation passes 105 tests across six focused suites, complete
+  Jest and Playwright typechecks, changed typecheck/lint, Knip, debt ratchet,
+  actionlint, formatting, and whitespace checks. The 6529 follow-up review
+  reports no findings; security, WCAG, and i18n are clean. Advisory workflow
+  coverage and Sonar reliability findings are incorporated in the current
+  head.
+- The separate Storm composer release completed its clean isolated Production
+  E2E verification and explicitly released the serialized frontend lane before
+  PR #3642 merged.
+- No staging or production environment has been mutated by this six-PR train.
+  Final staging, E2E, production, E2E, retained qualification, and developer
+  Wave closeout remain required.
