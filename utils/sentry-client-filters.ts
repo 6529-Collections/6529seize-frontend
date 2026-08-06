@@ -27,9 +27,7 @@ export {
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
-export {
-  shouldFilterInjectedIosAutoplayNotAllowedError,
-} from "./sentry-client-filters/media";
+export { shouldFilterInjectedIosAutoplayNotAllowedError } from "./sentry-client-filters/media";
 export {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
@@ -38,6 +36,7 @@ export { shouldFilterInstagramPageHideBridgeError } from "./sentry-client-filter
 export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
 } from "./sentry-client-filters/extension-messaging";
 export { shouldFilterPoperBlockerOrphanFetchRejection } from "./sentry-client-filters/extension-fetch";
 export { shouldFilterExpectedWaveRequestReplacementAbort } from "./sentry-client-filters/wave-abort";

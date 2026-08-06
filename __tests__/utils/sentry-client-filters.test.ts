@@ -12,6 +12,7 @@ import {
   shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
   shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -305,6 +306,50 @@ describe("sentry-client-filters", () => {
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
   const extensionMessagingConnectionFailureMessage =
     "Could not establish connection. Receiving end does not exist.";
+  const browserExtensionWalletRejectionMessage = "User rejected the request.";
+  const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+  const browserExtensionWalletBridgeFrames: SentryStackFrame[] = [
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "o",
+      lineno: 12,
+      colno: 50420,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce.dispose",
+      lineno: 1,
+      colno: 30025,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce._dispose",
+      lineno: 1,
+      colno: 28455,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Object.userRejectedRequest",
+      lineno: 1,
+      colno: 15879,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "a",
+      lineno: 1,
+      colno: 16591,
+      in_app: true,
+    },
+  ];
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const webkitExtensionMessagingTabNotFoundMessage =
@@ -1139,6 +1184,40 @@ describe("sentry-client-filters", () => {
       },
     ],
     ...overrides,
+  });
+
+  const createBrowserExtensionWalletRejectionEvent = ({
+    type = "Error",
+    value = browserExtensionWalletRejectionMessage,
+    mechanismType = "auto.browser.global_handlers.onunhandledrejection",
+    handled = false,
+    frames = browserExtensionWalletBridgeFrames,
+    additionalException,
+    eventOverrides = {},
+  }: {
+    type?: string | undefined;
+    value?: string | undefined;
+    mechanismType?: string | undefined;
+    handled?: boolean | undefined;
+    frames?: SentryStackFrame[] | undefined;
+    additionalException?: SentryExceptionValue | undefined;
+    eventOverrides?: TestSentryClientEventOverrides | undefined;
+  } = {}): TestSentryClientEvent => ({
+    ...eventOverrides,
+    exception: {
+      values: [
+        {
+          type,
+          value,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: { frames },
+        },
+        ...(additionalException ? [additionalException] : []),
+      ],
+    },
   });
 
   const createPoperBlockerOrphanFetchRejectionEvent = ({
@@ -8305,6 +8384,176 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters the exact browser-extension wallet rejection bridge stack", () => {
+    const event = createBrowserExtensionWalletRejectionEvent();
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [
+      "message",
+      createBrowserExtensionWalletRejectionEvent({
+        value: "User denied the request.",
+      }),
+    ],
+    [
+      "exception type",
+      createBrowserExtensionWalletRejectionEvent({ type: "TypeError" }),
+    ],
+    [
+      "capture mechanism",
+      createBrowserExtensionWalletRejectionEvent({
+        mechanismType: "auto.browser.global_handlers.onerror",
+      }),
+    ],
+    [
+      "handled state",
+      createBrowserExtensionWalletRejectionEvent({ handled: true }),
+    ],
+    [
+      "bridge path",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.map((frame, index) =>
+          index === 0
+            ? {
+                ...frame,
+                filename: "app:///content-scripts/content.js",
+                abs_path: "app:///content-scripts/content.js",
+              }
+            : frame
+        ),
+      }),
+    ],
+    [
+      "frame function",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.map((frame, index) =>
+          index === 3 ? { ...frame, function: "userRejectedRequest" } : frame
+        ),
+      }),
+    ],
+    [
+      "frame coordinate",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.map((frame, index) =>
+          index === 4 ? { ...frame, colno: 16592 } : frame
+        ),
+      }),
+    ],
+    [
+      "missing frame",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.slice(0, -1),
+      }),
+    ],
+    [
+      "extra frame",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: [
+          ...browserExtensionWalletBridgeFrames,
+          {
+            filename: browserExtensionWalletBridgePath,
+            abs_path: browserExtensionWalletBridgePath,
+            function: "a",
+            lineno: 1,
+            colno: 16591,
+            in_app: true,
+          },
+        ],
+      }),
+    ],
+  ])(
+    "keeps a wallet rejection bridge near miss with changed %s",
+    (_, event) => {
+      const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("keeps mixed exceptions containing the wallet rejection bridge stack", () => {
+    const event = createBrowserExtensionWalletRejectionEvent({
+      additionalException: {
+        type: "TypeError",
+        value: "Application wallet state failed.",
+        stacktrace: {
+          frames: [
+            {
+              filename: "app:///services/wallet/connection.ts",
+              function: "connectWallet",
+              in_app: true,
+            },
+          ],
+        },
+      },
+    });
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps events with an empty exception list", () => {
+    const result = shouldFilterBrowserExtensionWalletRejection({
+      exception: { values: [] },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps wallet rejection bridge events without a mechanism", () => {
+    const event = createBrowserExtensionWalletRejectionEvent();
+    const value = event.exception?.values?.[0];
+    if (!value) {
+      throw new Error("Expected a wallet rejection exception value");
+    }
+    delete value.mechanism;
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps wallet rejection bridge events with app-owned original stacks", () => {
+    const event = createBrowserExtensionWalletRejectionEvent();
+    const error = new Error(browserExtensionWalletRejectionMessage);
+    error.stack = [
+      `Error: ${browserExtensionWalletRejectionMessage}`,
+      `    at o (${browserExtensionWalletBridgePath}:12:50420)`,
+      "    at requestSignature (webpack-internal:///(app-pages-browser)/./services/wallet/signature.ts:10:1)",
+    ].join("\n");
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event, {
+      originalException: error,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps wallet rejection bridge events with app-owned serialized stacks", () => {
+    const event = createBrowserExtensionWalletRejectionEvent({
+      eventOverrides: {
+        extra: {
+          __serialized__: {
+            message: browserExtensionWalletRejectionMessage,
+            stack: [
+              `Error: ${browserExtensionWalletRejectionMessage}`,
+              `    at o (${browserExtensionWalletBridgePath}:12:50420)`,
+              "    at requestSignature (app:///services/wallet/signature.ts:10:1)",
+            ].join("\n"),
+          },
+        },
+      },
+    });
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
   });
 
   it("filters observed extension messaging failures from injected script frames", () => {
