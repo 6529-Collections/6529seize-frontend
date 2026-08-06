@@ -57,9 +57,9 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   return (
     <DownloadsLayout title={props.title}>
       {isLoading && !data && (
-        <div className="tw-pb-3 tw-text-center" role="status">
+        <output className="tw-block tw-pb-3 tw-text-center">
           {t(locale, "openData.downloads.loading")}
-        </div>
+        </output>
       )}
 
       {isError && (

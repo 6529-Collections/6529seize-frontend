@@ -85,7 +85,7 @@ export function DownloadsTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody>{data.map(renderRow)}</tbody>
+        <tbody>{data.map((item, index) => renderRow(item, index))}</tbody>
       </table>
     </div>
   );

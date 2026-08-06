@@ -432,12 +432,9 @@ export default function RoyaltiesComponent() {
         </div>
         {!fetching && royalties.length === 0 && (
           <div className="tw-mt-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-px-4 tw-py-8 tw-text-center">
-            <p
-              className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-400"
-              role="status"
-            >
+            <output className="tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
               {t(locale, "memeData.royalties.empty")}
-            </p>
+            </output>
           </div>
         )}
         {!fetching && royalties.length > 0 && (

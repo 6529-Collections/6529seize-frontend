@@ -15,6 +15,7 @@ import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import { getDateFilters } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import { fetchUrl } from "@/services/6529api";
 import {
   DateIntervalsSelection,
@@ -66,6 +67,35 @@ type DateFilterSelection =
   | DateIntervalsSelection
   | typeof PRIMARY_SALES_SELECTION
   | typeof CUSTOM_BLOCKS_SELECTION;
+
+function getCustomDateSelectionLabel(
+  locale: SupportedLocale,
+  fromDate?: Date,
+  toDate?: Date
+) {
+  const formattedFromDate = fromDate?.toISOString().slice(0, 10);
+  const formattedToDate = toDate?.toISOString().slice(0, 10);
+  if (formattedFromDate && formattedToDate) {
+    return t(locale, "memeData.filters.dates.both", {
+      from: formattedFromDate,
+      to: formattedToDate,
+    });
+  }
+  if (formattedFromDate) {
+    return t(locale, "memeData.filters.dates.from", {
+      from: formattedFromDate,
+    });
+  }
+  if (formattedToDate) {
+    return t(locale, "memeData.filters.dates.to", {
+      to: formattedToDate,
+    });
+  }
+  return t(
+    locale,
+    DATE_SELECTION_MESSAGE_KEYS[DateIntervalsSelection.CUSTOM_DATES]
+  );
+}
 
 interface HeaderProps {
   title: string;
@@ -170,25 +200,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
       return t(locale, "memeData.filters.customBlocks");
     }
     if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      const formattedFromDate = fromDate?.toISOString().slice(0, 10);
-      const formattedToDate = toDate?.toISOString().slice(0, 10);
-      if (formattedFromDate && formattedToDate) {
-        return t(locale, "memeData.filters.dates.both", {
-          from: formattedFromDate,
-          to: formattedToDate,
-        });
-      }
-      if (formattedFromDate) {
-        return t(locale, "memeData.filters.dates.from", {
-          from: formattedFromDate,
-        });
-      }
-      if (formattedToDate) {
-        return t(locale, "memeData.filters.dates.to", {
-          to: formattedToDate,
-        });
-      }
-      return getDateFilterLabel(DateIntervalsSelection.CUSTOM_DATES);
+      return getCustomDateSelectionLabel(locale, fromDate, toDate);
     }
     return getDateFilterLabel(props.date_selection);
   }
