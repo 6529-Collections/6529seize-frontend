@@ -249,3 +249,33 @@
   pass 39/39. Changed lint, changed TypeScript validation, targeted formatting,
   and the Windows-aware whitespace check are green. Exact staging and
   production reruns remain the authoritative end-to-end proof.
+- Corrected staging run 31102839144 proved that the constructor now inventories
+  the ZIP extraction, then exposed the same expected Next.js dependency links
+  inside those extracted bytes. The package had already passed its listing and
+  extraction assertions; the portability scanner alone rejected the links.
+- The package scan now accepts only relative symbolic links whose resolved
+  targets remain inside the asserted extraction root and resolve to a regular
+  file or directory. It traverses accepted aliases to retain and validate their
+  visible file projections while reading and charging each canonical file's
+  bytes once. Canonical ancestry prevents cycles. Absolute, broken, escaping,
+  and unsupported-target links fail closed. Source-content roots continue to
+  reject every symbolic link.
+- Review tightened that boundary further: both the immediate lexical target and
+  the fully resolved target must remain inside the extraction root, so a link
+  cannot leave the package and return through a second link. Target type is read
+  from the already-resolved path. Accepted link name, target, canonical target,
+  and target type are committed to the package-scan tree digest while canonical
+  file bytes are scanned once through their physical path.
+- Final review requires the scanner to prove completeness through every
+  accepted alias rather than rely on the target also appearing elsewhere in
+  the root walk. Contained directory links are now traversed under their alias
+  paths, contained file links are read through their resolved physical path,
+  and repeated real directories in one traversal ancestry fail closed as a
+  symbolic-link cycle. The tree digest retains the link metadata and commits
+  the alias-visible file projection.
+- Canonical-file accounting now de-duplicates reads, byte totals, and file
+  counts while applying the cached match result to every alias-visible path.
+  Symlink entries also retain a SHA-256 commitment to the exact raw link-target
+  bytes before their separately validated UTF-8 path text is normalized for
+  the human-readable fields. The extracted package root itself remains subject
+  to the pre-existing real-directory/no-symlink assertion.
