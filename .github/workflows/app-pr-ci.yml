@@ -31,7 +31,6 @@ jobs:
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
-      deadcode_required: ${{ steps.plan_outputs.outputs.deadcode_required }}
       release_bus_contract_required: ${{ steps.plan_outputs.outputs.release_bus_contract_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
@@ -374,7 +373,7 @@ jobs:
         run: ./bin/6529 install:frozen
 
       - name: Run Knip dead-code check
-        if: matrix.lane == 'quality' && needs.plan.outputs.deadcode_required == 'true'
+        if: matrix.lane == 'quality'
         run: ./bin/6529 run deadcode:knip
 
       - name: Lint package.json versions
@@ -753,7 +752,6 @@ jobs:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
           BUILD_REQUIRED: ${{ needs.plan.outputs.build_required }}
-          DEADCODE_REQUIRED: ${{ needs.plan.outputs.deadcode_required }}
           RELEASE_BUS_CONTRACT_REQUIRED: ${{ needs.plan.outputs.release_bus_contract_required }}
           TEST_TYPECHECK_REQUIRED: ${{ needs.plan.outputs.test_typecheck_required }}
           MUSEUM_BROWSER_REQUIRED: ${{ needs.plan.outputs.playwright_museum_required }}
@@ -763,7 +761,6 @@ jobs:
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$DEADCODE_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$RELEASE_BUS_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]]
@@ -815,7 +812,6 @@ jobs:
             --arg policy_bundle_digest "$policy_bundle_digest" \
             --argjson policy_bundle_line_count "$policy_bundle_line_count" \
             --argjson build_required "$BUILD_REQUIRED" \
-            --argjson deadcode_required "$DEADCODE_REQUIRED" \
             --argjson release_bus_contract_required "$RELEASE_BUS_CONTRACT_REQUIRED" \
             --argjson test_typecheck_required "$TEST_TYPECHECK_REQUIRED" \
             --argjson museum_browser_required "$MUSEUM_BROWSER_REQUIRED" \
@@ -830,7 +826,7 @@ jobs:
               merge_sha:$merge_sha,
               head_sha:$head_sha,
               production_build_required:$build_required,
-              dependency_analysis_required:$deadcode_required,
+              dependency_analysis_required:true,
               release_bus_contract_required:$release_bus_contract_required,
               test_typecheck_required:$test_typecheck_required,
               museum_browser_required:$museum_browser_required,
@@ -842,7 +838,7 @@ jobs:
               policy_bundle_line_count:$policy_bundle_line_count,
               required_gates:([
                 "package-manager-discipline",
-                "dependency-analysis-or-plan-not-required",
+                "dependency-analysis",
                 "reviewbot-contract",
                 "generated-agent-files",
                 "release-bus-workflow-contract-or-plan-not-required",
