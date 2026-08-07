@@ -29,6 +29,7 @@ import {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterBraveWalletPageEvaluationError,
   shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
@@ -141,6 +142,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterInjectedWalletCollision(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterBraveWalletPageEvaluationError(event, hint)) {
     return true;
   }
 

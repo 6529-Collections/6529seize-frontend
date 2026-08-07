@@ -13,6 +13,7 @@ import {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterBraveWalletPageEvaluationError,
   shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -75,6 +76,26 @@ type TwitterConfigRawEventOptions = {
   frames?: SentryStackFrame[] | undefined;
   userAgent?: string | undefined;
   includeAdditionalException?: boolean | undefined;
+};
+type BraveWalletPageEvaluationEventOptions = {
+  message?: string;
+  userAgent?: string;
+  includeRequest?: boolean;
+  exceptionType?: string;
+  mechanismType?: string;
+  handled?: boolean;
+  frameFilename?: string;
+  frameAbsPath?: string;
+  functionName?: string;
+  lineNo?: number;
+  colNo?: number;
+  frames?: SentryStackFrame[];
+  transaction?: string;
+  requestUrl?: string;
+  transactionTag?: string;
+  urlTag?: string;
+  additionalException?: SentryExceptionValue;
+  serializedStack?: string;
 };
 type TwitterCurrentInsetEventOptions = {
   request?: TestSentryClientEvent["request"];
@@ -215,6 +236,10 @@ describe("sentry-client-filters", () => {
     "Network request failed. Please check your connection and try again. (/metrics)";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
+  const braveWalletSelectedAddressMessage =
+    "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')";
+  const braveWalletEmitMessage =
+    "undefined is not an object (evaluating 'window.ethereum.emit')";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const rabbyMobileUserRejectedStack =
@@ -228,6 +253,8 @@ describe("sentry-client-filters", () => {
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
   const rabbyMobileAndroidUserAgent =
     "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
+  const braveWalletUserAgent =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15 Brave";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
   const twitterForIphoneUserAgent =
@@ -576,6 +603,80 @@ describe("sentry-client-filters", () => {
       ],
     },
   });
+
+  const createBraveWalletPageEvaluationErrorEvent = ({
+    message = braveWalletSelectedAddressMessage,
+    userAgent = braveWalletUserAgent,
+    includeRequest = true,
+    exceptionType = "TypeError",
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    frameFilename =
+      "app:///waves/00000000-0000-4000-8000-000000000002",
+    frameAbsPath,
+    functionName = "global code",
+    lineNo = 1,
+    colNo = 16,
+    frames,
+    transaction = "/waves/:wave",
+    requestUrl = "/waves/[wave]",
+    transactionTag = transaction,
+    urlTag = requestUrl,
+    additionalException,
+    serializedStack,
+  }: BraveWalletPageEvaluationEventOptions = {}): TestSentryClientEvent => {
+    const defaultFrame: SentryStackFrame = {
+      filename: frameFilename,
+      ...(frameAbsPath === undefined ? {} : { abs_path: frameAbsPath }),
+      function: functionName,
+      lineno: lineNo,
+      colno: colNo,
+      in_app: true,
+    };
+
+    return {
+      transaction,
+      ...(includeRequest
+        ? {
+            request: {
+              url: requestUrl,
+              headers: {
+                "User-Agent": userAgent,
+              },
+            },
+          }
+        : {}),
+      tags: {
+        transaction: transactionTag,
+        url: urlTag,
+      },
+      exception: {
+        values: [
+          {
+            type: exceptionType,
+            value: message,
+            mechanism: {
+              type: mechanismType,
+              handled,
+            },
+            stacktrace: {
+              frames: frames ?? [defaultFrame],
+            },
+          },
+          ...(additionalException ? [additionalException] : []),
+        ],
+      },
+      ...(serializedStack
+        ? {
+            extra: {
+              __serialized__: {
+                stack: serializedStack,
+              },
+            },
+          }
+        : {}),
+    };
+  };
 
   const createInjectedWalletCollisionEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -7817,6 +7918,185 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    braveWalletSelectedAddressMessage,
+    braveWalletEmitMessage,
+  ])("filters the exact Brave Wallet page-evaluation error: %s", (message) => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent({ message });
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event);
+
+    // Assert
+    expect(event.contexts?.["browser"]).toBeUndefined();
+    expect(event.tags?.["browser.name"]).toBeUndefined();
+    expect(event.request?.headers?.["User-Agent"]).toBe(
+      braveWalletUserAgent
+    );
+    expect(result).toBe(true);
+  });
+
+  it("uses the runtime user agent for a Brave Wallet page-evaluation error without request data", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent({
+      includeRequest: false,
+    });
+
+    // Act
+    const result = withRuntimeUserAgent(braveWalletUserAgent, () =>
+      shouldFilterBraveWalletPageEvaluationError(event)
+    );
+
+    // Assert
+    expect(event.request).toBeUndefined();
+    expect(result).toBe(true);
+  });
+
+  it("filters the Brave Wallet page-evaluation error without abs_path", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent();
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event);
+
+    // Assert
+    expect(event.exception?.values?.[0]?.stacktrace?.frames?.[0]).not.toHaveProperty(
+      "abs_path"
+    );
+    expect(result).toBe(true);
+  });
+
+  it("filters the Brave Wallet error with its WebKit page stack in the hint", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent();
+    const originalException = new TypeError(
+      braveWalletSelectedAddressMessage
+    );
+    originalException.stack = [
+      `TypeError: ${braveWalletSelectedAddressMessage}`,
+      "global code@https://6529.io/waves/00000000-0000-4000-8000-000000000002:1:16",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event, {
+      originalException,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["a different user agent", { userAgent: "Mozilla/5.0 Chrome/131.0.0.0" }],
+    ["a different message", { message: "window.ethereum is unavailable" }],
+    ["a different exception type", { exceptionType: "Error" }],
+    [
+      "a different mechanism",
+      { mechanismType: "auto.browser.global_handlers.onunhandledrejection" },
+    ],
+    ["a handled exception", { handled: true }],
+    ["a different function", { functionName: "emit" }],
+    ["a different line", { lineNo: 2 }],
+    ["a different column", { colNo: 17 }],
+    [
+      "a different route document",
+      {
+        transaction: "/messages/:wave",
+        requestUrl: "/messages/[wave]",
+        transactionTag: "/messages/:wave",
+        urlTag: "/messages/[wave]",
+      },
+    ],
+    [
+      "an additional frame",
+      {
+        frames: [
+          {
+            filename:
+              "app:///waves/00000000-0000-4000-8000-000000000002",
+            abs_path:
+              "app:///waves/00000000-0000-4000-8000-000000000002",
+            function: "global code",
+            lineno: 1,
+            colno: 16,
+            in_app: true,
+          },
+          {
+            filename: "app:///components/providers/WagmiSetup.tsx",
+            abs_path: "app:///components/providers/WagmiSetup.tsx",
+            function: "installProvider",
+            in_app: true,
+          },
+        ],
+      },
+    ],
+    [
+      "a mismatched absolute path",
+      { frameAbsPath: "app:///waves/another-route" },
+    ],
+    [
+      "a serialized application stack",
+      {
+        serializedStack:
+          "TypeError: application failure\n    at installProvider (app:///components/providers/WagmiSetup.tsx:1:1)",
+      },
+    ],
+  ])(
+    "does not filter the Brave Wallet near miss: %s",
+    (_description, options) => {
+      // Arrange
+      const event = createBraveWalletPageEvaluationErrorEvent(options);
+
+      // Act
+      const result = shouldFilterBraveWalletPageEvaluationError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter the Brave Wallet error when the hint contains an app-owned stack", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent();
+    const originalException = new Error("application failure");
+    originalException.stack =
+      "TypeError: application failure\n    at installProvider (app:///components/providers/WagmiSetup.tsx:1:1)";
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event, {
+      originalException,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the Brave Wallet error when another exception is present", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent({
+      additionalException: {
+        type: "Error",
+        value: "Application wallet failure",
+        stacktrace: {
+          frames: [
+            {
+              filename: "app:///components/providers/WagmiSetup.tsx",
+              abs_path: "app:///components/providers/WagmiSetup.tsx",
+              in_app: true,
+            },
+          ],
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event);
 
     // Assert
     expect(result).toBe(false);
