@@ -757,18 +757,20 @@ it("drops highly rated child rows when their parent leaves the section", async (
       />
     );
 
+    const worthCheckingOutWaves = screen.getByLabelText(
+      "Worth checking out waves"
+    );
     fireEvent.click(
-      within(screen.getByLabelText("Worth checking out waves")).getByRole(
-        "button",
-        { name: "View 1 subwave for Mock Wave" }
-      )
+      within(worthCheckingOutWaves).getByRole("button", {
+        name: "View 1 subwave for Mock Wave",
+      })
     );
     await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
+    expect(worthCheckingOutWaves).toBeInTheDocument();
     expect(
-      screen.getByLabelText("Worth checking out waves")
+      within(worthCheckingOutWaves).getByTestId("wave-highly-rated-child")
     ).toBeInTheDocument();
-    expect(screen.getAllByTestId("wave-highly-rated-child")).toHaveLength(2);
 
     rerender(
       <WebUnifiedWavesListWaves

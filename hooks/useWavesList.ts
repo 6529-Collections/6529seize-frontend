@@ -33,6 +33,7 @@ import {
   getShouldLoadMainWaves,
   getViewerIdentityKey,
   isKnownWaveForCurrentViewer,
+  SIDEBAR_DISCOVERY_SECTION_ALL,
   SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
   type SidebarDiscoverySection,
   type SidebarWaveWithDiscoverySection,
@@ -431,10 +432,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
         existingWave?.latestFollowedSubwaveDropTimestamp ?? 0,
         wave.latestFollowedSubwaveDropTimestamp ?? 0
       );
-      let preservedSidebarSection =
-        existingWave?.sidebarSection ?? sidebarSection ?? "all";
-      if (isJoinedMode && sidebarSection === "all") {
-        preservedSidebarSection = "all";
+      const hasHighlyRatedSection =
+        existingWave?.sidebarSection ===
+          SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED ||
+        sidebarSection === SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED;
+      const hasAllSection =
+        existingWave?.sidebarSection === SIDEBAR_DISCOVERY_SECTION_ALL ||
+        sidebarSection === SIDEBAR_DISCOVERY_SECTION_ALL;
+      let preservedSidebarSection = SIDEBAR_DISCOVERY_SECTION_ALL;
+      if (hasHighlyRatedSection && (!isJoinedMode || !hasAllSection)) {
+        preservedSidebarSection = SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED;
       }
       const isPinned = pinnedWavesSet.has(wave.id);
 

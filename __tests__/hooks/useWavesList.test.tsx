@@ -703,7 +703,7 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
   expect(fetchNextFollowedActivityPage).toHaveBeenCalled();
 });
 
-test("keeps a genuine discovery overlap in the joined activity membership", () => {
+test("gives joined activity precedence over an existing discovery row", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
   const discoverySnapshot = createSidebarWave({
