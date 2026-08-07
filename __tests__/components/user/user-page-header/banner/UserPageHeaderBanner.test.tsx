@@ -81,4 +81,36 @@ describe("UserPageHeaderBanner", () => {
 
     expect(screen.queryByRole("button")).toBeNull();
   });
+
+  it("keeps mobile artwork full strength and scopes fading to desktop", () => {
+    const { container } = render(
+      <UserPageHeaderBanner
+        profile={{
+          ...baseProfile,
+          banner1: "https://example.com/banner.jpg",
+        }}
+        defaultBanner1="#000"
+        defaultBanner2="#fff"
+        canEdit={false}
+        profileLabel="alice"
+      />
+    );
+
+    const imageLayer = container.querySelector<HTMLElement>(
+      'div[style*="background-image"]'
+    );
+    expect(imageLayer).toHaveClass(
+      "md:tw-mix-blend-lighten",
+      "md:tw-opacity-60"
+    );
+    expect(imageLayer).not.toHaveClass("tw-mix-blend-lighten", "tw-opacity-60");
+
+    const overlays = container.querySelectorAll<HTMLElement>(
+      ".tw-pointer-events-none"
+    );
+    expect(overlays).toHaveLength(3);
+    expect(overlays[0]).toHaveClass("tw-ring-white/5", "md:tw-hidden");
+    expect(overlays[1]).toHaveClass("tw-hidden", "md:tw-block");
+    expect(overlays[2]).toHaveClass("tw-hidden", "md:tw-block");
+  });
 });
