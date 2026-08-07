@@ -148,9 +148,10 @@ App PR CI:
   credentials, deployment credentials, external-model API keys, or durable
   artifact-store write credentials.
 - PR CI uses changed-file lint, typechecking, related Jest contracts, and a
-  production build when the risk plan requires it. Repository-wide Knip,
-  test-helper typechecking, and release-workflow contract suites run only when
-  their owning paths change.
+  production build when the risk plan requires it. Repository-wide Knip runs
+  in the installed quality lane for every pull request; test-helper
+  typechecking and release-workflow contract suites run only when their owning
+  paths change.
 - Selected quality/contracts, production-build, smoke-Playwright, and
   critical-shell-Playwright lanes run in parallel. The lightweight final
   `Installed app checks` job preserves the required branch-protection gate and
