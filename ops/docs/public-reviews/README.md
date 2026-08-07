@@ -92,8 +92,9 @@ The current **Where Development Stands** page begins with a separately dated
 development update. It summarizes recent work, active work, launch requirements,
 evidence counts, and the source commit checked for that update. The current
 **Community Review** page begins with six plain-language review questions and
-the authorship disclosure. These additions appear only on their current,
-unversioned routes.
+the authorship disclosure. The development update and review questions appear
+only on their current, unversioned routes. Immutable version routes keep their
+exact editorial snapshot and historical authorship disclosure.
 
 The plain Overview guide appears only on the unversioned Overview and replaces
 the versioned technical Overview there. Its on-page section navigation and

@@ -32,6 +32,9 @@ describe("StreamReviewDevelopmentStatus", () => {
       screen.queryByRole("heading", { name: "Where your input would help" })
     ).not.toBeInTheDocument();
     expect(
+      screen.queryAllByRole("link", { name: /^Open this question:/ })
+    ).toHaveLength(0);
+    expect(
       screen.getByRole("link", {
         name: "Development source (opens in a new tab)",
       })
