@@ -199,13 +199,61 @@ function sha256Buffer(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
 }
 
-function sha256File(filePath) {
+function sameFileIdentity(left, right) {
+  const sameDevice =
+    left.dev === right.dev || left.dev === 0n || right.dev === 0n;
+  return sameDevice && left.ino === right.ino;
+}
+
+function sameFileSnapshot(left, right) {
+  return (
+    sameFileIdentity(left, right) &&
+    left.size === right.size &&
+    left.mtimeNs === right.mtimeNs &&
+    left.ctimeNs === right.ctimeNs
+  );
+}
+
+function readStableRegularFile(filePath, label) {
+  let descriptor;
   try {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The workflow supplies exact artifact paths in the runner temp directory.
-    return sha256Buffer(fs.readFileSync(filePath));
+    const noFollow = fs.constants.O_NOFOLLOW ?? 0;
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path is confined to an isolated artifact root and opened without following links where supported.
+    descriptor = fs.openSync(filePath, fs.constants.O_RDONLY | noFollow);
   } catch (error) {
-    fail(`unable to hash ${filePath}: ${error.message}`);
+    fail(`unable to open ${label}: ${error.message}`);
   }
+  try {
+    const openedBefore = fs.fstatSync(descriptor, { bigint: true });
+    // Bind the opened descriptor to the current directory entry. A later path
+    // replacement cannot alter the bytes read through this descriptor.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The descriptor is cross-checked against this exact confined artifact path.
+    const pathStats = fs.lstatSync(filePath, { bigint: true });
+    assert(
+      openedBefore.isFile() &&
+        pathStats.isFile() &&
+        !pathStats.isSymbolicLink(),
+      `${label} is not a regular file`
+    );
+    assert(
+      sameFileIdentity(openedBefore, pathStats),
+      `${label} changed while opening`
+    );
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- This is an already-opened, identity-checked descriptor.
+    const bytes = fs.readFileSync(descriptor);
+    const openedAfter = fs.fstatSync(descriptor, { bigint: true });
+    assert(
+      sameFileSnapshot(openedBefore, openedAfter),
+      `${label} changed while reading`
+    );
+    return bytes;
+  } finally {
+    fs.closeSync(descriptor);
+  }
+}
+
+function sha256File(filePath, label = filePath) {
+  return sha256Buffer(readStableRegularFile(filePath, label));
 }
 
 function writeTextFile(filePath, contents) {
@@ -740,25 +788,11 @@ function listRegularFiles(root, current = root, result = []) {
 
 function verifyChecksums(root, requiredFiles) {
   const rootPath = path.resolve(root);
-  let checksumBytes;
   const checksumPath = path.join(rootPath, "SHA256SUMS");
-  let checksumStat;
-  try {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- SHA256SUMS is fixed relative to the extracted artifact root.
-    checksumStat = fs.lstatSync(checksumPath);
-  } catch (error) {
-    fail(`unable to stat artifact SHA256SUMS: ${error.message}`);
-  }
-  assert(
-    checksumStat.isFile() && !checksumStat.isSymbolicLink(),
-    "artifact SHA256SUMS must be a regular file"
+  const checksumBytes = readStableRegularFile(
+    checksumPath,
+    "artifact SHA256SUMS"
   );
-  try {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The checksum file is fixed relative to the extracted artifact root.
-    checksumBytes = fs.readFileSync(checksumPath);
-  } catch (error) {
-    fail(`unable to read artifact SHA256SUMS: ${error.message}`);
-  }
   const checksumText = checksumBytes.toString("utf8");
   assert(checksumText.endsWith("\n"), "SHA256SUMS must end with a newline");
   const lines = checksumText.split("\n").slice(0, -1);
@@ -785,20 +819,10 @@ function verifyChecksums(root, requiredFiles) {
 
   for (const [relativePath, expectedDigest] of entries) {
     const filePath = safeArtifactPath(rootPath, relativePath);
-    let stat;
-    try {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path was validated and is confined to the extracted artifact root.
-      stat = fs.lstatSync(filePath);
-    } catch (error) {
-      fail(
-        `SHA256SUMS references a missing file ${relativePath}: ${error.message}`
-      );
-    }
-    assert(
-      stat.isFile(),
-      `SHA256SUMS entry is not a regular file: ${relativePath}`
+    const actualDigest = sha256File(
+      filePath,
+      `SHA256SUMS entry ${relativePath}`
     );
-    const actualDigest = sha256File(filePath);
     assert(
       actualDigest === expectedDigest,
       `SHA256SUMS digest mismatch for ${relativePath}`

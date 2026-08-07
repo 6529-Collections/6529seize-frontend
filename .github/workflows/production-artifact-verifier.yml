@@ -96,7 +96,7 @@ permissions:
 run-name: Verify production artifact ${{ inputs.target_sha }} [${{ inputs.operation_id }}] [builder ${{ inputs.artifact_run_id }}/${{ inputs.artifact_run_attempt }} ${{ inputs.artifact_id }} ${{ inputs.artifact_api_digest }} ${{ inputs.artifact_workflow_sha }}]
 
 concurrency:
-  group: one-click-production-verifier-${{ inputs.operation_id || github.run_id }}
+  group: one-click-production-verifier-${{ inputs.operation_id }}
   cancel-in-progress: false
 
 jobs:

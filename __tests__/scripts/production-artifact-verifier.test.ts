@@ -176,6 +176,10 @@ describe("isolated production artifact verifier", () => {
     );
     expect(source).toContain("actions/artifacts/${ARTIFACT_ID}/zip");
     expect(source).toContain("github.run_attempt");
+    expect(source).toContain(
+      "group: one-click-production-verifier-${{ inputs.operation_id }}"
+    );
+    expect(source).not.toContain("inputs.operation_id || github.run_id");
     expect(source).toContain("ARTIFACT_WORKFLOW_SHA");
     expect(source).toContain("builder ${{ inputs.artifact_run_id }}");
     expect(source).toContain("sha256sum -c SHA256SUMS");
@@ -580,6 +584,49 @@ describe("isolated production artifact verifier", () => {
         "target/package.zip",
       ])
     ).toThrow("symbolic links are not allowed");
+  });
+
+  it("binds each checksum read to one stable regular-file descriptor", () => {
+    if (process.platform === "win32") return;
+
+    const raceRoot = path.join(tempRoot, "checksum-race");
+    fs.mkdirSync(raceRoot, { recursive: true });
+    const manifestPath = path.join(raceRoot, "manifest.json");
+    const displacedPath = path.join(raceRoot, "manifest.displaced");
+    fs.writeFileSync(manifestPath, "{}\n");
+    writeChecksums(raceRoot, ["manifest.json"]);
+
+    const originalOpenSync = fs.openSync;
+    let displaced = false;
+    const openSpy = jest
+      .spyOn(fs, "openSync")
+      .mockImplementation((filePath, flags, mode) => {
+        const descriptor =
+          mode === undefined
+            ? originalOpenSync(filePath, flags)
+            : originalOpenSync(filePath, flags, mode);
+        if (
+          !displaced &&
+          path.resolve(String(filePath)) === path.resolve(manifestPath)
+        ) {
+          displaced = true;
+          fs.renameSync(manifestPath, displacedPath);
+          fs.copyFileSync(displacedPath, manifestPath);
+        }
+        return descriptor;
+      });
+    try {
+      expect(() =>
+        verifier.verifyChecksums(raceRoot, ["manifest.json"])
+      ).toThrow("changed while opening");
+      expect(displaced).toBe(true);
+    } finally {
+      openSpy.mockRestore();
+      if (displaced) {
+        fs.rmSync(manifestPath, { force: true });
+        fs.renameSync(displacedPath, manifestPath);
+      }
+    }
   });
 
   it("fails closed when identity is absent or producer attempt changes", () => {

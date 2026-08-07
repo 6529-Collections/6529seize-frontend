@@ -17,6 +17,8 @@ const VERIFIER_TITLE_PREFIX = "Verify production artifact";
 const SELECTION_CONTRACT = "production-artifact-selection-v1";
 const SELECTION_SCHEMA_VERSION = 1;
 const SELECTION_ARTIFACT_NAME_PREFIX = "one-click-production-selection-";
+// This controller accepts only operation IDs minted by the frontend workflow;
+// downstream evidence verifiers intentionally support a broader safe alphabet.
 const OPERATION_ID_PATTERN = /^frontend-prod-[1-9]\d{0,19}$/u;
 const SHA_PATTERN = /^[a-f0-9]{40}$/u;
 const RUN_ID_PATTERN = /^[1-9]\d{0,19}$/u;
