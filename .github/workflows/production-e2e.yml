@@ -761,7 +761,7 @@ jobs:
           declared_size="$(jq -er '.size_in_bytes | numbers' "$operation_dir/record.json")"
           declared_digest="$(jq -r '.digest // empty' "$operation_dir/record.json")"
           gh api \
-            --header 'Accept: application/octet-stream' \
+            --header 'Accept: application/vnd.github+json' \
             "repos/${GITHUB_REPOSITORY}/actions/artifacts/${operation_id}/zip" > "$operation_dir/operation.zip"
           test "$(stat -c %s "$operation_dir/operation.zip")" = "$declared_size"
           test "$(stat -c %s "$operation_dir/operation.zip")" -le 1048576
