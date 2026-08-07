@@ -193,6 +193,11 @@ jobs:
               "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/attempts/${deploy_attempt}/jobs?per_page=100" \
               > "$jobs_file"
             test "$(stat -c %s "$jobs_file")" -le 1048576
+            jq -e '
+              type == "object" and
+              (.total_count | type == "number" and . <= 100) and
+              (.jobs | type == "array")
+            ' "$jobs_file" >/dev/null
             authority_acquisition_count="$(jq -er '[.jobs[].steps[]? | select(.name == "Atomically acquire and bind production authority" and .conclusion == "success")] | length' "$jobs_file")"
             if [ "$authority_acquisition_count" = 0 ]; then
               echo "Failed deployment never acquired production authority."

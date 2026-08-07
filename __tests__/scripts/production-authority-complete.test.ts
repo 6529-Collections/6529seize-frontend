@@ -153,6 +153,14 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       'select(.name == "Atomically acquire and bind production authority" and .conclusion == "success")'
     );
+    const failedDeployJobProof = completionSource.slice(
+      completionSource.indexOf('jobs_file="$proof_dir/failure-jobs.json"'),
+      completionSource.indexOf("authority_acquisition_count=")
+    );
+    expect(failedDeployJobProof).toContain(
+      '(.total_count | type == "number" and . <= 100)'
+    );
+    expect(failedDeployJobProof).toContain('(.jobs | type == "array")');
     expect(completionSource).toContain(
       'if [ "$authority_acquisition_count" = 0 ]; then'
     );
