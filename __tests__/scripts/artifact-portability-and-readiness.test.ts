@@ -1181,6 +1181,36 @@ describe("artifact-portability.v1", () => {
       })
     ).toThrow("workflow is not trusted");
 
+    const productionWorkflowPath =
+      ".github/workflows/production-build-artifact.yml";
+    const productionArtifactName = `production-frontend-${SOURCE_SHA}-frontend-prod-12345`;
+    const productionRun = {
+      ...run,
+      path: productionWorkflowPath,
+    };
+    expect(
+      portability.verifyReportRun({
+        ...options,
+        role: "production",
+        expectedWorkflowPath: productionWorkflowPath,
+        artifactName: productionArtifactName,
+        run: productionRun,
+      })
+    ).toMatchObject({
+      schema_version: "artifact-portability-source-provenance.v1",
+      role: "production",
+      run: { id: "12345", head_sha: runHeadSha },
+    });
+    expect(() =>
+      portability.verifyReportRun({
+        ...options,
+        role: "production",
+        expectedWorkflowPath: productionWorkflowPath,
+        artifactName: `production-frontend-${SOURCE_SHA}-invalid/operation`,
+        run: productionRun,
+      })
+    ).toThrow("artifact name is invalid");
+
     if (process.platform !== "win32") {
       fixture.refreshReportArtifact(fixture.build());
       const manifestPath = path.join(fixture.reportRoot, "manifest.json");
