@@ -57,22 +57,15 @@ describe("one-click production authority completion", () => {
         },
       },
     });
-    expect(completionJob.if).toContain(
-      "github.event.workflow_run.head_repository.full_name == github.repository"
+    expect(completionJob.if.replace(/\s+/gu, " ").trim()).toBe(
+      "(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && " +
+        "(github.actor == 'punk6529' || github.actor == 'prxt6529')) || " +
+        "(github.event_name == 'workflow_run' && " +
+        "github.event.workflow_run.head_repository.full_name == github.repository && " +
+        "github.event.workflow_run.head_branch == 'main' && " +
+        "(github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || " +
+        "github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml'))"
     );
-    expect(completionJob.if).toContain(
-      "github.event.workflow_run.head_branch == 'main'"
-    );
-    expect(completionJob.if).toContain(
-      "github.event.workflow_run.path == '.github/workflows/production-e2e.yml'"
-    );
-    expect(completionJob.if).toContain(
-      "github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml'"
-    );
-    expect(completionJob.if).toContain(
-      "github.event_name == 'workflow_dispatch'"
-    );
-    expect(completionJob.if).toContain("github.ref == 'refs/heads/main'");
     expect(completionJob.if).not.toContain("github.event.workflow_run.name");
     expect(completionJob["runs-on"]).toBe("ubuntu-latest");
     expect(completionJob.permissions).toEqual({
@@ -96,9 +89,7 @@ describe("one-click production authority completion", () => {
   });
 
   it("recovers an exact terminal run only from main and an authorized release actor", () => {
-    expect(completion["run-name"]).toContain(
-      "github.event.workflow_run.id || inputs.terminal_workflow_run_id"
-    );
+    expect(completion["run-name"]).toBe("Production authority completion");
     expect(proof.env.WORKFLOW_RUN_ID).toContain(
       "github.event.workflow_run.id || inputs.terminal_workflow_run_id"
     );
@@ -107,7 +98,12 @@ describe("one-click production authority completion", () => {
     expect(proof.run).toContain(
       'if [ "$EVENT_NAME" = workflow_dispatch ]; then'
     );
-    expect(proof.run).toContain('test "$GITHUB_REF" = refs/heads/main');
+    expect(proof.run).toContain(
+      'if [ "$GITHUB_REF" != refs/heads/main ]; then'
+    );
+    expect(proof.run).toContain(
+      "Production authority recovery must run from main."
+    );
     expect(proof.run).toContain("punk6529|prxt6529)");
     expect(proof.run).toContain(
       "Actor is not authorized for production authority recovery."
@@ -134,12 +130,8 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       '.path == ".github/workflows/build-upload-deploy-prod.yml"'
     );
-    expect(completionSource).toContain(
-      '(.name == "Web Deploy - PROD" or .name == .display_title)'
-    );
-    expect(completionSource).toContain(
-      '(.name == "Production E2E" or .name == .display_title)'
-    );
+    expect(completionSource).not.toContain('.name == "Web Deploy - PROD"');
+    expect(completionSource).not.toContain('.name == "Production E2E"');
     expect(completionSource).toContain(
       '.display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]")'
     );

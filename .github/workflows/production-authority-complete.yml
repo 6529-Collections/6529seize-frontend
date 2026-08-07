@@ -14,14 +14,15 @@ on:
 
 permissions: {}
 
-run-name: Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]
+run-name: Production authority completion
 
 jobs:
   complete-production-authority:
     name: Complete exact production authority
     if: >-
       (github.event_name == 'workflow_dispatch' &&
-      github.ref == 'refs/heads/main') ||
+      github.ref == 'refs/heads/main' &&
+      (github.actor == 'punk6529' || github.actor == 'prxt6529')) ||
       (github.event_name == 'workflow_run' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
       github.event.workflow_run.head_branch == 'main' &&
@@ -53,7 +54,10 @@ jobs:
           set -euo pipefail
 
           if [ "$EVENT_NAME" = workflow_dispatch ]; then
-            test "$GITHUB_REF" = refs/heads/main
+            if [ "$GITHUB_REF" != refs/heads/main ]; then
+              echo "::error::Production authority recovery must run from main."
+              exit 1
+            fi
             case "$DISPATCH_ACTOR" in
               punk6529|prxt6529) ;;
               *)
@@ -171,7 +175,6 @@ jobs:
                 type == "object" and
                 (.id | tostring) == $run_id and
                 .path == ".github/workflows/build-upload-deploy-prod.yml" and
-                (.name == "Web Deploy - PROD" or .name == .display_title) and
                 .display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]") and
                 .event == "workflow_dispatch" and
                 .head_branch == "main" and
@@ -291,7 +294,6 @@ jobs:
                (.id | tostring) == $run_id and
                .display_title == $title and
                .path == ".github/workflows/production-e2e.yml" and
-               (.name == "Production E2E" or .name == .display_title) and
                .event == "workflow_dispatch" and
                .head_branch == "main" and
                .repository.full_name == $repository and
@@ -315,7 +317,6 @@ jobs:
               type == "object" and
               (.id | tostring) == $run_id and
               .path == ".github/workflows/build-upload-deploy-prod.yml" and
-              (.name == "Web Deploy - PROD" or .name == .display_title) and
               .display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]") and
               .event == "workflow_dispatch" and
               .status == "completed" and
@@ -347,7 +348,6 @@ jobs:
               [.workflow_runs[] |
                 select(
                   .path == ".github/workflows/production-e2e.yml" and
-                  (.name == "Production E2E" or .name == .display_title) and
                   .display_title == $title and
                   .event == "workflow_dispatch" and
                   .head_branch == "main" and
