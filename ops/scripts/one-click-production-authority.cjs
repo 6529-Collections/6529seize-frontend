@@ -1019,29 +1019,42 @@ function expectedFromOptions(command, o) {
 
 function readBounded(file, label, maxBytes, allowStdin) {
   string(file, `${label}_FILE_INVALID`, MAX_PATH_BYTES);
-  if (file === "-") {
-    if (!allowStdin) fail(`${label}_STDIN_NOT_ALLOWED`);
+  const readDescriptor = (descriptor) => {
     const chunks = [];
     let total = 0;
     const chunk = Buffer.alloc(Math.min(8192, maxBytes + 1));
     while (true) {
-      const count = fs.readSync(0, chunk, 0, chunk.length, null);
+      const count = fs.readSync(
+        descriptor,
+        chunk,
+        0,
+        chunk.length,
+        null
+      );
       if (count === 0) break;
       total += count;
       if (total > maxBytes) fail(`${label}_TOO_LARGE`);
       chunks.push(Buffer.from(chunk.subarray(0, count)));
     }
     return Buffer.concat(chunks, total);
+  };
+  if (file === "-") {
+    if (!allowStdin) fail(`${label}_STDIN_NOT_ALLOWED`);
+    return readDescriptor(0);
   }
+  let descriptor;
   try {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Bounded local JSON input; never executed or sent to a network.
-    const stats = fs.statSync(file);
+    const noFollow = fs.constants.O_NOFOLLOW ?? 0;
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The descriptor pins one local file for both validation and the bounded read.
+    descriptor = fs.openSync(file, fs.constants.O_RDONLY | noFollow);
+    const stats = fs.fstatSync(descriptor);
     if (!stats.isFile() || stats.size > maxBytes) fail(`${label}_TOO_LARGE`);
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The size check above bounds the local JSON read.
-    return fs.readFileSync(file);
+    return readDescriptor(descriptor);
   } catch (error) {
     if (error instanceof AuthorityClientError) throw error;
     fail(`${label}_FILE_READ_FAILED`);
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
   }
 }
 
