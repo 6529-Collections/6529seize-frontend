@@ -126,10 +126,10 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
       return;
     }
     if (following) {
-      await unFollowMutation.mutateAsync();
+      unFollowMutation.mutate();
       return;
     }
-    await followMutation.mutateAsync();
+    followMutation.mutate();
   };
 
   return (
