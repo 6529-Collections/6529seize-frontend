@@ -178,8 +178,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.forArtistsGuide.artwork.heading": "Your artwork in Stream",
   "publicReview.forArtistsGuide.artwork.description":
     "An artwork in Stream includes its media, identity, edition size, artist approval, and sale and payment rules. Its records also show important changes and what later became final.",
-  "publicReview.forArtistsGuide.artwork.identity.title":
-    "Artwork and identity",
+  "publicReview.forArtistsGuide.artwork.identity.title": "Artwork and identity",
   "publicReview.forArtistsGuide.artwork.identity.description":
     "The artwork has its own identity. Its records show who the artist is, which files belong to the artwork, and which tokens were created from it.",
   "publicReview.forArtistsGuide.artwork.editions.title": "Editions and minting",
@@ -192,8 +191,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Sales, payments, and royalties",
   "publicReview.forArtistsGuide.artwork.sales.description":
     "The plan states how collectors first receive tokens: through a fixed-price mint or an auction. It also states the price, currency, and who receives the money. Later sales may pay royalties, but marketplaces do not always pay them.",
-  "publicReview.forArtistsGuide.artwork.control.title":
-    "What can still change",
+  "publicReview.forArtistsGuide.artwork.control.title": "What can still change",
   "publicReview.forArtistsGuide.artwork.control.description":
     "Before the artwork becomes final, details such as file links, token supply, minting, and sale settings can still be corrected or completed. Changes stay in the artwork's history. Some changes make the artist's old approval no longer apply.",
   "publicReview.forArtistsGuide.artwork.preservation.title":

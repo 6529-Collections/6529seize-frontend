@@ -10,9 +10,7 @@ if (!ACTIVE_REVIEW_VERSION) {
 
 describe("StreamReviewForArtistsGuide", () => {
   it("explains the artist journey before handing off to technical evidence", () => {
-    render(
-      <StreamReviewForArtistsGuide pages={ACTIVE_REVIEW_VERSION.pages} />
-    );
+    render(<StreamReviewForArtistsGuide pages={ACTIVE_REVIEW_VERSION.pages} />);
 
     expect(
       screen.getByRole("heading", { name: "Your artwork, your choices" })

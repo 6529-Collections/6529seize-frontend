@@ -129,11 +129,7 @@ const PERMANENCE_CHECKLIST = [
   "publicReview.forArtistsGuide.permanence.delay",
 ] as const satisfies readonly MessageKey[];
 
-function GuideLink({
-  page,
-}: {
-  readonly page: PublicReviewPageDefinition;
-}) {
+function GuideLink({ page }: { readonly page: PublicReviewPageDefinition }) {
   return (
     <Link
       href={getStreamReviewPageHref({ page })}
@@ -196,7 +192,10 @@ export function StreamReviewForArtistsGuide({
           {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.artwork.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.artwork.description")}
+          {t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.artwork.description"
+          )}
         </p>
         <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-y-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-px-0 tw-py-6">
           {ARTWORK_PARTS.map((part) => (
@@ -232,7 +231,10 @@ export function StreamReviewForArtistsGuide({
           {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.journey.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.journey.description")}
+          {t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.journey.description"
+          )}
         </p>
         <ol className="tw-mb-0 tw-mt-7 tw-list-none tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-p-0">
           {ARTIST_JOURNEY.map((step, index) => (
@@ -267,7 +269,10 @@ export function StreamReviewForArtistsGuide({
           {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.approval.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.approval.description")}
+          {t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.approval.description"
+          )}
         </p>
         <ul className="tw-mb-0 tw-mt-5 tw-grid tw-gap-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-grid-cols-2">
           {APPROVAL_CHECKLIST.map((item) => (
@@ -287,7 +292,10 @@ export function StreamReviewForArtistsGuide({
           {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.changes.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.changes.description")}
+          {t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.changes.description"
+          )}
         </p>
         <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-3">
           {CHANGE_STAGES.map((stage) => (
@@ -324,7 +332,9 @@ export function StreamReviewForArtistsGuide({
         </p>
         <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-2">
           {OTHER_ACTORS.map((actor) => {
-            const page = pages.find((candidate) => candidate.id === actor.pageId);
+            const page = pages.find(
+              (candidate) => candidate.id === actor.pageId
+            );
             if (!page) {
               return null;
             }
@@ -355,7 +365,10 @@ export function StreamReviewForArtistsGuide({
             {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.sales.heading")}
           </h2>
           <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.sales.description")}
+            {t(
+              DEFAULT_LOCALE,
+              "publicReview.forArtistsGuide.sales.description"
+            )}
           </p>
           <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.sales.royalties")}
@@ -371,7 +384,10 @@ export function StreamReviewForArtistsGuide({
             id="stream-artist-permanence-heading"
             className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
           >
-            {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.permanence.heading")}
+            {t(
+              DEFAULT_LOCALE,
+              "publicReview.forArtistsGuide.permanence.heading"
+            )}
           </h2>
           <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(
@@ -399,7 +415,10 @@ export function StreamReviewForArtistsGuide({
           {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.evidence.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.evidence.description")}
+          {t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.evidence.description"
+          )}
         </p>
         <a
           href="#your-collection-has-a-durable-identity"

@@ -1,7 +1,9 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 jest.mock("next/navigation", () => ({
-  notFound: jest.fn(),
+  notFound: jest.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
 }));
 
 jest.mock("@/components/providers/metadata", () => ({
@@ -96,10 +98,32 @@ jest.mock("@/lib/public-review/streamSolidityReference", () => ({
 }));
 
 import { render, screen } from "@testing-library/react";
+import { notFound } from "next/navigation";
 
+import {
+  loadStreamEditorialContent,
+  PublicReviewEditorialContentError,
+} from "@/lib/public-review/editorialContent";
 import { renderStreamReviewRoutePage } from "@/lib/public-review/streamReviewPage";
 
+const loadStreamEditorialContentMock = jest.mocked(loadStreamEditorialContent);
+const notFoundMock = jest.mocked(notFound);
+
 describe("renderStreamReviewRoutePage", () => {
+  it("renders the not-found route when editorial content is unavailable", async () => {
+    loadStreamEditorialContentMock.mockRejectedValueOnce(
+      new PublicReviewEditorialContentError("Editorial content is unavailable")
+    );
+
+    await expect(
+      renderStreamReviewRoutePage({
+        params: Promise.resolve({ review: "6529-stream" }),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+
+    expect(notFoundMock).toHaveBeenCalledTimes(1);
+  });
+
   it("ends the current Overview after its plain-language guide", async () => {
     render(
       await renderStreamReviewRoutePage({

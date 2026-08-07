@@ -71,6 +71,23 @@ function getStreamReviewMetadata({
   };
 }
 
+async function loadAvailableStreamEditorialContent({
+  contentVersion,
+  route,
+}: {
+  readonly contentVersion: string;
+  readonly route: StreamReviewRouteModel;
+}): Promise<string | undefined> {
+  try {
+    return await loadStreamEditorialContent(route.page, contentVersion);
+  } catch (error) {
+    if (error instanceof PublicReviewEditorialContentError) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
 async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
@@ -78,25 +95,17 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   if (!reviewVersion) {
     throw new Error("The resolved Stream review version is unavailable.");
   }
-  let editorialMarkdown: string;
-  try {
-    editorialMarkdown = await loadStreamEditorialContent(
-      route.page,
-      contentVersion
-    );
-  } catch (error) {
-    if (error instanceof PublicReviewEditorialContentError) {
-      notFound();
-    }
-    throw error;
+  const [editorialMarkdown, { manifest }, feedbackDestination] =
+    await Promise.all([
+      loadAvailableStreamEditorialContent({ contentVersion, route }),
+      getStreamSolidityReferenceReader().loadManifest(contentVersion),
+      resolveStreamReviewFeedbackDestination(route.baseEndpoint),
+    ]);
+  if (editorialMarkdown === undefined) {
+    notFound();
   }
   const sections = extractPublicReviewSections(editorialMarkdown);
-  const { manifest } =
-    await getStreamSolidityReferenceReader().loadManifest(contentVersion);
   const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
-  const feedbackDestination = await resolveStreamReviewFeedbackDestination(
-    route.baseEndpoint
-  );
   const isCurrentOverview =
     route.page.id === "overview" && route.version === undefined;
   const isCurrentForArtists =
