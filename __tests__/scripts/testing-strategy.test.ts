@@ -592,6 +592,10 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
     );
+    const coverageFloor = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/coverage-floor.yml"),
+      "utf8"
+    );
     const pushSecretScan = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
       "utf8"
@@ -599,6 +603,8 @@ describe("testing strategy CI plan", () => {
 
     expect(appPrCi.match(/filter: blob:none/gu)).toHaveLength(2);
     expect(appPrCi.match(/fetch-depth: 0/gu)).toHaveLength(2);
+    expect(coverageFloor).toContain("filter: blob:none");
+    expect(coverageFloor).toContain("fetch-depth: 0");
     expect(pushSecretScan).toContain("filter: blob:none");
     expect(pushSecretScan).toContain("fetch-depth: 0");
   });
