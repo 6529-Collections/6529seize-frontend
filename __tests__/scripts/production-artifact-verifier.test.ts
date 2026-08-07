@@ -193,7 +193,14 @@ describe("isolated production artifact verifier", () => {
       for (const match of sourceCode.matchAll(
         /require\(["']((?:\.{1,2}\/)[^"']+)["']\)/gu
       )) {
-        const dependencyPath = path.resolve(path.dirname(sourcePath), match[1]);
+        const relativeDependency = match[1];
+        if (!relativeDependency) {
+          throw new Error("Verifier dependency match is missing a path.");
+        }
+        const dependencyPath = path.resolve(
+          path.dirname(sourcePath),
+          relativeDependency
+        );
         const relativeToScripts = path.relative(
           scriptsDirectory,
           dependencyPath
