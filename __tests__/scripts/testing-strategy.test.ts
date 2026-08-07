@@ -662,6 +662,31 @@ describe("testing strategy CI security checks", () => {
     ]);
   });
 
+  it("does not treat YAML secret declarations as assigned values", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "reusable.yml"),
+      [
+        "on:",
+        "  workflow_call:",
+        "    secrets:",
+        "      ALCHEMY_API_KEY:",
+        "        required: false",
+        "      SENTRY_AUTH_TOKEN:",
+        "        required: true",
+      ].join("\n")
+    );
+
+    const result = scanFilesForSecrets(
+      [".github/workflows/reusable.yml"],
+      tempDir
+    );
+
+    expect(result).toMatchObject({ ok: true, findings: [] });
+  });
+
   it("scans common credential files that do not look like source", () => {
     fs.writeFileSync(
       path.join(tempDir, ".npmrc"),

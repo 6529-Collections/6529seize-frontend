@@ -11,8 +11,10 @@ const read = (file: string) =>
 describe("automatic production E2E dispatch", () => {
   const dispatchSource = read("production-e2e-dispatch.yml");
   const e2eSource = read("production-e2e.yml");
+  const completionSource = read("production-authority-complete.yml");
   const dispatch = YAML.parse(dispatchSource);
   const e2e = YAML.parse(e2eSource);
+  const completion = YAML.parse(completionSource);
 
   it("dispatches only successful same-repository main deployments", () => {
     expect(dispatch.on.workflow_run).toMatchObject({
@@ -33,6 +35,46 @@ describe("automatic production E2E dispatch", () => {
     );
     expect(dispatchSource).toContain(
       "inputs:{automatic_deploy_run_id:$deploy_run_id}"
+    );
+    expect(dispatch.concurrency).toEqual({
+      group: "production-e2e-dispatch-${{ github.event.workflow_run.id }}",
+      "cancel-in-progress": false,
+    });
+  });
+
+  it("reuses one exact E2E run and reconciles an ambiguous dispatch response", () => {
+    const step = dispatch.jobs["dispatch-successful-deploy"].steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Dispatch exact successful deploy to production E2E"
+    );
+    expect(step.run).toContain("list_exact_runs()");
+    expect(step.run).toContain('created=">=${DEPLOY_CREATED_AT}"');
+    expect(step.run).toContain('if [ "$existing_count" = 1 ]; then');
+    expect(step.run).toContain("|| dispatch_status=$?");
+    expect(step.run).toContain("for _ in $(seq 1 20); do");
+    expect(step.run).toContain('if [ "$observed_count" -gt 1 ]; then');
+    expect(step.run).toContain(
+      "No exact automatic Production E2E run became visible after dispatch"
+    );
+  });
+
+  it("keeps automatic dispatch on protected main through completion", () => {
+    const job = dispatch.jobs["dispatch-successful-deploy"];
+    const step = job.steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Dispatch exact successful deploy to production E2E"
+    );
+
+    const protectedRef = step.env.DEPLOY_REF;
+    expect(protectedRef).toBe("main");
+    expect(step.run).toContain('test "$DEPLOY_REF" = main');
+    expect(step.run).toContain('--arg ref "$DEPLOY_REF"');
+    expect(dispatchSource).not.toContain(
+      "github.event.repository.default_branch"
+    );
+    expect(completion.on.workflow_run.branches).toEqual([protectedRef]);
+    expect(completion.jobs["complete-production-authority"].if).toContain(
+      `github.event.workflow_run.head_branch == '${protectedRef}'`
     );
   });
 

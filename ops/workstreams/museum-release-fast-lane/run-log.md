@@ -948,3 +948,47 @@ disabled pending the migration proof in the implementation document.
   observations in 7.3 seconds.
 - No additional environment mutation was used to diagnose or prove the fix.
   Production E2E remains required after this correction is merged and released.
+
+## 2026-08-06 - Readiness hotfix merge and Actions incident
+
+- PR #3662 passed every exact-head required check and review lane at
+  `a960fbf62813cacd54096ca8bff2435e251f07e2`, then merged as exact main
+  `86f4d4aa2c3927df1ad0823dc12b1c6b9269f03e` at 15:40:45Z.
+- The staging merge `87a80d848e68fcb8f73717e3216fae35feab6e28`
+  has parents `e6b5638...` and `86f4d4aa...`; its tree exactly matches main.
+  Staging run 31117046350 passed its guard and then failed before repository
+  checkout because GitHub Actions returned repeated `Service Unavailable`
+  responses while resolving pinned actions. Deploy was skipped and no staging
+  state changed.
+- Three attempts to dispatch the exact-main production artifact workflow
+  returned GitHub REST HTTP 500 and created no run. GitHub Status reports an
+  Actions partial outage under incident `qcvjkzcs7j74`. The release will resume
+  with a complete staging rerun and a new exact artifact dispatch after service
+  recovery; no timed-only authorization retry is permitted.
+- Production remained healthy at exact runtime
+  `ee156caa5b2a9ed2efaee34659f098e916badcb9` with three consecutive
+  `stale:false` version readbacks. The hotfix is merged but not yet production
+  qualified.
+
+## 2026-08-06 - One-click production operation design
+
+- The Dev Team's requirements and objections are incorporated in
+  `one-click-production-architecture.md`. The controller freezes a protected-main
+  target, atomically drains and acquires one backend-owned frontend/backend lane,
+  binds the lease to the exact GitHub run and attempt, and renews it against the
+  same control epoch and immutable artifact-selection digest immediately before
+  AWS credentials are configured.
+- A clean precheck followed by a 409 is terminal for that attempt and produces
+  bounded denial evidence. A rerun must acquire or renew for its new
+  `run_attempt`; it cannot inherit an earlier green guard. Later main descendants
+  are allowed only while the frozen target remains in protected-main history.
+- The builder has build-time secrets but no AWS authority. The artifact verifier
+  has neither build nor deploy authority. The deploy job may consume only an
+  explicit artifact run, artifact ID, GitHub digest, source SHA, and operation
+  binding; newest/latest artifact discovery is prohibited.
+- The comparable successful release measured 46m59s. The incident sequence took
+  66m18s, including about 18 minutes of manual authorization/retry idle and a
+  22-minute readiness timeout. The parallel-build forecast is 21 / 42 / 58
+  minutes best / median / conservative envelope; the serialized forecast is
+  29 / 56 / 72 minutes. A deterministic workflow-DAG test will prevent
+  accidental serialization and duplicate production builds.
