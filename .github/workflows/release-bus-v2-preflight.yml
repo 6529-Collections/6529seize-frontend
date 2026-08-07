@@ -313,12 +313,12 @@ jobs:
             .policy_bundle_contract == "pr-ci-policy-bundle-v1" and
             (.policy_bundle_digest | test("^[a-f0-9]{64}$")) and
             (.policy_bundle_line_count | type == "number" and . >= 1 and . <= 1000 and floor == .) and
-            (.dependency_analysis_required | type == "boolean") and
+            .dependency_analysis_required == true and
             (.release_bus_contract_required | type == "boolean") and
             (.test_typecheck_required | type == "boolean") and
             .required_gates == ([
               "package-manager-discipline",
-              "dependency-analysis-or-plan-not-required",
+              "dependency-analysis",
               "reviewbot-contract",
               "generated-agent-files",
               "release-bus-workflow-contract-or-plan-not-required",

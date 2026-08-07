@@ -60,7 +60,10 @@ function normalizeSnapshot(value) {
 
   const health = environment.Health ?? environment.health;
   const status = environment.Status ?? environment.status;
-  const versionLabel = environment.VersionLabel ?? environment.versionLabel;
+  const versionLabel =
+    environment.VersionLabel ??
+    environment.versionLabel ??
+    environment.version_label;
 
   invariant(typeof health === "string", "Elastic Beanstalk health is missing");
   invariant(typeof status === "string", "Elastic Beanstalk status is missing");
