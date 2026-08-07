@@ -202,10 +202,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "The artwork's records can show where its files are stored and how to check that they have not changed. They can also include artist statements, authenticity details, and exhibition history. The files themselves still need reliable long-term storage.",
   "publicReview.forArtistsGuide.journey.heading": "Your journey",
   "publicReview.forArtistsGuide.journey.description":
-    "This is the intended path from preparing the work to making its final record permanent.",
+    "Along the way, its details are reviewed and approved, and collectors can mint or buy under the sale rules. After the final checks, further changes to the artwork itself are meant to stop.",
   "publicReview.forArtistsGuide.journey.prepare.title": "Prepare",
   "publicReview.forArtistsGuide.journey.prepare.description":
-    "Gather the artwork files and dependencies. Choose the edition size, collaborators, minting rules, and sale plan.",
+    "Gather the artwork files and everything they need to work. Choose the edition size, who should be credited, and how collectors can mint or buy at launch. Decide where the files will be stored and who receives the mint money.",
   "publicReview.forArtistsGuide.journey.review.title": "Review",
   "publicReview.forArtistsGuide.journey.review.description":
     "Check one readable plan showing the artwork identity, supply, sale terms, payments, roles, and future change powers.",

@@ -74,6 +74,16 @@ describe("StreamReviewForArtistsGuide", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
+        "Along the way, its details are reviewed and approved, and collectors can mint or buy under the sale rules. After the final checks, further changes to the artwork itself are meant to stop."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Gather the artwork files and everything they need to work. Choose the edition size, who should be credited, and how collectors can mint or buy at launch. Decide where the files will be stored and who receives the mint money."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
         "Use your wallet to sign the exact collection state you accept. If the plan changes, the new state needs its own approval."
       )
     ).toBeInTheDocument();
