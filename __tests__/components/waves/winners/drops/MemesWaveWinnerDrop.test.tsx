@@ -1,6 +1,7 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import { MemesWaveWinnersDrop } from "@/components/waves/winners/drops/MemesWaveWinnerDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
@@ -16,6 +17,9 @@ const setBrowserLanguages = (languages: readonly string[]) => {
 
 jest.mock("@/helpers/waves/drop.helpers", () => ({
   convertApiDropToExtendedDrop: jest.fn(() => ({ id: "ext" })),
+}));
+jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
+  getMintTimelineDetails: jest.fn(),
 }));
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -157,10 +161,12 @@ const wave: ApiWave = { voting: { credit_type: "votes" } } as any;
 const useDeviceInfo = require("@/hooks/useDeviceInfo").default as jest.Mock;
 const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
   .default as jest.Mock;
+const getMintTimelineDetailsMock = jest.mocked(getMintTimelineDetails);
 
 describe("MemesWaveWinnersDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getMintTimelineDetailsMock.mockReset();
     mockMobileMenuOpenClick.mockClear();
     useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
     useLongPressInteraction.mockReturnValue({
@@ -226,6 +232,9 @@ describe("MemesWaveWinnersDrop", () => {
     setBrowserLanguages(["en-GB"]);
 
     const mintInstant = new Date("2026-08-07T14:40:00.000Z");
+    getMintTimelineDetailsMock.mockReturnValue({
+      instantUtc: mintInstant,
+    } as ReturnType<typeof getMintTimelineDetails>);
     const expectedMintDate = new Intl.DateTimeFormat("en-GB", {
       weekday: "long",
       month: "long",
@@ -267,6 +276,38 @@ describe("MemesWaveWinnersDrop", () => {
         Reflect.deleteProperty(globalThis.navigator, "languages");
       }
     }
+  });
+
+  it.each([
+    ["throws", () => {
+      throw new Error("schedule unavailable");
+    }],
+    ["returns an invalid date", () => ({ instantUtc: new Date(Number.NaN) })],
+  ])("omits the mint date when the schedule %s", async (_case, schedule) => {
+    getMintTimelineDetailsMock.mockImplementation(
+      () => schedule() as ReturnType<typeof getMintTimelineDetails>
+    );
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={
+          {
+            ...winner,
+            drop: {
+              ...winner.drop,
+              submission_context: { meme_card_id: 532 },
+            },
+          } as ApiWaveDecisionWinner
+        }
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getMintTimelineDetailsMock).toHaveBeenCalledWith(532);
+    });
+    expect(screen.queryByText("Mint date:")).not.toBeInTheDocument();
   });
 
   it("does not infer a Meme card link when the mapping is absent", () => {

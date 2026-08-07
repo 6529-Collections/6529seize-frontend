@@ -33,9 +33,9 @@ import {
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { formatDate } from "@/i18n/format";
-import { normalizeLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
@@ -82,13 +82,10 @@ const getMetadataValue = (
 function MemesWinnerMintDate({
   memeCardId,
 }: {
-  readonly memeCardId: number | null | undefined;
+  readonly memeCardId: number;
 }) {
+  const locale = useBrowserLocale();
   const mintDate = React.useMemo(() => {
-    if (!isValidMemeCardId(memeCardId)) {
-      return null;
-    }
-
     try {
       const instantUtc = getMintTimelineDetails(memeCardId).instantUtc;
       return Number.isFinite(instantUtc.getTime()) ? instantUtc : null;
@@ -101,9 +98,6 @@ function MemesWinnerMintDate({
     return null;
   }
 
-  const locale = normalizeLocale(
-    globalThis.navigator.languages.at(0) ?? globalThis.navigator.language
-  );
   const mintDateLabel = formatDate(locale, mintDate, {
     weekday: "long",
     month: "long",
@@ -112,8 +106,8 @@ function MemesWinnerMintDate({
 
   return (
     <p className="tw-mb-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-sm tw-leading-5">
-      <span className="tw-font-medium tw-text-iron-300">
-        {t(locale, "theMemes.detail.live.artwork.mintDate")}:
+      <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
+        {t(locale, "theMemes.detail.live.artwork.mintDateLabel")}
       </span>
       <time className="tw-text-iron-400" dateTime={mintDate.toISOString()}>
         {mintDateLabel}
