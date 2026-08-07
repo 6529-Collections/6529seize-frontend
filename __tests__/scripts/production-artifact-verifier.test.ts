@@ -182,23 +182,46 @@ describe("isolated production artifact verifier", () => {
       ({ name }) => name === "Check out immutable verifier helper"
     );
     const sparseCheckout = String(checkout?.with?.["sparse-checkout"] ?? "");
-    const verifierSource = fs.readFileSync(
-      path.join(
-        process.cwd(),
-        "ops",
-        "scripts",
-        "verify-production-artifact-selection.cjs"
-      ),
-      "utf8"
+    const scriptsDirectory = path.join(process.cwd(), "ops", "scripts");
+    const verifierPath = path.join(
+      scriptsDirectory,
+      "verify-production-artifact-selection.cjs"
     );
-    const localDependencies = [
-      ...verifierSource.matchAll(/require\(["']\.\/([^"']+)["']\)/gu),
-    ].map((match) => `ops/scripts/${match[1]}`);
-    expect(localDependencies).toEqual(["ops/scripts/cli-args.cjs"]);
+    const localDependencies = new Set<string>();
+    const visitLocalDependencies = (sourcePath: string): void => {
+      const sourceCode = fs.readFileSync(sourcePath, "utf8");
+      for (const match of sourceCode.matchAll(
+        /require\(["']\.\/([^"']+)["']\)/gu
+      )) {
+        const dependencyPath = path.resolve(path.dirname(sourcePath), match[1]);
+        const relativeToScripts = path.relative(
+          scriptsDirectory,
+          dependencyPath
+        );
+        if (
+          relativeToScripts.startsWith("..") ||
+          path.isAbsolute(relativeToScripts)
+        ) {
+          throw new Error(
+            `Verifier dependency escapes ops/scripts: ${dependencyPath}`
+          );
+        }
+        const repositoryPath = path
+          .relative(process.cwd(), dependencyPath)
+          .split(path.sep)
+          .join("/");
+        if (!localDependencies.has(repositoryPath)) {
+          localDependencies.add(repositoryPath);
+          visitLocalDependencies(dependencyPath);
+        }
+      }
+    };
+    visitLocalDependencies(verifierPath);
+    expect([...localDependencies]).toContain("ops/scripts/cli-args.cjs");
     expect(sparseCheckout).toContain(
       "ops/scripts/verify-production-artifact-selection.cjs"
     );
-    for (const dependency of localDependencies) {
+    for (const dependency of [...localDependencies].sort()) {
       expect(sparseCheckout).toContain(dependency);
     }
     expect(source).toContain(
