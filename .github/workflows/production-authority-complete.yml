@@ -196,6 +196,16 @@ jobs:
               "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/attempts/${deploy_attempt}/jobs?per_page=100" \
               > "$jobs_file"
             test "$(stat -c %s "$jobs_file")" -le 1048576
+            authority_acquisition_count="$(jq -er '[.jobs[].steps[]? | select(.name == "Atomically acquire and bind production authority" and .conclusion == "success")] | length' "$jobs_file")"
+            if [ "$authority_acquisition_count" = 0 ]; then
+              echo "Failed deployment never acquired production authority."
+              echo "action=ignore" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$authority_acquisition_count" != 1 ]; then
+              echo "::error::Production authority acquisition evidence is ambiguous; refusing failure release."
+              exit 1
+            fi
             evidence_digest="$(node .authority-listener/ops/scripts/production-authority-failure-evidence.cjs \
               --kind deploy \
               --run-file "$workflow_file" \

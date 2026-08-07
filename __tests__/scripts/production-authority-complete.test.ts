@@ -152,6 +152,18 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       'select(.name == "Reauthorize exact production mutation" and .conclusion == "success")'
     );
+    expect(completionSource).toContain(
+      'select(.name == "Atomically acquire and bind production authority" and .conclusion == "success")'
+    );
+    expect(completionSource).toContain(
+      'if [ "$authority_acquisition_count" = 0 ]; then'
+    );
+    expect(completionSource).toContain(
+      "Failed deployment never acquired production authority."
+    );
+    expect(completionSource).toContain(
+      "Production authority acquisition evidence is ambiguous; refusing failure release."
+    );
     expect(completionSource).toContain('if [ "$operation_count" = 1 ]; then');
     expect(completionSource).toContain('created=">=${deploy_created_at}"');
     expect(completionSource).toContain(
