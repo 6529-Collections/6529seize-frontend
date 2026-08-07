@@ -233,3 +233,49 @@
   deployment otherwise fails closed. The contract also proves that the build
   workflow consumes no ignored local `.github` action; introducing one must
   first narrow the trigger exclusion.
+- Post-rollout qualification of the six-PR extension found a constructor defect
+  in staging run 31099280984 and the contemporaneous production prebuilds. The
+  portability inventory was pointed at the unzipped Next.js build workspace,
+  whose standalone dependency tree legitimately contains symbolic links. The
+  verifier therefore failed closed after a successful build and package check,
+  before any deployment mutation.
+- The correction makes the manual staging, exact production prebuild, and
+  Release Bus preflight constructors inventory the package ZIP's extracted
+  bytes. Runtime configuration and the asset-profile flag are read from that
+  same extraction. Temporary Release Bus extractions are removed before the
+  artifact checksum is written or bytes are uploaded. The build workspace is
+  no longer treated as if it were the deployable package.
+- Focused workflow, production-constructor, performance, and portability tests
+  pass 39/39. Changed lint, changed TypeScript validation, targeted formatting,
+  and the Windows-aware whitespace check are green. Exact staging and
+  production reruns remain the authoritative end-to-end proof.
+- Corrected staging run 31102839144 proved that the constructor now inventories
+  the ZIP extraction, then exposed the same expected Next.js dependency links
+  inside those extracted bytes. The package had already passed its listing and
+  extraction assertions; the portability scanner alone rejected the links.
+- The package scan now accepts only relative symbolic links whose resolved
+  targets remain inside the asserted extraction root and resolve to a regular
+  file or directory. It traverses accepted aliases to retain and validate their
+  visible file projections while reading and charging each canonical file's
+  bytes once. Canonical ancestry prevents cycles. Absolute, broken, escaping,
+  and unsupported-target links fail closed. Source-content roots continue to
+  reject every symbolic link.
+- Review tightened that boundary further: both the immediate lexical target and
+  the fully resolved target must remain inside the extraction root, so a link
+  cannot leave the package and return through a second link. Target type is read
+  from the already-resolved path. Accepted link name, target, canonical target,
+  and target type are committed to the package-scan tree digest while canonical
+  file bytes are scanned once through their physical path.
+- Final review requires the scanner to prove completeness through every
+  accepted alias rather than rely on the target also appearing elsewhere in
+  the root walk. Contained directory links are now traversed under their alias
+  paths, contained file links are read through their resolved physical path,
+  and repeated real directories in one traversal ancestry fail closed as a
+  symbolic-link cycle. The tree digest retains the link metadata and commits
+  the alias-visible file projection.
+- Canonical-file accounting now de-duplicates reads, byte totals, and file
+  counts while applying the cached match result to every alias-visible path.
+  Symlink entries also retain a SHA-256 commitment to the exact raw link-target
+  bytes before their separately validated UTF-8 path text is normalized for
+  the human-readable fields. The extracted package root itself remains subject
+  to the pre-existing real-directory/no-symlink assertion.
