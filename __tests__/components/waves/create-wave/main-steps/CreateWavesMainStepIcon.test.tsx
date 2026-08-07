@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import CreateWavesMainStepIcon from '@/components/waves/create-wave/main-steps/CreateWavesMainStepIcon';
 import { CreateWaveStepStatus } from '@/types/waves.types';

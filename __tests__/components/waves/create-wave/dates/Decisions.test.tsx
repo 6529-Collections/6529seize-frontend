@@ -84,6 +84,26 @@ describe("Decisions", () => {
     );
   });
 
+  it("disables rolling mode and recomputes the end date from the last decision", () => {
+    const setDates = jest.fn();
+    render(
+      <Decisions
+        dates={{ ...baseDates, subsequentDecisions: [1], isRolling: true }}
+        errors={[]}
+        setDates={setDates}
+        onRollingEnabled={jest.fn()}
+        isExpanded={true}
+        setIsExpanded={jest.fn()}
+      />
+    );
+    // The switch starts on (isRolling: true); clicking turns recurring cycles
+    // off, which pins the end date to the last decision time (mocked to 2).
+    fireEvent.click(screen.getByRole("switch"));
+    expect(setDates).toHaveBeenCalledWith(
+      expect.objectContaining({ isRolling: false, endDate: 2 })
+    );
+  });
+
   it("shows a future-date alert when rank dates are not in the future", () => {
     render(
       <Decisions

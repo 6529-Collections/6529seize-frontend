@@ -9,6 +9,17 @@ import {
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import Button from "@/components/utils/button/Button";
 
+// Winning positions drive a `new Array(maxPosition)` allocation at submit, so an
+// out-of-range value (e.g. a 10-digit rank, or a very wide range) would throw
+// "RangeError: Invalid array length" and crash the form. Cap positions to a sane
+// maximum and reject anything larger as invalid input.
+const MAX_WINNING_POSITION = 10_000;
+
+// Error copy is announced and programmatically tied to its field (WCAG 2.2 AA
+// 3.3.1 / 4.1.3) rather than being visual-only.
+const OUTCOME_ERROR_ID = "outcome-manual-error";
+const POSITIONS_ERROR_ID = "outcome-positions-error";
+
 export default function CreateWaveOutcomesManual({
   waveType,
   onOutcome,
@@ -37,14 +48,24 @@ export default function CreateWaveOutcomesManual({
   const parseRange = (range: string): number[] | null => {
     if (range.includes("-")) {
       const [start, end] = range.split("-").map((num) => parseInt(num));
-      if (isNaN(start!) || isNaN(end!) || start! < 1 || end! < start!) {
+      if (
+        start === undefined ||
+        end === undefined ||
+        Number.isNaN(start) ||
+        Number.isNaN(end) ||
+        start < 1 ||
+        end < start ||
+        end > MAX_WINNING_POSITION
+      ) {
         return null;
       }
-      return Array.from({ length: end! - start! + 1 }, (_, i) => start! + i);
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
     }
 
     const num = parseInt(range);
-    return isNaN(num) || num < 1 ? null : [num];
+    return Number.isNaN(num) || num < 1 || num > MAX_WINNING_POSITION
+      ? null
+      : [num];
   };
 
   const parsePositions = (input: string): number[] | null => {
@@ -134,6 +155,10 @@ export default function CreateWaveOutcomesManual({
                 value={value}
                 onChange={onValueChange}
                 id="outcome-manual"
+                aria-invalid={isInputEmptyError ? true : undefined}
+                aria-describedby={
+                  isInputEmptyError ? OUTCOME_ERROR_ID : undefined
+                }
                 autoComplete="off"
                 className={`${
                   isInputEmptyError
@@ -156,7 +181,10 @@ export default function CreateWaveOutcomesManual({
               </label>
             </div>
             {isInputEmptyError && (
-              <div className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
+              <div
+                id={OUTCOME_ERROR_ID}
+                role="alert"
+                className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
                 <svg
                   className="tw-size-5 tw-flex-shrink-0 tw-text-error"
                   viewBox="0 0 24 24"
@@ -186,6 +214,10 @@ export default function CreateWaveOutcomesManual({
                   value={positions}
                   onChange={onPositionsChange}
                   id="outcome-positions"
+                  aria-invalid={positionsError ? true : undefined}
+                  aria-describedby={
+                    positionsError ? POSITIONS_ERROR_ID : undefined
+                  }
                   autoComplete="off"
                   className={`${
                     positionsError
@@ -208,7 +240,10 @@ export default function CreateWaveOutcomesManual({
                 </label>
               </div>
               {positionsError && (
-                <div className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
+                <div
+                  id={POSITIONS_ERROR_ID}
+                  role="alert"
+                  className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
                   <svg
                     className="tw-size-5 tw-flex-shrink-0 tw-text-error"
                     viewBox="0 0 24 24"

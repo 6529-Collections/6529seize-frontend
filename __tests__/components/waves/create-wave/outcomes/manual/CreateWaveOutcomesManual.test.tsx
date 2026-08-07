@@ -193,6 +193,96 @@ describe("CreateWaveOutcomesManual", () => {
     );
   });
 
+  it("rejects a reversed range where the end precedes the start", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    await userEvent.type(positionsInput, "3-1");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
+  it("rejects a range whose start is below the first position", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    await userEvent.type(positionsInput, "0-2");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized single position instead of crashing on allocation", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    // Without the cap, submitting this would do `new Array(5_000_000_000)` and
+    // throw "RangeError: Invalid array length".
+    await userEvent.type(positionsInput, "5000000000");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized position range", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    await userEvent.type(positionsInput, "1-5000000000");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
   it("filters invalid characters in positions input", async () => {
     render(
       <CreateWaveOutcomesManual {...defaultProps} waveType={ApiWaveType.Rank} />
@@ -223,5 +313,154 @@ describe("CreateWaveOutcomesManual", () => {
     expect(
       screen.queryByText("Please enter your manual action")
     ).not.toBeInTheDocument();
+  });
+
+  // Characterization, not endorsement: `parsePositions` filters rejected
+  // segments out instead of failing the whole input, so a list that mixes a
+  // valid position with an invalid one submits the valid part silently. Pinned
+  // here so any future change to that trade-off is a deliberate one.
+  describe("mixed valid and invalid segments (current behavior)", () => {
+    const submitPositions = async (input: string) => {
+      const mockOnOutcome = jest.fn();
+      render(
+        <CreateWaveOutcomesManual
+          {...defaultProps}
+          waveType={ApiWaveType.Rank}
+          onOutcome={mockOnOutcome}
+        />
+      );
+
+      await userEvent.type(
+        screen.getByLabelText("Manual action"),
+        "Rank action"
+      );
+      await userEvent.type(screen.getByLabelText(/Winning Positions/i), input);
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      return mockOnOutcome;
+    };
+
+    it("keeps the valid position and drops a below-range segment without erroring", async () => {
+      const mockOnOutcome = await submitPositions("1,0-2");
+
+      expect(
+        screen.queryByText("Invalid position format")
+      ).not.toBeInTheDocument();
+      expect(mockOnOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({
+          winnersConfig: expect.objectContaining({
+            totalAmount: 1,
+            winners: [{ value: 1 }],
+          }),
+        })
+      );
+    });
+
+    it("keeps the valid position and drops an oversized range without erroring", async () => {
+      const mockOnOutcome = await submitPositions("1,1-5000000000");
+
+      expect(
+        screen.queryByText("Invalid position format")
+      ).not.toBeInTheDocument();
+      expect(mockOnOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({
+          winnersConfig: expect.objectContaining({
+            totalAmount: 1,
+            winners: [{ value: 1 }],
+          }),
+        })
+      );
+    });
+  });
+
+  describe("error announcement", () => {
+    it("leaves the manual action field valid and undescribed before submitting", () => {
+      render(<CreateWaveOutcomesManual {...defaultProps} />);
+
+      const actionInput = screen.getByLabelText("Manual action");
+      expect(actionInput).not.toHaveAttribute("aria-invalid");
+      expect(actionInput).not.toHaveAttribute("aria-describedby");
+    });
+
+    it("marks the manual action field invalid and points it at the announced error", async () => {
+      render(<CreateWaveOutcomesManual {...defaultProps} />);
+
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      const actionInput = screen.getByLabelText("Manual action");
+      expect(actionInput).toHaveAttribute("aria-invalid", "true");
+      const errorId = actionInput.getAttribute("aria-describedby");
+      expect(errorId).toBeTruthy();
+
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveAttribute("id", errorId);
+      expect(alert).toHaveTextContent("Please enter your manual action");
+    });
+
+    it("drops the invalid state once the manual action is filled in", async () => {
+      render(<CreateWaveOutcomesManual {...defaultProps} />);
+
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+      await userEvent.type(screen.getByLabelText("Manual action"), "Action");
+
+      const actionInput = screen.getByLabelText("Manual action");
+      expect(actionInput).not.toHaveAttribute("aria-invalid");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("marks the positions field invalid and points it at the announced error", async () => {
+      render(
+        <CreateWaveOutcomesManual
+          {...defaultProps}
+          waveType={ApiWaveType.Rank}
+        />
+      );
+
+      await userEvent.type(
+        screen.getByLabelText("Manual action"),
+        "Winner action"
+      );
+      await userEvent.type(
+        screen.getByLabelText(/Winning Positions/i),
+        "3-1"
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      const positionsInput = screen.getByLabelText(/Winning Positions/i);
+      expect(positionsInput).toHaveAttribute("aria-invalid", "true");
+      const errorId = positionsInput.getAttribute("aria-describedby");
+      expect(errorId).toBeTruthy();
+
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveAttribute("id", errorId);
+      expect(alert).toHaveTextContent("Invalid position format");
+    });
+
+    it("clears the positions error state once the field is edited again", async () => {
+      render(
+        <CreateWaveOutcomesManual
+          {...defaultProps}
+          waveType={ApiWaveType.Rank}
+        />
+      );
+
+      await userEvent.type(
+        screen.getByLabelText("Manual action"),
+        "Winner action"
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Please enter positions"
+      );
+
+      await userEvent.type(
+        screen.getByLabelText(/Winning Positions/i),
+        "1"
+      );
+
+      const positionsInput = screen.getByLabelText(/Winning Positions/i);
+      expect(positionsInput).not.toHaveAttribute("aria-invalid");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
   });
 });

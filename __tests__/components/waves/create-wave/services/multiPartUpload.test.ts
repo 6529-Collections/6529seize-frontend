@@ -1,7 +1,10 @@
-import axios from "axios";
+import axios, { type AxiosProgressEvent, type AxiosResponse } from "axios";
 import pLimit from "p-limit";
 import pRetry from "p-retry";
-import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+import {
+  multiPartAttachmentUpload,
+  multiPartUpload,
+} from "@/components/waves/create-wave/services/multiPartUpload";
 import { commonApiPost } from "@/services/api/common-api";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 
@@ -42,7 +45,9 @@ describe("multiPartUpload", () => {
     jest.clearAllMocks();
 
     // Mock pLimit to return a function that just executes the task
-    mockPLimit.mockReturnValue((fn: any) => fn());
+    mockPLimit.mockReturnValue(
+      ((fn: () => unknown) => fn()) as unknown as ReturnType<typeof pLimit>
+    );
 
     // Mock pRetry to just execute the function
     mockPRetry.mockImplementation((fn: any) => fn());
@@ -214,16 +219,20 @@ describe("multiPartUpload", () => {
       const progressSpy = jest.fn();
 
       // Mock axios.put to simulate progress
-      mockAxios.put.mockImplementation((url, data, config: any) => {
-        // Simulate progress callback
-        if (config.onUploadProgress) {
-          config.onUploadProgress({ loaded: 50, total: 100 });
-          config.onUploadProgress({ loaded: 100, total: 100 });
-        }
+      mockAxios.put.mockImplementation((_url, _data, config) => {
+        // Simulate progress callbacks
+        config?.onUploadProgress?.({
+          loaded: 50,
+          total: 100,
+        } as AxiosProgressEvent);
+        config?.onUploadProgress?.({
+          loaded: 100,
+          total: 100,
+        } as AxiosProgressEvent);
         return Promise.resolve({
           headers: { etag: '"test-etag"' },
           status: 200,
-        });
+        } as unknown as AxiosResponse);
       });
 
       await multiPartUpload({
@@ -471,6 +480,159 @@ describe("multiPartUpload", () => {
           parts: [{ part_no: 1, etag: "unquoted-etag" }],
         },
       });
+    });
+  });
+
+  describe("Empty File Handling", () => {
+    const emptyPng = () => new File([], "empty.png", { type: "image/png" });
+
+    it("rejects an empty file before contacting the API", async () => {
+      await expect(
+        multiPartUpload({ file: emptyPng(), path: "drop" })
+      ).rejects.toThrow("Empty file uploads are not allowed");
+
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+      expect(mockAxios.put).not.toHaveBeenCalled();
+    });
+
+    it("completes the progress bar before rejecting an empty file", async () => {
+      const progressSpy = jest.fn();
+
+      await expect(
+        multiPartUpload({
+          file: emptyPng(),
+          path: "drop",
+          onProgress: progressSpy,
+        })
+      ).rejects.toThrow("Empty file uploads are not allowed");
+
+      expect(progressSpy).toHaveBeenCalledWith(100);
+    });
+  });
+
+  describe("Processing Metadata", () => {
+    it("passes a processing note through to the caller", async () => {
+      mockCommonApiPost.mockReset();
+      mockCommonApiPost
+        .mockResolvedValueOnce(mockStartResponse)
+        .mockResolvedValueOnce(mockPartResponse)
+        .mockResolvedValueOnce({
+          ...mockCompleteResponse,
+          media_upload_id: "media-upload-2",
+          media_status: ApiDropMediaStatus.Processing,
+          media_error: "still transcoding",
+        });
+
+      const result = await multiPartUpload({
+        file: mockFile,
+        path: "drop",
+        waitForReady: false,
+      });
+
+      expect(result).toEqual({
+        url: "https://cdn.example.com/final-url",
+        mime_type: "image/png",
+        media_upload_id: "media-upload-2",
+        media_status: ApiDropMediaStatus.Processing,
+        media_error: "still transcoding",
+      });
+    });
+
+    it("rejects when the server reports a failed media status", async () => {
+      mockCommonApiPost.mockReset();
+      mockCommonApiPost
+        .mockResolvedValueOnce(mockStartResponse)
+        .mockResolvedValueOnce(mockPartResponse)
+        .mockResolvedValueOnce({
+          ...mockCompleteResponse,
+          media_upload_id: "media-upload-3",
+          media_status: ApiDropMediaStatus.Failed,
+          media_error: "transcode failed",
+        });
+
+      await expect(
+        multiPartUpload({ file: mockFile, path: "drop" })
+      ).rejects.toThrow("transcode failed");
+    });
+
+    it("omits processing metadata the server did not send", async () => {
+      const result = await multiPartUpload({ file: mockFile, path: "drop" });
+
+      expect(result).not.toHaveProperty("media_upload_id");
+      expect(result).not.toHaveProperty("media_status");
+      expect(result).not.toHaveProperty("media_error");
+    });
+  });
+
+  describe("multiPartAttachmentUpload", () => {
+    const pdfFile = (content: string[] = ["pdf bytes"]) =>
+      new File(content, "doc.pdf", { type: "application/pdf" });
+
+    it("rejects file types that are not attachments", async () => {
+      await expect(
+        multiPartAttachmentUpload({
+          file: new File(["png"], "image.png", { type: "image/png" }),
+        })
+      ).rejects.toThrow("File type not supported.");
+
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+    });
+
+    it("rejects an empty attachment", async () => {
+      await expect(
+        multiPartAttachmentUpload({ file: pdfFile([]) })
+      ).rejects.toThrow("Empty file uploads are not allowed");
+
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+    });
+
+    it("uploads an attachment through the attachment endpoints", async () => {
+      mockCommonApiPost.mockReset();
+      mockCommonApiPost
+        .mockResolvedValueOnce({
+          attachment_id: "attachment-1",
+          upload_id: "test-upload-id",
+          key: "test-key",
+        })
+        .mockResolvedValueOnce(mockPartResponse)
+        .mockResolvedValueOnce({
+          attachment_id: "attachment-1",
+          file_name: "doc.pdf",
+        });
+
+      const result = await multiPartAttachmentUpload({ file: pdfFile() });
+
+      expect(mockCommonApiPost).toHaveBeenNthCalledWith(1, {
+        endpoint: "attachments/multipart-upload",
+        body: { file_name: "doc.pdf", content_type: "application/pdf" },
+      });
+      expect(mockCommonApiPost).toHaveBeenNthCalledWith(3, {
+        endpoint: "attachments/multipart-upload/completion",
+        body: {
+          attachment_id: "attachment-1",
+          upload_id: "test-upload-id",
+          key: "test-key",
+          parts: [{ part_no: 1, etag: "test-etag" }],
+        },
+      });
+      expect(result).toEqual({
+        attachment_id: "attachment-1",
+        file_name: "doc.pdf",
+      });
+    });
+
+    it("throws when the attachment start call omits identifiers", async () => {
+      mockCommonApiPost.mockReset();
+      mockCommonApiPost.mockResolvedValueOnce({
+        upload_id: "test-upload-id",
+        key: "test-key",
+      });
+
+      await expect(
+        multiPartAttachmentUpload({ file: pdfFile() })
+      ).rejects.toThrow(
+        "Server did not return required attachment_id, upload_id, or key"
+      );
     });
   });
 });
