@@ -34,6 +34,10 @@ const ARTWORK_PARTS = [
     descriptionKey: "publicReview.forArtistsGuide.artwork.sales.description",
   },
   {
+    titleKey: "publicReview.forArtistsGuide.artwork.control.title",
+    descriptionKey: "publicReview.forArtistsGuide.artwork.control.description",
+  },
+  {
     titleKey: "publicReview.forArtistsGuide.artwork.preservation.title",
     descriptionKey:
       "publicReview.forArtistsGuide.artwork.preservation.description",
@@ -194,7 +198,7 @@ export function StreamReviewForArtistsGuide({
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.artwork.description")}
         </p>
-        <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-px-0 tw-py-6 sm:tw-grid-cols-2">
+        <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-y-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-px-0 tw-py-6">
           {ARTWORK_PARTS.map((part) => (
             <li
               key={part.titleKey}

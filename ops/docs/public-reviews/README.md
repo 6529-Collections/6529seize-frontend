@@ -77,9 +77,10 @@ starting points for artists, collectors and minters, and auditors. It ends
 after those audience paths. The secondary **Review history** destination opens
 the immutable technical Overview for the active snapshot. The current **For
 Artists** page starts with a plain artist guide
-covering the artwork package, approval journey, change boundaries, other actors,
-sales, payments, and finality. Its detailed versioned editorial remains below
-as the technical evidence. The generated technical reference lets reviewers
+covering six questions: artwork and identity; editions and minting; artist
+approval; sales, payments, and royalties; what can still change; and files and
+artwork history. Its detailed versioned editorial remains below as the technical
+evidence. The generated technical reference lets reviewers
 inspect Solidity files, definitions, functions, events, errors, and other
 declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100

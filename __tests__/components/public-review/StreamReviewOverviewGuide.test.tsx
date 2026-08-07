@@ -146,13 +146,13 @@ describe("StreamReviewOverviewGuide", () => {
     expect(screen.getByText("Use the permission")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The permission is submitted to the contract. If it passes the checks, the contract mints the token or starts the auction, then marks the permission as used."
+        "The permission is submitted to the contract. If it passes the checks, the contract marks it as used first. It then mints the token or starts the auction."
       )
     ).toBeInTheDocument();
-    expect(screen.getByText("Distribute the payment")).toBeInTheDocument();
+    expect(screen.getByText("Record the payment shares")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The contract splits the sale money according to the artwork's recorded payment settings: which wallets receive a share and how large each share is."
+        "The contract records how much primary-sale money each recipient is owed. The money is not sent automatically. Each recipient withdraws their share later."
       )
     ).toBeInTheDocument();
     expect(
