@@ -627,22 +627,29 @@ describe("one-click production verifier selection artifact metadata", () => {
     });
   });
 
+  it("rejects a present selection artifact attempt that disagrees with the verifier run", () => {
+    const exact = selectionBundle().artifacts[0];
+    expect(() =>
+      validateSelectionArtifactMetadata(
+        selectionInput({
+          metadataBundle: selectionBundle({
+            artifacts: [
+              {
+                ...exact,
+                workflow_run: {
+                  id: Number(VERIFIER_RUN_ID),
+                  run_attempt: VERIFIER_RUN_ATTEMPT + 1,
+                  head_sha: VERIFIER_HEAD_SHA,
+                },
+              },
+            ],
+          }),
+        })
+      )
+    ).toThrow(/workflow run attempt does not match/);
+  });
+
   it.each([
-    {
-      label: "wrong attempt attachment",
-      metadataBundle: selectionBundle({
-        artifacts: [
-          {
-            ...selectionBundle().artifacts[0],
-            workflow_run: {
-              id: Number(VERIFIER_RUN_ID),
-              run_attempt: 3,
-              head_sha: VERIFIER_HEAD_SHA,
-            },
-          },
-        ],
-      }),
-    },
     {
       label: "wrong artifact name",
       metadataBundle: selectionBundle({
