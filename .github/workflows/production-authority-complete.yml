@@ -19,15 +19,9 @@ run-name: Production authority completion
 jobs:
   complete-production-authority:
     name: Complete exact production authority
-    if: >-
-      (github.event_name == 'workflow_dispatch' &&
-      github.ref == 'refs/heads/main' &&
-      (github.actor == 'punk6529' || github.actor == 'prxt6529')) ||
-      (github.event_name == 'workflow_run' &&
-      github.event.workflow_run.head_repository.full_name == github.repository &&
-      github.event.workflow_run.head_branch == 'main' &&
-      (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' ||
-      github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml'))
+    # A workflow_dispatch actor is the authenticated dispatcher. This early gate is
+    # defense in depth; the shell and authority API independently verify identity.
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && (github.actor == 'punk6529' || github.actor == 'prxt6529')) || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

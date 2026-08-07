@@ -66,6 +66,12 @@ describe("one-click production authority completion", () => {
         "(github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || " +
         "github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml'))"
     );
+    const dispatchGateLine = completionSource
+      .split(/\r?\n/u)
+      .find((line) => line.trimStart().startsWith("if: (github.event_name"));
+    expect(dispatchGateLine).toContain("github.actor == 'punk6529'");
+    expect(dispatchGateLine).toContain("github.actor == 'prxt6529'");
+    expect(dispatchGateLine).toMatch(/# NOSONAR$/u);
     expect(completionJob.if).not.toContain("github.event.workflow_run.name");
     expect(completionJob["runs-on"]).toBe("ubuntu-latest");
     expect(completionJob.permissions).toEqual({
