@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { useTitle } from "@/contexts/TitleContext";
+import { useTitleOptional } from "@/contexts/TitleContext";
 import {
   faChevronDown,
   faChevronUp,
@@ -20,12 +20,15 @@ type ErrorComponentProps = {
   readonly onReset?: (() => void) | undefined;
 };
 
+const ERROR_TITLE = "6529 Error";
+
 export default function ErrorComponent({
   stackTrace,
   digest,
   onReset,
 }: ErrorComponentProps = {}) {
-  const { setTitle } = useTitle();
+  const titleContext = useTitleOptional();
+  const setTitle = titleContext?.setTitle;
   const searchParams = useSearchParams();
   const [isStacktraceExpanded, setIsStacktraceExpanded] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -33,7 +36,7 @@ export default function ErrorComponent({
   const [, copyToClipboard] = useCopyToClipboard();
 
   useEffect(() => {
-    setTitle("6529 Error");
+    setTitle?.(ERROR_TITLE);
   }, [setTitle]);
 
   const stackTraceFromQuery = useMemo(() => {
@@ -62,6 +65,7 @@ export default function ErrorComponent({
 
   return (
     <section className="tw-flex tw-h-full tw-min-h-screen tw-w-full tw-items-center tw-justify-center">
+      {titleContext ? null : <title>{ERROR_TITLE}</title>}
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
         <Image
           unoptimized

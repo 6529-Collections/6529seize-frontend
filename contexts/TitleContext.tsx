@@ -286,6 +286,8 @@ export const useTitle = () => {
   return context;
 };
 
+export const useTitleOptional = () => useContext(TitleContext) ?? null;
+
 // Hook to set page title - use this in page components
 export const useSetTitle = (pageTitle: string) => {
   const { setTitle } = useTitle();

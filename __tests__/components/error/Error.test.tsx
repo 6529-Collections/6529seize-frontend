@@ -5,12 +5,11 @@ import ErrorComponent from "@/components/error/Error";
 const setTitleMock = jest.fn();
 const copyToClipboardMock = jest.fn();
 let mockSearchParams: URLSearchParams;
+let mockTitleContext: { setTitle: typeof setTitleMock } | null;
 
 jest.mock("@/contexts/TitleContext", () => ({
   __esModule: true,
-  useTitle: () => ({
-    setTitle: setTitleMock,
-  }),
+  useTitleOptional: () => mockTitleContext,
 }));
 
 jest.mock("next/navigation", () => ({
@@ -46,6 +45,8 @@ describe("ErrorComponent", () => {
     setTitleMock.mockClear();
     copyToClipboardMock.mockClear();
     mockSearchParams = new URLSearchParams();
+    mockTitleContext = { setTitle: setTitleMock };
+    document.title = "Existing title";
   });
 
   afterEach(() => {
@@ -57,9 +58,28 @@ describe("ErrorComponent", () => {
     render(<ErrorComponent />);
 
     expect(setTitleMock).toHaveBeenCalledWith("6529 Error");
+    expect(document.title).toBe("Existing title");
 
     const supportLink = screen.getByRole("link", { name: "support@6529.io" });
     expect(supportLink).toHaveAttribute("href", "mailto:support@6529.io");
+  });
+
+  it("renders the error fallback without a TitleProvider", () => {
+    mockTitleContext = null;
+    const resetMock = jest.fn();
+
+    render(<ErrorComponent onReset={resetMock} />);
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Welcome to the 6529 Page of Doom",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /try again/i })
+    ).toBeInTheDocument();
+    expect(document.title).toBe("6529 Error");
+    expect(setTitleMock).not.toHaveBeenCalled();
   });
 
   it("reveals a provided stack trace when toggled", () => {
