@@ -16,6 +16,7 @@ import {
   shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterExodusProviderAccountTimeout,
   shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInstagramPageHideBridgeError,
   shouldFilterInjectedProviderProxyStartsWithError,
@@ -347,6 +348,28 @@ describe("sentry-client-filters", () => {
       function: "a",
       lineno: 1,
       colno: 16591,
+      in_app: true,
+    },
+  ];
+  const exodusProviderAccountTimeoutMessage =
+    "JSON-RPC: method call timeout calling 0x1_eth_accounts";
+  const exodusSentryWrapperChunkPath =
+    "app:///_next/static/chunks/44mdj46vrfcef.js";
+  const exodusProviderPath = "app:///ethereum-provider.js";
+  const createExodusProviderTimeoutFrames = (
+    wrapperLine = 7
+  ): SentryStackFrame[] => [
+    {
+      filename: exodusSentryWrapperChunkPath,
+      function: "n",
+      lineno: wrapperLine,
+      colno: 4853,
+      in_app: true,
+    },
+    {
+      filename: exodusProviderPath,
+      lineno: 1,
+      colno: 2244,
       in_app: true,
     },
   ];
@@ -1192,6 +1215,40 @@ describe("sentry-client-filters", () => {
     mechanismType = "auto.browser.global_handlers.onunhandledrejection",
     handled = false,
     frames = browserExtensionWalletBridgeFrames,
+    additionalException,
+    eventOverrides = {},
+  }: {
+    type?: string | undefined;
+    value?: string | undefined;
+    mechanismType?: string | undefined;
+    handled?: boolean | undefined;
+    frames?: SentryStackFrame[] | undefined;
+    additionalException?: SentryExceptionValue | undefined;
+    eventOverrides?: TestSentryClientEventOverrides | undefined;
+  } = {}): TestSentryClientEvent => ({
+    ...eventOverrides,
+    exception: {
+      values: [
+        {
+          type,
+          value,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: { frames },
+        },
+        ...(additionalException ? [additionalException] : []),
+      ],
+    },
+  });
+
+  const createExodusProviderAccountTimeoutEvent = ({
+    type = "Error",
+    value = exodusProviderAccountTimeoutMessage,
+    mechanismType = "auto.browser.global_handlers.onunhandledrejection",
+    handled = false,
+    frames = createExodusProviderTimeoutFrames(),
     additionalException,
     eventOverrides = {},
   }: {
@@ -8552,6 +8609,202 @@ describe("sentry-client-filters", () => {
     });
 
     const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each([3, 7])(
+    "filters the exact Exodus provider account timeout without absolute paths and wrapper line %i",
+    (wrapperLine) => {
+      const event = createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames(wrapperLine),
+      });
+
+      const result = shouldFilterExodusProviderAccountTimeout(event);
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it("filters the exact Exodus provider account timeout with matching absolute paths", () => {
+    const frames = createExodusProviderTimeoutFrames().map((frame) => ({
+      ...frame,
+      abs_path: frame.filename,
+    }));
+    const event = createExodusProviderAccountTimeoutEvent({ frames });
+
+    const result = shouldFilterExodusProviderAccountTimeout(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [
+      "message",
+      createExodusProviderAccountTimeoutEvent({
+        value: "JSON-RPC: method call timed out calling 0x1_eth_accounts",
+      }),
+    ],
+    [
+      "RPC method",
+      createExodusProviderAccountTimeoutEvent({
+        value: "JSON-RPC: method call timeout calling 0x1_eth_requestAccounts",
+      }),
+    ],
+    [
+      "exception type",
+      createExodusProviderAccountTimeoutEvent({ type: "TypeError" }),
+    ],
+    [
+      "capture mechanism",
+      createExodusProviderAccountTimeoutEvent({
+        mechanismType: "auto.browser.global_handlers.onerror",
+      }),
+    ],
+    [
+      "handled state",
+      createExodusProviderAccountTimeoutEvent({ handled: true }),
+    ],
+    [
+      "wrapper line",
+      createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames(4),
+      }),
+    ],
+    [
+      "wrapper coordinate",
+      createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames().map((frame, index) =>
+          index === 0 ? { ...frame, colno: 4854 } : frame
+        ),
+      }),
+    ],
+    [
+      "wrapper absolute path",
+      createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames().map((frame, index) =>
+          index === 0
+            ? { ...frame, abs_path: "app:///_next/static/chunks/other.js" }
+            : frame
+        ),
+      }),
+    ],
+    [
+      "provider path",
+      createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames().map((frame, index) =>
+          index === 1
+            ? {
+                ...frame,
+                filename: "app:///ethereum-provider-v2.js",
+                abs_path: "app:///ethereum-provider-v2.js",
+              }
+            : frame
+        ),
+      }),
+    ],
+    [
+      "provider absolute path",
+      createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames().map((frame, index) =>
+          index === 1
+            ? { ...frame, abs_path: "app:///ethereum-provider-v2.js" }
+            : frame
+        ),
+      }),
+    ],
+    [
+      "provider coordinate",
+      createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames().map((frame, index) =>
+          index === 1 ? { ...frame, colno: 2245 } : frame
+        ),
+      }),
+    ],
+    [
+      "missing frame",
+      createExodusProviderAccountTimeoutEvent({
+        frames: createExodusProviderTimeoutFrames().slice(1),
+      }),
+    ],
+    [
+      "extra frame",
+      createExodusProviderAccountTimeoutEvent({
+        frames: [
+          ...createExodusProviderTimeoutFrames(),
+          {
+            filename: exodusProviderPath,
+            abs_path: exodusProviderPath,
+            lineno: 1,
+            colno: 2244,
+          },
+        ],
+      }),
+    ],
+  ])(
+    "keeps an Exodus provider timeout near miss with changed %s",
+    (_, event) => {
+      const result = shouldFilterExodusProviderAccountTimeout(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("keeps mixed exceptions containing the Exodus provider timeout", () => {
+    const event = createExodusProviderAccountTimeoutEvent({
+      additionalException: {
+        type: "TypeError",
+        value: "Application wallet state failed.",
+        stacktrace: {
+          frames: [
+            {
+              filename: "app:///services/wallet/connection.ts",
+              function: "connectWallet",
+              in_app: true,
+            },
+          ],
+        },
+      },
+    });
+
+    const result = shouldFilterExodusProviderAccountTimeout(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Exodus provider timeouts with app-owned original stacks", () => {
+    const event = createExodusProviderAccountTimeoutEvent();
+    const error = new Error(exodusProviderAccountTimeoutMessage);
+    error.stack = [
+      `Error: ${exodusProviderAccountTimeoutMessage}`,
+      `    at n (${exodusSentryWrapperChunkPath}:7:4853)`,
+      "    at connectWallet (app:///services/wallet/connection.ts:10:1)",
+    ].join("\n");
+
+    const result = shouldFilterExodusProviderAccountTimeout(event, {
+      originalException: error,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Exodus provider timeouts with app-owned serialized stacks", () => {
+    const event = createExodusProviderAccountTimeoutEvent({
+      eventOverrides: {
+        extra: {
+          __serialized__: {
+            message: exodusProviderAccountTimeoutMessage,
+            stack: [
+              `Error: ${exodusProviderAccountTimeoutMessage}`,
+              `    at n (${exodusSentryWrapperChunkPath}:7:4853)`,
+              "    at connectWallet (app:///services/wallet/connection.ts:10:1)",
+            ].join("\n"),
+          },
+        },
+      },
+    });
+
+    const result = shouldFilterExodusProviderAccountTimeout(event);
 
     expect(result).toBe(false);
   });

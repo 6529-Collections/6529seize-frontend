@@ -34,6 +34,7 @@ import {
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterExodusProviderAccountTimeout,
   shouldFilterInjectedIosAutoplayNotAllowedError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
@@ -177,6 +178,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterBrowserExtensionWalletRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterExodusProviderAccountTimeout(event, hint)) {
     return true;
   }
 
