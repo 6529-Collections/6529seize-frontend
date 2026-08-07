@@ -12,6 +12,7 @@ import {
 import type {
   SentryClientEvent,
   SentryEventHint,
+  SentryExceptionValue,
   SentryStackFrame,
 } from "./types";
 import { hasAppOwnedSourceEvidence } from "./app-frame-utils";
@@ -23,6 +24,12 @@ import {
 
 const browserExtensionWalletRejectionMessage = "User rejected the request.";
 const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+const exodusProviderAccountTimeoutMessage =
+  "JSON-RPC: method call timeout calling 0x1_eth_accounts";
+const exodusProviderPath = "app:///ethereum-provider.js";
+const exodusSentryWrapperChunkPathPattern =
+  /^app:\/\/\/_next\/static\/chunks\/[a-z0-9._~-]+\.js$/i;
+const exodusSentryWrapperLineNumbers = new Set([3, 7]);
 // Keep the complete pre-symbolication stack exact so extension bundle drift
 // fails open and nearby application failures remain visible.
 const browserExtensionWalletBridgeFrameSignatures = [
@@ -117,6 +124,62 @@ function hasExactBrowserExtensionWalletBridgeFrames(
   });
 }
 
+function isExactExodusSentryWrapperFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  if (!frame) {
+    return false;
+  }
+
+  const filename = frame.filename;
+  return (
+    typeof filename === "string" &&
+    (frame.abs_path === undefined || frame.abs_path === filename) &&
+    exodusSentryWrapperChunkPathPattern.test(filename) &&
+    frame.function === "n" &&
+    frame.lineno !== undefined &&
+    exodusSentryWrapperLineNumbers.has(frame.lineno) &&
+    frame.colno === 4853
+  );
+}
+
+function isExactExodusProviderFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  return (
+    frame?.filename === exodusProviderPath &&
+    (frame.abs_path === undefined || frame.abs_path === exodusProviderPath) &&
+    frame.lineno === 1 &&
+    frame.colno === 2244
+  );
+}
+
+function hasExactExodusProviderTimeoutFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.length === 2 &&
+    isExactExodusSentryWrapperFrame(frames[0]) &&
+    isExactExodusProviderFrame(frames[1])
+  );
+}
+
+function hasExodusProviderTimeoutAppEvidence(
+  event: SentryClientEvent,
+  value: SentryExceptionValue,
+  hint?: SentryEventHint
+): boolean {
+  // beforeSend sees the known Sentry wrapper chunk before source mapping.
+  // The exact two-frame signature accounts for it, while independent hint and
+  // serialized stacks must still fail open when they identify application code.
+  const sourceEvidenceValue: SentryExceptionValue = {
+    ...value,
+    stacktrace: { frames: [] },
+  };
+  return hasAppOwnedSourceEvidence(event, sourceEvidenceValue, hint);
+}
+
 function hasExtensionMessagingConnectionFailureMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -173,6 +236,29 @@ export function shouldFilterBrowserExtensionWalletRejection(
   }
 
   return hasExactBrowserExtensionWalletBridgeFrames(value.stacktrace?.frames);
+}
+
+export function shouldFilterExodusProviderAccountTimeout(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
+  if (
+    value?.type !== "Error" ||
+    value.value !== exodusProviderAccountTimeoutMessage ||
+    value.mechanism?.type !== browserUnhandledRejectionMechanism ||
+    value.mechanism.handled !== false ||
+    !hasExactExodusProviderTimeoutFrames(value.stacktrace?.frames)
+  ) {
+    return false;
+  }
+
+  return !hasExodusProviderTimeoutAppEvidence(event, value, hint);
 }
 
 export function shouldFilterBrowserExtensionSendMessageError(
