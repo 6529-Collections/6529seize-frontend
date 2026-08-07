@@ -79,6 +79,25 @@ describe("profile collected navigation", () => {
     ).toBe("collected-card-nextgen-10000000643");
   });
 
+  it("accepts anchors only for known collected collection types", () => {
+    expect(
+      getProfileCollectedReturnContext(
+        "/Shelby/collected#collected-card-nextgen-10000000643"
+      )
+    ).toEqual({
+      href: "/Shelby/collected#collected-card-nextgen-10000000643",
+      profile: "Shelby",
+    });
+    expect(
+      getProfileCollectedReturnContext(
+        "/Shelby/collected#collected-card-unknown-10000000643"
+      )
+    ).toEqual({
+      href: "/Shelby/collected",
+      profile: "Shelby",
+    });
+  });
+
   it("removes transient return context from shared NextGen token routes", () => {
     const params = new URLSearchParams({
       locale: "de-DE",

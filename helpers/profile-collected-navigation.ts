@@ -7,6 +7,11 @@ const PROFILE_COLLECTED_PATH_PATTERN = /^\/([^/?#]+)\/collected\/?$/;
 const SAFE_URL_BASE = "https://6529.io";
 const MAX_PROFILE_LENGTH = 128;
 const MAX_QUERY_VALUE_LENGTH = 256;
+const COLLECTED_COLLECTION_ANCHOR_VALUES = new Set(
+  Object.values(CollectedCollectionType).map((collection) =>
+    collection.toLowerCase()
+  )
+);
 
 const ALLOWED_COLLECTED_QUERY_PARAMS = [
   "activity",
@@ -105,8 +110,13 @@ export const getCollectedCardAnchorId = ({
 }): string =>
   `${COLLECTED_CARD_ANCHOR_PREFIX}${collection.toLowerCase()}-${tokenId}`;
 
-export const isCollectedCardAnchorId = (value: string): boolean =>
-  /^collected-card-[a-z0-9-]+-\d+$/.test(value);
+export const isCollectedCardAnchorId = (value: string): boolean => {
+  const match = /^collected-card-([a-z]+)-\d+$/.exec(value);
+  return (
+    match?.[1] !== undefined &&
+    COLLECTED_COLLECTION_ANCHOR_VALUES.has(match[1])
+  );
+};
 
 interface ProfileCollectedReturnContext {
   readonly href: string;

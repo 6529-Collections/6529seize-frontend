@@ -36,14 +36,19 @@ jest.mock(
   })
 );
 
+type MockNextGenTokenProps = {
+  readonly returnTo?: string | null | undefined;
+  readonly setView: (view?: NextgenCollectionView) => void;
+};
+
 jest.mock("@/components/nextGen/collections/nextgenToken/NextGenToken", () => ({
   __esModule: true,
-  default: (props: any) => (
+  default: (props: MockNextGenTokenProps) => (
     <button
       type="button"
       data-testid="token-component"
       data-return-to={props.returnTo}
-      onClick={() => props.setView("Rarity")}
+      onClick={() => props.setView(NextgenCollectionView.RARITY)}
     />
   ),
 }));
