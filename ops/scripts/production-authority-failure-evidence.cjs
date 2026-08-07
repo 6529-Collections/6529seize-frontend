@@ -97,21 +97,18 @@ function validateRun({
     fail("RUN_TARGET_SHA_MISMATCH");
 
   if (kind === "deploy") {
-    exactString(run.name, "Web Deploy - PROD", "DEPLOY_NAME");
+    const expectedTitle = `Production deploy ${expectedTargetSha} [frontend-prod-${expectedRunId}]`;
+    exactString(run.name, expectedTitle, "DEPLOY_NAME");
     exactString(
       run.path,
       ".github/workflows/build-upload-deploy-prod.yml",
       "DEPLOY_PATH"
     );
-    exactString(
-      run.display_title,
-      `Production deploy ${expectedTargetSha} [frontend-prod-${expectedRunId}]`,
-      "DEPLOY_TITLE"
-    );
+    exactString(run.display_title, expectedTitle, "DEPLOY_TITLE");
   } else if (kind === "e2e") {
-    exactString(run.name, "Production E2E", "E2E_NAME");
-    exactString(run.path, ".github/workflows/production-e2e.yml", "E2E_PATH");
     const expectedTitle = `Production E2E automatic ${expectedDeployRunId}`;
+    exactString(run.name, expectedTitle, "E2E_NAME");
+    exactString(run.path, ".github/workflows/production-e2e.yml", "E2E_PATH");
     exactString(run.display_title, expectedTitle, "E2E_TITLE");
     actionsActor(run.actor, "E2E_ACTOR");
     actionsActor(run.triggering_actor, "E2E_TRIGGERING_ACTOR");
