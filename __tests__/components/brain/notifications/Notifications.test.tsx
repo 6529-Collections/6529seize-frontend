@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 const mutateAsyncMock = jest.fn();
+const mutateMock = jest.fn();
 const requestAuthMock = jest.fn().mockResolvedValue({ success: true });
 const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
 const setToastMock = jest.fn();
@@ -16,7 +17,7 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
 }));
 
 jest.mock("@tanstack/react-query", () => ({
-  useMutation: () => ({ mutateAsync: mutateAsyncMock }),
+  useMutation: () => ({ mutate: mutateMock, mutateAsync: mutateAsyncMock }),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -55,9 +56,15 @@ jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => {
   };
 });
 
+const mockNotificationsWrapper = jest.fn(
+  (_props: { markNotificationIdsAsRead?: (ids: number[]) => void }) => (
+    <div data-testid="wrapper" />
+  )
+);
 jest.mock("@/components/brain/notifications/NotificationsWrapper", () => ({
   __esModule: true,
-  default: () => <div data-testid="wrapper" />,
+  default: (props: { markNotificationIdsAsRead?: (ids: number[]) => void }) =>
+    mockNotificationsWrapper(props),
 }));
 
 jest.mock("@/components/brain/notifications/NotificationsCauseFilter", () => ({
@@ -148,6 +155,8 @@ describe("Notifications component", () => {
   beforeEach(() => {
     mutateAsyncMock.mockClear();
     mutateAsyncMock.mockResolvedValue(undefined);
+    mutateMock.mockClear();
+    mockNotificationsWrapper.mockClear();
     useNotificationsQueryMock.mockReset();
     setTitleMock.mockClear();
     requestAuthMock.mockClear();
@@ -205,6 +214,17 @@ describe("Notifications component", () => {
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
+  });
+
+  it("exposes grouped notification reads through the void mutation API", () => {
+    mockSuccessfulNotificationsQuery();
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+    const wrapperProps = mockNotificationsWrapper.mock.calls.at(-1)?.[0];
+
+    const result = wrapperProps?.markNotificationIdsAsRead?.([3, 5]);
+
+    expect(result).toBeUndefined();
+    expect(mutateMock).toHaveBeenCalledWith([3, 5]);
   });
 
   it("does not add floating dock clearance on mobile web", async () => {
