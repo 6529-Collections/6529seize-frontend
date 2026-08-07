@@ -2,6 +2,24 @@ name: Web Deploy - PROD
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy_hub_operation_id:
+        description: Deploy Hub correlation id; leave empty for manual fallback
+        type: string
+        required: false
+        default: ""
+      deploy_hub_controller_operation_id:
+        description: Deploy Hub controller operation id
+        type: string
+        required: false
+        default: ""
+      allow_rollback:
+        description: Explicitly allow deploying behind the current production SHA
+        type: boolean
+        required: false
+        default: false
+
+run-name: ${{ inputs.deploy_hub_operation_id != '' && format('Deploy Hub {0} — production', inputs.deploy_hub_operation_id) || 'Manual production deploy' }}
 
 permissions:
   contents: read
@@ -34,17 +52,45 @@ jobs:
     name: Authorize manual production fallback
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions: {}
+    permissions:
+      actions: read
+      contents: read
 
     steps:
       - name: Require authoritative production fallback readiness
         env:
+          DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
+          DEPLOY_HUB_CONTROLLER_OPERATION_ID: ${{ inputs.deploy_hub_controller_operation_id }}
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
+          GH_TOKEN: ${{ github.token }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           TARGET_ENVIRONMENT: prod
           TARGET_LANE: PRODUCTION
         run: |
           set -euo pipefail
+
+          if [ -n "${DEPLOY_HUB_OPERATION_ID:-}" ]; then
+            test "$GITHUB_ACTOR" = "github-actions[bot]"
+            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^dh-([1-9][0-9]{0,19})r[1-9][0-9]{0,8}-c[1-9][0-9]*-production-a[12]$ ]]
+            controller_run_id="${BASH_REMATCH[1]}"
+            controller_run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$controller_run_id")"
+            jq -e \
+              --arg branch "$DEPLOY_HUB_BASE_REF" \
+              --arg display_title "Deploy Hub $DEPLOY_HUB_CONTROLLER_OPERATION_ID — production continuation" \
+              --arg repository "$GITHUB_REPOSITORY" \
+              --arg workflow ".github/workflows/deploy-hub-production.yml" \
+              '.path == $workflow and .event == "workflow_dispatch" and .head_branch == $branch and .head_repository.full_name == $repository and .display_title == $display_title' \
+              <<< "$controller_run" >/dev/null
+            [[ "$DEPLOY_HUB_CONTROLLER_OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$ ]]
+            target_commit="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA")"
+            jq -e \
+              --arg operation "$DEPLOY_HUB_CONTROLLER_OPERATION_ID" \
+              --arg sha "$GITHUB_SHA" \
+              '.sha == $sha and (.commit.message | split("\n")[0] | startswith("Deploy Hub " + $operation + ":"))' \
+              <<< "$target_commit" >/dev/null
+            exit 0
+          fi
 
           test -n "$RELEASE_BUS_API_URL" || {
             echo "::error::Release Bus API URL is unavailable; refusing manual production deployment."
@@ -292,15 +338,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Confirm main did not advance before production mutation
+      - name: Confirm frozen production candidate remains safe
+        env:
+          ALLOW_ROLLBACK: ${{ inputs.allow_rollback }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          git fetch --no-tags origin main
-          latest_main_sha="$(git rev-parse origin/main)"
+          latest_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk 'NR == 1 { print $1 }')"
+          current_production_sha="$(aws elasticbeanstalk describe-environments \
+            --application-name "${BEANSTALK_APP_NAME}" \
+            --environment-names "${BEANSTALK_ENV_NAME}" \
+            --query 'Environments[0].VersionLabel' \
+            --output text)"
           node ops/scripts/deployment-bus.cjs production-preflight \
             --file deployment-bus-manifest.json \
             --current-main-sha "$latest_main_sha" \
+            --current-production-sha "$current_production_sha" \
+            --allow-rollback "${ALLOW_ROLLBACK:-false}" \
             --remote origin \
             --branch main
 

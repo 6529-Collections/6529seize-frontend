@@ -1,0 +1,90 @@
+name: Deploy Hub - FE Production
+
+run-name: Deploy Hub ${{ inputs.operation_id }} — production continuation
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation_id:
+        { description: Deploy Hub operation id, required: true, type: string }
+      manifest:
+        {
+          description: Exact production cohort JSON,
+          required: true,
+          type: string,
+        }
+      staging_sha:
+        {
+          description: Exact staging-validated SHA,
+          required: true,
+          type: string,
+        }
+      staging_correlation:
+        {
+          description: Exact staging E2E correlation id,
+          required: true,
+          type: string,
+        }
+      parent_run_id:
+        {
+          description: Authoritative staging controller run,
+          required: true,
+          type: string,
+        }
+
+permissions:
+  actions: write
+  checks: read
+  contents: write
+  pull-requests: write
+  statuses: write
+
+concurrency:
+  group: deploy-hub-frontend-production
+  cancel-in-progress: false
+
+jobs:
+  production:
+    name: Continue exact cohort to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    permissions:
+      actions: write
+      checks: read
+      contents: write
+      pull-requests: write
+      statuses: write
+
+    steps:
+      - name: Require trusted internal dispatch
+        env:
+          EXPECTED_REF: refs/heads/${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTOR" = "github-actions[bot]"
+          test "$GITHUB_REF" = "$EXPECTED_REF"
+
+      - name: Check out trusted operation controller
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Execute production continuation
+        env:
+          DEPLOY_HUB_ACTOR: ${{ github.actor }}
+          DEPLOY_HUB_API_URL: ${{ github.api_url }}
+          DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
+          DEPLOY_HUB_MANIFEST: ${{ inputs.manifest }}
+          DEPLOY_HUB_MODE: production
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.operation_id }}
+          DEPLOY_HUB_PARENT_RUN_ID: ${{ inputs.parent_run_id }}
+          DEPLOY_HUB_REPOSITORY: ${{ github.repository }}
+          DEPLOY_HUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          DEPLOY_HUB_RUN_ID: ${{ github.run_id }}
+          DEPLOY_HUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          DEPLOY_HUB_STAGING_CORRELATION: ${{ inputs.staging_correlation }}
+          DEPLOY_HUB_STAGING_SHA: ${{ inputs.staging_sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node ops/scripts/deploy-hub-operation.cjs >> "$GITHUB_STEP_SUMMARY"

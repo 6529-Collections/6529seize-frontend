@@ -1,6 +1,6 @@
-name: Deploy Hub - FE Dry Run
+name: Deploy Hub - FE Operation
 
-run-name: Deploy Hub shadow ${{ inputs.operation_id }} (dry-run)
+run-name: Deploy Hub ${{ inputs.operation_id }}
 
 on:
   workflow_dispatch:
@@ -9,25 +9,44 @@ on:
         description: Unique Deploy Hub operation identifier
         required: true
         type: string
+      action:
+        description: Deploy exact PRs or remove one exact PR from staging
+        required: true
+        type: choice
+        default: deploy
+        options:
+          - deploy
+          - remove-from-staging
       manifest:
         description: Ordered JSON array of exact frontend PR requests
         required: true
         type: string
+      confirmation:
+        description: Explicit live-operation confirmation
+        required: true
+        type: choice
+        options:
+          - DEPLOY
+          - REMOVE
 
 permissions:
-  checks: read
-  contents: read
+  actions: write
+  contents: write
   pull-requests: read
   statuses: write
 
+concurrency:
+  group: deploy-hub-frontend-controller
+  cancel-in-progress: false
+
 jobs:
-  shadow:
-    name: Validate exact frontend deployment plan
+  operate:
+    name: Execute exact frontend operation
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 355
     permissions:
-      checks: read
-      contents: read
+      actions: write
+      contents: write
       pull-requests: read
       statuses: write
 
@@ -39,28 +58,30 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF" = "$EXPECTED_REF"
 
-      - name: Check out immutable dry-run controller
+      - name: Check out trusted operation controller
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ github.workflow_sha }}
           fetch-depth: 0
-          persist-credentials: false
-          sparse-checkout: ops/scripts
-          sparse-checkout-cone-mode: false
+          persist-credentials: true
 
-      - name: Configure local merge planner
+      - name: Configure operation commit identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Run permission-limited dry run
+      - name: Execute Deploy Hub operation
         env:
           DEPLOY_HUB_ACTOR: ${{ github.actor }}
+          DEPLOY_HUB_ACTION: ${{ inputs.action }}
           DEPLOY_HUB_API_URL: ${{ github.api_url }}
           DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
+          DEPLOY_HUB_CONFIRMATION: ${{ inputs.confirmation }}
           DEPLOY_HUB_MANIFEST: ${{ inputs.manifest }}
           DEPLOY_HUB_OPERATION_ID: ${{ inputs.operation_id }}
           DEPLOY_HUB_REPOSITORY: ${{ github.repository }}
+          DEPLOY_HUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          DEPLOY_HUB_RUN_ID: ${{ github.run_id }}
           DEPLOY_HUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: node ops/scripts/deploy-hub-dry-run.cjs >> "$GITHUB_STEP_SUMMARY"
+        run: node ops/scripts/deploy-hub-operation.cjs >> "$GITHUB_STEP_SUMMARY"

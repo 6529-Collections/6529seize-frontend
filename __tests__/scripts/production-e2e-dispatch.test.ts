@@ -31,8 +31,9 @@ describe("automatic production E2E dispatch", () => {
     expect(dispatchSource).toContain(
       "actions/workflows/production-e2e.yml/dispatches"
     );
+    expect(dispatchSource).toContain("automatic_deploy_run_id:$deploy_run_id");
     expect(dispatchSource).toContain(
-      "inputs:{automatic_deploy_run_id:$deploy_run_id}"
+      "deploy_hub_operation_id:$deploy_hub_operation_id"
     );
   });
 
@@ -205,7 +206,11 @@ describe("automatic production E2E dispatch", () => {
     expect(verifier.if).toBe("always()");
     expect(verifier.needs).toBe("readonly");
     expect(verifier["runs-on"]).toBe("ubuntu-latest");
-    expect(verifier.permissions).toEqual({ actions: "read", contents: "read" });
+    expect(verifier.permissions).toEqual({
+      actions: "read",
+      contents: "read",
+      statuses: "write",
+    });
     expect(identityIndex).toBeGreaterThanOrEqual(0);
     expect(toolingIndex).toBeGreaterThan(identityIndex);
     expect(evidenceDownloadIndex).toBeGreaterThan(identityIndex);

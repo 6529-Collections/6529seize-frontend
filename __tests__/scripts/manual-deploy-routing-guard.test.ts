@@ -290,7 +290,10 @@ describe("frontend manual deployment routing guards", () => {
       const guardSource = guard.steps.map(({ run }) => run ?? "").join("\n");
 
       expect(needs).toContain("manual-deployment-guard");
-      expect(guard.permissions).toEqual({});
+      expect(guard.permissions).toEqual({
+        actions: "read",
+        contents: "read",
+      });
       expect(guard.steps).toHaveLength(1);
       expect(guard.steps[0]?.uses).toBeUndefined();
       expect(guard.steps[0]?.env).toMatchObject({
