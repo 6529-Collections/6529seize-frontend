@@ -3905,7 +3905,7 @@ describe("sentry-client-filters", () => {
     expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
   });
 
-  it("keeps an ambiguous failure across concurrent same-tuple reactions", () => {
+  it("samples an exact terminal pair across concurrent same-tuple reactions", () => {
     const event = createDropReactionNetworkEvent({
       breadcrumbs: [
         createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
@@ -3919,10 +3919,11 @@ describe("sentry-client-filters", () => {
       ],
     });
 
-    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
   });
 
-  it("keeps an ambiguous failure across concurrent different-tuple same-method reactions", () => {
+  it("samples an exact terminal pair across concurrent different-tuple same-method reactions", () => {
     const currentRequest = { mutationSequence: 1 } as const;
     const otherRequest = { mutationSequence: 2, source: "picker" } as const;
     const event = createDropReactionNetworkEvent({
@@ -3944,6 +3945,99 @@ describe("sentry-client-filters", () => {
           "POST",
           currentRequest
         ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it("keeps an ambiguous concurrent failure without an exact terminal pair", () => {
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionHttpBreadcrumb(),
+        {
+          category: "ui.click",
+          level: "info",
+          message: "button",
+        },
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST"
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it.each([
+    {
+      name: "real HTTP status",
+      breadcrumb: createDropReactionHttpBreadcrumb({ statusCode: 500 }),
+    },
+    {
+      name: "wrong endpoint",
+      breadcrumb: createDropReactionHttpBreadcrumb({
+        url: "/api/drops/drop-id/reactions",
+      }),
+    },
+    {
+      name: "wrong method",
+      breadcrumb: createDropReactionHttpBreadcrumb({ method: "DELETE" }),
+    },
+    {
+      name: "third-party endpoint",
+      breadcrumb: createDropReactionHttpBreadcrumb({
+        firstParty: false,
+        firstPartyApi: false,
+        url: "https://example.com/reaction",
+      }),
+    },
+    {
+      name: "non-error breadcrumb level",
+      breadcrumb: createDropReactionHttpBreadcrumb({ level: "info" }),
+    },
+  ])(
+    "keeps an ambiguous concurrent failure with an adjacent $name near miss",
+    ({ breadcrumb }) => {
+      const event = createDropReactionNetworkEvent({
+        breadcrumbs: [
+          createDropReactionLifecycleBreadcrumb(
+            "reaction.request_sent",
+            "POST"
+          ),
+          createDropReactionLifecycleBreadcrumb(
+            "reaction.request_sent",
+            "POST"
+          ),
+          breadcrumb,
+          createDropReactionLifecycleBreadcrumb(
+            "reaction.request_failed",
+            "POST"
+          ),
+        ],
+      });
+
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+    }
+  );
+
+  it("keeps an adjacent reaction failure classified as non-network", () => {
+    const failure = createDropReactionLifecycleBreadcrumb(
+      "reaction.request_failed",
+      "POST"
+    );
+    failure.data = { ...failure.data, error_kind: "server" };
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionHttpBreadcrumb(),
+        failure,
       ],
     });
 
@@ -4035,7 +4129,7 @@ describe("sentry-client-filters", () => {
       failedOptions: { action: "replace" as const },
     },
   ])(
-    "keeps a synthetic warning when lifecycle breadcrumbs have a different $name",
+    "samples an exact terminal pair when earlier lifecycle breadcrumbs have a different $name",
     ({ failedOptions }) => {
       const event = createDropReactionNetworkEvent({
         breadcrumbs: [
@@ -4052,7 +4146,8 @@ describe("sentry-client-filters", () => {
         ],
       });
 
-      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+      expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
     }
   );
 
