@@ -48,6 +48,9 @@ describe("automatic production E2E dispatch", () => {
         candidate.name === "Dispatch exact successful deploy to production E2E"
     );
     expect(step.run).toContain("list_exact_runs()");
+    expect(step.run).toContain(".name == $title");
+    expect(step.run).toContain(".display_title == $title");
+    expect(step.run).not.toContain('.name == "Production E2E"');
     expect(step.run).toContain('created=">=${DEPLOY_CREATED_AT}"');
     expect(step.run).toContain('if [ "$existing_count" = 1 ]; then');
     expect(step.run).toContain("|| dispatch_status=$?");
@@ -131,7 +134,10 @@ describe("automatic production E2E dispatch", () => {
     expect(
       e2e.on.workflow_dispatch.inputs.automatic_deploy_run_id.required
     ).toBe(false);
-    expect(resolve.run).toContain('.name == "Web Deploy - PROD"');
+    expect(resolve.run).toContain(
+      '.name == ("Production deploy " + .head_sha + " [frontend-prod-" + ($run_id | tostring) + "]")'
+    );
+    expect(resolve.run).toContain(".display_title == .name");
     expect(resolve.run).toContain(
       '.path == ".github/workflows/build-upload-deploy-prod.yml"'
     );
@@ -139,6 +145,11 @@ describe("automatic production E2E dispatch", () => {
     expect(resolve.run).toContain('.head_branch == "main"');
     expect(resolve.run).toContain("previous_deployed_sha=$previous_sha");
     expect(resolve.run).toContain(".run_started_at < $started_at");
+    expect(resolve.run).toContain(
+      '.name == ("Production deploy " + .head_sha + " [frontend-prod-" + (.id | tostring) + "]")'
+    );
+    expect(resolve.run).not.toContain('.name == "Web Deploy - PROD"');
+    expect(e2eSource).not.toContain('.name == "Web Deploy - PROD"');
     expect(e2eSource).toContain(
       "inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha"
     );

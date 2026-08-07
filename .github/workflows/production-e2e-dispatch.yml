@@ -64,7 +64,7 @@ jobs:
               --arg title "Production E2E automatic ${DEPLOY_WORKFLOW_RUN_ID}" '
                 [.workflow_runs[] |
                   select(
-                    .name == "Production E2E" and
+                    .name == $title and
                     .path == ".github/workflows/production-e2e.yml" and
                     .display_title == $title and
                     .event == "workflow_dispatch" and
