@@ -191,7 +191,7 @@ describe("isolated production artifact verifier", () => {
     const visitLocalDependencies = (sourcePath: string): void => {
       const sourceCode = fs.readFileSync(sourcePath, "utf8");
       for (const match of sourceCode.matchAll(
-        /require\(["']\.\/([^"']+)["']\)/gu
+        /require\(["']((?:\.{1,2}\/)[^"']+)["']\)/gu
       )) {
         const dependencyPath = path.resolve(path.dirname(sourcePath), match[1]);
         const relativeToScripts = path.relative(
