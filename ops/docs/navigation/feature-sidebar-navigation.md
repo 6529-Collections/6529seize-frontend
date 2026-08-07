@@ -41,9 +41,8 @@ On web layouts, route switching is sidebar-first.
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
-- Utility rows: desktop `Search`, `Share`, connected-only `Notifications`, then
-  the profile control
-  on supported desktop-web routes.
+- Utility rows: desktop `Search`, `Share` (only on supported desktop-web
+  routes), connected-only `Notifications`, then the profile control.
 - Bottom account area: connect action, loading placeholders, and the connected
   user menu.
 

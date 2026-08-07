@@ -10,6 +10,7 @@ import {
   screen,
   waitFor,
   waitForElementToBeRemoved,
+  within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -166,6 +167,7 @@ Object.assign(navigator, {
 });
 
 const testOrigin = globalThis.window.location.origin;
+const testPageUrl = `${testOrigin}/mock-path?something=value#details`;
 const originalSecureContextDescriptor = Object.getOwnPropertyDescriptor(
   globalThis,
   "isSecureContext"
@@ -396,11 +398,7 @@ describe("HeaderShare", () => {
     await userEvent.click(btn);
 
     const modal = await screen.findByTestId("header-share-modal");
-    expect(modal).toHaveClass(
-      "tw-max-w-sm",
-      "sm:tw-max-w-2xl",
-      "tw-p-0"
-    );
+    expect(modal).toHaveClass("tw-max-w-sm", "sm:tw-max-w-2xl", "tw-p-0");
     expect(screen.getByTestId("header-share-modal-content")).toHaveClass(
       "tw-p-5"
     );
@@ -412,9 +410,11 @@ describe("HeaderShare", () => {
     expect(screen.getByTestId("page-share-layout")).toHaveClass(
       "sm:tw-grid-cols-[var(--page-share-qr-size)_1px_minmax(0,1fr)]"
     );
-    expect(screen.getByTestId("page-share-layout")).toHaveStyle({
-      "--page-share-qr-size": "10.75rem",
-    });
+    expect(
+      screen
+        .getByTestId("page-share-layout")
+        .style.getPropertyValue("--page-share-qr-size")
+    ).toBe("10.75rem");
     expect(screen.getByTestId("page-share-target-menu")).toHaveClass(
       "tw-w-48",
       "sm:tw-w-full"
@@ -470,21 +470,24 @@ describe("HeaderShare", () => {
     expect(screen.queryByText("Mobile")).not.toBeInTheDocument();
     expect(screen.queryByText("Desktop")).not.toBeInTheDocument();
 
-    const currentUrl = globalThis.window.location.href;
-    expect(
-      screen.getByRole("link", { name: "Share on X" })
-    ).toHaveAttribute(
-      "href",
-      `https://x.com/intent/post?text=${encodeURIComponent(
-        `${globalThis.document.title.trim() || "6529"}\n${currentUrl}`
-      )}`
-    );
-    expect(
-      screen.getByRole("link", { name: "Share on Farcaster" })
-    ).toHaveAttribute(
-      "href",
-      expect.stringContaining(encodeURIComponent(currentUrl))
-    );
+    const xShareLink = screen.getByRole("link", {
+      name: "Share on X",
+    }) as HTMLAnchorElement;
+    const xShareUrl = new URL(xShareLink.href);
+    expect(xShareUrl.origin).toBe("https://x.com");
+    expect(xShareUrl.pathname).toBe("/intent/post");
+    expect(xShareUrl.searchParams.get("text")).toBe(`6529\n${testPageUrl}`);
+
+    const farcasterShareLink = screen.getByRole("link", {
+      name: "Share on Farcaster",
+    }) as HTMLAnchorElement;
+    const farcasterShareUrl = new URL(farcasterShareLink.href);
+    expect(farcasterShareUrl.origin).toBe("https://farcaster.xyz");
+    expect(farcasterShareUrl.pathname).toBe("/~/compose");
+    expect(farcasterShareUrl.searchParams.get("text")).toBe("6529");
+    expect(farcasterShareUrl.searchParams.getAll("embeds[]")).toEqual([
+      testPageUrl,
+    ]);
   });
 
   it("copies url to clipboard", async () => {
@@ -500,9 +503,7 @@ describe("HeaderShare", () => {
 
       const modal = await screen.findByTestId("header-share-modal");
       const copyButton = screen.getByRole("button", { name: "Copy Link" });
-      const copyIcon = modal.querySelector(
-        '[data-icon="copy"]'
-      ) as HTMLElement;
+      const copyIcon = modal.querySelector('[data-icon="copy"]') as HTMLElement;
 
       expect(copyIcon).toBeInTheDocument();
       await userEvent.click(copyButton);
@@ -510,15 +511,15 @@ describe("HeaderShare", () => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
         globalThis.window.location.href
       );
-      expect(screen.getByRole("button", { name: "Copied" })).toBe(
-        copyButton
-      );
+      expect(screen.getByRole("button", { name: "Copied" })).toBe(copyButton);
       expect(copyButton).toHaveClass(
         "tw-border-green-500",
         "tw-bg-green-500/15",
         "!tw-text-success"
       );
-      expect(screen.getByText("Copied")).toHaveClass("!tw-text-success");
+      expect(within(copyButton).getByText("Copied")).toHaveClass(
+        "!tw-text-success"
+      );
       expect(screen.getByRole("status")).toHaveTextContent("Copied");
       expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1500);
     } finally {
@@ -588,19 +589,21 @@ describe("HeaderShare", () => {
     expect(systemShareButton).toHaveClass("tw-w-full");
     expect(systemShareButton).not.toHaveAttribute("data-tooltip-id");
     expect(systemShareButton).not.toHaveAttribute("title");
-    expect(screen.getByTestId("page-share-layout")).toHaveStyle({
-      "--page-share-qr-size": "14.25rem",
-    });
+    expect(
+      screen
+        .getByTestId("page-share-layout")
+        .style.getPropertyValue("--page-share-qr-size")
+    ).toBe("14.25rem");
     expect(canShare).toHaveBeenCalledWith({
-      title: globalThis.document.title.trim() || "6529",
-      url: globalThis.window.location.href,
+      title: "6529",
+      url: testPageUrl,
     });
 
     await userEvent.click(systemShareButton);
 
     expect(systemShare).toHaveBeenCalledWith({
-      title: globalThis.document.title.trim() || "6529",
-      url: globalThis.window.location.href,
+      title: "6529",
+      url: testPageUrl,
     });
   });
 
@@ -679,8 +682,8 @@ describe("HeaderShare", () => {
 
     await waitFor(() =>
       expect(canShare).toHaveBeenCalledWith({
-        title: globalThis.document.title.trim() || "6529",
-        url: globalThis.window.location.href,
+        title: "6529",
+        url: testPageUrl,
       })
     );
     expect(
@@ -900,6 +903,9 @@ describe("HeaderShare", () => {
       );
       expect(
         screen.getByRole("button", { name: "Desktop" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("group", { name: "Device type" })
       ).toBeInTheDocument();
       expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
       expect(screen.queryByRole("link", { name: "Share on X" })).toBeNull();
@@ -1714,9 +1720,9 @@ describe("HeaderShare", () => {
         "tw-h-full"
       );
       expect(
-        screen.getByTestId("header-share-modal").querySelector(
-          "#header-share-content"
-        )
+        screen
+          .getByTestId("header-share-modal")
+          .querySelector("#header-share-content")
       ).toHaveClass("tw-aspect-square");
       expect(
         screen.getByTestId("connection-share-content").children

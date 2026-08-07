@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
@@ -33,9 +32,7 @@ jest.mock("@/components/header/useChainSwitcher", () => ({
 }));
 jest.mock("@/components/header/share/HeaderShare", () => ({
   HeaderConnectModal: ({ show }: { readonly show: boolean }) =>
-    show ? (
-      <div role="dialog" aria-label="Connect Device modal" />
-    ) : null,
+    show ? <div role="dialog" aria-label="Connect Device modal" /> : null,
 }));
 jest.mock("@/components/header/user/HeaderUserConnect", () => () => null);
 jest.mock("@/components/user/utils/level/UserLevel", () => () => null);
@@ -149,12 +146,8 @@ describe("HeaderUserMenuDropdown", () => {
     });
     expect(profileLink).toHaveAttribute("href", "/alice");
     expect(profileLink).not.toHaveAttribute("title");
-    expect(profileLink).toHaveClass(
-      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
-    );
-    expect(logoutButton).toHaveClass(
-      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
-    );
+    expect(profileLink).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
+    expect(logoutButton).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
     expect(profileLink.parentElement).toBe(logoutButton.parentElement);
     expect(
       profileLink.compareDocumentPosition(logoutButton) &
@@ -173,9 +166,9 @@ describe("HeaderUserMenuDropdown", () => {
       onOpenConnect,
     });
 
-    const connectWalletButton = screen
-      .getByText("Connect Wallet")
-      .closest("button");
+    const connectWalletButton = screen.getByRole("button", {
+      name: "Connect",
+    });
     const connectDeviceButton = screen.getByRole("button", {
       name: "Connect Device",
     });
@@ -194,10 +187,10 @@ describe("HeaderUserMenuDropdown", () => {
     expect(connectDeviceButton).toHaveClass(
       "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
     );
-    expect(connectWalletButton?.parentElement).toBe(
+    expect(connectWalletButton.parentElement).toBe(
       connectDeviceButton.parentElement
     );
-    expect(connectWalletButton?.closest("ul")).toHaveClass("tw-divide-y-2");
+    expect(connectWalletButton.closest("ul")).toHaveClass("tw-divide-y-2");
     const connectionActionsDivider = screen.getByTestId(
       "connection-actions-divider"
     );
@@ -207,7 +200,7 @@ describe("HeaderUserMenuDropdown", () => {
       "tw-border-iron-700"
     );
     expect(
-      connectWalletButton?.compareDocumentPosition(connectionActionsDivider) &
+      connectWalletButton.compareDocumentPosition(connectionActionsDivider) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
@@ -276,7 +269,7 @@ describe("HeaderUserMenuDropdown", () => {
       isConnected: false,
       seizeConnectFresh,
     });
-    fireEvent.click(screen.getAllByRole("button", { name: /connect/i })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Connect" }));
     await waitFor(() => {
       expect(seizeConnectFresh).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
@@ -291,7 +284,7 @@ describe("HeaderUserMenuDropdown", () => {
       isConnected: true,
       seizeDisconnect,
     });
-    fireEvent.click(screen.getAllByRole("button", { name: /disconnect/i })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
     await waitFor(() => {
       expect(seizeDisconnect).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();

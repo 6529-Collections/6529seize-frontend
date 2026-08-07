@@ -3,9 +3,9 @@ export const PAGE_SHARE_UNSUPPORTED_PATHS = [
   "/notifications",
 ] as const;
 
-const PAGE_SHARE_UNSUPPORTED_VIEWS: readonly string[] = ["messages"];
+const PAGE_SHARE_UNSUPPORTED_VIEWS = new Set(["messages"]);
 
-export type PageShareSurface = "desktop-web" | "mobile";
+type PageShareSurface = "desktop-web" | "mobile";
 
 export function isPageShareSupported({
   activeView,
@@ -22,13 +22,12 @@ export function isPageShareSupported({
 
   const isUnsupportedPath = PAGE_SHARE_UNSUPPORTED_PATHS.some(
     (unsupportedPath) =>
-      pathname === unsupportedPath ||
-      pathname.startsWith(`${unsupportedPath}/`)
+      pathname === unsupportedPath || pathname.startsWith(`${unsupportedPath}/`)
   );
 
   if (isUnsupportedPath) {
     return false;
   }
 
-  return !activeView || !PAGE_SHARE_UNSUPPORTED_VIEWS.includes(activeView);
+  return !activeView || !PAGE_SHARE_UNSUPPORTED_VIEWS.has(activeView);
 }

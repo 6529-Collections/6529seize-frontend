@@ -37,15 +37,16 @@ profile menu. Mobile web and native apps open page sharing from the app header.
 
 1. Select the Share icon.
 2. On desktop web, the `Share` dialog opens in two columns on wider screens.
-   The left column contains the `Browser` / `App` toggle and QR code, aligned
-   to the same width; the right column uses the remaining space and contains
-   equal-width sharing actions with an icon and visible label. A divider
-   separates the sections. On wider screens, the QR size responds to whether
-   four or five actions are available so both sections have equal height. On
-   narrow screens, the sections stack inside a narrower dialog and retain a
-   fixed compact QR. On mobile web and in the native app, the dialog contains
-   only the action list, with no QR target, QR code, divider, or Desktop deep
-   link.
+   The left column contains the persistent `Browser` / `App` toggle, which
+   defaults to `Browser` when no target has been selected, and the QR code,
+   aligned to the same width; the right column uses the remaining space and
+   contains equal-width sharing actions with an icon and visible label. A
+   divider separates the sections. On wider screens, the QR size responds to
+   whether four or five actions are available so both sections have equal
+   height. On narrow screens, the sections stack inside a narrower dialog and
+   retain a fixed compact QR. On mobile web and in the native app, the dialog
+   contains only the action list, with no QR target, QR code, divider, or
+   Desktop deep link.
 3. Choose an action:
    - `Copy Link` copies the exact current URL
    - `Open in 6529 Desktop` opens the same route in the desktop app
@@ -89,7 +90,7 @@ native app use their header entry.
 3. The `Connect Device` dialog defaults to `Mobile`; select `Desktop` when
    needed. The target tabs appear without an additional heading above them.
 4. Mobile displays the existing one-time session-v2 connection QR code.
-5. Desktop keeps the same square dimensions but uses a dark bordered handoff
+5. Desktop keeps the same square dimensions but uses a dark-bordered handoff
    card with a 6529 Desktop logo and compact white launch label. The entire card
    opens 6529 Desktop, not only the visible label.
 

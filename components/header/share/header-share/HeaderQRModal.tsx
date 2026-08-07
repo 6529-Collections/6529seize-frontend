@@ -18,10 +18,13 @@ import {
   getAvailableConnectSubMode,
   getDefaultSubMode,
   Mode,
-  PageShareTarget,
 } from "./constants";
-import type { SubMode } from "./constants";
+import type { PageShareTarget, SubMode } from "./constants";
 import { HeaderShareModalView } from "./HeaderShareModalView";
+import {
+  getSavedPageShareTarget,
+  savePageShareTarget,
+} from "./pageShareTargetCookie";
 import {
   bodyScrollLock,
   buildConnectionShareFailureKey,
@@ -60,29 +63,6 @@ type ShareDisplayState = {
   readonly mobileConnectionShareStatus: ConnectionShareStatus;
   readonly desktopConnectionShareStatus: ConnectionShareStatus;
 };
-
-const PAGE_SHARE_TARGET_COOKIE_NAME = "page-share-qr-target";
-const PAGE_SHARE_TARGET_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
-
-function getSavedPageShareTarget(): PageShareTarget {
-  if (typeof document === "undefined") {
-    return PageShareTarget.BROWSER;
-  }
-
-  const savedTarget = document.cookie
-    .split(";")
-    .map((cookie) => cookie.trim())
-    .find((cookie) => cookie.startsWith(`${PAGE_SHARE_TARGET_COOKIE_NAME}=`))
-    ?.split("=")[1];
-
-  return savedTarget === PageShareTarget.APP
-    ? PageShareTarget.APP
-    : PageShareTarget.BROWSER;
-}
-
-function savePageShareTarget(target: PageShareTarget): void {
-  document.cookie = `${PAGE_SHARE_TARGET_COOKIE_NAME}=${target}; Max-Age=${PAGE_SHARE_TARGET_COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax`;
-}
 
 function HeaderQRModal({
   show,

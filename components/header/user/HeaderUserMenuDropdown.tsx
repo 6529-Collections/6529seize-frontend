@@ -62,6 +62,11 @@ export default function HeaderUserMenuDropdown({
   } = useContext(AuthContext);
   const hasProxySection =
     !!activeProfileProxy || receivedProfileProxies.length > 0;
+  const hasConnectDeviceAction = onOpenConnect !== undefined;
+  const hasSessionUpgradeAction =
+    sessionUpgradeRequired && requestSessionUpgrade !== undefined;
+  const hasConnectionActions =
+    hasConnectDeviceAction || hasSessionUpgradeAction;
 
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
@@ -309,8 +314,7 @@ export default function HeaderUserMenuDropdown({
                         <span>Connect Wallet</span>
                       </button>
                     )}
-                    {(onOpenConnect ||
-                      (sessionUpgradeRequired && requestSessionUpgrade)) && (
+                    {hasConnectionActions && (
                       <>
                         <div
                           data-testid="connection-actions-divider"

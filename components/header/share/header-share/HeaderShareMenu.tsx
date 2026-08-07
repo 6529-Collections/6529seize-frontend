@@ -28,10 +28,10 @@ export function ModalMenu({
   };
 
   return (
-    <fieldset
-      aria-label={t(HEADER_SHARE_LOCALE, "headerShare.menu.deviceType")}
-      className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1 tw-border-0 tw-p-0"
-    >
+    <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1 tw-border-0 tw-p-0">
+      <legend className="tw-sr-only">
+        {t(HEADER_SHARE_LOCALE, "headerShare.menu.deviceType")}
+      </legend>
       <div
         className="tw-grid tw-gap-2"
         style={{

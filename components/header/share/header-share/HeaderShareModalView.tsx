@@ -6,12 +6,11 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef } from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
-import { isShareCancelError } from "@/utils/error";
 import {
   HEADER_SHARE_LOCALE,
   Mode,
@@ -20,20 +19,10 @@ import {
   SubMode,
 } from "./constants";
 import { ModalMenu } from "./HeaderShareMenu";
-import type {
-  ConnectionShareStatus,
-  TerminalConnectionShareStatus,
-} from "./shareUtils";
-import {
-  buildSocialShareUrls,
-  canUseSystemShare,
-  getCurrentFullUrl,
-  getCurrentPublicUrl,
-  type PageShareSystemShareAdapter,
-} from "./shareUtils";
+import type { HeaderShareModalViewProps } from "./HeaderShareModalView.types";
+import { buildSocialShareUrls, type ConnectionShareStatus } from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
-
-type MutableRef<T> = { current: T };
+import { useSystemShare } from "./useSystemShare";
 
 const SHARE_ACTION_CLASS_NAME =
   "tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
@@ -46,41 +35,6 @@ const TOOLTIP_STYLE = {
   opacity: 1,
   padding: "4px 8px",
 };
-
-interface HeaderShareModalViewProps {
-  readonly shouldRender: boolean;
-  readonly isVisible: boolean;
-  readonly onClose: () => void;
-  readonly dialogRef: MutableRef<HTMLDialogElement | null>;
-  readonly mode: Mode;
-  readonly activeSubTab: SubMode;
-  readonly setActiveSubTab: (subTab: SubMode) => void;
-  readonly navigateBrowserSrc: string;
-  readonly navigateBrowserUrl: string;
-  readonly navigateAppSrc: string;
-  readonly navigateAppUrl: string;
-  readonly navigateCoreUrl: string;
-  readonly pageShareTarget: PageShareTarget;
-  readonly setPageShareTarget: (target: PageShareTarget) => void;
-  readonly shareConnectionSrc: string;
-  readonly shareConnectionAppUrl: string;
-  readonly shareConnectionCoreUrl: string;
-  readonly mobileConnectionShareStatus: ConnectionShareStatus;
-  readonly desktopConnectionShareStatus: ConnectionShareStatus;
-  readonly terminalConnectionShareFailuresRef: MutableRef<
-    Map<string, TerminalConnectionShareStatus>
-  >;
-  readonly requestSessionUpgrade: (() => Promise<unknown>) | undefined;
-  readonly urlCopied: boolean;
-  readonly setUrlCopied: (copied: boolean) => void;
-  readonly isMobile: boolean;
-  readonly isElectron: boolean;
-  readonly compactPageShare: boolean;
-  readonly pageShareSystemShareAdapter?:
-    | PageShareSystemShareAdapter
-    | undefined;
-  readonly usePublicPageUrl: boolean;
-}
 
 export function HeaderShareModalView({
   shouldRender,
@@ -114,10 +68,17 @@ export function HeaderShareModalView({
 }: HeaderShareModalViewProps) {
   const isConnectMode = mode === Mode.CONNECT;
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isSystemShareAvailable, setIsSystemShareAvailable] = useState(false);
-  const [isSystemShareUnavailable, setIsSystemShareUnavailable] =
-    useState(false);
-  const [isSystemSharePending, setIsSystemSharePending] = useState(false);
+  const {
+    isAvailable: isSystemShareAvailable,
+    isPending: isSystemSharePending,
+    isUnavailable: isSystemShareUnavailable,
+    shareCurrentPage,
+  } = useSystemShare({
+    enabled:
+      mode === Mode.PAGE_SHARE && isVisible && Boolean(navigateBrowserUrl),
+    systemShareAdapter: pageShareSystemShareAdapter,
+    usePublicUrl: usePublicPageUrl,
+  });
 
   useEffect(() => {
     return () => {
@@ -128,51 +89,6 @@ export function HeaderShareModalView({
     };
   }, []);
 
-  useEffect(() => {
-    if (mode !== Mode.PAGE_SHARE || !isVisible || !navigateBrowserUrl) {
-      setIsSystemShareAvailable(false);
-      setIsSystemShareUnavailable(false);
-      return;
-    }
-
-    const shareData = {
-      title: document.title.trim() || "6529",
-      url: usePublicPageUrl
-        ? getCurrentPublicUrl()
-        : getCurrentFullUrl(),
-    };
-    setIsSystemShareUnavailable(false);
-
-    if (!pageShareSystemShareAdapter) {
-      setIsSystemShareAvailable(canUseSystemShare(shareData));
-      return;
-    }
-
-    let isCurrent = true;
-    setIsSystemShareAvailable(false);
-    void pageShareSystemShareAdapter
-      .canShare(shareData)
-      .then((isAvailable) => {
-        if (isCurrent) {
-          setIsSystemShareAvailable(isAvailable);
-        }
-      })
-      .catch(() => {
-        if (isCurrent) {
-          setIsSystemShareAvailable(false);
-        }
-      });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [
-    isVisible,
-    mode,
-    navigateBrowserUrl,
-    pageShareSystemShareAdapter,
-    usePublicPageUrl,
-  ]);
   const modalTitle = t(
     HEADER_SHARE_LOCALE,
     isConnectMode
@@ -431,47 +347,6 @@ export function HeaderShareModalView({
     }
   };
 
-  const markSystemShareUnavailable = () => {
-    setIsSystemShareAvailable(false);
-    setIsSystemShareUnavailable(true);
-  };
-
-  const shareCurrentPage = async () => {
-    const shareData = {
-      title: document.title.trim() || "6529",
-      url: usePublicPageUrl
-        ? getCurrentPublicUrl()
-        : getCurrentFullUrl(),
-    };
-
-    setIsSystemSharePending(true);
-    try {
-      if (pageShareSystemShareAdapter) {
-        if (!(await pageShareSystemShareAdapter.canShare(shareData))) {
-          markSystemShareUnavailable();
-          return;
-        }
-        await pageShareSystemShareAdapter.share(shareData);
-        return;
-      }
-
-      if (!canUseSystemShare(shareData)) {
-        markSystemShareUnavailable();
-        return;
-      }
-
-      await navigator.share(shareData);
-    } catch (error) {
-      if (isShareCancelError(error)) {
-        return;
-      }
-
-      markSystemShareUnavailable();
-    } finally {
-      setIsSystemSharePending(false);
-    }
-  };
-
   const renderConnectionUrl = (url: string) => {
     if (!isConnectMode) {
       return null;
@@ -643,9 +518,7 @@ export function HeaderShareModalView({
           className={SHARE_ACTION_CLASS_NAME}
         >
           <FarcasterLogo className={SHARE_ACTION_ICON_CLASS_NAME} />
-          <span>
-            {t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
-          </span>
+          <span>{t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}</span>
         </a>
         {isSystemShareAvailable && (
           <button
@@ -755,6 +628,13 @@ export function HeaderShareModalView({
     return null;
   }
 
+  let modalMaxWidthClassName = "tw-max-w-sm sm:tw-max-w-2xl";
+  if (isConnectMode) {
+    modalMaxWidthClassName = "tw-max-w-md";
+  } else if (compactPageShare) {
+    modalMaxWidthClassName = "tw-max-w-sm";
+  }
+
   return (
     <div
       className={`tailwind-scope tw-fixed tw-inset-0 tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/70 tw-p-2 tw-transition-opacity tw-duration-200 sm:tw-p-4 ${
@@ -774,13 +654,7 @@ export function HeaderShareModalView({
         aria-modal="true"
         aria-labelledby="header-share-title"
         data-testid="header-share-modal"
-        className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
-          isConnectMode
-            ? "tw-max-w-md"
-            : compactPageShare
-              ? "tw-max-w-sm"
-              : "tw-max-w-sm sm:tw-max-w-2xl"
-        } ${
+        className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${modalMaxWidthClassName} ${
           isVisible
             ? "tw-translate-y-0 tw-scale-100 tw-opacity-100"
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
