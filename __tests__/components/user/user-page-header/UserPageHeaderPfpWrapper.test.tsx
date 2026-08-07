@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import UserPageHeaderPfpWrapper from "@/components/user/user-page-header/pfp/UserPageHeaderPfpWrapper";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock("@/components/utils/icons/PencilIcon", () => () => (
   <span data-testid="pencil" />
@@ -28,11 +29,13 @@ jest.mock(
     )
 );
 
+const profile = new ApiIdentity();
+
 describe("UserPageHeaderPfpWrapper", () => {
   it("opens and closes edit modal when button clicked", async () => {
     render(
       <UserPageHeaderPfpWrapper
-        profile={{} as any}
+        profile={profile}
         canEdit={true}
         profileLabel="Alice"
       >
@@ -52,7 +55,7 @@ describe("UserPageHeaderPfpWrapper", () => {
   it("shows a bottom-right pencil badge on touch-first devices", () => {
     render(
       <UserPageHeaderPfpWrapper
-        profile={{} as any}
+        profile={profile}
         canEdit={true}
         profileLabel="Alice"
       >
@@ -72,7 +75,7 @@ describe("UserPageHeaderPfpWrapper", () => {
   it("does not render a disabled button when picture is read-only", () => {
     render(
       <UserPageHeaderPfpWrapper
-        profile={{} as any}
+        profile={profile}
         canEdit={false}
         profileLabel="Alice"
       >
