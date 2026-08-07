@@ -1,6 +1,6 @@
 # Frontend I18n Fallback Debt
 
-Status verified against current source on 2026-08-05.
+Status verified against current source on 2026-08-08.
 
 These records remain active because the corresponding surfaces still use the
 source locale, `DEFAULT_LOCALE`, hardcoded English copy, or source-locale
@@ -8,6 +8,7 @@ fallback dictionaries.
 
 | Record                                                              | Current source evidence                                                                                                       |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [Global error fallback](global-error-fallback.md)                   | The document title is message-backed in `en-US`; the remaining fallback controls and recovery copy still render in English    |
 | [About contents/navigation](about-contents-navigation.md)           | The About route, contents dropdown, Tech reports, and wallet-auth page still resolve with `DEFAULT_LOCALE`                    |
 | [About The Memes](about-memes.md)                                   | `AboutMemes` still resolves `about.memes.*` through `DEFAULT_LOCALE`                                                          |
 | [About minting](about-minting.md)                                   | `AboutMinting` still uses `DEFAULT_LOCALE`, with canonical body copy remaining in source-locale English                       |

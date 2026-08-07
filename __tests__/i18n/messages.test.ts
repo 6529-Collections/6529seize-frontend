@@ -498,6 +498,12 @@ describe("frontend i18n helpers", () => {
     ).toBe("(1 notification) Waves | Brain");
   });
 
+  it("falls back to the source-locale global error title", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "errorFallback.pageTitle")).toBe("6529 Error");
+    }
+  });
+
   it("translates the wave drop copy action messages", () => {
     expect(t("en-US", "waves.drop.actions.copyFailed")).toBe("Copy failed");
     expect(t("en-GB", "waves.drop.actions.copyFailed")).toBe("Copy failed");

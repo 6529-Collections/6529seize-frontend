@@ -62,6 +62,16 @@ describe("TitleContext", () => {
     expect(result.current).toBeNull();
   });
 
+  it("returns the real context from optional access inside TitleProvider", () => {
+    const { result } = renderHook(() => useTitleOptional(), {
+      wrapper: TitleProvider,
+    });
+
+    expect(result.current).toEqual(
+      expect.objectContaining({ setTitle: expect.any(Function) })
+    );
+  });
+
   it("resets the client title when leaving a wave for the meme calendar", async () => {
     const view = render(
       <TitleProvider>

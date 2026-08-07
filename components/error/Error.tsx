@@ -2,6 +2,8 @@
 
 import Button from "@/components/utils/button/Button";
 import { useTitleOptional } from "@/contexts/TitleContext";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   faChevronDown,
   faChevronUp,
@@ -20,7 +22,7 @@ type ErrorComponentProps = {
   readonly onReset?: (() => void) | undefined;
 };
 
-const ERROR_TITLE = "6529 Error";
+const ERROR_TITLE = t(DEFAULT_LOCALE, "errorFallback.pageTitle");
 
 export default function ErrorComponent({
   stackTrace,
@@ -71,19 +73,21 @@ export default function ErrorComponent({
           unoptimized
           priority
           loading="eager"
-          width="0"
-          height="0"
-          style={{ height: "auto", width: "100px" }}
+          width={100}
+          height={100}
+          className="tw-h-auto tw-w-[100px]"
           src="/SummerGlasses.svg"
-          alt="SummerGlasses"
+          alt=""
         />
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
           <h3 className="tw-text-2xl tw-font-semibold">
             Welcome to the 6529 Page of Doom
           </h3>
-          <img
+          <Image
             src="/emojis/sgt_grimacing.webp"
-            alt="sgt_grimacing"
+            alt=""
+            width={32}
+            height={32}
             className="tw-h-8 tw-w-8"
           />
         </div>
