@@ -278,7 +278,7 @@ jobs:
           unzip -Z1 .one-click-production/selection.zip \
             > .one-click-production/selection-members.txt
           node ops/scripts/verify-production-artifact-selection.cjs \
-            validate-archive-members \
+            validate-selection-archive-members \
             --archive-members .one-click-production/selection-members.txt >/dev/null
           unzip -q .one-click-production/selection.zip \
             -d .one-click-production/selection

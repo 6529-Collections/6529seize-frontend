@@ -85,14 +85,17 @@ jobs:
             --arg repository "$GITHUB_REPOSITORY" \
             --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
               .id == $run_id and
-              .name == "Web Deploy - PROD" and
+              .name == ("Production deploy " + .head_sha + " [frontend-prod-" + ($run_id | tostring) + "]") and
+              .display_title == .name and
               .path == ".github/workflows/build-upload-deploy-prod.yml" and
               .event == "workflow_dispatch" and
               .status == "completed" and
               .conclusion == "success" and
               .head_branch == "main" and
               .repository.full_name == $repository and
-              (.head_sha | test("^[a-f0-9]{40}$"))
+              .head_repository.full_name == $repository and
+              (.head_sha | test("^[a-f0-9]{40}$")) and
+              (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
             ' "$response_file" >/dev/null
           echo "deployed-sha=$(jq -r .head_sha "$response_file")" >> "$GITHUB_OUTPUT"
           started_at="$(jq -er .run_started_at "$response_file")"
@@ -102,18 +105,23 @@ jobs:
             > "$runs_file"
           previous_sha="$(jq -r \
             --argjson current_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
+            --arg repository "$GITHUB_REPOSITORY" \
             --arg started_at "$started_at" '
               [.workflow_runs[] |
                 select(
                   .id != $current_run_id and
-                  .name == "Web Deploy - PROD" and
+                  .name == ("Production deploy " + .head_sha + " [frontend-prod-" + (.id | tostring) + "]") and
+                  .display_title == .name and
                   .path == ".github/workflows/build-upload-deploy-prod.yml" and
                   .event == "workflow_dispatch" and
                   .status == "completed" and
                   .conclusion == "success" and
                   .head_branch == "main" and
+                  .repository.full_name == $repository and
+                  .head_repository.full_name == $repository and
                   .run_started_at < $started_at and
-                  (.head_sha | test("^[a-f0-9]{40}$"))
+                  (.head_sha | test("^[a-f0-9]{40}$")) and
+                  (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
                 )] |
               sort_by(.run_started_at) |
               last |
@@ -501,7 +509,8 @@ jobs:
               --arg repository "$GITHUB_REPOSITORY" \
               --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
                 .id == $run_id and
-                .name == "Web Deploy - PROD" and
+                .name == ("Production deploy " + .head_sha + " [frontend-prod-" + ($run_id | tostring) + "]") and
+                .display_title == .name and
                 .path == ".github/workflows/build-upload-deploy-prod.yml" and
                 .event == "workflow_dispatch" and
                 .status == "completed" and

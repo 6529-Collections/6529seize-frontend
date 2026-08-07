@@ -116,9 +116,16 @@ describe("one-click production operation", () => {
     expect(downloadSelection?.run).toMatch(
       /rm -rf \.one-click-production\/selection\s+mkdir -p \.one-click-production\/selection/
     );
+    expect(downloadSelection?.run).toContain(
+      "validate-selection-archive-members"
+    );
+    expect(
+      downloadSelection?.run.indexOf("validate-selection-archive-members")
+    ).toBeLessThan(downloadSelection?.run.indexOf("unzip -q") ?? -1);
     expect(downloadArtifact?.run).toMatch(
       /rm -rf production-artifact\s+mkdir -p production-artifact/
     );
+    expect(downloadArtifact?.run).toContain("validate-archive-members");
     expect(downloadArtifact?.run).toContain(
       "zip-container overhead above the 500 MiB package limit"
     );
