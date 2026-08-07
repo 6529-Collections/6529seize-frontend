@@ -34,6 +34,7 @@ export interface MinimalWave {
   firstUnreadFollowedSubwaveDropSerialNo: number | null;
   waveRep: ApiWaveRepSummary | null;
   waveScore: ApiWaveScore | null;
+  isInAllWaves: boolean;
   sidebarSection: SidebarDiscoverySection | null;
   sidebarActivityTimestamp: number | null;
   isFollowedSubwaveContainer: boolean;
@@ -42,6 +43,7 @@ export interface MinimalWave {
 type EnhancedSidebarWave = SidebarWave & {
   readonly isPinned?: boolean;
   readonly isOfficial?: boolean;
+  readonly isInAllWaves?: boolean;
   readonly sidebarSection?: SidebarDiscoverySection;
 };
 
@@ -255,6 +257,8 @@ function useEnhancedWavesListCore(
           wave.firstUnreadFollowedSubwaveDropSerialNo,
         waveRep: wave.waveRep,
         waveScore: wave.waveScore,
+        isInAllWaves:
+          wave.isInAllWaves ?? wave.sidebarSection !== "highly-rated",
         sidebarSection: wave.sidebarSection ?? null,
         sidebarActivityTimestamp,
         // Directly-followed waves remain normal following rows; this flag is

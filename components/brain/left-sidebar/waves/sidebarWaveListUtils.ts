@@ -56,11 +56,9 @@ export const validateSidebarWaveDetailed = (
 
 export const groupSidebarWaves = ({
   isAnnouncementsWave,
-  isJoinedFilterActive = false,
   waves,
 }: {
   readonly isAnnouncementsWave?: ((waveId: string) => boolean) | undefined;
-  readonly isJoinedFilterActive?: boolean | undefined;
   readonly waves: readonly MinimalWave[];
 }): SidebarWaveGroups => {
   const announcementWaves: MinimalWave[] = [];
@@ -79,7 +77,7 @@ export const groupSidebarWaves = ({
       if (isHighlyRated) {
         highlyRatedWaves.push(wave);
       }
-      if (!isHighlyRated || !isJoinedFilterActive) {
+      if (!isHighlyRated || wave.isInAllWaves) {
         allWaves.push(wave);
       }
     }
@@ -122,18 +120,15 @@ const groupDirectMessageSidebarWaves = (
 export const groupSidebarWavesForView = ({
   isAnnouncementsWave,
   isDirectMessage,
-  isJoinedFilterActive = false,
   waves,
 }: {
   readonly isAnnouncementsWave?: ((waveId: string) => boolean) | undefined;
   readonly isDirectMessage: boolean;
-  readonly isJoinedFilterActive?: boolean | undefined;
   readonly waves: readonly MinimalWave[];
 }): SidebarWaveGroups =>
   isDirectMessage
     ? groupDirectMessageSidebarWaves(waves)
     : groupSidebarWaves({
         isAnnouncementsWave,
-        isJoinedFilterActive,
         waves,
       });

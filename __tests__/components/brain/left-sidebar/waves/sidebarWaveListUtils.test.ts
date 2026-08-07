@@ -12,6 +12,7 @@ describe("sidebarWaveListUtils", () => {
         }),
         createMockMinimalWave({
           id: "quality-wave",
+          isInAllWaves: true,
           sidebarSection: "highly-rated",
         }),
       ],
@@ -35,6 +36,7 @@ describe("sidebarWaveListUtils", () => {
       waves: [
         createMockMinimalWave({
           id: "quality-wave",
+          isInAllWaves: true,
           sidebarActivityTimestamp: 200,
           sidebarSection: "highly-rated",
         }),
@@ -67,10 +69,10 @@ describe("sidebarWaveListUtils", () => {
 
   it("keeps discovery-only recommendations out of the Joined bottom list", () => {
     const groups = groupSidebarWaves({
-      isJoinedFilterActive: true,
       waves: [
         createMockMinimalWave({
           id: "recommendation",
+          isInAllWaves: false,
           sidebarSection: "highly-rated",
         }),
         createMockMinimalWave({ id: "joined-wave", isFollowing: true }),

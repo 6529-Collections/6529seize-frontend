@@ -446,6 +446,7 @@ it("keeps discovery-only worth checking out waves out of Joined", () => {
       waves={[
         createMockMinimalWave({
           id: "recommendation",
+          isInAllWaves: false,
           sidebarSection: "highly-rated",
         }),
         createMockMinimalWave({ id: "joined-wave", isFollowing: true }),

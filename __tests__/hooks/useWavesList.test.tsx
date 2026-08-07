@@ -685,6 +685,11 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
   ]);
   expect(
     result.current.waves
+      .filter((wave: any) => wave.sidebarSection === "highly-rated")
+      .every((wave: any) => wave.isInAllWaves === false)
+  ).toBe(true);
+  expect(
+    result.current.waves
       .filter(
         (wave: any) =>
           !wave.isPinned && !wave.subscribed && wave.sidebarSection === "all"
@@ -743,6 +748,7 @@ test("keeps a genuine discovery overlap in the joined activity membership", () =
   expect(result.current.waves).toHaveLength(1);
   expect(result.current.waves[0]).toMatchObject({
     id: "overlap",
+    isInAllWaves: true,
     sidebarSection: "all",
     subscribed: true,
   });
@@ -1097,6 +1103,9 @@ test("keeps highly rated first while bottom all waves use latest activity", () =
     "followed-new",
     "followed-old",
   ]);
+  expect(
+    result.current.waves.find((wave: any) => wave.id === "highly-rated")
+  ).toMatchObject({ isInAllWaves: true, sidebarSection: "highly-rated" });
 });
 
 test("sorts regular all waves by latest activity", () => {

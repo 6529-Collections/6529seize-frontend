@@ -44,6 +44,7 @@ export type { SidebarDiscoverySection } from "./useWavesList.helpers";
 type EnhancedWave = SidebarWave & {
   readonly isPinned: boolean;
   readonly isOfficial?: boolean;
+  readonly isInAllWaves?: boolean;
   readonly sidebarSection?: SidebarDiscoverySection;
 };
 
@@ -422,6 +423,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       const sidebarSection: SidebarDiscoverySection | undefined = (
         wave as SidebarWaveWithDiscoverySection
       ).sidebarSection;
+      const isInAllWaves =
+        existingWave?.isInAllWaves === true ||
+        (wave as SidebarWaveWithDiscoverySection).isInAllWaves === true;
 
       const nextLatestFollowedSubwaveDropTimestamp = Math.max(
         existingWave?.latestFollowedSubwaveDropTimestamp ?? 0,
@@ -457,6 +461,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
           existingWave?.firstUnreadFollowedSubwaveDropSerialNo ?? null,
           wave.firstUnreadFollowedSubwaveDropSerialNo
         ),
+        isInAllWaves,
         isPinned,
         sidebarSection: preservedSidebarSection,
       });

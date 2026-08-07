@@ -7,6 +7,7 @@ export type SidebarDiscoverySection = "highly-rated" | "all";
 
 export type SidebarWaveWithDiscoverySection = SidebarWave & {
   readonly sidebarSection?: SidebarDiscoverySection;
+  readonly isInAllWaves?: boolean;
 };
 
 export const SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED: SidebarDiscoverySection =
@@ -22,13 +23,16 @@ const mapAllActivityWave = (
   wave: SidebarWave
 ): SidebarWaveWithDiscoverySection => ({
   ...wave,
+  isInAllWaves: true,
   sidebarSection: SIDEBAR_DISCOVERY_SECTION_ALL,
 });
 
 const mapHighlyRatedWave = (
-  wave: SidebarWave
+  wave: SidebarWave,
+  isJoinedMode: boolean
 ): SidebarWaveWithDiscoverySection => ({
   ...wave,
+  isInAllWaves: !isJoinedMode,
   sidebarSection: SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
 });
 
@@ -54,7 +58,7 @@ export const buildMainWaves = ({
   const highlyRatedDiscoveryWaves = highlyRatedWaves
     .filter((wave) => !isKnownWaveForCurrentViewer(wave))
     .slice(0, HIGHLY_RATED_WAVE_LIMIT)
-    .map(mapHighlyRatedWave);
+    .map((wave) => mapHighlyRatedWave(wave, isJoinedMode));
   const activityWaves = (
     isJoinedMode ? followedActivityWaves : allActivityWaves
   ).map(mapAllActivityWave);
