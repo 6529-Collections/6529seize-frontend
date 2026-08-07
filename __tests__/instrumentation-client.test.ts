@@ -3,6 +3,7 @@ import {
   createLatestReactDomRawFrames,
   createObservedReactDomRawInsertBeforeFrames,
 } from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
+import { createObservedReactDomRawRemoveChildFrames } from "@/__tests__/fixtures/reactDomRawRemoveChildFixtures";
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
@@ -1285,6 +1286,68 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the production-shaped raw React DOM removeChild stack on waves", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-remove-child-event",
+      transaction: "/waves/:wave",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createObservedReactDomRawRemoveChildFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/waves/:wave",
+        url: "/waves/example-wave",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the production-shaped raw React DOM removeChild stack outside waves", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-remove-child-non-waves-event",
+      transaction: "/6529-gradient",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createObservedReactDomRawRemoveChildFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/6529-gradient",
+        url: "/6529-gradient",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toEqual(event);
   });
 
   it("drops injected WebAssembly CSP unsafe-eval errors", () => {
