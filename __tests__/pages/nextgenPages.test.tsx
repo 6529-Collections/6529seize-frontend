@@ -2,7 +2,7 @@ import NextGenTokenPageClient from "@/app/nextgen/token/[token]/[[...view]]/Next
 import { AuthContext } from "@/components/auth/Auth";
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { NextgenCollectionView } from "@/types/enums";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 // Mock Next.js App Router navigation
@@ -38,7 +38,14 @@ jest.mock(
 
 jest.mock("@/components/nextGen/collections/nextgenToken/NextGenToken", () => ({
   __esModule: true,
-  default: () => <div data-testid="token-component" />,
+  default: (props: any) => (
+    <button
+      type="button"
+      data-testid="token-component"
+      data-return-to={props.returnTo}
+      onClick={() => props.setView("Rarity")}
+    />
+  ),
 }));
 
 jest.mock("@/components/nextGen/collections/NextGenTokenOnChain", () => ({
@@ -228,6 +235,7 @@ const mockCollectionComponentProps = {
 describe("NextGen Client Components", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.history.replaceState({}, "", "/nextgen/token/123");
   });
 
   describe("NextGenTokenPageClient", () => {
@@ -236,6 +244,31 @@ describe("NextGen Client Components", () => {
       expect(screen.getByTestId("navigation-header")).toBeInTheDocument();
       expect(screen.getByTestId("token-component")).toBeInTheDocument();
       expect(mockSetTitle).toHaveBeenCalled();
+    });
+
+    it("passes return context through token subview navigation", () => {
+      const returnTo =
+        "/Shelby/collected?collection=nextgen#collected-card-nextgen-123";
+      const params = new URLSearchParams({ returnTo });
+      window.history.replaceState(
+        {},
+        "",
+        `/nextgen/token/123?${params.toString()}`
+      );
+
+      renderWithAuth(
+        <NextGenTokenPageClient
+          {...mockTokenPageClientProps}
+          returnTo={returnTo}
+        />
+      );
+      const tokenComponent = screen.getByTestId("token-component");
+      expect(tokenComponent).toHaveAttribute("data-return-to", returnTo);
+
+      fireEvent.click(tokenComponent);
+
+      expect(globalThis.location.pathname).toBe("/nextgen/token/123/rarity");
+      expect(globalThis.location.search).toBe(`?${params.toString()}`);
     });
 
     it("renders without token - shows on-chain component for unminted tokens", () => {

@@ -63,6 +63,7 @@ const mockUserPageCollectedCards = jest.fn((props: any) => (
     data-page={props.page}
     data-show-data-row={props.showDataRow}
     data-locale={props.locale}
+    data-return-to={props.returnTo}
   />
 ));
 
@@ -613,6 +614,10 @@ describe("UserPageCollected", () => {
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
     expect(screen.getByTestId("cards")).toHaveAttribute("data-locale", "de-DE");
+    expect(screen.getByTestId("cards")).toHaveAttribute(
+      "data-return-to",
+      "/testuser/collected?locale=DE-de"
+    );
     expect(screen.getByTestId("stats-summary")).toHaveAttribute(
       "data-locale",
       "de-DE"
