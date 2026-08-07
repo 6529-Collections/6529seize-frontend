@@ -3,6 +3,10 @@ import {
   createLatestReactDomRawFrames,
   createObservedReactDomRawInsertBeforeFrames,
 } from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
+import {
+  createObservedReactDomRawRemoveChildFrames,
+  type ReactDomRawRemoveChildVariant,
+} from "@/__tests__/fixtures/reactDomRawRemoveChildFixtures";
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
@@ -1285,6 +1289,77 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it.each([
+    { variant: "base", transaction: "/waves/:wave" },
+    { variant: "with-s9", transaction: "/:user" },
+  ] satisfies ReadonlyArray<{
+    variant: ReactDomRawRemoveChildVariant;
+    transaction: string;
+  }>)(
+    "drops the production-shaped raw removeChild stack variant $variant on $transaction",
+    ({ variant, transaction }) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        event_id: "raw-react-dom-remove-child-event",
+        transaction,
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomRemoveChildMessage,
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+              stacktrace: {
+                frames: createObservedReactDomRawRemoveChildFrames(variant),
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction,
+          url: transaction,
+        },
+      };
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps the production-shaped raw removeChild stack outside affected routes", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-remove-child-unobserved-route",
+      transaction: "/about",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createObservedReactDomRawRemoveChildFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/about",
+        url: "/about",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toEqual(event);
   });
 
   it("drops injected WebAssembly CSP unsafe-eval errors", () => {

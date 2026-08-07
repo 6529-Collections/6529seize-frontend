@@ -3,6 +3,10 @@ import {
   createObservedReactDomRawInsertBeforeFrames,
 } from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 import {
+  createObservedReactDomRawRemoveChildFrames,
+  type ReactDomRawRemoveChildVariant,
+} from "@/__tests__/fixtures/reactDomRawRemoveChildFixtures";
+import {
   __testing,
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
@@ -2568,6 +2572,64 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createReactDomRawRemoveChildEvent = (
+    options: {
+      exceptionType?: string;
+      exceptionValue?: string;
+      frames?: SentryStackFrame[];
+      transaction?: string;
+      includeAdditionalException?: boolean;
+      includeMechanism?: boolean;
+      mechanismType?: string;
+      mechanismHandled?: boolean;
+      variant?: ReactDomRawRemoveChildVariant;
+    } = {}
+  ): SentryClientEvent => ({
+    transaction: options.transaction ?? "/waves/:wave",
+    exception: {
+      values: [
+        {
+          type: options.exceptionType ?? "NotFoundError",
+          value: options.exceptionValue ?? reactDomRemoveChildMessage,
+          ...(options.includeMechanism === false
+            ? {}
+            : {
+                mechanism: {
+                  type: options.mechanismType ?? "generic",
+                  handled: options.mechanismHandled ?? true,
+                },
+              }),
+          stacktrace: {
+            frames:
+              options.frames ??
+              createObservedReactDomRawRemoveChildFrames(options.variant),
+          },
+        },
+        ...(options.includeAdditionalException
+          ? [
+              {
+                type: "Error",
+                value: "Independent application failure",
+                stacktrace: {
+                  frames: [
+                    {
+                      filename: "app:///components/waves/Wave.tsx",
+                      function: "Wave",
+                      in_app: true,
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    tags: {
+      transaction: options.transaction ?? "/waves/:wave",
+      url: options.transaction ?? "/waves/:wave",
+    },
+  });
+
   it("filters events when a stack frame matches a filename exception", () => {
     // Arrange
     const frames: SentryStackFrame[] = [
@@ -2997,6 +3059,141 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe(true);
+  });
+
+  it.each(["base", "with-s9"] as const)(
+    "filters the observed 50-frame raw React DOM removeChild stack variant %s",
+    (variant) => {
+      const frames = createObservedReactDomRawRemoveChildFrames(variant);
+      expect(frames).toHaveLength(50);
+
+      const result = shouldFilterReactDomRemoveChildNotFoundError(
+        createReactDomRawRemoveChildEvent({ frames })
+      );
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it.each([
+    {
+      name: "49 frames",
+      getFrames: () => createObservedReactDomRawRemoveChildFrames().slice(1),
+    },
+    {
+      name: "51 frames",
+      getFrames: () => [
+        ...createObservedReactDomRawRemoveChildFrames(),
+        reactDomRawStaticChunkFrame("s7"),
+      ],
+    },
+    {
+      name: "an unknown function",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("WaveDrop"),
+        ...createObservedReactDomRawRemoveChildFrames().slice(1),
+      ],
+    },
+    {
+      name: "a missing required function",
+      getFrames: () =>
+        createObservedReactDomRawRemoveChildFrames().map((frame) =>
+          frame.function === "lr" ? reactDomRawStaticChunkFrame("li") : frame
+        ),
+    },
+    {
+      name: "a nonterminal s7 function",
+      getFrames: () =>
+        createObservedReactDomRawRemoveChildFrames("with-s9").reverse(),
+    },
+    {
+      name: "multiple chunk files",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame(
+          "lr",
+          "app:///_next/static/chunks/0different-runtime.js"
+        ),
+        ...createObservedReactDomRawRemoveChildFrames().slice(1),
+      ],
+    },
+    {
+      name: "a non-Next chunk",
+      getFrames: () =>
+        createObservedReactDomRawRemoveChildFrames().map((frame) => ({
+          ...frame,
+          filename: "app:///runtime.js",
+          abs_path: "app:///runtime.js",
+        })),
+    },
+    {
+      name: "an application-owned frame",
+      getFrames: () => [
+        {
+          filename: "app:///components/waves/Wave.tsx",
+          abs_path: "app:///components/waves/Wave.tsx",
+          function: "lr",
+          in_app: true,
+        },
+        ...createObservedReactDomRawRemoveChildFrames().slice(1),
+      ],
+    },
+  ])("keeps raw removeChild events with $name", ({ getFrames }) => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRawRemoveChildEvent({ frames: getFrames() })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      name: "a different exception type",
+      options: { exceptionType: "TypeError" },
+    },
+    {
+      name: "a different exception message",
+      options: { exceptionValue: "The requested node was not found." },
+    },
+    {
+      name: "an unrelated route",
+      options: { transaction: "/about" },
+    },
+    {
+      name: "an actual profile pathname",
+      options: { transaction: "/profile-name" },
+    },
+    {
+      name: "a nested profile transaction",
+      options: { transaction: "/:user/subscriptions" },
+    },
+    {
+      name: "a different mechanism",
+      options: {
+        mechanismType: "auto.browser.global_handlers.onerror",
+      },
+    },
+    {
+      name: "an unhandled mechanism",
+      options: { mechanismHandled: false },
+    },
+    {
+      name: "no mechanism",
+      options: { includeMechanism: false },
+    },
+    {
+      name: "an empty stack",
+      options: { frames: [] },
+    },
+    {
+      name: "an additional exception",
+      options: { includeAdditionalException: true },
+    },
+  ])("keeps the observed raw removeChild stack with $name", ({ options }) => {
+    const result = shouldFilterReactDomRemoveChildNotFoundError(
+      createReactDomRawRemoveChildEvent(options)
+    );
+
+    expect(result).toBe(false);
   });
 
   it.each(["/profile-name", "/about", "/:user/", "/:user/subscriptions"])(
