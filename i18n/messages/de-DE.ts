@@ -451,6 +451,32 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.retryMore": "Weitere Drops erneut laden",
   "waves.leaderboard.loadMore": "Weitere Drops laden",
   "waves.leaderboard.loadingMoreButton": "Wird geladen…",
+  "waves.leaderboard.timeline.toggle":
+    "Entscheidungszeitplan ein- oder ausblenden",
+  "waves.leaderboard.timeline.decisionTimeline": "Entscheidungszeitplan",
+  "waves.leaderboard.timeline.announcementHistory":
+    "Ankündigungsverlauf",
+  "waves.leaderboard.timeline.paused": "Pausiert",
+  "waves.leaderboard.timeline.nextDecisionAfter":
+    "Nächste Entscheidung nach dem {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled":
+    "Keine Entscheidung geplant",
+  "waves.leaderboard.timeline.noUpcomingEvents":
+    "Keine bevorstehenden Ereignisse",
+  "waves.leaderboard.timeline.nextWinner": "Nächster Gewinner",
+  "waves.leaderboard.timeline.nextWinnerIn":
+    "Nächster Gewinner in {countdown}",
+  "waves.leaderboard.timeline.unit.day.one": "{count} Tag",
+  "waves.leaderboard.timeline.unit.day.other": "{count} Tage",
+  "waves.leaderboard.timeline.unit.hour.one": "{count} Stunde",
+  "waves.leaderboard.timeline.unit.hour.other": "{count} Stunden",
+  "waves.leaderboard.timeline.unit.minute.one": "{count} Minute",
+  "waves.leaderboard.timeline.unit.minute.other": "{count} Minuten",
+  "waves.leaderboard.timeline.unit.second.one": "{count} Sekunde",
+  "waves.leaderboard.timeline.unit.second.other": "{count} Sekunden",
+  "waves.leaderboard.timeline.status.next": "Als Nächstes",
+  "waves.leaderboard.timeline.status.done": "Erledigt",
+  "waves.leaderboard.timeline.status.completed": "Abgeschlossen",
   "waves.poll.actions.viewResults": "Ergebnisse anzeigen",
   "waves.poll.actions.vote": "Abstimmen",
   "waves.poll.actions.changeVote": "Stimme ändern",

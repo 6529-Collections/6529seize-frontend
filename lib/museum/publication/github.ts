@@ -25,6 +25,8 @@ const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
 const MAX_COMMIT_RESPONSE_BYTES = 256_000;
 const MAX_MANIFEST_BYTES = 2_000_000;
 const MAX_DOCUMENT_BYTES = 4_500_000;
+const MAX_REQUIRED_DOCUMENT_BYTES = 16_000_000;
+const MAX_DOCUMENT_FETCH_CONCURRENCY = 8;
 
 interface GitHubMuseumPublicationSourceOptions {
   readonly ref: string;
@@ -42,7 +44,8 @@ function sourceErrorCode(error: unknown): string {
 }
 
 function mediaTypeForPath(path: string): MuseumSourceDocument["mediaType"] {
-  return path.endsWith(".json") ? "application/json" : "text/markdown";
+  if (path.endsWith(".json")) return "application/json";
+  return path.endsWith(".txt") ? "text/plain" : "text/markdown";
 }
 
 export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
@@ -133,9 +136,40 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       }
       return entry;
     });
+    const requiredDocumentBytes = requiredEntries.reduce(
+      (total, entry) => total + entry.size,
+      0
+    );
+    if (
+      !Number.isSafeInteger(requiredDocumentBytes) ||
+      requiredDocumentBytes > MAX_REQUIRED_DOCUMENT_BYTES
+    ) {
+      throw new Error("publication_required_documents_too_large");
+    }
 
-    const documents = await Promise.all(
-      requiredEntries.map((entry) => this.fetchDocument(commit, entry))
+    const documents = new Array<MuseumSourceDocument>(requiredEntries.length);
+    let nextDocumentIndex = 0;
+    const fetchNextDocument = async (): Promise<void> => {
+      while (nextDocumentIndex < requiredEntries.length) {
+        const index = nextDocumentIndex;
+        nextDocumentIndex += 1;
+        const entry = requiredEntries[index];
+        if (entry === undefined) {
+          throw new Error("publication_required_document_missing");
+        }
+        documents[index] = await this.fetchDocument(commit, entry);
+      }
+    };
+    await Promise.all(
+      Array.from(
+        {
+          length: Math.min(
+            MAX_DOCUMENT_FETCH_CONCURRENCY,
+            requiredEntries.length
+          ),
+        },
+        fetchNextDocument
+      )
     );
     const assembledAt = this.now().toISOString();
     return this.assembler.assemble({

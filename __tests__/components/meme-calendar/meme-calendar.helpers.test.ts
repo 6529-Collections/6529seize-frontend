@@ -165,7 +165,8 @@ describe("printCalendarInvites", () => {
     expect(html).toContain("DTEND%3A20240704T140000Z");
     expect(html).toContain('aria-label="Add to Calendar"');
     expect(html).toContain('aria-label="Add to Google Calendar"');
-    expect(html).toContain('alt="" aria-hidden="true"');
+    expect(html).toContain('src="/calendar-ics.png"');
+    expect(html).toContain('src="/calendar-google.png"');
   });
 
   it("sets a 15:00 UTC end time for winter mints", () => {

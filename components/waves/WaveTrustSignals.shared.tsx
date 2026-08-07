@@ -125,10 +125,13 @@ const VISIBILITY_TONE_CLASSES: Record<
     default: INLINE_STAT_TONE_CLASSES,
   },
   "inline-header": {
-    excellent: "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300",
-    healthy: "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
-    low: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
-    default: "tw-text-primary-300 desktop-hover:hover:tw-text-[#A8C4FF]",
+    excellent:
+      "tw-border-emerald-500/20 tw-bg-emerald-500/[0.05] tw-text-emerald-400 desktop-hover:hover:tw-border-emerald-500/30 desktop-hover:hover:tw-bg-emerald-500/[0.08] desktop-hover:hover:tw-text-emerald-300",
+    healthy:
+      "tw-border-amber-500/20 tw-bg-amber-500/[0.05] tw-text-amber-400 desktop-hover:hover:tw-border-amber-500/30 desktop-hover:hover:tw-bg-amber-500/[0.08] desktop-hover:hover:tw-text-amber-300",
+    low: "tw-border-rose-500/20 tw-bg-rose-500/[0.05] tw-text-rose-400 desktop-hover:hover:tw-border-rose-500/30 desktop-hover:hover:tw-bg-rose-500/[0.08] desktop-hover:hover:tw-text-rose-300",
+    default:
+      "tw-border-primary-400/20 tw-bg-primary-500/[0.05] tw-text-primary-300 desktop-hover:hover:tw-border-primary-400/30 desktop-hover:hover:tw-bg-primary-500/[0.08] desktop-hover:hover:tw-text-[#A8C4FF]",
   },
   default: {
     excellent:
@@ -259,7 +262,7 @@ const getChipClasses = (
     sizeClasses = "";
   } else if (isInlineHeaderVariant(variant)) {
     variantClasses =
-      "tw-cursor-help tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none";
+      "tw-h-7 tw-cursor-help tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-text-[11px] tw-font-semibold tw-leading-4 tw-shadow-sm tw-shadow-black/20";
     sizeClasses = "";
   } else if (variant === "sidebar") {
     sizeClasses = "tw-h-5 tw-px-1.5 tw-text-[10px]";
@@ -286,7 +289,7 @@ const getChipClasses = (
 
 const getChipLabelClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineHeaderVariant(variant)) {
-    return "tw-text-[11px] tw-font-medium tw-text-iron-400";
+    return "tw-text-[11px] tw-font-semibold tw-leading-4 tw-tabular-nums";
   }
 
   if (isInlineSidebarVariant(variant)) {
@@ -318,7 +321,7 @@ const getValueClasses = (variant: WaveTrustSignalsVariant): string => {
   }
 
   if (isInlineHeaderVariant(variant)) {
-    return "tw-text-[11px] tw-font-semibold tw-tabular-nums";
+    return "tw-text-[11px] tw-font-semibold tw-leading-4";
   }
 
   return "tw-tabular-nums";

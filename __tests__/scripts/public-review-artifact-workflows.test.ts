@@ -10,10 +10,11 @@ function workflow(name: string): string {
 
 const appPrCi = workflow("app-pr-ci.yml");
 const releaseBusPreflight = workflow("release-bus-v2-preflight.yml");
-const legacyStaging = workflow("deploy-staging.yml");
+const stagingWorkflow = workflow("deploy-staging.yml");
 const legacyProduction = workflow("build-upload-deploy-prod.yml");
-const stagingScript = fs.readFileSync(
-  path.join(process.cwd(), "scripts", "staging.sh"),
+const productionBuild = workflow("production-build-artifact.yml");
+const stagingArtifactDeployScript = fs.readFileSync(
+  path.join(process.cwd(), "ops", "scripts", "deploy-staging-artifact.sh"),
   "utf8"
 );
 const proxySource = fs.readFileSync(
@@ -67,28 +68,41 @@ describe("public-review artifact workflow contract", () => {
     expect(releaseBusPreflight).toContain(
       'test -z "$(find "$destination/target/_next" -type l -print -quit)"'
     );
-    expect(releaseBusPreflight).toContain('--extracted-root "$zip_extract"');
+    expect(releaseBusPreflight).toContain(
+      '--extracted-root "$portability_extract"'
+    );
     expect(releaseBusPreflight).not.toMatch(/\bcp -r public\b/);
   });
 
-  it("fails closed around the legacy production artifact constructor", () => {
+  it("fails closed around the production prebuild artifact constructor", () => {
     expect(
-      legacyProduction.match(new RegExp(`${helper} prepare`, "g"))
+      productionBuild.match(new RegExp(`${helper} prepare`, "g"))
     ).toHaveLength(1);
     expect(
-      legacyProduction.match(new RegExp(`${helper} assert-zip`, "g"))
+      productionBuild.match(new RegExp(`${helper} assert-zip`, "g"))
     ).toHaveLength(1);
     expect(
-      legacyProduction.match(new RegExp(`${helper} assert-listing`, "g"))
+      productionBuild.match(new RegExp(`${helper} assert-listing`, "g"))
     ).toHaveLength(1);
-    expect(legacyProduction.match(/--profile production/g)).toHaveLength(3);
-    expect(legacyProduction).toContain("unzip -Z1 target/package.zip");
-    expect(legacyProduction).toContain(sourceCleanGuard);
-    expect(legacyProduction).toContain(
-      'test -z "$(find target/_next -type l -print -quit)"'
+    expect(productionBuild.match(/--profile production/g)).toHaveLength(3);
+    expect(productionBuild).toContain(
+      "unzip -Z1 production-artifact/target/package.zip"
     );
-    expect(legacyProduction).toContain('--extracted-root "$zip_extract"');
-    expect(legacyProduction).not.toMatch(/\bcp -r public\b/);
+    expect(productionBuild).toContain(sourceCleanGuard);
+    expect(productionBuild).toContain(
+      'test -z "$(find production-artifact/target/_next -type l -print -quit)"'
+    );
+    expect(productionBuild).toContain('--extracted-root "$zip_extract"');
+    expect(productionBuild).toContain(
+      '--runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json"'
+    );
+    expect(productionBuild).toContain(
+      '--assets-flag "$zip_extract/.next/ASSETS_FROM_S3"'
+    );
+    expect(productionBuild).not.toContain(
+      "--extracted-root .production-bundle"
+    );
+    expect(productionBuild).not.toMatch(/\bcp -r public\b/);
   });
 
   it("injects a validated production-only public-review destination", () => {
@@ -99,39 +113,46 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyProduction).toContain(
       'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
     );
-    expect(legacyProduction).toContain(
-      '--option-settings "$option_settings"'
-    );
+    expect(legacyProduction).toContain('--option-settings "$option_settings"');
   });
 
-  it("keeps legacy staging aligned with the public-review bundle contract", () => {
-    expect(legacyStaging).toContain(
+  it("builds and deploys one exact manual staging artifact", () => {
+    expect(stagingWorkflow).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
     );
-    expect(legacyStaging).toContain(
+    expect(stagingWorkflow).toContain('artifact_contract:"manual-staging-v1"');
+    expect(stagingWorkflow).toContain(`${helper} prepare`);
+    expect(stagingWorkflow).toContain(`${helper} assert-listing`);
+    expect(stagingWorkflow).toContain(`${helper} assert-zip`);
+    expect(stagingWorkflow).toContain('--extracted-root "$zip_extract"');
+    expect(stagingWorkflow).toContain(
+      '--runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json"'
+    );
+    expect(stagingWorkflow).toContain(
+      '--assets-flag "$zip_extract/.next/ASSETS_FROM_S3"'
+    );
+    expect(stagingWorkflow).not.toContain("--extracted-root .staging-bundle");
+    expect(stagingWorkflow).toContain("./bin/6529 run base-build");
+    expect(stagingWorkflow).toContain(
+      "bash ops/scripts/deploy-staging-artifact.sh"
+    );
+    expect(stagingWorkflow).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
     );
-    expect(legacyStaging).toContain("base64 -d");
-    expect(legacyStaging).not.toContain(
+    expect(stagingWorkflow).not.toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
     );
-    expect(legacyStaging).not.toContain("aws ssm get-parameter");
-    expect(legacyStaging).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file"
+    expect(stagingWorkflow).not.toContain("aws ssm get-parameter");
+    expect(stagingWorkflow).toContain('(has("production") | not)');
+    expect(stagingArtifactDeployScript).toContain(
+      "printf '%s' \"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64\" | base64 -d"
     );
-    expect(legacyStaging).toContain('(has("production") | not)');
-    expect(stagingScript).toContain(
-      'public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"'
+    expect(stagingArtifactDeployScript).toContain(
+      "public-review-discussion-destinations.json"
     );
-    expect(stagingScript).toContain(
-      "scripts/public-review-discussion-destinations.cjs"
-    );
-    expect(stagingScript).toContain("STANDALONE_ARTIFACT_PROFILE=staging");
-    expect(stagingScript).toContain(
-      "BASE_ENDPOINT=https://staging.6529.io \\\n  ./bin/6529 run build"
-    );
-    expect(stagingScript).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE="
+    expect(stagingArtifactDeployScript).toContain("pm2 startOrReload");
+    expect(stagingArtifactDeployScript).toContain(
+      'wait_for_local_version "$EXPECTED_SHA"'
     );
     expect(standaloneStart).toContain('"package-public-review-artifacts.cjs"');
     expect(standaloneStart).toContain('"prepare"');
@@ -143,6 +164,33 @@ describe("public-review artifact workflow contract", () => {
     );
     expect(standaloneStart).toContain(
       'delete packagingEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
+    );
+  });
+
+  it("inventories the exact extracted release package rather than the symlinked build tree", () => {
+    expect(releaseBusPreflight).toContain(
+      'local portability_extract="$destination/portability-extract"'
+    );
+    expect(releaseBusPreflight).toContain(
+      'unzip -q "$destination/target/package.zip" -d "$portability_extract"'
+    );
+    expect(releaseBusPreflight).toContain(
+      "--extracted-root release-bus-artifact/portability-extract"
+    );
+    expect(releaseBusPreflight).toContain(
+      '--extracted-root "release-bus-artifact/profiles/$profile/portability-extract"'
+    );
+    expect(releaseBusPreflight).not.toContain(
+      "--extracted-root release-bus-artifact/bundle"
+    );
+    expect(releaseBusPreflight).not.toContain(
+      '--extracted-root "release-bus-artifact/profiles/$profile/bundle"'
+    );
+    expect(releaseBusPreflight).toContain(
+      "rm -rf release-bus-artifact/portability-extract"
+    );
+    expect(releaseBusPreflight).toContain(
+      'rm -rf "release-bus-artifact/profiles/$profile/portability-extract"'
     );
   });
 
@@ -198,8 +246,8 @@ describe("public-review artifact workflow contract", () => {
       "isPublicStreamReviewDataPath(req, pathname)"
     );
     expect(proxySource).toContain("rawPathname === pathname");
-    expect(stagingScript).toContain("./bin/6529 run build");
-    expect(stagingScript).toContain("./bin/6529 run start:standalone");
+    expect(stagingWorkflow).toContain(`${helper} prepare`);
+    expect(stagingWorkflow).toContain("--profile staging");
     expect(releaseBusPreflight).toContain(
       'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
     );
@@ -215,7 +263,7 @@ describe("public-review artifact workflow contract", () => {
     expect(releaseBusPreflight).toContain(
       "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}"
     );
-    expect(legacyProduction).toContain(
+    expect(productionBuild).toContain(
       "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}"
     );
   });

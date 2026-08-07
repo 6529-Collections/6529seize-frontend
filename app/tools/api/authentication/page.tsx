@@ -5,22 +5,25 @@ import clsx from "clsx";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import {
-  ABOUT_TEXT_PAGE_CONTAINER_CLASS,
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_CONTAINER_CLASS,
+  CONTENT_PAGE_MAIN_CLASS,
+  CONTENT_PAGE_SECTION_HEADING_CLASS,
+  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 const API_REFERENCE_URL = "https://api.6529.io/docs/";
 
 const inlineCodeClass =
   "tw-rounded tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100";
-const sectionClass = "tw-w-full tw-text-base tw-leading-7 tw-text-iron-50";
+const sectionClass = "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300";
 const exampleSectionClass =
-  "tw-w-full tw-text-base tw-leading-7 tw-text-iron-50";
-const sectionHeadingClass =
-  "tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50";
+  "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300";
+const sectionHeadingClass = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-mb-3`;
 
 type ApiAuthSectionProps = Readonly<{
   children: ReactNode;
@@ -181,24 +184,30 @@ export async function logoutNativeSession({ address, nativeRefreshToken }) {
 
 export default function ApiAuthenticationPage() {
   return (
-    <main className={clsx(styles["main"], "tailwind-scope")}>
-      <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
+    <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
+      <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
-            <Link
-              href="/tools/api"
-              className="hover:tw-text-primary-200 tw-mb-5 tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline"
-            >
-              {apiAuthGuideCopy.backToApi}
-            </Link>
+            <div className="tw-mb-3 tw-flex tw-items-center">
+              <Link
+                href="/tools/api"
+                className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              >
+                <ArrowLeftIcon
+                  aria-hidden="true"
+                  className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                />
+                <span>{apiAuthGuideCopy.backToApi}</span>
+              </Link>
+            </div>
             <header className="tw-w-full">
-              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
+              <p className="tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
                 {apiAuthGuideCopy.eyebrow}
               </p>
-              <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
+              <h1 className={CONTENT_PAGE_TITLE_CLASS}>
                 {apiAuthGuideCopy.title}
               </h1>
-              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-50">
+              <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
                 {apiAuthGuideCopy.lead}
               </p>
             </header>

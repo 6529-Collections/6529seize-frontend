@@ -4,7 +4,10 @@ import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
-import { DropMode } from "@/components/waves/dropComposer.types";
+import {
+  DropMode,
+  type DropComposerDensity,
+} from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -63,6 +66,7 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
   readonly waveViewStyleOverride?: React.CSSProperties | undefined;
+  readonly composerDensity?: DropComposerDensity | undefined;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -188,6 +192,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
   waveViewStyleOverride,
+  composerDensity = "default",
 }) => {
   const router = useRouter();
   const { fetchAroundSerialNo } = useMyStream();
@@ -616,7 +621,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             className={composerContainerClassName}
             style={composerContainerStyle}
           >
-            <CreateDropWaveWrapper>
+            <CreateDropWaveWrapper composerDensity={composerDensity}>
               <PrivilegedDropCreator
                 activeDrop={activeDrop}
                 onCancelReplyQuote={onCancelReplyQuote}

@@ -28,7 +28,58 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
-    expect(publication.documents).toHaveLength(26);
+    expect(publication.documents).toHaveLength(73);
+    expect(publication.rightsHandbook).toEqual(
+      expect.objectContaining({
+        introduction: expect.objectContaining({
+          title: "Rights in digital art",
+        }),
+        artistGuide: expect.objectContaining({ title: "Rights for artists" }),
+        collectorGuide: expect.objectContaining({
+          title: "Rights for collectors",
+        }),
+        expressions: expect.arrayContaining([
+          expect.objectContaining({
+            id: "cc-by-nc-4.0",
+            shortLabel: "CC BY-NC 4.0",
+            legalCode: expect.objectContaining({
+              path: "docs/rights/legal-texts/cc-by-nc-4.0.txt",
+            }),
+          }),
+        ]),
+      })
+    );
+    expect(publication.institutionalPractice).toEqual(
+      expect.objectContaining({
+        id: "institutional-practice:a-field-of-practice",
+        slug: "a-field-of-practice",
+        introduction: expect.objectContaining({
+          title: "A field of practice",
+        }),
+        profiles: expect.arrayContaining([
+          expect.objectContaining({
+            slug: "centre-pompidou",
+            document: expect.objectContaining({ title: "Centre Pompidou" }),
+          }),
+          expect.objectContaining({
+            slug: "serpentine-arts-technologies",
+            document: expect.objectContaining({
+              title: "Serpentine Arts Technologies",
+            }),
+          }),
+        ]),
+        sourceRegister: expect.objectContaining({
+          title: "Source register: A field of practice",
+        }),
+        adjacentPractice: expect.objectContaining({
+          title:
+            "Adjacent practice: platforms, archives, festivals, and chain-native systems",
+        }),
+        editorialStandard: expect.objectContaining({
+          title: "Writing the 6529 Network Museum",
+        }),
+      })
+    );
     expect(
       publication.documents
         .filter(({ kind }) =>
@@ -139,6 +190,7 @@ describe("legacy Casey publication projection", () => {
         expect.objectContaining({
           licenseLabel: "CC BY-NC 4.0",
           licenseUrl: null,
+          rightsExpressionId: "cc-by-nc-4.0",
         })
       );
     }
@@ -164,6 +216,7 @@ describe("legacy Casey publication projection", () => {
         creditLine: "Program selection record",
         licenseLabel: null,
         licenseUrl: null,
+        rightsExpressionId: null,
         sourcePath: "records/programs/6529NM-AP-01/selected-works.json",
       },
       media: [],

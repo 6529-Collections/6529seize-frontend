@@ -1,6 +1,10 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { render, screen } from "@testing-library/react";
 import MuseumAboutPage from "@/app/museum/network/about/page";
+import MuseumNetworkPage from "@/app/museum/network/page";
 import MuseumProjectPage from "@/app/museum/network/projects/[slug]/page";
+import MuseumGenerativeSystemPage from "@/app/museum/network/projects/[slug]/system/page";
 import MuseumSourceAndChronologyPage from "@/app/museum/network/stories/source-and-chronology/page";
 import { MuseumGiftPage } from "@/components/museum/MuseumGiftPage";
 import type { CaseyArtwork } from "@/lib/museum/casey";
@@ -10,6 +14,7 @@ import {
   type MuseumPublication,
 } from "@/lib/museum/publication";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { MUSEUM_SAFE_ETHERSCAN_URL } from "@/lib/museum/types";
 import { createCaseyFixture } from "../../../lib/museum/publication/fixture";
 
 jest.mock("@/lib/museum/publication/runtime", () => ({
@@ -44,7 +49,7 @@ async function buildPublication(): Promise<MuseumPublication> {
       "records/accessions/6529NM.2026.001/public/projects/century.md":
         "# CENTURY: The Cut That Keeps Happening\n\nThe cut is an operation, not a motif.",
       "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md":
-        "# Casey Reas: shared source, chronology, and factual-boundary matrix\n\n- **Status:** internal metadata\n\n## 1. How all writing lanes should use this file\n\nInternal instruction.\n\n## 2. Canonical accession facts\n\n| Fact | Source |\n| --- | --- |\n| Artist | Governed record |\n\n## 11. Required omissions to acknowledge in the monograph and collection essay\n\nKnown limits.\n\n## 12. Notes style shared across lanes\n\nInternal style instruction.",
+        "# Casey Reas: Sources and chronology\n\n- **Status:** internal metadata\n\n## 1. How all writing lanes should use this file\n\nInternal instruction.\n\n## 2. Canonical accession facts\n\n| Fact | Source |\n| --- | --- |\n| Artist | Governed record |\n\n## 11. Required omissions to acknowledge in the monograph and collection essay\n\nKnown limits.\n\n## 12. Notes style shared across lanes\n\nInternal style instruction.",
       "docs/open-museum.md":
         "# The record outlives the interface\n\nStatus: working public operating statement; not an adopted governance policy\n\n## An open museum, built in public\n\nThe public record can be inspected, forked, and improved through reviewed contributions.",
       "docs/onchain-transition.md":
@@ -106,6 +111,87 @@ describe("Museum finished publication routes", () => {
         name: "Read the source and chronology matrix",
       })
     ).toHaveAttribute("href", "/museum/network/stories/source-and-chronology");
+    expect(
+      screen.getByRole("link", { name: "Enter the system" })
+    ).toHaveAttribute("href", "/museum/network/projects/century/system");
+  });
+
+  it("publishes a project-owned system study with a complete map", async () => {
+    render(
+      await MuseumGenerativeSystemPage({
+        params: Promise.resolve({ slug: "pre-process" }),
+      })
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Pre-Process" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Complete 120-position lattice",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("grid", {
+        name: /Complete Surface by Origin by Growth lattice/u,
+      })
+    ).toHaveAttribute("aria-rowcount", "8");
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Pre-Process #63" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Museum model · held conditions").length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "How the system makes the work",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Scope and open questions",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("presents one Network Museum proposition before the art-led homepage", async () => {
+    render(await MuseumNetworkPage());
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "A public museum for a network state",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "The 6529 Network Museum is the public art museum of the 6529 Network: a permanent collection of digital art, governed through TDH, held by the Network on Ethereum, and open to anyone."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText("Held by the 6529 Network")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Seven works by Casey Reas",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Explore the collection",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "How the Network Museum works" })
+    ).toHaveAttribute("href", "/museum/network/about");
+    expect(screen.getByRole("link", { name: "Museum Safe" })).toHaveAttribute(
+      "href",
+      MUSEUM_SAFE_ETHERSCAN_URL
+    );
+    expect(screen.getAllByTestId("museum-artwork-figure")).toHaveLength(7);
   });
 
   it("uses the governed gift narrative as the gift-page publication", async () => {
@@ -127,6 +213,29 @@ describe("Museum finished publication routes", () => {
     }
     for (const figure of artworkFigures.slice(3)) {
       expect(figure).toHaveAttribute("data-eager", "false");
+    }
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Five projects, seven works",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /CENTURY.*Explore the system/su })
+    ).toHaveAttribute("href", "/museum/network/projects/century/system");
+  });
+
+  it("renders the gift dossier slots without React list-key warnings", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    try {
+      render(await MuseumGiftPage({ accessionId: "6529NM.2026.001" }));
+
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
     }
   });
 
@@ -167,70 +276,73 @@ describe("Museum finished publication routes", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("presents the mission and public record as an edited Museum publication", async () => {
-    render(await MuseumAboutPage());
+  it("presents the Network Museum proposition with honest present-state boundaries", async () => {
+    const { container } = render(await MuseumAboutPage());
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(
       screen.getByRole("heading", {
-        level: 2,
-        name: "A permanent collection, held in public",
+        level: 1,
+        name: "A public museum for a network state",
       })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The Museum collects internet-native art for long-term stewardship, research, interpretation, and access. Accessioned works are held for the benefit of the 6529 Network and the public commons."
+        "The 6529 Network is building a decentralized network state. The Museum is one of its first public institutions: a permanent collection of digital art held by the Network on Ethereum, governed through TDH, and open online to anyone in the world."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "The Museum of the Network",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "The Museum today" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "It is meaningfully network-governed, but not yet fully decentralized. Governance outcomes are not yet canonical on-chain institutional records. Repository maintainers publish the current record, and Museum Safe signers execute Ethereum transactions."
       )
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         level: 3,
-        name: "The collection's obligations",
+        name: "Decision-constrained custody",
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 4, name: "Permanence" })
+      screen.getByRole("heading", { level: 2, name: "Permanence" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Read the founding record" })
+      screen.getByText(/Permanence requires more than token ownership/u)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Founding record" })
     ).toHaveAttribute(
       "href",
       expect.stringContaining(`/blob/${"a".repeat(40)}/policies/`)
     );
     expect(
-      screen.getByRole("heading", { level: 2, name: "A public catalogue" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: "A permanent record beyond the website",
-      })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/The public repository is the bridge/u)
-    ).toBeInTheDocument();
-    expect(screen.getAllByText(/Public operating statement/u)).toHaveLength(1);
-    expect(screen.getAllByText(/Contract design in progress/u)).toHaveLength(1);
-    expect(screen.queryByText(/Source HTML observed/u)).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/The public record can be inspected, forked/u)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("heading", {
-        name: "An open museum, built in public",
-      })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "On-chain design" })
+      screen.getByRole("link", { name: "Open Museum statement" })
     ).toHaveAttribute(
       "href",
-      expect.stringContaining(`/blob/${"a".repeat(40)}/docs/onchain-design.md`)
+      expect.stringContaining(`/blob/${"a".repeat(40)}/docs/`)
     );
     expect(
-      screen.getByRole("link", { name: "Rights and reuse boundary" })
+      screen.getByRole("link", { name: "On-chain transition" })
     ).toHaveAttribute(
       "href",
-      expect.stringContaining(`/blob/${"a".repeat(40)}/RIGHTS.md`)
+      expect.stringContaining(`/blob/${"a".repeat(40)}/docs/`)
     );
+    expect(screen.queryByText(/The Fall 2026 goal/u)).not.toBeInTheDocument();
+    const proseParagraphs = Array.from(container.querySelectorAll("p")).filter(
+      (paragraph) => !paragraph.classList.contains("tw-uppercase")
+    );
+    expect(proseParagraphs).not.toHaveLength(0);
+    for (const paragraph of proseParagraphs) {
+      expect(paragraph).not.toHaveClass("tw-font-semibold");
+      expect(paragraph.querySelector("strong, b")).toBeNull();
+    }
   });
 });

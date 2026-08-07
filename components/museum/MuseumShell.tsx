@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { MuseumNavigation } from "@/components/museum/MuseumNavigation";
 import { MuseumSourceContribution } from "@/components/museum/MuseumSourceContribution";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -9,14 +10,6 @@ import type {
 } from "@/lib/museum/publication";
 import { MUSEUM_REPOSITORY_URL } from "@/lib/museum/types";
 import type { MuseumSourceState } from "@/lib/museum/types";
-
-const NAV_ITEMS = [
-  ["museum.network.nav.collection", "/museum/network/collection"],
-  ["museum.network.nav.artists", "/museum/network/artists"],
-  ["museum.network.nav.programsExhibitions", "/museum/network/programs"],
-  ["museum.network.nav.stories", "/museum/network/stories"],
-  ["museum.network.nav.about", "/museum/network/about"],
-] as const;
 
 function MuseumSourceNotice({
   view,
@@ -57,35 +50,22 @@ export function MuseumShell({
   };
 }) {
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-min-w-0 tw-overflow-x-clip tw-bg-black tw-text-iron-100">
+    <main
+      className="tailwind-scope tw-min-h-screen tw-min-w-0 tw-overflow-x-clip tw-bg-black tw-text-iron-100"
+      style={{
+        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+      }}
+    >
       <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800">
         <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-[1324px] tw-flex-col tw-gap-4 tw-px-4 tw-py-5 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between lg:tw-px-8">
           <Link
             href="/museum/network"
-            className="tw-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            prefetch={false}
+            className="tw-flex tw-min-h-11 tw-items-center tw-text-base tw-font-medium tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             6529 Network Museum
           </Link>
-          <nav
-            aria-label={t(
-              DEFAULT_LOCALE,
-              "museum.network.accessibility.sections"
-            )}
-            className="tw-min-w-0"
-          >
-            <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-5 tw-gap-y-1 tw-p-0">
-              {NAV_ITEMS.map(([labelKey, href]) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    {t(DEFAULT_LOCALE, labelKey)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <MuseumNavigation />
         </div>
       </header>
 

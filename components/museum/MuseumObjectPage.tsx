@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { MuseumArtworkViewer } from "./MuseumArtworkViewer";
 import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
+import { MuseumProgramOutcomePage } from "./MuseumProgramOutcomePage";
+import { MuseumInTheSystem } from "./MuseumInsideSystem";
+import { MuseumRightsLink } from "./MuseumRightsLink";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -15,14 +18,32 @@ import {
   getCaseyArtwork,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { getMuseumView } from "@/lib/museum/normalize";
+import { museumSlugMatches } from "@/lib/museum/presentation";
+import { getGenerativeStudyByObjectId } from "@/lib/museum/generative-studies";
 
-export function getMuseumObjectMetadata(objectId: string): Metadata {
+export async function getMuseumObjectMetadata(
+  objectId: string
+): Promise<Metadata> {
   const artwork = getCaseyArtwork(objectId);
+  if (artwork !== null) {
+    return getAppMetadata({
+      title: artwork.title,
+      description: artwork.visualDescription,
+    });
+  }
+
+  const view = await getMuseumView();
+  const outcome = view.objects.find((item) =>
+    museumSlugMatches(item.objectId, objectId)
+  );
+  const description =
+    outcome === undefined || outcome.scope.trim().length === 0
+      ? t(DEFAULT_LOCALE, "museum.network.objects.description")
+      : outcome.scope;
   return getAppMetadata({
-    title: artwork?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
-    description:
-      artwork?.visualDescription ??
-      t(DEFAULT_LOCALE, "museum.network.objects.description"),
+    title: outcome?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
+    description,
   });
 }
 
@@ -40,9 +61,23 @@ export async function MuseumObjectPage({
   if (artworks === null) {
     return <MuseumPublicationUnavailable />;
   }
-  const artwork = artworks.find((item) => item.objectId === objectId);
+  const artwork = artworks.find((item) =>
+    museumSlugMatches(item.objectId, objectId)
+  );
   if (artwork === undefined) {
-    notFound();
+    const view = await getMuseumView();
+    const outcome = view.objects.find((item) =>
+      museumSlugMatches(item.objectId, objectId)
+    );
+    if (outcome?.programId === null || outcome?.programId === undefined) {
+      notFound();
+    }
+    return (
+      <MuseumProgramOutcomePage
+        outcome={outcome}
+        sourceCommit={publication.identity.commit}
+      />
+    );
   }
 
   const objectDocument = publication.documents.find(
@@ -52,6 +87,10 @@ export async function MuseumObjectPage({
   );
   const objectRecord = publication.artworks.find(
     (item) => item.id === artwork.objectId
+  );
+  const generativeStudy = getGenerativeStudyByObjectId(artwork.objectId);
+  const heldPosition = generativeStudy?.heldPositions.find(
+    (position) => position.objectId === artwork.objectId
   );
 
   return (
@@ -89,6 +128,10 @@ export async function MuseumObjectPage({
       </header>
 
       <MuseumArtworkViewer artwork={artwork} />
+
+      {generativeStudy && heldPosition ? (
+        <MuseumInTheSystem study={generativeStudy} position={heldPosition} />
+      ) : null}
 
       <div className="tw-mt-12 tw-grid tw-gap-10 lg:tw-grid-cols-[minmax(0,1fr)_18rem] lg:tw-gap-16">
         <section aria-labelledby="museum-object-reading-title">
@@ -147,18 +190,11 @@ export async function MuseumObjectPage({
               </dt>
               <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
                 {artwork.creditLine}{" "}
-                {artwork.rightsUrl ? (
-                  <a
-                    href={artwork.rightsUrl}
-                    target="_blank"
-                    rel="license noopener noreferrer"
-                    className="tw-text-iron-200 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    {artwork.rightsLabel}
-                  </a>
-                ) : (
-                  artwork.rightsLabel
-                )}
+                <MuseumRightsLink
+                  href={artwork.rightsUrl}
+                  label={artwork.rightsLabel}
+                  className="tw-text-iron-200 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                />
               </dd>
             </div>
           </dl>

@@ -475,6 +475,26 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   retryMore: "Retry loading more drops",
   loadMore: "Load more drops",
   loadingMoreButton: "Loading more…",
+  "timeline.toggle": "Toggle decision timeline",
+  "timeline.decisionTimeline": "Decision Timeline",
+  "timeline.announcementHistory": "Announcement history",
+  "timeline.paused": "Paused",
+  "timeline.nextDecisionAfter": "Next decision after {date}",
+  "timeline.noDecisionScheduled": "No decision scheduled",
+  "timeline.noUpcomingEvents": "No upcoming events",
+  "timeline.nextWinner": "Next winner",
+  "timeline.nextWinnerIn": "Next winner in {countdown}",
+  "timeline.unit.day.one": "{count} day",
+  "timeline.unit.day.other": "{count} days",
+  "timeline.unit.hour.one": "{count} hour",
+  "timeline.unit.hour.other": "{count} hours",
+  "timeline.unit.minute.one": "{count} minute",
+  "timeline.unit.minute.other": "{count} minutes",
+  "timeline.unit.second.one": "{count} second",
+  "timeline.unit.second.other": "{count} seconds",
+  "timeline.status.next": "Next",
+  "timeline.status.done": "Done",
+  "timeline.status.completed": "Completed",
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
@@ -890,14 +910,6 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
     ["allMentions.ariaLabel", "Receive ALL mention notifications"],
     ["allMessages.label", "All messages"],
     ["allMessages.ariaLabel", "Receive notifications for all messages"],
-    [
-      "allMessages.limit.unavailableDescription",
-      "Below {count} followers only.",
-    ],
-    [
-      "allMessages.limit.reenableDescription",
-      "Re-enable below {count} followers.",
-    ],
     ["mute.label", "Mute"],
     ["mute.activeLabel", "Muted"],
     ["mute.ariaLabel", "Mute wave"],
@@ -1281,6 +1293,23 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "metadata.title": "Tech",
   "metadata.description": "About",
+  "index.eyebrow": "About / Tech",
+  "index.title": "Tech Updates",
+  "index.intro":
+    "This is a current casual area for longer 6529 tech updates: repo work, bot notes, release context, and build reports that are too large for a single wave drop.",
+  "index.longUpdates":
+    "Long updates, repo analysis, bot context, and links back into the wave conversation.",
+  "index.liveActivity":
+    "Shorter live repo activity still belongs in {followTheRepo}. This page is the linkable longer-form shelf beside it.",
+  "index.followTheRepo": "Follow The Repo",
+  "index.activeTechnicalNotes": "Active Technical Notes",
+  "index.authChanges": "Auth changes",
+  "index.walletAuthenticationTitle": "Wallet authentication upgrade",
+  "index.walletAuthenticationDescription":
+    "What is changing with the new secure session, why users may be asked to upgrade, and what to expect during rollout.",
+  "index.reportsEyebrow": "Index",
+  "index.reportsTitle": "Reports",
+  "index.openLatestReport": "Open latest report",
   "index.prsCovered": "PRs Covered",
   "notes.walletAuthentication.ariaLabel":
     "Wallet authentication upgrade: what is changing with the new secure session",
@@ -1327,6 +1356,51 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "walletAuth.builders.body":
     "External clients should use the session-v2 API authentication guide instead of the user upgrade notes on this page.",
   "walletAuth.builders.link": "Open API authentication guide",
+} as const);
+
+const REVIEWBOT_USAGE_MESSAGES = objectMessages("reviewbotUsage", {
+  "header.eyebrow": "Open Data",
+  "header.title": "6529bot Usage",
+  "header.description":
+    "Public AI review activity across configured 6529 repositories.",
+  "status.loading": "Loading 6529bot usage data.",
+  "status.loaded":
+    "6529bot usage data loaded. {reviewRuns} review runs across {dailyRows} daily rows.",
+  "metrics.reviewRuns": "Review Runs",
+  "metrics.uniquePrs": "Unique PRs",
+  "metrics.estimatedSpend": "Estimated Spend",
+  "metrics.averageRun": "Avg / Run",
+  "metrics.averagePr": "Avg / PR",
+  "metrics.tokens": "Tokens",
+  "metrics.budgetSkips": "Budget Skips",
+  "analysis.title": "Cost Analysis",
+  "analysis.budgetSkipRate": "Budget Skip Rate",
+  "analysis.averageTokensRun": "Avg Tokens / Run",
+  "analysis.averageTokensPr": "Avg Tokens / PR",
+  "analysis.topRepo": "Top Repo",
+  "analysis.topProvider": "Top Provider",
+  "analysis.topReviewType": "Top Review Type",
+  "sections.dailyUsage": "Daily Usage",
+  "sections.repositories": "Repositories",
+  "sections.providersModels": "Providers and Models",
+  "sections.reviewTypes": "Review Types",
+  "columns.day": "Day",
+  "columns.repository": "Repository",
+  "columns.providerModel": "Provider and Model",
+  "columns.reviewType": "Review Type",
+  "columns.runs": "Runs",
+  "columns.spend": "Spend",
+  "columns.average": "Avg",
+  "columns.tokens": "Tokens",
+  "columns.skips": "Skips",
+  "table.rows": "{count} rows",
+  "table.scrollableLabel": "{title} table, scrollable",
+  "table.empty": "No usage recorded.",
+  window: "Window: {from} to {to}",
+  "unavailable.title": "Usage Data Unavailable",
+  "values.none": "None",
+  "values.unknown": "unknown",
+  "values.topCost": "{name} ({cost}, {percent})",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -1548,6 +1622,76 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "status.keyboardHint":
     "Use arrow keys to move through results and Enter to open.",
   viewAllCategory: "View all {category}",
+} as const);
+
+const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
+  pageTitle: "{title} Downloads",
+  loading: "Loading downloads...",
+  loadError: "Failed to load community downloads. Please try again.",
+  "columns.date": "Date",
+  "columns.link": "Link",
+  "columns.tokenId": "Token ID",
+} as const);
+
+const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
+  "heading.gas": "Meme Gas",
+  "heading.accounting": "Meme Accounting",
+  "collection.label": "Collection",
+  "collection.theMemes": "The Memes",
+  "collection.memeLab": "Meme Lab",
+  "filters.artist": "Artist",
+  "filters.period": "Period",
+  "filters.all": "All",
+  "filters.primarySales": "Primary Sales",
+  "filters.customBlocks": "Custom Blocks",
+  "filters.date.today": "Today",
+  "filters.date.yesterday": "Yesterday",
+  "filters.date.lastSevenDays": "Last 7 Days",
+  "filters.date.monthToDate": "Month to Date",
+  "filters.date.lastMonth": "Last Month",
+  "filters.date.yearToDate": "Year to Date",
+  "filters.date.lastYear": "Last Year",
+  "filters.date.all": "All",
+  "filters.date.customDates": "Custom Dates",
+  "filters.blocks.both": "from block: {from} to block: {to}",
+  "filters.blocks.from": "from block: {from}",
+  "filters.blocks.to": "to block: {to}",
+  "filters.dates.both": "from: {from} to: {to}",
+  "filters.dates.from": "from: {from}",
+  "filters.dates.to": "to: {to}",
+  download: "Download",
+  "columns.memeCardCount": "Meme Card (x{count})",
+  "columns.memeLabCardCount": "Meme Lab Card (x{count})",
+  "columns.artist": "Artist",
+  "columns.gasEth": "Gas (ETH)",
+  "columns.volume": "Volume",
+  "columns.primaryProceeds": "Primary Proceeds",
+  "columns.royalties": "Royalties",
+  "columns.effectiveRoyalty": "Effective Royalty %",
+  "columns.artistSplit": "Artist Split",
+  total: "TOTAL",
+  "gas.loadError": "Error: Failed to load gas data. Please try again.",
+  "gas.empty": "No gas info found for selected dates",
+  "royalties.loadError":
+    "Error: Failed to load royalties data. Please try again.",
+  "royalties.empty": "No royalties found for selected dates",
+  ethFootnote: "All values are in ETH",
+  "tooltip.primaryProceeds.label": "About primary proceeds",
+  "tooltip.primaryProceeds.description":
+    "Total Minter payments less the Manifold fee",
+  "tooltip.artistSplit.label": "About the artist split",
+  "tooltip.artistSplit.primaryMemeLab":
+    "Primary mint revenues in Meme Lab are split between the artist and the collection solely at the artist's discretion.",
+  "tooltip.artistSplit.secondaryMemeLab":
+    "Secondary royalties in Meme Lab are split between the artist and the collection solely at the artist's discretion.",
+  "tooltip.artistSplit.primaryMemes":
+    "Primary mint revenues in The Memes are split 50:50 between the artist and the collection.",
+  "tooltip.artistSplit.secondaryMemes":
+    "Secondary royalties in The Memes are split 50:50 between the artist and the collection.",
+  "tooltip.artistSplit.customArrangements":
+    "6529 and 6529er have custom arrangements not reflected here for simplicity.",
+  "token.manualSaleNote":
+    "Figures not easily calculable as card was sold manually",
 } as const);
 
 export const EN_US_MESSAGES = {
@@ -2456,6 +2600,7 @@ export const EN_US_MESSAGES = {
   ...networkTdhMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
+  ...REVIEWBOT_USAGE_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
@@ -2465,6 +2610,8 @@ export const EN_US_MESSAGES = {
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
   ...EN_US_PAGINATION_MESSAGES,
+  ...OPEN_DATA_DOWNLOAD_MESSAGES,
+  ...MEME_DATA_TABLE_MESSAGES,
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,

@@ -207,9 +207,7 @@ describe("release bus staging artifact transfer", () => {
     expect(productionDeployWorkflowSource).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}"
     );
-    expect(productionDeployWorkflowSource).toContain(
-      'keys == ["production"]'
-    );
+    expect(productionDeployWorkflowSource).toContain('keys == ["production"]');
     expect(productionDeployWorkflowSource).toContain(
       'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
     );
@@ -472,6 +470,12 @@ describe("release bus v2 E2E callbacks", () => {
   });
 
   it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain("Check out immutable Release Bus tooling");
+    expect(stagingE2E).toContain("timeout-minutes: 2");
+    expect(stagingE2E).toContain("path: .release-bus-control");
+    expect(stagingE2E).not.toContain(
+      'git fetch --no-tags origin "$WORKFLOW_SHA"'
+    );
     expect(stagingE2E).toContain(
       "scripts/release-bus-install-dependencies.cjs"
     );
@@ -721,10 +725,19 @@ describe("release bus v2 combined preflight", () => {
     }
   });
 
-  it("authorizes before the only secretless candidate checkout", () => {
-    const job = workflow.jobs.build;
-    expect(job.permissions).toEqual({ contents: "read" });
-    expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
+  it("authorizes before both secretless candidate checkouts", () => {
+    const evidenceJob = workflow.jobs.evidence;
+    const buildJob = workflow.jobs.build;
+    expect(evidenceJob.needs).toBe("authorize");
+    expect(evidenceJob.permissions).toEqual({
+      actions: "read",
+      contents: "read",
+      issues: "read",
+    });
+    expect(buildJob.needs).toBe("evidence");
+    expect(buildJob.permissions).toEqual({ contents: "read" });
+    expect(JSON.stringify(evidenceJob.env ?? {})).not.toContain("secrets.");
+    expect(JSON.stringify(buildJob.env ?? {})).not.toContain("secrets.");
     expect(
       workflow.jobs.authorize.steps.some((step: { uses?: string }) =>
         step.uses?.startsWith("actions/checkout@")
@@ -739,7 +752,7 @@ describe("release bus v2 combined preflight", () => {
     );
     expect(
       source.match(/codeql\[actions\/untrusted-checkout\/medium\]/g)
-    ).toHaveLength(1);
+    ).toHaveLength(2);
   });
 
   it("builds only the requested profile for v3 and keeps bounded legacy compatibility", () => {

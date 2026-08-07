@@ -5,7 +5,10 @@ import type { ReactNode } from "react";
 import { PublicReviewAudiencePaths } from "@/components/public-review/PublicReviewAudiencePaths";
 import { PublicReviewEvidenceLegend } from "@/components/public-review/PublicReviewEvidence";
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
-import { PublicReviewNavigation } from "@/components/public-review/PublicReviewNavigation";
+import {
+  PublicReviewMobileNavigation,
+  PublicReviewNavigation,
+} from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
 import { formatInteger } from "@/i18n/format";
@@ -99,6 +102,7 @@ export function PublicReviewShell({
   displayedVersion,
   feedbackSlot,
   introNotice,
+  showAudiencePaths = true,
   source,
 }: {
   readonly editorialMarkdown: string;
@@ -110,6 +114,7 @@ export function PublicReviewShell({
   readonly displayedVersion: string;
   readonly feedbackSlot: ReactNode;
   readonly introNotice?: ReactNode;
+  readonly showAudiencePaths?: boolean;
   readonly source: PublicReviewSource;
 }) {
   const pageIndex = reviewVersion.pages.findIndex(
@@ -136,7 +141,22 @@ export function PublicReviewShell({
 
         <div className="tw-min-h-screen tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-t-0 tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]">
           <PublicReviewReadingLayout
+            key={page.id}
             feedbackAvailable={review.feedbackAvailable}
+            mobileNavigation={
+              <PublicReviewMobileNavigation
+                currentPage={page}
+                feedbackHref={routes.getFeedbackHref(routeVersion)}
+                pages={reviewVersion.pages}
+                referenceHref={getSolidityReferenceRootHref({
+                  reviewSlug: review.slug,
+                  version: routeVersion,
+                })}
+                routes={routes}
+                sections={sections}
+                version={routeVersion}
+              />
+            }
             panel={feedbackSlot}
             toolbar={
               <p
@@ -181,7 +201,7 @@ export function PublicReviewShell({
 
                 {introNotice}
 
-                {page.id === "overview" && (
+                {page.id === "overview" && showAudiencePaths && (
                   <div className="tw-mt-10 tw-w-full">
                     <PublicReviewAudiencePaths
                       entryPageIds={reviewVersion.audienceEntryPageIds}
