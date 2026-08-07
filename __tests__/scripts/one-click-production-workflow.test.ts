@@ -81,6 +81,14 @@ describe("one-click production operation", () => {
       job,
       "Verify immutable production artifact selection"
     );
+    const downloadSelection = job.steps.find(
+      (step: { readonly name?: string }) =>
+        step.name === "Download immutable production artifact selection"
+    );
+    const downloadArtifact = job.steps.find(
+      (step: { readonly name?: string }) =>
+        step.name === "Download exact selected production artifact"
+    );
     const checkout = job.steps.find(
       (step: { readonly name?: string }) => step.name === "Checkout code"
     );
@@ -105,6 +113,15 @@ describe("one-click production operation", () => {
       "persist-credentials": false,
     });
     expect(verifySelection).toBeGreaterThan(-1);
+    expect(downloadSelection?.run).toMatch(
+      /rm -rf \.one-click-production\/selection\s+mkdir -p \.one-click-production\/selection/
+    );
+    expect(downloadArtifact?.run).toMatch(
+      /rm -rf production-artifact\s+mkdir -p production-artifact/
+    );
+    expect(downloadArtifact?.run).toContain(
+      "zip-container overhead above the 500 MiB package limit"
+    );
     expect(verifyPackage).toBeGreaterThan(verifySelection);
     expect(operationCreate).toBeGreaterThan(verifyPackage);
     expect(operationUpload).toBe(operationCreate + 1);

@@ -263,6 +263,7 @@ jobs:
           SELECTION_ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.selection-artifact-run-id }}
         run: |
           set -euo pipefail
+          rm -rf .one-click-production/selection
           mkdir -p .one-click-production/selection
           gh api \
             "repos/${GITHUB_REPOSITORY}/actions/runs/${SELECTION_ARTIFACT_RUN_ID}/attempts/${SELECTION_ARTIFACT_RUN_ATTEMPT}" \
@@ -331,6 +332,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          rm -rf production-artifact
           mkdir -p production-artifact
           gh api \
             "repos/${GITHUB_REPOSITORY}/actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}" \
@@ -341,6 +343,7 @@ jobs:
           gh api \
             "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
             > .one-click-production/artifact.zip
+          # Allow bounded zip-container overhead above the 500 MiB package limit.
           test "$(stat -c%s .one-click-production/artifact.zip)" -le $((550 * 1024 * 1024))
           unzip -Z1 .one-click-production/artifact.zip \
             > .one-click-production/artifact-members.txt
