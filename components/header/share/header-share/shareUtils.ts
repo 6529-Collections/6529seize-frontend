@@ -7,7 +7,7 @@ import {
   getWalletRole,
   hasActiveSessionV2Auth,
 } from "@/services/auth/auth.utils";
-import { createConnectionShare } from "@/services/auth/session-v2.utils";
+import type { createConnectionShare } from "@/services/auth/session-v2.utils";
 
 export type NativeConnectionShare = Awaited<
   ReturnType<typeof createConnectionShare>
@@ -215,6 +215,16 @@ export function buildLegacyDesktopConnectionShareUrl({
   readonly deepLinkPath: string;
 }): string {
   return `${coreScheme}://${DeepLinkScope.NAVIGATE}${deepLinkPath}`;
+}
+
+export function buildNavigateDeepLinkUrl({
+  scheme,
+  routerPath,
+}: {
+  readonly scheme: string;
+  readonly routerPath: string;
+}): string {
+  return `${scheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
 }
 
 export function generateQrCodeSource({

@@ -1,13 +1,23 @@
 import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { EllipsisHorizontalIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ComputerDesktopIcon,
+  EllipsisHorizontalIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
-import { HEADER_SHARE_LOCALE, Mode, squareStyle, SubMode } from "./constants";
+import {
+  HEADER_SHARE_LOCALE,
+  Mode,
+  PageShareTarget,
+  squareStyle,
+  SubMode,
+} from "./constants";
 import { ModalMenu } from "./HeaderShareMenu";
 import type {
   ConnectionShareStatus,
@@ -21,6 +31,7 @@ type MutableRef<T> = { current: T };
 const SHARE_ACTION_CLASS_NAME =
   "tw-inline-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 const PAGE_SHARE_ACTIONS_TOOLTIP_ID = "page-share-actions-tooltip";
+const COPY_FEEDBACK_DURATION_MS = 2000;
 const TOOLTIP_STYLE = {
   zIndex: 10000,
   backgroundColor: "#1F2937",
@@ -39,6 +50,11 @@ interface HeaderShareModalViewProps {
   readonly setActiveSubTab: (subTab: SubMode) => void;
   readonly navigateBrowserSrc: string;
   readonly navigateBrowserUrl: string;
+  readonly navigateAppSrc: string;
+  readonly navigateAppUrl: string;
+  readonly navigateCoreUrl: string;
+  readonly pageShareTarget: PageShareTarget;
+  readonly setPageShareTarget: (target: PageShareTarget) => void;
   readonly shareConnectionSrc: string;
   readonly shareConnectionAppUrl: string;
   readonly shareConnectionCoreUrl: string;
@@ -64,6 +80,11 @@ export function HeaderShareModalView({
   setActiveSubTab,
   navigateBrowserSrc,
   navigateBrowserUrl,
+  navigateAppSrc,
+  navigateAppUrl,
+  navigateCoreUrl,
+  pageShareTarget,
+  setPageShareTarget,
   shareConnectionSrc,
   shareConnectionAppUrl,
   shareConnectionCoreUrl,
@@ -107,7 +128,7 @@ export function HeaderShareModalView({
   );
 
   const renderQRCodeImage = (src: string, alt: string) => {
-    const normalizedSrc = src?.trim();
+    const normalizedSrc = src.trim();
 
     return (
       <div className="tw-relative tw-h-full tw-w-full tw-bg-white">
@@ -159,6 +180,16 @@ export function HeaderShareModalView({
   };
 
   const getNavigateContent = () => {
+    if (pageShareTarget === PageShareTarget.APP) {
+      return {
+        content: renderQRCodeImage(
+          navigateAppSrc,
+          t(HEADER_SHARE_LOCALE, "headerShare.qr.mobileAlt")
+        ),
+        url: navigateAppUrl,
+      };
+    }
+
     return {
       content: renderQRCodeImage(
         navigateBrowserSrc,
@@ -327,7 +358,7 @@ export function HeaderShareModalView({
       copyTimeoutRef.current = setTimeout(() => {
         setUrlCopied(false);
         copyTimeoutRef.current = null;
-      }, 500);
+      }, COPY_FEEDBACK_DURATION_MS);
     } catch (error) {
       console.error("Failed to copy share URL to clipboard", error);
     }
@@ -391,8 +422,52 @@ export function HeaderShareModalView({
     );
   };
 
-  const renderPageShareActions = (url: string) => {
-    if (mode !== Mode.PAGE_SHARE || !url) {
+  const renderPageShareTargetMenu = () => {
+    if (mode !== Mode.PAGE_SHARE) {
+      return null;
+    }
+
+    const getTargetButtonClassName = (active: boolean) => {
+      const baseClassName =
+        "tw-inline-flex tw-h-9 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-px-3 tw-text-sm tw-font-medium tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+      return active
+        ? `${baseClassName} tw-bg-iron-700 tw-text-iron-50`
+        : `${baseClassName} tw-bg-iron-900 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100`;
+    };
+
+    return (
+      <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1 tw-border-0 tw-p-0">
+        <legend className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+          {t(HEADER_SHARE_LOCALE, "headerShare.menu.qrTarget")}
+        </legend>
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+          <button
+            type="button"
+            aria-pressed={pageShareTarget === PageShareTarget.BROWSER}
+            className={getTargetButtonClassName(
+              pageShareTarget === PageShareTarget.BROWSER
+            )}
+            onClick={() => setPageShareTarget(PageShareTarget.BROWSER)}
+          >
+            {t(HEADER_SHARE_LOCALE, "headerShare.menu.browser")}
+          </button>
+          <button
+            type="button"
+            aria-pressed={pageShareTarget === PageShareTarget.APP}
+            className={getTargetButtonClassName(
+              pageShareTarget === PageShareTarget.APP
+            )}
+            onClick={() => setPageShareTarget(PageShareTarget.APP)}
+          >
+            {t(HEADER_SHARE_LOCALE, "headerShare.menu.app")}
+          </button>
+        </div>
+      </fieldset>
+    );
+  };
+
+  const renderPageShareActions = (url: string, desktopUrl: string) => {
+    if (mode !== Mode.PAGE_SHARE || !url || !desktopUrl) {
       return null;
     }
 
@@ -419,13 +494,26 @@ export function HeaderShareModalView({
               : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
           }
           onClick={() => void copyUrl(url)}
+          className={`${SHARE_ACTION_CLASS_NAME} ${
+            urlCopied
+              ? "tw-border-green-500 tw-bg-green-500/15 tw-text-green-300"
+              : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faCopy} className="tw-size-5" />
+        </button>
+        <a
+          href={desktopUrl}
+          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.desktop")}
+          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
+          data-tooltip-content={t(
+            HEADER_SHARE_LOCALE,
+            "headerShare.social.desktop"
+          )}
           className={SHARE_ACTION_CLASS_NAME}
         >
-          <FontAwesomeIcon
-            icon={faCopy}
-            className={`tw-size-5 ${urlCopied ? "tw-text-green-500" : ""}`}
-          />
-        </button>
+          <ComputerDesktopIcon className="tw-size-5" aria-hidden="true" />
+        </a>
         <a
           href={socialShareUrls.x}
           target="_blank"
@@ -472,6 +560,9 @@ export function HeaderShareModalView({
           positionStrategy="fixed"
           style={TOOLTIP_STYLE}
         />
+        <span className="tw-sr-only" role="status" aria-live="polite">
+          {urlCopied ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied") : ""}
+        </span>
       </div>
     );
   };
@@ -481,6 +572,7 @@ export function HeaderShareModalView({
 
     return (
       <div className="tw-flex tw-flex-col tw-gap-2">
+        {renderPageShareTargetMenu()}
         <div
           id="header-share-content"
           className={`tw-relative tw-aspect-square tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
@@ -492,7 +584,7 @@ export function HeaderShareModalView({
           </div>
         </div>
         {renderConnectionUrl(url)}
-        {renderPageShareActions(url)}
+        {renderPageShareActions(navigateBrowserUrl, navigateCoreUrl)}
       </div>
     );
   }

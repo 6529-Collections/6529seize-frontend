@@ -11,6 +11,11 @@ export enum SubMode {
   DESKTOP,
 }
 
+export enum PageShareTarget {
+  BROWSER = "browser",
+  APP = "app",
+}
+
 export function getDefaultSubMode(mode: Mode): SubMode {
   return mode === Mode.PAGE_SHARE ? SubMode.PAGE : SubMode.MOBILE;
 }

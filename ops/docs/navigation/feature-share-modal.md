@@ -24,18 +24,24 @@ sheet behavior.
 ## Share Flow
 
 1. Select the Share icon.
-2. The `Share this page` dialog opens with a compact QR code and icon-only
-   actions. Accessible names and rendered tooltips identify each action.
-3. Choose one of:
+2. The `Share this page` dialog opens with a compact QR code. Its `Browser` /
+   `App` toggle defaults to Browser and remembers the last choice in a cookie.
+3. Choose one of the icon-only actions, identified by accessible names and
+   rendered tooltips:
    - copy the exact current URL
+   - open the same route in 6529 Desktop
    - compose a post on X
    - compose a cast on Farcaster
    - open the system share sheet through `navigator.share`, when supported
 4. Close with the close button, backdrop, or `Escape`.
 
-The QR code is always visible while the dialog is open. The shared value comes
-from the complete current URL, including pathname, search parameters, and hash
-fragment. Social composer links and the QR code use that same value.
+The QR code is always visible while the dialog is open. Browser mode contains
+the complete current URL, including pathname, search parameters, and hash
+fragment. App mode uses the existing `mobile6529://navigate` deep-link shape
+with that same route. The Desktop action uses the corresponding
+`core6529://navigate` route. Copy, social composer links, and system sharing
+always use the browser URL regardless of the selected QR target. Copy shows a
+two-second green success state.
 
 ## Unsupported Share Pages
 

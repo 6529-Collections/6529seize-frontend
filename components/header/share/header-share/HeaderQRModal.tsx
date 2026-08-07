@@ -18,6 +18,7 @@ import {
   getAvailableConnectSubMode,
   getDefaultSubMode,
   Mode,
+  PageShareTarget,
 } from "./constants";
 import type { SubMode } from "./constants";
 import { HeaderShareModalView } from "./HeaderShareModalView";
@@ -26,6 +27,7 @@ import {
   buildConnectionShareFailureKey,
   buildLegacyDesktopConnectionSharePath,
   buildLegacyDesktopConnectionShareUrl,
+  buildNavigateDeepLinkUrl,
   buildNativeConnectionShareUrls,
   buildRouterPath,
   getCurrentFullUrl,
@@ -47,12 +49,38 @@ type ShareDisplayState = {
   readonly activeSubTab: SubMode;
   readonly navigateBrowserSrc: string;
   readonly navigateBrowserUrl: string;
+  readonly navigateAppSrc: string;
+  readonly navigateAppUrl: string;
+  readonly navigateCoreUrl: string;
   readonly shareConnectionSrc: string;
   readonly shareConnectionAppUrl: string;
   readonly shareConnectionCoreUrl: string;
   readonly mobileConnectionShareStatus: ConnectionShareStatus;
   readonly desktopConnectionShareStatus: ConnectionShareStatus;
 };
+
+const PAGE_SHARE_TARGET_COOKIE_NAME = "page-share-qr-target";
+const PAGE_SHARE_TARGET_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+
+function getSavedPageShareTarget(): PageShareTarget {
+  if (typeof document === "undefined") {
+    return PageShareTarget.BROWSER;
+  }
+
+  const savedTarget = document.cookie
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith(`${PAGE_SHARE_TARGET_COOKIE_NAME}=`))
+    ?.split("=")[1];
+
+  return savedTarget === PageShareTarget.APP
+    ? PageShareTarget.APP
+    : PageShareTarget.BROWSER;
+}
+
+function savePageShareTarget(target: PageShareTarget): void {
+  document.cookie = `${PAGE_SHARE_TARGET_COOKIE_NAME}=${target}; Max-Age=${PAGE_SHARE_TARGET_COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax`;
+}
 
 function HeaderQRModal({
   show,
@@ -81,8 +109,13 @@ function HeaderQRModal({
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(() =>
     getDefaultSubMode(mode)
   );
+  const [pageShareTarget, setPageShareTarget] = useState<PageShareTarget>(
+    getSavedPageShareTarget
+  );
 
   const [navigateBrowserUrl, setNavigateBrowserUrl] = useState<string>("");
+  const [navigateAppUrl, setNavigateAppUrl] = useState<string>("");
+  const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionAppUrl, setShareConnectionAppUrl] =
     useState<string>("");
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
@@ -97,7 +130,9 @@ function HeaderQRModal({
     );
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
+  const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
+  const [urlCopied, setUrlCopied] = useState<boolean>(false);
   const [closingDisplayState, setClosingDisplayState] =
     useState<ShareDisplayState | null>(null);
 
@@ -106,12 +141,16 @@ function HeaderQRModal({
       activeSubTab,
       navigateBrowserSrc,
       navigateBrowserUrl,
+      navigateAppSrc,
+      navigateAppUrl,
+      navigateCoreUrl,
       shareConnectionSrc,
       shareConnectionAppUrl,
       shareConnectionCoreUrl,
       mobileConnectionShareStatus,
       desktopConnectionShareStatus,
     });
+    setUrlCopied(false);
     setActiveSubTab(getDefaultSubMode(mode));
     onClose();
   }, [
@@ -121,13 +160,15 @@ function HeaderQRModal({
     mode,
     navigateBrowserSrc,
     navigateBrowserUrl,
+    navigateAppSrc,
+    navigateAppUrl,
+    navigateCoreUrl,
     onClose,
     shareConnectionAppUrl,
     shareConnectionCoreUrl,
     shareConnectionSrc,
   ]);
 
-  const [urlCopied, setUrlCopied] = useState<boolean>(false);
   const onCloseRef = useRef(closeModal);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
@@ -214,11 +255,26 @@ function HeaderQRModal({
       generationId !== shareGenerationIdRef.current || signal?.aborted;
 
     setNavigateBrowserSrc("");
+    setNavigateAppSrc("");
     setShareConnectionSrc("");
 
     const browserUrl = getCurrentFullUrl();
+    const routerPath = buildRouterPath(pathname, searchParams);
+    const pageRouterPath = `${routerPath}${globalThis.window.location.hash}`;
+    const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
+    const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
+    const appUrl = buildNavigateDeepLinkUrl({
+      scheme: appScheme,
+      routerPath: pageRouterPath,
+    });
+    const coreUrl = buildNavigateDeepLinkUrl({
+      scheme: coreScheme,
+      routerPath: pageRouterPath,
+    });
 
     setNavigateBrowserUrl(browserUrl);
+    setNavigateAppUrl(appUrl);
+    setNavigateCoreUrl(coreUrl);
 
     if (mode === Mode.PAGE_SHARE) {
       generateQrCodeSource({
@@ -229,15 +285,18 @@ function HeaderQRModal({
         signal,
         errorMessage: "Failed to generate browser QR code",
       });
+      generateQrCodeSource({
+        url: appUrl,
+        setSource: setNavigateAppSrc,
+        clearSource: () => setNavigateAppSrc(""),
+        staleGeneration: isStaleGeneration,
+        signal,
+        errorMessage: "Failed to generate mobile app QR code",
+      });
       return;
     }
 
-    const routerPath = buildRouterPath(pathname, searchParams);
-
-    const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-    const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
-
-    const shareConnectionAppUrl = await generateNativeConnectionShareUrl({
+    const generatedConnectionAppUrl = await generateNativeConnectionShareUrl({
       appScheme,
       isStaleGeneration,
       signal,
@@ -252,9 +311,9 @@ function HeaderQRModal({
       routerPath,
     });
 
-    if (!isStaleGeneration() && shareConnectionAppUrl) {
+    if (!isStaleGeneration() && generatedConnectionAppUrl) {
       generateQrCodeSource({
-        url: shareConnectionAppUrl,
+        url: generatedConnectionAppUrl,
         setSource: setShareConnectionSrc,
         clearSource: () => setShareConnectionSrc(""),
         staleGeneration: isStaleGeneration,
@@ -572,6 +631,7 @@ function HeaderQRModal({
     if (show) return;
     const timer = setTimeout(() => {
       setNavigateBrowserSrc("");
+      setNavigateAppSrc("");
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
@@ -644,6 +704,9 @@ function HeaderQRModal({
     activeSubTab,
     navigateBrowserSrc,
     navigateBrowserUrl,
+    navigateAppSrc,
+    navigateAppUrl,
+    navigateCoreUrl,
     shareConnectionSrc,
     shareConnectionAppUrl,
     shareConnectionCoreUrl,
@@ -669,6 +732,14 @@ function HeaderQRModal({
       setActiveSubTab={setActiveSubTab}
       navigateBrowserSrc={displayState.navigateBrowserSrc}
       navigateBrowserUrl={displayState.navigateBrowserUrl}
+      navigateAppSrc={displayState.navigateAppSrc}
+      navigateAppUrl={displayState.navigateAppUrl}
+      navigateCoreUrl={displayState.navigateCoreUrl}
+      pageShareTarget={pageShareTarget}
+      setPageShareTarget={(target) => {
+        setPageShareTarget(target);
+        savePageShareTarget(target);
+      }}
       shareConnectionSrc={displayState.shareConnectionSrc}
       shareConnectionAppUrl={displayState.shareConnectionAppUrl}
       shareConnectionCoreUrl={displayState.shareConnectionCoreUrl}

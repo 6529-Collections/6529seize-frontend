@@ -196,6 +196,7 @@ describe("HeaderShare", () => {
     mockPathname = "/mock-path";
     mockSearchParams = new URLSearchParams("something=value");
     mockUseElectron.mockReturnValue(false);
+    document.cookie = "page-share-qr-target=; Max-Age=0; Path=/";
     globalThis.window.history.replaceState(
       {},
       "",
@@ -301,12 +302,27 @@ describe("HeaderShare", () => {
     expect(screen.getByText("Share this page")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "X" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Farcaster" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open in 6529 Desktop" })
+    ).toHaveAttribute(
+      "href",
+      "testcore6529://navigate/mock-path?something=value#details"
+    );
+    expect(screen.getByRole("button", { name: "Browser" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "App" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
     expect(screen.queryByRole("button", { name: "Create QR code" })).toBeNull();
     expect(
       await screen.findByAltText("Current page QR code")
     ).toBeInTheDocument();
     const shareActions = [
       screen.getByRole("button", { name: "Copy link" }),
+      screen.getByRole("link", { name: "Open in 6529 Desktop" }),
       screen.getByRole("link", { name: "X" }),
       screen.getByRole("link", { name: "Farcaster" }),
     ];
@@ -342,13 +358,56 @@ describe("HeaderShare", () => {
     await userEvent.click(btn);
 
     const modal = await screen.findByTestId("header-share-modal");
+    const copyButton = screen.getByRole("button", { name: "Copy link" });
     const copyIcon = modal.querySelector('[data-icon="copy"]') as HTMLElement;
 
     expect(copyIcon).toBeInTheDocument();
-    await userEvent.click(copyIcon);
+    await userEvent.click(copyButton);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       globalThis.window.location.href
+    );
+    expect(copyButton).toHaveClass(
+      "tw-border-green-500",
+      "tw-bg-green-500/15",
+      "tw-text-green-300"
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Copied!");
+  });
+
+  it("remembers the App QR target and preserves the complete route", async () => {
+    const qrcode = require("qrcode");
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+
+    const firstRender = renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "App" }));
+
+    expect(screen.getByRole("button", { name: "App" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(
+      await screen.findByAltText("Mobile App Link - QR Code")
+    ).toBeInTheDocument();
+    expect(qrcode.toDataURL).toHaveBeenCalledWith(
+      "testmobile6529://navigate/mock-path?something=value#details",
+      QR_CODE_OPTIONS
+    );
+    expect(document.cookie).toContain("page-share-qr-target=app");
+
+    firstRender.unmount();
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    expect(screen.getByRole("button", { name: "App" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
     );
   });
 
