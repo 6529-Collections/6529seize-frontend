@@ -115,7 +115,14 @@ describe("isolated production artifact verifier", () => {
       };
       jobs: Record<
         string,
-        { permissions: Record<string, string>; "runs-on": string }
+        {
+          permissions: Record<string, string>;
+          "runs-on": string;
+          steps: Array<{
+            name?: string;
+            with?: Record<string, unknown>;
+          }>;
+        }
       >;
     };
     const requiredInputs = ["target_sha", "operation_id"];
@@ -171,6 +178,59 @@ describe("isolated production artifact verifier", () => {
       actions: "read",
       contents: "read",
     });
+    const checkout = verifyJob.steps.find(
+      ({ name }) => name === "Check out immutable verifier helper"
+    );
+    const sparseCheckout = String(checkout?.with?.["sparse-checkout"] ?? "");
+    const scriptsDirectory = path.join(process.cwd(), "ops", "scripts");
+    const verifierPath = path.join(
+      scriptsDirectory,
+      "verify-production-artifact-selection.cjs"
+    );
+    const localDependencies = new Set<string>();
+    const visitLocalDependencies = (sourcePath: string): void => {
+      const sourceCode = fs.readFileSync(sourcePath, "utf8");
+      for (const match of sourceCode.matchAll(
+        /require\(["']((?:\.{1,2}\/)[^"']+)["']\)/gu
+      )) {
+        const relativeDependency = match[1];
+        if (!relativeDependency) {
+          throw new Error("Verifier dependency match is missing a path.");
+        }
+        const dependencyPath = path.resolve(
+          path.dirname(sourcePath),
+          relativeDependency
+        );
+        const relativeToScripts = path.relative(
+          scriptsDirectory,
+          dependencyPath
+        );
+        if (
+          relativeToScripts.startsWith("..") ||
+          path.isAbsolute(relativeToScripts)
+        ) {
+          throw new Error(
+            `Verifier dependency escapes ops/scripts: ${dependencyPath}`
+          );
+        }
+        const repositoryPath = path
+          .relative(process.cwd(), dependencyPath)
+          .split(path.sep)
+          .join("/");
+        if (!localDependencies.has(repositoryPath)) {
+          localDependencies.add(repositoryPath);
+          visitLocalDependencies(dependencyPath);
+        }
+      }
+    };
+    visitLocalDependencies(verifierPath);
+    expect([...localDependencies]).toContain("ops/scripts/cli-args.cjs");
+    expect(sparseCheckout).toContain(
+      "ops/scripts/verify-production-artifact-selection.cjs"
+    );
+    for (const dependency of [...localDependencies].sort()) {
+      expect(sparseCheckout).toContain(dependency);
+    }
     expect(source).toContain(
       "actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}"
     );
