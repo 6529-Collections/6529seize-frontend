@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+import { PublicReviewGuidePointList } from "@/components/public-review/PublicReviewGuidePointList";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -197,27 +198,7 @@ export function StreamReviewForArtistsGuide({
             "publicReview.forArtistsGuide.artwork.description"
           )}
         </p>
-        <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-y-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-px-0 tw-py-6">
-          {ARTWORK_PARTS.map((part) => (
-            <li
-              key={part.titleKey}
-              className="tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-gap-3"
-            >
-              <span
-                aria-hidden="true"
-                className="tw-mt-2.5 tw-size-1.5 tw-rounded-full tw-bg-primary-300"
-              />
-              <div>
-                <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-                  {t(DEFAULT_LOCALE, part.titleKey)}
-                </h3>
-                <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
-                  {t(DEFAULT_LOCALE, part.descriptionKey)}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <PublicReviewGuidePointList points={ARTWORK_PARTS} />
       </section>
 
       <section
