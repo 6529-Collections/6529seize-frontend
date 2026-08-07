@@ -207,8 +207,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     enabled: shouldLoadMainWaves && isJoinedMode,
   });
   const mainWaves = useMemo<SidebarWaveWithDiscoverySection[]>(() => {
-    // Keep the highly-rated slice before the broader activity list:
-    // duplicate wave ids retain their first sidebarSection during merge.
+    // Keep discovery first so the later activity source provides the freshest
+    // duplicate payload. The merge below resolves overlapping membership.
     return buildMainWaves({
       shouldLoadMainWaves,
       isJoinedMode,
@@ -427,8 +427,11 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
         existingWave?.latestFollowedSubwaveDropTimestamp ?? 0,
         wave.latestFollowedSubwaveDropTimestamp ?? 0
       );
-      const preservedSidebarSection =
+      let preservedSidebarSection =
         existingWave?.sidebarSection ?? sidebarSection ?? "all";
+      if (isJoinedMode && sidebarSection === "all") {
+        preservedSidebarSection = "all";
+      }
       const isPinned = pinnedWavesSet.has(wave.id);
 
       // The current source has the freshest wave payload; the fields below
@@ -508,6 +511,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     pinnedIds,
     announcementWave,
     isAnnouncementsWave,
+    isJoinedMode,
     shouldLoadMainWaves,
   ]);
 

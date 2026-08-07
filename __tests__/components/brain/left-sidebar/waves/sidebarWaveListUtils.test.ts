@@ -23,6 +23,64 @@ describe("sidebarWaveListUtils", () => {
     expect(groups.highlyRatedWaves.map((wave) => wave.id)).toEqual([
       "quality-wave",
     ]);
+    expect(groups.allWaves.map((wave) => wave.id)).toEqual([
+      "subwave-parent",
+      "quality-wave",
+    ]);
+  });
+
+  it("keeps worth checking out membership overlapping with activity-ordered All", () => {
+    const groups = groupSidebarWaves({
+      isAnnouncementsWave: (waveId) => waveId === "announcement",
+      waves: [
+        createMockMinimalWave({
+          id: "quality-wave",
+          sidebarActivityTimestamp: 200,
+          sidebarSection: "highly-rated",
+        }),
+        createMockMinimalWave({
+          id: "recent-wave",
+          sidebarActivityTimestamp: 300,
+        }),
+        createMockMinimalWave({
+          id: "older-wave",
+          sidebarActivityTimestamp: 100,
+        }),
+        createMockMinimalWave({ id: "announcement" }),
+        createMockMinimalWave({ id: "pinned", isPinned: true }),
+      ],
+    });
+
+    expect(groups.highlyRatedWaves.map((wave) => wave.id)).toEqual([
+      "quality-wave",
+    ]);
+    expect(groups.allWaves.map((wave) => wave.id)).toEqual([
+      "recent-wave",
+      "quality-wave",
+      "older-wave",
+    ]);
+    expect(groups.announcementWaves.map((wave) => wave.id)).toEqual([
+      "announcement",
+    ]);
+    expect(groups.pinnedWaves.map((wave) => wave.id)).toEqual(["pinned"]);
+  });
+
+  it("keeps discovery-only recommendations out of the Joined bottom list", () => {
+    const groups = groupSidebarWaves({
+      isJoinedFilterActive: true,
+      waves: [
+        createMockMinimalWave({
+          id: "recommendation",
+          sidebarSection: "highly-rated",
+        }),
+        createMockMinimalWave({ id: "joined-wave", isFollowing: true }),
+      ],
+    });
+
+    expect(groups.highlyRatedWaves.map((wave) => wave.id)).toEqual([
+      "recommendation",
+    ]);
+    expect(groups.allWaves.map((wave) => wave.id)).toEqual(["joined-wave"]);
   });
 
   it("keeps pinned highly rated waves out of worth checking out", () => {

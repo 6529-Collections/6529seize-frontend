@@ -56,9 +56,11 @@ export const validateSidebarWaveDetailed = (
 
 export const groupSidebarWaves = ({
   isAnnouncementsWave,
+  isJoinedFilterActive = false,
   waves,
 }: {
   readonly isAnnouncementsWave?: ((waveId: string) => boolean) | undefined;
+  readonly isJoinedFilterActive?: boolean | undefined;
   readonly waves: readonly MinimalWave[];
 }): SidebarWaveGroups => {
   const announcementWaves: MinimalWave[] = [];
@@ -72,16 +74,31 @@ export const groupSidebarWaves = ({
       announcementWaves.push(wave);
     } else if (wave.isPinned) {
       pinnedWaves.push(wave);
-    } else if (wave.sidebarSection === "highly-rated") {
-      highlyRatedWaves.push(wave);
     } else {
-      allWaves.push(wave);
+      const isHighlyRated = wave.sidebarSection === "highly-rated";
+      if (isHighlyRated) {
+        highlyRatedWaves.push(wave);
+      }
+      if (!isHighlyRated || !isJoinedFilterActive) {
+        allWaves.push(wave);
+      }
     }
 
     if (wave.isFollowing || wave.isFollowedSubwaveContainer) {
       followingWaves.push(wave);
     }
   }
+
+  allWaves.sort((left, right) => {
+    if (left.isMuted !== right.isMuted) {
+      return left.isMuted ? 1 : -1;
+    }
+
+    return (
+      (right.sidebarActivityTimestamp ?? 0) -
+      (left.sidebarActivityTimestamp ?? 0)
+    );
+  });
 
   return {
     announcementWaves,
@@ -105,12 +122,18 @@ const groupDirectMessageSidebarWaves = (
 export const groupSidebarWavesForView = ({
   isAnnouncementsWave,
   isDirectMessage,
+  isJoinedFilterActive = false,
   waves,
 }: {
   readonly isAnnouncementsWave?: ((waveId: string) => boolean) | undefined;
   readonly isDirectMessage: boolean;
+  readonly isJoinedFilterActive?: boolean | undefined;
   readonly waves: readonly MinimalWave[];
 }): SidebarWaveGroups =>
   isDirectMessage
     ? groupDirectMessageSidebarWaves(waves)
-    : groupSidebarWaves({ isAnnouncementsWave, waves });
+    : groupSidebarWaves({
+        isAnnouncementsWave,
+        isJoinedFilterActive,
+        waves,
+      });

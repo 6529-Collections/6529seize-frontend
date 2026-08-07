@@ -55,9 +55,9 @@ export const buildMainWaves = ({
     .filter((wave) => !isKnownWaveForCurrentViewer(wave))
     .slice(0, HIGHLY_RATED_WAVE_LIMIT)
     .map(mapHighlyRatedWave);
-  const activityWaves = isJoinedMode
-    ? followedActivityWaves
-    : allActivityWaves.map(mapAllActivityWave);
+  const activityWaves = (
+    isJoinedMode ? followedActivityWaves : allActivityWaves
+  ).map(mapAllActivityWave);
 
   return [...highlyRatedDiscoveryWaves, ...activityWaves];
 };

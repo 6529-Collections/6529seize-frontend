@@ -206,9 +206,15 @@ const UnifiedWavesListWaves = forwardRef<
                 ? undefined
                 : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
             isDirectMessage,
+            isJoinedFilterActive,
             waves: topLevelWaves,
           }),
-        [topLevelWaves, seizeSettings, isDirectMessage]
+        [
+          topLevelWaves,
+          seizeSettings,
+          isDirectMessage,
+          isJoinedFilterActive,
+        ]
       );
 
     const announcementRows = useMemo(

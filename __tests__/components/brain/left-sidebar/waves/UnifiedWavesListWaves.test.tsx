@@ -395,15 +395,70 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(screen.queryByLabelText("Following waves")).toBeNull();
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
-  expect(screen.queryByTestId("wave-h1")).toBeNull();
+  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
   expect(
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
-  ).toEqual(["wave-a1", "wave-p1", "wave-f1", "wave-r1"]);
+  ).toEqual(["wave-a1", "wave-p1", "wave-h1", "wave-f1", "wave-r1"]);
   expect(ref.current?.containerRef.current).toBe(container);
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
+});
+
+it("keeps worth checking out waves in All at their recent-activity position", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "quality-wave",
+          sidebarActivityTimestamp: 200,
+          sidebarSection: "highly-rated",
+        }),
+        createMockMinimalWave({
+          id: "older-wave",
+          sidebarActivityTimestamp: 100,
+        }),
+        createMockMinimalWave({
+          id: "recent-wave",
+          sidebarActivityTimestamp: 300,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("preview-avatar-quality-wave")).toBeInTheDocument();
+  const bottomItems = mockUseVirtualizedWaves.mock.calls.at(-1)?.[0].items;
+  expect(bottomItems.map((row: any) => row.wave.id)).toEqual([
+    "recent-wave",
+    "quality-wave",
+    "older-wave",
+  ]);
+});
+
+it("keeps discovery-only worth checking out waves out of Joined", () => {
+  mockUseShowFollowingWaves.mockReturnValue([true, jest.fn()]);
+
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "recommendation",
+          sidebarSection: "highly-rated",
+        }),
+        createMockMinimalWave({ id: "joined-wave", isFollowing: true }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("preview-avatar-recommendation")).toBeInTheDocument();
+  expect(screen.getByLabelText("Following waves list")).toBeInTheDocument();
+  expect(screen.queryByTestId("wave-recommendation")).toBeNull();
+  expect(screen.getByTestId("wave-joined-wave")).toBeInTheDocument();
 });
 
 it("keeps the overlaid score inside the wave link and opens details on hover", async () => {
@@ -649,7 +704,7 @@ it("keeps the active highly rated wave visible in the preview strip", () => {
     screen.getByRole("link", { name: "Open Highly Rated One" })
   ).toBeInTheDocument();
   expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
-  expect(screen.queryByTestId("wave-h1")).toBeNull();
+  expect(screen.getByTestId("wave-h1")).toBeInTheDocument();
 });
 
 it("renders direct messages as one flat latest-first list", () => {
@@ -813,7 +868,10 @@ it("respects hide options and does not render toggle when not connected", () => 
   expect(screen.queryByTestId("header-All Waves")).toBeNull();
   expect(screen.queryByTestId("waves-filter-toggle")).toBeNull();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
-  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
+  expect(screen.getAllByTestId("wave-h1")).toHaveLength(2);
+  screen.getAllByTestId("wave-h1").forEach((row) => {
+    expect(row).toHaveAttribute("data-pin", "false");
+  });
   expect(screen.queryByTestId("wave-p1")).toBeNull();
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "false");
 });
