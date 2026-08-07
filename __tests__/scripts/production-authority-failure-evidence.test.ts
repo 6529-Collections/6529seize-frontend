@@ -16,17 +16,18 @@ function run(
   actorLogin = "github-actions[bot]",
   triggeringActorLogin = actorLogin
 ) {
+  const evaluatedTitle =
+    kind === "deploy"
+      ? `Production deploy ${headSha} [frontend-prod-123456789]`
+      : "Production E2E automatic 123456789";
   return {
     id: kind === "deploy" ? 123456789 : 987654321,
-    name: kind === "deploy" ? "Web Deploy - PROD" : "Production E2E",
+    name: evaluatedTitle,
     path:
       kind === "deploy"
         ? ".github/workflows/build-upload-deploy-prod.yml"
         : ".github/workflows/production-e2e.yml",
-    display_title:
-      kind === "deploy"
-        ? `Production deploy ${headSha} [frontend-prod-123456789]`
-        : "Production E2E automatic 123456789",
+    display_title: evaluatedTitle,
     event: "workflow_dispatch",
     head_branch: "main",
     head_sha: headSha,
@@ -139,6 +140,32 @@ describe("production terminal failure evidence", () => {
       })
     ).toThrow("DEPLOY_TITLE");
   });
+
+  it.each([
+    ["deploy", "Web Deploy - PROD", "DEPLOY_NAME"],
+    ["e2e", "Production E2E", "E2E_NAME"],
+  ] as const)(
+    "rejects the stale static %s workflow name",
+    (kind, staticName, expectedError) => {
+      const candidate = run(
+        kind,
+        "failure",
+        kind === "e2e" ? FOREIGN_SHA : TARGET_SHA
+      );
+      candidate.name = staticName;
+      expect(() =>
+        evidence.buildFailureEvidence({
+          kind,
+          run: candidate,
+          jobs,
+          runId: kind === "deploy" ? "123456789" : "987654321",
+          attempt: 2,
+          deployRunId: "123456789",
+          targetSha: TARGET_SHA,
+        })
+      ).toThrow(expectedError);
+    }
+  );
 
   it.each(["neutral", "skipped"])(
     "rejects unsupported terminal conclusion %s",
