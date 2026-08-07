@@ -54,9 +54,11 @@ handoff does not behave as expected.
   connect wallet first; profile access is an account utility and is hidden
   while disconnected.
 - `Share` row is missing on web:
-  disconnected desktop web shows a standalone `Share` row; connected desktop
-  web moves `Share` into the user menu; Capacitor/native and mobile-device web
-  hide it.
+  supported desktop-web routes show a standalone sidebar `Share` row whether
+  connected or disconnected. Small-screen mobile web and the native app place
+  Share in the header instead. Home omits the mobile header action but keeps
+  the desktop sidebar row; Messages, Notifications, and the Messages query
+  view omit page sharing on every surface.
 - App drawer profile shortcut does not open your profile:
   tap the connected avatar in the drawer
   header; handle/wallet text and level badge are not navigation controls.
@@ -75,9 +77,9 @@ handoff does not behave as expected.
   by query change or reopen.
 - `In this Wave` tab is missing:
   it appears only when search opens with active wave context.
-- Share modal `Connection` is missing or empty:
-  it depends on authenticated session state; share payload requires refresh
-  token plus wallet address.
+- `Connect Device` content is unavailable:
+  connection handoff depends on authenticated session state and an active
+  wallet. Follow the dialog's sign-in, authentication-update, or retry action.
 - Sidebar avatar switches accounts instead of opening the menu:
   expected when you activate it twice quickly and at least two connected
   accounts are available; use a single activate to open the menu.

@@ -34,7 +34,7 @@ jest.mock("@/components/header/useChainSwitcher", () => ({
 jest.mock("@/components/header/share/HeaderShare", () => ({
   HeaderConnectModal: ({ show }: { readonly show: boolean }) =>
     show ? (
-      <div role="dialog" aria-label="Connect another device modal" />
+      <div role="dialog" aria-label="Connect Device modal" />
     ) : null,
 }));
 jest.mock("@/components/header/user/HeaderUserConnect", () => () => null);
@@ -148,6 +148,13 @@ describe("HeaderUserMenuDropdown", () => {
       name: "Disconnect & Logout",
     });
     expect(profileLink).toHaveAttribute("href", "/alice");
+    expect(profileLink).not.toHaveAttribute("title");
+    expect(profileLink).toHaveClass(
+      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
+    );
+    expect(logoutButton).toHaveClass(
+      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
+    );
     expect(profileLink.parentElement).toBe(logoutButton.parentElement);
     expect(
       profileLink.compareDocumentPosition(logoutButton) &
@@ -157,7 +164,7 @@ describe("HeaderUserMenuDropdown", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("groups Connect Wallet with Connect Device without exposing Share", () => {
+  it("uses a full-width divider between Connect Wallet and Connect Device", () => {
     const onOpenConnect = jest.fn();
     renderDropdown({
       profile: profileBase,
@@ -176,9 +183,37 @@ describe("HeaderUserMenuDropdown", () => {
       "viewBox",
       "1 2 20 20"
     );
+    expect(connectDeviceButton.querySelector("path")).toHaveAttribute(
+      "d",
+      "M16.9 8.5V6.5a1.8 1.8 0 0 0-1.8-1.8H4.2a1.8 1.8 0 0 0-1.8 1.8v6.4a1.8 1.8 0 0 0 1.8 1.8h7.1"
+    );
+    expect(connectDeviceButton).not.toHaveAttribute("title");
+    expect(connectWalletButton).toHaveClass(
+      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
+    );
+    expect(connectDeviceButton).toHaveClass(
+      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
+    );
     expect(connectWalletButton?.parentElement).toBe(
       connectDeviceButton.parentElement
     );
+    expect(connectWalletButton?.closest("ul")).toHaveClass("tw-divide-y-2");
+    const connectionActionsDivider = screen.getByTestId(
+      "connection-actions-divider"
+    );
+    expect(connectionActionsDivider).toHaveClass(
+      "-tw-mx-2",
+      "tw-border-t",
+      "tw-border-iron-700"
+    );
+    expect(
+      connectWalletButton?.compareDocumentPosition(connectionActionsDivider) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      connectionActionsDivider.compareDocumentPosition(connectDeviceButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     fireEvent.click(connectDeviceButton);
     expect(onOpenConnect).toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
@@ -229,7 +264,7 @@ describe("HeaderUserMenuDropdown", () => {
     fireEvent.click(screen.getByRole("button", { name: "Connect Device" }));
 
     expect(
-      screen.getByRole("dialog", { name: "Connect another device modal" })
+      screen.getByRole("dialog", { name: "Connect Device modal" })
     ).toBeInTheDocument();
   });
 

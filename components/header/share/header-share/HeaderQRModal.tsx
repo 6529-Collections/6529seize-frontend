@@ -36,12 +36,14 @@ import {
   type ConnectionShareStatus,
   generateQrCodeSource,
   getCachedConnectionShare,
+  getCurrentPublicUrl,
   getFocusableElements,
   getLocalLegacyDesktopAuth,
   isAbortError,
   isSessionUpgradeRequiredError,
   type IsStaleGeneration,
   type NativeConnectionShare,
+  type PageShareSystemShareAdapter,
   type TerminalConnectionShareStatus,
 } from "./shareUtils";
 
@@ -86,10 +88,18 @@ function HeaderQRModal({
   show,
   onClose,
   mode,
+  compactPageShare = false,
+  pageShareSystemShareAdapter,
+  usePublicPageUrl = false,
 }: {
   readonly show: boolean;
   readonly onClose: () => void;
   readonly mode: Mode;
+  readonly compactPageShare?: boolean | undefined;
+  readonly pageShareSystemShareAdapter?:
+    | PageShareSystemShareAdapter
+    | undefined;
+  readonly usePublicPageUrl?: boolean | undefined;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -258,7 +268,9 @@ function HeaderQRModal({
     setNavigateAppSrc("");
     setShareConnectionSrc("");
 
-    const browserUrl = getCurrentFullUrl();
+    const browserUrl = usePublicPageUrl
+      ? getCurrentPublicUrl()
+      : getCurrentFullUrl();
     const routerPath = buildRouterPath(pathname, searchParams);
     const pageRouterPath = `${routerPath}${globalThis.window.location.hash}`;
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
@@ -277,6 +289,10 @@ function HeaderQRModal({
     setNavigateCoreUrl(coreUrl);
 
     if (mode === Mode.PAGE_SHARE) {
+      if (compactPageShare) {
+        return;
+      }
+
       generateQrCodeSource({
         url: browserUrl,
         setSource: setNavigateBrowserSrc,
@@ -625,6 +641,8 @@ function HeaderQRModal({
     pathname,
     searchParamsString,
     mode,
+    compactPageShare,
+    usePublicPageUrl,
   ]);
 
   useEffect(() => {
@@ -751,6 +769,9 @@ function HeaderQRModal({
       setUrlCopied={setUrlCopied}
       isMobile={isMobile}
       isElectron={isElectron}
+      compactPageShare={compactPageShare}
+      pageShareSystemShareAdapter={pageShareSystemShareAdapter}
+      usePublicPageUrl={usePublicPageUrl}
     />
   );
 }
@@ -760,8 +781,27 @@ type HeaderModalProps = {
   readonly onClose: () => void;
 };
 
-export function HeaderPageShareModal(props: HeaderModalProps) {
-  return <HeaderQRModal {...props} mode={Mode.PAGE_SHARE} />;
+type HeaderPageShareModalProps = HeaderModalProps & {
+  readonly compact?: boolean | undefined;
+  readonly systemShareAdapter?: PageShareSystemShareAdapter | undefined;
+  readonly usePublicUrl?: boolean | undefined;
+};
+
+export function HeaderPageShareModal({
+  compact = false,
+  systemShareAdapter,
+  usePublicUrl = false,
+  ...props
+}: HeaderPageShareModalProps) {
+  return (
+    <HeaderQRModal
+      {...props}
+      mode={Mode.PAGE_SHARE}
+      compactPageShare={compact}
+      pageShareSystemShareAdapter={systemShareAdapter}
+      usePublicPageUrl={usePublicUrl}
+    />
+  );
 }
 
 export function HeaderConnectModal(props: HeaderModalProps) {

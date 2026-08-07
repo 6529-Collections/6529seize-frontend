@@ -586,7 +586,8 @@ export default function AppHeader() {
     searchParams,
   });
   const showPageShareAction =
-    isCapacitor && isPageShareSupported({ activeView, pathname });
+    isCapacitor &&
+    isPageShareSupported({ activeView, pathname, surface: "mobile" });
 
   const isProfilePage = typeof params["user"] === "string";
 

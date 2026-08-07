@@ -1,6 +1,7 @@
 import HeaderShare, {
   HeaderConnectModal,
 } from "@/components/header/share/HeaderShare";
+import HeaderPageShareButton from "@/components/header/share/HeaderPageShareButton";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,11 +14,20 @@ import {
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
+const mockCapacitorCanShare = jest.fn();
+const mockCapacitorShare = jest.fn();
+
 // Mocks
 jest.mock("@/hooks/useCapacitor");
 jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/hooks/useElectron", () => ({
   useElectron: jest.fn(() => false),
+}));
+jest.mock("@capacitor/share", () => ({
+  Share: {
+    canShare: (...args: unknown[]) => mockCapacitorCanShare(...args),
+    share: (...args: unknown[]) => mockCapacitorShare(...args),
+  },
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
@@ -156,6 +166,10 @@ Object.assign(navigator, {
 });
 
 const testOrigin = globalThis.window.location.origin;
+const originalSecureContextDescriptor = Object.getOwnPropertyDescriptor(
+  globalThis,
+  "isSecureContext"
+);
 const QR_CODE_OPTIONS = {
   width: 500,
   margin: 4,
@@ -174,7 +188,7 @@ function HeaderConnectHarness() {
   return (
     <>
       <button type="button" aria-label="QR Code" onClick={() => setShow(true)}>
-        Connect another device
+        Connect Device
       </button>
       <HeaderConnectModal show={show} onClose={() => setShow(false)} />
     </>
@@ -196,12 +210,23 @@ describe("HeaderShare", () => {
     mockPathname = "/mock-path";
     mockSearchParams = new URLSearchParams("something=value");
     mockUseElectron.mockReturnValue(false);
+    mockCapacitorCanShare.mockResolvedValue({ value: true });
+    mockCapacitorShare.mockResolvedValue(undefined);
+    document.title = "6529";
     document.cookie = "page-share-qr-target=; Max-Age=0; Path=/";
     globalThis.window.history.replaceState(
       {},
       "",
       "/mock-path?something=value#details"
     );
+    Object.defineProperty(globalThis, "isSecureContext", {
+      configurable: true,
+      value: true,
+    });
+    Reflect.deleteProperty(globalThis.navigator, "share");
+    Reflect.deleteProperty(globalThis.navigator, "canShare");
+    Reflect.deleteProperty(globalThis.document, "permissionsPolicy");
+    Reflect.deleteProperty(globalThis.document, "featurePolicy");
 
     const auth = require("@/components/auth/Auth");
     auth.useAuth.mockReturnValue({
@@ -247,6 +272,22 @@ describe("HeaderShare", () => {
   afterEach(() => {
     jest.clearAllMocks();
     (navigator.clipboard.writeText as jest.Mock).mockReset?.();
+    Reflect.deleteProperty(globalThis.navigator, "share");
+    Reflect.deleteProperty(globalThis.navigator, "canShare");
+    Reflect.deleteProperty(globalThis.document, "permissionsPolicy");
+    Reflect.deleteProperty(globalThis.document, "featurePolicy");
+  });
+
+  afterAll(() => {
+    if (originalSecureContextDescriptor) {
+      Object.defineProperty(
+        globalThis,
+        "isSecureContext",
+        originalSecureContextDescriptor
+      );
+    } else {
+      Reflect.deleteProperty(globalThis, "isSecureContext");
+    }
   });
 
   it("renders nothing when running in Capacitor", () => {
@@ -263,6 +304,52 @@ describe("HeaderShare", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("opens the compact page-share modal in a mobile browser", async () => {
+    mockIsMobile.mockReturnValue(true);
+    document.title = "Mobile Share";
+    const share = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: share,
+    });
+    Object.defineProperty(globalThis.navigator, "canShare", {
+      configurable: true,
+      value: jest.fn(() => true),
+    });
+    const qrcode = require("qrcode");
+    qrcode.toDataURL.mockClear();
+
+    renderWithProviders(<HeaderPageShareButton isCapacitor={false} />);
+    await userEvent.click(screen.getByRole("button", { name: "Share page" }));
+
+    expect(
+      await screen.findByTestId("compact-page-share-layout")
+    ).toBeInTheDocument();
+    const modal = screen.getByTestId("header-share-modal");
+    expect(modal).toHaveClass("tw-max-w-sm");
+    expect(modal).not.toHaveClass("sm:tw-max-w-2xl");
+    expect(screen.getByRole("button", { name: "Copy Link" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Share on X" })).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Share on Farcaster" })
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("link", { name: "Open in 6529 Desktop" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("page-share-target-menu")).toBeNull();
+    expect(screen.queryByTestId("page-share-divider")).toBeNull();
+    expect(qrcode.toDataURL).not.toHaveBeenCalled();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share with another app" })
+    );
+
+    expect(share).toHaveBeenCalledWith({
+      title: "Mobile Share",
+      url: `${testOrigin}/mock-path?something=value#details`,
+    });
+  });
+
   it("renders nothing on a shared unsupported route", () => {
     mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
     mockIsMobile.mockReturnValue(false);
@@ -271,6 +358,18 @@ describe("HeaderShare", () => {
     const { container } = renderWithProviders(<HeaderShare />);
 
     expect(container.firstChild).toBeNull();
+  });
+
+  it("renders on the desktop-web home route", () => {
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    mockPathname = "/";
+
+    renderWithProviders(<HeaderShare />);
+
+    expect(
+      screen.getByRole("button", { name: "Share this page" })
+    ).toBeInTheDocument();
   });
 
   it("renders on a wave route", () => {
@@ -297,11 +396,47 @@ describe("HeaderShare", () => {
     await userEvent.click(btn);
 
     const modal = await screen.findByTestId("header-share-modal");
-    expect(modal).toHaveClass("tw-max-w-sm");
-    expect(modal.querySelector("#header-share-content")).toHaveClass("tw-w-64");
-    expect(screen.getByText("Share this page")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "X" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Farcaster" })).toBeInTheDocument();
+    expect(modal).toHaveClass(
+      "tw-max-w-sm",
+      "sm:tw-max-w-2xl",
+      "tw-p-0"
+    );
+    expect(screen.getByTestId("header-share-modal-content")).toHaveClass(
+      "tw-p-5"
+    );
+    expect(modal.querySelector("#header-share-content")).toHaveClass(
+      "tw-w-48",
+      "sm:tw-w-[var(--page-share-qr-size)]"
+    );
+    expect(screen.getByRole("heading", { name: "Share" })).toBeInTheDocument();
+    expect(screen.getByTestId("page-share-layout")).toHaveClass(
+      "sm:tw-grid-cols-[var(--page-share-qr-size)_1px_minmax(0,1fr)]"
+    );
+    expect(screen.getByTestId("page-share-layout")).toHaveStyle({
+      "--page-share-qr-size": "10.75rem",
+    });
+    expect(screen.getByTestId("page-share-target-menu")).toHaveClass(
+      "tw-w-48",
+      "sm:tw-w-full"
+    );
+    expect(screen.getByTestId("page-share-divider")).toHaveClass(
+      "tw-h-px",
+      "tw-w-full",
+      "sm:tw-h-full",
+      "sm:tw-w-px"
+    );
+    expect(screen.getByTestId("page-share-actions-column")).toHaveClass(
+      "tw-items-center"
+    );
+    expect(screen.getByTestId("page-share-qr-column")).toHaveClass(
+      "tw-justify-center"
+    );
+    expect(
+      screen.getByRole("link", { name: "Share on X" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Share on Farcaster" })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Open in 6529 Desktop" })
     ).toHaveAttribute(
@@ -321,16 +456,14 @@ describe("HeaderShare", () => {
       await screen.findByAltText("Current page QR code")
     ).toBeInTheDocument();
     const shareActions = [
-      screen.getByRole("button", { name: "Copy link" }),
+      screen.getByRole("button", { name: "Copy Link" }),
       screen.getByRole("link", { name: "Open in 6529 Desktop" }),
-      screen.getByRole("link", { name: "X" }),
-      screen.getByRole("link", { name: "Farcaster" }),
+      screen.getByRole("link", { name: "Share on X" }),
+      screen.getByRole("link", { name: "Share on Farcaster" }),
     ];
     shareActions.forEach((action) => {
-      expect(action).toHaveAttribute(
-        "data-tooltip-id",
-        "page-share-actions-tooltip"
-      );
+      expect(action).toHaveClass("tw-w-full");
+      expect(action).not.toHaveAttribute("data-tooltip-id");
       expect(action).not.toHaveAttribute("title");
     });
     expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
@@ -338,41 +471,59 @@ describe("HeaderShare", () => {
     expect(screen.queryByText("Desktop")).not.toBeInTheDocument();
 
     const currentUrl = globalThis.window.location.href;
-    expect(screen.getByRole("link", { name: "X" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Share on X" })
+    ).toHaveAttribute(
       "href",
-      expect.stringContaining(encodeURIComponent(currentUrl))
+      `https://x.com/intent/post?text=${encodeURIComponent(
+        `${globalThis.document.title.trim() || "6529"}\n${currentUrl}`
+      )}`
     );
-    expect(screen.getByRole("link", { name: "Farcaster" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Share on Farcaster" })
+    ).toHaveAttribute(
       "href",
       expect.stringContaining(encodeURIComponent(currentUrl))
     );
   });
 
   it("copies url to clipboard", async () => {
+    const setTimeoutSpy = jest.spyOn(globalThis, "setTimeout");
     mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
     mockIsMobile.mockReturnValue(false);
 
-    renderWithProviders(<HeaderShare />);
+    try {
+      renderWithProviders(<HeaderShare />);
 
-    const btn = screen.getByRole("button", { name: "Share this page" });
-    await userEvent.click(btn);
+      const btn = screen.getByRole("button", { name: "Share this page" });
+      await userEvent.click(btn);
 
-    const modal = await screen.findByTestId("header-share-modal");
-    const copyButton = screen.getByRole("button", { name: "Copy link" });
-    const copyIcon = modal.querySelector('[data-icon="copy"]') as HTMLElement;
+      const modal = await screen.findByTestId("header-share-modal");
+      const copyButton = screen.getByRole("button", { name: "Copy Link" });
+      const copyIcon = modal.querySelector(
+        '[data-icon="copy"]'
+      ) as HTMLElement;
 
-    expect(copyIcon).toBeInTheDocument();
-    await userEvent.click(copyButton);
+      expect(copyIcon).toBeInTheDocument();
+      await userEvent.click(copyButton);
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      globalThis.window.location.href
-    );
-    expect(copyButton).toHaveClass(
-      "tw-border-green-500",
-      "tw-bg-green-500/15",
-      "tw-text-green-300"
-    );
-    expect(screen.getByRole("status")).toHaveTextContent("Copied!");
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        globalThis.window.location.href
+      );
+      expect(screen.getByRole("button", { name: "Copied" })).toBe(
+        copyButton
+      );
+      expect(copyButton).toHaveClass(
+        "tw-border-green-500",
+        "tw-bg-green-500/15",
+        "!tw-text-success"
+      );
+      expect(screen.getByText("Copied")).toHaveClass("!tw-text-success");
+      expect(screen.getByRole("status")).toHaveTextContent("Copied");
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1500);
+    } finally {
+      setTimeoutSpy.mockRestore();
+    }
   });
 
   it("remembers the App QR target and preserves the complete route", async () => {
@@ -413,66 +564,287 @@ describe("HeaderShare", () => {
 
   it("uses the system share sheet with the exact current URL when available", async () => {
     const systemShare = jest.fn().mockResolvedValue(undefined);
+    const canShare = jest.fn().mockReturnValue(true);
     Object.defineProperty(globalThis.navigator, "share", {
       configurable: true,
       value: systemShare,
     });
+    Object.defineProperty(globalThis.navigator, "canShare", {
+      configurable: true,
+      value: canShare,
+    });
     mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
     mockIsMobile.mockReturnValue(false);
 
-    try {
-      renderWithProviders(<HeaderShare />);
-      await userEvent.click(
-        screen.getByRole("button", { name: "Share this page" })
-      );
-      await userEvent.click(
-        await screen.findByRole("button", { name: "More" })
-      );
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+    const systemShareButton = await screen.findByRole("button", {
+      name: "Share with another app",
+    });
 
-      expect(systemShare).toHaveBeenCalledWith({
-        title: globalThis.document.title || "6529",
+    expect(systemShareButton).toHaveTextContent("More");
+    expect(systemShareButton).toHaveClass("tw-w-full");
+    expect(systemShareButton).not.toHaveAttribute("data-tooltip-id");
+    expect(systemShareButton).not.toHaveAttribute("title");
+    expect(screen.getByTestId("page-share-layout")).toHaveStyle({
+      "--page-share-qr-size": "14.25rem",
+    });
+    expect(canShare).toHaveBeenCalledWith({
+      title: globalThis.document.title.trim() || "6529",
+      url: globalThis.window.location.href,
+    });
+
+    await userEvent.click(systemShareButton);
+
+    expect(systemShare).toHaveBeenCalledWith({
+      title: globalThis.document.title.trim() || "6529",
+      url: globalThis.window.location.href,
+    });
+  });
+
+  it("supports system sharing when canShare is unavailable", async () => {
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue(undefined),
+    });
+
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    expect(
+      await screen.findByRole("button", { name: "Share with another app" })
+    ).toBeInTheDocument();
+  });
+
+  it("hides system sharing when the API is unavailable", async () => {
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    await screen.findByTestId("header-share-modal");
+    expect(
+      screen.queryByRole("button", { name: "Share with another app" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("hides system sharing when the page is not a secure context", async () => {
+    Object.defineProperty(globalThis, "isSecureContext", {
+      configurable: true,
+      value: false,
+    });
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue(undefined),
+    });
+
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    await screen.findByTestId("header-share-modal");
+    expect(
+      screen.queryByRole("button", { name: "Share with another app" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("hides system sharing when canShare rejects the payload", async () => {
+    const canShare = jest.fn().mockReturnValue(false);
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue(undefined),
+    });
+    Object.defineProperty(globalThis.navigator, "canShare", {
+      configurable: true,
+      value: canShare,
+    });
+
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    await waitFor(() =>
+      expect(canShare).toHaveBeenCalledWith({
+        title: globalThis.document.title.trim() || "6529",
         url: globalThis.window.location.href,
-      });
-    } finally {
-      Reflect.deleteProperty(globalThis.navigator, "share");
-    }
+      })
+    );
+    expect(
+      screen.queryByRole("button", { name: "Share with another app" })
+    ).not.toBeInTheDocument();
   });
 
-  it("treats a denied system share request as an expected browser outcome", async () => {
-    const permissionError = Object.assign(new Error("Permission denied"), {
-      name: "NotAllowedError",
+  it("hides system sharing when checking canShare throws", async () => {
+    const canShareError = new Error("Share capability check failed");
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue(undefined),
     });
-    const systemShare = jest.fn().mockRejectedValue(permissionError);
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
+    Object.defineProperty(globalThis.navigator, "canShare", {
+      configurable: true,
+      value: jest.fn(() => {
+        throw canShareError;
+      }),
+    });
+
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    await screen.findByTestId("header-share-modal");
+    expect(
+      screen.queryByRole("button", { name: "Share with another app" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("hides system sharing when the document permissions policy blocks it", async () => {
+    const allowsFeature = jest.fn().mockReturnValue(false);
+    const features = jest.fn().mockReturnValue(["web-share"]);
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue(undefined),
+    });
+    Object.defineProperty(globalThis.document, "permissionsPolicy", {
+      configurable: true,
+      value: { allowsFeature, features },
+    });
+
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    await waitFor(() =>
+      expect(allowsFeature).toHaveBeenCalledWith("web-share")
+    );
+    expect(
+      screen.queryByRole("button", { name: "Share with another app" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("ignores an unrecognized web-share permissions policy feature", async () => {
+    const allowsFeature = jest.fn().mockReturnValue(false);
+    const canShare = jest.fn().mockReturnValue(true);
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue(undefined),
+    });
+    Object.defineProperty(globalThis.navigator, "canShare", {
+      configurable: true,
+      value: canShare,
+    });
+    Object.defineProperty(globalThis.document, "permissionsPolicy", {
+      configurable: true,
+      value: {
+        allowsFeature,
+        features: jest.fn().mockReturnValue(["fullscreen"]),
+      },
+    });
+
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    expect(
+      await screen.findByRole("button", { name: "Share with another app" })
+    ).toBeInTheDocument();
+    expect(canShare).toHaveBeenCalled();
+    expect(allowsFeature).not.toHaveBeenCalled();
+  });
+
+  it("silently keeps system sharing available after user cancellation", async () => {
+    const cancelError = Object.assign(new Error("Share cancelled"), {
+      name: "AbortError",
+    });
+    const systemShare = jest.fn().mockRejectedValue(cancelError);
     Object.defineProperty(globalThis.navigator, "share", {
       configurable: true,
       value: systemShare,
     });
+
     mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
     mockIsMobile.mockReturnValue(false);
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Share with another app" })
+    );
 
-    try {
+    await waitFor(() => expect(systemShare).toHaveBeenCalledTimes(1));
+    expect(
+      screen.getByRole("button", { name: "Share with another app" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      "a NotAllowedError",
+      () =>
+        Object.assign(new Error("Permission denied"), {
+          name: "NotAllowedError",
+        }),
+    ],
+    ["another runtime rejection", () => new Error("Share target unavailable")],
+  ])(
+    "hides system sharing and announces unavailability after %s",
+    async (_, createError) => {
+      const systemShare = jest.fn().mockRejectedValue(createError());
+      Object.defineProperty(globalThis.navigator, "share", {
+        configurable: true,
+        value: systemShare,
+      });
+
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+
       renderWithProviders(<HeaderShare />);
       await userEvent.click(
         screen.getByRole("button", { name: "Share this page" })
       );
-      const moreButton = await screen.findByRole("button", { name: "More" });
-      expect(moreButton).toHaveAttribute(
-        "data-tooltip-id",
-        "page-share-actions-tooltip"
+      await userEvent.click(
+        await screen.findByRole("button", {
+          name: "Share with another app",
+        })
       );
-      expect(moreButton).not.toHaveAttribute("title");
-      await userEvent.click(moreButton);
 
-      await waitFor(() => expect(systemShare).toHaveBeenCalledTimes(1));
-      expect(consoleError).not.toHaveBeenCalled();
-    } finally {
-      consoleError.mockRestore();
-      Reflect.deleteProperty(globalThis.navigator, "share");
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("button", { name: "Share with another app" })
+        ).not.toBeInTheDocument()
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "System sharing is unavailable."
+      );
+      expect(screen.getByRole("status")).toHaveClass("tw-w-full");
+      expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     }
-  });
+  );
 
   it("generates QR codes when modal opens", async () => {
     const qrcode = require("qrcode");
@@ -515,7 +887,7 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
 
       expect(
-        await screen.findByRole("heading", { name: "Connect another device" })
+        await screen.findByRole("heading", { name: "Connect Device" })
       ).toBeInTheDocument();
       const modal = screen.getByTestId("header-share-modal");
       expect(modal).toHaveClass("tw-max-w-md");
@@ -529,9 +901,14 @@ describe("HeaderShare", () => {
       expect(
         screen.getByRole("button", { name: "Desktop" })
       ).toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: "X" })).toBeNull();
-      expect(screen.queryByRole("link", { name: "Farcaster" })).toBeNull();
-      expect(screen.queryByRole("button", { name: "More" })).toBeNull();
+      expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Share on X" })).toBeNull();
+      expect(
+        screen.queryByRole("link", { name: "Share on Farcaster" })
+      ).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Share with another app" })
+      ).toBeNull();
     });
 
     it("falls back to Mobile if Desktop becomes unavailable", async () => {
@@ -609,7 +986,7 @@ describe("HeaderShare", () => {
       ).toBeInTheDocument();
       expect(
         screen.getByText(
-          "You can't connect another device from your current authentication. Update to the new secure session first."
+          "You can't connect a device from your current authentication. Update to the new secure session first."
         )
       ).toBeInTheDocument();
       expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1);
@@ -880,6 +1257,29 @@ describe("HeaderShare", () => {
       await screen.findByTestId("header-share-modal");
       await userEvent.click(screen.getByRole("button", { name: "Desktop" }));
 
+      const desktopPanel = await screen.findByTestId(
+        "desktop-connection-panel"
+      );
+      expect(desktopPanel).toHaveClass(
+        "tw-h-full",
+        "tw-w-full",
+        "tw-rounded-lg",
+        "tw-border-iron-700",
+        "tw-bg-iron-900/50"
+      );
+      expect(desktopPanel.tagName).toBe("A");
+      expect(desktopPanel).toHaveAttribute(
+        "href",
+        expect.stringContaining("token=local-legacy-refresh-token")
+      );
+      expect(screen.getByAltText("6529 Desktop")).toHaveAttribute(
+        "width",
+        "150"
+      );
+      expect(
+        screen.queryByText("Continue in the 6529 Desktop app.")
+      ).not.toBeInTheDocument();
+      expect(desktopPanel).toHaveTextContent("Open in 6529 Desktop");
       expect(
         await screen.findByTitle(/token=local-legacy-refresh-token/)
       ).toBeInTheDocument();
@@ -1250,7 +1650,7 @@ describe("HeaderShare", () => {
       );
       expect(screen.queryByTitle(/first-share-code/)).not.toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { name: "Connect another device" })
+        screen.getByRole("heading", { name: "Connect Device" })
       ).toBeInTheDocument();
       expect(
         screen.getByText("Preparing Device Connection")
@@ -1305,11 +1705,22 @@ describe("HeaderShare", () => {
         expect(sessionV2.createConnectionShare).toHaveBeenCalled()
       );
       expect(
-        screen.getByRole("heading", { name: "Connect another device" })
+        screen.getByRole("heading", { name: "Connect Device" })
       ).toBeInTheDocument();
       expect(
         screen.getByText("Device Connection Unavailable")
       ).toBeInTheDocument();
+      expect(screen.getByTestId("connection-share-notice")).toHaveClass(
+        "tw-h-full"
+      );
+      expect(
+        screen.getByTestId("header-share-modal").querySelector(
+          "#header-share-content"
+        )
+      ).toHaveClass("tw-aspect-square");
+      expect(
+        screen.getByTestId("connection-share-content").children
+      ).toHaveLength(1);
     });
   });
 

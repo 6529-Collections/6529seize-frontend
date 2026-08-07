@@ -153,8 +153,9 @@ On web layouts, route switching is sidebar-first.
 - Connected user row opens the account menu immediately on a single activate.
 - The web account dropdown stays horizontally anchored to the connected user
   row when the centered desktop layout adds wide-screen margins.
-- Desktop-web `Share` is hidden in Capacitor/native context, mobile-device web,
-  and on the shared unsupported-page list documented in
+- The desktop-web sidebar `Share` row is hidden in Capacitor/native and
+  mobile-device web contexts. Supported mobile pages expose Share from the
+  header instead. The route rules are documented in
   [Page Sharing and Device Connection](feature-share-modal.md).
 - `App Wallets` appears inside `About > Delegation & Wallets` only when
   app-wallet support is enabled.
@@ -170,8 +171,9 @@ On web layouts, route switching is sidebar-first.
 - If submenu state looks stale, toggle the group or rail again.
 - If `Drop Forge` is missing, verify the connected wallet can access the landing
   route and wait for permission checks to finish.
-- If `Share` looks missing, check the runtime and route-support list;
-  Capacitor/mobile-device web and unsupported routes intentionally hide it.
+- If the sidebar `Share` row looks missing, check the runtime and route-support
+  list. Mobile web and the native app place page sharing in the header, while
+  unsupported routes intentionally omit it.
 - Opening the target wave/DM thread should clear that wave's unread state and
   refresh unread indicators after read sync. If indicators still look stale,
   open `/notifications` for the target account and retry after refresh.

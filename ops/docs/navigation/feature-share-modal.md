@@ -2,70 +2,110 @@
 
 ## Overview
 
-Desktop web exposes two separate flows:
+6529 exposes two separate flows:
 
-- `Share` publishes the exact current browser URL through copy, QR code, X,
-  Farcaster, or the device share sheet when the Web Share API is available.
+- `Share` publishes the exact shareable web URL through copy, QR code, X,
+  Farcaster, or the `More` system-share action when the platform allows it.
 - `Connect Device` transfers the authenticated session to 6529 Mobile
   or 6529 Desktop.
 
-The flows use the same accessible dialog foundation, but never show each
-other's controls. Native app page sharing keeps its existing platform share
-sheet behavior.
+The flows use the same accessible dialog foundation and one consistent content
+inset, but never show each other's controls. Mobile web and the native app use
+a compact action-only version of the Share dialog.
+
+## Location in the Site
+
+Page sharing belongs to the shared navigation surface. On supported desktop-web
+pages it opens from the persistent sidebar. Device connection opens from the
+profile menu. Mobile web and native apps open page sharing from the app header.
 
 ## Entry Points
 
 - Desktop web: select the persistent `Share` icon in the sidebar on supported
   routes.
+- Mobile web: select the page-share icon in the small-screen header on supported
+  routes.
 - Desktop web connection: select the profile picture, then
-  `Connect Device`.
+  `Connect Device`. The account menu distinguishes wallet connection from
+  device connection with a full-width divider inside the connection-actions
+  section and stronger section boundaries around the pair.
 - Native app: select the page-share icon in the app header on supported routes.
 
-## Share Flow
+## User Journey
+
+### Share a Page
 
 1. Select the Share icon.
-2. The `Share this page` dialog opens with a compact QR code. Its `Browser` /
-   `App` toggle defaults to Browser and remembers the last choice in a cookie.
-3. Choose one of the icon-only actions, identified by accessible names and
-   rendered tooltips:
-   - copy the exact current URL
-   - open the same route in 6529 Desktop
-   - compose a post on X
-   - compose a cast on Farcaster
-   - open the system share sheet through `navigator.share`, when supported
+2. On desktop web, the `Share` dialog opens in two columns on wider screens.
+   The left column contains the `Browser` / `App` toggle and QR code, aligned
+   to the same width; the right column uses the remaining space and contains
+   equal-width sharing actions with an icon and visible label. A divider
+   separates the sections. On wider screens, the QR size responds to whether
+   four or five actions are available so both sections have equal height. On
+   narrow screens, the sections stack inside a narrower dialog and retain a
+   fixed compact QR. On mobile web and in the native app, the dialog contains
+   only the action list, with no QR target, QR code, divider, or Desktop deep
+   link.
+3. Choose an action:
+   - `Copy Link` copies the exact current URL
+   - `Open in 6529 Desktop` opens the same route in the desktop app
+   - `Share on X` opens an X composer
+   - `Share on Farcaster` opens a Farcaster composer
+   - `More` opens the system share sheet, when it is available
 4. Close with the close button, backdrop, or `Escape`.
 
-The QR code is always visible while the dialog is open. Browser mode contains
+The QR code is visible in the desktop-web dialog. Browser mode contains
 the complete current URL, including pathname, search parameters, and hash
 fragment. App mode uses the existing `mobile6529://navigate` deep-link shape
 with that same route. The Desktop action uses the corresponding
 `core6529://navigate` route. Copy, social composer links, and system sharing
-always use the browser URL regardless of the selected QR target. Copy shows a
-two-second green success state.
+always use the shareable web URL regardless of the selected QR target. Copy
+shows a green `Copied` state for about 1.5 seconds. System sharing reads the
+browser URL again when selected, so it includes the current pathname, search
+parameters, and hash fragment. In the native app, `More` uses Capacitor's
+system share sheet; mobile and desktop browsers use the Web Share API. Native
+system-share failure never falls back to Copy because `Copy Link` is available
+separately.
 
 ## Unsupported Share Pages
 
-Desktop web and the native app use the same route-support rules. Share is
-hidden on:
+Messages, Notifications, and the Messages query view are excluded on every
+surface. Home differs by surface: desktop web supports Share on `/`, while
+mobile web and the native app hide it. Specifically, Share is hidden on:
 
-- home (`/`)
 - Messages (`/messages` and child routes)
 - Notifications (`/notifications` and child routes)
 - any route currently rendered in the `messages` query view
+- home (`/`) on mobile web and in the native app only
 
 All other pages, including `/waves`, wave detail routes, and the `waves` query
-view, support Share. Desktop web uses the sidebar entry; the native app keeps
-its existing header placement and platform-share behavior.
+view, support Share. Desktop web uses the sidebar entry; mobile web and the
+native app use their header entry.
 
-## Connect Another Device Flow
+## Connect Device
 
 1. Select the desktop-web profile picture to open the account menu.
 2. Select `Connect Device`.
-3. The dialog defaults to `Mobile`; select `Desktop` when needed.
+3. The `Connect Device` dialog defaults to `Mobile`; select `Desktop` when
+   needed. The target tabs appear without an additional heading above them.
 4. Mobile displays the existing one-time session-v2 connection QR code.
-5. Desktop displays the existing legacy desktop connection handoff.
+5. Desktop keeps the same square dimensions but uses a dark bordered handoff
+   card with a 6529 Desktop logo and compact white launch label. The entire card
+   opens 6529 Desktop, not only the visible label.
 
 No copy-page, social, or current-page Share actions appear in this dialog.
+
+## Common Scenarios
+
+- Use `Copy Link` when you want the URL on the clipboard; system-share failures
+  never trigger Copy automatically.
+- Use X to open a prefilled composer with the page title on one line and the
+  exact current URL on the next. Farcaster opens a composer containing the
+  current page.
+- Use `More` to choose an application from the browser or operating-system
+  share sheet.
+- Switch the QR target to `App` when the recipient should open the route in
+  6529 Mobile rather than a browser.
 
 ## QR Rendering
 
@@ -77,14 +117,41 @@ No copy-page, social, or current-page Share actions appear in this dialog.
 
 ## Edge Cases
 
-- Desktop Share and Connect entries are hidden in Capacitor/native and
-  mobile-device web contexts.
+- The desktop sidebar Share row and account-menu `Connect Device` action are
+  hidden in Capacitor/native and mobile-device web contexts; supported mobile
+  contexts use the compact header Share flow instead.
 - Desktop is hidden as a connection target when already running in Electron.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
-  or unavailable states without revealing page-sharing controls.
-- The system-share action is omitted when `navigator.share` is unavailable.
-- Clipboard and system-share errors leave the dialog open; canceled system
-  sharing is not reported as an error.
+  or unavailable states without revealing page-sharing controls. These notice
+  states retain the QR panel's proportions but do not reserve blank footer
+  space when no connection link is available.
+- In browsers, `More` is omitted in an insecure context, when the Web Share API
+  is absent, when the browser rejects the title and URL payload, or when the
+  document permissions policy recognizes and blocks system sharing. An
+  unrecognized `web-share` policy directive is treated as unknown rather than
+  blocked, so browser capability checks remain authoritative without producing
+  a warning.
+- In the native app, `More` is omitted when Capacitor reports that system
+  sharing is unavailable.
+
+## Failure and Recovery
+
+- Canceling the system share sheet leaves the dialog and action unchanged and
+  does not announce an error.
+- If system sharing becomes unavailable or the browser rejects the request,
+  the action is hidden for the current dialog, and the dialog shows and
+  announces that system sharing is unavailable. Copy remains a separate
+  user-selected action.
+- Clipboard errors leave the dialog open so another sharing action can be
+  selected.
+
+## Limitations / Notes
+
+- Browser system sharing depends on browser, operating-system,
+  security-context, and document permissions-policy support. Native system
+  sharing depends on the Capacitor share plugin and operating system.
+- A browser may expose the Web Share API but still reject a particular request;
+  the dialog handles that as an unavailable system-share action.
 
 ## Related Pages
 

@@ -33,7 +33,11 @@ function HeaderShareContent({
   if (
     capacitor.isCapacitor ||
     isMobileDevice ||
-    !isPageShareSupported({ activeView, pathname })
+    !isPageShareSupported({
+      activeView,
+      pathname,
+      surface: "desktop-web",
+    })
   ) {
     return <></>;
   }

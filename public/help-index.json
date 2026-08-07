@@ -240,7 +240,7 @@
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
-        "Search, Share, Connect Wallet, and Notifications are utility controls; My Profile and Connect another device live in the connected account menu."
+        "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -1060,9 +1060,9 @@
         "connect mobile with qr",
         "mobile qr connection",
         "connect desktop app",
-        "share current page",
-        "send page to mobile",
-        "send page to desktop"
+        "connect device",
+        "connect 6529 mobile",
+        "connect 6529 desktop"
       ],
       "keywords": [
         "share",
@@ -1082,19 +1082,22 @@
         "page"
       ],
       "facts": [
-        "Use the desktop profile or account menu and select Connect another device.",
+        "Use the desktop profile or account menu and select Connect Device.",
         "The connection dialog contains only Mobile and Desktop targets and defaults to Mobile.",
-        "Connection sharing can show a QR code for Mobile or a deep link for Desktop.",
+        "Connection sharing shows a QR code for Mobile or a clickable 6529 Desktop handoff card and deep link for Desktop.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
         "If the connection dialog says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
-        "Page sharing is a separate sidebar action and never appears in the connection dialog.",
-        "In the native app, supported pages keep using the header Share page button and platform share sheet."
+        "Page sharing is a separate navigation action and never appears in the connection dialog.",
+        "On supported pages, mobile web and the native app use a header Share page button that opens a compact action-only Share dialog."
       ],
       "canonical_path": "/",
       "suppress_source_links": true,
       "tags": ["auth", "wallet", "navigation", "mobile", "desktop"],
       "source_refs": [
         "components/header/share/HeaderShare.tsx",
+        "components/header/share/header-share/HeaderQRModal.tsx",
+        "components/header/share/header-share/HeaderShareModalView.tsx",
+        "components/layout/sidebar/WebSidebarUser.tsx",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/contracts/wallet-auth-session-v2.md"
       ]
@@ -3843,7 +3846,7 @@
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
-        "Native app page sharing appears next to Search on supported non-wave, non-message, and non-notification routes.",
+        "Mobile-web and native-app page sharing appears next to Search on supported routes and opens a compact action-only Share dialog.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
       ],
       "canonical_path": "/waves",
@@ -3931,10 +3934,14 @@
       "keywords": ["share", "copy", "link", "modal", "url", "native"],
       "facts": [
         "Supported desktop-web pages show a persistent sidebar Share icon that opens a page-sharing-only modal.",
-        "Share actions copy the exact current full URL, create its QR code, compose on X or Farcaster, or open the system share sheet when navigator.share is available.",
-        "Desktop web and the native app share the same unsupported-page rules: home, Waves, Messages, Notifications, and Waves or Messages query views.",
-        "Native app sharing keeps its existing header placement and platform share-sheet behavior.",
-        "The profile menu contains My Profile and Connect another device; connection targets never appear in the Share modal.",
+        "The desktop-web Share dialog places the Browser or App QR target and QR code on the left of wider layouts, with equal-width labeled actions on the right; narrow layouts stack these sections.",
+        "Mobile web and the native app use a compact Share dialog with Copy Link, Share on X, Share on Farcaster, and More; it omits the QR controls and Open in 6529 Desktop.",
+        "Desktop and mobile browsers use the Web Share API for More when the secure context, payload support, and document permissions policy allow it; the native app uses Capacitor system sharing.",
+        "Copy changes to a green Copied state for about 1.5 seconds.",
+        "System sharing uses the browser URL at invocation time, including search parameters and the hash; cancellation is silent, while runtime unavailability hides the action and provides accessible feedback without falling back to Copy.",
+        "Desktop web supports page sharing on home, while mobile web and the native app hide it there; all three surfaces hide page sharing on Messages, Notifications, and the Messages query view, while Waves and the Waves query view remain shareable.",
+        "Mobile web and native app sharing use their existing header placement and open the compact Share dialog.",
+        "The profile menu contains Profile and Connect Device; connection targets never appear in the Share modal.",
         "Wave-specific link sharing also exists in the wave header.",
         "Use share controls when users ask how to copy a route or send someone a page."
       ],
@@ -3943,7 +3950,10 @@
       "tags": ["navigation", "share"],
       "source_refs": [
         "components/header/share/HeaderPageShareButton.tsx",
+        "components/header/share/header-share/HeaderShareModalView.tsx",
+        "components/header/share/header-share/HeaderShareTrigger.tsx",
         "components/header/share/page-share-support.ts",
+        "components/layout/SmallScreenHeader.tsx",
         "ops/docs/navigation/feature-app-header-context.md",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/docs/waves/header/feature-wave-link-share-copy.md"

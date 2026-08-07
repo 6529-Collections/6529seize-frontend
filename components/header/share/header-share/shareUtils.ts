@@ -1,5 +1,6 @@
 import { toDataURL } from "qrcode";
 
+import { publicEnv } from "@/config/env";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
   getRefreshToken,
@@ -40,6 +41,16 @@ export type ConnectionShareSessionVerificationStatus =
   | "error"
   | "stale";
 
+export type PageShareData = {
+  readonly title: string;
+  readonly url: string;
+};
+
+export type PageShareSystemShareAdapter = {
+  readonly canShare: (shareData: PageShareData) => Promise<boolean>;
+  readonly share: (shareData: PageShareData) => Promise<void>;
+};
+
 export function getLocalLegacyDesktopAuth(walletAddress: string): {
   readonly refreshToken: string;
   readonly role: string | null;
@@ -74,12 +85,61 @@ export function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   );
 }
 
-export function isExpectedSystemShareError(error: unknown): boolean {
-  if (typeof error !== "object" || error === null || !("name" in error)) {
+type PermissionsPolicyLike = {
+  readonly allowsFeature?: ((feature: string) => boolean) | undefined;
+  readonly features?: (() => readonly string[]) | undefined;
+};
+
+type DocumentWithPermissionsPolicy = Document & {
+  readonly permissionsPolicy?: PermissionsPolicyLike | undefined;
+  readonly featurePolicy?: PermissionsPolicyLike | undefined;
+};
+
+function isWebShareBlockedByPermissionsPolicy(): boolean {
+  if (typeof document === "undefined") {
     return false;
   }
 
-  return error.name === "AbortError" || error.name === "NotAllowedError";
+  const policyDocument = document as DocumentWithPermissionsPolicy;
+  const policy =
+    policyDocument.permissionsPolicy ?? policyDocument.featurePolicy;
+  if (
+    typeof policy?.allowsFeature !== "function" ||
+    typeof policy.features !== "function"
+  ) {
+    return false;
+  }
+
+  try {
+    if (!policy.features().includes("web-share")) {
+      return false;
+    }
+
+    return policy.allowsFeature("web-share") === false;
+  } catch {
+    return false;
+  }
+}
+
+export function canUseSystemShare(shareData: ShareData): boolean {
+  if (
+    globalThis.isSecureContext !== true ||
+    typeof navigator === "undefined" ||
+    typeof navigator.share !== "function" ||
+    isWebShareBlockedByPermissionsPolicy()
+  ) {
+    return false;
+  }
+
+  try {
+    if (typeof navigator.canShare !== "function") {
+      return true;
+    }
+
+    return navigator.canShare(shareData);
+  } catch {
+    return false;
+  }
 }
 
 export function isSessionUpgradeRequiredError(error: unknown): boolean {
@@ -124,6 +184,17 @@ export function getCurrentFullUrl(): string {
   return window.location.href;
 }
 
+export function getCurrentPublicUrl(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const route = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
+  const normalizedRoute = route.startsWith("/") ? route : `/${route}`;
+  return `${normalizedBase}${normalizedRoute}`;
+}
+
 export function buildSocialShareUrls({
   url,
   title,
@@ -136,9 +207,10 @@ export function buildSocialShareUrls({
 } {
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
+  const encodedXText = encodeURIComponent(`${title}\n${url}`);
 
   return {
-    x: `https://x.com/intent/post?url=${encodedUrl}&text=${encodedTitle}`,
+    x: `https://x.com/intent/post?text=${encodedXText}`,
     farcaster: `https://farcaster.xyz/~/compose?text=${encodedTitle}&embeds%5B%5D=${encodedUrl}`,
   };
 }

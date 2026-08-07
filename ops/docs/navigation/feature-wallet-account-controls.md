@@ -4,7 +4,8 @@
 
 Wallet and account controls cover connect, disconnect, add-account flows,
 device connection, profile navigation, account selection, network switching,
-logout, and proxy identity switching. Page Share is a separate sidebar action.
+logout, and proxy identity switching. Page Share is a separate navigation
+action.
 
 ## Location in the Site
 
@@ -51,8 +52,9 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
   - `Profile` opens the active handle route, with wallet-address fallback
   - `Connect Device` opens the Mobile/Desktop connection dialog on
     desktop web
-  - wallet connection/disconnection and `Connect Device` share one menu
-    subsection
+  - wallet connection/disconnection and `Connect Device` share one connection
+    section, separated by a lighter full-width divider; surrounding account,
+    proxy, network, and profile sections use stronger boundaries
   - `Profile`, logout, and multi-profile sign-out share the final subsection
   - wallet connected: `Disconnect Wallet`, `Disconnect & Logout`
   - wallet disconnected: `Connect Wallet`, `Logout`
@@ -187,7 +189,8 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
   actions.
 - Chain switching cycles through the configured supported wallet networks and
   appears only when more than one chain is available.
-- Desktop-web page Share is a supported-route sidebar action and is not part of
+- Desktop-web page Share is a supported-route sidebar action; mobile web and
+  the native app use a supported-route header action. Page Share is not part of
   the account dropdown.
 - Unread dots/badges are notification-count indicators only; they do not show
   notification category.

@@ -17,11 +17,17 @@ const DevicesIcon = ({
     aria-hidden="true"
     focusable="false"
   >
-    <path d="M17.7 8.3V6.3a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8" />
-    <path d="M10 19v-3.66 2.85" />
-    <path d="M7 19h5" />
-    <rect x="13.35" y="9.6" width="6" height="10" rx="2" />
-    <circle cx="16.35" cy="17.5" r="0.45" fill="currentColor" stroke="none" />
+    <path d="M16.9 8.5V6.5a1.8 1.8 0 0 0-1.8-1.8H4.2a1.8 1.8 0 0 0-1.8 1.8v6.4a1.8 1.8 0 0 0 1.8 1.8h7.1" />
+    <path d="M9.4 18.7v-3.5" />
+    <path d="M6.8 18.7h5.2" />
+    <rect x="13.15" y="8.9" width="6" height="10.4" rx="2" />
+    <circle
+      cx="16.15"
+      cy="17.45"
+      r="0.45"
+      fill="currentColor"
+      stroke="none"
+    />
   </svg>
 );
 

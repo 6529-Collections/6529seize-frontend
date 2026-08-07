@@ -6,11 +6,12 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
+import { isShareCancelError } from "@/utils/error";
 import {
   HEADER_SHARE_LOCALE,
   Mode,
@@ -23,15 +24,21 @@ import type {
   ConnectionShareStatus,
   TerminalConnectionShareStatus,
 } from "./shareUtils";
-import { buildSocialShareUrls, isExpectedSystemShareError } from "./shareUtils";
+import {
+  buildSocialShareUrls,
+  canUseSystemShare,
+  getCurrentFullUrl,
+  getCurrentPublicUrl,
+  type PageShareSystemShareAdapter,
+} from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
 
 type MutableRef<T> = { current: T };
 
 const SHARE_ACTION_CLASS_NAME =
-  "tw-inline-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
-const PAGE_SHARE_ACTIONS_TOOLTIP_ID = "page-share-actions-tooltip";
-const COPY_FEEDBACK_DURATION_MS = 2000;
+  "tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+const SHARE_ACTION_ICON_CLASS_NAME = "tw-size-5 tw-flex-shrink-0";
+const COPY_FEEDBACK_DURATION_MS = 1500;
 const TOOLTIP_STYLE = {
   zIndex: 10000,
   backgroundColor: "#1F2937",
@@ -68,6 +75,11 @@ interface HeaderShareModalViewProps {
   readonly setUrlCopied: (copied: boolean) => void;
   readonly isMobile: boolean;
   readonly isElectron: boolean;
+  readonly compactPageShare: boolean;
+  readonly pageShareSystemShareAdapter?:
+    | PageShareSystemShareAdapter
+    | undefined;
+  readonly usePublicPageUrl: boolean;
 }
 
 export function HeaderShareModalView({
@@ -96,9 +108,16 @@ export function HeaderShareModalView({
   setUrlCopied,
   isMobile,
   isElectron,
+  compactPageShare,
+  pageShareSystemShareAdapter,
+  usePublicPageUrl,
 }: HeaderShareModalViewProps) {
   const isConnectMode = mode === Mode.CONNECT;
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isSystemShareAvailable, setIsSystemShareAvailable] = useState(false);
+  const [isSystemShareUnavailable, setIsSystemShareUnavailable] =
+    useState(false);
+  const [isSystemSharePending, setIsSystemSharePending] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -108,6 +127,52 @@ export function HeaderShareModalView({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (mode !== Mode.PAGE_SHARE || !isVisible || !navigateBrowserUrl) {
+      setIsSystemShareAvailable(false);
+      setIsSystemShareUnavailable(false);
+      return;
+    }
+
+    const shareData = {
+      title: document.title.trim() || "6529",
+      url: usePublicPageUrl
+        ? getCurrentPublicUrl()
+        : getCurrentFullUrl(),
+    };
+    setIsSystemShareUnavailable(false);
+
+    if (!pageShareSystemShareAdapter) {
+      setIsSystemShareAvailable(canUseSystemShare(shareData));
+      return;
+    }
+
+    let isCurrent = true;
+    setIsSystemShareAvailable(false);
+    void pageShareSystemShareAdapter
+      .canShare(shareData)
+      .then((isAvailable) => {
+        if (isCurrent) {
+          setIsSystemShareAvailable(isAvailable);
+        }
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setIsSystemShareAvailable(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [
+    isVisible,
+    mode,
+    navigateBrowserUrl,
+    pageShareSystemShareAdapter,
+    usePublicPageUrl,
+  ]);
   const modalTitle = t(
     HEADER_SHARE_LOCALE,
     isConnectMode
@@ -153,29 +218,29 @@ export function HeaderShareModalView({
 
   const renderCoreLink = (url: string) => {
     return (
-      <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
-        <a
-          href={url}
-          className="tw-flex tw-flex-col tw-items-center tw-gap-8 tw-no-underline"
-        >
-          <Image
-            unoptimized
-            priority
-            loading="eager"
-            src="/6529Core.png"
-            alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
-            width={150}
-            height={150}
-            className="tw-unselectable"
-          />
-          <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-200 tw-px-4 tw-py-3 tw-text-iron-900">
-            <FontAwesomeIcon icon={faExternalLink} />
-            <div className="tw-min-w-fit tw-whitespace-nowrap">
-              {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
-            </div>
-          </div>
-        </a>
-      </div>
+      <a
+        data-testid="desktop-connection-panel"
+        href={url}
+        className="tw-group tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-6 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300"
+        style={squareStyle}
+      >
+        <Image
+          unoptimized
+          priority
+          loading="eager"
+          src="/6529Core.png"
+          alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
+          width={150}
+          height={150}
+          className="tw-unselectable"
+        />
+        <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
+          <FontAwesomeIcon icon={faExternalLink} aria-hidden="true" />
+          <span className="tw-whitespace-nowrap">
+            {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
+          </span>
+        </span>
+      </a>
     );
   };
 
@@ -299,6 +364,8 @@ export function HeaderShareModalView({
 
     return (
       <div
+        data-testid="connection-share-notice"
+        data-status={status}
         className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center"
         style={squareStyle}
       >
@@ -364,13 +431,44 @@ export function HeaderShareModalView({
     }
   };
 
-  const shareCurrentPage = async (title: string, url: string) => {
+  const markSystemShareUnavailable = () => {
+    setIsSystemShareAvailable(false);
+    setIsSystemShareUnavailable(true);
+  };
+
+  const shareCurrentPage = async () => {
+    const shareData = {
+      title: document.title.trim() || "6529",
+      url: usePublicPageUrl
+        ? getCurrentPublicUrl()
+        : getCurrentFullUrl(),
+    };
+
+    setIsSystemSharePending(true);
     try {
-      await navigator.share({ title, url });
-    } catch (error) {
-      if (!isExpectedSystemShareError(error)) {
-        console.error("Failed to share current page", error);
+      if (pageShareSystemShareAdapter) {
+        if (!(await pageShareSystemShareAdapter.canShare(shareData))) {
+          markSystemShareUnavailable();
+          return;
+        }
+        await pageShareSystemShareAdapter.share(shareData);
+        return;
       }
+
+      if (!canUseSystemShare(shareData)) {
+        markSystemShareUnavailable();
+        return;
+      }
+
+      await navigator.share(shareData);
+    } catch (error) {
+      if (isShareCancelError(error)) {
+        return;
+      }
+
+      markSystemShareUnavailable();
+    } finally {
+      setIsSystemSharePending(false);
     }
   };
 
@@ -380,7 +478,7 @@ export function HeaderShareModalView({
     }
 
     if (!url) {
-      return <div className="tw-h-10" />;
+      return null;
     }
 
     return (
@@ -436,8 +534,11 @@ export function HeaderShareModalView({
     };
 
     return (
-      <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1 tw-border-0 tw-p-0">
-        <legend className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+      <fieldset
+        data-testid="page-share-target-menu"
+        className="tw-m-0 tw-flex tw-w-48 tw-min-w-0 tw-flex-col tw-gap-1 tw-border-0 tw-p-0 sm:tw-w-full"
+      >
+        <legend className="tw-sr-only">
           {t(HEADER_SHARE_LOCALE, "headerShare.menu.qrTarget")}
         </legend>
         <div className="tw-grid tw-grid-cols-2 tw-gap-2">
@@ -467,7 +568,7 @@ export function HeaderShareModalView({
   };
 
   const renderPageShareActions = (url: string, desktopUrl: string) => {
-    if (mode !== Mode.PAGE_SHARE || !url || !desktopUrl) {
+    if (mode !== Mode.PAGE_SHARE || !url) {
       return null;
     }
 
@@ -479,89 +580,102 @@ export function HeaderShareModalView({
       url,
       title: shareTitle,
     });
-    const canUseSystemShare =
-      typeof navigator !== "undefined" && typeof navigator.share === "function";
-
+    const copyLabel = t(
+      HEADER_SHARE_LOCALE,
+      urlCopied ? "headerShare.copy.copied" : "headerShare.copy.default"
+    );
+    let liveStatus = "";
+    if (isSystemShareUnavailable) {
+      liveStatus = t(
+        HEADER_SHARE_LOCALE,
+        "headerShare.social.systemShareUnavailable"
+      );
+    } else if (urlCopied) {
+      liveStatus = t(HEADER_SHARE_LOCALE, "headerShare.copy.copied");
+    }
     return (
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
+      <div
+        data-testid="page-share-actions"
+        className="tw-flex tw-w-full tw-flex-col tw-gap-2"
+      >
         <button
           type="button"
-          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
-          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
-          data-tooltip-content={
-            urlCopied
-              ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
-              : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
-          }
           onClick={() => void copyUrl(url)}
           className={`${SHARE_ACTION_CLASS_NAME} ${
             urlCopied
-              ? "tw-border-green-500 tw-bg-green-500/15 tw-text-green-300"
+              ? "tw-border-green-500 tw-bg-green-500/15 !tw-text-success"
               : ""
           }`}
         >
-          <FontAwesomeIcon icon={faCopy} className="tw-size-5" />
+          <FontAwesomeIcon
+            icon={faCopy}
+            className={`${SHARE_ACTION_ICON_CLASS_NAME} ${
+              urlCopied ? "!tw-text-success" : ""
+            }`}
+            aria-hidden="true"
+          />
+          <span className={urlCopied ? "!tw-text-success" : undefined}>
+            {copyLabel}
+          </span>
         </button>
-        <a
-          href={desktopUrl}
-          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.desktop")}
-          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
-          data-tooltip-content={t(
-            HEADER_SHARE_LOCALE,
-            "headerShare.social.desktop"
-          )}
-          className={SHARE_ACTION_CLASS_NAME}
-        >
-          <ComputerDesktopIcon className="tw-size-5" aria-hidden="true" />
-        </a>
+        {!compactPageShare && desktopUrl && (
+          <a href={desktopUrl} className={SHARE_ACTION_CLASS_NAME}>
+            <ComputerDesktopIcon
+              className={SHARE_ACTION_ICON_CLASS_NAME}
+              aria-hidden="true"
+            />
+            <span>{t(HEADER_SHARE_LOCALE, "headerShare.social.desktop")}</span>
+          </a>
+        )}
         <a
           href={socialShareUrls.x}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
-          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
-          data-tooltip-content={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
           className={SHARE_ACTION_CLASS_NAME}
         >
-          <XLogo className="tw-size-5" />
+          <XLogo className={SHARE_ACTION_ICON_CLASS_NAME} />
+          <span>{t(HEADER_SHARE_LOCALE, "headerShare.social.x")}</span>
         </a>
         <a
           href={socialShareUrls.farcaster}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
-          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
-          data-tooltip-content={t(
-            HEADER_SHARE_LOCALE,
-            "headerShare.social.farcaster"
-          )}
           className={SHARE_ACTION_CLASS_NAME}
         >
-          <FarcasterLogo className="tw-size-5" />
+          <FarcasterLogo className={SHARE_ACTION_ICON_CLASS_NAME} />
+          <span>
+            {t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
+          </span>
         </a>
-        {canUseSystemShare && (
+        {isSystemShareAvailable && (
           <button
             type="button"
-            aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
-            data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
-            data-tooltip-content={t(
+            aria-label={t(
               HEADER_SHARE_LOCALE,
-              "headerShare.social.more"
+              "headerShare.social.systemShare"
             )}
-            onClick={() => void shareCurrentPage(shareTitle, url)}
-            className={SHARE_ACTION_CLASS_NAME}
+            onClick={() => void shareCurrentPage()}
+            disabled={isSystemSharePending}
+            aria-busy={isSystemSharePending ? "true" : undefined}
+            className={`${SHARE_ACTION_CLASS_NAME} disabled:tw-cursor-wait disabled:tw-opacity-70`}
           >
-            <EllipsisHorizontalIcon className="tw-size-6" />
+            <EllipsisHorizontalIcon
+              className={SHARE_ACTION_ICON_CLASS_NAME}
+              aria-hidden="true"
+            />
+            <span>{t(HEADER_SHARE_LOCALE, "headerShare.social.more")}</span>
           </button>
         )}
-        <Tooltip
-          id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
-          place="top"
-          positionStrategy="fixed"
-          style={TOOLTIP_STYLE}
-        />
-        <span className="tw-sr-only" role="status" aria-live="polite">
-          {urlCopied ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied") : ""}
+        <span
+          className={
+            isSystemShareUnavailable
+              ? "tw-w-full tw-text-sm tw-text-iron-400"
+              : "tw-sr-only"
+          }
+          role="status"
+          aria-live="polite"
+        >
+          {liveStatus}
         </span>
       </div>
     );
@@ -569,22 +683,70 @@ export function HeaderShareModalView({
 
   function renderActiveContent() {
     const { content, url } = getDisplayContent();
+    const pageShareQrSize = isSystemShareAvailable ? "14.25rem" : "10.75rem";
+    const qrContent = (
+      <div
+        id="header-share-content"
+        className={`tw-relative tw-aspect-square tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
+          isConnectMode
+            ? "tw-w-full"
+            : "tw-w-48 sm:tw-w-[var(--page-share-qr-size)]"
+        }`}
+      >
+        <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
+          {content}
+        </div>
+      </div>
+    );
 
-    return (
-      <div className="tw-flex tw-flex-col tw-gap-2">
-        {renderPageShareTargetMenu()}
+    if (mode === Mode.PAGE_SHARE) {
+      if (compactPageShare) {
+        return (
+          <div data-testid="compact-page-share-layout" className="tw-w-full">
+            {renderPageShareActions(navigateBrowserUrl, "")}
+          </div>
+        );
+      }
+
+      return (
         <div
-          id="header-share-content"
-          className={`tw-relative tw-aspect-square tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
-            isConnectMode ? "tw-w-full" : "tw-w-64"
-          }`}
+          data-testid="page-share-layout"
+          className="tw-grid tw-w-full tw-gap-4 sm:tw-grid-cols-[var(--page-share-qr-size)_1px_minmax(0,1fr)] sm:tw-items-stretch"
+          style={
+            {
+              "--page-share-qr-size": pageShareQrSize,
+            } as CSSProperties
+          }
         >
-          <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
-            {content}
+          <div
+            data-testid="page-share-qr-column"
+            className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-gap-2"
+          >
+            {renderPageShareTargetMenu()}
+            {qrContent}
+          </div>
+          <div
+            data-testid="page-share-divider"
+            aria-hidden="true"
+            className="tw-h-px tw-w-full tw-bg-iron-700 sm:tw-h-full sm:tw-w-px"
+          />
+          <div
+            data-testid="page-share-actions-column"
+            className="tw-flex tw-items-center"
+          >
+            {renderPageShareActions(navigateBrowserUrl, navigateCoreUrl)}
           </div>
         </div>
+      );
+    }
+
+    return (
+      <div
+        data-testid="connection-share-content"
+        className="tw-flex tw-flex-col tw-gap-2"
+      >
+        {qrContent}
         {renderConnectionUrl(url)}
-        {renderPageShareActions(navigateBrowserUrl, navigateCoreUrl)}
       </div>
     );
   }
@@ -612,15 +774,22 @@ export function HeaderShareModalView({
         aria-modal="true"
         aria-labelledby="header-share-title"
         data-testid="header-share-modal"
-        className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
-          isConnectMode ? "tw-max-w-md" : "tw-max-w-sm"
+        className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
+          isConnectMode
+            ? "tw-max-w-md"
+            : compactPageShare
+              ? "tw-max-w-sm"
+              : "tw-max-w-sm sm:tw-max-w-2xl"
         } ${
           isVisible
             ? "tw-translate-y-0 tw-scale-100 tw-opacity-100"
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
         }`}
       >
-        <div className="tw-flex tw-flex-col tw-gap-3 tw-p-4">
+        <div
+          data-testid="header-share-modal-content"
+          className="tw-flex tw-flex-col tw-gap-3 tw-p-5"
+        >
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
             <h2
               id="header-share-title"
