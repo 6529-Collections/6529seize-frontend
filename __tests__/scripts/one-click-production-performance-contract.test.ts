@@ -41,6 +41,15 @@ function finishTimes(nodes: Readonly<Record<string, DagNode>>) {
   return finished;
 }
 
+function requireDagNode(
+  nodes: Readonly<Record<string, DagNode>>,
+  name: string
+): DagNode {
+  const node = nodes[name];
+  if (!node) throw new Error(`Missing synthetic DAG node ${name}`);
+  return node;
+}
+
 describe("one-click production performance contract", () => {
   it("records measured evidence separately from forecasts", () => {
     expect(contract.schema_version).toBe("one-click-production-performance.v1");
@@ -70,9 +79,11 @@ describe("one-click production performance contract", () => {
     const nodes = contract.synthetic_dag.nodes as Readonly<
       Record<string, DagNode>
     >;
-    expect(nodes["production-build"].needs).toEqual(["preflight"]);
-    expect(nodes["staging-build"].needs).toEqual(["preflight"]);
-    expect(nodes["production-build"].needs).not.toContain("staging-e2e");
+    const productionBuild = requireDagNode(nodes, "production-build");
+    const stagingBuild = requireDagNode(nodes, "staging-build");
+    expect(productionBuild.needs).toEqual(["preflight"]);
+    expect(stagingBuild.needs).toEqual(["preflight"]);
+    expect(productionBuild.needs).not.toContain("staging-e2e");
 
     const times = finishTimes(nodes);
     expect(times.get("production-build")).toBe(9);

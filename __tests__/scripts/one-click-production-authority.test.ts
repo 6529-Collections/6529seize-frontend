@@ -45,6 +45,14 @@ const common = {
   workflow_run_id: "123456",
 };
 
+function stringField(record: Record<string, unknown>, key: string): string {
+  const value: unknown = record[key];
+  if (typeof value !== "string") {
+    throw new Error(`Expected ${key} to be a string`);
+  }
+  return value;
+}
+
 const failureInput = (
   selection_digest: string | null,
   reason_code: string
@@ -65,15 +73,15 @@ function bindResponse(request: Record<string, unknown>) {
     hard_expires_at: 2000,
     lease_expires_at: 1500,
     lock_row_version: 19,
-    operation_id: request.operation_id,
+    operation_id: request["operation_id"],
     repository: "frontend",
     reused: false,
-    selection_digest: request.selection_digest,
+    selection_digest: request["selection_digest"],
     service: "frontend",
     status: "BOUND",
-    target_sha: request.target_sha,
-    workflow_run_attempt: request.workflow_run_attempt,
-    workflow_run_id: request.workflow_run_id,
+    target_sha: request["target_sha"],
+    workflow_run_attempt: request["workflow_run_attempt"],
+    workflow_run_id: request["workflow_run_id"],
     authorized: true,
     bound: true,
   };
@@ -165,14 +173,14 @@ describe("one-click production authority client", () => {
     const afterSelection = authority.buildFailPayload(
       failureInput(SELECTION_DIGEST, "AWS_MUTATION_FAILED")
     );
-    expect(reauthorize.selection_digest).toBe(SELECTION_DIGEST);
+    expect(reauthorize["selection_digest"]).toBe(SELECTION_DIGEST);
     expect(complete).toMatchObject({
       evidence_digest: EVIDENCE_DIGEST,
       qualifier_workflow_run_attempt: 3,
       qualifier_workflow_run_id: "789012",
     });
-    expect(beforeSelection.selection_digest).toBeNull();
-    expect(afterSelection.selection_digest).toBe(SELECTION_DIGEST);
+    expect(beforeSelection["selection_digest"]).toBeNull();
+    expect(afterSelection["selection_digest"]).toBe(SELECTION_DIGEST);
   });
 
   it.each([
@@ -232,7 +240,7 @@ describe("one-click production authority client", () => {
       lease_expires_at: null,
       lock_row_version: null,
       observed_epoch: EPOCH,
-      operation_id: request.operation_id,
+      operation_id: request["operation_id"],
       reason_code: "ACTIVE_WORKFLOW",
       repository: "frontend",
       reused: false,
@@ -322,7 +330,10 @@ describe("one-click production authority client", () => {
         "complete",
         completeRequest,
         {
-          ...completionResponse(completeRequest.operation_id, "completed"),
+          ...completionResponse(
+            stringField(completeRequest, "operation_id"),
+            "completed"
+          ),
           target_sha: TARGET_SHA,
         },
         {
@@ -348,7 +359,7 @@ describe("one-click production authority client", () => {
       authority.validateResponse(
         "fail",
         request,
-        completionResponse(request.operation_id, "failed"),
+        completionResponse(stringField(request, "operation_id"), "failed"),
         {
           failed: true,
           evidence_digest: EVIDENCE_DIGEST,
@@ -375,7 +386,7 @@ describe("one-click production authority client", () => {
       authority.validateResponse(
         "fail",
         request,
-        completionResponse(request.operation_id, "failed"),
+        completionResponse(stringField(request, "operation_id"), "failed"),
         {
           failed: true,
           evidence_digest: EVIDENCE_DIGEST,
@@ -419,7 +430,7 @@ describe("one-click production authority client", () => {
       authority.validateResponse(
         "complete",
         complete,
-        completionResponse(complete.operation_id, "completed"),
+        completionResponse(stringField(complete, "operation_id"), "completed"),
         {
           completed: true,
           evidence_digest: EVIDENCE_DIGEST,
@@ -449,7 +460,7 @@ describe("one-click production authority client", () => {
       authority.validateResponse(
         "complete",
         complete,
-        completionResponse(complete.operation_id, "failed"),
+        completionResponse(stringField(complete, "operation_id"), "failed"),
         {
           completed: true,
           evidence_digest: EVIDENCE_DIGEST,

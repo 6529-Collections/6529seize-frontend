@@ -17,6 +17,7 @@ const verifier =
     ) => string;
     validateArchiveMembers: (memberList: string) => unknown;
     validateVerifierInputs: (options: Record<string, unknown>) => unknown;
+    verifyChecksums: (root: string, requiredFiles: string[]) => unknown;
     verifyArtifact: (
       options: Record<string, unknown>
     ) => Record<string, unknown>;
@@ -49,6 +50,18 @@ const currentMainSha = "e".repeat(40);
 
 function digest(value: Buffer | string): string {
   return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+function requireRecordEntry<T>(
+  record: Readonly<Record<string, T>>,
+  key: string,
+  label: string
+): T {
+  const value = record[key];
+  if (value === undefined) {
+    throw new Error(`Missing ${label}: ${key}`);
+  }
+  return value;
 }
 
 function writeJson(filePath: string, value: unknown): void {
@@ -116,16 +129,45 @@ describe("isolated production artifact verifier", () => {
     ];
 
     for (const input of requiredInputs) {
-      expect(workflow.on.workflow_call.inputs[input].required).toBe(true);
-      expect(workflow.on.workflow_dispatch.inputs[input].required).toBe(true);
+      expect(
+        requireRecordEntry(
+          workflow.on.workflow_call.inputs,
+          input,
+          "workflow_call input"
+        ).required
+      ).toBe(true);
+      expect(
+        requireRecordEntry(
+          workflow.on.workflow_dispatch.inputs,
+          input,
+          "workflow_dispatch input"
+        ).required
+      ).toBe(true);
     }
     for (const input of identityInputs) {
-      expect(workflow.on.workflow_call.inputs[input].required).toBe(true);
-      expect(workflow.on.workflow_dispatch.inputs[input].required).toBe(true);
+      expect(
+        requireRecordEntry(
+          workflow.on.workflow_call.inputs,
+          input,
+          "workflow_call input"
+        ).required
+      ).toBe(true);
+      expect(
+        requireRecordEntry(
+          workflow.on.workflow_dispatch.inputs,
+          input,
+          "workflow_dispatch input"
+        ).required
+      ).toBe(true);
     }
 
-    expect(workflow.jobs.verify["runs-on"]).toBe("ubuntu-latest");
-    expect(workflow.jobs.verify.permissions).toEqual({
+    const verifyJob = requireRecordEntry(
+      workflow.jobs,
+      "verify",
+      "workflow job"
+    );
+    expect(verifyJob["runs-on"]).toBe("ubuntu-latest");
+    expect(verifyJob.permissions).toEqual({
       actions: "read",
       contents: "read",
     });
@@ -281,13 +323,13 @@ describe("isolated production artifact verifier", () => {
       verifierWorkflowSha,
     });
 
-    expect(selection.operation_id).toBe(currentOperationId);
-    expect(selection.artifact_operation_id).toBe(producerOperationId);
-    expect(selection.artifact_name).toBe(artifactName);
-    expect(selection.artifact_run_attempt).toBe(artifactRunAttempt);
-    expect(selection.verifier_run_attempt).toBe(verifierRunAttempt);
-    expect(selection.protected_main_current_sha).toBe(currentMainSha);
-    expect(selection.selection_artifact_name).toBe(
+    expect(selection["operation_id"]).toBe(currentOperationId);
+    expect(selection["artifact_operation_id"]).toBe(producerOperationId);
+    expect(selection["artifact_name"]).toBe(artifactName);
+    expect(selection["artifact_run_attempt"]).toBe(artifactRunAttempt);
+    expect(selection["verifier_run_attempt"]).toBe(verifierRunAttempt);
+    expect(selection["protected_main_current_sha"]).toBe(currentMainSha);
+    expect(selection["selection_artifact_name"]).toBe(
       verifier.expectedSelectionArtifactName(targetSha, verifierRunAttempt)
     );
 
@@ -304,7 +346,7 @@ describe("isolated production artifact verifier", () => {
       digest: selectionArtifactApiDigest,
       expired: false,
       id: selectionArtifactId,
-      name: selection.selection_artifact_name,
+      name: selection["selection_artifact_name"],
       size_in_bytes: selectionArchive.length,
       workflow_run: {
         head_branch: "main",
@@ -339,13 +381,15 @@ describe("isolated production artifact verifier", () => {
       expectedTargetSha: targetSha,
       repository,
       selectionArtifactId,
-      selectionArtifactName: selection.selection_artifact_name,
+      selectionArtifactName: selection["selection_artifact_name"],
       selectionArtifactRunAttempt: verifierRunAttempt,
       selectionArtifactRunId: verifierRunId,
       selectionRoot: path.join(tempRoot, "selection"),
       selectionRunMetadataFile: selectionRunMetadataPath,
     });
-    expect(verifiedSelection.selection_digest).toBe(selection.selection_digest);
+    expect(verifiedSelection["selection_digest"]).toBe(
+      selection["selection_digest"]
+    );
 
     const tamperedArchivePath = path.join(tempRoot, "tampered-artifact.zip");
     fs.writeFileSync(
@@ -415,7 +459,7 @@ describe("isolated production artifact verifier", () => {
     const manifest = JSON.parse(
       fs.readFileSync(manifestPath, "utf8")
     ) as Record<string, unknown>;
-    manifest.protected_main_sha = "f".repeat(40);
+    manifest["protected_main_sha"] = "f".repeat(40);
     writeJson(manifestPath, manifest);
     writeChecksums(artifactRoot, [
       "artifact-portability.json",

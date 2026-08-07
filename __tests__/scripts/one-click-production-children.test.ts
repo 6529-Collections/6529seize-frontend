@@ -97,7 +97,7 @@ function run(overrides: Record<string, unknown> = {}) {
     conclusion: "success",
     head_branch: "main",
     head_sha: LATER_MAIN_SHA,
-    display_title: titles().builder_display_title,
+    display_title: titles()["builder_display_title"],
     repository: { full_name: EXPECTED_REPOSITORY },
     head_repository: { full_name: EXPECTED_REPOSITORY },
     ...overrides,
@@ -151,7 +151,7 @@ function artifactInput(overrides: Record<string, unknown> = {}) {
 }
 
 function selectedChildRun(overrides: Record<string, unknown> = {}) {
-  const selected = selectTrustedWorkflowRun(selectInput()).run;
+  const selected = selectTrustedWorkflowRun(selectInput())["run"];
   if (!selected || typeof selected !== "object") {
     throw new Error("test fixture did not select a child run");
   }
@@ -185,7 +185,7 @@ function selectedVerifierRun(overrides: Record<string, unknown> = {}) {
     operationId: OPERATION_ID,
     targetSha: TARGET_SHA,
     sourceArtifact: SOURCE_ARTIFACT,
-  }).run;
+  })["run"];
   if (!selected || typeof selected !== "object") {
     throw new Error("test fixture did not select a verifier run");
   }
@@ -305,7 +305,7 @@ describe("one-click production child identity", () => {
     expect(verifierTitle()).toContain(
       `builder 7001/1 8001 ${ARTIFACT_DIGEST} ${LATER_MAIN_SHA}`
     );
-    expect(verifierTitle()).not.toBe(titles().verifier_display_title);
+    expect(verifierTitle()).not.toBe(titles()["verifier_display_title"]);
   });
 
   it.each([
@@ -334,7 +334,10 @@ describe("one-click production child run selection", () => {
       })
     );
     expect(result).toMatchObject({ result: "selected", state: "reusable" });
-    expect(result.run).toMatchObject({ id: "7001", head_sha: LATER_MAIN_SHA });
+    expect(result["run"]).toMatchObject({
+      id: "7001",
+      head_sha: LATER_MAIN_SHA,
+    });
   });
 
   it("reports no exact match as absent", () => {
@@ -435,8 +438,8 @@ describe("one-click production child run selection", () => {
   it("accepts an observed later-main workflow head without predicting it", () => {
     const result = selectTrustedWorkflowRun(selectInput());
     expect(result).toMatchObject({ target_sha: TARGET_SHA });
-    expect(result.run).toMatchObject({ head_sha: LATER_MAIN_SHA });
-    expect(result.run).not.toMatchObject({ head_sha: TARGET_SHA });
+    expect(result["run"]).toMatchObject({ head_sha: LATER_MAIN_SHA });
+    expect(result["run"]).not.toMatchObject({ head_sha: TARGET_SHA });
   });
 
   it("accepts an old failed child followed by one active retry", () => {
@@ -455,7 +458,7 @@ describe("one-click production child run selection", () => {
       state: "active",
       run: { id: "7002" },
     });
-    expect(result.failed_terminal_runs).toEqual([
+    expect(result["failed_terminal_runs"]).toEqual([
       expect.objectContaining({ id: "7000", state: "failed_terminal" }),
     ]);
   });
@@ -596,7 +599,7 @@ describe("one-click production artifact metadata", () => {
         }),
       })
     );
-    expect(result.head_identity).toMatchObject({
+    expect(result["head_identity"]).toMatchObject({
       target_sha: TARGET_SHA,
       workflow_sha: LATER_MAIN_SHA,
     });

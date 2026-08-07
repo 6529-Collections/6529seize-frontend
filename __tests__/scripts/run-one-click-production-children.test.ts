@@ -78,6 +78,25 @@ function titles() {
   });
 }
 
+function requireArrayEntry<T>(
+  values: readonly T[],
+  index: number,
+  label: string
+): T {
+  const value = values[index];
+  if (value === undefined) {
+    throw new Error(`Missing ${label} at index ${index}`);
+  }
+  return value;
+}
+
+function requireString(value: unknown, label: string): string {
+  if (typeof value !== "string") {
+    throw new Error(`${label} must be a string`);
+  }
+  return value;
+}
+
 function verifierTitle(sourceOverrides: Record<string, unknown> = {}) {
   return expectedDisplayTitle({
     workflowPath: VERIFIER_WORKFLOW_PATH,
@@ -117,7 +136,7 @@ function workflowRun({
     head_sha: headSha,
     display_title: verifier
       ? verifierTitle()
-      : titles().builder_display_title,
+      : titles()["builder_display_title"],
     repository: { full_name: EXPECTED_REPOSITORY },
     head_repository: { full_name: EXPECTED_REPOSITORY },
     ...overrides,
@@ -308,10 +327,10 @@ class FakeGitHub {
   request = async (request: Record<string, unknown>) => {
     this.calls.push({
       ...request,
-      headers: { ...(request.headers as Record<string, string>) },
+      headers: { ...(request["headers"] as Record<string, string>) },
     });
-    const method = request.method as string;
-    const path = request.path as string;
+    const method = requireString(request["method"], "request method");
+    const path = requireString(request["path"], "request path");
     const status = this.statusOverrides[path];
     if (status) {
       return {
@@ -320,6 +339,9 @@ class FakeGitHub {
       };
     }
     const cleanPath = path.split("?")[0];
+    if (cleanPath === undefined) {
+      throw new Error("request path could not be normalized");
+    }
     if (method === "GET" && cleanPath.endsWith("/actions/workflows")) {
       return {
         status: 200,
@@ -362,16 +384,16 @@ class FakeGitHub {
       const id = runMatch[1];
       const isBuilderRun = this.builderRuns
         .flat()
-        .some((candidate) => String(candidate.id) === id);
+        .some((candidate) => String(candidate["id"]) === id);
       const run = isBuilderRun
         ? this.builderRuns
             .flat()
             .reverse()
-            .find((candidate) => String(candidate.id) === id)
+            .find((candidate) => String(candidate["id"]) === id)
         : this.verifierRuns
             .flat()
             .reverse()
-            .find((candidate) => String(candidate.id) === id);
+            .find((candidate) => String(candidate["id"]) === id);
       return { status: 200, body: run };
     }
     const artifactsMatch = cleanPath.match(
@@ -380,7 +402,7 @@ class FakeGitHub {
     if (method === "GET" && artifactsMatch) {
       const isBuilderRun = this.builderRuns
         .flat()
-        .some((candidate) => String(candidate.id) === artifactsMatch[1]);
+        .some((candidate) => String(candidate["id"]) === artifactsMatch[1]);
       const artifacts = isBuilderRun
         ? this.builderArtifacts
         : this.verifierArtifacts;
@@ -473,29 +495,32 @@ describe("run-one-click-production-children", () => {
       selection_artifact_id: SELECTION_ARTIFACT_ID,
       selection_artifact_name: SELECTION_ARTIFACT_NAME,
       selection_artifact_api_digest: SELECTION_ARTIFACT_DIGEST,
-      selection_digest: selectionJson().selection_digest,
+      selection_digest: selectionJson()["selection_digest"],
     });
     expect(first.canonical).toBe(`${canonicalJson(first.record)}\n`);
     expect(first.canonical).not.toContain("test-token");
     expect(
       fake.calls.filter(
         (call) =>
-          call.method === "POST" && String(call.path).includes("dispatches")
+          call["method"] === "POST" &&
+          String(call["path"]).includes("dispatches")
       )
     ).toHaveLength(2);
-    expect(fake.calls[0].headers).toMatchObject({
+    expect(
+      requireArrayEntry(fake.calls, 0, "GitHub call")["headers"]
+    ).toMatchObject({
       "X-GitHub-Api-Version": GITHUB_API_VERSION,
       Accept: "application/vnd.github+json",
     });
     const dispatches = fake.calls.filter(
       (call) =>
-        call.method === "POST" && String(call.path).includes("dispatches")
+        call["method"] === "POST" && String(call["path"]).includes("dispatches")
     );
-    expect(dispatches[0].body).toEqual({
+    expect(requireArrayEntry(dispatches, 0, "dispatch")["body"]).toEqual({
       ref: "main",
       inputs: { target_sha: TARGET_SHA, operation_id: OPERATION_ID },
     });
-    expect(dispatches[1].body).toMatchObject({
+    expect(requireArrayEntry(dispatches, 1, "dispatch")["body"]).toMatchObject({
       ref: "main",
       inputs: {
         target_sha: TARGET_SHA,
@@ -531,11 +556,12 @@ describe("run-one-click-production-children", () => {
       verifierRuns: [[workflowRun({ kind: "verifier" })]],
     });
     const result = await runOneClickProductionChildren(setup(fake));
-    expect(result.record.builder_run_id).toBe(BUILDER_RUN_ID);
+    expect(result.record["builder_run_id"]).toBe(BUILDER_RUN_ID);
     expect(
       fake.calls.filter(
         (call) =>
-          call.method === "POST" && String(call.path).includes("dispatches")
+          call["method"] === "POST" &&
+          String(call["path"]).includes("dispatches")
       )
     ).toHaveLength(0);
   });
@@ -549,8 +575,8 @@ describe("run-one-click-production-children", () => {
     await runOneClickProductionChildren(setup(fake));
     const builderDispatches = fake.calls.filter(
       (call) =>
-        call.method === "POST" &&
-        String(call.path).includes(`/workflows/${BUILDER_WORKFLOW_ID}/`)
+        call["method"] === "POST" &&
+        String(call["path"]).includes(`/workflows/${BUILDER_WORKFLOW_ID}/`)
     );
     expect(builderDispatches).toHaveLength(1);
   });
@@ -575,8 +601,8 @@ describe("run-one-click-production-children", () => {
       expect(
         fake.calls.filter(
           (call) =>
-            call.method === "POST" &&
-            String(call.path).includes(`/workflows/${BUILDER_WORKFLOW_ID}/`)
+            call["method"] === "POST" &&
+            String(call["path"]).includes(`/workflows/${BUILDER_WORKFLOW_ID}/`)
         )
       ).toHaveLength(1);
     }
@@ -704,8 +730,8 @@ describe("run-one-click-production-children", () => {
     expect(
       fake.calls.filter(
         (call) =>
-          call.method === "POST" &&
-          String(call.path).includes(`/workflows/${BUILDER_WORKFLOW_ID}/`)
+          call["method"] === "POST" &&
+          String(call["path"]).includes(`/workflows/${BUILDER_WORKFLOW_ID}/`)
       )
     ).toHaveLength(0);
   });
