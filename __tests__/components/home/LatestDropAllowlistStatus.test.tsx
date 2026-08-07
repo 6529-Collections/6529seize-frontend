@@ -202,16 +202,33 @@ describe("LatestDropAllowlistStatus", () => {
     );
   });
 
-  it("keeps the checking state while the wallet connection initializes", () => {
+  it.each(["initializing", "connecting"])(
+    "keeps the checking state while the wallet connection is %s",
+    (connectionState) => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        address: TEST_ADDRESS,
+        connectionState,
+      });
+
+      render(<LatestDropAllowlistStatus tokenId={532} />);
+
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Checking your connected wallet…"
+      );
+      expect(screen.queryByText("Phase 1")).not.toBeInTheDocument();
+    }
+  );
+
+  it("shows unavailable when the wallet connection fails", () => {
     mockUseSeizeConnectContext.mockReturnValue({
       address: TEST_ADDRESS,
-      connectionState: "initializing",
+      connectionState: "error",
     });
 
     render(<LatestDropAllowlistStatus tokenId={532} />);
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Checking your connected wallet…"
+      "Allowlist status is temporarily unavailable."
     );
     expect(screen.queryByText("Phase 1")).not.toBeInTheDocument();
   });

@@ -140,7 +140,9 @@ export default function LatestDropAllowlistStatus({
                   key={phase}
                   className="tw-rounded-full tw-border tw-border-solid tw-border-success/30 tw-bg-success/10 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-success"
                 >
-                  {phase}
+                  {t(locale, "home.mintAllowlist.phase", {
+                    number: phase.slice("Phase ".length),
+                  })}
                 </li>
               ))}
             </ul>

@@ -1916,6 +1916,7 @@ export const EN_US_MESSAGES = {
     "Manage subscriptions from your own profile, not a proxy session.",
   "home.mintAllowlist.label": "Your allowlist",
   "home.mintAllowlist.connectedWallet": "Connected wallet",
+  "home.mintAllowlist.phase": "Phase {number}",
   "home.mintAllowlist.phasesAriaLabel":
     "Allowlist phases for the connected wallet",
   "home.mintAllowlist.checking": "Checking your connected wallet…",
