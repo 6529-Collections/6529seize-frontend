@@ -5,12 +5,11 @@ import ErrorComponent from "@/components/error/Error";
 const setTitleMock = jest.fn();
 const copyToClipboardMock = jest.fn();
 let mockSearchParams: URLSearchParams;
+let mockTitleContext: { setTitle: typeof setTitleMock };
 
 jest.mock("@/contexts/TitleContext", () => ({
   __esModule: true,
-  useTitle: () => ({
-    setTitle: setTitleMock,
-  }),
+  useTitleOptional: () => mockTitleContext,
 }));
 
 jest.mock("next/navigation", () => ({
@@ -20,9 +19,9 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ unoptimized, ...props }: any) => {
+  default: ({ unoptimized, priority, ...props }: any) => {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} alt="SummerGlasses" />;
+    return <img {...props} />;
   },
 }));
 
@@ -46,6 +45,8 @@ describe("ErrorComponent", () => {
     setTitleMock.mockClear();
     copyToClipboardMock.mockClear();
     mockSearchParams = new URLSearchParams();
+    mockTitleContext = { setTitle: setTitleMock };
+    document.title = "Existing title";
   });
 
   afterEach(() => {
@@ -57,6 +58,7 @@ describe("ErrorComponent", () => {
     render(<ErrorComponent />);
 
     expect(setTitleMock).toHaveBeenCalledWith("6529 Error");
+    expect(document.title).toBe("Existing title");
 
     const supportLink = screen.getByRole("link", { name: "support@6529.io" });
     expect(supportLink).toHaveAttribute("href", "mailto:support@6529.io");

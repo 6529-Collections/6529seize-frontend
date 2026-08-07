@@ -1,7 +1,9 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { useTitle } from "@/contexts/TitleContext";
+import { useTitleOptional } from "@/contexts/TitleContext";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   faChevronDown,
   faChevronUp,
@@ -20,12 +22,15 @@ type ErrorComponentProps = {
   readonly onReset?: (() => void) | undefined;
 };
 
+const ERROR_TITLE = t(DEFAULT_LOCALE, "errorFallback.pageTitle");
+
 export default function ErrorComponent({
   stackTrace,
   digest,
   onReset,
 }: ErrorComponentProps = {}) {
-  const { setTitle } = useTitle();
+  const titleContext = useTitleOptional();
+  const setTitle = titleContext?.setTitle;
   const searchParams = useSearchParams();
   const [isStacktraceExpanded, setIsStacktraceExpanded] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -33,7 +38,7 @@ export default function ErrorComponent({
   const [, copyToClipboard] = useCopyToClipboard();
 
   useEffect(() => {
-    setTitle("6529 Error");
+    setTitle?.(ERROR_TITLE);
   }, [setTitle]);
 
   const stackTraceFromQuery = useMemo(() => {
@@ -62,24 +67,27 @@ export default function ErrorComponent({
 
   return (
     <section className="tw-flex tw-h-full tw-min-h-screen tw-w-full tw-items-center tw-justify-center">
+      {titleContext ? null : <title>{ERROR_TITLE}</title>}
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-2">
         <Image
           unoptimized
           priority
           loading="eager"
-          width="0"
-          height="0"
-          style={{ height: "auto", width: "100px" }}
+          width={100}
+          height={100}
+          className="tw-h-auto tw-w-[100px]"
           src="/SummerGlasses.svg"
-          alt="SummerGlasses"
+          alt=""
         />
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
           <h3 className="tw-text-2xl tw-font-semibold">
             Welcome to the 6529 Page of Doom
           </h3>
-          <img
+          <Image
             src="/emojis/sgt_grimacing.webp"
-            alt="sgt_grimacing"
+            alt=""
+            width={32}
+            height={32}
             className="tw-h-8 tw-w-8"
           />
         </div>

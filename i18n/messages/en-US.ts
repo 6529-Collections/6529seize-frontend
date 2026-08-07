@@ -400,6 +400,10 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
   "notifications.other": "({count} notifications) {title}",
 } as const);
 
+const ERROR_FALLBACK_MESSAGES = objectMessages("errorFallback", {
+  pageTitle: "6529 Error",
+} as const);
+
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   waveSections: "Wave sections",
   appSections: "App sections",
@@ -2615,6 +2619,7 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...ERROR_FALLBACK_MESSAGES,
   ...PUBLIC_REVIEW_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,

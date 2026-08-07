@@ -3,8 +3,9 @@ import {
   TitleProvider,
   useSetWaveData,
   useTitle,
+  useTitleOptional,
 } from "@/contexts/TitleContext";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, renderHook, screen, waitFor } from "@testing-library/react";
 
 let mockPathname = "/waves/wave-1";
 let mockSearchParams = new URLSearchParams("divider=841669");
@@ -47,6 +48,28 @@ describe("TitleContext", () => {
     mockSearchParams = new URLSearchParams("divider=841669");
     mockActiveWaveId = "wave-1";
     document.title = "";
+  });
+
+  it("keeps useTitle strict outside TitleProvider", () => {
+    expect(() => renderHook(() => useTitle())).toThrow(
+      "useTitle must be used within a TitleProvider"
+    );
+  });
+
+  it("allows optional title access outside TitleProvider", () => {
+    const { result } = renderHook(() => useTitleOptional());
+
+    expect(result.current).toBeNull();
+  });
+
+  it("returns the real context from optional access inside TitleProvider", () => {
+    const { result } = renderHook(() => useTitleOptional(), {
+      wrapper: TitleProvider,
+    });
+
+    expect(result.current).toEqual(
+      expect.objectContaining({ setTitle: expect.any(Function) })
+    );
   });
 
   it("resets the client title when leaving a wave for the meme calendar", async () => {
