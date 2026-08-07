@@ -77,7 +77,7 @@ export const groupSidebarWaves = ({
       if (isHighlyRated) {
         highlyRatedWaves.push(wave);
       }
-      if (!isHighlyRated || wave.isInAllWaves) {
+      if (!isHighlyRated || wave.isInAllWaves !== false) {
         allWaves.push(wave);
       }
     }

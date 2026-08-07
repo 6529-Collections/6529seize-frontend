@@ -34,7 +34,7 @@ export interface MinimalWave {
   firstUnreadFollowedSubwaveDropSerialNo: number | null;
   waveRep: ApiWaveRepSummary | null;
   waveScore: ApiWaveScore | null;
-  isInAllWaves: boolean;
+  isInAllWaves?: boolean;
   sidebarSection: SidebarDiscoverySection | null;
   sidebarActivityTimestamp: number | null;
   isFollowedSubwaveContainer: boolean;

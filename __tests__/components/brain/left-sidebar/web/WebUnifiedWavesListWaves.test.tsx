@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import WebUnifiedWavesListWaves from "@/components/brain/left-sidebar/web/WebUnifiedWavesListWaves";
 import { SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS } from "@/hooks/useAnimatedSidebarWaveRows";
@@ -757,9 +758,10 @@ it("drops highly rated child rows when their parent leaves the section", async (
     );
 
     fireEvent.click(
-      screen.getAllByRole("button", {
-        name: "View 1 subwave for Mock Wave",
-      })[0]
+      within(screen.getByLabelText("Worth checking out waves")).getByRole(
+        "button",
+        { name: "View 1 subwave for Mock Wave" }
+      )
     );
     await flushAnimatedSidebarRows();
     expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
