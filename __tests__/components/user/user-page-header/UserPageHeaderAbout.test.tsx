@@ -44,6 +44,23 @@ describe("UserPageHeaderAbout", () => {
     expect(screen.getByTestId("edit")).toBeInTheDocument();
   });
 
+  it("keeps the statement edit action visible and touch-sized on touch-first devices", () => {
+    render(
+      <UserPageHeaderAbout
+        profile={profile}
+        statement={{ statement_value: "Hello there" } as any}
+        canEdit={true}
+      />
+    );
+
+    const editButton = screen.getByRole("button", {
+      name: "Edit About statement",
+    });
+    expect(editButton).toHaveClass("touch-only:tw-pointer-events-auto");
+    expect(editButton).toHaveClass("touch-only:tw-opacity-100");
+    expect(editButton).toHaveClass("touch-only:tw-size-11");
+  });
+
   it("resets view when props change", () => {
     const { rerender } = render(
       <UserPageHeaderAbout profile={profile} statement={null} canEdit={true} />

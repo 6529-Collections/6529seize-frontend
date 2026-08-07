@@ -49,6 +49,26 @@ describe("UserPageHeaderPfpWrapper", () => {
     expect(screen.queryByTestId("edit")).toBeNull();
   });
 
+  it("shows a bottom-right pencil badge on touch-first devices", () => {
+    render(
+      <UserPageHeaderPfpWrapper
+        profile={{} as any}
+        canEdit={true}
+        profileLabel="Alice"
+      >
+        <span data-testid="child" />
+      </UserPageHeaderPfpWrapper>
+    );
+
+    const pencilBadge = screen.getByTestId("pencil").parentElement;
+    const pictureOverlay = pencilBadge?.parentElement;
+
+    expect(pictureOverlay).toHaveClass("touch-only:tw-bg-transparent");
+    expect(pictureOverlay).toHaveClass("touch-only:tw-opacity-100");
+    expect(pencilBadge).toHaveClass("tw-bottom-2", "tw-right-2");
+    expect(pencilBadge).toHaveClass("touch-only:tw-size-7");
+  });
+
   it("does not render a disabled button when picture is read-only", () => {
     render(
       <UserPageHeaderPfpWrapper
