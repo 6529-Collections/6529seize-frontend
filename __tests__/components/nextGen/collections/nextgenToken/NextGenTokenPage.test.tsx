@@ -125,6 +125,7 @@ const baseProps = {
   tokenCount: 2,
   view: NextgenCollectionView.ABOUT,
   setView: jest.fn(),
+  returnTo: null as string | null,
 };
 
 function renderComponent(props?: Partial<typeof baseProps>) {
