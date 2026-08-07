@@ -7,6 +7,13 @@ import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWi
 
 const mockMobileMenuOpenClick = jest.fn();
 
+const setBrowserLanguages = (languages: readonly string[]) => {
+  Object.defineProperty(globalThis.navigator, "languages", {
+    configurable: true,
+    value: languages,
+  });
+};
+
 jest.mock("@/helpers/waves/drop.helpers", () => ({
   convertApiDropToExtendedDrop: jest.fn(() => ({ id: "ext" })),
 }));
@@ -211,6 +218,57 @@ describe("MemesWaveWinnersDrop", () => {
     ).toHaveAttribute("href", "/the-memes/521");
   });
 
+  it("shows the mapped Meme card mint date in the viewer's locale and timezone", async () => {
+    const originalLanguagesDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis.navigator,
+      "languages"
+    );
+    setBrowserLanguages(["en-GB"]);
+
+    const mintInstant = new Date("2026-08-07T14:40:00.000Z");
+    const expectedMintDate = new Intl.DateTimeFormat("en-GB", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    }).format(mintInstant);
+
+    try {
+      render(
+        <MemesWaveWinnersDrop
+          winner={
+            {
+              ...winner,
+              drop: {
+                ...winner.drop,
+                submission_context: { meme_card_id: 532 },
+              },
+            } as ApiWaveDecisionWinner
+          }
+          wave={wave}
+          onDropClick={jest.fn()}
+        />
+      );
+
+      expect(await screen.findByText("Mint date:")).toBeInTheDocument();
+      const mintDate = await screen.findByText(expectedMintDate);
+      expect(mintDate.tagName).toBe("TIME");
+      expect(mintDate).toHaveAttribute(
+        "datetime",
+        mintInstant.toISOString()
+      );
+    } finally {
+      if (originalLanguagesDescriptor) {
+        Object.defineProperty(
+          globalThis.navigator,
+          "languages",
+          originalLanguagesDescriptor
+        );
+      } else {
+        Reflect.deleteProperty(globalThis.navigator, "languages");
+      }
+    }
+  });
+
   it("does not infer a Meme card link when the mapping is absent", () => {
     render(
       <MemesWaveWinnersDrop
@@ -223,6 +281,7 @@ describe("MemesWaveWinnersDrop", () => {
     expect(
       screen.queryByRole("link", { name: /The Memes #/ })
     ).not.toBeInTheDocument();
+    expect(screen.queryByText("Mint date:")).not.toBeInTheDocument();
   });
 
   it("keeps native tap behavior for touch long-press handlers", () => {
