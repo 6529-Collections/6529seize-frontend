@@ -94,11 +94,15 @@ export default function HeaderUserMenuDropdown({
   };
 
   const [label, setLabel] = useState(getLabel());
-  const profilePath = profile.handle
-    ? `/${profile.handle}`
-    : address
-      ? `/${address}`
-      : "/";
+  const profilePath = (() => {
+    if (profile.handle) {
+      return `/${profile.handle}`;
+    }
+    if (address) {
+      return `/${address}`;
+    }
+    return null;
+  })();
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   useEffect(() => setLabel(getLabel()), [profile, address]);
 
@@ -181,26 +185,31 @@ export default function HeaderUserMenuDropdown({
                       />
                     </li>
                   )}
-                  <li className="tw-h-full tw-px-2 tw-pt-2">
-                    <Link
-                      href={profilePath}
-                      onClick={onClose}
-                      aria-label={t(
-                        HEADER_USER_MENU_LOCALE,
-                        "headerUserMenu.myProfile"
-                      )}
-                      title={t(
-                        HEADER_USER_MENU_LOCALE,
-                        "headerUserMenu.myProfile"
-                      )}
-                      className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                    >
-                      <FontAwesomeIcon icon={faUser} height={20} width={20} />
-                      <span>
-                        {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.myProfile")}
-                      </span>
-                    </Link>
-                  </li>
+                  {profilePath && (
+                    <li className="tw-h-full tw-px-2 tw-pt-2">
+                      <Link
+                        href={profilePath}
+                        onClick={onClose}
+                        aria-label={t(
+                          HEADER_USER_MENU_LOCALE,
+                          "headerUserMenu.myProfile"
+                        )}
+                        title={t(
+                          HEADER_USER_MENU_LOCALE,
+                          "headerUserMenu.myProfile"
+                        )}
+                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <FontAwesomeIcon icon={faUser} height={20} width={20} />
+                        <span>
+                          {t(
+                            HEADER_USER_MENU_LOCALE,
+                            "headerUserMenu.myProfile"
+                          )}
+                        </span>
+                      </Link>
+                    </li>
+                  )}
                   {hasProxySection && (
                     <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
                       <p className="tw-m-0 tw-px-3 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">

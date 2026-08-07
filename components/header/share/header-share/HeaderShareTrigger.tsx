@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import ShareArrowIcon from "@/components/common/icons/ShareArrowIcon";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
@@ -14,7 +14,7 @@ import { isPageShareSupported } from "../page-share-support";
 import { HEADER_SHARE_LOCALE } from "./constants";
 import { HeaderPageShareModal } from "./HeaderQRModal";
 
-export default function HeaderShare({
+function HeaderShareContent({
   isCollapsed = false,
 }: {
   readonly isCollapsed?: boolean | undefined;
@@ -79,5 +79,17 @@ export default function HeaderShare({
         onClose={() => setShowQRModal(false)}
       />
     </div>
+  );
+}
+
+export default function HeaderShare({
+  isCollapsed = false,
+}: {
+  readonly isCollapsed?: boolean | undefined;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <HeaderShareContent isCollapsed={isCollapsed} />
+    </Suspense>
   );
 }

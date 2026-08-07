@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
+import WebSidebarUser from "@/components/layout/sidebar/WebSidebarUser";
 
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
   <div data-testid="item" />
@@ -30,6 +31,39 @@ jest.mock("@/components/auth/SeizeConnectContext");
 jest.mock("@/components/header/useChainSwitcher", () => ({
   useChainSwitcher: jest.fn(),
 }));
+jest.mock("@/components/header/share/HeaderShare", () => ({
+  HeaderConnectModal: ({ show }: { readonly show: boolean }) =>
+    show ? (
+      <div role="dialog" aria-label="Connect another device modal" />
+    ) : null,
+}));
+jest.mock("@/components/header/user/HeaderUserConnect", () => () => null);
+jest.mock("@/components/user/utils/level/UserLevel", () => () => null);
+jest.mock("@/components/auth/connection-state-indicator", () => ({
+  getConnectionProfileIndicator: () => ({
+    avatarClassName: "",
+    overlayClassName: "",
+    title: "Connected",
+  }),
+}));
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (value: string) => value,
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false }),
+}));
+jest.mock("@/hooks/isMobileDevice", () => ({
+  __esModule: true,
+  useIsMobileDeviceStatus: () => ({
+    isMobileDevice: false,
+    isDeviceDetectionResolved: true,
+  }),
+}));
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: () => ({ profile: null, isLoading: false }),
+}));
+jest.mock("react-use", () => ({ useClickAway: jest.fn() }));
 
 const {
   useSeizeConnectContext: mockConnect,
@@ -129,6 +163,57 @@ describe("HeaderUserMenuDropdown", () => {
     );
     expect(onOpenConnect).toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
+  });
+
+  it("opens the connect modal through the desktop account menu", () => {
+    mockConnect.mockReturnValue({
+      address: "0xabc",
+      isAuthenticated: true,
+      hasValidWalletAuth: true,
+      isConnected: true,
+      connectedAccounts: [],
+      connectedAccountUnreadNotifications: {},
+      canAddConnectedAccount: false,
+      seizeConnect: jest.fn(),
+      seizeConnectFresh: jest.fn(),
+      seizeAddConnectedAccount: jest.fn(),
+      seizeDisconnect: jest.fn(),
+      seizeDisconnectAndLogout: jest.fn(),
+      seizeDisconnectAndLogoutAll: jest.fn(),
+      seizeSwitchConnectedAccount: jest.fn(),
+    });
+    (useChainSwitcher as jest.Mock).mockReturnValue({
+      chains: [],
+      currentChainName: "Ethereum",
+      nextChainName: "Polygon",
+      switchToNextChain: jest.fn(),
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            activeProfileProxy: null,
+            setActiveProfileProxy: jest.fn(),
+            receivedProfileProxies: [],
+            requestSessionUpgrade: jest.fn(),
+            sessionUpgradeRequired: false,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <WebSidebarUser isCollapsed={false} profile={profileBase} />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /account.*menu/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Connect another device" })
+    );
+
+    expect(
+      screen.getByRole("dialog", { name: "Connect another device modal" })
+    ).toBeInTheDocument();
   });
 
   it("connects wallet when not connected", async () => {

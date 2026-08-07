@@ -5,7 +5,10 @@ export const PAGE_SHARE_UNSUPPORTED_PATHS = [
   "/notifications",
 ] as const;
 
-export const PAGE_SHARE_UNSUPPORTED_VIEWS = ["waves", "messages"] as const;
+export const PAGE_SHARE_UNSUPPORTED_VIEWS: readonly string[] = [
+  "waves",
+  "messages",
+];
 
 export function isPageShareSupported({
   activeView,
@@ -24,5 +27,5 @@ export function isPageShareSupported({
     return false;
   }
 
-  return !PAGE_SHARE_UNSUPPORTED_VIEWS.some((view) => view === activeView);
+  return !activeView || !PAGE_SHARE_UNSUPPORTED_VIEWS.includes(activeView);
 }

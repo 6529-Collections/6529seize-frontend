@@ -1837,7 +1837,7 @@ export const EN_US_MESSAGES = {
     "Connect and authenticate your wallet before connecting another device.",
   "headerShare.connectionNotice.cancel": "Cancel",
   "headerShare.connectionNotice.update": "Update",
-  "headerShare.invalidShareSubmode": "Invalid submode for SHARE",
+  "headerShare.invalidConnectTarget": "Invalid connection target",
   "headerShare.copy.ariaLabel": "Copy link",
   "headerShare.copy.default": "Copy link",
   "headerShare.copy.copied": "Copied!",

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { toDataURL } from "qrcode";
 
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
@@ -8,8 +9,6 @@ import {
   hasActiveSessionV2Auth,
 } from "@/services/auth/auth.utils";
 import { createConnectionShare } from "@/services/auth/session-v2.utils";
-
-const QRCode = require("qrcode");
 
 export type NativeConnectionShare = Awaited<
   ReturnType<typeof createConnectionShare>
@@ -115,7 +114,11 @@ export function buildRouterPath(
 }
 
 export function getCurrentFullUrl(): string {
-  return globalThis.window?.location.href ?? "";
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.location.href;
 }
 
 export function buildSocialShareUrls({
@@ -132,7 +135,7 @@ export function buildSocialShareUrls({
   const encodedTitle = encodeURIComponent(title);
 
   return {
-    x: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+    x: `https://x.com/intent/post?url=${encodedUrl}&text=${encodedTitle}`,
     farcaster: `https://farcaster.xyz/~/compose?text=${encodedTitle}&embeds%5B%5D=${encodedUrl}`,
   };
 }
@@ -226,7 +229,7 @@ export function generateQrCodeSource({
   readonly signal?: AbortSignal | undefined;
   readonly errorMessage: string;
 }): void {
-  QRCode.toDataURL(url, {
+  toDataURL(url, {
     width: 500,
     margin: 4,
     color: {

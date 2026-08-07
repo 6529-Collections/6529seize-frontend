@@ -13,7 +13,8 @@ import {
   createConnectionShare,
   createLegacyDesktopConnectionShare,
 } from "@/services/auth/session-v2.utils";
-import { getDefaultSubMode, Mode, SubMode } from "./constants";
+import { getDefaultSubMode, Mode } from "./constants";
+import type { SubMode } from "./constants";
 import { HeaderShareModalView } from "./HeaderShareModalView";
 import {
   bodyScrollLock,
@@ -64,6 +65,10 @@ export function HeaderQRModal({
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(() =>
     getDefaultSubMode(mode)
   );
+  const closeModal = useCallback(() => {
+    setActiveSubTab(getDefaultSubMode(mode));
+    onClose();
+  }, [mode, onClose]);
 
   const [navigateBrowserUrl, setNavigateBrowserUrl] = useState<string>("");
   const [shareConnectionAppUrl, setShareConnectionAppUrl] =
@@ -83,7 +88,7 @@ export function HeaderQRModal({
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
 
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
-  const onCloseRef = useRef(onClose);
+  const onCloseRef = useRef(closeModal);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
@@ -143,8 +148,8 @@ export function HeaderQRModal({
   }, []);
 
   useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
+    onCloseRef.current = closeModal;
+  }, [closeModal]);
 
   useEffect(() => {
     return () => {
@@ -182,7 +187,6 @@ export function HeaderQRModal({
     setNavigateBrowserSrc("");
     setShareConnectionSrc("");
 
-    const routerPath = buildRouterPath(pathname, searchParams);
     const browserUrl = getCurrentFullUrl();
 
     setNavigateBrowserUrl(browserUrl);
@@ -198,6 +202,8 @@ export function HeaderQRModal({
       });
       return;
     }
+
+    const routerPath = buildRouterPath(pathname, searchParams);
 
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
     const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
@@ -535,14 +541,13 @@ export function HeaderQRModal({
   ]);
 
   useEffect(() => {
-    setActiveSubTab(getDefaultSubMode(mode));
     if (show) return;
     const timer = setTimeout(() => {
       setNavigateBrowserSrc("");
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show, mode]);
+  }, [show]);
 
   useEffect(() => {
     if (show) {
@@ -610,10 +615,11 @@ export function HeaderQRModal({
 
   return (
     <HeaderShareModalView
+      key={show ? "open" : "closed"}
       show={show}
       shouldRender={shouldRender}
       isVisible={isVisible}
-      onClose={onClose}
+      onClose={closeModal}
       dialogRef={dialogRef}
       mode={mode}
       activeSubTab={activeSubTab}

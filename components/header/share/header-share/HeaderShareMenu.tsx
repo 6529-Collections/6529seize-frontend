@@ -31,10 +31,15 @@ export function ModalMenu({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-1">
-      <div className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+      <div
+        id="header-share-connect-target-label"
+        className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500"
+      >
         {t(HEADER_SHARE_LOCALE, "headerShare.menu.connectTo")}
       </div>
       <div
+        role="group"
+        aria-labelledby="header-share-connect-target-label"
         className="tw-grid tw-gap-2"
         style={{
           gridTemplateColumns: `repeat(${subTabCount}, minmax(0, 1fr))`,

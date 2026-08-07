@@ -1,6 +1,4 @@
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-
-export const HEADER_SHARE_LOCALE = DEFAULT_LOCALE;
+export { DEFAULT_LOCALE as HEADER_SHARE_LOCALE } from "@/i18n/locales";
 
 export enum Mode {
   PAGE_SHARE,

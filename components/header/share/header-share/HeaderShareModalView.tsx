@@ -6,7 +6,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { EllipsisHorizontalIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
@@ -22,6 +22,9 @@ import { buildSocialShareUrls } from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
 
 type MutableRef<T> = { current: T };
+
+const SHARE_ACTION_CLASS_NAME =
+  "tw-inline-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
 interface HeaderShareModalViewProps {
   readonly show: boolean;
@@ -76,12 +79,6 @@ export function HeaderShareModalView({
 }: HeaderShareModalViewProps) {
   const isConnectMode = mode === Mode.CONNECT;
   const [isShareQrVisible, setIsShareQrVisible] = useState(false);
-
-  useEffect(() => {
-    if (!show) {
-      setIsShareQrVisible(false);
-    }
-  }, [show]);
   const modalTitle = t(
     HEADER_SHARE_LOCALE,
     isConnectMode
@@ -194,10 +191,20 @@ export function HeaderShareModalView({
 
     return {
       content: (
-        <span>{t(HEADER_SHARE_LOCALE, "headerShare.invalidShareSubmode")}</span>
+        <span>
+          {t(HEADER_SHARE_LOCALE, "headerShare.invalidConnectTarget")}
+        </span>
       ),
       url: "",
     };
+  };
+
+  const requestAuthenticationUpgrade = async () => {
+    try {
+      await requestSessionUpgrade?.();
+    } catch (error) {
+      console.error("Failed to request session upgrade", error);
+    }
   };
 
   const renderConnectionShareNotice = (status: ConnectionShareStatus) => {
@@ -283,9 +290,7 @@ export function HeaderShareModalView({
               onClick={() => {
                 onClose();
                 terminalConnectionShareFailuresRef.current.clear();
-                requestSessionUpgrade?.().catch((error: unknown) => {
-                  console.error("Failed to request session upgrade", error);
-                });
+                void requestAuthenticationUpgrade();
               }}
             >
               {t(HEADER_SHARE_LOCALE, "headerShare.connectionNotice.update")}
@@ -332,18 +337,151 @@ export function HeaderShareModalView({
     }
   };
 
-  function renderActiveContent() {
-    const { content, url } = getDisplayContent();
-    const shareTitle = globalThis.document?.title?.trim() || "6529";
+  const shareCurrentPage = async (title: string, url: string) => {
+    try {
+      await navigator.share({ title, url });
+    } catch (error) {
+      if (!(error instanceof DOMException) || error.name !== "AbortError") {
+        console.error("Failed to share current page", error);
+      }
+    }
+  };
+
+  const renderConnectionUrl = (url: string) => {
+    if (!isConnectMode) {
+      return null;
+    }
+
+    if (!url) {
+      return <div className="tw-h-10" />;
+    }
+
+    return (
+      <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
+        <div
+          className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-text-iron-400"
+          title={url}
+        >
+          {url}
+        </div>
+        <button
+          type="button"
+          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
+          className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100"
+          data-tooltip-id="copy-url-tooltip"
+          onClick={() => void copyUrl(url)}
+        >
+          <FontAwesomeIcon
+            icon={faCopy}
+            className={urlCopied ? "tw-text-green-500" : ""}
+          />
+        </button>
+        <Tooltip
+          id="copy-url-tooltip"
+          place="top-end"
+          content={
+            urlCopied
+              ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
+              : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
+          }
+          openEvents={isMobile ? { click: true } : { mouseenter: true }}
+          closeEvents={isMobile ? { click: true } : { mouseleave: true }}
+          positionStrategy="fixed"
+          style={{
+            zIndex: 10000,
+            backgroundColor: "#1F2937",
+            color: "white",
+            opacity: 1,
+            padding: "4px 8px",
+          }}
+        />
+      </div>
+    );
+  };
+
+  const renderPageShareActions = (url: string) => {
+    if (mode !== Mode.PAGE_SHARE || !url) {
+      return null;
+    }
+
+    const shareTitle =
+      typeof document === "undefined"
+        ? "6529"
+        : document.title.trim() || "6529";
     const socialShareUrls = buildSocialShareUrls({
       url,
       title: shareTitle,
     });
     const canUseSystemShare =
-      mode === Mode.PAGE_SHARE &&
-      typeof globalThis.navigator?.share === "function";
-    const shareActionClassName =
-      "tw-inline-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+      typeof navigator !== "undefined" && typeof navigator.share === "function";
+
+    return (
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
+        <button
+          type="button"
+          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
+          title={
+            urlCopied
+              ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
+              : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
+          }
+          onClick={() => void copyUrl(url)}
+          className={SHARE_ACTION_CLASS_NAME}
+        >
+          <FontAwesomeIcon
+            icon={faCopy}
+            className={`tw-size-5 ${urlCopied ? "tw-text-green-500" : ""}`}
+          />
+        </button>
+        <button
+          type="button"
+          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.qr.createAriaLabel")}
+          title={t(HEADER_SHARE_LOCALE, "headerShare.qr.createAriaLabel")}
+          aria-pressed={isShareQrVisible}
+          onClick={() => setIsShareQrVisible((current) => !current)}
+          className={`${SHARE_ACTION_CLASS_NAME} ${
+            isShareQrVisible ? "tw-border-primary-400 tw-text-primary-300" : ""
+          }`}
+        >
+          <FontAwesomeIcon icon={faQrcode} className="tw-size-5" />
+        </button>
+        <a
+          href={socialShareUrls.x}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
+          title={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
+          className={SHARE_ACTION_CLASS_NAME}
+        >
+          <XLogo className="tw-size-5" />
+        </a>
+        <a
+          href={socialShareUrls.farcaster}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
+          title={t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
+          className={SHARE_ACTION_CLASS_NAME}
+        >
+          <FarcasterLogo className="tw-size-5" />
+        </a>
+        {canUseSystemShare && (
+          <button
+            type="button"
+            aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
+            title={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
+            onClick={() => void shareCurrentPage(shareTitle, url)}
+            className={SHARE_ACTION_CLASS_NAME}
+          >
+            <EllipsisHorizontalIcon className="tw-size-6" />
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  function renderActiveContent() {
+    const { content, url } = getDisplayContent();
 
     return (
       <div className="tw-flex tw-flex-col tw-gap-2">
@@ -357,131 +495,8 @@ export function HeaderShareModalView({
             </div>
           </div>
         )}
-        {isConnectMode && url ? (
-          <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
-            <div
-              className="tw-min-w-0 tw-flex-1 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
-              title={url}
-            >
-              {url}
-            </div>
-            <button
-              type="button"
-              aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
-              className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100"
-              data-tooltip-id="copy-url-tooltip"
-              onClick={() => void copyUrl(url)}
-            >
-              <FontAwesomeIcon
-                icon={faCopy}
-                className={urlCopied ? "tw-text-green-500" : ""}
-              />
-            </button>
-            <Tooltip
-              id="copy-url-tooltip"
-              place="top-end"
-              content={
-                urlCopied
-                  ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
-                  : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
-              }
-              openEvents={isMobile ? { click: true } : { mouseenter: true }}
-              closeEvents={isMobile ? { click: true } : { mouseleave: true }}
-              positionStrategy="fixed"
-              style={{
-                zIndex: 10000,
-                backgroundColor: "#1F2937",
-                color: "white",
-                opacity: 1,
-                padding: "4px 8px",
-              }}
-            />
-          </div>
-        ) : isConnectMode ? (
-          <div className="tw-h-10" />
-        ) : null}
-        {mode === Mode.PAGE_SHARE && url && (
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
-            <button
-              type="button"
-              aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
-              title={
-                urlCopied
-                  ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
-                  : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
-              }
-              onClick={() => void copyUrl(url)}
-              className={shareActionClassName}
-            >
-              <FontAwesomeIcon
-                icon={faCopy}
-                className={`tw-size-5 ${urlCopied ? "tw-text-green-500" : ""}`}
-              />
-            </button>
-            <button
-              type="button"
-              aria-label={t(
-                HEADER_SHARE_LOCALE,
-                "headerShare.qr.createAriaLabel"
-              )}
-              title={t(HEADER_SHARE_LOCALE, "headerShare.qr.createAriaLabel")}
-              aria-pressed={isShareQrVisible}
-              onClick={() => setIsShareQrVisible((current) => !current)}
-              className={`${shareActionClassName} ${
-                isShareQrVisible
-                  ? "tw-border-primary-400 tw-text-primary-300"
-                  : ""
-              }`}
-            >
-              <FontAwesomeIcon icon={faQrcode} className="tw-size-5" />
-            </button>
-            <a
-              href={socialShareUrls.x}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
-              title={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
-              className={shareActionClassName}
-            >
-              <XLogo className="tw-size-5" />
-            </a>
-            <a
-              href={socialShareUrls.farcaster}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t(
-                HEADER_SHARE_LOCALE,
-                "headerShare.social.farcaster"
-              )}
-              title={t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
-              className={shareActionClassName}
-            >
-              <FarcasterLogo className="tw-size-5" />
-            </a>
-            {canUseSystemShare && (
-              <button
-                type="button"
-                aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
-                title={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
-                onClick={() => {
-                  void globalThis.navigator
-                    .share({ title: shareTitle, url })
-                    .catch((error: unknown) => {
-                      if (
-                        !(error instanceof DOMException) ||
-                        error.name !== "AbortError"
-                      ) {
-                        console.error("Failed to share current page", error);
-                      }
-                    });
-                }}
-                className={shareActionClassName}
-              >
-                <EllipsisHorizontalIcon className="tw-size-6" />
-              </button>
-            )}
-          </div>
-        )}
+        {renderConnectionUrl(url)}
+        {renderPageShareActions(url)}
       </div>
     );
   }
