@@ -48,12 +48,31 @@ describe("one-click production authority completion", () => {
       types: ["completed"],
       branches: ["main"],
     });
-    expect(completionJob.if).toContain(
-      "github.event.workflow_run.head_repository.full_name == github.repository"
+    expect(completion.on.workflow_dispatch).toEqual({
+      inputs: {
+        terminal_workflow_run_id: {
+          description: "Exact failed production workflow run to release",
+          required: true,
+          type: "string",
+        },
+      },
+    });
+    expect(completionJob.if.replace(/\s+/gu, " ").trim()).toBe(
+      "(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && " +
+        "(github.actor == 'punk6529' || github.actor == 'prxt6529')) || " +
+        "(github.event_name == 'workflow_run' && " +
+        "github.event.workflow_run.head_repository.full_name == github.repository && " +
+        "github.event.workflow_run.head_branch == 'main' && " +
+        "(github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || " +
+        "github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml'))"
     );
-    expect(completionJob.if).toContain(
-      "github.event.workflow_run.head_branch == 'main'"
-    );
+    const dispatchGateLine = completionSource
+      .split(/\r?\n/u)
+      .find((line) => line.trimStart().startsWith("if: (github.event_name"));
+    expect(dispatchGateLine).toContain("github.actor == 'punk6529'");
+    expect(dispatchGateLine).toContain("github.actor == 'prxt6529'");
+    expect(dispatchGateLine).toMatch(/# NOSONAR$/u);
+    expect(completionJob.if).not.toContain("github.event.workflow_run.name");
     expect(completionJob["runs-on"]).toBe("ubuntu-latest");
     expect(completionJob.permissions).toEqual({
       actions: "read",
@@ -75,6 +94,32 @@ describe("one-click production authority completion", () => {
     );
   });
 
+  it("recovers an exact terminal run only from main and an authorized release actor", () => {
+    expect(completion["run-name"]).toBe("Production authority completion");
+    expect(proof.env.WORKFLOW_RUN_ID).toContain(
+      "github.event.workflow_run.id || inputs.terminal_workflow_run_id"
+    );
+    expect(proof.env.EVENT_NAME).toBe("${{ github.event_name }}");
+    expect(proof.env.DISPATCH_ACTOR).toBe("${{ github.actor }}");
+    expect(proof.run).toContain(
+      'if [ "$EVENT_NAME" = workflow_dispatch ]; then'
+    );
+    expect(proof.run).toContain(
+      'if [ "$GITHUB_REF" != refs/heads/main ]; then'
+    );
+    expect(proof.run).toContain(
+      "Production authority recovery must run from main."
+    );
+    expect(proof.run).toContain("punk6529|prxt6529)");
+    expect(proof.run).toContain(
+      "Actor is not authorized for production authority recovery."
+    );
+    expect(proof.run).toContain(
+      'workflow_path="$(jq -er \'.path | strings\' "$workflow_file")"'
+    );
+    expect(proof.run).not.toContain("workflow_name=");
+  });
+
   it("derives the deploy run only from the exact automatic title and re-reads both identities", () => {
     expect(completionSource).toContain(
       "^Production\\ E2E\\ automatic\\ ([1-9][0-9]{0,19})$"
@@ -91,6 +136,8 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       '.path == ".github/workflows/build-upload-deploy-prod.yml"'
     );
+    expect(completionSource).not.toContain('.name == "Web Deploy - PROD"');
+    expect(completionSource).not.toContain('.name == "Production E2E"');
     expect(completionSource).toContain(
       '.display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]")'
     );
@@ -102,6 +149,26 @@ describe("one-click production authority completion", () => {
     );
     expect(completionSource).toContain(
       'select(.name == "Reauthorize exact production mutation" and .conclusion == "success")'
+    );
+    expect(completionSource).toContain(
+      'select(.name == "Atomically acquire and bind production authority" and .conclusion == "success")'
+    );
+    const failedDeployJobProof = completionSource.slice(
+      completionSource.indexOf('jobs_file="$proof_dir/failure-jobs.json"'),
+      completionSource.indexOf("authority_acquisition_count=")
+    );
+    expect(failedDeployJobProof).toContain(
+      '(.total_count | type == "number" and . <= 100)'
+    );
+    expect(failedDeployJobProof).toContain('(.jobs | type == "array")');
+    expect(completionSource).toContain(
+      'if [ "$authority_acquisition_count" = 0 ]; then'
+    );
+    expect(completionSource).toContain(
+      "Failed deployment never acquired production authority."
+    );
+    expect(completionSource).toContain(
+      "Production authority acquisition evidence is ambiguous; refusing failure release."
     );
     expect(completionSource).toContain('if [ "$operation_count" = 1 ]; then');
     expect(completionSource).toContain('created=">=${deploy_created_at}"');
