@@ -959,6 +959,7 @@ function validateSelectionArtifactRecord(artifacts, request, verifierRun) {
     );
   }
   if (
+    attachment.run_attempt !== undefined &&
     requireRunAttempt(
       attachment.run_attempt,
       "selection artifact workflow run attempt"
