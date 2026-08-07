@@ -145,6 +145,8 @@ const mockUseCapacitor = useCapacitor as jest.MockedFunction<
 const mockIsMobile = useIsMobileDevice as jest.MockedFunction<
   typeof useIsMobileDevice
 >;
+const mockUseElectron = require("@/hooks/useElectron")
+  .useElectron as jest.MockedFunction<() => boolean>;
 
 // Mock navigator.clipboard
 Object.assign(navigator, {
@@ -193,6 +195,7 @@ describe("HeaderShare", () => {
     mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
     mockPathname = "/mock-path";
     mockSearchParams = new URLSearchParams("something=value");
+    mockUseElectron.mockReturnValue(false);
     globalThis.window.history.replaceState(
       {},
       "",
@@ -262,11 +265,23 @@ describe("HeaderShare", () => {
   it("renders nothing on a shared unsupported route", () => {
     mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
     mockIsMobile.mockReturnValue(false);
-    mockPathname = "/waves/abc";
+    mockPathname = "/messages/create";
 
     const { container } = renderWithProviders(<HeaderShare />);
 
     expect(container.firstChild).toBeNull();
+  });
+
+  it("renders on a wave route", () => {
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    mockPathname = "/waves/abc";
+
+    renderWithProviders(<HeaderShare />);
+
+    expect(
+      screen.getByRole("button", { name: "Share this page" })
+    ).toBeInTheDocument();
   });
 
   it("shows the share button and opens a share-only modal", async () => {
@@ -276,16 +291,32 @@ describe("HeaderShare", () => {
 
     const btn = screen.getByRole("button", { name: "Share this page" });
     expect(btn).toBeInTheDocument();
+    expect(btn.querySelector("svg")).toHaveClass("tw-size-5");
 
     await userEvent.click(btn);
 
-    expect(await screen.findByTestId("header-share-modal")).toBeInTheDocument();
+    const modal = await screen.findByTestId("header-share-modal");
+    expect(modal).toHaveClass("tw-max-w-sm");
+    expect(modal.querySelector("#header-share-content")).toHaveClass("tw-w-64");
     expect(screen.getByText("Share this page")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "X" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Farcaster" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create QR code" })).toBeNull();
     expect(
-      screen.getByRole("button", { name: "Create QR code" })
+      await screen.findByAltText("Current page QR code")
     ).toBeInTheDocument();
+    const shareActions = [
+      screen.getByRole("button", { name: "Copy link" }),
+      screen.getByRole("link", { name: "X" }),
+      screen.getByRole("link", { name: "Farcaster" }),
+    ];
+    shareActions.forEach((action) => {
+      expect(action).toHaveAttribute(
+        "data-tooltip-id",
+        "page-share-actions-tooltip"
+      );
+      expect(action).not.toHaveAttribute("title");
+    });
     expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
     expect(screen.queryByText("Mobile")).not.toBeInTheDocument();
     expect(screen.queryByText("Desktop")).not.toBeInTheDocument();
@@ -299,13 +330,6 @@ describe("HeaderShare", () => {
       "href",
       expect.stringContaining(encodeURIComponent(currentUrl))
     );
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Create QR code" })
-    );
-    expect(
-      await screen.findByAltText("Current page QR code")
-    ).toBeInTheDocument();
   });
 
   it("copies url to clipboard", async () => {
@@ -355,6 +379,42 @@ describe("HeaderShare", () => {
     }
   });
 
+  it("treats a denied system share request as an expected browser outcome", async () => {
+    const permissionError = Object.assign(new Error("Permission denied"), {
+      name: "NotAllowedError",
+    });
+    const systemShare = jest.fn().mockRejectedValue(permissionError);
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    Object.defineProperty(globalThis.navigator, "share", {
+      configurable: true,
+      value: systemShare,
+    });
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+
+    try {
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(
+        screen.getByRole("button", { name: "Share this page" })
+      );
+      const moreButton = await screen.findByRole("button", { name: "More" });
+      expect(moreButton).toHaveAttribute(
+        "data-tooltip-id",
+        "page-share-actions-tooltip"
+      );
+      expect(moreButton).not.toHaveAttribute("title");
+      await userEvent.click(moreButton);
+
+      await waitFor(() => expect(systemShare).toHaveBeenCalledTimes(1));
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+      Reflect.deleteProperty(globalThis.navigator, "share");
+    }
+  });
+
   it("generates QR codes when modal opens", async () => {
     const qrcode = require("qrcode");
     mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
@@ -398,6 +458,11 @@ describe("HeaderShare", () => {
       expect(
         await screen.findByRole("heading", { name: "Connect another device" })
       ).toBeInTheDocument();
+      const modal = screen.getByTestId("header-share-modal");
+      expect(modal).toHaveClass("tw-max-w-md");
+      expect(modal.querySelector("#header-share-content")).toHaveClass(
+        "tw-w-full"
+      );
       expect(screen.getByRole("button", { name: "Mobile" })).toHaveAttribute(
         "aria-pressed",
         "true"
@@ -408,6 +473,32 @@ describe("HeaderShare", () => {
       expect(screen.queryByRole("link", { name: "X" })).toBeNull();
       expect(screen.queryByRole("link", { name: "Farcaster" })).toBeNull();
       expect(screen.queryByRole("button", { name: "More" })).toBeNull();
+    });
+
+    it("falls back to Mobile if Desktop becomes unavailable", async () => {
+      const { rerender } = renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Desktop" })
+      );
+      expect(screen.getByRole("button", { name: "Desktop" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+
+      mockUseElectron.mockReturnValue(true);
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <HeaderShare />
+        </QueryClientProvider>
+      );
+
+      expect(screen.queryByRole("button", { name: "Desktop" })).toBeNull();
+      expect(screen.getByRole("button", { name: "Mobile" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
     });
 
     it("aborts in-flight connection-share creation when the modal closes", async () => {

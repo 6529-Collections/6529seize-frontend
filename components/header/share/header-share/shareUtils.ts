@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { toDataURL } from "qrcode";
 
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
@@ -35,10 +34,6 @@ export type TerminalConnectionShareStatus = Extract<
   ConnectionShareStatus,
   "legacy-auth" | "error"
 >;
-export type DisplayContent = {
-  readonly content: ReactNode;
-  readonly url: string;
-};
 export type ConnectionShareSessionVerificationStatus =
   | "active"
   | "inactive"
@@ -77,6 +72,14 @@ export function isAbortError(error: unknown, signal?: AbortSignal): boolean {
       "name" in error &&
       error.name === "AbortError")
   );
+}
+
+export function isExpectedSystemShareError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null || !("name" in error)) {
+    return false;
+  }
+
+  return error.name === "AbortError" || error.name === "NotAllowedError";
 }
 
 export function isSessionUpgradeRequiredError(error: unknown): boolean {

@@ -63,7 +63,7 @@ function HeaderShareContent({
           }`}
         >
           <div className="tw-flex tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
-            <ShareArrowIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+            <ShareArrowIcon className="tw-size-5 tw-flex-shrink-0" />
           </div>
           <span
             className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 ${

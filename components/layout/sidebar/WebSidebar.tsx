@@ -179,6 +179,8 @@ function WebSidebar({
                 </div>
               )}
 
+              <HeaderShare isCollapsed={shouldShowCollapsed} />
+
               {address && (
                 <div
                   className={showDesktopSearch ? "tw-px-3" : "tw-px-3 tw-pt-2"}
@@ -193,8 +195,6 @@ function WebSidebar({
                   />
                 </div>
               )}
-
-              <HeaderShare isCollapsed={shouldShowCollapsed} />
 
               <WebSidebarUser
                 isCollapsed={shouldShowCollapsed}

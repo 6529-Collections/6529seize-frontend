@@ -1,6 +1,3 @@
-"use client";
-
-import { useElectron } from "@/hooks/useElectron";
 import { t } from "@/i18n/messages";
 
 import {
@@ -11,12 +8,13 @@ import {
 
 export function ModalMenu({
   activeSubTab,
+  isElectron,
   onSubTabChange,
 }: {
   readonly activeSubTab: SubMode;
+  readonly isElectron: boolean;
   readonly onSubTabChange: (subTab: SubMode) => void;
 }) {
-  const isElectron = useElectron() ?? false;
   const subTabCount = getConnectTargetCount(isElectron);
   const getMenuButtonClass = (active: boolean) => {
     const baseClassName =
@@ -30,16 +28,11 @@ export function ModalMenu({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-1">
-      <div
-        id="header-share-connect-target-label"
-        className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500"
-      >
+    <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1 tw-border-0 tw-p-0">
+      <legend className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
         {t(HEADER_SHARE_LOCALE, "headerShare.menu.connectTo")}
-      </div>
+      </legend>
       <div
-        role="group"
-        aria-labelledby="header-share-connect-target-label"
         className="tw-grid tw-gap-2"
         style={{
           gridTemplateColumns: `repeat(${subTabCount}, minmax(0, 1fr))`,
@@ -64,6 +57,6 @@ export function ModalMenu({
           </button>
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }

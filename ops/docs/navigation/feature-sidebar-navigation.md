@@ -41,7 +41,8 @@ On web layouts, route switching is sidebar-first.
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
-- Utility rows: desktop `Search`, connected-only `Notifications`, and `Share`
+- Utility rows: desktop `Search`, `Share`, connected-only `Notifications`, then
+  the profile control
   on supported desktop-web routes.
 - Bottom account area: connect action, loading placeholders, and the connected
   user menu.
@@ -60,14 +61,14 @@ On web layouts, route switching is sidebar-first.
 - Open `Search` from the desktop sidebar row.
 - Open connected `Notifications` from the lower utility rows.
 - Open `Share` from the desktop sidebar on a supported route.
-- Open `My Profile` or `Connect another device` from the connected user menu.
+- Open `Profile` or `Connect Device` from the connected user menu.
 - Press `⌘K` or `Ctrl+K` when desktop sidebar navigation is mounted.
 
 ## User Journey
 
 1. Open a web route.
 2. Switch primary sections with direct rows.
-3. Use lower utility rows for connected `Notifications` and page `Share`.
+3. Use lower utility rows in `Search`, `Share`, `Notifications`, profile order.
 4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
    `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
@@ -122,8 +123,8 @@ On web layouts, route switching is sidebar-first.
 - Open connected `Notifications` from the lower utility rows.
 - Open `Share` for copy, QR, X, Farcaster, and supported system-share actions
   using the exact current URL.
-- Select the connected avatar, then `My Profile` (handle route first, wallet
-  fallback) or `Connect another device`.
+- Select the connected avatar, then `Profile` (handle route first, wallet
+  fallback) or `Connect Device`.
 
 ## Edge Cases
 
@@ -164,7 +165,7 @@ On web layouts, route switching is sidebar-first.
 ## Failure and Recovery
 
 - While identity data loads, account area shows placeholders.
-- If profile handle is missing, `My Profile` falls back to the wallet address.
+- If profile handle is missing, `Profile` falls back to the wallet address.
 - If overlay looks stuck, close with backdrop, `Escape`, or route change.
 - If submenu state looks stale, toggle the group or rail again.
 - If `Drop Forge` is missing, verify the connected wallet can access the landing

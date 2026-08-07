@@ -1,12 +1,8 @@
-import {
-  faCopy,
-  faExternalLink,
-  faQrcode,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { EllipsisHorizontalIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
@@ -15,19 +11,25 @@ import { HEADER_SHARE_LOCALE, Mode, squareStyle, SubMode } from "./constants";
 import { ModalMenu } from "./HeaderShareMenu";
 import type {
   ConnectionShareStatus,
-  DisplayContent,
   TerminalConnectionShareStatus,
 } from "./shareUtils";
-import { buildSocialShareUrls } from "./shareUtils";
+import { buildSocialShareUrls, isExpectedSystemShareError } from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
 
 type MutableRef<T> = { current: T };
 
 const SHARE_ACTION_CLASS_NAME =
   "tw-inline-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+const PAGE_SHARE_ACTIONS_TOOLTIP_ID = "page-share-actions-tooltip";
+const TOOLTIP_STYLE = {
+  zIndex: 10000,
+  backgroundColor: "#1F2937",
+  color: "white",
+  opacity: 1,
+  padding: "4px 8px",
+};
 
 interface HeaderShareModalViewProps {
-  readonly show: boolean;
   readonly shouldRender: boolean;
   readonly isVisible: boolean;
   readonly onClose: () => void;
@@ -42,19 +44,17 @@ interface HeaderShareModalViewProps {
   readonly shareConnectionCoreUrl: string;
   readonly mobileConnectionShareStatus: ConnectionShareStatus;
   readonly desktopConnectionShareStatus: ConnectionShareStatus;
-  readonly visibleDisplayContentRef: MutableRef<DisplayContent | null>;
   readonly terminalConnectionShareFailuresRef: MutableRef<
     Map<string, TerminalConnectionShareStatus>
   >;
   readonly requestSessionUpgrade: (() => Promise<unknown>) | undefined;
   readonly urlCopied: boolean;
   readonly setUrlCopied: (copied: boolean) => void;
-  readonly copyTimeoutRef: MutableRef<ReturnType<typeof setTimeout> | null>;
   readonly isMobile: boolean;
+  readonly isElectron: boolean;
 }
 
 export function HeaderShareModalView({
-  show,
   shouldRender,
   isVisible,
   onClose,
@@ -69,16 +69,24 @@ export function HeaderShareModalView({
   shareConnectionCoreUrl,
   mobileConnectionShareStatus,
   desktopConnectionShareStatus,
-  visibleDisplayContentRef,
   terminalConnectionShareFailuresRef,
   requestSessionUpgrade,
   urlCopied,
   setUrlCopied,
-  copyTimeoutRef,
   isMobile,
+  isElectron,
 }: HeaderShareModalViewProps) {
   const isConnectMode = mode === Mode.CONNECT;
-  const [isShareQrVisible, setIsShareQrVisible] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+        copyTimeoutRef.current = null;
+      }
+    };
+  }, []);
   const modalTitle = t(
     HEADER_SHARE_LOCALE,
     isConnectMode
@@ -301,24 +309,12 @@ export function HeaderShareModalView({
     );
   };
 
-  const getCurrentDisplayContent = (): DisplayContent => {
+  const getDisplayContent = () => {
     if (mode === Mode.PAGE_SHARE) {
       return getNavigateContent();
     }
 
     return getShareContent();
-  };
-
-  const getDisplayContent = (): DisplayContent => {
-    if (!show && visibleDisplayContentRef.current) {
-      return visibleDisplayContentRef.current;
-    }
-
-    const displayContent = getCurrentDisplayContent();
-    if (show) {
-      visibleDisplayContentRef.current = displayContent;
-    }
-    return displayContent;
   };
 
   const copyUrl = async (url: string) => {
@@ -341,7 +337,7 @@ export function HeaderShareModalView({
     try {
       await navigator.share({ title, url });
     } catch (error) {
-      if (!(error instanceof DOMException) || error.name !== "AbortError") {
+      if (!isExpectedSystemShareError(error)) {
         console.error("Failed to share current page", error);
       }
     }
@@ -388,11 +384,7 @@ export function HeaderShareModalView({
           closeEvents={isMobile ? { click: true } : { mouseleave: true }}
           positionStrategy="fixed"
           style={{
-            zIndex: 10000,
-            backgroundColor: "#1F2937",
-            color: "white",
-            opacity: 1,
-            padding: "4px 8px",
+            ...TOOLTIP_STYLE,
           }}
         />
       </div>
@@ -420,7 +412,8 @@ export function HeaderShareModalView({
         <button
           type="button"
           aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
-          title={
+          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
+          data-tooltip-content={
             urlCopied
               ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
               : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
@@ -433,24 +426,13 @@ export function HeaderShareModalView({
             className={`tw-size-5 ${urlCopied ? "tw-text-green-500" : ""}`}
           />
         </button>
-        <button
-          type="button"
-          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.qr.createAriaLabel")}
-          title={t(HEADER_SHARE_LOCALE, "headerShare.qr.createAriaLabel")}
-          aria-pressed={isShareQrVisible}
-          onClick={() => setIsShareQrVisible((current) => !current)}
-          className={`${SHARE_ACTION_CLASS_NAME} ${
-            isShareQrVisible ? "tw-border-primary-400 tw-text-primary-300" : ""
-          }`}
-        >
-          <FontAwesomeIcon icon={faQrcode} className="tw-size-5" />
-        </button>
         <a
           href={socialShareUrls.x}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
-          title={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
+          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
+          data-tooltip-content={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
           className={SHARE_ACTION_CLASS_NAME}
         >
           <XLogo className="tw-size-5" />
@@ -460,7 +442,11 @@ export function HeaderShareModalView({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
-          title={t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
+          data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
+          data-tooltip-content={t(
+            HEADER_SHARE_LOCALE,
+            "headerShare.social.farcaster"
+          )}
           className={SHARE_ACTION_CLASS_NAME}
         >
           <FarcasterLogo className="tw-size-5" />
@@ -469,13 +455,23 @@ export function HeaderShareModalView({
           <button
             type="button"
             aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
-            title={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
+            data-tooltip-id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
+            data-tooltip-content={t(
+              HEADER_SHARE_LOCALE,
+              "headerShare.social.more"
+            )}
             onClick={() => void shareCurrentPage(shareTitle, url)}
             className={SHARE_ACTION_CLASS_NAME}
           >
             <EllipsisHorizontalIcon className="tw-size-6" />
           </button>
         )}
+        <Tooltip
+          id={PAGE_SHARE_ACTIONS_TOOLTIP_ID}
+          place="top"
+          positionStrategy="fixed"
+          style={TOOLTIP_STYLE}
+        />
       </div>
     );
   };
@@ -485,16 +481,16 @@ export function HeaderShareModalView({
 
     return (
       <div className="tw-flex tw-flex-col tw-gap-2">
-        {(isConnectMode || isShareQrVisible) && (
-          <div
-            id="header-share-content"
-            className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg"
-          >
-            <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
-              {content}
-            </div>
+        <div
+          id="header-share-content"
+          className={`tw-relative tw-aspect-square tw-max-w-full tw-self-center tw-overflow-hidden tw-rounded-lg ${
+            isConnectMode ? "tw-w-full" : "tw-w-64"
+          }`}
+        >
+          <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
+            {content}
           </div>
-        )}
+        </div>
         {renderConnectionUrl(url)}
         {renderPageShareActions(url)}
       </div>
@@ -524,7 +520,9 @@ export function HeaderShareModalView({
         aria-modal="true"
         aria-labelledby="header-share-title"
         data-testid="header-share-modal"
-        className={`tw-relative tw-flex tw-w-full tw-max-w-md tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
+        className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-y-auto tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-200 ${
+          isConnectMode ? "tw-max-w-md" : "tw-max-w-sm"
+        } ${
           isVisible
             ? "tw-translate-y-0 tw-scale-100 tw-opacity-100"
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
@@ -551,6 +549,7 @@ export function HeaderShareModalView({
           {isConnectMode && (
             <ModalMenu
               activeSubTab={activeSubTab}
+              isElectron={isElectron}
               onSubTabChange={setActiveSubTab}
             />
           )}

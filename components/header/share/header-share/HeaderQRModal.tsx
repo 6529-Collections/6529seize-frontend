@@ -9,11 +9,16 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { getWalletAddress } from "@/services/auth/auth.utils";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import { useElectron } from "@/hooks/useElectron";
 import {
   createConnectionShare,
   createLegacyDesktopConnectionShare,
 } from "@/services/auth/session-v2.utils";
-import { getDefaultSubMode, Mode } from "./constants";
+import {
+  getAvailableConnectSubMode,
+  getDefaultSubMode,
+  Mode,
+} from "./constants";
 import type { SubMode } from "./constants";
 import { HeaderShareModalView } from "./HeaderShareModalView";
 import {
@@ -27,7 +32,6 @@ import {
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
   type ConnectionShareStatus,
-  type DisplayContent,
   generateQrCodeSource,
   getCachedConnectionShare,
   getFocusableElements,
@@ -39,7 +43,18 @@ import {
   type TerminalConnectionShareStatus,
 } from "./shareUtils";
 
-export function HeaderQRModal({
+type ShareDisplayState = {
+  readonly activeSubTab: SubMode;
+  readonly navigateBrowserSrc: string;
+  readonly navigateBrowserUrl: string;
+  readonly shareConnectionSrc: string;
+  readonly shareConnectionAppUrl: string;
+  readonly shareConnectionCoreUrl: string;
+  readonly mobileConnectionShareStatus: ConnectionShareStatus;
+  readonly desktopConnectionShareStatus: ConnectionShareStatus;
+};
+
+function HeaderQRModal({
   show,
   onClose,
   mode,
@@ -52,6 +67,7 @@ export function HeaderQRModal({
   const searchParams = useSearchParams();
   const searchParamsString = searchParams?.toString() ?? "";
   const isMobile = useIsMobileDevice();
+  const isElectron = useElectron();
 
   const [shouldRender, setShouldRender] = useState(show);
   const [isVisible, setIsVisible] = useState(show);
@@ -65,10 +81,6 @@ export function HeaderQRModal({
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(() =>
     getDefaultSubMode(mode)
   );
-  const closeModal = useCallback(() => {
-    setActiveSubTab(getDefaultSubMode(mode));
-    onClose();
-  }, [mode, onClose]);
 
   const [navigateBrowserUrl, setNavigateBrowserUrl] = useState<string>("");
   const [shareConnectionAppUrl, setShareConnectionAppUrl] =
@@ -86,16 +98,42 @@ export function HeaderQRModal({
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
+  const [closingDisplayState, setClosingDisplayState] =
+    useState<ShareDisplayState | null>(null);
+
+  const closeModal = useCallback(() => {
+    setClosingDisplayState({
+      activeSubTab,
+      navigateBrowserSrc,
+      navigateBrowserUrl,
+      shareConnectionSrc,
+      shareConnectionAppUrl,
+      shareConnectionCoreUrl,
+      mobileConnectionShareStatus,
+      desktopConnectionShareStatus,
+    });
+    setActiveSubTab(getDefaultSubMode(mode));
+    onClose();
+  }, [
+    activeSubTab,
+    desktopConnectionShareStatus,
+    mobileConnectionShareStatus,
+    mode,
+    navigateBrowserSrc,
+    navigateBrowserUrl,
+    onClose,
+    shareConnectionAppUrl,
+    shareConnectionCoreUrl,
+    shareConnectionSrc,
+  ]);
 
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
   const onCloseRef = useRef(closeModal);
-  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const connectionShareAbortRef = useRef<AbortController | null>(null);
   const shareGenerationIdRef = useRef(0);
   const cachedConnectionShareRef = useRef<CachedConnectionShare | null>(null);
-  const visibleDisplayContentRef = useRef<DisplayContent | null>(null);
   const terminalConnectionShareFailuresRef = useRef<
     Map<string, TerminalConnectionShareStatus>
   >(new Map());
@@ -150,15 +188,6 @@ export function HeaderQRModal({
   useEffect(() => {
     onCloseRef.current = closeModal;
   }, [closeModal]);
-
-  useEffect(() => {
-    return () => {
-      if (copyTimeoutRef.current) {
-        clearTimeout(copyTimeoutRef.current);
-        copyTimeoutRef.current = null;
-      }
-    };
-  }, []);
 
   const handleEscapeKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -516,7 +545,6 @@ export function HeaderQRModal({
       return;
     }
 
-    visibleDisplayContentRef.current = null;
     connectionShareAbortRef.current?.abort();
     const controller = new AbortController();
     connectionShareAbortRef.current = controller;
@@ -558,7 +586,6 @@ export function HeaderQRModal({
 
     setIsVisible(false);
     const timeout = setTimeout(() => {
-      visibleDisplayContentRef.current = null;
       setShouldRender(false);
     }, 200);
     return () => clearTimeout(timeout);
@@ -613,31 +640,46 @@ export function HeaderQRModal({
     return null;
   }
 
+  const currentDisplayState: ShareDisplayState = {
+    activeSubTab,
+    navigateBrowserSrc,
+    navigateBrowserUrl,
+    shareConnectionSrc,
+    shareConnectionAppUrl,
+    shareConnectionCoreUrl,
+    mobileConnectionShareStatus,
+    desktopConnectionShareStatus,
+  };
+  const displayState =
+    !show && closingDisplayState ? closingDisplayState : currentDisplayState;
+  const displayActiveSubTab = getAvailableConnectSubMode(
+    displayState.activeSubTab,
+    isElectron
+  );
+
   return (
     <HeaderShareModalView
       key={show ? "open" : "closed"}
-      show={show}
       shouldRender={shouldRender}
       isVisible={isVisible}
       onClose={closeModal}
       dialogRef={dialogRef}
       mode={mode}
-      activeSubTab={activeSubTab}
+      activeSubTab={displayActiveSubTab}
       setActiveSubTab={setActiveSubTab}
-      navigateBrowserSrc={navigateBrowserSrc}
-      navigateBrowserUrl={navigateBrowserUrl}
-      shareConnectionSrc={shareConnectionSrc}
-      shareConnectionAppUrl={shareConnectionAppUrl}
-      shareConnectionCoreUrl={shareConnectionCoreUrl}
-      mobileConnectionShareStatus={mobileConnectionShareStatus}
-      desktopConnectionShareStatus={desktopConnectionShareStatus}
-      visibleDisplayContentRef={visibleDisplayContentRef}
+      navigateBrowserSrc={displayState.navigateBrowserSrc}
+      navigateBrowserUrl={displayState.navigateBrowserUrl}
+      shareConnectionSrc={displayState.shareConnectionSrc}
+      shareConnectionAppUrl={displayState.shareConnectionAppUrl}
+      shareConnectionCoreUrl={displayState.shareConnectionCoreUrl}
+      mobileConnectionShareStatus={displayState.mobileConnectionShareStatus}
+      desktopConnectionShareStatus={displayState.desktopConnectionShareStatus}
       terminalConnectionShareFailuresRef={terminalConnectionShareFailuresRef}
       requestSessionUpgrade={requestSessionUpgrade}
       urlCopied={urlCopied}
       setUrlCopied={setUrlCopied}
-      copyTimeoutRef={copyTimeoutRef}
       isMobile={isMobile}
+      isElectron={isElectron}
     />
   );
 }

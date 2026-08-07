@@ -6,7 +6,6 @@ import {
   faPlugCircleXmark,
   faRightFromBracket,
   faShuffle,
-  faLink,
   faShieldHalved,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
@@ -21,6 +20,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 
@@ -185,31 +185,6 @@ export default function HeaderUserMenuDropdown({
                       />
                     </li>
                   )}
-                  {profilePath && (
-                    <li className="tw-h-full tw-px-2 tw-pt-2">
-                      <Link
-                        href={profilePath}
-                        onClick={onClose}
-                        aria-label={t(
-                          HEADER_USER_MENU_LOCALE,
-                          "headerUserMenu.myProfile"
-                        )}
-                        title={t(
-                          HEADER_USER_MENU_LOCALE,
-                          "headerUserMenu.myProfile"
-                        )}
-                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        <FontAwesomeIcon icon={faUser} height={20} width={20} />
-                        <span>
-                          {t(
-                            HEADER_USER_MENU_LOCALE,
-                            "headerUserMenu.myProfile"
-                          )}
-                        </span>
-                      </Link>
-                    </li>
-                  )}
                   {hasProxySection && (
                     <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
                       <p className="tw-m-0 tw-px-3 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
@@ -288,7 +263,7 @@ export default function HeaderUserMenuDropdown({
                       ))}
                     </li>
                   )}
-                  <li className="tw-h-full tw-px-2 tw-pt-2">
+                  <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
                     {isConnected ? (
                       <button
                         onClick={() => {
@@ -336,6 +311,29 @@ export default function HeaderUserMenuDropdown({
                         <span>Connect Wallet</span>
                       </button>
                     )}
+                    {onOpenConnect && (
+                      <button
+                        onClick={onOpenConnect}
+                        type="button"
+                        aria-label={t(
+                          HEADER_USER_MENU_LOCALE,
+                          "headerUserMenu.connectDevice"
+                        )}
+                        title={t(
+                          HEADER_USER_MENU_LOCALE,
+                          "headerUserMenu.connectDevice"
+                        )}
+                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <DevicesIcon className="tw-size-5 tw-flex-shrink-0" />
+                        <span>
+                          {t(
+                            HEADER_USER_MENU_LOCALE,
+                            "headerUserMenu.connectDevice"
+                          )}
+                        </span>
+                      </button>
+                    )}
                     {sessionUpgradeRequired && requestSessionUpgrade && (
                       <button
                         onClick={() => {
@@ -352,7 +350,7 @@ export default function HeaderUserMenuDropdown({
                         type="button"
                         aria-label={upgradeAuthenticationLabel}
                         title={upgradeAuthenticationLabel}
-                        className="tw-relative tw-mt-2 tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
                         <FontAwesomeIcon
                           icon={faShieldHalved}
@@ -384,32 +382,27 @@ export default function HeaderUserMenuDropdown({
                       </button>
                     </li>
                   )}
-                  {onOpenConnect && (
-                    <li className="tw-h-full tw-px-2 tw-pt-2">
-                      <button
-                        onClick={onOpenConnect}
-                        type="button"
+                  <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
+                    {profilePath && (
+                      <Link
+                        href={profilePath}
+                        onClick={onClose}
                         aria-label={t(
                           HEADER_USER_MENU_LOCALE,
-                          "headerUserMenu.connectDevice"
+                          "headerUserMenu.profile"
                         )}
                         title={t(
                           HEADER_USER_MENU_LOCALE,
-                          "headerUserMenu.connectDevice"
+                          "headerUserMenu.profile"
                         )}
-                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
-                        <FontAwesomeIcon icon={faLink} height={20} width={20} />
+                        <FontAwesomeIcon icon={faUser} height={20} width={20} />
                         <span>
-                          {t(
-                            HEADER_USER_MENU_LOCALE,
-                            "headerUserMenu.connectDevice"
-                          )}
+                          {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.profile")}
                         </span>
-                      </button>
-                    </li>
-                  )}
-                  <li className="tw-h-full tw-px-2 tw-pt-2">
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         void runMenuAction({

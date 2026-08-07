@@ -25,3 +25,14 @@ export const squareStyle = {
 export function getConnectTargetCount(isElectron: boolean): number {
   return isElectron ? 1 : 2;
 }
+
+export function getAvailableConnectSubMode(
+  activeSubTab: SubMode,
+  isElectron: boolean
+): SubMode {
+  if (isElectron && activeSubTab === SubMode.DESKTOP) {
+    return SubMode.MOBILE;
+  }
+
+  return activeSubTab;
+}

@@ -48,9 +48,12 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
   - when fewer than five connected profiles are stored, an `Add` row appears
     under the connected-profile list
 - Session actions:
-  - `My Profile` opens the active handle route, with wallet-address fallback
-  - `Connect another device` opens the Mobile/Desktop connection dialog on
+  - `Profile` opens the active handle route, with wallet-address fallback
+  - `Connect Device` opens the Mobile/Desktop connection dialog on
     desktop web
+  - wallet connection/disconnection and `Connect Device` share one menu
+    subsection
+  - `Profile`, logout, and multi-profile sign-out share the final subsection
   - wallet connected: `Disconnect Wallet`, `Disconnect & Logout`
   - wallet disconnected: `Connect Wallet`, `Logout`
   - multi-account web sessions also expose `Sign Out All Profiles`
@@ -88,8 +91,8 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
    - use app account switch controls in the app sidebar footer.
 6. Use session actions:
    - `Disconnect Wallet` (web only): disconnect wallet without full logout.
-   - `My Profile`: open the active profile.
-   - desktop-web `Connect another device`: choose Mobile or Desktop without
+   - `Profile`: open the active profile.
+   - desktop-web `Connect Device`: choose Mobile or Desktop without
      exposing page-share actions.
    - `Switch to {nextChain}`: move to the next supported wallet network when
      chain switching is available.
@@ -120,7 +123,7 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
   logout.
 - Use `Switch to {nextChain}` from the web dropdown or app footer when you need
   to cycle between supported wallet networks.
-- Open `Connect another device` from the web dropdown on desktop web.
+- Open `Connect Device` from the web dropdown on desktop web.
 - Use `Sign Out All Profiles` when you need to clear a multi-account web
   session.
 - Open app `Push Notifications` settings from the account footer.
@@ -132,7 +135,7 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
 
 - Web sidebar account area shows loading placeholders while identity data loads.
 - Name label fallback order is handle -> wallet display name -> wallet prefix.
-- `My Profile` is available in the connected web account dropdown.
+- `Profile` is available in the connected web account dropdown.
 - Web dropdown always includes the base identity row.
 - Web dropdown positioning follows the sidebar account row when wide desktop
   layouts add centered outer margins.
@@ -142,7 +145,7 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
   stored.
 - Proxy rows appear only when active received proxies exist.
 - Proxy switching is not available in app footer.
-- Web `Connect another device` appears only on desktop web after device
+- Web `Connect Device` appears only on desktop web after device
   detection resolves; it is hidden in Capacitor/native and mobile-device web
   contexts.
 - Chain switch controls appear only when the connected wallet has more than one
@@ -156,7 +159,7 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
 - If add-account is canceled and the wallet flow returns to the original active
   wallet, the current session should stay on that original profile.
 - After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
-  and `Logout` while profile and device-connection actions remain separate.
+  and `Logout`; `Connect Wallet` remains grouped with `Connect Device`.
 
 ## Failure and Recovery
 
@@ -167,7 +170,7 @@ logout, and proxy identity switching. Page Share is a separate sidebar action.
   `Disconnect & Logout`, then reconnect.
 - If chain switching is missing, verify the wallet is connected and the current
   session exposes more than one supported chain.
-- If `Connect another device` is missing, verify you are on desktop web with a
+- If `Connect Device` is missing, verify you are on desktop web with a
   resolved device state; Capacitor/native and mobile-device web intentionally
   hide it.
 - If unread account dots/badges look stale, open `/notifications` for the

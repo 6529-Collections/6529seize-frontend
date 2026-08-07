@@ -136,31 +136,50 @@ describe("HeaderUserMenuDropdown", () => {
     expect(screen.getByText("alice")).toBeInTheDocument();
   });
 
-  it("links My Profile to the active profile and closes the menu", () => {
+  it("groups Profile immediately above Logout and closes the menu", () => {
     const { onClose } = renderDropdown({
       profile: profileBase,
       address: "0xabc",
       isConnected: true,
     });
 
-    const profileLink = screen.getByRole("link", { name: "My Profile" });
+    const profileLink = screen.getByRole("link", { name: "Profile" });
+    const logoutButton = screen.getByRole("button", {
+      name: "Disconnect & Logout",
+    });
     expect(profileLink).toHaveAttribute("href", "/alice");
+    expect(profileLink.parentElement).toBe(logoutButton.parentElement);
+    expect(
+      profileLink.compareDocumentPosition(logoutButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     fireEvent.click(profileLink);
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("opens device connection without exposing Share in the profile menu", () => {
+  it("groups Connect Wallet with Connect Device without exposing Share", () => {
     const onOpenConnect = jest.fn();
     renderDropdown({
       profile: profileBase,
       address: "0xabc",
-      isConnected: true,
+      isConnected: false,
       onOpenConnect,
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Connect another device" })
+    const connectWalletButton = screen
+      .getByText("Connect Wallet")
+      .closest("button");
+    const connectDeviceButton = screen.getByRole("button", {
+      name: "Connect Device",
+    });
+    expect(connectDeviceButton.querySelector("svg")).toHaveAttribute(
+      "viewBox",
+      "1 2 20 20"
     );
+    expect(connectWalletButton?.parentElement).toBe(
+      connectDeviceButton.parentElement
+    );
+    fireEvent.click(connectDeviceButton);
     expect(onOpenConnect).toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
   });
@@ -207,9 +226,7 @@ describe("HeaderUserMenuDropdown", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: /account.*menu/i }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Connect another device" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Connect Device" }));
 
     expect(
       screen.getByRole("dialog", { name: "Connect another device modal" })

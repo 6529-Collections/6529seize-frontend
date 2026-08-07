@@ -1,14 +1,10 @@
 export const PAGE_SHARE_UNSUPPORTED_PATHS = [
   "/",
-  "/waves",
   "/messages",
   "/notifications",
 ] as const;
 
-export const PAGE_SHARE_UNSUPPORTED_VIEWS: readonly string[] = [
-  "waves",
-  "messages",
-];
+const PAGE_SHARE_UNSUPPORTED_VIEWS: readonly string[] = ["messages"];
 
 export function isPageShareSupported({
   activeView,
