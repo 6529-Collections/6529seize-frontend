@@ -245,6 +245,9 @@ describe("isolated production artifact verifier", () => {
     expect(source).toContain("ARTIFACT_WORKFLOW_SHA");
     expect(source).toContain("builder ${{ inputs.artifact_run_id }}");
     expect(source).toContain("sha256sum -c SHA256SUMS");
+    expect(source).toContain(
+      "SELECTION_ARTIFACT_DIGEST: sha256:${{ steps.upload-selection.outputs.artifact-digest }}"
+    );
     expect(source).toContain("unzip -Z1");
     expect(source).toContain("validate-archive-members");
     expect(source).toContain("validate-extracted-artifact");
