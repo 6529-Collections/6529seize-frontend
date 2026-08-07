@@ -48,12 +48,32 @@ describe("one-click production authority completion", () => {
       types: ["completed"],
       branches: ["main"],
     });
+    expect(completion.on.workflow_dispatch).toEqual({
+      inputs: {
+        terminal_workflow_run_id: {
+          description: "Exact failed production workflow run to release",
+          required: true,
+          type: "string",
+        },
+      },
+    });
     expect(completionJob.if).toContain(
       "github.event.workflow_run.head_repository.full_name == github.repository"
     );
     expect(completionJob.if).toContain(
       "github.event.workflow_run.head_branch == 'main'"
     );
+    expect(completionJob.if).toContain(
+      "github.event.workflow_run.path == '.github/workflows/production-e2e.yml'"
+    );
+    expect(completionJob.if).toContain(
+      "github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml'"
+    );
+    expect(completionJob.if).toContain(
+      "github.event_name == 'workflow_dispatch'"
+    );
+    expect(completionJob.if).toContain("github.ref == 'refs/heads/main'");
+    expect(completionJob.if).not.toContain("github.event.workflow_run.name");
     expect(completionJob["runs-on"]).toBe("ubuntu-latest");
     expect(completionJob.permissions).toEqual({
       actions: "read",
@@ -75,6 +95,29 @@ describe("one-click production authority completion", () => {
     );
   });
 
+  it("recovers an exact terminal run only from main and an authorized release actor", () => {
+    expect(completion["run-name"]).toContain(
+      "github.event.workflow_run.id || inputs.terminal_workflow_run_id"
+    );
+    expect(proof.env.WORKFLOW_RUN_ID).toContain(
+      "github.event.workflow_run.id || inputs.terminal_workflow_run_id"
+    );
+    expect(proof.env.EVENT_NAME).toBe("${{ github.event_name }}");
+    expect(proof.env.DISPATCH_ACTOR).toBe("${{ github.actor }}");
+    expect(proof.run).toContain(
+      'if [ "$EVENT_NAME" = workflow_dispatch ]; then'
+    );
+    expect(proof.run).toContain('test "$GITHUB_REF" = refs/heads/main');
+    expect(proof.run).toContain("punk6529|prxt6529)");
+    expect(proof.run).toContain(
+      "Actor is not authorized for production authority recovery."
+    );
+    expect(proof.run).toContain(
+      'workflow_path="$(jq -er \'.path | strings\' "$workflow_file")"'
+    );
+    expect(proof.run).not.toContain("workflow_name=");
+  });
+
   it("derives the deploy run only from the exact automatic title and re-reads both identities", () => {
     expect(completionSource).toContain(
       "^Production\\ E2E\\ automatic\\ ([1-9][0-9]{0,19})$"
@@ -90,6 +133,12 @@ describe("one-click production authority completion", () => {
     );
     expect(completionSource).toContain(
       '.path == ".github/workflows/build-upload-deploy-prod.yml"'
+    );
+    expect(completionSource).toContain(
+      '(.name == "Web Deploy - PROD" or .name == .display_title)'
+    );
+    expect(completionSource).toContain(
+      '(.name == "Production E2E" or .name == .display_title)'
     );
     expect(completionSource).toContain(
       '.display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]")'
