@@ -35,29 +35,30 @@ const CASES = [
 }[];
 
 describe("PublicReviewStatusBanner", () => {
-  it("keeps status details wrapped through medium content widths", () => {
+  it("lets the explanation span the banner below desktop status details", () => {
     const { container } = render(
       <PublicReviewStatusBanner
         review={STREAM_REVIEW_DEFINITION}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
-        versionHref={`/reviews/6529-stream/versions/${STREAM_REVIEW_DEFINITION.activeVersion}`}
       />
     );
 
     expect(container.querySelector("section > div")).toHaveClass(
-      "@[860px]:tw-flex-row"
+      "@[860px]:tw-grid-cols-[minmax(0,1fr)_auto]"
     );
     expect(container.querySelector("section > div")).not.toHaveClass(
-      "@[720px]:tw-flex-row"
+      "@[720px]:tw-grid-cols-[minmax(0,1fr)_auto]"
     );
     expect(
-      screen.getByRole("link", {
-        name: `Review version ${STREAM_REVIEW_DEFINITION.activeVersion}`,
-      })
-    ).toHaveAttribute(
-      "href",
-      `/reviews/6529-stream/versions/${STREAM_REVIEW_DEFINITION.activeVersion}`
-    );
+      screen.getByText(
+        "This contract candidate is open for public review. Independent audit and deployment remain ahead."
+      )
+    ).toHaveClass("@[860px]:tw-col-span-2");
+    expect(
+      screen.queryByText(
+        `Review version ${STREAM_REVIEW_DEFINITION.activeVersion}`
+      )
+    ).not.toBeInTheDocument();
   });
 
   it.each(CASES)(
@@ -102,6 +103,7 @@ describe("PublicReviewStatusBanner", () => {
     render(
       <PublicReviewStatusBanner
         displayedVersion="review-v1"
+        isVersionedRoute
         review={{
           ...STREAM_REVIEW_DEFINITION,
           auditStatus: "AUDIT_COMPLETE",
@@ -130,5 +132,24 @@ describe("PublicReviewStatusBanner", () => {
     expect(screen.getByText("Audit planned")).toBeInTheDocument();
     expect(screen.queryByText("Deployed")).not.toBeInTheDocument();
     expect(screen.queryByText("Audit complete")).not.toBeInTheDocument();
+  });
+
+  it("shows the exact version and current-review link on an active saved snapshot", () => {
+    render(
+      <PublicReviewStatusBanner
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        isVersionedRoute
+        review={STREAM_REVIEW_DEFINITION}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        `Review version ${STREAM_REVIEW_DEFINITION.activeVersion}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View current review" })
+    ).toHaveAttribute("href", "/reviews/6529-stream");
   });
 });

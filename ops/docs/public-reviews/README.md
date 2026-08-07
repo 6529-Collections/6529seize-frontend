@@ -60,9 +60,10 @@ Every page includes:
 - a persistent status area showing the lifecycle, deployment, and audit states;
   Stream currently shows **Public review**, **Preparing for launch**, and
   **Audit planned**
-- a consistent **Review**, **Technical reference**, and **Public feedback**
-  switcher below the status area
-- the review version and a link to the exact source snapshot
+- consistent **Technical reference**, **All public feedback**, and **Review
+  history** destinations on current pages
+- a link to the exact source snapshot; saved snapshot pages also show their
+  exact review version and a link back to the current review
 - navigation across the fourteen pages in the current version snapshot
 - an on-page contents list generated from the displayed editorial headings;
   the simplified current Overview intentionally has no technical subsection list
@@ -73,9 +74,9 @@ Every page includes:
 The current overview contains a plain definition of Stream, five important
 parts of a Stream artwork, a seven-step artwork journey, and focused
 starting points for artists, collectors and minters, and auditors. It ends
-after those audience paths. On current review pages, the review-version label in
-the status area opens the matching page in the immutable active snapshot. The
-current **For Artists** page starts with a plain artist guide
+after those audience paths. The secondary **Review history** destination opens
+the immutable technical Overview for the active snapshot. The current **For
+Artists** page starts with a plain artist guide
 covering the artwork package, approval journey, change boundaries, other actors,
 sales, payments, and finality. Its detailed versioned editorial remains below
 as the technical evidence. The generated technical reference lets reviewers
@@ -96,8 +97,9 @@ unversioned routes.
 The plain Overview guide appears only on the unversioned Overview and replaces
 the versioned technical Overview there. Its on-page section navigation and
 feedback section choices therefore omit the hidden technical headings. A link
-from the current page's review-version label opens its immutable technical
-editorial. Immutable version routes continue to describe their exact review snapshot.
+from the current review-wide navigation opens its immutable technical editorial.
+Immutable version routes show their exact review version and continue to
+describe their exact review snapshot.
 The plain artist guide follows the same rule: it appears only on the current,
 unversioned **For Artists** route, while immutable version routes continue to
 render their exact editorial snapshot without the guide.

@@ -131,6 +131,11 @@ export function PublicReviewShell({
         <PublicReviewNavigation
           currentPage={page}
           feedbackHref={routes.getFeedbackHref(routeVersion)}
+          historyHref={
+            routeVersion === undefined
+              ? routes.getRootHref(displayedVersion)
+              : undefined
+          }
           pages={reviewVersion.pages}
           referenceHref={getSolidityReferenceRootHref({
             reviewSlug: review.slug,
@@ -149,6 +154,11 @@ export function PublicReviewShell({
               <PublicReviewMobileNavigation
                 currentPage={page}
                 feedbackHref={routes.getFeedbackHref(routeVersion)}
+                historyHref={
+                  routeVersion === undefined
+                    ? routes.getRootHref(displayedVersion)
+                    : undefined
+                }
                 pages={reviewVersion.pages}
                 referenceHref={getSolidityReferenceRootHref({
                   reviewSlug: review.slug,
@@ -183,12 +193,8 @@ export function PublicReviewShell({
                   <PublicReviewStatusBanner
                     review={review}
                     displayedVersion={displayedVersion}
+                    isVersionedRoute={routeVersion !== undefined}
                     source={source}
-                    versionHref={
-                      routeVersion === undefined
-                        ? routes.getPageHref(page, displayedVersion)
-                        : undefined
-                    }
                   />
                 </div>
 

@@ -81,6 +81,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.surface.backToReview": "Back to review contents",
   "publicReview.surface.reference": "Technical reference",
   "publicReview.surface.feedback": "All public feedback",
+  "publicReview.surface.history": "Review history",
   "publicReview.navigation.previous": "Previous",
   "publicReview.navigation.next": "Next",
   "publicReview.navigation.pagePosition": "Page {current} of {total}",
