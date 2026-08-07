@@ -1,6 +1,4 @@
-import LatestDropAllowlistStatus, {
-  getConnectedWalletAllowlistPhases,
-} from "@/components/home/now-minting/LatestDropAllowlistStatus";
+import LatestDropAllowlistStatus from "@/components/home/now-minting/LatestDropAllowlistStatus";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DistributionNormalizedPage } from "@/generated/models/DistributionNormalizedPage";
@@ -68,70 +66,6 @@ function createPage(
   };
 }
 
-describe("getConnectedWalletAllowlistPhases", () => {
-  it("returns every manual allowlist phase in mint order", () => {
-    const data = createPage([
-      {
-        phase: "phase 2",
-        spots: 1,
-        spots_airdrop: 0,
-        spots_allowlist: 1,
-      },
-      {
-        phase: "Phase   0",
-        spots: 2,
-        spots_airdrop: 0,
-        spots_allowlist: 2,
-      },
-    ]);
-
-    expect(
-      getConnectedWalletAllowlistPhases({
-        address: TEST_ADDRESS.toUpperCase(),
-        data,
-        tokenId: 532,
-      })
-    ).toEqual(["Phase 0", "Phase 2"]);
-  });
-
-  it("ignores airdrop-only entries and unrelated distribution rows", () => {
-    const airdropOnly = createPage([
-      {
-        phase: "Phase 0",
-        spots: 11,
-        spots_airdrop: 11,
-        spots_allowlist: 0,
-      },
-    ]);
-    const wrongWallet = createPage(
-      [
-        {
-          phase: "Phase 1",
-          spots: 1,
-          spots_airdrop: 0,
-          spots_allowlist: 1,
-        },
-      ],
-      { wallet: OTHER_ADDRESS }
-    );
-
-    expect(
-      getConnectedWalletAllowlistPhases({
-        address: TEST_ADDRESS,
-        data: airdropOnly,
-        tokenId: 532,
-      })
-    ).toEqual([]);
-    expect(
-      getConnectedWalletAllowlistPhases({
-        address: TEST_ADDRESS,
-        data: wrongWallet,
-        tokenId: 532,
-      })
-    ).toEqual([]);
-  });
-});
-
 describe("LatestDropAllowlistStatus", () => {
   beforeEach(() => {
     mockUseSeizeConnectContext.mockReturnValue({
@@ -189,6 +123,67 @@ describe("LatestDropAllowlistStatus", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Phase 1")).toBeInTheDocument();
     expect(screen.getByText("Phase 2")).toBeInTheDocument();
+  });
+
+  it("normalizes, deduplicates, and sorts supported manual phases", () => {
+    useQueryMock.mockReturnValue({
+      data: createPage(
+        [
+          {
+            phase: "phase 2",
+            spots: 1,
+            spots_airdrop: 0,
+            spots_allowlist: 1,
+          },
+          {
+            phase: "Phase   0",
+            spots: 2,
+            spots_airdrop: 0,
+            spots_allowlist: 2,
+          },
+          {
+            phase: "PHASE 2",
+            spots: 1,
+            spots_airdrop: 0,
+            spots_allowlist: 1,
+          },
+        ],
+        { wallet: TEST_ADDRESS.toUpperCase() }
+      ),
+      isError: false,
+      isPending: false,
+    });
+
+    render(<LatestDropAllowlistStatus tokenId={532} />);
+
+    expect(
+      screen.getAllByRole("listitem").map((item) => item.textContent)
+    ).toEqual(["Phase 0", "Phase 2"]);
+  });
+
+  it("ignores unrelated distribution rows", () => {
+    useQueryMock.mockReturnValue({
+      data: createPage(
+        [
+          {
+            phase: "Phase 1",
+            spots: 1,
+            spots_airdrop: 0,
+            spots_allowlist: 1,
+          },
+        ],
+        { wallet: OTHER_ADDRESS }
+      ),
+      isError: false,
+      isPending: false,
+    });
+
+    render(<LatestDropAllowlistStatus tokenId={532} />);
+
+    expect(
+      screen.getByText("No allowlist phase found for this wallet.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Phase 1")).not.toBeInTheDocument();
   });
 
   it("asks disconnected users to connect without starting a request", () => {

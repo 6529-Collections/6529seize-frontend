@@ -22,7 +22,7 @@ function normalizeAllowlistPhase(value: string): AllowlistPhase | undefined {
   return ALLOWLIST_PHASES.find((phase) => phase.toLowerCase() === normalized);
 }
 
-export function getConnectedWalletAllowlistPhases({
+function getConnectedWalletAllowlistPhases({
   address,
   data,
   tokenId,
