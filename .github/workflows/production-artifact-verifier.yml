@@ -121,7 +121,9 @@ jobs:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
           path: trusted-verifier
-          sparse-checkout: ops/scripts/verify-production-artifact-selection.cjs
+          sparse-checkout: |
+            ops/scripts/verify-production-artifact-selection.cjs
+            ops/scripts/cli-args.cjs
           sparse-checkout-cone-mode: false
 
       - name: Install pinned Node.js

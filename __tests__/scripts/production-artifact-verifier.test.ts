@@ -115,7 +115,14 @@ describe("isolated production artifact verifier", () => {
       };
       jobs: Record<
         string,
-        { permissions: Record<string, string>; "runs-on": string }
+        {
+          permissions: Record<string, string>;
+          "runs-on": string;
+          steps: Array<{
+            name?: string;
+            with?: Record<string, unknown>;
+          }>;
+        }
       >;
     };
     const requiredInputs = ["target_sha", "operation_id"];
@@ -171,6 +178,29 @@ describe("isolated production artifact verifier", () => {
       actions: "read",
       contents: "read",
     });
+    const checkout = verifyJob.steps.find(
+      ({ name }) => name === "Check out immutable verifier helper"
+    );
+    const sparseCheckout = String(checkout?.with?.["sparse-checkout"] ?? "");
+    const verifierSource = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "ops",
+        "scripts",
+        "verify-production-artifact-selection.cjs"
+      ),
+      "utf8"
+    );
+    const localDependencies = [
+      ...verifierSource.matchAll(/require\(["']\.\/([^"']+)["']\)/gu),
+    ].map((match) => `ops/scripts/${match[1]}`);
+    expect(localDependencies).toEqual(["ops/scripts/cli-args.cjs"]);
+    expect(sparseCheckout).toContain(
+      "ops/scripts/verify-production-artifact-selection.cjs"
+    );
+    for (const dependency of localDependencies) {
+      expect(sparseCheckout).toContain(dependency);
+    }
     expect(source).toContain(
       "actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}"
     );
