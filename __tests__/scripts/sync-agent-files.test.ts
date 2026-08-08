@@ -270,6 +270,13 @@ describe("sync-agent-files", () => {
             record.id === "delegation.manage-update-doc"
         )
       );
+      const walletManagementClarificationRecords = [source, published].map(
+        (index) =>
+          index.records.find(
+            (record: { id: string }) =>
+              record.id === "delegation.wallet-management-clarification"
+          )
+      );
 
       consolidationRecords.forEach((consolidationRecord) => {
         expect(consolidationRecord?.aliases).toEqual(
@@ -346,6 +353,24 @@ describe("sync-agent-files", () => {
       });
       expect(consolidationUpdateRecords[1]).toEqual(
         consolidationUpdateRecords[0]
+      );
+      walletManagementClarificationRecords.forEach((record) => {
+        expect(record?.facts).toEqual(
+          expect.arrayContaining([
+            "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
+            "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
+            "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
+          ])
+        );
+        expect(record?.related_paths).toEqual(
+          expect.arrayContaining([
+            "/delegation/delegation-faq/manage-revoke",
+            "/delegation/delegation-faq/manage-update",
+          ])
+        );
+      });
+      expect(walletManagementClarificationRecords[1]).toEqual(
+        walletManagementClarificationRecords[0]
       );
     });
   });
