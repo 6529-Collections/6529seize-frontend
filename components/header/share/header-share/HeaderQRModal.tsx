@@ -33,6 +33,7 @@ import {
   buildNavigateDeepLinkUrl,
   buildNativeConnectionShareUrls,
   buildRouterPath,
+  createQrCodeSource,
   getCurrentPageLocation,
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
@@ -287,23 +288,73 @@ function HeaderQRModal({
       walletAddress,
       routerPath,
     });
-    await generateLegacyDesktopConnectionShareUrl({
-      coreScheme,
-      isStaleGeneration,
-      signal,
-      walletAddress,
-      routerPath,
-    });
-
-    if (!isStaleGeneration() && generatedConnectionAppUrl) {
-      generateQrCodeSource({
-        url: generatedConnectionAppUrl,
-        setSource: setShareConnectionSrc,
-        clearSource: () => setShareConnectionSrc(""),
-        staleGeneration: isStaleGeneration,
+    await Promise.all([
+      prepareMobileConnectionShare({
+        connectionUrl: generatedConnectionAppUrl,
+        isStaleGeneration,
         signal,
-        errorMessage: "Failed to generate share connection QR code",
-      });
+      }),
+      generateLegacyDesktopConnectionShareUrl({
+        coreScheme,
+        isStaleGeneration,
+        signal,
+        walletAddress,
+        routerPath,
+      }),
+    ]);
+  }
+
+  async function prepareMobileConnectionShare({
+    connectionUrl,
+    isStaleGeneration,
+    signal,
+  }: {
+    readonly connectionUrl: string;
+    readonly isStaleGeneration: IsStaleGeneration;
+    readonly signal?: AbortSignal | undefined;
+  }): Promise<void> {
+    if (!connectionUrl || isStaleGeneration()) {
+      return;
+    }
+
+    const qrSource = await createQrCodeSource({
+      url: connectionUrl,
+      staleGeneration: isStaleGeneration,
+      signal,
+      errorMessage: "Failed to generate share connection QR code",
+    });
+    if (isStaleGeneration()) {
+      return;
+    }
+    if (!qrSource || !(await decodeQrCodeSource(qrSource))) {
+      if (!isStaleGeneration()) {
+        setUnavailableMobileConnectionShare("error");
+      }
+      return;
+    }
+
+    setShareConnectionAppUrl(connectionUrl);
+    setShareConnectionSrc(qrSource);
+    setMobileConnectionShareStatus("ready");
+  }
+
+  async function decodeQrCodeSource(source: string): Promise<boolean> {
+    if (typeof window === "undefined" || typeof window.Image !== "function") {
+      return true;
+    }
+
+    const image = new window.Image();
+    image.src = source;
+    if (typeof image.decode !== "function") {
+      return true;
+    }
+
+    try {
+      await image.decode();
+      return true;
+    } catch (error: unknown) {
+      console.error("Failed to decode share connection QR code", error);
+      return false;
     }
   }
 
@@ -380,8 +431,6 @@ function HeaderQRModal({
       });
 
       terminalConnectionShareFailuresRef.current.delete(failureKey);
-      setMobileConnectionShareStatus("ready");
-      setShareConnectionAppUrl(shareUrls.appUrl);
       return shareUrls.appUrl;
     } catch (error: unknown) {
       if (isStaleGeneration() || isAbortError(error, signal)) {

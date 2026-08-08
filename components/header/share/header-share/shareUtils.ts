@@ -310,6 +310,36 @@ export function buildNavigateDeepLinkUrl({
   return `${scheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
 }
 
+export async function createQrCodeSource({
+  url,
+  staleGeneration,
+  signal,
+  errorMessage,
+}: {
+  readonly url: string;
+  readonly staleGeneration: IsStaleGeneration;
+  readonly signal?: AbortSignal | undefined;
+  readonly errorMessage: string;
+}): Promise<string> {
+  try {
+    const dataUrl = await toDataURL(url, {
+      width: 500,
+      margin: 4,
+      color: {
+        dark: "#000000",
+        light: "#ffffff",
+      },
+    });
+
+    return staleGeneration() ? "" : dataUrl;
+  } catch (error: unknown) {
+    if (!staleGeneration() && !isAbortError(error, signal)) {
+      console.error(errorMessage, error);
+    }
+    return "";
+  }
+}
+
 export function generateQrCodeSource({
   url,
   setSource,
@@ -325,27 +355,21 @@ export function generateQrCodeSource({
   readonly signal?: AbortSignal | undefined;
   readonly errorMessage: string;
 }): void {
-  toDataURL(url, {
-    width: 500,
-    margin: 4,
-    color: {
-      dark: "#000000",
-      light: "#ffffff",
-    },
-  })
-    .then((dataUrl: string) => {
-      if (staleGeneration()) {
-        return;
-      }
+  void createQrCodeSource({
+    url,
+    staleGeneration,
+    signal,
+    errorMessage,
+  }).then((dataUrl) => {
+    if (staleGeneration()) {
+      return;
+    }
+    if (dataUrl) {
       setSource(dataUrl);
-    })
-    .catch((error: unknown) => {
-      if (staleGeneration() || isAbortError(error, signal)) {
-        return;
-      }
-      console.error(errorMessage, error);
+    } else {
       clearSource();
-    });
+    }
+  });
 }
 
 export const bodyScrollLock = (() => {

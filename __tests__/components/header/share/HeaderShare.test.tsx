@@ -580,10 +580,7 @@ describe("HeaderShare", () => {
     );
 
     expect(await screen.findByAltText("Current page QR code")).toBeVisible();
-    expect(qrcode.toDataURL).toHaveBeenCalledWith(
-      testPageUrl,
-      QR_CODE_OPTIONS
-    );
+    expect(qrcode.toDataURL).toHaveBeenCalledWith(testPageUrl, QR_CODE_OPTIONS);
     expect(qrcode.toDataURL).toHaveBeenCalledWith(
       "testmobile6529://navigate/mock-path?something=value#details",
       QR_CODE_OPTIONS
@@ -944,6 +941,16 @@ describe("HeaderShare", () => {
       expect(
         screen.getByRole("group", { name: "Device type" })
       ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", {
+          name: "Open 6529 app downloads in a new tab",
+        })
+      ).toHaveAttribute("href", "/about/6529-apps");
+      expect(
+        screen.getByRole("link", {
+          name: "Open 6529 app downloads in a new tab",
+        })
+      ).toHaveAttribute("target", "_blank");
       expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
       expect(screen.queryByRole("link", { name: "Share on X" })).toBeNull();
       expect(
@@ -952,6 +959,47 @@ describe("HeaderShare", () => {
       expect(
         screen.queryByRole("button", { name: "Share with another app" })
       ).toBeNull();
+    });
+
+    it("keeps preparing visible until the connection QR is ready", async () => {
+      const qrcode = require("qrcode");
+      let resolveQrCode!: (source: string) => void;
+      qrcode.toDataURL.mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveQrCode = resolve;
+          })
+      );
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() => expect(qrcode.toDataURL).toHaveBeenCalledTimes(1));
+
+      const loadingNotice = screen.getByTestId("connection-share-notice");
+      expect(loadingNotice).toHaveAttribute("data-status", "loading");
+      expect(loadingNotice).not.toHaveClass("tw-border", "tw-bg-iron-900/50");
+      expect(
+        screen.getByText("Preparing Device Connection")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByAltText("Connect 6529 Mobile QR code")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId("connection-share-reserved-space")
+      ).toBeInTheDocument();
+
+      resolveQrCode("data:image/png;base64,READY_QR_CODE");
+
+      expect(
+        await screen.findByAltText("Connect 6529 Mobile QR code")
+      ).toHaveAttribute("src", "data:image/png;base64,READY_QR_CODE");
+      expect(
+        screen.queryByText("Preparing Device Connection")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId("connection-share-reserved-space")
+      ).toBeInTheDocument();
     });
 
     it("falls back to Mobile if Desktop becomes unavailable", async () => {
@@ -1795,13 +1843,12 @@ describe("HeaderShare", () => {
         "tw-h-full"
       );
       expect(
-        screen
-          .getByTestId("header-share-modal")
-          .querySelector("#header-share-content")
-      ).toHaveClass("tw-aspect-square");
-      expect(
-        screen.getByTestId("connection-share-content").children
-      ).toHaveLength(1);
+        screen.getByTestId("connection-share-reserved-space")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("connection-share-notice")).toHaveClass(
+        "tw-border",
+        "tw-bg-iron-900/50"
+      );
     });
   });
 
