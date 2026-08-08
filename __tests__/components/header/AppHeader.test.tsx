@@ -11,6 +11,7 @@ import AppHeader from "@/components/header/AppHeader";
 const mockShare = jest.fn();
 const mockNativeCanShare = jest.fn();
 const mockNativeShare = jest.fn();
+const mockShowAppToast = jest.fn();
 const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
 const mockCapacitorIsNativePlatform = jest.fn();
@@ -64,6 +65,9 @@ jest.mock("@capacitor/share", () => ({
     canShare: (...args: unknown[]) => mockNativeCanShare(...args),
     share: (...args: unknown[]) => mockNativeShare(...args),
   },
+}));
+jest.mock("@/components/utils/toast/AppToast", () => ({
+  showAppToast: (...args: unknown[]) => mockShowAppToast(...args),
 }));
 jest.mock("@capacitor/core", () => ({
   Capacitor: {
@@ -721,7 +725,7 @@ describe("AppHeader", () => {
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
   });
 
-  it("shares the exact current app URL from non-wave app pages", async () => {
+  it("shares the exact public page URL directly from non-wave app pages", async () => {
     window.history.pushState(
       {},
       "",
@@ -732,25 +736,6 @@ describe("AppHeader", () => {
     setup({ address: "0x1", asPath: "/the-memes/123" });
 
     fireEvent.click(screen.getByRole("button", { name: "Share page" }));
-    expect(
-      await screen.findByTestId("compact-page-share-layout")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Copy Link" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Share on X" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Share on Farcaster" })
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: "Open in 6529 Desktop" })
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId("page-share-target-menu")).toBeNull();
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Share with another app" })
-    );
 
     await waitFor(() =>
       expect(mockNativeShare).toHaveBeenCalledWith({
@@ -758,9 +743,10 @@ describe("AppHeader", () => {
         url: "https://test.6529.io/the-memes/123?foo=bar&view=exact#details",
       })
     );
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
   });
 
-  it("shows More as active while the native share sheet is open", async () => {
+  it("shows the page-share button as busy while the native share sheet is open", async () => {
     let resolveShare: (value: unknown) => void = () => undefined;
     mockNativeShare.mockReturnValueOnce(
       new Promise((resolve) => {
@@ -770,18 +756,15 @@ describe("AppHeader", () => {
 
     setup({ address: "0x1", asPath: "/open-data" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Share page" }));
-    const moreButton = await screen.findByRole("button", {
-      name: "Share with another app",
-    });
-    fireEvent.click(moreButton);
+    const shareButton = screen.getByRole("button", { name: "Share page" });
+    fireEvent.click(shareButton);
 
     await waitFor(() =>
-      expect(moreButton).toHaveAttribute("aria-busy", "true")
+      expect(shareButton).toHaveAttribute("aria-busy", "true")
     );
-    expect(moreButton).toBeDisabled();
+    expect(shareButton).toBeDisabled();
 
-    fireEvent.click(moreButton);
+    fireEvent.click(shareButton);
 
     expect(mockNativeShare).toHaveBeenCalledTimes(1);
 
@@ -790,26 +773,24 @@ describe("AppHeader", () => {
       await Promise.resolve();
     });
 
-    await waitFor(() =>
-      expect(moreButton).not.toHaveAttribute("aria-busy")
-    );
-    expect(moreButton).not.toBeDisabled();
+    await waitFor(() => expect(shareButton).not.toHaveAttribute("aria-busy"));
+    expect(shareButton).not.toBeDisabled();
   });
 
-  it("hides More when native system sharing is unavailable", async () => {
-    mockNativeCanShare.mockResolvedValueOnce({ value: false });
+  it("shows feedback when native system sharing is unavailable", async () => {
+    mockNativeCanShare.mockResolvedValue({ value: false });
 
     setup({ address: "0x1", asPath: "/open-data" });
 
     fireEvent.click(screen.getByRole("button", { name: "Share page" }));
-    expect(
-      await screen.findByTestId("compact-page-share-layout")
-    ).toBeInTheDocument();
 
-    await waitFor(() => expect(mockNativeCanShare).toHaveBeenCalled());
-    expect(
-      screen.queryByRole("button", { name: "Share with another app" })
-    ).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(mockShowAppToast).toHaveBeenCalledWith({
+        type: "error",
+        message: "System sharing is unavailable.",
+      })
+    );
+    expect(mockNativeShare).not.toHaveBeenCalled();
   });
 
   it("shows unavailable feedback without copying when native page share fails", async () => {
@@ -819,17 +800,14 @@ describe("AppHeader", () => {
     setup({ address: "0x1", asPath: "/open-data" });
 
     fireEvent.click(screen.getByRole("button", { name: "Share page" }));
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Share with another app" })
-    );
 
-    expect(
-      await screen.findByText("System sharing is unavailable.")
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(mockShowAppToast).toHaveBeenCalledWith({
+        type: "error",
+        message: "System sharing is unavailable.",
+      })
+    );
     expect(mockWriteText).not.toHaveBeenCalled();
-    expect(
-      screen.queryByRole("button", { name: "Share with another app" })
-    ).not.toBeInTheDocument();
   });
 
   it("does not copy the current app URL when native page share is cancelled", async () => {
@@ -840,15 +818,13 @@ describe("AppHeader", () => {
 
     setup({ address: "0x1", asPath: "/open-data" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Share page" }));
-    const moreButton = await screen.findByRole("button", {
-      name: "Share with another app",
-    });
-    fireEvent.click(moreButton);
+    const shareButton = screen.getByRole("button", { name: "Share page" });
+    fireEvent.click(shareButton);
 
     await waitFor(() => expect(mockNativeShare).toHaveBeenCalledTimes(1));
     expect(mockWriteText).not.toHaveBeenCalled();
-    expect(moreButton).toBeInTheDocument();
+    expect(mockShowAppToast).not.toHaveBeenCalled();
+    expect(shareButton).toBeInTheDocument();
   });
 
   it.each([

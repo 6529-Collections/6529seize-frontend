@@ -83,8 +83,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 - Open `/rememes/{contract}/{tokenId}`: title uses shortened contract/token.
 - Open `/`: health heart shortcut appears in the action row.
 - Open a native app or small-screen web page such as `/the-memes/123`: the
-  share button opens a compact action modal for copying the link, sharing to X
-  or Farcaster, or opening the platform share sheet through `More`.
+  share button opens the platform share sheet directly with the exact public
+  page URL.
 
 ## Edge Cases
 

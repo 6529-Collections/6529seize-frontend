@@ -17,6 +17,7 @@ import React from "react";
 
 const mockCapacitorCanShare = jest.fn();
 const mockCapacitorShare = jest.fn();
+const mockShowAppToast = jest.fn();
 
 // Mocks
 jest.mock("@/hooks/useCapacitor");
@@ -29,6 +30,9 @@ jest.mock("@capacitor/share", () => ({
     canShare: (...args: unknown[]) => mockCapacitorCanShare(...args),
     share: (...args: unknown[]) => mockCapacitorShare(...args),
   },
+}));
+jest.mock("@/components/utils/toast/AppToast", () => ({
+  showAppToast: (...args: unknown[]) => mockShowAppToast(...args),
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
@@ -306,7 +310,7 @@ describe("HeaderShare", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("opens the compact page-share modal in a mobile browser", async () => {
+  it("shares directly from a mobile browser without opening a modal", async () => {
     mockIsMobile.mockReturnValue(true);
     document.title = "Mobile Share";
     const share = jest.fn().mockResolvedValue(undefined);
@@ -318,38 +322,40 @@ describe("HeaderShare", () => {
       configurable: true,
       value: jest.fn(() => true),
     });
-    const qrcode = require("qrcode");
-    qrcode.toDataURL.mockClear();
-
     renderWithProviders(<HeaderPageShareButton isCapacitor={false} />);
     await userEvent.click(screen.getByRole("button", { name: "Share page" }));
-
-    expect(
-      await screen.findByTestId("compact-page-share-layout")
-    ).toBeInTheDocument();
-    const modal = screen.getByTestId("header-share-modal");
-    expect(modal).toHaveClass("tw-max-w-sm");
-    expect(modal).not.toHaveClass("sm:tw-max-w-2xl");
-    expect(screen.getByRole("button", { name: "Copy Link" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Share on X" })).toBeVisible();
-    expect(
-      screen.getByRole("link", { name: "Share on Farcaster" })
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("link", { name: "Open in 6529 Desktop" })
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId("page-share-target-menu")).toBeNull();
-    expect(screen.queryByTestId("page-share-divider")).toBeNull();
-    expect(qrcode.toDataURL).not.toHaveBeenCalled();
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Share with another app" })
-    );
 
     expect(share).toHaveBeenCalledWith({
       title: "Mobile Share",
       url: `${testOrigin}/mock-path?something=value#details`,
     });
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
+  });
+
+  it("shares the public page URL directly from the native app", async () => {
+    document.title = "Native Share";
+
+    renderWithProviders(<HeaderPageShareButton isCapacitor />);
+    await userEvent.click(screen.getByRole("button", { name: "Share page" }));
+
+    await waitFor(() =>
+      expect(mockCapacitorShare).toHaveBeenCalledWith({
+        title: "Native Share",
+        url: "https://test.6529.io/mock-path?something=value#details",
+      })
+    );
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
+  });
+
+  it("reports unavailable direct mobile sharing without opening a modal", async () => {
+    renderWithProviders(<HeaderPageShareButton isCapacitor={false} />);
+    await userEvent.click(screen.getByRole("button", { name: "Share page" }));
+
+    expect(mockShowAppToast).toHaveBeenCalledWith({
+      type: "error",
+      message: "System sharing is unavailable.",
+    });
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
   });
 
   it("renders nothing on a shared unsupported route", () => {
@@ -508,9 +514,7 @@ describe("HeaderShare", () => {
       expect(copyIcon).toBeInTheDocument();
       await userEvent.click(copyButton);
 
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        testPageUrl
-      );
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(testPageUrl);
       expect(screen.getByRole("button", { name: "Copied" })).toBe(copyButton);
       expect(copyButton).toHaveClass(
         "tw-border-green-500",
@@ -560,6 +564,39 @@ describe("HeaderShare", () => {
     expect(screen.getByRole("button", { name: "App" })).toHaveAttribute(
       "aria-pressed",
       "true"
+    );
+  });
+
+  it("derives every page-share target from the live browser location", async () => {
+    const qrcode = require("qrcode");
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    mockPathname = "/stale-router-path";
+    mockSearchParams = new URLSearchParams("stale=true");
+
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    expect(await screen.findByAltText("Current page QR code")).toBeVisible();
+    expect(qrcode.toDataURL).toHaveBeenCalledWith(
+      testPageUrl,
+      QR_CODE_OPTIONS
+    );
+    expect(qrcode.toDataURL).toHaveBeenCalledWith(
+      "testmobile6529://navigate/mock-path?something=value#details",
+      QR_CODE_OPTIONS
+    );
+    expect(
+      screen.getByRole("link", { name: "Open in 6529 Desktop" })
+    ).toHaveAttribute(
+      "href",
+      "testcore6529://navigate/mock-path?something=value#details"
+    );
+    expect(qrcode.toDataURL).not.toHaveBeenCalledWith(
+      expect.stringContaining("stale-router-path"),
+      expect.anything()
     );
   });
 
@@ -1442,6 +1479,10 @@ describe("HeaderShare", () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       const firstAddress = "0x1111111111111111111111111111111111111111";
       const secondAddress = "0x2222222222222222222222222222222222222222";
+      let resolveSecondMobileShare!: (share: unknown) => void;
+      const secondMobileShare = new Promise<unknown>((resolve) => {
+        resolveSecondMobileShare = resolve;
+      });
       let activeAddress = firstAddress;
       mockAuthUtils.getWalletAddress.mockImplementation(() => activeAddress);
       mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
@@ -1466,6 +1507,17 @@ describe("HeaderShare", () => {
           role: null,
           deep_link_path: `/accept-connection-sharing?token=second-desktop-refresh-token&address=${secondAddress}`,
         });
+      sessionV2.createConnectionShare
+        .mockResolvedValueOnce({
+          connection_share_code: "first-mobile-share-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: firstAddress,
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=first-mobile-share-code",
+        })
+        .mockImplementationOnce(() => secondMobileShare);
 
       const { rerender } = renderWithProviders(<HeaderShare />);
 
@@ -1486,6 +1538,29 @@ describe("HeaderShare", () => {
           <HeaderShare />
         </QueryClientProvider>
       );
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+      );
+      expect(
+        screen.queryByTitle(/token=first-desktop-refresh-token/)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText("Preparing Device Connection")
+      ).toBeInTheDocument();
+      expect(
+        sessionV2.createLegacyDesktopConnectionShare
+      ).toHaveBeenCalledTimes(1);
+
+      resolveSecondMobileShare({
+        connection_share_code: "second-mobile-share-code",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: secondAddress,
+        role: null,
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?connection_share_code=second-mobile-share-code",
+      });
 
       await waitFor(() =>
         expect(

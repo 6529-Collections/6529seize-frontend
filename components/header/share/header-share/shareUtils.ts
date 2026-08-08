@@ -176,20 +176,31 @@ export function buildRouterPath(
   return routerPath;
 }
 
-export function getCurrentFullUrl(): string {
+export function getCurrentPageLocation(): {
+  readonly fullUrl: string;
+  readonly routerPath: string;
+} {
   if (typeof window === "undefined") {
-    return "";
+    return { fullUrl: "", routerPath: "" };
   }
 
-  return window.location.href;
+  const { hash, href, pathname, search } = window.location;
+  return {
+    fullUrl: href,
+    routerPath: `${pathname}${search}${hash}`,
+  };
+}
+
+export function getCurrentFullUrl(): string {
+  return getCurrentPageLocation().fullUrl;
 }
 
 export function getCurrentPublicUrl(): string {
-  if (typeof window === "undefined") {
+  const route = getCurrentPageLocation().routerPath;
+  if (!route) {
     return "";
   }
 
-  const route = `${window.location.pathname}${window.location.search}${window.location.hash}`;
   const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
   const normalizedRoute = route.startsWith("/") ? route : `/${route}`;
   return `${normalizedBase}${normalizedRoute}`;
