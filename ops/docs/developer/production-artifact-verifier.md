@@ -44,8 +44,9 @@ artifact endpoints by the supplied IDs, then requires all of the following:
   expected root (including traversal, absolute-path, duplicate, and
   backslash checks); the extracted artifact has no symlinks or special files,
   has exact checksummed regular-file membership, contains the required
-  manifest, portability inventory, and `target/package.zip`, and passes every
-  `SHA256SUMS` entry.
+  manifest, portability inventory, and `target/package.zip`, permits deployment
+  assets only below `target/_next/static/`, and passes every `SHA256SUMS`
+  entry. No other `target/**` or root path is admissible.
 
 The manifest must be `production-prebuild-v2` and bind exactly the builder
 contract fields `schema_version`, `artifact_contract`, `repository`,
@@ -105,8 +106,9 @@ selection_digest           # selection.json content digest, <hex>
 
 The orchestrator must pass these exact outputs to the later fresh deploy job.
 That job must fetch selection metadata by the exact selection artifact ID,
-download the raw archive from the exact artifact endpoint/run, compare its
-bytes to the GitHub API digest, verify `SHA256SUMS` and `selection_digest`,
+download the raw archive from the exact artifact endpoint/run, validate its
+pre-extraction member list against the separate two-file selection contract,
+compare its bytes to the GitHub API digest, verify `SHA256SUMS` and `selection_digest`,
 and verify the target, operation, original artifact run/ID/name, original
 artifact API digest, and production workflow identity before any deploy
 authority is used. The helper supports this with:

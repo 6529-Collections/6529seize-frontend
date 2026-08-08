@@ -958,7 +958,11 @@ function validateSelectionArtifactRecord(artifacts, request, verifierRun) {
       "selection artifact is not attached to the exact verifier run"
     );
   }
+  // GitHub's artifact attachment omits run_attempt. The exact attempt remains
+  // mandatory on the authenticated verifier run, the attempt-suffixed artifact
+  // name, and selection.json; reject an attachment attempt if GitHub adds one.
   if (
+    attachment.run_attempt !== undefined &&
     requireRunAttempt(
       attachment.run_attempt,
       "selection artifact workflow run attempt"
