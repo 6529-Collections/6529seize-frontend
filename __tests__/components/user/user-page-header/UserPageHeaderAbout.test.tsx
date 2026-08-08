@@ -77,6 +77,10 @@ describe("UserPageHeaderAbout", () => {
     expect(editButton).toHaveClass("touch-only:tw-pointer-events-auto");
     expect(editButton).toHaveClass("touch-only:tw-opacity-100");
     expect(editButton).toHaveClass("touch-only:tw-size-11");
+    expect(editButton).toHaveClass(
+      "touch-only:-tw-ml-2",
+      "touch-only:-tw-mt-2.5"
+    );
   });
 
   it("resets view when props change", () => {
