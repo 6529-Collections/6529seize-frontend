@@ -4,9 +4,11 @@ import userEvent from "@testing-library/user-event";
 import UserPageHeaderPfpWrapper from "@/components/user/user-page-header/pfp/UserPageHeaderPfpWrapper";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-jest.mock("@/components/utils/icons/PencilIcon", () => () => (
-  <span data-testid="pencil" />
-));
+jest.mock("@/components/utils/icons/PencilIcon", () => ({
+  __esModule: true,
+  default: () => <span data-testid="pencil" />,
+  PencilIconSize: { SMALL: "SMALL", MEDIUM: "MEDIUM" },
+}));
 jest.mock(
   "@/components/user/user-page-header/pfp/UserPageHeaderEditPfp",
   () => (props: any) => (
@@ -68,8 +70,11 @@ describe("UserPageHeaderPfpWrapper", () => {
 
     expect(pictureOverlay).toHaveClass("touch-only:tw-bg-transparent");
     expect(pictureOverlay).toHaveClass("touch-only:tw-opacity-100");
-    expect(pencilBadge).toHaveClass("tw-bottom-2", "tw-right-2");
-    expect(pencilBadge).toHaveClass("touch-only:tw-size-7");
+    expect(pencilBadge).toHaveClass(
+      "touch-only:-tw-bottom-1",
+      "touch-only:-tw-right-1"
+    );
+    expect(pencilBadge).toHaveClass("touch-only:tw-size-6");
   });
 
   it("does not render a disabled button when picture is read-only", () => {
