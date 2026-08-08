@@ -23,10 +23,12 @@ function ConnectedAccountRow({
   account,
   onSelect,
   showActiveState,
+  actionsDisabled,
 }: {
   readonly account: ConnectedAccountItem;
   readonly onSelect: (address: string) => void;
   readonly showActiveState: boolean;
+  readonly actionsDisabled: boolean;
 }) {
   const { profile, isLoading: isProfileLoading } = useIdentity({
     handleOrWallet: account.address,
@@ -135,8 +137,12 @@ function ConnectedAccountRow({
     <button
       type="button"
       onClick={() => onSelect(account.address)}
-      className={`${rowClassName} tw-cursor-pointer hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
-      aria-label={`Switch to ${label} (${walletLabel})`}
+      disabled={actionsDisabled}
+      className={`${rowClassName} tw-cursor-pointer hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-50`}
+      aria-label={t(HEADER_USER_MENU_LOCALE, "headerUserMenu.switchToProfile", {
+        profile: label,
+        wallet: walletLabel,
+      })}
     >
       {rowContent}
     </button>
@@ -203,6 +209,7 @@ export default function HeaderUserConnectedAccounts({
             account={account}
             onSelect={onSelectAccount}
             showActiveState={accounts.length > 1}
+            actionsDisabled={actionsDisabled}
           />
         ))}
       </div>

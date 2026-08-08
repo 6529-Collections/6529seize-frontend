@@ -36,9 +36,11 @@ const secondaryAccount = {
 function renderAccounts({
   accounts,
   canAddAccount = true,
+  actionsDisabled = false,
 }: {
   readonly accounts: readonly (typeof activeAccount)[];
   readonly canAddAccount?: boolean;
+  readonly actionsDisabled?: boolean;
 }) {
   const onSelectAccount = jest.fn();
   const onAddAccount = jest.fn();
@@ -50,7 +52,7 @@ function renderAccounts({
       canAddAccount={canAddAccount}
       onAddAccount={onAddAccount}
       onSignOutAll={onSignOutAll}
-      actionsDisabled={false}
+      actionsDisabled={actionsDisabled}
     />
   );
   return { onSelectAccount, onAddAccount, onSignOutAll };
@@ -106,5 +108,29 @@ describe("HeaderUserConnectedAccounts", () => {
     expect(
       screen.queryByRole("button", { name: "Add profile" })
     ).not.toBeInTheDocument();
+  });
+
+  it("disables profile actions while another menu action is pending", () => {
+    const { onSelectAccount, onAddAccount, onSignOutAll } = renderAccounts({
+      accounts: [activeAccount, secondaryAccount],
+      actionsDisabled: true,
+    });
+
+    const addProfile = screen.getByRole("button", { name: "Add profile" });
+    const signOutAll = screen.getByRole("button", { name: "Sign out all" });
+    const switchProfile = screen.getByRole("button", {
+      name: /Switch to secondary/,
+    });
+    expect(addProfile).toBeDisabled();
+    expect(signOutAll).toBeDisabled();
+    expect(switchProfile).toBeDisabled();
+
+    fireEvent.click(addProfile);
+    fireEvent.click(signOutAll);
+    fireEvent.click(switchProfile);
+
+    expect(onAddAccount).not.toHaveBeenCalled();
+    expect(onSignOutAll).not.toHaveBeenCalled();
+    expect(onSelectAccount).not.toHaveBeenCalled();
   });
 });

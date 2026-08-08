@@ -33,7 +33,7 @@ import {
   buildNavigateDeepLinkUrl,
   buildNativeConnectionShareUrls,
   buildRouterPath,
-  createQrCodeSource,
+  createReadyQrCodeSource,
   getCurrentPageLocation,
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
@@ -317,7 +317,7 @@ function HeaderQRModal({
       return;
     }
 
-    const qrSource = await createQrCodeSource({
+    const qrSource = await createReadyQrCodeSource({
       url: connectionUrl,
       staleGeneration: isStaleGeneration,
       signal,
@@ -326,36 +326,14 @@ function HeaderQRModal({
     if (isStaleGeneration()) {
       return;
     }
-    if (!qrSource || !(await decodeQrCodeSource(qrSource))) {
-      if (!isStaleGeneration()) {
-        setUnavailableMobileConnectionShare("error");
-      }
+    if (!qrSource) {
+      setUnavailableMobileConnectionShare("error");
       return;
     }
 
     setShareConnectionAppUrl(connectionUrl);
     setShareConnectionSrc(qrSource);
     setMobileConnectionShareStatus("ready");
-  }
-
-  async function decodeQrCodeSource(source: string): Promise<boolean> {
-    if (typeof window === "undefined" || typeof window.Image !== "function") {
-      return true;
-    }
-
-    const image = new window.Image();
-    image.src = source;
-    if (typeof image.decode !== "function") {
-      return true;
-    }
-
-    try {
-      await image.decode();
-      return true;
-    } catch (error: unknown) {
-      console.error("Failed to decode share connection QR code", error);
-      return false;
-    }
   }
 
   async function generateNativeConnectionShareUrl({

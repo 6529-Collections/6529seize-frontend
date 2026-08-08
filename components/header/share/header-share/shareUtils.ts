@@ -340,6 +340,78 @@ export async function createQrCodeSource({
   }
 }
 
+const CONNECTION_QR_PREPARATION_ATTEMPTS = 2;
+
+async function decodeQrCodeSource({
+  source,
+  staleGeneration,
+  signal,
+}: {
+  readonly source: string;
+  readonly staleGeneration: IsStaleGeneration;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<boolean> {
+  const ImageConstructor = globalThis.Image;
+  if (typeof ImageConstructor !== "function") {
+    return true;
+  }
+
+  const image = new ImageConstructor();
+  image.src = source;
+  if (typeof image.decode !== "function") {
+    return true;
+  }
+
+  try {
+    await image.decode();
+    return !staleGeneration();
+  } catch (error: unknown) {
+    if (!staleGeneration() && !isAbortError(error, signal)) {
+      console.error("Failed to decode share connection QR code", error);
+    }
+    return false;
+  }
+}
+
+export async function createReadyQrCodeSource({
+  url,
+  staleGeneration,
+  signal,
+  errorMessage,
+}: {
+  readonly url: string;
+  readonly staleGeneration: IsStaleGeneration;
+  readonly signal?: AbortSignal | undefined;
+  readonly errorMessage: string;
+}): Promise<string> {
+  for (
+    let attempt = 0;
+    attempt < CONNECTION_QR_PREPARATION_ATTEMPTS;
+    attempt++
+  ) {
+    if (staleGeneration()) {
+      return "";
+    }
+    const source = await createQrCodeSource({
+      url,
+      staleGeneration,
+      signal,
+      errorMessage,
+    });
+    if (staleGeneration()) {
+      return "";
+    }
+    if (
+      source &&
+      (await decodeQrCodeSource({ source, staleGeneration, signal }))
+    ) {
+      return staleGeneration() ? "" : source;
+    }
+  }
+
+  return "";
+}
+
 export function generateQrCodeSource({
   url,
   setSource,

@@ -176,6 +176,7 @@ const originalSecureContextDescriptor = Object.getOwnPropertyDescriptor(
   globalThis,
   "isSecureContext"
 );
+const originalImageConstructor = globalThis.Image;
 const QR_CODE_OPTIONS = {
   width: 500,
   margin: 4,
@@ -282,6 +283,11 @@ describe("HeaderShare", () => {
     Reflect.deleteProperty(globalThis.navigator, "canShare");
     Reflect.deleteProperty(globalThis.document, "permissionsPolicy");
     Reflect.deleteProperty(globalThis.document, "featurePolicy");
+    Object.defineProperty(globalThis, "Image", {
+      configurable: true,
+      writable: true,
+      value: originalImageConstructor,
+    });
   });
 
   afterAll(() => {
@@ -1000,6 +1006,76 @@ describe("HeaderShare", () => {
       expect(
         screen.getByTestId("connection-share-reserved-space")
       ).toBeInTheDocument();
+    });
+
+    it("retries a transient QR decode failure before showing ready", async () => {
+      const qrcode = require("qrcode");
+      const decode = jest
+        .fn<Promise<void>, []>()
+        .mockRejectedValueOnce(new Error("transient decode failure"))
+        .mockResolvedValueOnce(undefined);
+      Object.defineProperty(globalThis, "Image", {
+        configurable: true,
+        writable: true,
+        value: class {
+          public src = "";
+          public decode = decode;
+        },
+      });
+      const consoleError = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByAltText("Connect 6529 Mobile QR code")
+      ).toBeInTheDocument();
+      expect(qrcode.toDataURL).toHaveBeenCalledTimes(2);
+      expect(decode).toHaveBeenCalledTimes(2);
+      expect(
+        screen.queryByText("Device Connection Unavailable")
+      ).not.toBeInTheDocument();
+      consoleError.mockRestore();
+    });
+
+    it("does not retry or update connection state after closing during decode", async () => {
+      const qrcode = require("qrcode");
+      let rejectDecode!: (error: Error) => void;
+      const decode = jest.fn(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectDecode = reject;
+          })
+      );
+      Object.defineProperty(globalThis, "Image", {
+        configurable: true,
+        writable: true,
+        value: class {
+          public src = "";
+          public decode = decode;
+        },
+      });
+      const consoleError = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() => expect(decode).toHaveBeenCalledTimes(1));
+
+      await userEvent.click(
+        screen.getByLabelText("Close connect device modal")
+      );
+      rejectDecode(new Error("decode cancelled with modal close"));
+
+      await waitFor(() => expect(qrcode.toDataURL).toHaveBeenCalledTimes(1));
+      expect(
+        screen.queryByText("Device Connection Unavailable")
+      ).not.toBeInTheDocument();
+      expect(consoleError).not.toHaveBeenCalled();
+      consoleError.mockRestore();
     });
 
     it("falls back to Mobile if Desktop becomes unavailable", async () => {

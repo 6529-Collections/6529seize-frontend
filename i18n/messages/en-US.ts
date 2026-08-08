@@ -1856,6 +1856,7 @@ export const EN_US_MESSAGES = {
   "headerUserMenu.connectDevice": "Connect Device",
   "headerUserMenu.profiles": "Profiles",
   "headerUserMenu.addProfile": "Add profile",
+  "headerUserMenu.switchToProfile": "Switch to {profile} ({wallet})",
   "headerUserMenu.signOutAll": "Sign out all",
   "headerUserMenu.logout": "Logout",
   "webSidebar.accountMenu.openAriaLabel": "Open account and profiles menu",
