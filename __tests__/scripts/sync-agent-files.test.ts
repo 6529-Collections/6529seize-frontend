@@ -252,6 +252,12 @@ describe("sync-agent-files", () => {
             record.id === "delegation.register-consolidation-doc"
         )
       );
+      const consolidationUseCaseRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.consolidation-use-cases"
+        )
+      );
 
       consolidationRecords.forEach((consolidationRecord) => {
         expect(consolidationRecord?.aliases).toEqual(
@@ -281,6 +287,29 @@ describe("sync-agent-files", () => {
         );
       });
       expect(consolidationRecords[1]).toEqual(consolidationRecords[0]);
+      consolidationUseCaseRecords.forEach((consolidationUseCaseRecord) => {
+        expect(consolidationUseCaseRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "wallet consolidation limit",
+            "maximum consolidation group size",
+            "number of wallets in a consolidation",
+            "number of addresses in a consolidation",
+            "wallet consolidation capacity",
+          ])
+        );
+        expect(consolidationUseCaseRecord?.keywords).toEqual(
+          expect.arrayContaining(["limit", "maximum", "capacity"])
+        );
+        expect(consolidationUseCaseRecord?.facts).toEqual(
+          expect.arrayContaining([
+            "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
+            "That group limit means a wallet can be consolidated with up to 2 other addresses in the same three-address group.",
+          ])
+        );
+      });
+      expect(consolidationUseCaseRecords[1]).toEqual(
+        consolidationUseCaseRecords[0]
+      );
     });
   });
 

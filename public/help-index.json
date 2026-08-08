@@ -3020,6 +3020,14 @@
       "title": "Consolidation Use Cases",
       "aliases": [
         "consolidation use cases",
+        "wallet consolidation limit",
+        "consolidation wallet limit",
+        "maximum consolidation group size",
+        "number of wallets in a consolidation",
+        "number of addresses in a consolidation",
+        "how many wallets can be consolidated",
+        "how many addresses can be consolidated",
+        "wallet consolidation capacity",
         "4 wallet consolidation",
         "four wallet consolidation",
         "4 wallet consolidation limit",
@@ -3048,11 +3056,15 @@
         "minting",
         "transaction",
         "compromised",
-        "reciprocal"
+        "reciprocal",
+        "limit",
+        "maximum",
+        "capacity"
       ],
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
         "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
+        "That group limit means a wallet can be consolidated with up to 2 other addresses in the same three-address group.",
         "The docs cover two-address and three-address patterns, plus a four-address compromised-wallet scenario where the user chooses which three-address set should count.",
         "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
       ],
