@@ -31,6 +31,8 @@ profile menu. Mobile web and native apps open page sharing from the app header.
   device connection with a full-width divider inside the connection-actions
   section and stronger section boundaries around the pair.
 - Native app: select the page-share icon in the app header on supported routes.
+  When a wave is active, use its arrow-style share action inside the `More`
+  menu instead of a separate page-share icon.
 
 ## User Journey
 
@@ -81,8 +83,10 @@ mobile web and the native app hide it. Specifically, Share is hidden on:
 - home (`/`) on mobile web and in the native app only
 
 All other pages, including `/waves`, wave detail routes, and the `waves` query
-view, support Share. Desktop web uses the sidebar entry; mobile web and the
-native app use their header entry.
+view, support Share. Desktop web uses the sidebar entry and mobile web uses its
+header entry. In the native app, the general header entry is hidden while a
+wave is active because the wave-specific share action is already available in
+the `More` menu.
 
 ## Connect Device
 

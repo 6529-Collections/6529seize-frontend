@@ -944,7 +944,7 @@ describe("AppHeader", () => {
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
   });
 
-  it("shows gallery toggle in eligible wave context and toggles view mode", () => {
+  it("keeps eligible wave sharing in the overflow with the arrow icon", () => {
     const toggleViewMode = jest.fn();
     const wave = {
       id: "w4",
@@ -961,8 +961,18 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
+
     fireEvent.click(
       screen.getByRole("button", { name: "More header actions" })
+    );
+
+    const shareWave = screen.getByRole("menuitem", { name: "Share wave" });
+    expect(shareWave.querySelector("svg")).toHaveAttribute(
+      "viewBox",
+      "0 0 512 512"
     );
 
     const galleryToggle = screen.getByRole("menuitem", {

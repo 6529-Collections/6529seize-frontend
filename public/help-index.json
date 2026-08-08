@@ -3940,6 +3940,7 @@
         "Copy changes to a green Copied state for about 1.5 seconds.",
         "System sharing uses the browser URL at invocation time, including search parameters and the hash; cancellation is silent, while runtime unavailability hides the action and provides accessible feedback without falling back to Copy.",
         "Desktop web supports page sharing on home, while mobile web and the native app hide it there; all three surfaces hide page sharing on Messages, Notifications, and the Messages query view, while Waves and the Waves query view remain shareable.",
+        "When a wave is active in the native app, the general Share page button is hidden and the wave-specific arrow share action remains inside the More menu.",
         "Mobile web and native app sharing use their existing header placement and open the compact Share dialog.",
         "The profile menu contains Profile and Connect Device; connection targets never appear in the Share modal.",
         "Wave-specific link sharing also exists in the wave header.",
@@ -5110,6 +5111,7 @@
       "facts": [
         "Wave link share and copy behavior is documented as a wave header feature.",
         "Use the wave header share/copy affordance when users ask how to send someone a wave link.",
+        "In the native app, an active wave keeps sharing in the More menu with an arrow-style share icon instead of showing a second page-share button.",
         "General route sharing is covered by the shared share modal record."
       ],
       "canonical_path": "/waves",
