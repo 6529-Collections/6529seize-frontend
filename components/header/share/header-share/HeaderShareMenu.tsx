@@ -1,29 +1,21 @@
-"use client";
-
-import { useElectron } from "@/hooks/useElectron";
 import { t } from "@/i18n/messages";
 
 import {
-  getSubTabCount,
-  getSubTabLabel,
+  getConnectTargetCount,
   HEADER_SHARE_LOCALE,
-  Mode,
   SubMode,
 } from "./constants";
 
 export function ModalMenu({
-  activeTab,
   activeSubTab,
-  onTabChange,
+  isElectron,
+  onSubTabChange,
 }: {
-  readonly activeTab: Mode;
   readonly activeSubTab: SubMode;
-  readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
+  readonly isElectron: boolean;
+  readonly onSubTabChange: (subTab: SubMode) => void;
 }) {
-  const isElectron = useElectron() ?? false;
-  const topTabCount = 2;
-  const subTabCount = getSubTabCount(activeTab, isElectron);
-  const subTabLabel = getSubTabLabel(activeTab);
+  const subTabCount = getConnectTargetCount(isElectron);
   const getMenuButtonClass = (active: boolean) => {
     const baseClassName =
       "tw-inline-flex tw-h-10 tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-rounded-xl tw-border-0 tw-px-2 tw-text-[15px] tw-font-medium tw-transition tw-duration-200";
@@ -36,76 +28,35 @@ export function ModalMenu({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
-      <div className="tw-flex tw-flex-col tw-gap-1">
-        <div className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
-          {t(HEADER_SHARE_LOCALE, "headerShare.menu.shareType")}
-        </div>
-        <div
-          className="tw-grid tw-gap-2"
-          style={{
-            gridTemplateColumns: `repeat(${topTabCount}, minmax(0, 1fr))`,
-          }}
+    <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1 tw-border-0 tw-p-0">
+      <legend className="tw-sr-only">
+        {t(HEADER_SHARE_LOCALE, "headerShare.menu.deviceType")}
+      </legend>
+      <div
+        className="tw-grid tw-gap-2"
+        style={{
+          gridTemplateColumns: `repeat(${subTabCount}, minmax(0, 1fr))`,
+        }}
+      >
+        <button
+          type="button"
+          aria-pressed={activeSubTab === SubMode.MOBILE}
+          className={getMenuButtonClass(activeSubTab === SubMode.MOBILE)}
+          onClick={() => onSubTabChange(SubMode.MOBILE)}
         >
+          <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.mobile")}</span>
+        </button>
+        {!isElectron && (
           <button
             type="button"
-            disabled={activeTab === Mode.SHARE}
-            className={getMenuButtonClass(activeTab === Mode.SHARE)}
-            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}
+            aria-pressed={activeSubTab === SubMode.DESKTOP}
+            className={getMenuButtonClass(activeSubTab === SubMode.DESKTOP)}
+            onClick={() => onSubTabChange(SubMode.DESKTOP)}
           >
-            {t(HEADER_SHARE_LOCALE, "headerShare.menu.connection")}
+            <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.desktop")}</span>
           </button>
-          <button
-            type="button"
-            disabled={activeTab === Mode.NAVIGATE}
-            className={getMenuButtonClass(activeTab === Mode.NAVIGATE)}
-            onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}
-          >
-            {t(HEADER_SHARE_LOCALE, "headerShare.menu.currentUrl")}
-          </button>
-        </div>
+        )}
       </div>
-
-      <div className="tw-flex tw-flex-col tw-gap-1">
-        <div className="tw-px-1 tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
-          {subTabLabel}
-        </div>
-        <div
-          className="tw-grid tw-gap-2"
-          style={{
-            gridTemplateColumns: `repeat(${subTabCount}, minmax(0, 1fr))`,
-          }}
-        >
-          <button
-            type="button"
-            disabled={activeSubTab === SubMode.APP}
-            className={getMenuButtonClass(activeSubTab === SubMode.APP)}
-            onClick={() => onTabChange(activeTab, SubMode.APP)}
-          >
-            <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.mobile")}</span>
-          </button>
-          {activeTab === Mode.NAVIGATE && (
-            <button
-              type="button"
-              disabled={activeSubTab === SubMode.BROWSER}
-              className={getMenuButtonClass(activeSubTab === SubMode.BROWSER)}
-              onClick={() => onTabChange(activeTab, SubMode.BROWSER)}
-            >
-              <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.browser")}</span>
-            </button>
-          )}
-          {!isElectron && (
-            <button
-              type="button"
-              disabled={activeSubTab === SubMode.CORE}
-              className={getMenuButtonClass(activeSubTab === SubMode.CORE)}
-              onClick={() => onTabChange(activeTab, SubMode.CORE)}
-            >
-              <span>{t(HEADER_SHARE_LOCALE, "headerShare.menu.desktop")}</span>
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+    </fieldset>
   );
 }

@@ -3,9 +3,9 @@
 ## Overview
 
 Wallet and account controls cover connect, disconnect, add-account flows,
-share, account selection, network switching, logout, and proxy identity
-switching. Web and app surfaces reach the same session outcomes, but they
-expose different controls.
+device connection, profile navigation, account selection, network switching,
+logout, and proxy identity switching. Page Share is a separate navigation
+action.
 
 ## Location in the Site
 
@@ -18,8 +18,6 @@ expose different controls.
 
 - Web disconnected: select `Connect` in the sidebar account area.
 - Web connected: single-activate the user row to open the account dropdown.
-- Web connected with multiple accounts: activate the user row twice quickly to
-  switch to the next connected account.
 - App layout: open the menu/avatar button, then use footer account actions.
 - Connected multi-profile surfaces: use `Add` on web or `+` in app footer when
   another connected profile slot is available.
@@ -33,9 +31,7 @@ expose different controls.
   - expanded sidebar button: `Connect`
   - collapsed sidebar icon button tooltip: `Connect Wallet`
 - Connected:
-  - single activate opens the account dropdown
-  - quick double activate cycles to the next connected account when at least
-    two accounts are available
+  - single activate opens the account dropdown immediately
   - collapsed-rail hover visibly highlights the avatar without opening the
     dropdown
   - avatar can show a small unread dot when another connected account has
@@ -53,9 +49,15 @@ expose different controls.
   - when fewer than five connected profiles are stored, an `Add` row appears
     under the connected-profile list
 - Session actions:
-  - wallet connected: `Disconnect Wallet`, desktop-web `Share`,
-    `Disconnect & Logout`
-  - wallet disconnected: `Connect Wallet`, desktop-web `Share`, `Logout`
+  - `Profile` opens the active handle route, with wallet-address fallback
+  - `Connect Device` opens the Mobile/Desktop connection dialog on
+    desktop web
+  - wallet connection/disconnection and `Connect Device` share one connection
+    section, separated by a lighter full-width divider; surrounding account,
+    proxy, network, and profile sections use stronger boundaries
+  - `Profile`, logout, and multi-profile sign-out share the final subsection
+  - wallet connected: `Disconnect Wallet`, `Disconnect & Logout`
+  - wallet disconnected: `Connect Wallet`, `Logout`
   - multi-account web sessions also expose `Sign Out All Profiles`
 - Network controls:
   - when the connected wallet has more than one supported chain, the dropdown
@@ -83,8 +85,7 @@ expose different controls.
 
 1. Open account controls from web sidebar or app sidebar footer.
 2. Connect wallet if needed.
-3. On web, single-activate the user row to open the dropdown, or quickly
-   activate it twice to cycle to the next connected account.
+3. On web, single-activate the user row to open the dropdown.
 4. If another profile slot is available, use `Add` on web or `+` in app footer
    to reopen wallet connect and authorize another account.
 5. Use connected-account controls:
@@ -92,7 +93,9 @@ expose different controls.
    - use app account switch controls in the app sidebar footer.
 6. Use session actions:
    - `Disconnect Wallet` (web only): disconnect wallet without full logout.
-   - desktop-web `Share`: open the QR/deep-link modal from the web dropdown.
+   - `Profile`: open the active profile.
+   - desktop-web `Connect Device`: choose Mobile or Desktop without
+     exposing page-share actions.
    - `Switch to {nextChain}`: move to the next supported wallet network when
      chain switching is available.
    - `Disconnect & Logout` / `Logout`: full sign-out.
@@ -117,14 +120,12 @@ expose different controls.
   without leaving the current route.
 - Use connected-account rows in the web dropdown to switch profiles without
   leaving the menu.
-- Use a quick second activate on the web user row to cycle to the next
-  connected account.
 - Use `Disconnect & Logout` (or `Logout`) to fully sign out.
 - Use web `Disconnect Wallet` when you need wallet disconnect without full
   logout.
 - Use `Switch to {nextChain}` from the web dropdown or app footer when you need
   to cycle between supported wallet networks.
-- Open `Share` from the web dropdown on desktop web.
+- Open `Connect Device` from the web dropdown on desktop web.
 - Use `Sign Out All Profiles` when you need to clear a multi-account web
   session.
 - Open app `Push Notifications` settings from the account footer.
@@ -136,8 +137,7 @@ expose different controls.
 
 - Web sidebar account area shows loading placeholders while identity data loads.
 - Name label fallback order is handle -> wallet display name -> wallet prefix.
-- `Profile` shortcuts in web/app navigation appear only when an address is
-  present.
+- `Profile` is available in the connected web account dropdown.
 - Web dropdown always includes the base identity row.
 - Web dropdown positioning follows the sidebar account row when wide desktop
   layouts add centered outer margins.
@@ -147,12 +147,11 @@ expose different controls.
   stored.
 - Proxy rows appear only when active received proxies exist.
 - Proxy switching is not available in app footer.
-- Web `Share` appears only on desktop web after device detection resolves; it
-  is hidden in Capacitor/native and mobile-device web contexts.
+- Web `Connect Device` appears only on desktop web after device
+  detection resolves; it is hidden in Capacitor/native and mobile-device web
+  contexts.
 - Chain switch controls appear only when the connected wallet has more than one
   supported chain.
-- Quick double activate cycles accounts only when at least two connected
-  accounts are available.
 - Unread count badges are capped at `99+`.
 - Avatar unread dots are shown only for unread activity on non-active connected
   accounts.
@@ -161,8 +160,8 @@ expose different controls.
   flips to another already-known account.
 - If add-account is canceled and the wallet flow returns to the original active
   wallet, the current session should stay on that original profile.
-- After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`,
-  `Share`, and `Logout`.
+- After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
+  and `Logout`; `Connect Wallet` remains grouped with `Connect Device`.
 
 ## Failure and Recovery
 
@@ -171,12 +170,11 @@ expose different controls.
   and complete the wallet handoff again.
 - If account state looks stale after proxy/account changes, run
   `Disconnect & Logout`, then reconnect.
-- If quick re-activating the web user row switches accounts unexpectedly, wait
-  a moment and use a single activate to reopen the dropdown.
 - If chain switching is missing, verify the wallet is connected and the current
   session exposes more than one supported chain.
-- If web `Share` is missing, verify you are on desktop web with a resolved
-  device state; Capacitor/native and mobile-device web intentionally hide it.
+- If `Connect Device` is missing, verify you are on desktop web with a
+  resolved device state; Capacitor/native and mobile-device web intentionally
+  hide it.
 - If unread account dots/badges look stale, open `/notifications` for the
   target account, then revisit account controls.
 - If wallet controls crash, use wallet error-boundary actions: `Try Again`,
@@ -191,8 +189,9 @@ expose different controls.
   actions.
 - Chain switching cycles through the configured supported wallet networks and
   appears only when more than one chain is available.
-- Desktop-web `Share` is available from the web dropdown, while disconnected
-  desktop web exposes `Share` as a standalone sidebar row instead.
+- Desktop-web page Share is a supported-route sidebar action; mobile web and
+  the native app use a supported-route header action. Page Share is not part of
+  the account dropdown.
 - Unread dots/badges are notification-count indicators only; they do not show
   notification category.
 
@@ -201,7 +200,7 @@ expose different controls.
 - [Navigation Index](README.md)
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Mobile Push Notifications](../notifications/feature-mobile-push-notifications.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)
