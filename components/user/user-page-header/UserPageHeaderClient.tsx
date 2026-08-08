@@ -30,6 +30,7 @@ import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import UserPageHeaderSubscriptionStatus from "./UserPageHeaderSubscriptionStatus";
+import UserPageHeaderEditProfile from "./UserPageHeaderEditProfile";
 import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
@@ -241,10 +242,15 @@ export default function UserPageHeaderClient({
                   </div>
                 </div>
 
-                {websiteAction || followHandle || showSubscriptionStatus ? (
+                {websiteAction || followHandle || canEdit ? (
                   <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-flex-col tw-items-stretch tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
-                    {showSubscriptionStatus ? (
-                      <UserPageHeaderSubscriptionStatus profile={profile} />
+                    {canEdit ? (
+                      <UserPageHeaderEditProfile
+                        profile={profile}
+                        statement={aboutStatement}
+                        defaultBanner1={banner1Color}
+                        defaultBanner2={banner2Color}
+                      />
                     ) : null}
                     {websiteAction ? (
                       <ButtonLink
@@ -284,6 +290,12 @@ export default function UserPageHeaderClient({
                   statement={aboutStatement}
                   canEdit={canEdit}
                 />
+              </div>
+            ) : null}
+
+            {showSubscriptionStatus ? (
+              <div className="tw-mt-4">
+                <UserPageHeaderSubscriptionStatus profile={profile} />
               </div>
             ) : null}
 
