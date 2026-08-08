@@ -279,6 +279,11 @@ describe("sync-agent-files", () => {
       );
 
       consolidationRecords.forEach((consolidationRecord) => {
+        expect(consolidationRecord?.facts).toEqual(
+          expect.arrayContaining([
+            "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
+          ])
+        );
         expect(consolidationRecord?.aliases).toEqual(
           expect.arrayContaining([
             "add another wallet",
@@ -291,6 +296,8 @@ describe("sync-agent-files", () => {
         );
         expect(consolidationRecord?.aliases).not.toEqual(
           expect.arrayContaining([
+            "connect another wallet",
+            "connect two wallets",
             "use multiple wallets",
             "use more than one wallet",
           ])
@@ -355,8 +362,16 @@ describe("sync-agent-files", () => {
         consolidationUpdateRecords[0]
       );
       walletManagementClarificationRecords.forEach((record) => {
+        expect(record?.aliases).toEqual(
+          expect.arrayContaining([
+            "connect another wallet",
+            "connect two wallets",
+            "wallet connection or consolidation",
+          ])
+        );
         expect(record?.facts).toEqual(
           expect.arrayContaining([
+            "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
             "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
             "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
             "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",

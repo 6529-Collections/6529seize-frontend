@@ -2877,8 +2877,6 @@
         "link another wallet",
         "link two wallets",
         "link my wallets",
-        "connect another wallet",
-        "connect two wallets",
         "pair two wallets",
         "set up multiple wallets",
         "set up a second wallet"
@@ -3132,14 +3130,18 @@
     {
       "id": "delegation.wallet-management-clarification",
       "kind": "workflow",
-      "title": "Wallet Management Clarification",
+      "title": "Wallet Connection and Management Clarification",
       "link_label": "Delegation Center",
       "aliases": [
         "connected wallet or consolidation",
+        "connect another wallet",
+        "connect two wallets",
+        "wallet connection or consolidation",
         "wallet management clarification"
       ],
       "keywords": ["wallet", "management", "consolidation", "connected"],
       "facts": [
+        "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
         "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
         "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
         "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
