@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import { toDataURL } from "qrcode";
 
+import { publicEnv } from "@/config/env";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
   getRefreshToken,
@@ -7,9 +8,7 @@ import {
   getWalletRole,
   hasActiveSessionV2Auth,
 } from "@/services/auth/auth.utils";
-import { createConnectionShare } from "@/services/auth/session-v2.utils";
-
-const QRCode = require("qrcode");
+import type { createConnectionShare } from "@/services/auth/session-v2.utils";
 
 export type NativeConnectionShare = Awaited<
   ReturnType<typeof createConnectionShare>
@@ -36,15 +35,21 @@ export type TerminalConnectionShareStatus = Extract<
   ConnectionShareStatus,
   "legacy-auth" | "error"
 >;
-export type DisplayContent = {
-  readonly content: ReactNode;
-  readonly url: string;
-};
 export type ConnectionShareSessionVerificationStatus =
   | "active"
   | "inactive"
   | "error"
   | "stale";
+
+export type PageShareData = {
+  readonly title: string;
+  readonly url: string;
+};
+
+export type PageShareSystemShareAdapter = {
+  readonly canShare: (shareData: PageShareData) => Promise<boolean>;
+  readonly share: (shareData: PageShareData) => Promise<void>;
+};
 
 export function getLocalLegacyDesktopAuth(walletAddress: string): {
   readonly refreshToken: string;
@@ -80,6 +85,63 @@ export function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   );
 }
 
+type PermissionsPolicyLike = {
+  readonly allowsFeature?: ((feature: string) => boolean) | undefined;
+  readonly features?: (() => readonly string[]) | undefined;
+};
+
+type DocumentWithPermissionsPolicy = Document & {
+  readonly permissionsPolicy?: PermissionsPolicyLike | undefined;
+  readonly featurePolicy?: PermissionsPolicyLike | undefined;
+};
+
+function isWebShareBlockedByPermissionsPolicy(): boolean {
+  if (typeof document === "undefined") {
+    return false;
+  }
+
+  const policyDocument = document as DocumentWithPermissionsPolicy;
+  const policy =
+    policyDocument.permissionsPolicy ?? policyDocument.featurePolicy;
+  if (
+    typeof policy?.allowsFeature !== "function" ||
+    typeof policy.features !== "function"
+  ) {
+    return false;
+  }
+
+  try {
+    if (!policy.features().includes("web-share")) {
+      return false;
+    }
+
+    return policy.allowsFeature("web-share") === false;
+  } catch {
+    return false;
+  }
+}
+
+export function canUseSystemShare(shareData: ShareData): boolean {
+  if (
+    globalThis.isSecureContext !== true ||
+    typeof navigator === "undefined" ||
+    typeof navigator.share !== "function" ||
+    isWebShareBlockedByPermissionsPolicy()
+  ) {
+    return false;
+  }
+
+  try {
+    if (typeof navigator.canShare !== "function") {
+      return true;
+    }
+
+    return navigator.canShare(shareData);
+  } catch {
+    return false;
+  }
+}
+
 export function isSessionUpgradeRequiredError(error: unknown): boolean {
   const message = getErrorMessage(error);
   return message.toLowerCase().includes("session-v2");
@@ -112,6 +174,45 @@ export function buildRouterPath(
   }
 
   return routerPath;
+}
+
+export function getCurrentFullUrl(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.location.href;
+}
+
+export function getCurrentPublicUrl(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const route = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
+  const normalizedRoute = route.startsWith("/") ? route : `/${route}`;
+  return `${normalizedBase}${normalizedRoute}`;
+}
+
+export function buildSocialShareUrls({
+  url,
+  title,
+}: {
+  readonly url: string;
+  readonly title: string;
+}): {
+  readonly x: string;
+  readonly farcaster: string;
+} {
+  const encodedUrl = encodeURIComponent(url);
+  const encodedTitle = encodeURIComponent(title);
+  const encodedXText = encodeURIComponent(`${title}\n${url}`);
+
+  return {
+    x: `https://x.com/intent/post?text=${encodedXText}`,
+    farcaster: `https://farcaster.xyz/~/compose?text=${encodedTitle}&embeds%5B%5D=${encodedUrl}`,
+  };
 }
 
 export function buildConnectionShareFailureKey({
@@ -188,6 +289,16 @@ export function buildLegacyDesktopConnectionShareUrl({
   return `${coreScheme}://${DeepLinkScope.NAVIGATE}${deepLinkPath}`;
 }
 
+export function buildNavigateDeepLinkUrl({
+  scheme,
+  routerPath,
+}: {
+  readonly scheme: string;
+  readonly routerPath: string;
+}): string {
+  return `${scheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
+}
+
 export function generateQrCodeSource({
   url,
   setSource,
@@ -203,7 +314,14 @@ export function generateQrCodeSource({
   readonly signal?: AbortSignal | undefined;
   readonly errorMessage: string;
 }): void {
-  QRCode.toDataURL(url, { width: 500, margin: 0 })
+  toDataURL(url, {
+    width: 500,
+    margin: 4,
+    color: {
+      dark: "#000000",
+      light: "#ffffff",
+    },
+  })
     .then((dataUrl: string) => {
       if (staleGeneration()) {
         return;

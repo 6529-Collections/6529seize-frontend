@@ -1,17 +1,23 @@
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-
-export const HEADER_SHARE_LOCALE = DEFAULT_LOCALE;
+export { DEFAULT_LOCALE as HEADER_SHARE_LOCALE } from "@/i18n/locales";
 
 export enum Mode {
-  NAVIGATE,
-  SHARE,
+  PAGE_SHARE,
+  CONNECT,
 }
 
 export enum SubMode {
-  BROWSER,
-  APP,
-  CORE,
+  PAGE,
+  MOBILE,
+  DESKTOP,
+}
+
+export enum PageShareTarget {
+  BROWSER = "browser",
+  APP = "app",
+}
+
+export function getDefaultSubMode(mode: Mode): SubMode {
+  return mode === Mode.PAGE_SHARE ? SubMode.PAGE : SubMode.MOBILE;
 }
 
 export const squareStyle = {
@@ -21,16 +27,17 @@ export const squareStyle = {
   justifyContent: "center",
 };
 
-export function getSubTabCount(activeTab: Mode, isElectron: boolean): number {
-  if (activeTab === Mode.NAVIGATE) {
-    return isElectron ? 2 : 3;
-  }
+export function getConnectTargetCount(isElectron: boolean): number {
   return isElectron ? 1 : 2;
 }
 
-export function getSubTabLabel(activeTab: Mode): string {
-  if (activeTab === Mode.SHARE) {
-    return t(HEADER_SHARE_LOCALE, "headerShare.menu.openLinkIn");
+export function getAvailableConnectSubMode(
+  activeSubTab: SubMode,
+  isElectron: boolean
+): SubMode {
+  if (isElectron && activeSubTab === SubMode.DESKTOP) {
+    return SubMode.MOBILE;
   }
-  return t(HEADER_SHARE_LOCALE, "headerShare.menu.openUrlIn");
+
+  return activeSubTab;
 }

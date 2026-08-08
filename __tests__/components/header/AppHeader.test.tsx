@@ -9,6 +9,7 @@ import React from "react";
 import AppHeader from "@/components/header/AppHeader";
 
 const mockShare = jest.fn();
+const mockNativeCanShare = jest.fn();
 const mockNativeShare = jest.fn();
 const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
@@ -60,6 +61,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 jest.mock("@capacitor/share", () => ({
   Share: {
+    canShare: (...args: unknown[]) => mockNativeCanShare(...args),
     share: (...args: unknown[]) => mockNativeShare(...args),
   },
 }));
@@ -219,11 +221,13 @@ describe("AppHeader", () => {
 
   beforeEach(() => {
     mockShare.mockReset();
+    mockNativeCanShare.mockReset();
     mockNativeShare.mockReset();
     mockWriteText.mockReset();
     mockCopyToClipboard.mockReset();
     mockCapacitorIsNativePlatform.mockReset();
     mockShare.mockResolvedValue(undefined);
+    mockNativeCanShare.mockResolvedValue({ value: true });
     mockNativeShare.mockResolvedValue(undefined);
     mockCapacitorIsNativePlatform.mockReturnValue(false);
     mockWriteText.mockResolvedValue(undefined);
@@ -728,6 +732,25 @@ describe("AppHeader", () => {
     setup({ address: "0x1", asPath: "/the-memes/123" });
 
     fireEvent.click(screen.getByRole("button", { name: "Share page" }));
+    expect(
+      await screen.findByTestId("compact-page-share-layout")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Copy Link" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Share on X" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Share on Farcaster" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Open in 6529 Desktop" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("page-share-target-menu")).toBeNull();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Share with another app" })
+    );
 
     await waitFor(() =>
       expect(mockNativeShare).toHaveBeenCalledWith({
@@ -737,7 +760,7 @@ describe("AppHeader", () => {
     );
   });
 
-  it("shows the page share button as active while the share sheet is open", async () => {
+  it("shows More as active while the native share sheet is open", async () => {
     let resolveShare: (value: unknown) => void = () => undefined;
     mockNativeShare.mockReturnValueOnce(
       new Promise((resolve) => {
@@ -747,16 +770,18 @@ describe("AppHeader", () => {
 
     setup({ address: "0x1", asPath: "/open-data" });
 
-    const sharePageButton = screen.getByRole("button", { name: "Share page" });
-
-    fireEvent.click(sharePageButton);
+    fireEvent.click(screen.getByRole("button", { name: "Share page" }));
+    const moreButton = await screen.findByRole("button", {
+      name: "Share with another app",
+    });
+    fireEvent.click(moreButton);
 
     await waitFor(() =>
-      expect(sharePageButton).toHaveAttribute("aria-busy", "true")
+      expect(moreButton).toHaveAttribute("aria-busy", "true")
     );
-    expect(sharePageButton).toBeDisabled();
+    expect(moreButton).toBeDisabled();
 
-    fireEvent.click(sharePageButton);
+    fireEvent.click(moreButton);
 
     expect(mockNativeShare).toHaveBeenCalledTimes(1);
 
@@ -766,24 +791,45 @@ describe("AppHeader", () => {
     });
 
     await waitFor(() =>
-      expect(sharePageButton).not.toHaveAttribute("aria-busy")
+      expect(moreButton).not.toHaveAttribute("aria-busy")
     );
-    expect(sharePageButton).not.toBeDisabled();
+    expect(moreButton).not.toBeDisabled();
   });
 
-  it("copies the exact current app URL when native page share fails", async () => {
+  it("hides More when native system sharing is unavailable", async () => {
+    mockNativeCanShare.mockResolvedValueOnce({ value: false });
+
+    setup({ address: "0x1", asPath: "/open-data" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Share page" }));
+    expect(
+      await screen.findByTestId("compact-page-share-layout")
+    ).toBeInTheDocument();
+
+    await waitFor(() => expect(mockNativeCanShare).toHaveBeenCalled());
+    expect(
+      screen.queryByRole("button", { name: "Share with another app" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows unavailable feedback without copying when native page share fails", async () => {
     mockNativeShare.mockRejectedValueOnce(new Error("Native share failed"));
     window.history.pushState({}, "", "/open-data?tab=artists#chart");
 
     setup({ address: "0x1", asPath: "/open-data" });
 
     fireEvent.click(screen.getByRole("button", { name: "Share page" }));
-
-    await waitFor(() =>
-      expect(mockWriteText).toHaveBeenCalledWith(
-        "https://test.6529.io/open-data?tab=artists#chart"
-      )
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Share with another app" })
     );
+
+    expect(
+      await screen.findByText("System sharing is unavailable.")
+    ).toBeInTheDocument();
+    expect(mockWriteText).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("button", { name: "Share with another app" })
+    ).not.toBeInTheDocument();
   });
 
   it("does not copy the current app URL when native page share is cancelled", async () => {
@@ -795,15 +841,18 @@ describe("AppHeader", () => {
     setup({ address: "0x1", asPath: "/open-data" });
 
     fireEvent.click(screen.getByRole("button", { name: "Share page" }));
+    const moreButton = await screen.findByRole("button", {
+      name: "Share with another app",
+    });
+    fireEvent.click(moreButton);
 
     await waitFor(() => expect(mockNativeShare).toHaveBeenCalledTimes(1));
     expect(mockWriteText).not.toHaveBeenCalled();
+    expect(moreButton).toBeInTheDocument();
   });
 
   it.each([
     "/",
-    "/waves",
-    "/waves/w1",
     "/messages",
     "/messages/w1",
     "/notifications",
@@ -816,16 +865,32 @@ describe("AppHeader", () => {
     ).not.toBeInTheDocument();
   });
 
-  it.each(["waves", "messages"])(
-    "hides page share while app is showing %s query context",
-    (view) => {
-      setup({ asPath: "/", query: { view } });
+  it.each(["/waves", "/waves/w1"])(
+    "shows page share on supported wave route %s",
+    (asPath) => {
+      setup({ asPath });
 
       expect(
-        screen.queryByRole("button", { name: "Share page" })
-      ).not.toBeInTheDocument();
+        screen.getByRole("button", { name: "Share page" })
+      ).toBeInTheDocument();
     }
   );
+
+  it("shows page share while the app is showing the waves query context", () => {
+    setup({ asPath: "/alice", query: { view: "waves" } });
+
+    expect(
+      screen.getByRole("button", { name: "Share page" })
+    ).toBeInTheDocument();
+  });
+
+  it("hides page share while the app is showing the messages query context", () => {
+    setup({ asPath: "/alice", query: { view: "messages" } });
+
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
+  });
 
   it("hides page share outside Capacitor", () => {
     useCapacitor.mockReturnValue({ isCapacitor: false });

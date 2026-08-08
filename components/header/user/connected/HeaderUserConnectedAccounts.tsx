@@ -163,7 +163,7 @@ export default function HeaderUserConnectedAccounts({
           <button
             type="button"
             onClick={onAddAccount}
-            className="tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+            className="tw-group tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
             aria-label="Add account"
           >
             <div className="tw-flex tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-700 tw-text-iron-200 tw-ring-1 tw-ring-iron-500">

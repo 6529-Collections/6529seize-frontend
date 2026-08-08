@@ -1,7 +1,7 @@
-import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
+import WebSidebarUser from "@/components/layout/sidebar/WebSidebarUser";
 
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
   <div data-testid="item" />
@@ -30,6 +30,37 @@ jest.mock("@/components/auth/SeizeConnectContext");
 jest.mock("@/components/header/useChainSwitcher", () => ({
   useChainSwitcher: jest.fn(),
 }));
+jest.mock("@/components/header/share/HeaderShare", () => ({
+  HeaderConnectModal: ({ show }: { readonly show: boolean }) =>
+    show ? <div role="dialog" aria-label="Connect Device modal" /> : null,
+}));
+jest.mock("@/components/header/user/HeaderUserConnect", () => () => null);
+jest.mock("@/components/user/utils/level/UserLevel", () => () => null);
+jest.mock("@/components/auth/connection-state-indicator", () => ({
+  getConnectionProfileIndicator: () => ({
+    avatarClassName: "",
+    overlayClassName: "",
+    title: "Connected",
+  }),
+}));
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (value: string) => value,
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false }),
+}));
+jest.mock("@/hooks/isMobileDevice", () => ({
+  __esModule: true,
+  useIsMobileDeviceStatus: () => ({
+    isMobileDevice: false,
+    isDeviceDetectionResolved: true,
+  }),
+}));
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: () => ({ profile: null, isLoading: false }),
+}));
+jest.mock("react-use", () => ({ useClickAway: jest.fn() }));
 
 const {
   useSeizeConnectContext: mockConnect,
@@ -83,6 +114,7 @@ function renderDropdown(options: any) {
         isOpen
         profile={options.profile}
         onClose={onClose}
+        onOpenConnect={options.onOpenConnect}
       />
     </AuthContext.Provider>
   );
@@ -101,6 +133,134 @@ describe("HeaderUserMenuDropdown", () => {
     expect(screen.getByText("alice")).toBeInTheDocument();
   });
 
+  it("groups Profile immediately above Logout and closes the menu", () => {
+    const { onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+    });
+
+    const profileLink = screen.getByRole("link", { name: "Profile" });
+    const logoutButton = screen.getByRole("button", {
+      name: "Disconnect & Logout",
+    });
+    expect(profileLink).toHaveAttribute("href", "/alice");
+    expect(profileLink).not.toHaveAttribute("title");
+    expect(profileLink).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
+    expect(logoutButton).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
+    expect(profileLink.parentElement).toBe(logoutButton.parentElement);
+    expect(
+      profileLink.compareDocumentPosition(logoutButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    fireEvent.click(profileLink);
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("uses a full-width divider between Connect Wallet and Connect Device", () => {
+    const onOpenConnect = jest.fn();
+    renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: false,
+      onOpenConnect,
+    });
+
+    const connectWalletButton = screen.getByRole("button", {
+      name: "Connect",
+    });
+    const connectDeviceButton = screen.getByRole("button", {
+      name: "Connect Device",
+    });
+    expect(connectDeviceButton.querySelector("svg")).toHaveAttribute(
+      "viewBox",
+      "1 2 20 20"
+    );
+    expect(connectDeviceButton.querySelector("path")).toHaveAttribute(
+      "d",
+      "M16.9 8.5V6.5a1.8 1.8 0 0 0-1.8-1.8H4.2a1.8 1.8 0 0 0-1.8 1.8v6.4a1.8 1.8 0 0 0 1.8 1.8h7.1"
+    );
+    expect(connectDeviceButton).not.toHaveAttribute("title");
+    expect(connectWalletButton).toHaveClass(
+      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
+    );
+    expect(connectDeviceButton).toHaveClass(
+      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
+    );
+    expect(connectWalletButton.parentElement).toBe(
+      connectDeviceButton.parentElement
+    );
+    expect(connectWalletButton.closest("ul")).toHaveClass("tw-divide-y-2");
+    const connectionActionsDivider = screen.getByTestId(
+      "connection-actions-divider"
+    );
+    expect(connectionActionsDivider).toHaveClass(
+      "-tw-mx-2",
+      "tw-border-t",
+      "tw-border-iron-700"
+    );
+    expect(
+      connectWalletButton.compareDocumentPosition(connectionActionsDivider) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      connectionActionsDivider.compareDocumentPosition(connectDeviceButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    fireEvent.click(connectDeviceButton);
+    expect(onOpenConnect).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
+  });
+
+  it("opens the connect modal through the desktop account menu", () => {
+    mockConnect.mockReturnValue({
+      address: "0xabc",
+      isAuthenticated: true,
+      hasValidWalletAuth: true,
+      isConnected: true,
+      connectedAccounts: [],
+      connectedAccountUnreadNotifications: {},
+      canAddConnectedAccount: false,
+      seizeConnect: jest.fn(),
+      seizeConnectFresh: jest.fn(),
+      seizeAddConnectedAccount: jest.fn(),
+      seizeDisconnect: jest.fn(),
+      seizeDisconnectAndLogout: jest.fn(),
+      seizeDisconnectAndLogoutAll: jest.fn(),
+      seizeSwitchConnectedAccount: jest.fn(),
+    });
+    (useChainSwitcher as jest.Mock).mockReturnValue({
+      chains: [],
+      currentChainName: "Ethereum",
+      nextChainName: "Polygon",
+      switchToNextChain: jest.fn(),
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            activeProfileProxy: null,
+            setActiveProfileProxy: jest.fn(),
+            receivedProfileProxies: [],
+            requestSessionUpgrade: jest.fn(),
+            sessionUpgradeRequired: false,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <WebSidebarUser isCollapsed={false} profile={profileBase} />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /account.*menu/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Connect Device" }));
+
+    expect(
+      screen.getByRole("dialog", { name: "Connect Device modal" })
+    ).toBeInTheDocument();
+  });
+
   it("connects wallet when not connected", async () => {
     const seizeConnectFresh = jest.fn().mockResolvedValue(undefined);
     const { onClose } = renderDropdown({
@@ -109,7 +269,7 @@ describe("HeaderUserMenuDropdown", () => {
       isConnected: false,
       seizeConnectFresh,
     });
-    fireEvent.click(screen.getAllByRole("button", { name: /connect/i })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Connect" }));
     await waitFor(() => {
       expect(seizeConnectFresh).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
@@ -124,7 +284,7 @@ describe("HeaderUserMenuDropdown", () => {
       isConnected: true,
       seizeDisconnect,
     });
-    fireEvent.click(screen.getAllByRole("button", { name: /disconnect/i })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
     await waitFor(() => {
       expect(seizeDisconnect).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
