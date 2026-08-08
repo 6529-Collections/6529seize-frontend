@@ -310,7 +310,7 @@ export function buildNavigateDeepLinkUrl({
   return `${scheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
 }
 
-export async function createQrCodeSource({
+async function createQrCodeSource({
   url,
   staleGeneration,
   signal,
