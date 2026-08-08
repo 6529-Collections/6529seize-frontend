@@ -592,6 +592,24 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
     );
+    const coverageFloor = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/coverage-floor.yml"),
+      "utf8"
+    );
+    const parsedCoverageFloor = YAML.parse(coverageFloor) as {
+      jobs: {
+        "coverage-floor": {
+          steps: Array<{
+            uses?: string;
+            with?: Record<string, unknown>;
+          }>;
+        };
+      };
+    };
+    const coverageCheckoutSteps =
+      parsedCoverageFloor.jobs["coverage-floor"].steps.filter((step) =>
+        step.uses?.startsWith("actions/checkout@")
+      );
     const pushSecretScan = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
       "utf8"
@@ -599,6 +617,11 @@ describe("testing strategy CI plan", () => {
 
     expect(appPrCi.match(/filter: blob:none/gu)).toHaveLength(2);
     expect(appPrCi.match(/fetch-depth: 0/gu)).toHaveLength(2);
+    expect(coverageCheckoutSteps).toHaveLength(1);
+    expect(coverageCheckoutSteps[0]?.with).toMatchObject({
+      "fetch-depth": 0,
+      filter: "blob:none",
+    });
     expect(pushSecretScan).toContain("filter: blob:none");
     expect(pushSecretScan).toContain("fetch-depth: 0");
   });
