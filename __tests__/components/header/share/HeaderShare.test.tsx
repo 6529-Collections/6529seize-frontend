@@ -176,6 +176,7 @@ const originalSecureContextDescriptor = Object.getOwnPropertyDescriptor(
   globalThis,
   "isSecureContext"
 );
+const originalImageConstructor = globalThis.Image;
 const QR_CODE_OPTIONS = {
   width: 500,
   margin: 4,
@@ -282,6 +283,11 @@ describe("HeaderShare", () => {
     Reflect.deleteProperty(globalThis.navigator, "canShare");
     Reflect.deleteProperty(globalThis.document, "permissionsPolicy");
     Reflect.deleteProperty(globalThis.document, "featurePolicy");
+    Object.defineProperty(globalThis, "Image", {
+      configurable: true,
+      writable: true,
+      value: originalImageConstructor,
+    });
   });
 
   afterAll(() => {
@@ -580,10 +586,7 @@ describe("HeaderShare", () => {
     );
 
     expect(await screen.findByAltText("Current page QR code")).toBeVisible();
-    expect(qrcode.toDataURL).toHaveBeenCalledWith(
-      testPageUrl,
-      QR_CODE_OPTIONS
-    );
+    expect(qrcode.toDataURL).toHaveBeenCalledWith(testPageUrl, QR_CODE_OPTIONS);
     expect(qrcode.toDataURL).toHaveBeenCalledWith(
       "testmobile6529://navigate/mock-path?something=value#details",
       QR_CODE_OPTIONS
@@ -944,6 +947,16 @@ describe("HeaderShare", () => {
       expect(
         screen.getByRole("group", { name: "Device type" })
       ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", {
+          name: "Open 6529 app downloads in a new tab",
+        })
+      ).toHaveAttribute("href", "/about/6529-apps");
+      expect(
+        screen.getByRole("link", {
+          name: "Open 6529 app downloads in a new tab",
+        })
+      ).toHaveAttribute("target", "_blank");
       expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
       expect(screen.queryByRole("link", { name: "Share on X" })).toBeNull();
       expect(
@@ -952,6 +965,117 @@ describe("HeaderShare", () => {
       expect(
         screen.queryByRole("button", { name: "Share with another app" })
       ).toBeNull();
+    });
+
+    it("keeps preparing visible until the connection QR is ready", async () => {
+      const qrcode = require("qrcode");
+      let resolveQrCode!: (source: string) => void;
+      qrcode.toDataURL.mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveQrCode = resolve;
+          })
+      );
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() => expect(qrcode.toDataURL).toHaveBeenCalledTimes(1));
+
+      const loadingNotice = screen.getByTestId("connection-share-notice");
+      expect(loadingNotice).toHaveAttribute("data-status", "loading");
+      expect(loadingNotice).not.toHaveClass("tw-border", "tw-bg-iron-900/50");
+      expect(
+        screen.getByText("Preparing Device Connection")
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByAltText("Connect 6529 Mobile QR code")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId("connection-share-reserved-space")
+      ).toBeInTheDocument();
+
+      resolveQrCode("data:image/png;base64,READY_QR_CODE");
+
+      expect(
+        await screen.findByAltText("Connect 6529 Mobile QR code")
+      ).toHaveAttribute("src", "data:image/png;base64,READY_QR_CODE");
+      expect(
+        screen.queryByText("Preparing Device Connection")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId("connection-share-reserved-space")
+      ).toBeInTheDocument();
+    });
+
+    it("retries a transient QR decode failure before showing ready", async () => {
+      const qrcode = require("qrcode");
+      const decode = jest
+        .fn<Promise<void>, []>()
+        .mockRejectedValueOnce(new Error("transient decode failure"))
+        .mockResolvedValueOnce(undefined);
+      Object.defineProperty(globalThis, "Image", {
+        configurable: true,
+        writable: true,
+        value: class {
+          public src = "";
+          public decode = decode;
+        },
+      });
+      const consoleError = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      expect(
+        await screen.findByAltText("Connect 6529 Mobile QR code")
+      ).toBeInTheDocument();
+      expect(qrcode.toDataURL).toHaveBeenCalledTimes(2);
+      expect(decode).toHaveBeenCalledTimes(2);
+      expect(
+        screen.queryByText("Device Connection Unavailable")
+      ).not.toBeInTheDocument();
+      consoleError.mockRestore();
+    });
+
+    it("does not retry or update connection state after closing during decode", async () => {
+      const qrcode = require("qrcode");
+      let rejectDecode!: (error: Error) => void;
+      const decode = jest.fn(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectDecode = reject;
+          })
+      );
+      Object.defineProperty(globalThis, "Image", {
+        configurable: true,
+        writable: true,
+        value: class {
+          public src = "";
+          public decode = decode;
+        },
+      });
+      const consoleError = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => undefined);
+
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() => expect(decode).toHaveBeenCalledTimes(1));
+
+      await userEvent.click(
+        screen.getByLabelText("Close connect device modal")
+      );
+      rejectDecode(new Error("decode cancelled with modal close"));
+
+      await waitFor(() => expect(qrcode.toDataURL).toHaveBeenCalledTimes(1));
+      expect(
+        screen.queryByText("Device Connection Unavailable")
+      ).not.toBeInTheDocument();
+      expect(consoleError).not.toHaveBeenCalled();
+      consoleError.mockRestore();
     });
 
     it("falls back to Mobile if Desktop becomes unavailable", async () => {
@@ -1795,13 +1919,12 @@ describe("HeaderShare", () => {
         "tw-h-full"
       );
       expect(
-        screen
-          .getByTestId("header-share-modal")
-          .querySelector("#header-share-content")
-      ).toHaveClass("tw-aspect-square");
-      expect(
-        screen.getByTestId("connection-share-content").children
-      ).toHaveLength(1);
+        screen.getByTestId("connection-share-reserved-space")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("connection-share-notice")).toHaveClass(
+        "tw-border",
+        "tw-bg-iron-900/50"
+      );
     });
   });
 

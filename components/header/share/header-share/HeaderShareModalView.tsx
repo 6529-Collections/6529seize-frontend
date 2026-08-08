@@ -6,6 +6,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import Link from "next/link";
 import { type CSSProperties, useEffect, useRef } from "react";
 import { Tooltip } from "react-tooltip";
 
@@ -278,8 +279,11 @@ export function HeaderShareModalView({
       <div
         data-testid="connection-share-notice"
         data-status={status}
-        className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center"
-        style={squareStyle}
+        className={`tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-p-8 tw-text-center ${
+          status === "loading"
+            ? ""
+            : "tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50"
+        }`}
       >
         <div className="tw-flex tw-flex-col tw-gap-2">
           <div className="tw-text-lg tw-font-semibold tw-text-iron-50">
@@ -604,10 +608,26 @@ export function HeaderShareModalView({
     return (
       <div
         data-testid="connection-share-content"
-        className="tw-flex tw-flex-col tw-gap-2"
+        className="tw-relative tw-w-full"
       >
-        {qrContent}
-        {renderConnectionUrl(url)}
+        <div
+          data-testid="connection-share-reserved-space"
+          aria-hidden="true"
+          className="tw-invisible tw-flex tw-w-full tw-flex-col tw-gap-2"
+        >
+          <div className="tw-aspect-square tw-w-full" />
+          <div className="tw-h-10 tw-w-full" />
+        </div>
+        <div className="tw-absolute tw-inset-0">
+          {url ? (
+            <div className="tw-animate-in tw-fade-in tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2 tw-duration-200 motion-reduce:tw-animate-none">
+              {qrContent}
+              {renderConnectionUrl(url)}
+            </div>
+          ) : (
+            content
+          )}
+        </div>
       </div>
     );
   }
@@ -657,15 +677,41 @@ export function HeaderShareModalView({
             >
               {modalTitle}
             </h2>
-            <button
-              type="button"
-              aria-label={closeAriaLabel}
-              title={closeAriaLabel}
-              onClick={onClose}
-              className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-            >
-              <XMarkIcon className="tw-size-5" aria-hidden="true" />
-            </button>
+            <div className="tw-flex tw-items-center tw-gap-2">
+              {isConnectMode && (
+                <Link
+                  href="/about/6529-apps"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t(
+                    HEADER_SHARE_LOCALE,
+                    "headerShare.connectModal.downloadsAriaLabel"
+                  )}
+                  className="tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-px-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                >
+                  <span>
+                    {t(
+                      HEADER_SHARE_LOCALE,
+                      "headerShare.connectModal.downloads"
+                    )}
+                  </span>
+                  <FontAwesomeIcon
+                    icon={faExternalLink}
+                    className="tw-size-3"
+                    aria-hidden="true"
+                  />
+                </Link>
+              )}
+              <button
+                type="button"
+                aria-label={closeAriaLabel}
+                title={closeAriaLabel}
+                onClick={onClose}
+                className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                <XMarkIcon className="tw-size-5" aria-hidden="true" />
+              </button>
+            </div>
           </div>
           {isConnectMode && (
             <ModalMenu
