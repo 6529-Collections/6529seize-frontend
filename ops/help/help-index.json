@@ -2873,7 +2873,19 @@
         "wallet consolidation",
         "consolidate wallets",
         "tdh consolidation",
-        "consolidation"
+        "consolidation",
+        "add a second wallet",
+        "add another wallet",
+        "add an additional wallet",
+        "add my other wallet",
+        "link another wallet",
+        "link two wallets",
+        "link my wallets",
+        "connect another wallet",
+        "connect two wallets",
+        "pair two wallets",
+        "set up multiple wallets",
+        "set up a second wallet"
       ],
       "keywords": [
         "consolidation",
@@ -2889,6 +2901,7 @@
       ],
       "facts": [
         "A consolidation connects wallets you control so 6529 can treat them together for supported metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
+        "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
         "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
         "For TDH consolidation, use Any Collection or The Memes.",
         "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."

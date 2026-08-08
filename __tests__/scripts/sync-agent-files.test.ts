@@ -235,6 +235,53 @@ describe("sync-agent-files", () => {
       ).toEqual(["local", "staging", "production"]);
       expect(published).toEqual(expectedProduction);
     });
+
+    it("publishes natural multi-wallet consolidation language", () => {
+      const source = JSON.parse(
+        fs.readFileSync(
+          path.join(repoRoot, "ops/help/help-index.json"),
+          "utf8"
+        )
+      );
+      const published = JSON.parse(
+        fs.readFileSync(path.join(repoRoot, "public/help-index.json"), "utf8")
+      );
+      const consolidationRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.register-consolidation-doc"
+        )
+      );
+
+      consolidationRecords.forEach((consolidationRecord) => {
+        expect(consolidationRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "add another wallet",
+            "add my other wallet",
+            "link two wallets",
+            "link my wallets",
+            "pair two wallets",
+            "set up multiple wallets",
+          ])
+        );
+        expect(consolidationRecord?.aliases).not.toEqual(
+          expect.arrayContaining([
+            "use multiple wallets",
+            "use more than one wallet",
+          ])
+        );
+        expect(consolidationRecord?.keywords).not.toEqual(
+          expect.arrayContaining([
+            "add",
+            "another",
+            "multiple",
+            "link",
+            "connect",
+          ])
+        );
+      });
+      expect(consolidationRecords[1]).toEqual(consolidationRecords[0]);
+    });
   });
 
   describe("robots.txt agent discovery block", () => {
