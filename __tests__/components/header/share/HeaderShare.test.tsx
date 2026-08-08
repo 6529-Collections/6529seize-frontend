@@ -1479,6 +1479,10 @@ describe("HeaderShare", () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       const firstAddress = "0x1111111111111111111111111111111111111111";
       const secondAddress = "0x2222222222222222222222222222222222222222";
+      let resolveSecondMobileShare!: (share: unknown) => void;
+      const secondMobileShare = new Promise<unknown>((resolve) => {
+        resolveSecondMobileShare = resolve;
+      });
       let activeAddress = firstAddress;
       mockAuthUtils.getWalletAddress.mockImplementation(() => activeAddress);
       mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
@@ -1503,6 +1507,17 @@ describe("HeaderShare", () => {
           role: null,
           deep_link_path: `/accept-connection-sharing?token=second-desktop-refresh-token&address=${secondAddress}`,
         });
+      sessionV2.createConnectionShare
+        .mockResolvedValueOnce({
+          connection_share_code: "first-mobile-share-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: firstAddress,
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=first-mobile-share-code",
+        })
+        .mockImplementationOnce(() => secondMobileShare);
 
       const { rerender } = renderWithProviders(<HeaderShare />);
 
@@ -1523,6 +1538,29 @@ describe("HeaderShare", () => {
           <HeaderShare />
         </QueryClientProvider>
       );
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+      );
+      expect(
+        screen.queryByTitle(/token=first-desktop-refresh-token/)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText("Preparing Device Connection")
+      ).toBeInTheDocument();
+      expect(
+        sessionV2.createLegacyDesktopConnectionShare
+      ).toHaveBeenCalledTimes(1);
+
+      resolveSecondMobileShare({
+        connection_share_code: "second-mobile-share-code",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: secondAddress,
+        role: null,
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?connection_share_code=second-mobile-share-code",
+      });
 
       await waitFor(() =>
         expect(

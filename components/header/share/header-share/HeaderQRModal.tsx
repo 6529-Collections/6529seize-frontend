@@ -276,6 +276,10 @@ function HeaderQRModal({
     }
 
     const routerPath = buildRouterPath(pathname, searchParams);
+    setShareConnectionAppUrl("");
+    setShareConnectionCoreUrl("");
+    setMobileConnectionShareStatus("loading");
+    setDesktopConnectionShareStatus("loading");
     const generatedConnectionAppUrl = await generateNativeConnectionShareUrl({
       appScheme,
       isStaleGeneration,
