@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { stripCollectedReturnFromTokenRoute } from "@/helpers/profile-collected-navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { isShareCancelError } from "@/utils/error";
@@ -16,7 +17,10 @@ function getCurrentPublicUrl(): string {
       ? "/"
       : `${currentWindow.location.pathname}${currentWindow.location.search}${currentWindow.location.hash}`;
   const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
-  const normalizedRoute = route.startsWith("/") ? route : "/" + route;
+  const shareRoute = stripCollectedReturnFromTokenRoute(route);
+  const normalizedRoute = shareRoute.startsWith("/")
+    ? shareRoute
+    : "/" + shareRoute;
   return `${normalizedBase}${normalizedRoute}`;
 }
 
