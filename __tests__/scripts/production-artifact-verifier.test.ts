@@ -16,6 +16,8 @@ const verifier =
       verifierRunAttempt: number
     ) => string;
     validateArchiveMembers: (memberList: string) => unknown;
+    validateExtractedArtifact: (root: string) => unknown;
+    validateSelectionArchiveMembers: (memberList: string) => unknown;
     validateVerifierInputs: (options: Record<string, unknown>) => unknown;
     verifyChecksums: (root: string, requiredFiles: string[]) => unknown;
     verifyArtifact: (
@@ -115,7 +117,14 @@ describe("isolated production artifact verifier", () => {
       };
       jobs: Record<
         string,
-        { permissions: Record<string, string>; "runs-on": string }
+        {
+          permissions: Record<string, string>;
+          "runs-on": string;
+          steps: Array<{
+            name?: string;
+            with?: Record<string, unknown>;
+          }>;
+        }
       >;
     };
     const requiredInputs = ["target_sha", "operation_id"];
@@ -171,6 +180,59 @@ describe("isolated production artifact verifier", () => {
       actions: "read",
       contents: "read",
     });
+    const checkout = verifyJob.steps.find(
+      ({ name }) => name === "Check out immutable verifier helper"
+    );
+    const sparseCheckout = String(checkout?.with?.["sparse-checkout"] ?? "");
+    const scriptsDirectory = path.join(process.cwd(), "ops", "scripts");
+    const verifierPath = path.join(
+      scriptsDirectory,
+      "verify-production-artifact-selection.cjs"
+    );
+    const localDependencies = new Set<string>();
+    const visitLocalDependencies = (sourcePath: string): void => {
+      const sourceCode = fs.readFileSync(sourcePath, "utf8");
+      for (const match of sourceCode.matchAll(
+        /require\(["']((?:\.{1,2}\/)[^"']+)["']\)/gu
+      )) {
+        const relativeDependency = match[1];
+        if (!relativeDependency) {
+          throw new Error("Verifier dependency match is missing a path.");
+        }
+        const dependencyPath = path.resolve(
+          path.dirname(sourcePath),
+          relativeDependency
+        );
+        const relativeToScripts = path.relative(
+          scriptsDirectory,
+          dependencyPath
+        );
+        if (
+          relativeToScripts.startsWith("..") ||
+          path.isAbsolute(relativeToScripts)
+        ) {
+          throw new Error(
+            `Verifier dependency escapes ops/scripts: ${dependencyPath}`
+          );
+        }
+        const repositoryPath = path
+          .relative(process.cwd(), dependencyPath)
+          .split(path.sep)
+          .join("/");
+        if (!localDependencies.has(repositoryPath)) {
+          localDependencies.add(repositoryPath);
+          visitLocalDependencies(dependencyPath);
+        }
+      }
+    };
+    visitLocalDependencies(verifierPath);
+    expect([...localDependencies]).toContain("ops/scripts/cli-args.cjs");
+    expect(sparseCheckout).toContain(
+      "ops/scripts/verify-production-artifact-selection.cjs"
+    );
+    for (const dependency of [...localDependencies].sort()) {
+      expect(sparseCheckout).toContain(dependency);
+    }
     expect(source).toContain(
       "actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}"
     );
@@ -183,6 +245,9 @@ describe("isolated production artifact verifier", () => {
     expect(source).toContain("ARTIFACT_WORKFLOW_SHA");
     expect(source).toContain("builder ${{ inputs.artifact_run_id }}");
     expect(source).toContain("sha256sum -c SHA256SUMS");
+    expect(source).toContain(
+      "SELECTION_ARTIFACT_DIGEST: sha256:${{ steps.upload-selection.outputs.artifact-digest }}"
+    );
     expect(source).toContain("unzip -Z1");
     expect(source).toContain("validate-archive-members");
     expect(source).toContain("validate-extracted-artifact");
@@ -215,8 +280,18 @@ describe("isolated production artifact verifier", () => {
     const artifactApiDigest = `sha256:${digest(rawArtifactArchive)}`;
     const artifactRoot = path.join(tempRoot, "artifact");
     const packagePath = path.join(artifactRoot, "target", "package.zip");
+    const staticAssetPath = path.join(
+      artifactRoot,
+      "target",
+      "_next",
+      "static",
+      targetSha,
+      "_buildManifest.js"
+    );
     fs.mkdirSync(path.dirname(packagePath), { recursive: true });
     fs.writeFileSync(packagePath, packageBytes);
+    fs.mkdirSync(path.dirname(staticAssetPath), { recursive: true });
+    fs.writeFileSync(staticAssetPath, "self.__BUILD_MANIFEST = {};\n");
     writeJson(path.join(artifactRoot, "artifact-portability.json"), {
       contract: "artifact-portability-v1",
       digests: { package_sha256: digest(packageBytes) },
@@ -249,6 +324,7 @@ describe("isolated production artifact verifier", () => {
     writeChecksums(artifactRoot, [
       "artifact-portability.json",
       "manifest.json",
+      `target/_next/static/${targetSha}/_buildManifest.js`,
       "target/package.zip",
     ]);
     const archivePath = path.join(tempRoot, "artifact.zip");
@@ -468,6 +544,7 @@ describe("isolated production artifact verifier", () => {
     writeChecksums(artifactRoot, [
       "artifact-portability.json",
       "manifest.json",
+      `target/_next/static/${targetSha}/_buildManifest.js`,
       "target/package.zip",
     ]);
     writeJson(targetAncestryPath, ancestryEvidence(targetSha, 2));
@@ -489,12 +566,46 @@ describe("isolated production artifact verifier", () => {
 
   it("rejects unsafe archive members and non-regular extracted entries", () => {
     expect(() =>
+      verifier.validateSelectionArchiveMembers(
+        ["SHA256SUMS", "selection.json"].join("\n")
+      )
+    ).not.toThrow();
+    for (const member of [
+      "target/package.zip",
+      "target/_next/static/chunks/app.js",
+      "selection/",
+      "unexpected.json",
+    ]) {
+      expect(() =>
+        verifier.validateSelectionArchiveMembers(
+          ["SHA256SUMS", "selection.json", member].join("\n")
+        )
+      ).toThrow("outside the closed artifact root");
+    }
+
+    expect(() =>
       verifier.validateArchiveMembers(
         [
           "SHA256SUMS",
           "artifact-portability.json",
           "manifest.json",
           "target/",
+          "target/package.zip",
+        ].join("\n")
+      )
+    ).not.toThrow();
+
+    expect(() =>
+      verifier.validateArchiveMembers(
+        [
+          "SHA256SUMS",
+          "artifact-portability.json",
+          "manifest.json",
+          "target/",
+          "target/_next/",
+          "target/_next/static/",
+          "target/_next/static/chunks/",
+          "target/_next/static/chunks/app.js",
           "target/package.zip",
         ].join("\n")
       )
@@ -508,6 +619,9 @@ describe("isolated production artifact verifier", () => {
       "C:/manifest.json",
       "\\\\server\\share\\manifest.json",
       "outside/manifest.json",
+      "target/_next/server.js",
+      "target/_next/staticx/app.js",
+      "target/_next/static",
       "./manifest.json",
     ]) {
       expect(() =>
@@ -533,7 +647,37 @@ describe("isolated production artifact verifier", () => {
           "manifest.json",
         ].join("\n")
       )
-    ).toThrow("duplicate archive member");
+    ).toThrow("duplicate archive member path");
+
+    expect(() =>
+      verifier.validateArchiveMembers(
+        [
+          "SHA256SUMS",
+          "artifact-portability.json",
+          "manifest.json",
+          "target/_next/static/chunks/",
+          "target/_next/static/chunks",
+          "target/package.zip",
+        ].join("\n")
+      )
+    ).toThrow("duplicate archive member path");
+
+    const outsideRoot = path.join(tempRoot, "outside-entry");
+    const outsideFiles = [
+      "artifact-portability.json",
+      "manifest.json",
+      "target/_next/server.js",
+      "target/package.zip",
+    ];
+    for (const relativePath of outsideFiles) {
+      const absolutePath = path.join(outsideRoot, ...relativePath.split("/"));
+      fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+      fs.writeFileSync(absolutePath, `${relativePath}\n`);
+    }
+    writeChecksums(outsideRoot, outsideFiles);
+    expect(() => verifier.validateExtractedArtifact(outsideRoot)).toThrow(
+      "outside the closed artifact root: target/_next/server.js"
+    );
 
     const specialRoot = path.join(tempRoot, "special-entry");
     fs.mkdirSync(path.join(specialRoot, "target"), { recursive: true });
