@@ -237,33 +237,50 @@ describe("sync-agent-files", () => {
     });
 
     it("publishes natural multi-wallet consolidation language", () => {
+      const source = JSON.parse(
+        fs.readFileSync(
+          path.join(repoRoot, "ops/help/help-index.json"),
+          "utf8"
+        )
+      );
       const published = JSON.parse(
         fs.readFileSync(path.join(repoRoot, "public/help-index.json"), "utf8")
       );
-      const consolidationRecord = published.records.find(
-        (record: { id: string }) =>
-          record.id === "delegation.register-consolidation-doc"
+      const consolidationRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.register-consolidation-doc"
+        )
       );
 
-      expect(consolidationRecord?.aliases).toEqual(
-        expect.arrayContaining([
-          "add another wallet",
-          "add my other wallet",
-          "link two wallets",
-          "link my wallets",
-          "use more than one wallet",
-          "set up multiple wallets",
-        ])
-      );
-      expect(consolidationRecord?.keywords).toEqual(
-        expect.arrayContaining([
-          "add",
-          "another",
-          "multiple",
-          "link",
-          "connect",
-        ])
-      );
+      consolidationRecords.forEach((consolidationRecord) => {
+        expect(consolidationRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "add another wallet",
+            "add my other wallet",
+            "link two wallets",
+            "link my wallets",
+            "pair two wallets",
+            "set up multiple wallets",
+          ])
+        );
+        expect(consolidationRecord?.aliases).not.toEqual(
+          expect.arrayContaining([
+            "use multiple wallets",
+            "use more than one wallet",
+          ])
+        );
+        expect(consolidationRecord?.keywords).not.toEqual(
+          expect.arrayContaining([
+            "add",
+            "another",
+            "multiple",
+            "link",
+            "connect",
+          ])
+        );
+      });
+      expect(consolidationRecords[1]).toEqual(consolidationRecords[0]);
     });
   });
 
