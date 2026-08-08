@@ -1,8 +1,8 @@
 "use client";
 
-import { MagnifyingGlassIcon, UserIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -52,12 +52,6 @@ function WebSidebar({
       profileId: connectedProfile?.id,
     }
   );
-  const profilePath = useMemo(() => {
-    if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
-    if (address) return `/${address}`;
-    return null;
-  }, [connectedProfile?.handle, address]);
-
   const isTouchScreen = useIsTouchDevice();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -185,6 +179,8 @@ function WebSidebar({
                 </div>
               )}
 
+              <HeaderShare isCollapsed={shouldShowCollapsed} />
+
               {address && (
                 <div
                   className={showDesktopSearch ? "tw-px-3" : "tw-px-3 tw-pt-2"}
@@ -199,21 +195,6 @@ function WebSidebar({
                   />
                 </div>
               )}
-
-              {profilePath && (
-                <div className="tw-px-3">
-                  <WebSidebarNavItem
-                    href={profilePath}
-                    icon={UserIcon}
-                    iconSizeClass="tw-h-6 tw-w-6"
-                    active={pathname === profilePath}
-                    collapsed={shouldShowCollapsed}
-                    label="Profile"
-                  />
-                </div>
-              )}
-
-              {!address && <HeaderShare isCollapsed={shouldShowCollapsed} />}
 
               <WebSidebarUser
                 isCollapsed={shouldShowCollapsed}
