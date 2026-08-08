@@ -587,6 +587,7 @@ export default function AppHeader() {
   });
   const showPageShareAction =
     isCapacitor &&
+    !isInsideWave &&
     isPageShareSupported({ activeView, pathname, surface: "mobile" });
 
   const isProfilePage = typeof params["user"] === "string";

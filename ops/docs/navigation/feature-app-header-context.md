@@ -64,10 +64,12 @@ In the app layout, the header adapts to route and thread state. It controls:
    - On `/`, network-health heart shortcut appears.
    - In the native app and small-screen web header, `Share page` appears
      immediately before `Search` on pages outside `/`, `/messages*`, and
-     `/notifications*`.
+     `/notifications*`. In the native app, it is also hidden while an active
+     wave is open because that wave keeps its share action in `More`.
    - `Search` is always available.
 7. More actions:
-   - Wave-specific actions can appear in the overflow menu.
+   - Wave-specific actions can appear in the overflow menu. The wave share
+     action uses the arrow-style share icon there.
    - If the only overflow action is the wave link share/copy action, it renders
      as a direct icon button instead of a one-item overflow menu.
 
@@ -96,7 +98,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 - Mobile page share is hidden on `/`, `/messages*`, and `/notifications*`, and
   also while the native app or small-screen web header is showing the Messages
   context from query-state navigation. Waves routes and the Waves query context
-  remain shareable.
+  remain shareable, but the native app hides the general page-share button once
+  a wave is active and uses that wave's `More` menu instead.
 - Rememes formatting applies only when both `contract` and `tokenId` are
   present.
 - Drop Forge title formatting applies only on `craft` and `launch` route
@@ -110,7 +113,8 @@ In the app layout, the header adapts to route and thread state. It controls:
 - If create action is missing, verify you are in waves/messages list context
   and not inside an active thread.
 - If page share is missing on mobile, verify the route is not `/`, under
-  `/messages` or `/notifications`, or rendered in the Messages query view.
+  `/messages` or `/notifications`, rendered in the Messages query view, or an
+  active wave in the native app. Active waves share from `More`.
 - If menu does not open, retry from the same top-left control.
 - If the menu/avatar unread dot looks stale, open account controls and switch
   to the target account, then revisit `/notifications`.
