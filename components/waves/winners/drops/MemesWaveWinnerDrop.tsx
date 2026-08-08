@@ -1,8 +1,13 @@
 "use client";
 
+import ClientOnly from "@/components/client-only/ClientOnly";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import MainStageMemeCardLink, {
+  isValidMemeCardId,
+} from "@/components/memes/drops/MainStageMemeCardLink";
 import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
+import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -28,7 +33,10 @@ import {
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import { formatDate } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -36,7 +44,6 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
-import MainStageMemeCardLink from "@/components/memes/drops/MainStageMemeCardLink";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: Omit<ApiWaveDecisionWinner, "drop"> & {
@@ -71,6 +78,43 @@ const getMetadataValue = (
     winner.drop.metadata.find((metadata) => metadata.data_key === dataKey)
       ?.data_value
   );
+
+function MemesWinnerMintDate({
+  memeCardId,
+}: {
+  readonly memeCardId: number;
+}) {
+  const locale = useBrowserLocale();
+  const mintDate = React.useMemo(() => {
+    try {
+      const instantUtc = getMintTimelineDetails(memeCardId).instantUtc;
+      return Number.isFinite(instantUtc.getTime()) ? instantUtc : null;
+    } catch {
+      return null;
+    }
+  }, [memeCardId]);
+
+  if (!mintDate) {
+    return null;
+  }
+
+  const mintDateLabel = formatDate(locale, mintDate, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <p className="tw-mb-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-sm tw-leading-5">
+      <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
+        {t(locale, "theMemes.detail.live.artwork.mintDateLabel")}
+      </span>
+      <time className="tw-text-iron-400" dateTime={mintDate.toISOString()}>
+        {mintDateLabel}
+      </time>
+    </p>
+  );
+}
 
 export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   winner,
@@ -138,6 +182,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     "This is an artwork submission for The Memes collection.";
 
   const artworkMedia = winner.drop.parts.at(0)?.media.at(0);
+  const memeCardId = winner.drop.submission_context?.meme_card_id;
 
   const rating = winner.drop.rating || 0;
   const topVoters = winner.drop.top_raters.slice(0, 3);
@@ -251,9 +296,14 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   {title}
                 </h3>
                 <MainStageMemeCardLink
-                  memeCardId={winner.drop.submission_context?.meme_card_id}
+                  memeCardId={memeCardId}
                 />
               </div>
+              {isValidMemeCardId(memeCardId) ? (
+                <ClientOnly>
+                  <MemesWinnerMintDate memeCardId={memeCardId} />
+                </ClientOnly>
+              ) : null}
               <p className="tw-mb-0 tw-line-clamp-2 tw-text-sm tw-text-iron-400">
                 {description}
               </p>
