@@ -258,6 +258,18 @@ describe("sync-agent-files", () => {
             record.id === "delegation.consolidation-use-cases"
         )
       );
+      const consolidationRevokeRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.manage-revoke-doc"
+        )
+      );
+      const consolidationUpdateRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.manage-update-doc"
+        )
+      );
 
       consolidationRecords.forEach((consolidationRecord) => {
         expect(consolidationRecord?.aliases).toEqual(
@@ -303,12 +315,37 @@ describe("sync-agent-files", () => {
         expect(consolidationUseCaseRecord?.facts).toEqual(
           expect.arrayContaining([
             "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
-            "That group limit means a wallet can be consolidated with up to 2 other addresses in the same three-address group.",
+            "More than 3 addresses can have consolidation records, but Seize only counts the last 3 addresses for consolidation purposes.",
+            "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 3 addresses count together.",
           ])
         );
       });
       expect(consolidationUseCaseRecords[1]).toEqual(
         consolidationUseCaseRecords[0]
+      );
+      consolidationRevokeRecords.forEach((consolidationRevokeRecord) => {
+        expect(consolidationRevokeRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "remove wallet from consolidation",
+            "unlink consolidated wallet",
+            "detach wallet from consolidation",
+          ])
+        );
+      });
+      expect(consolidationRevokeRecords[1]).toEqual(
+        consolidationRevokeRecords[0]
+      );
+      consolidationUpdateRecords.forEach((consolidationUpdateRecord) => {
+        expect(consolidationUpdateRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "replace wallet in consolidation",
+            "swap a consolidated wallet",
+            "change wallet in consolidation",
+          ])
+        );
+      });
+      expect(consolidationUpdateRecords[1]).toEqual(
+        consolidationUpdateRecords[0]
       );
     });
   });

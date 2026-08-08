@@ -3028,6 +3028,7 @@
         "how many wallets can be consolidated",
         "how many addresses can be consolidated",
         "wallet consolidation capacity",
+        "effective consolidation group size",
         "4 wallet consolidation",
         "four wallet consolidation",
         "4 wallet consolidation limit",
@@ -3059,12 +3060,15 @@
         "reciprocal",
         "limit",
         "maximum",
-        "capacity"
+        "capacity",
+        "allowed",
+        "counted"
       ],
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
         "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
-        "That group limit means a wallet can be consolidated with up to 2 other addresses in the same three-address group.",
+        "More than 3 addresses can have consolidation records, but Seize only counts the last 3 addresses for consolidation purposes.",
+        "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 3 addresses count together.",
         "The docs cover two-address and three-address patterns, plus a four-address compromised-wallet scenario where the user chooses which three-address set should count.",
         "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
       ],
@@ -3128,8 +3132,8 @@
     {
       "id": "delegation.manage-revoke-doc",
       "kind": "workflow",
-      "title": "How to Revoke a Delegation",
-      "link_label": "Revoke Delegation",
+      "title": "How to Revoke a Delegation or Consolidation",
+      "link_label": "Revoke Delegation or Consolidation",
       "aliases": [
         "how to revoke a delegation",
         "how do i revoke a delegation",
@@ -3139,7 +3143,12 @@
         "delete delegation",
         "revoke a consolidation",
         "revoke consolidation",
-        "revoke delegation manager"
+        "revoke delegation manager",
+        "remove wallet from consolidation",
+        "remove consolidated wallet",
+        "unlink consolidated wallet",
+        "detach wallet from consolidation",
+        "delete wallet consolidation"
       ],
       "keywords": [
         "delegation",
@@ -3172,8 +3181,8 @@
     {
       "id": "delegation.manage-update-doc",
       "kind": "workflow",
-      "title": "How to Update a Delegation",
-      "link_label": "Update Delegation",
+      "title": "How to Update a Delegation or Consolidation",
+      "link_label": "Update Delegation or Consolidation",
       "aliases": [
         "how to update a delegation",
         "how do i update a delegation",
@@ -3181,7 +3190,12 @@
         "edit delegation",
         "change delegation",
         "update consolidation",
-        "update delegation manager"
+        "update delegation manager",
+        "replace wallet in consolidation",
+        "replace consolidated wallet",
+        "swap a consolidated wallet",
+        "change wallet in consolidation",
+        "update consolidated wallet"
       ],
       "keywords": [
         "delegation",
