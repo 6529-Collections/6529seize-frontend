@@ -4,20 +4,26 @@ const YAML = require("yaml");
 
 const {
   EXPECTED_REPOSITORY,
-  createFailureSummary,
+  createGitPlanner,
   createGithubClient,
   createSummary,
   executeShadow,
   normalizeManifest,
+  parseComposition,
   partitionCohorts,
+  planStagingContent,
   statusContext,
-  statusPlan,
-  validateOperation,
 } = require("../../ops/scripts/deploy-hub-shadow.cjs");
+
+const shadowSource = fs.readFileSync(
+  path.join(process.cwd(), "ops/scripts/deploy-hub-shadow.cjs"),
+  "utf8"
+);
 
 const SHA_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const SHA_B = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const SHA_C = "cccccccccccccccccccccccccccccccccccccccc";
+const SHA_D = "dddddddddddddddddddddddddddddddddddddddd";
 const ACTOR = "prxt6529";
 const RUN_URL =
   "https://github.com/6529-Collections/6529seize-frontend/actions/runs/12345";
@@ -29,65 +35,98 @@ function request(pr: number, sha: string, target: "staging" | "production") {
     sha,
     target,
     requester: ACTOR,
-    requested_at: "2026-08-04T12:00:00.000Z",
+    requested_at: "2026-08-06T12:00:00.000Z",
   };
 }
 
-function githubForHeads(heads: Record<number, string>) {
-  const statuses: Array<{
-    sha: string;
-    status: Record<string, string>;
-  }> = [];
+function githubHarness(heads: Record<number, string>) {
+  const statuses: Array<{ sha: string; status: Record<string, string> }> = [];
   return {
     statuses,
+    async createCommitStatus(sha: string, status: Record<string, string>) {
+      statuses.push({ sha, status });
+    },
+    async getCheckRuns() {
+      return {
+        check_runs: [
+          {
+            name: "Installed app checks",
+            status: "completed",
+            conclusion: "success",
+          },
+        ],
+      };
+    },
+    async getCollaboratorPermission() {
+      return { permission: "maintain", role_name: "custom-maintainer" };
+    },
+    async getCombinedStatus() {
+      return { statuses: [{ context: "DCO", state: "success" }] };
+    },
     async getPullRequest(pr: number) {
       return {
         state: "open",
         base: { ref: "main" },
         head: { sha: heads[pr] },
+        mergeable: true,
       };
     },
-    async createCommitStatus(sha: string, status: Record<string, string>) {
-      statuses.push({ sha, status });
-      return {};
+    async getRef() {
+      return { object: { sha: SHA_D } };
     },
   };
 }
 
-describe("Deploy Hub FE shadow workflow", () => {
+function gitHarness({ tracked = false, sameTree = true } = {}) {
+  const mergeContent = jest
+    .fn()
+    .mockReturnValueOnce(SHA_B)
+    .mockReturnValueOnce(SHA_C);
+  const composition = Buffer.from(
+    JSON.stringify({
+      version: 1,
+      base_sha: SHA_A,
+      prs: [{ pr: 99, sha: SHA_C }],
+    })
+  ).toString("base64url");
+  return {
+    remoteSha: jest.fn((ref: string) => (ref === "main" ? SHA_D : SHA_A)),
+    fetchExact: jest.fn(),
+    readCommitMessage: jest
+      .fn()
+      .mockReturnValue(
+        tracked
+          ? `Deploy Hub prior\n\nDeploy-Hub-Composition: ${composition}`
+          : "Manual staging commit"
+      ),
+    sameTree: jest.fn().mockReturnValue(sameTree),
+    mergeContent,
+  };
+}
+
+describe("Deploy Hub FE dry-run workflow", () => {
   const source = fs.readFileSync(
     path.join(process.cwd(), ".github/workflows/deploy-hub-shadow.yml"),
     "utf8"
   );
   const workflow = YAML.parse(source);
 
-  it("is manually dispatched with only read and shadow-status authority", () => {
+  it("is manual-only and cannot deploy or change a branch", () => {
     expect(workflow.on).toEqual({
       workflow_dispatch: {
-        inputs: expect.objectContaining({
+        inputs: {
           operation_id: expect.objectContaining({ required: true }),
           manifest: expect.objectContaining({ required: true }),
-          scenario: expect.objectContaining({
-            options: [
-              "success",
-              "product-failure",
-              "infrastructure-failure",
-              "cancelled",
-              "stale",
-            ],
-          }),
-        }),
+        },
       },
     });
     expect(workflow.permissions).toEqual({
+      checks: "read",
       contents: "read",
       "pull-requests": "read",
       statuses: "write",
     });
     expect(workflow.jobs.shadow.permissions).toEqual(workflow.permissions);
-    expect(workflow.jobs.shadow.steps[2].env.DEPLOY_HUB_BASE_REF).toBe(
-      "${{ github.event.repository.default_branch }}"
-    );
     expect(source).not.toContain("secrets.");
     expect(source).not.toContain("contents: write");
     expect(source).not.toContain("actions: write");
@@ -95,356 +134,291 @@ describe("Deploy Hub FE shadow workflow", () => {
     expect(source).not.toContain("id-token:");
     expect(source).not.toContain("environment:");
     expect(source).not.toContain("aws-actions/");
-    expect(source).not.toContain("deploy-staging.yml");
-    expect(source).not.toContain("build-upload-deploy-prod.yml");
+    expect(shadowSource).not.toMatch(/\bdispatchWorkflow\s*\(/);
+    expect(shadowSource).not.toMatch(/run\(\[\s*["']push["']/);
   });
 
-  it("runs immutable workflow code from the default branch without checkout credentials", () => {
+  it("runs immutable default-branch code without checkout credentials", () => {
     const steps = workflow.jobs.shadow.steps;
-    expect(steps[0].name).toBe("Require default-branch dispatch");
     expect(steps[0].run).toContain('test "$GITHUB_REF" = "$EXPECTED_REF"');
     expect(steps[1].with).toMatchObject({
       ref: "${{ github.workflow_sha }}",
+      "fetch-depth": 0,
       "persist-credentials": false,
-      "sparse-checkout": "ops/scripts/deploy-hub-shadow.cjs",
-      "sparse-checkout-cone-mode": false,
     });
+    expect(steps[2].run).toContain("deploy-hub-shadow.cjs");
   });
 });
 
-describe("Deploy Hub FE shadow manifest", () => {
-  it("freezes exact requests and partitions only adjacent equal targets", () => {
-    const manifest = [
-      request(1, SHA_A, "production"),
-      request(2, SHA_B, "production"),
-      request(3, SHA_C, "staging"),
-      request(4, SHA_A, "production"),
-    ];
-    const normalized = normalizeManifest(
-      JSON.stringify(manifest),
+describe("Deploy Hub FE dry-run planning", () => {
+  it("freezes exact requests and retains adjacent target order", () => {
+    const requests = normalizeManifest(
+      JSON.stringify([
+        request(1, SHA_A, "production"),
+        request(2, SHA_B, "production"),
+        request(3, SHA_C, "staging"),
+      ]),
       ACTOR,
       EXPECTED_REPOSITORY
     );
-
-    expect(normalized).toEqual(manifest);
-    expect(partitionCohorts(normalized)).toEqual([
-      { target: "production", requests: normalized.slice(0, 2) },
-      { target: "staging", requests: normalized.slice(2, 3) },
-      { target: "production", requests: normalized.slice(3, 4) },
+    expect(partitionCohorts(requests)).toEqual([
+      { target: "production", requests: requests.slice(0, 2) },
+      { target: "staging", requests: requests.slice(2) },
     ]);
-    expect(Object.isFrozen(normalized[0])).toBe(true);
+    expect(Object.isFrozen(requests[0])).toBe(true);
   });
 
-  it.each([
-    [
-      "another repository",
-      { ...request(1, SHA_A, "staging"), repository: "owner/other" },
-    ],
-    [
-      "a moved requester",
-      { ...request(1, SHA_A, "staging"), requester: "someone-else" },
-    ],
-    ["a non-exact SHA", { ...request(1, SHA_A, "staging"), sha: "main" }],
-    [
-      "an unknown target",
-      { ...request(1, SHA_A, "staging"), target: "preview" },
-    ],
-    [
-      "an invalid request time",
-      { ...request(1, SHA_A, "staging"), requested_at: "not-a-date" },
-    ],
-  ])("rejects %s", (_name, invalidRequest) => {
-    expect(() =>
-      normalizeManifest(
-        JSON.stringify([invalidRequest]),
-        ACTOR,
-        EXPECTED_REPOSITORY
-      )
-    ).toThrow();
+  it("rebuilds on latest main and preserves tracked staged PRs", () => {
+    const git = gitHarness({ tracked: true });
+    const plan = planStagingContent({
+      git,
+      requests: [request(1, SHA_A, "staging")],
+      operationId: "operation-1",
+      baseRef: "main",
+    });
+    expect(plan).toMatchObject({
+      stagingSha: SHA_A,
+      mainSha: SHA_D,
+      baselineRequired: false,
+    });
+    expect(git.mergeContent).toHaveBeenCalledWith(
+      SHA_D,
+      [
+        { pr: 99, sha: SHA_C },
+        { pr: 1, sha: SHA_A },
+      ],
+      "operation-1"
+    );
   });
 
-  it.each([
-    ["operation ID", { operationId: "bad operation" }],
-    ["delay", { delaySeconds: 1 }],
-    ["run URL", { runUrl: "https://example.com/actions/runs/12345" }],
-  ])("rejects an invalid %s", (_name, override) => {
+  it("reports when the one-time live baseline is still needed", () => {
+    const plan = planStagingContent({
+      git: gitHarness({ sameTree: false }),
+      requests: [request(1, SHA_A, "staging")],
+      operationId: "operation-1",
+      baseRef: "main",
+    });
+    expect(plan.baselineRequired).toBe(true);
+  });
+
+  it("rejects invalid composition metadata", () => {
+    expect(() => parseComposition("Deploy-Hub-Composition: invalid")).toThrow(
+      "Staging composition metadata is invalid."
+    );
+  });
+
+  it("does not mislabel an unavailable merge-tree command as a conflict", () => {
+    const exec = jest.fn((_command, args: string[]) => {
+      if (args[0] === "merge-tree") {
+        throw Object.assign(new Error("unsupported"), { status: 129 });
+      }
+      return "";
+    });
+    const git = createGitPlanner({ exec });
     expect(() =>
-      validateOperation({
-        operationId: "operation-1",
-        scenario: "success",
-        delaySeconds: 0,
-        runUrl: RUN_URL,
-        ...override,
-      })
-    ).toThrow();
+      git.mergeContent(SHA_D, [{ pr: 1, sha: SHA_A }], "operation-1")
+    ).toThrow("unsupported");
+  });
+
+  it("fails closed when a requested PR conflicts with the plan", () => {
+    const exec = jest.fn((_command, args: string[]) => {
+      if (args[0] === "merge-tree") {
+        throw Object.assign(new Error("conflict"), { status: 1 });
+      }
+      return "";
+    });
+    const git = createGitPlanner({ exec });
+    expect(() =>
+      git.mergeContent(SHA_D, [{ pr: 1, sha: SHA_A }], "operation-1")
+    ).toThrow("Frontend PR #1 conflicts with the plan.");
+  });
+
+  it("fetches advertised PR refs and verifies their exact heads", () => {
+    const exec = jest.fn((_command, args: string[]) => {
+      if (args[0] === "rev-parse" && args[1] === "FETCH_HEAD") return SHA_A;
+      return "";
+    });
+    const git = createGitPlanner({ exec });
+    git.fetchExact([request(123, SHA_A, "staging")]);
+    expect(exec).toHaveBeenCalledWith(
+      "git",
+      ["fetch", "--no-tags", "origin", "refs/pull/123/head"],
+      expect.any(Object)
+    );
+    expect(exec).toHaveBeenCalledWith(
+      "git",
+      ["rev-parse", "FETCH_HEAD"],
+      expect.any(Object)
+    );
+  });
+
+  it("rejects a fetched PR ref whose tip no longer matches", () => {
+    const exec = jest.fn((_command, args: string[]) => {
+      if (args[0] === "rev-parse" && args[1] === "FETCH_HEAD") return SHA_B;
+      return "";
+    });
+    const git = createGitPlanner({ exec });
+    expect(() => git.fetchExact([request(123, SHA_A, "staging")])).toThrow(
+      "PR #123 head moved while fetching."
+    );
   });
 });
 
-describe("Deploy Hub FE shadow execution", () => {
-  it("posts exact-run-linked phases and an unambiguous success", async () => {
-    const github = githubForHeads({ 1: SHA_A, 2: SHA_B });
-    const manifest = [
-      request(1, SHA_A, "production"),
-      request(2, SHA_B, "production"),
-    ];
+describe("Deploy Hub FE dry-run GitHub reads", () => {
+  it("reads the exact main ref through GitHub's single-ref endpoint", async () => {
+    const fetchImpl = jest.fn(async (url: URL) => ({
+      ok: true,
+      status: 200,
+      async json() {
+        return { object: { sha: SHA_D }, path: url.pathname };
+      },
+    }));
+    const github = createGithubClient({
+      apiUrl: "https://api.github.com",
+      repository: EXPECTED_REPOSITORY,
+      token: "token",
+      fetchImpl,
+    });
+    await expect(github.getRef("main")).resolves.toMatchObject({
+      object: { sha: SHA_D },
+      path: "/repos/6529-Collections/6529seize-frontend/git/refs/heads/main",
+    });
+  });
 
+  it("reads every page of production checks and statuses", async () => {
+    const fetchImpl = jest.fn(async (url: URL) => {
+      const page = url.searchParams.get("page");
+      const firstPage = Array.from({ length: 100 }, (_, index) => ({
+        name: `check-${index}`,
+      }));
+      const body = url.pathname.endsWith("/check-runs")
+        ? { check_runs: page === "1" ? firstPage : [{ name: "check-100" }] }
+        : page === "1"
+          ? firstPage.map(({ name }) => ({ context: name }))
+          : [{ context: "check-100" }];
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return body;
+        },
+      };
+    });
+    const github = createGithubClient({
+      apiUrl: "https://api.github.com",
+      repository: EXPECTED_REPOSITORY,
+      token: "token",
+      fetchImpl,
+    });
+    await expect(github.getCheckRuns(SHA_A)).resolves.toHaveProperty(
+      "check_runs.length",
+      101
+    );
+    await expect(github.getCombinedStatus(SHA_A)).resolves.toHaveProperty(
+      "statuses.length",
+      101
+    );
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
+  });
+});
+
+describe("Deploy Hub FE dry-run execution", () => {
+  it("validates the real plan and only publishes dry-run statuses", async () => {
+    const github = githubHarness({ 1: SHA_A, 2: SHA_B });
+    const git = gitHarness();
     const result = await executeShadow({
       operationId: "operation-1",
-      manifestJson: JSON.stringify(manifest),
-      scenario: "success",
-      delaySeconds: 0,
-      repository: EXPECTED_REPOSITORY,
-      baseRef: "main",
-      actor: ACTOR,
-      runUrl: RUN_URL,
-      github,
-    });
-
-    expect(result.conclusion).toBe("success");
-    expect(github.statuses).toHaveLength(8);
-    expect(github.statuses.at(-1)).toEqual({
-      sha: SHA_B,
-      status: {
-        state: "success",
-        target_url: RUN_URL,
-        description: "SHADOW: Production simulation complete; not deployed",
-        context: "Deploy Hub Shadow — Target: Production",
-      },
-    });
-    expect(
-      github.statuses.every(({ status }) => status["target_url"] === RUN_URL)
-    ).toBe(true);
-  });
-
-  it("fails closed and marks every request when one exact PR head moved", async () => {
-    const github = githubForHeads({ 1: SHA_A, 2: SHA_C });
-    const result = await executeShadow({
-      operationId: "operation-stale",
       manifestJson: JSON.stringify([
         request(1, SHA_A, "staging"),
-        request(2, SHA_B, "staging"),
+        request(2, SHA_B, "production"),
       ]),
-      scenario: "success",
-      delaySeconds: 0,
       repository: EXPECTED_REPOSITORY,
       baseRef: "main",
       actor: ACTOR,
       runUrl: RUN_URL,
       github,
+      git,
     });
-
-    expect(result.conclusion).toBe("failure");
-    expect(result.scenario).toBe("stale");
-    expect(github.statuses).toEqual([
-      expect.objectContaining({
-        sha: SHA_A,
-        status: expect.objectContaining({
-          state: "error",
-          description: "SHADOW: blocked by stale cohort input; no deployment",
-        }),
+    expect(result.conclusion).toBe("success");
+    expect(github.statuses).toHaveLength(4);
+    expect(github.statuses.at(-1)).toEqual({
+      sha: SHA_B,
+      status: expect.objectContaining({
+        state: "success",
+        context: "Deploy Hub Dry Run — Target: Production",
       }),
-      expect.objectContaining({
-        sha: SHA_B,
-        status: expect.objectContaining({
-          state: "error",
-          description: "SHADOW: stale exact PR head; no deployment",
-        }),
-      }),
-    ]);
+    });
+    expect(createSummary(result, RUN_URL)).toContain("READ ONLY");
   });
 
-  it.each([
-    [
-      "closed",
-      { state: "closed", base: { ref: "main" }, head: { sha: SHA_A } },
-    ],
-    [
-      "wrong base",
-      { state: "open", base: { ref: "develop" }, head: { sha: SHA_A } },
-    ],
-  ])("fails closed when the PR is %s", async (_name, pull) => {
-    const statuses: Array<{ sha: string; status: Record<string, string> }> = [];
-    const github = {
-      async getPullRequest() {
-        return pull;
-      },
-      async createCommitStatus(sha: string, status: Record<string, string>) {
-        statuses.push({ sha, status });
-        return {};
-      },
-    };
-    const result = await executeShadow({
-      operationId: "operation-stale-pr",
-      manifestJson: JSON.stringify([request(1, SHA_A, "staging")]),
-      scenario: "success",
-      delaySeconds: 0,
-      repository: EXPECTED_REPOSITORY,
-      baseRef: "main",
-      actor: ACTOR,
-      runUrl: RUN_URL,
-      github,
+  it("uses GitHub's canonical permission instead of a custom role name", async () => {
+    const github = githubHarness({ 1: SHA_A });
+    github.getCollaboratorPermission = async () => ({
+      permission: "read",
+      role_name: "admin",
     });
-
-    expect(result).toMatchObject({ scenario: "stale", conclusion: "failure" });
-    expect(statuses.at(-1)?.status).toMatchObject({ state: "error" });
-  });
-
-  it("best-effort terminates pending projections after an API interruption", async () => {
-    const github = githubForHeads({ 1: SHA_A, 2: SHA_B });
-    const originalCreateStatus = github.createCommitStatus.bind(github);
-    let calls = 0;
-    github.createCommitStatus = async (sha, status) => {
-      calls += 1;
-      if (calls === 3) {
-        throw new Error("simulated API interruption");
-      }
-      return originalCreateStatus(sha, status);
-    };
-
     await expect(
       executeShadow({
-        operationId: "operation-interrupted",
-        manifestJson: JSON.stringify([
-          request(1, SHA_A, "staging"),
-          request(2, SHA_B, "staging"),
-        ]),
-        scenario: "success",
-        delaySeconds: 0,
+        operationId: "operation-permission",
+        manifestJson: JSON.stringify([request(1, SHA_A, "staging")]),
         repository: EXPECTED_REPOSITORY,
         baseRef: "main",
         actor: ACTOR,
         runUrl: RUN_URL,
         github,
+        git: gitHarness(),
       })
-    ).rejects.toThrow("simulated API interruption");
-
-    expect(github.statuses.slice(-2)).toEqual([
-      expect.objectContaining({
-        sha: SHA_A,
-        status: expect.objectContaining({ state: "error" }),
-      }),
-      expect.objectContaining({
-        sha: SHA_B,
-        status: expect.objectContaining({ state: "error" }),
-      }),
-    ]);
+    ).rejects.toThrow("Requester lacks frontend write access.");
   });
 
-  it("uses the repository default branch instead of assuming main", async () => {
-    const statuses: Array<{ sha: string; status: Record<string, string> }> = [];
-    const github = {
-      async getPullRequest() {
-        return {
-          state: "open",
-          base: { ref: "develop" },
-          head: { sha: SHA_A },
-        };
-      },
-      async createCommitStatus(sha: string, status: Record<string, string>) {
-        statuses.push({ sha, status });
-        return {};
-      },
-    };
+  it("fails closed when an exact PR head moved", async () => {
+    const github = githubHarness({ 1: SHA_B });
+    await expect(
+      executeShadow({
+        operationId: "operation-stale",
+        manifestJson: JSON.stringify([request(1, SHA_A, "staging")]),
+        repository: EXPECTED_REPOSITORY,
+        baseRef: "main",
+        actor: ACTOR,
+        runUrl: RUN_URL,
+        github,
+        git: gitHarness(),
+      })
+    ).rejects.toThrow("PR #1 head moved.");
+    expect(github.statuses.at(-1)?.status).toMatchObject({ state: "error" });
+  });
 
-    const result = await executeShadow({
-      operationId: "operation-default-branch",
-      manifestJson: JSON.stringify([request(1, SHA_A, "staging")]),
-      scenario: "success",
-      delaySeconds: 0,
-      repository: EXPECTED_REPOSITORY,
-      baseRef: "develop",
-      actor: ACTOR,
-      runUrl: RUN_URL,
-      github,
+  it("requires the production installed-app check to have passed", async () => {
+    const github = githubHarness({ 1: SHA_A });
+    github.getCheckRuns = async () => ({
+      check_runs: [
+        {
+          name: "Installed app checks",
+          status: "completed",
+          conclusion: "skipped",
+        },
+      ],
     });
-
-    expect(result.conclusion).toBe("success");
-    expect(statuses.at(-1)?.status).toMatchObject({ state: "success" });
+    await expect(
+      executeShadow({
+        operationId: "operation-checks",
+        manifestJson: JSON.stringify([request(1, SHA_A, "production")]),
+        repository: EXPECTED_REPOSITORY,
+        baseRef: "main",
+        actor: ACTOR,
+        runUrl: RUN_URL,
+        github,
+        git: gitHarness(),
+      })
+    ).rejects.toThrow("did not pass Installed app checks");
   });
 
-  it.each([
-    ["product-failure", "failure", "product-failure"],
-    ["infrastructure-failure", "error", "infrastructure-failure"],
-    ["cancelled", "error", "cancelled"],
-    ["stale", "error", "stale"],
-  ])(
-    "projects the %s terminal outcome without deployment evidence",
-    (scenario, terminalState, terminalPhase) => {
-      const plan = statusPlan("staging", scenario);
-      expect(plan.at(-1)).toMatchObject({
-        phase: terminalPhase,
-        state: terminalState,
-      });
-      expect(plan.at(-1).description).toMatch(/SHADOW:/);
-      expect(plan.at(-1).description).toMatch(/deployment|deployed/);
-    }
-  );
-
-  it("uses target-specific shadow contexts", () => {
+  it("uses target-specific dry-run status contexts", () => {
     expect(statusContext("staging")).toBe(
-      "Deploy Hub Shadow — Target: Staging"
+      "Deploy Hub Dry Run — Target: Staging"
     );
     expect(statusContext("production")).toBe(
-      "Deploy Hub Shadow — Target: Production"
-    );
-  });
-
-  it("creates unambiguous success and pre-execution failure summaries", () => {
-    const summary = createSummary(
-      {
-        operationId: "operation-summary",
-        scenario: "success",
-        conclusion: "success",
-        requests: [request(1, SHA_A, "staging")],
-        cohorts: [
-          { target: "staging", requests: [request(1, SHA_A, "staging")] },
-        ],
-      },
-      RUN_URL
-    );
-    expect(summary).toContain("SHADOW ONLY");
-    expect(summary).toContain(RUN_URL);
-    expect(createFailureSummary("Manifest must be valid JSON.")).toContain(
-      "Manifest must be valid JSON."
-    );
-  });
-});
-
-describe("Deploy Hub FE shadow GitHub client", () => {
-  it("uses the exact repository API and never exposes an error response body", async () => {
-    const fetchImpl = jest
-      .fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({ state: "open" }),
-      })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 503,
-        json: async () => ({ secret: "must-not-escape" }),
-      });
-    const client = createGithubClient({
-      apiUrl: "https://api.github.com",
-      repository: EXPECTED_REPOSITORY,
-      token: "token-canary",
-      fetchImpl,
-    });
-
-    await expect(client.getPullRequest(1)).resolves.toEqual({ state: "open" });
-    await expect(
-      client.createCommitStatus(SHA_A, {
-        state: "pending",
-        target_url: RUN_URL,
-        description: "SHADOW: queued",
-        context: "Deploy Hub Shadow",
-      })
-    ).rejects.toThrow("GitHub request failed with HTTP 503.");
-    expect(fetchImpl.mock.calls[0][0]).toBe(
-      `https://api.github.com/repos/${EXPECTED_REPOSITORY}/pulls/1`
-    );
-    expect(JSON.stringify(fetchImpl.mock.calls)).not.toContain(
-      "must-not-escape"
+      "Deploy Hub Dry Run — Target: Production"
     );
   });
 });
