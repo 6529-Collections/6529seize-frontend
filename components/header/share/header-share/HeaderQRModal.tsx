@@ -33,7 +33,7 @@ import {
   buildNavigateDeepLinkUrl,
   buildNativeConnectionShareUrls,
   buildRouterPath,
-  getCurrentFullUrl,
+  getCurrentPageLocation,
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
   type ConnectionShareStatus,
@@ -238,25 +238,24 @@ function HeaderQRModal({
     setNavigateAppSrc("");
     setShareConnectionSrc("");
 
-    const browserUrl = getCurrentFullUrl();
-    const routerPath = buildRouterPath(pathname, searchParams);
-    const pageRouterPath = `${routerPath}${globalThis.window.location.hash}`;
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
     const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
-    const appUrl = buildNavigateDeepLinkUrl({
-      scheme: appScheme,
-      routerPath: pageRouterPath,
-    });
-    const coreUrl = buildNavigateDeepLinkUrl({
-      scheme: coreScheme,
-      routerPath: pageRouterPath,
-    });
-
-    setNavigateBrowserUrl(browserUrl);
-    setNavigateAppUrl(appUrl);
-    setNavigateCoreUrl(coreUrl);
 
     if (mode === Mode.PAGE_SHARE) {
+      const { fullUrl: browserUrl, routerPath: pageRouterPath } =
+        getCurrentPageLocation();
+      const appUrl = buildNavigateDeepLinkUrl({
+        scheme: appScheme,
+        routerPath: pageRouterPath,
+      });
+      const coreUrl = buildNavigateDeepLinkUrl({
+        scheme: coreScheme,
+        routerPath: pageRouterPath,
+      });
+
+      setNavigateBrowserUrl(browserUrl);
+      setNavigateAppUrl(appUrl);
+      setNavigateCoreUrl(coreUrl);
       generateQrCodeSource({
         url: browserUrl,
         setSource: setNavigateBrowserSrc,
@@ -276,6 +275,7 @@ function HeaderQRModal({
       return;
     }
 
+    const routerPath = buildRouterPath(pathname, searchParams);
     const generatedConnectionAppUrl = await generateNativeConnectionShareUrl({
       appScheme,
       isStaleGeneration,

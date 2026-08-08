@@ -567,6 +567,39 @@ describe("HeaderShare", () => {
     );
   });
 
+  it("derives every page-share target from the live browser location", async () => {
+    const qrcode = require("qrcode");
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false);
+    mockPathname = "/stale-router-path";
+    mockSearchParams = new URLSearchParams("stale=true");
+
+    renderWithProviders(<HeaderShare />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Share this page" })
+    );
+
+    expect(await screen.findByAltText("Current page QR code")).toBeVisible();
+    expect(qrcode.toDataURL).toHaveBeenCalledWith(
+      testPageUrl,
+      QR_CODE_OPTIONS
+    );
+    expect(qrcode.toDataURL).toHaveBeenCalledWith(
+      "testmobile6529://navigate/mock-path?something=value#details",
+      QR_CODE_OPTIONS
+    );
+    expect(
+      screen.getByRole("link", { name: "Open in 6529 Desktop" })
+    ).toHaveAttribute(
+      "href",
+      "testcore6529://navigate/mock-path?something=value#details"
+    );
+    expect(qrcode.toDataURL).not.toHaveBeenCalledWith(
+      expect.stringContaining("stale-router-path"),
+      expect.anything()
+    );
+  });
+
   it("uses the system share sheet with the exact current URL when available", async () => {
     const systemShare = jest.fn().mockResolvedValue(undefined);
     const canShare = jest.fn().mockReturnValue(true);
