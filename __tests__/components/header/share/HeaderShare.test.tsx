@@ -17,6 +17,7 @@ import React from "react";
 
 const mockCapacitorCanShare = jest.fn();
 const mockCapacitorShare = jest.fn();
+const mockShowAppToast = jest.fn();
 
 // Mocks
 jest.mock("@/hooks/useCapacitor");
@@ -29,6 +30,9 @@ jest.mock("@capacitor/share", () => ({
     canShare: (...args: unknown[]) => mockCapacitorCanShare(...args),
     share: (...args: unknown[]) => mockCapacitorShare(...args),
   },
+}));
+jest.mock("@/components/utils/toast/AppToast", () => ({
+  showAppToast: (...args: unknown[]) => mockShowAppToast(...args),
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
@@ -306,7 +310,7 @@ describe("HeaderShare", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("opens the compact page-share modal in a mobile browser", async () => {
+  it("shares directly from a mobile browser without opening a modal", async () => {
     mockIsMobile.mockReturnValue(true);
     document.title = "Mobile Share";
     const share = jest.fn().mockResolvedValue(undefined);
@@ -318,38 +322,40 @@ describe("HeaderShare", () => {
       configurable: true,
       value: jest.fn(() => true),
     });
-    const qrcode = require("qrcode");
-    qrcode.toDataURL.mockClear();
-
     renderWithProviders(<HeaderPageShareButton isCapacitor={false} />);
     await userEvent.click(screen.getByRole("button", { name: "Share page" }));
-
-    expect(
-      await screen.findByTestId("compact-page-share-layout")
-    ).toBeInTheDocument();
-    const modal = screen.getByTestId("header-share-modal");
-    expect(modal).toHaveClass("tw-max-w-sm");
-    expect(modal).not.toHaveClass("sm:tw-max-w-2xl");
-    expect(screen.getByRole("button", { name: "Copy Link" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Share on X" })).toBeVisible();
-    expect(
-      screen.getByRole("link", { name: "Share on Farcaster" })
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("link", { name: "Open in 6529 Desktop" })
-    ).not.toBeInTheDocument();
-    expect(screen.queryByTestId("page-share-target-menu")).toBeNull();
-    expect(screen.queryByTestId("page-share-divider")).toBeNull();
-    expect(qrcode.toDataURL).not.toHaveBeenCalled();
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Share with another app" })
-    );
 
     expect(share).toHaveBeenCalledWith({
       title: "Mobile Share",
       url: `${testOrigin}/mock-path?something=value#details`,
     });
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
+  });
+
+  it("shares the public page URL directly from the native app", async () => {
+    document.title = "Native Share";
+
+    renderWithProviders(<HeaderPageShareButton isCapacitor />);
+    await userEvent.click(screen.getByRole("button", { name: "Share page" }));
+
+    await waitFor(() =>
+      expect(mockCapacitorShare).toHaveBeenCalledWith({
+        title: "Native Share",
+        url: "https://test.6529.io/mock-path?something=value#details",
+      })
+    );
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
+  });
+
+  it("reports unavailable direct mobile sharing without opening a modal", async () => {
+    renderWithProviders(<HeaderPageShareButton isCapacitor={false} />);
+    await userEvent.click(screen.getByRole("button", { name: "Share page" }));
+
+    expect(mockShowAppToast).toHaveBeenCalledWith({
+      type: "error",
+      message: "System sharing is unavailable.",
+    });
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
   });
 
   it("renders nothing on a shared unsupported route", () => {
@@ -508,9 +514,7 @@ describe("HeaderShare", () => {
       expect(copyIcon).toBeInTheDocument();
       await userEvent.click(copyButton);
 
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        testPageUrl
-      );
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(testPageUrl);
       expect(screen.getByRole("button", { name: "Copied" })).toBe(copyButton);
       expect(copyButton).toHaveClass(
         "tw-border-green-500",

@@ -1,7 +1,6 @@
 import type { Mode, PageShareTarget, SubMode } from "./constants";
 import type {
   ConnectionShareStatus,
-  PageShareSystemShareAdapter,
   TerminalConnectionShareStatus,
 } from "./shareUtils";
 
@@ -35,9 +34,4 @@ export interface HeaderShareModalViewProps {
   readonly setUrlCopied: (copied: boolean) => void;
   readonly isMobile: boolean;
   readonly isElectron: boolean;
-  readonly compactPageShare: boolean;
-  readonly pageShareSystemShareAdapter?:
-    | PageShareSystemShareAdapter
-    | undefined;
-  readonly usePublicPageUrl: boolean;
 }

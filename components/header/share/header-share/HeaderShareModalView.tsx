@@ -62,9 +62,6 @@ export function HeaderShareModalView({
   setUrlCopied,
   isMobile,
   isElectron,
-  compactPageShare,
-  pageShareSystemShareAdapter,
-  usePublicPageUrl,
 }: HeaderShareModalViewProps) {
   const isConnectMode = mode === Mode.CONNECT;
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,8 +73,7 @@ export function HeaderShareModalView({
   } = useSystemShare({
     enabled:
       mode === Mode.PAGE_SHARE && isVisible && Boolean(navigateBrowserUrl),
-    systemShareAdapter: pageShareSystemShareAdapter,
-    usePublicUrl: usePublicPageUrl,
+    usePublicUrl: false,
   });
 
   useEffect(() => {
@@ -493,7 +489,7 @@ export function HeaderShareModalView({
             {copyLabel}
           </span>
         </button>
-        {!compactPageShare && desktopUrl && (
+        {desktopUrl && (
           <a href={desktopUrl} className={SHARE_ACTION_CLASS_NAME}>
             <ComputerDesktopIcon
               className={SHARE_ACTION_ICON_CLASS_NAME}
@@ -573,14 +569,6 @@ export function HeaderShareModalView({
     );
 
     if (mode === Mode.PAGE_SHARE) {
-      if (compactPageShare) {
-        return (
-          <div data-testid="compact-page-share-layout" className="tw-w-full">
-            {renderPageShareActions(navigateBrowserUrl, "")}
-          </div>
-        );
-      }
-
       return (
         <div
           data-testid="page-share-layout"
@@ -631,8 +619,6 @@ export function HeaderShareModalView({
   let modalMaxWidthClassName = "tw-max-w-sm sm:tw-max-w-2xl";
   if (isConnectMode) {
     modalMaxWidthClassName = "tw-max-w-md";
-  } else if (compactPageShare) {
-    modalMaxWidthClassName = "tw-max-w-sm";
   }
 
   return (

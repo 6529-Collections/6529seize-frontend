@@ -15,6 +15,8 @@ type SystemShareAvailability = {
   readonly isAvailable: boolean;
 };
 
+type SystemShareOutcome = "shared" | "cancelled" | "unavailable";
+
 function getPageShareData(usePublicUrl: boolean): PageShareData {
   return {
     title: document.title.trim() || "6529",
@@ -91,9 +93,9 @@ export function useSystemShare({
     }
   }
 
-  const shareCurrentPage = async () => {
+  const shareCurrentPage = async (): Promise<SystemShareOutcome> => {
     if (typeof document === "undefined") {
-      return;
+      return "unavailable";
     }
 
     const currentShareData = getPageShareData(usePublicUrl);
@@ -105,24 +107,26 @@ export function useSystemShare({
       if (systemShareAdapter) {
         if (!(await systemShareAdapter.canShare(currentShareData))) {
           markUnavailable();
-          return;
+          return "unavailable";
         }
         await systemShareAdapter.share(currentShareData);
-        return;
+        return "shared";
       }
 
       if (!canUseSystemShare(currentShareData)) {
         markUnavailable();
-        return;
+        return "unavailable";
       }
 
       await navigator.share(currentShareData);
+      return "shared";
     } catch (error) {
       if (isShareCancelError(error)) {
-        return;
+        return "cancelled";
       }
 
       markUnavailable();
+      return "unavailable";
     } finally {
       setIsPending(false);
     }
