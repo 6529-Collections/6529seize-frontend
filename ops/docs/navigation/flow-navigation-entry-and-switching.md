@@ -136,7 +136,7 @@ context-aware `Back`).
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [Back Button](feature-back-button.md)
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)

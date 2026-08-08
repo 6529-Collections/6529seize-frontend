@@ -509,7 +509,7 @@ describe("HeaderShare", () => {
       await userEvent.click(copyButton);
 
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        globalThis.window.location.href
+        testPageUrl
       );
       expect(screen.getByRole("button", { name: "Copied" })).toBe(copyButton);
       expect(copyButton).toHaveClass(
@@ -1811,7 +1811,7 @@ describe("HeaderShare", () => {
       expect(qrcode.toDataURL).toHaveBeenCalled();
 
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
-        globalThis.window.location.href,
+        testPageUrl,
         QR_CODE_OPTIONS
       );
     });

@@ -199,7 +199,7 @@ On web layouts, route switching is sidebar-first.
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [6529 Apps Page](feature-6529-apps-page.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Network Index](../network/README.md)

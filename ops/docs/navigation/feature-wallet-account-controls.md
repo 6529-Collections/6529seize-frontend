@@ -200,7 +200,7 @@ action.
 - [Navigation Index](README.md)
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Mobile Push Notifications](../notifications/feature-mobile-push-notifications.md)
 - [Profile Navigation Flow](../profiles/navigation/flow-navigation.md)

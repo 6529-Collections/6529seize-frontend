@@ -137,6 +137,6 @@ In the app layout, the header adapts to route and thread state. It controls:
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Back Button Behavior](feature-back-button.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Chat and Gallery View Toggle](../waves/header/feature-chat-gallery-toggle.md)

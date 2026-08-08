@@ -142,7 +142,7 @@ handoff does not behave as expected.
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [Back Button Behavior](feature-back-button.md)
 - [Mobile Pull-to-Refresh Behavior](feature-mobile-pull-to-refresh.md)
 - [Mobile App Landing Page](feature-mobile-app-landing.md)
