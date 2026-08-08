@@ -7,7 +7,7 @@ In the app layout, the header adapts to route and thread state. It controls:
 - left control (`Back` or `Open menu`)
 - title
 - right action row (`Create Wave`/`Create DM`, home health shortcut,
-  native page share, `Search`)
+  mobile page share, `Search`)
 
 ## Location in the Site
 
@@ -62,8 +62,9 @@ In the app layout, the header adapts to route and thread state. It controls:
    - `Create DM` appears in messages list context with no active wave
      (including `?view=messages`).
    - On `/`, network-health heart shortcut appears.
-   - In the native app, `Share page` appears immediately before `Search` on
-     pages outside `/`, `/waves*`, `/messages*`, and `/notifications*`.
+   - In the native app and small-screen web header, `Share page` appears
+     immediately before `Search` on pages outside `/`, `/messages*`, and
+     `/notifications*`.
    - `Search` is always available.
 7. More actions:
    - Wave-specific actions can appear in the overflow menu.
@@ -81,8 +82,9 @@ In the app layout, the header adapts to route and thread state. It controls:
 - Open `/drop-forge/launch/42`: title is `Drop Forge - Launch #42`.
 - Open `/rememes/{contract}/{tokenId}`: title uses shortened contract/token.
 - Open `/`: health heart shortcut appears in the action row.
-- Open a native app page such as `/the-memes/123`: the share button opens the
-  platform share sheet with the exact current path, query string, and hash.
+- Open a native app or small-screen web page such as `/the-memes/123`: the
+  share button opens the platform share sheet directly with the exact public
+  page URL.
 
 ## Edge Cases
 
@@ -91,9 +93,10 @@ In the app layout, the header adapts to route and thread state. It controls:
 - Profile routes show `Back` only when in-app history can resolve a target.
 - Menu/avatar unread dot appears only when a non-active connected account has
   unread notifications.
-- Native page share is hidden on `/`, `/waves*`, `/messages*`, and
-  `/notifications*`, and also while the native app is showing waves/messages
-  context from query-state navigation.
+- Mobile page share is hidden on `/`, `/messages*`, and `/notifications*`, and
+  also while the native app or small-screen web header is showing the Messages
+  context from query-state navigation. Waves routes and the Waves query context
+  remain shareable.
 - Rememes formatting applies only when both `contract` and `tokenId` are
   present.
 - Drop Forge title formatting applies only on `craft` and `launch` route
@@ -106,8 +109,8 @@ In the app layout, the header adapts to route and thread state. It controls:
   or `/messages`.
 - If create action is missing, verify you are in waves/messages list context
   and not inside an active thread.
-- If page share is missing in the native app, verify the route is not `/` or
-  under `/waves`, `/messages`, or `/notifications`.
+- If page share is missing on mobile, verify the route is not `/`, under
+  `/messages` or `/notifications`, or rendered in the Messages query view.
 - If menu does not open, retry from the same top-left control.
 - If the menu/avatar unread dot looks stale, open account controls and switch
   to the target account, then revisit `/notifications`.
@@ -115,11 +118,12 @@ In the app layout, the header adapts to route and thread state. It controls:
 
 ## Limitations / Notes
 
-- This page covers app-layout header behavior only (not web/small-screen web
-  header).
+- This page primarily covers app-layout header behavior; the page-share notes
+  also apply to the small-screen web header.
 - Native page share uses the configured public web endpoint plus the exact
   current route state so recipients receive a normal web URL rather than an
-  internal native-app URL.
+  internal native-app URL. Small-screen web sharing preserves the exact
+  current browser URL.
 - Back execution order is documented in
   [Back Button Behavior](feature-back-button.md).
 - Sidebar route groups and account actions are documented in
@@ -133,6 +137,6 @@ In the app layout, the header adapts to route and thread state. It controls:
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Back Button Behavior](feature-back-button.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Chat and Gallery View Toggle](../waves/header/feature-chat-gallery-toggle.md)
