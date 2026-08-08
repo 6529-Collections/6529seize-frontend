@@ -121,7 +121,9 @@ jobs:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
           path: trusted-verifier
-          sparse-checkout: ops/scripts/verify-production-artifact-selection.cjs
+          sparse-checkout: |
+            ops/scripts/verify-production-artifact-selection.cjs
+            ops/scripts/cli-args.cjs
           sparse-checkout-cone-mode: false
 
       - name: Install pinned Node.js
@@ -359,7 +361,7 @@ jobs:
       - name: Publish immutable selection identity
         id: selection-result
         env:
-          SELECTION_ARTIFACT_DIGEST: ${{ steps.upload-selection.outputs.artifact-digest }}
+          SELECTION_ARTIFACT_DIGEST: sha256:${{ steps.upload-selection.outputs.artifact-digest }}
           SELECTION_ARTIFACT_ID: ${{ steps.upload-selection.outputs.artifact-id }}
           SELECTION_ARTIFACT_NAME: ${{ steps.verified-selection.outputs.selection_artifact_name }}
           SELECTION_ARTIFACT_RUN_ATTEMPT: ${{ steps.verified-selection.outputs.selection_artifact_run_attempt }}

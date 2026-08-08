@@ -5,19 +5,23 @@ on:
     workflows: ["Production E2E", "Web Deploy - PROD"]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      terminal_workflow_run_id:
+        description: Exact terminal production workflow run to complete
+        required: true
+        type: string
 
 permissions: {}
 
-run-name: Production authority completion [${{ github.event.workflow_run.id }}]
+run-name: Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]
 
 jobs:
   complete-production-authority:
     name: Complete exact production authority
-    if: >-
-      github.event.workflow_run.head_repository.full_name == github.repository &&
-      github.event.workflow_run.head_branch == 'main' &&
-      (github.event.workflow_run.name == 'Production E2E' ||
-      github.event.workflow_run.name == 'Web Deploy - PROD')
+    # A workflow_dispatch actor is the authenticated dispatcher. This early gate is
+    # defense in depth; the shell and authority API independently verify identity.
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && (github.actor == 'punk6529' || github.actor == 'prxt6529' || github.actor == 'github-actions[bot]')) || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -36,10 +40,26 @@ jobs:
       - name: Read exact terminal workflow and immutable evidence
         id: proof
         env:
-          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_ACTOR: ${{ github.actor }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            if [ "$GITHUB_REF" != refs/heads/main ]; then
+              echo "::error::Production authority recovery must run from main."
+              exit 1
+            fi
+            case "$DISPATCH_ACTOR" in
+              punk6529|prxt6529|github-actions\[bot\]) ;;
+              *)
+                echo "::error::Actor is not authorized for production authority recovery."
+                exit 1
+                ;;
+            esac
+          fi
 
           proof_dir="$(mktemp -d)"
           trap 'rm -rf "$proof_dir"' EXIT
@@ -47,9 +67,14 @@ jobs:
 
           workflow_file="$proof_dir/workflow.json"
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}" > "$workflow_file"
-          workflow_name="$(jq -er '.name | strings' "$workflow_file")"
+          workflow_path="$(jq -er '.path | strings' "$workflow_file")"
 
-          if [[ "$workflow_name" != "Web Deploy - PROD" && "$workflow_name" != "Production E2E" ]]; then
+          if [ "$EVENT_NAME" = workflow_dispatch ] && [ "$DISPATCH_ACTOR" = 'github-actions[bot]' ] && [ "$workflow_path" != '.github/workflows/production-e2e.yml' ]; then
+            echo "::error::Automatic authority completion accepts only an exact Production E2E run."
+            exit 1
+          fi
+
+          if [[ "$workflow_path" != ".github/workflows/build-upload-deploy-prod.yml" && "$workflow_path" != ".github/workflows/production-e2e.yml" ]]; then
             echo "Ignoring an unrelated workflow completion."
             echo "action=ignore" >> "$GITHUB_OUTPUT"
             exit 0
@@ -92,7 +117,7 @@ jobs:
             declared_digest="$(jq -r '.digest // empty' "$record_file")"
             declared_size="$(jq -er '.size_in_bytes | numbers' "$record_file")"
             gh api \
-              --header 'Accept: application/octet-stream' \
+              --header 'Accept: application/vnd.github+json' \
               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > "$archive_file"
             test "$(stat -c %s "$archive_file")" -gt 0
             test "$(stat -c %s "$archive_file")" -le "$maximum_size"
@@ -142,13 +167,12 @@ jobs:
             test ! -L "$output_file"
           }
 
-          if [[ "$workflow_name" == "Web Deploy - PROD" ]]; then
+          if [[ "$workflow_path" == ".github/workflows/build-upload-deploy-prod.yml" ]]; then
             jq -e \
               --arg repository "$GITHUB_REPOSITORY" \
               --arg run_id "$WORKFLOW_RUN_ID" '
                 type == "object" and
                 (.id | tostring) == $run_id and
-                .name == "Web Deploy - PROD" and
                 .path == ".github/workflows/build-upload-deploy-prod.yml" and
                 .display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]") and
                 .event == "workflow_dispatch" and
@@ -174,6 +198,21 @@ jobs:
               "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/attempts/${deploy_attempt}/jobs?per_page=100" \
               > "$jobs_file"
             test "$(stat -c %s "$jobs_file")" -le 1048576
+            jq -e '
+              type == "object" and
+              (.total_count | type == "number" and . <= 100) and
+              (.jobs | type == "array")
+            ' "$jobs_file" >/dev/null
+            authority_acquisition_count="$(jq -er '[.jobs[].steps[]? | select(.name == "Atomically acquire and bind production authority" and .conclusion == "success")] | length' "$jobs_file")"
+            if [ "$authority_acquisition_count" = 0 ]; then
+              echo "Failed deployment never acquired production authority."
+              echo "action=ignore" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$authority_acquisition_count" != 1 ]; then
+              echo "::error::Production authority acquisition evidence is ambiguous; refusing failure release."
+              exit 1
+            fi
             evidence_digest="$(node .authority-listener/ops/scripts/production-authority-failure-evidence.cjs \
               --kind deploy \
               --run-file "$workflow_file" \
@@ -257,7 +296,6 @@ jobs:
             --arg title "$e2e_title" '
               type == "object" and
                (.id | tostring) == $run_id and
-               .name == "Production E2E" and
                .display_title == $title and
                .path == ".github/workflows/production-e2e.yml" and
                .event == "workflow_dispatch" and
@@ -282,7 +320,6 @@ jobs:
             --arg run_id "$deploy_run_id" '
               type == "object" and
               (.id | tostring) == $run_id and
-              .name == "Web Deploy - PROD" and
               .path == ".github/workflows/build-upload-deploy-prod.yml" and
               .display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]") and
               .event == "workflow_dispatch" and
@@ -314,7 +351,6 @@ jobs:
             --arg title "$e2e_title" '
               [.workflow_runs[] |
                 select(
-                  .name == "Production E2E" and
                   .path == ".github/workflows/production-e2e.yml" and
                   .display_title == $title and
                   .event == "workflow_dispatch" and
@@ -369,7 +405,7 @@ jobs:
             declared_digest="$(jq -r '.digest // empty' "$record_file")"
             declared_size="$(jq -er '.size_in_bytes | numbers' "$record_file")"
             gh api \
-              --header 'Accept: application/octet-stream' \
+              --header 'Accept: application/vnd.github+json' \
               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > "$archive_file"
             test "$(stat -c %s "$archive_file")" -gt 0
             test "$(stat -c %s "$archive_file")" -le "$maximum_size"

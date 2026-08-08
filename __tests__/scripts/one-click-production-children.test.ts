@@ -243,7 +243,6 @@ function selectionBundle(overrides: Record<string, unknown> = {}) {
         digest: SELECTION_ARTIFACT_DIGEST,
         workflow_run: {
           id: Number(VERIFIER_RUN_ID),
-          run_attempt: VERIFIER_RUN_ATTEMPT,
           head_sha: VERIFIER_HEAD_SHA,
         },
       },
@@ -484,20 +483,23 @@ describe("one-click production child run selection", () => {
     { id: "8002" },
     { api_digest: `sha256:${"0".repeat(64)}` },
     { workflow_sha: FOREIGN_SHA },
-  ])("does not select a verifier bound to a different artifact: %j", (source) => {
-    const stale = verifierRun({ display_title: verifierTitle(source) });
-    expect(
-      selectTrustedWorkflowRun({
-        workflowRunsJson: { workflow_runs: [stale] },
-        repository: EXPECTED_REPOSITORY,
-        workflowPath: VERIFIER_WORKFLOW_PATH,
-        workflowId: VERIFIER_WORKFLOW_ID,
-        operationId: OPERATION_ID,
-        targetSha: TARGET_SHA,
-        sourceArtifact: SOURCE_ARTIFACT,
-      })
-    ).toMatchObject({ result: "absent", reason: "no_exact_identity_match" });
-  });
+  ])(
+    "does not select a verifier bound to a different artifact: %j",
+    (source) => {
+      const stale = verifierRun({ display_title: verifierTitle(source) });
+      expect(
+        selectTrustedWorkflowRun({
+          workflowRunsJson: { workflow_runs: [stale] },
+          repository: EXPECTED_REPOSITORY,
+          workflowPath: VERIFIER_WORKFLOW_PATH,
+          workflowId: VERIFIER_WORKFLOW_ID,
+          operationId: OPERATION_ID,
+          targetSha: TARGET_SHA,
+          sourceArtifact: SOURCE_ARTIFACT,
+        })
+      ).toMatchObject({ result: "absent", reason: "no_exact_identity_match" });
+    }
+  );
 });
 
 describe("one-click production artifact metadata", () => {
@@ -625,22 +627,29 @@ describe("one-click production verifier selection artifact metadata", () => {
     });
   });
 
+  it("rejects a present selection artifact attempt that disagrees with the verifier run", () => {
+    const exact = selectionBundle().artifacts[0];
+    expect(() =>
+      validateSelectionArtifactMetadata(
+        selectionInput({
+          metadataBundle: selectionBundle({
+            artifacts: [
+              {
+                ...exact,
+                workflow_run: {
+                  id: Number(VERIFIER_RUN_ID),
+                  run_attempt: VERIFIER_RUN_ATTEMPT + 1,
+                  head_sha: VERIFIER_HEAD_SHA,
+                },
+              },
+            ],
+          }),
+        })
+      )
+    ).toThrow(/workflow run attempt does not match/);
+  });
+
   it.each([
-    {
-      label: "wrong attempt attachment",
-      metadataBundle: selectionBundle({
-        artifacts: [
-          {
-            ...selectionBundle().artifacts[0],
-            workflow_run: {
-              id: Number(VERIFIER_RUN_ID),
-              run_attempt: 3,
-              head_sha: VERIFIER_HEAD_SHA,
-            },
-          },
-        ],
-      }),
-    },
     {
       label: "wrong artifact name",
       metadataBundle: selectionBundle({
