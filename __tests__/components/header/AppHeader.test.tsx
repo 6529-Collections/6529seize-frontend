@@ -4,6 +4,7 @@ import {
   screen,
   fireEvent,
   waitFor,
+  within,
 } from "@testing-library/react";
 import React from "react";
 import AppHeader from "@/components/header/AppHeader";
@@ -55,6 +56,12 @@ jest.mock("@/components/utils/Spinner", () => ({
 jest.mock("@/components/header/HeaderActionButtons", () => ({
   __esModule: true,
   default: () => <div data-testid="actions" />,
+}));
+jest.mock("@/components/common/icons/ShareArrowIcon", () => ({
+  __esModule: true,
+  default: ({ className }: { readonly className?: string | undefined }) => (
+    <svg data-testid="share-arrow-icon" className={className} />
+  ),
 }));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
@@ -944,7 +951,7 @@ describe("AppHeader", () => {
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
   });
 
-  it("shows gallery toggle in eligible wave context and toggles view mode", () => {
+  it("keeps wave sharing in the overflow and toggles gallery view", () => {
     const toggleViewMode = jest.fn();
     const wave = {
       id: "w4",
@@ -953,6 +960,7 @@ describe("AppHeader", () => {
       contributors_overview: [{ contributor_pfp: "/c1.png" }],
       chat: { scope: { group: { is_direct_message: false } } },
     };
+    useCapacitor.mockReturnValue({ isCapacitor: true });
     setup({
       wave,
       asPath: "/waves/w4",
@@ -961,9 +969,16 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
+
     fireEvent.click(
       screen.getByRole("button", { name: "More header actions" })
     );
+
+    const shareWave = screen.getByRole("menuitem", { name: "Share wave" });
+    expect(within(shareWave).getByTestId("share-arrow-icon")).toBeVisible();
 
     const galleryToggle = screen.getByRole("menuitem", {
       name: "Switch to gallery view",
