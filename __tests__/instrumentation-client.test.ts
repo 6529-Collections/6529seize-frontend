@@ -130,6 +130,9 @@ describe("instrumentation-client", () => {
     },
   ];
   const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
+  const coinbaseAnalyticsAbortErrorValue = "AbortError: AbortError";
+  const coinbaseAnalyticsIndexedDbGetErrorMessage =
+    "Analytics SDK: Error: IndexedDB:Get:InternalError undefined";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const poperBlockerInjectedFetchFrames = [
@@ -566,6 +569,23 @@ describe("instrumentation-client", () => {
           request_kind: "background_sync",
           trigger: "request_replaced",
         },
+      },
+    ],
+  });
+
+  const createCoinbaseAnalyticsIndexedDBAbortEvent = () => ({
+    ...createUnhandledRejectionEvent(coinbaseAnalyticsAbortErrorValue),
+    timestamp: 1_786_147_714.163,
+    tags: {
+      "DOMException.code": "20",
+      "os.name": "iOS",
+    },
+    breadcrumbs: [
+      {
+        category: "console",
+        level: "error",
+        message: coinbaseAnalyticsIndexedDbGetErrorMessage,
+        timestamp: 1_786_147_714.162,
       },
     ],
   });
@@ -2585,6 +2605,27 @@ describe("instrumentation-client", () => {
     const beforeSend = loadBeforeSend();
     const event = {
       ...createExpectedWaveReplacementAbortEvent(),
+      breadcrumbs: [],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("drops the exact Coinbase analytics IndexedDB abort", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createCoinbaseAnalyticsIndexedDBAbortEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Coinbase-shaped AbortError without the vendor breadcrumb", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createCoinbaseAnalyticsIndexedDBAbortEvent(),
       breadcrumbs: [],
     };
 

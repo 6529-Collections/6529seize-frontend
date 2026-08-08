@@ -30,6 +30,7 @@ import {
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterBrowserExtensionWalletRejection,
   shouldFilterChromeMobileIosInjectedGaError,
+  shouldFilterCoinbaseAnalyticsIndexedDBAbort,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
@@ -181,6 +182,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterPoperBlockerOrphanFetchRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterCoinbaseAnalyticsIndexedDBAbort(event)) {
     return true;
   }
 
