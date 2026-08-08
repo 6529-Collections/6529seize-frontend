@@ -200,6 +200,7 @@ jobs:
       actions: read
       contents: read
       deployments: write
+      pull-requests: read
     environment: production
     outputs:
       authorized-selection-digest: ${{ steps.reauthorize.outputs.selection-digest }}
@@ -907,6 +908,7 @@ jobs:
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ github.sha }}
           CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
+          GITHUB_TOKEN: ${{ github.token }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
 
   notify-production-prerequisite-failure:
