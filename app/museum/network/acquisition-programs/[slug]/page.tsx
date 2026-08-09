@@ -27,7 +27,10 @@ import {
 } from "@/lib/museum/publication/routes";
 import type { MuseumPublicWork } from "@/lib/museum/publication/types";
 import type { MuseumProgram, MuseumView } from "@/lib/museum/types";
-import { displayMuseumPublicAcquisitionStatus } from "@/lib/museum/presentation";
+import {
+  displayMuseumPublicAcquisitionProgramStatus,
+  museumPublicAcquisitionProgramStatusAsOf,
+} from "@/lib/museum/publication/programStatus";
 
 interface MuseumAcquisitionProgramPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -149,6 +152,11 @@ export default async function MuseumAcquisitionProgramPage({
     typed === undefined ? (legacy?.selectedWorks ?? []) : [];
   const title = typed?.title ?? legacy?.title ?? "";
   const sourcePath = typed?.sourcePaths[0] ?? legacy?.sourcePath ?? null;
+  const typedStatus =
+    typed === undefined
+      ? undefined
+      : displayMuseumPublicAcquisitionProgramStatus(typed.status);
+  const typedStatusAsOf = museumPublicAcquisitionProgramStatusAsOf(typed);
   const context = buildMuseumEntityContext({
     kind: "acquisition_program",
     id: typed?.id ?? legacy?.programId ?? slug,
@@ -164,10 +172,9 @@ export default async function MuseumAcquisitionProgramPage({
       },
       { label: title },
     ],
-    ...(typedWorks[0]?.status === undefined
-      ? {}
-      : { status: displayMuseumPublicAcquisitionStatus(typedWorks[0].status) }),
-    statusAsOf: typedWorks[0]?.statusAsOf ?? legacy?.statusAsOf ?? null,
+    ...(typedStatus === undefined ? {} : { status: typedStatus }),
+    statusAsOf:
+      typed === undefined ? (legacy?.statusAsOf ?? null) : typedStatusAsOf,
     primaryRelations: typedWorks.flatMap((work) => {
       const relationSourcePath = work.sourcePaths[0];
       return relationSourcePath === undefined
