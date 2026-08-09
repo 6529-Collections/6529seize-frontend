@@ -15,11 +15,8 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { KEYS_AND_GATES_PROGRAM_ID } from "@/lib/museum/constants";
-import { getMuseumView } from "@/lib/museum/normalize";
-import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
-import { museumLegacyAcquisitionProgramHref } from "@/lib/museum/publication/routes";
 import {
   museumWorkHrefForSourceId,
   resolveMuseumAcquisitionProgramSlug,
@@ -39,15 +36,22 @@ export async function generateMetadata({
   params,
 }: ProgramDetailProps): Promise<Metadata> {
   const { programId } = await params;
-  const view = await getMuseumView();
-  const program = view.programs.find((item) =>
+  const { publicationState, view } = await getMuseumPublicationBundle();
+  const typedProgram = publicationState.publication?.acquisitionPrograms?.find(
+    (item) =>
+      item.slug === programId ||
+      item.id === programId ||
+      item.sourceAliases?.includes(programId) === true
+  );
+  const program = view?.programs.find((item) =>
     museumSlugMatches(item.programId, programId)
   );
   return getAppMetadata({
-    title: program?.title ?? t(DEFAULT_LOCALE, "museum.network.programs.title"),
-    description:
-      program?.subtitle ??
-      t(DEFAULT_LOCALE, "museum.network.programs.description"),
+    title:
+      typedProgram?.title ??
+      program?.title ??
+      t(DEFAULT_LOCALE, "museum.network.programs.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.programs.description"),
   });
 }
 
@@ -55,7 +59,7 @@ export default async function MuseumProgramDetailPage({
   params,
 }: ProgramDetailProps) {
   const { programId } = await params;
-  const { publicationState: bundlePublicationState } =
+  const { publicationState: bundlePublicationState, view } =
     await getMuseumPublicationBundle();
   if (bundlePublicationState.publication !== null) {
     const programSlug = resolveMuseumAcquisitionProgramSlug(
@@ -63,19 +67,15 @@ export default async function MuseumProgramDetailPage({
       programId
     );
     if (programSlug !== null) {
-      permanentRedirect(
+      return permanentRedirect(
         `/museum/network/acquisition-programs/${encodeURIComponent(programSlug)}`
       );
     }
   } else {
-    const canonicalProgramHref = museumLegacyAcquisitionProgramHref(programId);
-    if (canonicalProgramHref !== null) permanentRedirect(canonicalProgramHref);
+    notFound();
   }
-  const [view, publicationState] = await Promise.all([
-    getMuseumView(),
-    getMuseumPublicationState(),
-  ]);
-  const program = view.programs.find((item) =>
+  const publicationState = bundlePublicationState;
+  const program = view?.programs.find((item) =>
     museumSlugMatches(item.programId, programId)
   );
   if (!program) notFound();

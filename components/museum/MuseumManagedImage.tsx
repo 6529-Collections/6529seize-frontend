@@ -31,7 +31,7 @@ function MuseumMediaFailure({
   readonly retryLabel: string;
   readonly sourceHref?: string;
   readonly sourceLabel?: string;
-  readonly onRetry: () => void;
+  readonly onRetry?: () => void;
 }) {
   return (
     <div
@@ -40,13 +40,15 @@ function MuseumMediaFailure({
     >
       <p className="tw-m-0">{message}</p>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        <button
-          type="button"
-          onClick={onRetry}
-          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          {retryLabel}
-        </button>
+        {onRetry === undefined ? null : (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {retryLabel}
+          </button>
+        )}
         {sourceHref !== undefined && sourceLabel !== undefined ? (
           <a
             href={sourceHref}
@@ -89,12 +91,15 @@ export function MuseumManagedImage({
         {...(sourceHref === undefined || sourceLabel === undefined
           ? {}
           : { sourceHref, sourceLabel })}
-        onRetry={() => {
-          if (alt.trim().length === 0) return;
-          setFailed(false);
-          setAttempt((value) => value + 1);
-          onStatusChange?.("loading");
-        }}
+        {...(alt.trim().length === 0
+          ? {}
+          : {
+              onRetry: () => {
+                setFailed(false);
+                setAttempt((value) => value + 1);
+                onStatusChange?.("loading");
+              },
+            })}
       />
     );
   }

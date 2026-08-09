@@ -5,6 +5,7 @@ import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicat
 import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
 import { MuseumProposalImage } from "@/components/museum/MuseumProposalImage";
 import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
+import { MuseumMediaMetadataPlaceholder } from "@/components/museum/MuseumMediaMetadataPlaceholder";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
@@ -15,7 +16,10 @@ import {
   type MuseumAcquisitionViewModel,
   type MuseumPublicAcquisitionStatus,
 } from "@/lib/museum/publication/ia";
-import { museumAcquisitionHref } from "@/lib/museum/publication/routes";
+import {
+  museumAcquisitionHref,
+  museumWorkHref,
+} from "@/lib/museum/publication/routes";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
@@ -126,6 +130,7 @@ function AcquisitionPreview({
     acquisition.workIds.includes(work.id)
   );
   const typedMedia = typedWork?.media[0];
+  const typedMetadata = typedWork?.mediaMetadata?.[0];
   if (typedWork !== undefined && typedMedia !== undefined) {
     const artist = publication.artists.find(
       (item) => item.id === typedWork.artistId
@@ -141,6 +146,30 @@ function AcquisitionPreview({
         byline={artist?.preferredName ?? ""}
         eager={eager}
       />
+    );
+  }
+  if (typedWork !== undefined && typedMetadata !== undefined) {
+    const artist = publication.artists.find(
+      (item) => item.id === typedWork.artistId
+    );
+    return (
+      <figure className="tw-m-0 tw-min-w-0">
+        <MuseumMediaMetadataPlaceholder
+          title={typedWork.title}
+          metadata={typedMetadata}
+        />
+        <figcaption className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4">
+          <Link
+            href={museumWorkHref(typedWork.id)}
+            className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {typedWork.title}
+          </Link>
+          <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
+            {artist?.preferredName ?? typedWork.artistId}
+          </span>
+        </figcaption>
+      </figure>
     );
   }
   const proposal = acquisition.presentationMedia[0];
