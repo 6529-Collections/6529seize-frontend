@@ -182,7 +182,9 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
   return new GitHubMuseumPublicationSource({
     ref: resolveMuseumPublicationRef(),
     assembler: legacyCaseyPublicationAssembler,
-    catalogResolver: museumPublicationCatalogResolver,
+    ...(allowUncataloguedTestFixture
+      ? {}
+      : { catalogResolver: museumPublicationCatalogResolver }),
     ...(allowUncataloguedTestFixture
       ? { allowUncataloguedTestFixture: true }
       : {}),
