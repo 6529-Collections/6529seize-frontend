@@ -69,7 +69,7 @@ describe("MuseumSourceContribution", () => {
       screen.getByRole("link", { name: "Propose an edit" })
     ).toHaveAttribute(
       "href",
-      `https://github.com/6529-Collections/6529networkmuseum/edit/${COMMIT}/records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md`
+      "https://github.com/6529-Collections/6529networkmuseum/edit/main/records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md"
     );
     expect(
       screen.getByRole("link", { name: "Contributor guide" })

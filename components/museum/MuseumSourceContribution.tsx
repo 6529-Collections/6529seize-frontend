@@ -9,7 +9,7 @@ import { resolveMuseumPageSource } from "@/lib/museum/publication/pageSources";
 import { MUSEUM_CONTRIBUTOR_GUIDE_PATH } from "@/lib/museum/publication/openMuseum";
 import {
   buildImmutableMuseumBlobUrl,
-  buildImmutableMuseumEditUrl,
+  buildMuseumMainEditUrl,
 } from "@/lib/museum/publication/security";
 import type { MuseumPublicationIdentity } from "@/lib/museum/publication/types";
 import type { MuseumSourceState } from "@/lib/museum/types";
@@ -111,7 +111,7 @@ export function MuseumSourceContribution({
   const improvementUrl =
     pageSource === null
       ? null
-      : buildImmutableMuseumEditUrl(commit, pageSource.primaryPath);
+      : buildMuseumMainEditUrl(pageSource.primaryPath);
   const contributionUrl = buildImmutableMuseumBlobUrl(
     commit,
     MUSEUM_CONTRIBUTOR_GUIDE_PATH

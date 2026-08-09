@@ -119,6 +119,7 @@ describe("Museum publication security boundary", () => {
       "https://github.com/6529-Collections/6529networkmuseum/edit/main/docs/open-museum.md"
     );
     expect(buildMuseumMainEditUrl("docs/../RIGHTS.md")).toBeNull();
+    expect(buildMuseumMainEditUrl("https://evil.test/README.md")).toBeNull();
   });
 
   it("rejects arbitrary GitHub and Art Blocks origins", () => {
