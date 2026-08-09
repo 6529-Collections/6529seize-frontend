@@ -133,6 +133,7 @@ function ref(input: {
   readonly href: string | null;
   readonly relation: string;
   readonly status?: string;
+  readonly statusAsOf?: string | null;
   readonly sourcePath?: string | null;
   readonly sourceCommit?: string | null;
   readonly media?: MuseumEntityRefMedia;
@@ -150,6 +151,7 @@ function ref(input: {
     href: input.href,
     relation: input.relation,
     ...(input.status === undefined ? {} : { status: input.status }),
+    ...(input.statusAsOf === undefined ? {} : { statusAsOf: input.statusAsOf }),
     ...(input.sourcePath?.trim() ? { sourcePath: input.sourcePath } : {}),
     ...(input.sourceCommit?.trim() ? { sourceCommit: input.sourceCommit } : {}),
     ...(input.media === undefined ? {} : { media: input.media }),
@@ -285,7 +287,7 @@ function artistRelation(
       });
 }
 
-function buildMuseumArtistRelations(
+export function buildMuseumArtistRelations(
   publication: MuseumPublication,
   artistSlug: string,
   view: MuseumView | null = null
@@ -317,8 +319,12 @@ function buildMuseumArtistRelations(
         id: acquisition.acquisitionId,
         label: acquisition.title,
         href: museumAcquisitionHref(acquisition.slug),
-        relation: "Acquired through",
+        relation:
+          acquisition.status === "accessioned_into_permanent_collection"
+            ? "Acquired through"
+            : "Included in",
         status: acquisition.status,
+        statusAsOf: acquisition.statusAsOf,
         sourcePath: acquisition.sourcePath,
         sourceCommit: publication.identity.commit,
       });

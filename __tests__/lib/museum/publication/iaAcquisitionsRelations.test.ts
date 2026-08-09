@@ -1,3 +1,4 @@
+import { buildMuseumArtistRelations } from "@/lib/museum/publication/ia";
 import { buildMuseumWorkRelations } from "@/lib/museum/publication/iaWorkContext";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
 
@@ -215,6 +216,50 @@ describe("typed acquisition/work relation presentation", () => {
     expect(magnum.secondaryRelations).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: "6529NM-AP-ENT-0001" }),
+      ])
+    );
+  });
+
+  it("uses a lifecycle-neutral artist relation for peer acquisitions", () => {
+    const publication = relationPublication();
+
+    expect(
+      buildMuseumArtistRelations(publication, "casey-reas").secondaryRelations
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "6529NM-CA-2026-001",
+          relation: "Acquired through",
+          status: "accessioned_into_permanent_collection",
+          statusAsOf: "2026-01-01",
+        }),
+      ])
+    );
+
+    expect(
+      buildMuseumArtistRelations(publication, "keys-artist").secondaryRelations
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "6529NM-CA-2026-002",
+          relation: "Included in",
+          status: "selected_through_acquisition_program_acquisition_pending",
+          statusAsOf: "2026-01-01",
+        }),
+      ])
+    );
+
+    expect(
+      buildMuseumArtistRelations(publication, "magnum-artist")
+        .secondaryRelations
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "6529NM-CA-2026-003",
+          relation: "Included in",
+          status: "selected_by_museum_wave_acquisition_review_in_progress",
+          statusAsOf: "2026-01-01",
+        }),
       ])
     );
   });

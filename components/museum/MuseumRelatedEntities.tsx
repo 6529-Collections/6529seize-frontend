@@ -1,10 +1,16 @@
 import Link from "next/link";
+import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
   MuseumEntityRef,
   MuseumEntityRefMedia,
+  MuseumPublicAcquisitionStatus,
 } from "@/lib/museum/publication/ia";
+import {
+  displayMuseumPublicAcquisitionStatus,
+  displayMuseumStatus,
+} from "@/lib/museum/presentation";
 import {
   MuseumManagedImage,
   type MuseumManagedImageProps,
@@ -24,6 +30,26 @@ interface MuseumRelatedEntitiesProps {
   readonly entities: readonly MuseumEntityRef[];
   readonly headingId: string;
   readonly title: string;
+}
+
+const PUBLIC_ACQUISITION_STATUSES: readonly MuseumPublicAcquisitionStatus[] = [
+  "proposed_in_museum_wave",
+  "selected_by_museum_wave_acquisition_review_in_progress",
+  "selected_through_acquisition_program_acquisition_pending",
+  "acquisition_complete_accession_review_in_progress",
+  "accessioned_into_permanent_collection",
+  "closed_without_selection",
+  "withdrawn",
+];
+
+function displayRelationStatus(status: string): string {
+  return PUBLIC_ACQUISITION_STATUSES.includes(
+    status as MuseumPublicAcquisitionStatus
+  )
+    ? displayMuseumPublicAcquisitionStatus(
+        status as MuseumPublicAcquisitionStatus
+      )
+    : displayMuseumStatus(status);
 }
 
 export function MuseumRelatedEntities({
@@ -85,6 +111,34 @@ export function MuseumRelatedEntities({
                 >
                   {entity.label}
                 </Link>
+                {entity.status === undefined &&
+                (entity.statusAsOf === null ||
+                  entity.statusAsOf === undefined) ? null : (
+                  <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-leading-5 tw-text-iron-400">
+                    {entity.status === undefined ? null : (
+                      <span>
+                        <span className="tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+                          {t(DEFAULT_LOCALE, "museum.network.entity.status")}
+                        </span>{" "}
+                        {displayRelationStatus(entity.status)}
+                      </span>
+                    )}
+                    {entity.statusAsOf === null ||
+                    entity.statusAsOf === undefined ? null : (
+                      <span>
+                        <span className="tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+                          {t(
+                            DEFAULT_LOCALE,
+                            "museum.network.entity.statusAsOf"
+                          )}
+                        </span>{" "}
+                        <time dateTime={entity.statusAsOf}>
+                          {formatDate(DEFAULT_LOCALE, entity.statusAsOf)}
+                        </time>
+                      </span>
+                    )}
+                  </div>
+                )}
                 {media?.creditLine === undefined ? null : (
                   <span className="tw-text-xs tw-leading-5 tw-text-iron-500">
                     {media.creditLine}
