@@ -240,7 +240,7 @@
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
-        "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
+        "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -1064,9 +1064,9 @@
         "connect mobile with qr",
         "mobile qr connection",
         "connect desktop app",
-        "share current page",
-        "send page to mobile",
-        "send page to desktop"
+        "connect device",
+        "connect 6529 mobile",
+        "connect 6529 desktop"
       ],
       "keywords": [
         "share",
@@ -1086,19 +1086,22 @@
         "page"
       ],
       "facts": [
-        "Use the profile or account menu in the header to open the Share menu.",
-        "Choose Connection when you want to share your authenticated connection to another 6529 client.",
-        "Connection sharing can show a QR code for 6529 Mobile or a deep link for 6529 Desktop.",
+        "Use the desktop profile or account menu and select Connect Device.",
+        "The connection dialog contains only Mobile and Desktop targets and defaults to Mobile.",
+        "Connection sharing shows a QR code for Mobile or a clickable 6529 Desktop handoff card and deep link for Desktop.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
-        "If the Share menu says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
-        "The desktop Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection.",
-        "In the native app, supported non-wave pages use the header Share page button for current-page sharing."
+        "If the connection dialog says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
+        "Page sharing is a separate navigation action and never appears in the connection dialog.",
+        "On supported pages, mobile web and the native app use a header Share page button that opens a compact action-only Share dialog."
       ],
       "canonical_path": "/",
       "suppress_source_links": true,
       "tags": ["auth", "wallet", "navigation", "mobile", "desktop"],
       "source_refs": [
         "components/header/share/HeaderShare.tsx",
+        "components/header/share/header-share/HeaderQRModal.tsx",
+        "components/header/share/header-share/HeaderShareModalView.tsx",
+        "components/layout/sidebar/WebSidebarUser.tsx",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/contracts/wallet-auth-session-v2.md"
       ]
@@ -2870,7 +2873,17 @@
         "wallet consolidation",
         "consolidate wallets",
         "tdh consolidation",
-        "consolidation"
+        "consolidation",
+        "add a second wallet",
+        "add another wallet",
+        "add an additional wallet",
+        "add my other wallet",
+        "link another wallet",
+        "link two wallets",
+        "link my wallets",
+        "pair two wallets",
+        "set up multiple wallets",
+        "set up a second wallet"
       ],
       "keywords": [
         "consolidation",
@@ -2886,6 +2899,7 @@
       ],
       "facts": [
         "A consolidation connects wallets you control so 6529 can treat them together for supported metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
+        "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
         "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
         "For TDH consolidation, use Any Collection or The Memes.",
         "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."
@@ -3008,6 +3022,15 @@
       "title": "Consolidation Use Cases",
       "aliases": [
         "consolidation use cases",
+        "wallet consolidation limit",
+        "consolidation wallet limit",
+        "maximum consolidation group size",
+        "number of wallets in a consolidation",
+        "number of addresses in a consolidation",
+        "how many wallets can be consolidated",
+        "how many addresses can be consolidated",
+        "wallet consolidation capacity",
+        "effective consolidation group size",
         "4 wallet consolidation",
         "four wallet consolidation",
         "4 wallet consolidation limit",
@@ -3036,11 +3059,18 @@
         "minting",
         "transaction",
         "compromised",
-        "reciprocal"
+        "reciprocal",
+        "limit",
+        "maximum",
+        "capacity",
+        "allowed",
+        "counted"
       ],
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
         "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
+        "More than 3 addresses can have consolidation records, but Seize only counts the last 3 addresses for consolidation purposes.",
+        "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 3 addresses count together.",
         "The docs cover two-address and three-address patterns, plus a four-address compromised-wallet scenario where the user chooses which three-address set should count.",
         "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
       ],
@@ -3102,10 +3132,43 @@
       ]
     },
     {
+      "id": "delegation.wallet-management-clarification",
+      "kind": "workflow",
+      "title": "Wallet Connection and Management Clarification",
+      "link_label": "Delegation Center",
+      "aliases": [
+        "connected wallet or consolidation",
+        "connect another wallet",
+        "connect two wallets",
+        "wallet connection or consolidation",
+        "wallet management clarification"
+      ],
+      "keywords": ["wallet", "management", "consolidation", "connected"],
+      "facts": [
+        "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
+        "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
+        "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
+        "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
+        "If the question is only about the site's currently connected wallet, clarify that it is a connection question rather than a consolidation change."
+      ],
+      "canonical_path": "/delegation/delegation-center",
+      "related_paths": [
+        "/delegation/delegation-faq/manage-revoke",
+        "/delegation/delegation-faq/manage-update",
+        "/delegation/delegation-faq/register-consolidation"
+      ],
+      "tags": ["delegation", "wallet", "consolidation", "management"],
+      "source_refs": [
+        "public/delegation-content/delegation-docs-2026-06-16/html/manage-revoke.html",
+        "public/delegation-content/delegation-docs-2026-06-16/html/manage-update.html",
+        "components/delegation/delegation-page-metadata.ts"
+      ]
+    },
+    {
       "id": "delegation.manage-revoke-doc",
       "kind": "workflow",
-      "title": "How to Revoke a Delegation",
-      "link_label": "Revoke Delegation",
+      "title": "How to Revoke a Delegation or Consolidation",
+      "link_label": "Revoke Delegation or Consolidation",
       "aliases": [
         "how to revoke a delegation",
         "how do i revoke a delegation",
@@ -3115,7 +3178,12 @@
         "delete delegation",
         "revoke a consolidation",
         "revoke consolidation",
-        "revoke delegation manager"
+        "revoke delegation manager",
+        "remove wallet from consolidation",
+        "remove consolidated wallet",
+        "unlink consolidated wallet",
+        "detach wallet from consolidation",
+        "delete wallet consolidation"
       ],
       "keywords": [
         "delegation",
@@ -3148,8 +3216,8 @@
     {
       "id": "delegation.manage-update-doc",
       "kind": "workflow",
-      "title": "How to Update a Delegation",
-      "link_label": "Update Delegation",
+      "title": "How to Update a Delegation or Consolidation",
+      "link_label": "Update Delegation or Consolidation",
       "aliases": [
         "how to update a delegation",
         "how do i update a delegation",
@@ -3157,7 +3225,12 @@
         "edit delegation",
         "change delegation",
         "update consolidation",
-        "update delegation manager"
+        "update delegation manager",
+        "replace wallet in consolidation",
+        "replace consolidated wallet",
+        "swap a consolidated wallet",
+        "change wallet in consolidation",
+        "update consolidated wallet"
       ],
       "keywords": [
         "delegation",
@@ -3847,7 +3920,7 @@
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
-        "Native app page sharing appears next to Search on supported non-wave, non-message, and non-notification routes.",
+        "Mobile-web and native-app page sharing appears next to Search on supported routes and opens a compact action-only Share dialog.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
       ],
       "canonical_path": "/waves",
@@ -3934,8 +4007,16 @@
       "aliases": ["share", "share modal", "copy link", "share page"],
       "keywords": ["share", "copy", "link", "modal", "url", "native"],
       "facts": [
-        "Desktop web surfaces can open a share modal for copying or sharing links.",
-        "Native app pages outside home, Waves, Messages, and Notifications use a direct Share page header button instead of the desktop share modal.",
+        "Supported desktop-web pages show a persistent sidebar Share icon that opens a page-sharing-only modal.",
+        "The desktop-web Share dialog places the Browser or App QR target and QR code on the left of wider layouts, with equal-width labeled actions on the right; narrow layouts stack these sections.",
+        "Mobile web and the native app use a compact Share dialog with Copy Link, Share on X, Share on Farcaster, and More; it omits the QR controls and Open in 6529 Desktop.",
+        "Desktop and mobile browsers use the Web Share API for More when the secure context, payload support, and document permissions policy allow it; the native app uses Capacitor system sharing.",
+        "Copy changes to a green Copied state for about 1.5 seconds.",
+        "System sharing uses the browser URL at invocation time, including search parameters and the hash; cancellation is silent, while runtime unavailability hides the action and provides accessible feedback without falling back to Copy.",
+        "Desktop web supports page sharing on home, while mobile web and the native app hide it there; all three surfaces hide page sharing on Messages, Notifications, and the Messages query view, while Waves and the Waves query view remain shareable.",
+        "When a wave is active in the native app, the general Share page button is hidden and the wave-specific arrow share action remains inside the More menu.",
+        "Mobile web and native app sharing use their existing header placement and open the compact Share dialog.",
+        "The profile menu contains Profile and Connect Device; connection targets never appear in the Share modal.",
         "Wave-specific link sharing also exists in the wave header.",
         "Use share controls when users ask how to copy a route or send someone a page."
       ],
@@ -3944,6 +4025,10 @@
       "tags": ["navigation", "share"],
       "source_refs": [
         "components/header/share/HeaderPageShareButton.tsx",
+        "components/header/share/header-share/HeaderShareModalView.tsx",
+        "components/header/share/header-share/HeaderShareTrigger.tsx",
+        "components/header/share/page-share-support.ts",
+        "components/layout/SmallScreenHeader.tsx",
         "ops/docs/navigation/feature-app-header-context.md",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/docs/waves/header/feature-wave-link-share-copy.md"
@@ -5100,6 +5185,7 @@
       "facts": [
         "Wave link share and copy behavior is documented as a wave header feature.",
         "Use the wave header share/copy affordance when users ask how to send someone a wave link.",
+        "In the native app, an active wave keeps sharing in the More menu with an arrow-style share icon instead of showing a second page-share button.",
         "General route sharing is covered by the shared share modal record."
       ],
       "canonical_path": "/waves",
