@@ -947,16 +947,15 @@ describe("HeaderShare", () => {
       expect(
         screen.getByRole("group", { name: "Device type" })
       ).toBeInTheDocument();
+      const downloadAppsLink = screen.getByRole("link", {
+        name: "Open 6529 app downloads",
+      });
+      expect(downloadAppsLink).toHaveAttribute("href", "/about/6529-apps");
+      expect(downloadAppsLink).not.toHaveAttribute("target");
       expect(
-        screen.getByRole("link", {
-          name: "Open 6529 app downloads in a new tab",
-        })
-      ).toHaveAttribute("href", "/about/6529-apps");
-      expect(
-        screen.getByRole("link", {
-          name: "Open 6529 app downloads in a new tab",
-        })
-      ).toHaveAttribute("target", "_blank");
+        screen.getByRole("heading", { name: "Connect Device" })
+          .nextElementSibling
+      ).toBe(downloadAppsLink);
       expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
       expect(screen.queryByRole("link", { name: "Share on X" })).toBeNull();
       expect(
