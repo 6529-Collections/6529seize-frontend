@@ -175,7 +175,7 @@ describe("Wave publication receipt joins", () => {
     const document = replaceObservationParts(fixture.document, (parts) => {
       const part = parts[1];
       if (part === undefined) throw new Error("test_fixture_part");
-      part.content_sha256 = changedHash;
+      part["content_sha256"] = changedHash;
     });
 
     expect(() => parseWavePublicationParts(document, sourceDocuments)).toThrow(
@@ -190,7 +190,7 @@ describe("Wave publication receipt joins", () => {
       (parts) => {
         const part = parts[1];
         if (part === undefined) throw new Error("test_fixture_part");
-        part.part_id = 1;
+        part["part_id"] = 1;
       }
     );
     expect(() =>
@@ -206,7 +206,7 @@ describe("Wave publication receipt joins", () => {
       (parts) => {
         const part = parts[2];
         if (part === undefined) throw new Error("test_fixture_part");
-        part.candidate_object_id = `${PROPOSAL_ID}.OBJ-001`;
+        part["candidate_object_id"] = `${PROPOSAL_ID}.OBJ-001`;
       }
     );
     expect(() =>
@@ -224,14 +224,22 @@ describe("Wave publication receipt joins", () => {
       (parts) => {
         const part = parts[1];
         if (part === undefined) throw new Error("test_fixture_part");
-        part.media_url =
+        part["media_url"] =
           "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/part-2-source/changed.jpg";
       }
     );
     const sourceDocuments = new Map(fixture.sourceDocuments);
     sourceDocuments.set(changedDocument.path, changedDocument);
-    const subjectEntity = {
+    const subjectEntity: MuseumPublicEntityRecord = {
       id: "6529NM-W-0024",
+      entityType: "WORK",
+      label: "Conflict at Its Edges",
+      slug: "conflict-at-its-edges",
+      canonicalRoute: "/museum/network/works/6529NM-W-0024",
+      pageExposure: "canonical_page",
+      entityStatus: "published",
+      sourcePath: "records/entities/6529NM-W-0024.json",
+      sourceRecordIds: ["6529NM-W-0024"],
       profile: {
         manifestation_references: [
           {
@@ -240,7 +248,7 @@ describe("Wave publication receipt joins", () => {
           },
         ],
       },
-    } as MuseumPublicEntityRecord;
+    };
 
     expect(() =>
       findWavePublicationPart({
@@ -252,11 +260,7 @@ describe("Wave publication receipt joins", () => {
         input: {
           uri: "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/part-2-source/part-2.jpg",
           mediaType: "image/jpeg",
-          width: 2400,
-          height: 1600,
-          altText: "Governed presentation photograph",
           creditLine: "© artist/Magnum Photos",
-          allowedUiAffordances: ["view"],
         },
       })
     ).toThrow("public_entity_graph_media_wave_publication_mismatch");

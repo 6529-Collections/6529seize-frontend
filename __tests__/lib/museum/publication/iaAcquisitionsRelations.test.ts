@@ -18,7 +18,7 @@ function relationPublication(): MuseumPublication {
   const work = (
     id: string,
     artistId: string,
-    status: MuseumPublication["works"][number]["status"],
+    status: NonNullable<MuseumPublication["works"]>[number]["status"],
     acquisitionId: string,
     programIds: readonly string[]
   ) => ({
@@ -42,7 +42,9 @@ function relationPublication(): MuseumPublication {
   const acquisition = (
     id: string,
     slug: string,
-    status: MuseumPublication["curatedAcquisitions"][number]["status"],
+    status: NonNullable<
+      MuseumPublication["curatedAcquisitions"]
+    >[number]["status"],
     method: "gift" | "program_primary_mint_purchase",
     workId: string,
     artistId: string,
@@ -67,7 +69,16 @@ function relationPublication(): MuseumPublication {
   });
 
   return {
-    identity: { commit: SOURCE_COMMIT },
+    identity: {
+      repository: "6529-Collections/6529networkmuseum",
+      requestedRef: SOURCE_COMMIT,
+      commit: SOURCE_COMMIT,
+      manifestPath: "release-artifacts/latest/record-manifest.json",
+      manifestSha256: null,
+      manifestCommitment: null,
+      inventoryCount: 0,
+      assembledAt: "2026-08-08T00:00:00Z",
+    },
     declaredSourcePaths: [],
     artists: [
       artist("6529NM-AGT-0001", "casey-reas", "6529NM-W-0001"),

@@ -134,7 +134,7 @@ describe("Museum publication entity contract", () => {
 
   it("accepts each exact Arweave transaction media join", () => {
     const transactionIds = ["A", "B", "C", "_", "-"] as const;
-    const joins = transactionIds.map((character, index) => {
+    const joins = transactionIds.map((_, index) => {
       const sourcePath = `records/entities/6529NM-MED-${String(index + 3).padStart(4, "0")}.json`;
       const mediaUrl = [
         "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/d498d837-3331-4650-a30e-27ca18d53521/magnum-75-127.jpg",
@@ -143,6 +143,7 @@ describe("Museum publication entity contract", () => {
         "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/5d6d9bf0-7ff3-4afd-ac69-c6b34079fbf9/magnum-75-44.jpg",
         "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/4526b19e-76df-493b-86ac-105782c061ea/magnum-75-104.jpg",
       ][index];
+      if (mediaUrl === undefined) throw new Error("test_media_url");
       const media = {
         id: `conflict-at-its-edges-${index + 1}`,
         kind: "external_proposal_presentation",

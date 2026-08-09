@@ -4,15 +4,14 @@ import {
 } from "@/lib/museum/publication/publicEntityGraph";
 import { parseMuseumEntityRecord } from "@/lib/museum/publication/publicEntityGraphParsing";
 import { isRelationGatedCollectionMember } from "@/lib/museum/publication/publicEntityGraphValidation";
-import {
-  buildMuseumAcquisitionIndex,
-} from "@/lib/museum/publication/ia";
+import { buildMuseumAcquisitionIndex } from "@/lib/museum/publication/ia";
 import { resolveMuseumWorkId } from "@/lib/museum/publication/routes";
 import { mapAcquisitionStatus } from "@/lib/museum/publication/publicEntityGraphMedia";
 import type {
   MuseumCuratedAcquisition,
   MuseumPublication,
   MuseumPublicEntityRecord,
+  MuseumPublicRelationRecord,
   MuseumSourceDocument,
 } from "@/lib/museum/publication/types";
 
@@ -498,20 +497,35 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
         },
       },
     } as unknown as MuseumPublicEntityRecord;
-    const collectionRelation = {
-      relationType: "COLLECTION_CONTAINS_WORK",
-      sourceEntityId: "6529NM-C-0001",
+    const relation = (
+      id: string,
+      relationType: MuseumPublicRelationRecord["relationType"],
+      sourceEntityId: string,
+      qualifier: Readonly<Record<string, unknown>>,
+      assertionStatus: MuseumPublicRelationRecord["assertionStatus"] = "asserted"
+    ): MuseumPublicRelationRecord => ({
+      id,
+      relationType,
+      sourceEntityId,
       targetEntityId: work.id,
-      assertionStatus: "asserted",
-      qualifier: { collection_membership_status: "permanent_collection" },
-    } as const;
-    const accessionRelation = {
-      relationType: "ACCESSION_ADMITS_WORK",
-      sourceEntityId: "6529NM-ACC-ENT-0001",
-      targetEntityId: work.id,
-      assertionStatus: "observed",
-      qualifier: { accession_object_id: "6529NM.2026.001.01" },
-    } as const;
+      assertionStatus,
+      qualifier,
+      sourceRecordIds: [id],
+      sourcePath: `records/relations/${id}.json`,
+    });
+    const collectionRelation = relation(
+      "6529NM-REL-COLLECTION",
+      "COLLECTION_CONTAINS_WORK",
+      "6529NM-C-0001",
+      { collection_membership_status: "permanent_collection" }
+    );
+    const accessionRelation = relation(
+      "6529NM-REL-ACCESSION",
+      "ACCESSION_ADMITS_WORK",
+      "6529NM-ACC-ENT-0001",
+      { accession_object_id: "6529NM.2026.001.01" },
+      "observed"
+    );
 
     expect(
       isRelationGatedCollectionMember(work, [
@@ -527,10 +541,12 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     ).toBe(true);
     expect(
       isRelationGatedCollectionMember(work, [
-        {
-          ...collectionRelation,
-          qualifier: { collection_membership_status: "selected" },
-        },
+        relation(
+          "6529NM-REL-COLLECTION-SELECTED",
+          "COLLECTION_CONTAINS_WORK",
+          "6529NM-C-0001",
+          { collection_membership_status: "selected" }
+        ),
         accessionRelation,
       ])
     ).toBe(false);
@@ -542,11 +558,12 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
         {
           ...work,
           profile: {
-            ...work.profile,
             work_lifecycle_status: "accessioned",
+            accession_entity_ids: ["6529NM-ACC-ENT-0001"],
             collection_membership: {
-              ...work.profile["collection_membership"],
               status: "not_in_collection",
+              collection_entity_id: "6529NM-C-0001",
+              accession_entity_ids: ["6529NM-ACC-ENT-0001"],
             },
           },
         },

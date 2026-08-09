@@ -22,11 +22,12 @@ import type {
   MuseumSourceDocument,
 } from "@/lib/museum/publication/types";
 
-const WP1_SOURCE_COMMIT = "f31ac3f6c72753d11c9dffbdd42c88fc749695ca";
-const SOURCE_ROOT = process.env.MUSEUM_WP1_SOURCE_ROOT;
+// Test-only local qualification identity. Production remains catalog-bound.
+const WP1_SOURCE_COMMIT = "a5ad49c945501b94b948a246d44836ed4881c176";
+const SOURCE_ROOT = process.env["MUSEUM_WP1_SOURCE_ROOT"];
 const LOCAL_FIXTURE_SOURCE_COMMIT =
-  process.env.MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT ??
-  process.env.MUSEUM_WP1_SOURCE_COMMIT ??
+  process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"] ??
+  process.env["MUSEUM_WP1_SOURCE_COMMIT"] ??
   WP1_SOURCE_COMMIT;
 
 interface SourceManifest {
@@ -61,14 +62,14 @@ function readSourceFixture(): SourceFixture | null {
     readFileSync(manifestPath, "utf8")
   ) as SourceManifest;
   const sourceCommit =
-    process.env.MUSEUM_WP1_SOURCE_COMMIT ?? WP1_SOURCE_COMMIT;
+    process.env["MUSEUM_WP1_SOURCE_COMMIT"] ?? WP1_SOURCE_COMMIT;
   if (sourceCommit === WP1_SOURCE_COMMIT) {
     if (
-      manifest.entries.length !== 692 ||
+      manifest.entries.length !== 776 ||
       manifest.manifest_sha256 !==
-        "sha256:0313c88d2ae30eab59e50f6b1b3dec3c16608a6a4f280241b0d9e9400466a8fc" ||
+        "sha256:c9ef8e2147ebc85dc6c5da45bc6fee1d70ce5a49f923bdac3df8bea43ae38541" ||
       manifest.manifest_commitment?.digest !==
-        "0x33f1a50e12a6914525d7554ea8cbe683f298bc5a8b3c104b8eea202370a5f1e0"
+        "0x59705536f2aa9b516f685cb5663f8d46f8c1094f8dfe0e150ff34f283610fb46"
     ) {
       throw new Error("wp1_source_manifest_commitment_mismatch");
     }
@@ -231,7 +232,7 @@ function qualifyReviewPendingFixture(fixture: SourceFixture): SourceFixture {
       isEntity && payload?.entity_status === "review_pending";
     const needsRelationQualification =
       isRelation &&
-      payload?.relation_type === "ORGANIZATION_ORIGINATES_PROJECT";
+      payload?.["relation_type"] === "ORGANIZATION_ORIGINATES_PROJECT";
     if (!needsStatusQualification && !needsRelationQualification) {
       documents.set(path, document);
       continue;
@@ -240,7 +241,7 @@ function qualifyReviewPendingFixture(fixture: SourceFixture): SourceFixture {
       payload.entity_status = "published";
     }
     if (needsRelationQualification) {
-      payload.relation_type = "ORGANIZATION_PUBLISHES_PROJECT";
+      payload["relation_type"] = "ORGANIZATION_PUBLISHES_PROJECT";
     }
     if (payload === undefined) {
       documents.set(path, document);
@@ -286,9 +287,9 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       return;
     }
     const expectedManifestSha256 =
-      process.env.MUSEUM_WP1_EXPECTED_MANIFEST_SHA256;
+      process.env["MUSEUM_WP1_EXPECTED_MANIFEST_SHA256"];
     const expectedManifestCommitment =
-      process.env.MUSEUM_WP1_EXPECTED_MANIFEST_COMMITMENT;
+      process.env["MUSEUM_WP1_EXPECTED_MANIFEST_COMMITMENT"];
     if (expectedManifestSha256 !== undefined) {
       expect(fixture.manifestSha256).toBe(expectedManifestSha256);
     }
@@ -329,7 +330,7 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     ).payload;
     if (
       firstEntityPayload?.entity_status === "review_pending" &&
-      process.env.MUSEUM_WP1_QUALIFY_REVIEW_PENDING !== "1"
+      process.env["MUSEUM_WP1_QUALIFY_REVIEW_PENDING"] !== "1"
     ) {
       expect(() =>
         parseMuseumPublicEntityGraph(

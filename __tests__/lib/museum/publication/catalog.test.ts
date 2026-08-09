@@ -117,7 +117,7 @@ function buildFixture(): {
     },
   };
   const inventoryBody = { ...inventoryValue } as Record<string, unknown>;
-  delete inventoryBody.integrity;
+  delete inventoryBody["integrity"];
   const inventoryBodyBytes = new TextEncoder().encode(
     canonicalMuseumJson(inventoryBody)
   );
