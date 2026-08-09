@@ -1086,7 +1086,7 @@
       "facts": [
         "Use the desktop profile or account menu and select Connect Device.",
         "The connection dialog contains only Mobile and Desktop targets and defaults to Mobile.",
-        "Use Download apps beside the Connect Device title to open the 6529 Apps page in the same tab.",
+        "Use the Download apps text link beside the Connect Device title to close the connection dialog and open the 6529 Apps page in the same tab.",
         "Connection sharing shows a QR code for Mobile or a clickable 6529 Desktop handoff card and deep link for Desktop.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
         "If the connection dialog says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",

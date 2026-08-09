@@ -94,8 +94,9 @@ the `More` menu.
 2. Select `Connect Device`.
 3. The `Connect Device` dialog defaults to `Mobile`; select `Desktop` when
    needed. The target tabs appear without an additional heading above them.
-4. Use the compact outlined `Download apps` button beside the dialog title to
-   open the 6529 Apps page in the same tab.
+4. Use the muted `Download apps` text link and download icon beside the dialog
+   title to close the connection dialog and open the 6529 Apps page in the same
+   tab.
 5. Mobile displays the existing one-time session-v2 connection QR code.
 6. Desktop keeps the same square dimensions but uses a dark-bordered handoff
    card with a 6529 Desktop logo and compact white launch label. The entire card

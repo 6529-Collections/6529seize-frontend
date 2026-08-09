@@ -954,12 +954,17 @@ describe("HeaderShare", () => {
       expect(downloadAppsLink).toHaveAttribute("href", "/about/6529-apps");
       expect(downloadAppsLink).not.toHaveAttribute("target");
       expect(downloadAppsLink).toHaveClass(
-        "tw-border-iron-600",
-        "tw-bg-iron-800/50",
-        "tw-text-iron-300",
-        "hover:tw-border-primary-400",
-        "hover:tw-bg-iron-700",
+        "tw-gap-1.5",
+        "tw-text-iron-400",
         "hover:tw-text-primary-300"
+      );
+      expect(downloadAppsLink).not.toHaveClass(
+        "tw-border",
+        "tw-bg-iron-800/50"
+      );
+      expect(downloadAppsLink.querySelector("svg")).toHaveAttribute(
+        "aria-hidden",
+        "true"
       );
       expect(
         screen.getByRole("heading", { name: "Connect Device" })
@@ -973,6 +978,21 @@ describe("HeaderShare", () => {
       expect(
         screen.queryByRole("button", { name: "Share with another app" })
       ).toBeNull();
+    });
+
+    it("closes the dialog when opening app downloads", async () => {
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      const downloadAppsLink = await screen.findByRole("link", {
+        name: "Open 6529 app downloads",
+      });
+      await userEvent.click(downloadAppsLink);
+
+      await waitForElementToBeRemoved(() =>
+        screen.queryByTestId("header-share-modal")
+      );
     });
 
     it("keeps preparing visible until the connection QR is ready", async () => {
