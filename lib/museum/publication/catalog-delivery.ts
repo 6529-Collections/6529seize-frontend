@@ -1,5 +1,9 @@
 import { keccak256, toBytes } from "viem";
-import { canonicalMuseumJson, verifyMuseumSha256 } from "./manifest";
+import {
+  canonicalMuseumJson,
+  verifyMuseumSha256,
+  type MuseumPublicationManifestEntry,
+} from "./manifest";
 import {
   MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
   MUSEUM_PUBLICATION_BUNDLE_PATH,
@@ -11,6 +15,7 @@ import {
   assertExactKeys,
   assertSortedUniquePaths,
   asRecord,
+  compareMuseumCatalogPaths,
   isPlainRecord,
   sha256Text,
 } from "./catalog-contract";
@@ -63,6 +68,21 @@ export function assertMuseumCatalogDocumentBytes(
     verifyDocumentCommitment?.(normalized);
   }
   return normalized;
+}
+
+export function assertMuseumPublicationInventoryManifestBinding(
+  entry:
+    | Pick<MuseumPublicationManifestEntry, "path" | "sha256" | "size">
+    | undefined,
+  catalog: MuseumPublicationCatalog
+): void {
+  if (
+    entry?.path !== catalog.publicationInventory.path ||
+    entry.size !== catalog.publicationInventory.fileSize ||
+    entry.sha256 !== catalog.publicationInventory.fileSha256
+  ) {
+    throw new Error("publication_catalog_inventory_manifest_mismatch");
+  }
 }
 
 /** Validates a decoded bundle's exact path and fixity set before parsing it. */
@@ -345,7 +365,7 @@ function assertInventorySet(
   const expectedAssembly = catalog.assemblyDocuments.map((entry) => entry.path);
   const expectedMedia = catalog.mediaAssets.map((entry) => entry.path);
   const expectedPaths = [...expectedAssembly, ...expectedMedia].sort(
-    (left, right) => left.localeCompare(right)
+    compareMuseumCatalogPaths
   );
   if (
     inventoryPaths.length !== expectedPaths.length ||

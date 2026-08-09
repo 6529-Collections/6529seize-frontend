@@ -26,6 +26,7 @@ export * from "./catalog-contract";
 export {
   assertMuseumCatalogDocumentBytes,
   assertMuseumPublicationCatalogAssemblyBundle,
+  assertMuseumPublicationInventoryManifestBinding,
   assertMuseumPublicationInventoryDocument,
   normalizeMuseumCatalogBytes,
 } from "./catalog-delivery";

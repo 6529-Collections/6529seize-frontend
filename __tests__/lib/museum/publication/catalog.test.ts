@@ -3,7 +3,9 @@ import { keccak256, toBytes } from "viem";
 import {
   assertMuseumPublicationCatalog,
   assertMuseumPublicationCatalogAssemblyBundle,
+  assertMuseumPublicationInventoryManifestBinding,
   assertMuseumPublicationInventoryDocument,
+  assertSortedUniquePaths,
   canonicalMuseumJson,
   decodePublicationAssemblyBundle,
   MUSEUM_PUBLICATION_INVENTORY_PATH,
@@ -56,6 +58,7 @@ function buildFixture(): {
   catalog: MuseumPublicationCatalog;
   bundleBytes: Uint8Array;
   bundleDocuments: readonly { path: string; bytes: Uint8Array }[];
+  inventoryDocument: { path: string; bytes: Uint8Array };
 } {
   const manuscriptBytes = new TextEncoder().encode("# Museum\n");
   const inventoryPath = MUSEUM_PUBLICATION_INVENTORY_PATH;
@@ -72,7 +75,7 @@ function buildFixture(): {
       body_keccak256: "computed",
     },
     assembler: {
-      required_paths: ["docs/a.md", inventoryPath],
+      required_paths: ["docs/a.md"],
       activation_mode: "atomic",
       bundle_path: "records/publication/visitor-corpus-bundle-v1.json",
     },
@@ -99,17 +102,9 @@ function buildFixture(): {
         required_in_catalog: true,
         activation_mode: "deferred_on_demand",
       },
-      {
-        path: inventoryPath,
-        kind: "public_assembly_control_document",
-        delivery_role: "assembly_document",
-        required_in_catalog: true,
-        activation_mode: "atomic",
-      },
     ],
     counts: {
       approved_public_media: 1,
-      public_assembly_control_document: 1,
       public_curatorial_manuscript: 1,
     },
     required_source_sets: {
@@ -130,11 +125,8 @@ function buildFixture(): {
     `${JSON.stringify(inventoryValue)}\n`
   );
   const assemblyDocuments = [
-    document("docs/a.md", manuscriptBytes),
-    document(inventoryPath, inventoryBytes, {
+    document("docs/a.md", manuscriptBytes, {
       byteMode: "lf-normalized",
-      jcsKeccak: keccak256(toBytes(canonicalMuseumJson(inventoryValue))),
-      canonicalizationId: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
     }),
   ];
   const mediaAssets = [document("media/a.webp", mediaBytes)];
@@ -157,17 +149,9 @@ function buildFixture(): {
         sha256: sha(manuscriptBytes),
         jcs_keccak256: null,
       },
-      {
-        path: inventoryPath,
-        byte_mode: "lf-normalized",
-        content: new TextDecoder().decode(inventoryBytes),
-        file_size: inventoryBytes.byteLength,
-        sha256: sha(inventoryBytes),
-        jcs_keccak256: keccak256(toBytes(canonicalMuseumJson(inventoryValue))),
-      },
     ],
-    entry_count: 2,
-    content_bytes: manuscriptBytes.byteLength + inventoryBytes.byteLength,
+    entry_count: 1,
+    content_bytes: manuscriptBytes.byteLength,
   };
   const bundleBytes = new TextEncoder().encode(
     `${JSON.stringify(bundleValue)}\n`
@@ -208,7 +192,6 @@ function buildFixture(): {
       canonicalizationId: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
       counts: {
         approved_public_media: 1,
-        public_assembly_control_document: 1,
         public_curatorial_manuscript: 1,
       },
       sourceUrl: sourceUrl(inventoryPath),
@@ -248,25 +231,36 @@ function buildFixture(): {
     pointer,
     catalog,
     bundleBytes,
-    bundleDocuments: [
-      { path: "docs/a.md", bytes: manuscriptBytes },
-      { path: inventoryPath, bytes: inventoryBytes },
-    ],
+    bundleDocuments: [{ path: "docs/a.md", bytes: manuscriptBytes }],
+    inventoryDocument: { path: inventoryPath, bytes: inventoryBytes },
   };
 }
 
 describe("Museum publication catalog boundary", () => {
+  it("uses the source contract's ordinal path order", () => {
+    expect(() =>
+      assertSortedUniquePaths(
+        ["docs/README.md", "docs/a.md"],
+        "publication_catalog_test_paths"
+      )
+    ).not.toThrow();
+    expect(() =>
+      assertSortedUniquePaths(
+        ["docs/a.md", "docs/README.md"],
+        "publication_catalog_test_paths"
+      )
+    ).toThrow("publication_catalog_test_paths");
+  });
+
   it("accepts the source wire algorithm and explicit assembly/media roles", () => {
     const fixture = buildFixture();
     expect(() =>
       assertMuseumPublicationCatalog(fixture.pointer, fixture.catalog, [
         "docs/a.md",
-        MUSEUM_PUBLICATION_INVENTORY_PATH,
       ])
     ).not.toThrow();
     expect(fixture.catalog.contentHash.algorithm).toBe(1);
-    expect(fixture.catalog.assemblyDocuments[0]?.byteMode).toBe("raw");
-    expect(fixture.catalog.assemblyDocuments[1]?.byteMode).toBe(
+    expect(fixture.catalog.assemblyDocuments[0]?.byteMode).toBe(
       "lf-normalized"
     );
     expect(() =>
@@ -374,7 +368,6 @@ describe("Museum publication catalog boundary", () => {
     );
     expect(decoded.documents.map((entry) => entry.path)).toEqual([
       "docs/a.md",
-      MUSEUM_PUBLICATION_INVENTORY_PATH,
     ]);
     expect(decoded.inventorySha256).toBe(
       fixture.catalog.publicationInventory.bodySha256
@@ -415,18 +408,17 @@ describe("Museum publication catalog boundary", () => {
         ...f.catalog,
         assemblyDocuments: [
           { ...f.catalog.assemblyDocuments[0], byteMode: "utf8-lf" },
-          f.catalog.assemblyDocuments[1],
         ],
       }),
     ],
     [
-      "missing inventory from assembly role",
+      "missing required assembly document",
       (f: ReturnType<typeof buildFixture>) => ({
         ...f.catalog,
-        assemblyDocuments: [f.catalog.assemblyDocuments[0]],
+        assemblyDocuments: [],
         assemblyBundle: {
           ...f.catalog.assemblyBundle,
-          embeddedDocuments: [f.catalog.assemblyDocuments[0]],
+          embeddedDocuments: [],
         },
       }),
     ],
@@ -443,7 +435,7 @@ describe("Museum publication catalog boundary", () => {
       assertMuseumPublicationCatalog(
         fixture.pointer,
         mutate(fixture) as MuseumPublicationCatalog,
-        ["docs/a.md", MUSEUM_PUBLICATION_INVENTORY_PATH]
+        ["docs/a.md"]
       )
     ).toThrow();
   });
@@ -498,7 +490,7 @@ describe("Museum publication catalog boundary", () => {
             rawFileSize: MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
           },
         },
-        ["docs/a.md", MUSEUM_PUBLICATION_INVENTORY_PATH]
+        ["docs/a.md"]
       )
     ).not.toThrow();
     expect(() =>
@@ -516,14 +508,14 @@ describe("Museum publication catalog boundary", () => {
             rawFileSize: MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES + 1,
           },
         },
-        ["docs/a.md", MUSEUM_PUBLICATION_INVENTORY_PATH]
+        ["docs/a.md"]
       )
     ).toThrow("publication_catalog_bundle_too_large");
   });
 
   it("normalizes only the catalog-declared text mode and fails fixity drift", () => {
     const fixture = buildFixture();
-    const entry = fixture.catalog.assemblyDocuments[1];
+    const entry = fixture.catalog.assemblyDocuments[0];
     if (entry === undefined) throw new Error("test_entry_missing");
     const crlf = new TextEncoder().encode(
       JSON.stringify({ ok: true }).replaceAll("}", "}\r\n")
@@ -533,12 +525,33 @@ describe("Museum publication catalog boundary", () => {
     );
   });
 
-  it("checks the embedded inventory's role set, counts, and body commitment", () => {
+  it("checks the separately bound inventory's manifest fixity", () => {
     const fixture = buildFixture();
-    const inventory = fixture.bundleDocuments.find(
-      (entry) => entry.path === MUSEUM_PUBLICATION_INVENTORY_PATH
-    );
-    if (inventory === undefined) throw new Error("test_inventory_missing");
+    const entry = {
+      path: fixture.catalog.publicationInventory.path,
+      size: fixture.catalog.publicationInventory.fileSize,
+      sha256: fixture.catalog.publicationInventory.fileSha256,
+    };
+    expect(() =>
+      assertMuseumPublicationInventoryManifestBinding(entry, fixture.catalog)
+    ).not.toThrow();
+    expect(() =>
+      assertMuseumPublicationInventoryManifestBinding(
+        { ...entry, size: entry.size + 1 },
+        fixture.catalog
+      )
+    ).toThrow("publication_catalog_inventory_manifest_mismatch");
+    expect(() =>
+      assertMuseumPublicationInventoryManifestBinding(
+        undefined,
+        fixture.catalog
+      )
+    ).toThrow("publication_catalog_inventory_manifest_mismatch");
+  });
+
+  it("checks the separately bound inventory's role set and body commitment", () => {
+    const fixture = buildFixture();
+    const inventory = fixture.inventoryDocument;
     expect(() =>
       assertMuseumPublicationInventoryDocument(inventory, fixture.catalog)
     ).not.toThrow();
@@ -566,10 +579,7 @@ describe("Museum publication catalog boundary", () => {
     ],
   ])("rejects %s after fixity is updated", (_name, mutatePaths) => {
     const fixture = buildFixture();
-    const inventory = fixture.bundleDocuments.find(
-      (entry) => entry.path === MUSEUM_PUBLICATION_INVENTORY_PATH
-    );
-    if (inventory === undefined) throw new Error("test_inventory_missing");
+    const inventory = fixture.inventoryDocument;
     const inventoryValue = JSON.parse(
       new TextDecoder().decode(inventory.bytes)
     ) as Record<string, unknown>;

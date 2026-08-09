@@ -277,6 +277,12 @@ export function assertExactKeys(
   }
 }
 
+export function compareMuseumCatalogPaths(left: string, right: string): number {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
+}
+
 export function sha256Text(text: string): MuseumSha256 {
   return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
 }
@@ -372,7 +378,7 @@ export function assertSortedUniquePaths(
   paths: readonly string[],
   errorCode: string
 ): void {
-  const sorted = [...paths].sort((left, right) => left.localeCompare(right));
+  const sorted = [...paths].sort(compareMuseumCatalogPaths);
   if (
     paths.length === 0 ||
     paths.some((path) => path.trim().length === 0) ||
@@ -571,9 +577,6 @@ function assertCatalogDocuments(
     if (!assemblyPaths.includes(requiredPath)) {
       throw new Error("publication_catalog_required_path_unlisted");
     }
-  }
-  if (!assemblyPaths.includes(MUSEUM_PUBLICATION_INVENTORY_PATH)) {
-    throw new Error("publication_catalog_inventory_unlisted");
   }
   if (
     acceptedPaths.includes(catalog.manifest.path) ||

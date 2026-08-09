@@ -25,6 +25,7 @@ import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBund
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { getMuseumView } from "@/lib/museum/normalize";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
+import type { Metadata } from "next";
 
 jest.mock("@/components/museum/MuseumObjectPage", () => ({
   getMuseumObjectMetadata: jest.fn(),
@@ -125,10 +126,9 @@ function installPublication(): void {
   } as never);
 }
 
-function canonical(metadata: { readonly alternates?: { canonical?: string } }):
-  | string
-  | undefined {
-  return metadata.alternates?.canonical;
+function canonical(metadata: Metadata): string | undefined {
+  const value = metadata.alternates?.canonical;
+  return value === null || value === undefined ? undefined : value.toString();
 }
 
 describe("Network Museum canonical metadata", () => {
@@ -138,8 +138,6 @@ describe("Network Museum canonical metadata", () => {
     mockedObjectMetadata.mockResolvedValue({
       title: "Legacy object",
       description: "Legacy object metadata",
-      ogImage: "/6529io.png",
-      twitterCard: "summary",
     });
   });
 

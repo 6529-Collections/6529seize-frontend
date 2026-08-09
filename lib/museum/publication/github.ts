@@ -29,13 +29,12 @@ import {
 import {
   assertMuseumCatalogDocumentBytes,
   assertMuseumPublicationCatalogAssemblyBundle,
-  assertMuseumPublicationInventoryDocument,
+  assertMuseumPublicationInventoryManifestBinding,
   MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
   resolveMuseumPublicationCatalog,
   type MuseumPublicationCatalog,
   type MuseumPublicationCatalogDocument,
   type MuseumPublicationCatalogResolver,
-  MUSEUM_PUBLICATION_INVENTORY_PATH,
 } from "./catalog";
 import { getNodeEnv } from "../../../config/env";
 import {
@@ -286,6 +285,13 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
             return { catalogEntry, entry };
           });
     if (catalog !== null) {
+      const publicationInventoryEntry = inventory.get(
+        catalog.publicationInventory.path
+      );
+      assertMuseumPublicationInventoryManifestBinding(
+        publicationInventoryEntry,
+        catalog
+      );
       for (const mediaAsset of catalog.mediaAssets) {
         const entry = inventory.get(mediaAsset.path);
         if (
@@ -387,16 +393,6 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
         catalog,
         (entry, embeddedBytes) =>
           this.catalogResolver?.verifyDocumentCommitment(entry, embeddedBytes)
-      );
-      const inventoryBytes = bundleBytesByPath.get(
-        MUSEUM_PUBLICATION_INVENTORY_PATH
-      );
-      if (inventoryBytes === undefined) {
-        throw new Error("publication_catalog_inventory_document_missing");
-      }
-      assertMuseumPublicationInventoryDocument(
-        { path: MUSEUM_PUBLICATION_INVENTORY_PATH, bytes: inventoryBytes },
-        catalog
       );
       documents = catalogAssemblyEntries.map(({ catalogEntry, entry }) => {
         const bytes = bundleBytesByPath.get(catalogEntry.path);

@@ -895,7 +895,7 @@ jobs:
         env:
           # Test-only reviewed-B qualification. Production and deployment
           # lanes remain catalog-bound and never consume this commit pin.
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "311ae4281893f404472b8f7ba94454a57a2cd572"
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "bf517353ef861e91f5137908daca514b81578b4d"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(
