@@ -670,48 +670,39 @@ export function HeaderShareModalView({
           data-testid="header-share-modal-content"
           className="tw-flex tw-flex-col tw-gap-3 tw-p-5"
         >
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-            <h2
-              id="header-share-title"
-              className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
-            >
-              {modalTitle}
-            </h2>
-            <div className="tw-flex tw-items-center tw-gap-2">
+          <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
+              <h2
+                id="header-share-title"
+                className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
+              >
+                {modalTitle}
+              </h2>
               {isConnectMode && (
                 <Link
                   href="/about/6529-apps"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   aria-label={t(
                     HEADER_SHARE_LOCALE,
-                    "headerShare.connectModal.downloadsAriaLabel"
+                    "headerShare.connectModal.downloadAppsAriaLabel"
                   )}
-                  className="tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-px-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900/50 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
                 >
-                  <span>
-                    {t(
-                      HEADER_SHARE_LOCALE,
-                      "headerShare.connectModal.downloads"
-                    )}
-                  </span>
-                  <FontAwesomeIcon
-                    icon={faExternalLink}
-                    className="tw-size-3"
-                    aria-hidden="true"
-                  />
+                  {t(
+                    HEADER_SHARE_LOCALE,
+                    "headerShare.connectModal.downloadApps"
+                  )}
                 </Link>
               )}
-              <button
-                type="button"
-                aria-label={closeAriaLabel}
-                title={closeAriaLabel}
-                onClick={onClose}
-                className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                <XMarkIcon className="tw-size-5" aria-hidden="true" />
-              </button>
             </div>
+            <button
+              type="button"
+              aria-label={closeAriaLabel}
+              title={closeAriaLabel}
+              onClick={onClose}
+              className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              <XMarkIcon className="tw-size-5" aria-hidden="true" />
+            </button>
           </div>
           {isConnectMode && (
             <ModalMenu

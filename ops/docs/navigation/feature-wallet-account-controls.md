@@ -42,16 +42,16 @@ action.
 - The dropdown enters with a short opacity and vertical-position reveal;
   reduced-motion preferences show it immediately without animation.
 - Identity rows:
-  - the section heading is `Profiles`; a compact `+` action beside it replaces
-    the full-width Add row while another profile slot is available
+  - the section heading is `Profiles`; a compact outlined `+` button beside it
+    replaces the full-width Add row while another profile slot is available
   - base identity row is always present
   - received proxy rows appear when available
   - connected-account rows can show unread count badges (`1-99+`) and can be
     used for direct account selection
   - a single connected profile has no selected background or active checkmark;
     those switching indicators appear only when multiple profiles are present
-  - with multiple profiles, a compact `Sign out all` action appears at the top
-    right of the section
+  - with multiple profiles, a compact outlined `Sign out all` button appears at
+    the top right of the tightly spaced section header
 - Session actions:
   - `Profile` opens the active handle route, with wallet-address fallback
   - `Connect Device` opens the Mobile/Desktop connection dialog on

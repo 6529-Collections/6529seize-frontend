@@ -6,6 +6,7 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  act,
   render,
   screen,
   waitFor,
@@ -947,16 +948,15 @@ describe("HeaderShare", () => {
       expect(
         screen.getByRole("group", { name: "Device type" })
       ).toBeInTheDocument();
+      const downloadAppsLink = screen.getByRole("link", {
+        name: "Open 6529 app downloads",
+      });
+      expect(downloadAppsLink).toHaveAttribute("href", "/about/6529-apps");
+      expect(downloadAppsLink).not.toHaveAttribute("target");
       expect(
-        screen.getByRole("link", {
-          name: "Open 6529 app downloads in a new tab",
-        })
-      ).toHaveAttribute("href", "/about/6529-apps");
-      expect(
-        screen.getByRole("link", {
-          name: "Open 6529 app downloads in a new tab",
-        })
-      ).toHaveAttribute("target", "_blank");
+        screen.getByRole("heading", { name: "Connect Device" })
+          .nextElementSibling
+      ).toBe(downloadAppsLink);
       expect(screen.queryByText("Connect to")).not.toBeInTheDocument();
       expect(screen.queryByRole("link", { name: "Share on X" })).toBeNull();
       expect(
@@ -1068,9 +1068,13 @@ describe("HeaderShare", () => {
       await userEvent.click(
         screen.getByLabelText("Close connect device modal")
       );
-      rejectDecode(new Error("decode cancelled with modal close"));
+      await act(async () => {
+        rejectDecode(new Error("decode cancelled with modal close"));
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      await waitFor(() => expect(qrcode.toDataURL).toHaveBeenCalledTimes(1));
+      expect(qrcode.toDataURL).toHaveBeenCalledTimes(1);
       expect(
         screen.queryByText("Device Connection Unavailable")
       ).not.toBeInTheDocument();

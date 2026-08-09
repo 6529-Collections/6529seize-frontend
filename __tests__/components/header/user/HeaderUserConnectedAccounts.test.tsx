@@ -85,11 +85,15 @@ describe("HeaderUserConnectedAccounts", () => {
     const activeButton = screen.getByRole("button", {
       name: /Switch to active/,
     });
+    const addProfile = screen.getByRole("button", { name: "Add profile" });
+    const signOutAll = screen.getByRole("button", { name: "Sign out all" });
     expect(activeButton).toHaveClass("tw-bg-iron-700");
     expect(activeButton.querySelector("svg")).toBeInTheDocument();
+    expect(addProfile).toHaveClass("tw-border", "tw-border-iron-600");
+    expect(signOutAll).toHaveClass("tw-border", "tw-border-iron-600");
 
-    fireEvent.click(screen.getByRole("button", { name: "Add profile" }));
-    fireEvent.click(screen.getByRole("button", { name: "Sign out all" }));
+    fireEvent.click(addProfile);
+    fireEvent.click(signOutAll);
     fireEvent.click(
       screen.getByRole("button", { name: /Switch to secondary/ })
     );

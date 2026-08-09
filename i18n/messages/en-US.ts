@@ -1814,9 +1814,9 @@ export const EN_US_MESSAGES = {
   "headerShare.connectModal.title": "Connect Device",
   "headerShare.connectModal.closeAriaLabel": "Close connect device modal",
   "headerShare.connectModal.backdropAriaLabel": "Dismiss connect device modal",
-  "headerShare.connectModal.downloads": "Downloads",
-  "headerShare.connectModal.downloadsAriaLabel":
-    "Open 6529 app downloads in a new tab",
+  "headerShare.connectModal.downloadApps": "Download apps",
+  "headerShare.connectModal.downloadAppsAriaLabel":
+    "Open 6529 app downloads",
   "headerShare.menu.deviceType": "Device type",
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
