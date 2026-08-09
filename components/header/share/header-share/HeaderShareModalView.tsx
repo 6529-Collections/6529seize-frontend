@@ -1,6 +1,7 @@
 import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  ArrowDownTrayIcon,
   ComputerDesktopIcon,
   EllipsisHorizontalIcon,
   XMarkIcon,
@@ -681,12 +682,17 @@ export function HeaderShareModalView({
               {isConnectMode && (
                 <Link
                   href="/about/6529-apps"
+                  onClick={onClose}
                   aria-label={t(
                     HEADER_SHARE_LOCALE,
                     "headerShare.connectModal.downloadAppsAriaLabel"
                   )}
-                  className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800/50 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-bg-iron-700 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
+                  <ArrowDownTrayIcon
+                    aria-hidden="true"
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
                   {t(
                     HEADER_SHARE_LOCALE,
                     "headerShare.connectModal.downloadApps"
