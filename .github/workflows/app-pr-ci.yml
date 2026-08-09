@@ -893,9 +893,9 @@ jobs:
         id: museum_publication
         if: matrix.lane == 'playwright-museum'
         env:
-          # Test-only source qualification. Production and deployment lanes
-          # remain catalog-bound and never consume this candidate pin.
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "a20f04ce7441c367fc39ef22a74236d22e6a652e"
+          # Test-only reviewed-B qualification. Production and deployment
+          # lanes remain catalog-bound and never consume this commit pin.
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "311ae4281893f404472b8f7ba94454a57a2cd572"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(

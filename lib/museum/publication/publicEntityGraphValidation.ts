@@ -166,6 +166,21 @@ function assertRelationReferences(
     if (source.id === target.id) {
       throw new Error("public_entity_graph_self_relation");
     }
+    if (
+      relation.relationType === "ORGANIZATION_ORIGINATES_PROJECT" &&
+      (
+        relation.qualifier["role"] !== "originator" ||
+        source.profile["organization_kind"] === "platform"
+      )
+    ) {
+      throw new Error("public_entity_graph_organization_project_role");
+    }
+    if (
+      relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT" &&
+      relation.qualifier["role"] !== "publisher"
+    ) {
+      throw new Error("public_entity_graph_organization_project_role");
+    }
     if (relation.relationType === "ENTITY_HAS_MEDIA") {
       assertMediaRelation(source, target);
     }

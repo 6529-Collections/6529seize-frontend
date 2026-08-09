@@ -22,8 +22,9 @@ import type {
   MuseumSourceDocument,
 } from "@/lib/museum/publication/types";
 
-// Test-only local qualification identity. Production remains catalog-bound.
-const WP1_SOURCE_COMMIT = "a20f04ce7441c367fc39ef22a74236d22e6a652e";
+// Reviewed B is exercised only through the explicit read-only fixture.
+// Production remains catalog-bound until canonical C is published.
+const WP1_SOURCE_COMMIT = "311ae4281893f404472b8f7ba94454a57a2cd572";
 const SOURCE_ROOT = process.env["MUSEUM_WP1_SOURCE_ROOT"];
 const LOCAL_FIXTURE_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"] ??
@@ -67,9 +68,9 @@ function readSourceFixture(): SourceFixture | null {
     if (
       manifest.entries.length !== 776 ||
       manifest.manifest_sha256 !==
-        "sha256:636bf24457f4aa9b9645ff2be1d05188c15417e13cff7a0a949b0abd1b4bb2de" ||
+        "sha256:fb96e0391a7b7d11a7ea8226cc3f4f98044a92c49c51d6ac6ac337239d35cac3" ||
       manifest.manifest_commitment?.digest !==
-        "0x52047bb5297bd7d976e233208ed244d9e388d51ba32dcd783923a6485a77a84d"
+        "0xdc719e5bbed0906ba69dd8ea30047fbe44bc86ea7e1f12116ff6b84eb3886e9e"
     ) {
       throw new Error("wp1_source_manifest_commitment_mismatch");
     }
@@ -126,133 +127,16 @@ function readSourceFixture(): SourceFixture | null {
   };
 }
 
-function qualifyReviewPendingFixture(fixture: SourceFixture): SourceFixture {
-  const documents = new Map<string, MuseumSourceDocument>();
-  for (const [path, document] of fixture.documents) {
-    if (path === "schemas/public-entity-identity-inventory.json") {
-      const inventory = JSON.parse(document.text) as Record<string, unknown>;
-      const patterns = inventory["entity_id_patterns"] as Record<
-        string,
-        unknown
-      >;
-      inventory["entity_id_patterns"] = {
-        ...patterns,
-        RESEARCH_PUBLICATION: "^6529NM-RP-[0-9]{4}$",
-        MEDIA_REFERENCE: "^6529NM-MED-[0-9]{4}$",
-      };
-      const bindings = inventory["identity_bindings"] as Record<
-        string,
-        unknown
-      >;
-      inventory["identity_bindings"] = {
-        ...bindings,
-        INSTITUTION: [
-          ...(Array.isArray(bindings["INSTITUTION"])
-            ? bindings["INSTITUTION"]
-            : []),
-          {
-            source_key: "local-qualification:institution",
-            entity_id: "6529NM-I-0001",
-          },
-        ],
-        COLLECTION: [
-          ...(Array.isArray(bindings["COLLECTION"])
-            ? bindings["COLLECTION"]
-            : []),
-          {
-            source_key: "local-qualification:collection",
-            entity_id: "6529NM-C-0001",
-          },
-        ],
-        ACCESSION: [
-          ...(Array.isArray(bindings["ACCESSION"])
-            ? bindings["ACCESSION"]
-            : []),
-          {
-            source_key: "local-qualification:accession",
-            entity_id: "6529NM-ACC-ENT-0001",
-          },
-        ],
-        RESEARCH_PUBLICATION: [
-          ...(Array.isArray(bindings["RESEARCH_PUBLICATION"])
-            ? bindings["RESEARCH_PUBLICATION"]
-            : []),
-          {
-            source_key: "local-qualification:research-1",
-            entity_id: "6529NM-RP-0001",
-          },
-          {
-            source_key: "local-qualification:research-2",
-            entity_id: "6529NM-RP-0002",
-          },
-          {
-            source_key: "local-qualification:research-3",
-            entity_id: "6529NM-RP-0003",
-          },
-        ],
-      };
-      const slugInventory = Array.isArray(inventory["public_slug_inventory"])
-        ? [...inventory["public_slug_inventory"]]
-        : [];
-      if (
-        !slugInventory.some(
-          (entry) =>
-            typeof entry === "object" &&
-            entry !== null &&
-            !Array.isArray(entry) &&
-            (entry as Record<string, unknown>)["entity_id"] === "6529NM-RP-0001"
-        )
-      ) {
-        slugInventory.push({
-          entity_id: "6529NM-RP-0001",
-          entity_type: "RESEARCH_PUBLICATION",
-          preferred_label: "The System in Seven States",
-          public_slug: "the-system-in-seven-states",
-          canonical_route:
-            "/museum/network/research/the-system-in-seven-states",
-        });
-      }
-      inventory["public_slug_inventory"] = slugInventory;
-      documents.set(path, { ...document, text: JSON.stringify(inventory) });
-      continue;
-    }
-    const isEntity = /^records\/entities\/[^/]+\.json$/u.test(path);
-    const isRelation = /^records\/relations\/[^/]+\.json$/u.test(path);
-    if (!isEntity && !isRelation) {
-      documents.set(path, document);
-      continue;
-    }
-    const parsed = JSON.parse(document.text) as {
-      payload?: { entity_status?: unknown } & Record<string, unknown>;
-    };
-    const payload = parsed.payload as
-      | (Record<string, unknown> & { entity_status?: unknown })
-      | undefined;
-    const needsStatusQualification =
-      isEntity && payload?.entity_status === "review_pending";
-    const needsRelationQualification =
-      isRelation &&
-      payload?.["relation_type"] === "ORGANIZATION_ORIGINATES_PROJECT";
-    if (!needsStatusQualification && !needsRelationQualification) {
-      documents.set(path, document);
-      continue;
-    }
-    if (needsStatusQualification) {
-      payload.entity_status = "published";
-    }
-    if (needsRelationQualification) {
-      payload["relation_type"] = "ORGANIZATION_PUBLISHES_PROJECT";
-    }
-    if (payload === undefined) {
-      documents.set(path, document);
-      continue;
-    }
-    documents.set(path, {
-      ...document,
-      text: JSON.stringify(parsed),
-    });
-  }
-  return { ...fixture, documents };
+function qualifyIncompleteInventoryFixture(fixture: SourceFixture): SourceFixture {
+  return {
+    ...fixture,
+    documents: new Map(
+      [...fixture.documents].map(([path, document]) => [
+        path,
+        qualifyLocalReadOnlyDocument(document, fixture.sourceCommit),
+      ])
+    ),
+  };
 }
 
 function emptyPublication(fixture: SourceFixture): MuseumPublication {
@@ -282,7 +166,7 @@ function emptyPublication(fixture: SourceFixture): MuseumPublication {
 describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
   const fixture = readSourceFixture();
 
-  it("fails closed for a review-pending source candidate and projects a reviewed graph", () => {
+  it("fails closed for B's incomplete identity inventory and projects only the explicit read-only fixture", () => {
     if (fixture === null) {
       return;
     }
@@ -318,33 +202,14 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       const expected = process.env[variable];
       if (expected !== undefined) expect(String(actual)).toBe(expected);
     }
-    const firstEntity = [...fixture.documents.values()].find((document) =>
-      /^records\/entities\/[^/]+\.json$/u.test(document.path)
-    );
-    if (firstEntity === undefined)
-      throw new Error("wp1_entity_fixture_missing");
-    const firstEntityPayload = (
-      JSON.parse(firstEntity.text) as {
-        payload?: { entity_status?: unknown };
-      }
-    ).payload;
-    if (
-      firstEntityPayload?.entity_status === "review_pending" &&
-      process.env["MUSEUM_WP1_QUALIFY_REVIEW_PENDING"] !== "1"
-    ) {
-      expect(() =>
-        parseMuseumPublicEntityGraph(
-          fixture.documents,
-          fixture.declaredPaths,
-          fixture.sourceCommit
-        )
-      ).toThrow("public_entity_graph_entity_status");
-      return;
-    }
-    const qualifiedFixture =
-      firstEntityPayload?.entity_status === "review_pending"
-        ? qualifyReviewPendingFixture(fixture)
-        : fixture;
+    expect(() =>
+      parseMuseumPublicEntityGraph(
+        fixture.documents,
+        fixture.declaredPaths,
+        fixture.sourceCommit
+      )
+    ).toThrow("public_entity_graph_inventory_entity_missing");
+    const qualifiedFixture = qualifyIncompleteInventoryFixture(fixture);
     const graph = parseMuseumPublicEntityGraph(
       qualifiedFixture.documents,
       qualifiedFixture.declaredPaths,
@@ -415,6 +280,24 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     );
     expect(selectedMagnum?.status).toBe(
       "selected_by_museum_wave_acquisition_review_in_progress"
+    );
+    expect(selectedMagnum?.organizationIds).toContain("6529NM-ORG-0002");
+    expect(
+      publication.projects.find((project) => project.id === "6529NM-PRJ-0006")
+        ?.organizationIds
+    ).toContain("6529NM-ORG-0002");
+    expect(publication.relations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          relation: "organization_publishes_project",
+          from: expect.objectContaining({ id: "6529NM-ORG-0001" }),
+        }),
+        expect.objectContaining({
+          relation: "organization_originates_project",
+          from: expect.objectContaining({ id: "6529NM-ORG-0002" }),
+          to: expect.objectContaining({ id: "6529NM-PRJ-0006" }),
+        }),
+      ])
     );
     expect(selectedMagnum?.presentationMedia ?? []).toHaveLength(0);
     const magnumWorks = publication.works?.filter((work) =>

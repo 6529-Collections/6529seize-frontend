@@ -58,7 +58,7 @@ interface GitHubMuseumPublicationSourceOptions {
   readonly requestTimeoutMs?: number;
   /** Required for typed graph activation outside the test-only fixture path. */
   readonly catalogResolver?: MuseumPublicationCatalogResolver;
-  /** Explicit local-fixture escape hatch; rejected outside NODE_ENV=test. */
+  /** Explicit read-only fixture escape hatch; rejected outside test lanes. */
   readonly allowUncataloguedTestFixture?: boolean;
   /** Read-only local review-fixture qualification; never used by production. */
   readonly localFixtureDocumentTransform?: (
@@ -253,9 +253,10 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       }
       return entry;
     });
-    // The pre-ontology test fixture still uses bounded individual fetches. A
-    // verified catalog uses one immutable B bundle for every assembly byte;
-    // media assets are membership-checked below and never fetched here.
+    // The explicit uncatalogued read-only fixture uses bounded individual
+    // fetches. A verified catalog uses one immutable B bundle for every
+    // assembly byte; media assets are membership-checked below and never
+    // fetched here.
     const typedSourceEntries = manifest.entries.filter(
       (entry) =>
         isAcceptedLocalFixturePath(entry.path) &&

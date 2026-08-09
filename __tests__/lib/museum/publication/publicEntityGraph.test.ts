@@ -3,7 +3,10 @@ import {
   parseMuseumPublicEntityGraph,
 } from "@/lib/museum/publication/publicEntityGraph";
 import { parseMuseumEntityRecord } from "@/lib/museum/publication/publicEntityGraphParsing";
-import { isRelationGatedCollectionMember } from "@/lib/museum/publication/publicEntityGraphValidation";
+import {
+  assertGraphReferences,
+  isRelationGatedCollectionMember,
+} from "@/lib/museum/publication/publicEntityGraphValidation";
 import { buildMuseumAcquisitionIndex } from "@/lib/museum/publication/ia";
 import { resolveMuseumWorkId } from "@/lib/museum/publication/routes";
 import { mapAcquisitionStatus } from "@/lib/museum/publication/publicEntityGraphMedia";
@@ -331,19 +334,116 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
   });
 
   it("rejects the semantically false platform origin predicate", () => {
-    const institution = institutionDocument();
-    const relation = relationDocument("ORGANIZATION_ORIGINATES_PROJECT");
-    const documents = new Map([
-      [institution.path, institution],
-      [relation.path, relation],
-    ]);
+    const platform: MuseumPublicEntityRecord = {
+      id: "6529NM-ORG-0001",
+      entityType: "ORGANIZATION",
+      label: "Art Blocks",
+      slug: "art-blocks",
+      canonicalRoute: "/museum/network/organizations/art-blocks",
+      pageExposure: "canonical_page",
+      entityStatus: "published",
+      sourcePath: "records/entities/6529NM-ORG-0001.json",
+      sourceRecordIds: ["6529NM.2026.001.01"],
+      profile: { organization_kind: "platform" },
+    };
+    const project: MuseumPublicEntityRecord = {
+      id: "6529NM-PRJ-0001",
+      entityType: "PROJECT_OR_SERIES",
+      label: "CENTURY",
+      slug: "century",
+      canonicalRoute: "/museum/network/projects/century",
+      pageExposure: "canonical_page",
+      entityStatus: "published",
+      sourcePath: "records/entities/6529NM-PRJ-0001.json",
+      sourceRecordIds: ["6529NM.2026.001.01"],
+      profile: { work_entity_ids: [] },
+    };
+    const relation: MuseumPublicRelationRecord = {
+      id: "6529NM-REL-0037",
+      relationType: "ORGANIZATION_ORIGINATES_PROJECT",
+      sourceEntityId: platform.id,
+      targetEntityId: project.id,
+      assertionStatus: "asserted",
+      qualifier: { role: "originator" },
+      sourceRecordIds: ["6529NM.2026.001.01"],
+      sourcePath: "records/relations/6529NM-REL-0037.json",
+    };
     expect(() =>
-      parseMuseumPublicEntityGraph(
-        documents,
-        [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
-        SOURCE_COMMIT
+      assertGraphReferences([platform, project], [relation])
+    ).toThrow("public_entity_graph_organization_project_role");
+  });
+
+  it("distinguishes a collective project origin from platform publication", () => {
+    const platform: MuseumPublicEntityRecord = {
+      id: "6529NM-ORG-0001",
+      entityType: "ORGANIZATION",
+      label: "Art Blocks",
+      slug: "art-blocks",
+      canonicalRoute: "/museum/network/organizations/art-blocks",
+      pageExposure: "canonical_page",
+      entityStatus: "published",
+      sourcePath: "records/entities/6529NM-ORG-0001.json",
+      sourceRecordIds: ["6529NM.2026.001.01"],
+      profile: { organization_kind: "platform" },
+    };
+    const collective: MuseumPublicEntityRecord = {
+      ...platform,
+      id: "6529NM-ORG-0002",
+      label: "Magnum Photos",
+      slug: "magnum-photos",
+      canonicalRoute: "/museum/network/organizations/magnum-photos",
+      sourcePath: "records/entities/6529NM-ORG-0002.json",
+      sourceRecordIds: ["6529NM-PG-2026-001"],
+      profile: { organization_kind: "collective" },
+    };
+    const century: MuseumPublicEntityRecord = {
+      id: "6529NM-PRJ-0001",
+      entityType: "PROJECT_OR_SERIES",
+      label: "CENTURY",
+      slug: "century",
+      canonicalRoute: "/museum/network/projects/century",
+      pageExposure: "canonical_page",
+      entityStatus: "published",
+      sourcePath: "records/entities/6529NM-PRJ-0001.json",
+      sourceRecordIds: ["6529NM.2026.001.01"],
+      profile: { work_entity_ids: [] },
+    };
+    const magnum75: MuseumPublicEntityRecord = {
+      ...century,
+      id: "6529NM-PRJ-0006",
+      label: "Magnum Photos 75",
+      slug: "magnum-photos-75",
+      canonicalRoute: "/museum/network/projects/magnum-photos-75",
+      sourcePath: "records/entities/6529NM-PRJ-0006.json",
+      sourceRecordIds: ["6529NM-PG-2026-001"],
+    };
+    const publication: MuseumPublicRelationRecord = {
+      id: "6529NM-REL-0037",
+      relationType: "ORGANIZATION_PUBLISHES_PROJECT",
+      sourceEntityId: platform.id,
+      targetEntityId: century.id,
+      assertionStatus: "asserted",
+      qualifier: { role: "publisher" },
+      sourceRecordIds: ["6529NM.2026.001.01"],
+      sourcePath: "records/relations/6529NM-REL-0037.json",
+    };
+    const origin: MuseumPublicRelationRecord = {
+      ...publication,
+      id: "6529NM-REL-0047",
+      relationType: "ORGANIZATION_ORIGINATES_PROJECT",
+      sourceEntityId: collective.id,
+      targetEntityId: magnum75.id,
+      qualifier: { role: "originator" },
+      sourceRecordIds: ["6529NM-PG-2026-001"],
+      sourcePath: "records/relations/6529NM-REL-0047.json",
+    };
+
+    expect(() =>
+      assertGraphReferences(
+        [platform, collective, century, magnum75],
+        [publication, origin]
       )
-    ).toThrow("public_entity_graph_unknown_relation_type");
+    ).not.toThrow();
   });
 
   it("rejects dangling relations atomically", () => {

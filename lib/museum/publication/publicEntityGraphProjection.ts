@@ -289,7 +289,8 @@ function projectOrganizations(
       const projectIds = graph.relations
         .filter(
           (relation) =>
-            relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT" &&
+            (relation.relationType === "ORGANIZATION_ORIGINATES_PROJECT" ||
+              relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT") &&
             relation.sourceEntityId === entity.id
         )
         .map((relation) => relation.targetEntityId);
@@ -337,7 +338,8 @@ function projectProjects(
       const organizationIds = graph.relations
         .filter(
           (relation) =>
-            relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT" &&
+            (relation.relationType === "ORGANIZATION_ORIGINATES_PROJECT" ||
+              relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT") &&
             relation.targetEntityId === entity.id
         )
         .map((relation) => relation.sourceEntityId);
@@ -421,7 +423,10 @@ function projectAcquisitions(
           graph.relations
             .filter(
               (relation) =>
-                relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT" &&
+                (relation.relationType ===
+                  "ORGANIZATION_ORIGINATES_PROJECT" ||
+                  relation.relationType ===
+                    "ORGANIZATION_PUBLISHES_PROJECT") &&
                 relation.targetEntityId === projectId
             )
             .map((relation) => relation.sourceEntityId)
@@ -623,6 +628,7 @@ function projectRelations(
     INSTITUTION_HOLDS_COLLECTION: "institution_holds_collection",
     ARTIST_CREATES_WORK: "artist_creates_work",
     PROJECT_CONTEXTUALIZES_WORK: "project_contextualizes_work",
+    ORGANIZATION_ORIGINATES_PROJECT: "organization_originates_project",
     ORGANIZATION_PUBLISHES_PROJECT: "organization_publishes_project",
     ACQUISITION_PROGRAM_PRODUCES_ACQUISITION:
       "acquisition_program_produces_curated_acquisition",

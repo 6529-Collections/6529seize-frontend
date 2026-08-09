@@ -57,6 +57,7 @@ export type MuseumEntityRelationKind =
   | "institution_holds_collection"
   | "collection_contains_work"
   | "artist_creates_work"
+  | "organization_originates_project"
   | "organization_publishes_project"
   | "project_contextualizes_work"
   | "acquisition_program_produces_curated_acquisition"

@@ -53,6 +53,7 @@ export const RELATION_TYPES = new Set<MuseumPublicRelationType>([
   "ARTIST_CREATES_WORK",
   "AGENT_PLAYS_ROLE",
   "PROJECT_CONTEXTUALIZES_WORK",
+  "ORGANIZATION_ORIGINATES_PROJECT",
   "ORGANIZATION_PUBLISHES_PROJECT",
   "ACQUISITION_PROGRAM_PRODUCES_ACQUISITION",
   "CURATED_ACQUISITION_BRINGS_TOGETHER_WORK",
@@ -136,11 +137,17 @@ export const RELATION_PROFILES: Readonly<
     allowedQualifiers: ["scope"],
     requiredQualifiers: [],
   },
+  ORGANIZATION_ORIGINATES_PROJECT: {
+    sources: ["ORGANIZATION"],
+    targets: ["PROJECT_OR_SERIES"],
+    allowedQualifiers: ["role"],
+    requiredQualifiers: ["role"],
+  },
   ORGANIZATION_PUBLISHES_PROJECT: {
     sources: ["ORGANIZATION"],
     targets: ["PROJECT_OR_SERIES"],
     allowedQualifiers: ["role"],
-    requiredQualifiers: [],
+    requiredQualifiers: ["role"],
   },
   ACQUISITION_PROGRAM_PRODUCES_ACQUISITION: {
     sources: ["ACQUISITION_PROGRAM"],

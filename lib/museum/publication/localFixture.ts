@@ -6,10 +6,6 @@ import { isExactGitCommit } from "./security";
 const INVENTORY_PATH = "schemas/public-entity-identity-inventory.json";
 const VISITOR_BUNDLE_PATH = "records/publication/visitor-corpus-bundle-v1.json";
 
-interface CandidateARecord {
-  payload?: Record<string, unknown>;
-}
-
 function requestUrl(input: RequestInfo | URL): string {
   if (typeof input === "string") return input;
   if (input instanceof URL) return input.href;
@@ -228,31 +224,15 @@ function qualifyInventory(
 }
 
 /**
- * A review-pending source snapshot may be qualified only through the explicit
- * local read-only browser fixture. Production publication loading never uses
- * this transformer; the reviewed catalog boundary supplies published records.
+ * The explicit read-only fixture may complete the four inventory declarations
+ * missing from reviewed B. Production loading never uses this transformer and
+ * therefore remains fail-closed until a catalog pins a complete inventory.
  */
 export function qualifyLocalReadOnlyDocument(
   document: MuseumSourceDocument,
   _sourceCommit: string
 ): MuseumSourceDocument {
-  if (document.path === INVENTORY_PATH) return qualifyInventory(document);
-  if (!/^records\/(?:entities|relations)\/[^/]+\.json$/u.test(document.path)) {
-    return document;
-  }
-  let parsed: CandidateARecord;
-  try {
-    parsed = JSON.parse(document.text) as CandidateARecord;
-  } catch {
-    throw new Error("publication_local_fixture_record_json");
-  }
-  const payload = parsed.payload;
-  if (!isRecord(payload)) throw new Error("publication_local_fixture_record");
-  if (payload["entity_status"] === "review_pending") {
-    payload["entity_status"] = "published";
-  }
-  if (payload["relation_type"] === "ORGANIZATION_ORIGINATES_PROJECT") {
-    payload["relation_type"] = "ORGANIZATION_PUBLISHES_PROJECT";
-  }
-  return { ...document, text: JSON.stringify(parsed) };
+  return document.path === INVENTORY_PATH
+    ? qualifyInventory(document)
+    : document;
 }
