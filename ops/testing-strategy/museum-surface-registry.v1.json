@@ -487,6 +487,10 @@
       "surface_ids": ["museum.about.proposition"]
     },
     {
+      "file": "components/museum/MuseumNetworkHomeSecondarySections.tsx",
+      "surface_ids": ["museum.home"]
+    },
+    {
       "file": "components/museum/MuseumObjectPage.tsx",
       "surface_ids": ["museum.object", "museum.collection"]
     },
