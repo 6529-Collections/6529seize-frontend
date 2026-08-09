@@ -83,6 +83,8 @@ describe("instrumentation-client", () => {
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
+  const metaMaskMobileIosUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebView MetaMaskMobile";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
   const browserExtensionWalletRejectionMessage = "User rejected the request.";
@@ -840,6 +842,66 @@ describe("instrumentation-client", () => {
     ],
     ...overrides,
   });
+
+  const createMetaMaskMobileIosCyclicJsonEvent = (
+    overrides: Record<string, unknown> = {}
+  ) => {
+    const rawChunkPath =
+      "app:///_next/static/chunks/0synthetic-monitoring.js";
+    return createSentryRouteParameterizationEvent(
+      [
+        {
+          filename: rawChunkPath,
+          abs_path: rawChunkPath,
+          function: "n",
+          lineno: 7,
+          colno: 4858,
+          in_app: true,
+        },
+        {
+          filename: "[native code]",
+          abs_path: "[native code]",
+          function: "stringify",
+          in_app: true,
+        },
+      ],
+      {
+        timestamp: 1000.295,
+        transaction: "/notifications",
+        request: {
+          url: "https://6529.io/notifications",
+          headers: {
+            "User-Agent": metaMaskMobileIosUserAgent,
+          },
+        },
+        contexts: {
+          browser: {
+            name: "Mobile Safari UI/WKWebView",
+          },
+          os: {
+            name: "iOS",
+            version: "18.7",
+          },
+        },
+        tags: {
+          browser: "Mobile Safari UI/WKWebView",
+          "browser.name": "Mobile Safari UI/WKWebView",
+          "os.name": "iOS",
+        },
+        breadcrumbs: [
+          {
+            timestamp: 1000,
+            category: "navigation",
+            data: {
+              from: "/waves/synthetic-wave",
+              to: "/notifications",
+            },
+          },
+        ],
+        ...overrides,
+      }
+    );
+  };
 
   const createAppKitCoinbaseBreadcrumbs = () => [
     {
@@ -2239,7 +2301,19 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps cyclic JSON timer errors for origin diagnostics", () => {
+  it("filters the exact unsampled iOS MetaMask Mobile cyclic JSON event", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createMetaMaskMobileIosCyclicJsonEvent({
+      contexts: undefined,
+      tags: undefined,
+    });
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps cyclic JSON timer errors without the exact MetaMask stack", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
 

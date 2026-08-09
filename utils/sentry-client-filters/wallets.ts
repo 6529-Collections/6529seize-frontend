@@ -73,6 +73,20 @@ import {
 } from "./walletlink-websocket";
 
 const rabbyRainbowKitRawChunkPathPrefix = "app:///_next/static/chunks/";
+const metaMaskMobileIosCyclicJsonMessage =
+  "JSON.stringify cannot serialize cyclic structures.";
+const metaMaskMobileIosTimerMechanism =
+  "auto.browser.browserapierrors.setTimeout";
+const metaMaskMobileIosBrowserName = "Mobile Safari UI/WKWebView";
+const metaMaskMobileIosOsName = "iOS";
+const metaMaskMobileIosUserAgentPattern =
+  /\biPhone\b.*\bAppleWebKit\/[^\s]+.*\bMobile\/[^\s]+.*\bWebView MetaMaskMobile\s*$/i;
+const rawNextChunkPathPattern =
+  /^app:\/\/\/_next\/static\/chunks\/[a-z0-9._~-]+\.js$/i;
+const sentryRawTimerWrapperLine = 7;
+const sentryRawTimerWrapperColumn = 4858;
+const minimumMetaMaskNavigationDelaySeconds = 0.075;
+const maximumMetaMaskNavigationDelaySeconds = 0.35;
 
 function matchesStackPattern(
   value: string | undefined,
@@ -374,6 +388,127 @@ function hasMetaMaskMobileUpdateUrlCircularJsonSignature(
   return hasMetaMaskUpdateUrlJsonStringifySignature(
     value.stacktrace?.frames,
     hint
+  );
+}
+
+function hasExactMetaMaskMobileIosContext(event: SentryClientEvent): boolean {
+  const browserValues = [
+    getContextString(event, "browser", "name"),
+    getContextString(event, "browser", "browser"),
+    getStringValue(event.tags?.["browser"]),
+    getStringValue(event.tags?.["browser.name"]),
+  ].filter((value): value is string => typeof value === "string");
+  const osValues = [
+    getContextString(event, "os", "name"),
+    getStringValue(event.tags?.["os.name"]),
+  ].filter((value): value is string => typeof value === "string");
+  const userAgentValues = [
+    getRequestHeaderString(event, "user-agent"),
+    getRuntimeUserAgentString(),
+  ];
+
+  return (
+    userAgentValues.some(
+      (userAgent) =>
+        typeof userAgent === "string" &&
+        metaMaskMobileIosUserAgentPattern.test(userAgent)
+    ) &&
+    browserValues.every((value) => value === metaMaskMobileIosBrowserName) &&
+    osValues.every((value) => value === metaMaskMobileIosOsName)
+  );
+}
+
+function isExactSentryRawTimerWrapperFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  return (
+    frame?.filename !== undefined &&
+    rawNextChunkPathPattern.test(frame.filename) &&
+    frame.abs_path === frame.filename &&
+    frame.function === "n" &&
+    frame.lineno === sentryRawTimerWrapperLine &&
+    frame.colno === sentryRawTimerWrapperColumn &&
+    frame.in_app === true
+  );
+}
+
+function isExactNativeStringifyFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  return (
+    frame?.filename === "[native code]" &&
+    frame.abs_path === "[native code]" &&
+    frame.function === "stringify" &&
+    frame.lineno === undefined &&
+    frame.colno === undefined &&
+    frame.in_app === true
+  );
+}
+
+function hasExactMetaMaskMobileIosExecutionStack(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  return (
+    Array.isArray(frames) &&
+    frames.length === 2 &&
+    isExactSentryRawTimerWrapperFrame(frames[0]) &&
+    isExactNativeStringifyFrame(frames[1])
+  );
+}
+
+function isFiniteTimestamp(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function hasRecentMetaMaskSpaNavigation(event: SentryClientEvent): boolean {
+  const eventTimestamp = event.timestamp;
+  if (!isFiniteTimestamp(eventTimestamp)) {
+    return false;
+  }
+
+  return getBreadcrumbValues(event).some((breadcrumb) => {
+    const data = breadcrumb.data;
+    if (
+      breadcrumb.category !== "navigation" ||
+      !isFiniteTimestamp(breadcrumb.timestamp) ||
+      !data ||
+      typeof data["from"] !== "string" ||
+      typeof data["to"] !== "string" ||
+      data["from"] === data["to"]
+    ) {
+      return false;
+    }
+
+    const delaySeconds = eventTimestamp - breadcrumb.timestamp;
+    return (
+      delaySeconds >= minimumMetaMaskNavigationDelaySeconds &&
+      delaySeconds <= maximumMetaMaskNavigationDelaySeconds
+    );
+  });
+}
+
+function hasMetaMaskMobileIosSpaNavigationCyclicJsonSignature(
+  event: SentryClientEvent
+): boolean {
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== metaMaskMobileIosCyclicJsonMessage ||
+    value.mechanism?.type !== metaMaskMobileIosTimerMechanism ||
+    value.mechanism.handled !== false
+  ) {
+    return false;
+  }
+
+  return (
+    hasExactMetaMaskMobileIosContext(event) &&
+    hasExactMetaMaskMobileIosExecutionStack(value.stacktrace?.frames) &&
+    hasRecentMetaMaskSpaNavigation(event)
   );
 }
 
@@ -783,6 +918,10 @@ export function shouldFilterInjectedWalletCollision(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
+  if (hasMetaMaskMobileIosSpaNavigationCyclicJsonSignature(event)) {
+    return true;
+  }
+
   if (hasMetaMaskMobileUpdateUrlCircularJsonSignature(event, hint)) {
     return true;
   }
