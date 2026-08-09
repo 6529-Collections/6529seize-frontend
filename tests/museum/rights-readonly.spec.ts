@@ -113,7 +113,7 @@ test.describe("Museum rights education @surface @readonly", () => {
       await expect(
         page
           .locator('aside[aria-labelledby="museum-open-source-title"]')
-          .getByRole("link", { name: /^Exact legal text:/u })
+          .getByRole("link", { name: "Exact legal text", exact: true })
       ).toHaveAttribute(
         "href",
         /\/blob\/[a-f0-9]{40}\/docs\/rights\/legal-texts\/cc-by-nc-4\.0\.txt$/u
