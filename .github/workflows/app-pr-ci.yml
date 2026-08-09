@@ -1050,6 +1050,7 @@ jobs:
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-museum"
           PLAYWRIGHT_READONLY: "1"
+          MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE: "1"
           MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.commit }}
           MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
         run: |

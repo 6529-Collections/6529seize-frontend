@@ -1,5 +1,7 @@
 export interface MuseumPublicationEnvironment {
   readonly MUSEUM_PUBLICATION_TEST_COMMIT?: string;
+  /** Explicit CI-only compatibility mode for a source before catalog activation. */
+  readonly MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE?: string;
   readonly PLAYWRIGHT_READONLY?: string;
   readonly MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT?: string;
   readonly MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT?: string;
@@ -15,6 +17,8 @@ export function getMuseumPublicationEnvironment(): MuseumPublicationEnvironment 
     return {};
   }
   const testCommit = process.env["MUSEUM_PUBLICATION_TEST_COMMIT"];
+  const uncataloguedTestMode =
+    process.env["MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE"];
   const playwrightReadonly = process.env["PLAYWRIGHT_READONLY"];
   const localFixtureRoot = process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT"];
   const localFixtureCommit =
@@ -25,6 +29,9 @@ export function getMuseumPublicationEnvironment(): MuseumPublicationEnvironment 
     ...(testCommit === undefined
       ? {}
       : { MUSEUM_PUBLICATION_TEST_COMMIT: testCommit }),
+    ...(uncataloguedTestMode === undefined
+      ? {}
+      : { MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE: uncataloguedTestMode }),
     ...(playwrightReadonly === undefined
       ? {}
       : { PLAYWRIGHT_READONLY: playwrightReadonly }),

@@ -1,6 +1,7 @@
 import {
   createMuseumPublicationRuntime,
   GitHubMuseumPublicationSource,
+  isMuseumUncataloguedReadOnlyTestMode,
   legacyCaseyPublicationAssembler,
   resolveMuseumPublicationRef,
   type MuseumLastValidPublication,
@@ -273,6 +274,28 @@ describe("Museum publication runtime", () => {
 });
 
 describe("Museum publication runtime source ref", () => {
+  it("requires explicit read-only mode for an uncatalogued exact source fixture", () => {
+    const environment = {
+      MUSEUM_PUBLICATION_TEST_COMMIT:
+        "66c9eb9fa8c1512ca9450108151d2d7a037c4f31",
+      MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE: "1",
+      PLAYWRIGHT_READONLY: "1",
+    } as const;
+
+    expect(
+      isMuseumUncataloguedReadOnlyTestMode(environment, "development")
+    ).toBe(true);
+    expect(
+      isMuseumUncataloguedReadOnlyTestMode(environment, "production")
+    ).toBe(false);
+    expect(
+      isMuseumUncataloguedReadOnlyTestMode(
+        { ...environment, MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE: "0" },
+        "development"
+      )
+    ).toBe(false);
+  });
+
   it("uses the moving canonical ref outside the read-only browser harness", () => {
     expect(resolveMuseumPublicationRef({})).toBe("main");
   });

@@ -25,6 +25,22 @@ const FAILURE_MAX_TTL_MS = 10 * 60 * 1000;
 const STALE_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_PUBLICATION_REF = "main";
 const PLAYWRIGHT_READONLY_VALUE = "1";
+const UNCATALOGUED_TEST_MODE_VALUE = "1";
+
+export function isMuseumUncataloguedReadOnlyTestMode(
+  environment: MuseumPublicationEnvironment,
+  nodeEnvironment: string | undefined = getNodeEnv()
+): boolean {
+  const testCommit = environment.MUSEUM_PUBLICATION_TEST_COMMIT;
+  return (
+    nodeEnvironment !== "production" &&
+    environment.PLAYWRIGHT_READONLY === PLAYWRIGHT_READONLY_VALUE &&
+    environment.MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE ===
+      UNCATALOGUED_TEST_MODE_VALUE &&
+    testCommit !== undefined &&
+    isExactGitCommit(testCommit)
+  );
+}
 
 interface RuntimeCacheEntry {
   readonly loadedAt: number;
@@ -150,10 +166,15 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
         : {}),
     });
   }
+  const allowUncataloguedTestFixture =
+    isMuseumUncataloguedReadOnlyTestMode(environment);
   return new GitHubMuseumPublicationSource({
     ref: resolveMuseumPublicationRef(),
     assembler: legacyCaseyPublicationAssembler,
     catalogResolver: museumPublicationCatalogResolver,
+    ...(allowUncataloguedTestFixture
+      ? { allowUncataloguedTestFixture: true }
+      : {}),
   });
 }
 

@@ -111,8 +111,15 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
         : new Set(options.localFixtureAcceptedPaths);
     const isTestEnvironment = getNodeEnv() === "test";
     const environment = getMuseumPublicationEnvironment();
+    const uncataloguedReadOnlyTestMode =
+      environment.MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE === "1" &&
+      environment.PLAYWRIGHT_READONLY === "1" &&
+      environment.MUSEUM_PUBLICATION_TEST_COMMIT === this.ref &&
+      isExactGitCommit(this.ref) &&
+      getNodeEnv() !== "production";
     const localFixtureEnvironment =
       isTestEnvironment ||
+      uncataloguedReadOnlyTestMode ||
       (environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT !== undefined &&
         environment.PLAYWRIGHT_READONLY === "1" &&
         (getNodeEnv() !== "production" || isMuseumProductionBuildPhase()));
