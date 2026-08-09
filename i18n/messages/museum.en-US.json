@@ -132,7 +132,7 @@
   "museum.network.accessions.detail.noObjects": "This release contains no object-level records.",
   "museum.network.accessions.detail.declaredObjects": "Declared object records",
   "museum.network.programs.title": "Acquisition programs",
-  "museum.network.programs.description": "Curatorial pathways through which the Museum considers and selects Works.",
+  "museum.network.programs.description": "Curatorial pathways through which the Museum considers and selects works.",
   "museum.network.programs.empty": "No program records are present in the verified release.",
   "museum.network.governance.title": "Governance decisions",
   "museum.network.governance.description": "Adopted decisions and participatory proposals are presented with their recorded governance effect.",

@@ -1,6 +1,7 @@
 import type { MuseumMediaMetadata } from "@/lib/museum/publication/types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { MuseumRightsLink } from "./MuseumRightsLink";
 
 export function MuseumMediaMetadataPlaceholder({
   title,
@@ -39,7 +40,11 @@ export function MuseumMediaMetadataPlaceholder({
       </p>
       {metadata.credit.licenseLabel === null ? null : (
         <p className="tw-m-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-500">
-          {metadata.credit.licenseLabel}
+          <MuseumRightsLink
+            href={metadata.credit.licenseUrl ?? undefined}
+            label={metadata.credit.licenseLabel}
+            className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          />
         </p>
       )}
       {metadata.context?.openHref === null ||

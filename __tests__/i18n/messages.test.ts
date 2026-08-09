@@ -544,6 +544,12 @@ describe("frontend i18n helpers", () => {
     expect(EN_US_MESSAGES).not.toHaveProperty("close");
   });
 
+  it("keeps Museum program copy in sentence case", () => {
+    expect(t("en-US", "museum.network.programs.description")).toBe(
+      "Curatorial pathways through which the Museum considers and selects works."
+    );
+  });
+
   it("keeps file-kind labels distinguishable within each locale", () => {
     for (const locale of SUPPORTED_LOCALES) {
       const labels = FILE_KIND_MESSAGE_KEYS.map((key) =>

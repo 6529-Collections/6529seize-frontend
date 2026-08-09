@@ -135,6 +135,16 @@ function MuseumCanonicalWorkMedia({
               </div>
               <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
                 {media.credit.creditLine}
+                {media.credit.licenseLabel === null ? null : (
+                  <>
+                    {" "}
+                    <MuseumRightsLink
+                      href={media.credit.licenseUrl ?? undefined}
+                      label={media.credit.licenseLabel}
+                      className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    />
+                  </>
+                )}
               </figcaption>
             </figure>
           ))}
