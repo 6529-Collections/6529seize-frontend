@@ -297,6 +297,9 @@ function projectProposalMedia(
     "public_entity_graph_media"
   );
   const { waveId, dropId, publicationRecordId } = waveContext(media);
+  if (!mediaEntity.sourceRecordIds.includes(publicationRecordId)) {
+    throw new Error("public_entity_graph_media_wave_source_join");
+  }
   const metadataOnly =
     input.uri === null || !input.allowedUiAffordances.includes("view");
   if (metadataOnly) {
@@ -318,9 +321,6 @@ function projectProposalMedia(
     };
   }
   assertProposalPresentationInput(input);
-  if (!mediaEntity.sourceRecordIds.includes(publicationRecordId)) {
-    throw new Error("public_entity_graph_media_wave_source_join");
-  }
   assertProposalContext(media, subjectEntity, context, waveId, dropId);
   assertProposalSourceLocator(input);
   const part = findWavePublicationPart({

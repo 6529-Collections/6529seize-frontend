@@ -462,4 +462,104 @@ describe("Wave publication receipt joins", () => {
       "museum_generated_public_derivative"
     );
   });
+
+  it("rejects Wave metadata and context when sourceRecordIds miss the publication record", () => {
+    const workId = "6529NM-W-0024";
+    const mediaId = "6529NM-MED-0003";
+    const acquisitionId = "6529NM-CA-2026-003";
+    const relation: MuseumPublicRelationRecord = {
+      id: "6529NM-REL-0001",
+      relationType: "ENTITY_HAS_MEDIA",
+      sourceEntityId: workId,
+      targetEntityId: mediaId,
+      assertionStatus: "asserted",
+      qualifier: {},
+      sourceRecordIds: [workId],
+      sourcePath: "records/relations/6529NM-REL-0001.json",
+    };
+    const graph = {
+      sourceCommit: "a".repeat(40),
+      entityPaths: [],
+      relationPaths: [],
+      entities: [
+        {
+          id: workId,
+          entityType: "WORK",
+          label: "Conflict at Its Edges",
+          slug: "conflict-at-its-edges",
+          canonicalRoute: `/museum/network/works/${workId}`,
+          pageExposure: "canonical_page",
+          entityStatus: "published",
+          sourcePath: "records/entities/6529NM-W-0024.json",
+          sourceRecordIds: [workId],
+          profile: {},
+        },
+        {
+          id: mediaId,
+          entityType: "MEDIA_REFERENCE",
+          label: "Historical Wave proposal image",
+          slug: null,
+          canonicalRoute: null,
+          pageExposure: "relational_only",
+          entityStatus: "published",
+          sourcePath: "records/entities/6529NM-MED-0003.json",
+          sourceRecordIds: ["6529NM-PG-2026-999"],
+          profile: {
+            media: {
+              media_role: "historical_wave_proposal_presentation",
+              source_locator: { uri: null },
+              media_type: "image/jpeg",
+              accessibility_text: "A governed source photograph.",
+              credit: "© artist / Magnum Photos",
+              allowed_ui_affordances: [
+                "alt_text",
+                "open_wave_proposal_context",
+              ],
+              subject_entity_id: workId,
+              signed_wave: {
+                wave_id: "5f207393-5418-4a75-8738-e40edb44a94d",
+                drop_id: "002bfa4f-8416-48bf-b35e-38f354e9a9f0",
+                publication_record_id: PROPOSAL_ID,
+              },
+              publication_context_entity_ids: [acquisitionId],
+            },
+          },
+        },
+      ],
+      relations: [
+        relation,
+        {
+          id: "6529NM-REL-0002",
+          relationType: "CURATED_ACQUISITION_BRINGS_TOGETHER_WORK",
+          sourceEntityId: acquisitionId,
+          targetEntityId: workId,
+          assertionStatus: "asserted",
+          qualifier: {},
+          sourceRecordIds: [acquisitionId],
+          sourcePath: "records/relations/6529NM-REL-0002.json",
+        },
+      ],
+      identityInventory: {
+        sourcePath: "schemas/public-entity-identity-inventory.json",
+        inventoryVersion: "1.4.0",
+        curatedAcquisitionIds: [acquisitionId],
+        workAliases: [],
+        acquisitionAliases: [],
+        programAliases: [],
+        routeAliases: [],
+        typedReferenceRegistry: [],
+      },
+      relationIdentityInventory: {
+        sourcePath: "schemas/public-relation-identity-inventory.json",
+        schemaPath: "schemas/public-relation-identity-inventory.schema.json",
+        inventoryVersion: "1.3.0",
+        activeRelationIds: [relation.id, "6529NM-REL-0002"],
+        retiredRelationIds: [],
+      },
+    } satisfies MuseumPublicEntityGraph;
+
+    expect(() =>
+      projectMediaRelations(graph.entities, graph, new Map())
+    ).toThrow("public_entity_graph_media_wave_source_join");
+  });
 });
