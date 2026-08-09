@@ -63,9 +63,13 @@ describe("HeaderUserConnectedAccounts", () => {
     renderAccounts({ accounts: [activeAccount] });
 
     expect(screen.getByText("Profiles")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Add profile" })
-    ).toBeInTheDocument();
+    const addProfile = screen.getByRole("button", { name: "Add profile" });
+    expect(addProfile).toBeInTheDocument();
+    expect(addProfile.parentElement).toHaveClass("tw-ml-auto");
+    expect(addProfile).toHaveClass(
+      "hover:tw-border-primary-400",
+      "hover:tw-text-primary-300"
+    );
     expect(
       screen.queryByRole("button", { name: "Sign out all" })
     ).not.toBeInTheDocument();
@@ -91,6 +95,16 @@ describe("HeaderUserConnectedAccounts", () => {
     expect(activeButton.querySelector("svg")).toBeInTheDocument();
     expect(addProfile).toHaveClass("tw-border", "tw-border-iron-600");
     expect(signOutAll).toHaveClass("tw-border", "tw-border-iron-600");
+    expect(addProfile.parentElement).toHaveClass("tw-ml-auto");
+    expect(addProfile.nextElementSibling).toBe(signOutAll);
+    expect(addProfile).toHaveClass(
+      "hover:tw-border-primary-400",
+      "hover:tw-text-primary-300"
+    );
+    expect(signOutAll).toHaveClass(
+      "hover:tw-border-primary-400",
+      "hover:tw-text-primary-300"
+    );
 
     fireEvent.click(addProfile);
     fireEvent.click(signOutAll);

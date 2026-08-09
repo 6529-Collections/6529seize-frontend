@@ -170,36 +170,38 @@ export default function HeaderUserConnectedAccounts({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1">
-      <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-2 tw-px-3">
-        <div className="tw-flex tw-items-center tw-gap-1">
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-            {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.profiles")}
-          </p>
-          {canAddAccount && (
-            <button
-              type="button"
-              onClick={onAddAccount}
-              disabled={actionsDisabled}
-              aria-label={t(
-                HEADER_USER_MENU_LOCALE,
-                "headerUserMenu.addProfile"
-              )}
-              title={t(HEADER_USER_MENU_LOCALE, "headerUserMenu.addProfile")}
-              className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800/50 tw-text-lg tw-font-medium tw-leading-none tw-text-iron-300 tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-700 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-50"
-            >
-              <span aria-hidden="true">+</span>
-            </button>
-          )}
-        </div>
-        {accounts.length > 1 && (
-          <button
-            type="button"
-            onClick={onSignOutAll}
-            disabled={actionsDisabled}
-            className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800/50 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-700 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-50"
-          >
-            {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.signOutAll")}
-          </button>
+      <div className="tw-flex tw-min-h-8 tw-items-center tw-gap-2 tw-px-3">
+        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+          {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.profiles")}
+        </p>
+        {(canAddAccount || accounts.length > 1) && (
+          <div className="tw-ml-auto tw-flex tw-items-center tw-gap-2">
+            {canAddAccount && (
+              <button
+                type="button"
+                onClick={onAddAccount}
+                disabled={actionsDisabled}
+                aria-label={t(
+                  HEADER_USER_MENU_LOCALE,
+                  "headerUserMenu.addProfile"
+                )}
+                title={t(HEADER_USER_MENU_LOCALE, "headerUserMenu.addProfile")}
+                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800/50 tw-text-lg tw-font-medium tw-leading-none tw-text-iron-300 tw-transition-colors hover:tw-border-primary-400 hover:tw-bg-iron-700 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-50"
+              >
+                <span aria-hidden="true">+</span>
+              </button>
+            )}
+            {accounts.length > 1 && (
+              <button
+                type="button"
+                onClick={onSignOutAll}
+                disabled={actionsDisabled}
+                className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800/50 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-border-primary-400 hover:tw-bg-iron-700 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-50"
+              >
+                {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.signOutAll")}
+              </button>
+            )}
+          </div>
         )}
       </div>
       <div className="tw-flex tw-flex-col tw-gap-y-1">
