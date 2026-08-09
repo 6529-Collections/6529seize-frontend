@@ -93,7 +93,9 @@ function selectPaths(
   declared: ReadonlySet<string>,
   pattern: RegExp
 ): readonly string[] {
-  return [...declared].filter((path) => pattern.test(path)).sort();
+  return [...declared]
+    .filter((path) => pattern.test(path))
+    .sort((left, right) => left.localeCompare(right));
 }
 
 function assertDeclaredGraphDocuments(

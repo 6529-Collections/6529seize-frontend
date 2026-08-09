@@ -263,8 +263,12 @@ export function assertExactKeys(
   expectedKeys: readonly string[],
   code: string
 ): void {
-  const actualKeys = Object.keys(record).sort();
-  const expected = [...expectedKeys].sort();
+  const actualKeys = Object.keys(record).sort((left, right) =>
+    left.localeCompare(right)
+  );
+  const expected = [...expectedKeys].sort((left, right) =>
+    left.localeCompare(right)
+  );
   if (
     actualKeys.length !== expected.length ||
     actualKeys.some((key, index) => key !== expected[index])
@@ -368,7 +372,7 @@ export function assertSortedUniquePaths(
   paths: readonly string[],
   errorCode: string
 ): void {
-  const sorted = [...paths].sort();
+  const sorted = [...paths].sort((left, right) => left.localeCompare(right));
   if (
     paths.length === 0 ||
     paths.some((path) => path.trim().length === 0) ||

@@ -252,11 +252,13 @@ function assertEntityPatterns(
   const expectedInventoryOnlyTypes = Object.keys(
     INVENTORY_ONLY_ENTITY_ID_PATTERNS
   ) as (keyof typeof INVENTORY_ONLY_ENTITY_ID_PATTERNS)[];
-  const patternKeys = Object.keys(patterns).sort();
+  const patternKeys = Object.keys(patterns).sort((left, right) =>
+    left.localeCompare(right)
+  );
   const expectedPatternKeys = [
     ...expectedTypes,
     ...expectedInventoryOnlyTypes,
-  ].sort();
+  ].sort((left, right) => left.localeCompare(right));
   if (
     patternKeys.length !== expectedPatternKeys.length ||
     expectedPatternKeys.some((type) => !patternKeys.includes(type))

@@ -344,7 +344,9 @@ function assertInventorySet(
   );
   const expectedAssembly = catalog.assemblyDocuments.map((entry) => entry.path);
   const expectedMedia = catalog.mediaAssets.map((entry) => entry.path);
-  const expectedPaths = [...expectedAssembly, ...expectedMedia].sort();
+  const expectedPaths = [...expectedAssembly, ...expectedMedia].sort(
+    (left, right) => left.localeCompare(right)
+  );
   if (
     inventoryPaths.length !== expectedPaths.length ||
     inventoryPaths.some((path, index) => path !== expectedPaths[index])
