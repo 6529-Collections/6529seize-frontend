@@ -111,16 +111,24 @@ function buildFixture(): {
       fixture_required_paths: ["docs/a.md"],
     },
   };
-  const inventoryBody = { ...inventoryValue } as Record<string, unknown>;
-  delete inventoryBody["integrity"];
-  const inventoryBodyBytes = new TextEncoder().encode(
-    canonicalMuseumJson(inventoryBody)
+  const inventorySelfIntegrityBody = {
+    ...inventoryValue,
+  } as Record<string, unknown>;
+  delete inventorySelfIntegrityBody["integrity"];
+  const inventorySelfIntegrityBytes = new TextEncoder().encode(
+    canonicalMuseumJson(inventorySelfIntegrityBody)
   );
   inventoryValue.integrity = {
     canonicalization_id: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
-    body_sha256: sha(inventoryBodyBytes),
-    body_keccak256: keccak256(toBytes(canonicalMuseumJson(inventoryBody))),
+    body_sha256: sha(inventorySelfIntegrityBytes),
+    body_keccak256: keccak256(
+      toBytes(canonicalMuseumJson(inventorySelfIntegrityBody))
+    ),
   };
+  const completeInventoryJcs = canonicalMuseumJson(inventoryValue);
+  const completeInventoryJcsBytes = new TextEncoder().encode(
+    completeInventoryJcs
+  );
   const inventoryBytes = new TextEncoder().encode(
     `${JSON.stringify(inventoryValue)}\n`
   );
@@ -135,10 +143,8 @@ function buildFixture(): {
     bundle_version: "1.0.0",
     bundle_id: "6529NM_PUBLIC_VISITOR_CORPUS_BUNDLE_V1",
     source_inventory_path: inventoryPath,
-    source_inventory_body_sha256: sha(inventoryBodyBytes),
-    source_inventory_body_keccak256: keccak256(
-      toBytes(canonicalMuseumJson(inventoryBody))
-    ),
+    source_inventory_body_sha256: sha(completeInventoryJcsBytes),
+    source_inventory_body_keccak256: keccak256(toBytes(completeInventoryJcs)),
     canonicalization_id: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
     entries: [
       {
@@ -160,7 +166,8 @@ function buildFixture(): {
     MUSEUM_PUBLICATION_BUNDLE_PATH,
     bundleBytes
   );
-  const inventoryBodySha256 = sha(inventoryBodyBytes);
+  const completeInventorySha256 = sha(completeInventoryJcsBytes);
+  const completeInventoryJcsKeccak = keccak256(toBytes(completeInventoryJcs));
   const payload = {
     catalog_id: `6529NM-PUBCAT-${B}`,
     catalog_version: "1.0.0",
@@ -186,8 +193,8 @@ function buildFixture(): {
       path: inventoryPath,
       fileSize: inventoryBytes.byteLength,
       fileSha256: sha(inventoryBytes),
-      bodySha256: inventoryBodySha256,
-      jcsKeccak: keccak256(toBytes(canonicalMuseumJson(inventoryBody))),
+      completeInventorySha256,
+      completeInventoryJcsKeccak,
       inventoryVersion: "1.0.0",
       canonicalizationId: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
       counts: {
@@ -202,8 +209,8 @@ function buildFixture(): {
     assemblyBundle: {
       descriptor: bundleDescriptor,
       embeddedDocuments: assemblyDocuments,
-      inventorySha256: inventoryBodySha256,
-      inventoryKeccak: keccak256(toBytes(canonicalMuseumJson(inventoryBody))),
+      completeInventorySha256,
+      completeInventoryJcsKeccak,
       fileSize: bundleBytes.byteLength,
       fileSha256: sha(bundleBytes),
       rawFileSize: bundleBytes.byteLength,
@@ -300,8 +307,10 @@ describe("Museum publication catalog boundary", () => {
         path: fixture.catalog.publicationInventory.path,
         file_size: fixture.catalog.publicationInventory.fileSize,
         file_sha256: fixture.catalog.publicationInventory.fileSha256,
-        body_sha256: fixture.catalog.publicationInventory.bodySha256,
-        body_keccak256: fixture.catalog.publicationInventory.jcsKeccak,
+        body_sha256:
+          fixture.catalog.publicationInventory.completeInventorySha256,
+        body_keccak256:
+          fixture.catalog.publicationInventory.completeInventoryJcsKeccak,
         canonicalization_id:
           fixture.catalog.publicationInventory.canonicalizationId,
         inventory_version:
@@ -322,9 +331,9 @@ describe("Museum publication catalog boundary", () => {
         body_keccak256: fixture.catalog.assemblyBundle.bodyKeccak,
         canonicalization_id: fixture.catalog.assemblyBundle.canonicalizationId,
         source_inventory_body_sha256:
-          fixture.catalog.assemblyBundle.inventorySha256,
+          fixture.catalog.assemblyBundle.completeInventorySha256,
         source_inventory_body_keccak256:
-          fixture.catalog.assemblyBundle.inventoryKeccak,
+          fixture.catalog.assemblyBundle.completeInventoryJcsKeccak,
         immutable_source_url:
           fixture.catalog.assemblyBundle.descriptor.sourceUrl,
         immutable_raw_url: fixture.catalog.assemblyBundle.descriptor.rawUrl,
@@ -358,6 +367,12 @@ describe("Museum publication catalog boundary", () => {
         payload: { ...wirePayload, unexpected: true },
       })
     ).toThrow("publication_catalog_payload");
+    expect(() =>
+      museumPublicationCatalogResolver.decodeCatalog({
+        ...wireCatalog,
+        payload: { ...wirePayload, catalog_version: "1.1.0" },
+      })
+    ).toThrow("publication_catalog_version");
   });
 
   it("decodes the v1 relative-schema visitor bundle and verifies its body commitment", () => {
@@ -366,14 +381,12 @@ describe("Museum publication catalog boundary", () => {
       fixture.bundleBytes,
       fixture.catalog
     );
-    expect(decoded.documents.map((entry) => entry.path)).toEqual([
-      "docs/a.md",
-    ]);
-    expect(decoded.inventorySha256).toBe(
-      fixture.catalog.publicationInventory.bodySha256
+    expect(decoded.documents.map((entry) => entry.path)).toEqual(["docs/a.md"]);
+    expect(decoded.completeInventorySha256).toBe(
+      fixture.catalog.publicationInventory.completeInventorySha256
     );
-    expect(decoded.inventoryKeccak).toBe(
-      fixture.catalog.publicationInventory.jcsKeccak
+    expect(decoded.completeInventoryJcsKeccak).toBe(
+      fixture.catalog.publicationInventory.completeInventoryJcsKeccak
     );
   });
 
@@ -429,6 +442,20 @@ describe("Museum publication catalog boundary", () => {
         mediaAssets: [f.catalog.assemblyDocuments[0]],
       }),
     ],
+    [
+      "text-normalized deferred media",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.catalog,
+        mediaAssets: [{ ...f.catalog.mediaAssets[0], byteMode: "lf-normalized" }],
+      }),
+    ],
+    [
+      "non-media deferred path",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.catalog,
+        mediaAssets: [{ ...f.catalog.mediaAssets[0], path: "media/a.json" }],
+      }),
+    ],
   ])("rejects %s", (_name, mutate) => {
     const fixture = buildFixture();
     expect(() =>
@@ -452,8 +479,10 @@ describe("Museum publication catalog boundary", () => {
       assertMuseumPublicationCatalogAssemblyBundle(
         {
           documents: fixture.bundleDocuments,
-          inventorySha256: fixture.catalog.assemblyBundle.inventorySha256,
-          inventoryKeccak: fixture.catalog.assemblyBundle.inventoryKeccak,
+          completeInventorySha256:
+            fixture.catalog.assemblyBundle.completeInventorySha256,
+          completeInventoryJcsKeccak:
+            fixture.catalog.assemblyBundle.completeInventoryJcsKeccak,
         },
         fixture.catalog
       )
@@ -465,8 +494,10 @@ describe("Museum publication catalog boundary", () => {
             ...fixture.bundleDocuments,
             { path: "docs/extra.md", bytes: new TextEncoder().encode("extra") },
           ],
-          inventorySha256: fixture.catalog.assemblyBundle.inventorySha256,
-          inventoryKeccak: fixture.catalog.assemblyBundle.inventoryKeccak,
+          completeInventorySha256:
+            fixture.catalog.assemblyBundle.completeInventorySha256,
+          completeInventoryJcsKeccak:
+            fixture.catalog.assemblyBundle.completeInventoryJcsKeccak,
         },
         fixture.catalog
       )
@@ -568,6 +599,66 @@ describe("Museum publication catalog boundary", () => {
     ).toThrow();
   });
 
+  it("keeps inventory self-integrity distinct from the complete-inventory catalog commitment", () => {
+    const fixture = buildFixture();
+    const inventoryValue = JSON.parse(
+      new TextDecoder().decode(fixture.inventoryDocument.bytes)
+    ) as Record<string, unknown>;
+    const integrity = inventoryValue["integrity"] as Record<string, unknown>;
+    integrity["body_sha256"] = SHA_ZERO;
+    const changedBytes = new TextEncoder().encode(
+      `${JSON.stringify(inventoryValue)}\n`
+    );
+    const completeInventoryText = canonicalMuseumJson(inventoryValue);
+    const catalog = {
+      ...fixture.catalog,
+      publicationInventory: {
+        ...fixture.catalog.publicationInventory,
+        fileSize: changedBytes.byteLength,
+        fileSha256: sha(changedBytes),
+        completeInventorySha256: sha(
+          new TextEncoder().encode(completeInventoryText)
+        ),
+        completeInventoryJcsKeccak: keccak256(toBytes(completeInventoryText)),
+      },
+    };
+    expect(() =>
+      assertMuseumPublicationInventoryDocument(
+        { ...fixture.inventoryDocument, bytes: changedBytes },
+        catalog
+      )
+    ).toThrow("publication_catalog_inventory_commitment_mismatch");
+  });
+
+  it("rejects a complete-inventory catalog commitment drift even when self-integrity is valid", () => {
+    const fixture = buildFixture();
+    expect(() =>
+      assertMuseumPublicationInventoryDocument(fixture.inventoryDocument, {
+        ...fixture.catalog,
+        publicationInventory: {
+          ...fixture.catalog.publicationInventory,
+          completeInventorySha256: SHA_ZERO,
+        },
+      })
+    ).toThrow("publication_catalog_inventory_commitment_mismatch");
+  });
+
+  it("rejects catalog count drift from the complete bound inventory", () => {
+    const fixture = buildFixture();
+    expect(() =>
+      assertMuseumPublicationInventoryDocument(fixture.inventoryDocument, {
+        ...fixture.catalog,
+        publicationInventory: {
+          ...fixture.catalog.publicationInventory,
+          counts: {
+            ...fixture.catalog.publicationInventory.counts,
+            public_entity_record: 2,
+          },
+        },
+      })
+    ).toThrow("publication_catalog_inventory_counts_mismatch");
+  });
+
   it.each([
     [
       "duplicate required source-set path",
@@ -588,17 +679,24 @@ describe("Museum publication catalog boundary", () => {
       string[]
     >;
     mutatePaths(requiredSourceSets["fixture_required_paths"] ?? []);
-    const inventoryBody = { ...inventoryValue };
-    delete inventoryBody["integrity"];
-    const inventoryBodyText = canonicalMuseumJson(inventoryBody);
-    const inventoryBodyBytes = new TextEncoder().encode(inventoryBodyText);
-    const inventoryBodySha256 = sha(inventoryBodyBytes);
-    const inventoryBodyKeccak = keccak256(toBytes(inventoryBodyText));
+    const selfIntegrityBody = { ...inventoryValue };
+    delete selfIntegrityBody["integrity"];
+    const selfIntegrityBodyText = canonicalMuseumJson(selfIntegrityBody);
+    const selfIntegrityBodyBytes = new TextEncoder().encode(
+      selfIntegrityBodyText
+    );
     inventoryValue["integrity"] = {
       canonicalization_id: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
-      body_sha256: inventoryBodySha256,
-      body_keccak256: inventoryBodyKeccak,
+      body_sha256: sha(selfIntegrityBodyBytes),
+      body_keccak256: keccak256(toBytes(selfIntegrityBodyText)),
     };
+    const completeInventoryText = canonicalMuseumJson(inventoryValue);
+    const completeInventorySha256 = sha(
+      new TextEncoder().encode(completeInventoryText)
+    );
+    const completeInventoryJcsKeccak = keccak256(
+      toBytes(completeInventoryText)
+    );
     const inventoryBytes = new TextEncoder().encode(
       `${JSON.stringify(inventoryValue)}\n`
     );
@@ -608,13 +706,13 @@ describe("Museum publication catalog boundary", () => {
         ...fixture.catalog.publicationInventory,
         fileSize: inventoryBytes.byteLength,
         fileSha256: sha(inventoryBytes),
-        bodySha256: inventoryBodySha256,
-        jcsKeccak: inventoryBodyKeccak,
+        completeInventorySha256,
+        completeInventoryJcsKeccak,
       },
       assemblyBundle: {
         ...fixture.catalog.assemblyBundle,
-        inventorySha256: inventoryBodySha256,
-        inventoryKeccak: inventoryBodyKeccak,
+        completeInventorySha256,
+        completeInventoryJcsKeccak,
       },
     };
     expect(() =>

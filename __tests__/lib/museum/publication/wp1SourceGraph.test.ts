@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -7,6 +8,7 @@ import {
 import {
   GitHubMuseumPublicationSource,
   legacyCaseyPublicationAssembler,
+  museumPublicationCatalogResolver,
 } from "@/lib/museum/publication";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import {
@@ -21,9 +23,29 @@ import type {
   MuseumSourceDocument,
 } from "@/lib/museum/publication/types";
 
-// Reviewed B3 is exercised only through the explicit read-only fixture.
-// Production remains catalog-bound until canonical C is published.
-const WP1_SOURCE_COMMIT = "bf517353ef861e91f5137908daca514b81578b4d";
+// Canonical B4 is exercised through the explicit local qualification fixture.
+// Production resolves canonical C4 and then consumes this immutable B4 corpus.
+const WP1_SOURCE_COMMIT = "2733944555ae0f80242ec895558bdb7fba7115d3";
+const C4_CATALOG_COMMIT = "a9a925861c654f71a85f0129ee5c0ba8ee71e9e4";
+const C4_CATALOG_ID = `6529NM-PUBCAT-${WP1_SOURCE_COMMIT}`;
+const C4_CATALOG_PATH =
+  `release-artifacts/catalog/${C4_CATALOG_ID}.json` as const;
+const C4_POINTER_PATH =
+  "release-artifacts/latest/publication-catalog-pointer.json" as const;
+const C4_POINTER_SHA256 =
+  "sha256:7ef5ac1db989e13bdf50b1c736ff0d9d35e68f812a698bf4e3d7ba3ca322db17";
+const C4_CATALOG_SHA256 =
+  "sha256:dda487e41681eb42b51fa1f37dd7b38695e12b9e2471962d7b2aed6838575839";
+const C4_CATALOG_ENVELOPE =
+  "0x83a1c0169c1451a79fe4d0858d9d2cea3a53197f0b9cf37dfa97512482757ee3";
+const B4_INVENTORY_SELF_SHA256 =
+  "sha256:21308a37c12f39e48c220c35249306fa13d356be49d71b17a0b14e0fadabef39";
+const B4_INVENTORY_SELF_KECCAK =
+  "0x10c59f2195d7a78fad19e0a73c5fb08f40cdd2ac5b08fb2838027d6a1fdd9981";
+const B4_COMPLETE_INVENTORY_SHA256 =
+  "sha256:f15ac9f48b60bc91d49ded01e367a5c6f504ca571c1f7fb71bfc93bf28fd194d";
+const B4_COMPLETE_INVENTORY_KECCAK =
+  "0x0b2b12829713f77d2bf7255e198b715d315c99b89082a1631dca72af5b5cbc4f";
 const SOURCE_ROOT = process.env["MUSEUM_WP1_SOURCE_ROOT"];
 const LOCAL_FIXTURE_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"] ??
@@ -50,6 +72,71 @@ interface SourceFixture {
   readonly bundleContentBytes: number;
 }
 
+function sha256(bytes: Uint8Array): `sha256:${string}` {
+  return `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
+}
+
+function createCanonicalCatalogFetch(
+  sourceRoot: string,
+  calls: string[]
+): typeof fetch {
+  const allowedPathsByCommit = new Map<string, ReadonlySet<string>>([
+    [C4_CATALOG_COMMIT, new Set([C4_POINTER_PATH, C4_CATALOG_PATH])],
+    [
+      WP1_SOURCE_COMMIT,
+      new Set([
+        "release-artifacts/latest/record-manifest.json",
+        "schemas/public-publication-inventory.json",
+        "records/publication/visitor-corpus-bundle-v1.json",
+      ]),
+    ],
+  ]);
+  return async (input) => {
+    const requestUrl =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.href
+          : input.url;
+    calls.push(requestUrl);
+    const url = new URL(requestUrl);
+    const segments = url.pathname.split("/").filter(Boolean);
+    const commit = segments[2];
+    const sourcePath = segments.slice(3).map(decodeURIComponent).join("/");
+    if (
+      url.protocol !== "https:" ||
+      url.hostname !== "raw.githubusercontent.com" ||
+      segments[0] !== "6529-Collections" ||
+      segments[1] !== "6529networkmuseum" ||
+      commit === undefined ||
+      !allowedPathsByCommit.get(commit)?.has(sourcePath) ||
+      url.username.length > 0 ||
+      url.password.length > 0 ||
+      url.port.length > 0 ||
+      url.search.length > 0 ||
+      url.hash.length > 0
+    ) {
+      throw new Error(`unexpected_catalog_transport:${requestUrl}`);
+    }
+    const bytes = new Uint8Array(
+      readFileSync(join(sourceRoot, ...sourcePath.split("/")))
+    );
+    return {
+      ok: true,
+      status: 200,
+      url: "",
+      headers: {
+        get(name: string) {
+          return name.toLowerCase() === "content-length"
+            ? String(bytes.byteLength)
+            : null;
+        },
+      },
+      arrayBuffer: () => Promise.resolve(bytes.slice().buffer),
+    } as unknown as Response;
+  };
+}
+
 function readSourceFixture(): SourceFixture | null {
   if (SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0) return null;
   const manifestPath = join(
@@ -67,9 +154,9 @@ function readSourceFixture(): SourceFixture | null {
     if (
       manifest.entries.length !== 776 ||
       manifest.manifest_sha256 !==
-        "sha256:8c8a2d453c746107210e4716ce340f599833738e689bec05e7c4f12c8c0eeb48" ||
+        "sha256:6d49b7fb74b11a3f6c4813fcedcd12a1d43577f8c04d43bc7739eeada736b400" ||
       manifest.manifest_commitment?.digest !==
-        "0xeb8f78dae7a87fb51c395031f82471a743524ab8ec2a2a679d48dc5c85cb2cf5"
+        "0x679319a97d0fdc9e10d208eb01c33037ceee4bc59aef4c086ddc884b09da1891"
     ) {
       throw new Error("wp1_source_manifest_commitment_mismatch");
     }
@@ -96,7 +183,9 @@ function readSourceFixture(): SourceFixture | null {
   for (const entry of manifest.entries) {
     if (
       !/^(?:records|docs|policies)\//u.test(entry.path) &&
-      entry.path !== "schemas/public-entity-identity-inventory.json"
+      entry.path !== "schemas/public-entity-identity-inventory.json" &&
+      entry.path !== "schemas/public-relation-identity-inventory.json" &&
+      entry.path !== "schemas/public-relation-identity-inventory.schema.json"
     ) {
       continue;
     }
@@ -171,6 +260,47 @@ function mutateIdentityInventory(
   };
 }
 
+function mutateRelationIdentityInventory(
+  fixture: SourceFixture,
+  mutate: (inventory: Record<string, unknown>) => void
+): SourceFixture {
+  const inventory = fixture.documents.get(
+    "schemas/public-relation-identity-inventory.json"
+  );
+  if (inventory === undefined) {
+    throw new Error("wp1_relation_identity_inventory_missing");
+  }
+  const value = JSON.parse(inventory.text) as Record<string, unknown>;
+  mutate(value);
+  return {
+    ...fixture,
+    documents: new Map(fixture.documents).set(inventory.path, {
+      ...inventory,
+      text: JSON.stringify(value),
+    }),
+  };
+}
+
+function mutateSourceJson(
+  fixture: SourceFixture,
+  path: string,
+  mutate: (value: Record<string, unknown>) => void
+): SourceFixture {
+  const document = fixture.documents.get(path);
+  if (document === undefined) {
+    throw new Error(`wp1_source_document_missing:${path}`);
+  }
+  const value = JSON.parse(document.text) as Record<string, unknown>;
+  mutate(value);
+  return {
+    ...fixture,
+    documents: new Map(fixture.documents).set(path, {
+      ...document,
+      text: JSON.stringify(value),
+    }),
+  };
+}
+
 const wp1Suite =
   SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0
     ? describe.skip
@@ -179,7 +309,7 @@ const wp1Suite =
 wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
   const fixture = readSourceFixture();
 
-  it("accepts B3's complete identity inventory through the explicit read-only fixture", () => {
+  it("accepts B4's complete entity and relation identity inventories", () => {
     if (fixture === null) throw new Error("wp1_source_fixture_required");
     const expectedManifestSha256 =
       process.env["MUSEUM_WP1_EXPECTED_MANIFEST_SHA256"];
@@ -230,6 +360,22 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     expect(graph.entities.length + graph.relations.length).toBe(
       declaredGraphPaths.length
     );
+    expect(graph.relationIdentityInventory).toMatchObject({
+      inventoryVersion: "1.3.0",
+      sourcePath: "schemas/public-relation-identity-inventory.json",
+      schemaPath: "schemas/public-relation-identity-inventory.schema.json",
+    });
+    expect(graph.relationIdentityInventory.activeRelationIds).toHaveLength(
+      graph.relations.length
+    );
+    expect(graph.relationIdentityInventory.retiredRelationIds).toEqual([
+      "6529NM-REL-0159",
+      "6529NM-REL-0160",
+      "6529NM-REL-0161",
+      "6529NM-REL-0162",
+      "6529NM-REL-0163",
+      "6529NM-REL-0164",
+    ]);
 
     const publication = applyMuseumPublicEntityGraph(
       emptyPublication(fixture),
@@ -407,8 +553,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
           bindings["RESEARCH_PUBLICATION"] ?? []
         ).filter(
           (binding) =>
-            (binding as { entity_id?: unknown }).entity_id !==
-            "6529NM-RP-0001"
+            (binding as { entity_id?: unknown }).entity_id !== "6529NM-RP-0001"
         );
       },
       "public_entity_graph_inventory_bindings",
@@ -420,8 +565,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
           inventory["public_slug_inventory"] as unknown[]
         ).filter(
           (entry) =>
-            (entry as { entity_id?: unknown }).entity_id !==
-            "6529NM-RP-0001"
+            (entry as { entity_id?: unknown }).entity_id !== "6529NM-RP-0001"
         );
       },
       "public_entity_graph_inventory_slugs",
@@ -433,7 +577,23 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       },
       "public_entity_graph_inventory_version",
     ],
-  ] as const)("rejects B3 when it omits %s", (_label, mutate, errorCode) => {
+    [
+      "an obsolete pre-1.4 inventory version",
+      (inventory: Record<string, unknown>) => {
+        inventory["inventory_version"] = "1.3.2";
+      },
+      "public_entity_graph_inventory_version",
+    ],
+    [
+      "a governed typed-reference binding",
+      (inventory: Record<string, unknown>) => {
+        inventory["typed_reference_registry"] = (
+          inventory["typed_reference_registry"] as unknown[]
+        ).slice(1);
+      },
+      "public_entity_graph_typed_reference_registry",
+    ],
+  ] as const)("rejects B4 when it omits %s", (_label, mutate, errorCode) => {
     if (fixture === null) throw new Error("wp1_source_fixture_required");
     const mutated = mutateIdentityInventory(fixture, mutate);
     expect(() =>
@@ -445,7 +605,107 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     ).toThrow(errorCode);
   });
 
-  it("assembles the exact reviewed B3 fixture through the source adapter", async () => {
+  it("rejects a Work whose governed manifestation identity drifts from the 1.4 registry", () => {
+    if (fixture === null) throw new Error("wp1_source_fixture_required");
+    const mutated = mutateSourceJson(
+      fixture,
+      "records/entities/6529NM-W-0024.json",
+      (root) => {
+        const payload = root["payload"] as Record<string, unknown>;
+        const profile = payload["profile"] as Record<string, unknown>;
+        const references = profile["manifestation_references"] as Record<
+          string,
+          unknown
+        >[];
+        const first = references[0];
+        if (first !== undefined) {
+          first["caip19"] =
+            "eip155:1/erc721:0xe628b59d34f42b16c53f4d697f1ffd4d8d987b91/999";
+        }
+      }
+    );
+    expect(() =>
+      parseMuseumPublicEntityGraph(
+        mutated.documents,
+        mutated.declaredPaths,
+        mutated.sourceCommit
+      )
+    ).toThrow("public_entity_graph_typed_reference_registry");
+  });
+
+  it.each([
+    [
+      "an active relation binding",
+      (inventory: Record<string, unknown>) => {
+        inventory["relation_bindings"] = (
+          inventory["relation_bindings"] as unknown[]
+        ).slice(1);
+      },
+      "public_entity_graph_relation_inventory_bindings",
+    ],
+    [
+      "the semantic key for an active relation",
+      (inventory: Record<string, unknown>) => {
+        const bindings = inventory["relation_bindings"] as Record<
+          string,
+          unknown
+        >[];
+        const first = bindings[0];
+        if (first !== undefined) {
+          first["source_key"] =
+            "ORGANIZATION_ORIGINATES_PROJECT|6529NM-ORG-0001|6529NM-PRJ-0001";
+        }
+      },
+      "public_entity_graph_relation_inventory_binding_mismatch",
+    ],
+    [
+      "a retired relation tombstone",
+      (inventory: Record<string, unknown>) => {
+        inventory["retired_relation_ids"] = (
+          inventory["retired_relation_ids"] as unknown[]
+        ).slice(1);
+      },
+      "public_entity_graph_relation_inventory_retired",
+    ],
+    [
+      "the closed relation inventory version",
+      (inventory: Record<string, unknown>) => {
+        inventory["inventory_version"] = "1.3.1";
+      },
+      "public_entity_graph_relation_inventory_version",
+    ],
+  ] as const)(
+    "rejects B4 when relation identity inventory omits or changes %s",
+    (_label, mutate, errorCode) => {
+      if (fixture === null) throw new Error("wp1_source_fixture_required");
+      const mutated = mutateRelationIdentityInventory(fixture, mutate);
+      expect(() =>
+        parseMuseumPublicEntityGraph(
+          mutated.documents,
+          mutated.declaredPaths,
+          mutated.sourceCommit
+        )
+      ).toThrow(errorCode);
+    }
+  );
+
+  it.each([
+    "schemas/public-relation-identity-inventory.json",
+    "schemas/public-relation-identity-inventory.schema.json",
+  ])("rejects B4 when %s is absent from the closed graph", (path) => {
+    if (fixture === null) throw new Error("wp1_source_fixture_required");
+    const documents = new Map(fixture.documents);
+    documents.delete(path);
+    expect(() =>
+      parseMuseumPublicEntityGraph(
+        documents,
+        fixture.declaredPaths.filter((candidate) => candidate !== path),
+        fixture.sourceCommit
+      )
+    ).toThrow("public_entity_graph_inventory_incomplete");
+  });
+
+  it("assembles the exact canonical B4 fixture through the source adapter", async () => {
     if (SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0) {
       throw new Error("wp1_source_root_required");
     }
@@ -462,7 +722,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     });
     const result = await source.load();
     if (result.status !== "current") {
-      throw new Error(`reviewed_b3_source:${result.errorCode ?? "unknown"}`);
+      throw new Error(`canonical_b4_source:${result.errorCode ?? "unknown"}`);
     }
     const pageSources = buildMuseumPageSourceCatalog(result.publication);
     const homeSource = pageSources.find(
@@ -515,6 +775,91 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
               document.sourcePath
             )
         )
+    ).toBe(true);
+  });
+
+  it("activates canonical C4 through five exact C/B requests and no individual or media fetches", async () => {
+    if (SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0) {
+      throw new Error("wp1_source_root_required");
+    }
+    const pointerBytes = new Uint8Array(
+      readFileSync(join(SOURCE_ROOT, ...C4_POINTER_PATH.split("/")))
+    );
+    const catalogBytes = new Uint8Array(
+      readFileSync(join(SOURCE_ROOT, ...C4_CATALOG_PATH.split("/")))
+    );
+    expect(sha256(pointerBytes)).toBe(C4_POINTER_SHA256);
+    expect(sha256(catalogBytes)).toBe(C4_CATALOG_SHA256);
+    const inventory = JSON.parse(
+      readFileSync(
+        join(SOURCE_ROOT, "schemas", "public-publication-inventory.json"),
+        "utf8"
+      )
+    ) as { readonly integrity: Record<string, unknown> };
+    const catalogWire = JSON.parse(new TextDecoder().decode(catalogBytes)) as {
+      readonly payload: {
+        readonly publication_inventory_binding: Record<string, unknown>;
+        readonly bundle_binding: Record<string, unknown>;
+      };
+    };
+    expect(inventory.integrity).toMatchObject({
+      body_sha256: B4_INVENTORY_SELF_SHA256,
+      body_keccak256: B4_INVENTORY_SELF_KECCAK,
+    });
+    expect(catalogWire.payload.publication_inventory_binding).toMatchObject({
+      body_sha256: B4_COMPLETE_INVENTORY_SHA256,
+      body_keccak256: B4_COMPLETE_INVENTORY_KECCAK,
+    });
+    expect(catalogWire.payload.bundle_binding).toMatchObject({
+      source_inventory_body_sha256: B4_COMPLETE_INVENTORY_SHA256,
+      source_inventory_body_keccak256: B4_COMPLETE_INVENTORY_KECCAK,
+    });
+    expect(B4_INVENTORY_SELF_SHA256).not.toBe(B4_COMPLETE_INVENTORY_SHA256);
+    expect(B4_INVENTORY_SELF_KECCAK).not.toBe(B4_COMPLETE_INVENTORY_KECCAK);
+
+    const calls: string[] = [];
+    const source = new GitHubMuseumPublicationSource({
+      ref: C4_CATALOG_COMMIT,
+      assembler: legacyCaseyPublicationAssembler,
+      catalogResolver: museumPublicationCatalogResolver,
+      fetch: createCanonicalCatalogFetch(SOURCE_ROOT, calls),
+      now: () => new Date("2026-08-09T20:05:00.000Z"),
+    });
+    const result = await source.load();
+
+    if (result.status !== "current") {
+      throw new Error(`canonical_c4_source:${result.errorCode ?? "unknown"}`);
+    }
+    expect(result.publication.identity).toMatchObject({
+      commit: WP1_SOURCE_COMMIT,
+      requestedRef: C4_CATALOG_COMMIT,
+      catalogId: C4_CATALOG_ID,
+      catalogContentHash: C4_CATALOG_ENVELOPE,
+    });
+    expect(calls).toHaveLength(5);
+    expect(calls).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(`/${C4_CATALOG_COMMIT}/${C4_POINTER_PATH}`),
+        expect.stringContaining(`/${C4_CATALOG_COMMIT}/${C4_CATALOG_PATH}`),
+        expect.stringContaining(
+          `/${WP1_SOURCE_COMMIT}/release-artifacts/latest/record-manifest.json`
+        ),
+        expect.stringContaining(
+          `/${WP1_SOURCE_COMMIT}/schemas/public-publication-inventory.json`
+        ),
+        expect.stringContaining(
+          `/${WP1_SOURCE_COMMIT}/records/publication/visitor-corpus-bundle-v1.json`
+        ),
+      ])
+    );
+    expect(
+      calls.every(
+        (url) =>
+          !url.includes("/main/") &&
+          !url.includes("/HEAD/") &&
+          !url.includes("github.com/6529-Collections") &&
+          !url.includes("media/")
+      )
     ).toBe(true);
   });
 

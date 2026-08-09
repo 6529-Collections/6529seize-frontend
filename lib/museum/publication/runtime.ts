@@ -1,6 +1,6 @@
 import {
   getMuseumPublicationEnvironment,
-  isMuseumProductionBuildPhase,
+  isMuseumLocalFixtureEnvironment,
   type MuseumPublicationEnvironment,
 } from "@/config/museumPublicationEnv.server";
 import { getNodeEnv } from "@/config/env";
@@ -24,22 +24,6 @@ const FAILURE_MAX_TTL_MS = 10 * 60 * 1000;
 const STALE_TTL_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_PUBLICATION_REF = "main";
 const PLAYWRIGHT_READONLY_VALUE = "1";
-const UNCATALOGUED_TEST_MODE_VALUE = "1";
-
-export function isMuseumUncataloguedReadOnlyTestMode(
-  environment: MuseumPublicationEnvironment,
-  nodeEnvironment: string | undefined = getNodeEnv()
-): boolean {
-  const testCommit = environment.MUSEUM_PUBLICATION_TEST_COMMIT;
-  return (
-    nodeEnvironment !== "production" &&
-    environment.PLAYWRIGHT_READONLY === PLAYWRIGHT_READONLY_VALUE &&
-    environment.MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE ===
-      UNCATALOGUED_TEST_MODE_VALUE &&
-    testCommit !== undefined &&
-    isExactGitCommit(testCommit)
-  );
-}
 
 interface RuntimeCacheEntry {
   readonly loadedAt: number;
@@ -52,11 +36,15 @@ interface MuseumPublicationRuntime {
 }
 
 export function resolveMuseumPublicationRef(
-  environment: MuseumPublicationEnvironment = getMuseumPublicationEnvironment()
+  environment: MuseumPublicationEnvironment = getMuseumPublicationEnvironment(),
+  nodeEnvironment: string | undefined = getNodeEnv()
 ): string {
   const testCommit = environment["MUSEUM_PUBLICATION_TEST_COMMIT"];
   if (testCommit === undefined) {
     return DEFAULT_PUBLICATION_REF;
+  }
+  if (nodeEnvironment === "production") {
+    throw new Error("publication_test_commit_not_allowed_in_production");
   }
   if (environment["PLAYWRIGHT_READONLY"] !== PLAYWRIGHT_READONLY_VALUE) {
     throw new Error("publication_test_commit_requires_readonly");
@@ -79,7 +67,14 @@ export function createMuseumPublicationRuntime(
 
   const load = async (): Promise<MuseumPublicationLoadState> => {
     const currentTime = now();
-    if (cache !== undefined && currentTime - cache.loadedAt <= cache.ttlMs) {
+    const cachedStaleIsExpired =
+      cache?.state.status === "stale" &&
+      currentTime - Date.parse(cache.state.lastValidAcceptedAt) > STALE_TTL_MS;
+    if (
+      cache !== undefined &&
+      !cachedStaleIsExpired &&
+      currentTime - cache.loadedAt <= cache.ttlMs
+    ) {
       return cache.state;
     }
 
@@ -140,8 +135,7 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
     const localFixtureCommit =
       environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT;
     if (
-      (getNodeEnv() === "production" && !isMuseumProductionBuildPhase()) ||
-      environment.PLAYWRIGHT_READONLY !== PLAYWRIGHT_READONLY_VALUE ||
+      !isMuseumLocalFixtureEnvironment(environment, getNodeEnv()) ||
       localFixtureCommit === undefined ||
       !isExactGitCommit(localFixtureCommit)
     ) {
@@ -159,17 +153,10 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
         readMuseumLocalFixtureVisitorPaths(localFixtureRoot),
     });
   }
-  const allowUncataloguedTestFixture =
-    isMuseumUncataloguedReadOnlyTestMode(environment);
   return new GitHubMuseumPublicationSource({
     ref: resolveMuseumPublicationRef(),
     assembler: legacyCaseyPublicationAssembler,
-    ...(allowUncataloguedTestFixture
-      ? {}
-      : { catalogResolver: museumPublicationCatalogResolver }),
-    ...(allowUncataloguedTestFixture
-      ? { allowUncataloguedTestFixture: true }
-      : {}),
+    catalogResolver: museumPublicationCatalogResolver,
   });
 }
 

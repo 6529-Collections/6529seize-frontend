@@ -2,6 +2,7 @@ import type { Page, TestInfo } from "@playwright/test";
 
 import {
   expect,
+  expectAxeClean,
   expectNoHorizontalOverflow,
   test,
   waitForRouteReady,
@@ -104,13 +105,16 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(
       page.getByText("Seven works by Casey Reas", { exact: true })
     ).toBeVisible();
+    const acquisitionStories = page.getByLabel(
+      "Three ways a work enters the Museum's public record"
+    );
     for (const title of [
       "The System in Seven States",
       "Keys and Gates",
       "Conflict at Its Edges",
     ]) {
       await expect(
-        page.getByRole("link", { name: title, exact: true })
+        acquisitionStories.getByRole("link", { name: title, exact: true })
       ).toBeVisible();
     }
     await retainScreenshot(page, testInfo, "museum-network-home");
@@ -238,5 +242,41 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(page.locator("body")).not.toContainText(
       /\bchild\b|\bchildren\b/iu
     );
+  });
+
+  test("keeps representative Museum templates free of automated WCAG A and AA violations", async ({
+    page,
+  }) => {
+    for (const path of [
+      "/museum/network",
+      "/museum/network/acquisitions/keys-and-gates",
+      "/museum/network/works/6529NM-W-0008",
+    ]) {
+      await openRoute(page, path);
+      await expectAxeClean(page, { route: path });
+    }
+  });
+
+  test("keeps Museum section navigation keyboard-visible and touch-sized", async ({
+    page,
+  }) => {
+    await openRoute(page, "/museum/network");
+    const links = page.locator('nav[aria-label="Museum sections"] a');
+
+    await links.first().focus();
+    await page.keyboard.press("Tab");
+    await expect(links.nth(1)).toBeFocused();
+
+    const focusAndTarget = await links.nth(1).evaluate((link) => {
+      const style = getComputedStyle(link);
+      const bounds = link.getBoundingClientRect();
+      return {
+        hasVisibleFocus:
+          style.outlineStyle !== "none" || style.boxShadow !== "none",
+        height: bounds.height,
+      };
+    });
+    expect(focusAndTarget.hasVisibleFocus).toBe(true);
+    expect(focusAndTarget.height).toBeGreaterThanOrEqual(44);
   });
 });

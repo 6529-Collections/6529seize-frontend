@@ -9,6 +9,13 @@ export const ENTITY_PATH_PATTERN = /^records\/entities\/([^/]+)\.json$/u;
 export const RELATION_PATH_PATTERN = /^records\/relations\/([^/]+)\.json$/u;
 export const MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH =
   "schemas/public-entity-identity-inventory.json" as const;
+export const MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH =
+  "schemas/public-relation-identity-inventory.json" as const;
+export const MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH =
+  "schemas/public-relation-identity-inventory.schema.json" as const;
+export const PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA =
+  "https://6529networkmuseum.org/schemas/public-relation-identity-inventory-v1.json" as const;
+export const PUBLIC_RELATION_IDENTITY_INVENTORY_VERSION = "1.3.0" as const;
 
 export const ENTITY_ID_PATTERNS: Readonly<
   Record<MuseumPublicEntityType, RegExp | null>

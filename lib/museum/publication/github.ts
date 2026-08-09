@@ -24,12 +24,15 @@ import type {
 import {
   applyMuseumPublicEntityGraph,
   MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH,
   parseMuseumPublicEntityGraph,
 } from "./publicEntityGraph";
 import {
   assertMuseumCatalogDocumentBytes,
   assertMuseumPublicationCatalogAssemblyBundle,
   assertMuseumPublicationInventoryManifestBinding,
+  assertMuseumPublicationInventoryDocument,
   MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
   resolveMuseumPublicationCatalog,
   type MuseumPublicationCatalog,
@@ -39,7 +42,7 @@ import {
 import { getNodeEnv } from "../../../config/env";
 import {
   getMuseumPublicationEnvironment,
-  isMuseumProductionBuildPhase,
+  isMuseumLocalFixtureEnvironment,
 } from "../../../config/museumPublicationEnv.server";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
@@ -79,6 +82,54 @@ function mediaTypeForPath(path: string): MuseumSourceDocument["mediaType"] {
   return path.endsWith(".txt") ? "text/plain" : "text/markdown";
 }
 
+async function readBoundedResponseBytes(
+  response: Response,
+  maxBytes: number
+): Promise<Uint8Array> {
+  const body = (response as Partial<Response>).body;
+  if (body === null || body === undefined) {
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength > maxBytes) {
+      throw new Error("publication_response_too_large");
+    }
+    return bytes;
+  }
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  try {
+    let result = await reader.read();
+    while (!result.done) {
+      const chunk = result.value;
+      totalBytes += chunk.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel("publication_response_too_large");
+        throw new Error("publication_response_too_large");
+      }
+      chunks.push(chunk);
+      result = await reader.read();
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
+function isMuseumOntologyPath(path: string): boolean {
+  return (
+    /^records\/(?:entities|relations)\/[^/]+\.json$/u.test(path) ||
+    path === MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH ||
+    path === MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH ||
+    path === MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH
+  );
+}
+
 export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
   private readonly ref: string;
   private readonly assembler: MuseumPublicationAssembler;
@@ -110,18 +161,9 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
         : new Set(options.localFixtureAcceptedPaths);
     const isTestEnvironment = getNodeEnv() === "test";
     const environment = getMuseumPublicationEnvironment();
-    const uncataloguedReadOnlyTestMode =
-      environment.MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE === "1" &&
-      environment.PLAYWRIGHT_READONLY === "1" &&
-      environment.MUSEUM_PUBLICATION_TEST_COMMIT === this.ref &&
-      isExactGitCommit(this.ref) &&
-      getNodeEnv() !== "production";
     const localFixtureEnvironment =
       isTestEnvironment ||
-      uncataloguedReadOnlyTestMode ||
-      (environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT !== undefined &&
-        environment.PLAYWRIGHT_READONLY === "1" &&
-        (getNodeEnv() !== "production" || isMuseumProductionBuildPhase()));
+      isMuseumLocalFixtureEnvironment(environment, getNodeEnv());
     this.allowUncataloguedTestFixture =
       options.allowUncataloguedTestFixture ?? isTestEnvironment;
 
@@ -205,8 +247,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     const ontologyEntries = manifest.entries.filter(
       (entry) =>
         isAcceptedLocalFixturePath(entry.path) &&
-        (/^records\/(?:entities|relations)\/[^/]+\.json$/u.test(entry.path) ||
-          entry.path === MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH)
+        isMuseumOntologyPath(entry.path)
     );
     const typedGraphDeclared = ontologyEntries.length > 0;
     if (catalog !== null) {
@@ -215,11 +256,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       );
       const catalogOntologyPaths = catalog.assemblyDocuments
         .map((entry) => entry.path)
-        .filter(
-          (path) =>
-            /^records\/(?:entities|relations)\/[^/]+\.json$/u.test(path) ||
-            path === MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH
-        );
+        .filter((path) => isMuseumOntologyPath(path));
       if (
         ontologyEntries.some(
           (entry) => !catalogAssemblyPaths.has(entry.path)
@@ -368,10 +405,24 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       if (this.catalogResolver === undefined) {
         throw new Error("publication_catalog_decoder_missing");
       }
-      const bundleBytes = await this.fetchBytes(
-        catalog.assemblyBundle.descriptor.rawUrl,
-        MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
-        "application/octet-stream, application/json"
+      const [inventoryBytes, bundleBytes] = await Promise.all([
+        this.fetchBytes(
+          catalog.publicationInventory.rawUrl,
+          catalog.publicationInventory.fileSize,
+          "application/json"
+        ),
+        this.fetchBytes(
+          catalog.assemblyBundle.descriptor.rawUrl,
+          MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
+          "application/octet-stream, application/json"
+        ),
+      ]);
+      assertMuseumPublicationInventoryDocument(
+        {
+          path: catalog.publicationInventory.path,
+          bytes: inventoryBytes,
+        },
+        catalog
       );
       const normalizedBundleBytes = assertMuseumCatalogDocumentBytes(
         catalog.assemblyBundle.descriptor,
@@ -679,11 +730,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
         throw new Error("publication_response_too_large");
       }
 
-      const bytes = new Uint8Array(await response.arrayBuffer());
-      if (bytes.byteLength > maxBytes) {
-        throw new Error("publication_response_too_large");
-      }
-      return bytes;
+      return readBoundedResponseBytes(response, maxBytes);
     } finally {
       clearTimeout(timeout);
     }

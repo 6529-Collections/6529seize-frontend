@@ -5,19 +5,43 @@ import type {
   MuseumPublicIdentityInventory,
   MuseumPublicProgramAlias,
   MuseumPublicRouteAlias,
+  MuseumPublicTypedReferenceRegistryEntry,
   MuseumSourceDocument,
   MuseumWorkAlias,
 } from "./types";
+import { parseMuseumPublicationJson } from "./catalog-json";
 import {
   ENTITY_ID_PATTERNS,
   INVENTORY_ONLY_ENTITY_ID_PATTERNS,
   MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
 } from "./publicEntityGraphSchema";
 import {
+  assertDateTime,
   requiredRecord,
   requiredString,
   stringArray,
 } from "./publicEntityGraphPrimitives";
+
+const PUBLIC_ENTITY_IDENTITY_INVENTORY_SCHEMA =
+  "https://6529networkmuseum.org/schemas/public-entity-identity-inventory-v1.json";
+const PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSION = "1.4.0" as const;
+const PUBLIC_TYPED_REFERENCE_REGISTRY_ID =
+  "PUBLIC_TYPED_REFERENCE_REGISTRY_V1" as const;
+const INVENTORY_KEYS = [
+  "$schema",
+  "inventory_version",
+  "identity_policy",
+  "entity_id_patterns",
+  "retired_identity_ids",
+  "required_bootstrap_curated_acquisitions",
+  "acquisition_aliases",
+  "source_aliases",
+  "work_aliases",
+  "typed_reference_registry",
+  "identity_bindings",
+  "route_aliases",
+  "public_slug_inventory",
+] as const;
 
 const PROGRAM_ALIAS_KINDS = new Set(["program_route_key", "source_program"]);
 const ACQUISITION_ALIAS_KINDS = new Set([
@@ -32,19 +56,23 @@ export function parseMuseumIdentityInventory(
 ): MuseumPublicIdentityInventory {
   assertInventoryDocument(document);
   const inventory = parseInventoryJson(document);
-  const inventoryVersion = assertInventoryVersion(inventory);
+  assertInventoryVersion(inventory);
+  assertRetiredIdentities(inventory, entities);
   const byId = new Map(entities.map((entity) => [entity.id, entity] as const));
   assertEntityPatterns(inventory, entities);
-  assertCompleteIdentityBindings(inventory, entities, inventoryVersion);
+  assertCompleteIdentityBindings(inventory, entities);
   assertInventoryEntityCoverage(inventory, entities);
+  assertSourceAliases(inventory, byId);
   const acquisitionAliases = readAcquisitionAliases(inventory, byId);
   const curatedAcquisitionIds = readCuratedAcquisitionIds(inventory, byId);
   const workAliases = readWorkAliases(inventory, byId);
   const routeAliases = readRouteAliases(inventory, byId);
+  const typedReferenceRegistry = readTypedReferenceRegistry(inventory);
   validateSlugInventory(inventory, byId);
   validateCanonicalRouteCoverage(entities);
   return {
     sourcePath: MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+    inventoryVersion: PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSION,
     curatedAcquisitionIds,
     workAliases: [...workAliases.values()].sort((left, right) =>
       left.sourceObjectId.localeCompare(right.sourceObjectId)
@@ -56,6 +84,7 @@ export function parseMuseumIdentityInventory(
     routeAliases: [...routeAliases.values()].sort((left, right) =>
       left.legacyRoute.localeCompare(right.legacyRoute)
     ),
+    typedReferenceRegistry,
   };
 }
 
@@ -78,25 +107,26 @@ function parseInventoryJson(
 ): Record<string, unknown> {
   let root: unknown;
   try {
-    root = JSON.parse(document.text) as unknown;
+    root = parseMuseumPublicationJson(document.text);
   } catch {
     throw new Error("public_entity_graph_inventory_json_invalid");
   }
   return requiredRecord(root, "public_entity_graph_inventory_shape");
 }
 
-function assertInventoryVersion(inventory: Record<string, unknown>): string {
+function assertInventoryVersion(inventory: Record<string, unknown>): void {
+  if (
+    inventory["$schema"] !== PUBLIC_ENTITY_IDENTITY_INVENTORY_SCHEMA ||
+    !sameIdSet(Object.keys(inventory).sort(), [...INVENTORY_KEYS].sort())
+  ) {
+    throw new Error("public_entity_graph_inventory_shape");
+  }
   const version = requiredString(
     inventory,
     "inventory_version",
     "public_entity_graph_inventory_version"
   );
-  if (
-    version !== "1.1.0" &&
-    version !== "1.2.0" &&
-    version !== "1.3.2" &&
-    version !== "1.4.0"
-  ) {
+  if (version !== PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSION) {
     throw new Error("public_entity_graph_inventory_version");
   }
   requiredString(
@@ -104,7 +134,222 @@ function assertInventoryVersion(inventory: Record<string, unknown>): string {
     "identity_policy",
     "public_entity_graph_inventory_policy"
   );
-  return version;
+}
+
+function assertRetiredIdentities(
+  inventory: Record<string, unknown>,
+  entities: readonly MuseumPublicEntityRecord[]
+): void {
+  const raw = inventory["retired_identity_ids"];
+  if (!Array.isArray(raw)) {
+    throw new Error("public_entity_graph_inventory_retired_identities");
+  }
+  const activeById = new Map(entities.map((entity) => [entity.id, entity]));
+  const retiredIds = new Set<string>();
+  for (const value of raw) {
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_retired_identities"
+    );
+    if (
+      !sameIdSet(Object.keys(entry).sort(), [
+        "entity_id",
+        "entity_type",
+        "reason",
+        "retired_at",
+        "superseded_by",
+      ])
+    ) {
+      throw new Error("public_entity_graph_inventory_retired_identities");
+    }
+    const id = requiredString(
+      entry,
+      "entity_id",
+      "public_entity_graph_inventory_retired_identities"
+    );
+    const entityType = requiredString(
+      entry,
+      "entity_type",
+      "public_entity_graph_inventory_retired_identities"
+    ) as (typeof INVENTORY_BINDING_CATEGORIES)[number];
+    const pattern =
+      entityType === "WORK_LIFECYCLE_OBSERVATION"
+        ? INVENTORY_ONLY_ENTITY_ID_PATTERNS[entityType]
+        : ENTITY_ID_PATTERNS[entityType];
+    if (
+      pattern?.test(id) !== true ||
+      activeById.has(id) ||
+      retiredIds.has(id)
+    ) {
+      throw new Error("public_entity_graph_inventory_retired_identities");
+    }
+    retiredIds.add(id);
+    assertDateTime(
+      entry,
+      "retired_at",
+      "public_entity_graph_inventory_retired_identities"
+    );
+    requiredString(
+      entry,
+      "reason",
+      "public_entity_graph_inventory_retired_identities"
+    );
+    const supersededBy = entry["superseded_by"];
+    if (
+      supersededBy !== null &&
+      (typeof supersededBy !== "string" ||
+        supersededBy.trim().length === 0 ||
+        (entityType !== "WORK_LIFECYCLE_OBSERVATION" &&
+          activeById.get(supersededBy)?.entityType !== entityType))
+    ) {
+      throw new Error("public_entity_graph_inventory_retired_identities");
+    }
+  }
+}
+
+function assertSourceAliases(
+  inventory: Record<string, unknown>,
+  byId: ReadonlyMap<string, MuseumPublicEntityRecord>
+): void {
+  const raw = inventory["source_aliases"];
+  if (!Array.isArray(raw) || raw.length === 0) {
+    throw new Error("public_entity_graph_inventory_source_aliases");
+  }
+  const seen = new Set<string>();
+  const supportedKinds = new Set([
+    ...PROGRAM_ALIAS_KINDS,
+    ...ACQUISITION_ALIAS_KINDS,
+    "source_acquisition_context",
+  ]);
+  for (const value of raw) {
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_source_aliases"
+    );
+    if (
+      !sameIdSet(Object.keys(entry).sort(), [
+        "alias",
+        "alias_type",
+        "canonical_entity_id",
+        "route_target",
+      ])
+    ) {
+      throw new Error("public_entity_graph_inventory_source_aliases");
+    }
+    const alias = requiredString(
+      entry,
+      "alias",
+      "public_entity_graph_inventory_source_aliases"
+    );
+    const aliasType = requiredString(
+      entry,
+      "alias_type",
+      "public_entity_graph_inventory_source_aliases"
+    );
+    const canonicalEntityId = requiredString(
+      entry,
+      "canonical_entity_id",
+      "public_entity_graph_inventory_source_aliases"
+    );
+    const entity = byId.get(canonicalEntityId);
+    const expectsProgram = PROGRAM_ALIAS_KINDS.has(aliasType);
+    if (
+      !supportedKinds.has(aliasType) ||
+      typeof entry["route_target"] !== "boolean" ||
+      entity === undefined ||
+      (expectsProgram && entity.entityType !== "ACQUISITION_PROGRAM") ||
+      (!expectsProgram && entity.entityType !== "CURATED_ACQUISITION") ||
+      seen.has(`${aliasType}:${alias}`)
+    ) {
+      throw new Error("public_entity_graph_inventory_source_aliases");
+    }
+    seen.add(`${aliasType}:${alias}`);
+  }
+}
+
+function readTypedReferenceRegistry(
+  inventory: Record<string, unknown>
+): readonly MuseumPublicTypedReferenceRegistryEntry[] {
+  const raw = inventory["typed_reference_registry"];
+  if (!Array.isArray(raw) || raw.length === 0) {
+    throw new Error("public_entity_graph_inventory_typed_references");
+  }
+  const entries: MuseumPublicTypedReferenceRegistryEntry[] = [];
+  const keys = new Set<string>();
+  for (const value of raw) {
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_typed_references"
+    );
+    if (
+      !sameIdSet(Object.keys(entry).sort(), [
+        "authoritative_record_id",
+        "authoritative_record_type",
+        "caip19",
+        "reference_type",
+        "registry_id",
+        "target_id",
+        "target_type",
+      ]) ||
+      entry["registry_id"] !== PUBLIC_TYPED_REFERENCE_REGISTRY_ID
+    ) {
+      throw new Error("public_entity_graph_inventory_typed_references");
+    }
+    const targetId = requiredString(
+      entry,
+      "target_id",
+      "public_entity_graph_inventory_typed_references"
+    );
+    const referenceType = requiredString(
+      entry,
+      "reference_type",
+      "public_entity_graph_inventory_typed_references"
+    );
+    const targetType = requiredString(
+      entry,
+      "target_type",
+      "public_entity_graph_inventory_typed_references"
+    );
+    const authoritativeRecordId = requiredString(
+      entry,
+      "authoritative_record_id",
+      "public_entity_graph_inventory_typed_references"
+    );
+    const authoritativeRecordType = requiredString(
+      entry,
+      "authoritative_record_type",
+      "public_entity_graph_inventory_typed_references"
+    );
+    const caip19 = entry["caip19"];
+    const key = `${referenceType}:${targetId}`;
+    if (
+      referenceType !== "manifestation" ||
+      targetType !== "ERC721_TOKEN_MANIFESTATION" ||
+      authoritativeRecordType !== "PROPOSED_GIFT" ||
+      typeof caip19 !== "string" ||
+      !/^eip155:[0-9]+\/erc721:0x[0-9a-fA-F]{40}\/[0-9]+$/u.test(
+        caip19
+      ) ||
+      keys.has(key)
+    ) {
+      throw new Error("public_entity_graph_inventory_typed_references");
+    }
+    keys.add(key);
+    entries.push({
+      registryId: PUBLIC_TYPED_REFERENCE_REGISTRY_ID,
+      targetId,
+      referenceType,
+      targetType,
+      authoritativeRecordId,
+      authoritativeRecordType,
+      caip19,
+    });
+  }
+  return entries.sort((left, right) =>
+    `${left.referenceType}:${left.targetId}`.localeCompare(
+      `${right.referenceType}:${right.targetId}`
+    )
+  );
 }
 
 const INVENTORY_BINDING_CATEGORIES = [
@@ -118,10 +363,8 @@ const INVENTORY_BINDING_CATEGORIES = [
 
 function assertCompleteIdentityBindings(
   inventory: Record<string, unknown>,
-  entities: readonly MuseumPublicEntityRecord[],
-  inventoryVersion: string
+  entities: readonly MuseumPublicEntityRecord[]
 ): void {
-  if (inventoryVersion !== "1.4.0") return;
   const bindings = requiredRecord(
     inventory["identity_bindings"],
     "public_entity_graph_inventory_bindings"

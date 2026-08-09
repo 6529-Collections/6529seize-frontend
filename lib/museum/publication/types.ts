@@ -557,6 +557,15 @@ export interface MuseumPublicEntityGraph {
   readonly entities: readonly MuseumPublicEntityRecord[];
   readonly relations: readonly MuseumPublicRelationRecord[];
   readonly identityInventory: MuseumPublicIdentityInventory;
+  readonly relationIdentityInventory: MuseumPublicRelationIdentityInventory;
+}
+
+export interface MuseumPublicRelationIdentityInventory {
+  readonly sourcePath: string;
+  readonly schemaPath: string;
+  readonly inventoryVersion: string;
+  readonly activeRelationIds: readonly string[];
+  readonly retiredRelationIds: readonly string[];
 }
 
 export interface MuseumResearchPublication {
@@ -592,14 +601,26 @@ export interface MuseumPublicRouteAlias {
   readonly sourcePath: string;
 }
 
+export interface MuseumPublicTypedReferenceRegistryEntry {
+  readonly registryId: "PUBLIC_TYPED_REFERENCE_REGISTRY_V1";
+  readonly targetId: string;
+  readonly referenceType: "component" | "manifestation";
+  readonly targetType: string;
+  readonly authoritativeRecordId: string;
+  readonly authoritativeRecordType: string;
+  readonly caip19: string | null;
+}
+
 export interface MuseumPublicIdentityInventory {
   readonly sourcePath: string;
+  readonly inventoryVersion: "1.4.0";
   /** Canonical curated acquisitions explicitly declared by the identity inventory. */
   readonly curatedAcquisitionIds: readonly string[];
   readonly workAliases: readonly MuseumWorkAlias[];
   readonly acquisitionAliases: readonly MuseumAcquisitionAlias[];
   readonly programAliases: readonly MuseumPublicProgramAlias[];
   readonly routeAliases: readonly MuseumPublicRouteAlias[];
+  readonly typedReferenceRegistry: readonly MuseumPublicTypedReferenceRegistryEntry[];
 }
 
 export interface MuseumPublication {

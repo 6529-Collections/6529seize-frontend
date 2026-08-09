@@ -102,10 +102,16 @@ function decodeCatalogRoot(value: unknown): DecodedCatalogRoot {
     "publication_catalog_payload"
   );
   if (
+    requiredString(
+      payload,
+      "catalog_version",
+      "publication_catalog_version"
+    ) !== "1.0.0"
+  ) {
+    throw new Error("publication_catalog_version");
+  }
+  if (
     catalogId !== `6529NM-PUBCAT-${sourceCommit}` ||
-    !/^\d+\.\d+\.\d+$/u.test(
-      requiredString(payload, "catalog_version", "publication_catalog_payload")
-    ) ||
     payload.state !== "immutable_binding" ||
     !Number.isFinite(
       Date.parse(
@@ -227,12 +233,12 @@ function decodeCatalogBindings(
         "file_sha256",
         "publication_catalog_inventory_binding"
       ),
-      bodySha256: requiredSha(
+      completeInventorySha256: requiredSha(
         inventory,
         "body_sha256",
         "publication_catalog_inventory_binding"
       ),
-      jcsKeccak: requiredKeccak(
+      completeInventoryJcsKeccak: requiredKeccak(
         inventory,
         "body_keccak256",
         "publication_catalog_inventory_binding"
@@ -357,12 +363,12 @@ function decodeCatalogBundleBinding(
       rawUrl,
     },
     embeddedDocuments: [],
-    inventorySha256: requiredSha(
+    completeInventorySha256: requiredSha(
       bundleRecord,
       "source_inventory_body_sha256",
       "publication_catalog_assembly_bundle"
     ),
-    inventoryKeccak: requiredKeccak(
+    completeInventoryJcsKeccak: requiredKeccak(
       bundleRecord,
       "source_inventory_body_keccak256",
       "publication_catalog_assembly_bundle"

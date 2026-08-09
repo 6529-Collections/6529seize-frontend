@@ -3,6 +3,7 @@ import MuseumObjectLegacyRoute from "@/app/museum/network/objects/[objectId]/pag
 import MuseumCollectionObjectRoute from "@/app/museum/network/collection/[objectId]/page";
 import MuseumGiftRoute from "@/app/museum/network/gifts/[accessionId]/page";
 import MuseumAccessionLegacyRoute from "@/app/museum/network/accessions/[accessionId]/page";
+import MuseumAccessionsPage from "@/app/museum/network/accessions/page";
 import MuseumProgramDetailPage from "@/app/museum/network/programs/[programId]/page";
 import MuseumRightsLegacyPage from "@/app/museum/network/rights/page";
 import MuseumRightsForArtistsLegacyPage from "@/app/museum/network/rights/artists/page";
@@ -148,6 +149,13 @@ describe("Museum legacy route contract", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     installBundle();
+  });
+
+  it("redirects the legacy accessions index to Collection accession records", async () => {
+    await expectRedirect(
+      () => MuseumAccessionsPage(),
+      "/museum/network/collection#accessions"
+    );
   });
 
   describe("Work aliases", () => {

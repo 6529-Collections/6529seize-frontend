@@ -427,11 +427,20 @@ describe("Wave publication receipt joins", () => {
       relations,
       identityInventory: {
         sourcePath: "schemas/public-entity-identity-inventory.json",
+        inventoryVersion: "1.4.0",
         curatedAcquisitionIds: ["6529NM-CA-2026-003"],
         workAliases: [],
         acquisitionAliases: [],
         programAliases: [],
         routeAliases: [],
+        typedReferenceRegistry: [],
+      },
+      relationIdentityInventory: {
+        sourcePath: "schemas/public-relation-identity-inventory.json",
+        schemaPath: "schemas/public-relation-identity-inventory.schema.json",
+        inventoryVersion: "1.3.0",
+        activeRelationIds: relations.map((relation) => relation.id),
+        retiredRelationIds: [],
       },
     } satisfies MuseumPublicEntityGraph;
 

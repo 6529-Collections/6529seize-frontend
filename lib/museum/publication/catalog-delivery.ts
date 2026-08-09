@@ -19,11 +19,16 @@ import {
   isPlainRecord,
   sha256Text,
 } from "./catalog-contract";
-import { parseMuseumPublicationJson } from "./catalog-json";
+import {
+  parseMuseumPublicationJson,
+  requiredKeccak,
+  requiredSha,
+} from "./catalog-json";
 import type {
   MuseumPublicationCatalogAssemblyBundleResult,
   MuseumPublicationCatalogDocument,
   MuseumPublicationCatalog,
+  MuseumPublicationInventorySelfIntegrity,
   MuseumSourceBundleDocument,
 } from "./catalog-contract";
 
@@ -95,8 +100,10 @@ export function assertMuseumPublicationCatalogAssemblyBundle(
   ) => void
 ): ReadonlyMap<string, Uint8Array> {
   if (
-    bundle.inventorySha256 !== catalog.assemblyBundle.inventorySha256 ||
-    bundle.inventoryKeccak !== catalog.assemblyBundle.inventoryKeccak
+    bundle.completeInventorySha256 !==
+      catalog.assemblyBundle.completeInventorySha256 ||
+    bundle.completeInventoryJcsKeccak !==
+      catalog.assemblyBundle.completeInventoryJcsKeccak
   ) {
     throw new Error("publication_catalog_bundle_inventory_mismatch");
   }
@@ -141,6 +148,7 @@ type MuseumPublicationInventoryEntry = {
 
 type MuseumPublicationInventoryContext = {
   inventory: Record<string, unknown>;
+  selfIntegrity: MuseumPublicationInventorySelfIntegrity;
   entries: readonly unknown[];
   counts: Record<string, unknown>;
   inventoryVersion: string;
@@ -241,14 +249,25 @@ function decodeInventoryContext(
     "publication_catalog_inventory_integrity"
   );
   if (
-    integrity.canonicalization_id !==
-      catalog.publicationInventory.canonicalizationId ||
     integrity.canonicalization_id !== MUSEUM_PUBLICATION_CANONICALIZATION_ID ||
-    integrity.body_sha256 !== catalog.publicationInventory.bodySha256 ||
-    integrity.body_keccak256 !== catalog.publicationInventory.jcsKeccak
+    typeof integrity.body_sha256 !== "string" ||
+    typeof integrity.body_keccak256 !== "string"
   ) {
     throw new Error("publication_catalog_inventory_integrity");
   }
+  const selfIntegrity: MuseumPublicationInventorySelfIntegrity = {
+    canonicalizationId: integrity.canonicalization_id,
+    bodyExcludingIntegritySha256: requiredSha(
+      integrity,
+      "body_sha256",
+      "publication_catalog_inventory_integrity"
+    ),
+    bodyExcludingIntegrityJcsKeccak: requiredKeccak(
+      integrity,
+      "body_keccak256",
+      "publication_catalog_inventory_integrity"
+    ),
+  };
   const assembler = asRecord(
     inventory.assembler,
     "publication_catalog_inventory_assembler"
@@ -298,6 +317,7 @@ function decodeInventoryContext(
   );
   return {
     inventory,
+    selfIntegrity,
     entries: inventory.entries,
     counts: inventory.counts,
     inventoryVersion: inventory.inventory_version,
@@ -429,22 +449,28 @@ function assertInventoryCounts(
         )
       )
     );
-  if (sortCounts(actualCounts) !== sortCounts(declaredCounts)) {
+  if (
+    sortCounts(actualCounts) !== sortCounts(declaredCounts) ||
+    sortCounts(declaredCounts) !==
+      sortCounts({ ...catalog.publicationInventory.counts })
+  ) {
     throw new Error("publication_catalog_inventory_counts_mismatch");
   }
+  const bodyExcludingIntegrity = { ...context.inventory };
+  delete bodyExcludingIntegrity["integrity"];
+  const selfIntegrityBody = canonicalMuseumJson(bodyExcludingIntegrity);
+  const completeInventoryBody = canonicalMuseumJson(context.inventory);
   if (
     context.inventoryVersion !==
       catalog.publicationInventory.inventoryVersion ||
-    (() => {
-      const body = { ...context.inventory };
-      delete body["integrity"];
-      return sha256Text(canonicalMuseumJson(body));
-    })() !== catalog.publicationInventory.bodySha256 ||
-    (() => {
-      const body = { ...context.inventory };
-      delete body["integrity"];
-      return keccak256(toBytes(canonicalMuseumJson(body)));
-    })() !== catalog.publicationInventory.jcsKeccak
+    sha256Text(selfIntegrityBody) !==
+      context.selfIntegrity.bodyExcludingIntegritySha256 ||
+    keccak256(toBytes(selfIntegrityBody)) !==
+      context.selfIntegrity.bodyExcludingIntegrityJcsKeccak ||
+    sha256Text(completeInventoryBody) !==
+      catalog.publicationInventory.completeInventorySha256 ||
+    keccak256(toBytes(completeInventoryBody)) !==
+      catalog.publicationInventory.completeInventoryJcsKeccak
   ) {
     throw new Error("publication_catalog_inventory_commitment_mismatch");
   }

@@ -24,6 +24,8 @@ export const MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES = 8_000_000 as const;
 export const MUSEUM_PUBLICATION_CANONICALIZATION_ID =
   "0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044" as const;
 const MUSEUM_CATALOG_RAW_BYTE_MODE = "raw" as const;
+const MUSEUM_CATALOG_MEDIA_PATH_PATTERN =
+  /\.(?:avif|gif|jpe?g|pdf|png|webp)$/u;
 export const PUBLICATION_CATALOG_SCHEMA =
   "https://6529networkmuseum.org/schemas/publication-catalog-v1.json" as const;
 export const PUBLICATION_CATALOG_POINTER_SCHEMA =
@@ -71,8 +73,10 @@ export interface MuseumPublicationCatalogInventoryBinding {
   readonly path: string;
   readonly fileSize: number;
   readonly fileSha256: MuseumSha256;
-  readonly bodySha256: MuseumSha256;
-  readonly jcsKeccak: `0x${string}`;
+  /** JCS commitment to the complete inventory, including `integrity`. */
+  readonly completeInventorySha256: MuseumSha256;
+  /** JCS/Keccak commitment to the complete inventory, including `integrity`. */
+  readonly completeInventoryJcsKeccak: `0x${string}`;
   readonly canonicalizationId: string;
   readonly inventoryVersion: string;
   readonly counts: Readonly<Record<string, number>>;
@@ -104,8 +108,9 @@ export interface MuseumPublicationCatalogAssemblyBundle {
   /** Internal view synthesized from the exact source `bundle_binding`. */
   readonly descriptor: MuseumPublicationCatalogDocument;
   readonly embeddedDocuments: readonly MuseumPublicationCatalogDocument[];
-  readonly inventorySha256: MuseumSha256;
-  readonly inventoryKeccak: `0x${string}`;
+  /** Complete-inventory commitment copied from the source inventory binding. */
+  readonly completeInventorySha256: MuseumSha256;
+  readonly completeInventoryJcsKeccak: `0x${string}`;
   readonly fileSize: number;
   readonly fileSha256: MuseumSha256;
   readonly rawFileSize: number;
@@ -133,8 +138,20 @@ export interface MuseumPublicationCatalog {
 
 export interface MuseumPublicationCatalogAssemblyBundleResult {
   readonly documents: readonly MuseumSourceBundleDocument[];
-  readonly inventorySha256: MuseumSha256;
-  readonly inventoryKeccak: `0x${string}`;
+  /** Complete-inventory commitment carried by the bundle envelope. */
+  readonly completeInventorySha256: MuseumSha256;
+  readonly completeInventoryJcsKeccak: `0x${string}`;
+}
+
+/**
+ * The inventory's self-integrity scope excludes the entire `integrity`
+ * member. It is intentionally different from the catalog/bundle commitment
+ * to the complete inventory object.
+ */
+export interface MuseumPublicationInventorySelfIntegrity {
+  readonly canonicalizationId: `0x${string}`;
+  readonly bodyExcludingIntegritySha256: MuseumSha256;
+  readonly bodyExcludingIntegrityJcsKeccak: `0x${string}`;
 }
 
 export interface MuseumSourceBundleDocument {
@@ -364,6 +381,16 @@ function assertCatalogDocument(
   ) {
     throw new Error("publication_catalog_document_invalid");
   }
+  if (
+    role === "media" &&
+    (document.byteMode !== MUSEUM_CATALOG_RAW_BYTE_MODE ||
+      document.size === 0 ||
+      !MUSEUM_CATALOG_MEDIA_PATH_PATTERN.test(document.path) ||
+      document.jcsKeccak !== undefined ||
+      document.canonicalizationId !== undefined)
+  ) {
+    throw new Error("publication_catalog_media_asset_invalid");
+  }
   assertSha256(document.sha256, "publication_catalog_document_hash");
   if (document.jcsKeccak !== undefined) {
     assertKeccak(document.jcsKeccak, "publication_catalog_document_keccak");
@@ -497,11 +524,11 @@ function assertCatalogInventory(catalog: MuseumPublicationCatalog): void {
     throw new Error("publication_catalog_inventory_file_size");
   }
   assertSha256(
-    catalog.publicationInventory.bodySha256,
+    catalog.publicationInventory.completeInventorySha256,
     "publication_catalog_inventory_body_hash"
   );
   assertKeccak(
-    catalog.publicationInventory.jcsKeccak,
+    catalog.publicationInventory.completeInventoryJcsKeccak,
     "publication_catalog_inventory_keccak"
   );
   assertKeccak(
@@ -613,10 +640,10 @@ function assertCatalogBundle(
     throw new Error("publication_catalog_bundle_too_large");
   }
   if (
-    catalog.assemblyBundle.inventorySha256 !==
-      catalog.publicationInventory.bodySha256 ||
-    catalog.assemblyBundle.inventoryKeccak !==
-      catalog.publicationInventory.jcsKeccak
+    catalog.assemblyBundle.completeInventorySha256 !==
+      catalog.publicationInventory.completeInventorySha256 ||
+    catalog.assemblyBundle.completeInventoryJcsKeccak !==
+      catalog.publicationInventory.completeInventoryJcsKeccak
   ) {
     throw new Error("publication_catalog_bundle_inventory_mismatch");
   }

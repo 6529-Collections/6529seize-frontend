@@ -5,6 +5,7 @@ import {
   assertSafeMuseumRepositoryPath,
   buildImmutableMuseumBlobUrl,
   buildImmutableMuseumCommitUrl,
+  buildImmutableMuseumEditUrl,
   buildImmutableMuseumRawUrl,
   buildMuseumMainBlobUrl,
   buildMuseumMainEditUrl,
@@ -60,6 +61,18 @@ describe("Museum publication security boundary", () => {
     );
   });
 
+  it.each([
+    "records/.git/config.json",
+    "records/object.json?raw=1",
+    "records/object.json#fragment",
+    "records/object name.json",
+    " records/object.json",
+  ])("rejects the catalog-schema-unsafe path %s", (path) => {
+    expect(() => assertSafeMuseumRepositoryPath(path)).toThrow(
+      "publication_unsafe_path"
+    );
+  });
+
   it("builds raw URLs from an exact commit only", () => {
     expect(
       buildImmutableMuseumRawUrl(EXACT_COMMIT, "records/accessions/object.json")
@@ -94,6 +107,10 @@ describe("Museum publication security boundary", () => {
       `https://github.com/6529-Collections/6529networkmuseum/tree/${EXACT_COMMIT}`
     );
     expect(buildImmutableMuseumCommitUrl("main")).toBeNull();
+    expect(buildImmutableMuseumEditUrl(EXACT_COMMIT, "docs/open-museum.md")).toBe(
+      `https://github.com/6529-Collections/6529networkmuseum/edit/${EXACT_COMMIT}/docs/open-museum.md`
+    );
+    expect(buildImmutableMuseumEditUrl("main", "docs/open-museum.md")).toBeNull();
     expect(buildMuseumMainBlobUrl("CONTRIBUTING.md")).toBe(
       "https://github.com/6529-Collections/6529networkmuseum/blob/main/CONTRIBUTING.md"
     );

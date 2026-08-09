@@ -893,9 +893,10 @@ jobs:
         id: museum_publication
         if: matrix.lane == 'playwright-museum'
         env:
-          # Test-only reviewed-B qualification. Production and deployment
-          # lanes remain catalog-bound and never consume this commit pin.
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "bf517353ef861e91f5137908daca514b81578b4d"
+          # Exact canonical C4 qualification. The runtime resolves its pointer
+          # and catalog at C4, then assembles only the immutable B4 corpus.
+          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "a9a925861c654f71a85f0129ee5c0ba8ee71e9e4"
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "2733944555ae0f80242ec895558bdb7fba7115d3"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(
@@ -908,11 +909,15 @@ jobs:
           test -z "${extra:-}"
           test "$museum_ref" = "refs/heads/main"
           [[ "$museum_commit" =~ ^[a-f0-9]{40}$ ]]
-          test_commit="$MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT"
-          [[ "$test_commit" =~ ^[a-f0-9]{40}$ ]]
-          echo "commit=$test_commit" >> "$GITHUB_OUTPUT"
+          catalog_commit="$MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT"
+          source_commit="$MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT"
+          [[ "$catalog_commit" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
+          echo "catalog_commit=$catalog_commit" >> "$GITHUB_OUTPUT"
+          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
           echo "Museum moving source main: $museum_commit"
-          echo "Museum Playwright test fixture: $test_commit"
+          echo "Museum Playwright catalog fixture: $catalog_commit"
+          echo "Museum Playwright source fixture: $source_commit"
 
       - name: Select fail-closed Museum qualification packs
         id: museum-selection
@@ -920,7 +925,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE }}
-          SOURCE_COMMIT: ${{ steps.museum_publication.outputs.commit }}
+          SOURCE_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}
         run: |
           set -euo pipefail
           hold_state="unknown"
@@ -1058,16 +1063,15 @@ jobs:
           NEXT_DEV_DIST_DIR: ".next-playwright-museum"
           NODE_ENV: "development"
           PLAYWRIGHT_READONLY: "1"
-          MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE: "1"
-          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.commit }}
-          MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
+          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}
+          MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}
         run: |
           set -euo pipefail
           mapfile -t selected_packs < <(
             jq -r '.selected_packs[]' test-results/app-pr-ci/museum-release-selection.json
           )
           test "${#selected_packs[@]}" -gt 0
-          selected_specs=()
+          selected_specs=(tests/museum/network-ia-readonly.spec.ts)
           for selected_pack in "${selected_packs[@]}"; do
             case "$selected_pack" in
               test:e2e:museum-data-architecture) selected_specs+=(tests/museum/data-architecture-readonly.spec.ts) ;;

@@ -459,6 +459,7 @@ describe("testing strategy CI plan", () => {
     for (const museumBrowserSpec of [
       "tests/museum/data-architecture-readonly.spec.ts",
       "tests/museum/institutional-practice-readonly.spec.ts",
+      "tests/museum/network-ia-readonly.spec.ts",
       "tests/museum/about-readonly.spec.ts",
       "tests/museum/inside-system-readonly.spec.ts",
       "tests/museum/rights-readonly.spec.ts",
@@ -483,13 +484,21 @@ describe("testing strategy CI plan", () => {
       "Resolve exact Museum publication for Playwright"
     );
     expect(workflow).toContain(
-      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}"
     );
     expect(workflow).toContain(
-      "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+      "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
+    );
+    expect(workflow).toContain(
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "a9a925861c654f71a85f0129ee5c0ba8ee71e9e4"'
+    );
+    expect(workflow).toContain(
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "2733944555ae0f80242ec895558bdb7fba7115d3"'
     );
     expect(workflow).toContain('case "$selected_pack"');
-    expect(workflow).toContain("selected_specs=()");
+    expect(workflow).toContain(
+      "selected_specs=(tests/museum/network-ia-readonly.spec.ts)"
+    );
     expect(workflow).toContain('[ ! -f "$selected_spec" ]');
     expect(workflow).toContain("./bin/6529 exec playwright test");
     expect(workflow).not.toContain('./bin/6529 run "$selected_pack"');
@@ -565,6 +574,7 @@ describe("testing strategy CI plan", () => {
     expect(
       museumBrowserRun.match(/tests\/museum\/[a-z-]+\.spec\.ts/gu) ?? []
     ).toEqual([
+      "tests/museum/network-ia-readonly.spec.ts",
       "tests/museum/data-architecture-readonly.spec.ts",
       "tests/museum/institutional-practice-readonly.spec.ts",
       "tests/museum/about-readonly.spec.ts",

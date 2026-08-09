@@ -1,5 +1,7 @@
 import {
   MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH,
   parseMuseumPublicEntityGraph,
 } from "@/lib/museum/publication/publicEntityGraph";
 import { parseMuseumEntityRecord } from "@/lib/museum/publication/publicEntityGraphParsing";
@@ -23,6 +25,11 @@ const ENTITY_SCHEMA =
   "0xd8aef6592fe156c4c3c10e59de540f5cdf8b130eedca322e0e22b30764bee1a9";
 const RELATION_SCHEMA =
   "0xaa76f1b93e01ae7a1cff2717b0c814df772fd26d3997a47847a1887cba6756de";
+const GRAPH_CONTROL_PATHS = [
+  MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH,
+] as const;
 
 function documentFor(
   path: string,
@@ -311,7 +318,7 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     expect(() =>
       parseMuseumPublicEntityGraph(
         documents,
-        [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
+        [...GRAPH_CONTROL_PATHS, ...documents.keys()],
         SOURCE_COMMIT
       )
     ).toThrow("public_entity_graph_unknown_entity_type");
@@ -327,7 +334,7 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     expect(() =>
       parseMuseumPublicEntityGraph(
         documents,
-        [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
+        [...GRAPH_CONTROL_PATHS, ...documents.keys()],
         SOURCE_COMMIT
       )
     ).toThrow("public_entity_graph_unknown_relation_type");
@@ -456,7 +463,7 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     expect(() =>
       parseMuseumPublicEntityGraph(
         documents,
-        [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
+        [...GRAPH_CONTROL_PATHS, ...documents.keys()],
         SOURCE_COMMIT
       )
     ).toThrow("public_entity_graph_dangling_relation");
@@ -484,7 +491,7 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
           ],
         ]),
         [
-          MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+          ...GRAPH_CONTROL_PATHS,
           path,
           "records/relations/6529NM-REL-0001.json",
         ],

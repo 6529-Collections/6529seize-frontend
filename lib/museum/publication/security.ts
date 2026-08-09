@@ -43,6 +43,9 @@ export function assertSafeMuseumRepositoryPath(path: string): void {
     path.includes("\\") ||
     path.includes("%") ||
     path.includes(":") ||
+    path.includes("?") ||
+    path.includes("#") ||
+    /\s/u.test(path) ||
     /[\u0000-\u001f\u007f]/u.test(path)
   ) {
     throw new Error("publication_unsafe_path");
@@ -51,7 +54,11 @@ export function assertSafeMuseumRepositoryPath(path: string): void {
   const segments = path.split("/");
   if (
     segments.some(
-      (segment) => segment.length === 0 || segment === "." || segment === ".."
+      (segment) =>
+        segment.length === 0 ||
+        segment === "." ||
+        segment === ".." ||
+        segment === ".git"
     )
   ) {
     throw new Error("publication_unsafe_path");
@@ -173,6 +180,20 @@ export function buildMuseumMainBlobUrl(path: string, hash = ""): string | null {
 export function buildMuseumMainEditUrl(path: string): string | null {
   try {
     return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/edit/main/${encodeRepositoryPath(path)}`;
+  } catch {
+    return null;
+  }
+}
+
+export function buildImmutableMuseumEditUrl(
+  commit: string | null,
+  path: string
+): string | null {
+  if (!commit || !isExactGitCommit(commit)) {
+    return null;
+  }
+  try {
+    return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/edit/${commit}/${encodeRepositoryPath(path)}`;
   } catch {
     return null;
   }

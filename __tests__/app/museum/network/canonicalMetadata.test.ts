@@ -5,6 +5,8 @@ import { metadata as acquisitionProgramsMetadata } from "@/app/museum/network/ac
 import MuseumAcquisitionProgramPage, {
   generateMetadata as acquisitionProgramDetailMetadata,
 } from "@/app/museum/network/acquisition-programs/[slug]/page";
+import { metadata as acquisitionsMetadata } from "@/app/museum/network/acquisitions/page";
+import { generateMetadata as acquisitionDetailMetadata } from "@/app/museum/network/acquisitions/[slug]/page";
 import { metadata as artistsMetadata } from "@/app/museum/network/artists/page";
 import { generateMetadata as artistDetailMetadata } from "@/app/museum/network/artists/[slug]/page";
 import { generateMetadata as collectionObjectMetadata } from "@/app/museum/network/collection/[objectId]/page";
@@ -22,6 +24,8 @@ import { metadata as rightsMetadata } from "@/app/museum/network/research/rights
 import { metadata as rightsArtistsMetadata } from "@/app/museum/network/research/rights/artists/page";
 import { metadata as rightsCollectorsMetadata } from "@/app/museum/network/research/rights/collectors/page";
 import { generateMetadata as researchDetailMetadata } from "@/app/museum/network/research/[slug]/page";
+import { metadata as worksMetadata } from "@/app/museum/network/works/page";
+import { generateMetadata as workDetailMetadata } from "@/app/museum/network/works/[workId]/page";
 import { getMuseumObjectMetadata } from "@/components/museum/MuseumObjectPage";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
@@ -89,8 +93,37 @@ const publication = {
       acquisitionIds: [],
     },
   ],
+  curatedAcquisitions: [
+    {
+      kind: "curated_acquisition",
+      id: "6529NM-CA-2026-001",
+      slug: "the-system-in-seven-states",
+      title: "The System in Seven States",
+      thesis: "Seven works by Casey Reas.",
+      status: "accessioned_into_permanent_collection",
+      statusAsOf: "2026-08-09",
+      acquisitionMethod: "gift",
+      programId: null,
+      artistIds: [],
+      organizationIds: [],
+      projectIds: [],
+      workIds: ["6529NM-W-0001"],
+      accessionLotIds: [],
+      sourceDocumentIds: [],
+      sourcePaths: ["records/entities/6529NM-CA-2026-001.json"],
+    },
+  ],
   documents: [],
-  works: [],
+  works: [
+    {
+      id: "6529NM-W-0001",
+      title: "A Casey Reas work",
+      status: "accessioned_into_permanent_collection",
+      statusAsOf: "2026-08-09",
+      media: [],
+      sourcePaths: ["records/entities/6529NM-W-0001.json"],
+    },
+  ],
 } as unknown as MuseumPublication;
 
 function installPublication(): void {
@@ -146,7 +179,9 @@ describe("Network Museum canonical metadata", () => {
   it.each([
     [aboutMetadata, "/museum/network/about"],
     [collectionMetadata, "/museum/network/collection"],
+    [worksMetadata, "/museum/network/works"],
     [artistsMetadata, "/museum/network/artists"],
+    [acquisitionsMetadata, "/museum/network/acquisitions"],
     [projectsMetadata, "/museum/network/projects"],
     [organizationsMetadata, "/museum/network/organizations"],
     [acquisitionProgramsMetadata, "/museum/network/acquisition-programs"],
@@ -192,6 +227,22 @@ describe("Network Museum canonical metadata", () => {
         })
       )
     ).toBe("/museum/network/acquisition-programs/keys-and-gates");
+    await expect(
+      canonical(
+        await workDetailMetadata({
+          params: Promise.resolve({ workId: "6529NM-W-0001" }),
+        })
+      )
+    ).toBe("/museum/network/works/6529NM-W-0001");
+    await expect(
+      canonical(
+        await acquisitionDetailMetadata({
+          params: Promise.resolve({ slug: "the-system-in-seven-states" }),
+        })
+      )
+    ).toBe(
+      "/museum/network/acquisitions/the-system-in-seven-states"
+    );
     await expect(
       canonical(
         await researchDetailMetadata({

@@ -17,10 +17,13 @@ import {
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import type { MuseumProgramMedia } from "@/lib/museum/types";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.works.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.works.description"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.works.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.works.description"),
+  }),
+  alternates: { canonical: "/museum/network/works" },
+};
 
 function caseyMedia(artwork: {
   readonly imageUrl: string;

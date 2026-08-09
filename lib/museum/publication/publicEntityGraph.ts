@@ -7,6 +7,8 @@ import type {
 import {
   ENTITY_PATH_PATTERN,
   MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH,
   RELATION_PATH_PATTERN,
 } from "./publicEntityGraphSchema";
 import {
@@ -15,9 +17,15 @@ import {
 } from "./publicEntityGraphParsing";
 import { assertGraphReferences } from "./publicEntityGraphValidation";
 import { parseMuseumIdentityInventory } from "./publicEntityGraphInventory";
+import { parseMuseumRelationIdentityInventory } from "./publicEntityGraphRelationInventory";
+import { assertMuseumWorkTypedReferences } from "./publicEntityGraphTypedReferences";
 import { projectMuseumGraph } from "./publicEntityGraphProjection";
 
-export { MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH } from "./publicEntityGraphSchema";
+export {
+  MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH,
+  MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH,
+} from "./publicEntityGraphSchema";
 
 export function parseMuseumPublicEntityGraph(
   documents: ReadonlyMap<string, MuseumSourceDocument>,
@@ -49,6 +57,12 @@ export function parseMuseumPublicEntityGraph(
     documents.get(MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH),
     entities
   );
+  assertMuseumWorkTypedReferences(entities, identityInventory);
+  const relationIdentityInventory = parseMuseumRelationIdentityInventory(
+    documents.get(MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH),
+    documents.get(MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH),
+    relations
+  );
   return {
     sourceCommit,
     entityPaths,
@@ -56,6 +70,7 @@ export function parseMuseumPublicEntityGraph(
     entities,
     relations,
     identityInventory,
+    relationIdentityInventory,
   };
 }
 
@@ -69,7 +84,9 @@ function isGraphActivated(declared: ReadonlySet<string>): boolean {
   return (
     [...declared].some((path) => ENTITY_PATH_PATTERN.test(path)) ||
     [...declared].some((path) => RELATION_PATH_PATTERN.test(path)) ||
-    declared.has(MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH)
+    declared.has(MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH) ||
+    declared.has(MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH) ||
+    declared.has(MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH)
   );
 }
 
@@ -82,6 +99,8 @@ function assertGraphInventoryIsComplete(declared: ReadonlySet<string>): void {
   );
   if (
     !declared.has(MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH) ||
+    !declared.has(MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_PATH) ||
+    !declared.has(MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH) ||
     !hasEntities ||
     !hasRelations
   ) {

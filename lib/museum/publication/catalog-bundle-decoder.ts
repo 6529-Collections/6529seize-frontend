@@ -83,12 +83,12 @@ export function decodePublicationAssemblyBundle(
   ) {
     throw new Error("publication_catalog_bundle_shape");
   }
-  const inventorySha256 = requiredSha(
+  const completeInventorySha256 = requiredSha(
     bundle,
     "source_inventory_body_sha256",
     "publication_catalog_bundle_shape"
   );
-  const inventoryKeccak = requiredKeccak(
+  const completeInventoryJcsKeccak = requiredKeccak(
     bundle,
     "source_inventory_body_keccak256",
     "publication_catalog_bundle_shape"
@@ -172,5 +172,9 @@ export function decodePublicationAssemblyBundle(
   ) {
     throw new Error("publication_catalog_bundle_body_commitment");
   }
-  return { documents: entries, inventorySha256, inventoryKeccak };
+  return {
+    documents: entries,
+    completeInventorySha256,
+    completeInventoryJcsKeccak,
+  };
 }
