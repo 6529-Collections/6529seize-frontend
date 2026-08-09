@@ -23,7 +23,7 @@ import type {
 } from "@/lib/museum/publication/types";
 
 // Test-only local qualification identity. Production remains catalog-bound.
-const WP1_SOURCE_COMMIT = "1f01f43ca717fc486593afab73f160316f188652";
+const WP1_SOURCE_COMMIT = "a20f04ce7441c367fc39ef22a74236d22e6a652e";
 const SOURCE_ROOT = process.env["MUSEUM_WP1_SOURCE_ROOT"];
 const LOCAL_FIXTURE_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"] ??
@@ -67,9 +67,9 @@ function readSourceFixture(): SourceFixture | null {
     if (
       manifest.entries.length !== 776 ||
       manifest.manifest_sha256 !==
-        "sha256:542b1178741dd19360e541939cff73864f6c3c2c10b34c3ee7f9fee2b3a27a5e" ||
+        "sha256:636bf24457f4aa9b9645ff2be1d05188c15417e13cff7a0a949b0abd1b4bb2de" ||
       manifest.manifest_commitment?.digest !==
-        "0x33271cd281b9b0b21dd45be8f18d52eab42e3977911dbf2b65d23167412a8b29"
+        "0x52047bb5297bd7d976e233208ed244d9e388d51ba32dcd783923a6485a77a84d"
     ) {
       throw new Error("wp1_source_manifest_commitment_mismatch");
     }
