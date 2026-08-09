@@ -3,6 +3,17 @@ const GITHUB_RAW_ORIGIN = "https://raw.githubusercontent.com";
 const GITHUB_WEB_ORIGIN = "https://github.com";
 const MUSEUM_REPOSITORY = "6529-Collections/6529networkmuseum";
 const SUPPORTED_CONTENT_EXTENSIONS = [".json", ".md", ".txt"] as const;
+const SUPPORTED_MEDIA_EXTENSIONS = [
+  ".avif",
+  ".gif",
+  ".jpeg",
+  ".jpg",
+  ".json",
+  ".pdf",
+  ".png",
+  ".svg",
+  ".webp",
+] as const;
 
 const ART_BLOCKS_HOSTS = {
   live: "generator.artblocks.io",
@@ -12,6 +23,10 @@ const ART_BLOCKS_PATH_PATTERNS = {
   live: /^\/1\/0x[a-f\d]{40}\/\d+$/u,
   still: /^\/1\/0x[a-f\d]{40}\/\d+\.png$/u,
 } as const;
+const MUSEUM_GENERATED_DERIVATIVE_HOST =
+  "d3lqz0a4bldqgf.cloudfront.net";
+const MUSEUM_GENERATED_DERIVATIVE_PATH_PATTERN =
+  /^\/museum\/programs\/[A-Za-z0-9-]+\/[A-Za-z0-9-]+\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\/(?:[0-9]+)\.(?:webp|png|jpe?g)$/u;
 
 export const MUSEUM_MANIFEST_PATH =
   "release-artifacts/latest/record-manifest.json" as const;
@@ -51,8 +66,21 @@ export function assertGovernedMuseumPath(path: string): void {
   }
 }
 
+export function assertGovernedMuseumMediaPath(path: string): void {
+  assertSafeMuseumRepositoryPath(path);
+  if (!SUPPORTED_MEDIA_EXTENSIONS.some((suffix) => path.endsWith(suffix))) {
+    throw new Error("publication_unsupported_media_extension");
+  }
+}
+
 function encodeRepositoryPath(path: string): string {
-  assertGovernedMuseumPath(path);
+  assertSafeMuseumRepositoryPath(path);
+  if (
+    !SUPPORTED_CONTENT_EXTENSIONS.some((suffix) => path.endsWith(suffix)) &&
+    !SUPPORTED_MEDIA_EXTENSIONS.some((suffix) => path.endsWith(suffix))
+  ) {
+    throw new Error("publication_unsupported_extension");
+  }
   return path.split("/").map(encodeURIComponent).join("/");
 }
 
@@ -88,6 +116,31 @@ export function buildImmutableMuseumBlobUrl(
     return null;
   }
   return buildMuseumBlobUrl(commit, path, hash);
+}
+
+/**
+ * Builds the immutable GitHub source page URL used for visitor citations.
+ * Runtime bytes must use buildImmutableMuseumRawUrl; this URL is never a
+ * fetch authority.
+ */
+export function buildImmutableMuseumSourceUrl(
+  commit: string,
+  path: string
+): string {
+  if (!isExactGitCommit(commit)) {
+    throw new Error("publication_invalid_commit");
+  }
+  assertSafeMuseumRepositoryPath(path);
+  if (
+    !SUPPORTED_CONTENT_EXTENSIONS.some((suffix) => path.endsWith(suffix)) &&
+    !SUPPORTED_MEDIA_EXTENSIONS.some((suffix) => path.endsWith(suffix))
+  ) {
+    throw new Error("publication_unsupported_extension");
+  }
+  return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/blob/${commit}/${path
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/")}`;
 }
 
 function buildMuseumBlobUrl(
@@ -173,4 +226,28 @@ export function assertApprovedArtBlocksUrl(
   }
 
   return parsed.toString();
+}
+
+export function assertApprovedMuseumGeneratedDerivativeUrl(
+  url: string
+): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error("publication_unapproved_museum_media_origin");
+  }
+  if (
+    parsed.protocol !== "https:" ||
+    parsed.hostname !== MUSEUM_GENERATED_DERIVATIVE_HOST ||
+    parsed.username.length > 0 ||
+    parsed.password.length > 0 ||
+    parsed.port.length > 0 ||
+    parsed.search.length > 0 ||
+    parsed.hash.length > 0 ||
+    !MUSEUM_GENERATED_DERIVATIVE_PATH_PATTERN.test(parsed.pathname)
+  ) {
+    throw new Error("publication_unapproved_museum_media_origin");
+  }
+  return url;
 }

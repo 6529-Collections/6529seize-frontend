@@ -54,7 +54,7 @@ export default async function MuseumGenerativeSystemPage({
   if (project === undefined || study === null) {
     notFound();
   }
-  if (project.id !== study.projectId) {
+  if (project.id !== study.projectId && project.slug !== study.projectSlug) {
     notFound();
   }
   const caseyArtworks = tryCaseyArtworksFromPublication(

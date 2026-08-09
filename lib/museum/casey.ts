@@ -117,7 +117,7 @@ function createCaseyArtwork([
     creditLine: `Casey REAS, ${title}; 6529 Network Museum, gift of punk6529, ${objectId}.`,
     rightsLabel: CASEY_RIGHTS_LABEL,
     rightsExpressionId: "cc-by-nc-4.0",
-    rightsUrl: "/museum/network/rights/cc-by-nc-4.0",
+    rightsUrl: "/museum/network/research/rights/cc-by-nc-4.0",
     status: "accessioned",
     mediaRetention: "upstream_not_retained",
   };
@@ -383,9 +383,9 @@ export function caseyArtworksFromPublication(
       throw new Error("museum_casey_media_mismatch");
     }
 
-    const project = publication.projects.find(
-      (item) => item.id === governed.projectId
-    );
+    const project =
+      publication.projects.find((item) => item.id === governed.projectId) ??
+      publication.projects.find((item) => item.slug === overlay.projectSlug);
     if (
       project?.slug !== overlay.projectSlug ||
       project.title !== overlay.project
@@ -402,7 +402,7 @@ export function caseyArtworksFromPublication(
 
     return {
       ...overlay,
-      year: project.releaseYear,
+      year: project.releaseYear || overlay.year,
       medium: governed.medium,
       imageUrl: still.url,
       generatorUrl: live.url,
@@ -415,7 +415,7 @@ export function caseyArtworksFromPublication(
       rightsUrl:
         governed.rightsCredit.rightsExpressionId === null
           ? undefined
-          : `/museum/network/rights/${encodeURIComponent(rightsExpressionId)}`,
+          : `/museum/network/research/rights/${encodeURIComponent(rightsExpressionId)}`,
     };
   });
 }

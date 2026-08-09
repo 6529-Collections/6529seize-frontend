@@ -85,7 +85,7 @@ describe("MuseumSourceContribution", () => {
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json`
     );
-    expect(screen.getByText("Related records")).toBeInTheDocument();
+    expect(screen.getByText("Related works and context")).toBeInTheDocument();
     expect(screen.getByText("Structured record")).toHaveAttribute(
       "title",
       "records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json"

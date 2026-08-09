@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import MuseumDataArchitectureProfilePage, {
   generateMetadata,
-} from "@/app/museum/network/methodology/data-architecture/[slug]/page";
-import MuseumDataArchitecturePage from "@/app/museum/network/methodology/data-architecture/page";
+} from "@/app/museum/network/research/data-architecture/[slug]/page";
+import MuseumDataArchitecturePage from "@/app/museum/network/research/data-architecture/page";
 import {
   GitHubMuseumPublicationSource,
   legacyCaseyPublicationAssembler,
@@ -93,7 +93,7 @@ describe("Museum data architecture routes", () => {
         ?.querySelector("pre")?.textContent
     ).toBe(publication.dataArchitecture.profileJson);
     expect(
-      screen.getByRole("link", { name: "Back to methods and provenance" })
+      screen.getByRole("link", { name: "Back to Research" })
     ).toHaveAttribute("data-prefetch", "false");
   });
 

@@ -1,9 +1,17 @@
 import {
   getMuseumPublicationEnvironment,
+  isMuseumProductionBuildPhase,
   type MuseumPublicationEnvironment,
 } from "@/config/museumPublicationEnv.server";
+import { getNodeEnv } from "@/config/env";
 import { GitHubMuseumPublicationSource } from "./github";
+import { museumPublicationCatalogResolver } from "./catalog";
 import { legacyCaseyPublicationAssembler } from "./legacyCasey";
+import {
+  createMuseumLocalFixtureFetch,
+  readMuseumLocalFixtureVisitorPaths,
+  qualifyLocalReadOnlyDocument,
+} from "./localFixture";
 import { isExactGitCommit } from "./security";
 import type {
   MuseumLastValidPublication,
@@ -110,10 +118,42 @@ export function createMuseumPublicationRuntime(
   return { load };
 }
 
-const githubPublicationSource = new GitHubMuseumPublicationSource({
-  ref: resolveMuseumPublicationRef(),
-  assembler: legacyCaseyPublicationAssembler,
-});
+function createMuseumPublicationSource(): MuseumPublicationSource {
+  const environment = getMuseumPublicationEnvironment();
+  const localFixtureRoot = environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT;
+  if (localFixtureRoot !== undefined) {
+    const localFixtureCommit =
+      environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT;
+    if (
+      (getNodeEnv() === "production" && !isMuseumProductionBuildPhase()) ||
+      environment.PLAYWRIGHT_READONLY !== PLAYWRIGHT_READONLY_VALUE ||
+      localFixtureCommit === undefined ||
+      !isExactGitCommit(localFixtureCommit)
+    ) {
+      throw new Error("publication_local_fixture_not_allowed");
+    }
+    return new GitHubMuseumPublicationSource({
+      ref: localFixtureCommit,
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: createMuseumLocalFixtureFetch(localFixtureRoot, localFixtureCommit),
+      allowUncataloguedTestFixture: true,
+      localFixtureAcceptedPaths: readMuseumLocalFixtureVisitorPaths(localFixtureRoot),
+      ...(environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY === "1"
+        ? {
+            localFixtureDocumentTransform: (document) =>
+              qualifyLocalReadOnlyDocument(document, localFixtureCommit),
+          }
+        : {}),
+    });
+  }
+  return new GitHubMuseumPublicationSource({
+    ref: resolveMuseumPublicationRef(),
+    assembler: legacyCaseyPublicationAssembler,
+    catalogResolver: museumPublicationCatalogResolver,
+  });
+}
+
+const githubPublicationSource = createMuseumPublicationSource();
 
 const museumPublicationRuntime = createMuseumPublicationRuntime(
   githubPublicationSource

@@ -5,49 +5,77 @@ import { usePathname } from "next/navigation";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
-const NAV_ITEMS: ReadonlyArray<{
+export const MUSEUM_NAVIGATION_ITEMS: ReadonlyArray<{
+  readonly section: MuseumNavigationSection;
   readonly labelKey: MessageKey;
   readonly href: string;
   readonly activePrefixes: readonly string[];
 }> = [
   {
+    section: "collection",
     labelKey: "museum.network.nav.collection",
     href: "/museum/network/collection",
-    activePrefixes: [
-      "/museum/network/collection",
-      "/museum/network/projects",
-      "/museum/network/gifts",
-      "/museum/network/accessions",
-    ],
+    activePrefixes: ["/museum/network/collection"],
   },
   {
+    section: "artists",
     labelKey: "museum.network.nav.artists",
     href: "/museum/network/artists",
     activePrefixes: ["/museum/network/artists"],
   },
   {
-    labelKey: "museum.network.nav.programsExhibitions",
-    href: "/museum/network/programs",
-    activePrefixes: ["/museum/network/programs"],
-  },
-  {
-    labelKey: "museum.network.nav.stories",
-    href: "/museum/network/stories",
+    section: "acquisitions",
+    labelKey: "museum.network.nav.acquisitions",
+    href: "/museum/network/acquisitions",
     activePrefixes: [
-      "/museum/network/stories",
-      "/museum/network/methodology",
-      "/museum/network/governance",
+      "/museum/network/acquisitions",
+      "/museum/network/acquisition-programs",
+      "/museum/network/programs",
+      "/museum/network/gifts",
+      "/museum/network/accessions",
     ],
   },
   {
+    section: "research",
+    labelKey: "museum.network.nav.research",
+    href: "/museum/network/research",
+    activePrefixes: [
+      "/museum/network/research",
+      "/museum/network/stories",
+      "/museum/network/methodology",
+    ],
+  },
+  {
+    section: "about",
     labelKey: "museum.network.nav.about",
     href: "/museum/network/about",
-    activePrefixes: ["/museum/network/about", "/museum/network/rights"],
+    activePrefixes: [
+      "/museum/network/about",
+      "/museum/network/governance",
+      "/museum/network/rights",
+    ],
   },
 ];
 
 function pathMatchesPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+export type MuseumNavigationSection =
+  | "collection"
+  | "artists"
+  | "acquisitions"
+  | "research"
+  | "about";
+
+export function museumNavigationActiveSection(
+  pathname: string
+): MuseumNavigationSection | null {
+  return (
+    MUSEUM_NAVIGATION_ITEMS.find(({ activePrefixes }) =>
+      activePrefixes.some((prefix) => pathMatchesPrefix(pathname, prefix))
+    )?.section ?? null
+  );
 }
 
 export function MuseumNavigation() {
@@ -59,10 +87,8 @@ export function MuseumNavigation() {
       className="tw-min-w-0"
     >
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-5 tw-gap-y-1 tw-p-0">
-        {NAV_ITEMS.map(({ labelKey, href, activePrefixes }) => {
-          const isActive = activePrefixes.some((prefix) =>
-            pathMatchesPrefix(pathname, prefix)
-          );
+        {MUSEUM_NAVIGATION_ITEMS.map(({ section, labelKey, href }) => {
+          const isActive = museumNavigationActiveSection(pathname) === section;
 
           return (
             <li key={href}>

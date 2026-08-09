@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   DataArchitectureManuscript,
   DataArchitectureScheduleDisclosure,
@@ -57,7 +57,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function MuseumDataArchitectureProfilePage({
+export async function renderMuseumDataArchitectureProfilePage({
   params,
 }: DataArchitectureProfilePageProps) {
   const { slug } = await params;
@@ -76,7 +76,7 @@ export default async function MuseumDataArchitectureProfilePage({
   return (
     <article className="tw-min-w-0">
       <Link
-        href="/museum/network/methodology/data-architecture"
+        href="/museum/network/research/data-architecture"
         prefetch={false}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
@@ -127,5 +127,21 @@ export default async function MuseumDataArchitectureProfilePage({
         </section>
       ) : null}
     </article>
+  );
+}
+
+export default async function MuseumDataArchitectureProfileLegacyPage({
+  params,
+}: DataArchitectureProfilePageProps) {
+  const { slug } = await params;
+  const state = await getMuseumPublicationState();
+  if (
+    !dataArchitecturePublicationIsComplete(state.publication) ||
+    architectureDocument(state.publication, slug) === undefined
+  ) {
+    notFound();
+  }
+  permanentRedirect(
+    `/museum/network/research/data-architecture/${encodeURIComponent(slug)}`
   );
 }

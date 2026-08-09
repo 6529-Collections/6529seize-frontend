@@ -100,7 +100,7 @@ describe("MuseumProgramOutcomePage", () => {
     );
     expect(
       screen.getByRole("link", { name: "Back to Keys and Gates" })
-    ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-01");
+    ).toHaveAttribute("href", "/museum/network/acquisitions/keys-and-gates");
   });
 
   it("does not apply Keys and Gates status copy to another program", () => {

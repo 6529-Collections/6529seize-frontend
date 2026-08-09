@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumRightsExpressionPage } from "@/components/museum/MuseumRightsReadingRoom";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -29,7 +29,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function MuseumRightsExpressionRoute({
+export async function renderMuseumRightsExpressionRoute({
   params,
 }: MuseumRightsExpressionRouteProps) {
   const { expressionId } = await params;
@@ -50,5 +50,23 @@ export default async function MuseumRightsExpressionRoute({
       expression={expression}
       sourceCommit={publication.identity.commit}
     />
+  );
+}
+
+export default async function MuseumRightsExpressionLegacyRoute({
+  params,
+}: MuseumRightsExpressionRouteProps) {
+  const { expressionId } = await params;
+  const publication = (await getMuseumPublicationState()).publication;
+  if (
+    publication === null ||
+    publication.rightsHandbook.expressions.every(
+      (expression) => expression.id !== expressionId
+    )
+  ) {
+    notFound();
+  }
+  permanentRedirect(
+    `/museum/network/research/rights/${encodeURIComponent(expressionId)}`
   );
 }

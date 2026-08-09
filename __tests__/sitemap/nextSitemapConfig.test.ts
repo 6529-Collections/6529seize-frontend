@@ -114,6 +114,14 @@ describe("next-sitemap config", () => {
     expect(locations).toContain("/nextgen/collection/pebbles");
     expect(locations).toContain("/nextgen/collection/pebbles/art");
     expect(locations).toContain("/waves/5f207393-5418-4a75-8738-e40edb44a94d");
+    expect(locations).toContain("/museum/network/acquisitions");
+    expect(locations).toContain("/museum/network/research");
+    expect(locations).toContain("/museum/network/research/institutional-practice");
+    expect(locations).toContain("/museum/network/research/data-architecture");
+    expect(locations).toContain("/museum/network/research/rights");
+    expect(locations).toContain("/museum/network/about/governance");
+    expect(locations).toContain("/museum/network/works");
+    expect(locations).toContain("/museum/network/organizations");
     expect(locations).not.toContain("/about/release-notes");
   });
 
@@ -174,6 +182,17 @@ describe("next-sitemap config", () => {
     expect(shouldExcludeSitemapPath("/messages/create?wave=abc")).toBe(true);
     expect(shouldExcludeSitemapPath("/tools/app-wallets")).toBe(true);
     expect(shouldExcludeSitemapPath("/stream")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/collections")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/objects/OUT-001")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/gifts/6529NM.2026.001")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/programs/6529NM-AP-01")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/stories")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/methodology")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/governance")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/rights/cc-by-4.0")).toBe(true);
+    expect(shouldExcludeSitemapPath("/museum/network/about/governance")).toBe(false);
+    expect(shouldExcludeSitemapPath("/museum/network/research/rights")).toBe(false);
+    expect(shouldExcludeSitemapPath("/museum/network/acquisitions/keys-and-gates")).toBe(false);
     expect(shouldExcludeSitemapPath("/reviews/6529-stream")).toBe(true);
     expect(
       shouldExcludeSitemapPath("/reviews/6529-stream/for-artists?ref=nav")

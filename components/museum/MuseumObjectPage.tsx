@@ -2,16 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MuseumArtworkViewer } from "./MuseumArtworkViewer";
+import { MuseumBreadcrumbs } from "./MuseumBreadcrumbs";
+import { MuseumEntityContext } from "./MuseumEntityContext";
 import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
+import { MuseumMediaMetadataPlaceholder } from "./MuseumMediaMetadataPlaceholder";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
 import { MuseumProgramOutcomePage } from "./MuseumProgramOutcomePage";
+import { MuseumProposalImage } from "./MuseumProposalImage";
+import { MuseumRelatedEntities } from "./MuseumRelatedEntities";
 import { MuseumInTheSystem } from "./MuseumInsideSystem";
 import { MuseumRightsLink } from "./MuseumRightsLink";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
-  CASEY_ACCESSION_ID,
   CASEY_ARTIST_NAME,
   CASEY_ARTIST_SLUG,
   tryCaseyArtworksFromPublication,
@@ -19,8 +23,22 @@ import {
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { getMuseumView } from "@/lib/museum/normalize";
-import { museumSlugMatches } from "@/lib/museum/presentation";
+import { buildMuseumWorkContext } from "@/lib/museum/publication/ia";
+import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
+import type {
+  MuseumMedia,
+  MuseumPublication,
+  MuseumPublicWork,
+} from "@/lib/museum/publication/types";
+import {
+  displayMuseumPublicAcquisitionStatus,
+  museumSlugMatches,
+} from "@/lib/museum/presentation";
 import { getGenerativeStudyByObjectId } from "@/lib/museum/generative-studies";
+import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
+import { MuseumProgramImage } from "./MuseumProgramImage";
+import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
+import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 
 export async function getMuseumObjectMetadata(
   objectId: string
@@ -30,6 +48,17 @@ export async function getMuseumObjectMetadata(
     return getAppMetadata({
       title: artwork.title,
       description: artwork.visualDescription,
+    });
+  }
+
+  const publicationState = await getMuseumPublicationState();
+  const publicWork = publicationState.publication?.works?.find(
+    (work) => work.id === objectId
+  );
+  if (publicWork !== undefined) {
+    return getAppMetadata({
+      title: publicWork.title,
+      description: publicWork.title,
     });
   }
 
@@ -47,16 +76,374 @@ export async function getMuseumObjectMetadata(
   });
 }
 
+function publicWorkMedia(media: MuseumMedia): MuseumProgramMedia {
+  return {
+    sourceUrl: media.url,
+    sourceMimeType: media.mediaType ?? "image/*",
+    sourceSha256: media.sha256,
+    sourceByteSize: null,
+    sourceWidth: media.width,
+    sourceHeight: media.height,
+    altText: media.altText ?? "",
+    altTextStatus:
+      media.altText === null ? "unavailable" : "governed_artwork_description",
+    variants: [],
+  };
+}
+
+function workQualifierLabel(
+  work: MuseumPublicWork,
+  qualifier: MuseumPublicWork["qualifiers"][number]
+): string | null {
+  if (qualifier.kind !== "mint" || qualifier.status !== "pending") {
+    return null;
+  }
+  if (
+    work.status ===
+    "selected_through_acquisition_program_acquisition_pending"
+  ) {
+    return t(
+      DEFAULT_LOCALE,
+      "museum.network.acquisitions.selectedWorkQualifier"
+    );
+  }
+  return t(DEFAULT_LOCALE, "museum.network.works.mintPending");
+}
+
+function MuseumCanonicalWorkMedia({
+  work,
+}: {
+  readonly work: MuseumPublicWork;
+}) {
+  if (work.media.length > 0) {
+    return (
+      <section className="tw-mt-10" aria-labelledby="canonical-work-media-title">
+        <h2 id="canonical-work-media-title" className="tw-sr-only">
+          {t(DEFAULT_LOCALE, "museum.network.works.title")}
+        </h2>
+        <div className="tw-grid tw-gap-6 sm:tw-grid-cols-2">
+          {work.media.map((media) => (
+            <figure key={media.id} className="tw-m-0">
+              <div className="tw-overflow-hidden tw-bg-black">
+                <MuseumProgramImage
+                  media={publicWorkMedia(media)}
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                />
+              </div>
+              <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {media.credit.creditLine}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+    );
+  }
+  const metadata = work.mediaMetadata?.[0];
+  if (metadata !== undefined) {
+    return (
+      <section className="tw-mt-10" aria-labelledby="canonical-work-media-title">
+        <h2 id="canonical-work-media-title" className="tw-sr-only">
+          {t(DEFAULT_LOCALE, "museum.network.works.title")}
+        </h2>
+        <MuseumMediaMetadataPlaceholder title={work.title} metadata={metadata} />
+      </section>
+    );
+  }
+  return (
+    <p className="tw-mt-10 tw-text-sm tw-leading-6 tw-text-iron-400">
+      {t(DEFAULT_LOCALE, "museum.network.objects.mediaUnavailable")}
+    </p>
+  );
+}
+
+function museumWorkInsideSystemHref(
+  work: MuseumPublicWork,
+  publication: MuseumPublication
+): string | null {
+  const legacyStudyObjectId = [
+    ...(work.sourceRecordIds ?? []),
+    ...(publication.workAliases ?? [])
+      .filter((alias) => alias.workId === work.id)
+      .map((alias) => alias.sourceObjectId),
+  ].find((sourceObjectId) => getGenerativeStudyByObjectId(sourceObjectId) !== null);
+  if (legacyStudyObjectId === undefined) return null;
+  const generativeStudy = getGenerativeStudyByObjectId(legacyStudyObjectId);
+  if (
+    generativeStudy?.heldPositions.some(
+      (position) => position.objectId === legacyStudyObjectId
+    ) !== true
+  ) {
+    return null;
+  }
+  return `/museum/network/projects/${generativeStudy.projectSlug}/system?work=${encodeURIComponent(legacyStudyObjectId)}#possibility-space`;
+}
+
+function MuseumCanonicalWorkRecordPage({
+  work,
+  publication,
+  view,
+}: {
+  readonly work: MuseumPublicWork;
+  readonly publication: MuseumPublication;
+  readonly view: MuseumView | null;
+}) {
+  const artist = publication.artists.find((item) => item.id === work.artistId);
+  const project =
+    work.projectId === null
+      ? null
+      : publication.projects.find((item) => item.id === work.projectId);
+  const context = buildMuseumWorkContext(publication, work.id, view, [
+    { label: "6529 Network Museum", href: "/museum/network" },
+    { label: t(DEFAULT_LOCALE, "museum.network.works.title"), href: "/museum/network/works" },
+    { label: work.title },
+  ]);
+  if (context === null) return <MuseumPublicationUnavailable />;
+  const projectedDocuments = work.documentIds.flatMap((documentId) => {
+    const document = publication.documents.find(
+      (candidate) => candidate.id === documentId
+    );
+    return document === undefined ? [] : [document];
+  });
+  const documents = selectMuseumPublicWorkDocuments(work, projectedDocuments);
+  const primaryCredit =
+    work.media[0]?.credit.creditLine ?? work.presentationMedia?.[0]?.credit.creditLine;
+  const primarySource =
+    work.sourcePaths[0] === undefined
+      ? null
+      : buildImmutableMuseumBlobUrl(
+          publication.identity.commit,
+          work.sourcePaths[0]
+        );
+  const insideSystemHref = museumWorkInsideSystemHref(work, publication);
+  return (
+    <article className="tw-min-w-0">
+      <MuseumBreadcrumbs
+        ariaLabel={t(DEFAULT_LOCALE, "museum.network.accessibility.breadcrumbs")}
+        items={context.breadcrumbs}
+      />
+      <header className="tw-mt-6 tw-max-w-4xl">
+        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+          {t(DEFAULT_LOCALE, "museum.network.works.eyebrow")}
+        </p>
+        <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-5xl">
+          {work.title}
+        </h1>
+        {artist !== undefined ? (
+          <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+            <Link
+              href={`/museum/network/artists/${encodeURIComponent(artist.slug)}`}
+              className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {artist.preferredName}
+            </Link>
+            {project === undefined || project === null ? null : ` / ${project.title}`}
+          </p>
+        ) : null}
+      </header>
+      <MuseumCanonicalWorkMedia work={work} />
+      {insideSystemHref !== null ? (
+        <div className="tw-mt-8">
+          <Link
+            href={insideSystemHref}
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.locateWork")}
+          </Link>
+        </div>
+      ) : null}
+      {work.presentationMedia !== undefined && work.presentationMedia.length > 0 ? (
+        <section className="tw-mt-10" aria-labelledby="canonical-work-presentation-title">
+          <h2 id="canonical-work-presentation-title" className="tw-sr-only">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitions.historicalWavePresentation"
+            )}
+          </h2>
+          <div className="tw-grid tw-gap-6 sm:tw-grid-cols-2">
+            {work.presentationMedia.map((media, index) => {
+              const sourceHref = buildMuseumSignedWaveStormDropUrl(
+                media.source.waveId,
+                media.source.dropId
+              );
+              const canOpenPresentation = media.affordances.includes(
+                "open_upstream_presentation"
+              );
+              return (
+                <figure key={media.id} className="tw-m-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-5">
+                  <div className="tw-overflow-hidden tw-bg-black">
+                    <MuseumProposalImage
+                      src={media.mediaUrl}
+                      alt={media.altText}
+                      width={media.width}
+                      height={media.height}
+                      {...(media.sourceByteSize === undefined
+                        ? {}
+                        : { sourceByteSize: media.sourceByteSize })}
+                      {...(sourceHref === null || !canOpenPresentation
+                        ? {}
+                        : {
+                            sourceHref,
+                            sourceLabel: t(
+                              DEFAULT_LOCALE,
+                              "museum.network.acquisitions.openPresentation"
+                            ),
+                          })}
+                      eager={index === 0}
+                    />
+                  </div>
+                  <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+                    <span className="tw-block tw-text-iron-200">{media.credit.creditLine}</span>
+                    <span className="tw-mt-1 tw-block">
+                      {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationRights")}
+                    </span>
+                    <span className="tw-mt-1 tw-block">
+                      {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationSource")}: {" "}
+                      {sourceHref === null || !canOpenPresentation ? (
+                        media.source.sourcePath
+                      ) : (
+                        <a
+                          href={sourceHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                        >
+                          {t(DEFAULT_LOCALE, "museum.network.acquisitions.openPresentation")}
+                        </a>
+                      )}
+                    </span>
+                  </figcaption>
+                </figure>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+      <MuseumEntityContext
+        context={{
+          ...context,
+          status: displayMuseumPublicAcquisitionStatus(work.status),
+        }}
+        labels={{
+          ariaLabel: t(DEFAULT_LOCALE, "museum.network.accessibility.entityContext"),
+          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
+          statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
+          source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
+        }}
+      />
+      <section className="tw-mt-10" aria-labelledby="canonical-work-record-title">
+        <h2 id="canonical-work-record-title" className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+          {t(DEFAULT_LOCALE, "museum.network.objects.reading")}
+        </h2>
+        {documents.length > 0 ? (
+          <div className="tw-mt-6 tw-space-y-8">
+            {documents.map((document) =>
+              document.kind === "source_record" ? (
+                <MuseumJsonDisclosure
+                  key={document.id}
+                  label={document.title}
+                  sourceJson={document.markdown}
+                />
+              ) : (
+                <MuseumMarkdown
+                  key={document.id}
+                  className="tw-max-w-3xl"
+                  embeddedDocument={document.kind === "object_entry"}
+                  sourceCommit={publication.identity.commit}
+                  sourcePath={document.sourcePath}
+                >
+                  {document.markdown}
+                </MuseumMarkdown>
+              )
+            )}
+          </div>
+        ) : (
+          <p className="tw-m-0 tw-mt-5 tw-text-sm tw-text-yellow-100">
+            {t(DEFAULT_LOCALE, "museum.network.objects.readingUnavailable")}
+          </p>
+        )}
+      </section>
+      <dl className="tw-mt-10 tw-grid tw-gap-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-5 sm:tw-grid-cols-2">
+        <div>
+          <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+            {t(DEFAULT_LOCALE, "museum.network.objects.medium")}
+          </dt>
+          <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {work.medium}
+          </dd>
+        </div>
+        {primaryCredit === undefined ? null : (
+          <div>
+            <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+              {t(DEFAULT_LOCALE, "museum.network.objects.credit")}
+            </dt>
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+              {primaryCredit}
+            </dd>
+          </div>
+        )}
+        {primarySource === null ? null : (
+          <div>
+            <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+              {t(DEFAULT_LOCALE, "museum.network.entity.sources")}
+            </dt>
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+              <a
+                href={primarySource}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                {t(DEFAULT_LOCALE, "museum.network.entity.sources")}
+              </a>
+            </dd>
+          </div>
+        )}
+      </dl>
+      {work.qualifiers.length > 0 ? (
+        <dl className="tw-mt-10 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-4">
+          {work.qualifiers.map((qualifier) => (
+            <div key={`${qualifier.kind}:${qualifier.sourcePath}`} className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-text-sm">
+              <dt className="tw-font-semibold tw-text-iron-300">
+                {workQualifierLabel(work, qualifier)}
+              </dt>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+      <MuseumRelatedEntities
+        entities={[...context.primaryRelations, ...context.secondaryRelations]}
+        headingId="canonical-work-related-title"
+        title={t(DEFAULT_LOCALE, "museum.network.acquisitions.related")}
+      />
+    </article>
+  );
+}
+
 export async function MuseumObjectPage({
   objectId,
+  publication: publicationInput,
+  view: viewInput,
 }: {
   readonly objectId: string;
+  readonly publication?: MuseumPublication;
+  readonly view?: MuseumView | null;
 }) {
-  const publicationState = await getMuseumPublicationState();
-  if (publicationState.publication === null) {
+  const publicationState =
+    publicationInput === undefined ? await getMuseumPublicationState() : null;
+  const publication = publicationInput ?? publicationState?.publication;
+  if (publication === null || publication === undefined) {
     return <MuseumPublicationUnavailable />;
   }
-  const publication = publicationState.publication;
+  const view =
+    viewInput === undefined ? await getMuseumView() : viewInput;
+  const publicWork = publication.works?.find((work) => work.id === objectId);
+  if (publicWork !== undefined) {
+    return <MuseumCanonicalWorkRecordPage work={publicWork} publication={publication} view={view} />;
+  }
+  if (view === null) {
+    return <MuseumPublicationUnavailable />;
+  }
   const artworks = tryCaseyArtworksFromPublication(publication);
   if (artworks === null) {
     return <MuseumPublicationUnavailable />;
@@ -65,7 +452,6 @@ export async function MuseumObjectPage({
     museumSlugMatches(item.objectId, objectId)
   );
   if (artwork === undefined) {
-    const view = await getMuseumView();
     const outcome = view.objects.find((item) =>
       museumSlugMatches(item.objectId, objectId)
     );
@@ -199,7 +585,7 @@ export async function MuseumObjectPage({
             </div>
           </dl>
           <Link
-            href={`/museum/network/gifts/${CASEY_ACCESSION_ID}`}
+            href="/museum/network/acquisitions/the-system-in-seven-states"
             className="hover:tw-text-primary-200 tw-mt-6 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             {t(DEFAULT_LOCALE, "museum.network.objects.viewGift")}

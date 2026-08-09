@@ -1,4 +1,44 @@
 import type { MuseumDataArchitectureStandardSlug as DataArchitectureStandardSlug } from "./dataArchitectureContract";
+import type {
+  MuseumAcquisitionProgram,
+  MuseumCuratedAcquisition,
+  MuseumCuratedAcquisitionStatus,
+  MuseumEntityRelation,
+  MuseumExhibition,
+  MuseumExternalProposalPresentationMedia,
+  MuseumOrganization,
+} from "./entities";
+
+export type {
+  MuseumAcquisitionMethod,
+  MuseumAcquisitionProgram,
+  MuseumAcquisitionProgramStatus,
+  MuseumCuratedAcquisition,
+  MuseumCuratedAcquisitionStatus,
+  MuseumEntityKind,
+  MuseumEntityReference,
+  MuseumEntityRelation,
+  MuseumEntityRelationKind,
+  MuseumEntityType,
+  MuseumExhibition,
+  MuseumExternalProposalPresentationAffordance,
+  MuseumExternalProposalPresentationCredit,
+  MuseumExternalProposalPresentationMedia,
+  MuseumExternalProposalPresentationRights,
+  MuseumExternalProposalPresentationSource,
+  MuseumOrganization,
+  MuseumProposedAcquisitionStatus,
+  MuseumSignedWaveStormUrl,
+} from "./entities";
+
+export {
+  isMuseumExternalProposalMediaUrl,
+  isMuseumExternalProposalPresentationMedia,
+  isMuseumExternalProposalTokenSourceUrl,
+  isMuseumSafeGovernedSourcePath,
+  isMuseumSignedWaveStormUrl,
+  buildMuseumSignedWaveStormDropUrl,
+} from "./entities";
 
 export type MuseumSha256 = `sha256:${string}`;
 
@@ -6,11 +46,14 @@ export interface MuseumPublicationIdentity {
   readonly repository: "6529-Collections/6529networkmuseum";
   readonly requestedRef: string;
   readonly commit: string;
-  readonly manifestPath: "release-artifacts/latest/record-manifest.json";
+  readonly manifestPath: string;
   readonly manifestSha256: MuseumSha256 | null;
   readonly manifestCommitment: string | null;
   readonly inventoryCount: number;
   readonly assembledAt: string;
+  /** Present only when the two-phase catalog was verified atomically. */
+  readonly catalogId?: string;
+  readonly catalogContentHash?: `0x${string}`;
 }
 
 export interface MuseumRightsCredit {
@@ -50,10 +93,45 @@ export interface MuseumUpstreamMedia extends MuseumMediaBase {
   readonly url: string;
   readonly preservationStatus: "not_retained";
   readonly sha256: null;
-  readonly upstreamProvider: "art_blocks";
+  readonly upstreamProvider: "art_blocks" | "museum_public_derivative";
 }
 
 export type MuseumMedia = MuseumRetainedMedia | MuseumUpstreamMedia;
+
+export type MuseumMediaMetadataRole =
+  | "museum_retained_preservation_object"
+  | "token_linked_source_media"
+  | "museum_generated_public_derivative"
+  | "museum_authored_public_graphic"
+  | "historical_wave_proposal_presentation";
+
+export interface MuseumMediaMetadataContext {
+  readonly kind: "wave_proposal";
+  readonly waveId: string;
+  readonly dropId: string;
+  readonly publicationRecordId: string;
+  readonly acquisitionId: string;
+  readonly sourcePath: string;
+  /** Null when the source record withholds the upstream presentation link. */
+  readonly openHref: string | null;
+}
+
+/**
+ * A governed media record whose descriptive evidence is published while its
+ * image locator is withheld. It never carries a visitor image URL.
+ */
+export interface MuseumMediaMetadata {
+  readonly id: string;
+  readonly artworkId: string;
+  readonly role: MuseumMediaMetadataRole;
+  readonly mediaType: string | null;
+  readonly width: number | null;
+  readonly height: number | null;
+  readonly altText: string | null;
+  readonly credit: MuseumRightsCredit;
+  readonly sourcePath: string;
+  readonly context?: MuseumMediaMetadataContext;
+}
 
 export type MuseumPublicDocumentKind =
   | "founding_principles"
@@ -62,6 +140,9 @@ export type MuseumPublicDocumentKind =
   | "contributor_guide"
   | "artist_practice"
   | "collection_essay"
+  | "acquisition_essay"
+  | "program_essay"
+  | "source_record"
   | "curatorial_accession_review"
   | "accession_certificate"
   | "gift_acceptance_authorization"
@@ -95,6 +176,11 @@ export interface MuseumPublicDocument {
   readonly projectIds: readonly string[];
   readonly giftIds: readonly string[];
   readonly artworkIds: readonly string[];
+  readonly workIds?: readonly string[];
+  readonly acquisitionIds?: readonly string[];
+  readonly programIds?: readonly string[];
+  readonly organizationIds?: readonly string[];
+  readonly sourceRecordIds?: readonly string[];
 }
 
 export type MuseumInstitutionProfileSlug =
@@ -302,6 +388,7 @@ export interface MuseumArtist {
   readonly preferredName: string;
   readonly projectIds: readonly string[];
   readonly artworkIds: readonly string[];
+  readonly workIds?: readonly string[];
   readonly documentIds: readonly string[];
   readonly sourcePaths: readonly string[];
 }
@@ -311,9 +398,12 @@ export interface MuseumProject {
   readonly slug: string;
   readonly title: string;
   readonly artistId: string;
+  readonly artistIds?: readonly string[];
+  readonly organizationIds?: readonly string[];
   readonly platform: string;
   readonly releaseYear: number;
   readonly artworkIds: readonly string[];
+  readonly workIds?: readonly string[];
   readonly documentIds: readonly string[];
   readonly sourcePaths: readonly string[];
 }
@@ -361,13 +451,198 @@ export type MuseumArtwork =
   | MuseumAccessionedArtwork
   | MuseumSelectedUnmintedArtwork;
 
+/**
+ * Canonical public Work records are additive to the released legacy artwork
+ * projection. Their Museum relationship is explicit and never inferred from
+ * the raw program outcome status.
+ */
+export type MuseumWorkPublicStatus = MuseumCuratedAcquisitionStatus;
+
+export interface MuseumWorkQualifier {
+  readonly kind:
+    | "mint"
+    | "payment"
+    | "title"
+    | "custody"
+    | "rights"
+    | "preservation";
+  readonly status: string;
+  readonly sourcePath: string;
+}
+
+export interface MuseumPublicWork {
+  readonly kind: "work";
+  readonly id: string;
+  readonly slug: string;
+  readonly title: string;
+  readonly medium: string;
+  readonly artistId: string;
+  readonly projectId: string | null;
+  readonly status: MuseumWorkPublicStatus;
+  readonly statusAsOf: string;
+  /** True only when the active Collection and accession edges agree. */
+  readonly collectionMembership?: boolean;
+  readonly acquisitionIds: readonly string[];
+  readonly programIds: readonly string[];
+  readonly media: readonly MuseumMedia[];
+  readonly mediaMetadata?: readonly MuseumMediaMetadata[];
+  readonly presentationMedia?: readonly MuseumExternalProposalPresentationMedia[];
+  readonly documentIds: readonly string[];
+  readonly qualifiers: readonly MuseumWorkQualifier[];
+  readonly sourceRecordIds?: readonly string[];
+  readonly sourcePaths: readonly string[];
+}
+
+/** Explicit compatibility join from a released source/program object ID. */
+export interface MuseumWorkAlias {
+  readonly kind: "work_source_alias";
+  readonly sourceObjectId: string;
+  readonly workId: string;
+  readonly sourcePath: string;
+}
+
+export type MuseumPublicEntityType =
+  | "INSTITUTION"
+  | "COLLECTION"
+  | "AGENT"
+  | "ARTIST"
+  | "ORGANIZATION"
+  | "WORK"
+  | "PROJECT_OR_SERIES"
+  | "CURATED_ACQUISITION"
+  | "ACQUISITION_PROGRAM"
+  | "ACCESSION"
+  | "RESEARCH_PUBLICATION"
+  | "MEDIA_REFERENCE"
+  | "EXHIBITION";
+
+export interface MuseumPublicEntityRecord {
+  readonly id: string;
+  readonly entityType: MuseumPublicEntityType;
+  readonly label: string;
+  readonly slug: string | null;
+  readonly canonicalRoute: string | null;
+  readonly pageExposure:
+    | "canonical_page"
+    | "relational_only"
+    | "reserved_no_instance";
+  readonly entityStatus: "published" | "archived";
+  readonly sourcePath: string;
+  readonly sourceRecordIds: readonly string[];
+  readonly mediaEntityIds?: readonly string[];
+  readonly profile: Readonly<Record<string, unknown>>;
+}
+
+export type MuseumPublicRelationType =
+  | "INSTITUTION_HOLDS_COLLECTION"
+  | "ARTIST_CREATES_WORK"
+  | "AGENT_PLAYS_ROLE"
+  | "PROJECT_CONTEXTUALIZES_WORK"
+  | "ORGANIZATION_PUBLISHES_PROJECT"
+  | "ACQUISITION_PROGRAM_PRODUCES_ACQUISITION"
+  | "CURATED_ACQUISITION_BRINGS_TOGETHER_WORK"
+  | "PROGRAM_SELECTS_WORK"
+  | "ACCESSION_ADMITS_WORK"
+  | "COLLECTION_CONTAINS_WORK"
+  | "WORK_CONSTITUTED_BY_COMPONENT"
+  | "WORK_HAS_MANIFESTATION"
+  | "PUBLICATION_INTERPRETS_ENTITY"
+  | "INSTITUTION_PUBLISHES_PUBLICATION"
+  | "ENTITY_HAS_MEDIA"
+  | "EXHIBITION_PRESENTS_WORK";
+
+export interface MuseumPublicRelationRecord {
+  readonly id: string;
+  readonly relationType: MuseumPublicRelationType;
+  readonly sourceEntityId: string;
+  readonly targetEntityId: string;
+  readonly assertionStatus: "asserted" | "observed" | "reserved";
+  readonly qualifier: Readonly<Record<string, unknown>>;
+  readonly sourceRecordIds: readonly string[];
+  readonly sourcePath: string;
+}
+
+export interface MuseumPublicEntityGraph {
+  readonly sourceCommit: string;
+  readonly entityPaths: readonly string[];
+  readonly relationPaths: readonly string[];
+  readonly entities: readonly MuseumPublicEntityRecord[];
+  readonly relations: readonly MuseumPublicRelationRecord[];
+  readonly identityInventory: MuseumPublicIdentityInventory;
+}
+
+export interface MuseumResearchPublication {
+  readonly kind: "research";
+  readonly id: string;
+  readonly slug: string;
+  readonly title: string;
+  readonly publicationKind: string;
+  readonly publicationUri: string;
+  readonly authorIds: readonly string[];
+  readonly subjectIds: readonly string[];
+  readonly sourcePath: string;
+}
+
+export interface MuseumAcquisitionAlias {
+  readonly kind: "acquisition_source_alias";
+  readonly alias: string;
+  readonly acquisitionId: string;
+  readonly sourcePath: string;
+}
+
+export interface MuseumPublicProgramAlias {
+  readonly kind: "program_source_alias";
+  readonly alias: string;
+  readonly programId: string;
+  readonly sourcePath: string;
+}
+
+export interface MuseumPublicRouteAlias {
+  readonly legacyRoute: string;
+  readonly canonicalRoute: string;
+  readonly canonicalEntityId: string;
+  readonly sourcePath: string;
+}
+
+export interface MuseumPublicIdentityInventory {
+  readonly sourcePath: string;
+  /** Canonical curated acquisitions explicitly declared by the identity inventory. */
+  readonly curatedAcquisitionIds: readonly string[];
+  readonly workAliases: readonly MuseumWorkAlias[];
+  readonly acquisitionAliases: readonly MuseumAcquisitionAlias[];
+  readonly programAliases: readonly MuseumPublicProgramAlias[];
+  readonly routeAliases: readonly MuseumPublicRouteAlias[];
+}
+
 export interface MuseumPublication {
   readonly identity: MuseumPublicationIdentity;
   readonly declaredSourcePaths: readonly string[];
   readonly artists: readonly MuseumArtist[];
+  /** Optional additive IA projection; legacy publications may omit it. */
+  readonly organizations?: readonly MuseumOrganization[];
   readonly projects: readonly MuseumProject[];
   readonly gifts: readonly MuseumGift[];
   readonly artworks: readonly MuseumArtwork[];
+  /** Optional canonical Work records; absent on the released legacy source. */
+  readonly works?: readonly MuseumPublicWork[];
+  /** Optional explicit source-ID joins for legacy Work URLs. */
+  readonly workAliases?: readonly MuseumWorkAlias[];
+  /** Exact route aliases published with the typed identity inventory. */
+  readonly routeAliases?: readonly MuseumPublicRouteAlias[];
+  /** Exact typed PUBLIC_ENTITY/PUBLIC_RELATION graph for this commit. */
+  readonly entityGraph?: MuseumPublicEntityGraph;
+  /** Typed research publications; markdown remains a separate source document. */
+  readonly researchPublications?: readonly MuseumResearchPublication[];
+  /** Explicit typed aliases for legacy acquisition and program identifiers. */
+  readonly acquisitionAliases?: readonly MuseumAcquisitionAlias[];
+  /** Optional additive IA projection; legacy publications may omit it. */
+  readonly acquisitionPrograms?: readonly MuseumAcquisitionProgram[];
+  /** Optional additive IA projection; legacy publications may omit it. */
+  readonly curatedAcquisitions?: readonly MuseumCuratedAcquisition[];
+  /** Optional additive IA projection; legacy publications may omit it. */
+  readonly relations?: readonly MuseumEntityRelation[];
+  /** Reserved until a substantive exhibition is published. */
+  readonly exhibitions?: readonly MuseumExhibition[];
   readonly documents: readonly MuseumPublicDocument[];
   readonly institutionalPractice: MuseumInstitutionalPractice;
   readonly dataArchitecture: MuseumDataArchitecture;

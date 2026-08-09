@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   InstitutionalPracticeManuscript,
   InstitutionalPracticePublicationLine,
@@ -40,7 +40,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function MuseumInstitutionProfilePage({
+export async function renderMuseumInstitutionProfilePage({
   params,
 }: MuseumInstitutionProfilePageProps) {
   const { slug } = await params;
@@ -73,7 +73,7 @@ export default async function MuseumInstitutionProfilePage({
   return (
     <article className="tw-min-w-0">
       <Link
-        href="/museum/network/stories/a-field-of-practice"
+        href="/museum/network/research/institutional-practice"
         prefetch={false}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
@@ -108,7 +108,7 @@ export default async function MuseumInstitutionProfilePage({
         className="tw-mt-12 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6"
       >
         <Link
-          href="/museum/network/stories/a-field-of-practice/sources"
+          href="/museum/network/research/institutional-practice/sources"
           prefetch={false}
           className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
@@ -130,7 +130,7 @@ export default async function MuseumInstitutionProfilePage({
           <span aria-hidden="true" />
         ) : (
           <Link
-            href={`/museum/network/stories/a-field-of-practice/${previousProfile.slug}`}
+            href={`/museum/network/research/institutional-practice/${previousProfile.slug}`}
             prefetch={false}
             className="tw-group tw-min-w-0 tw-py-2 tw-text-left tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
@@ -147,7 +147,7 @@ export default async function MuseumInstitutionProfilePage({
         )}
         {nextProfile === undefined ? null : (
           <Link
-            href={`/museum/network/stories/a-field-of-practice/${nextProfile.slug}`}
+            href={`/museum/network/research/institutional-practice/${nextProfile.slug}`}
             prefetch={false}
             className="tw-group tw-min-w-0 tw-py-2 tw-text-left tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-text-right"
           >
@@ -164,5 +164,21 @@ export default async function MuseumInstitutionProfilePage({
         )}
       </nav>
     </article>
+  );
+}
+
+export default async function MuseumInstitutionProfileLegacyPage({
+  params,
+}: MuseumInstitutionProfilePageProps) {
+  const { slug } = await params;
+  const publication = (await getMuseumPublicationState()).publication;
+  const profile = institutionalPracticePublicationIsComplete(publication)
+    ? publication.institutionalPractice.profiles.find(
+        (candidate) => candidate.slug === slug
+      )
+    : undefined;
+  if (profile === undefined) notFound();
+  permanentRedirect(
+    `/museum/network/research/institutional-practice/${encodeURIComponent(slug)}`
   );
 }

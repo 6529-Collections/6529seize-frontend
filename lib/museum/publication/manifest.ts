@@ -46,11 +46,17 @@ function canonicalNumber(value: number): string {
 function canonicalRecord(value: Record<string, unknown>): string {
   const properties = Object.keys(value)
     .sort(compareCanonicalStrings)
-    .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`);
+    .map((key) => `${JSON.stringify(key)}:${canonicalMuseumJson(value[key])}`);
   return `{${properties.join(",")}}`;
 }
 
-function canonicalJson(value: unknown): string {
+/**
+ * Canonical JSON used by the reviewed Museum commitments. The source catalog
+ * decoder supplies the exact commitment fields; this helper is exported so
+ * that the catalog boundary can verify the payload it has decoded without
+ * making route code responsible for hashing.
+ */
+export function canonicalMuseumJson(value: unknown): string {
   if (value === null) {
     return "null";
   }
@@ -63,7 +69,7 @@ function canonicalJson(value: unknown): string {
       return canonicalNumber(value);
     case "object":
       return Array.isArray(value)
-        ? `[${value.map(canonicalJson).join(",")}]`
+        ? `[${value.map(canonicalMuseumJson).join(",")}]`
         : canonicalRecord(value as Record<string, unknown>);
     case "bigint":
     case "function":
@@ -137,7 +143,7 @@ export function parseMuseumPublicationManifest(
   }
 
   if (manifestSha256 !== null) {
-    const canonicalBody = canonicalJson(
+    const canonicalBody = canonicalMuseumJson(
       Object.fromEntries(
         Object.entries(value).filter(
           ([key]) => key !== "manifest_commitment" && key !== "manifest_sha256"

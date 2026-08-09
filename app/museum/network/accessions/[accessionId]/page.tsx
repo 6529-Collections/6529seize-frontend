@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   getMuseumGiftMetadata,
-  MuseumGiftPage,
 } from "@/components/museum/MuseumGiftPage";
+import { museumAcquisitionHrefForLegacyRoute } from "@/lib/museum/publication/routes";
+import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 
 interface MuseumAccessionLegacyRouteProps {
   readonly params: Promise<{ accessionId: string }>;
@@ -12,12 +14,32 @@ export async function generateMetadata({
   params,
 }: MuseumAccessionLegacyRouteProps): Promise<Metadata> {
   const { accessionId } = await params;
-  return getMuseumGiftMetadata(accessionId);
+  const metadata = getMuseumGiftMetadata(accessionId);
+  const { publicationState } = await getMuseumPublicationBundle();
+  const href =
+    publicationState.publication === null
+      ? null
+      : museumAcquisitionHrefForLegacyRoute(
+          publicationState.publication,
+          accessionId,
+          "/museum/network/accessions/"
+        );
+  return href === null
+    ? metadata
+    : { ...metadata, alternates: { canonical: href } };
 }
 
 export default async function MuseumAccessionLegacyRoute({
   params,
 }: MuseumAccessionLegacyRouteProps) {
   const { accessionId } = await params;
-  return <MuseumGiftPage accessionId={accessionId} />;
+  const { publicationState } = await getMuseumPublicationBundle();
+  if (publicationState.publication === null) notFound();
+  const href = museumAcquisitionHrefForLegacyRoute(
+    publicationState.publication,
+    accessionId,
+    "/museum/network/accessions/"
+  );
+  if (href === null) notFound();
+  permanentRedirect(href);
 }

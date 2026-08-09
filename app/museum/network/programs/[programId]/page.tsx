@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
 import {
   MuseumJsonDisclosure,
@@ -20,8 +20,15 @@ import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
 import {
+  museumLegacyAcquisitionProgramHref,
+} from "@/lib/museum/publication/routes";
+import {
+  museumWorkHrefForSourceId,
+  resolveMuseumAcquisitionProgramSlug,
+} from "@/lib/museum/publication/ia";
+import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
+import {
   displayMuseumStatus,
-  museumSlug,
   museumSlugMatches,
   statusTone,
 } from "@/lib/museum/presentation";
@@ -50,6 +57,20 @@ export default async function MuseumProgramDetailPage({
   params,
 }: ProgramDetailProps) {
   const { programId } = await params;
+  const { publicationState: bundlePublicationState } =
+    await getMuseumPublicationBundle();
+  if (bundlePublicationState.publication !== null) {
+    const programSlug = resolveMuseumAcquisitionProgramSlug(
+      bundlePublicationState.publication,
+      programId
+    );
+    if (programSlug !== null) {
+      permanentRedirect(`/museum/network/acquisition-programs/${encodeURIComponent(programSlug)}`);
+    }
+  } else {
+    const canonicalProgramHref = museumLegacyAcquisitionProgramHref(programId);
+    if (canonicalProgramHref !== null) permanentRedirect(canonicalProgramHref);
+  }
   const [view, publicationState] = await Promise.all([
     getMuseumView(),
     getMuseumPublicationState(),
@@ -59,17 +80,20 @@ export default async function MuseumProgramDetailPage({
   );
   if (!program) notFound();
   const isKeysAndGates = program.programId === KEYS_AND_GATES_PROGRAM_ID;
-  const programEssay = isKeysAndGates
-    ? view.methodology.find(
-        (document) => document.path === "docs/programs/keys-and-gates.md"
-      )
-    : undefined;
+  const typedProgram = publicationState.publication?.acquisitionPrograms?.find(
+    (item) => item.id === program.programId || item.slug === program.programId
+  );
+  const programDocuments =
+    typedProgram === undefined || publicationState.publication === null
+      ? []
+      : publicationState.publication.documents.filter((document) =>
+          typedProgram.sourceDocumentIds.includes(document.id)
+        );
   const sourceCommit = publicationState.publication?.identity.commit ?? null;
   const programSourceHref =
     sourceCommit === null
       ? buildMuseumRawUrl(program.sourcePath)
-      : (buildImmutableMuseumBlobUrl(sourceCommit, program.sourcePath) ??
-        buildMuseumRawUrl(program.sourcePath));
+      : buildImmutableMuseumBlobUrl(sourceCommit, program.sourcePath);
   const selectionPlaceMessageKey = isKeysAndGates
     ? "museum.network.programs.detail.winnerPlace"
     : "museum.network.programs.detail.selectionPlace";
@@ -77,7 +101,7 @@ export default async function MuseumProgramDetailPage({
   return (
     <article>
       <Link
-        href="/museum/network/programs"
+        href="/museum/network/acquisitions"
         className="hover:tw-text-primary-200 tw-text-sm tw-font-medium tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         {t(DEFAULT_LOCALE, "museum.network.programs.detail.back")}
@@ -187,7 +211,7 @@ export default async function MuseumProgramDetailPage({
             </li>
           </ol>
           <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/30 tw-px-6 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-8">
-            {t(DEFAULT_LOCALE, "museum.network.programs.detail.statusBoundary")}
+            {t(DEFAULT_LOCALE, "museum.network.programs.detail.selectionStatus")}
           </p>
         </section>
       )}
@@ -222,67 +246,81 @@ export default async function MuseumProgramDetailPage({
           )}
         </div>
         <div className="tw-mt-4 tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-3">
-          {program.selectedWorks.map((work) => (
-            <MuseumRecordCard
-              key={work.recordId}
-              href={`/museum/network/objects/${museumSlug(work.recordId)}`}
-              eyebrow={work.recordId}
-              title={work.title}
-              description={work.artist}
-              media={work.media ?? undefined}
-              meta={
-                work.winnerPlace === null
-                  ? undefined
-                  : t(DEFAULT_LOCALE, selectionPlaceMessageKey, {
-                      place: work.winnerPlace,
-                    })
-              }
-            >
-              <MuseumStatusBadge
-                label={displayMuseumStatus(work.status)}
-                tone={statusTone(work.status)}
-              />
-            </MuseumRecordCard>
-          ))}
+          {program.selectedWorks.map((work) => {
+            const href =
+              publicationState.publication === null
+                ? null
+                  : museumWorkHrefForSourceId(
+                      publicationState.publication,
+                      work.recordId,
+                      view
+                    );
+            if (href === null) return null;
+            return (
+              <MuseumRecordCard
+                key={work.recordId}
+                href={href}
+                eyebrow={work.recordId}
+                title={work.title}
+                description={work.artist}
+                media={work.media ?? undefined}
+                meta={
+                  work.winnerPlace === null
+                    ? undefined
+                    : t(DEFAULT_LOCALE, selectionPlaceMessageKey, {
+                        place: work.winnerPlace,
+                      })
+                }
+              >
+                <MuseumStatusBadge
+                  label={displayMuseumStatus(work.status)}
+                  tone={statusTone(work.status)}
+                />
+              </MuseumRecordCard>
+            );
+          })}
         </div>
       </section>
-      {programEssay && (
+      {programDocuments.map((programDocument) => (
         <section
+          key={programDocument.id}
           className="tw-mt-14 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
-          aria-labelledby="program-essay-title"
+          aria-labelledby={`program-document-${programDocument.id}`}
         >
           <h2
-            id="program-essay-title"
+            id={`program-document-${programDocument.id}`}
             className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
           >
-            {t(DEFAULT_LOCALE, "museum.network.programs.detail.programEssay")}
+            {programDocument.title}
           </h2>
           <MuseumMarkdown
             className="tw-mt-6"
             embeddedDocument
             sourceCommit={sourceCommit}
-            sourcePath={programEssay.path}
+            sourcePath={programDocument.sourcePath}
           >
-            {programEssay.markdown}
+            {programDocument.markdown}
           </MuseumMarkdown>
         </section>
-      )}
+      ))}
       <div className="tw-mt-6">
         <MuseumJsonDisclosure
           label={t(DEFAULT_LOCALE, "museum.network.detail.technicalEvidence")}
           value={program}
         />
       </div>
-      <p className="tw-mt-4 tw-text-xs tw-text-iron-500">
-        <a
-          href={programSourceHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tw-underline tw-underline-offset-4 hover:tw-text-iron-300"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.detail.sourceRecord")}
-        </a>
-      </p>
+      {programSourceHref === null ? null : (
+        <p className="tw-mt-4 tw-text-xs tw-text-iron-500">
+          <a
+            href={programSourceHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tw-underline tw-underline-offset-4 hover:tw-text-iron-300"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.detail.sourceRecord")}
+          </a>
+        </p>
+      )}
     </article>
   );
 }
