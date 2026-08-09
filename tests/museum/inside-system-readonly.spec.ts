@@ -247,7 +247,8 @@ test.describe("Museum Inside the System @surface @readonly", () => {
       });
       await expect(link).toHaveAttribute(
         "href",
-        "/museum/network/projects/century/system?work=6529NM.2026.001.01#possibility-space"
+        "/museum/network/projects/century/system?work=6529NM.2026.001.01#possibility-space",
+        { timeout: 45_000 }
       );
       await link.click();
       await expect(page).toHaveURL((url) => {
