@@ -33,37 +33,43 @@ export { verifyMuseumPublicationCatalogContentHash };
 export { parseMuseumPublicationJson } from "./catalog-json";
 export { decodePublicationAssemblyBundle } from "./catalog-bundle-decoder";
 
-export const museumPublicationCatalogResolver: MuseumPublicationCatalogResolver = {
-  pointerPath: MUSEUM_PUBLICATION_CATALOG_POINTER_PATH,
-  decodePointer: decodePublicationCatalogPointer,
-  decodeCatalog: decodePublicationCatalog,
-  decodeAssemblyBundle: decodePublicationAssemblyBundle,
-  verifyCatalogEnvelope(value, catalog) {
-    const root = asRecord(value, "publication_catalog_envelope");
-    const envelope = asRecord(root.envelope, "publication_catalog_envelope");
-    const contentHash = asRecord(
-      envelope.contentHash,
-      "publication_catalog_content_hash"
-    );
-    if (
-      envelope.recordType !== "PUBLICATION_CATALOG" ||
-      contentHash.algorithm !== 1 ||
-      contentHash.digest !== catalog.contentHash.digest ||
-      contentHash.canonicalizationId !== catalog.contentHash.canonicalizationId ||
-      envelope.uri !==
-        `https://6529networkmuseum.org/release/catalog/${catalog.id}.json`
-    ) {
-      throw new Error("publication_catalog_envelope_mismatch");
-    }
-  },
-  verifyDocumentCommitment: verifyDocumentJcs,
-};
+export const museumPublicationCatalogResolver: MuseumPublicationCatalogResolver =
+  {
+    pointerPath: MUSEUM_PUBLICATION_CATALOG_POINTER_PATH,
+    decodePointer: decodePublicationCatalogPointer,
+    decodeCatalog: decodePublicationCatalog,
+    decodeAssemblyBundle: decodePublicationAssemblyBundle,
+    verifyCatalogEnvelope(value, catalog) {
+      const root = asRecord(value, "publication_catalog_envelope");
+      const envelope = asRecord(root.envelope, "publication_catalog_envelope");
+      const contentHash = asRecord(
+        envelope.contentHash,
+        "publication_catalog_content_hash"
+      );
+      if (
+        envelope.recordType !== "PUBLICATION_CATALOG" ||
+        contentHash.algorithm !== 1 ||
+        contentHash.digest !== catalog.contentHash.digest ||
+        contentHash.canonicalizationId !==
+          catalog.contentHash.canonicalizationId ||
+        envelope.uri !==
+          `https://6529networkmuseum.org/release/catalog/${catalog.id}.json`
+      ) {
+        throw new Error("publication_catalog_envelope_mismatch");
+      }
+    },
+    verifyDocumentCommitment: verifyDocumentJcs,
+  };
 
 export async function resolveMuseumPublicationCatalog(input: {
   readonly resolvedMainCommit: string;
   readonly resolver: MuseumPublicationCatalogResolver;
   readonly requiredPaths: readonly string[];
-  readonly fetchBytes: (url: string, maxBytes: number, accept: string) => Promise<Uint8Array>;
+  readonly fetchBytes: (
+    url: string,
+    maxBytes: number,
+    accept: string
+  ) => Promise<Uint8Array>;
 }): Promise<MuseumPublicationCatalogFetchResult> {
   if (
     !isExactGitCommit(input.resolvedMainCommit) ||
@@ -86,7 +92,10 @@ export async function resolveMuseumPublicationCatalog(input: {
       new TextDecoder("utf-8", { fatal: true }).decode(pointerBytes)
     );
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith("publication_catalog_")) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith("publication_catalog_")
+    ) {
       throw error;
     }
     throw new Error("publication_catalog_pointer_json_invalid");
@@ -111,7 +120,10 @@ export async function resolveMuseumPublicationCatalog(input: {
       new TextDecoder("utf-8", { fatal: true }).decode(catalogBytes)
     );
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith("publication_catalog_")) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith("publication_catalog_")
+    ) {
       throw error;
     }
     throw new Error("publication_catalog_json_invalid");

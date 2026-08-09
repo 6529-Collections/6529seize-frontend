@@ -19,7 +19,10 @@ import {
   requiredString,
   stringArray,
 } from "./publicEntityGraphPrimitives";
-import { assertCanonicalIdentity, assertProfile } from "./publicEntityGraphProfiles";
+import {
+  assertCanonicalIdentity,
+  assertProfile,
+} from "./publicEntityGraphProfiles";
 
 export function parseMuseumEntityRecord(
   document: MuseumSourceDocument,
@@ -73,7 +76,11 @@ export function parseMuseumEntityRecord(
   return {
     id: entityId,
     entityType,
-    label: requiredString(payload, "preferred_label", "public_entity_graph_label"),
+    label: requiredString(
+      payload,
+      "preferred_label",
+      "public_entity_graph_label"
+    ),
     slug: identity.slug,
     canonicalRoute: identity.route,
     pageExposure: identity.exposure,
@@ -202,7 +209,12 @@ function validateRelationQualifier(
 function isAllowedSelectionStatus(value: unknown): boolean {
   return (
     typeof value === "string" &&
-    new Set(["proposed", "selected_unminted", "selected", "not_established"]).has(value)
+    new Set([
+      "proposed",
+      "selected_unminted",
+      "selected",
+      "not_established",
+    ]).has(value)
   );
 }
 

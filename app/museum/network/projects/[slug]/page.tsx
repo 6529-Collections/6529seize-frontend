@@ -23,13 +23,13 @@ import type { MuseumPublication } from "@/lib/museum/publication/types";
 import {
   buildMuseumEntityContext,
   buildMuseumProjectRelations,
-  museumWorkHrefForSourceId,
 } from "@/lib/museum/publication/ia";
 import {
   museumArtistHref,
   museumOrganizationHref,
   museumProjectHref,
   museumWorkHref,
+  museumWorkHrefForSourceId,
 } from "@/lib/museum/publication/routes";
 interface MuseumProjectPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -44,16 +44,19 @@ function TypedProjectPage({
 }) {
   const works = (publication.works ?? []).filter(
     (work) =>
-      work.projectId === project.id || project.workIds?.includes(work.id) === true
+      work.projectId === project.id ||
+      project.workIds?.includes(work.id) === true
   );
   const artists = publication.artists.filter(
     (artist) =>
       project.artistIds?.includes(artist.id) === true ||
       artist.id === project.artistId
   );
-  const organizations = publication.organizations?.filter((organization) =>
-    project.organizationIds?.includes(organization.id) === true
-  ) ?? [];
+  const organizations =
+    publication.organizations?.filter(
+      (organization) =>
+        project.organizationIds?.includes(organization.id) === true
+    ) ?? [];
   const relations = buildMuseumProjectRelations(publication, project.slug);
   const context = buildMuseumEntityContext({
     kind: "project",
@@ -62,7 +65,10 @@ function TypedProjectPage({
     canonicalHref: museumProjectHref(project.slug),
     breadcrumbs: [
       { label: "6529 Network Museum", href: "/museum/network" },
-      { label: t(DEFAULT_LOCALE, "museum.network.projects.title"), href: "/museum/network/projects" },
+      {
+        label: t(DEFAULT_LOCALE, "museum.network.projects.title"),
+        href: "/museum/network/projects",
+      },
       { label: project.title },
     ],
     primaryRelations: relations.primaryRelations,
@@ -91,17 +97,29 @@ function TypedProjectPage({
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
-        ariaLabel={t(DEFAULT_LOCALE, "museum.network.accessibility.breadcrumbs")}
+        ariaLabel={t(
+          DEFAULT_LOCALE,
+          "museum.network.accessibility.breadcrumbs"
+        )}
         items={context.breadcrumbs}
       />
       <header className="tw-mt-6 tw-max-w-4xl">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">{t(DEFAULT_LOCALE, "museum.network.projects.project")}</p>
-        <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-5xl">{project.title}</h1>
+        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+          {t(DEFAULT_LOCALE, "museum.network.projects.project")}
+        </p>
+        <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-5xl">
+          {project.title}
+        </h1>
         <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
           {artists.map((artist, index) => (
             <span key={artist.id}>
               {index > 0 ? ", " : null}
-              <Link href={museumArtistHref(artist.slug)} className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200">{artist.preferredName}</Link>
+              <Link
+                href={museumArtistHref(artist.slug)}
+                className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4"
+              >
+                {artist.preferredName}
+              </Link>
             </span>
           ))}
         </p>
@@ -109,30 +127,68 @@ function TypedProjectPage({
       <MuseumEntityContext
         context={context}
         labels={{
-          ariaLabel: t(DEFAULT_LOCALE, "museum.network.accessibility.entityContext"),
+          ariaLabel: t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.entityContext"
+          ),
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
       />
       <section className="tw-mt-10" aria-labelledby="typed-project-works-title">
-        <h2 id="typed-project-works-title" className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">{t(DEFAULT_LOCALE, "museum.network.projects.works")}</h2>
+        <h2
+          id="typed-project-works-title"
+          className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+        >
+          {t(DEFAULT_LOCALE, "museum.network.projects.works")}
+        </h2>
         <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
           {works.map((work) => {
             const media = work.media[0];
             return media ? (
-              <MuseumPublicMediaFigure key={work.id} src={media.url} width={media.width} height={media.height} alt={media.altText ?? ""} href={museumWorkHref(work.id)} title={work.title} />
+              <MuseumPublicMediaFigure
+                key={work.id}
+                src={media.url}
+                width={media.width}
+                height={media.height}
+                alt={media.altText ?? ""}
+                href={museumWorkHref(work.id)}
+                title={work.title}
+              />
             ) : (
-              <Link key={work.id} href={museumWorkHref(work.id)} className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-primary-300 tw-underline-offset-4 hover:tw-text-primary-200 hover:tw-underline">{work.title}</Link>
+              <Link
+                key={work.id}
+                href={museumWorkHref(work.id)}
+                className="hover:tw-text-primary-200 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-primary-300 tw-underline-offset-4 hover:tw-underline"
+              >
+                {work.title}
+              </Link>
             );
           })}
         </div>
       </section>
       {documents.map((document) => (
-        <section key={document.id} className="tw-mt-14 tw-max-w-4xl tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10">
-          <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">{document.title}</h2>
-          <MuseumMarkdown className="tw-mt-6" embeddedDocument sourceCommit={publication.identity.commit} sourcePath={document.sourcePath}>{document.markdown}</MuseumMarkdown>
+        <section
+          key={document.id}
+          className="tw-mt-14 tw-max-w-4xl tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        >
+          <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+            {document.title}
+          </h2>
+          <MuseumMarkdown
+            className="tw-mt-6"
+            embeddedDocument
+            sourceCommit={publication.identity.commit}
+            sourcePath={document.sourcePath}
+          >
+            {document.markdown}
+          </MuseumMarkdown>
         </section>
       ))}
-      <MuseumRelatedEntities entities={[...context.secondaryRelations]} headingId="typed-project-related-title" title={t(DEFAULT_LOCALE, "museum.network.projects.related")} />
+      <MuseumRelatedEntities
+        entities={[...context.secondaryRelations]}
+        headingId="typed-project-related-title"
+        title={t(DEFAULT_LOCALE, "museum.network.projects.related")}
+      />
     </article>
   );
 }
@@ -166,7 +222,12 @@ export default async function MuseumProjectPage({
     notFound();
   }
   if (publicationState.publication.works !== undefined) {
-    return <TypedProjectPage project={project} publication={publicationState.publication} />;
+    return (
+      <TypedProjectPage
+        project={project}
+        publication={publicationState.publication}
+      />
+    );
   }
   const artist = publicationState.publication.artists.find(
     (item) => item.id === project.artistId

@@ -23,7 +23,7 @@ export const MUSEUM_PUBLICATION_BUNDLE_PATH =
 export const MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES = 8_000_000 as const;
 export const MUSEUM_PUBLICATION_CANONICALIZATION_ID =
   "0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044" as const;
-export const MUSEUM_CATALOG_RAW_BYTE_MODE = "raw" as const;
+const MUSEUM_CATALOG_RAW_BYTE_MODE = "raw" as const;
 export const PUBLICATION_CATALOG_SCHEMA =
   "https://6529networkmuseum.org/schemas/publication-catalog-v1.json" as const;
 export const PUBLICATION_CATALOG_POINTER_SCHEMA =
@@ -34,9 +34,6 @@ export const PUBLICATION_BUNDLE_INVENTORY_SCHEMA =
   "https://6529networkmuseum.org/schemas/public-publication-bundle-v1.json" as const;
 export const PUBLICATION_INVENTORY_SCHEMA =
   "https://6529networkmuseum.org/schemas/public-publication-inventory-v1.json" as const;
-
-/** Internal decoded form of the source wire's byte_mode field. */
-export type MuseumCatalogByteMode = "lf-normalized" | typeof MUSEUM_CATALOG_RAW_BYTE_MODE;
 
 export interface MuseumPublicationCatalogPointer {
   readonly catalogPath: string;
@@ -177,7 +174,9 @@ export interface MuseumPublicationCatalogFetchResult {
   readonly catalog: MuseumPublicationCatalog;
 }
 
-export function isPlainRecord(value: unknown): value is Record<string, unknown> {
+export function isPlainRecord(
+  value: unknown
+): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
@@ -282,7 +281,10 @@ export function assertSha256(value: MuseumSha256, code: string): void {
   if (!/^sha256:[a-f0-9]{64}$/u.test(value)) throw new Error(code);
 }
 
-export function assertKeccak(value: string, code: string): asserts value is `0x${string}` {
+export function assertKeccak(
+  value: string,
+  code: string
+): asserts value is `0x${string}` {
   if (!/^0x[a-f0-9]{64}$/u.test(value)) throw new Error(code);
 }
 
@@ -434,7 +436,10 @@ function assertCatalogManifest(catalog: MuseumPublicationCatalog): void {
   }
   assertSafeMuseumRepositoryPath(catalog.manifest.path);
   assertGovernedMuseumPath(catalog.manifest.path);
-  assertSha256(catalog.manifest.fileSha256, "publication_catalog_manifest_file_hash");
+  assertSha256(
+    catalog.manifest.fileSha256,
+    "publication_catalog_manifest_file_hash"
+  );
   if (
     !Number.isSafeInteger(catalog.manifest.fileSize) ||
     catalog.manifest.fileSize < 0
@@ -442,7 +447,10 @@ function assertCatalogManifest(catalog: MuseumPublicationCatalog): void {
     throw new Error("publication_catalog_manifest_size");
   }
   assertSha256(catalog.manifest.sha256, "publication_catalog_manifest_hash");
-  assertKeccak(catalog.manifest.jcsKeccak, "publication_catalog_manifest_keccak");
+  assertKeccak(
+    catalog.manifest.jcsKeccak,
+    "publication_catalog_manifest_keccak"
+  );
   if (catalog.manifest.canonicalizationId.trim().length === 0) {
     throw new Error("publication_catalog_manifest_canonicalization");
   }
@@ -587,7 +595,9 @@ function assertCatalogBundle(
     catalog.sourceCommit,
     "bundle"
   );
-  if (catalog.assemblyBundle.descriptor.path !== MUSEUM_PUBLICATION_BUNDLE_PATH) {
+  if (
+    catalog.assemblyBundle.descriptor.path !== MUSEUM_PUBLICATION_BUNDLE_PATH
+  ) {
     throw new Error("publication_catalog_bundle_path");
   }
   if (
@@ -649,7 +659,8 @@ function assertCatalogBundle(
     catalog.assemblyBundle.fileSize < 0 ||
     !Number.isSafeInteger(catalog.assemblyBundle.rawFileSize) ||
     catalog.assemblyBundle.rawFileSize < 0 ||
-    catalog.assemblyBundle.descriptor.size !== catalog.assemblyBundle.rawFileSize ||
+    catalog.assemblyBundle.descriptor.size !==
+      catalog.assemblyBundle.rawFileSize ||
     catalog.assemblyBundle.descriptor.sha256 !==
       catalog.assemblyBundle.rawFileSha256
   ) {

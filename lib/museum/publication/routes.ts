@@ -10,31 +10,15 @@ import type { MuseumView } from "@/lib/museum/types";
 export const MUSEUM_CASEY_ACQUISITION_ID = "6529NM-CA-2026-001" as const;
 export const MUSEUM_KEYS_AND_GATES_ACQUISITION_ID =
   "6529NM-CA-2026-002" as const;
-export const MUSEUM_CONFLICT_AT_ITS_EDGES_ACQUISITION_ID =
-  "6529NM-CA-2026-003" as const;
-
 export const MUSEUM_CASEY_ACQUISITION_SLUG =
   "the-system-in-seven-states" as const;
-export const MUSEUM_KEYS_AND_GATES_ACQUISITION_SLUG =
-  "keys-and-gates" as const;
-export const MUSEUM_KEYS_AND_GATES_PROGRAM_SLUG = "keys-and-gates" as const;
-export const MUSEUM_GIFT_ACQUISITIONS_PROGRAM_SLUG =
+export const MUSEUM_KEYS_AND_GATES_ACQUISITION_SLUG = "keys-and-gates" as const;
+const MUSEUM_KEYS_AND_GATES_PROGRAM_SLUG = "keys-and-gates" as const;
+const MUSEUM_GIFT_ACQUISITIONS_PROGRAM_SLUG =
   "gift-acquisitions" as const;
 
 export function museumCollectionHref(): string {
   return "/museum/network/collection";
-}
-
-export function museumWorksHref(): string {
-  return "/museum/network/works";
-}
-
-export function museumArtistsHref(): string {
-  return "/museum/network/artists";
-}
-
-export function museumProjectsHref(): string {
-  return "/museum/network/projects";
 }
 
 export function museumAcquisitionsHref(): string {
@@ -44,20 +28,6 @@ export function museumAcquisitionsHref(): string {
 export function museumAcquisitionProgramsHref(): string {
   return "/museum/network/acquisition-programs";
 }
-
-export function museumOrganizationsHref(): string {
-  return "/museum/network/organizations";
-}
-
-export type MuseumReservedEntityType =
-  | "artist"
-  | "organization"
-  | "project"
-  | "work"
-  | "curated-acquisition"
-  | "acquisition-program"
-  | "research"
-  | "exhibition";
 
 export function museumWorkHref(objectId: string): string {
   return `/museum/network/works/${encodeURIComponent(objectId)}`;
@@ -70,7 +40,11 @@ export function isMuseumCanonicalWorkId(value: string): boolean {
 function routeAliasesForPublication(
   publication: MuseumPublication
 ): readonly NonNullable<MuseumPublication["routeAliases"]>[number][] {
-  return publication.routeAliases ?? publication.entityGraph?.identityInventory.routeAliases ?? [];
+  return (
+    publication.routeAliases ??
+    publication.entityGraph?.identityInventory.routeAliases ??
+    []
+  );
 }
 
 function canonicalRouteAliasForSourceId(
@@ -85,7 +59,9 @@ function canonicalRouteAliasForSourceId(
     );
     try {
       return (
-        legacyPrefixes.some((prefix) => candidate.legacyRoute.startsWith(prefix)) &&
+        legacyPrefixes.some((prefix) =>
+          candidate.legacyRoute.startsWith(prefix)
+        ) &&
         decodeURIComponent(lastSegment) === sourceId &&
         candidate.canonicalRoute.startsWith(canonicalPrefix)
       );
@@ -112,9 +88,7 @@ export function museumAcquisitionHref(slug: string): string {
  * Legacy URL joins are explicit fixture joins. A legacy accession/program
  * value is never transformed into an acquisition identity by string rules.
  */
-export function museumLegacyAcquisitionHref(
-  value: string
-): string | null {
+function museumLegacyAcquisitionHref(value: string): string | null {
   if (value === "6529NM.2026.001") {
     return museumAcquisitionHref(MUSEUM_CASEY_ACQUISITION_SLUG);
   }
@@ -170,13 +144,21 @@ export function resolveMuseumWorkId(
   view: MuseumView | null = null
 ): string | null {
   if (publication.works === undefined) {
-    return publication.artworks.some((artwork) => artwork.id === sourceObjectId) ||
-      view?.objects.some((object) => object.objectId === sourceObjectId) === true
+    return publication.artworks.some(
+      (artwork) => artwork.id === sourceObjectId
+    ) ||
+      view?.objects.some((object) => object.objectId === sourceObjectId) ===
+        true
       ? sourceObjectId
       : null;
   }
-  if (publication.works.some((work) => work.id === sourceObjectId)) return sourceObjectId;
-  return publication.workAliases?.find((alias) => alias.sourceObjectId === sourceObjectId)?.workId ?? null;
+  if (publication.works.some((work) => work.id === sourceObjectId))
+    return sourceObjectId;
+  return (
+    publication.workAliases?.find(
+      (alias) => alias.sourceObjectId === sourceObjectId
+    )?.workId ?? null
+  );
 }
 
 export function museumWorkHrefForSourceId(
@@ -216,7 +198,9 @@ export function museumCollectionWorkHrefForSourceId(
   if (typedWork !== undefined) {
     return typedWork.collectionMembership ? museumWorkHref(workId) : null;
   }
-  const legacyArtwork = publication.artworks.find((artwork) => artwork.id === sourceObjectId);
+  const legacyArtwork = publication.artworks.find(
+    (artwork) => artwork.id === sourceObjectId
+  );
   return legacyArtwork?.institutionalStatus === "accessioned"
     ? museumWorkHrefForSourceId(publication, sourceObjectId, view)
     : null;
@@ -232,7 +216,8 @@ export function resolveMuseumAcquisitionSlug(
       acquisition.slug === sourceId ||
       acquisition.sourceAliases?.includes(sourceId) === true ||
       publication.acquisitionAliases?.some(
-        (alias) => alias.acquisitionId === acquisition.id && alias.alias === sourceId
+        (alias) =>
+          alias.acquisitionId === acquisition.id && alias.alias === sourceId
       ) === true
   );
   if (typed !== undefined) return typed.slug;
@@ -313,10 +298,7 @@ export function resolveMuseumAcquisitionProgramSlug(
   const routeAlias = canonicalRouteAliasForSourceId(
     publication,
     sourceId,
-    [
-      "/museum/network/acquisition-programs/",
-      "/museum/network/programs/",
-    ],
+    ["/museum/network/acquisition-programs/"],
     "/museum/network/acquisition-programs/"
   );
   if (routeAlias !== null) return routeAlias.split("/").at(-1) ?? null;

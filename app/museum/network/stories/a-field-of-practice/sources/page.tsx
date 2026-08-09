@@ -77,7 +77,5 @@ export async function renderMuseumInstitutionalPracticeSourcesPage() {
 }
 
 export default function MuseumInstitutionalPracticeSourcesLegacyPage() {
-  permanentRedirect(
-    "/museum/network/research/institutional-practice/sources"
-  );
+  permanentRedirect("/museum/network/research/institutional-practice/sources");
 }

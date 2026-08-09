@@ -16,13 +16,13 @@ import { t } from "@/i18n/messages";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import {
   buildMuseumEntityContext,
-  museumWorkHrefForSourceId,
 } from "@/lib/museum/publication/ia";
 import {
   museumAcquisitionProgramHref,
   museumAcquisitionsHref,
   museumApprovedCollectionSlug,
   museumWorkHref,
+  museumWorkHrefForSourceId,
 } from "@/lib/museum/publication/routes";
 import type { MuseumPublicWork } from "@/lib/museum/publication/types";
 import type { MuseumProgram, MuseumView } from "@/lib/museum/types";
@@ -39,7 +39,11 @@ function legacyGiftAcquisitionsProgram(
   view: MuseumView | null,
   slug: string
 ): MuseumProgram | undefined {
-  if (slug !== "gift-acquisitions" || view === null || view.approvedCollections.length === 0) {
+  if (
+    slug !== "gift-acquisitions" ||
+    view === null ||
+    view.approvedCollections.length === 0
+  ) {
     return undefined;
   }
   return {
@@ -76,11 +80,18 @@ export async function generateMetadata({
   );
   const legacy =
     view?.programs.find(
-      (program) => program.programId === slug || program.programId === "6529NM-AP-01"
+      (program) =>
+        program.programId === slug || program.programId === "6529NM-AP-01"
     ) ?? legacyGiftAcquisitionsProgram(view, slug);
   return getAppMetadata({
-    title: typed?.title ?? legacy?.title ?? t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title"),
-    description: t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.description"),
+    title:
+      typed?.title ??
+      legacy?.title ??
+      t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title"),
+    description: t(
+      DEFAULT_LOCALE,
+      "museum.network.acquisitionPrograms.description"
+    ),
   });
 }
 
@@ -113,24 +124,33 @@ export default async function MuseumAcquisitionProgramPage({
     ) ?? legacyGiftAcquisitionsProgram(view, slug);
   if (typed === undefined && legacy === undefined) notFound();
 
-  const typedWorks = typed === undefined
-    ? []
-    : (publication.works ?? []).filter(
-        (work) =>
-          work.programIds.includes(typed.id) ||
-          typed.acquisitionIds.some((acquisitionId) => work.acquisitionIds.includes(acquisitionId))
-      );
-  const selectedWorks = typed === undefined ? legacy?.selectedWorks ?? [] : [];
+  const typedWorks =
+    typed === undefined
+      ? []
+      : (publication.works ?? []).filter(
+          (work) =>
+            work.programIds.includes(typed.id) ||
+            typed.acquisitionIds.some((acquisitionId) =>
+              work.acquisitionIds.includes(acquisitionId)
+            )
+        );
+  const selectedWorks =
+    typed === undefined ? (legacy?.selectedWorks ?? []) : [];
   const title = typed?.title ?? legacy?.title ?? "";
   const sourcePath = typed?.sourcePaths[0] ?? legacy?.sourcePath ?? null;
   const context = buildMuseumEntityContext({
     kind: "acquisition_program",
     id: typed?.id ?? legacy?.programId ?? slug,
     label: title,
-    canonicalHref: museumAcquisitionProgramHref(typed?.slug ?? "keys-and-gates"),
+    canonicalHref: museumAcquisitionProgramHref(
+      typed?.slug ?? "keys-and-gates"
+    ),
     breadcrumbs: [
       { label: "6529 Network Museum", href: "/museum/network" },
-      { label: t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title"), href: "/museum/network/acquisition-programs" },
+      {
+        label: t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title"),
+        href: "/museum/network/acquisition-programs",
+      },
       { label: title },
     ],
     ...(typedWorks[0]?.status === undefined
@@ -160,15 +180,21 @@ export default async function MuseumAcquisitionProgramPage({
     sourceCommit: publication.identity.commit,
   });
   if (context === null) return <MuseumPublicationUnavailable />;
-  const documents = typed === undefined
-    ? []
-    : publication.documents.filter((document) => typed.sourceDocumentIds.includes(document.id));
+  const documents =
+    typed === undefined
+      ? []
+      : publication.documents.filter((document) =>
+          typed.sourceDocumentIds.includes(document.id)
+        );
   const approvedCollections =
-    legacy?.programId === "AP-GIFT-01" ? view?.approvedCollections ?? [] : [];
+    legacy?.programId === "AP-GIFT-01" ? (view?.approvedCollections ?? []) : [];
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
-        ariaLabel={t(DEFAULT_LOCALE, "museum.network.accessibility.breadcrumbs")}
+        ariaLabel={t(
+          DEFAULT_LOCALE,
+          "museum.network.accessibility.breadcrumbs"
+        )}
         items={context.breadcrumbs}
       />
       <Link
@@ -181,22 +207,37 @@ export default async function MuseumAcquisitionProgramPage({
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.eyebrow")}
         </p>
-        <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-5xl">{title}</h1>
+        <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-5xl">
+          {title}
+        </h1>
         <p className="tw-m-0 tw-mt-5 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-          {typed ? t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.detailDescription") : legacy?.curatorialFrame}
+          {typed
+            ? t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitionPrograms.detailDescription"
+              )
+            : legacy?.curatorialFrame}
         </p>
       </header>
       <MuseumEntityContext
         context={context}
         labels={{
-          ariaLabel: t(DEFAULT_LOCALE, "museum.network.accessibility.entityContext"),
+          ariaLabel: t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.entityContext"
+          ),
           statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
       />
       {typedWorks.length > 0 ? (
         <section className="tw-mt-10" aria-labelledby="program-works-title">
-          <h2 id="program-works-title" className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">{t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}</h2>
+          <h2
+            id="program-works-title"
+            className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}
+          </h2>
           <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
             {typedWorks.map((work) => {
               const media = publicWorkMedia(work);
@@ -211,33 +252,69 @@ export default async function MuseumAcquisitionProgramPage({
                   title={work.title}
                 />
               ) : (
-                <Link key={work.id} href={museumWorkHref(work.id)} className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-base tw-font-semibold tw-text-primary-300 tw-underline-offset-4 hover:tw-text-primary-200 hover:tw-underline">{work.title}</Link>
+                <Link
+                  key={work.id}
+                  href={museumWorkHref(work.id)}
+                  className="hover:tw-text-primary-200 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-base tw-font-semibold tw-text-primary-300 tw-underline-offset-4 hover:tw-underline"
+                >
+                  {work.title}
+                </Link>
               );
             })}
           </div>
         </section>
       ) : null}
       {selectedWorks.length > 0 ? (
-        <section className="tw-mt-10" aria-labelledby="legacy-program-works-title">
-          <h2 id="legacy-program-works-title" className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">{t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}</h2>
+        <section
+          className="tw-mt-10"
+          aria-labelledby="legacy-program-works-title"
+        >
+          <h2
+            id="legacy-program-works-title"
+            className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}
+          </h2>
           <div className="tw-mt-6 tw-grid tw-gap-6 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
             {selectedWorks.map((work) => {
-              const href = museumWorkHrefForSourceId(publication, work.recordId, view);
+              const href = museumWorkHrefForSourceId(
+                publication,
+                work.recordId,
+                view
+              );
               const content = work.media ? (
                 <>
                   <div className="tw-aspect-square tw-overflow-hidden tw-bg-black">
-                    <MuseumProgramImage media={work.media} sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw" className="tw-h-full tw-w-full tw-object-contain" />
+                    <MuseumProgramImage
+                      media={work.media}
+                      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+                      className="tw-h-full tw-w-full tw-object-contain"
+                    />
                   </div>
-                  <p className="tw-m-0 tw-mt-3 tw-text-base tw-font-semibold tw-text-iron-50">{work.title}</p>
-                  <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">{work.artist}</p>
+                  <p className="tw-m-0 tw-mt-3 tw-text-base tw-font-semibold tw-text-iron-50">
+                    {work.title}
+                  </p>
+                  <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">
+                    {work.artist}
+                  </p>
                 </>
               ) : (
-                <span className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-primary-300">{work.title}</span>
+                <span className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-primary-300">
+                  {work.title}
+                </span>
               );
               return href === null ? (
-                <article key={work.recordId} className="tw-min-w-0">{content}</article>
+                <article key={work.recordId} className="tw-min-w-0">
+                  {content}
+                </article>
               ) : (
-                <Link key={work.recordId} href={href} className="tw-group tw-block tw-no-underline hover:tw-text-primary-200">{content}</Link>
+                <Link
+                  key={work.recordId}
+                  href={href}
+                  className="hover:tw-text-primary-200 tw-group tw-block tw-no-underline"
+                >
+                  {content}
+                </Link>
               );
             })}
           </div>
@@ -276,14 +353,29 @@ export default async function MuseumAcquisitionProgramPage({
         </section>
       ) : null}
       {documents.map((document) => (
-        <section key={document.id} className="tw-mt-14 tw-max-w-4xl tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10">
-          <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">{document.title}</h2>
+        <section
+          key={document.id}
+          className="tw-mt-14 tw-max-w-4xl tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        >
+          <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+            {document.title}
+          </h2>
           {document.kind === "source_record" ? (
             <div className="tw-mt-6">
-              <MuseumJsonDisclosure label={document.title} sourceJson={document.markdown} />
+              <MuseumJsonDisclosure
+                label={document.title}
+                sourceJson={document.markdown}
+              />
             </div>
           ) : (
-            <MuseumMarkdown className="tw-mt-6" embeddedDocument sourceCommit={publication.identity.commit} sourcePath={document.sourcePath}>{document.markdown}</MuseumMarkdown>
+            <MuseumMarkdown
+              className="tw-mt-6"
+              embeddedDocument
+              sourceCommit={publication.identity.commit}
+              sourcePath={document.sourcePath}
+            >
+              {document.markdown}
+            </MuseumMarkdown>
           )}
         </section>
       ))}

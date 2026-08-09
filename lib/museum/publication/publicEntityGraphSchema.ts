@@ -1,10 +1,5 @@
-import type {
-  MuseumAcquisitionMethod,
-} from "./entities";
-import type {
-  MuseumPublicEntityType,
-  MuseumPublicRelationType,
-} from "./types";
+import type { MuseumAcquisitionMethod } from "./entities";
+import type { MuseumPublicEntityType, MuseumPublicRelationType } from "./types";
 
 export const PUBLIC_ENTITY_SCHEMA_ID =
   "0xd8aef6592fe156c4c3c10e59de540f5cdf8b130eedca322e0e22b30764bee1a9";
@@ -101,7 +96,7 @@ export const RELATION_ASSERTION_STATUSES = new Set([
   "reserved",
 ]);
 
-export interface MuseumRelationProfile {
+interface MuseumRelationProfile {
   readonly sources: readonly MuseumPublicEntityType[];
   readonly targets: readonly MuseumPublicEntityType[];
   readonly allowedQualifiers: readonly string[];
@@ -254,15 +249,3 @@ export const OPTIONAL_MEDIA_AFFORDANCES = [
   "hero",
   "copy_citation",
 ] as const;
-
-export function isSupportedEntityType(
-  value: unknown
-): value is MuseumPublicEntityType {
-  return typeof value === "string" && ENTITY_TYPES.has(value as MuseumPublicEntityType);
-}
-
-export function isSupportedRelationType(
-  value: unknown
-): value is MuseumPublicRelationType {
-  return typeof value === "string" && RELATION_TYPES.has(value as MuseumPublicRelationType);
-}

@@ -15,10 +15,7 @@ import type {
   MuseumPublicWork,
   MuseumPublication,
 } from "./types";
-import type {
-  MuseumSelectedWork,
-  MuseumView,
-} from "@/lib/museum/types";
+import type { MuseumSelectedWork, MuseumView } from "@/lib/museum/types";
 import {
   MUSEUM_CASEY_ACQUISITION_ID,
   MUSEUM_CASEY_ACQUISITION_SLUG,
@@ -55,7 +52,9 @@ function dedupe(
   });
 }
 
-function statusTone(status?: string): "neutral" | "success" | "warning" | "danger" {
+function statusTone(
+  status?: string
+): "neutral" | "success" | "warning" | "danger" {
   const normalized = status?.toLocaleLowerCase() ?? "";
   if (
     status === "accessioned_into_permanent_collection" ||
@@ -63,7 +62,8 @@ function statusTone(status?: string): "neutral" | "success" | "warning" | "dange
   ) {
     return "success";
   }
-  if (status === "closed_without_selection" || status === "withdrawn") return "neutral";
+  if (status === "closed_without_selection" || status === "withdrawn")
+    return "neutral";
   return "warning";
 }
 
@@ -125,7 +125,11 @@ function ref(input: {
   readonly sourceCommit?: string | null;
   readonly media?: MuseumEntityRefMedia;
 }): MuseumEntityRef | null {
-  if (input.href === null || input.href.trim().length === 0 || input.id.trim().length === 0) {
+  if (
+    input.href === null ||
+    input.href.trim().length === 0 ||
+    input.id.trim().length === 0
+  ) {
     return null;
   }
   return {
@@ -169,7 +173,9 @@ function artistForSourceValue(
   );
 }
 
-function artworkMedia(artwork: MuseumArtwork): MuseumEntityRefMedia | undefined {
+function artworkMedia(
+  artwork: MuseumArtwork
+): MuseumEntityRefMedia | undefined {
   const media: MuseumMedia | undefined = artwork.media[0];
   if (media === undefined) return undefined;
   return {
@@ -182,7 +188,9 @@ function artworkMedia(artwork: MuseumArtwork): MuseumEntityRefMedia | undefined 
   };
 }
 
-function publicWorkMedia(work: MuseumPublicWork): MuseumEntityRefMedia | undefined {
+function publicWorkMedia(
+  work: MuseumPublicWork
+): MuseumEntityRefMedia | undefined {
   const retained = work.media[0];
   if (retained !== undefined) {
     return {
@@ -336,7 +344,9 @@ function typedProgramRef(
   publication: MuseumPublication,
   programId: string
 ): MuseumEntityRef | null {
-  const program = publication.acquisitionPrograms?.find((item) => item.id === programId);
+  const program = publication.acquisitionPrograms?.find(
+    (item) => item.id === programId
+  );
   if (program === undefined) return null;
   return ref({
     kind: "acquisition_program",
@@ -354,26 +364,56 @@ function acquisitionRelations(
   acquisition: MuseumAcquisitionViewModel,
   publication: MuseumPublication
 ): MuseumEntityRelations {
-  const typedWorks = acquisition.workIds.map((id) => publication.works?.find((work) => work.id === id))
-    .flatMap((work) => work === undefined ? [] : [workRef(work, publication.identity.commit, "Part of")]);
-  const legacyWorks = acquisition.workIds.map((id) => publication.artworks.find((artwork) => artwork.id === id))
-    .flatMap((artwork) => artwork === undefined ? [] : [artworkRef(artwork, publication, publication.identity.commit, "Part of")]);
-  const artistRefs = acquisition.artistIds.map((id) => artistRef(id, publication));
+  const typedWorks = acquisition.workIds
+    .map((id) => publication.works?.find((work) => work.id === id))
+    .flatMap((work) =>
+      work === undefined
+        ? []
+        : [workRef(work, publication.identity.commit, "Part of")]
+    );
+  const legacyWorks = acquisition.workIds
+    .map((id) => publication.artworks.find((artwork) => artwork.id === id))
+    .flatMap((artwork) =>
+      artwork === undefined
+        ? []
+        : [
+            artworkRef(
+              artwork,
+              publication,
+              publication.identity.commit,
+              "Part of"
+            ),
+          ]
+    );
+  const artistRefs = acquisition.artistIds.map((id) =>
+    artistRef(id, publication)
+  );
   const organizationRefs = acquisition.organizationIds.map((id) => {
-    const organization = publication.organizations?.find((item) => item.id === id);
-    return organization === undefined ? null : ref({
-      kind: "organization",
-      id: organization.id,
-      label: organization.preferredName,
-      href: museumOrganizationHref(organization.slug),
-      relation: "Published by project",
-      sourcePath: firstPath(organization.sourcePaths),
-      sourceCommit: publication.identity.commit,
-    });
+    const organization = publication.organizations?.find(
+      (item) => item.id === id
+    );
+    return organization === undefined
+      ? null
+      : ref({
+          kind: "organization",
+          id: organization.id,
+          label: organization.preferredName,
+          href: museumOrganizationHref(organization.slug),
+          relation: "Published by project",
+          sourcePath: firstPath(organization.sourcePaths),
+          sourceCommit: publication.identity.commit,
+        });
   });
-  const program = acquisition.programId === null
-    ? null
-    : programRef(publication, acquisition.programId, acquisition.pathway ?? acquisition.programId, acquisition.statusAsOf, acquisition.sourcePath);
+  const program =
+    acquisition.programId === null
+      ? null
+      : programRef(
+          publication,
+          acquisition.programId,
+          acquisition.pathway ?? acquisition.programId,
+          acquisition.statusAsOf,
+          acquisition.sourcePath
+        );
   return {
     primaryRelations: dedupe([...typedWorks, ...legacyWorks, ...artistRefs]),
     secondaryRelations: dedupe([
@@ -390,25 +430,36 @@ function typedAcquisitionRelations(
 ): MuseumEntityRelations {
   const workRefs = acquisition.workIds.flatMap((id) => {
     const work = publication.works?.find((item) => item.id === id);
-    return work === undefined ? [] : [workRef(work, publication.identity.commit, "Part of")];
+    return work === undefined
+      ? []
+      : [workRef(work, publication.identity.commit, "Part of")];
   });
-  const artistRefs = acquisition.artistIds.map((id) => artistRef(id, publication));
+  const artistRefs = acquisition.artistIds.map((id) =>
+    artistRef(id, publication)
+  );
   const organizationRefs = acquisition.organizationIds.map((id) => {
-    const organization = publication.organizations?.find((item) => item.id === id);
-    return organization === undefined ? null : ref({
-      kind: "organization",
-      id: organization.id,
-      label: organization.preferredName,
-      href: museumOrganizationHref(organization.slug),
-      relation: "Published by project",
-      sourcePath: firstPath(organization.sourcePaths),
-      sourceCommit: publication.identity.commit,
-    });
+    const organization = publication.organizations?.find(
+      (item) => item.id === id
+    );
+    return organization === undefined
+      ? null
+      : ref({
+          kind: "organization",
+          id: organization.id,
+          label: organization.preferredName,
+          href: museumOrganizationHref(organization.slug),
+          relation: "Published by project",
+          sourcePath: firstPath(organization.sourcePaths),
+          sourceCommit: publication.identity.commit,
+        });
   });
-  const programRefs = acquisition.programId === null
-    ? []
-    : [typedProgramRef(publication, acquisition.programId)];
-  const projectRefs = acquisition.projectIds.map((id) => projectRef(id, publication));
+  const programRefs =
+    acquisition.programId === null
+      ? []
+      : [typedProgramRef(publication, acquisition.programId)];
+  const projectRefs = acquisition.projectIds.map((id) =>
+    projectRef(id, publication)
+  );
   return {
     primaryRelations: dedupe([...workRefs, ...artistRefs]),
     secondaryRelations: dedupe([
@@ -431,7 +482,8 @@ function modelFromTypedAcquisition(
     !acquisition.statusAsOf.trim() ||
     acquisition.workIds.length === 0 ||
     acquisition.sourcePaths.length === 0
-  ) return null;
+  )
+    return null;
   const status = acquisition.status;
   if (!isPublicAcquisitionStatus(status)) return null;
   const relations = typedAcquisitionRelations(acquisition, publication);
@@ -470,12 +522,24 @@ function modelFromTypedAcquisition(
   };
 }
 
-function caseyAcquisition(publication: MuseumPublication): MuseumAcquisitionViewModel | null {
-  const gift: MuseumGift | undefined = publication.gifts.find((item) => item.artworkIds.length > 0);
+function caseyAcquisition(
+  publication: MuseumPublication
+): MuseumAcquisitionViewModel | null {
+  const gift: MuseumGift | undefined = publication.gifts.find(
+    (item) => item.artworkIds.length > 0
+  );
   if (gift === undefined || gift.artworkIds.length === 0) return null;
   const works = artworkById(publication, gift.artworkIds);
-  if (!works.every((artwork) => artwork.institutionalStatus === "accessioned")) return null;
-  const title = publication.documents.find((document) => document.kind === "gift_narrative" && document.giftIds.includes(gift.id))?.title.trim() ?? "The System in Seven States";
+  if (!works.every((artwork) => artwork.institutionalStatus === "accessioned"))
+    return null;
+  const title =
+    publication.documents
+      .find(
+        (document) =>
+          document.kind === "gift_narrative" &&
+          document.giftIds.includes(gift.id)
+      )
+      ?.title.trim() ?? "The System in Seven States";
   const modelContext = context({
     kind: "curated_acquisition",
     id: MUSEUM_CASEY_ACQUISITION_ID,
@@ -493,7 +557,8 @@ function caseyAcquisition(publication: MuseumPublication): MuseumAcquisitionView
     acquisitionId: MUSEUM_CASEY_ACQUISITION_ID,
     slug: MUSEUM_CASEY_ACQUISITION_SLUG,
     title,
-    thesis: "A seven-work Casey Reas gift considered together as a public encounter with executable systems and their changing states.",
+    thesis:
+      "A seven-work Casey Reas gift considered together as a public encounter with executable systems and their changing states.",
     status: "accessioned_into_permanent_collection",
     acquisitionMethod: gift.acquisitionMethod,
     programId: null,
@@ -504,23 +569,34 @@ function caseyAcquisition(publication: MuseumPublication): MuseumAcquisitionView
     workIds: unique(gift.artworkIds),
     accessionLotIds: [gift.accessionLotId],
     sourceDocumentIds: unique(gift.documentIds),
-    sourcePaths: unique([gift.sourcePath, ...gift.documentIds.flatMap((id) => {
-      const document = publication.documents.find((item) => item.id === id);
-      return document === undefined ? [] : [document.sourcePath];
-    })]),
+    sourcePaths: unique([
+      gift.sourcePath,
+      ...gift.documentIds.flatMap((id) => {
+        const document = publication.documents.find((item) => item.id === id);
+        return document === undefined ? [] : [document.sourcePath];
+      }),
+    ]),
     presentationMedia: [],
   };
   const relations = acquisitionRelations(model, publication);
-  return { ...model, primaryRelations: relations.primaryRelations, secondaryRelations: relations.secondaryRelations };
+  return {
+    ...model,
+    primaryRelations: relations.primaryRelations,
+    secondaryRelations: relations.secondaryRelations,
+  };
 }
 
 function keysAndGatesAcquisition(
   publication: MuseumPublication,
   view: MuseumView | null
 ): MuseumAcquisitionViewModel | null {
-  const program = view?.programs.find((item) => item.programId === "6529NM-AP-01");
+  const program = view?.programs.find(
+    (item) => item.programId === "6529NM-AP-01"
+  );
   if (program === undefined) return null;
-  const selectedIds = unique(program.selectedWorks.map((work) => work.recordId));
+  const selectedIds = unique(
+    program.selectedWorks.map((work) => work.recordId)
+  );
   const objects = selectedIds.flatMap((id) => {
     const object = view?.objects.find((item) => item.objectId === id);
     return object === undefined ? [] : [object];
@@ -533,7 +609,9 @@ function keysAndGatesAcquisition(
     kind: "curated_acquisition",
     id: MUSEUM_KEYS_AND_GATES_ACQUISITION_ID,
     label: "Keys and Gates",
-    canonicalHref: museumAcquisitionHref(MUSEUM_KEYS_AND_GATES_ACQUISITION_SLUG),
+    canonicalHref: museumAcquisitionHref(
+      MUSEUM_KEYS_AND_GATES_ACQUISITION_SLUG
+    ),
     breadcrumbs: [],
     status: "selected_through_acquisition_program_acquisition_pending",
     statusAsOf: program.statusAsOf,
@@ -546,7 +624,8 @@ function keysAndGatesAcquisition(
     acquisitionId: MUSEUM_KEYS_AND_GATES_ACQUISITION_ID,
     slug: MUSEUM_KEYS_AND_GATES_ACQUISITION_SLUG,
     title: "Keys and Gates",
-    thesis: "A coherent photographic group selected through the Keys and Gates program.",
+    thesis:
+      "A coherent photographic group selected through the Keys and Gates program.",
     status: "selected_through_acquisition_program_acquisition_pending",
     acquisitionMethod: "purchase",
     programId: program.programId,
@@ -557,35 +636,51 @@ function keysAndGatesAcquisition(
     workIds: selectedIds,
     accessionLotIds: [],
     sourceDocumentIds: [],
-    sourcePaths: unique([program.sourcePath, program.selectedWorksPath ?? "", ...program.selectedWorks.map((work) => work.outcomePath ?? "")]),
+    sourcePaths: unique([
+      program.sourcePath,
+      program.selectedWorksPath ?? "",
+      ...program.selectedWorks.map((work) => work.outcomePath ?? ""),
+    ]),
     presentationMedia: [],
   };
-  const workRefs = program.selectedWorks.map((work) => ref({
-    kind: "work",
-    id: work.recordId,
-    label: selectedWorkLabel(work),
-    href: museumWorkHrefForSourceId(publication, work.recordId, view),
-    relation: "Part of",
-    status: model.status,
-    statusAsOf: program.statusAsOf,
-    sourcePath: work.outcomePath ?? program.selectedWorksPath,
-    sourceCommit: publication.identity.commit,
-  }));
+  const workRefs = program.selectedWorks.map((work) =>
+    ref({
+      kind: "work",
+      id: work.recordId,
+      label: selectedWorkLabel(work),
+      href: museumWorkHrefForSourceId(publication, work.recordId, view),
+      relation: "Part of",
+      status: model.status,
+      statusAsOf: program.statusAsOf,
+      sourcePath: work.outcomePath ?? program.selectedWorksPath,
+      sourceCommit: publication.identity.commit,
+    })
+  );
   return {
     ...model,
     primaryRelations: dedupe([
-      programRef(publication, program.programId, program.title || program.programId, program.statusAsOf, program.sourcePath),
+      programRef(
+        publication,
+        program.programId,
+        program.title || program.programId,
+        program.statusAsOf,
+        program.sourcePath
+      ),
       ...workRefs,
     ]),
-    secondaryRelations: dedupe(artists.map((artist) => ref({
-      kind: "artist",
-      id: artist.id,
-      label: artist.preferredName,
-      href: museumArtistHref(artist.slug),
-      relation: "By",
-      sourcePath: firstPath(artist.sourcePaths),
-      sourceCommit: publication.identity.commit,
-    }))),
+    secondaryRelations: dedupe(
+      artists.map((artist) =>
+        ref({
+          kind: "artist",
+          id: artist.id,
+          label: artist.preferredName,
+          href: museumArtistHref(artist.slug),
+          relation: "By",
+          sourcePath: firstPath(artist.sourcePaths),
+          sourceCommit: publication.identity.commit,
+        })
+      )
+    ),
   };
 }
 
@@ -594,12 +689,19 @@ export function buildMuseumAcquisitionIndex(
   view: MuseumView | null
 ): readonly MuseumAcquisitionViewModel[] {
   if (publication.curatedAcquisitions !== undefined) {
-    const typed = publication.curatedAcquisitions.map((acquisition) => modelFromTypedAcquisition(acquisition, publication));
+    const typed = publication.curatedAcquisitions.map((acquisition) =>
+      modelFromTypedAcquisition(acquisition, publication)
+    );
     return typed.some((model) => model === null)
       ? []
-      : typed.filter((model): model is MuseumAcquisitionViewModel => model !== null);
+      : typed.filter(
+          (model): model is MuseumAcquisitionViewModel => model !== null
+        );
   }
-  return [caseyAcquisition(publication), keysAndGatesAcquisition(publication, view)].flatMap((model) => model === null ? [] : [model]);
+  return [
+    caseyAcquisition(publication),
+    keysAndGatesAcquisition(publication, view),
+  ].flatMap((model) => (model === null ? [] : [model]));
 }
 
 export function buildMuseumAcquisitionContext(
@@ -608,7 +710,9 @@ export function buildMuseumAcquisitionContext(
   view: MuseumView | null,
   breadcrumbs: readonly MuseumBreadcrumbItem[] = []
 ): MuseumAcquisitionViewModel | null {
-  const acquisition = buildMuseumAcquisitionIndex(publication, view).find((item) => item.slug === slug);
+  const acquisition = buildMuseumAcquisitionIndex(publication, view).find(
+    (item) => item.slug === slug
+  );
   return acquisition === undefined ? null : { ...acquisition, breadcrumbs };
 }
 
@@ -619,7 +723,9 @@ export function buildMuseumWorkRelations(
 ): MuseumEntityRelations {
   const publicWork = publication.works?.find((work) => work.id === artworkId);
   if (publicWork !== undefined) {
-    const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter((item) => publicWork.acquisitionIds.includes(item.acquisitionId));
+    const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter(
+      (item) => publicWork.acquisitionIds.includes(item.acquisitionId)
+    );
     const programRefs =
       publicWork.status ===
       "selected_through_acquisition_program_acquisition_pending"
@@ -628,25 +734,52 @@ export function buildMuseumWorkRelations(
     return {
       primaryRelations: dedupe([
         artistRef(publicWork.artistId, publication),
-        publicWork.projectId === null ? null : projectRef(publicWork.projectId, publication),
+        publicWork.projectId === null
+          ? null
+          : projectRef(publicWork.projectId, publication),
       ]),
       secondaryRelations: dedupe([
-        ...acquisitions.map((item) => acquisitionRef(item, publicWork.status === "accessioned_into_permanent_collection" ? "Acquired through" : "Part of")),
+        ...acquisitions.map((item) =>
+          acquisitionRef(
+            item,
+            publicWork.status === "accessioned_into_permanent_collection"
+              ? "Acquired through"
+              : "Part of"
+          )
+        ),
         ...programRefs,
       ]),
     };
   }
   const artwork = publication.artworks.find((item) => item.id === artworkId);
-  const outcome = artwork === undefined ? view?.objects.find((object) => object.objectId === artworkId) : undefined;
-  if (artwork === undefined && outcome === undefined) return { primaryRelations: [], secondaryRelations: [] };
+  const outcome =
+    artwork === undefined
+      ? view?.objects.find((object) => object.objectId === artworkId)
+      : undefined;
+  if (artwork === undefined && outcome === undefined)
+    return { primaryRelations: [], secondaryRelations: [] };
   const workId = artwork?.id ?? outcome?.objectId ?? artworkId;
-  const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter((item) => item.workIds.includes(workId));
+  const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter(
+    (item) => item.workIds.includes(workId)
+  );
   return {
-    primaryRelations: dedupe([artwork === undefined ? null : artistRef(artwork.artistId, publication)]),
-    secondaryRelations: dedupe(acquisitions.flatMap((item) => [
-      acquisitionRef(item, "Part of"),
-      item.programId === null ? null : programRef(publication, item.programId, item.pathway ?? item.programId, item.statusAsOf, item.sourcePath),
-    ])),
+    primaryRelations: dedupe([
+      artwork === undefined ? null : artistRef(artwork.artistId, publication),
+    ]),
+    secondaryRelations: dedupe(
+      acquisitions.flatMap((item) => [
+        acquisitionRef(item, "Part of"),
+        item.programId === null
+          ? null
+          : programRef(
+              publication,
+              item.programId,
+              item.pathway ?? item.programId,
+              item.statusAsOf,
+              item.sourcePath
+            ),
+      ])
+    ),
   };
 }
 
@@ -666,8 +799,10 @@ export function buildMuseumWorkContext(
       breadcrumbs,
       status: publicWork.status,
       statusAsOf: publicWork.statusAsOf,
-      primaryRelations: buildMuseumWorkRelations(publication, artworkId, view).primaryRelations,
-      secondaryRelations: buildMuseumWorkRelations(publication, artworkId, view).secondaryRelations,
+      primaryRelations: buildMuseumWorkRelations(publication, artworkId, view)
+        .primaryRelations,
+      secondaryRelations: buildMuseumWorkRelations(publication, artworkId, view)
+        .secondaryRelations,
       sourcePath: firstPath(publicWork.sourcePaths),
       sourceCommit: publication.identity.commit,
     });
@@ -685,7 +820,10 @@ export function buildMuseumWorkContext(
     label: artwork?.title ?? outcome?.title ?? artworkId,
     canonicalHref,
     breadcrumbs,
-    status: artwork === undefined ? "selected_through_acquisition_program_acquisition_pending" : legacyStatus(artwork),
+    status:
+      artwork === undefined
+        ? "selected_through_acquisition_program_acquisition_pending"
+        : legacyStatus(artwork),
     statusAsOf: outcome?.statusAsOf ?? null,
     primaryRelations: relations.primaryRelations,
     secondaryRelations: relations.secondaryRelations,

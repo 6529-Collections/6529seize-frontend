@@ -7,11 +7,11 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   buildMuseumAcquisitionContext,
-  resolveMuseumAcquisitionSlug,
   type MuseumAcquisitionViewModel,
 } from "@/lib/museum/publication/ia";
 import {
   museumAcquisitionHref,
+  resolveMuseumAcquisitionSlug,
 } from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 
@@ -22,7 +22,10 @@ interface MuseumAcquisitionRouteProps {
 function acquisitionDescription(
   acquisition: MuseumAcquisitionViewModel | null
 ): string {
-  return acquisition?.thesis ?? t(DEFAULT_LOCALE, "museum.network.acquisitions.description");
+  return (
+    acquisition?.thesis ??
+    t(DEFAULT_LOCALE, "museum.network.acquisitions.description")
+  );
 }
 
 export async function generateMetadata({
@@ -30,16 +33,23 @@ export async function generateMetadata({
 }: MuseumAcquisitionRouteProps): Promise<Metadata> {
   const { slug } = await params;
   const { publicationState, view } = await getMuseumPublicationBundle();
-  const canonicalSlug = publicationState.publication === null
-    ? null
-    : resolveMuseumAcquisitionSlug(publicationState.publication, slug);
+  const canonicalSlug =
+    publicationState.publication === null
+      ? null
+      : resolveMuseumAcquisitionSlug(publicationState.publication, slug);
   const acquisition =
     publicationState.publication === null || canonicalSlug === null
       ? null
-      : buildMuseumAcquisitionContext(publicationState.publication, canonicalSlug, view);
+      : buildMuseumAcquisitionContext(
+          publicationState.publication,
+          canonicalSlug,
+          view
+        );
   return {
     ...getAppMetadata({
-      title: acquisition?.title ?? t(DEFAULT_LOCALE, "museum.network.acquisitions.title"),
+      title:
+        acquisition?.title ??
+        t(DEFAULT_LOCALE, "museum.network.acquisitions.title"),
       description: acquisitionDescription(acquisition),
     }),
     ...(canonicalSlug === null
@@ -62,7 +72,11 @@ export default async function MuseumAcquisitionRoute({
   if (canonicalSlug !== slug) {
     permanentRedirect(museumAcquisitionHref(canonicalSlug));
   }
-  const acquisition = buildMuseumAcquisitionContext(publication, canonicalSlug, view);
+  const acquisition = buildMuseumAcquisitionContext(
+    publication,
+    canonicalSlug,
+    view
+  );
   if (acquisition === null) notFound();
 
   return (

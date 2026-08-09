@@ -61,7 +61,7 @@ function pathMatchesPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
-export type MuseumNavigationSection =
+type MuseumNavigationSection =
   | "collection"
   | "artists"
   | "acquisitions"

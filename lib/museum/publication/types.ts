@@ -10,32 +10,19 @@ import type {
 } from "./entities";
 
 export type {
-  MuseumAcquisitionMethod,
   MuseumAcquisitionProgram,
-  MuseumAcquisitionProgramStatus,
   MuseumCuratedAcquisition,
-  MuseumCuratedAcquisitionStatus,
   MuseumEntityKind,
-  MuseumEntityReference,
   MuseumEntityRelation,
-  MuseumEntityRelationKind,
-  MuseumEntityType,
   MuseumExhibition,
-  MuseumExternalProposalPresentationAffordance,
-  MuseumExternalProposalPresentationCredit,
   MuseumExternalProposalPresentationMedia,
-  MuseumExternalProposalPresentationRights,
-  MuseumExternalProposalPresentationSource,
   MuseumOrganization,
-  MuseumProposedAcquisitionStatus,
-  MuseumSignedWaveStormUrl,
 } from "./entities";
 
 export {
   isMuseumExternalProposalMediaUrl,
   isMuseumExternalProposalPresentationMedia,
   isMuseumExternalProposalTokenSourceUrl,
-  isMuseumSafeGovernedSourcePath,
   isMuseumSignedWaveStormUrl,
   buildMuseumSignedWaveStormDropUrl,
 } from "./entities";

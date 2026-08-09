@@ -50,7 +50,7 @@ const MAX_DOCUMENT_BYTES = 4_500_000;
 const MAX_REQUIRED_DOCUMENT_BYTES = 16_000_000;
 const MAX_DOCUMENT_FETCH_CONCURRENCY = 8;
 
-export interface GitHubMuseumPublicationSourceOptions {
+interface GitHubMuseumPublicationSourceOptions {
   readonly ref: string;
   readonly assembler: MuseumPublicationAssembler;
   readonly fetch?: typeof fetch;
@@ -86,7 +86,9 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
   private readonly fetchImplementation: typeof fetch;
   private readonly now: () => Date;
   private readonly requestTimeoutMs: number;
-  private readonly catalogResolver: MuseumPublicationCatalogResolver | undefined;
+  private readonly catalogResolver:
+    | MuseumPublicationCatalogResolver
+    | undefined;
   private readonly allowUncataloguedTestFixture: boolean;
   private readonly localFixtureDocumentTransform:
     | ((document: MuseumSourceDocument) => MuseumSourceDocument)
@@ -124,7 +126,10 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     ) {
       throw new Error("publication_uncatalogued_fixture_not_allowed");
     }
-    if (this.localFixtureDocumentTransform !== undefined && !localFixtureEnvironment) {
+    if (
+      this.localFixtureDocumentTransform !== undefined &&
+      !localFixtureEnvironment
+    ) {
       throw new Error("publication_local_fixture_not_allowed");
     }
 
@@ -210,7 +215,9 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
             path === MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH
         );
       if (
-        ontologyEntries.some((entry) => !catalogAssemblyPaths.has(entry.path)) ||
+        ontologyEntries.some(
+          (entry) => !catalogAssemblyPaths.has(entry.path)
+        ) ||
         catalogOntologyPaths.some(
           (path) => !manifest.entries.some((entry) => entry.path === path)
         )
@@ -264,7 +271,9 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
               entry?.size !== catalogEntry.size ||
               entry.sha256 !== catalogEntry.sha256
             ) {
-              throw new Error("publication_catalog_manifest_inventory_mismatch");
+              throw new Error(
+                "publication_catalog_manifest_inventory_mismatch"
+              );
             }
             return { catalogEntry, entry };
           });
@@ -485,7 +494,8 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     catalog: MuseumPublicationCatalog | null
   ) {
     const manifestPath = catalog?.manifest.path ?? MUSEUM_MANIFEST_PATH;
-    const url = catalog?.manifest.rawUrl ??
+    const url =
+      catalog?.manifest.rawUrl ??
       buildImmutableMuseumRawUrl(commit, manifestPath);
     const bytes = await this.fetchBytes(
       url,
@@ -533,8 +543,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       throw new Error("publication_catalog_document_path_mismatch");
     }
     const url =
-      catalogEntry?.rawUrl ??
-      buildImmutableMuseumRawUrl(commit, entry.path);
+      catalogEntry?.rawUrl ?? buildImmutableMuseumRawUrl(commit, entry.path);
     const bytes = await this.fetchBytes(
       url,
       MAX_DOCUMENT_BYTES,
@@ -610,7 +619,10 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       }
       return text;
     } catch (error) {
-      if (error instanceof Error && error.message === "publication_document_text_mode") {
+      if (
+        error instanceof Error &&
+        error.message === "publication_document_text_mode"
+      ) {
         throw error;
       }
       throw new Error(

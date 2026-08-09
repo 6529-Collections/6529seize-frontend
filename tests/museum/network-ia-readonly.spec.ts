@@ -30,24 +30,15 @@ async function openRoute(page: Page, path: string) {
   await expect(page).toHaveURL((url) => url.pathname === path);
 }
 
-async function retainScreenshot(
-  page: Page,
-  testInfo: TestInfo,
-  name: string
-) {
+async function retainScreenshot(page: Page, testInfo: TestInfo, name: string) {
   await page.screenshot({
     path: testInfo.outputPath(`${name}.png`),
     fullPage: testInfo.project.name !== MOBILE_PROJECT,
   });
 }
 
-async function expectMuseumNavigation(
-  page: Page,
-  activeLabel: string | null
-) {
-  const navigation = page.locator(
-    'nav[aria-label="Museum sections"]'
-  );
+async function expectMuseumNavigation(page: Page, activeLabel: string | null) {
+  const navigation = page.locator('nav[aria-label="Museum sections"]');
   await expect(navigation).toBeVisible();
   await expect(navigation.locator("a")).toHaveText([
     "Collection",
@@ -62,11 +53,15 @@ async function expectMuseumNavigation(
 }
 
 async function expectNoDeadLinks(page: Page) {
-  const deadLinks = await page.locator("a").evaluateAll((anchors) =>
-    anchors
-      .map((anchor) => anchor.getAttribute("href"))
-      .filter((href) => href === null || href.trim().length === 0 || href === "#")
-  );
+  const deadLinks = await page
+    .locator("a")
+    .evaluateAll((anchors) =>
+      anchors
+        .map((anchor) => anchor.getAttribute("href"))
+        .filter(
+          (href) => href === null || href.trim().length === 0 || href === "#"
+        )
+    );
   expect(deadLinks).toEqual([]);
 }
 
@@ -106,22 +101,26 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     }
 
     await openRoute(page, "/museum/network");
-    await expect(page.getByText("Seven works by Casey Reas", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Seven works by Casey Reas", { exact: true })
+    ).toBeVisible();
     for (const title of [
       "The System in Seven States",
       "Keys and Gates",
       "Conflict at Its Edges",
     ]) {
-      await expect(page.getByRole("link", { name: title, exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: title, exact: true })
+      ).toBeVisible();
     }
     await retainScreenshot(page, testInfo, "museum-network-home");
 
     await openRoute(page, "/museum/network/collection");
     const collectionWorkHrefs = await page
       .locator('a[href^="/museum/network/works/"]')
-      .evaluateAll((links) =>
-        [...new Set(links.map((link) => link.getAttribute("href")))]
-      );
+      .evaluateAll((links) => [
+        ...new Set(links.map((link) => link.getAttribute("href"))),
+      ]);
     expect(collectionWorkHrefs).toHaveLength(7);
     expect(
       collectionWorkHrefs.every(
@@ -134,9 +133,9 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await openRoute(page, "/museum/network/artists");
     const artistHrefs = await page
       .locator('a[href^="/museum/network/artists/"]')
-      .evaluateAll((links) =>
-        [...new Set(links.map((link) => link.getAttribute("href")))]
-      );
+      .evaluateAll((links) => [
+        ...new Set(links.map((link) => link.getAttribute("href"))),
+      ]);
     expect(artistHrefs).toHaveLength(21);
 
     await openRoute(page, "/museum/network/acquisitions");
@@ -167,13 +166,19 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await openRoute(page, "/museum/network/works/6529NM-W-0001");
     await expect(page.getByText("By", { exact: true })).toBeVisible();
     await expect(page.getByText("Part of", { exact: true })).toBeVisible();
-    await expect(page.getByText("Acquired through", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Acquired through", { exact: true })
+    ).toBeVisible();
     await retainScreenshot(page, testInfo, "museum-work-casey");
 
     await openRoute(page, "/museum/network/works/6529NM-W-0008");
-    await expect(page.getByText("Selected through", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("No public image is available for this record.", { exact: true })
+      page.getByText("Selected through", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("No public image is available for this record.", {
+        exact: true,
+      })
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: /historical proposal image/u })
@@ -183,15 +188,27 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await openRoute(page, "/museum/network/works/6529NM-W-0028");
     await expectMuseumNavigation(page, null);
     await expect(
-      page.getByText("No public image is available for this record.", { exact: true })
-    ).toBeVisible();
-    await expect(
-      page.getByText("Selected by Museum Wave; acquisition review in progress", {
+      page.getByText("No public image is available for this record.", {
         exact: true,
       })
     ).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Historical Wave proposal presentation", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /historical proposal image/u })).toHaveCount(0);
+    await expect(
+      page.getByText(
+        "Selected by Museum Wave; acquisition review in progress",
+        {
+          exact: true,
+        }
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Historical Wave proposal presentation",
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /historical proposal image/u })
+    ).toHaveCount(0);
     await expect(
       page.locator('[aria-labelledby="canonical-work-media-title"] img')
     ).toHaveCount(0);
@@ -203,7 +220,10 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       page.locator(`a[href="${MAGNUM_WAVE_CONTEXT_HREF}"]`)
     ).toHaveCount(2);
     await expect(
-      page.getByRole("link", { name: "Open Wave proposal context", exact: true })
+      page.getByRole("link", {
+        name: "Open Wave proposal context",
+        exact: true,
+      })
     ).toHaveCount(1);
     await expect(
       page.getByRole("link", { name: "Wave proposal, part 6", exact: true })

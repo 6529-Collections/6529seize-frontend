@@ -243,13 +243,15 @@ function addMuseumPageSource(
 function hasCompleteInstitutionalPractice(
   practice: MuseumInstitutionalPractice | undefined
 ): practice is MuseumInstitutionalPractice {
-  const candidate = practice as unknown as {
-    readonly introduction?: MuseumInstitutionalPractice["introduction"];
-    readonly adjacentPractice?: MuseumInstitutionalPractice["adjacentPractice"];
-    readonly editorialStandard?: MuseumInstitutionalPractice["editorialStandard"];
-    readonly sourceRegister?: MuseumInstitutionalPractice["sourceRegister"];
-    readonly profiles?: unknown;
-  } | undefined;
+  const candidate = practice as unknown as
+    | {
+        readonly introduction?: MuseumInstitutionalPractice["introduction"];
+        readonly adjacentPractice?: MuseumInstitutionalPractice["adjacentPractice"];
+        readonly editorialStandard?: MuseumInstitutionalPractice["editorialStandard"];
+        readonly sourceRegister?: MuseumInstitutionalPractice["sourceRegister"];
+        readonly profiles?: unknown;
+      }
+    | undefined;
   if (
     candidate?.introduction === undefined ||
     candidate.adjacentPractice === undefined ||
@@ -267,7 +269,8 @@ function hasCompleteInstitutionalPractice(
       CURATORIAL_PUBLICATION_STANDARD_PATH &&
     candidate.sourceRegister.sourcePath ===
       INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH;
-  const profiles = candidate.profiles as readonly Partial<MuseumInstitutionProfile>[];
+  const profiles =
+    candidate.profiles as readonly Partial<MuseumInstitutionProfile>[];
   const profileCountMatches =
     profiles.length === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS.length;
   const profilesMatch = profiles.every(
@@ -413,13 +416,14 @@ export function buildMuseumPageSourceCatalog(
   const typedWorkPath = publication.works?.[0]?.sourcePaths[0];
   const typedArtistPath = publication.artists[0]?.sourcePaths[0];
   const typedProjectPath = publication.projects[0]?.sourcePaths[0];
-  const typedAcquisitionPath = publication.curatedAcquisitions?.[0]?.sourcePaths[0];
+  const typedAcquisitionPath =
+    publication.curatedAcquisitions?.[0]?.sourcePaths[0];
   const typedResearchPath = publication.researchPublications?.[0]?.sourcePath;
   const legacyProgramPath = publication.declaredSourcePaths.find((path) =>
     /^records\/programs\/[^/]+\/program\.json$/u.test(path)
   );
-  const legacyProgramSelectionPath = publication.declaredSourcePaths.find((path) =>
-    /^records\/programs\/[^/]+\/selected-works\.json$/u.test(path)
+  const legacyProgramSelectionPath = publication.declaredSourcePaths.find(
+    (path) => /^records\/programs\/[^/]+\/selected-works\.json$/u.test(path)
   );
   const typedKeysAndGatesProgram = publication.acquisitionPrograms?.find(
     (program) => program.slug === "keys-and-gates"
@@ -433,7 +437,9 @@ export function buildMuseumPageSourceCatalog(
         )[0] ?? typedKeysAndGatesProgram.sourcePaths[0]);
   const keysAndGatesRelatedPath =
     typedKeysAndGatesPath ??
-    (publication.acquisitionPrograms === undefined ? KEYS_AND_GATES_PATH : undefined);
+    (publication.acquisitionPrograms === undefined
+      ? KEYS_AND_GATES_PATH
+      : undefined);
 
   add(
     MUSEUM_ROOT,
@@ -442,35 +448,56 @@ export function buildMuseumPageSourceCatalog(
       ? []
       : [{ path: keysAndGatesRelatedPath, label: "keysAndGates" }]
   );
-  add(`${MUSEUM_ROOT}/collection`, collectionEssay?.sourcePath ?? typedWorkPath, [
-    { path: ACCESSION_REGISTER_PATH, label: "accessionRegister" },
-  ]);
+  add(
+    `${MUSEUM_ROOT}/collection`,
+    collectionEssay?.sourcePath ?? typedWorkPath,
+    [{ path: ACCESSION_REGISTER_PATH, label: "accessionRegister" }]
+  );
   add(`${MUSEUM_ROOT}/artists`, artistProfile?.sourcePath ?? typedArtistPath);
-  add(`${MUSEUM_ROOT}/projects`, collectionEssay?.sourcePath ?? typedProjectPath);
+  add(
+    `${MUSEUM_ROOT}/projects`,
+    collectionEssay?.sourcePath ?? typedProjectPath
+  );
   add(`${MUSEUM_ROOT}/works`, collectionEssay?.sourcePath ?? typedWorkPath, [
     { path: ACCESSION_REGISTER_PATH, label: "accessionRegister" },
   ]);
-  add(`${MUSEUM_ROOT}/acquisitions`, typedAcquisitionPath ?? collectionEssay?.sourcePath, [
-    { path: ACCESSION_REGISTER_PATH, label: "accessionRegister" },
-  ]);
-  add(`${MUSEUM_ROOT}/research`, typedResearchPath ?? sourceMatrix?.sourcePath, [
-    { path: CURATORIAL_PUBLICATION_STANDARD_PATH, label: "scholarshipStandard" },
-  ]);
+  add(
+    `${MUSEUM_ROOT}/acquisitions`,
+    typedAcquisitionPath ?? collectionEssay?.sourcePath,
+    [{ path: ACCESSION_REGISTER_PATH, label: "accessionRegister" }]
+  );
+  add(
+    `${MUSEUM_ROOT}/research`,
+    typedResearchPath ?? sourceMatrix?.sourcePath,
+    [
+      {
+        path: CURATORIAL_PUBLICATION_STANDARD_PATH,
+        label: "scholarshipStandard",
+      },
+    ]
+  );
   if (publication.organizations !== undefined) {
-    add(`${MUSEUM_ROOT}/organizations`, publication.organizations[0]?.sourcePaths[0]);
+    add(
+      `${MUSEUM_ROOT}/organizations`,
+      publication.organizations[0]?.sourcePaths[0]
+    );
     for (const organization of publication.organizations) {
       add(
         `${MUSEUM_ROOT}/organizations/${encodeURIComponent(organization.slug)}`,
         organization.sourcePaths[0],
         organization.projectIds.map((projectId) => ({
-          path: publication.projects.find((project) => project.id === projectId)?.sourcePaths[0],
+          path: publication.projects.find((project) => project.id === projectId)
+            ?.sourcePaths[0],
           label: "machineRecord" as const,
         }))
       );
     }
   }
   if (publication.acquisitionPrograms !== undefined) {
-    add(`${MUSEUM_ROOT}/acquisition-programs`, publication.acquisitionPrograms[0]?.sourcePaths[0]);
+    add(
+      `${MUSEUM_ROOT}/acquisition-programs`,
+      publication.acquisitionPrograms[0]?.sourcePaths[0]
+    );
     for (const program of publication.acquisitionPrograms) {
       add(
         `${MUSEUM_ROOT}/acquisition-programs/${encodeURIComponent(program.slug)}`,
@@ -492,10 +519,14 @@ export function buildMuseumPageSourceCatalog(
     // Bounded pre-ontology adapter: the released AP-01 record predates typed
     // program entities. It supplies the canonical pathway page until the
     // source graph publishes the program and its document relations.
-      add(`${MUSEUM_ROOT}/acquisition-programs/keys-and-gates`, legacyProgramPath, [
-      { path: KEYS_AND_GATES_PATH, label: "supportingRecord" },
-      { path: legacyProgramSelectionPath, label: "supportingRecord" },
-    ]);
+    add(
+      `${MUSEUM_ROOT}/acquisition-programs/keys-and-gates`,
+      legacyProgramPath,
+      [
+        { path: KEYS_AND_GATES_PATH, label: "supportingRecord" },
+        { path: legacyProgramSelectionPath, label: "supportingRecord" },
+      ]
+    );
   }
   if (publication.curatedAcquisitions !== undefined) {
     for (const acquisition of publication.curatedAcquisitions) {
@@ -503,7 +534,9 @@ export function buildMuseumPageSourceCatalog(
         `${MUSEUM_ROOT}/acquisitions/${encodeURIComponent(acquisition.slug)}`,
         acquisition.sourcePaths[0],
         acquisition.sourceDocumentIds.map((documentId) => ({
-          path: publication.documents.find((document) => document.id === documentId)?.sourcePath,
+          path: publication.documents.find(
+            (document) => document.id === documentId
+          )?.sourcePath,
           label: "supportingRecord" as const,
         }))
       );
@@ -515,13 +548,18 @@ export function buildMuseumPageSourceCatalog(
         `${MUSEUM_ROOT}/works/${encodeURIComponent(work.id)}`,
         work.sourcePaths[0],
         work.documentIds.map((documentId) => ({
-          path: publication.documents.find((document) => document.id === documentId)?.sourcePath,
+          path: publication.documents.find(
+            (document) => document.id === documentId
+          )?.sourcePath,
           label: "supportingRecord" as const,
         }))
       );
     }
   }
-  add(`${MUSEUM_ROOT}/research/sources-and-chronology`, sourceMatrix?.sourcePath);
+  add(
+    `${MUSEUM_ROOT}/research/sources-and-chronology`,
+    sourceMatrix?.sourcePath
+  );
   addInstitutionalPracticePageSources(publication, add);
   const dataArchitecture = (publication as Partial<MuseumPublication>)
     .dataArchitecture;
@@ -576,7 +614,10 @@ export function buildMuseumPageSourceCatalog(
   add(`${MUSEUM_ROOT}/about/governance`, GOVERNANCE_REGISTER_PATH);
 
   for (const decisionId of GOVERNANCE_DECISION_IDS) {
-    add(`${MUSEUM_ROOT}/about/governance/${decisionId}`, GOVERNANCE_REGISTER_PATH);
+    add(
+      `${MUSEUM_ROOT}/about/governance/${decisionId}`,
+      GOVERNANCE_REGISTER_PATH
+    );
   }
 
   for (const artist of publication.artists) {
@@ -669,7 +710,10 @@ export function buildMuseumPageSourceCatalog(
       document.kind === "data_architecture_overview" ||
       document.kind === "data_architecture_standard"
     ) {
-      add(`${MUSEUM_ROOT}/research/${encodeURIComponent(document.id)}`, document.sourcePath);
+      add(
+        `${MUSEUM_ROOT}/research/${encodeURIComponent(document.id)}`,
+        document.sourcePath
+      );
     }
   }
 

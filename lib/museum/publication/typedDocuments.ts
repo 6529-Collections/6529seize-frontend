@@ -1,7 +1,4 @@
-import {
-  buildImmutableMuseumBlobUrl,
-  isExactGitCommit,
-} from "./security";
+import { buildImmutableMuseumBlobUrl, isExactGitCommit } from "./security";
 import type {
   MuseumPublicDocument,
   MuseumPublicEntityGraph,
@@ -18,13 +15,12 @@ interface MuseumTypedDocumentProjectionInput {
   readonly sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>;
 }
 
-export interface MuseumTypedDocumentProjection {
+interface MuseumTypedDocumentProjection {
   readonly documents: readonly MuseumPublicDocument[];
   readonly documentIdsByEntity: ReadonlyMap<string, readonly string[]>;
 }
 
-const GITHUB_REPOSITORY_PATH =
-  "/6529-Collections/6529networkmuseum/blob/main/";
+const GITHUB_REPOSITORY_PATH = "/6529-Collections/6529networkmuseum/blob/main/";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -88,7 +84,10 @@ function collectSourceRecordIds(value: unknown, output: Set<string>): void {
   }
 }
 
-function sourceRecordMatchesPath(sourceRecordId: string, path: string): boolean {
+function sourceRecordMatchesPath(
+  sourceRecordId: string,
+  path: string
+): boolean {
   if (path.includes(sourceRecordId)) return true;
   const outcome = /^(.*?)-(OUT|OBJ)-(\d{3})$/u.exec(sourceRecordId);
   if (outcome !== null) {
@@ -121,7 +120,9 @@ function entitySourceRecordIds(
   return ids;
 }
 
-function entityOwnSourceRecordIds(entity: MuseumPublicEntityRecord): Set<string> {
+function entityOwnSourceRecordIds(
+  entity: MuseumPublicEntityRecord
+): Set<string> {
   const ids = new Set(entity.sourceRecordIds);
   collectSourceRecordIds(entity.profile, ids);
   return ids;
@@ -148,7 +149,9 @@ function compatibilityDocumentPaths(
     entity.entityType === "ACQUISITION_PROGRAM" &&
     programKind === "donation_pathway"
   ) {
-    return paths.filter((path) => path.endsWith("policies/donation-acceptance.md"));
+    return paths.filter((path) =>
+      path.endsWith("policies/donation-acceptance.md")
+    );
   }
   return [];
 }
@@ -219,8 +222,10 @@ function isWorkManuscriptPath(
   if (!normalizedPath.endsWith(".md")) return false;
   if (/\/public\/scholarship\/works\/\d{2}-[^/]+\.md$/u.test(normalizedPath)) {
     const number = workNumber(sourceRecordIds);
-    return number !== null &&
-      normalizedPath.split("/").at(-1)?.startsWith(`${number}-`) === true;
+    return (
+      number !== null &&
+      normalizedPath.split("/").at(-1)?.startsWith(`${number}-`) === true
+    );
   }
   if (/\/public\/works\/[^/]+\.md$/u.test(normalizedPath)) {
     const expectedStem = documentStem(title);
@@ -265,7 +270,9 @@ function isWorkPublicDocumentPath(
   return (
     isWorkManuscriptPath(path, title, sourceRecordIds) ||
     (path.endsWith("/public/title-rights-and-accession-review.md") &&
-      workContextPathTokens(sourceRecordIds).some((token) => path.includes(token)))
+      workContextPathTokens(sourceRecordIds).some((token) =>
+        path.includes(token)
+      ))
   );
 }
 
@@ -289,7 +296,12 @@ function researchDocumentPath(
 function titleFromDocument(path: string, text: string): string {
   const heading = /^#\s+(.+)$/mu.exec(text)?.[1]?.trim();
   if (heading !== undefined && heading.length > 0) return heading;
-  return path.split("/").at(-1)?.replace(/\.[^.]+$/u, "") ?? path;
+  return (
+    path
+      .split("/")
+      .at(-1)
+      ?.replace(/\.[^.]+$/u, "") ?? path
+  );
 }
 
 function documentKind(
@@ -300,7 +312,10 @@ function documentKind(
   if (/\/public\/\d{4}NM\.\d{4}\.\d{3}\.\d{2}\.md$/u.test(path)) {
     return "object_entry";
   }
-  if (path.includes("/public/scholarship/works/") || path.includes("/public/works/")) {
+  if (
+    path.includes("/public/scholarship/works/") ||
+    path.includes("/public/works/")
+  ) {
     return "object_entry";
   }
   if (path.includes("/public/scholarship/artists/")) {
@@ -347,10 +362,8 @@ function generatedDocument(
     workIds: entity.entityType === "WORK" ? [entity.id] : [],
     acquisitionIds:
       entity.entityType === "CURATED_ACQUISITION" ? [entity.id] : [],
-    programIds:
-      entity.entityType === "ACQUISITION_PROGRAM" ? [entity.id] : [],
-    organizationIds:
-      entity.entityType === "ORGANIZATION" ? [entity.id] : [],
+    programIds: entity.entityType === "ACQUISITION_PROGRAM" ? [entity.id] : [],
+    organizationIds: entity.entityType === "ORGANIZATION" ? [entity.id] : [],
     sourceRecordIds: entity.sourceRecordIds,
   };
 }
@@ -377,7 +390,9 @@ export function buildMuseumTypedDocumentProjection(
     throw new Error("public_entity_graph_document_commit");
   }
   const documents = new Map(
-    input.publication.documents.map((document) => [document.id, document] as const)
+    input.publication.documents.map(
+      (document) => [document.id, document] as const
+    )
   );
   const documentIdsByEntity = new Map<string, readonly string[]>();
 
@@ -393,12 +408,7 @@ export function buildMuseumTypedDocumentProjection(
       ];
     }
     const ids = paths.map((path) =>
-      mergeDocument(
-        documents,
-        path,
-        input.sourceDocuments.get(path)!,
-        entity
-      )
+      mergeDocument(documents, path, input.sourceDocuments.get(path)!, entity)
     );
     documentIdsByEntity.set(entity.id, [...new Set(ids)]);
   }

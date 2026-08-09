@@ -1,7 +1,7 @@
 import type { MessageKey } from "@/i18n/messages";
 import type { MuseumPublicDocumentKind } from "./types";
 
-export type MuseumDocumentKindLabelKey = Extract<
+type MuseumDocumentKindLabelKey = Extract<
   MessageKey,
   `museum.network.research.documentKind.${string}`
 >;

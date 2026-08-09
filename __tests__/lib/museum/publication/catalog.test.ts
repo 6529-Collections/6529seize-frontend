@@ -61,7 +61,8 @@ function buildFixture(): {
   const inventoryPath = MUSEUM_PUBLICATION_INVENTORY_PATH;
   const mediaBytes = Uint8Array.from([1, 2, 3, 4]);
   const inventoryValue = {
-    "$schema": "https://6529networkmuseum.org/schemas/public-publication-inventory-v1.json",
+    $schema:
+      "https://6529networkmuseum.org/schemas/public-publication-inventory-v1.json",
     inventory_version: "1.0.0",
     inventory_id: "6529NM_PUBLIC_VISITOR_CORPUS",
     scope: "visitor_publication_corpus",
@@ -171,7 +172,10 @@ function buildFixture(): {
   const bundleBytes = new TextEncoder().encode(
     `${JSON.stringify(bundleValue)}\n`
   );
-  const bundleDescriptor = document(MUSEUM_PUBLICATION_BUNDLE_PATH, bundleBytes);
+  const bundleDescriptor = document(
+    MUSEUM_PUBLICATION_BUNDLE_PATH,
+    bundleBytes
+  );
   const inventoryBodySha256 = sha(inventoryBodyBytes);
   const payload = {
     catalog_id: `6529NM-PUBCAT-${B}`,
@@ -255,18 +259,19 @@ describe("Museum publication catalog boundary", () => {
   it("accepts the source wire algorithm and explicit assembly/media roles", () => {
     const fixture = buildFixture();
     expect(() =>
-      assertMuseumPublicationCatalog(
-        fixture.pointer,
-        fixture.catalog,
-        ["docs/a.md", MUSEUM_PUBLICATION_INVENTORY_PATH]
-      )
+      assertMuseumPublicationCatalog(fixture.pointer, fixture.catalog, [
+        "docs/a.md",
+        MUSEUM_PUBLICATION_INVENTORY_PATH,
+      ])
     ).not.toThrow();
     expect(fixture.catalog.contentHash.algorithm).toBe(1);
     expect(fixture.catalog.assemblyDocuments[0]?.byteMode).toBe("raw");
     expect(fixture.catalog.assemblyDocuments[1]?.byteMode).toBe(
       "lf-normalized"
     );
-    expect(() => verifyMuseumPublicationCatalogContentHash(fixture.catalog)).not.toThrow();
+    expect(() =>
+      verifyMuseumPublicationCatalogContentHash(fixture.catalog)
+    ).not.toThrow();
   });
 
   it("decodes the strict source envelopes instead of accepting a frontend-shaped catalog", () => {
@@ -305,7 +310,8 @@ describe("Museum publication catalog boundary", () => {
         body_keccak256: fixture.catalog.publicationInventory.jcsKeccak,
         canonicalization_id:
           fixture.catalog.publicationInventory.canonicalizationId,
-        inventory_version: fixture.catalog.publicationInventory.inventoryVersion,
+        inventory_version:
+          fixture.catalog.publicationInventory.inventoryVersion,
         counts: fixture.catalog.publicationInventory.counts,
         immutable_source_url: fixture.catalog.publicationInventory.sourceUrl,
         immutable_raw_url: fixture.catalog.publicationInventory.rawUrl,
@@ -325,13 +331,14 @@ describe("Museum publication catalog boundary", () => {
           fixture.catalog.assemblyBundle.inventorySha256,
         source_inventory_body_keccak256:
           fixture.catalog.assemblyBundle.inventoryKeccak,
-        immutable_source_url: fixture.catalog.assemblyBundle.descriptor.sourceUrl,
+        immutable_source_url:
+          fixture.catalog.assemblyBundle.descriptor.sourceUrl,
         immutable_raw_url: fixture.catalog.assemblyBundle.descriptor.rawUrl,
       },
       activation_policy: "frontend_activates_only_verified_catalog",
     };
     const wireCatalog = {
-      "$schema":
+      $schema:
         "https://6529networkmuseum.org/schemas/publication-catalog-v1.json",
       envelope: {
         recordType: "PUBLICATION_CATALOG",
@@ -378,40 +385,58 @@ describe("Museum publication catalog boundary", () => {
   });
 
   it.each([
-    ["pointer/catalog commit mismatch", (f: ReturnType<typeof buildFixture>) => ({
-      ...f.pointer,
-      sourceCommit: C,
-    })],
-    ["pointer envelope hash mismatch", (f: ReturnType<typeof buildFixture>) => ({
-      ...f.pointer,
-      catalogEnvelopeContentHash: KECCAK_ZERO,
-    })],
-    ["blob URL used as runtime URL", (f: ReturnType<typeof buildFixture>) => ({
-      ...f.catalog,
-      manifest: {
-        ...f.catalog.manifest,
-        rawUrl: f.catalog.manifest.sourceUrl,
-      },
-    })],
-    ["legacy utf8-lf byte mode", (f: ReturnType<typeof buildFixture>) => ({
-      ...f.catalog,
-      assemblyDocuments: [
-        { ...f.catalog.assemblyDocuments[0], byteMode: "utf8-lf" },
-        f.catalog.assemblyDocuments[1],
-      ],
-    })],
-    ["missing inventory from assembly role", (f: ReturnType<typeof buildFixture>) => ({
-      ...f.catalog,
-      assemblyDocuments: [f.catalog.assemblyDocuments[0]],
-      assemblyBundle: {
-        ...f.catalog.assemblyBundle,
-        embeddedDocuments: [f.catalog.assemblyDocuments[0]],
-      },
-    })],
-    ["assembly/media overlap", (f: ReturnType<typeof buildFixture>) => ({
-      ...f.catalog,
-      mediaAssets: [f.catalog.assemblyDocuments[0]],
-    })],
+    [
+      "pointer/catalog commit mismatch",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.pointer,
+        sourceCommit: C,
+      }),
+    ],
+    [
+      "pointer envelope hash mismatch",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.pointer,
+        catalogEnvelopeContentHash: KECCAK_ZERO,
+      }),
+    ],
+    [
+      "blob URL used as runtime URL",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.catalog,
+        manifest: {
+          ...f.catalog.manifest,
+          rawUrl: f.catalog.manifest.sourceUrl,
+        },
+      }),
+    ],
+    [
+      "legacy utf8-lf byte mode",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.catalog,
+        assemblyDocuments: [
+          { ...f.catalog.assemblyDocuments[0], byteMode: "utf8-lf" },
+          f.catalog.assemblyDocuments[1],
+        ],
+      }),
+    ],
+    [
+      "missing inventory from assembly role",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.catalog,
+        assemblyDocuments: [f.catalog.assemblyDocuments[0]],
+        assemblyBundle: {
+          ...f.catalog.assemblyBundle,
+          embeddedDocuments: [f.catalog.assemblyDocuments[0]],
+        },
+      }),
+    ],
+    [
+      "assembly/media overlap",
+      (f: ReturnType<typeof buildFixture>) => ({
+        ...f.catalog,
+        mediaAssets: [f.catalog.assemblyDocuments[0]],
+      }),
+    ],
   ])("rejects %s", (_name, mutate) => {
     const fixture = buildFixture();
     expect(() =>
@@ -518,10 +543,9 @@ describe("Museum publication catalog boundary", () => {
       assertMuseumPublicationInventoryDocument(inventory, fixture.catalog)
     ).not.toThrow();
     const changed = new TextEncoder().encode(
-      new TextDecoder().decode(inventory.bytes).replace(
-        "approved_public_media",
-        "public_entity_record"
-      )
+      new TextDecoder()
+        .decode(inventory.bytes)
+        .replace("approved_public_media", "public_entity_record")
     );
     expect(() =>
       assertMuseumPublicationInventoryDocument(
@@ -532,8 +556,14 @@ describe("Museum publication catalog boundary", () => {
   });
 
   it.each([
-    ["duplicate required source-set path", (paths: string[]) => paths.push(paths[0] ?? "")],
-    ["unlisted required source-set path", (paths: string[]) => paths.splice(0, paths.length, "docs/missing.md")],
+    [
+      "duplicate required source-set path",
+      (paths: string[]) => paths.push(paths[0] ?? ""),
+    ],
+    [
+      "unlisted required source-set path",
+      (paths: string[]) => paths.splice(0, paths.length, "docs/missing.md"),
+    ],
   ])("rejects %s after fixity is updated", (_name, mutatePaths) => {
     const fixture = buildFixture();
     const inventory = fixture.bundleDocuments.find(

@@ -8,18 +8,26 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
-import { museumWorkHrefForSourceId } from "@/lib/museum/publication/ia";
-import { museumWorkHref } from "@/lib/museum/publication/routes";
+import {
+  museumWorkHref,
+  museumWorkHrefForSourceId,
+} from "@/lib/museum/publication/routes";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 
 function MuseumAccessionRecords({
   publication,
 }: {
-  readonly publication: NonNullable<Awaited<ReturnType<typeof getMuseumPublicationBundle>>["publicationState"]["publication"]>;
+  readonly publication: NonNullable<
+    Awaited<
+      ReturnType<typeof getMuseumPublicationBundle>
+    >["publicationState"]["publication"]
+  >;
 }) {
   const graph = publication.entityGraph;
   if (graph === undefined) return null;
-  const worksById = new Map((publication.works ?? []).map((work) => [work.id, work] as const));
+  const worksById = new Map(
+    (publication.works ?? []).map((work) => [work.id, work] as const)
+  );
   const accessions = graph.entities
     .filter((entity) => entity.entityType === "ACCESSION")
     .map((accession) => ({
@@ -29,33 +37,52 @@ function MuseumAccessionRecords({
           (relation) =>
             relation.relationType === "ACCESSION_ADMITS_WORK" &&
             relation.sourceEntityId === accession.id &&
-            (relation.assertionStatus === "asserted" || relation.assertionStatus === "observed")
+            (relation.assertionStatus === "asserted" ||
+              relation.assertionStatus === "observed")
         )
         .map((relation) => relation.targetEntityId),
     }))
     .filter((item) => item.workIds.length > 0);
   if (accessions.length === 0) return null;
   return (
-    <section id="accessions" className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10" aria-labelledby="museum-accession-records-title">
-      <h2 id="museum-accession-records-title" className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+    <section
+      id="accessions"
+      className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+      aria-labelledby="museum-accession-records-title"
+    >
+      <h2
+        id="museum-accession-records-title"
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+      >
         {t(DEFAULT_LOCALE, "museum.network.collection.accessionRecords")}
       </h2>
       <div className="tw-mt-6 tw-space-y-8">
         {accessions.map(({ accession, workIds }) => {
           const profile = accession.profile;
-          const accessionNumber = typeof profile["accession_number"] === "string"
-            ? profile["accession_number"]
-            : accession.label;
+          const accessionNumber =
+            typeof profile["accession_number"] === "string"
+              ? profile["accession_number"]
+              : accession.label;
           const sourceHref = buildImmutableMuseumBlobUrl(
             publication.identity.commit,
             accession.sourcePath
           );
           return (
-            <div key={accession.id} className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-6">
+            <div
+              key={accession.id}
+              className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-6"
+            >
               <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-3">
-                <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">{String(accessionNumber)}</h3>
+                <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+                  {String(accessionNumber)}
+                </h3>
                 {sourceHref === null ? null : (
-                  <a href={sourceHref} target="_blank" rel="noopener noreferrer" className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+                  <a
+                    href={sourceHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  >
                     {t(DEFAULT_LOCALE, "museum.network.detail.sourceRecord")}
                   </a>
                 )}
@@ -66,7 +93,10 @@ function MuseumAccessionRecords({
                   if (work === undefined) return null;
                   return (
                     <li key={work.id}>
-                      <a href={museumWorkHref(work.id)} className="tw-text-sm tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+                      <a
+                        href={museumWorkHref(work.id)}
+                        className="hover:tw-text-primary-200 tw-text-sm tw-text-iron-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                      >
                         {work.title}
                       </a>
                     </li>
@@ -104,7 +134,10 @@ export default async function MuseumCollectionPage() {
         <MuseumSectionHeading
           eyebrow={t(DEFAULT_LOCALE, "museum.network.collection.eyebrow")}
           title={t(DEFAULT_LOCALE, "museum.network.collection.title")}
-          description={t(DEFAULT_LOCALE, "museum.network.collection.description")}
+          description={t(
+            DEFAULT_LOCALE,
+            "museum.network.collection.description"
+          )}
         />
         <p className="tw-m-0 tw-mb-10 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-6 tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(DEFAULT_LOCALE, "museum.network.collection.scope")}
@@ -129,9 +162,12 @@ export default async function MuseumCollectionPage() {
             const sourceAlias = publication.workAliases?.find(
               (alias) => alias.workId === work.id
             )?.sourceObjectId;
-            const legacyArtwork = sourceAlias === undefined
-              ? undefined
-              : publication.artworks.find((artwork) => artwork.id === sourceAlias);
+            const legacyArtwork =
+              sourceAlias === undefined
+                ? undefined
+                : publication.artworks.find(
+                    (artwork) => artwork.id === sourceAlias
+                  );
             const legacyMedia = legacyArtwork?.media[0];
             if (legacyMedia !== undefined) {
               return (
@@ -148,9 +184,15 @@ export default async function MuseumCollectionPage() {
               );
             }
             return (
-              <article key={work.id} className="tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-py-5">
+              <article
+                key={work.id}
+                className="tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-py-5"
+              >
                 <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-                  <a href={museumWorkHref(work.id)} className="tw-text-inherit tw-no-underline hover:tw-text-primary-200">
+                  <a
+                    href={museumWorkHref(work.id)}
+                    className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline"
+                  >
                     {work.title}
                   </a>
                 </h2>
@@ -162,9 +204,7 @@ export default async function MuseumCollectionPage() {
       </div>
     );
   }
-  const artworks = tryCaseyArtworksFromPublication(
-    publication
-  );
+  const artworks = tryCaseyArtworksFromPublication(publication);
   if (artworks === null) {
     return <MuseumPublicationUnavailable />;
   }

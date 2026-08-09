@@ -19,13 +19,11 @@ import { getMuseumView } from "@/lib/museum/normalize";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
-import {
-  museumLegacyAcquisitionProgramHref,
-} from "@/lib/museum/publication/routes";
+import { museumLegacyAcquisitionProgramHref } from "@/lib/museum/publication/routes";
 import {
   museumWorkHrefForSourceId,
   resolveMuseumAcquisitionProgramSlug,
-} from "@/lib/museum/publication/ia";
+} from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import {
   displayMuseumStatus,
@@ -65,7 +63,9 @@ export default async function MuseumProgramDetailPage({
       programId
     );
     if (programSlug !== null) {
-      permanentRedirect(`/museum/network/acquisition-programs/${encodeURIComponent(programSlug)}`);
+      permanentRedirect(
+        `/museum/network/acquisition-programs/${encodeURIComponent(programSlug)}`
+      );
     }
   } else {
     const canonicalProgramHref = museumLegacyAcquisitionProgramHref(programId);
@@ -211,7 +211,10 @@ export default async function MuseumProgramDetailPage({
             </li>
           </ol>
           <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/30 tw-px-6 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-8">
-            {t(DEFAULT_LOCALE, "museum.network.programs.detail.selectionStatus")}
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.programs.detail.selectionStatus"
+            )}
           </p>
         </section>
       )}
@@ -250,11 +253,11 @@ export default async function MuseumProgramDetailPage({
             const href =
               publicationState.publication === null
                 ? null
-                  : museumWorkHrefForSourceId(
-                      publicationState.publication,
-                      work.recordId,
-                      view
-                    );
+                : museumWorkHrefForSourceId(
+                    publicationState.publication,
+                    work.recordId,
+                    view
+                  );
             if (href === null) return null;
             return (
               <MuseumRecordCard

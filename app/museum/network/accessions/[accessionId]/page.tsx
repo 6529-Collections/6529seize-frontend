@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import {
-  getMuseumGiftMetadata,
-} from "@/components/museum/MuseumGiftPage";
+import { getMuseumGiftMetadata } from "@/components/museum/MuseumGiftPage";
 import { museumAcquisitionHrefForLegacyRoute } from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 

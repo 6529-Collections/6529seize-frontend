@@ -17,8 +17,6 @@ export type MuseumEntityKind =
   | "research"
   | "exhibition";
 
-export type MuseumEntityType = MuseumEntityKind;
-
 export type MuseumAcquisitionMethod =
   | "gift"
   | "donation"
@@ -92,7 +90,7 @@ export interface MuseumOrganization {
   readonly sourcePaths: readonly string[];
 }
 
-export type MuseumSignedWaveStormUrl =
+type MuseumSignedWaveStormUrl =
   `https://6529.io/waves/${string}-${string}-${string}-${string}-${string}`;
 
 export interface MuseumExternalProposalPresentationSource {
@@ -229,8 +227,7 @@ export function isMuseumSignedWaveStormUrl(
   }
 }
 
-const ARWEAVE_TRANSACTION_PATH_PATTERN =
-  /^\/[A-Za-z0-9_-]{43}$/u;
+const ARWEAVE_TRANSACTION_PATH_PATTERN = /^\/[A-Za-z0-9_-]{43}$/u;
 const WAVE_PRESENTATION_HOST = "d3lqz0a4bldqgf.cloudfront.net";
 const WAVE_PRESENTATION_PATH_PATTERN =
   /^\/drops\/[A-Za-z0-9_-]+\/[A-Za-z0-9-]+\/[A-Za-z0-9_.-]+\.(?:jpe?g|png|webp)$/u;
@@ -249,7 +246,11 @@ export function isMuseumSafeGovernedSourcePath(value: string): boolean {
     return false;
   }
   const segments = value.split("/");
-  if (segments.some((segment) => segment.length === 0 || segment === "." || segment === "..")) {
+  if (
+    segments.some(
+      (segment) => segment.length === 0 || segment === "." || segment === ".."
+    )
+  ) {
     return false;
   }
   const filename = segments.at(-1);
@@ -398,8 +399,13 @@ function isMuseumExternalProposalPresentationAffordances(
   return (
     new Set(value).size === value.length &&
     value.every(
-      (affordance): affordance is MuseumExternalProposalPresentationAffordance =>
-        typeof affordance === "string" && allowed.includes(affordance as MuseumExternalProposalPresentationAffordance)
+      (
+        affordance
+      ): affordance is MuseumExternalProposalPresentationAffordance =>
+        typeof affordance === "string" &&
+        allowed.includes(
+          affordance as MuseumExternalProposalPresentationAffordance
+        )
     ) &&
     value.includes("view") &&
     value.includes("alt") &&
@@ -416,8 +422,7 @@ export function buildMuseumSignedWaveStormDropUrl(
   try {
     const parsed = new URL(url);
     const entries = [...parsed.searchParams.entries()];
-    return (
-      parsed.protocol === "https:" &&
+    return parsed.protocol === "https:" &&
       parsed.hostname === "6529.io" &&
       parsed.username.length === 0 &&
       parsed.password.length === 0 &&
@@ -426,7 +431,6 @@ export function buildMuseumSignedWaveStormDropUrl(
       entries.length === 1 &&
       entries[0]?.[0] === "drop" &&
       entries[0][1] === dropId
-    )
       ? url
       : null;
   } catch {

@@ -7,7 +7,10 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
-import { museumProjectHref, museumWorkHref } from "@/lib/museum/publication/routes";
+import {
+  museumProjectHref,
+  museumWorkHref,
+} from "@/lib/museum/publication/routes";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.projects.title"),
@@ -54,7 +57,7 @@ export default async function MuseumProjectsPage() {
                 <div className="tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-py-5">
                   <Link
                     href={museumProjectHref(project.slug)}
-                    className="tw-text-xl tw-font-semibold tw-text-iron-50 tw-underline-offset-4 hover:tw-text-primary-200 hover:tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    className="hover:tw-text-primary-200 tw-text-xl tw-font-semibold tw-text-iron-50 tw-underline-offset-4 hover:tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                   >
                     {project.title}
                   </Link>

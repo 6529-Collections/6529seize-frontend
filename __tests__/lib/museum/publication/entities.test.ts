@@ -102,8 +102,7 @@ describe("Museum publication entity contract", () => {
       height: 1067,
       altText: "A proposed Magnum photograph.",
       credit: {
-        creditLine:
-          "© artist / Magnum Photos. All Rights Reserved.",
+        creditLine: "© artist / Magnum Photos. All Rights Reserved.",
         sourcePath: "records/entities/6529NM-MED-0003.json",
       },
       rights: {
@@ -113,13 +112,13 @@ describe("Museum publication entity contract", () => {
       },
       download: "not_permitted",
       preservation: "not_retained",
-        affordances: [
-          "view",
-          "thumbnail",
-          "hero",
-          "alt",
-          "open_upstream_presentation",
-        ],
+      affordances: [
+        "view",
+        "thumbnail",
+        "hero",
+        "alt",
+        "open_upstream_presentation",
+      ],
     } satisfies MuseumExternalProposalPresentationMedia;
 
     expect(
@@ -176,13 +175,13 @@ describe("Museum publication entity contract", () => {
         },
         download: "not_permitted",
         preservation: "not_retained",
-      affordances: [
-        "view",
-        "thumbnail",
-        "hero",
-        "alt",
-        "open_upstream_presentation",
-      ],
+        affordances: [
+          "view",
+          "thumbnail",
+          "hero",
+          "alt",
+          "open_upstream_presentation",
+        ],
       } satisfies MuseumExternalProposalPresentationMedia;
 
       return media;
@@ -209,12 +208,12 @@ describe("Museum publication entity contract", () => {
       "https://arweave.net/manifest.json",
     ];
 
-    expect(invalidUrls.every((url) => !isMuseumExternalProposalTokenSourceUrl(url))).toBe(
-      true
-    );
-    expect(invalidUrls.every((url) => !isMuseumExternalProposalMediaUrl(url))).toBe(
-      true
-    );
+    expect(
+      invalidUrls.every((url) => !isMuseumExternalProposalTokenSourceUrl(url))
+    ).toBe(true);
+    expect(
+      invalidUrls.every((url) => !isMuseumExternalProposalMediaUrl(url))
+    ).toBe(true);
     expect(
       isMuseumExternalProposalTokenSourceUrl(
         `https://arweave.net/${transactionId}`
@@ -229,7 +228,10 @@ describe("Museum publication entity contract", () => {
     const invalidUrls = [
       valid.replace("https://", "http://"),
       valid.replace("d3lqz0a4bldqgf.cloudfront.net", "media.6529.io"),
-      valid.replace("d3lqz0a4bldqgf.cloudfront.net", "user:pass@d3lqz0a4bldqgf.cloudfront.net"),
+      valid.replace(
+        "d3lqz0a4bldqgf.cloudfront.net",
+        "user:pass@d3lqz0a4bldqgf.cloudfront.net"
+      ),
       `${valid}?download=1`,
       `${valid}#fragment`,
       valid.replace("/drops/", "/other/"),
@@ -239,9 +241,9 @@ describe("Museum publication entity contract", () => {
         "d498d837-3331-4650-a30e-27ca18d53521/extra"
       ),
     ];
-    expect(invalidUrls.every((url) => !isMuseumExternalProposalMediaUrl(url))).toBe(
-      true
-    );
+    expect(
+      invalidUrls.every((url) => !isMuseumExternalProposalMediaUrl(url))
+    ).toBe(true);
   });
 
   it("rejects mutable, non-canonical, or signed-URL query variants", () => {
@@ -294,7 +296,11 @@ describe("Museum publication entity contract", () => {
           sourceCommit: "not-a-commit",
         },
         credit: { creditLine: "", sourcePath: "records/broken.json" },
-        rights: { status: "presentation_only", licenseLabel: "All Rights Reserved", licenseUrl: null },
+        rights: {
+          status: "presentation_only",
+          licenseLabel: "All Rights Reserved",
+          licenseUrl: null,
+        },
         download: "not_permitted",
         preservation: "not_retained",
         affordances: [

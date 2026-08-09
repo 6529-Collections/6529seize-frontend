@@ -11,17 +11,20 @@ import {
   stringArray,
 } from "./publicEntityGraphPrimitives";
 
-export function relationKey(relation: MuseumPublicRelationRecord): string {
+function relationKey(relation: MuseumPublicRelationRecord): string {
   return `${relation.relationType}:${relation.sourceEntityId}:${relation.targetEntityId}`;
 }
 
-export function isActivePublicRelation(
+function isActivePublicRelation(
   relation: MuseumPublicRelationRecord
 ): boolean {
-  return relation.assertionStatus === "asserted" || relation.assertionStatus === "observed";
+  return (
+    relation.assertionStatus === "asserted" ||
+    relation.assertionStatus === "observed"
+  );
 }
 
-export function hasRelation(
+function hasRelation(
   relations: readonly MuseumPublicRelationRecord[],
   relationType: MuseumPublicRelationType,
   sourceEntityId: string,
@@ -45,7 +48,8 @@ function activeRelations(
     (relation) =>
       isActivePublicRelation(relation) &&
       relation.relationType === relationType &&
-      (targetEntityId === undefined || relation.targetEntityId === targetEntityId)
+      (targetEntityId === undefined ||
+        relation.targetEntityId === targetEntityId)
   );
 }
 
@@ -79,7 +83,11 @@ export function isRelationGatedCollectionMember(
     "public_entity_graph_work_accessions",
     false
   );
-  const profileAccessionIds = profileStringArray(entity, "accession_entity_ids", false);
+  const profileAccessionIds = profileStringArray(
+    entity,
+    "accession_entity_ids",
+    false
+  );
   const collectionRelations = activeRelations(
     relations,
     "COLLECTION_CONTAINS_WORK",
@@ -113,7 +121,12 @@ export function profileStringArray(
   key: string,
   required = false
 ): string[] {
-  return stringArray(entity.profile, key, "public_entity_graph_profile_reference", required);
+  return stringArray(
+    entity.profile,
+    key,
+    "public_entity_graph_profile_reference",
+    required
+  );
 }
 
 export function assertGraphReferences(
@@ -222,7 +235,14 @@ function assertInstitutionReferences(
     "collection_entity_id",
     "public_entity_graph_collection_reference"
   );
-  if (!hasRelation(relations, "INSTITUTION_HOLDS_COLLECTION", entity.id, collectionId)) {
+  if (
+    !hasRelation(
+      relations,
+      "INSTITUTION_HOLDS_COLLECTION",
+      entity.id,
+      collectionId
+    )
+  ) {
     throw new Error("public_entity_graph_institution_relation_missing");
   }
 }
@@ -231,7 +251,10 @@ function assertCollectionReferences(
   entity: MuseumPublicEntityRecord,
   relations: readonly MuseumPublicRelationRecord[]
 ): void {
-  const declaredWorkIds = profileStringArray(entity, "admitted_work_entity_ids");
+  const declaredWorkIds = profileStringArray(
+    entity,
+    "admitted_work_entity_ids"
+  );
   const activeRelationsForCollection = relations.filter(
     (relation) =>
       isActivePublicRelation(relation) &&
@@ -248,7 +271,10 @@ function assertCollectionReferences(
     throw new Error("public_entity_graph_collection_relation_missing");
   }
   for (const relation of activeRelationsForCollection) {
-    if (relation.qualifier["collection_membership_status"] !== "permanent_collection") {
+    if (
+      relation.qualifier["collection_membership_status"] !==
+      "permanent_collection"
+    ) {
       throw new Error("public_entity_graph_collection_relation_qualifier");
     }
   }
@@ -307,8 +333,18 @@ function assertWorkProjects(
   entity: MuseumPublicEntityRecord,
   relations: readonly MuseumPublicRelationRecord[]
 ): void {
-  for (const projectId of profileStringArray(entity, "project_or_series_entity_ids")) {
-    if (!hasRelation(relations, "PROJECT_CONTEXTUALIZES_WORK", projectId, entity.id)) {
+  for (const projectId of profileStringArray(
+    entity,
+    "project_or_series_entity_ids"
+  )) {
+    if (
+      !hasRelation(
+        relations,
+        "PROJECT_CONTEXTUALIZES_WORK",
+        projectId,
+        entity.id
+      )
+    ) {
       throw new Error("public_entity_graph_project_relation_missing");
     }
   }
@@ -417,7 +453,10 @@ function assertWorkCollection(
     "COLLECTION_CONTAINS_WORK",
     entity.id
   );
-  if (membershipStatus === "permanent_collection" || lifecycle === "accessioned") {
+  if (
+    membershipStatus === "permanent_collection" ||
+    lifecycle === "accessioned"
+  ) {
     if (
       membershipStatus !== "permanent_collection" ||
       lifecycle !== "accessioned" ||
@@ -441,7 +480,9 @@ function assertProjectReferences(
   relations: readonly MuseumPublicRelationRecord[]
 ): void {
   for (const workId of profileStringArray(entity, "work_entity_ids")) {
-    if (!hasRelation(relations, "PROJECT_CONTEXTUALIZES_WORK", entity.id, workId)) {
+    if (
+      !hasRelation(relations, "PROJECT_CONTEXTUALIZES_WORK", entity.id, workId)
+    ) {
       throw new Error("public_entity_graph_project_relation_missing");
     }
   }
@@ -472,9 +513,23 @@ function assertAcquisitionReferences(
     "program_or_pathway",
     "public_entity_graph_pathway"
   );
-  for (const programId of stringArray(pathway, "entity_ids", "public_entity_graph_pathway_entities", false)) {
-    if (!hasRelation(relations, "ACQUISITION_PROGRAM_PRODUCES_ACQUISITION", programId, entity.id)) {
-      throw new Error("public_entity_graph_program_acquisition_relation_missing");
+  for (const programId of stringArray(
+    pathway,
+    "entity_ids",
+    "public_entity_graph_pathway_entities",
+    false
+  )) {
+    if (
+      !hasRelation(
+        relations,
+        "ACQUISITION_PROGRAM_PRODUCES_ACQUISITION",
+        programId,
+        entity.id
+      )
+    ) {
+      throw new Error(
+        "public_entity_graph_program_acquisition_relation_missing"
+      );
     }
   }
 }
@@ -483,9 +538,21 @@ function assertProgramReferences(
   entity: MuseumPublicEntityRecord,
   relations: readonly MuseumPublicRelationRecord[]
 ): void {
-  for (const acquisitionId of profileStringArray(entity, "produced_acquisition_entity_ids")) {
-    if (!hasRelation(relations, "ACQUISITION_PROGRAM_PRODUCES_ACQUISITION", entity.id, acquisitionId)) {
-      throw new Error("public_entity_graph_program_acquisition_relation_missing");
+  for (const acquisitionId of profileStringArray(
+    entity,
+    "produced_acquisition_entity_ids"
+  )) {
+    if (
+      !hasRelation(
+        relations,
+        "ACQUISITION_PROGRAM_PRODUCES_ACQUISITION",
+        entity.id,
+        acquisitionId
+      )
+    ) {
+      throw new Error(
+        "public_entity_graph_program_acquisition_relation_missing"
+      );
     }
   }
 }
@@ -534,9 +601,4 @@ export function requireEntity(
 
 export function uniqueIds(values: readonly string[]): readonly string[] {
   return [...new Set(values)];
-}
-
-export function assertProfileObject(value: unknown, code: string): Record<string, unknown> {
-  if (!isRecord(value)) throw new Error(code);
-  return value;
 }

@@ -6,8 +6,8 @@ import { parseMuseumEntityRecord } from "@/lib/museum/publication/publicEntityGr
 import { isRelationGatedCollectionMember } from "@/lib/museum/publication/publicEntityGraphValidation";
 import {
   buildMuseumAcquisitionIndex,
-  resolveMuseumWorkId,
 } from "@/lib/museum/publication/ia";
+import { resolveMuseumWorkId } from "@/lib/museum/publication/routes";
 import { mapAcquisitionStatus } from "@/lib/museum/publication/publicEntityGraphMedia";
 import type {
   MuseumCuratedAcquisition,
@@ -27,7 +27,8 @@ function documentFor(
   recordType: "PUBLIC_ENTITY" | "PUBLIC_RELATION",
   payload: Record<string, unknown>
 ): MuseumSourceDocument {
-  const schemaId = recordType === "PUBLIC_ENTITY" ? ENTITY_SCHEMA : RELATION_SCHEMA;
+  const schemaId =
+    recordType === "PUBLIC_ENTITY" ? ENTITY_SCHEMA : RELATION_SCHEMA;
   return {
     path,
     sha256: null,
@@ -53,12 +54,14 @@ function commonPayload(id: string): Record<string, unknown> {
     created_at: "2026-08-08T00:00:00Z",
     effective_at: "2026-08-08T00:00:00Z",
     source_record_ids: [id],
-    evidence_refs: [{
-      uri: "https://example.test/evidence",
-      label: "Evidence",
-      observed_at: "2026-08-08T00:00:00Z",
-      evidence_class: "C",
-    }],
+    evidence_refs: [
+      {
+        uri: "https://example.test/evidence",
+        label: "Evidence",
+        observed_at: "2026-08-08T00:00:00Z",
+        evidence_class: "C",
+      },
+    ],
   };
 }
 
@@ -75,12 +78,14 @@ function institutionDocument(): MuseumSourceDocument {
     entity_status: "published",
     profile: {
       profile_type: "INSTITUTION",
-      evidence_refs: [{
-        uri: "https://example.test/institution",
-        label: "Institution",
-        observed_at: "2026-08-08T00:00:00Z",
-        evidence_class: "C",
-      }],
+      evidence_refs: [
+        {
+          uri: "https://example.test/institution",
+          label: "Institution",
+          observed_at: "2026-08-08T00:00:00Z",
+          evidence_class: "C",
+        },
+      ],
       collection_entity_id: "6529NM-C-0001",
     },
   });
@@ -151,7 +156,9 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
   });
 
   it("keeps the released pre-ontology path compatible", () => {
-    expect(parseMuseumPublicEntityGraph(new Map(), [], SOURCE_COMMIT)).toBeNull();
+    expect(
+      parseMuseumPublicEntityGraph(new Map(), [], SOURCE_COMMIT)
+    ).toBeNull();
   });
 
   it("accepts a rights-limited media record with metadata and no direct locator", () => {
@@ -216,7 +223,11 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
       ...magnumIds.map((suffix) => ({
         id: `6529NM-MED-${suffix}`,
         role: "historical_wave_proposal_presentation",
-        affordances: ["alt_text", "copy_citation", "open_wave_proposal_context"],
+        affordances: [
+          "alt_text",
+          "copy_citation",
+          "open_wave_proposal_context",
+        ],
         extra: {
           signed_wave: {
             wave_id: "5f207393-5418-4a75-8738-e40edb44a94d",
@@ -290,14 +301,17 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     });
     const documents = new Map([
       [path, unknown],
-      ["records/relations/6529NM-REL-0001.json", relationDocument("UNKNOWN_RELATION")],
+      [
+        "records/relations/6529NM-REL-0001.json",
+        relationDocument("UNKNOWN_RELATION"),
+      ],
     ]);
     expect(() =>
-       parseMuseumPublicEntityGraph(
-         documents,
-         [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
-         SOURCE_COMMIT
-       )
+      parseMuseumPublicEntityGraph(
+        documents,
+        [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
+        SOURCE_COMMIT
+      )
     ).toThrow("public_entity_graph_unknown_entity_type");
   });
 
@@ -309,11 +323,11 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
       [relation.path, relation],
     ]);
     expect(() =>
-       parseMuseumPublicEntityGraph(
-         documents,
-         [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
-         SOURCE_COMMIT
-       )
+      parseMuseumPublicEntityGraph(
+        documents,
+        [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
+        SOURCE_COMMIT
+      )
     ).toThrow("public_entity_graph_unknown_relation_type");
   });
 
@@ -341,11 +355,11 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
       [relation.path, relation],
     ]);
     expect(() =>
-       parseMuseumPublicEntityGraph(
-         documents,
-         [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
-         SOURCE_COMMIT
-       )
+      parseMuseumPublicEntityGraph(
+        documents,
+        [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, ...documents.keys()],
+        SOURCE_COMMIT
+      )
     ).toThrow("public_entity_graph_dangling_relation");
   });
 
@@ -370,7 +384,11 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
             relationDocument("INSTITUTION_HOLDS_COLLECTION"),
           ],
         ]),
-         [MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH, path, "records/relations/6529NM-REL-0001.json"],
+        [
+          MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+          path,
+          "records/relations/6529NM-REL-0001.json",
+        ],
         SOURCE_COMMIT
       )
     ).toThrow("public_entity_graph_work_route");
@@ -390,14 +408,35 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
         { id: "6529NM-W-0024" },
       ],
       workAliases: [
-        { kind: "work_source_alias", sourceObjectId: "6529NM.2026.001.01", workId: "6529NM-W-0001", sourcePath: "records/entities/6529NM-W-0001.json" },
-        { kind: "work_source_alias", sourceObjectId: "6529NM-AP-01-OUT-001", workId: "6529NM-W-0008", sourcePath: "records/entities/6529NM-W-0008.json" },
-        { kind: "work_source_alias", sourceObjectId: "6529NM-PG-2026-001.OBJ-001", workId: "6529NM-W-0024", sourcePath: "records/entities/6529NM-W-0024.json" },
+        {
+          kind: "work_source_alias",
+          sourceObjectId: "6529NM.2026.001.01",
+          workId: "6529NM-W-0001",
+          sourcePath: "records/entities/6529NM-W-0001.json",
+        },
+        {
+          kind: "work_source_alias",
+          sourceObjectId: "6529NM-AP-01-OUT-001",
+          workId: "6529NM-W-0008",
+          sourcePath: "records/entities/6529NM-W-0008.json",
+        },
+        {
+          kind: "work_source_alias",
+          sourceObjectId: "6529NM-PG-2026-001.OBJ-001",
+          workId: "6529NM-W-0024",
+          sourcePath: "records/entities/6529NM-W-0024.json",
+        },
       ],
     } as unknown as MuseumPublication;
-    expect(resolveMuseumWorkId(publication, "6529NM.2026.001.01")).toBe("6529NM-W-0001");
-    expect(resolveMuseumWorkId(publication, "6529NM-AP-01-OUT-001")).toBe("6529NM-W-0008");
-    expect(resolveMuseumWorkId(publication, "6529NM-PG-2026-001.OBJ-001")).toBe("6529NM-W-0024");
+    expect(resolveMuseumWorkId(publication, "6529NM.2026.001.01")).toBe(
+      "6529NM-W-0001"
+    );
+    expect(resolveMuseumWorkId(publication, "6529NM-AP-01-OUT-001")).toBe(
+      "6529NM-W-0008"
+    );
+    expect(resolveMuseumWorkId(publication, "6529NM-PG-2026-001.OBJ-001")).toBe(
+      "6529NM-W-0024"
+    );
     expect(resolveMuseumWorkId(publication, "6529NM-AP-01-OUT-999")).toBeNull();
   });
 
@@ -423,7 +462,13 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     const publication = {
       identity: { commit: SOURCE_COMMIT },
       curatedAcquisitions: [typedAcquisition],
-      gifts: [{ institutionalStatus: "accessioned", artworkIds: ["legacy"], id: "legacy" }],
+      gifts: [
+        {
+          institutionalStatus: "accessioned",
+          artworkIds: ["legacy"],
+          id: "legacy",
+        },
+      ],
       artworks: [],
       artists: [],
       projects: [],
@@ -469,20 +514,29 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     } as const;
 
     expect(
-      isRelationGatedCollectionMember(work, [accessionRelation, collectionRelation])
-    ).toBe(true);
-    expect(
-      isRelationGatedCollectionMember(work, [collectionRelation, accessionRelation])
+      isRelationGatedCollectionMember(work, [
+        accessionRelation,
+        collectionRelation,
+      ])
     ).toBe(true);
     expect(
       isRelationGatedCollectionMember(work, [
-        { ...collectionRelation, qualifier: { collection_membership_status: "selected" } },
+        collectionRelation,
+        accessionRelation,
+      ])
+    ).toBe(true);
+    expect(
+      isRelationGatedCollectionMember(work, [
+        {
+          ...collectionRelation,
+          qualifier: { collection_membership_status: "selected" },
+        },
         accessionRelation,
       ])
     ).toBe(false);
-    expect(
-      isRelationGatedCollectionMember(work, [collectionRelation])
-    ).toBe(false);
+    expect(isRelationGatedCollectionMember(work, [collectionRelation])).toBe(
+      false
+    );
     expect(
       isRelationGatedCollectionMember(
         {

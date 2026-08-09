@@ -74,9 +74,17 @@ function isGraphActivated(declared: ReadonlySet<string>): boolean {
 }
 
 function assertGraphInventoryIsComplete(declared: ReadonlySet<string>): void {
-  const hasEntities = [...declared].some((path) => ENTITY_PATH_PATTERN.test(path));
-  const hasRelations = [...declared].some((path) => RELATION_PATH_PATTERN.test(path));
-  if (!declared.has(MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH) || !hasEntities || !hasRelations) {
+  const hasEntities = [...declared].some((path) =>
+    ENTITY_PATH_PATTERN.test(path)
+  );
+  const hasRelations = [...declared].some((path) =>
+    RELATION_PATH_PATTERN.test(path)
+  );
+  if (
+    !declared.has(MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH) ||
+    !hasEntities ||
+    !hasRelations
+  ) {
     throw new Error("public_entity_graph_inventory_incomplete");
   }
 }

@@ -58,11 +58,15 @@ export function MuseumProposalImage({
             setMediaStatus("loading");
             setRevealed(true);
           }}
-          className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-bg-black tw-p-5 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="hover:tw-text-primary-200 tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-bg-black tw-p-5 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
-          {t(DEFAULT_LOCALE, "museum.network.acquisitions.viewHistoricalProposalImage", {
-            size: formatMegabytes(sourceByteSize ?? 0),
-          })}
+          {t(
+            DEFAULT_LOCALE,
+            "museum.network.acquisitions.viewHistoricalProposalImage",
+            {
+              size: formatMegabytes(sourceByteSize ?? 0),
+            }
+          )}
         </button>
       </>
     );

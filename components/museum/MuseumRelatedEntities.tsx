@@ -20,7 +20,7 @@ function imageDimensions(
   return dimensions;
 }
 
-export interface MuseumRelatedEntitiesProps {
+interface MuseumRelatedEntitiesProps {
   readonly entities: readonly MuseumEntityRef[];
   readonly headingId: string;
   readonly title: string;
@@ -32,8 +32,7 @@ export function MuseumRelatedEntities({
   title,
 }: MuseumRelatedEntitiesProps) {
   const visibleEntities = entities.filter(
-    (entity) =>
-      entity.href.trim().length > 0 && entity.label.trim().length > 0
+    (entity) => entity.href.trim().length > 0 && entity.label.trim().length > 0
   );
   if (visibleEntities.length === 0) {
     return null;
@@ -59,7 +58,10 @@ export function MuseumRelatedEntities({
                   {...dimensions}
                   alt={media.alt}
                   loading="lazy"
-                  failureMessage={t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
+                  failureMessage={t(
+                    DEFAULT_LOCALE,
+                    "museum.network.media.unavailable"
+                  )}
                   retryLabel={t(DEFAULT_LOCALE, "museum.network.media.retry")}
                   className="tw-block tw-h-full tw-w-full tw-object-contain tw-transition-transform tw-duration-300 group-hover:tw-scale-[1.01] motion-reduce:tw-transition-none"
                 />
@@ -68,7 +70,7 @@ export function MuseumRelatedEntities({
           return (
             <li
               key={`${entity.kind}:${entity.id}:${entity.href}`}
-              className="tw-min-w-0 tw-border-solid tw-border-iron-800 sm:tw-border-b sm:tw-border-b-0 sm:tw-border-t-0 sm:tw-border-r-0 sm:tw-px-5 first:sm:tw-pl-0 last:sm:tw-pr-0"
+              className="tw-min-w-0 tw-border-solid tw-border-iron-800 sm:tw-border-b sm:tw-border-b-0 sm:tw-border-r-0 sm:tw-border-t-0 sm:tw-px-5 first:sm:tw-pl-0 last:sm:tw-pr-0"
               data-museum-entity-kind={entity.kind}
             >
               <div className="tw-group tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-py-4 tw-text-sm">
@@ -79,7 +81,7 @@ export function MuseumRelatedEntities({
                 <Link
                   href={entity.href}
                   prefetch={false}
-                  className="tw-break-words tw-font-semibold tw-text-primary-300 group-hover:tw-text-primary-200 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  className="group-hover:tw-text-primary-200 tw-break-words tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 >
                   {entity.label}
                 </Link>

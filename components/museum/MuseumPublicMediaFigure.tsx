@@ -57,14 +57,20 @@ export function MuseumPublicMediaFigure({
         {href ? (
           <Link
             href={href}
-            className="tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             {title}
           </Link>
         ) : (
-          <span className="tw-text-base tw-font-semibold tw-text-iron-50">{title}</span>
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {title}
+          </span>
         )}
-        {byline ? <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">{byline}</span> : null}
+        {byline ? (
+          <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
+            {byline}
+          </span>
+        ) : null}
         {qualifier ? (
           <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
             {qualifier}

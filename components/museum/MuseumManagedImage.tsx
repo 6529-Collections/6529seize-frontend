@@ -43,7 +43,7 @@ function MuseumMediaFailure({
         <button
           type="button"
           onClick={onRetry}
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {retryLabel}
         </button>
@@ -52,7 +52,7 @@ function MuseumMediaFailure({
             href={sourceHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             {sourceLabel}
           </a>
@@ -99,7 +99,6 @@ export function MuseumManagedImage({
     );
   }
   return (
-    /* eslint-disable-next-line @next/next/no-img-element -- URI and affordances are validated by the Museum publication adapter. */
     <img
       key={`${src}:${attempt}`}
       src={src}
@@ -121,5 +120,3 @@ export function MuseumManagedImage({
     />
   );
 }
-
-export { MuseumMediaFailure };

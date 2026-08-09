@@ -2,17 +2,12 @@ import {
   isMuseumExternalProposalMediaUrl,
   isMuseumExternalProposalTokenSourceUrl,
 } from "./entities";
-import {
-  isRecord,
-} from "./publicEntityGraphPrimitives";
+import { isRecord } from "./publicEntityGraphPrimitives";
 import {
   parseWavePublicationParts,
   type MuseumWavePublicationPart,
 } from "./publicEntityGraphWaveReceipt";
-import type {
-  MuseumPublicEntityRecord,
-  MuseumSourceDocument,
-} from "./types";
+import type { MuseumPublicEntityRecord, MuseumSourceDocument } from "./types";
 
 const WAVE_PUBLICATION_OBSERVATION_PATH_PATTERN =
   /^records\/proposed-gifts\/[^/]+\/wave-publication-observation-[^/]+\.json$/u;
@@ -23,7 +18,7 @@ interface MuseumWavePublicationJoinInput {
   readonly creditLine: string;
 }
 
-export interface MuseumWavePublicationJoin {
+interface MuseumWavePublicationJoin {
   readonly sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>;
   readonly subjectEntity: MuseumPublicEntityRecord;
   readonly publicationRecordId: string;
@@ -119,11 +114,7 @@ function withSourceDeclaredByteSize(
     throw new Error("public_entity_graph_media_wave_source_join");
   }
   const bytes = image["bytes"];
-  if (
-    typeof bytes !== "number" ||
-    !Number.isSafeInteger(bytes) ||
-    bytes < 1
-  ) {
+  if (typeof bytes !== "number" || !Number.isSafeInteger(bytes) || bytes < 1) {
     throw new Error("public_entity_graph_media_wave_source_join");
   }
   return { ...part, mediaByteSize: bytes };
@@ -145,7 +136,8 @@ function sourceProfileReferences(
       return [];
     }
     const sourceRecordId = value["source_record_id"];
-    return typeof sourceRecordId === "string" && sourceRecordId.trim().length > 0
+    return typeof sourceRecordId === "string" &&
+      sourceRecordId.trim().length > 0
       ? [sourceRecordId]
       : [];
   });

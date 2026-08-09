@@ -23,8 +23,7 @@ const ART_BLOCKS_PATH_PATTERNS = {
   live: /^\/1\/0x[a-f\d]{40}\/\d+$/u,
   still: /^\/1\/0x[a-f\d]{40}\/\d+\.png$/u,
 } as const;
-const MUSEUM_GENERATED_DERIVATIVE_HOST =
-  "d3lqz0a4bldqgf.cloudfront.net";
+const MUSEUM_GENERATED_DERIVATIVE_HOST = "d3lqz0a4bldqgf.cloudfront.net";
 const MUSEUM_GENERATED_DERIVATIVE_PATH_PATTERN =
   /^\/museum\/programs\/[A-Za-z0-9-]+\/[A-Za-z0-9-]+\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\/(?:[0-9]+)\.(?:webp|png|jpe?g)$/u;
 

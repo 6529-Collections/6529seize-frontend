@@ -58,7 +58,9 @@ export function parseMuseumIdentityInventory(
   };
 }
 
-function assertInventoryDocument(document: MuseumSourceDocument | undefined): asserts document is MuseumSourceDocument {
+function assertInventoryDocument(
+  document: MuseumSourceDocument | undefined
+): asserts document is MuseumSourceDocument {
   if (document === undefined) {
     throw new Error("public_entity_graph_inventory_document_missing");
   }
@@ -70,7 +72,9 @@ function assertInventoryDocument(document: MuseumSourceDocument | undefined): as
   }
 }
 
-function parseInventoryJson(document: MuseumSourceDocument): Record<string, unknown> {
+function parseInventoryJson(
+  document: MuseumSourceDocument
+): Record<string, unknown> {
   let root: unknown;
   try {
     root = JSON.parse(document.text) as unknown;
@@ -89,7 +93,11 @@ function assertInventoryVersion(inventory: Record<string, unknown>): void {
   if (version !== "1.1.0" && version !== "1.2.0" && version !== "1.3.2") {
     throw new Error("public_entity_graph_inventory_version");
   }
-  requiredString(inventory, "identity_policy", "public_entity_graph_inventory_policy");
+  requiredString(
+    inventory,
+    "identity_policy",
+    "public_entity_graph_inventory_policy"
+  );
 }
 
 function declaredInventoryEntityIds(
@@ -107,22 +115,22 @@ function declaredInventoryEntityIds(
         throw new Error("public_entity_graph_inventory_bindings");
       }
       for (const binding of value) {
-        const entry = requiredRecord(binding, "public_entity_graph_inventory_bindings");
+        const entry = requiredRecord(
+          binding,
+          "public_entity_graph_inventory_bindings"
+        );
         const id = requiredString(
           entry,
           "entity_id",
           "public_entity_graph_inventory_bindings"
         );
-        if (ids.has(id)) throw new Error("public_entity_graph_inventory_identity_collision");
+        if (ids.has(id))
+          throw new Error("public_entity_graph_inventory_identity_collision");
         ids.add(id);
       }
     }
   }
-  const addEntries = (
-    key: string,
-    field: string,
-    code: string
-  ): void => {
+  const addEntries = (key: string, field: string, code: string): void => {
     const raw = inventory[key];
     if (!Array.isArray(raw)) throw new Error(code);
     for (const value of raw) {
@@ -131,16 +139,35 @@ function declaredInventoryEntityIds(
       ids.add(id);
     }
   };
-  addEntries("required_bootstrap_curated_acquisitions", "entity_id", "public_entity_graph_inventory_bootstrap");
-  addEntries("public_slug_inventory", "entity_id", "public_entity_graph_inventory_slugs");
-  addEntries("work_aliases", "canonical_entity_id", "public_entity_graph_inventory_work_aliases");
-  addEntries("route_aliases", "canonical_entity_id", "public_entity_graph_inventory_route_aliases");
+  addEntries(
+    "required_bootstrap_curated_acquisitions",
+    "entity_id",
+    "public_entity_graph_inventory_bootstrap"
+  );
+  addEntries(
+    "public_slug_inventory",
+    "entity_id",
+    "public_entity_graph_inventory_slugs"
+  );
+  addEntries(
+    "work_aliases",
+    "canonical_entity_id",
+    "public_entity_graph_inventory_work_aliases"
+  );
+  addEntries(
+    "route_aliases",
+    "canonical_entity_id",
+    "public_entity_graph_inventory_route_aliases"
+  );
   const acquisitionAliases = inventory["acquisition_aliases"];
   if (!Array.isArray(acquisitionAliases)) {
     throw new Error("public_entity_graph_inventory_acquisition_aliases");
   }
   for (const value of acquisitionAliases) {
-    const entry = requiredRecord(value, "public_entity_graph_inventory_acquisition_aliases");
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
     ids.add(
       requiredString(
         entry,
@@ -173,8 +200,15 @@ function readCuratedAcquisitionIds(
     throw new Error("public_entity_graph_inventory_bootstrap");
   }
   const ids = raw.map((value) => {
-    const entry = requiredRecord(value, "public_entity_graph_inventory_bootstrap");
-    const id = requiredString(entry, "entity_id", "public_entity_graph_inventory_bootstrap");
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_bootstrap"
+    );
+    const id = requiredString(
+      entry,
+      "entity_id",
+      "public_entity_graph_inventory_bootstrap"
+    );
     const entity = byId.get(id);
     if (
       entity?.entityType !== "CURATED_ACQUISITION" ||
@@ -212,14 +246,17 @@ function assertEntityPatterns(
     inventory["entity_id_patterns"],
     "public_entity_graph_inventory_patterns"
   );
-  const expectedTypes = (Object.keys(ENTITY_ID_PATTERNS) as MuseumPublicEntityType[]).filter(
-    (type) => ENTITY_ID_PATTERNS[type] !== null
-  );
+  const expectedTypes = (
+    Object.keys(ENTITY_ID_PATTERNS) as MuseumPublicEntityType[]
+  ).filter((type) => ENTITY_ID_PATTERNS[type] !== null);
   const expectedInventoryOnlyTypes = Object.keys(
     INVENTORY_ONLY_ENTITY_ID_PATTERNS
   ) as (keyof typeof INVENTORY_ONLY_ENTITY_ID_PATTERNS)[];
   const patternKeys = Object.keys(patterns).sort();
-  const expectedPatternKeys = [...expectedTypes, ...expectedInventoryOnlyTypes].sort();
+  const expectedPatternKeys = [
+    ...expectedTypes,
+    ...expectedInventoryOnlyTypes,
+  ].sort();
   if (
     patternKeys.length !== expectedPatternKeys.length ||
     expectedPatternKeys.some((type) => !patternKeys.includes(type))
@@ -252,20 +289,42 @@ function readAcquisitionAliases(
     throw new Error("public_entity_graph_inventory_bootstrap");
   }
   for (const value of bootstrap) {
-    const entry = requiredRecord(value, "public_entity_graph_inventory_bootstrap");
-    const id = requiredString(entry, "entity_id", "public_entity_graph_inventory_bootstrap");
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_bootstrap"
+    );
+    const id = requiredString(
+      entry,
+      "entity_id",
+      "public_entity_graph_inventory_bootstrap"
+    );
     const entity = byId.get(id);
     if (entity === undefined) {
       throw new Error("public_entity_graph_inventory_bootstrap");
     }
     if (
       entity.entityType !== "CURATED_ACQUISITION" ||
-      entity.label !== requiredString(entry, "preferred_label", "public_entity_graph_inventory_bootstrap") ||
-      entity.slug !== requiredString(entry, "public_slug", "public_entity_graph_inventory_bootstrap")
+      entity.label !==
+        requiredString(
+          entry,
+          "preferred_label",
+          "public_entity_graph_inventory_bootstrap"
+        ) ||
+      entity.slug !==
+        requiredString(
+          entry,
+          "public_slug",
+          "public_entity_graph_inventory_bootstrap"
+        )
     ) {
       throw new Error("public_entity_graph_inventory_bootstrap");
     }
-    for (const alias of stringArray(entry, "source_aliases", "public_entity_graph_inventory_bootstrap", false)) {
+    for (const alias of stringArray(
+      entry,
+      "source_aliases",
+      "public_entity_graph_inventory_bootstrap",
+      false
+    )) {
       addAcquisitionAlias(aliases, alias, id);
     }
   }
@@ -283,16 +342,34 @@ function readRawAcquisitionAliases(
     throw new Error("public_entity_graph_inventory_acquisition_aliases");
   }
   for (const value of raw) {
-    const entry = requiredRecord(value, "public_entity_graph_inventory_acquisition_aliases");
-    const alias = requiredString(entry, "alias", "public_entity_graph_inventory_acquisition_aliases");
-    const canonicalEntityId = requiredString(entry, "canonical_entity_id", "public_entity_graph_inventory_acquisition_aliases");
-    const aliasKind = requiredString(entry, "alias_kind", "public_entity_graph_inventory_acquisition_aliases");
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
+    const alias = requiredString(
+      entry,
+      "alias",
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
+    const canonicalEntityId = requiredString(
+      entry,
+      "canonical_entity_id",
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
+    const aliasKind = requiredString(
+      entry,
+      "alias_kind",
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
     const entity = byId.get(canonicalEntityId);
     if (
       entity === undefined ||
-      (!PROGRAM_ALIAS_KINDS.has(aliasKind) && !ACQUISITION_ALIAS_KINDS.has(aliasKind)) ||
-      (PROGRAM_ALIAS_KINDS.has(aliasKind) && entity.entityType !== "ACQUISITION_PROGRAM") ||
-      (ACQUISITION_ALIAS_KINDS.has(aliasKind) && entity.entityType !== "CURATED_ACQUISITION")
+      (!PROGRAM_ALIAS_KINDS.has(aliasKind) &&
+        !ACQUISITION_ALIAS_KINDS.has(aliasKind)) ||
+      (PROGRAM_ALIAS_KINDS.has(aliasKind) &&
+        entity.entityType !== "ACQUISITION_PROGRAM") ||
+      (ACQUISITION_ALIAS_KINDS.has(aliasKind) &&
+        entity.entityType !== "CURATED_ACQUISITION")
     ) {
       throw new Error("public_entity_graph_inventory_acquisition_aliases");
     }
@@ -329,16 +406,34 @@ function readProgramAliases(
   }
   const aliases = new Map<string, MuseumPublicProgramAlias>();
   for (const value of raw) {
-    const entry = requiredRecord(value, "public_entity_graph_inventory_acquisition_aliases");
-    const alias = requiredString(entry, "alias", "public_entity_graph_inventory_acquisition_aliases");
-    const canonicalEntityId = requiredString(entry, "canonical_entity_id", "public_entity_graph_inventory_acquisition_aliases");
-    const aliasKind = requiredString(entry, "alias_kind", "public_entity_graph_inventory_acquisition_aliases");
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
+    const alias = requiredString(
+      entry,
+      "alias",
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
+    const canonicalEntityId = requiredString(
+      entry,
+      "canonical_entity_id",
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
+    const aliasKind = requiredString(
+      entry,
+      "alias_kind",
+      "public_entity_graph_inventory_acquisition_aliases"
+    );
     const entity = byId.get(canonicalEntityId);
     if (
-      (!PROGRAM_ALIAS_KINDS.has(aliasKind) && !ACQUISITION_ALIAS_KINDS.has(aliasKind)) ||
+      (!PROGRAM_ALIAS_KINDS.has(aliasKind) &&
+        !ACQUISITION_ALIAS_KINDS.has(aliasKind)) ||
       entity === undefined ||
-      (PROGRAM_ALIAS_KINDS.has(aliasKind) && entity.entityType !== "ACQUISITION_PROGRAM") ||
-      (ACQUISITION_ALIAS_KINDS.has(aliasKind) && entity.entityType !== "CURATED_ACQUISITION")
+      (PROGRAM_ALIAS_KINDS.has(aliasKind) &&
+        entity.entityType !== "ACQUISITION_PROGRAM") ||
+      (ACQUISITION_ALIAS_KINDS.has(aliasKind) &&
+        entity.entityType !== "CURATED_ACQUISITION")
     ) {
       throw new Error("public_entity_graph_inventory_acquisition_aliases");
     }
@@ -354,7 +449,9 @@ function readProgramAliases(
       sourcePath: MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
     });
   }
-  return [...aliases.values()].sort((left, right) => left.alias.localeCompare(right.alias));
+  return [...aliases.values()].sort((left, right) =>
+    left.alias.localeCompare(right.alias)
+  );
 }
 
 function readWorkAliases(
@@ -367,9 +464,20 @@ function readWorkAliases(
   }
   const aliases = new Map<string, MuseumWorkAlias>();
   for (const value of raw) {
-    const entry = requiredRecord(value, "public_entity_graph_inventory_work_aliases");
-    const alias = requiredString(entry, "alias", "public_entity_graph_inventory_work_aliases");
-    const canonicalEntityId = requiredString(entry, "canonical_entity_id", "public_entity_graph_inventory_work_aliases");
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_work_aliases"
+    );
+    const alias = requiredString(
+      entry,
+      "alias",
+      "public_entity_graph_inventory_work_aliases"
+    );
+    const canonicalEntityId = requiredString(
+      entry,
+      "canonical_entity_id",
+      "public_entity_graph_inventory_work_aliases"
+    );
     const entity = byId.get(canonicalEntityId);
     if (entity?.entityType !== "WORK" || alias === canonicalEntityId) {
       throw new Error("public_entity_graph_inventory_work_aliases");
@@ -398,10 +506,25 @@ function readRouteAliases(
   }
   const aliases = new Map<string, MuseumPublicRouteAlias>();
   for (const value of raw) {
-    const entry = requiredRecord(value, "public_entity_graph_inventory_route_aliases");
-    const legacyRoute = requiredString(entry, "legacy_route", "public_entity_graph_inventory_route_aliases");
-    const canonicalRoute = requiredString(entry, "canonical_route", "public_entity_graph_inventory_route_aliases");
-    const canonicalEntityId = requiredString(entry, "canonical_entity_id", "public_entity_graph_inventory_route_aliases");
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_route_aliases"
+    );
+    const legacyRoute = requiredString(
+      entry,
+      "legacy_route",
+      "public_entity_graph_inventory_route_aliases"
+    );
+    const canonicalRoute = requiredString(
+      entry,
+      "canonical_route",
+      "public_entity_graph_inventory_route_aliases"
+    );
+    const canonicalEntityId = requiredString(
+      entry,
+      "canonical_entity_id",
+      "public_entity_graph_inventory_route_aliases"
+    );
     const entity = byId.get(canonicalEntityId);
     if (entity === undefined) {
       throw new Error("public_entity_graph_inventory_route_aliases");
@@ -428,7 +551,11 @@ function readRouteAliases(
 }
 
 function isMuseumNetworkPath(value: string): boolean {
-  return value.startsWith("/museum/network/") && !value.includes("?") && !value.includes("#");
+  return (
+    value.startsWith("/museum/network/") &&
+    !value.includes("?") &&
+    !value.includes("#")
+  );
 }
 
 function validateSlugInventory(
@@ -453,29 +580,50 @@ function validateSlugInventory(
     }
     seen.add(entity.id);
     if (
-      entity.entityType !== requiredString(entry, "entity_type", "public_entity_graph_inventory_slugs") ||
-      entity.label !== requiredString(entry, "preferred_label", "public_entity_graph_inventory_slugs") ||
-      entity.slug !== requiredString(entry, "public_slug", "public_entity_graph_inventory_slugs") ||
-      entity.canonicalRoute !== requiredString(entry, "canonical_route", "public_entity_graph_inventory_slugs")
+      entity.entityType !==
+        requiredString(
+          entry,
+          "entity_type",
+          "public_entity_graph_inventory_slugs"
+        ) ||
+      entity.label !==
+        requiredString(
+          entry,
+          "preferred_label",
+          "public_entity_graph_inventory_slugs"
+        ) ||
+      entity.slug !==
+        requiredString(
+          entry,
+          "public_slug",
+          "public_entity_graph_inventory_slugs"
+        ) ||
+      entity.canonicalRoute !==
+        requiredString(
+          entry,
+          "canonical_route",
+          "public_entity_graph_inventory_slugs"
+        )
     ) {
       throw new Error("public_entity_graph_inventory_slugs");
     }
   }
-  const expected = byId.size === 0
-    ? []
-    : [...byId.values()]
-        .filter(
-          (entity) =>
-            entity.pageExposure === "canonical_page" &&
-            [
-              "ARTIST",
-              "ORGANIZATION",
-              "PROJECT_OR_SERIES",
-              "ACQUISITION_PROGRAM",
-              "RESEARCH_PUBLICATION",
-            ].includes(entity.entityType)
-        )
-        .map((entity) => entity.id);
+  const expected =
+    byId.size === 0
+      ? []
+      : [...byId.values()]
+          .filter(
+            (entity) =>
+              entity.pageExposure === "canonical_page" &&
+              [
+                "ARTIST",
+                "ORGANIZATION",
+                "PROJECT_OR_SERIES",
+                "ACQUISITION_PROGRAM",
+                "RESEARCH_PUBLICATION",
+              ].includes(entity.entityType)
+          )
+          .map((entity) => entity.id);
   if (!sameIdSet([...seen], expected)) {
     throw new Error("public_entity_graph_inventory_slugs");
   }
@@ -488,7 +636,10 @@ function validateCanonicalRouteCoverage(
   const slugs = new Set<string>();
   for (const entity of entities) {
     if (entity.pageExposure !== "canonical_page") continue;
-    if (entity.canonicalRoute === null || entity.canonicalRoute.trim().length === 0) {
+    if (
+      entity.canonicalRoute === null ||
+      entity.canonicalRoute.trim().length === 0
+    ) {
       throw new Error("public_entity_graph_canonical_route_missing");
     }
     if (routes.has(entity.canonicalRoute)) {

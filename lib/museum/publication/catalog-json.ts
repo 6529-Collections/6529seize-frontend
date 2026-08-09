@@ -124,7 +124,8 @@ class UniqueJsonParser {
     this.consumeJsonFraction();
     this.consumeJsonExponent();
     const value = Number(this.text.slice(start, this.index));
-    if (!Number.isFinite(value)) throw new Error("publication_catalog_json_invalid");
+    if (!Number.isFinite(value))
+      throw new Error("publication_catalog_json_invalid");
     return value;
   }
 
@@ -176,7 +177,8 @@ class UniqueJsonParser {
   }
 
   private expect(value: string): void {
-    if (!this.consume(value)) throw new Error("publication_catalog_json_invalid");
+    if (!this.consume(value))
+      throw new Error("publication_catalog_json_invalid");
   }
 }
 

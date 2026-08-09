@@ -44,7 +44,9 @@ function buildFixture(): {
       text,
     });
     const isCandidate = index >= 2 && index <= 6;
-    const mediaByteSizes = [2_518_674, 1_813_285, 1_666_083, 1_540_870, 16_871_807];
+    const mediaByteSizes = [
+      2_518_674, 1_813_285, 1_666_083, 1_540_870, 16_871_807,
+    ];
     parts.push({
       part_id: index,
       source_path: sourcePath,
@@ -127,16 +129,10 @@ describe("Wave publication receipt joins", () => {
     expect(parts).toHaveLength(5);
     expect(parts.map((part) => part.partId)).toEqual([2, 3, 4, 5, 6]);
     expect(parts.map((part) => part.mediaByteSize)).toEqual([
-      2_518_674,
-      1_813_285,
-      1_666_083,
-      1_540_870,
-      16_871_807,
+      2_518_674, 1_813_285, 1_666_083, 1_540_870, 16_871_807,
     ]);
     expect(
-      parts.every((part) =>
-        isMuseumExternalProposalMediaUrl(part.mediaUrl)
-      )
+      parts.every((part) => isMuseumExternalProposalMediaUrl(part.mediaUrl))
     ).toBe(true);
     expect(
       parts.every(
@@ -223,12 +219,15 @@ describe("Wave publication receipt joins", () => {
 
   it("rejects a changed-valid presentation URL at the exact media join", () => {
     const fixture = buildFixture();
-    const changedDocument = replaceObservationParts(fixture.document, (parts) => {
-      const part = parts[1];
-      if (part === undefined) throw new Error("test_fixture_part");
-      part.media_url =
-        "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/part-2-source/changed.jpg";
-    });
+    const changedDocument = replaceObservationParts(
+      fixture.document,
+      (parts) => {
+        const part = parts[1];
+        if (part === undefined) throw new Error("test_fixture_part");
+        part.media_url =
+          "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/part-2-source/changed.jpg";
+      }
+    );
     const sourceDocuments = new Map(fixture.sourceDocuments);
     sourceDocuments.set(changedDocument.path, changedDocument);
     const subjectEntity = {

@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import {
-  getMuseumObjectMetadata,
-} from "@/components/museum/MuseumObjectPage";
-import { museumWorkHrefForSourceId } from "@/lib/museum/publication/ia";
+import { getMuseumObjectMetadata } from "@/components/museum/MuseumObjectPage";
+import { museumWorkHrefForSourceId } from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 
 interface MuseumObjectLegacyRouteProps {

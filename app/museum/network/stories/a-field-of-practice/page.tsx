@@ -42,7 +42,7 @@ export async function renderMuseumInstitutionalPracticePage() {
         prefetch={false}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
-          {t(DEFAULT_LOCALE, "museum.network.research.back")}
+        {t(DEFAULT_LOCALE, "museum.network.research.back")}
       </Link>
       <header className="tw-mt-6 tw-max-w-4xl">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">

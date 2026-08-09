@@ -81,7 +81,10 @@ describe("Museum page source projection", () => {
       "/museum/network/research/rights/collectors",
       "records/institutional-practice/rights-for-collectors.md",
     ],
-    ["/museum/network/research/rights/cc-by-nc-4.0", "docs/rights/registry.json"],
+    [
+      "/museum/network/research/rights/cc-by-nc-4.0",
+      "docs/rights/registry.json",
+    ],
     [
       "/museum/network/research/sources-and-chronology",
       "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md",
@@ -310,10 +313,18 @@ describe("Museum page source projection", () => {
     expect(
       resolveMuseumPageSource("/museum/network/collections/autoglyphs", catalog)
     ).toBeNull();
-    expect(resolveMuseumPageSource("/museum/network/stories", catalog)).toBeNull();
-    expect(resolveMuseumPageSource("/museum/network/methodology", catalog)).toBeNull();
-    expect(resolveMuseumPageSource("/museum/network/governance", catalog)).toBeNull();
-    expect(resolveMuseumPageSource("/museum/network/rights", catalog)).toBeNull();
+    expect(
+      resolveMuseumPageSource("/museum/network/stories", catalog)
+    ).toBeNull();
+    expect(
+      resolveMuseumPageSource("/museum/network/methodology", catalog)
+    ).toBeNull();
+    expect(
+      resolveMuseumPageSource("/museum/network/governance", catalog)
+    ).toBeNull();
+    expect(
+      resolveMuseumPageSource("/museum/network/rights", catalog)
+    ).toBeNull();
     expect(
       resolveMuseumPageSource(
         "/museum/network/stories/a-field-of-practice",

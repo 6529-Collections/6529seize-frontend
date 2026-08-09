@@ -9,9 +9,11 @@ import {
   CASEY_ARTIST_NAME,
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
-import { museumWorkHrefForSourceId } from "@/lib/museum/publication/ia";
 import type { MuseumMedia } from "@/lib/museum/publication/types";
-import { museumWorkHref } from "@/lib/museum/publication/routes";
+import {
+  museumWorkHref,
+  museumWorkHrefForSourceId,
+} from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import type { MuseumProgramMedia } from "@/lib/museum/types";
 
@@ -50,9 +52,7 @@ function publicWorkMedia(
     sourceHeight: media.height,
     altText: media.altText ?? "",
     altTextStatus:
-      media.altText === null
-        ? "unavailable"
-        : "governed_artwork_description",
+      media.altText === null ? "unavailable" : "governed_artwork_description",
     variants: [],
   };
 }
@@ -64,7 +64,10 @@ function publicWorkStatus(status: string): string {
     case "proposed_in_museum_wave":
       return t(DEFAULT_LOCALE, "museum.network.works.proposedStatus");
     case "selected_by_museum_wave_acquisition_review_in_progress":
-      return t(DEFAULT_LOCALE, "museum.network.acquisitions.selectedWaveStatus");
+      return t(
+        DEFAULT_LOCALE,
+        "museum.network.acquisitions.selectedWaveStatus"
+      );
     case "selected_through_acquisition_program_acquisition_pending":
       return t(DEFAULT_LOCALE, "museum.network.works.selectedStatus");
     case "acquisition_complete_accession_review_in_progress":
@@ -94,7 +97,7 @@ function WorkTextFigure({
       <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
         <a
           href={href}
-          className="tw-text-inherit tw-no-underline hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {title}
         </a>
@@ -156,17 +159,16 @@ export default async function MuseumWorksPage() {
                   "museum.network.acquisitions.selectedWorkQualifier"
                 )
               : undefined;
-          const qualifierProps =
-            qualifier === undefined ? {} : { qualifier };
+          const qualifierProps = qualifier === undefined ? {} : { qualifier };
           if (media === undefined) {
             return (
-            <WorkTextFigure
-              key={work.id}
-              href={museumWorkHref(work.id)}
-              title={work.title}
-              byline={byline}
-              {...qualifierProps}
-            />
+              <WorkTextFigure
+                key={work.id}
+                href={museumWorkHref(work.id)}
+                title={work.title}
+                byline={byline}
+                {...qualifierProps}
+              />
             );
           }
           return (
@@ -209,10 +211,7 @@ export default async function MuseumWorksPage() {
           })}
         {publicWorks === undefined &&
           selectedWorks.flatMap((work) => {
-            const href = museumWorkHrefForSourceId(
-              publication,
-              work.objectId
-            );
+            const href = museumWorkHrefForSourceId(publication, work.objectId);
             if (href === null) return [];
             const media = work.media;
             return [
@@ -231,23 +230,23 @@ export default async function MuseumWorksPage() {
                   )}
                 />
               ) : (
-              <MuseumPublicMediaFigure
-                key={work.objectId}
-                src={media.sourceUrl}
-                width={media.sourceWidth}
-                height={media.sourceHeight}
-                alt={media.altText}
-                href={href}
-                title={work.title}
-                byline={`${work.artist} · ${t(
-                  DEFAULT_LOCALE,
-                  "museum.network.works.selectedStatus"
-                )}`}
-                qualifier={t(
-                  DEFAULT_LOCALE,
-                  "museum.network.acquisitions.selectedWorkQualifier"
-                )}
-              />
+                <MuseumPublicMediaFigure
+                  key={work.objectId}
+                  src={media.sourceUrl}
+                  width={media.sourceWidth}
+                  height={media.sourceHeight}
+                  alt={media.altText}
+                  href={href}
+                  title={work.title}
+                  byline={`${work.artist} · ${t(
+                    DEFAULT_LOCALE,
+                    "museum.network.works.selectedStatus"
+                  )}`}
+                  qualifier={t(
+                    DEFAULT_LOCALE,
+                    "museum.network.acquisitions.selectedWorkQualifier"
+                  )}
+                />
               ),
             ];
           })}

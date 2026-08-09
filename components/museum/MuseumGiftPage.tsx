@@ -10,7 +10,7 @@ import { MuseumInsideSystemDirectory } from "./MuseumInsideSystem";
 import { MuseumBreadcrumbs } from "./MuseumBreadcrumbs";
 import { MuseumEntityContext } from "./MuseumEntityContext";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
-import { museumWorkHrefForSourceId } from "@/lib/museum/publication/ia";
+import { museumWorkHrefForSourceId } from "@/lib/museum/publication/routes";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -35,6 +35,7 @@ export function getMuseumGiftMetadata(accessionId: string): Metadata {
   });
 }
 
+/** @api Compatibility component retained for explicit legacy route tests. */
 export async function MuseumGiftPage({
   accessionId,
   canonicalTitle,
@@ -179,7 +180,10 @@ export async function MuseumGiftPage({
         </h2>
         <div className="tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
           {artworks.map((artwork, index) => {
-            const href = museumWorkHrefForSourceId(publication, artwork.objectId);
+            const href = museumWorkHrefForSourceId(
+              publication,
+              artwork.objectId
+            );
             return (
               <MuseumArtworkFigure
                 key={artwork.objectId}

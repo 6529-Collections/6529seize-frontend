@@ -3,9 +3,7 @@ import {
   assertGovernedMuseumPath,
 } from "./security";
 import type {
-  MuseumPublicEntityRecord,
   MuseumPublicEntityType,
-  MuseumPublicRelationRecord,
   MuseumPublicRelationType,
   MuseumSourceDocument,
 } from "./types";
@@ -78,7 +76,9 @@ export function stringArray(
     throw new Error(code);
   }
   if (
-    value.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
+    value.some(
+      (entry) => typeof entry !== "string" || entry.trim().length === 0
+    )
   ) {
     throw new Error(code);
   }
@@ -100,7 +100,11 @@ export function requiredEvidenceRefs(
     requiredString(object, "label", code);
     assertDateTime(object, "observed_at", code);
     const evidenceClass = requiredString(object, "evidence_class", code);
-    if (!(new Set(["A", "B", "C", "D", "E"]) as ReadonlySet<string>).has(evidenceClass)) {
+    if (
+      !(new Set(["A", "B", "C", "D", "E"]) as ReadonlySet<string>).has(
+        evidenceClass
+      )
+    ) {
       throw new Error(code);
     }
   }
@@ -139,7 +143,7 @@ export function typedNameVariantArray(
   }
 }
 
-export function validDateTime(value: unknown): boolean {
+function validDateTime(value: unknown): boolean {
   return (
     typeof value === "string" &&
     value.trim().length > 0 &&
@@ -233,8 +237,7 @@ export function parseDocument(
   } catch {
     throw new Error("public_entity_graph_envelope_uri");
   }
-  const stableRecordUri =
-    `https://6529networkmuseum.org/${document.path}`;
+  const stableRecordUri = `https://6529networkmuseum.org/${document.path}`;
   const immutableBlobUri =
     sourceCommit === undefined
       ? null
@@ -268,19 +271,35 @@ export function parseDocument(
   if (payload["visibility"] !== "public") {
     throw new Error("public_entity_graph_visibility");
   }
-  requiredString(payload, "record_version", "public_entity_graph_record_version");
+  requiredString(
+    payload,
+    "record_version",
+    "public_entity_graph_record_version"
+  );
   assertDateTime(payload, "created_at", "public_entity_graph_created_at");
   assertDateTime(payload, "effective_at", "public_entity_graph_effective_at");
-  requiredEvidenceRefs(payload, "evidence_refs", "public_entity_graph_evidence");
+  requiredEvidenceRefs(
+    payload,
+    "evidence_refs",
+    "public_entity_graph_evidence"
+  );
   return payload;
 }
 
 export function isEntityType(value: unknown): value is MuseumPublicEntityType {
-  return typeof value === "string" && ENTITY_TYPES.has(value as MuseumPublicEntityType);
+  return (
+    typeof value === "string" &&
+    ENTITY_TYPES.has(value as MuseumPublicEntityType)
+  );
 }
 
-export function isRelationType(value: unknown): value is MuseumPublicRelationType {
-  return typeof value === "string" && RELATION_TYPES.has(value as MuseumPublicRelationType);
+export function isRelationType(
+  value: unknown
+): value is MuseumPublicRelationType {
+  return (
+    typeof value === "string" &&
+    RELATION_TYPES.has(value as MuseumPublicRelationType)
+  );
 }
 
 export function parseEntityEnvelopeIdentity(
@@ -302,6 +321,3 @@ export function parseRelationEnvelopeIdentity(
     throw new Error("public_entity_graph_relation_path");
   }
 }
-
-export type ParsedEntity = MuseumPublicEntityRecord;
-export type ParsedRelation = MuseumPublicRelationRecord;

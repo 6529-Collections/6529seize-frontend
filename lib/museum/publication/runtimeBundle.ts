@@ -9,7 +9,7 @@ import type { MuseumPublicationLoadState } from "./types";
  * strict publication when both loaders describe the same manifest. A partial,
  * stale, or differently committed corpus is never joined into the public IA.
  */
-export function isMuseumViewAtomicToPublication(
+function isMuseumViewAtomicToPublication(
   publicationState: MuseumPublicationLoadState,
   view: MuseumView
 ): boolean {
@@ -27,15 +27,20 @@ export async function getMuseumPublicationBundle(): Promise<{
   readonly publicationState: MuseumPublicationLoadState;
   readonly view: MuseumView | null;
 }> {
-  const [publicationState, view] = await Promise.all([
-    getMuseumPublicationState(),
-    getMuseumView(),
-  ]);
+  const publicationState = await getMuseumPublicationState();
+  const publication = publicationState.publication;
+
+  // A catalog-activated typed graph is authoritative. Do not also read the
+  // legacy moving-main corpus: besides being unnecessary, that fetch would
+  // re-open the pre-ontology source boundary during static generation.
+  if (publication?.entityGraph !== undefined || publication === null) {
+    return { publicationState, view: null };
+  }
+
+  const view = await getMuseumView();
 
   return {
     publicationState,
-    view: isMuseumViewAtomicToPublication(publicationState, view)
-      ? view
-      : null,
+    view: isMuseumViewAtomicToPublication(publicationState, view) ? view : null,
   };
 }

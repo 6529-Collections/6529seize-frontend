@@ -26,7 +26,10 @@ function localSourcePathFromUrl(
   sourceCommit: string
 ): string {
   const url = new URL(requestUrl(input));
-  if (url.hostname !== "raw.githubusercontent.com" || url.protocol !== "https:") {
+  if (
+    url.hostname !== "raw.githubusercontent.com" ||
+    url.protocol !== "https:"
+  ) {
     throw new Error("publication_local_fixture_url_host");
   }
   const prefix = `/6529-Collections/6529networkmuseum/${sourceCommit}/`;
@@ -45,7 +48,9 @@ function localSourcePathFromUrl(
     sourcePath.length === 0 ||
     sourcePath.startsWith("/") ||
     sourcePath.includes("\\") ||
-    sourcePath.split("/").some((segment) => segment === "" || segment === "." || segment === "..")
+    sourcePath
+      .split("/")
+      .some((segment) => segment === "" || segment === "." || segment === "..")
   ) {
     throw new Error("publication_local_fixture_path");
   }
@@ -63,8 +68,10 @@ function readLocalPath(root: string, sourcePath: string): Uint8Array {
   ) {
     throw new Error("publication_local_fixture_path");
   }
-  /* eslint-disable-next-line security/detect-non-literal-fs-filename -- the path is confined to the validated fixture root above. */
-  return new Uint8Array(readFileSync(join(resolvedRoot, ...sourcePath.split("/"))));
+  return new Uint8Array(
+    /* eslint-disable-next-line security/detect-non-literal-fs-filename -- the path is confined to the validated fixture root above. */
+    readFileSync(join(resolvedRoot, ...sourcePath.split("/")))
+  );
 }
 
 export function readMuseumLocalFixtureVisitorPaths(
@@ -73,7 +80,9 @@ export function readMuseumLocalFixtureVisitorPaths(
   const bytes = readLocalPath(root, VISITOR_BUNDLE_PATH);
   let parsed: unknown;
   try {
-    parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as unknown;
+    parsed = JSON.parse(
+      new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+    ) as unknown;
   } catch {
     throw new Error("publication_local_fixture_bundle_json");
   }
@@ -127,7 +136,11 @@ export function createMuseumLocalFixtureFetch(
         arrayBuffer: () => Promise.resolve(bytes.slice().buffer),
       } as unknown as Response);
     } catch {
-      return Promise.resolve({ ok: false, status: 404, url } as unknown as Response);
+      return Promise.resolve({
+        ok: false,
+        status: 404,
+        url,
+      } as unknown as Response);
     }
   };
 }
@@ -136,7 +149,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function qualifyInventory(document: MuseumSourceDocument): MuseumSourceDocument {
+function qualifyInventory(
+  document: MuseumSourceDocument
+): MuseumSourceDocument {
   let parsed: unknown;
   try {
     parsed = JSON.parse(document.text) as unknown;
@@ -159,27 +174,47 @@ function qualifyInventory(document: MuseumSourceDocument): MuseumSourceDocument 
     ...bindings,
     INSTITUTION: [
       ...unknownArray(bindings["INSTITUTION"]),
-      { source_key: "local-qualification:institution", entity_id: "6529NM-I-0001" },
+      {
+        source_key: "local-qualification:institution",
+        entity_id: "6529NM-I-0001",
+      },
     ],
     COLLECTION: [
       ...unknownArray(bindings["COLLECTION"]),
-      { source_key: "local-qualification:collection", entity_id: "6529NM-C-0001" },
+      {
+        source_key: "local-qualification:collection",
+        entity_id: "6529NM-C-0001",
+      },
     ],
     ACCESSION: [
       ...unknownArray(bindings["ACCESSION"]),
-      { source_key: "local-qualification:accession", entity_id: "6529NM-ACC-ENT-0001" },
+      {
+        source_key: "local-qualification:accession",
+        entity_id: "6529NM-ACC-ENT-0001",
+      },
     ],
     RESEARCH_PUBLICATION: [
       ...unknownArray(bindings["RESEARCH_PUBLICATION"]),
-      { source_key: "local-qualification:research-1", entity_id: "6529NM-RP-0001" },
-      { source_key: "local-qualification:research-2", entity_id: "6529NM-RP-0002" },
-      { source_key: "local-qualification:research-3", entity_id: "6529NM-RP-0003" },
+      {
+        source_key: "local-qualification:research-1",
+        entity_id: "6529NM-RP-0001",
+      },
+      {
+        source_key: "local-qualification:research-2",
+        entity_id: "6529NM-RP-0002",
+      },
+      {
+        source_key: "local-qualification:research-3",
+        entity_id: "6529NM-RP-0003",
+      },
     ],
   };
-  const slugInventory = [...unknownArray(parsed["public_slug_inventory"])]
-  if (!slugInventory.some((entry) =>
-    isRecord(entry) && entry["entity_id"] === "6529NM-RP-0001"
-  )) {
+  const slugInventory = [...unknownArray(parsed["public_slug_inventory"])];
+  if (
+    !slugInventory.some(
+      (entry) => isRecord(entry) && entry["entity_id"] === "6529NM-RP-0001"
+    )
+  ) {
     slugInventory.push({
       entity_id: "6529NM-RP-0001",
       entity_type: "RESEARCH_PUBLICATION",
@@ -202,9 +237,7 @@ export function qualifyLocalReadOnlyDocument(
   _sourceCommit: string
 ): MuseumSourceDocument {
   if (document.path === INVENTORY_PATH) return qualifyInventory(document);
-  if (
-    !/^records\/(?:entities|relations)\/[^/]+\.json$/u.test(document.path)
-  ) {
+  if (!/^records\/(?:entities|relations)\/[^/]+\.json$/u.test(document.path)) {
     return document;
   }
   let parsed: CandidateARecord;

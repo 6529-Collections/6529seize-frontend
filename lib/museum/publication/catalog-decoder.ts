@@ -34,7 +34,11 @@ type DecodedCatalogBindings = {
 
 function decodeCatalogRoot(value: unknown): DecodedCatalogRoot {
   const root = asRecord(value, "publication_catalog_shape");
-  assertExactKeys(root, ["$schema", "envelope", "payload"], "publication_catalog_shape");
+  assertExactKeys(
+    root,
+    ["$schema", "envelope", "payload"],
+    "publication_catalog_shape"
+  );
   if (root.$schema !== PUBLICATION_CATALOG_SCHEMA) {
     throw new Error("publication_catalog_schema");
   }
@@ -97,7 +101,9 @@ function decodeCatalogRoot(value: unknown): DecodedCatalogRoot {
     ) ||
     payload.state !== "immutable_binding" ||
     !Number.isFinite(
-      Date.parse(requiredString(payload, "created_at", "publication_catalog_payload"))
+      Date.parse(
+        requiredString(payload, "created_at", "publication_catalog_payload")
+      )
     ) ||
     payload.activation_policy !== "frontend_activates_only_verified_catalog"
   ) {
@@ -156,7 +162,10 @@ function decodeCatalogBindings(
     "publication_catalog_inventory_binding"
   );
   const manifestFileSize = manifest.file_size;
-  if (!Number.isSafeInteger(manifestFileSize) || (manifestFileSize as number) < 0) {
+  if (
+    !Number.isSafeInteger(manifestFileSize) ||
+    (manifestFileSize as number) < 0
+  ) {
     throw new Error("publication_catalog_manifest_binding");
   }
   if (
@@ -171,37 +180,94 @@ function decodeCatalogBindings(
   return {
     manifest: {
       path: manifest.path,
-      fileSha256: requiredSha(manifest, "file_sha256", "publication_catalog_manifest_binding"),
+      fileSha256: requiredSha(
+        manifest,
+        "file_sha256",
+        "publication_catalog_manifest_binding"
+      ),
       fileSize: manifestFileSize as number,
-      sourceUrl: requiredString(manifest, "immutable_source_url", "publication_catalog_manifest_binding"),
-      rawUrl: requiredString(manifest, "immutable_raw_url", "publication_catalog_manifest_binding"),
-      sha256: requiredSha(manifest, "body_sha256", "publication_catalog_manifest_binding"),
-      jcsKeccak: requiredKeccak(manifest, "body_keccak256", "publication_catalog_manifest_binding"),
-      canonicalizationId: requiredKeccak(manifest, "canonicalization_id", "publication_catalog_manifest_binding"),
+      sourceUrl: requiredString(
+        manifest,
+        "immutable_source_url",
+        "publication_catalog_manifest_binding"
+      ),
+      rawUrl: requiredString(
+        manifest,
+        "immutable_raw_url",
+        "publication_catalog_manifest_binding"
+      ),
+      sha256: requiredSha(
+        manifest,
+        "body_sha256",
+        "publication_catalog_manifest_binding"
+      ),
+      jcsKeccak: requiredKeccak(
+        manifest,
+        "body_keccak256",
+        "publication_catalog_manifest_binding"
+      ),
+      canonicalizationId: requiredKeccak(
+        manifest,
+        "canonicalization_id",
+        "publication_catalog_manifest_binding"
+      ),
     },
     inventory: {
       path: inventory.path,
       fileSize: (() => {
-        if (!Number.isSafeInteger(inventory.file_size) || (inventory.file_size as number) < 0) {
+        if (
+          !Number.isSafeInteger(inventory.file_size) ||
+          (inventory.file_size as number) < 0
+        ) {
           throw new Error("publication_catalog_inventory_binding");
         }
         return inventory.file_size as number;
       })(),
-      fileSha256: requiredSha(inventory, "file_sha256", "publication_catalog_inventory_binding"),
-      bodySha256: requiredSha(inventory, "body_sha256", "publication_catalog_inventory_binding"),
-      jcsKeccak: requiredKeccak(inventory, "body_keccak256", "publication_catalog_inventory_binding"),
-      canonicalizationId: requiredKeccak(inventory, "canonicalization_id", "publication_catalog_inventory_binding"),
-      inventoryVersion: requiredString(inventory, "inventory_version", "publication_catalog_inventory_binding"),
-      counts: Object.fromEntries(
-        Object.entries(inventory.counts as Record<string, unknown>).map(([key, count]) => {
-          if (!Number.isSafeInteger(count) || (count as number) < 1) {
-            throw new Error("publication_catalog_inventory_binding");
-          }
-          return [key, count as number];
-        })
+      fileSha256: requiredSha(
+        inventory,
+        "file_sha256",
+        "publication_catalog_inventory_binding"
       ),
-      sourceUrl: requiredString(inventory, "immutable_source_url", "publication_catalog_inventory_binding"),
-      rawUrl: requiredString(inventory, "immutable_raw_url", "publication_catalog_inventory_binding"),
+      bodySha256: requiredSha(
+        inventory,
+        "body_sha256",
+        "publication_catalog_inventory_binding"
+      ),
+      jcsKeccak: requiredKeccak(
+        inventory,
+        "body_keccak256",
+        "publication_catalog_inventory_binding"
+      ),
+      canonicalizationId: requiredKeccak(
+        inventory,
+        "canonicalization_id",
+        "publication_catalog_inventory_binding"
+      ),
+      inventoryVersion: requiredString(
+        inventory,
+        "inventory_version",
+        "publication_catalog_inventory_binding"
+      ),
+      counts: Object.fromEntries(
+        Object.entries(inventory.counts as Record<string, unknown>).map(
+          ([key, count]) => {
+            if (!Number.isSafeInteger(count) || (count as number) < 1) {
+              throw new Error("publication_catalog_inventory_binding");
+            }
+            return [key, count as number];
+          }
+        )
+      ),
+      sourceUrl: requiredString(
+        inventory,
+        "immutable_source_url",
+        "publication_catalog_inventory_binding"
+      ),
+      rawUrl: requiredString(
+        inventory,
+        "immutable_raw_url",
+        "publication_catalog_inventory_binding"
+      ),
     },
   };
 }
@@ -328,8 +394,11 @@ function decodeCatalogBundleBinding(
   };
 }
 
-export function decodePublicationCatalog(value: unknown): MuseumPublicationCatalog {
-  const { contentHash, catalogId, sourceCommit, payload } = decodeCatalogRoot(value);
+export function decodePublicationCatalog(
+  value: unknown
+): MuseumPublicationCatalog {
+  const { contentHash, catalogId, sourceCommit, payload } =
+    decodeCatalogRoot(value);
   const { manifest, inventory } = decodeCatalogBindings(payload);
   const { assemblyDocuments, mediaAssets } = decodeCatalogDocuments(payload);
   const assemblyBundle = decodeCatalogBundleBinding(payload);

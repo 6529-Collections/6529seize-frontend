@@ -411,11 +411,16 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       })
     ).toBeVisible();
     await expect(
-      page.getByText("Selected through an acquisition program; acquisition pending", {
-        exact: true,
-      })
+      page.getByText(
+        "Selected through an acquisition program; acquisition pending",
+        {
+          exact: true,
+        }
+      )
     ).toBeVisible();
-    await expect(page.locator('main a[href^="/museum/network/works/"]')).toHaveCount(16);
+    await expect(
+      page.locator('main a[href^="/museum/network/works/"]')
+    ).toHaveCount(16);
     await expect(page.locator("main figure img")).toHaveCount(0);
   });
 
@@ -429,11 +434,18 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     );
     await expect(page.locator("main figure img")).toHaveCount(0);
     await expect(
-      page.getByText("Selected through an acquisition program; acquisition pending", {
-        exact: true,
-      })
+      page.getByText(
+        "Selected through an acquisition program; acquisition pending",
+        {
+          exact: true,
+        }
+      )
     ).toBeVisible();
-    await expect(page.getByText("Not yet minted or accessioned.", { exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Open submitted high-resolution image" })).toHaveCount(0);
+    await expect(
+      page.getByText("Not yet minted or accessioned.", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Open submitted high-resolution image" })
+    ).toHaveCount(0);
   });
 });

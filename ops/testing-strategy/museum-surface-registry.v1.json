@@ -373,7 +373,13 @@
     },
     {
       "file": "components/museum/MuseumArtworkFigure.tsx",
-      "surface_ids": ["museum.collection", "museum.object", "museum.program", "museum.work", "museum.acquisition"]
+      "surface_ids": [
+        "museum.collection",
+        "museum.object",
+        "museum.program",
+        "museum.work",
+        "museum.acquisition"
+      ]
     },
     {
       "file": "components/museum/MuseumArtworkViewer.tsx",
@@ -398,7 +404,11 @@
     },
     {
       "file": "components/museum/MuseumManagedImage.tsx",
-      "surface_ids": ["museum.work", "museum.acquisition", "museum.acquisition.program"]
+      "surface_ids": [
+        "museum.work",
+        "museum.acquisition",
+        "museum.acquisition.program"
+      ]
     },
     {
       "file": "components/museum/MuseumMediaMetadataPlaceholder.tsx",
@@ -422,11 +432,21 @@
     },
     {
       "file": "components/museum/MuseumPublicMediaFigure.tsx",
-      "surface_ids": ["museum.work", "museum.acquisition", "museum.acquisition.program"]
+      "surface_ids": [
+        "museum.work",
+        "museum.acquisition",
+        "museum.acquisition.program"
+      ]
     },
     {
       "file": "components/museum/MuseumRelatedEntities.tsx",
-      "surface_ids": ["museum.artist", "museum.project", "museum.work", "museum.acquisition", "museum.organization"]
+      "surface_ids": [
+        "museum.artist",
+        "museum.project",
+        "museum.work",
+        "museum.acquisition",
+        "museum.organization"
+      ]
     },
     {
       "file": "components/museum/MuseumHeldPositionSelection.tsx",

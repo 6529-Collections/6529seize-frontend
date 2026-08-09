@@ -5,7 +5,10 @@ import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import type { MuseumPublication, MuseumPublicDocument } from "@/lib/museum/publication/types";
+import type {
+  MuseumPublication,
+  MuseumPublicDocument,
+} from "@/lib/museum/publication/types";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { museumResearchHref } from "@/lib/museum/publication/routes";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
@@ -34,7 +37,11 @@ function researchGroup(value: string): MuseumResearchGroup {
   if (/(?:artist|project|work|acquisition|close|reading)/u.test(normalized)) {
     return "art";
   }
-  if (/(?:institution|accession|rights|preservation|data|practice)/u.test(normalized)) {
+  if (
+    /(?:institution|accession|rights|preservation|data|practice)/u.test(
+      normalized
+    )
+  ) {
     return "practice";
   }
   return "methods";
@@ -81,12 +88,13 @@ export function buildMuseumResearchIndex(
           candidate.sourcePath
         ) === record.publicationUri
     );
-    const immutablePublicationUri = document === undefined
-      ? null
-      : buildImmutableMuseumBlobUrl(
-          publication.identity.commit,
-          document.sourcePath
-        );
+    const immutablePublicationUri =
+      document === undefined
+        ? null
+        : buildImmutableMuseumBlobUrl(
+            publication.identity.commit,
+            document.sourcePath
+          );
     if (
       document === undefined ||
       immutablePublicationUri === null ||
@@ -94,22 +102,28 @@ export function buildMuseumResearchIndex(
     ) {
       return [];
     }
-    return [{
-      id: record.id,
-      slug: record.slug,
-      title: record.title,
-      group: researchGroup(record.publicationKind),
-      sourcePath: record.sourcePath,
-      typed: true,
-      publicationUri: immutablePublicationUri,
-      document,
-    }];
+    return [
+      {
+        id: record.id,
+        slug: record.slug,
+        title: record.title,
+        group: researchGroup(record.publicationKind),
+        sourcePath: record.sourcePath,
+        typed: true,
+        publicationUri: immutablePublicationUri,
+        document,
+      },
+    ];
   });
   const representedDocumentIds = new Set(
     typedEntries.map((entry) => entry.document.id)
   );
   const documentEntries = publication.documents
-    .filter((document) => document.kind !== "founding_principles" && document.kind !== "open_museum_statement")
+    .filter(
+      (document) =>
+        document.kind !== "founding_principles" &&
+        document.kind !== "open_museum_statement"
+    )
     .filter((document) => !representedDocumentIds.has(document.id))
     .map((document) => ({
       id: document.id,
@@ -124,9 +138,21 @@ export function buildMuseumResearchIndex(
 }
 
 const GROUPS: readonly [MuseumResearchGroup, MessageKey, MessageKey][] = [
-  ["art", "museum.network.research.artAndArtists", "museum.network.research.artAndArtistsDescription"],
-  ["practice", "museum.network.research.museumPractice", "museum.network.research.museumPracticeDescription"],
-  ["methods", "museum.network.research.sourcesMethods", "museum.network.research.sourcesMethodsDescription"],
+  [
+    "art",
+    "museum.network.research.artAndArtists",
+    "museum.network.research.artAndArtistsDescription",
+  ],
+  [
+    "practice",
+    "museum.network.research.museumPractice",
+    "museum.network.research.museumPracticeDescription",
+  ],
+  [
+    "methods",
+    "museum.network.research.sourcesMethods",
+    "museum.network.research.sourcesMethodsDescription",
+  ],
 ];
 
 export default async function MuseumResearchPage() {
@@ -139,7 +165,10 @@ export default async function MuseumResearchPage() {
       <MuseumSectionHeading
         eyebrow={t(DEFAULT_LOCALE, "museum.network.research.indexEyebrow")}
         title={t(DEFAULT_LOCALE, "museum.network.research.indexTitle")}
-        description={t(DEFAULT_LOCALE, "museum.network.research.indexDescription")}
+        description={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.indexDescription"
+        )}
       />
       <div className="tw-space-y-12">
         {GROUPS.map(([group, titleKey, descriptionKey]) => {
@@ -147,20 +176,34 @@ export default async function MuseumResearchPage() {
           if (groupEntries.length === 0) return null;
           return (
             <section key={group} aria-labelledby={`research-${group}-title`}>
-              <h2 id={`research-${group}-title`} className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">{t(DEFAULT_LOCALE, titleKey)}</h2>
-              <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">{t(DEFAULT_LOCALE, descriptionKey)}</p>
+              <h2
+                id={`research-${group}-title`}
+                className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+              >
+                {t(DEFAULT_LOCALE, titleKey)}
+              </h2>
+              <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(DEFAULT_LOCALE, descriptionKey)}
+              </p>
               <ul className="tw-m-0 tw-mt-5 tw-list-none tw-border-y tw-border-solid tw-border-iron-800 tw-p-0">
                 {groupEntries.map((entry) => (
-                  <li key={entry.id} className="tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0">
+                  <li
+                    key={entry.id}
+                    className="tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0"
+                  >
                     <Link
                       href={museumResearchHref(entry.slug)}
                       className="tw-flex tw-min-h-20 tw-flex-col tw-justify-center tw-gap-1 tw-py-5 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                     >
-                      <span className="tw-text-lg tw-font-semibold tw-text-iron-50 hover:tw-text-primary-200">{entry.title}</span>
+                      <span className="hover:tw-text-primary-200 tw-text-lg tw-font-semibold tw-text-iron-50">
+                        {entry.title}
+                      </span>
                       <span className="tw-text-sm tw-text-iron-500">
                         {t(
                           DEFAULT_LOCALE,
-                          museumDocumentKindLabelKey(entry.document?.kind ?? "source_record")
+                          museumDocumentKindLabelKey(
+                            entry.document?.kind ?? "source_record"
+                          )
                         )}
                       </span>
                     </Link>

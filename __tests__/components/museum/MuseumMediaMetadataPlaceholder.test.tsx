@@ -49,7 +49,9 @@ describe("MuseumMediaMetadataPlaceholder", () => {
     expect(
       screen.getByText("© artist / Magnum Photos. All Rights Reserved.")
     ).toBeInTheDocument();
-    expect(screen.getByText("All Rights Reserved", { exact: true })).toBeInTheDocument();
+    expect(
+      screen.getByText("All Rights Reserved", { exact: true })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Open Wave proposal context" })
     ).toHaveAttribute("href", metadata.context?.openHref);

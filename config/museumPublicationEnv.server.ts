@@ -17,8 +17,10 @@ export function getMuseumPublicationEnvironment(): MuseumPublicationEnvironment 
   const testCommit = process.env["MUSEUM_PUBLICATION_TEST_COMMIT"];
   const playwrightReadonly = process.env["PLAYWRIGHT_READONLY"];
   const localFixtureRoot = process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT"];
-  const localFixtureCommit = process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"];
-  const localFixtureQualify = process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY"];
+  const localFixtureCommit =
+    process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"];
+  const localFixtureQualify =
+    process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY"];
   return {
     ...(testCommit === undefined
       ? {}

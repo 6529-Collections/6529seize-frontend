@@ -48,9 +48,9 @@ describe("MuseumBreadcrumbs", () => {
     expect(list).not.toHaveClass("tw-min-w-max");
     expect(list).not.toHaveClass("tw-overflow-x-auto");
     expect(
-      screen.getAllByRole("link").every((link) =>
-        link.className.includes("tw-min-h-11")
-      )
+      screen
+        .getAllByRole("link")
+        .every((link) => link.className.includes("tw-min-h-11"))
     ).toBe(true);
     expect(
       screen.getByText(

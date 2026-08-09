@@ -72,17 +72,17 @@ export default async function MuseumArtistsPage() {
             const metadataRecord = representative?.mediaMetadata?.[0];
             if (media !== undefined) {
               return (
-              <MuseumPublicMediaFigure
-                key={artist.id}
-                src={media.url}
-                width={media.width}
-                height={media.height}
-                alt={media.altText ?? ""}
-                href={museumArtistHref(artist.slug)}
-                title={artist.preferredName}
-                byline={relationshipLine(works)}
-                eager={index < 3}
-              />
+                <MuseumPublicMediaFigure
+                  key={artist.id}
+                  src={media.url}
+                  width={media.width}
+                  height={media.height}
+                  alt={media.altText ?? ""}
+                  href={museumArtistHref(artist.slug)}
+                  title={artist.preferredName}
+                  byline={relationshipLine(works)}
+                  eager={index < 3}
+                />
               );
             }
             if (presentation !== undefined) {
@@ -94,45 +94,50 @@ export default async function MuseumArtistsPage() {
                 "open_upstream_presentation"
               );
               return (
-              <figure key={artist.id} className="tw-m-0 tw-min-w-0">
-                <div className="tw-group tw-block">
-                  <div className="tw-aspect-square tw-overflow-hidden tw-bg-black">
-                    <MuseumProposalImage
-                      src={presentation.mediaUrl}
-                      alt={presentation.altText}
-                      width={presentation.width}
-                      height={presentation.height}
-                      {...(presentation.sourceByteSize === undefined
-                        ? {}
-                        : { sourceByteSize: presentation.sourceByteSize })}
-                      {...(sourceHref === null || !canOpenPresentation
-                        ? {}
-                        : {
-                            sourceHref,
-                            sourceLabel: t(
-                              DEFAULT_LOCALE,
-                              "museum.network.acquisitions.openPresentation"
-                            ),
-                          })}
-                      className="tw-block tw-h-full tw-w-full tw-object-contain"
-                    />
+                <figure key={artist.id} className="tw-m-0 tw-min-w-0">
+                  <div className="tw-group tw-block">
+                    <div className="tw-aspect-square tw-overflow-hidden tw-bg-black">
+                      <MuseumProposalImage
+                        src={presentation.mediaUrl}
+                        alt={presentation.altText}
+                        width={presentation.width}
+                        height={presentation.height}
+                        {...(presentation.sourceByteSize === undefined
+                          ? {}
+                          : { sourceByteSize: presentation.sourceByteSize })}
+                        {...(sourceHref === null || !canOpenPresentation
+                          ? {}
+                          : {
+                              sourceHref,
+                              sourceLabel: t(
+                                DEFAULT_LOCALE,
+                                "museum.network.acquisitions.openPresentation"
+                              ),
+                            })}
+                        className="tw-block tw-h-full tw-w-full tw-object-contain"
+                      />
+                    </div>
                   </div>
-                </div>
-                <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
-                  <a
-                    href={museumArtistHref(artist.slug)}
-                    className="tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    {artist.preferredName}
-                  </a>
-                  <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
-                    {relationshipLine(works)}
-                  </span>
-                  <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
-                    {presentation.credit.creditLine}{" \u00b7 "}{t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationRights")}
-                  </span>
-                </figcaption>
-              </figure>
+                  <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
+                    <a
+                      href={museumArtistHref(artist.slug)}
+                      className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    >
+                      {artist.preferredName}
+                    </a>
+                    <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
+                      {relationshipLine(works)}
+                    </span>
+                    <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
+                      {presentation.credit.creditLine}
+                      {" \u00b7 "}
+                      {t(
+                        DEFAULT_LOCALE,
+                        "museum.network.acquisitions.presentationRights"
+                      )}
+                    </span>
+                  </figcaption>
+                </figure>
               );
             }
             if (metadataRecord !== undefined) {
@@ -145,7 +150,7 @@ export default async function MuseumArtistsPage() {
                   <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
                     <a
                       href={museumArtistHref(artist.slug)}
-                      className="tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                      className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                     >
                       {artist.preferredName}
                     </a>
@@ -164,7 +169,7 @@ export default async function MuseumArtistsPage() {
                 <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
                   <a
                     href={museumArtistHref(artist.slug)}
-                    className="tw-text-inherit tw-no-underline hover:tw-text-primary-200"
+                    className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline"
                   >
                     {artist.preferredName}
                   </a>

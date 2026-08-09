@@ -29,7 +29,9 @@ describe("MuseumProposalImage", () => {
     expect(images[1]).toHaveAttribute("fetchpriority", "low");
     expect(images[0]).toHaveAttribute("width", "2400");
     expect(images[0]).toHaveAttribute("height", "1600");
-    expect((images[0] as HTMLImageElement).style.aspectRatio).toBe("2400 / 1600");
+    expect((images[0] as HTMLImageElement).style.aspectRatio).toBe(
+      "2400 / 1600"
+    );
   });
 
   it("requires an intentional view for a source-declared 16.9 MB presentation", () => {

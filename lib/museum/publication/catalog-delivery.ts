@@ -221,7 +221,8 @@ function decodeInventoryContext(
     "publication_catalog_inventory_integrity"
   );
   if (
-    integrity.canonicalization_id !== catalog.publicationInventory.canonicalizationId ||
+    integrity.canonicalization_id !==
+      catalog.publicationInventory.canonicalizationId ||
     integrity.canonicalization_id !== MUSEUM_PUBLICATION_CANONICALIZATION_ID ||
     integrity.body_sha256 !== catalog.publicationInventory.bodySha256 ||
     integrity.body_keccak256 !== catalog.publicationInventory.jcsKeccak
@@ -243,7 +244,13 @@ function decodeInventoryContext(
   );
   assertExactKeys(
     bundle,
-    ["path", "schema", "required_in_catalog", "activation_mode", "max_serialized_bytes"],
+    [
+      "path",
+      "schema",
+      "required_in_catalog",
+      "activation_mode",
+      "max_serialized_bytes",
+    ],
     "publication_catalog_inventory_bundle"
   );
   if (
@@ -291,7 +298,13 @@ function decodeInventoryEntries(
     );
     assertExactKeys(
       entryRecord,
-      ["path", "kind", "delivery_role", "required_in_catalog", "activation_mode"],
+      [
+        "path",
+        "kind",
+        "delivery_role",
+        "required_in_catalog",
+        "activation_mode",
+      ],
       "publication_catalog_inventory_entry_invalid"
     );
     if (
@@ -344,11 +357,13 @@ function assertInventorySet(
       (path, index) => path !== expectedAssembly[index]
     )
   ) {
-      throw new Error("publication_catalog_inventory_assembly_mismatch");
+    throw new Error("publication_catalog_inventory_assembly_mismatch");
   }
   for (const paths of Object.values(context.requiredSourceSets)) {
     if (paths.some((path) => !expectedAssembly.includes(path))) {
-      throw new Error("publication_catalog_inventory_required_source_set_unlisted");
+      throw new Error(
+        "publication_catalog_inventory_required_source_set_unlisted"
+      );
     }
   }
   if (context.bundle["path"] !== catalog.assemblyBundle.descriptor.path) {
@@ -396,7 +411,8 @@ function assertInventoryCounts(
     throw new Error("publication_catalog_inventory_counts_mismatch");
   }
   if (
-    context.inventoryVersion !== catalog.publicationInventory.inventoryVersion ||
+    context.inventoryVersion !==
+      catalog.publicationInventory.inventoryVersion ||
     (() => {
       const body = { ...context.inventory };
       delete body["integrity"];
@@ -425,7 +441,9 @@ export function assertMuseumPublicationInventoryDocument(
 export function verifyMuseumPublicationCatalogContentHash(
   catalog: MuseumPublicationCatalog
 ): void {
-  const digest = keccak256(toBytes(canonicalMuseumJson(catalog.contentHash.payload)));
+  const digest = keccak256(
+    toBytes(canonicalMuseumJson(catalog.contentHash.payload))
+  );
   if (digest !== catalog.contentHash.digest) {
     throw new Error("publication_catalog_content_hash_mismatch");
   }

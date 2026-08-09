@@ -14,7 +14,7 @@ import {
   readMuseumLocalFixtureVisitorPaths,
   qualifyLocalReadOnlyDocument,
 } from "@/lib/museum/publication/localFixture";
-import { museumWorkHrefForSourceId } from "@/lib/museum/publication/ia";
+import { museumWorkHrefForSourceId } from "@/lib/museum/publication/routes";
 import { buildMuseumPageSourceCatalog } from "@/lib/museum/publication/pageSources";
 import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
 import type {
@@ -82,7 +82,12 @@ function readSourceFixture(): SourceFixture | null {
   ) as { entries?: unknown[] };
   const bundle = JSON.parse(
     readFileSync(
-      join(SOURCE_ROOT, "records", "publication", "visitor-corpus-bundle-v1.json"),
+      join(
+        SOURCE_ROOT,
+        "records",
+        "publication",
+        "visitor-corpus-bundle-v1.json"
+      ),
       "utf8"
     )
   ) as { entry_count?: number; content_bytes?: number };
@@ -120,58 +125,90 @@ function readSourceFixture(): SourceFixture | null {
   };
 }
 
-function qualifyReviewPendingFixture(
-  fixture: SourceFixture
-): SourceFixture {
+function qualifyReviewPendingFixture(fixture: SourceFixture): SourceFixture {
   const documents = new Map<string, MuseumSourceDocument>();
   for (const [path, document] of fixture.documents) {
     if (path === "schemas/public-entity-identity-inventory.json") {
       const inventory = JSON.parse(document.text) as Record<string, unknown>;
-      const patterns = inventory["entity_id_patterns"] as Record<string, unknown>;
+      const patterns = inventory["entity_id_patterns"] as Record<
+        string,
+        unknown
+      >;
       inventory["entity_id_patterns"] = {
         ...patterns,
         RESEARCH_PUBLICATION: "^6529NM-RP-[0-9]{4}$",
         MEDIA_REFERENCE: "^6529NM-MED-[0-9]{4}$",
       };
-      const bindings = inventory["identity_bindings"] as Record<string, unknown>;
+      const bindings = inventory["identity_bindings"] as Record<
+        string,
+        unknown
+      >;
       inventory["identity_bindings"] = {
         ...bindings,
         INSTITUTION: [
-          ...(Array.isArray(bindings["INSTITUTION"]) ? bindings["INSTITUTION"] : []),
-          { source_key: "local-qualification:institution", entity_id: "6529NM-I-0001" },
+          ...(Array.isArray(bindings["INSTITUTION"])
+            ? bindings["INSTITUTION"]
+            : []),
+          {
+            source_key: "local-qualification:institution",
+            entity_id: "6529NM-I-0001",
+          },
         ],
         COLLECTION: [
-          ...(Array.isArray(bindings["COLLECTION"]) ? bindings["COLLECTION"] : []),
-          { source_key: "local-qualification:collection", entity_id: "6529NM-C-0001" },
+          ...(Array.isArray(bindings["COLLECTION"])
+            ? bindings["COLLECTION"]
+            : []),
+          {
+            source_key: "local-qualification:collection",
+            entity_id: "6529NM-C-0001",
+          },
         ],
         ACCESSION: [
-          ...(Array.isArray(bindings["ACCESSION"]) ? bindings["ACCESSION"] : []),
-          { source_key: "local-qualification:accession", entity_id: "6529NM-ACC-ENT-0001" },
+          ...(Array.isArray(bindings["ACCESSION"])
+            ? bindings["ACCESSION"]
+            : []),
+          {
+            source_key: "local-qualification:accession",
+            entity_id: "6529NM-ACC-ENT-0001",
+          },
         ],
         RESEARCH_PUBLICATION: [
           ...(Array.isArray(bindings["RESEARCH_PUBLICATION"])
             ? bindings["RESEARCH_PUBLICATION"]
             : []),
-          { source_key: "local-qualification:research-1", entity_id: "6529NM-RP-0001" },
-          { source_key: "local-qualification:research-2", entity_id: "6529NM-RP-0002" },
-          { source_key: "local-qualification:research-3", entity_id: "6529NM-RP-0003" },
+          {
+            source_key: "local-qualification:research-1",
+            entity_id: "6529NM-RP-0001",
+          },
+          {
+            source_key: "local-qualification:research-2",
+            entity_id: "6529NM-RP-0002",
+          },
+          {
+            source_key: "local-qualification:research-3",
+            entity_id: "6529NM-RP-0003",
+          },
         ],
       };
       const slugInventory = Array.isArray(inventory["public_slug_inventory"])
         ? [...inventory["public_slug_inventory"]]
         : [];
-      if (!slugInventory.some((entry) =>
-        typeof entry === "object" &&
-        entry !== null &&
-        !Array.isArray(entry) &&
-        (entry as Record<string, unknown>)["entity_id"] === "6529NM-RP-0001"
-      )) {
+      if (
+        !slugInventory.some(
+          (entry) =>
+            typeof entry === "object" &&
+            entry !== null &&
+            !Array.isArray(entry) &&
+            (entry as Record<string, unknown>)["entity_id"] === "6529NM-RP-0001"
+        )
+      ) {
         slugInventory.push({
           entity_id: "6529NM-RP-0001",
           entity_type: "RESEARCH_PUBLICATION",
           preferred_label: "The System in Seven States",
           public_slug: "the-system-in-seven-states",
-          canonical_route: "/museum/network/research/the-system-in-seven-states",
+          canonical_route:
+            "/museum/network/research/the-system-in-seven-states",
         });
       }
       inventory["public_slug_inventory"] = slugInventory;
@@ -217,9 +254,7 @@ function qualifyReviewPendingFixture(
   return { ...fixture, documents };
 }
 
-function emptyPublication(
-  fixture: SourceFixture
-): MuseumPublication {
+function emptyPublication(fixture: SourceFixture): MuseumPublication {
   return {
     identity: {
       repository: "6529-Collections/6529networkmuseum",
@@ -285,10 +320,13 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     const firstEntity = [...fixture.documents.values()].find((document) =>
       /^records\/entities\/[^/]+\.json$/u.test(document.path)
     );
-    if (firstEntity === undefined) throw new Error("wp1_entity_fixture_missing");
-    const firstEntityPayload = (JSON.parse(firstEntity.text) as {
-      payload?: { entity_status?: unknown };
-    }).payload;
+    if (firstEntity === undefined)
+      throw new Error("wp1_entity_fixture_missing");
+    const firstEntityPayload = (
+      JSON.parse(firstEntity.text) as {
+        payload?: { entity_status?: unknown };
+      }
+    ).payload;
     if (
       firstEntityPayload?.entity_status === "review_pending" &&
       process.env.MUSEUM_WP1_QUALIFY_REVIEW_PENDING !== "1"
@@ -365,7 +403,9 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     ).toBe(true);
     expect(publication.exhibitions).toBeUndefined();
 
-    const casey = publication.works?.find((work) => work.id === "6529NM-W-0001");
+    const casey = publication.works?.find(
+      (work) => work.id === "6529NM-W-0001"
+    );
     expect(casey?.documentIds.some((id) => id.includes("typed-source:"))).toBe(
       true
     );
@@ -380,11 +420,15 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       selectedMagnum?.workIds.includes(work.id)
     );
     expect(magnumWorks).toHaveLength(5);
-    expect(magnumWorks?.every((work) => (work.presentationMedia ?? []).length === 0)).toBe(
-      true
-    );
     expect(
-      new Set(magnumWorks?.flatMap((work) => work.mediaMetadata?.map((media) => media.id) ?? []))
+      magnumWorks?.every((work) => (work.presentationMedia ?? []).length === 0)
+    ).toBe(true);
+    expect(
+      new Set(
+        magnumWorks?.flatMap(
+          (work) => work.mediaMetadata?.map((media) => media.id) ?? []
+        )
+      )
     ).toEqual(
       new Set([
         "6529NM-MED-0003",
@@ -400,7 +444,9 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
           (media) =>
             media.context?.kind === "wave_proposal" &&
             media.credit.licenseLabel === "All Rights Reserved" &&
-            media.context.openHref?.includes("drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0")
+            media.context.openHref?.includes(
+              "drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0"
+            )
         )
       )
     ).toBe(true);
@@ -408,35 +454,39 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       work.acquisitionIds.includes("6529NM-CA-2026-002")
     );
     expect(keysAndGatesWorks).toHaveLength(16);
-    expect(keysAndGatesWorks?.every((work) => (work.presentationMedia ?? []).length === 0)).toBe(
-      true
-    );
+    expect(
+      keysAndGatesWorks?.every(
+        (work) => (work.presentationMedia ?? []).length === 0
+      )
+    ).toBe(true);
     expect(
       new Set(
-        keysAndGatesWorks?.flatMap((work) =>
-          work.mediaMetadata?.map((media) => media.id) ?? []
+        keysAndGatesWorks?.flatMap(
+          (work) => work.mediaMetadata?.map((media) => media.id) ?? []
         )
       )
     ).toEqual(
       new Set(
-        Array.from({ length: 16 }, (_, index) =>
-          `6529NM-MED-${String(index + 20).padStart(4, "0")}`
+        Array.from(
+          { length: 16 },
+          (_, index) => `6529NM-MED-${String(index + 20).padStart(4, "0")}`
         )
       )
     );
     expect(
       publication.workAliases?.every((alias) =>
-        museumWorkHrefForSourceId(publication, alias.sourceObjectId)?.startsWith(
-          "/museum/network/works/6529NM-W-"
-        )
+        museumWorkHrefForSourceId(
+          publication,
+          alias.sourceObjectId
+        )?.startsWith("/museum/network/works/6529NM-W-")
       )
     ).toBe(true);
-    expect(
-      museumWorkHrefForSourceId(publication, "6529NM.2026.001.01")
-    ).toBe("/museum/network/works/6529NM-W-0001");
-    expect(
-      museumWorkHrefForSourceId(publication, "6529NM-AP-01-OUT-001")
-    ).toBe("/museum/network/works/6529NM-W-0008");
+    expect(museumWorkHrefForSourceId(publication, "6529NM.2026.001.01")).toBe(
+      "/museum/network/works/6529NM-W-0001"
+    );
+    expect(museumWorkHrefForSourceId(publication, "6529NM-AP-01-OUT-001")).toBe(
+      "/museum/network/works/6529NM-W-0008"
+    );
     expect(
       museumWorkHrefForSourceId(publication, "6529NM-PG-2026-001.OBJ-001")
     ).toBe("/museum/network/works/6529NM-W-0024");
@@ -457,12 +507,10 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
         LOCAL_FIXTURE_SOURCE_COMMIT
       ),
       allowUncataloguedTestFixture: true,
-      localFixtureAcceptedPaths: readMuseumLocalFixtureVisitorPaths(SOURCE_ROOT),
+      localFixtureAcceptedPaths:
+        readMuseumLocalFixtureVisitorPaths(SOURCE_ROOT),
       localFixtureDocumentTransform: (document) =>
-        qualifyLocalReadOnlyDocument(
-          document,
-          LOCAL_FIXTURE_SOURCE_COMMIT
-        ),
+        qualifyLocalReadOnlyDocument(document, LOCAL_FIXTURE_SOURCE_COMMIT),
     });
     const result = await source.load();
     if (result.status !== "current") {
@@ -487,28 +535,38 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       homeSource?.relatedSources[0]?.path
     );
     const workDocuments = (workId: string): readonly string[] => {
-      const work = result.publication.works?.find((candidate) => candidate.id === workId);
+      const work = result.publication.works?.find(
+        (candidate) => candidate.id === workId
+      );
       if (work === undefined) return [];
-      return selectMuseumPublicWorkDocuments(work, result.publication.documents)
-        .map((document) => document.sourcePath);
+      return selectMuseumPublicWorkDocuments(
+        work,
+        result.publication.documents
+      ).map((document) => document.sourcePath);
     };
     expect(workDocuments("6529NM-W-0001")).toContain(
       "records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md"
     );
-    expect(workDocuments("6529NM-W-0008").some((path) =>
-      path === "records/programs/6529NM-AP-01/public/works/take-the-key.md"
-    )).toBe(true);
+    expect(
+      workDocuments("6529NM-W-0008").some(
+        (path) =>
+          path === "records/programs/6529NM-AP-01/public/works/take-the-key.md"
+      )
+    ).toBe(true);
     expect(workDocuments("6529NM-W-0027")).toContain(
       "records/proposed-gifts/6529NM-PG-2026-001/public/scholarship/works/04-moises-saman-44.md"
     );
     expect(
-      result.publication.works?.flatMap((work) =>
-        selectMuseumPublicWorkDocuments(work, result.publication.documents)
-      ).every((document) =>
-        !/(?:wave-storm|proposal\.json|voter-dossier|status-amendments)/u.test(
-          document.sourcePath
+      result.publication.works
+        ?.flatMap((work) =>
+          selectMuseumPublicWorkDocuments(work, result.publication.documents)
         )
-      )
+        .every(
+          (document) =>
+            !/(?:wave-storm|proposal\.json|voter-dossier|status-amendments)/u.test(
+              document.sourcePath
+            )
+        )
     ).toBe(true);
   });
 

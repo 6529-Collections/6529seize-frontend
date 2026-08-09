@@ -2,44 +2,26 @@ import {
   buildMuseumAcquisitionContext,
   buildMuseumAcquisitionIndex,
   buildMuseumWorkContext,
-  buildMuseumWorkRelations,
 } from "./iaAcquisitions";
 import type {
-  MuseumAccessionedArtwork,
-  MuseumSelectedUnmintedArtwork,
   MuseumExternalProposalPresentationMedia,
   MuseumArtist,
   MuseumPublication,
 } from "./types";
-import type {
-  MuseumObjectRecord,
-  MuseumView,
-} from "@/lib/museum/types";
+import type { MuseumView } from "@/lib/museum/types";
 import {
   museumAcquisitionHref,
   museumAcquisitionProgramHref,
-  museumAcquisitionsHref,
   museumArtistHref,
-  museumArtistsHref,
   museumCollectionHref,
-  museumCollectionWorkHrefForSourceId,
-  museumLegacyAcquisitionProgramHref,
   museumOrganizationHref,
   museumProjectHref,
-  museumProjectsHref,
   museumResearchHref,
   museumWorkHref,
   museumWorkHrefForSourceId,
-  museumWorksHref,
-  museumAcquisitionHrefForSourceId,
-  museumAcquisitionHrefForLegacyRoute,
-  museumAcquisitionProgramHrefForSourceId,
-  resolveMuseumAcquisitionProgramSlug,
-  resolveMuseumAcquisitionSlug,
-  resolveMuseumWorkId,
 } from "./routes";
 
-export const MUSEUM_NETWORK_ROOT = "/museum/network" as const;
+const MUSEUM_NETWORK_ROOT = "/museum/network" as const;
 
 export type MuseumEntityKind =
   | "collection"
@@ -131,13 +113,6 @@ export interface MuseumAcquisitionViewModel extends MuseumEntityContextModel {
   readonly presentationMedia: readonly MuseumExternalProposalPresentationMedia[];
 }
 
-export interface MuseumAcquisitionProgramViewModel extends MuseumEntityContextModel {
-  readonly kind: "acquisition_program";
-  readonly programId: string;
-  readonly selectedWorksPath: string | null;
-  readonly selectedWorkIds: readonly string[];
-}
-
 function dedupe(
   refs: readonly (MuseumEntityRef | null)[]
 ): readonly MuseumEntityRef[] {
@@ -162,7 +137,12 @@ function ref(input: {
   readonly sourceCommit?: string | null;
   readonly media?: MuseumEntityRefMedia;
 }): MuseumEntityRef | null {
-  if (input.href === null || input.href.trim().length === 0 || input.id.trim().length === 0) return null;
+  if (
+    input.href === null ||
+    input.href.trim().length === 0 ||
+    input.id.trim().length === 0
+  )
+    return null;
   return {
     kind: input.kind,
     id: input.id,
@@ -193,7 +173,8 @@ function statusTone(status: string): MuseumStatusTone {
   ) {
     return "success";
   }
-  if (status === "closed_without_selection" || status === "withdrawn") return "neutral";
+  if (status === "closed_without_selection" || status === "withdrawn")
+    return "neutral";
   return "warning";
 }
 
@@ -201,9 +182,16 @@ function museumEntityHref(kind: MuseumEntityKind, id?: string): string | null {
   if (id?.trim() === "") return null;
   if (kind === "collection") return museumCollectionHref();
   if (kind === "about") return `${MUSEUM_NETWORK_ROOT}/about`;
-  if (kind === "research") return id === undefined ? museumResearchHref() : museumResearchHref(id);
+  if (kind === "research")
+    return id === undefined ? museumResearchHref() : museumResearchHref(id);
   if (kind === "exhibition" || id === undefined) return null;
-  const detailHrefs: Record<Exclude<MuseumEntityKind, "collection" | "about" | "research" | "exhibition">, (value: string) => string> = {
+  const detailHrefs: Record<
+    Exclude<
+      MuseumEntityKind,
+      "collection" | "about" | "research" | "exhibition"
+    >,
+    (value: string) => string
+  > = {
     work: museumWorkHref,
     artist: museumArtistHref,
     organization: museumOrganizationHref,
@@ -218,27 +206,6 @@ export {
   buildMuseumAcquisitionContext,
   buildMuseumAcquisitionIndex,
   buildMuseumWorkContext,
-  buildMuseumWorkRelations,
-  museumAcquisitionHref,
-  museumAcquisitionsHref,
-  museumArtistHref,
-  museumArtistsHref,
-  museumCollectionHref,
-  museumOrganizationHref,
-  museumProjectHref,
-  museumProjectsHref,
-  museumResearchHref,
-  museumWorkHref,
-  museumWorkHrefForSourceId,
-  museumCollectionWorkHrefForSourceId,
-  museumWorksHref,
-  museumAcquisitionProgramHref,
-  museumAcquisitionHrefForSourceId,
-  museumAcquisitionHrefForLegacyRoute,
-  museumAcquisitionProgramHrefForSourceId,
-  resolveMuseumAcquisitionProgramSlug,
-  resolveMuseumAcquisitionSlug,
-  resolveMuseumWorkId,
 };
 
 export function buildMuseumEntityContext(input: {
@@ -254,7 +221,8 @@ export function buildMuseumEntityContext(input: {
   readonly sourcePath: string | null;
   readonly sourceCommit: string | null;
 }): MuseumEntityContextModel | null {
-  const canonicalHref = input.canonicalHref ?? museumEntityHref(input.kind, input.id);
+  const canonicalHref =
+    input.canonicalHref ?? museumEntityHref(input.kind, input.id);
   if (canonicalHref === null) return null;
   const primaryRelations = input.primaryRelations ?? [];
   const secondaryRelations = input.secondaryRelations ?? [];
@@ -317,21 +285,32 @@ function artistRelation(
       });
 }
 
-export function buildMuseumArtistRelations(
+function buildMuseumArtistRelations(
   publication: MuseumPublication,
   artistSlug: string,
   view: MuseumView | null = null
 ): MuseumEntityRelations {
   const artist = publication.artists.find((item) => item.slug === artistSlug);
-  const typedWorks = (publication.works ?? []).filter((work) => work.artistId === artist?.id);
-  const legacyWorks = artist === undefined
-    ? []
-    : publication.artworks.filter((artwork) => artist.artworkIds.includes(artwork.id));
-  const selectedWorks = publication.works === undefined
-    ? (view?.objects ?? []).filter((object) => artistForValue(publication, object.artist)?.slug === artistSlug)
-    : [];
+  const typedWorks = (publication.works ?? []).filter(
+    (work) => work.artistId === artist?.id
+  );
+  const legacyWorks =
+    artist === undefined
+      ? []
+      : publication.artworks.filter((artwork) =>
+          artist.artworkIds.includes(artwork.id)
+        );
+  const selectedWorks =
+    publication.works === undefined
+      ? (view?.objects ?? []).filter(
+          (object) =>
+            artistForValue(publication, object.artist)?.slug === artistSlug
+        )
+      : [];
   const acquisitionRefs = buildMuseumAcquisitionIndex(publication, view)
-    .filter((acquisition) => acquisition.artistIds.includes(artist?.id ?? artistSlug))
+    .filter((acquisition) =>
+      acquisition.artistIds.includes(artist?.id ?? artistSlug)
+    )
     .map((acquisition) => {
       return ref({
         kind: "curated_acquisition",
@@ -351,16 +330,23 @@ export function buildMuseumArtistRelations(
       id: work.id,
       label: work.title,
       href: museumWorkHref(work.id),
-      relation: work.status === "accessioned_into_permanent_collection" ? "In Collection" : "Connected work",
+      relation:
+        work.status === "accessioned_into_permanent_collection"
+          ? "In Collection"
+          : "Connected work",
       status: work.status,
-      ...(media === undefined ? {} : { media: {
-        kind: "governed" as const,
-        src: media.url,
-        width: media.width,
-        height: media.height,
-        alt: media.altText ?? work.title,
-        creditLine: media.credit.creditLine,
-      } }),
+      ...(media === undefined
+        ? {}
+        : {
+            media: {
+              kind: "governed" as const,
+              src: media.url,
+              width: media.width,
+              height: media.height,
+              alt: media.altText ?? work.title,
+              creditLine: media.credit.creditLine,
+            },
+          }),
     });
     return relation === null ? [] : [relation];
   });
@@ -370,8 +356,14 @@ export function buildMuseumArtistRelations(
       id: artwork.id,
       label: artwork.title,
       href: museumWorkHrefForSourceId(publication, artwork.id, view),
-      relation: artwork.institutionalStatus === "accessioned" ? "In Collection" : "Selected work",
-      status: artwork.institutionalStatus === "accessioned" ? "accessioned_into_permanent_collection" : "selected_through_acquisition_program_acquisition_pending",
+      relation:
+        artwork.institutionalStatus === "accessioned"
+          ? "In Collection"
+          : "Selected work",
+      status:
+        artwork.institutionalStatus === "accessioned"
+          ? "accessioned_into_permanent_collection"
+          : "selected_through_acquisition_program_acquisition_pending",
     });
     return relation === null ? [] : [relation];
   });
@@ -399,7 +391,14 @@ export function buildMuseumArtistContext(
   breadcrumbs: readonly MuseumBreadcrumbItem[] = []
 ): MuseumEntityContextModel | null {
   const artist = publication.artists.find((item) => item.slug === artistSlug);
-  if (artist === undefined && !(view?.objects ?? []).some((object) => artistForValue(publication, object.artist)?.slug === artistSlug)) return null;
+  if (
+    artist === undefined &&
+    !(view?.objects ?? []).some(
+      (object) =>
+        artistForValue(publication, object.artist)?.slug === artistSlug
+    )
+  )
+    return null;
   const relations = buildMuseumArtistRelations(publication, artistSlug, view);
   return buildMuseumEntityContext({
     kind: "artist",
@@ -417,28 +416,39 @@ export function buildMuseumProjectRelations(
   publication: MuseumPublication,
   projectSlug: string
 ): MuseumEntityRelations {
-  const project = publication.projects.find((item) => item.slug === projectSlug);
-  if (project === undefined) return { primaryRelations: [], secondaryRelations: [] };
-  const workRefs = (publication.works ?? []).filter((work) => work.projectId === project.id).flatMap((work) => {
-    const media = work.media[0];
-    const relation = ref({
-      kind: "work" as const,
-      id: work.id,
-      label: work.title,
-      href: museumWorkHref(work.id),
-      relation: "Part of",
-      ...(media === undefined ? {} : { media: {
-        kind: "governed" as const,
-        src: media.url,
-        width: media.width,
-        height: media.height,
-        alt: media.altText ?? work.title,
-        creditLine: media.credit.creditLine,
-      } }),
+  const project = publication.projects.find(
+    (item) => item.slug === projectSlug
+  );
+  if (project === undefined)
+    return { primaryRelations: [], secondaryRelations: [] };
+  const workRefs = (publication.works ?? [])
+    .filter((work) => work.projectId === project.id)
+    .flatMap((work) => {
+      const media = work.media[0];
+      const relation = ref({
+        kind: "work" as const,
+        id: work.id,
+        label: work.title,
+        href: museumWorkHref(work.id),
+        relation: "Part of",
+        ...(media === undefined
+          ? {}
+          : {
+              media: {
+                kind: "governed" as const,
+                src: media.url,
+                width: media.width,
+                height: media.height,
+                alt: media.altText ?? work.title,
+                creditLine: media.credit.creditLine,
+              },
+            }),
+      });
+      return relation === null ? [] : [relation];
     });
-    return relation === null ? [] : [relation];
-  });
-  const artistRefs = (project.artistIds ?? [project.artistId]).map((id) => artistRelation(publication, id, "By"));
+  const artistRefs = (project.artistIds ?? [project.artistId]).map((id) =>
+    artistRelation(publication, id, "By")
+  );
   const researchRefs = publication.documents
     .filter((document) => document.projectIds.includes(project.id))
     .map((document) => ({
@@ -455,92 +465,3 @@ export function buildMuseumProjectRelations(
     secondaryRelations: dedupe([...artistRefs, ...researchRefs]),
   };
 }
-
-export function buildMuseumProjectContext(
-  publication: MuseumPublication,
-  projectSlug: string,
-  breadcrumbs: readonly MuseumBreadcrumbItem[] = []
-): MuseumEntityContextModel | null {
-  const project = publication.projects.find((item) => item.slug === projectSlug);
-  if (project === undefined) return null;
-  const relations = buildMuseumProjectRelations(publication, projectSlug);
-  return buildMuseumEntityContext({
-    kind: "project",
-    id: project.id,
-    label: project.title,
-    breadcrumbs,
-    primaryRelations: relations.primaryRelations,
-    secondaryRelations: relations.secondaryRelations,
-    sourcePath: project.sourcePaths.find((path) => path.trim()) ?? null,
-    sourceCommit: publication.identity.commit,
-  });
-}
-
-export function buildMuseumAcquisitionProgramContext(
-  view: MuseumView,
-  programId: string,
-  sourceCommit: string,
-  breadcrumbs: readonly MuseumBreadcrumbItem[] = [],
-  publication?: MuseumPublication
-): MuseumAcquisitionProgramViewModel | null {
-  const program = view.programs.find((item) => item.programId === programId);
-  if (program === undefined) return null;
-  const selectedWorks = program.selectedWorks.flatMap((work) => {
-    const relation = ref({
-      kind: "work" as const,
-      id: work.recordId,
-      label: work.title || work.recordId,
-      href: publication === undefined
-        ? null
-        : museumWorkHrefForSourceId(publication, work.recordId, view),
-      relation: "Selected through",
-      status: "selected_through_acquisition_program_acquisition_pending",
-      sourcePath: work.outcomePath ?? program.selectedWorksPath,
-      sourceCommit,
-    });
-    return relation === null ? [] : [relation];
-  });
-  const canonicalHref = publication === undefined
-    ? museumLegacyAcquisitionProgramHref(program.programId)
-    : museumAcquisitionProgramHrefForSourceId(publication, program.programId);
-  if (canonicalHref === null) return null;
-  return {
-    ...buildMuseumEntityContext({
-      kind: "acquisition_program",
-      id: program.programId,
-      label: program.title || program.programId,
-      canonicalHref,
-      breadcrumbs,
-      status: "selected_through_acquisition_program_acquisition_pending",
-      statusAsOf: program.statusAsOf,
-      primaryRelations: selectedWorks,
-      secondaryRelations: [],
-      sourcePath: program.sourcePath,
-      sourceCommit,
-    })!,
-    kind: "acquisition_program",
-    programId: program.programId,
-    selectedWorksPath: program.selectedWorksPath,
-    selectedWorkIds: program.selectedWorks.map((work) => work.recordId),
-  };
-}
-
-export function buildMuseumNormalizedObjectRef(
-  object: MuseumObjectRecord,
-  publication: MuseumPublication,
-  sourceCommit: string
-): MuseumEntityRef | null {
-  return ref({
-    kind: "work",
-    id: object.objectId,
-    label: object.title,
-    href: museumWorkHrefForSourceId(publication, object.objectId),
-    relation: "Selected work",
-    status: "selected_through_acquisition_program_acquisition_pending",
-    sourcePath: object.sourcePath,
-    sourceCommit,
-  });
-}
-
-export type MuseumAccessionedArtworkRecord = MuseumAccessionedArtwork;
-export type MuseumSelectedUnmintedArtworkRecord = MuseumSelectedUnmintedArtwork;

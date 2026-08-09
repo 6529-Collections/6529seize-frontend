@@ -5,13 +5,15 @@ import {
 import {
   buildMuseumEntityContext,
   buildMuseumWorkContext,
+} from "@/lib/museum/publication/ia";
+import {
   museumCollectionWorkHrefForSourceId,
   museumAcquisitionHrefForLegacyRoute,
   museumAcquisitionHrefForSourceId,
   museumAcquisitionProgramHrefForSourceId,
   museumWorkHrefForSourceId,
   resolveMuseumAcquisitionSlug,
-} from "@/lib/museum/publication/ia";
+} from "@/lib/museum/publication/routes";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -53,7 +55,8 @@ function typedPublication(): MuseumPublication {
       },
       {
         legacyRoute: "/museum/network/accessions/legacy-accession",
-        canonicalRoute: "/museum/network/acquisitions/the-system-in-seven-states",
+        canonicalRoute:
+          "/museum/network/acquisitions/the-system-in-seven-states",
         canonicalEntityId: "6529NM-CA-2026-001",
         sourcePath: "schemas/public-entity-identity-inventory.json",
       },
@@ -65,7 +68,8 @@ function typedPublication(): MuseumPublication {
       },
       {
         legacyRoute: "/museum/network/gifts/legacy-gift",
-        canonicalRoute: "/museum/network/acquisitions/the-system-in-seven-states",
+        canonicalRoute:
+          "/museum/network/acquisitions/the-system-in-seven-states",
         canonicalEntityId: "6529NM-CA-2026-001",
         sourcePath: "schemas/public-entity-identity-inventory.json",
       },
@@ -116,24 +120,24 @@ function typedPublication(): MuseumPublication {
 
 describe("Museum IA route boundaries", () => {
   it("keeps the five public navigation labels and active sections exact", () => {
-    expect(MUSEUM_NAVIGATION_ITEMS.map((item) => t(DEFAULT_LOCALE, item.labelKey))).toEqual([
-      "Collection",
-      "Artists",
-      "Acquisitions",
-      "Research",
-      "About",
-    ]);
+    expect(
+      MUSEUM_NAVIGATION_ITEMS.map((item) => t(DEFAULT_LOCALE, item.labelKey))
+    ).toEqual(["Collection", "Artists", "Acquisitions", "Research", "About"]);
     expect(museumNavigationActiveSection("/museum/network/collection")).toBe(
       "collection"
     );
-    expect(museumNavigationActiveSection("/museum/network/artists/casey-reas")).toBe(
-      "artists"
-    );
     expect(
-      museumNavigationActiveSection("/museum/network/acquisitions/keys-and-gates")
+      museumNavigationActiveSection("/museum/network/artists/casey-reas")
+    ).toBe("artists");
+    expect(
+      museumNavigationActiveSection(
+        "/museum/network/acquisitions/keys-and-gates"
+      )
     ).toBe("acquisitions");
     expect(
-      museumNavigationActiveSection("/museum/network/acquisition-programs/keys-and-gates")
+      museumNavigationActiveSection(
+        "/museum/network/acquisition-programs/keys-and-gates"
+      )
     ).toBe("acquisitions");
     expect(museumNavigationActiveSection("/museum/network/research")).toBe(
       "research"
@@ -160,7 +164,9 @@ describe("Museum IA route boundaries", () => {
       museumNavigationActiveSection("/museum/network/projects/casey-reas")
     ).toBeNull();
     expect(
-      museumNavigationActiveSection("/museum/network/organizations/magnum-photos")
+      museumNavigationActiveSection(
+        "/museum/network/organizations/magnum-photos"
+      )
     ).toBeNull();
   });
 
@@ -178,19 +184,25 @@ describe("Museum IA route boundaries", () => {
     expect(museumWorkHrefForSourceId(publication, "route-only-alias")).toBe(
       "/museum/network/works/6529NM-W-0001"
     );
-    expect(museumAcquisitionHrefForSourceId(publication, "6529NM.2026.001")).toBe(
-      "/museum/network/acquisitions/the-system-in-seven-states"
-    );
+    expect(
+      museumAcquisitionHrefForSourceId(publication, "6529NM.2026.001")
+    ).toBe("/museum/network/acquisitions/the-system-in-seven-states");
     expect(
       museumAcquisitionHrefForSourceId(publication, "6529NM-PG-2026-001")
     ).toBe("/museum/network/acquisitions/conflict-at-its-edges");
-    expect(resolveMuseumAcquisitionSlug(publication, "legacy-accession")).toBeNull();
-    expect(resolveMuseumAcquisitionSlug(publication, "keys-and-gates")).toBeNull();
+    expect(
+      resolveMuseumAcquisitionSlug(publication, "legacy-accession")
+    ).toBeNull();
+    expect(
+      resolveMuseumAcquisitionSlug(publication, "keys-and-gates")
+    ).toBeNull();
     expect(resolveMuseumAcquisitionSlug(publication, "legacy-gift")).toBeNull();
     expect(
       museumAcquisitionProgramHrefForSourceId(publication, "6529NM-AP-01")
     ).toBe("/museum/network/acquisition-programs/keys-and-gates");
-    expect(museumWorkHrefForSourceId(publication, "unresolved-source-id")).toBeNull();
+    expect(
+      museumWorkHrefForSourceId(publication, "unresolved-source-id")
+    ).toBeNull();
     expect(
       museumAcquisitionHrefForLegacyRoute(
         publication,
@@ -256,7 +268,9 @@ describe("Museum IA route boundaries", () => {
       artworks: [{ id: "legacy-object-id", title: "Legacy object" }],
     } as unknown as MuseumPublication;
 
-    expect(buildMuseumWorkContext(publication, "legacy-object-id", null)).toBeNull();
+    expect(
+      buildMuseumWorkContext(publication, "legacy-object-id", null)
+    ).toBeNull();
   });
 
   it("keeps the permanent Collection alias narrower than generic Work aliases", () => {

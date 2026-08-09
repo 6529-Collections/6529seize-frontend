@@ -135,9 +135,13 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
     return new GitHubMuseumPublicationSource({
       ref: localFixtureCommit,
       assembler: legacyCaseyPublicationAssembler,
-      fetch: createMuseumLocalFixtureFetch(localFixtureRoot, localFixtureCommit),
+      fetch: createMuseumLocalFixtureFetch(
+        localFixtureRoot,
+        localFixtureCommit
+      ),
       allowUncataloguedTestFixture: true,
-      localFixtureAcceptedPaths: readMuseumLocalFixtureVisitorPaths(localFixtureRoot),
+      localFixtureAcceptedPaths:
+        readMuseumLocalFixtureVisitorPaths(localFixtureRoot),
       ...(environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY === "1"
         ? {
             localFixtureDocumentTransform: (document) =>

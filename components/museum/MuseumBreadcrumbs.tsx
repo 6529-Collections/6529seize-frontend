@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { MuseumBreadcrumbItem } from "@/lib/museum/publication/ia";
 
-export interface MuseumBreadcrumbsProps {
+interface MuseumBreadcrumbsProps {
   readonly ariaLabel: string;
   readonly items: readonly MuseumBreadcrumbItem[];
 }
@@ -16,17 +16,14 @@ export function MuseumBreadcrumbs({
   }
 
   return (
-    <nav
-      aria-label={ariaLabel}
-      className="tw-mb-6 tw-min-w-0"
-    >
+    <nav aria-label={ariaLabel} className="tw-mb-6 tw-min-w-0">
       <ol className="tw-m-0 tw-flex tw-min-w-0 tw-list-none tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-p-0 tw-text-sm tw-leading-6">
         {visibleItems.map((item, index) => {
           const isCurrent = index === visibleItems.length - 1;
 
           return (
             <li
-              key={`${item.label}-${index}`}
+              key={item.href ?? item.label}
               className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2"
             >
               {index > 0 ? (

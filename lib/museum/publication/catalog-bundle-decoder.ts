@@ -74,7 +74,8 @@ export function decodePublicationAssemblyBundle(
     bundle.bundle_id !== "6529NM_PUBLIC_VISITOR_CORPUS_BUNDLE_V1" ||
     bundle.source_inventory_path !== MUSEUM_PUBLICATION_INVENTORY_PATH ||
     bundle.canonicalization_id !== MUSEUM_PUBLICATION_CANONICALIZATION_ID ||
-    bundle.canonicalization_id !== catalog.publicationInventory.canonicalizationId ||
+    bundle.canonicalization_id !==
+      catalog.publicationInventory.canonicalizationId ||
     !Array.isArray(bundle.entries) ||
     !Number.isSafeInteger(bundle.entry_count) ||
     !Number.isSafeInteger(bundle.content_bytes) ||
@@ -92,76 +93,80 @@ export function decodePublicationAssemblyBundle(
     "source_inventory_body_keccak256",
     "publication_catalog_bundle_shape"
   );
-  const entries = bundle.entries.map((entryValue): MuseumSourceBundleDocument => {
-    const entry = asRecord(
-      entryValue,
-      "publication_catalog_bundle_entry_shape"
-    );
-    assertExactKeys(
-      entry,
-      [
-        "path",
-        "byte_mode",
-        "content",
-        "file_size",
-        "sha256",
-        "jcs_keccak256",
-      ],
-      "publication_catalog_bundle_entry_shape"
-    );
-    if (
-      typeof entry.path !== "string" ||
-      entry.byte_mode !== "lf-normalized" ||
-      typeof entry.content !== "string" ||
-      !Number.isSafeInteger(entry.file_size) ||
-      (entry.file_size as number) < 0
-    ) {
-      throw new Error("publication_catalog_bundle_entry_shape");
-    }
-    assertCatalogPublicationPath(entry.path);
-    if (entry.content.startsWith("\uFEFF") || entry.content.includes("\r")) {
-      throw new Error("publication_catalog_bundle_entry_normalization");
-    }
-    const content = new TextEncoder().encode(entry.content);
-    if (
-      content.byteLength !== entry.file_size ||
-      !verifyMuseumSha256(content, requiredSha(entry, "sha256", "publication_catalog_bundle_entry_shape"))
-    ) {
-      throw new Error("publication_catalog_bundle_entry_fixity");
-    }
-    const jcsValue = entry.jcs_keccak256;
-    if (jcsValue !== null && typeof jcsValue !== "string") {
-      throw new Error("publication_catalog_bundle_entry_shape");
-    }
-    if (typeof jcsValue === "string") {
-      assertKeccak(jcsValue, "publication_catalog_bundle_entry_shape");
-      const expected = decodeCatalogDocumentRecord(
-        {
-          path: entry.path,
-          file_size: entry.file_size,
-          byte_mode: "lf-normalized",
-          sha256: entry.sha256,
-          jcs_keccak256: jcsValue,
-          immutable_source_url: `https://github.com/6529-Collections/6529networkmuseum/blob/${catalog.sourceCommit}/${entry.path}`,
-          immutable_raw_url: `https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/${catalog.sourceCommit}/${entry.path}`,
-        },
+  const entries = bundle.entries.map(
+    (entryValue): MuseumSourceBundleDocument => {
+      const entry = asRecord(
+        entryValue,
         "publication_catalog_bundle_entry_shape"
       );
-      verifyDocumentJcs(expected, content);
+      assertExactKeys(
+        entry,
+        [
+          "path",
+          "byte_mode",
+          "content",
+          "file_size",
+          "sha256",
+          "jcs_keccak256",
+        ],
+        "publication_catalog_bundle_entry_shape"
+      );
+      if (
+        typeof entry.path !== "string" ||
+        entry.byte_mode !== "lf-normalized" ||
+        typeof entry.content !== "string" ||
+        !Number.isSafeInteger(entry.file_size) ||
+        (entry.file_size as number) < 0
+      ) {
+        throw new Error("publication_catalog_bundle_entry_shape");
+      }
+      assertCatalogPublicationPath(entry.path);
+      if (entry.content.startsWith("\uFEFF") || entry.content.includes("\r")) {
+        throw new Error("publication_catalog_bundle_entry_normalization");
+      }
+      const content = new TextEncoder().encode(entry.content);
+      if (
+        content.byteLength !== entry.file_size ||
+        !verifyMuseumSha256(
+          content,
+          requiredSha(entry, "sha256", "publication_catalog_bundle_entry_shape")
+        )
+      ) {
+        throw new Error("publication_catalog_bundle_entry_fixity");
+      }
+      const jcsValue = entry.jcs_keccak256;
+      if (jcsValue !== null && typeof jcsValue !== "string") {
+        throw new Error("publication_catalog_bundle_entry_shape");
+      }
+      if (typeof jcsValue === "string") {
+        assertKeccak(jcsValue, "publication_catalog_bundle_entry_shape");
+        const expected = decodeCatalogDocumentRecord(
+          {
+            path: entry.path,
+            file_size: entry.file_size,
+            byte_mode: "lf-normalized",
+            sha256: entry.sha256,
+            jcs_keccak256: jcsValue,
+            immutable_source_url: `https://github.com/6529-Collections/6529networkmuseum/blob/${catalog.sourceCommit}/${entry.path}`,
+            immutable_raw_url: `https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/${catalog.sourceCommit}/${entry.path}`,
+          },
+          "publication_catalog_bundle_entry_shape"
+        );
+        verifyDocumentJcs(expected, content);
+      }
+      return { path: entry.path, bytes: content };
     }
-    return { path: entry.path, bytes: content };
-  });
+  );
   if (
     bundle.entry_count !== entries.length ||
-    bundle.content_bytes !== entries.reduce(
-      (total, entry) => total + entry.bytes.byteLength,
-      0
-    )
+    bundle.content_bytes !==
+      entries.reduce((total, entry) => total + entry.bytes.byteLength, 0)
   ) {
     throw new Error("publication_catalog_bundle_count");
   }
   if (
-    sha256Text(canonicalMuseumJson(bundle)) !== catalog.assemblyBundle.bodySha256 ||
+    sha256Text(canonicalMuseumJson(bundle)) !==
+      catalog.assemblyBundle.bodySha256 ||
     keccak256(toBytes(canonicalMuseumJson(bundle))) !==
       catalog.assemblyBundle.bodyKeccak
   ) {

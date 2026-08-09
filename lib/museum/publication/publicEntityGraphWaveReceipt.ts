@@ -54,7 +54,10 @@ function sha256Utf8(value: string): `sha256:${string}` {
   return `sha256:${createHash("sha256").update(value, "utf8").digest("hex")}`;
 }
 
-function assertPartsCount(value: unknown, length: number): asserts value is number {
+function assertPartsCount(
+  value: unknown,
+  length: number
+): asserts value is number {
   if (
     typeof value !== "number" ||
     !Number.isSafeInteger(value) ||
@@ -111,7 +114,10 @@ function assertReceiptIntegrity(
     throw new Error("public_entity_graph_media_wave_publication_receipt");
   }
   const computedHash = sha256Utf8(sourceDocument.text);
-  if (computedHash !== contentSha256 || sourceDocument.sha256 !== contentSha256) {
+  if (
+    computedHash !== contentSha256 ||
+    sourceDocument.sha256 !== contentSha256
+  ) {
     throw new Error("public_entity_graph_media_wave_publication_receipt");
   }
 }
@@ -308,7 +314,9 @@ export function parseWavePublicationParts(
     accumulator.candidateObjectIds.size !== 5 ||
     accumulator.result.length !== 5
   ) {
-    throw new Error("public_entity_graph_media_wave_publication_candidate_count");
+    throw new Error(
+      "public_entity_graph_media_wave_publication_candidate_count"
+    );
   }
   return accumulator.result;
 }

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { MuseumObjectPage, getMuseumObjectMetadata } from "@/components/museum/MuseumObjectPage";
+import {
+  MuseumObjectPage,
+  getMuseumObjectMetadata,
+} from "@/components/museum/MuseumObjectPage";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import {
   isMuseumCanonicalWorkId,
@@ -14,7 +17,9 @@ interface MuseumWorkRouteProps {
 }
 
 function resolveCanonicalWorkId(
-  publication: Awaited<ReturnType<typeof getMuseumPublicationBundle>>["publicationState"]["publication"],
+  publication: Awaited<
+    ReturnType<typeof getMuseumPublicationBundle>
+  >["publicationState"]["publication"],
   requestedId: string,
   view: MuseumView | null = null
 ): string | null {

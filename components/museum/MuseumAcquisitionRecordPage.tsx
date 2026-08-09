@@ -8,23 +8,20 @@ import {
 } from "./MuseumProposalImage";
 import { MuseumProgramImage } from "./MuseumProgramImage";
 import { MuseumRelatedEntities } from "./MuseumRelatedEntities";
-import {
-  MuseumJsonDisclosure,
-  MuseumMarkdown,
-} from "./MuseumMarkdown";
+import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import {
   type MuseumAcquisitionViewModel,
+} from "@/lib/museum/publication/ia";
+import {
   museumAcquisitionProgramHref,
   museumAcquisitionProgramHrefForSourceId,
   museumWorkHrefForSourceId,
   museumWorkHref,
-} from "@/lib/museum/publication/ia";
-import {
-  buildMuseumSignedWaveStormDropUrl,
-} from "@/lib/museum/publication";
+} from "@/lib/museum/publication/routes";
+import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import type {
   MuseumArtwork,
   MuseumExternalProposalPresentationMedia,
@@ -32,17 +29,17 @@ import type {
   MuseumMedia,
   MuseumPublication,
 } from "@/lib/museum/publication/types";
-import type {
-  MuseumProgramMedia,
-  MuseumView,
-} from "@/lib/museum/types";
+import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
 import { museumDocumentKindLabelKey } from "@/lib/museum/publication/documentLabels";
 import { displayMuseumPublicAcquisitionStatus } from "@/lib/museum/presentation";
 
 const MUSEUM_OPEN_PRESENTATION_MESSAGE =
   "museum.network.acquisitions.openPresentation";
 
-function acquisitionMethodLabel(method: string, programId: string | null): string {
+function acquisitionMethodLabel(
+  method: string,
+  programId: string | null
+): string {
   switch (method) {
     case "gift":
     case "donation":
@@ -83,7 +80,8 @@ function museumMediaToProgramMedia(media: MuseumMedia): MuseumProgramMedia {
     sourceWidth: media.width,
     sourceHeight: media.height,
     altText: media.altText ?? "",
-    altTextStatus: media.altText === null ? "unavailable" : "governed_artwork_description",
+    altTextStatus:
+      media.altText === null ? "unavailable" : "governed_artwork_description",
     variants: [],
   };
 }
@@ -182,7 +180,9 @@ function acquisitionArtworkCard(
   if (artwork === undefined) return undefined;
   const href = museumWorkHrefForSourceId(publication, artwork.id);
   if (href === null) return undefined;
-  const artist = publication.artists.find((item) => item.id === artwork.artistId);
+  const artist = publication.artists.find(
+    (item) => item.id === artwork.artistId
+  );
   const programMedia = artworkMedia(artwork);
   return {
     id: artwork.id,
@@ -272,31 +272,41 @@ function MuseumProposalPresentationMedia({
               />
             </div>
             <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-              <span className="tw-block tw-text-iron-200">{presentationMedia.credit.creditLine}</span>
-              <span className="tw-mt-1 tw-block">
-                {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationRights")}
+              <span className="tw-block tw-text-iron-200">
+                {presentationMedia.credit.creditLine}
               </span>
               <span className="tw-mt-1 tw-block">
-                {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationSource")}:{" "}
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.acquisitions.presentationRights"
+                )}
+              </span>
+              <span className="tw-mt-1 tw-block">
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.acquisitions.presentationSource"
+                )}
+                :{" "}
                 {(() => {
-                const sourceHref = buildMuseumSignedWaveStormDropUrl(
+                  const sourceHref = buildMuseumSignedWaveStormDropUrl(
                     presentationMedia.source.waveId,
                     presentationMedia.source.dropId
                   );
-                  const canOpenPresentation = presentationMedia.affordances.includes(
-                    "open_upstream_presentation"
-                  );
+                  const canOpenPresentation =
+                    presentationMedia.affordances.includes(
+                      "open_upstream_presentation"
+                    );
                   return sourceHref === null || !canOpenPresentation ? (
                     presentationMedia.source.sourcePath
                   ) : (
-                  <a
-                    href={sourceHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
-                  </a>
+                    <a
+                      href={sourceHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    >
+                      {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
+                    </a>
                   );
                 })()}
               </span>
@@ -328,8 +338,7 @@ function AcquisitionWorkFigure({
     ) === true;
   const requiresIntent =
     work.presentationMedia?.sourceByteSize !== undefined &&
-      work.presentationMedia.sourceByteSize >=
-      MUSEUM_PROPOSAL_INTENT_VIEW_BYTES;
+    work.presentationMedia.sourceByteSize >= MUSEUM_PROPOSAL_INTENT_VIEW_BYTES;
   const metadataOnly =
     work.media === undefined &&
     work.presentationMedia === undefined &&
@@ -348,10 +357,15 @@ function AcquisitionWorkFigure({
         </Link>
       )}
       <figcaption className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4">
-        <Link href={work.href} className="tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+        <Link
+          href={work.href}
+          className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
           {work.title}
         </Link>
-        <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">{work.artist}</span>
+        <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
+          {work.artist}
+        </span>
         {work.status ? (
           <span className="tw-mt-2 tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
             {work.status}
@@ -364,12 +378,21 @@ function AcquisitionWorkFigure({
         ) : null}
         {work.presentationMedia ? (
           <div className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
-            <span className="tw-block tw-text-iron-300">{work.presentationMedia.credit.creditLine}</span>
-            <span className="tw-mt-1 tw-block">
-              {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationRights")}
+            <span className="tw-block tw-text-iron-300">
+              {work.presentationMedia.credit.creditLine}
             </span>
             <span className="tw-mt-1 tw-block">
-              {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationSource")}: {" "}
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.presentationRights"
+              )}
+            </span>
+            <span className="tw-mt-1 tw-block">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.presentationSource"
+              )}
+              :{" "}
               {presentationSourceHref === null || !canOpenPresentation ? (
                 work.presentationMedia.source.sourcePath
               ) : (
@@ -377,7 +400,7 @@ function AcquisitionWorkFigure({
                   href={presentationSourceHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 >
                   {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
                 </a>
@@ -385,7 +408,11 @@ function AcquisitionWorkFigure({
             </span>
           </div>
         ) : null}
-        {work.meta ? <span className="tw-mt-1 tw-block tw-text-xs tw-text-iron-500">{work.meta}</span> : null}
+        {work.meta ? (
+          <span className="tw-mt-1 tw-block tw-text-xs tw-text-iron-500">
+            {work.meta}
+          </span>
+        ) : null}
       </figcaption>
     </figure>
   );
@@ -471,11 +498,13 @@ export function MuseumAcquisitionRecordPage({
   const program =
     acquisition.programId === null
       ? null
-      : publication.acquisitionPrograms?.find(
+      : (publication.acquisitionPrograms?.find(
           (item) => item.id === acquisition.programId
         ) ??
-        view?.programs.find((item) => item.programId === acquisition.programId) ??
-        null;
+        view?.programs.find(
+          (item) => item.programId === acquisition.programId
+        ) ??
+        null);
   const acquisitionDocuments = publication.documents.filter((document) =>
     acquisition.sourceDocumentIds.includes(document.id)
   );
@@ -493,7 +522,10 @@ export function MuseumAcquisitionRecordPage({
     status: displayMuseumPublicAcquisitionStatus(acquisition.status),
     breadcrumbs: [
       { label: "6529 Network Museum", href: "/museum/network" },
-      { label: t(DEFAULT_LOCALE, "museum.network.acquisitions.title"), href: "/museum/network/acquisitions" },
+      {
+        label: t(DEFAULT_LOCALE, "museum.network.acquisitions.title"),
+        href: "/museum/network/acquisitions",
+      },
       { label: acquisition.title },
     ],
   };
@@ -501,7 +533,10 @@ export function MuseumAcquisitionRecordPage({
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
-        ariaLabel={t(DEFAULT_LOCALE, "museum.network.accessibility.breadcrumbs")}
+        ariaLabel={t(
+          DEFAULT_LOCALE,
+          "museum.network.accessibility.breadcrumbs"
+        )}
         items={context.breadcrumbs}
       />
       <Link
@@ -525,28 +560,44 @@ export function MuseumAcquisitionRecordPage({
       <MuseumEntityContext
         context={context}
         labels={{
-          ariaLabel: t(DEFAULT_LOCALE, "museum.network.accessibility.entityContext"),
+          ariaLabel: t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.entityContext"
+          ),
           status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
           statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
       />
 
-      <section className="tw-mt-10 tw-grid tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3" aria-label={t(DEFAULT_LOCALE, "museum.network.acquisitions.context")}>
+      <section
+        className="tw-mt-10 tw-grid tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3"
+        aria-label={t(DEFAULT_LOCALE, "museum.network.acquisitions.context")}
+      >
         <div>
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">{t(DEFAULT_LOCALE, "museum.network.acquisitions.method")}</p>
-          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">{acquisitionMethodLabel(acquisition.acquisitionMethod, acquisition.programId)}</p>
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.method")}
+          </p>
+          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {acquisitionMethodLabel(
+              acquisition.acquisitionMethod,
+              acquisition.programId
+            )}
+          </p>
         </div>
         {program && (
           <div>
-            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">{t(DEFAULT_LOCALE, "museum.network.acquisitions.program")}</p>
+            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+              {t(DEFAULT_LOCALE, "museum.network.acquisitions.program")}
+            </p>
             {(() => {
-              const programHref = "slug" in program
-                ? museumAcquisitionProgramHref(program.slug)
-                : museumAcquisitionProgramHrefForSourceId(
-                    publication,
-                    program.programId
-                  );
+              const programHref =
+                "slug" in program
+                  ? museumAcquisitionProgramHref(program.slug)
+                  : museumAcquisitionProgramHrefForSourceId(
+                      publication,
+                      program.programId
+                    );
               return programHref === null ? (
                 <span className="tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
                   {program.title}
@@ -554,7 +605,7 @@ export function MuseumAcquisitionRecordPage({
               ) : (
                 <Link
                   href={programHref}
-                  className="tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 >
                   {program.title}
                 </Link>
@@ -563,16 +614,27 @@ export function MuseumAcquisitionRecordPage({
           </div>
         )}
         <div>
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">{t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}</p>
-          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">{formatInteger(DEFAULT_LOCALE, acquisition.workIds.length)}</p>
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
+          </p>
+          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {formatInteger(DEFAULT_LOCALE, acquisition.workIds.length)}
+          </p>
         </div>
       </section>
 
       {workCards.length > 0 ? (
         <section className="tw-mt-12" aria-labelledby="acquisition-works-title">
           <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
-            <h2 id="acquisition-works-title" className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">{t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}</h2>
-            <p className="tw-m-0 tw-text-sm tw-text-iron-500">{formatInteger(DEFAULT_LOCALE, workCards.length)}</p>
+            <h2
+              id="acquisition-works-title"
+              className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
+            </h2>
+            <p className="tw-m-0 tw-text-sm tw-text-iron-500">
+              {formatInteger(DEFAULT_LOCALE, workCards.length)}
+            </p>
           </div>
           <div className="tw-mt-6 tw-grid tw-gap-5 md:tw-grid-cols-2 xl:tw-grid-cols-3">
             {workCards.map((work, index) => (
@@ -595,10 +657,7 @@ export function MuseumAcquisitionRecordPage({
           aria-labelledby={`acquisition-document-${document.id}`}
         >
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            {t(
-              DEFAULT_LOCALE,
-              museumDocumentKindLabelKey(document.kind)
-            )}
+            {t(DEFAULT_LOCALE, museumDocumentKindLabelKey(document.kind))}
           </p>
           <h2
             id={`acquisition-document-${document.id}`}
@@ -634,7 +693,6 @@ export function MuseumAcquisitionRecordPage({
         headingId="acquisition-related-entities-title"
         title={t(DEFAULT_LOCALE, "museum.network.acquisitions.related")}
       />
-
     </article>
   );
 }

@@ -2,12 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { MuseumRecordCard } from "@/components/museum/MuseumRecordCard";
-import { MuseumSectionHeading, MuseumStatusBadge } from "@/components/museum/MuseumShell";
+import {
+  MuseumSectionHeading,
+  MuseumStatusBadge,
+} from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
-import { isAdoptedGovernanceEffect, museumSlug, statusTone } from "@/lib/museum/presentation";
+import {
+  isAdoptedGovernanceEffect,
+  museumSlug,
+  statusTone,
+} from "@/lib/museum/presentation";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.governance.title"),
@@ -30,7 +37,9 @@ export default async function MuseumAboutGovernancePage() {
       ) : (
         <div className="tw-grid tw-gap-4 md:tw-grid-cols-2">
           {view.governance.map((decision) => {
-            const adopted = isAdoptedGovernanceEffect(decision.governanceEffect);
+            const adopted = isAdoptedGovernanceEffect(
+              decision.governanceEffect
+            );
             return (
               <MuseumRecordCard
                 key={decision.decisionId}
@@ -38,14 +47,28 @@ export default async function MuseumAboutGovernancePage() {
                 eyebrow={decision.decisionId}
                 title={decision.title}
                 description={decision.governanceEffect}
-                meta={decision.createdAt ? formatDate(DEFAULT_LOCALE, decision.createdAt) : undefined}
+                meta={
+                  decision.createdAt
+                    ? formatDate(DEFAULT_LOCALE, decision.createdAt)
+                    : undefined
+                }
               >
                 <div className="tw-flex tw-flex-wrap tw-gap-2">
                   <MuseumStatusBadge
-                    label={adopted ? t(DEFAULT_LOCALE, "museum.network.governance.adopted") : t(DEFAULT_LOCALE, "museum.network.governance.notAdopted")}
+                    label={
+                      adopted
+                        ? t(DEFAULT_LOCALE, "museum.network.governance.adopted")
+                        : t(
+                            DEFAULT_LOCALE,
+                            "museum.network.governance.notAdopted"
+                          )
+                    }
                     tone={adopted ? "success" : "warning"}
                   />
-                  <MuseumStatusBadge label={decision.decisionClass} tone={statusTone(decision.observedWaveStatus)} />
+                  <MuseumStatusBadge
+                    label={decision.decisionClass}
+                    tone={statusTone(decision.observedWaveStatus)}
+                  />
                 </div>
               </MuseumRecordCard>
             );

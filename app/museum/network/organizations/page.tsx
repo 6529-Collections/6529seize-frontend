@@ -25,7 +25,10 @@ export default async function MuseumOrganizationsPage() {
       <MuseumSectionHeading
         eyebrow={t(DEFAULT_LOCALE, "museum.network.organizations.eyebrow")}
         title={t(DEFAULT_LOCALE, "museum.network.organizations.title")}
-        description={t(DEFAULT_LOCALE, "museum.network.organizations.description")}
+        description={t(
+          DEFAULT_LOCALE,
+          "museum.network.organizations.description"
+        )}
       />
       <ul className="tw-m-0 tw-list-none tw-border-y tw-border-solid tw-border-iron-800 tw-p-0">
         {publication.organizations.map((organization) => (
@@ -38,14 +41,20 @@ export default async function MuseumOrganizationsPage() {
               className="tw-flex tw-min-h-20 tw-flex-wrap tw-items-center tw-justify-between tw-gap-4 tw-py-5 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
               <span>
-                <span className="tw-block tw-text-lg tw-font-semibold tw-text-iron-50 hover:tw-text-primary-200">
+                <span className="hover:tw-text-primary-200 tw-block tw-text-lg tw-font-semibold tw-text-iron-50">
                   {organization.preferredName}
                 </span>
                 <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
-                  {organization.projectIds.length} {t(DEFAULT_LOCALE, "museum.network.organizations.projects").toLocaleLowerCase()}
+                  {organization.projectIds.length}{" "}
+                  {t(
+                    DEFAULT_LOCALE,
+                    "museum.network.organizations.projects"
+                  ).toLocaleLowerCase()}
                 </span>
               </span>
-              <span className="tw-text-sm tw-text-primary-300">{t(DEFAULT_LOCALE, "museum.network.organizations.view")}</span>
+              <span className="tw-text-sm tw-text-primary-300">
+                {t(DEFAULT_LOCALE, "museum.network.organizations.view")}
+              </span>
             </Link>
           </li>
         ))}

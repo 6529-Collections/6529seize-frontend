@@ -28,7 +28,8 @@ export function MuseumMediaMetadataPlaceholder({
       {metadata.altText === null ? null : (
         <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
           <span className="tw-font-semibold tw-text-iron-200">
-            {t(DEFAULT_LOCALE, "museum.network.media.accessibilityDescription")}:
+            {t(DEFAULT_LOCALE, "museum.network.media.accessibilityDescription")}
+            :
           </span>{" "}
           {metadata.altText}
         </p>
@@ -41,12 +42,13 @@ export function MuseumMediaMetadataPlaceholder({
           {metadata.credit.licenseLabel}
         </p>
       )}
-      {metadata.context?.openHref === null || metadata.context === undefined ? null : (
+      {metadata.context?.openHref === null ||
+      metadata.context === undefined ? null : (
         <a
           href={metadata.context.openHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-mt-4 tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {t(DEFAULT_LOCALE, "museum.network.media.openWaveContext")}
         </a>

@@ -110,7 +110,10 @@ describe("Museum finished publication routes", () => {
       screen.getByRole("link", {
         name: "Read the source and chronology matrix",
       })
-    ).toHaveAttribute("href", "/museum/network/research/sources-and-chronology");
+    ).toHaveAttribute(
+      "href",
+      "/museum/network/research/sources-and-chronology"
+    );
     expect(
       screen.getByRole("link", { name: "Enter the system" })
     ).toHaveAttribute("href", "/museum/network/projects/century/system");

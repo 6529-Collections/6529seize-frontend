@@ -40,7 +40,7 @@ import {
   stringArray,
 } from "./publicEntityGraphPrimitives";
 
-export interface MuseumGraphProjection {
+interface MuseumGraphProjection {
   readonly artists: readonly MuseumArtist[];
   readonly organizations: readonly MuseumOrganization[];
   readonly projects: readonly MuseumProject[];
@@ -90,13 +90,21 @@ export function projectMuseumGraph(
     workAliases,
   };
   const works = projectWorks(graph, workContext);
-  const artists = projectArtists(graph, base, typedDocuments.documentIdsByEntity);
+  const artists = projectArtists(
+    graph,
+    base,
+    typedDocuments.documentIdsByEntity
+  );
   const organizations = projectOrganizations(
     graph,
     base,
     typedDocuments.documentIdsByEntity
   );
-  const projects = projectProjects(graph, base, typedDocuments.documentIdsByEntity);
+  const projects = projectProjects(
+    graph,
+    base,
+    typedDocuments.documentIdsByEntity
+  );
   const curatedAcquisitions = projectAcquisitions(
     graph,
     typedDocuments.documentIdsByEntity,
@@ -193,12 +201,24 @@ function projectWork(
     id: entity.id,
     slug: entity.id,
     title: requiredString(profile, "title", "public_entity_graph_work_title"),
-    medium: requiredString(profile, "medium", "public_entity_graph_work_medium"),
+    medium: requiredString(
+      profile,
+      "medium",
+      "public_entity_graph_work_medium"
+    ),
     artistId,
-    projectId: profileStringArray(entity, "project_or_series_entity_ids")[0] ?? null,
+    projectId:
+      profileStringArray(entity, "project_or_series_entity_ids")[0] ?? null,
     status: mapWorkStatus(lifecycle),
-    collectionMembership: isRelationGatedCollectionMember(entity, context.graph.relations),
-    statusAsOf: requiredString(currentRelation, "as_of", "public_entity_graph_work_as_of"),
+    collectionMembership: isRelationGatedCollectionMember(
+      entity,
+      context.graph.relations
+    ),
+    statusAsOf: requiredString(
+      currentRelation,
+      "as_of",
+      "public_entity_graph_work_as_of"
+    ),
     acquisitionIds: profileStringArray(entity, "acquisition_entity_ids"),
     programIds: profileStringArray(entity, "program_entity_ids"),
     media: media.retained,
@@ -206,7 +226,9 @@ function projectWork(
     ...(presentationMedia.length > 0 ? { presentationMedia } : {}),
     documentIds,
     sourceRecordIds,
-    qualifiers: [{ kind: "mint", status: mintStatus, sourcePath: entity.sourcePath }],
+    qualifiers: [
+      { kind: "mint", status: mintStatus, sourcePath: entity.sourcePath },
+    ],
     sourcePaths: [entity.sourcePath],
   };
 }
@@ -273,7 +295,9 @@ function projectOrganizations(
         .map((relation) => relation.targetEntityId);
       const legacyDocumentIds = base.documents
         .filter((document) =>
-          document.projectIds.some((projectId) => projectIds.includes(projectId))
+          document.projectIds.some((projectId) =>
+            projectIds.includes(projectId)
+          )
         )
         .map((document) => document.id);
       return {
@@ -407,7 +431,12 @@ function projectAcquisitions(
         .flatMap((workId) => mediaBySubject.get(workId)?.presentation ?? [])
         .filter((media) => media.source.contextEntityId === entity.id);
       const sourceAliases = uniqueIds([
-        ...stringArray(profile, "source_aliases", "public_entity_graph_acquisition_aliases", false),
+        ...stringArray(
+          profile,
+          "source_aliases",
+          "public_entity_graph_acquisition_aliases",
+          false
+        ),
         ...graph.identityInventory.acquisitionAliases
           .filter((alias) => alias.acquisitionId === entity.id)
           .map((alias) => alias.alias),
@@ -431,8 +460,16 @@ function projectAcquisitions(
         kind: "curated_acquisition" as const,
         id: entity.id,
         slug: entity.slug ?? entity.id,
-        title: requiredString(profile, "title", "public_entity_graph_acquisition_title"),
-        thesis: requiredString(profile, "thesis", "public_entity_graph_acquisition_thesis"),
+        title: requiredString(
+          profile,
+          "title",
+          "public_entity_graph_acquisition_title"
+        ),
+        thesis: requiredString(
+          profile,
+          "thesis",
+          "public_entity_graph_acquisition_thesis"
+        ),
         status: mapAcquisitionStatus(
           requiredString(
             lifecycle,
@@ -440,10 +477,26 @@ function projectAcquisitions(
             "public_entity_graph_acquisition_status"
           )
         ),
-        statusAsOf: requiredString(lifecycle, "as_of", "public_entity_graph_acquisition_as_of"),
-        acquisitionMethod: mapAcquisitionMethod(requiredString(profile, "acquisition_method", "public_entity_graph_acquisition_method")),
+        statusAsOf: requiredString(
+          lifecycle,
+          "as_of",
+          "public_entity_graph_acquisition_as_of"
+        ),
+        acquisitionMethod: mapAcquisitionMethod(
+          requiredString(
+            profile,
+            "acquisition_method",
+            "public_entity_graph_acquisition_method"
+          )
+        ),
         ...(sourceAliases.length > 0 ? { sourceAliases } : {}),
-        programId: stringArray(pathway, "entity_ids", "public_entity_graph_acquisition_pathway_entities", false)[0] ?? null,
+        programId:
+          stringArray(
+            pathway,
+            "entity_ids",
+            "public_entity_graph_acquisition_pathway_entities",
+            false
+          )[0] ?? null,
         artistIds,
         organizationIds,
         projectIds,
@@ -487,7 +540,11 @@ function projectPrograms(
         title: entity.label,
         status: mapProgramStatus(rawStatus),
         acquisitionMethod: "other_authorized_method" as const,
-        acquisitionIds: profileStringArray(entity, "produced_acquisition_entity_ids", false),
+        acquisitionIds: profileStringArray(
+          entity,
+          "produced_acquisition_entity_ids",
+          false
+        ),
         ...(sourceAliases.length > 0 ? { sourceAliases } : {}),
         sourceDocumentIds,
         sourcePaths: [entity.sourcePath],
@@ -495,9 +552,7 @@ function projectPrograms(
     });
 }
 
-function mapProgramStatus(
-  value: string
-): MuseumAcquisitionProgram["status"] {
+function mapProgramStatus(value: string): MuseumAcquisitionProgram["status"] {
   switch (value) {
     case "open_call":
     case "active":
@@ -527,7 +582,9 @@ function projectResearch(
     .filter((entity) => entity.entityType === "RESEARCH_PUBLICATION")
     .map((entity) => {
       const documentId = documentIdsByEntity.get(entity.id)?.[0];
-      const document = documents.find((candidate) => candidate.id === documentId);
+      const document = documents.find(
+        (candidate) => candidate.id === documentId
+      );
       if (document === undefined) {
         throw new Error("public_entity_graph_research_document_join");
       }
@@ -536,9 +593,20 @@ function projectResearch(
         kind: "research" as const,
         id: entity.id,
         slug: entity.slug ?? entity.id,
-        title: requiredString(profile, "title", "public_entity_graph_research_title"),
-        publicationKind: requiredString(profile, "publication_kind", "public_entity_graph_research_kind"),
-        publicationUri: immutableDocumentSource(graph.sourceCommit, document.sourcePath),
+        title: requiredString(
+          profile,
+          "title",
+          "public_entity_graph_research_title"
+        ),
+        publicationKind: requiredString(
+          profile,
+          "publication_kind",
+          "public_entity_graph_research_kind"
+        ),
+        publicationUri: immutableDocumentSource(
+          graph.sourceCommit,
+          document.sourcePath
+        ),
         authorIds: profileStringArray(entity, "author_entity_ids"),
         subjectIds: profileStringArray(entity, "subject_entity_ids"),
         sourcePath: entity.sourcePath,
@@ -583,13 +651,15 @@ function projectRelations(
     if (mappedRelation === undefined || fromKind === null || toKind === null) {
       return [];
     }
-    return [{
-      id: relation.id,
-      relation: mappedRelation,
-      from: { id: source.id, kind: fromKind },
-      to: { id: target.id, kind: toKind },
-      sourcePath: relation.sourcePath,
-    }];
+    return [
+      {
+        id: relation.id,
+        relation: mappedRelation,
+        from: { id: source.id, kind: fromKind },
+        to: { id: target.id, kind: toKind },
+        sourcePath: relation.sourcePath,
+      },
+    ];
   });
 }
 
