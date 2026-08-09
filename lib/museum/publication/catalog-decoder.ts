@@ -32,6 +32,13 @@ type DecodedCatalogBindings = {
   inventory: MuseumPublicationCatalogInventoryBinding;
 };
 
+function nonNegativeSafeInteger(value: unknown, errorCode: string): number {
+  if (!Number.isSafeInteger(value) || (value as number) < 0) {
+    throw new Error(errorCode);
+  }
+  return value as number;
+}
+
 function decodeCatalogRoot(value: unknown): DecodedCatalogRoot {
   const root = asRecord(value, "publication_catalog_shape");
   assertExactKeys(
@@ -161,13 +168,10 @@ function decodeCatalogBindings(
     ],
     "publication_catalog_inventory_binding"
   );
-  const manifestFileSize = manifest.file_size;
-  if (
-    !Number.isSafeInteger(manifestFileSize) ||
-    (manifestFileSize as number) < 0
-  ) {
-    throw new Error("publication_catalog_manifest_binding");
-  }
+  const manifestFileSize = nonNegativeSafeInteger(
+    manifest.file_size,
+    "publication_catalog_manifest_binding"
+  );
   if (
     manifest.path !== MUSEUM_MANIFEST_PATH ||
     inventory.path !== MUSEUM_PUBLICATION_INVENTORY_PATH ||
@@ -185,7 +189,7 @@ function decodeCatalogBindings(
         "file_sha256",
         "publication_catalog_manifest_binding"
       ),
-      fileSize: manifestFileSize as number,
+      fileSize: manifestFileSize,
       sourceUrl: requiredString(
         manifest,
         "immutable_source_url",
@@ -214,15 +218,10 @@ function decodeCatalogBindings(
     },
     inventory: {
       path: inventory.path,
-      fileSize: (() => {
-        if (
-          !Number.isSafeInteger(inventory.file_size) ||
-          (inventory.file_size as number) < 0
-        ) {
-          throw new Error("publication_catalog_inventory_binding");
-        }
-        return inventory.file_size as number;
-      })(),
+      fileSize: nonNegativeSafeInteger(
+        inventory.file_size,
+        "publication_catalog_inventory_binding"
+      ),
       fileSha256: requiredSha(
         inventory,
         "file_sha256",

@@ -12,9 +12,7 @@ import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import {
-  type MuseumAcquisitionViewModel,
-} from "@/lib/museum/publication/ia";
+import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import {
   museumAcquisitionProgramHref,
   museumAcquisitionProgramHrefForSourceId,

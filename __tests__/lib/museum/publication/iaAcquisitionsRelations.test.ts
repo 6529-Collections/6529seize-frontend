@@ -1,4 +1,4 @@
-import { buildMuseumWorkRelations } from "@/lib/museum/publication/iaAcquisitions";
+import { buildMuseumWorkRelations } from "@/lib/museum/publication/iaWorkContext";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
 
 const SOURCE_COMMIT = "a".repeat(40);

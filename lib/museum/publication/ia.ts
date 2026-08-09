@@ -1,8 +1,8 @@
 import {
   buildMuseumAcquisitionContext,
   buildMuseumAcquisitionIndex,
-  buildMuseumWorkContext,
 } from "./iaAcquisitions";
+import { buildMuseumWorkContext } from "./iaWorkContext";
 import type {
   MuseumExternalProposalPresentationMedia,
   MuseumArtist,

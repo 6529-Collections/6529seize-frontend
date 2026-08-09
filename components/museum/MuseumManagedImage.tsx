@@ -104,6 +104,8 @@ export function MuseumManagedImage({
     );
   }
   return (
+    // Governed media must use the exact upstream URI; Next Image would create an unapproved derivative.
+    // eslint-disable-next-line @next/next/no-img-element -- exact governed media cannot use the optimizer.
     <img
       key={`${src}:${attempt}`}
       src={src}

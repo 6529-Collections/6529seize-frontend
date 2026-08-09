@@ -16,7 +16,6 @@ import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { KEYS_AND_GATES_PROGRAM_ID } from "@/lib/museum/constants";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
-import { buildMuseumRawUrl } from "@/lib/museum/source";
 import {
   museumWorkHrefForSourceId,
   resolveMuseumAcquisitionProgramSlug,
@@ -61,39 +60,36 @@ export default async function MuseumProgramDetailPage({
   const { programId } = await params;
   const { publicationState: bundlePublicationState, view } =
     await getMuseumPublicationBundle();
-  if (bundlePublicationState.publication !== null) {
-    const programSlug = resolveMuseumAcquisitionProgramSlug(
-      bundlePublicationState.publication,
-      programId
+  const publication = bundlePublicationState.publication;
+  if (publication === null) notFound();
+  const programSlug = resolveMuseumAcquisitionProgramSlug(
+    publication,
+    programId
+  );
+  if (programSlug !== null) {
+    return permanentRedirect(
+      `/museum/network/acquisition-programs/${encodeURIComponent(programSlug)}`
     );
-    if (programSlug !== null) {
-      return permanentRedirect(
-        `/museum/network/acquisition-programs/${encodeURIComponent(programSlug)}`
-      );
-    }
-  } else {
-    notFound();
   }
-  const publicationState = bundlePublicationState;
   const program = view?.programs.find((item) =>
     museumSlugMatches(item.programId, programId)
   );
   if (!program) notFound();
   const isKeysAndGates = program.programId === KEYS_AND_GATES_PROGRAM_ID;
-  const typedProgram = publicationState.publication?.acquisitionPrograms?.find(
+  const typedProgram = publication.acquisitionPrograms?.find(
     (item) => item.id === program.programId || item.slug === program.programId
   );
   const programDocuments =
-    typedProgram === undefined || publicationState.publication === null
+    typedProgram === undefined
       ? []
-      : publicationState.publication.documents.filter((document) =>
+      : publication.documents.filter((document) =>
           typedProgram.sourceDocumentIds.includes(document.id)
         );
-  const sourceCommit = publicationState.publication?.identity.commit ?? null;
-  const programSourceHref =
-    sourceCommit === null
-      ? buildMuseumRawUrl(program.sourcePath)
-      : buildImmutableMuseumBlobUrl(sourceCommit, program.sourcePath);
+  const sourceCommit = publication.identity.commit;
+  const programSourceHref = buildImmutableMuseumBlobUrl(
+    sourceCommit,
+    program.sourcePath
+  );
   const selectionPlaceMessageKey = isKeysAndGates
     ? "museum.network.programs.detail.winnerPlace"
     : "museum.network.programs.detail.selectionPlace";
@@ -250,14 +246,11 @@ export default async function MuseumProgramDetailPage({
         </div>
         <div className="tw-mt-4 tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-3">
           {program.selectedWorks.map((work) => {
-            const href =
-              publicationState.publication === null
-                ? null
-                : museumWorkHrefForSourceId(
-                    publicationState.publication,
-                    work.recordId,
-                    view
-                  );
+            const href = museumWorkHrefForSourceId(
+              publication,
+              work.recordId,
+              view
+            );
             if (href === null) return null;
             return (
               <MuseumRecordCard

@@ -1,8 +1,20 @@
-import type { MuseumBreadcrumbItem, MuseumEntityContextModel } from "./ia";
+import type {
+  MuseumBreadcrumbItem,
+  MuseumEntityContextModel,
+  MuseumEntityRelations,
+} from "./ia";
 import type { MuseumArtwork, MuseumPublication } from "./types";
 import type { MuseumView } from "@/lib/museum/types";
 import { museumWorkHref, museumWorkHrefForSourceId } from "./routes";
-import { buildMuseumWorkRelations } from "./iaAcquisitions";
+import {
+  acquisitionRef,
+  artistRef,
+  buildMuseumAcquisitionIndex,
+  dedupe,
+  projectRef,
+  programRef,
+  typedProgramRef,
+} from "./iaAcquisitions";
 
 function firstPath(paths: readonly string[]): string | null {
   return paths.find((path) => path.trim().length > 0) ?? null;
@@ -32,6 +44,73 @@ function statusTone(
     return "neutral";
   }
   return "warning";
+}
+
+export function buildMuseumWorkRelations(
+  publication: MuseumPublication,
+  artworkId: string,
+  view: MuseumView | null
+): MuseumEntityRelations {
+  const publicWork = publication.works?.find((work) => work.id === artworkId);
+  if (publicWork !== undefined) {
+    const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter(
+      (item) => publicWork.acquisitionIds.includes(item.acquisitionId)
+    );
+    const programRefs =
+      publicWork.status ===
+      "selected_through_acquisition_program_acquisition_pending"
+        ? publicWork.programIds.map((id) => typedProgramRef(publication, id))
+        : [];
+    return {
+      primaryRelations: dedupe([
+        artistRef(publicWork.artistId, publication),
+        publicWork.projectId === null
+          ? null
+          : projectRef(publicWork.projectId, publication),
+      ]),
+      secondaryRelations: dedupe([
+        ...acquisitions.map((item) =>
+          acquisitionRef(
+            item,
+            publicWork.status === "accessioned_into_permanent_collection"
+              ? "Acquired through"
+              : "Part of"
+          )
+        ),
+        ...programRefs,
+      ]),
+    };
+  }
+  const artwork = publication.artworks.find((item) => item.id === artworkId);
+  const outcome =
+    artwork === undefined
+      ? view?.objects.find((object) => object.objectId === artworkId)
+      : undefined;
+  if (artwork === undefined && outcome === undefined)
+    return { primaryRelations: [], secondaryRelations: [] };
+  const workId = artwork?.id ?? outcome?.objectId ?? artworkId;
+  const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter(
+    (item) => item.workIds.includes(workId)
+  );
+  return {
+    primaryRelations: dedupe([
+      artwork === undefined ? null : artistRef(artwork.artistId, publication),
+    ]),
+    secondaryRelations: dedupe(
+      acquisitions.flatMap((item) => [
+        acquisitionRef(item, "Part of"),
+        item.programId === null
+          ? null
+          : programRef(
+              publication,
+              item.programId,
+              item.pathway ?? item.programId,
+              item.statusAsOf,
+              item.sourcePath
+            ),
+      ])
+    ),
+  };
 }
 
 export function buildMuseumWorkContext(
