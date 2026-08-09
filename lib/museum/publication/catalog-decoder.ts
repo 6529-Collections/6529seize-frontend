@@ -2,6 +2,7 @@ import {
   MUSEUM_PUBLICATION_BUNDLE_PATH,
   MUSEUM_PUBLICATION_CANONICALIZATION_ID,
   MUSEUM_PUBLICATION_INVENTORY_PATH,
+  MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES,
   PUBLICATION_CATALOG_SCHEMA,
   assertExactKeys,
   asRecord,
@@ -187,6 +188,13 @@ function decodeCatalogBindings(
   ) {
     throw new Error("publication_catalog_binding_path");
   }
+  const inventoryFileSize = nonNegativeSafeInteger(
+    inventory.file_size,
+    "publication_catalog_inventory_binding"
+  );
+  if (inventoryFileSize > MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES) {
+    throw new Error("publication_catalog_inventory_too_large");
+  }
   return {
     manifest: {
       path: manifest.path,
@@ -224,10 +232,7 @@ function decodeCatalogBindings(
     },
     inventory: {
       path: inventory.path,
-      fileSize: nonNegativeSafeInteger(
-        inventory.file_size,
-        "publication_catalog_inventory_binding"
-      ),
+      fileSize: inventoryFileSize,
       fileSha256: requiredSha(
         inventory,
         "file_sha256",

@@ -9,6 +9,7 @@ import {
   canonicalMuseumJson,
   decodePublicationAssemblyBundle,
   MUSEUM_PUBLICATION_INVENTORY_PATH,
+  MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES,
   MUSEUM_PUBLICATION_BUNDLE_PATH,
   MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
   MUSEUM_PUBLICATION_CANONICALIZATION_ID,
@@ -25,6 +26,7 @@ const B = "a".repeat(40);
 const C = "b".repeat(40);
 const SHA_ZERO = `sha256:${"0".repeat(64)}` as `sha256:${string}`;
 const KECCAK_ZERO = `0x${"0".repeat(64)}` as `0x${string}`;
+const C4_PUBLICATION_INVENTORY_FILE_SIZE = 163_984;
 function sha(bytes: Uint8Array): `sha256:${string}` {
   return `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 }
@@ -373,6 +375,18 @@ describe("Museum publication catalog boundary", () => {
         payload: { ...wirePayload, catalog_version: "1.1.0" },
       })
     ).toThrow("publication_catalog_version");
+    expect(() =>
+      museumPublicationCatalogResolver.decodeCatalog({
+        ...wireCatalog,
+        payload: {
+          ...wirePayload,
+          publication_inventory_binding: {
+            ...wirePayload.publication_inventory_binding,
+            file_size: MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES + 1,
+          },
+        },
+      })
+    ).toThrow("publication_catalog_inventory_too_large");
   });
 
   it("decodes the v1 relative-schema visitor bundle and verifies its body commitment", () => {
@@ -542,6 +556,44 @@ describe("Museum publication catalog boundary", () => {
         ["docs/a.md"]
       )
     ).toThrow("publication_catalog_bundle_too_large");
+  });
+
+  it("accepts the real C4 inventory and hard boundary, then rejects max plus one", () => {
+    const fixture = buildFixture();
+    expect(C4_PUBLICATION_INVENTORY_FILE_SIZE).toBeLessThanOrEqual(
+      MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES
+    );
+    for (const fileSize of [
+      C4_PUBLICATION_INVENTORY_FILE_SIZE,
+      MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES,
+    ]) {
+      expect(() =>
+        assertMuseumPublicationCatalog(
+          fixture.pointer,
+          {
+            ...fixture.catalog,
+            publicationInventory: {
+              ...fixture.catalog.publicationInventory,
+              fileSize,
+            },
+          },
+          ["docs/a.md"]
+        )
+      ).not.toThrow();
+    }
+    expect(() =>
+      assertMuseumPublicationCatalog(
+        fixture.pointer,
+        {
+          ...fixture.catalog,
+          publicationInventory: {
+            ...fixture.catalog.publicationInventory,
+            fileSize: MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES + 1,
+          },
+        },
+        ["docs/a.md"]
+      )
+    ).toThrow("publication_catalog_inventory_too_large");
   });
 
   it("normalizes only the catalog-declared text mode and fails fixity drift", () => {

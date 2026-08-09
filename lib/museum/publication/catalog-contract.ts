@@ -21,6 +21,12 @@ export const MUSEUM_PUBLICATION_INVENTORY_PATH =
 export const MUSEUM_PUBLICATION_BUNDLE_PATH =
   "records/publication/visitor-corpus-bundle-v1.json" as const;
 export const MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES = 8_000_000 as const;
+/**
+ * Hard response ceiling for the catalog-declared publication inventory.
+ * C4 is 163,984 bytes; 500 KiB leaves bounded room for reviewed inventory
+ * growth without allowing an unbounded catalog-controlled allocation.
+ */
+export const MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES = 512_000 as const;
 export const MUSEUM_PUBLICATION_CANONICALIZATION_ID =
   "0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044" as const;
 const MUSEUM_CATALOG_RAW_BYTE_MODE = "raw" as const;
@@ -522,6 +528,12 @@ function assertCatalogInventory(catalog: MuseumPublicationCatalog): void {
     catalog.publicationInventory.fileSize < 0
   ) {
     throw new Error("publication_catalog_inventory_file_size");
+  }
+  if (
+    catalog.publicationInventory.fileSize >
+    MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES
+  ) {
+    throw new Error("publication_catalog_inventory_too_large");
   }
   assertSha256(
     catalog.publicationInventory.completeInventorySha256,

@@ -34,6 +34,7 @@ import {
   assertMuseumPublicationInventoryManifestBinding,
   assertMuseumPublicationInventoryDocument,
   MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES,
+  MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES,
   resolveMuseumPublicationCatalog,
   type MuseumPublicationCatalog,
   type MuseumPublicationCatalogDocument,
@@ -408,7 +409,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       const [inventoryBytes, bundleBytes] = await Promise.all([
         this.fetchBytes(
           catalog.publicationInventory.rawUrl,
-          catalog.publicationInventory.fileSize,
+          MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES,
           "application/json"
         ),
         this.fetchBytes(
