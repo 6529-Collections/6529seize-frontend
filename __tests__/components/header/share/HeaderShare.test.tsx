@@ -953,6 +953,14 @@ describe("HeaderShare", () => {
       });
       expect(downloadAppsLink).toHaveAttribute("href", "/about/6529-apps");
       expect(downloadAppsLink).not.toHaveAttribute("target");
+      expect(downloadAppsLink).toHaveClass(
+        "tw-border-iron-600",
+        "tw-bg-iron-800/50",
+        "tw-text-iron-300",
+        "hover:tw-border-primary-400",
+        "hover:tw-bg-iron-700",
+        "hover:tw-text-primary-300"
+      );
       expect(
         screen.getByRole("heading", { name: "Connect Device" })
           .nextElementSibling

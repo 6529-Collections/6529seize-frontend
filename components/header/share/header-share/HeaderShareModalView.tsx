@@ -685,7 +685,7 @@ export function HeaderShareModalView({
                     HEADER_SHARE_LOCALE,
                     "headerShare.connectModal.downloadAppsAriaLabel"
                   )}
-                  className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900/50 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800/50 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-bg-iron-700 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
                 >
                   {t(
                     HEADER_SHARE_LOCALE,
