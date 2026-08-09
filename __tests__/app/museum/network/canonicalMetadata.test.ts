@@ -2,7 +2,9 @@ import { metadata as aboutMetadata } from "@/app/museum/network/about/page";
 import { metadata as governanceMetadata } from "@/app/museum/network/about/governance/page";
 import { generateMetadata as governanceDetailMetadata } from "@/app/museum/network/about/governance/[decisionId]/page";
 import { metadata as acquisitionProgramsMetadata } from "@/app/museum/network/acquisition-programs/page";
-import { generateMetadata as acquisitionProgramDetailMetadata } from "@/app/museum/network/acquisition-programs/[slug]/page";
+import MuseumAcquisitionProgramPage, {
+  generateMetadata as acquisitionProgramDetailMetadata,
+} from "@/app/museum/network/acquisition-programs/[slug]/page";
 import { metadata as artistsMetadata } from "@/app/museum/network/artists/page";
 import { generateMetadata as artistDetailMetadata } from "@/app/museum/network/artists/[slug]/page";
 import { generateMetadata as collectionObjectMetadata } from "@/app/museum/network/collection/[objectId]/page";
@@ -232,6 +234,11 @@ describe("Network Museum canonical metadata", () => {
 
     expect(canonical(metadata)).toBeUndefined();
     expect(JSON.stringify(metadata.title)).not.toContain("Keys and Gates");
+    await expect(
+      MuseumAcquisitionProgramPage({
+        params: Promise.resolve({ slug: "unknown-program" }),
+      })
+    ).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
   });
 
   it("keeps legacy Collection object metadata redirect-owned", async () => {
