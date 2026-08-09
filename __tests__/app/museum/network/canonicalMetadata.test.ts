@@ -206,6 +206,34 @@ describe("Network Museum canonical metadata", () => {
     ).toBeUndefined();
   });
 
+  it("does not project Keys and Gates metadata onto an unknown program route", async () => {
+    mockedBundle.mockResolvedValue({
+      publicationState: {
+        status: "current",
+        publication,
+        errorCode: null,
+        failedAt: null,
+        lastValidAcceptedAt: null,
+      },
+      view: {
+        approvedCollections: [],
+        programs: [
+          {
+            programId: "6529NM-AP-01",
+            title: "Keys and Gates",
+          },
+        ],
+      } as never,
+    });
+
+    const metadata = await acquisitionProgramDetailMetadata({
+      params: Promise.resolve({ slug: "unknown-program" }),
+    });
+
+    expect(canonical(metadata)).toBeUndefined();
+    expect(JSON.stringify(metadata.title)).not.toContain("Keys and Gates");
+  });
+
   it("keeps legacy Collection object metadata redirect-owned", async () => {
     expect(
       canonical(

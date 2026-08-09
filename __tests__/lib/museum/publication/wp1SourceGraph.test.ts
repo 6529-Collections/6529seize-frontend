@@ -171,13 +171,16 @@ function mutateIdentityInventory(
   };
 }
 
-describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
+const wp1Suite =
+  SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0
+    ? describe.skip
+    : describe;
+
+wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
   const fixture = readSourceFixture();
 
   it("accepts B3's complete identity inventory through the explicit read-only fixture", () => {
-    if (fixture === null) {
-      return;
-    }
+    if (fixture === null) throw new Error("wp1_source_fixture_required");
     const expectedManifestSha256 =
       process.env["MUSEUM_WP1_EXPECTED_MANIFEST_SHA256"];
     const expectedManifestCommitment =
@@ -431,7 +434,7 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       "public_entity_graph_inventory_version",
     ],
   ] as const)("rejects B3 when it omits %s", (_label, mutate, errorCode) => {
-    if (fixture === null) return;
+    if (fixture === null) throw new Error("wp1_source_fixture_required");
     const mutated = mutateIdentityInventory(fixture, mutate);
     expect(() =>
       parseMuseumPublicEntityGraph(
@@ -443,7 +446,9 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
   });
 
   it("assembles the exact reviewed B3 fixture through the source adapter", async () => {
-    if (SOURCE_ROOT === undefined) return;
+    if (SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0) {
+      throw new Error("wp1_source_root_required");
+    }
     const source = new GitHubMuseumPublicationSource({
       ref: LOCAL_FIXTURE_SOURCE_COMMIT,
       assembler: legacyCaseyPublicationAssembler,
@@ -514,7 +519,9 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
   });
 
   it("activates the same local fixture through the runtime binding", async () => {
-    if (SOURCE_ROOT === undefined) return;
+    if (SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0) {
+      throw new Error("wp1_source_root_required");
+    }
     const result = await getMuseumPublicationState();
     if (result.status !== "current") {
       throw new Error(`local_fixture_runtime:${result.errorCode ?? "unknown"}`);

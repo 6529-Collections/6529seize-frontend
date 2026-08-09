@@ -68,6 +68,19 @@ function legacyGiftAcquisitionsProgram(
   };
 }
 
+function legacyAcquisitionProgram(
+  view: MuseumView | null,
+  slug: string
+): MuseumProgram | undefined {
+  return (
+    view?.programs.find(
+      (program) =>
+        program.programId === slug ||
+        (slug === "keys-and-gates" && program.programId === "6529NM-AP-01")
+    ) ?? legacyGiftAcquisitionsProgram(view, slug)
+  );
+}
+
 export async function generateMetadata({
   params,
 }: MuseumAcquisitionProgramPageProps): Promise<Metadata> {
@@ -79,11 +92,7 @@ export async function generateMetadata({
       program.id === slug ||
       program.sourceAliases?.includes(slug) === true
   );
-  const legacy =
-    view?.programs.find(
-      (program) =>
-        program.programId === slug || program.programId === "6529NM-AP-01"
-    ) ?? legacyGiftAcquisitionsProgram(view, slug);
+  const legacy = legacyAcquisitionProgram(view, slug);
   const metadata = getAppMetadata({
     title:
       typed?.title ??
@@ -123,12 +132,7 @@ export default async function MuseumAcquisitionProgramPage({
   if (typed !== undefined && typed.slug !== slug) {
     permanentRedirect(museumAcquisitionProgramHref(typed.slug));
   }
-  const legacy =
-    view?.programs.find(
-      (program) =>
-        program.programId === slug ||
-        (slug === "keys-and-gates" && program.programId === "6529NM-AP-01")
-    ) ?? legacyGiftAcquisitionsProgram(view, slug);
+  const legacy = legacyAcquisitionProgram(view, slug);
   if (typed === undefined && legacy === undefined) notFound();
 
   const typedWorks =

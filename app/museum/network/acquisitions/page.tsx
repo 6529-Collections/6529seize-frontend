@@ -54,6 +54,7 @@ function statusLabel(status: MuseumPublicAcquisitionStatus): string {
     case "withdrawn":
       return t(DEFAULT_LOCALE, "museum.network.acquisitions.withdrawnStatus");
   }
+  throw new Error(`museum_acquisition_status:${String(status)}`);
 }
 
 function workCountLabel(count: number): string {
