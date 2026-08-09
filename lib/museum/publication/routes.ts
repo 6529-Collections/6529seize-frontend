@@ -14,8 +14,7 @@ export const MUSEUM_CASEY_ACQUISITION_SLUG =
   "the-system-in-seven-states" as const;
 export const MUSEUM_KEYS_AND_GATES_ACQUISITION_SLUG = "keys-and-gates" as const;
 const MUSEUM_KEYS_AND_GATES_PROGRAM_SLUG = "keys-and-gates" as const;
-const MUSEUM_GIFT_ACQUISITIONS_PROGRAM_SLUG =
-  "gift-acquisitions" as const;
+const MUSEUM_GIFT_ACQUISITIONS_PROGRAM_SLUG = "gift-acquisitions" as const;
 
 export function museumCollectionHref(): string {
   return "/museum/network/collection";
@@ -104,9 +103,7 @@ export function museumAcquisitionProgramHref(slug: string): string {
  * program entity has its own canonical route; it is not the curated
  * acquisition route for the works it produced.
  */
-export function museumLegacyAcquisitionProgramHref(
-  value: string
-): string | null {
+function museumLegacyAcquisitionProgramHref(value: string): string | null {
   if (
     value === "6529NM-AP-01" ||
     value === MUSEUM_KEYS_AND_GATES_PROGRAM_SLUG
