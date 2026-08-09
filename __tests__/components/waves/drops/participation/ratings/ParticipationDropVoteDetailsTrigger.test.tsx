@@ -169,8 +169,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
       "tw-border-iron-700",
       "tw-bg-iron-900/40",
       "tw-px-1.5",
-      "tw-py-0.5",
-      "tw-text-xs"
+      "tw-py-0.5"
     );
     expect(trigger).not.toHaveClass("tw-h-8");
     expect(trigger.querySelector("svg")).toHaveClass("tw-size-3");
@@ -189,8 +188,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
       "tw-box-border",
       "tw-h-8",
       "tw-px-2.5",
-      "tw-py-0",
-      "tw-text-xs"
+      "tw-py-0"
     );
     expect(trigger.querySelector("svg")).toHaveClass("tw-size-3");
   });

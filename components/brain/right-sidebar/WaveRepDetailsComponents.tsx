@@ -151,7 +151,7 @@ export function CategoryRow({
       onClick={onClick}
       className={`tw-relative tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-border-0 tw-px-2.5 tw-py-2 tw-text-left tw-transition before:tw-pointer-events-none before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-w-0.5 before:tw-content-[''] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
         selected
-          ? "tw-bg-white/[0.035] before:tw-bg-primary-400"
+          ? "tw-bg-white/[0.045] before:tw-bg-primary-400"
           : "tw-bg-transparent before:tw-bg-transparent hover:tw-bg-white/[0.025]"
       }`}
     >
@@ -227,12 +227,12 @@ export function ContributorRow({
             </span>
           }
         />
-        <p className="tw-mb-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-white">
+        <p className="tw-mb-0 tw-min-w-0 tw--translate-y-px tw-truncate tw-text-sm tw-font-medium tw-leading-none tw-text-white">
           {display}
         </p>
       </div>
       <span
-        className={`tw-flex-shrink-0 tw-text-sm tw-font-semibold ${contributionClass}`}
+        className={`tw-flex-shrink-0 tw--translate-y-px tw-text-sm tw-font-semibold tw-leading-none ${contributionClass}`}
       >
         {formatSignedRep(contributor.contribution)}
       </span>
