@@ -201,12 +201,6 @@ export function MuseumSourceContribution({
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title={path}
-                      aria-label={t(
-                        DEFAULT_LOCALE,
-                        "museum.network.openMuseum.strip.relatedAccessible",
-                        { label: visibleLabel, path }
-                      )}
                       className={LINK_CLASS}
                     >
                       {visibleLabel}

@@ -5,7 +5,6 @@ export interface MuseumPublicationEnvironment {
   readonly PLAYWRIGHT_READONLY?: string;
   readonly MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT?: string;
   readonly MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT?: string;
-  readonly MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY?: string;
 }
 
 export function isMuseumProductionBuildPhase(): boolean {
@@ -23,8 +22,6 @@ export function getMuseumPublicationEnvironment(): MuseumPublicationEnvironment 
   const localFixtureRoot = process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT"];
   const localFixtureCommit =
     process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"];
-  const localFixtureQualify =
-    process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY"];
   return {
     ...(testCommit === undefined
       ? {}
@@ -41,8 +38,5 @@ export function getMuseumPublicationEnvironment(): MuseumPublicationEnvironment 
     ...(localFixtureCommit === undefined
       ? {}
       : { MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT: localFixtureCommit }),
-    ...(localFixtureQualify === undefined
-      ? {}
-      : { MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY: localFixtureQualify }),
   };
 }

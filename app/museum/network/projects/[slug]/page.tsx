@@ -30,6 +30,7 @@ import {
   museumProjectHref,
   museumWorkHref,
   museumWorkHrefForSourceId,
+  museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
 interface MuseumProjectPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -93,6 +94,7 @@ function TypedProjectPage({
   const documents = publication.documents.filter((document) =>
     project.documentIds.includes(document.id)
   );
+  const workHrefs = museumWorkHrefIndex(publication);
 
   return (
     <article className="tw-min-w-0">
@@ -179,6 +181,7 @@ function TypedProjectPage({
             embeddedDocument
             sourceCommit={publication.identity.commit}
             sourcePath={document.sourcePath}
+            workHrefs={workHrefs}
           >
             {document.markdown}
           </MuseumMarkdown>
@@ -201,10 +204,13 @@ export async function generateMetadata({
   const project = publicationState.publication?.projects.find(
     (item) => item.slug === slug
   );
-  return getAppMetadata({
+  const metadata = getAppMetadata({
     title: project?.title ?? t(DEFAULT_LOCALE, "museum.network.projects.title"),
     description: t(DEFAULT_LOCALE, "museum.network.projects.description"),
   });
+  return project === undefined
+    ? metadata
+    : { ...metadata, alternates: { canonical: museumProjectHref(project.slug) } };
 }
 
 export default async function MuseumProjectPage({
@@ -260,6 +266,7 @@ export default async function MuseumProjectPage({
   const generativeStudy = getGenerativeStudyByProjectSlug(project.slug);
   const hasGenerativeExplorer =
     generativeStudy !== null && getMintedProjectIndex(project.slug) !== null;
+  const workHrefs = museumWorkHrefIndex(publicationState.publication);
 
   return (
     <article>
@@ -343,6 +350,7 @@ export default async function MuseumProjectPage({
           embeddedDocument
           sourceCommit={publicationState.publication.identity.commit}
           sourcePath={projectEssay.sourcePath}
+          workHrefs={workHrefs}
         >
           {projectEssay.markdown}
         </MuseumMarkdown>

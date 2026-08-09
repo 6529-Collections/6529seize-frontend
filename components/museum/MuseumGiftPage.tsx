@@ -10,7 +10,10 @@ import { MuseumInsideSystemDirectory } from "./MuseumInsideSystem";
 import { MuseumBreadcrumbs } from "./MuseumBreadcrumbs";
 import { MuseumEntityContext } from "./MuseumEntityContext";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
-import { museumWorkHrefForSourceId } from "@/lib/museum/publication/routes";
+import {
+  museumWorkHrefForSourceId,
+  museumWorkHrefIndex,
+} from "@/lib/museum/publication/routes";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -54,6 +57,7 @@ export async function MuseumGiftPage({
     return <MuseumPublicationUnavailable />;
   }
   const publication = publicationState.publication;
+  const workHrefs = museumWorkHrefIndex(publication);
   const artworks = tryCaseyArtworksFromPublication(publication);
   if (artworks === null) {
     return <MuseumPublicationUnavailable />;
@@ -238,6 +242,7 @@ export async function MuseumGiftPage({
           embeddedDocument
           sourceCommit={publication.identity.commit}
           sourcePath={giftNarrative.sourcePath}
+          workHrefs={workHrefs}
         >
           {giftNarrative.markdown}
         </MuseumMarkdown>
@@ -298,6 +303,7 @@ export async function MuseumGiftPage({
                     <MuseumMarkdown
                       sourceCommit={publication.identity.commit}
                       sourcePath={document.sourcePath}
+                      workHrefs={workHrefs}
                     >
                       {document.markdown}
                     </MuseumMarkdown>

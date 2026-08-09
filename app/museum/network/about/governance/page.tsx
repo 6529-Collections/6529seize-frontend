@@ -16,10 +16,13 @@ import {
   statusTone,
 } from "@/lib/museum/presentation";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.governance.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.governance.description"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.governance.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.governance.description"),
+  }),
+  alternates: { canonical: "/museum/network/about/governance" },
+};
 
 export default async function MuseumAboutGovernancePage() {
   const view = await getMuseumView();

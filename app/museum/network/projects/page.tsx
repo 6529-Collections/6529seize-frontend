@@ -12,10 +12,13 @@ import {
   museumWorkHref,
 } from "@/lib/museum/publication/routes";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.projects.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.projects.description"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.projects.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.projects.description"),
+  }),
+  alternates: { canonical: "/museum/network/projects" },
+};
 
 export default async function MuseumProjectsPage() {
   const publicationState = await getMuseumPublicationState();

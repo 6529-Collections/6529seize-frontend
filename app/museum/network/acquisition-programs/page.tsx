@@ -8,13 +8,16 @@ import { t } from "@/i18n/messages";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import { museumAcquisitionProgramHref } from "@/lib/museum/publication/routes";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title"),
-  description: t(
-    DEFAULT_LOCALE,
-    "museum.network.acquisitionPrograms.description"
-  ),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title"),
+    description: t(
+      DEFAULT_LOCALE,
+      "museum.network.acquisitionPrograms.description"
+    ),
+  }),
+  alternates: { canonical: "/museum/network/acquisition-programs" },
+};
 
 export default async function MuseumAcquisitionProgramsPage() {
   const { publicationState, view } = await getMuseumPublicationBundle();

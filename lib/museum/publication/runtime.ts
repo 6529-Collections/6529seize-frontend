@@ -10,14 +10,12 @@ import { legacyCaseyPublicationAssembler } from "./legacyCasey";
 import {
   createMuseumLocalFixtureFetch,
   readMuseumLocalFixtureVisitorPaths,
-  qualifyLocalReadOnlyDocument,
 } from "./localFixture";
 import { isExactGitCommit } from "./security";
 import type {
   MuseumLastValidPublication,
   MuseumPublicationLoadState,
   MuseumPublicationSource,
-  MuseumSourceDocument,
 } from "./types";
 
 const CURRENT_TTL_MS = 10 * 60 * 1000;
@@ -159,26 +157,10 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
       allowUncataloguedTestFixture: true,
       localFixtureAcceptedPaths:
         readMuseumLocalFixtureVisitorPaths(localFixtureRoot),
-      ...(environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_QUALIFY === "1"
-        ? {
-            localFixtureDocumentTransform: (document) =>
-              qualifyLocalReadOnlyDocument(document, localFixtureCommit),
-          }
-        : {}),
     });
   }
   const allowUncataloguedTestFixture =
     isMuseumUncataloguedReadOnlyTestMode(environment);
-  const uncataloguedTestFixtureOptions = allowUncataloguedTestFixture
-    ? {
-        localFixtureDocumentTransform: (document: MuseumSourceDocument) =>
-          qualifyLocalReadOnlyDocument(
-            document,
-            environment.MUSEUM_PUBLICATION_TEST_COMMIT ??
-              resolveMuseumPublicationRef(environment)
-          ),
-      }
-    : {};
   return new GitHubMuseumPublicationSource({
     ref: resolveMuseumPublicationRef(),
     assembler: legacyCaseyPublicationAssembler,
@@ -188,7 +170,6 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
     ...(allowUncataloguedTestFixture
       ? { allowUncataloguedTestFixture: true }
       : {}),
-    ...uncataloguedTestFixtureOptions,
   });
 }
 

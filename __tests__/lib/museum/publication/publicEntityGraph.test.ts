@@ -653,6 +653,47 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     expect(isRelationGatedCollectionMember(work, [collectionRelation])).toBe(
       false
     );
+    expect(isRelationGatedCollectionMember(work, [accessionRelation])).toBe(
+      false
+    );
+    expect(
+      isRelationGatedCollectionMember(work, [
+        {
+          ...collectionRelation,
+          sourceEntityId: "6529NM-C-0002",
+        },
+        accessionRelation,
+      ])
+    ).toBe(false);
+    expect(
+      isRelationGatedCollectionMember(work, [
+        collectionRelation,
+        {
+          ...accessionRelation,
+          sourceEntityId: "6529NM-ACC-ENT-0002",
+        },
+      ])
+    ).toBe(false);
+    expect(
+      isRelationGatedCollectionMember(work, [
+        {
+          ...collectionRelation,
+          sourceEntityId: work.id,
+          targetEntityId: "6529NM-C-0001",
+        },
+        accessionRelation,
+      ])
+    ).toBe(false);
+    expect(
+      isRelationGatedCollectionMember(work, [
+        collectionRelation,
+        {
+          ...collectionRelation,
+          id: "6529NM-REL-COLLECTION-DUPLICATE",
+        },
+        accessionRelation,
+      ])
+    ).toBe(false);
     expect(
       isRelationGatedCollectionMember(
         {
@@ -668,6 +709,27 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
           },
         },
         [collectionRelation, accessionRelation]
+      )
+    ).toBe(false);
+    expect(
+      isRelationGatedCollectionMember(
+        {
+          ...work,
+          id: "6529NM-W-0008",
+          profile: {
+            work_lifecycle_status: "accessioned",
+            accession_entity_ids: [],
+            collection_membership: {
+              status: "not_in_collection",
+              collection_entity_id: "6529NM-C-0001",
+              accession_entity_ids: [],
+            },
+          },
+        },
+        [
+          { ...collectionRelation, targetEntityId: "6529NM-W-0008" },
+          { ...accessionRelation, targetEntityId: "6529NM-W-0008" },
+        ]
       )
     ).toBe(false);
   });

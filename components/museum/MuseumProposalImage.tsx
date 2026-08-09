@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { MuseumManagedImage } from "./MuseumManagedImage";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -39,6 +39,12 @@ export function MuseumProposalImage({
   const [mediaStatus, setMediaStatus] = useState<
     "idle" | "loading" | "revealed" | "error"
   >(requiresIntent ? "idle" : "loading");
+  const focusOnRevealRef = useRef(false);
+  const focusRevealedMedia = useCallback((node: HTMLDivElement | null) => {
+    if (node === null || !focusOnRevealRef.current) return;
+    focusOnRevealRef.current = false;
+    node.focus();
+  }, []);
 
   if (!revealed) {
     let statusMessage: string | null = null;
@@ -55,6 +61,7 @@ export function MuseumProposalImage({
         <button
           type="button"
           onClick={() => {
+            focusOnRevealRef.current = true;
             setMediaStatus("loading");
             setRevealed(true);
           }}
@@ -80,7 +87,12 @@ export function MuseumProposalImage({
     statusMessage = t(DEFAULT_LOCALE, "museum.network.media.revealed");
   }
   return (
-    <>
+    <div
+      ref={focusRevealedMedia}
+      tabIndex={-1}
+      aria-label={statusMessage}
+      className="tw-outline-none"
+    >
       <span className="tw-sr-only" aria-live="polite">
         {statusMessage}
       </span>
@@ -100,6 +112,6 @@ export function MuseumProposalImage({
           : { sourceHref, sourceLabel })}
         onStatusChange={setMediaStatus}
       />
-    </>
+    </div>
   );
 }

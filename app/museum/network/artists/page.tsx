@@ -13,10 +13,13 @@ import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { museumArtistHref } from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.artists.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.artists.description"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.artists.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.artists.description"),
+  }),
+  alternates: { canonical: "/museum/network/artists" },
+};
 
 function relationshipLine(
   works: readonly {

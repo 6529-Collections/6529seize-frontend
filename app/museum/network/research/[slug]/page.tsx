@@ -10,7 +10,10 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { buildMuseumEntityContext } from "@/lib/museum/publication/ia";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
-import { museumResearchHref } from "@/lib/museum/publication/routes";
+import {
+  museumResearchHref,
+  museumWorkHrefIndex,
+} from "@/lib/museum/publication/routes";
 import {
   buildMuseumResearchIndex,
   type MuseumResearchIndexEntry,
@@ -39,12 +42,15 @@ export async function generateMetadata({
 }: MuseumResearchDetailProps): Promise<Metadata> {
   const { slug } = await params;
   const found = await findEntry(slug);
-  return getAppMetadata({
+  const metadata = getAppMetadata({
     title:
       found?.entry.title ??
       t(DEFAULT_LOCALE, "museum.network.research.indexTitle"),
     description: t(DEFAULT_LOCALE, "museum.network.research.indexDescription"),
   });
+  return found === null
+    ? metadata
+    : { ...metadata, alternates: { canonical: museumResearchHref(found.entry.slug) } };
 }
 
 export default async function MuseumResearchDetailPage({
@@ -54,6 +60,7 @@ export default async function MuseumResearchDetailPage({
   const found = await findEntry(slug);
   if (found === null) notFound();
   const { entry, publication } = found;
+  const workHrefs = museumWorkHrefIndex(publication);
   const context = buildMuseumEntityContext({
     kind: "research",
     id: entry.id,
@@ -107,6 +114,7 @@ export default async function MuseumResearchDetailPage({
           embeddedDocument
           sourceCommit={publication.identity.commit}
           sourcePath={entry.document.sourcePath}
+          workHrefs={workHrefs}
         >
           {entry.document.markdown}
         </MuseumMarkdown>

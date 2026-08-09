@@ -8,10 +8,13 @@ import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { museumOrganizationHref } from "@/lib/museum/publication/routes";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.organizations.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.organizations.description"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.organizations.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.organizations.description"),
+  }),
+  alternates: { canonical: "/museum/network/organizations" },
+};
 
 export default async function MuseumOrganizationsPage() {
   const publicationState = await getMuseumPublicationState();

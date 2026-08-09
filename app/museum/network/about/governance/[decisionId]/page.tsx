@@ -14,6 +14,7 @@ import { getMuseumView } from "@/lib/museum/normalize";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
 import {
   isAdoptedGovernanceEffect,
+  museumSlug,
   museumSlugMatches,
 } from "@/lib/museum/presentation";
 
@@ -33,13 +34,21 @@ export async function generateMetadata({
 }: GovernanceDetailProps): Promise<Metadata> {
   const { decisionId } = await params;
   const decision = await findDecision(decisionId);
-  return getAppMetadata({
+  const metadata = getAppMetadata({
     title:
       decision?.title ?? t(DEFAULT_LOCALE, "museum.network.governance.title"),
     description:
       decision?.governanceEffect ??
       t(DEFAULT_LOCALE, "museum.network.governance.description"),
   });
+  return decision === undefined || museumSlug(decision.decisionId) !== decisionId
+    ? metadata
+    : {
+        ...metadata,
+        alternates: {
+          canonical: `/museum/network/about/governance/${encodeURIComponent(museumSlug(decision.decisionId))}`,
+        },
+      };
 }
 
 export default async function MuseumAboutGovernanceDetailPage({

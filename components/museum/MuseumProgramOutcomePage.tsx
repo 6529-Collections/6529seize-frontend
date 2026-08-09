@@ -21,9 +21,7 @@ export function MuseumProgramOutcomePage({
   const programHref =
     outcome.programId === KEYS_AND_GATES_PROGRAM_ID
       ? "/museum/network/acquisitions/keys-and-gates"
-      : `/museum/network/programs/${encodeURIComponent(
-          outcome.programId ?? KEYS_AND_GATES_PROGRAM_ID
-        )}`;
+      : null;
   const sourceHref = buildImmutableMuseumBlobUrl(
     sourceCommit,
     outcome.sourcePath
@@ -31,17 +29,19 @@ export function MuseumProgramOutcomePage({
 
   return (
     <article className="tw-min-w-0">
-      <Link
-        href={programHref}
-        className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-      >
-        {t(
-          DEFAULT_LOCALE,
-          isKeysAndGates
-            ? "museum.network.objects.backToKeysAndGates"
-            : "museum.network.objects.backToProgram"
-        )}
-      </Link>
+      {programHref === null ? null : (
+        <Link
+          href={programHref}
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {t(
+            DEFAULT_LOCALE,
+            isKeysAndGates
+              ? "museum.network.objects.backToKeysAndGates"
+              : "museum.network.objects.backToProgram"
+          )}
+        </Link>
+      )}
 
       <header className="tw-mb-8 tw-mt-6">
         <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-primary-300">

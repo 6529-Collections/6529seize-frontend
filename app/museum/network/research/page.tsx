@@ -14,10 +14,13 @@ import { museumResearchHref } from "@/lib/museum/publication/routes";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { museumDocumentKindLabelKey } from "@/lib/museum/publication/documentLabels";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.research.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.research.description"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.research.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.research.description"),
+  }),
+  alternates: { canonical: "/museum/network/research" },
+};
 
 export type MuseumResearchGroup = "art" | "practice" | "methods";
 

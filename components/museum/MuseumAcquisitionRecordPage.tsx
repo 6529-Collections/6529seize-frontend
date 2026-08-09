@@ -16,8 +16,9 @@ import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import {
   museumAcquisitionProgramHref,
   museumAcquisitionProgramHrefForSourceId,
-  museumWorkHrefForSourceId,
   museumWorkHref,
+  museumWorkHrefForSourceId,
+  museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import type {
@@ -279,24 +280,22 @@ function MuseumProposalPresentationMedia({
                   "museum.network.acquisitions.presentationRights"
                 )}
               </span>
-              <span className="tw-mt-1 tw-block">
-                {t(
-                  DEFAULT_LOCALE,
-                  "museum.network.acquisitions.presentationSource"
-                )}
-                :{" "}
-                {(() => {
-                  const sourceHref = buildMuseumSignedWaveStormDropUrl(
-                    presentationMedia.source.waveId,
-                    presentationMedia.source.dropId
+              {(() => {
+                const sourceHref = buildMuseumSignedWaveStormDropUrl(
+                  presentationMedia.source.waveId,
+                  presentationMedia.source.dropId
+                );
+                const canOpenPresentation =
+                  presentationMedia.affordances.includes(
+                    "open_upstream_presentation"
                   );
-                  const canOpenPresentation =
-                    presentationMedia.affordances.includes(
-                      "open_upstream_presentation"
-                    );
-                  return sourceHref === null || !canOpenPresentation ? (
-                    presentationMedia.source.sourcePath
-                  ) : (
+                return sourceHref === null || !canOpenPresentation ? null : (
+                  <span className="tw-mt-1 tw-block">
+                    {t(
+                      DEFAULT_LOCALE,
+                      "museum.network.acquisitions.presentationSource"
+                    )}
+                    :{" "}
                     <a
                       href={sourceHref}
                       target="_blank"
@@ -305,9 +304,9 @@ function MuseumProposalPresentationMedia({
                     >
                       {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
                     </a>
-                  );
-                })()}
-              </span>
+                  </span>
+                );
+              })()}
             </figcaption>
           </figure>
         ))}
@@ -385,15 +384,13 @@ function AcquisitionWorkFigure({
                 "museum.network.acquisitions.presentationRights"
               )}
             </span>
-            <span className="tw-mt-1 tw-block">
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.acquisitions.presentationSource"
-              )}
-              :{" "}
-              {presentationSourceHref === null || !canOpenPresentation ? (
-                work.presentationMedia.source.sourcePath
-              ) : (
+            {presentationSourceHref === null || !canOpenPresentation ? null : (
+              <span className="tw-mt-1 tw-block">
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.acquisitions.presentationSource"
+                )}
+                :{" "}
                 <a
                   href={presentationSourceHref}
                   target="_blank"
@@ -402,8 +399,8 @@ function AcquisitionWorkFigure({
                 >
                   {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
                 </a>
-              )}
-            </span>
+              </span>
+            )}
           </div>
         ) : null}
         {work.meta ? (
@@ -506,6 +503,7 @@ export function MuseumAcquisitionRecordPage({
   const acquisitionDocuments = publication.documents.filter((document) =>
     acquisition.sourceDocumentIds.includes(document.id)
   );
+  const workHrefs = museumWorkHrefIndex(publication, view);
   const workCards = acquisitionWorkCards(publication, acquisition, view);
   const coveredPresentationIds = new Set(
     workCards.flatMap((work) =>
@@ -554,6 +552,33 @@ export function MuseumAcquisitionRecordPage({
           {acquisition.thesis}
         </p>
       </header>
+
+      {workCards.length > 0 ? (
+        <section className="tw-mt-12" aria-labelledby="acquisition-works-title">
+          <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
+            <h2
+              id="acquisition-works-title"
+              className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
+            </h2>
+            <p className="tw-m-0 tw-text-sm tw-text-iron-500">
+              {formatInteger(DEFAULT_LOCALE, workCards.length)}
+            </p>
+          </div>
+          <div className="tw-mt-6 tw-grid tw-gap-5 md:tw-grid-cols-2 xl:tw-grid-cols-3">
+            {workCards.map((work, index) => (
+              <AcquisitionWorkFigure
+                key={work.id}
+                work={work}
+                eager={index === 0}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <MuseumProposalPresentationMedia media={additionalPresentationMedia} />
 
       <MuseumEntityContext
         context={context}
@@ -621,33 +646,6 @@ export function MuseumAcquisitionRecordPage({
         </div>
       </section>
 
-      {workCards.length > 0 ? (
-        <section className="tw-mt-12" aria-labelledby="acquisition-works-title">
-          <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
-            <h2
-              id="acquisition-works-title"
-              className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-            >
-              {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
-            </h2>
-            <p className="tw-m-0 tw-text-sm tw-text-iron-500">
-              {formatInteger(DEFAULT_LOCALE, workCards.length)}
-            </p>
-          </div>
-          <div className="tw-mt-6 tw-grid tw-gap-5 md:tw-grid-cols-2 xl:tw-grid-cols-3">
-            {workCards.map((work, index) => (
-              <AcquisitionWorkFigure
-                key={work.id}
-                work={work}
-                eager={index === 0}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <MuseumProposalPresentationMedia media={additionalPresentationMedia} />
-
       {acquisitionDocuments.map((document) => (
         <section
           key={document.id}
@@ -676,6 +674,7 @@ export function MuseumAcquisitionRecordPage({
               embeddedDocument
               sourceCommit={sourceCommit}
               sourcePath={document.sourcePath}
+              workHrefs={workHrefs}
             >
               {document.markdown}
             </MuseumMarkdown>

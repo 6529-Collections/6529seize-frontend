@@ -12,7 +12,6 @@ import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import {
   createMuseumLocalFixtureFetch,
   readMuseumLocalFixtureVisitorPaths,
-  qualifyLocalReadOnlyDocument,
 } from "@/lib/museum/publication/localFixture";
 import { museumWorkHrefForSourceId } from "@/lib/museum/publication/routes";
 import { buildMuseumPageSourceCatalog } from "@/lib/museum/publication/pageSources";
@@ -22,9 +21,9 @@ import type {
   MuseumSourceDocument,
 } from "@/lib/museum/publication/types";
 
-// Reviewed B is exercised only through the explicit read-only fixture.
+// Reviewed B3 is exercised only through the explicit read-only fixture.
 // Production remains catalog-bound until canonical C is published.
-const WP1_SOURCE_COMMIT = "311ae4281893f404472b8f7ba94454a57a2cd572";
+const WP1_SOURCE_COMMIT = "bf517353ef861e91f5137908daca514b81578b4d";
 const SOURCE_ROOT = process.env["MUSEUM_WP1_SOURCE_ROOT"];
 const LOCAL_FIXTURE_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"] ??
@@ -68,9 +67,9 @@ function readSourceFixture(): SourceFixture | null {
     if (
       manifest.entries.length !== 776 ||
       manifest.manifest_sha256 !==
-        "sha256:fb96e0391a7b7d11a7ea8226cc3f4f98044a92c49c51d6ac6ac337239d35cac3" ||
+        "sha256:8c8a2d453c746107210e4716ce340f599833738e689bec05e7c4f12c8c0eeb48" ||
       manifest.manifest_commitment?.digest !==
-        "0xdc719e5bbed0906ba69dd8ea30047fbe44bc86ea7e1f12116ff6b84eb3886e9e"
+        "0xeb8f78dae7a87fb51c395031f82471a743524ab8ec2a2a679d48dc5c85cb2cf5"
     ) {
       throw new Error("wp1_source_manifest_commitment_mismatch");
     }
@@ -127,18 +126,6 @@ function readSourceFixture(): SourceFixture | null {
   };
 }
 
-function qualifyIncompleteInventoryFixture(fixture: SourceFixture): SourceFixture {
-  return {
-    ...fixture,
-    documents: new Map(
-      [...fixture.documents].map(([path, document]) => [
-        path,
-        qualifyLocalReadOnlyDocument(document, fixture.sourceCommit),
-      ])
-    ),
-  };
-}
-
 function emptyPublication(fixture: SourceFixture): MuseumPublication {
   return {
     identity: {
@@ -163,10 +150,31 @@ function emptyPublication(fixture: SourceFixture): MuseumPublication {
   };
 }
 
+function mutateIdentityInventory(
+  fixture: SourceFixture,
+  mutate: (inventory: Record<string, unknown>) => void
+): SourceFixture {
+  const inventory = fixture.documents.get(
+    "schemas/public-entity-identity-inventory.json"
+  );
+  if (inventory === undefined) {
+    throw new Error("wp1_identity_inventory_missing");
+  }
+  const value = JSON.parse(inventory.text) as Record<string, unknown>;
+  mutate(value);
+  return {
+    ...fixture,
+    documents: new Map(fixture.documents).set(inventory.path, {
+      ...inventory,
+      text: JSON.stringify(value),
+    }),
+  };
+}
+
 describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
   const fixture = readSourceFixture();
 
-  it("fails closed for B's incomplete identity inventory and projects only the explicit read-only fixture", () => {
+  it("accepts B3's complete identity inventory through the explicit read-only fixture", () => {
     if (fixture === null) {
       return;
     }
@@ -202,18 +210,10 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       const expected = process.env[variable];
       if (expected !== undefined) expect(String(actual)).toBe(expected);
     }
-    expect(() =>
-      parseMuseumPublicEntityGraph(
-        fixture.documents,
-        fixture.declaredPaths,
-        fixture.sourceCommit
-      )
-    ).toThrow("public_entity_graph_inventory_entity_missing");
-    const qualifiedFixture = qualifyIncompleteInventoryFixture(fixture);
     const graph = parseMuseumPublicEntityGraph(
-      qualifiedFixture.documents,
-      qualifiedFixture.declaredPaths,
-      qualifiedFixture.sourceCommit
+      fixture.documents,
+      fixture.declaredPaths,
+      fixture.sourceCommit
     );
     expect(graph).not.toBeNull();
     if (graph === null) return;
@@ -231,7 +231,7 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     const publication = applyMuseumPublicEntityGraph(
       emptyPublication(fixture),
       graph,
-      qualifiedFixture.documents
+      fixture.documents
     );
     expect(publication.works).toHaveLength(28);
     expect(publication.artists).toHaveLength(21);
@@ -381,7 +381,68 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     ).toBe(true);
   });
 
-  it("assembles the qualified local browser fixture through the source adapter", async () => {
+  it.each([
+    [
+      "an identity category",
+      (inventory: Record<string, unknown>) => {
+        const bindings = inventory["identity_bindings"] as Record<
+          string,
+          unknown
+        >;
+        delete bindings["WORK_LIFECYCLE_OBSERVATION"];
+      },
+      "public_entity_graph_inventory_bindings",
+    ],
+    [
+      "a required entity binding",
+      (inventory: Record<string, unknown>) => {
+        const bindings = inventory["identity_bindings"] as Record<
+          string,
+          unknown[]
+        >;
+        bindings["RESEARCH_PUBLICATION"] = (
+          bindings["RESEARCH_PUBLICATION"] ?? []
+        ).filter(
+          (binding) =>
+            (binding as { entity_id?: unknown }).entity_id !==
+            "6529NM-RP-0001"
+        );
+      },
+      "public_entity_graph_inventory_bindings",
+    ],
+    [
+      "a required public slug",
+      (inventory: Record<string, unknown>) => {
+        inventory["public_slug_inventory"] = (
+          inventory["public_slug_inventory"] as unknown[]
+        ).filter(
+          (entry) =>
+            (entry as { entity_id?: unknown }).entity_id !==
+            "6529NM-RP-0001"
+        );
+      },
+      "public_entity_graph_inventory_slugs",
+    ],
+    [
+      "an unknown inventory version",
+      (inventory: Record<string, unknown>) => {
+        inventory["inventory_version"] = "1.4.1";
+      },
+      "public_entity_graph_inventory_version",
+    ],
+  ] as const)("rejects B3 when it omits %s", (_label, mutate, errorCode) => {
+    if (fixture === null) return;
+    const mutated = mutateIdentityInventory(fixture, mutate);
+    expect(() =>
+      parseMuseumPublicEntityGraph(
+        mutated.documents,
+        mutated.declaredPaths,
+        mutated.sourceCommit
+      )
+    ).toThrow(errorCode);
+  });
+
+  it("assembles the exact reviewed B3 fixture through the source adapter", async () => {
     if (SOURCE_ROOT === undefined) return;
     const source = new GitHubMuseumPublicationSource({
       ref: LOCAL_FIXTURE_SOURCE_COMMIT,
@@ -393,12 +454,10 @@ describe("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       allowUncataloguedTestFixture: true,
       localFixtureAcceptedPaths:
         readMuseumLocalFixtureVisitorPaths(SOURCE_ROOT),
-      localFixtureDocumentTransform: (document) =>
-        qualifyLocalReadOnlyDocument(document, LOCAL_FIXTURE_SOURCE_COMMIT),
     });
     const result = await source.load();
     if (result.status !== "current") {
-      throw new Error(`candidate_a_source:${result.errorCode ?? "unknown"}`);
+      throw new Error(`reviewed_b3_source:${result.errorCode ?? "unknown"}`);
     }
     const pageSources = buildMuseumPageSourceCatalog(result.publication);
     const homeSource = pageSources.find(

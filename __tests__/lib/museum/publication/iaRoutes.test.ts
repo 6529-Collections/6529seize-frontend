@@ -11,6 +11,7 @@ import {
   museumAcquisitionHrefForLegacyRoute,
   museumAcquisitionHrefForSourceId,
   museumAcquisitionProgramHrefForSourceId,
+  museumWorkHref,
   museumWorkHrefForSourceId,
   resolveMuseumAcquisitionSlug,
 } from "@/lib/museum/publication/routes";
@@ -271,6 +272,22 @@ describe("Museum IA route boundaries", () => {
     expect(
       buildMuseumWorkContext(publication, "legacy-object-id", null)
     ).toBeNull();
+  });
+
+  it("serializes only canonical Work entity IDs", () => {
+    expect(museumWorkHref("6529NM-W-0001")).toBe(
+      "/museum/network/works/6529NM-W-0001"
+    );
+    for (const sourceAlias of [
+      "6529NM.2026.001.01",
+      "6529NM-AP-01-OUT-001",
+      "6529NM-PG-2026-001.OBJ-001",
+      "A Work Title",
+    ]) {
+      expect(() => museumWorkHref(sourceAlias)).toThrow(
+        "museum_work_id_not_canonical"
+      );
+    }
   });
 
   it("keeps the permanent Collection alias narrower than generic Work aliases", () => {

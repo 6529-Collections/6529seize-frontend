@@ -217,15 +217,13 @@ function AcquisitionPreview({
               "museum.network.acquisitions.presentationRights"
             )}
           </span>
-          <span className="tw-mt-1 tw-block">
-            {t(
-              DEFAULT_LOCALE,
-              "museum.network.acquisitions.presentationSource"
-            )}
-            :{" "}
-            {sourceHref === null || !canOpenPresentation ? (
-              proposal.source.sourcePath
-            ) : (
+          {sourceHref === null || !canOpenPresentation ? null : (
+            <span className="tw-mt-1 tw-block">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.presentationSource"
+              )}
+              :{" "}
               <a
                 href={sourceHref}
                 target="_blank"
@@ -237,8 +235,8 @@ function AcquisitionPreview({
                   "museum.network.acquisitions.openPresentation"
                 )}
               </a>
-            )}
-          </span>
+            </span>
+          )}
         </figcaption>
       </figure>
     );
@@ -320,6 +318,9 @@ function AcquisitionEditorialRow({
           {acquisition.thesis}
         </p>
         <p className="tw-m-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-500">
+          {statusLabel(acquisition.status)}
+        </p>
+        <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-500">
           {acquisitionMethodLabel(
             acquisition.acquisitionMethod,
             acquisition.programId
@@ -328,8 +329,7 @@ function AcquisitionEditorialRow({
           {t(
             DEFAULT_LOCALE,
             "museum.network.acquisitions.works"
-          ).toLocaleLowerCase()}{" "}
-          · {statusLabel(acquisition.status)}
+          ).toLocaleLowerCase()}
         </p>
         <Link
           href={museumAcquisitionHref(acquisition.slug)}

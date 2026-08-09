@@ -77,19 +77,16 @@ describe("MuseumSourceContribution", () => {
       "href",
       "https://github.com/6529-Collections/6529networkmuseum/blob/main/CONTRIBUTING.md"
     );
-    expect(
-      screen.getByRole("link", {
-        name: /Structured record: exact source.*objects\/6529NM\.2026\.001\.01\.json/u,
-      })
-    ).toHaveAttribute(
+    const structuredRecord = screen.getByRole("link", {
+      name: "Structured record",
+    });
+    expect(structuredRecord).toHaveAttribute(
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json`
     );
     expect(screen.getByText("Related works and context")).toBeInTheDocument();
-    expect(screen.getByText("Structured record")).toHaveAttribute(
-      "title",
-      "records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json"
-    );
+    expect(structuredRecord).not.toHaveAttribute("title");
+    expect(structuredRecord).not.toHaveAttribute("aria-label");
   });
 
   it("keeps the exact stale commit visible", () => {
@@ -150,9 +147,7 @@ describe("MuseumSourceContribution", () => {
         screen.queryByRole("link", { name: "Propose an edit" })
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByRole("link", {
-          name: /Structured record: exact source.*objects\/6529NM\.2026\.001\.01\.json/u,
-        })
+        screen.queryByRole("link", { name: "Structured record" })
       ).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Contributor guide" })

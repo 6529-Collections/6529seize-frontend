@@ -39,6 +39,7 @@ import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
 import { MuseumProgramImage } from "./MuseumProgramImage";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
+import { museumWorkHrefIndex } from "@/lib/museum/publication/routes";
 
 export async function getMuseumObjectMetadata(
   objectId: string
@@ -219,6 +220,7 @@ function MuseumCanonicalWorkRecordPage({
     return document === undefined ? [] : [document];
   });
   const documents = selectMuseumPublicWorkDocuments(work, projectedDocuments);
+  const workHrefs = museumWorkHrefIndex(publication, view);
   const primaryCredit =
     work.media[0]?.credit.creditLine ??
     work.presentationMedia?.[0]?.credit.creditLine;
@@ -328,15 +330,13 @@ function MuseumCanonicalWorkRecordPage({
                         "museum.network.acquisitions.presentationRights"
                       )}
                     </span>
-                    <span className="tw-mt-1 tw-block">
-                      {t(
-                        DEFAULT_LOCALE,
-                        "museum.network.acquisitions.presentationSource"
-                      )}
-                      :{" "}
-                      {sourceHref === null || !canOpenPresentation ? (
-                        media.source.sourcePath
-                      ) : (
+                    {sourceHref === null || !canOpenPresentation ? null : (
+                      <span className="tw-mt-1 tw-block">
+                        {t(
+                          DEFAULT_LOCALE,
+                          "museum.network.acquisitions.presentationSource"
+                        )}
+                        :{" "}
                         <a
                           href={sourceHref}
                           target="_blank"
@@ -348,8 +348,8 @@ function MuseumCanonicalWorkRecordPage({
                             "museum.network.acquisitions.openPresentation"
                           )}
                         </a>
-                      )}
-                    </span>
+                      </span>
+                    )}
                   </figcaption>
                 </figure>
               );
@@ -398,6 +398,7 @@ function MuseumCanonicalWorkRecordPage({
                   embeddedDocument={document.kind === "object_entry"}
                   sourceCommit={publication.identity.commit}
                   sourcePath={document.sourcePath}
+                  workHrefs={workHrefs}
                 >
                   {document.markdown}
                 </MuseumMarkdown>
@@ -486,6 +487,7 @@ export async function MuseumObjectPage({
     return <MuseumPublicationUnavailable />;
   }
   const view = viewInput === undefined ? await getMuseumView() : viewInput;
+  const workHrefs = museumWorkHrefIndex(publication, view);
   const publicWork = publication.works?.find((work) => work.id === objectId);
   if (publicWork !== undefined) {
     return (
@@ -588,6 +590,7 @@ export async function MuseumObjectPage({
               embeddedDocument
               sourceCommit={publication.identity.commit}
               sourcePath={objectDocument.sourcePath}
+              workHrefs={workHrefs}
             >
               {objectDocument.markdown}
             </MuseumMarkdown>

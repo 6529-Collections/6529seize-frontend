@@ -1,9 +1,7 @@
 import { readFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
-import type { MuseumSourceDocument } from "./types";
 import { isExactGitCommit } from "./security";
 
-const INVENTORY_PATH = "schemas/public-entity-identity-inventory.json";
 const VISITOR_BUNDLE_PATH = "records/publication/visitor-corpus-bundle-v1.json";
 
 function requestUrl(input: RequestInfo | URL): string {
@@ -13,8 +11,8 @@ function requestUrl(input: RequestInfo | URL): string {
   throw new Error("publication_local_fixture_url");
 }
 
-function unknownArray(value: unknown): readonly unknown[] {
-  return Array.isArray(value) ? value : [];
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function localSourcePathFromUrl(
@@ -139,100 +137,4 @@ export function createMuseumLocalFixtureFetch(
       } as unknown as Response);
     }
   };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function qualifyInventory(
-  document: MuseumSourceDocument
-): MuseumSourceDocument {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(document.text) as unknown;
-  } catch {
-    throw new Error("publication_local_fixture_inventory_json");
-  }
-  if (!isRecord(parsed)) throw new Error("publication_local_fixture_inventory");
-  const patterns = isRecord(parsed["entity_id_patterns"])
-    ? parsed["entity_id_patterns"]
-    : {};
-  const bindings = isRecord(parsed["identity_bindings"])
-    ? parsed["identity_bindings"]
-    : {};
-  parsed["entity_id_patterns"] = {
-    ...patterns,
-    RESEARCH_PUBLICATION: "^6529NM-RP-[0-9]{4}$",
-    MEDIA_REFERENCE: "^6529NM-MED-[0-9]{4}$",
-  };
-  parsed["identity_bindings"] = {
-    ...bindings,
-    INSTITUTION: [
-      ...unknownArray(bindings["INSTITUTION"]),
-      {
-        source_key: "local-qualification:institution",
-        entity_id: "6529NM-I-0001",
-      },
-    ],
-    COLLECTION: [
-      ...unknownArray(bindings["COLLECTION"]),
-      {
-        source_key: "local-qualification:collection",
-        entity_id: "6529NM-C-0001",
-      },
-    ],
-    ACCESSION: [
-      ...unknownArray(bindings["ACCESSION"]),
-      {
-        source_key: "local-qualification:accession",
-        entity_id: "6529NM-ACC-ENT-0001",
-      },
-    ],
-    RESEARCH_PUBLICATION: [
-      ...unknownArray(bindings["RESEARCH_PUBLICATION"]),
-      {
-        source_key: "local-qualification:research-1",
-        entity_id: "6529NM-RP-0001",
-      },
-      {
-        source_key: "local-qualification:research-2",
-        entity_id: "6529NM-RP-0002",
-      },
-      {
-        source_key: "local-qualification:research-3",
-        entity_id: "6529NM-RP-0003",
-      },
-    ],
-  };
-  const slugInventory = [...unknownArray(parsed["public_slug_inventory"])];
-  if (
-    !slugInventory.some(
-      (entry) => isRecord(entry) && entry["entity_id"] === "6529NM-RP-0001"
-    )
-  ) {
-    slugInventory.push({
-      entity_id: "6529NM-RP-0001",
-      entity_type: "RESEARCH_PUBLICATION",
-      preferred_label: "The System in Seven States",
-      public_slug: "the-system-in-seven-states",
-      canonical_route: "/museum/network/research/the-system-in-seven-states",
-    });
-  }
-  parsed["public_slug_inventory"] = slugInventory;
-  return { ...document, text: JSON.stringify(parsed) };
-}
-
-/**
- * The explicit read-only fixture may complete the four inventory declarations
- * missing from reviewed B. Production loading never uses this transformer and
- * therefore remains fail-closed until a catalog pins a complete inventory.
- */
-export function qualifyLocalReadOnlyDocument(
-  document: MuseumSourceDocument,
-  _sourceCommit: string
-): MuseumSourceDocument {
-  return document.path === INVENTORY_PATH
-    ? qualifyInventory(document)
-    : document;
 }

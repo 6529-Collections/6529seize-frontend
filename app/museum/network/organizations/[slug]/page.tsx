@@ -26,12 +26,18 @@ export async function generateMetadata({
   const organization = (
     await getMuseumPublicationState()
   ).publication?.organizations?.find((candidate) => candidate.slug === slug);
-  return getAppMetadata({
+  const metadata = getAppMetadata({
     title:
       organization?.preferredName ??
       t(DEFAULT_LOCALE, "museum.network.organizations.title"),
     description: t(DEFAULT_LOCALE, "museum.network.organizations.description"),
   });
+  return organization === undefined
+    ? metadata
+    : {
+        ...metadata,
+        alternates: { canonical: museumOrganizationHref(organization.slug) },
+      };
 }
 
 export default async function MuseumOrganizationPage({

@@ -76,7 +76,21 @@ const LEGACY_MUSEUM_PREFIXES = [
   "/museum/network/rights",
 ] as const;
 
-const MUSEUM_CANONICAL_PATHS = [
+const MUSEUM_FIXED_DATA_ARCHITECTURE_PATHS = [
+  "spectrum",
+  "cidoc-crm",
+  "lido",
+  "premis",
+  "prov-o",
+  "getty-aat-ulan",
+  "iiif",
+  "c2pa",
+  "bagit",
+  "ocfl",
+  "caip-19",
+] as const;
+
+export const MUSEUM_STATIC_CANONICAL_PATHS = [
   "/museum/network",
   "/museum/network/collection",
   "/museum/network/artists",
@@ -88,10 +102,18 @@ const MUSEUM_CANONICAL_PATHS = [
   "/museum/network/organizations",
   "/museum/network/acquisition-programs",
   "/museum/network/research/institutional-practice",
+  "/museum/network/research/institutional-practice/adjacent-practice",
+  "/museum/network/research/institutional-practice/sources",
   "/museum/network/research/scholarship-and-writing",
   "/museum/network/research/sources-and-chronology",
   "/museum/network/research/data-architecture",
+  ...MUSEUM_FIXED_DATA_ARCHITECTURE_PATHS.map(
+    (slug) => `/museum/network/research/data-architecture/${slug}`
+  ),
+  "/museum/network/research/data-architecture/casey-reas-implementation",
   "/museum/network/research/rights",
+  "/museum/network/research/rights/artists",
+  "/museum/network/research/rights/collectors",
   "/museum/network/about/governance",
 ] as const;
 
@@ -351,7 +373,7 @@ function getAboutPaths(): ISitemapField[] {
 }
 
 function getMuseumCanonicalPaths(): ISitemapField[] {
-  return MUSEUM_CANONICAL_PATHS.map((path) =>
+  return MUSEUM_STATIC_CANONICAL_PATHS.map((path) =>
     createSitemapPath(path, { changefreq: "monthly", priority: 0.6 })
   );
 }

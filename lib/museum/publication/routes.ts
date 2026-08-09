@@ -28,12 +28,15 @@ export function museumAcquisitionProgramsHref(): string {
   return "/museum/network/acquisition-programs";
 }
 
-export function museumWorkHref(objectId: string): string {
-  return `/museum/network/works/${encodeURIComponent(objectId)}`;
-}
-
 export function isMuseumCanonicalWorkId(value: string): boolean {
   return /^6529NM-W-[0-9]{4}$/u.test(value);
+}
+
+export function museumWorkHref(workId: string): string {
+  if (!isMuseumCanonicalWorkId(workId)) {
+    throw new Error("museum_work_id_not_canonical");
+  }
+  return `/museum/network/works/${encodeURIComponent(workId)}`;
 }
 
 function routeAliasesForPublication(
@@ -176,6 +179,24 @@ export function museumWorkHrefForSourceId(
       "/museum/network/collection/",
     ],
     "/museum/network/works/"
+  );
+}
+
+export function museumWorkHrefIndex(
+  publication: MuseumPublication,
+  view: MuseumView | null = null
+): Readonly<Record<string, string>> {
+  const sourceIds = new Set([
+    ...(publication.works?.map((work) => work.id) ?? []),
+    ...(publication.workAliases?.map((alias) => alias.sourceObjectId) ?? []),
+    ...publication.artworks.map((artwork) => artwork.id),
+    ...(view?.objects.map((object) => object.objectId) ?? []),
+  ]);
+  return Object.fromEntries(
+    [...sourceIds].flatMap((sourceId) => {
+      const href = museumWorkHrefForSourceId(publication, sourceId, view);
+      return href === null ? [] : [[sourceId, href]];
+    })
   );
 }
 

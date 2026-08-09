@@ -23,6 +23,7 @@ import {
   museumApprovedCollectionSlug,
   museumWorkHref,
   museumWorkHrefForSourceId,
+  museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
 import type { MuseumPublicWork } from "@/lib/museum/publication/types";
 import type { MuseumProgram, MuseumView } from "@/lib/museum/types";
@@ -83,7 +84,7 @@ export async function generateMetadata({
       (program) =>
         program.programId === slug || program.programId === "6529NM-AP-01"
     ) ?? legacyGiftAcquisitionsProgram(view, slug);
-  return getAppMetadata({
+  const metadata = getAppMetadata({
     title:
       typed?.title ??
       legacy?.title ??
@@ -93,6 +94,12 @@ export async function generateMetadata({
       "museum.network.acquisitionPrograms.description"
     ),
   });
+  return typed?.slug !== slug
+    ? metadata
+    : {
+        ...metadata,
+        alternates: { canonical: museumAcquisitionProgramHref(typed.slug) },
+      };
 }
 
 function publicWorkMedia(work: MuseumPublicWork) {
@@ -188,6 +195,7 @@ export default async function MuseumAcquisitionProgramPage({
         );
   const approvedCollections =
     legacy?.programId === "AP-GIFT-01" ? (view?.approvedCollections ?? []) : [];
+  const workHrefs = museumWorkHrefIndex(publication, view);
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -373,6 +381,7 @@ export default async function MuseumAcquisitionProgramPage({
               embeddedDocument
               sourceCommit={publication.identity.commit}
               sourcePath={document.sourcePath}
+              workHrefs={workHrefs}
             >
               {document.markdown}
             </MuseumMarkdown>

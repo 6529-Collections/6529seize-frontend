@@ -32,9 +32,10 @@ export function parseMuseumIdentityInventory(
 ): MuseumPublicIdentityInventory {
   assertInventoryDocument(document);
   const inventory = parseInventoryJson(document);
-  assertInventoryVersion(inventory);
+  const inventoryVersion = assertInventoryVersion(inventory);
   const byId = new Map(entities.map((entity) => [entity.id, entity] as const));
   assertEntityPatterns(inventory, entities);
+  assertCompleteIdentityBindings(inventory, entities, inventoryVersion);
   assertInventoryEntityCoverage(inventory, entities);
   const acquisitionAliases = readAcquisitionAliases(inventory, byId);
   const curatedAcquisitionIds = readCuratedAcquisitionIds(inventory, byId);
@@ -84,13 +85,18 @@ function parseInventoryJson(
   return requiredRecord(root, "public_entity_graph_inventory_shape");
 }
 
-function assertInventoryVersion(inventory: Record<string, unknown>): void {
+function assertInventoryVersion(inventory: Record<string, unknown>): string {
   const version = requiredString(
     inventory,
     "inventory_version",
     "public_entity_graph_inventory_version"
   );
-  if (version !== "1.1.0" && version !== "1.2.0" && version !== "1.3.2") {
+  if (
+    version !== "1.1.0" &&
+    version !== "1.2.0" &&
+    version !== "1.3.2" &&
+    version !== "1.4.0"
+  ) {
     throw new Error("public_entity_graph_inventory_version");
   }
   requiredString(
@@ -98,6 +104,103 @@ function assertInventoryVersion(inventory: Record<string, unknown>): void {
     "identity_policy",
     "public_entity_graph_inventory_policy"
   );
+  return version;
+}
+
+const INVENTORY_BINDING_CATEGORIES = [
+  ...(
+    Object.keys(ENTITY_ID_PATTERNS) as MuseumPublicEntityType[]
+  ).filter((type) => ENTITY_ID_PATTERNS[type] !== null),
+  ...(Object.keys(
+    INVENTORY_ONLY_ENTITY_ID_PATTERNS
+  ) as (keyof typeof INVENTORY_ONLY_ENTITY_ID_PATTERNS)[]),
+] as const;
+
+function assertCompleteIdentityBindings(
+  inventory: Record<string, unknown>,
+  entities: readonly MuseumPublicEntityRecord[],
+  inventoryVersion: string
+): void {
+  if (inventoryVersion !== "1.4.0") return;
+  const bindings = requiredRecord(
+    inventory["identity_bindings"],
+    "public_entity_graph_inventory_bindings"
+  );
+  const actualCategories = Object.keys(bindings).sort((left, right) =>
+    left.localeCompare(right)
+  );
+  const expectedCategories = [...INVENTORY_BINDING_CATEGORIES].sort(
+    (left, right) => left.localeCompare(right)
+  );
+  if (!sameIdSet(actualCategories, expectedCategories)) {
+    throw new Error("public_entity_graph_inventory_bindings");
+  }
+  const entitiesById = new Map(
+    entities.map((entity) => [entity.id, entity] as const)
+  );
+  for (const category of INVENTORY_BINDING_CATEGORIES) {
+    assertIdentityBindingCategory(bindings, category, entities, entitiesById);
+  }
+}
+
+function assertIdentityBindingCategory(
+  bindings: Record<string, unknown>,
+  category: (typeof INVENTORY_BINDING_CATEGORIES)[number],
+  entities: readonly MuseumPublicEntityRecord[],
+  entitiesById: ReadonlyMap<string, MuseumPublicEntityRecord>
+): void {
+  const rawBindings = bindings[category];
+  if (!Array.isArray(rawBindings) || rawBindings.length === 0) {
+    throw new Error("public_entity_graph_inventory_bindings");
+  }
+  const ids = new Set<string>();
+  const sourceKeys = new Set<string>();
+  for (const value of rawBindings) {
+    const entry = requiredRecord(
+      value,
+      "public_entity_graph_inventory_bindings"
+    );
+    const sourceKey = requiredString(
+      entry,
+      "source_key",
+      "public_entity_graph_inventory_bindings"
+    );
+    const id = requiredString(
+      entry,
+      "entity_id",
+      "public_entity_graph_inventory_bindings"
+    );
+    assertIdentityBinding(category, id, entitiesById);
+    if (ids.has(id) || sourceKeys.has(sourceKey)) {
+      throw new Error("public_entity_graph_inventory_identity_collision");
+    }
+    ids.add(id);
+    sourceKeys.add(sourceKey);
+  }
+  if (category === "WORK_LIFECYCLE_OBSERVATION") return;
+  const expectedIds = entities
+    .filter((entity) => entity.entityType === category)
+    .map((entity) => entity.id);
+  if (!sameIdSet([...ids], expectedIds)) {
+    throw new Error("public_entity_graph_inventory_bindings");
+  }
+}
+
+function assertIdentityBinding(
+  category: (typeof INVENTORY_BINDING_CATEGORIES)[number],
+  id: string,
+  entitiesById: ReadonlyMap<string, MuseumPublicEntityRecord>
+): void {
+  if (category === "WORK_LIFECYCLE_OBSERVATION") {
+    if (!INVENTORY_ONLY_ENTITY_ID_PATTERNS[category].test(id)) {
+      throw new Error("public_entity_graph_inventory_bindings");
+    }
+    return;
+  }
+  const entity = entitiesById.get(id);
+  if (entity?.entityType !== category || ENTITY_ID_PATTERNS[category] === null) {
+    throw new Error("public_entity_graph_inventory_bindings");
+  }
 }
 
 function declaredInventoryEntityIds(

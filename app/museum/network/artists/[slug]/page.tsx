@@ -24,8 +24,10 @@ import {
   buildMuseumArtistContext,
 } from "@/lib/museum/publication/ia";
 import {
+  museumArtistHref,
   museumWorkHref,
   museumWorkHrefForSourceId,
+  museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 
@@ -41,12 +43,15 @@ export async function generateMetadata({
   const artist = publicationState.publication?.artists.find(
     (item) => item.slug === slug
   );
-  return getAppMetadata({
+  const metadata = getAppMetadata({
     title:
       artist?.preferredName ??
       t(DEFAULT_LOCALE, "museum.network.artists.title"),
     description: t(DEFAULT_LOCALE, "museum.network.artists.description"),
   });
+  return artist === undefined
+    ? metadata
+    : { ...metadata, alternates: { canonical: museumArtistHref(artist.slug) } };
 }
 
 function TypedArtistPage({
@@ -123,6 +128,7 @@ function TypedArtistPage({
     );
     return document === undefined ? [] : [document];
   });
+  const workHrefs = museumWorkHrefIndex(publication);
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -188,6 +194,7 @@ function TypedArtistPage({
                   embeddedDocument
                   sourceCommit={publication.identity.commit}
                   sourcePath={document.sourcePath}
+                  workHrefs={workHrefs}
                 >
                   {document.markdown}
                 </MuseumMarkdown>
@@ -360,6 +367,7 @@ export default async function MuseumArtistPage({
   const projects = publication.projects.filter(
     (project) => project.artistId === artist.id
   );
+  const workHrefs = museumWorkHrefIndex(publication);
 
   return (
     <article>
@@ -455,6 +463,7 @@ export default async function MuseumArtistPage({
             embeddedDocument
             sourceCommit={publication.identity.commit}
             sourcePath={profile.sourcePath}
+            workHrefs={workHrefs}
           >
             {profile.markdown}
           </MuseumMarkdown>

@@ -115,7 +115,10 @@ describe("MuseumProgramOutcomePage", () => {
       screen.queryByText("A Keys and Gates winner")
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Back to program" })
-    ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-02");
+      screen.queryByRole("link", { name: "Back to program" })
+    ).not.toBeInTheDocument();
+    expect(document.querySelector('a[href^="/museum/network/programs/"]')).toBe(
+      null
+    );
   });
 });

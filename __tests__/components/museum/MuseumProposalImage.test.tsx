@@ -48,6 +48,8 @@ describe("MuseumProposalImage", () => {
       name: "Show historical Wave proposal image · loads 16.9 MB",
     });
     fireEvent.click(viewButton);
-    expect(screen.getByRole("img")).toHaveAttribute("src", media.src);
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute("src", media.src);
+    expect(image.parentElement).toHaveFocus();
   });
 });

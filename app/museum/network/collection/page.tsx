@@ -111,10 +111,13 @@ function MuseumAccessionRecords({
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.collection.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.collection.description"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.collection.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.collection.description"),
+  }),
+  alternates: { canonical: "/museum/network/collection" },
+};
 
 export default async function MuseumCollectionPage() {
   const { publicationState } = await getMuseumPublicationBundle();

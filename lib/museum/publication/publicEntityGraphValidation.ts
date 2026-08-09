@@ -146,44 +146,75 @@ function assertRelationReferences(
 ): void {
   const seenRelations = new Set<string>();
   for (const relation of relations) {
-    const source = byId.get(relation.sourceEntityId);
-    const target = byId.get(relation.targetEntityId);
-    if (source === undefined || target === undefined) {
-      throw new Error("public_entity_graph_dangling_relation");
-    }
-    const profile = RELATION_PROFILES[relation.relationType];
-    if (
-      !profile.sources.includes(source.entityType) ||
-      !profile.targets.includes(target.entityType)
-    ) {
-      throw new Error("public_entity_graph_relation_domain");
-    }
-    const key = relationKey(relation);
-    if (seenRelations.has(key)) {
-      throw new Error("public_entity_graph_duplicate_relation");
-    }
-    seenRelations.add(key);
-    if (source.id === target.id) {
-      throw new Error("public_entity_graph_self_relation");
-    }
-    if (
-      relation.relationType === "ORGANIZATION_ORIGINATES_PROJECT" &&
-      (
-        relation.qualifier["role"] !== "originator" ||
-        source.profile["organization_kind"] === "platform"
-      )
-    ) {
-      throw new Error("public_entity_graph_organization_project_role");
-    }
-    if (
-      relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT" &&
-      relation.qualifier["role"] !== "publisher"
-    ) {
-      throw new Error("public_entity_graph_organization_project_role");
-    }
+    const [source, target] = requireRelationEntities(byId, relation);
+    assertRelationDomain(relation, source, target);
+    assertRelationIdentity(relation, source, target, seenRelations);
+    assertOrganizationProjectRole(relation, source);
     if (relation.relationType === "ENTITY_HAS_MEDIA") {
       assertMediaRelation(source, target);
     }
+  }
+}
+
+function requireRelationEntities(
+  byId: ReadonlyMap<string, MuseumPublicEntityRecord>,
+  relation: MuseumPublicRelationRecord
+): readonly [MuseumPublicEntityRecord, MuseumPublicEntityRecord] {
+  const source = byId.get(relation.sourceEntityId);
+  const target = byId.get(relation.targetEntityId);
+  if (source === undefined || target === undefined) {
+    throw new Error("public_entity_graph_dangling_relation");
+  }
+  return [source, target];
+}
+
+function assertRelationDomain(
+  relation: MuseumPublicRelationRecord,
+  source: MuseumPublicEntityRecord,
+  target: MuseumPublicEntityRecord
+): void {
+  const profile = RELATION_PROFILES[relation.relationType];
+  if (
+    !profile.sources.includes(source.entityType) ||
+    !profile.targets.includes(target.entityType)
+  ) {
+    throw new Error("public_entity_graph_relation_domain");
+  }
+}
+
+function assertRelationIdentity(
+  relation: MuseumPublicRelationRecord,
+  source: MuseumPublicEntityRecord,
+  target: MuseumPublicEntityRecord,
+  seenRelations: Set<string>
+): void {
+  const key = relationKey(relation);
+  if (seenRelations.has(key)) {
+    throw new Error("public_entity_graph_duplicate_relation");
+  }
+  seenRelations.add(key);
+  if (source.id === target.id) {
+    throw new Error("public_entity_graph_self_relation");
+  }
+}
+
+function assertOrganizationProjectRole(
+  relation: MuseumPublicRelationRecord,
+  source: MuseumPublicEntityRecord
+): void {
+  const role = relation.qualifier["role"];
+  if (
+    relation.relationType === "ORGANIZATION_ORIGINATES_PROJECT" &&
+    (role !== "originator" ||
+      source.profile["organization_kind"] === "platform")
+  ) {
+    throw new Error("public_entity_graph_organization_project_role");
+  }
+  if (
+    relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT" &&
+    role !== "publisher"
+  ) {
+    throw new Error("public_entity_graph_organization_project_role");
   }
 }
 

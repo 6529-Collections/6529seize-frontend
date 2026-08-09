@@ -66,25 +66,20 @@ function MuseumEntitySource({
     context.sourceCommit === null
       ? null
       : buildImmutableMuseumBlobUrl(context.sourceCommit, sourcePath);
+  if (sourceHref === null) return null;
   return (
     <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-text-sm">
       <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
         {label}
       </span>
-      {sourceHref === null ? (
-        <span className="tw-break-words tw-leading-6 tw-text-iron-400">
-          {sourcePath}
-        </span>
-      ) : (
-        <a
-          href={sourceHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-break-words tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          {label}
-        </a>
-      )}
+      <a
+        href={sourceHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-break-words tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      >
+        {label}
+      </a>
     </div>
   );
 }
@@ -97,7 +92,11 @@ export function MuseumEntityContext({
   const hasStatusAsOf =
     context.statusAsOf !== null && labels.statusAsOf !== undefined;
   const source =
-    context.sourcePath === null || labels.source === undefined
+    context.sourcePath === null ||
+    context.sourceCommit === null ||
+    labels.source === undefined ||
+    buildImmutableMuseumBlobUrl(context.sourceCommit, context.sourcePath) ===
+      null
       ? null
       : { context, label: labels.source };
   if (!hasStatus && !hasStatusAsOf && source === null) return null;

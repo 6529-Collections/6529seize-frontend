@@ -456,15 +456,13 @@ function MuseumAcquisitionStoryMedia({
               "museum.network.acquisitions.presentationRights"
             )}
           </span>
-          <span className="tw-mt-1 tw-block">
-            {t(
-              DEFAULT_LOCALE,
-              "museum.network.acquisitions.presentationSource"
-            )}
-            :{" "}
-            {sourceHref === null || !canOpenPresentation ? (
-              presentation.source.sourcePath
-            ) : (
+          {sourceHref === null || !canOpenPresentation ? null : (
+            <span className="tw-mt-1 tw-block">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.presentationSource"
+              )}
+              :{" "}
               <a
                 href={sourceHref}
                 target="_blank"
@@ -476,8 +474,8 @@ function MuseumAcquisitionStoryMedia({
                   "museum.network.acquisitions.openPresentation"
                 )}
               </a>
-            )}
-          </span>
+            </span>
+          )}
         </figcaption>
       </figure>
     );
