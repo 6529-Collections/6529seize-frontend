@@ -892,6 +892,10 @@ jobs:
       - name: Resolve exact Museum publication for Playwright
         id: museum_publication
         if: matrix.lane == 'playwright-museum'
+        env:
+          # Test-only source qualification. Production and deployment lanes
+          # remain catalog-bound and never consume this candidate pin.
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "adaed1a21f31b15a18703c350a0802fa02602696"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(
@@ -904,8 +908,11 @@ jobs:
           test -z "${extra:-}"
           test "$museum_ref" = "refs/heads/main"
           [[ "$museum_commit" =~ ^[a-f0-9]{40}$ ]]
-          echo "commit=$museum_commit" >> "$GITHUB_OUTPUT"
-          echo "Museum Playwright source: $museum_commit"
+          test_commit="$MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT"
+          [[ "$test_commit" =~ ^[a-f0-9]{40}$ ]]
+          echo "commit=$test_commit" >> "$GITHUB_OUTPUT"
+          echo "Museum moving source main: $museum_commit"
+          echo "Museum Playwright test fixture: $test_commit"
 
       - name: Select fail-closed Museum qualification packs
         id: museum-selection
@@ -1049,6 +1056,7 @@ jobs:
         if: matrix.lane == 'playwright-museum'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-museum"
+          NODE_ENV: "development"
           PLAYWRIGHT_READONLY: "1"
           MUSEUM_PUBLICATION_UNCATALOGUED_TEST_MODE: "1"
           MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.commit }}
