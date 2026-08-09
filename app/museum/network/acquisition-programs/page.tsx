@@ -3,10 +3,21 @@ import Link from "next/link";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import { museumAcquisitionProgramHref } from "@/lib/museum/publication/routes";
+
+function acquisitionCountLabel(count: number): string {
+  return t(
+    DEFAULT_LOCALE,
+    count === 1
+      ? "museum.network.acquisitionPrograms.acquisitionsCount.one"
+      : "museum.network.acquisitionPrograms.acquisitionsCount.other",
+    { count: formatInteger(DEFAULT_LOCALE, count) }
+  );
+}
 
 export const metadata: Metadata = {
   ...getAppMetadata({
@@ -55,11 +66,7 @@ export default async function MuseumAcquisitionProgramsPage() {
                   {program.title}
                 </span>
                 <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
-                  {program.acquisitionIds.length}{" "}
-                  {t(
-                    DEFAULT_LOCALE,
-                    "museum.network.acquisitionPrograms.acquisitions"
-                  ).toLocaleLowerCase()}
+                  {acquisitionCountLabel(program.acquisitionIds.length)}
                 </span>
               </span>
               <span className="tw-text-sm tw-text-primary-300">

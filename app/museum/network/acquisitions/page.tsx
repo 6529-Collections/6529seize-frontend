@@ -56,6 +56,16 @@ function statusLabel(status: MuseumPublicAcquisitionStatus): string {
   }
 }
 
+function workCountLabel(count: number): string {
+  return t(
+    DEFAULT_LOCALE,
+    count === 1
+      ? "museum.network.acquisitions.worksCount.one"
+      : "museum.network.acquisitions.worksCount.other",
+    { count: formatInteger(DEFAULT_LOCALE, count) }
+  );
+}
+
 function acquisitionMethodLabel(
   method: string,
   programId: string | null
@@ -325,11 +335,7 @@ function AcquisitionEditorialRow({
             acquisition.acquisitionMethod,
             acquisition.programId
           )}{" "}
-          · {formatInteger(DEFAULT_LOCALE, acquisition.workIds.length)}{" "}
-          {t(
-            DEFAULT_LOCALE,
-            "museum.network.acquisitions.works"
-          ).toLocaleLowerCase()}
+          · {workCountLabel(acquisition.workIds.length)}
         </p>
         <Link
           href={museumAcquisitionHref(acquisition.slug)}

@@ -275,7 +275,7 @@ describe("Wave publication receipt joins", () => {
     const sourceDocuments = new Map(lineEndingFixture.sourceDocuments);
     sourceDocuments.set(sourcePath, {
       ...source,
-      text: `\uFEFF${source.text.replace("\n", "\r\n")}`,
+      text: `\uFEFF${source.text.replaceAll("\n", "\r\n")}`,
     });
     expect(() =>
       parseWavePublicationParts(lineEndingFixture.document, sourceDocuments)
