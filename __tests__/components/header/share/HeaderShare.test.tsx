@@ -6,6 +6,7 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  act,
   render,
   screen,
   waitFor,
@@ -1067,9 +1068,13 @@ describe("HeaderShare", () => {
       await userEvent.click(
         screen.getByLabelText("Close connect device modal")
       );
-      rejectDecode(new Error("decode cancelled with modal close"));
+      await act(async () => {
+        rejectDecode(new Error("decode cancelled with modal close"));
+        await Promise.resolve();
+        await Promise.resolve();
+      });
 
-      await waitFor(() => expect(qrcode.toDataURL).toHaveBeenCalledTimes(1));
+      expect(qrcode.toDataURL).toHaveBeenCalledTimes(1);
       expect(
         screen.queryByText("Device Connection Unavailable")
       ).not.toBeInTheDocument();
