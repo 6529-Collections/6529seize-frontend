@@ -8,6 +8,7 @@ jest.mock('framer-motion', () => ({
     div: (p: any) => <div {...p} />,
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
+  useReducedMotion: () => false,
 }));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <span data-testid="icon" /> }));
@@ -56,5 +57,24 @@ describe('WaveRepOutcome', () => {
     const viewMoreBtn = screen.getByRole('button', { name: /loading\.\.\./i });
     expect(viewMoreBtn).toBeInTheDocument();
     expect(viewMoreBtn).toBeDisabled();
+  });
+
+  it('uses a plain view-more label when the remaining count is unknown', () => {
+    render(
+      <WaveRepOutcome
+        outcome={outcome}
+        distribution={{
+          ...distribution,
+          items: [],
+          totalCount: 0,
+          hasNextPage: true,
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(
+      screen.getByRole('button', { name: 'View more' })
+    ).toBeInTheDocument();
   });
 });

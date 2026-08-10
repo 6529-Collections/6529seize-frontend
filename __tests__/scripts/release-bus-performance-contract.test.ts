@@ -76,6 +76,12 @@ describe("Release Bus frontend performance contract", () => {
     );
     expect(appPrCi).toContain("./bin/6529 run lint:changed");
     expect(appPrCi).toContain("./bin/6529 run typecheck:changed");
+    expect(appPrCi).toContain("./bin/6529 run deadcode:knip");
+    expect(appPrCi).toContain("if: matrix.lane == 'quality'");
+    expect(appPrCi).not.toContain("deadcode_required");
+    expect(appPrCi).toContain("dependency_analysis_required:true");
+    expect(appPrCi).toContain('"dependency-analysis"');
+    expect(appPrCi).not.toContain('"dependency-analysis-or-plan-not-required"');
     expect(appPrCi).toContain("Run related Jest tests");
     expect(appPrCi).toContain("./bin/6529 run build:ci");
     expect(appPrCi).toContain("playwright install --with-deps chromium");
@@ -367,7 +373,10 @@ describe("Release Bus frontend performance contract", () => {
         '[ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]'
       );
       expect(verification.run).toContain("artifact_contract=legacy-v2");
-      expect(deployReport.run).toContain("summary_environment=portable");
+      expect(deployReport.run).toContain(
+        'summary_environment="$ARTIFACT_ENVIRONMENT"'
+      );
+      expect(deployReport.run).not.toContain("summary_environment=portable");
       expect(deployReport.run).toContain(
         "deployment_environment:$deployment_environment"
       );

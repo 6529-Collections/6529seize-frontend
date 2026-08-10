@@ -30,6 +30,24 @@ const sourceCleanGuard =
   "git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews";
 
 describe("public-review artifact workflow contract", () => {
+  it("bakes the environment-specific mobile app scheme", () => {
+    expect(stagingWorkflow).toContain(
+      "MOBILE_APP_SCHEME: mobileStaging6529"
+    );
+    expect(releaseBusPreflight).toContain(
+      "export MOBILE_APP_SCHEME=mobileStaging6529"
+    );
+    expect(releaseBusPreflight).toContain(
+      "export MOBILE_APP_SCHEME=mobile6529"
+    );
+    expect(legacyProduction).toContain(
+      'MOBILE_APP_SCHEME: "mobile6529"'
+    );
+    expect(productionBuild).toContain(
+      'MOBILE_APP_SCHEME: "mobile6529"'
+    );
+  });
+
   it("keeps exact PR CI source-evidence-only instead of building deploy profiles", () => {
     if (appPrCi.includes("Create exact PR merge-tree CI evidence")) {
       expect(appPrCi).toContain("release-bus-v2-pr-evidence/manifest.json");
@@ -68,7 +86,9 @@ describe("public-review artifact workflow contract", () => {
     expect(releaseBusPreflight).toContain(
       'test -z "$(find "$destination/target/_next" -type l -print -quit)"'
     );
-    expect(releaseBusPreflight).toContain('--extracted-root "$zip_extract"');
+    expect(releaseBusPreflight).toContain(
+      '--extracted-root "$portability_extract"'
+    );
     expect(releaseBusPreflight).not.toMatch(/\bcp -r public\b/);
   });
 
@@ -91,6 +111,15 @@ describe("public-review artifact workflow contract", () => {
       'test -z "$(find production-artifact/target/_next -type l -print -quit)"'
     );
     expect(productionBuild).toContain('--extracted-root "$zip_extract"');
+    expect(productionBuild).toContain(
+      '--runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json"'
+    );
+    expect(productionBuild).toContain(
+      '--assets-flag "$zip_extract/.next/ASSETS_FROM_S3"'
+    );
+    expect(productionBuild).not.toContain(
+      "--extracted-root .production-bundle"
+    );
     expect(productionBuild).not.toMatch(/\bcp -r public\b/);
   });
 
@@ -113,6 +142,14 @@ describe("public-review artifact workflow contract", () => {
     expect(stagingWorkflow).toContain(`${helper} prepare`);
     expect(stagingWorkflow).toContain(`${helper} assert-listing`);
     expect(stagingWorkflow).toContain(`${helper} assert-zip`);
+    expect(stagingWorkflow).toContain('--extracted-root "$zip_extract"');
+    expect(stagingWorkflow).toContain(
+      '--runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json"'
+    );
+    expect(stagingWorkflow).toContain(
+      '--assets-flag "$zip_extract/.next/ASSETS_FROM_S3"'
+    );
+    expect(stagingWorkflow).not.toContain("--extracted-root .staging-bundle");
     expect(stagingWorkflow).toContain("./bin/6529 run base-build");
     expect(stagingWorkflow).toContain(
       "bash ops/scripts/deploy-staging-artifact.sh"
@@ -145,6 +182,33 @@ describe("public-review artifact workflow contract", () => {
     );
     expect(standaloneStart).toContain(
       'delete packagingEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
+    );
+  });
+
+  it("inventories the exact extracted release package rather than the symlinked build tree", () => {
+    expect(releaseBusPreflight).toContain(
+      'local portability_extract="$destination/portability-extract"'
+    );
+    expect(releaseBusPreflight).toContain(
+      'unzip -q "$destination/target/package.zip" -d "$portability_extract"'
+    );
+    expect(releaseBusPreflight).toContain(
+      "--extracted-root release-bus-artifact/portability-extract"
+    );
+    expect(releaseBusPreflight).toContain(
+      '--extracted-root "release-bus-artifact/profiles/$profile/portability-extract"'
+    );
+    expect(releaseBusPreflight).not.toContain(
+      "--extracted-root release-bus-artifact/bundle"
+    );
+    expect(releaseBusPreflight).not.toContain(
+      '--extracted-root "release-bus-artifact/profiles/$profile/bundle"'
+    );
+    expect(releaseBusPreflight).toContain(
+      "rm -rf release-bus-artifact/portability-extract"
+    );
+    expect(releaseBusPreflight).toContain(
+      'rm -rf "release-bus-artifact/profiles/$profile/portability-extract"'
     );
   });
 

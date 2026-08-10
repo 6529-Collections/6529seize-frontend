@@ -101,6 +101,14 @@ export const objectCapturedPromiseRejectionMessages = new Set([
   objectCapturedPromiseRejectionMessage,
   objectCapturedPromiseRejectionWithoutStackMessage,
 ]);
+const braveWalletSelectedAddressEvaluationErrorMessage =
+  "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')";
+const braveWalletEmitEvaluationErrorMessage =
+  "undefined is not an object (evaluating 'window.ethereum.emit')";
+export const braveWalletPageEvaluationErrorMessages = new Set([
+  braveWalletSelectedAddressEvaluationErrorMessage,
+  braveWalletEmitEvaluationErrorMessage,
+]);
 export const providerDisconnectedCode = 4900;
 export const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
@@ -108,8 +116,7 @@ export const walletRevokePermissionsUnsupportedCode = -32601;
 export const walletRevokePermissionsUnsupportedMessage =
   "the method wallet_revokePermissions does not exist/is not available";
 export const backpackInternalJsonRpcErrorCode = -32603;
-export const backpackInternalJsonRpcErrorMessage =
-  "Internal JSON-RPC error.";
+export const backpackInternalJsonRpcErrorMessage = "Internal JSON-RPC error.";
 export const backpackWalletCollisionBreadcrumbMessage =
   "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
 export const readOnlyEthereumProxyBreadcrumbPattern =
@@ -135,6 +142,15 @@ export const rabbyMobileUserRejectedCode = 4001;
 export const rabbyMobileUserRejectedMessage = "Not Allowed";
 export const rabbyMobileStackContextPattern = "rabbymobile";
 export const rabbyMobileUserRejectedStackPattern = "userrejectedrequest";
+export const rabbyChromeUserRejectedCode = 4001;
+export const rabbyChromeUserRejectedMessage = "User rejected the request.";
+export const rabbyChromeUserRejectedStackHeader = `Error: ${rabbyChromeUserRejectedMessage}`;
+// Rabby's pinned source maps this extension ID to its Chrome Web Store listing:
+// https://github.com/RabbyHub/Rabby/blob/606cd9c641a79aff335ee992ebe7fa8d8982c0bd/src/ui/utils/webapi.tsx#L63-L70
+export const rabbyChromeExtensionContentScriptUrlPrefix =
+  "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:";
+export const rabbyChromeUserRejectedStackFunction =
+  "Object.userRejectedRequest";
 export const appOwnedStackPatterns = [
   "webpack-internal:///(app-pages-browser)",
   "webpack://_n_e/./",
@@ -241,6 +257,7 @@ export const extensionMessagingConnectionFailureMessage =
   "Could not establish connection. Receiving end does not exist.";
 export const extensionMessagingContentScriptPaths = new Set([
   "app:///content-scripts/content.js",
+  "app:///injected-script.js",
 ]);
 export const injectedScriptBundlePathToken = "injectedscript.bundle.js";
 export const injectedScriptSendMessageError =

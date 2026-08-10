@@ -21,6 +21,22 @@ import {
   normalizeErrorPrefix,
 } from "./value-utils";
 
+const browserExtensionWalletRejectionMessage = "User rejected the request.";
+const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+// Keep the complete pre-symbolication stack exact so extension bundle drift
+// fails open and nearby application failures remain visible.
+const browserExtensionWalletBridgeFrameSignatures = [
+  { functionName: "o", lineNumber: 12, columnNumber: 50420 },
+  { functionName: "Ce.dispose", lineNumber: 1, columnNumber: 30025 },
+  { functionName: "Ce._dispose", lineNumber: 1, columnNumber: 28455 },
+  {
+    functionName: "Object.userRejectedRequest",
+    lineNumber: 1,
+    columnNumber: 15879,
+  },
+  { functionName: "a", lineNumber: 1, columnNumber: 16591 },
+] as const;
+
 function isExtensionMessagingInjectedPath(value: string): boolean {
   const normalizedValue = value.toLowerCase();
   return (
@@ -74,18 +90,49 @@ function hasOnlyExtensionMessagingFrames(
   );
 }
 
+function hasExactBrowserExtensionWalletBridgeFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (
+    !Array.isArray(frames) ||
+    frames.length !== browserExtensionWalletBridgeFrameSignatures.length
+  ) {
+    return false;
+  }
+
+  return frames.every((frame, index) => {
+    const signature = browserExtensionWalletBridgeFrameSignatures[index];
+    if (!signature) {
+      return false;
+    }
+
+    const framePaths = getFramePaths(frame);
+    return (
+      frame.function === signature.functionName &&
+      frame.lineno === signature.lineNumber &&
+      frame.colno === signature.columnNumber &&
+      framePaths.length > 0 &&
+      framePaths.every((path) => path === browserExtensionWalletBridgePath)
+    );
+  });
+}
+
 function hasExtensionMessagingConnectionFailureMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  const value = event.exception?.values?.[0];
-  const messageCandidates = [
-    value?.value,
-    event.message,
-    getHintExceptionMessage(hint),
-  ];
+  const exceptionMessage = event.exception?.values?.[0]?.value;
+  if (
+    typeof exceptionMessage === "string" &&
+    exceptionMessage.trim().length > 0
+  ) {
+    return (
+      normalizeErrorPrefix(exceptionMessage) ===
+      extensionMessagingConnectionFailureMessage
+    );
+  }
 
-  return messageCandidates.some(
+  return [event.message, getHintExceptionMessage(hint)].some(
     (candidate) =>
       typeof candidate === "string" &&
       normalizeErrorPrefix(candidate) ===
@@ -97,7 +144,12 @@ export function shouldFilterBrowserExtensionMessagingConnectionError(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  const value = event.exception?.values?.[0];
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
   if (!hasExtensionMessagingConnectionFailureMessage(event, hint)) {
     return false;
   }
@@ -107,6 +159,29 @@ export function shouldFilterBrowserExtensionMessagingConnectionError(
   }
 
   return hasOnlyExtensionMessagingFrames(value?.stacktrace?.frames);
+}
+
+export function shouldFilterBrowserExtensionWalletRejection(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
+  if (
+    value?.type !== "Error" ||
+    value.value !== browserExtensionWalletRejectionMessage ||
+    value.mechanism?.type !== browserUnhandledRejectionMechanism ||
+    value.mechanism.handled !== false ||
+    hasAppOwnedSourceEvidence(event, value, hint)
+  ) {
+    return false;
+  }
+
+  return hasExactBrowserExtensionWalletBridgeFrames(value.stacktrace?.frames);
 }
 
 export function shouldFilterBrowserExtensionSendMessageError(

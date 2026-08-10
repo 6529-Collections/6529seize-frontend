@@ -1,6 +1,6 @@
 # Frontend I18n Fallback Debt
 
-Status verified against current source on 2026-08-05.
+Status verified against current source on 2026-08-07.
 
 These records remain active because the corresponding surfaces still use the
 source locale, `DEFAULT_LOCALE`, hardcoded English copy, or source-locale
@@ -15,6 +15,7 @@ fallback dictionaries.
 | [Network reference pages](network-reference-pages.md)               | Prenodes and xTDH remain English in source; Definitions and Historic Boosts messages fall back to `en-US` outside the source  |
 | [Museum Open Museum and source contribution](museum-open-source.md) | Museum source/contribution and transition interface messages currently resolve through the reviewed `en-US` fallback          |
 | [Museum data architecture](museum-data-architecture.md)             | The data-architecture reading room and profile interface currently resolve through the reviewed `en-US` fallback              |
+| [Share and connect controls](share-connect-controls.md)             | Page-sharing, social-action, device-connection, and account-menu messages currently fall back to `en-US` outside the source locale |
 | [Sidebar navigation](sidebar-navigation.md)                         | `useSidebarSections` still resolves shared navigation through `DEFAULT_LOCALE` and retains residual hardcoded labels          |
 | [Wave competition badges](wave-competition-badges.md)               | The source locale contains `waves.competitionBadges.*`; supported locale dictionaries still rely on fallback for this surface |
 | [Wave rules](wave-rules.md)                                         | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |

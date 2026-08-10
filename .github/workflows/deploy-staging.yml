@@ -131,7 +131,7 @@ jobs:
     env:
       NODE_ENV: production
       VERSION: ${{ github.sha }}
-      MOBILE_APP_SCHEME: mobile6529
+      MOBILE_APP_SCHEME: mobileStaging6529
       CORE_SCHEME: core6529
       IPFS_API_ENDPOINT: https://api-ipfs.6529.io
       IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
@@ -249,7 +249,19 @@ jobs:
             --arg package_digest "$package_digest" \
             '{schema_version:1,artifact_contract:"manual-staging-v1",repository:"frontend",source_sha:$source_sha,environment:"staging",package_sha256:$package_digest}' \
             > staging-artifact/manifest.json
-          (cd staging-artifact && sha256sum manifest.json package.zip > SHA256SUMS)
+          node ops/scripts/artifact-portability.cjs inventory \
+            --manifest staging-artifact/manifest.json \
+            --package staging-artifact/package.zip \
+            --extracted-root "$zip_extract" \
+            --runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json" \
+            --assets-flag "$zip_extract/.next/ASSETS_FROM_S3" \
+            --source-root . \
+            --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+            --environment staging \
+            --node-version "$(node --version)" \
+            --pnpm-version "$(pnpm --version)" \
+            --output staging-artifact/artifact-portability.json
+          (cd staging-artifact && sha256sum manifest.json artifact-portability.json package.zip > SHA256SUMS)
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
 
@@ -315,6 +327,17 @@ jobs:
           ' staging-artifact/manifest.json >/dev/null
           package_digest="$(sha256sum staging-artifact/package.zip | cut -d' ' -f1)"
           test "$package_digest" = "$(jq -r '.package_sha256' staging-artifact/manifest.json)"
+          jq -e --arg source_sha "$EXPECTED_SHA" --arg package_sha256 "$package_digest" '
+            .schema_version == "artifact-portability.v1" and
+            .contract == "artifact-portability-v1" and
+            .environment == "staging" and
+            .source.git_sha == $source_sha and
+            .digests.package_sha256 == $package_sha256 and
+            .portability.status == "NOT_PORTABLE" and
+            .portability.portable == false and
+            .portability.reuse_authorized == false and
+            .portability.promotion_authorized == false
+          ' staging-artifact/artifact-portability.json >/dev/null
           echo "package-digest=$package_digest" >> "$GITHUB_OUTPUT"
 
       - name: Reconfirm manual fallback readiness before deployment

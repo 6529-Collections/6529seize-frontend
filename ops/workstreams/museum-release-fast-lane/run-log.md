@@ -751,3 +751,244 @@
   reviewed baseline in the same PR.
 - Follow-up validation passed: 8 focused tests, live source-only CLI, changed
   lint, 1,373-file changed TypeScript ratchet, Knip, and whitespace.
+
+## 2026-08-05 — PR6 local implementation checkpoint
+
+- Implemented on `codex/museum-release-readiness`; no push, PR, merge, deploy, or
+  live-environment mutation has occurred.
+- Replaced both sanctioned Elastic Beanstalk production waits with
+  `elastic-beanstalk-readiness.cjs`: immediate observation, bounded 5/10/20/30
+  second backoff, existing 1320-second timeout, exact Green/Ready/VersionLabel
+  matching, and two consecutive successful samples. The existing `/api/version`
+  verifier remains a separate gate.
+- Added durable JSON readiness evidence and retained it as an Actions artifact
+  in both production paths.
+- Added the `artifact-portability.v1` contract and inventory producer. It records
+  source, content, toolchain, package, and runtime-configuration digests, hashes
+  baked inputs without persisting their values, and marks the current
+  environment-bound artifact `NOT_PORTABLE` with both reuse and promotion
+  disabled.
+- Added a credentials-free report workflow that compares exact staging and
+  production inventory artifacts. Its only successful outcome is report-only
+  evidence; a malformed or incomplete inventory fails closed.
+- Added the runtime-neutral migration boundary and protected the workflow,
+  schema, tests, producer, contract verifier, and readiness poller in the PR
+  policy bundle.
+
+### PR6 validation status
+
+Validation is complete locally. The focused readiness/portability suite passed
+19/19; release-bus artifact compatibility passed 16/16; the performance contract
+passed 7/7; production artifact coverage passed 2/2; staging artifact coverage
+passed 3/3; changed lint and formatting passed; typecheck passed for 1,358
+changed TypeScript files; and `codex-diff-check` passed. YAML parsing passed for
+all seven changed workflows. `actionlint` passed for the new report-only
+workflow and the production artifact workflow. The remaining release workflows
+retain baseline ShellCheck findings (SC2129/SC2155), while the two largest
+workflows exceeded the local 60-second per-file analyzer limit; these are
+reported as analyzer limitations, not treated as green. No live environment was
+mutated. The intended residual portability blocker is unchanged: the package
+continues to bake environment configuration, so build-once/promote-twice is not
+activated by this PR.
+
+## 2026-08-05 — PR6 independent Luna review corrections
+
+- Resolved all five accepted findings without committing or publishing the work.
+- Preserved pre-PR6 `legacy-v2` deploy compatibility when the new sidecar is absent;
+  the workflow emits `not-portable-pre-pr6-legacy`, and tests prove that missing v3
+  sidecars still fail.
+- Added a 30-second maximum AWS subprocess timeout bounded by the remaining global
+  deadline. Post-deadline Green/Ready/exact-version samples are ineligible.
+- Added a complete regular-file scan of the producer-supplied extracted package
+  root and closed classification for every known and observed runtime key. Evidence
+  contains hashes and bounded path samples, never raw values.
+- Split full-shape validation and source-run provenance into the protected
+  `artifact-portability-contract.cjs` module. The policy bundle remains at its
+  96-file ceiling.
+- Bound report inputs to the exact successful GitHub Actions source run and to the
+  expected artifact manifest, environment, source, contract, and inventory before
+  staging/production comparison.
+
+### Corrected validation
+
+- Readiness, portability, package-scan, closed-schema, and provenance tests: 19/19.
+- Release Bus artifact compatibility, including pre-PR6 legacy and missing-v3
+  regressions for both environments: 16/16.
+- Release Bus performance contract: 7/7.
+- Production artifact contract: 2/2.
+- Staging artifact contract: 3/3.
+- Changed lint and targeted Prettier: passed.
+- Changed typecheck: passed for 1,358 TypeScript files.
+- All seven changed workflows parse as YAML; targeted `actionlint` passes for the
+  report-only and production-artifact workflows.
+- `git diff --check` and `codex-diff-check`: passed.
+
+Residual portability boundary: exact-literal scanning does not prove absence of an
+encoded, transformed, or indirectly generated configuration value. The inventory
+therefore remains `NOT_PORTABLE`; build-once/promote-twice, reuse, and promotion stay
+disabled pending the migration proof in the implementation document.
+
+## 2026-08-05 — PR6 bounded independent re-review
+
+- The independent artifact-integrity review found four remaining gaps. All four
+  are corrected locally and remain uncommitted.
+- Deployment result summaries now carry the artifact step's explicit
+  `portability_status` as the sole authoritative portability/authorization
+  field. Legacy summaries preserve the actual `staging` or `production`
+  environment; they no longer label the environment `portable`.
+- Report-source verification now cross-binds the inventory package digest,
+  artifact contract, and artifact contract version to the downloaded manifest,
+  with an exact contract binding for every trusted producer/version pair.
+- The report workflow now obtains the artifact's independent GitHub Actions API
+  digest, requires it during source verification, and independently recomputes
+  every regular file's digest and exact membership against `SHA256SUMS`.
+- Content-root hashing rejects symlink roots and checks canonical real-path
+  containment before walking. Adversarial fixtures cover symlink roots,
+  real-path escapes, forged producer contracts, forged checksum entries, and
+  missing artifact digests.
+
+## 2026-08-06 - PR 6 full test-quality gate
+
+- The complete Jest typecheck ratchet found seven diagnostics hidden by the
+  CommonJS test imports, and the debt ratchet found one generic `any` in the
+  malformed-inventory mutation table. The harness now declares the readiness,
+  inventory, comparison, and verification boundaries explicitly and uses a
+  closed mutation target. No diagnostic or debt baseline was raised.
+- Exact local validation now passes 46/46 focused tests, the complete Jest and
+  Playwright typecheck ratchets, changed lint, Knip, the debt ratchet, all four
+  Node syntax checks, all seven workflow syntax/expression checks, Prettier, and
+  `codex-diff-check`.
+
+## 2026-08-06 - PR 6 independent provenance review
+
+- An independent Luna review found that the report workflow's sparse checkout
+  omitted the verifier module required by its CommonJS contract. The exact
+  dependency is now checked out and protected by workflow coverage.
+- Downloaded package bytes are now hashed independently and must match both the
+  producer manifest and validated inventory. Updating a self-declared
+  `SHA256SUMS` after tampering can no longer produce accepted report evidence;
+  an adversarial test proves rejection.
+- The report-source verifier is now part of the protected policy bundle and is
+  classified as P3/release-contract work by both CI planners. Tests bind all
+  three protections so the security-critical file cannot take a reduced lane.
+- Trusted producer runs must originate from the producer's closed branch set
+  (`main` for Release Bus and production artifacts; `1a-staging` for the manual
+  staging producer) and from the same head repository. Artifact metadata now
+  requires an explicit unexpired state and exact source workflow-run identity.
+- The portability decision remains `NOT_PORTABLE`; these changes strengthen
+  report provenance and do not authorize reuse, promotion, or deployment.
+
+## 2026-08-06 - PR 6 stacked review hardening
+
+- PR #3643 was opened against the PR 5 branch to parallelize review while the
+  Storm production lane remained serialized. The current PR 6 commit was then
+  rebased onto the exact PR 5 head, signed again, and made conflict-free.
+- The 6529 follow-up review confirmed that canonical source-root containment
+  and the prior provenance findings are resolved. Security, WCAG, and i18n
+  reported no findings.
+- The advisory swarm identified missing workflow-level regression coverage.
+  Tests now bind the exact staging and production inventory predicates across
+  Release Bus and manual fallback workflows, the Release Bus verifier's sparse
+  checkout, the poller invocation path, and required readiness-evidence uploads.
+- Sonar's deterministic-sort findings are corrected with explicit fixed-locale
+  comparators in every canonicalization path. The remaining reported regex and
+  ownership idioms were updated without changing accepted input boundaries.
+- These changes do not alter the release authorization boundary: inventory
+  status remains `NOT_PORTABLE`, and reuse and promotion remain disabled.
+
+## 2026-08-06 - PR 5 merge and PR 6 restack
+
+- The Storm owner cleared the frontend serialization hold after Production E2E
+  run 31089652308 passed both the read-only product job and the clean isolated
+  verifier against the qualified Storm deployment.
+- PR #3642 passed every exact-head check with no unresolved review thread and
+  merged as `c807f6da8efea7e39405fba8185de153096bf95d`.
+- PR #3643 was replayed as its three PR6-only commits over that exact squash
+  merge, re-signed, force-pushed with an exact lease, and retargeted to `main`.
+  The only rebase conflict was the append-only workstream log; PR5 and PR6
+  chronology were both preserved.
+- Post-restack local verification passed 105 focused tests across six suites,
+  changed-source lint, changed TypeScript for 1,381 files, the complete Jest
+  typecheck ratchet, and the Playwright typecheck. Fresh exact-head hosted
+  review and CI remain the merge authority.
+
+## 2026-08-06 - PR 6 CodeQL correction
+
+- Exact-head CodeQL check 92594943779 reported two high-severity findings: a
+  path-check/read race in the downloaded-artifact verifier and ambiguous
+  backtracking in the portability-path CI classifier. The head was not merged.
+- Artifact files are now opened once with `O_NOFOLLOW` where available, bound
+  to their post-open path identity, read only through the descriptor, and
+  checked for descriptor-snapshot changes after the read. Parsed JSON and its
+  digest are derived from the same bytes.
+- The portability classifier now recognizes unambiguous hyphen-delimited
+  alphanumeric segments. A long malformed-path regression protects the linear
+  matcher, and the Linux test path replaces a file after it is opened to prove
+  the verifier rejects the race.
+- Windows reports a zero path-device identifier alongside the descriptor's
+  volume identifier, so cross-platform identity comparison treats only that
+  documented zero as unavailable while still requiring the inode match. The
+  two corrected suites pass 57/57 with changed-source lint clean.
+
+## 2026-08-06 - Live readiness adapter defect
+
+- PR #3656 merged as `ee156caa5b2a9ed2efaee34659f098e916badcb9`.
+  Staging deployment 31110364640 and automatic staging E2E 31111224279
+  passed. Production run 31113392584 deployed that exact version and live
+  readback reached Green/Ready with three exact `/api/version` responses.
+- The production qualification step then exposed a real adapter-boundary bug:
+  `describeEnvironmentWithAws` returned the normalized `version_label` field,
+  while the outer readiness loop normalized that value again but recognized
+  only AWS `VersionLabel` and camel-case `versionLabel`. Every valid sample was
+  therefore discarded as `Elastic Beanstalk VersionLabel is missing`.
+- The correction makes normalization idempotent by accepting the closed
+  normalized field. A regression test passes the actual AWS adapter output
+  through the readiness loop. The focused suite passes 25/25, and a live
+  read-only reproduction now accepts two consecutive Green/Ready exact-version
+  observations in 7.3 seconds.
+- No additional environment mutation was used to diagnose or prove the fix.
+  Production E2E remains required after this correction is merged and released.
+
+## 2026-08-06 - Readiness hotfix merge and Actions incident
+
+- PR #3662 passed every exact-head required check and review lane at
+  `a960fbf62813cacd54096ca8bff2435e251f07e2`, then merged as exact main
+  `86f4d4aa2c3927df1ad0823dc12b1c6b9269f03e` at 15:40:45Z.
+- The staging merge `87a80d848e68fcb8f73717e3216fae35feab6e28`
+  has parents `e6b5638...` and `86f4d4aa...`; its tree exactly matches main.
+  Staging run 31117046350 passed its guard and then failed before repository
+  checkout because GitHub Actions returned repeated `Service Unavailable`
+  responses while resolving pinned actions. Deploy was skipped and no staging
+  state changed.
+- Three attempts to dispatch the exact-main production artifact workflow
+  returned GitHub REST HTTP 500 and created no run. GitHub Status reports an
+  Actions partial outage under incident `qcvjkzcs7j74`. The release will resume
+  with a complete staging rerun and a new exact artifact dispatch after service
+  recovery; no timed-only authorization retry is permitted.
+- Production remained healthy at exact runtime
+  `ee156caa5b2a9ed2efaee34659f098e916badcb9` with three consecutive
+  `stale:false` version readbacks. The hotfix is merged but not yet production
+  qualified.
+
+## 2026-08-06 - One-click production operation design
+
+- The Dev Team's requirements and objections are incorporated in
+  `one-click-production-architecture.md`. The controller freezes a protected-main
+  target, atomically drains and acquires one backend-owned frontend/backend lane,
+  binds the lease to the exact GitHub run and attempt, and renews it against the
+  same control epoch and immutable artifact-selection digest immediately before
+  AWS credentials are configured.
+- A clean precheck followed by a 409 is terminal for that attempt and produces
+  bounded denial evidence. A rerun must acquire or renew for its new
+  `run_attempt`; it cannot inherit an earlier green guard. Later main descendants
+  are allowed only while the frozen target remains in protected-main history.
+- The builder has build-time secrets but no AWS authority. The artifact verifier
+  has neither build nor deploy authority. The deploy job may consume only an
+  explicit artifact run, artifact ID, GitHub digest, source SHA, and operation
+  binding; newest/latest artifact discovery is prohibited.
+- The comparable successful release measured 46m59s. The incident sequence took
+  66m18s, including about 18 minutes of manual authorization/retry idle and a
+  22-minute readiness timeout. The parallel-build forecast is 21 / 42 / 58
+  minutes best / median / conservative envelope; the serialized forecast is
+  29 / 56 / 72 minutes. A deterministic workflow-DAG test will prevent
+  accidental serialization and duplicate production builds.

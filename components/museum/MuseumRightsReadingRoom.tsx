@@ -90,7 +90,7 @@ function RightsExpressionCard({
         {expression.summary}
       </p>
       <Link
-        href={`/museum/network/rights/${expression.id}`}
+        href={`/museum/network/research/rights/${expression.id}`}
         prefetch={false}
         className={`${TEXT_LINK_CLASS} tw-mt-4 tw-self-start`}
       >
@@ -153,12 +153,12 @@ export function MuseumRightsGuideCards({
   const guides = [
     {
       document: handbook.artistGuide,
-      href: "/museum/network/rights/artists",
+      href: "/museum/network/research/rights/artists",
       descriptionKey: "museum.network.rights.artistGuideDescription" as const,
     },
     {
       document: handbook.collectorGuide,
-      href: "/museum/network/rights/collectors",
+      href: "/museum/network/research/rights/collectors",
       descriptionKey:
         "museum.network.rights.collectorGuideDescription" as const,
     },
@@ -269,7 +269,7 @@ export function MuseumRightsExpressionPage({
   return (
     <article className="tw-min-w-0">
       <Link
-        href="/museum/network/rights"
+        href="/museum/network/research/rights"
         prefetch={false}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >

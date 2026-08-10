@@ -1,5 +1,7 @@
-import type { ReactNode } from "react";
+import { toDataURL } from "qrcode";
 
+import { publicEnv } from "@/config/env";
+import { stripCollectedReturnFromTokenRoute } from "@/helpers/profile-collected-navigation";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
   getRefreshToken,
@@ -7,9 +9,7 @@ import {
   getWalletRole,
   hasActiveSessionV2Auth,
 } from "@/services/auth/auth.utils";
-import { createConnectionShare } from "@/services/auth/session-v2.utils";
-
-const QRCode = require("qrcode");
+import type { createConnectionShare } from "@/services/auth/session-v2.utils";
 
 export type NativeConnectionShare = Awaited<
   ReturnType<typeof createConnectionShare>
@@ -36,15 +36,21 @@ export type TerminalConnectionShareStatus = Extract<
   ConnectionShareStatus,
   "legacy-auth" | "error"
 >;
-export type DisplayContent = {
-  readonly content: ReactNode;
-  readonly url: string;
-};
 export type ConnectionShareSessionVerificationStatus =
   | "active"
   | "inactive"
   | "error"
   | "stale";
+
+export type PageShareData = {
+  readonly title: string;
+  readonly url: string;
+};
+
+export type PageShareSystemShareAdapter = {
+  readonly canShare: (shareData: PageShareData) => Promise<boolean>;
+  readonly share: (shareData: PageShareData) => Promise<void>;
+};
 
 export function getLocalLegacyDesktopAuth(walletAddress: string): {
   readonly refreshToken: string;
@@ -80,6 +86,63 @@ export function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   );
 }
 
+type PermissionsPolicyLike = {
+  readonly allowsFeature?: ((feature: string) => boolean) | undefined;
+  readonly features?: (() => readonly string[]) | undefined;
+};
+
+type DocumentWithPermissionsPolicy = Document & {
+  readonly permissionsPolicy?: PermissionsPolicyLike | undefined;
+  readonly featurePolicy?: PermissionsPolicyLike | undefined;
+};
+
+function isWebShareBlockedByPermissionsPolicy(): boolean {
+  if (typeof document === "undefined") {
+    return false;
+  }
+
+  const policyDocument = document as DocumentWithPermissionsPolicy;
+  const policy =
+    policyDocument.permissionsPolicy ?? policyDocument.featurePolicy;
+  if (
+    typeof policy?.allowsFeature !== "function" ||
+    typeof policy.features !== "function"
+  ) {
+    return false;
+  }
+
+  try {
+    if (!policy.features().includes("web-share")) {
+      return false;
+    }
+
+    return policy.allowsFeature("web-share") === false;
+  } catch {
+    return false;
+  }
+}
+
+export function canUseSystemShare(shareData: ShareData): boolean {
+  if (
+    globalThis.isSecureContext !== true ||
+    typeof navigator === "undefined" ||
+    typeof navigator.share !== "function" ||
+    isWebShareBlockedByPermissionsPolicy()
+  ) {
+    return false;
+  }
+
+  try {
+    if (typeof navigator.canShare !== "function") {
+      return true;
+    }
+
+    return navigator.canShare(shareData);
+  } catch {
+    return false;
+  }
+}
+
 export function isSessionUpgradeRequiredError(error: unknown): boolean {
   const message = getErrorMessage(error);
   return message.toLowerCase().includes("session-v2");
@@ -112,6 +175,59 @@ export function buildRouterPath(
   }
 
   return routerPath;
+}
+
+export function getCurrentPageLocation(): {
+  readonly fullUrl: string;
+  readonly routerPath: string;
+} {
+  if (typeof window === "undefined") {
+    return { fullUrl: "", routerPath: "" };
+  }
+
+  const { hash, href, pathname, search } = window.location;
+  const routerPath = stripCollectedReturnFromTokenRoute(
+    `${pathname}${search}${hash}`
+  );
+  return {
+    fullUrl: new URL(routerPath, href).href,
+    routerPath,
+  };
+}
+
+export function getCurrentFullUrl(): string {
+  return getCurrentPageLocation().fullUrl;
+}
+
+export function getCurrentPublicUrl(): string {
+  const route = getCurrentPageLocation().routerPath;
+  if (!route) {
+    return "";
+  }
+
+  const normalizedBase = publicEnv.BASE_ENDPOINT.replace(/\/$/, "");
+  const normalizedRoute = route.startsWith("/") ? route : `/${route}`;
+  return `${normalizedBase}${normalizedRoute}`;
+}
+
+export function buildSocialShareUrls({
+  url,
+  title,
+}: {
+  readonly url: string;
+  readonly title: string;
+}): {
+  readonly x: string;
+  readonly farcaster: string;
+} {
+  const encodedUrl = encodeURIComponent(url);
+  const encodedTitle = encodeURIComponent(title);
+  const encodedXText = encodeURIComponent(`${title}\n${url}`);
+
+  return {
+    x: `https://x.com/intent/post?text=${encodedXText}`,
+    farcaster: `https://farcaster.xyz/~/compose?text=${encodedTitle}&embeds%5B%5D=${encodedUrl}`,
+  };
 }
 
 export function buildConnectionShareFailureKey({
@@ -188,6 +304,118 @@ export function buildLegacyDesktopConnectionShareUrl({
   return `${coreScheme}://${DeepLinkScope.NAVIGATE}${deepLinkPath}`;
 }
 
+export function buildNavigateDeepLinkUrl({
+  scheme,
+  routerPath,
+}: {
+  readonly scheme: string;
+  readonly routerPath: string;
+}): string {
+  return `${scheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
+}
+
+async function createQrCodeSource({
+  url,
+  staleGeneration,
+  signal,
+  errorMessage,
+}: {
+  readonly url: string;
+  readonly staleGeneration: IsStaleGeneration;
+  readonly signal?: AbortSignal | undefined;
+  readonly errorMessage: string;
+}): Promise<string> {
+  try {
+    const dataUrl = await toDataURL(url, {
+      width: 500,
+      margin: 4,
+      color: {
+        dark: "#000000",
+        light: "#ffffff",
+      },
+    });
+
+    return staleGeneration() ? "" : dataUrl;
+  } catch (error: unknown) {
+    if (!staleGeneration() && !isAbortError(error, signal)) {
+      console.error(errorMessage, error);
+    }
+    return "";
+  }
+}
+
+const CONNECTION_QR_PREPARATION_ATTEMPTS = 2;
+
+async function decodeQrCodeSource({
+  source,
+  staleGeneration,
+  signal,
+}: {
+  readonly source: string;
+  readonly staleGeneration: IsStaleGeneration;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<boolean> {
+  const ImageConstructor = globalThis.Image;
+  if (typeof ImageConstructor !== "function") {
+    return true;
+  }
+
+  const image = new ImageConstructor();
+  image.src = source;
+  if (typeof image.decode !== "function") {
+    return true;
+  }
+
+  try {
+    await image.decode();
+    return !staleGeneration();
+  } catch (error: unknown) {
+    if (!staleGeneration() && !isAbortError(error, signal)) {
+      console.error("Failed to decode share connection QR code", error);
+    }
+    return false;
+  }
+}
+
+export async function createReadyQrCodeSource({
+  url,
+  staleGeneration,
+  signal,
+  errorMessage,
+}: {
+  readonly url: string;
+  readonly staleGeneration: IsStaleGeneration;
+  readonly signal?: AbortSignal | undefined;
+  readonly errorMessage: string;
+}): Promise<string> {
+  for (
+    let attempt = 0;
+    attempt < CONNECTION_QR_PREPARATION_ATTEMPTS;
+    attempt++
+  ) {
+    if (staleGeneration()) {
+      return "";
+    }
+    const source = await createQrCodeSource({
+      url,
+      staleGeneration,
+      signal,
+      errorMessage,
+    });
+    if (staleGeneration()) {
+      return "";
+    }
+    if (
+      source &&
+      (await decodeQrCodeSource({ source, staleGeneration, signal }))
+    ) {
+      return staleGeneration() ? "" : source;
+    }
+  }
+
+  return "";
+}
+
 export function generateQrCodeSource({
   url,
   setSource,
@@ -203,20 +431,21 @@ export function generateQrCodeSource({
   readonly signal?: AbortSignal | undefined;
   readonly errorMessage: string;
 }): void {
-  QRCode.toDataURL(url, { width: 500, margin: 0 })
-    .then((dataUrl: string) => {
-      if (staleGeneration()) {
-        return;
-      }
+  void createQrCodeSource({
+    url,
+    staleGeneration,
+    signal,
+    errorMessage,
+  }).then((dataUrl) => {
+    if (staleGeneration()) {
+      return;
+    }
+    if (dataUrl) {
       setSource(dataUrl);
-    })
-    .catch((error: unknown) => {
-      if (staleGeneration() || isAbortError(error, signal)) {
-        return;
-      }
-      console.error(errorMessage, error);
+    } else {
       clearSource();
-    });
+    }
+  });
 }
 
 export const bodyScrollLock = (() => {

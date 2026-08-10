@@ -28,6 +28,9 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterBraveWalletPageEvaluationError,
+  shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
@@ -40,6 +43,7 @@ import {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyChromeUserRejectedRequest,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,
@@ -142,11 +146,19 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterBraveWalletPageEvaluationError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
     return true;
   }
 
   if (shouldFilterKnownWalletProviderObjectRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterRabbyChromeUserRejectedRequest(event, hint)) {
     return true;
   }
 
@@ -171,6 +183,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterBrowserExtensionSendMessageError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionWalletRejection(event, hint)) {
     return true;
   }
 
@@ -224,6 +240,10 @@ function shouldFilterEvent(
   // retaining only the sampled diagnostic subset would hide genuine app errors.
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
+  if (shouldFilterChromeMobileIosInjectedGaError(event)) {
     return true;
   }
 

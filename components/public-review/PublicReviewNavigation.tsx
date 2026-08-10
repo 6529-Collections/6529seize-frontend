@@ -1,6 +1,7 @@
 import {
   ChatBubbleLeftRightIcon,
   ChevronRightIcon,
+  ClockIcon,
   CodeBracketIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -93,11 +94,13 @@ function ReviewSectionLinks({
 function ReviewWideDestinationNavigation({
   feedbackHref,
   headingId,
+  historyHref,
   landmarkContext,
   referenceHref,
 }: {
   readonly feedbackHref: string;
   readonly headingId: string;
+  readonly historyHref?: string | undefined;
   readonly landmarkContext: string;
   readonly referenceHref: string;
 }) {
@@ -112,6 +115,15 @@ function ReviewWideDestinationNavigation({
       icon: ChatBubbleLeftRightIcon,
       label: t(DEFAULT_LOCALE, "publicReview.surface.feedback"),
     },
+    ...(historyHref
+      ? [
+          {
+            href: historyHref,
+            icon: ClockIcon,
+            label: t(DEFAULT_LOCALE, "publicReview.surface.history"),
+          },
+        ]
+      : []),
   ] as const;
 
   return (
@@ -149,6 +161,7 @@ function ReviewWideDestinationNavigation({
 type PublicReviewNavigationProps = {
   readonly currentPage: PublicReviewPageDefinition;
   readonly feedbackHref: string;
+  readonly historyHref?: string | undefined;
   readonly pages: readonly PublicReviewPageDefinition[];
   readonly referenceHref: string;
   readonly routes: PublicReviewRouteBuilder;
@@ -159,6 +172,7 @@ type PublicReviewNavigationProps = {
 export function PublicReviewMobileNavigation({
   currentPage,
   feedbackHref,
+  historyHref,
   pages,
   referenceHref,
   routes,
@@ -185,6 +199,7 @@ export function PublicReviewMobileNavigation({
           <ReviewWideDestinationNavigation
             feedbackHref={feedbackHref}
             headingId="public-review-wide-destinations-mobile"
+            historyHref={historyHref}
             landmarkContext={t(
               DEFAULT_LOCALE,
               "publicReview.surface.navigationMobileContext"
@@ -216,6 +231,7 @@ export function PublicReviewMobileNavigation({
 export function PublicReviewNavigation({
   currentPage,
   feedbackHref,
+  historyHref,
   pages,
   referenceHref,
   routes,
@@ -232,6 +248,7 @@ export function PublicReviewNavigation({
         <ReviewWideDestinationNavigation
           feedbackHref={feedbackHref}
           headingId="public-review-wide-destinations-sidebar"
+          historyHref={historyHref}
           landmarkContext={t(
             DEFAULT_LOCALE,
             "publicReview.surface.navigationSidebarContext"

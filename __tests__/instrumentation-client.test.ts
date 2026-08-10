@@ -34,10 +34,24 @@ describe("instrumentation-client", () => {
   const readOnlyEthereumProxyBreadcrumbMessage =
     "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
   const indexedDBUserDeleteMessage = "Database deleted by request of the user";
+  const indexedDBGetRecordNoTransactionMessage =
+    "Attempt to get a record from database without an in-progress transaction";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
+  const braveWalletSelectedAddressMessage =
+    "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')";
+  const braveWalletEmitMessage =
+    "undefined is not an object (evaluating 'window.ethereum.emit')";
+  const braveWalletUserAgent =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15 Brave";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const rabbyChromeUserRejectedStack = [
+    "Error: User rejected the request.",
+    "    at a (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:123184)",
+    "    at Object.userRejectedRequest (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:124412)",
+    "    at h.dispose (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:297934)",
+  ].join("\n");
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
   const gifPickerTenorUndefinedTagsMessage =
@@ -83,6 +97,50 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const browserExtensionWalletRejectionMessage = "User rejected the request.";
+  const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+  const browserExtensionWalletBridgeFrames = [
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "o",
+      lineno: 12,
+      colno: 50420,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce.dispose",
+      lineno: 1,
+      colno: 30025,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce._dispose",
+      lineno: 1,
+      colno: 28455,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Object.userRejectedRequest",
+      lineno: 1,
+      colno: 15879,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "a",
+      lineno: 1,
+      colno: 16591,
+      in_app: true,
+    },
+  ];
   const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
@@ -329,6 +387,26 @@ describe("instrumentation-client", () => {
     ) => BeforeSendResult;
   };
 
+  const withRuntimeUserAgent = <T>(
+    userAgent: string,
+    callback: () => T
+  ): T => {
+    const originalUserAgent = globalThis.navigator.userAgent;
+    Object.defineProperty(globalThis.navigator, "userAgent", {
+      configurable: true,
+      value: userAgent,
+    });
+
+    try {
+      return callback();
+    } finally {
+      Object.defineProperty(globalThis.navigator, "userAgent", {
+        configurable: true,
+        value: originalUserAgent,
+      });
+    }
+  };
+
   const loadBeforeSendTransaction = () => {
     const config = loadSentryConfig();
     expect(typeof config.beforeSendTransaction).toBe("function");
@@ -363,6 +441,52 @@ describe("instrumentation-client", () => {
             type: browserUnhandledRejectionMechanismType,
             handled: false,
           },
+        },
+      ],
+    },
+  });
+
+  const createRabbyChromeUserRejectedEvent = (
+    exceptionValueOverrides: Record<string, unknown> = {},
+    serializedStack = rabbyChromeUserRejectedStack
+  ) => ({
+    event_id: "rabby-chrome-user-rejected",
+    exception: {
+      values: [
+        {
+          type: "UnhandledRejection",
+          value: objectCapturedPromiseRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          ...exceptionValueOverrides,
+        },
+      ],
+    },
+    extra: {
+      __serialized__: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: serializedStack,
+      },
+    },
+  });
+
+  const createBrowserExtensionWalletRejectionEvent = (
+    frames: Array<Record<string, unknown>> = browserExtensionWalletBridgeFrames
+  ) => ({
+    ...createUnhandledRejectionEvent(browserExtensionWalletRejectionMessage),
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: browserExtensionWalletRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: { frames },
         },
       ],
     },
@@ -527,6 +651,51 @@ describe("instrumentation-client", () => {
     },
   });
 
+  const createBraveWalletPageEvaluationErrorEvent = (
+    message: string,
+    includeRequest = true
+  ) => ({
+    transaction: "/waves/:wave",
+    ...(includeRequest
+      ? {
+          request: {
+            url: "/waves/[wave]",
+            headers: {
+              "User-Agent": braveWalletUserAgent,
+            },
+          },
+        }
+      : {}),
+    tags: {
+      transaction: "/waves/:wave",
+      url: "/waves/[wave]",
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: message,
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                function: "global code",
+                lineno: 1,
+                colno: 16,
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+
   const createWebKitExtensionMessagingTabNotFoundEvent = (
     valueOverrides: Record<string, unknown> = {},
     eventOverrides: Record<string, unknown> = {}
@@ -575,6 +744,41 @@ describe("instrumentation-client", () => {
           },
           stacktrace: {
             frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createChromeMobileIosInjectedGaEvent = () => ({
+    level: "error",
+    transaction: "/nextgen/collection/:collection/art",
+    request: {
+      url: "https://6529.io/nextgen/collection/pebbles/art",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "ga",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///nextgen/collection/pebbles/art",
+                function: "?",
+                lineno: 415,
+                colno: 45,
+                in_app: true,
+              },
+            ],
           },
         },
       ],
@@ -854,6 +1058,14 @@ describe("instrumentation-client", () => {
       description: "Sentry-prefixed WebKit open-failure value",
       message: "UnknownError: Unable to open database file on disk",
     },
+    {
+      description: "raw WebKit record-without-transaction message",
+      message: indexedDBGetRecordNoTransactionMessage,
+    },
+    {
+      description: "Sentry-prefixed WebKit record-without-transaction value",
+      message: `UnknownError: ${indexedDBGetRecordNoTransactionMessage}`,
+    },
   ])(
     "classifies the $description as a handled IndexedDB warning",
     ({ message }) => {
@@ -888,6 +1100,10 @@ describe("instrumentation-client", () => {
     "UnknownError: Database deleted by request of the administrator",
     "UnknownError: Database deleted by request of the user during migration",
     "UnknownError: Unable to open database file on disk because it is locked",
+    `${indexedDBGetRecordNoTransactionMessage} while reopening`,
+    `UnknownError:${indexedDBGetRecordNoTransactionMessage}`,
+    "Attempt to get records from database without an in-progress transaction",
+    "Attempt to store a record in an object store without an in-progress transaction",
   ])("preserves the near-miss database failure %s", (message) => {
     const beforeSend = loadBeforeSend();
 
@@ -900,6 +1116,64 @@ describe("instrumentation-client", () => {
       type: browserUnhandledRejectionMechanismType,
       handled: false,
     });
+  });
+
+  it.each([
+    braveWalletSelectedAddressMessage,
+    braveWalletEmitMessage,
+  ])("drops the exact Brave Wallet page-evaluation error: %s", (message) => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(message);
+
+    const result = beforeSend(event);
+
+    expect(event).not.toHaveProperty("contexts.browser");
+    expect(event).not.toHaveProperty("tags.browser.name");
+    expect(result).toBeNull();
+  });
+
+  it("drops a Brave Wallet page-evaluation error using the runtime user agent without request data", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(
+      braveWalletSelectedAddressMessage,
+      false
+    );
+
+    const result = withRuntimeUserAgent(braveWalletUserAgent, () =>
+      beforeSend(event)
+    );
+
+    expect(event).not.toHaveProperty("request");
+    expect(result).toBeNull();
+  });
+
+  it("drops the Brave Wallet error with its WebKit page stack in the hint", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(
+      braveWalletSelectedAddressMessage
+    );
+    const originalException = new TypeError(
+      braveWalletSelectedAddressMessage
+    );
+    originalException.stack = [
+      `TypeError: ${braveWalletSelectedAddressMessage}`,
+      "global code@https://6529.io/waves/00000000-0000-4000-8000-000000000002:1:16",
+    ].join("\n");
+
+    const result = beforeSend(event, { originalException });
+
+    expect(result).toBeNull();
+  });
+
+  it("preserves a near-miss Brave Wallet page-evaluation error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(
+      "window.ethereum is unavailable"
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops disconnected wallet-provider object promise rejections", () => {
@@ -929,6 +1203,49 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the exact Rabby Chrome user-rejected object rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyChromeUserRejectedEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps Rabby Chrome user rejections with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyChromeUserRejectedEvent({
+      stacktrace: {
+        frames: [
+          {
+            filename: "hooks/drops/useDropSignature.ts",
+            abs_path: "hooks/drops/useDropSignature.ts",
+            in_app: true,
+          },
+        ],
+      },
+    });
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps Rabby Chrome user rejections with app-owned serialized frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyChromeUserRejectedEvent(
+      {},
+      [
+        rabbyChromeUserRejectedStack,
+        "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+      ].join("\n")
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops unsupported wallet_revokePermissions provider rejections", () => {
@@ -1855,6 +2172,50 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
+  it("drops the exact Chrome Mobile iOS document ga error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createChromeMobileIosInjectedGaEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Chrome Mobile iOS ga error when an application chunk frame is present", () => {
+    const beforeSend = loadBeforeSend();
+    const documentEvent = createChromeMobileIosInjectedGaEvent();
+    const [documentException] = documentEvent.exception.values;
+    if (!documentException) {
+      throw new Error("Expected the test event to contain an exception.");
+    }
+    const event = {
+      ...documentEvent,
+      exception: {
+        values: [
+          {
+            ...documentException,
+            stacktrace: {
+              frames: [
+                ...documentException.stacktrace.frames,
+                {
+                  filename: "app:///_next/static/chunks/app-owned.js",
+                  function: "renderArt",
+                  lineno: 1,
+                  colno: 1,
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
   it.each(["app:///", "app:///waves/11111111-2222-4333-8444-555555555555"])(
     "drops the exact client-shaped injected iOS autoplay rejection from %s",
     (path) => {
@@ -2255,6 +2616,27 @@ describe("instrumentation-client", () => {
     const result = beforeSend(noiseFilterFixtures.threeV);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the exact browser-extension wallet rejection bridge stack", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createBrowserExtensionWalletRejectionEvent());
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps a browser-extension wallet rejection with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const frames = browserExtensionWalletBridgeFrames.map((frame, index) =>
+      index === 4 ? { ...frame, colno: 16592 } : frame
+    );
+
+    const result = beforeSend(
+      createBrowserExtensionWalletRejectionEvent(frames)
+    );
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {

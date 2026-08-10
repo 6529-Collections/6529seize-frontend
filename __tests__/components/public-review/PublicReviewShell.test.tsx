@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
@@ -40,6 +40,11 @@ describe("PublicReviewShell", () => {
     expect(screen.getByText("Public review")).toBeInTheDocument();
     expect(screen.getByText("Preparing for launch")).toBeInTheDocument();
     expect(screen.getByText("Audit planned")).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        `Review version ${STREAM_REVIEW_DEFINITION.activeVersion}`
+      )
+    ).not.toBeInTheDocument();
     expect(screen.getByText("Page 1 of 14")).toBeInTheDocument();
     expect(
       screen.getByRole("complementary", { name: "A small human disclosure" })
@@ -101,6 +106,16 @@ describe("PublicReviewShell", () => {
     expect(
       screen.getAllByRole("link", { name: "All public feedback" })
     ).toHaveLength(2);
+    const reviewHistoryLinks = screen.getAllByRole("link", {
+      name: "Review history",
+    });
+    expect(reviewHistoryLinks).toHaveLength(2);
+    reviewHistoryLinks.forEach((link) =>
+      expect(link).toHaveAttribute(
+        "href",
+        `/reviews/6529-stream/versions/${STREAM_REVIEW_DEFINITION.activeVersion}`
+      )
+    );
     expect(
       screen.queryByRole("link", { name: "Review" })
     ).not.toBeInTheDocument();
@@ -149,6 +164,66 @@ describe("PublicReviewShell", () => {
     window.history.replaceState(null, "", window.location.pathname);
   });
 
+  it("can replace the generic overview paths with a review-specific guide", () => {
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Editorial title"
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
+        sections={[]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback form</div>}
+        showAudiencePaths={false}
+        source={ACTIVE_REVIEW_VERSION.source}
+      />
+    );
+
+    expect(
+      screen.queryByRole("heading", { name: "Choose a reading path" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("can end a current overview before the versioned editorial", () => {
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Old technical overview"
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
+        sections={[]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback form</div>}
+        showAudiencePaths={false}
+        showEditorialContent={false}
+        source={ACTIVE_REVIEW_VERSION.source}
+      />
+    );
+
+    expect(
+      screen.queryByText("Old technical overview")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Evidence labels" })
+    ).not.toBeInTheDocument();
+    const pageStepper = screen.getByRole("navigation", {
+      name: "Previous and next contract review pages",
+    });
+    expect(
+      within(pageStepper).getByRole("link", { name: /Artwork Lifecycle/ })
+    ).toHaveAttribute("href", "/reviews/6529-stream/artwork-lifecycle");
+  });
+
   it("uses the exact resolved source identity instead of the active default", () => {
     const overview = ACTIVE_REVIEW_VERSION.pages[0];
     if (!overview) {
@@ -192,6 +267,13 @@ describe("PublicReviewShell", () => {
       "href",
       `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
     );
+    expect(screen.getByText("Review version 2026-07-25.1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View current review" })
+    ).toHaveAttribute("href", "/reviews/6529-stream");
+    expect(
+      screen.queryByRole("link", { name: "Review history" })
+    ).not.toBeInTheDocument();
     const historicalFeedbackLinks = screen.getAllByRole("link", {
       name: "All public feedback",
     });

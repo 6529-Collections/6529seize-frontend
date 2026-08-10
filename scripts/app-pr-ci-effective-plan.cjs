@@ -28,12 +28,11 @@ const REQUIRED_BASE_CHECKS = [
   "reviewbot_contract",
   "agent_files_sync",
 ];
-const SOURCE_EXTENSION = /\.(?:cjs|js|jsx|mjs|ts|tsx)$/u;
 const RELEASE_BUS_CONTRACT_PATTERNS = [
   /^\.github\/workflows\//u,
   /^ops\/deployment-bus\//u,
   /^ops\/testing-strategy\/museum-/u,
-  /^ops\/scripts\/(?:deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
+  /^ops\/scripts\/(?:artifact-portability(?:-[A-Za-z0-9]+)*|deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
   /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
   /^components\/museum\/MuseumNetworkProposition\.tsx$/u,
@@ -54,7 +53,7 @@ function isTestFile(file) {
   );
 }
 
-function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
+function applyEffectiveAppPrCiPlan(plan) {
   const baseChecks = plan?.checks;
   const hasValidBaseChecks =
     baseChecks !== null &&
@@ -76,16 +75,6 @@ function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
   const packageGovernance = files.some((file) =>
     PACKAGE_GOVERNANCE_FILES.has(file)
   );
-  // The caller runs this planner from the exact PR merge-tree checkout;
-  // absence therefore identifies a deleted runtime source, not a sparse tree.
-  const deletedRuntimeSource = files.some(
-    (file) =>
-      SOURCE_EXTENSION.test(file) &&
-      !isTestFile(file) &&
-      !fs.existsSync(path.join(cwd, file))
-  );
-  const deadcode =
-    packageGovernance || files.includes("knip.jsonc") || deletedRuntimeSource;
   const testTypecheck =
     packageGovernance ||
     files.some(
@@ -105,16 +94,12 @@ function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
   const checks = {
     ...plan.checks,
     install: check(
-      baseChecks.install.required || playwrightMuseum,
+      true,
       playwrightMuseum
         ? "Museum-owned public pages or their publication contract changed and need the isolated Museum browser lane."
-        : baseChecks.install.reason
-    ),
-    deadcode: check(
-      deadcode,
-      deadcode
-        ? "Dependency policy, Knip configuration, or deleted runtime source needs dead-code analysis."
-        : "No dependency policy, Knip configuration, or deleted runtime source changed."
+        : baseChecks.install.required
+          ? baseChecks.install.reason
+          : "Repository-wide Knip runs for every pull request."
     ),
     release_bus_contract: check(
       releaseBusContract,

@@ -9,24 +9,35 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { getWalletAddress } from "@/services/auth/auth.utils";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
+import { useElectron } from "@/hooks/useElectron";
 import {
   createConnectionShare,
   createLegacyDesktopConnectionShare,
 } from "@/services/auth/session-v2.utils";
-import { Mode, SubMode } from "./constants";
+import {
+  getAvailableConnectSubMode,
+  getDefaultSubMode,
+  Mode,
+} from "./constants";
+import type { PageShareTarget, SubMode } from "./constants";
 import { HeaderShareModalView } from "./HeaderShareModalView";
+import {
+  getSavedPageShareTarget,
+  savePageShareTarget,
+} from "./pageShareTargetCookie";
 import {
   bodyScrollLock,
   buildConnectionShareFailureKey,
   buildLegacyDesktopConnectionSharePath,
   buildLegacyDesktopConnectionShareUrl,
+  buildNavigateDeepLinkUrl,
   buildNativeConnectionShareUrls,
   buildRouterPath,
+  createReadyQrCodeSource,
+  getCurrentPageLocation,
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
   type ConnectionShareStatus,
-  type DisplayContent,
   generateQrCodeSource,
   getCachedConnectionShare,
   getFocusableElements,
@@ -38,17 +49,34 @@ import {
   type TerminalConnectionShareStatus,
 } from "./shareUtils";
 
-export function HeaderQRModal({
+type ShareDisplayState = {
+  readonly activeSubTab: SubMode;
+  readonly navigateBrowserSrc: string;
+  readonly navigateBrowserUrl: string;
+  readonly navigateAppSrc: string;
+  readonly navigateAppUrl: string;
+  readonly navigateCoreUrl: string;
+  readonly shareConnectionSrc: string;
+  readonly shareConnectionAppUrl: string;
+  readonly shareConnectionCoreUrl: string;
+  readonly mobileConnectionShareStatus: ConnectionShareStatus;
+  readonly desktopConnectionShareStatus: ConnectionShareStatus;
+};
+
+function HeaderQRModal({
   show,
   onClose,
+  mode,
 }: {
   readonly show: boolean;
   readonly onClose: () => void;
+  readonly mode: Mode;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchParamsString = searchParams?.toString() ?? "";
   const isMobile = useIsMobileDevice();
+  const isElectron = useElectron();
 
   const [shouldRender, setShouldRender] = useState(show);
   const [isVisible, setIsVisible] = useState(show);
@@ -59,16 +87,18 @@ export function HeaderQRModal({
   const activeWalletAddress = contextWalletAddress ?? getWalletAddress();
   const hasWalletAddress = Boolean(activeWalletAddress);
 
-  const [activeTab, setActiveTab] = useState<Mode>(
-    hasValidWalletAuth || hasWalletAddress ? Mode.SHARE : Mode.NAVIGATE
+  const [activeSubTab, setActiveSubTab] = useState<SubMode>(() =>
+    getDefaultSubMode(mode)
   );
-  const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
+  const [pageShareTarget, setPageShareTarget] = useState<PageShareTarget>(
+    getSavedPageShareTarget
+  );
 
   const [navigateBrowserUrl, setNavigateBrowserUrl] = useState<string>("");
   const [navigateAppUrl, setNavigateAppUrl] = useState<string>("");
+  const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionAppUrl, setShareConnectionAppUrl] =
     useState<string>("");
-  const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
     useState<string>("");
   const [mobileConnectionShareStatus, setMobileConnectionShareStatus] =
@@ -83,16 +113,49 @@ export function HeaderQRModal({
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
-
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
-  const onCloseRef = useRef(onClose);
-  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [closingDisplayState, setClosingDisplayState] =
+    useState<ShareDisplayState | null>(null);
+
+  const closeModal = useCallback(() => {
+    setClosingDisplayState({
+      activeSubTab,
+      navigateBrowserSrc,
+      navigateBrowserUrl,
+      navigateAppSrc,
+      navigateAppUrl,
+      navigateCoreUrl,
+      shareConnectionSrc,
+      shareConnectionAppUrl,
+      shareConnectionCoreUrl,
+      mobileConnectionShareStatus,
+      desktopConnectionShareStatus,
+    });
+    setUrlCopied(false);
+    setActiveSubTab(getDefaultSubMode(mode));
+    onClose();
+  }, [
+    activeSubTab,
+    desktopConnectionShareStatus,
+    mobileConnectionShareStatus,
+    mode,
+    navigateBrowserSrc,
+    navigateBrowserUrl,
+    navigateAppSrc,
+    navigateAppUrl,
+    navigateCoreUrl,
+    onClose,
+    shareConnectionAppUrl,
+    shareConnectionCoreUrl,
+    shareConnectionSrc,
+  ]);
+
+  const onCloseRef = useRef(closeModal);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const connectionShareAbortRef = useRef<AbortController | null>(null);
   const shareGenerationIdRef = useRef(0);
   const cachedConnectionShareRef = useRef<CachedConnectionShare | null>(null);
-  const visibleDisplayContentRef = useRef<DisplayContent | null>(null);
   const terminalConnectionShareFailuresRef = useRef<
     Map<string, TerminalConnectionShareStatus>
   >(new Map());
@@ -145,17 +208,8 @@ export function HeaderQRModal({
   }, []);
 
   useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  useEffect(() => {
-    return () => {
-      if (copyTimeoutRef.current) {
-        clearTimeout(copyTimeoutRef.current);
-        copyTimeoutRef.current = null;
-      }
-    };
-  }, []);
+    onCloseRef.current = closeModal;
+  }, [closeModal]);
 
   const handleEscapeKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -185,65 +239,104 @@ export function HeaderQRModal({
     setNavigateAppSrc("");
     setShareConnectionSrc("");
 
-    const routerPath = buildRouterPath(pathname, searchParams);
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
     const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
 
-    const browserUrl = `${globalThis.window.location.origin}${routerPath}`;
-    const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
-    const coreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
+    if (mode === Mode.PAGE_SHARE) {
+      const { fullUrl: browserUrl, routerPath: pageRouterPath } =
+        getCurrentPageLocation();
+      const appUrl = buildNavigateDeepLinkUrl({
+        scheme: appScheme,
+        routerPath: pageRouterPath,
+      });
+      const coreUrl = buildNavigateDeepLinkUrl({
+        scheme: coreScheme,
+        routerPath: pageRouterPath,
+      });
 
-    setNavigateBrowserUrl(browserUrl);
-    setNavigateAppUrl(appUrl);
-    setNavigateCoreUrl(coreUrl);
+      setNavigateBrowserUrl(browserUrl);
+      setNavigateAppUrl(appUrl);
+      setNavigateCoreUrl(coreUrl);
+      generateQrCodeSource({
+        url: browserUrl,
+        setSource: setNavigateBrowserSrc,
+        clearSource: () => setNavigateBrowserSrc(""),
+        staleGeneration: isStaleGeneration,
+        signal,
+        errorMessage: "Failed to generate browser QR code",
+      });
+      generateQrCodeSource({
+        url: appUrl,
+        setSource: setNavigateAppSrc,
+        clearSource: () => setNavigateAppSrc(""),
+        staleGeneration: isStaleGeneration,
+        signal,
+        errorMessage: "Failed to generate mobile app QR code",
+      });
+      return;
+    }
 
-    const shareConnectionAppUrl = await generateNativeConnectionShareUrl({
+    const routerPath = buildRouterPath(pathname, searchParams);
+    setShareConnectionAppUrl("");
+    setShareConnectionCoreUrl("");
+    setMobileConnectionShareStatus("loading");
+    setDesktopConnectionShareStatus("loading");
+    const generatedConnectionAppUrl = await generateNativeConnectionShareUrl({
       appScheme,
       isStaleGeneration,
       signal,
       walletAddress,
       routerPath,
     });
-    await generateLegacyDesktopConnectionShareUrl({
-      coreScheme,
-      isStaleGeneration,
-      signal,
-      walletAddress,
-      routerPath,
-    });
-
     if (isStaleGeneration()) {
       return;
     }
-
-    generateQrCodeSource({
-      url: browserUrl,
-      setSource: setNavigateBrowserSrc,
-      clearSource: () => setNavigateBrowserSrc(""),
-      staleGeneration: isStaleGeneration,
-      signal,
-      errorMessage: "Failed to generate browser QR code",
-    });
-
-    generateQrCodeSource({
-      url: appUrl,
-      setSource: setNavigateAppSrc,
-      clearSource: () => setNavigateAppSrc(""),
-      staleGeneration: isStaleGeneration,
-      signal,
-      errorMessage: "Failed to generate mobile app QR code",
-    });
-
-    if (shareConnectionAppUrl) {
-      generateQrCodeSource({
-        url: shareConnectionAppUrl,
-        setSource: setShareConnectionSrc,
-        clearSource: () => setShareConnectionSrc(""),
-        staleGeneration: isStaleGeneration,
+    await Promise.all([
+      prepareMobileConnectionShare({
+        connectionUrl: generatedConnectionAppUrl,
+        isStaleGeneration,
         signal,
-        errorMessage: "Failed to generate share connection QR code",
-      });
+      }),
+      generateLegacyDesktopConnectionShareUrl({
+        coreScheme,
+        isStaleGeneration,
+        signal,
+        walletAddress,
+        routerPath,
+      }),
+    ]);
+  }
+
+  async function prepareMobileConnectionShare({
+    connectionUrl,
+    isStaleGeneration,
+    signal,
+  }: {
+    readonly connectionUrl: string;
+    readonly isStaleGeneration: IsStaleGeneration;
+    readonly signal?: AbortSignal | undefined;
+  }): Promise<void> {
+    if (!connectionUrl || isStaleGeneration()) {
+      return;
     }
+
+    const qrSource = await createReadyQrCodeSource({
+      url: connectionUrl,
+      staleGeneration: isStaleGeneration,
+      signal,
+      errorMessage: "Failed to generate share connection QR code",
+    });
+    if (isStaleGeneration()) {
+      return;
+    }
+    if (!qrSource) {
+      setUnavailableMobileConnectionShare("error");
+      return;
+    }
+
+    setShareConnectionAppUrl(connectionUrl);
+    setShareConnectionSrc(qrSource);
+    setMobileConnectionShareStatus("ready");
   }
 
   async function generateNativeConnectionShareUrl({
@@ -319,8 +412,6 @@ export function HeaderQRModal({
       });
 
       terminalConnectionShareFailuresRef.current.delete(failureKey);
-      setMobileConnectionShareStatus("ready");
-      setShareConnectionAppUrl(shareUrls.appUrl);
       return shareUrls.appUrl;
     } catch (error: unknown) {
       if (isStaleGeneration() || isAbortError(error, signal)) {
@@ -527,7 +618,6 @@ export function HeaderQRModal({
       return;
     }
 
-    visibleDisplayContentRef.current = null;
     connectionShareAbortRef.current?.abort();
     const controller = new AbortController();
     connectionShareAbortRef.current = controller;
@@ -548,13 +638,10 @@ export function HeaderQRModal({
     activeWalletAddress,
     pathname,
     searchParamsString,
+    mode,
   ]);
 
   useEffect(() => {
-    setActiveTab(
-      hasValidWalletAuth || hasWalletAddress ? Mode.SHARE : Mode.NAVIGATE
-    );
-    setActiveSubTab(SubMode.APP);
     if (show) return;
     const timer = setTimeout(() => {
       setNavigateBrowserSrc("");
@@ -562,7 +649,7 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show, hasValidWalletAuth, hasWalletAddress]);
+  }, [show]);
 
   useEffect(() => {
     if (show) {
@@ -573,7 +660,6 @@ export function HeaderQRModal({
 
     setIsVisible(false);
     const timeout = setTimeout(() => {
-      visibleDisplayContentRef.current = null;
       setShouldRender(false);
     }, 200);
     return () => clearTimeout(timeout);
@@ -628,34 +714,70 @@ export function HeaderQRModal({
     return null;
   }
 
+  const currentDisplayState: ShareDisplayState = {
+    activeSubTab,
+    navigateBrowserSrc,
+    navigateBrowserUrl,
+    navigateAppSrc,
+    navigateAppUrl,
+    navigateCoreUrl,
+    shareConnectionSrc,
+    shareConnectionAppUrl,
+    shareConnectionCoreUrl,
+    mobileConnectionShareStatus,
+    desktopConnectionShareStatus,
+  };
+  const displayState =
+    !show && closingDisplayState ? closingDisplayState : currentDisplayState;
+  const displayActiveSubTab = getAvailableConnectSubMode(
+    displayState.activeSubTab,
+    isElectron
+  );
+
   return (
     <HeaderShareModalView
-      show={show}
+      key={show ? "open" : "closed"}
       shouldRender={shouldRender}
       isVisible={isVisible}
-      onClose={onClose}
+      onClose={closeModal}
       dialogRef={dialogRef}
-      activeTab={activeTab}
-      activeSubTab={activeSubTab}
-      setActiveTab={setActiveTab}
+      mode={mode}
+      activeSubTab={displayActiveSubTab}
       setActiveSubTab={setActiveSubTab}
-      navigateBrowserSrc={navigateBrowserSrc}
-      navigateBrowserUrl={navigateBrowserUrl}
-      navigateAppSrc={navigateAppSrc}
-      navigateAppUrl={navigateAppUrl}
-      navigateCoreUrl={navigateCoreUrl}
-      shareConnectionSrc={shareConnectionSrc}
-      shareConnectionAppUrl={shareConnectionAppUrl}
-      shareConnectionCoreUrl={shareConnectionCoreUrl}
-      mobileConnectionShareStatus={mobileConnectionShareStatus}
-      desktopConnectionShareStatus={desktopConnectionShareStatus}
-      visibleDisplayContentRef={visibleDisplayContentRef}
+      navigateBrowserSrc={displayState.navigateBrowserSrc}
+      navigateBrowserUrl={displayState.navigateBrowserUrl}
+      navigateAppSrc={displayState.navigateAppSrc}
+      navigateAppUrl={displayState.navigateAppUrl}
+      navigateCoreUrl={displayState.navigateCoreUrl}
+      pageShareTarget={pageShareTarget}
+      setPageShareTarget={(target) => {
+        setPageShareTarget(target);
+        savePageShareTarget(target);
+      }}
+      shareConnectionSrc={displayState.shareConnectionSrc}
+      shareConnectionAppUrl={displayState.shareConnectionAppUrl}
+      shareConnectionCoreUrl={displayState.shareConnectionCoreUrl}
+      mobileConnectionShareStatus={displayState.mobileConnectionShareStatus}
+      desktopConnectionShareStatus={displayState.desktopConnectionShareStatus}
       terminalConnectionShareFailuresRef={terminalConnectionShareFailuresRef}
       requestSessionUpgrade={requestSessionUpgrade}
       urlCopied={urlCopied}
       setUrlCopied={setUrlCopied}
-      copyTimeoutRef={copyTimeoutRef}
       isMobile={isMobile}
+      isElectron={isElectron}
     />
   );
+}
+
+type HeaderModalProps = {
+  readonly show: boolean;
+  readonly onClose: () => void;
+};
+
+export function HeaderPageShareModal(props: HeaderModalProps) {
+  return <HeaderQRModal {...props} mode={Mode.PAGE_SHARE} />;
+}
+
+export function HeaderConnectModal(props: HeaderModalProps) {
+  return <HeaderQRModal {...props} mode={Mode.CONNECT} />;
 }

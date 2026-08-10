@@ -30,7 +30,7 @@ const MyStreamWaveOutcome: FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
   } = useWaveOutcomesQuery({ waveId: wave.id });
 
   const containerClassName = useMemo(() => {
-    return `tw-pt-4 tw-pb-4 tw-w-full tw-flex tw-flex-col tw-overflow-y-auto tw-no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-flex-grow lg:tw-pr-2`;
+    return `tw-w-full tw-flex tw-flex-grow tw-flex-col tw-overflow-y-auto tw-no-scrollbar tw-pb-[21px] tw-pt-[13px] lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300`;
   }, []);
 
   useInfiniteScroll(
@@ -52,15 +52,17 @@ const MyStreamWaveOutcome: FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
     >
       {isInitialLoading && <SpinnerLoader text="Loading outcomes..." />}
       {!isInitialLoading && errorMessage && (
-        <div className="tw-text-red-400 tw-px-4 tw-text-sm">{errorMessage}</div>
+        <div className="tw-px-[13px] tw-text-sm tw-text-red-400 sm:tw-px-[21px]">
+          {errorMessage}
+        </div>
       )}
       {!isInitialLoading && !errorMessage && !hasOutcomes && !isFetching && (
-        <div className="tw-px-4 tw-text-sm tw-text-iron-500">
+        <div className="tw-px-[13px] tw-text-sm tw-text-iron-500 sm:tw-px-[21px]">
           No outcomes to show.
         </div>
       )}
       {hasOutcomes && (
-        <div className="tw-space-y-4 tw-px-2 sm:tw-px-4">
+        <div className="tw-space-y-[13px] tw-px-[8px] sm:tw-px-[13px]">
           {outcomes.map((outcome, index) => (
             <WaveOutcome
               waveId={wave.id}
