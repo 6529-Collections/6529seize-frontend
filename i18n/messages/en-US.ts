@@ -1006,6 +1006,18 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
+const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
+  title: "Schedule",
+  description:
+    "Review when this wave opens, voting begins, and winners are announced.",
+  "approve.noEndSummary": "Starts {start}. No end date.",
+  "approve.endSummary": "Starts {start}. Ends {end}.",
+  "rank.ongoingSummary":
+    "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
+  "rank.scheduledSummary":
+    "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
+} as const);
+
 const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   cancel: "Cancel",
   complete: "Complete",
@@ -2683,6 +2695,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_ADVANCED_MESSAGES,
   ...WAVE_CREATE_OVERVIEW_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
+  ...WAVE_CREATE_DATES_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,

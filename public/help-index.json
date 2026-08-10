@@ -2213,6 +2213,7 @@
         "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "Dates starts with a compact Schedule summary using the draft's current values; expand Advanced settings to change starts, winner announcements, recurring cycles, or an optional end date.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "In Description, individual @ mention suggestions follow the draft wave's Who can view group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."

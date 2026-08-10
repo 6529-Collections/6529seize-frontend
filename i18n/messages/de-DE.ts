@@ -441,6 +441,17 @@ export const DE_DE_MESSAGES = {
     "Alle können die Wave sehen und teilnehmen. Nur du kannst sie verwalten.",
   "waves.create.groups.advanced.customSummary":
     "Zugriffs- oder Moderationseinstellungen wurden angepasst.",
+  "waves.create.dates.title": "Zeitplan",
+  "waves.create.dates.description":
+    "Prüfe, wann diese Wave startet, die Abstimmung beginnt und Gewinner bekannt gegeben werden.",
+  "waves.create.dates.approve.noEndSummary":
+    "Startet {start}. Kein Enddatum.",
+  "waves.create.dates.approve.endSummary":
+    "Startet {start}. Endet {end}.",
+  "waves.create.dates.rank.ongoingSummary":
+    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Das Ranking bleibt offen.",
+  "waves.create.dates.rank.scheduledSummary":
+    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Erste Gewinner: {announcement}.",
   ...DE_DE_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",

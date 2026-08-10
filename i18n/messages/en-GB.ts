@@ -430,6 +430,15 @@ export const EN_GB_MESSAGES = {
     "Anyone can view and participate. Only you can administer the wave.",
   "waves.create.groups.advanced.customSummary":
     "Access or moderation settings have been customised.",
+  "waves.create.dates.title": "Schedule",
+  "waves.create.dates.description":
+    "Review when this wave opens, voting begins, and winners are announced.",
+  "waves.create.dates.approve.noEndSummary": "Starts {start}. No end date.",
+  "waves.create.dates.approve.endSummary": "Starts {start}. Ends {end}.",
+  "waves.create.dates.rank.ongoingSummary":
+    "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
+  "waves.create.dates.rank.scheduledSummary":
+    "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
   ...EN_GB_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",
