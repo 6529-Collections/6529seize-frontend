@@ -162,8 +162,8 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
   return (
     <div
       className={clsx(
-        "tw-flex",
-        isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-1",
+        "tailwind-scope tw-flex",
+        isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-0.5",
         fullWidth ? "tw-w-full" : "tw-w-auto"
       )}
     >
@@ -172,7 +172,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
         aria-orientation="horizontal"
         className={clsx(
           "tw-flex",
-          isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-1",
+          isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-0.5",
           fullWidth && "tw-flex-1"
         )}
       >
@@ -207,7 +207,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
 
       {overflowTabs.length > 0 && (
         <CompactMenu
-          className="tw-relative"
+          className="tw-relative tw-flex-none"
           unstyledTrigger
           unstyledMenu
           unstyledItems
@@ -221,15 +221,16 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
               isCompactPills,
             })
           )}
-          trigger={
+          trigger={({ isOpen }) => (
             <OverflowTrigger
+              isOpen={isOpen}
               isActiveInOverflow={isActiveInOverflow}
               activeLabel={activeOption?.label}
               fallbackLabel={
                 TAB_TOGGLE_WITH_OVERFLOW_MESSAGES.overflowFallbackLabel
               }
             />
-          }
+          )}
           items={overflowTabs.map((option) => ({
             id: option.key,
             label: option.label,
@@ -244,7 +245,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           focusItemClassName="tw-bg-iron-800 tw-text-iron-100"
           menuWidthClassName="tw-w-36"
           menuClassName={clsx(
-            "tw-z-50 tw-mt-2 tw-rounded-md tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 focus:tw-outline-none",
+            "tailwind-scope tw-z-[120] tw-mt-2 tw-rounded-md tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 focus:tw-outline-none",
             isCompactPills ? "tw-ring-white/10" : "tw-ring-primary-400/20"
           )}
           anchor="bottom end"

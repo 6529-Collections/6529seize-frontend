@@ -155,8 +155,8 @@ jobs:
       artifact-api-digest: ${{ steps.children.outputs.artifact_api_digest }}
       artifact-id: ${{ steps.children.outputs.artifact_id }}
       artifact-name: ${{ steps.children.outputs.artifact_name }}
-      artifact-run-attempt: ${{ steps.children.outputs.artifact_run_attempt }}
-      artifact-run-id: ${{ steps.children.outputs.artifact_run_id }}
+      artifact-run-attempt: ${{ steps.children.outputs.builder_run_attempt }}
+      artifact-run-id: ${{ steps.children.outputs.builder_run_id }}
       selection-artifact-api-digest: ${{ steps.children.outputs.selection_artifact_api_digest }}
       selection-artifact-id: ${{ steps.children.outputs.selection_artifact_id }}
       selection-artifact-name: ${{ steps.children.outputs.selection_artifact_name }}
@@ -278,7 +278,7 @@ jobs:
           unzip -Z1 .one-click-production/selection.zip \
             > .one-click-production/selection-members.txt
           node ops/scripts/verify-production-artifact-selection.cjs \
-            validate-archive-members \
+            validate-selection-archive-members \
             --archive-members .one-click-production/selection-members.txt >/dev/null
           unzip -q .one-click-production/selection.zip \
             -d .one-click-production/selection
