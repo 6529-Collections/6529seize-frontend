@@ -90,7 +90,10 @@ describe("museum publication compatibility", () => {
       path.join(process.cwd(), ".tmp-museum-compatibility-")
     );
     const outputPath = path.join(outputDirectory, "strict-adapter.json");
-    const environment = { ...process.env, NODE_ENV: "test" };
+    const environment: NodeJS.ProcessEnv = {
+      ...process.env,
+      NODE_ENV: "test",
+    };
     delete environment["PUBLIC_RUNTIME"];
 
     try {

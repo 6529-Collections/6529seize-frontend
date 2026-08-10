@@ -369,41 +369,34 @@ describe("Museum publication runtime source ref", () => {
   });
 
   it("reads the publication node environment without requiring unrelated public endpoints", () => {
-    const previousPublicRuntime = process.env["PUBLIC_RUNTIME"];
-    const previousNodeEnvironment = process.env["NODE_ENV"];
+    const environment: NodeJS.ProcessEnv = {
+      ...process.env,
+      NODE_ENV: "production",
+      PUBLIC_RUNTIME: JSON.stringify({ NODE_ENV: "local" }),
+    };
+    const replacement = jest.replaceProperty(process, "env", environment);
     try {
-      process.env["NODE_ENV"] = "production";
-      process.env["PUBLIC_RUNTIME"] = JSON.stringify({ NODE_ENV: "local" });
       expect(getMuseumPublicationNodeEnvironment()).toBe("local");
 
-      process.env["PUBLIC_RUNTIME"] = "{}";
+      environment["PUBLIC_RUNTIME"] = "{}";
       expect(getMuseumPublicationNodeEnvironment()).toBe("production");
 
-      process.env["PUBLIC_RUNTIME"] = "not-json";
+      environment["PUBLIC_RUNTIME"] = "not-json";
       expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
         "museum_publication_runtime_environment_invalid"
       );
 
-      process.env["PUBLIC_RUNTIME"] = "[]";
+      environment["PUBLIC_RUNTIME"] = "[]";
       expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
         "museum_publication_runtime_environment_invalid"
       );
 
-      process.env["PUBLIC_RUNTIME"] = JSON.stringify({ NODE_ENV: "bogus" });
+      environment["PUBLIC_RUNTIME"] = JSON.stringify({ NODE_ENV: "bogus" });
       expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
         "museum_publication_runtime_environment_invalid"
       );
     } finally {
-      if (previousPublicRuntime === undefined) {
-        delete process.env["PUBLIC_RUNTIME"];
-      } else {
-        process.env["PUBLIC_RUNTIME"] = previousPublicRuntime;
-      }
-      if (previousNodeEnvironment === undefined) {
-        delete process.env["NODE_ENV"];
-      } else {
-        process.env["NODE_ENV"] = previousNodeEnvironment;
-      }
+      replacement.restore();
     }
   });
 });
