@@ -487,7 +487,7 @@ set -euo pipefail
 if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
   case "\${MOCK_RUNNER_CAPABILITY:-old}" in
     current)
-      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1},"serial_failed_pack_retry":{"version":1,"max_retries":1}}}'
+      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1},"serial_failed_pack_retry":{"version":2,"max_retries":1,"policy":"transient-infrastructure-only"}}}'
       exit 0
       ;;
     incompatible)
@@ -1068,6 +1068,8 @@ describe("Release Bus artifact rollout compatibility", () => {
         OPERATION_KEY: "rb2:production:e2e:a1",
         PATH: `${mockBin}:${process.env["PATH"]}`,
         READONLY_EVIDENCE_UPLOAD_OUTCOME: "skipped",
+        READONLY_MUSEUM_PROVENANCE_OUTCOME: "success",
+        READONLY_MUSEUM_PUBLICATION_OUTCOME: "success",
         READONLY_RESULT: "failure",
         READONLY_SELECTION_OUTCOME: "success",
         READONLY_SELECTION_UPLOAD_OUTCOME: "success",
@@ -1113,6 +1115,26 @@ describe("Release Bus artifact rollout compatibility", () => {
       expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
         failure_class: "E2E",
         failure_phase: "production_e2e",
+        retryable: false,
+        status: "FAILED",
+      });
+
+      expect(
+        runShell(report.run!, {
+          cwd: root,
+          env: {
+            ...baseEnv,
+            READONLY_DEPENDENCIES_OUTCOME: "success",
+            READONLY_E2E_OUTCOME: "skipped",
+            READONLY_MUSEUM_PUBLICATION_OUTCOME: "failure",
+            READONLY_PLAYWRIGHT_OUTCOME: "success",
+            READONLY_SOCKET_OUTCOME: "success",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        failure_class: "CONTROL_PLANE",
+        failure_phase: "production_e2e_museum_publication",
         retryable: false,
         status: "FAILED",
       });

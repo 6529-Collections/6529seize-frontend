@@ -53,7 +53,7 @@ const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-export const isDmUnreadConversationState = (
+const isDmUnreadConversationState = (
   value: unknown
 ): value is ApiDmUnreadConversationState => {
   if (!isRecord(value)) {
@@ -371,14 +371,4 @@ export const useOptionalDmUnreadActions = () => {
       reconcileFailedRead,
     };
   }, [activeProfileId, cancelRead, reconcileFailedRead, store]);
-};
-
-export const useDmUnreadActions = () => {
-  const actions = useOptionalDmUnreadActions();
-  if (!actions) {
-    throw new Error(
-      "DM unread actions must be used within DmUnreadStateProvider"
-    );
-  }
-  return actions;
 };

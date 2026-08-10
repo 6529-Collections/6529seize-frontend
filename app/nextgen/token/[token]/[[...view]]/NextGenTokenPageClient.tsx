@@ -33,6 +33,7 @@ export default function NextGenTokenPageClient({
   tokenCount,
   collection,
   view: initialView,
+  returnTo,
 }: {
   readonly tokenId: number;
   readonly token: NextGenToken | null;
@@ -40,6 +41,7 @@ export default function NextGenTokenPageClient({
   readonly tokenCount: number;
   readonly collection: NextGenCollection;
   readonly view: NextgenCollectionView;
+  readonly returnTo?: string | null | undefined;
 }) {
   const { setTitle } = useTitle();
   const [tokenView, setTokenView] =
@@ -71,6 +73,7 @@ export default function NextGenTokenPageClient({
     if (nextView !== NextgenCollectionView.ABOUT) {
       newPath += `/${nextView.toLowerCase().replaceAll(" ", "-")}`;
     }
+    newPath += globalThis.location.search;
     setTokenView(nextView);
     globalThis.history.pushState({ view: nextView }, "", newPath);
   };
@@ -86,6 +89,7 @@ export default function NextGenTokenPageClient({
           tokenCount={tokenCount}
           view={tokenView}
           setView={updateView}
+          returnTo={returnTo}
         />
       ) : (
         <NextGenTokenOnChain collection={collection} token_id={tokenId} />

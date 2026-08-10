@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import {
   InstitutionalPracticeManuscript,
   InstitutionalPracticePublicationLine,
@@ -23,7 +24,7 @@ export const metadata: Metadata = getAppMetadata({
   ),
 });
 
-export default async function MuseumInstitutionalPracticeSourcesPage() {
+export async function renderMuseumInstitutionalPracticeSourcesPage() {
   const publicationState = await getMuseumPublicationState();
   const publication = publicationState.publication;
   if (!institutionalPracticePublicationIsComplete(publication)) {
@@ -39,7 +40,7 @@ export default async function MuseumInstitutionalPracticeSourcesPage() {
   return (
     <article className="tw-min-w-0">
       <Link
-        href="/museum/network/stories/a-field-of-practice"
+        href="/museum/network/research/institutional-practice"
         prefetch={false}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
@@ -73,4 +74,8 @@ export default async function MuseumInstitutionalPracticeSourcesPage() {
       </div>
     </article>
   );
+}
+
+export default function MuseumInstitutionalPracticeSourcesLegacyPage() {
+  permanentRedirect("/museum/network/research/institutional-practice/sources");
 }

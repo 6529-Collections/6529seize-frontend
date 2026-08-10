@@ -6,6 +6,7 @@ import { CollectedCollectionType } from "@/entities/IProfile";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
+import { buildCollectedCardHref } from "@/helpers/profile-collected-navigation";
 import { ContractType } from "@/types/enums";
 import {
   faCheck,
@@ -34,6 +35,7 @@ export default function UserPageCollectedCard({
   isTransferLoading = false,
   showZeroSeizedCount = false,
   locale = DEFAULT_LOCALE,
+  returnTo,
 }: {
   readonly card: CollectedCard;
   readonly contractType: ContractType;
@@ -48,9 +50,16 @@ export default function UserPageCollectedCard({
   readonly isTransferLoading?: boolean | undefined;
   readonly showZeroSeizedCount?: boolean | undefined;
   readonly locale?: SupportedLocale | undefined;
+  readonly returnTo?: string | null | undefined;
 }) {
   const collectionMeta = COLLECTED_COLLECTIONS_META[card.collection];
-  const path = `${collectionMeta.cardPath}/${card.token_id}`;
+  const tokenPath = `${collectionMeta.cardPath}/${card.token_id}`;
+  const path = buildCollectedCardHref({
+    tokenPath,
+    collection: card.collection,
+    tokenId: card.token_id,
+    returnTo,
+  });
   const tooltipId = useId();
   const isSelectMode = interactiveMode === "select";
   const canSelect = copiesMax > 0;
@@ -365,7 +374,10 @@ export default function UserPageCollectedCard({
   }
 
   return (
-    <Link href={path} className="tw-no-underline">
+    <Link
+      href={path}
+      className="tw-block tw-rounded-xl tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+    >
       {CardBody}
     </Link>
   );

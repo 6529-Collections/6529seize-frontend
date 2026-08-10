@@ -17,7 +17,7 @@ interface DmUnreadProfileState {
   readonly conversations: Readonly<Record<string, StoredDmUnreadConversation>>;
 }
 
-export interface DmUnreadStoreSnapshot {
+interface DmUnreadStoreSnapshot {
   readonly profiles: Readonly<Record<string, DmUnreadProfileState>>;
   readonly snapshotReadyProfiles: Readonly<Record<string, true>>;
 }

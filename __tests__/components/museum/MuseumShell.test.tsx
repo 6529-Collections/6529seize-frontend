@@ -44,8 +44,8 @@ describe("MuseumShell", () => {
       "6529 Network Museum",
       "Collection",
       "Artists",
-      "Programs",
-      "Stories & Research",
+      "Acquisitions",
+      "Research",
       "About",
     ]) {
       expect(screen.getByRole("link", { name })).toHaveAttribute(

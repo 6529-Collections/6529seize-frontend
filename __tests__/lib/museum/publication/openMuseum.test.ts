@@ -24,7 +24,7 @@ describe("withoutEmbeddedStatementFrontMatter", () => {
     const markdown = [
       "# The record outlives the interface",
       "",
-      "Status: working public operating statement; not an adopted governance policy",
+      "Status: working public operating statement; policy adoption pending",
       "",
       "## An open museum, built in public",
       "",
@@ -42,7 +42,7 @@ describe("withoutEmbeddedStatementFrontMatter", () => {
     const markdown = [
       "# The record outlives the interface",
       "",
-      "Status: working public operating statement; not an adopted governance policy",
+      "Status: working public operating statement; policy adoption pending",
       "Additional governed caveat that must remain visible.",
       "",
       "## An open museum, built in public",
@@ -57,7 +57,7 @@ describe("withoutEmbeddedStatementFrontMatter", () => {
     const markdown = [
       "# A revised governed title",
       "",
-      "Status: working public operating statement; not an adopted governance policy",
+      "Status: working public operating statement; policy adoption pending",
       "",
       "## An open museum, built in public",
     ].join("\n");

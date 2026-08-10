@@ -13,78 +13,70 @@ acquisition and accession checks follow a future mint.
 
 ## Location in the Site
 
-The program is at `/museum/network/programs/6529NM-AP-01`. Each winner links to
-an artwork page under `/museum/network/objects/`.
+The program is at `/museum/network/acquisition-programs/keys-and-gates`. Each
+winner links to a canonical Work record under `/museum/network/works/`.
 
 ## Entry Points
 
-- Open **Museum**, then **Programs**, then **Keys and Gates**.
+- Open **Museum**, then **Acquisition programs**, then **Keys and Gates**.
 - Follow a direct link to the Keys and Gates program.
 - Open an individual winner from a shared artwork link.
 
 ## User Journey
 
-1. Read the program banner to see the sixteen-work result and current contract
-   dependency.
-2. Review the three-stage journey: chosen by TDH, mint on 6529Stream, then
-   acquire and accession.
-3. Browse the responsive winner grid and open a photograph without losing its
-   original proportions.
+1. Read the program record to see the sixteen-work result and current status.
+2. Review the work-level status and the not-yet-minted-or-accessioned
+   qualifier.
+3. Browse the text-only winner grid and open an individual record.
 4. On the artwork page, read the artist statement and recorded selection
-   details.
-5. Use **Open submitted high-resolution image** when the submitted source is
-   needed instead of the web presentation copy.
+   details without treating submitted media as Museum-held art.
 
 ## Common Scenarios
 
 ### Browsing all winners
 
-The grid loads smaller presentation copies first and lets the browser choose a
-larger copy for wide or high-density displays. Images are not cropped.
+The grid presents each winner's title, artist, selection place, and current
+status. Submitted images are intentionally withheld while the works remain
+unminted and unaccessioned.
 
 ### Inspecting a work closely
 
-Open the winner's artwork page for a larger responsive view. The submitted
-high-resolution image is available as a separate link below the viewer.
+Open the winner's artwork page for its artist statement, selection details,
+rights-review status, and public source record. The page does not display or
+link directly to the submitted image while the work remains outside the
+Museum's collection.
 
 ### Checking whether a winner is in the collection
 
-Use the status text on the program or artwork page. A Keys and Gates winner is
-still `Selected; unminted` until primary mint evidence and the later Museum
+Use the status text on the program or Work page. A Keys and Gates winner is
+still `Selected through an acquisition program; acquisition pending` and `Not
+yet minted or accessioned` until primary mint evidence and the later Museum
 acquisition and accession checks exist. Selection alone does not make the work
 a Museum holding.
 
 ## Edge Cases
 
-- A browser may briefly show empty image space while the closest CloudFront
-  presentation copy is fetched.
-- A winner can have portrait, landscape, or square proportions; the viewer
-  preserves them instead of forcing a common crop.
-- The submitted high-resolution source can be much larger than the responsive
-  presentation copy and may take longer to open.
+- Winner records remain browsable even though their submitted images are not
+  part of the public presentation.
+- A future mint does not by itself make a work a Museum holding; acquisition,
+  custody, rights, and accession checks still have to complete.
 
 ## Failure and Recovery
 
-- If one image does not appear, reload the page or open the winner's artwork
-  page. Other winners remain independently browsable.
-- If the high-resolution source is unavailable, return to the artwork page and
-  use its responsive presentation copy. The source link is not silently
-  replaced with a lower-resolution file.
+- If an individual winner page is unavailable, return to the program grid and
+  use the remaining text records.
 - If the exact Museum source publication cannot be verified, the site uses its
   established atomic-publication failure behavior rather than mixing records
   from different releases.
 
 ## Limitations / Notes
 
-- Responsive WebP files are delivery surrogates, not preservation masters and
-  not tokenized artworks.
-- The high-resolution link points to the recorded submitted source. Its
-  presence does not establish title, custody, rights, acquisition, or
-  accession.
+- Submitted images are not displayed or linked from the Keys and Gates public
+  pages while the works remain selected and unminted. The presentation can be
+  revisited after mint, acquisition, custody, rights, and accession evidence is
+  validated.
 - Mint timing depends on finalization of the 6529Stream contract. The page does
   not predict a date.
-- Visual descriptions are accessibility text and may be refined through the
-  Museum's reviewed record process.
 
 ## Related Pages
 
