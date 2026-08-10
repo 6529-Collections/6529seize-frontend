@@ -30,6 +30,24 @@ const sourceCleanGuard =
   "git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews";
 
 describe("public-review artifact workflow contract", () => {
+  it("bakes the environment-specific mobile app scheme", () => {
+    expect(stagingWorkflow).toContain(
+      "MOBILE_APP_SCHEME: mobileStaging6529"
+    );
+    expect(releaseBusPreflight).toContain(
+      "export MOBILE_APP_SCHEME=mobileStaging6529"
+    );
+    expect(releaseBusPreflight).toContain(
+      "export MOBILE_APP_SCHEME=mobile6529"
+    );
+    expect(legacyProduction).toContain(
+      'MOBILE_APP_SCHEME: "mobile6529"'
+    );
+    expect(productionBuild).toContain(
+      'MOBILE_APP_SCHEME: "mobile6529"'
+    );
+  });
+
   it("keeps exact PR CI source-evidence-only instead of building deploy profiles", () => {
     if (appPrCi.includes("Create exact PR merge-tree CI evidence")) {
       expect(appPrCi).toContain("release-bus-v2-pr-evidence/manifest.json");

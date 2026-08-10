@@ -298,7 +298,6 @@
     "__tests__/components/header/HeaderSearchModal.test.tsx": 1,
     "__tests__/components/header/HeaderSearchModalItem.test.tsx": 1,
     "__tests__/components/header/proxy/HeaderProxyNewModal.test.tsx": 1,
-    "__tests__/components/header/user/HeaderUserMenuDropdown.test.tsx": 3,
     "__tests__/components/home/explore-waves/ExploreWaveCard.test.tsx": 2,
     "__tests__/components/home/HomeNewcomerIntro.test.tsx": 4,
     "__tests__/components/home/LatestDropNextMintSection.test.tsx": 1,

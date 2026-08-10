@@ -28,7 +28,7 @@ export const ArtistPreviewModalTabs: React.FC<ArtistPreviewModalTabsProps> = ({
           onClick={() => onTabChange("winners")}
           className={`tw-flex-1 tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1.5 tw-transition-all tw-duration-300 ${
             activeTab === "winners"
-              ? `tw-bg-[#3F3A31] tw-font-medium tw-text-[#EADFBF] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_0_6px_rgba(0,0,0,0.2)]`
+              ? "tw-bg-iron-800 tw-font-medium tw-text-iron-50 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_0_6px_rgba(0,0,0,0.15)]"
               : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-300"
           }`}
         >
