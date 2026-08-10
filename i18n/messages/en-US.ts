@@ -483,8 +483,6 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   "grid.voters.one": "{count} voter",
   "grid.voters.other": "{count} voters",
   "grid.you": "You",
-  "grid.reachedRequired": "Reached / required",
-  "grid.currentVote": "Current vote",
   "grid.votesNow": "Votes now",
   "grid.status.approved": "Approved",
   "grid.status.approvingIn": "Approving in {time}",

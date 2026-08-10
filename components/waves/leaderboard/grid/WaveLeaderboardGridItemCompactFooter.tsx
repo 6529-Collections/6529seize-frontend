@@ -91,8 +91,6 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
   >;
   const votingCreditLabel =
     votingCreditLabels[votingCreditType] ?? votingCreditType;
-  const hasWinningThreshold =
-    typeof winningThreshold === "number" && winningThreshold > 0;
   const voterCountLabel = t(
     locale,
     drop.raters_count === 1
@@ -135,14 +133,6 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
         supplementFullWidth
       />
       <div className="tw-mb-3 tw-min-w-0 tw-text-xs">
-        <span className="tw-mb-1 tw-block tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
-          {t(
-            locale,
-            hasWinningThreshold
-              ? "waves.leaderboard.grid.reachedRequired"
-              : "waves.leaderboard.grid.currentVote"
-          )}
-        </span>
         <WaveLeaderboardGalleryItemVotes
           drop={drop}
           variant="subtle"
@@ -164,7 +154,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
         <div
           aria-label={voterCountLabel}
           title={voterCountLabel}
-          className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-iron-500"
+          className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-xs tw-text-iron-500"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

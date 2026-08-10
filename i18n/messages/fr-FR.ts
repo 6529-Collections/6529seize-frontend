@@ -468,8 +468,6 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.grid.voters.one": "{count} votant",
   "waves.leaderboard.grid.voters.other": "{count} votants",
   "waves.leaderboard.grid.you": "Vous",
-  "waves.leaderboard.grid.reachedRequired": "Atteint / requis",
-  "waves.leaderboard.grid.currentVote": "Vote actuel",
   "waves.leaderboard.grid.votesNow": "Votes actuels",
   "waves.leaderboard.grid.status.approved": "Approuvé",
   "waves.leaderboard.grid.status.approvingIn": "Approbation dans {time}",

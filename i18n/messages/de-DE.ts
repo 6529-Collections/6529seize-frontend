@@ -459,8 +459,6 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.grid.voters.one": "{count} abstimmende Person",
   "waves.leaderboard.grid.voters.other": "{count} abstimmende Personen",
   "waves.leaderboard.grid.you": "Du",
-  "waves.leaderboard.grid.reachedRequired": "Erreicht / erforderlich",
-  "waves.leaderboard.grid.currentVote": "Aktuelle Stimme",
   "waves.leaderboard.grid.votesNow": "Stimmen jetzt",
   "waves.leaderboard.grid.status.approved": "Genehmigt",
   "waves.leaderboard.grid.status.approvingIn": "Genehmigung in {time}",

@@ -168,7 +168,7 @@ export default function ApprovalDropVoteSummary({
           aria-hidden="true"
           className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-1.5"
         >
-          <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-2 tw-whitespace-nowrap">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
             <span
               className={`tw-font-mono tw-text-sm tw-font-bold ${getCurrentValueClass(
                 {
@@ -185,20 +185,15 @@ export default function ApprovalDropVoteSummary({
             <span className="tw-font-mono tw-text-sm tw-font-bold tw-text-iron-200">
               {formatInteger(locale, winningThreshold)}
             </span>
-          </div>
-          {hasRealtimeRating && (
-            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-              <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
-                {t(locale, "waves.leaderboard.grid.votesNow")}
-              </span>
+            {hasRealtimeRating && (
               <DropVoteProgressing
                 current={current}
                 projected={drop.realtime_rating}
                 tooltipLabel={t(locale, "waves.leaderboard.grid.votesNow")}
                 subtle={subtle}
               />
-            </div>
-          )}
+            )}
+          </div>
           <span
             className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${statusClass}`}
           >
