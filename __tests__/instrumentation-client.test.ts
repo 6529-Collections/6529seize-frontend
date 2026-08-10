@@ -38,6 +38,12 @@ describe("instrumentation-client", () => {
     "Attempt to get a record from database without an in-progress transaction";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
+  const braveWalletSelectedAddressMessage =
+    "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')";
+  const braveWalletEmitMessage =
+    "undefined is not an object (evaluating 'window.ethereum.emit')";
+  const braveWalletUserAgent =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15 Brave";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
   const rabbyChromeUserRejectedStack = [
@@ -381,6 +387,26 @@ describe("instrumentation-client", () => {
     ) => BeforeSendResult;
   };
 
+  const withRuntimeUserAgent = <T>(
+    userAgent: string,
+    callback: () => T
+  ): T => {
+    const originalUserAgent = globalThis.navigator.userAgent;
+    Object.defineProperty(globalThis.navigator, "userAgent", {
+      configurable: true,
+      value: userAgent,
+    });
+
+    try {
+      return callback();
+    } finally {
+      Object.defineProperty(globalThis.navigator, "userAgent", {
+        configurable: true,
+        value: originalUserAgent,
+      });
+    }
+  };
+
   const loadBeforeSendTransaction = () => {
     const config = loadSentryConfig();
     expect(typeof config.beforeSendTransaction).toBe("function");
@@ -619,6 +645,51 @@ describe("instrumentation-client", () => {
           },
           stacktrace: {
             frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createBraveWalletPageEvaluationErrorEvent = (
+    message: string,
+    includeRequest = true
+  ) => ({
+    transaction: "/waves/:wave",
+    ...(includeRequest
+      ? {
+          request: {
+            url: "/waves/[wave]",
+            headers: {
+              "User-Agent": braveWalletUserAgent,
+            },
+          },
+        }
+      : {}),
+    tags: {
+      transaction: "/waves/:wave",
+      url: "/waves/[wave]",
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: message,
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename:
+                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                function: "global code",
+                lineno: 1,
+                colno: 16,
+                in_app: true,
+              },
+            ],
           },
         },
       ],
@@ -1045,6 +1116,64 @@ describe("instrumentation-client", () => {
       type: browserUnhandledRejectionMechanismType,
       handled: false,
     });
+  });
+
+  it.each([
+    braveWalletSelectedAddressMessage,
+    braveWalletEmitMessage,
+  ])("drops the exact Brave Wallet page-evaluation error: %s", (message) => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(message);
+
+    const result = beforeSend(event);
+
+    expect(event).not.toHaveProperty("contexts.browser");
+    expect(event).not.toHaveProperty("tags.browser.name");
+    expect(result).toBeNull();
+  });
+
+  it("drops a Brave Wallet page-evaluation error using the runtime user agent without request data", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(
+      braveWalletSelectedAddressMessage,
+      false
+    );
+
+    const result = withRuntimeUserAgent(braveWalletUserAgent, () =>
+      beforeSend(event)
+    );
+
+    expect(event).not.toHaveProperty("request");
+    expect(result).toBeNull();
+  });
+
+  it("drops the Brave Wallet error with its WebKit page stack in the hint", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(
+      braveWalletSelectedAddressMessage
+    );
+    const originalException = new TypeError(
+      braveWalletSelectedAddressMessage
+    );
+    originalException.stack = [
+      `TypeError: ${braveWalletSelectedAddressMessage}`,
+      "global code@https://6529.io/waves/00000000-0000-4000-8000-000000000002:1:16",
+    ].join("\n");
+
+    const result = beforeSend(event, { originalException });
+
+    expect(result).toBeNull();
+  });
+
+  it("preserves a near-miss Brave Wallet page-evaluation error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(
+      "window.ethereum is unavailable"
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops disconnected wallet-provider object promise rejections", () => {
