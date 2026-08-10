@@ -1,0 +1,170 @@
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
+import { markdownToPlainText } from "./waveDescriptionPreview";
+
+const PROPOSAL_CARD_TITLE_MAX_LENGTH = 180;
+const PROPOSAL_CARD_EXCERPT_MAX_LENGTH = 360;
+
+interface ProposalCardPreviewImage {
+  readonly url: string;
+}
+
+interface ProposalCardViewModel {
+  readonly title: string | null;
+  readonly excerpt: string | null;
+  readonly previewImage: ProposalCardPreviewImage | null;
+  readonly partCount: number;
+  readonly mediaCount: number;
+  readonly attachmentCount: number;
+}
+
+type ProposalCardDrop = Pick<
+  ApiDrop,
+  "title" | "parts" | "parts_count" | "nft_links"
+>;
+
+const normalizePlainText = (value: string): string =>
+  markdownToPlainText(value)
+    .replaceAll(/<[^>]*>/g, " ")
+    .replaceAll(/\s+/g, " ")
+    .trim();
+
+const normalizeComparableText = (value: string): string =>
+  normalizePlainText(value).toLowerCase();
+
+const truncateAtWord = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  const candidate = value.slice(0, maxLength + 1);
+  const wordBoundary = candidate.lastIndexOf(" ");
+  const cutAt =
+    wordBoundary >= Math.floor(maxLength * 0.6) ? wordBoundary : maxLength;
+
+  return `${candidate.slice(0, cutAt).trimEnd()}…`;
+};
+
+const getAuthoredText = (drop: ProposalCardDrop): string =>
+  drop.parts
+    .map((part) => part.content?.trim() ?? "")
+    .filter(Boolean)
+    .join("\n\n");
+
+const getFirstMeaningfulLine = (
+  lines: readonly string[]
+): { readonly index: number; readonly text: string } | null => {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line === undefined) {
+      continue;
+    }
+
+    const text = normalizePlainText(line);
+    if (text) {
+      return { index, text };
+    }
+  }
+
+  return null;
+};
+
+const isStaticImage = (mimeType: string, url: string): boolean => {
+  const normalizedMimeType = mimeType.toLowerCase();
+  const normalizedUrl = url.toLowerCase().split("?")[0] ?? "";
+
+  return (
+    normalizedMimeType.startsWith("image/") &&
+    normalizedMimeType !== "image/gif" &&
+    !normalizedUrl.endsWith(".gif")
+  );
+};
+
+const getProposalCardPreviewImage = (
+  drop: ProposalCardDrop
+): ProposalCardPreviewImage | null => {
+  for (const part of drop.parts) {
+    const media = part.media.find(
+      (item) =>
+        (item.media_status === undefined ||
+          item.media_status === ApiDropMediaStatus.Ready) &&
+        isStaticImage(item.mime_type, item.url)
+    );
+    if (media) {
+      return { url: media.url };
+    }
+  }
+
+  for (const nftLink of drop.nft_links ?? []) {
+    const preview = nftLink.data?.media_preview;
+    if (preview?.status !== ApiNftLinkMediaPreviewStatusEnum.Ready) {
+      continue;
+    }
+
+    const url = [preview.small_url, preview.thumb_url, preview.card_url]
+      .map((candidate) => candidate?.trim() ?? "")
+      .find((candidate) => candidate.length > 0);
+    const previewMimeType = preview.mime_type?.trim() ?? "";
+    const mimeType =
+      previewMimeType.length > 0 ? previewMimeType : "image/jpeg";
+
+    if (url && isStaticImage(mimeType, url)) {
+      return { url };
+    }
+  }
+
+  return null;
+};
+
+export const getProposalCardViewModel = (
+  drop: ProposalCardDrop
+): ProposalCardViewModel => {
+  const authoredText = getAuthoredText(drop);
+  const lines = authoredText.split(/\r?\n/);
+  const firstMeaningfulLine = getFirstMeaningfulLine(lines);
+  const nativeTitle = drop.title?.trim() ?? "";
+  const titleSource = nativeTitle
+    ? nativeTitle
+    : (firstMeaningfulLine?.text ?? "");
+  const title = titleSource
+    ? truncateAtWord(
+        normalizePlainText(titleSource),
+        PROPOSAL_CARD_TITLE_MAX_LENGTH
+      )
+    : null;
+
+  let excerptSource = authoredText;
+  if (
+    firstMeaningfulLine &&
+    titleSource &&
+    normalizeComparableText(firstMeaningfulLine.text) ===
+      normalizeComparableText(titleSource)
+  ) {
+    excerptSource = lines
+      .filter((_, index) => index !== firstMeaningfulLine.index)
+      .join("\n");
+  }
+
+  const plainExcerpt = normalizePlainText(excerptSource);
+  const excerpt = plainExcerpt
+    ? truncateAtWord(plainExcerpt, PROPOSAL_CARD_EXCERPT_MAX_LENGTH)
+    : null;
+  const mediaCount = drop.parts.reduce(
+    (count, part) => count + part.media.length,
+    0
+  );
+  const attachmentCount = drop.parts.reduce(
+    (count, part) => count + part.attachments.length,
+    0
+  );
+
+  return {
+    title,
+    excerpt,
+    previewImage: getProposalCardPreviewImage(drop),
+    partCount: Math.max(drop.parts_count, drop.parts.length),
+    mediaCount,
+    attachmentCount,
+  };
+};

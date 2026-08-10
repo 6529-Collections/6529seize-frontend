@@ -18,6 +18,7 @@ import {
   WaveLeaderboardVotingModal,
 } from "../WaveLeaderboardVotingModal";
 import { WaveLeaderboardGridItem } from "./WaveLeaderboardGridItem";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 
 export type WaveLeaderboardGridMode = "compact" | "content_only";
 
@@ -48,6 +49,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   priceCurrency,
   scrollContainerRef,
 }) => {
+  const contentPresentation = useWaveProposalCardPresentation(wave.id);
   const winningThreshold =
     wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
   const winningThresholdMinDurationMs =
@@ -146,6 +148,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
             isVotingControlsLocked={isVotingControlsLocked}
             winningThreshold={winningThreshold}
             winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            contentPresentation={contentPresentation}
             onDropClick={onDropClick}
             onVoteClick={openVotingModal}
           />

@@ -38,6 +38,11 @@ jest.mock(
   }
 );
 
+jest.mock(
+  "@/components/waves/drops/proposal/ProposalCardContent",
+  () => (props: any) => <div data-testid="proposal-card">{props.drop.id}</div>
+);
+
 jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
   <div data-testid="rank" />
 ));
@@ -245,6 +250,35 @@ describe("WaveLeaderboardGridItem", () => {
     expect(onDropClick).toHaveBeenCalledTimes(1);
     expect(onDropClick).toHaveBeenCalledWith(baseDrop);
     expect(startDropOpen).toHaveBeenCalledTimes(1);
+    expect(startDropOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dropId: "d1",
+        waveId: "w1",
+        source: "leaderboard_grid",
+      })
+    );
+  });
+
+  it("renders proposal cards without the full inline content and opens by keyboard", () => {
+    const onDropClick = jest.fn();
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        contentPresentation="proposalCard"
+        onDropClick={onDropClick}
+      />
+    );
+
+    expect(screen.getByTestId("proposal-card")).toHaveTextContent("d1");
+    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByTestId("wave-leaderboard-grid-item-d1"), {
+      key: "Enter",
+    });
+
+    expect(onDropClick).toHaveBeenCalledWith(baseDrop);
     expect(startDropOpen).toHaveBeenCalledWith(
       expect.objectContaining({
         dropId: "d1",

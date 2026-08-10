@@ -504,6 +504,22 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyFailed: "Copy failed",
 } as const);
 
+const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
+  badge: "Proposal",
+  untitledProposal: "Untitled proposal",
+  openFullProposal: "Open full proposal",
+  previewAlt: "Media preview for {title}",
+  "part.one": "{count} part",
+  "part.other": "{count} parts",
+  "media.one": "{count} media item",
+  "media.other": "{count} media items",
+  "attachment.one": "{count} attachment",
+  "attachment.other": "{count} attachments",
+  settingLabel: "Compact proposal cards",
+  settingDescription:
+    "Show published proposals as compact previews that open to the complete original proposal.",
+} as const);
+
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
   "waves.competitionBadges",
   {
@@ -1817,8 +1833,7 @@ export const EN_US_MESSAGES = {
   "headerShare.connectModal.closeAriaLabel": "Close connect device modal",
   "headerShare.connectModal.backdropAriaLabel": "Dismiss connect device modal",
   "headerShare.connectModal.downloadApps": "Download apps",
-  "headerShare.connectModal.downloadAppsAriaLabel":
-    "Open 6529 app downloads",
+  "headerShare.connectModal.downloadAppsAriaLabel": "Open 6529 app downloads",
   "headerShare.menu.deviceType": "Device type",
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
@@ -2658,6 +2673,7 @@ export const EN_US_MESSAGES = {
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_LEADERBOARD_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_PROPOSAL_CARD_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,

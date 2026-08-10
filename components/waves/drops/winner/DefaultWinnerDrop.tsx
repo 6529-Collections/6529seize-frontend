@@ -35,6 +35,7 @@ import WaveDropReply from "../WaveDropReply";
 import WinnerDropBadge from "./WinnerDropBadge";
 import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
 import { getWinnerVisibleMetadata } from "@/components/waves/winners/identity/winnerIdentity.helpers";
+import type { DropContentPresentation } from "../dropContentPresentation";
 
 const getRankHoverClass = (rank: number | null): string => {
   return getRankHoverBorderClass(rank);
@@ -76,6 +77,7 @@ interface DefautWinnerDropProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 const DefaultWinnerDropInner = ({
@@ -102,6 +104,7 @@ const DefaultWinnerDropInner = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  contentPresentation = "default",
 }: DefautWinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -286,6 +289,7 @@ const DefaultWinnerDropInner = ({
                 quotePath={quotePath}
                 embedDepth={embedDepth}
                 maxEmbedDepth={maxEmbedDepth}
+                contentPresentation={contentPresentation}
               />
             </div>
           </div>

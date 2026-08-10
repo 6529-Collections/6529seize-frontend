@@ -95,6 +95,15 @@ export default function CreateWaveDisplaySettings({
     });
   };
 
+  const onCompactProposalCardsChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    onChange({
+      ...display,
+      compactProposalCards: event.target.checked,
+    });
+  };
+
   const inputClasses = ({
     hasError,
     hasValue,
@@ -169,6 +178,26 @@ export default function CreateWaveDisplaySettings({
             ) : null}
           </CommonAnimationHeight>
         </div>
+        <label
+          htmlFor="create-wave-compact-proposal-cards"
+          className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-justify-between tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-3 tw-transition-colors desktop-hover:hover:tw-border-iron-600"
+        >
+          <span className="tw-min-w-0">
+            <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
+              {t(DEFAULT_LOCALE, "waves.proposalCard.settingLabel")}
+            </span>
+            <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+              {t(DEFAULT_LOCALE, "waves.proposalCard.settingDescription")}
+            </span>
+          </span>
+          <input
+            id="create-wave-compact-proposal-cards"
+            type="checkbox"
+            checked={display.compactProposalCards === true}
+            onChange={onCompactProposalCardsChange}
+            className="tw-form-checkbox tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+          />
+        </label>
         {showApproveTabLabels ? (
           <>
             <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">

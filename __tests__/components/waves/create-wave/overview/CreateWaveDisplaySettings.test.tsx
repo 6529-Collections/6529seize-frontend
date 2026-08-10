@@ -5,6 +5,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 describe("CreateWaveDisplaySettings", () => {
   const baseDisplay = {
+    compactProposalCards: false,
     customRules: null,
     outcomesVisible: true,
     submissionButtonLabel: null,
@@ -73,6 +74,30 @@ describe("CreateWaveDisplaySettings", () => {
     expect(onChange).toHaveBeenCalledWith({
       ...baseDisplay,
       submissionButtonLabel: "Apply",
+    });
+  });
+
+  it("lets proposal-bearing waves opt into the reusable compact-card display", () => {
+    const onChange = jest.fn();
+    render(
+      <CreateWaveDisplaySettings
+        display={baseDisplay}
+        errors={[]}
+        onChange={onChange}
+        waveType={ApiWaveType.Approve}
+      />
+    );
+
+    const checkbox = screen.getByRole("checkbox", {
+      name: "Compact proposal cards Show published proposals as compact previews that open to the complete original proposal.",
+    });
+    expect(checkbox).not.toBeChecked();
+
+    fireEvent.click(checkbox);
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...baseDisplay,
+      compactProposalCards: true,
     });
   });
 

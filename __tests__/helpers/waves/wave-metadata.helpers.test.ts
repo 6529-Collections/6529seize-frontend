@@ -1,5 +1,6 @@
 import {
   DEFAULT_APPROVE_WAVE_TAB_LABELS,
+  INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS,
   WAVE_DISPLAY_METADATA_KEYS,
   getApproveWaveDisplayMetadataDraft,
   getApproveWaveDisplayMetadataUpdate,
@@ -10,6 +11,7 @@ import {
   getWaveCustomRulesMetadataUpdate,
   getWaveOutcomeVisibilityFromMetadata,
   getWaveOutcomeVisibilityMetadataUpdate,
+  getWaveProposalCardsEnabledFromMetadata,
   getWaveSubmissionButtonLabelFromMetadata,
   getWaveSubmissionButtonLabelMetadataDraft,
   getWaveSubmissionButtonLabelMetadataUpdate,
@@ -18,8 +20,13 @@ import {
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 
+const INITIAL_PROPOSAL_CARD_WAVE_ID = [
+  ...INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS,
+][0]!;
+
 describe("wave-metadata.helpers", () => {
   const defaultDisplay = {
+    compactProposalCards: false,
     customRules: null,
     outcomesVisible: true,
     submissionButtonLabel: null,
@@ -155,6 +162,70 @@ describe("wave-metadata.helpers", () => {
         data_value: "Apply",
       },
     ]);
+  });
+
+  it("persists compact proposal cards only when a non-chat wave opts in", () => {
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Approve,
+        display: {
+          ...defaultDisplay,
+          compactProposalCards: true,
+        },
+      })
+    ).toContainEqual({
+      data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+      data_value: "true",
+    });
+
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Chat,
+        display: {
+          ...defaultDisplay,
+          compactProposalCards: true,
+        },
+      })
+    ).toEqual([]);
+  });
+
+  it("rolls compact cards out only to Network Museum when metadata is absent", () => {
+    expect(
+      getWaveProposalCardsEnabledFromMetadata(INITIAL_PROPOSAL_CARD_WAVE_ID, [])
+    ).toBe(true);
+    expect(
+      getWaveProposalCardsEnabledFromMetadata("another-standard-wave", [])
+    ).toBe(false);
+  });
+
+  it("respects explicit proposal-card metadata without changing malformed defaults", () => {
+    expect(
+      getWaveProposalCardsEnabledFromMetadata("another-standard-wave", [
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+          data_value: " true ",
+        },
+      ])
+    ).toBe(true);
+    expect(
+      getWaveProposalCardsEnabledFromMetadata(INITIAL_PROPOSAL_CARD_WAVE_ID, [
+        {
+          id: 2,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+          data_value: "false",
+        },
+      ])
+    ).toBe(false);
+    expect(
+      getWaveProposalCardsEnabledFromMetadata("another-standard-wave", [
+        {
+          id: 3,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+          data_value: "compact",
+        },
+      ])
+    ).toBe(false);
   });
 
   it("creates custom rules metadata for chat waves without outcome or approve metadata", () => {

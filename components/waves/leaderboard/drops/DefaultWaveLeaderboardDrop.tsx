@@ -167,6 +167,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
             </div>
             <WaveLeaderboardDropContent
               drop={drop}
+              onDropClick={onDropClick}
               isCompetitionDrop={true}
               mediaContainerHeightClassName={mediaContainerHeightClassName}
               contentPresentation={contentPresentation}

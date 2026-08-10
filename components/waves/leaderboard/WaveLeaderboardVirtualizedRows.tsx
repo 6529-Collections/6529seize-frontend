@@ -7,13 +7,7 @@ import { t } from "@/i18n/messages";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Virtualizer } from "@tanstack/react-virtual";
 import type { RefObject, ReactNode } from "react";
-import {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/utils/button/Button";
 
 type LeaderboardVirtualLayout = "list" | "grid" | "gallery";
@@ -87,8 +81,7 @@ const getProjectedLeadingItemCount = ({
       page < firstRetainedPage;
       page++
     ) {
-      leadingItemCount +=
-        ledger.counts.get(page) ?? WAVE_DROPS_PARAMS.limit;
+      leadingItemCount += ledger.counts.get(page) ?? WAVE_DROPS_PARAMS.limit;
     }
   } else if (firstRetainedPage < ledger.firstRetainedPage) {
     for (
@@ -187,6 +180,8 @@ interface WaveLeaderboardVirtualizedRowsProps<TItem> {
   readonly isFetchNextPageError: boolean;
   readonly isFetchPreviousPageError: boolean;
   readonly autoLoadNext?: boolean | undefined;
+  readonly estimatedRowHeight?: number | undefined;
+  readonly measureLoadedRowsAtNaturalHeight?: boolean | undefined;
 }
 
 export function WaveLeaderboardVirtualizedRows<TItem>({
@@ -206,6 +201,8 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   isFetchNextPageError,
   isFetchPreviousPageError,
   autoLoadNext = false,
+  estimatedRowHeight,
+  measureLoadedRowsAtNaturalHeight = false,
 }: WaveLeaderboardVirtualizedRowsProps<TItem>) {
   const locale = useBrowserLocale();
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -219,7 +216,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   const [scrollMargin, setScrollMargin] = useState(0);
   const logicalItemCount = leadingItemCount + items.length;
   const rowCount = Math.ceil(logicalItemCount / columns);
-  const estimateRowHeight = getEstimatedRowHeight(layout);
+  const estimateRowHeight = estimatedRowHeight ?? getEstimatedRowHeight(layout);
 
   const captureVisibleAnchor = useCallback(() => {
     const root = rootRef.current;
@@ -304,8 +301,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     updateScrollMargin();
     if (globalThis.ResizeObserver === undefined) {
       globalThis.addEventListener("resize", updateScrollMargin);
-      return () =>
-        globalThis.removeEventListener("resize", updateScrollMargin);
+      return () => globalThis.removeEventListener("resize", updateScrollMargin);
     }
 
     const observer = new globalThis.ResizeObserver(updateScrollMargin);
@@ -360,8 +356,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
         return;
       }
 
-      const lastVisibleLogicalIndex =
-        (lastChangedRowIndex + 1) * columns - 1;
+      const lastVisibleLogicalIndex = (lastChangedRowIndex + 1) * columns - 1;
       const nextPrefetchBoundary = Math.max(
         0,
         logicalItemCount - NEXT_PAGE_PREFETCH_ROWS * columns
@@ -371,8 +366,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       }
 
       const lastItem = items.at(-1);
-      const lastItemId =
-        lastItem === undefined ? "empty" : getItemId(lastItem);
+      const lastItemId = lastItem === undefined ? "empty" : getItemId(lastItem);
       const nextTriggerKey = `${windowKey}:${leadingItemCount}:${lastItemId}`;
       if (nextTriggerKeyRef.current === nextTriggerKey) {
         return;
@@ -423,8 +417,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     const anchoredDrop = Array.from(
       root.querySelectorAll<HTMLElement>("[data-leaderboard-drop-id]")
     ).find(
-      (candidate) =>
-        candidate.dataset["leaderboardDropId"] === anchor.dropId
+      (candidate) => candidate.dataset["leaderboardDropId"] === anchor.dropId
     );
     if (anchoredDrop) {
       scrollContainer.scrollTo({
@@ -499,7 +492,8 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
               className={`tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 tw-pb-4 ${gridColumnsClassName}`}
               style={{
                 minHeight:
-                  layout === "gallery" && hasLoadedItem
+                  (layout === "gallery" || measureLoadedRowsAtNaturalHeight) &&
+                  hasLoadedItem
                     ? undefined
                     : virtualRow.size,
                 transform: `translateY(${virtualRow.start - scrollMargin}px)`,

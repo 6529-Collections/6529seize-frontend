@@ -10,6 +10,9 @@ jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   WaveDropsLeaderboardSort: { RANK: "RANK" },
   WAVE_DROPS_LEADERBOARD_MAX_PAGES: 10,
 }));
+jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
+  useWaveProposalCardPresentation: () => "proposalCard",
+}));
 jest.mock(
   "@/components/waves/leaderboard/WaveLeaderboardVirtualizedRows",
   () => ({
@@ -31,17 +34,14 @@ jest.mock(
     ),
   })
 );
-jest.mock(
-  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
-  () => ({
-    useWaveLeaderboardVotingModal: () => ({
-      votingDrop: null,
-      openVotingModal: mockOpenVotingModal,
-      closeVotingModal: jest.fn(),
-    }),
-    WaveLeaderboardVotingModal: () => null,
-  })
-);
+jest.mock("@/components/waves/leaderboard/WaveLeaderboardVotingModal", () => ({
+  useWaveLeaderboardVotingModal: () => ({
+    votingDrop: null,
+    openVotingModal: mockOpenVotingModal,
+    closeVotingModal: jest.fn(),
+  }),
+  WaveLeaderboardVotingModal: () => null,
+}));
 
 jest.mock(
   "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem",
@@ -51,6 +51,7 @@ jest.mock(
       isVotingClosed,
       isVotingControlsLocked,
       mode,
+      contentPresentation,
       onDropClick,
       onVoteClick,
     }: any) => (
@@ -58,6 +59,7 @@ jest.mock(
         data-testid="grid-item"
         data-is-voting-closed={String(isVotingClosed)}
         data-is-voting-controls-locked={String(isVotingControlsLocked)}
+        data-content-presentation={contentPresentation}
         onClick={() => onDropClick(drop)}
       >
         {drop.id}:{mode}
@@ -154,6 +156,10 @@ describe("WaveLeaderboardGrid", () => {
     expect(screen.getByTestId("grid-item")).toHaveAttribute(
       "data-is-voting-controls-locked",
       "true"
+    );
+    expect(screen.getByTestId("grid-item")).toHaveAttribute(
+      "data-content-presentation",
+      "proposalCard"
     );
     fireEvent.click(screen.getByRole("button", { name: "Load more drops" }));
     expect(fetchNextPage).toHaveBeenCalled();

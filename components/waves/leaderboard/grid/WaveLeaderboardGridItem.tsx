@@ -15,6 +15,7 @@ import { WaveLeaderboardGridItemCompactFooter } from "./WaveLeaderboardGridItemC
 import { WaveLeaderboardGridItemMobileActionsMenu } from "./WaveLeaderboardGridItemMobileActionsMenu";
 import { WaveLeaderboardGridItemViewport } from "./WaveLeaderboardGridItemViewport";
 import { WaveLeaderboardGridItemVotingModal } from "./WaveLeaderboardGridItemVotingModal";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 interface WaveLeaderboardGridItemProps {
   readonly drop: ExtendedDrop;
@@ -23,6 +24,7 @@ interface WaveLeaderboardGridItemProps {
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
@@ -53,6 +55,7 @@ export const WaveLeaderboardGridItem: React.FC<
   isVotingControlsLocked = false,
   winningThreshold,
   winningThresholdMinDurationMs,
+  contentPresentation = "default",
   onDropClick,
   onVoteClick,
 }) => {
@@ -151,6 +154,7 @@ export const WaveLeaderboardGridItem: React.FC<
         canShowVotingAction={canShowVotingAction}
         onOpenDrop={openDrop}
         onVoteButtonClick={handleVoteButtonClick}
+        contentPresentation={contentPresentation}
       />
 
       {isContentOnlyMode && (

@@ -30,11 +30,18 @@ export const WAVE_DISPLAY_METADATA_KEYS = {
   approvalsTabLabel: "wave_display.approve.tabs.approvals_label",
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
   submissionButtonLabel: "wave_display.submission.button_label",
+  compactProposalCards: "wave_display.proposals.compact",
   customRules: "wave_display.rules.custom",
   outcomesVisible: "wave_display.outcomes.visible",
 } as const;
 
 const HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE = "false";
+const ENABLED_PROPOSAL_CARDS_METADATA_VALUE = "true";
+const DISABLED_PROPOSAL_CARDS_METADATA_VALUE = "false";
+// Existing rollout targets predate this metadata key. New Waves opt in through
+// persisted metadata, and an explicit metadata value always wins over this set.
+export const INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS: ReadonlySet<string> =
+  new Set(["5f207393-5418-4a75-8738-e40edb44a94d"]);
 
 type ApproveWaveDisplayMetadataField = {
   readonly displayKey: keyof CreateWaveApproveDisplayConfig;
@@ -216,6 +223,19 @@ const getSubmissionButtonLabelMetadataRequest = (
   };
 };
 
+const getProposalCardsMetadataRequest = (
+  compactProposalCards: boolean | null | undefined
+): ApiCreateWaveMetadataRequest | null => {
+  if (compactProposalCards !== true) {
+    return null;
+  }
+
+  return {
+    data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+    data_value: ENABLED_PROPOSAL_CARDS_METADATA_VALUE,
+  };
+};
+
 export const getCreateWaveDisplayMetadataRequests = ({
   display,
   waveType,
@@ -248,10 +268,15 @@ export const getCreateWaveDisplayMetadataRequests = ({
     waveType === ApiWaveType.Chat
       ? null
       : getSubmissionButtonLabelMetadataRequest(display.submissionButtonLabel);
+  const proposalCardsRequest =
+    waveType === ApiWaveType.Chat
+      ? null
+      : getProposalCardsMetadataRequest(display.compactProposalCards);
   const requests = [
     outcomeVisibilityRequest,
     customRulesRequest,
     submissionButtonLabelRequest,
+    proposalCardsRequest,
   ].filter(
     (request): request is ApiCreateWaveMetadataRequest => request !== null
   );
@@ -434,6 +459,31 @@ export const getWaveOutcomeVisibilityFromMetadata = (
       dataKey: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
     })
   );
+
+export const getWaveProposalCardsEnabledFromMetadata = (
+  waveId: string | null | undefined,
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): boolean => {
+  const value = getLatestMetadataValue({
+    metadata,
+    dataKey: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+  })
+    ?.trim()
+    .toLowerCase();
+
+  if (value === ENABLED_PROPOSAL_CARDS_METADATA_VALUE) {
+    return true;
+  }
+
+  if (value === DISABLED_PROPOSAL_CARDS_METADATA_VALUE) {
+    return false;
+  }
+
+  const normalizedWaveId = waveId?.trim().toLowerCase();
+  return normalizedWaveId
+    ? INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS.has(normalizedWaveId)
+    : false;
+};
 
 export const getWaveOutcomeVisibilityMetadataUpdate = ({
   metadata,

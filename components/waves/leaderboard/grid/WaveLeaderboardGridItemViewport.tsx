@@ -14,6 +14,8 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import ProposalCardContent from "@/components/waves/drops/proposal/ProposalCardContent";
 
 interface WaveLeaderboardGridItemViewportProps {
   readonly drop: ExtendedDrop;
@@ -24,6 +26,7 @@ interface WaveLeaderboardGridItemViewportProps {
   readonly canShowVotingAction: boolean;
   readonly onOpenDrop: () => void;
   readonly onVoteButtonClick: () => void;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 const getGridViewportClassName = ({
@@ -133,6 +136,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
   canShowVotingAction,
   onOpenDrop,
   onVoteButtonClick,
+  contentPresentation = "default",
 }) => {
   const activePart = drop.parts[0];
   const primaryMedia = activePart?.media[0];
@@ -176,6 +180,14 @@ export const WaveLeaderboardGridItemViewport: React.FC<
     },
     [onOpenDrop]
   );
+
+  if (contentPresentation === "proposalCard") {
+    return (
+      <div className="tw-p-3">
+        <ProposalCardContent drop={drop} density="compact" />
+      </div>
+    );
+  }
 
   return (
     <div

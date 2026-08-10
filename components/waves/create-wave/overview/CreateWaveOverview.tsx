@@ -11,6 +11,7 @@ import CreateWaveType from "./type/CreateWaveType";
 import RankScheduleModeSelector from "./type/RankScheduleModeSelector";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
+  compactProposalCards: false,
   customRules: null,
   outcomesVisible: true,
   submissionButtonLabel: null,

@@ -1,1 +1,4 @@
-export type DropContentPresentation = "default" | "quorumCompact";
+export type DropContentPresentation =
+  | "default"
+  | "proposalCard"
+  | "quorumCompact";

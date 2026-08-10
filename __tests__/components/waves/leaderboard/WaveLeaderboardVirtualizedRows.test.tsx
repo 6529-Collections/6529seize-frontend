@@ -25,9 +25,8 @@ const mockVirtualizer = {
 } as unknown as Virtualizer<HTMLDivElement, Element>;
 interface MockVirtualizerOptions {
   readonly getScrollElement?: () => HTMLDivElement | null;
-  readonly onChange?: (
-    instance: Virtualizer<HTMLDivElement, Element>
-  ) => void;
+  readonly estimateSize?: () => number;
+  readonly onChange?: (instance: Virtualizer<HTMLDivElement, Element>) => void;
 }
 let mockVirtualizerOptions: MockVirtualizerOptions | undefined;
 let mockOnVirtualizerChange:
@@ -223,6 +222,37 @@ describe("WaveLeaderboardVirtualizedRows", () => {
     expect(screen.queryByText("drop-2")).not.toBeInTheDocument();
     expect(screen.getByText("drop-4")).toBeInTheDocument();
     expect(screen.getByText("drop-5")).toBeInTheDocument();
+  });
+
+  it("uses a caller-provided row estimate for compact presentations", () => {
+    const scrollContainerRef = { current: document.createElement("div") };
+
+    const { container } = render(
+      <WaveLeaderboardVirtualizedRows
+        items={["drop-1"]}
+        getItemId={(item) => item}
+        leadingItemCount={0}
+        windowKey="wave-1:rank"
+        layout="list"
+        scrollContainerRef={scrollContainerRef}
+        renderItem={(item) => <div>{item}</div>}
+        fetchNextPage={jest.fn().mockResolvedValue(undefined)}
+        fetchPreviousPage={jest.fn().mockResolvedValue(undefined)}
+        hasNextPage={false}
+        hasPreviousPage={false}
+        isFetchingNextPage={false}
+        isFetchingPreviousPage={false}
+        isFetchNextPageError={false}
+        isFetchPreviousPageError={false}
+        estimatedRowHeight={360}
+        measureLoadedRowsAtNaturalHeight
+      />
+    );
+
+    expect(mockVirtualizerOptions?.estimateSize?.()).toBe(360);
+    expect(
+      container.querySelector<HTMLElement>("[data-index='0']")?.style.minHeight
+    ).toBe("");
   });
 
   it("automatically fetches the next page near the last virtual row", () => {

@@ -68,4 +68,29 @@ describe("WaveLeaderboardDropContent", () => {
       })
     );
   });
+
+  it("opens proposal cards through the full drop-detail handler", () => {
+    const push = jest.fn();
+    const onDropClick = jest.fn();
+    routerMock.mockReturnValue({ push });
+    const drop = {
+      id: "drop-1",
+      wave: { id: "w" },
+      serial_no: 5,
+      metadata: [],
+    } as any;
+
+    render(
+      <WaveLeaderboardDropContent
+        drop={drop}
+        onDropClick={onDropClick}
+        contentPresentation="proposalCard"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("content"));
+
+    expect(onDropClick).toHaveBeenCalledWith(drop);
+    expect(push).not.toHaveBeenCalled();
+  });
 });

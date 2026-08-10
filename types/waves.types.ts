@@ -121,6 +121,8 @@ export interface CreateWaveApproveDisplayConfig {
 
 export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
+  /** Omitted in older saved drafts; absence preserves the standard display. */
+  readonly compactProposalCards?: boolean;
   readonly customRules: string | null;
   readonly outcomesVisible: boolean;
   readonly submissionButtonLabel: string | null;

@@ -10,6 +10,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
+  readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaContainerHeightClassName?: string | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
@@ -19,6 +20,7 @@ export const WaveLeaderboardDropContent: React.FC<
   WaveLeaderboardDropContentProps
 > = ({
   drop,
+  onDropClick,
   isCompetitionDrop = false,
   mediaContainerHeightClassName,
   contentPresentation = "default",
@@ -27,6 +29,11 @@ export const WaveLeaderboardDropContent: React.FC<
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
+    if (contentPresentation === "proposalCard" && onDropClick) {
+      onDropClick(clickedDrop);
+      return;
+    }
+
     const href = getWaveRoute({
       waveId: clickedDrop.wave.id,
       serialNo: clickedDrop.serial_no,

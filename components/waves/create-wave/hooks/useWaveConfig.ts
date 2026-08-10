@@ -98,6 +98,7 @@ export function useWaveConfig() {
         maxWinners: null,
       },
       display: {
+        compactProposalCards: false,
         customRules: null,
         outcomesVisible: true,
         submissionButtonLabel: null,
