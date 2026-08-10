@@ -8,7 +8,10 @@ import {
   type MuseumPublicationLoadState,
   type MuseumPublicationSource,
 } from "@/lib/museum/publication";
-import { isMuseumLocalFixtureEnvironment } from "@/config/museumPublicationEnv.server";
+import {
+  getMuseumPublicationNodeEnvironment,
+  isMuseumLocalFixtureEnvironment,
+} from "@/config/museumPublicationEnv.server";
 import { createCaseyFixture } from "./fixture";
 
 type CurrentState = Extract<
@@ -363,5 +366,34 @@ describe("Museum publication runtime source ref", () => {
     expect(isMuseumLocalFixtureEnvironment(environment, "production")).toBe(
       false
     );
+  });
+
+  it("reads the publication node environment without requiring unrelated public endpoints", () => {
+    const previousPublicRuntime = process.env["PUBLIC_RUNTIME"];
+    const previousNodeEnvironment = process.env["NODE_ENV"];
+    try {
+      process.env["NODE_ENV"] = "production";
+      process.env["PUBLIC_RUNTIME"] = JSON.stringify({ NODE_ENV: "local" });
+      expect(getMuseumPublicationNodeEnvironment()).toBe("local");
+
+      process.env["PUBLIC_RUNTIME"] = "{}";
+      expect(getMuseumPublicationNodeEnvironment()).toBe("production");
+
+      process.env["PUBLIC_RUNTIME"] = "not-json";
+      expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
+        "museum_publication_runtime_environment_invalid"
+      );
+    } finally {
+      if (previousPublicRuntime === undefined) {
+        delete process.env["PUBLIC_RUNTIME"];
+      } else {
+        process.env["PUBLIC_RUNTIME"] = previousPublicRuntime;
+      }
+      if (previousNodeEnvironment === undefined) {
+        delete process.env["NODE_ENV"];
+      } else {
+        process.env["NODE_ENV"] = previousNodeEnvironment;
+      }
+    }
   });
 });
