@@ -194,10 +194,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const baseImageClasses =
       "tw-aspect-square tw-relative tw-flex-shrink-0 tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
-    const imageScaleClasses =
-      hasTouchScreen || !hasStaticMediaPreview
-        ? ""
-        : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
+    const imageScaleClasses = hasTouchScreen || !hasStaticMediaPreview
+      ? ""
+      : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
 
     const imageContainerClass = baseImageClasses;
     const mediaContent = (
@@ -235,7 +234,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               onClick={handleImageClick}
               aria-label={t(locale, "drop.media.openMedia")}
               title={t(locale, "drop.media.openMedia")}
-              className="tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-flex tw-size-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/70 tw-p-0 tw-text-iron-300 tw-shadow-md tw-backdrop-blur-sm tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+              className="tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/70 tw-p-0 tw-text-iron-300 tw-shadow-md tw-backdrop-blur-sm tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
             >
               <FontAwesomeIcon
                 icon={faArrowUpRightFromSquare}
@@ -277,7 +276,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 <Link
                   onClick={(e) => e.stopPropagation()}
                   href={`/${drop.author?.handle}`}
-                  className="tw-mt-1 tw-inline-flex tw-min-h-11 tw-max-w-full tw-items-center tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                  className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
                 >
                   {drop.author?.handle}
                 </Link>
@@ -301,7 +300,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             </div>
           </div>
           <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
-            <div className="tw-flex tw-min-h-11 tw-flex-shrink-0 tw-items-center [&>button]:tw-min-h-11">
+            <div className="tw-flex tw-flex-shrink-0">
               <ParticipationDropVoteDetailsTrigger
                 drop={drop}
                 density="gallery"
@@ -313,7 +312,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                   drop={drop}
                   onClick={handleVoteButtonClick}
                   variant={artFocused ? "subtle" : "default"}
-                  className="tw-box-border tw-min-h-11 tw-min-w-0 tw-max-w-full"
+                  className="tw-box-border tw-h-8 tw-min-w-0 tw-max-w-full"
                 >
                   {voteButtonLabel}
                 </VotingModalButton>

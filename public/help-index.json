@@ -2637,8 +2637,6 @@
       "aliases": [
         "leaderboard",
         "wave leaderboard",
-        "leaderboard grid",
-        "content only view",
         "winners",
         "top voters",
         "my votes"
@@ -2654,10 +2652,8 @@
         "eligibility"
       ],
       "facts": [
-        "Wave leaderboard docs cover grid cards, winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
+        "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, decision timelines, and drop eligibility states.",
         "Leaderboard availability depends on the wave type and configuration.",
-        "On non-memes waves, Grid and Content only cards use a square media or bounded text preview, show the title once, and provide an explicit Open action for the full drop.",
-        "Grid cards label rank-wave voting values as Current, Projected, and Your vote; approval waves label Reached, Required, Votes now, Your vote, and Status.",
         "Use the right sidebar or wave-specific navigation to inspect leaderboard surfaces when available."
       ],
       "canonical_path": "/waves",
@@ -2665,7 +2661,6 @@
       "tags": ["waves", "leaderboard"],
       "source_refs": [
         "ops/docs/waves/leaderboard/README.md",
-        "ops/docs/waves/leaderboard/feature-grid-cards.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-leaderboard.md"
       ]
     },

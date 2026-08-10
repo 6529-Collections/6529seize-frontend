@@ -122,37 +122,35 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
 
   return (
     <>
-      <div className="lg:tw-pr-[5.5rem]">
-        <WaveLeaderboardVirtualizedRows
-          items={dropsWithMedia}
-          getItemId={getDropId}
-          leadingItemCount={leadingItemCount}
-          windowKey={queryWindowKey}
-          layout="gallery"
-          scrollContainerRef={scrollContainerRef}
-          fetchNextPage={fetchNextPage}
-          fetchPreviousPage={fetchPreviousPage}
-          hasNextPage={hasNextPage}
-          hasPreviousPage={hasPreviousPage}
-          isFetchingNextPage={isFetchingNextPage}
-          isFetchingPreviousPage={isFetchingPreviousPage}
-          isFetchNextPageError={isFetchNextPageError}
-          isFetchPreviousPageError={isFetchPreviousPageError}
-          renderItem={(drop) => (
-            <WaveLeaderboardGalleryItem
-              drop={drop}
-              onDropClick={onDropClick}
-              onVoteClick={openVotingModal}
-              activeSort={sort}
-              animationKey={animationKey}
-              isVotingClosed={isVotingClosed}
-              isVotingControlsLocked={isVotingControlsLocked}
-              winningThreshold={winningThreshold}
-              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-            />
-          )}
-        />
-      </div>
+      <WaveLeaderboardVirtualizedRows
+        items={dropsWithMedia}
+        getItemId={getDropId}
+        leadingItemCount={leadingItemCount}
+        windowKey={queryWindowKey}
+        layout="gallery"
+        scrollContainerRef={scrollContainerRef}
+        fetchNextPage={fetchNextPage}
+        fetchPreviousPage={fetchPreviousPage}
+        hasNextPage={hasNextPage}
+        hasPreviousPage={hasPreviousPage}
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchingPreviousPage={isFetchingPreviousPage}
+        isFetchNextPageError={isFetchNextPageError}
+        isFetchPreviousPageError={isFetchPreviousPageError}
+        renderItem={(drop) => (
+          <WaveLeaderboardGalleryItem
+            drop={drop}
+            onDropClick={onDropClick}
+            onVoteClick={openVotingModal}
+            activeSort={sort}
+            animationKey={animationKey}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+            winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+          />
+        )}
+      />
       <WaveLeaderboardVotingModal
         drop={votingDrop}
         onClose={closeVotingModal}

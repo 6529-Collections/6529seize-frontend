@@ -90,7 +90,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   if (isFetching && drops.length === 0) {
     return (
       <div
-        className="tw-@container lg:tw-pr-[5.5rem]"
+        className="tw-@container"
         role="status"
         aria-label="Loading drops"
         aria-busy="true"
@@ -123,36 +123,34 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
 
   return (
     <>
-      <div className="lg:tw-pr-[5.5rem]">
-        <WaveLeaderboardVirtualizedRows
-          items={drops}
-          getItemId={getDropId}
-          leadingItemCount={leadingItemCount}
-          windowKey={queryWindowKey}
-          layout="grid"
-          scrollContainerRef={scrollContainerRef}
-          fetchNextPage={fetchNextPage}
-          fetchPreviousPage={fetchPreviousPage}
-          hasNextPage={hasNextPage}
-          hasPreviousPage={hasPreviousPage}
-          isFetchingNextPage={isFetchingNextPage}
-          isFetchingPreviousPage={isFetchingPreviousPage}
-          isFetchNextPageError={isFetchNextPageError}
-          isFetchPreviousPageError={isFetchPreviousPageError}
-          renderItem={(drop) => (
-            <WaveLeaderboardGridItem
-              drop={drop}
-              mode={mode}
-              isVotingClosed={isVotingClosed}
-              isVotingControlsLocked={isVotingControlsLocked}
-              winningThreshold={winningThreshold}
-              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-              onDropClick={onDropClick}
-              onVoteClick={openVotingModal}
-            />
-          )}
-        />
-      </div>
+      <WaveLeaderboardVirtualizedRows
+        items={drops}
+        getItemId={getDropId}
+        leadingItemCount={leadingItemCount}
+        windowKey={queryWindowKey}
+        layout="grid"
+        scrollContainerRef={scrollContainerRef}
+        fetchNextPage={fetchNextPage}
+        fetchPreviousPage={fetchPreviousPage}
+        hasNextPage={hasNextPage}
+        hasPreviousPage={hasPreviousPage}
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchingPreviousPage={isFetchingPreviousPage}
+        isFetchNextPageError={isFetchNextPageError}
+        isFetchPreviousPageError={isFetchPreviousPageError}
+        renderItem={(drop) => (
+          <WaveLeaderboardGridItem
+            drop={drop}
+            mode={mode}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+            winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            onDropClick={onDropClick}
+            onVoteClick={openVotingModal}
+          />
+        )}
+      />
       <WaveLeaderboardVotingModal
         drop={votingDrop}
         onClose={closeVotingModal}

@@ -25,7 +25,9 @@ const mockVirtualizer = {
 } as unknown as Virtualizer<HTMLDivElement, Element>;
 interface MockVirtualizerOptions {
   readonly getScrollElement?: () => HTMLDivElement | null;
-  readonly onChange?: (instance: Virtualizer<HTMLDivElement, Element>) => void;
+  readonly onChange?: (
+    instance: Virtualizer<HTMLDivElement, Element>
+  ) => void;
 }
 let mockVirtualizerOptions: MockVirtualizerOptions | undefined;
 let mockOnVirtualizerChange:
@@ -202,7 +204,6 @@ describe("WaveLeaderboardVirtualizedRows", () => {
       "aria-posinset",
       "1"
     );
-    expect(screen.getByText("drop-1").parentElement).toHaveClass("tw-h-full");
     expect(screen.getByText("drop-2").parentElement).toHaveAttribute(
       "aria-posinset",
       "2"

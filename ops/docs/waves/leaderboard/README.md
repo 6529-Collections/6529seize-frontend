@@ -28,8 +28,6 @@ This area covers:
   sort options, curation-wave price filtering, and local-state behavior.
 - [Wave Leaderboard Gallery Cards](feature-gallery-cards.md): memes `Grid view`
   cards, media badges, and vote entry points.
-- [Wave Leaderboard Grid Cards](feature-grid-cards.md): non-memes `Grid` and
-  `Content only` cards, bounded previews, labeled metrics, and card actions.
 
 ### Decision and Outcome Views
 

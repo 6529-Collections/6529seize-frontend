@@ -20,7 +20,7 @@ jest.mock(
       hasNextPage,
       fetchNextPage,
     }: any) => (
-      <div data-testid="virtual-rows">
+      <div>
         {items.map((item: any) => (
           <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
         ))}
@@ -31,14 +31,17 @@ jest.mock(
     ),
   })
 );
-jest.mock("@/components/waves/leaderboard/WaveLeaderboardVotingModal", () => ({
-  useWaveLeaderboardVotingModal: () => ({
-    votingDrop: null,
-    openVotingModal: mockOpenVotingModal,
-    closeVotingModal: jest.fn(),
-  }),
-  WaveLeaderboardVotingModal: () => null,
-}));
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
+  () => ({
+    useWaveLeaderboardVotingModal: () => ({
+      votingDrop: null,
+      openVotingModal: mockOpenVotingModal,
+      closeVotingModal: jest.fn(),
+    }),
+    WaveLeaderboardVotingModal: () => null,
+  })
+);
 
 jest.mock(
   "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem",
@@ -143,9 +146,6 @@ describe("WaveLeaderboardGrid", () => {
 
     expect(screen.getByTestId("grid-item")).toHaveTextContent(
       "d1:content_only"
-    );
-    expect(screen.getByTestId("virtual-rows").parentElement).toHaveClass(
-      "lg:tw-pr-[5.5rem]"
     );
     expect(screen.getByTestId("grid-item")).toHaveAttribute(
       "data-is-voting-closed",
