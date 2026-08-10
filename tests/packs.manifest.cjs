@@ -10,7 +10,6 @@
 
 const DESKTOP = "web-desktop-chromium";
 const MOBILE = "web-mobile-chromium";
-const MUSEUM_INSTITUTIONAL_PRACTICE_TIMEOUT_MINUTES = 30;
 const SIMULATION_PROJECTS = [
   "capacitor-ios-sim",
   "capacitor-android-sim",
@@ -93,7 +92,7 @@ function localPack(scriptKey, description, specs, tweaks = {}) {
     ...(specs ? { specs } : {}),
     ...tweaks,
     projects: tweaks.projects ?? [DESKTOP, MOBILE],
-    workers: 1,
+    workers: tweaks.workers ?? 1,
     timeoutMinutes: tweaks.timeoutMinutes ?? 15,
   };
 }
@@ -137,7 +136,7 @@ function stagingPack(alias, suffix, description, specs, tweaks = {}) {
     specs,
     ...tweaks,
     projects: tweaks.projects ?? [DESKTOP, MOBILE],
-    workers: 1,
+    workers: tweaks.workers ?? 1,
     timeoutMinutes: tweaks.timeoutMinutes ?? 15,
   };
 }
@@ -525,7 +524,7 @@ const PACKS = [
       "museum-institutional-practice",
       "Staging Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
-      { timeoutMinutes: MUSEUM_INSTITUTIONAL_PRACTICE_TIMEOUT_MINUTES }
+      { workers: 2 }
     )
   ),
   museumPack(
@@ -620,16 +619,17 @@ const PACKS = [
       [DESKTOP, MOBILE]
     )
   ),
-  museumPack(
-    productionPack(
+  museumPack({
+    ...productionPack(
       "museum-institutional-practice",
       "Production Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
       ["cron", "post-deploy", "manual"],
-      MUSEUM_INSTITUTIONAL_PRACTICE_TIMEOUT_MINUTES,
+      30,
       [DESKTOP, MOBILE]
-    )
-  ),
+    ),
+    workers: 2,
+  }),
   museumPack(
     productionPack(
       "museum-about",

@@ -13,6 +13,7 @@ type Pack = {
   triggers: string[];
   specs?: string[];
   projects?: string[];
+  workers?: number;
   timeoutMinutes: number;
   changeScope?: "museum";
 };
@@ -40,6 +41,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
       serial_failed_pack_retry: {
         version: number;
         max_retries: number;
+        policy: string;
       };
     };
   };
@@ -52,6 +54,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
   classifyResult: (result: SpawnResult) => {
     failed: boolean;
     infrastructure: boolean;
+    retryable: boolean;
     label: string;
   };
   parseArgs: (args: string[]) => {
@@ -227,8 +230,9 @@ describe("manifest-driven E2E runner", () => {
           version: 1,
         },
         serial_failed_pack_retry: {
-          version: 1,
+          version: 2,
           max_retries: 1,
+          policy: "transient-infrastructure-only",
         },
       },
     });
@@ -315,7 +319,11 @@ describe("manifest-driven E2E runner", () => {
         stderr: "",
         error: timeoutError,
       })
-    ).toMatchObject({ failed: true, infrastructure: true });
+    ).toMatchObject({
+      failed: true,
+      infrastructure: true,
+      retryable: false,
+    });
     expect(
       runner.classifyResult({
         status: 1,
@@ -323,7 +331,11 @@ describe("manifest-driven E2E runner", () => {
         stdout: "",
         stderr: "",
       })
-    ).toMatchObject({ failed: true, infrastructure: false });
+    ).toMatchObject({
+      failed: true,
+      infrastructure: false,
+      retryable: false,
+    });
     expect(
       runner.classifyResult({
         status: null,
@@ -331,7 +343,11 @@ describe("manifest-driven E2E runner", () => {
         stdout: "",
         stderr: "",
       })
-    ).toMatchObject({ failed: true, infrastructure: true });
+    ).toMatchObject({
+      failed: true,
+      infrastructure: true,
+      retryable: true,
+    });
 
     const cleanTeardownTimeout = spawnSync(
       process.execPath,
@@ -349,6 +365,7 @@ describe("manifest-driven E2E runner", () => {
     expect(runner.classifyResult(cleanTeardownTimeout)).toMatchObject({
       failed: true,
       infrastructure: true,
+      retryable: false,
     });
   });
 
@@ -425,7 +442,7 @@ describe("manifest-driven E2E runner", () => {
     }
   });
 
-  it("retries only failed packs once in serial and preserves both attempts", async () => {
+  it("retries only transient infrastructure failures once in serial", async () => {
     const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-retry-"));
     const packs = [
       samplePacks[0]!,
@@ -436,6 +453,10 @@ describe("manifest-driven E2E runner", () => {
       {
         ...samplePacks[0]!,
         scriptKey: "test:e2e:staging:third-readonly",
+      },
+      {
+        ...samplePacks[0]!,
+        scriptKey: "test:e2e:staging:fourth-readonly",
       },
     ];
     const calls = new Map<string, number>();
@@ -463,11 +484,34 @@ describe("manifest-driven E2E runner", () => {
           }
           await new Promise((resolve) => setTimeout(resolve, 5));
           active -= 1;
-          const persistentFailure = pack.scriptKey.includes("second");
-          const transientFailure =
+          const deterministicFailure = pack.scriptKey.includes("second");
+          const timeoutFailure = pack.scriptKey.includes("third");
+          const transientInfrastructureFailure =
             pack.scriptKey.includes("smoke") && call === 1;
+          if (transientInfrastructureFailure) {
+            return {
+              status: null,
+              signal: null,
+              stdout: `attempt ${call}`,
+              stderr: "",
+              error: Object.assign(new Error("runner unavailable"), {
+                code: "EAGAIN",
+              }),
+            };
+          }
+          if (timeoutFailure) {
+            return {
+              status: null,
+              signal: null,
+              stdout: `attempt ${call}`,
+              stderr: "",
+              error: Object.assign(new Error("timed out"), {
+                code: "ETIMEDOUT",
+              }),
+            };
+          }
           return {
-            status: persistentFailure || transientFailure ? 1 : 0,
+            status: deterministicFailure ? 1 : 0,
             signal: null,
             stdout: `attempt ${call}`,
             stderr: "",
@@ -481,18 +525,16 @@ describe("manifest-driven E2E runner", () => {
       });
 
       expect(peak).toBe(3);
-      expect(retryOrder).toEqual([
-        "test:e2e:staging:smoke",
-        "test:e2e:staging:second-readonly",
-      ]);
+      expect(retryOrder).toEqual(["test:e2e:staging:smoke"]);
       expect(Object.fromEntries(calls)).toEqual({
         "test:e2e:staging:smoke": 2,
-        "test:e2e:staging:second-readonly": 2,
+        "test:e2e:staging:second-readonly": 1,
         "test:e2e:staging:third-readonly": 1,
+        "test:e2e:staging:fourth-readonly": 1,
       });
       expect(result).toMatchObject({
-        failedCount: 1,
-        infrastructureFailureCount: 0,
+        failedCount: 2,
+        infrastructureFailureCount: 1,
         evidence: {
           serial_retry_limit: 1,
           results: [
@@ -501,17 +543,26 @@ describe("manifest-driven E2E runner", () => {
               status: "passed",
               attempt_count: 2,
               attempts: [
-                { attempt: 1, status: "failed", failure_class: "e2e" },
+                {
+                  attempt: 1,
+                  status: "failed",
+                  failure_class: "infrastructure",
+                },
                 { attempt: 2, status: "passed", failure_class: null },
               ],
             },
             {
               script_key: "test:e2e:staging:second-readonly",
               status: "failed",
-              attempt_count: 2,
+              attempt_count: 1,
             },
             {
               script_key: "test:e2e:staging:third-readonly",
+              status: "failed",
+              attempt_count: 1,
+            },
+            {
+              script_key: "test:e2e:staging:fourth-readonly",
               status: "passed",
               attempt_count: 1,
             },
@@ -897,6 +948,7 @@ describe("E2E runner CLI resolution", () => {
     expect(museumPacks[0]?.triggers).toEqual(["manual"]);
     expect(museumPacks[1]?.triggers).toEqual(["post-deploy", "manual"]);
     expect(museumPacks[2]?.triggers).toEqual(["cron", "post-deploy", "manual"]);
+    expect(museumPacks.slice(1, 3).map((pack) => pack.workers)).toEqual([2, 2]);
   });
 
   it("classifies every dedicated Museum pack across local and deployed environments", () => {

@@ -94,15 +94,17 @@ describe("E2E pack manifest", () => {
     );
   });
 
-  it("gives the deployed institutional-practice sweeps enough time", () => {
-    for (const scriptKey of [
-      "test:e2e:staging:museum-institutional-practice",
-      "test:e2e:production:museum-institutional-practice",
-    ]) {
-      expect(
-        packs.find((pack) => pack.scriptKey === scriptKey)?.timeoutMinutes
-      ).toBe(30);
-    }
+  it("parallelizes deployed institutional-practice sweeps without inflating staging timeout", () => {
+    const staging = packs.find(
+      (pack) =>
+        pack.scriptKey === "test:e2e:staging:museum-institutional-practice"
+    );
+    const production = packs.find(
+      (pack) =>
+        pack.scriptKey === "test:e2e:production:museum-institutional-practice"
+    );
+    expect(staging).toMatchObject({ timeoutMinutes: 15, workers: 2 });
+    expect(production).toMatchObject({ timeoutMinutes: 30, workers: 2 });
   });
 
   it("rejects missing, unknown, or overbroad Museum change scopes", () => {
@@ -200,7 +202,7 @@ describe("E2E pack manifest", () => {
       expect(museumPack).toMatchObject({
         safety: "readonly",
         projects: ["web-desktop-chromium", "web-mobile-chromium"],
-        workers: 1,
+        workers: environment === "local" ? 1 : 2,
       });
     }
   });

@@ -32,8 +32,9 @@ const RUNNER_CAPABILITIES = Object.freeze({
       version: 1,
     }),
     serial_failed_pack_retry: Object.freeze({
-      version: 1,
+      version: 2,
       max_retries: 1,
+      policy: "transient-infrastructure-only",
     }),
   }),
 });
@@ -450,6 +451,7 @@ function classifyResult(result) {
     return {
       failed: true,
       infrastructure: true,
+      retryable: false,
       label: `timed out: ${result.error.message}`,
     };
   }
@@ -457,6 +459,7 @@ function classifyResult(result) {
     return {
       failed: true,
       infrastructure: true,
+      retryable: result.error.code !== "ENOBUFS",
       label: `failed to launch: ${result.error.message}`,
     };
   }
@@ -464,6 +467,7 @@ function classifyResult(result) {
     return {
       failed: true,
       infrastructure: true,
+      retryable: true,
       label: `terminated by signal ${result.signal}`,
     };
   }
@@ -471,10 +475,16 @@ function classifyResult(result) {
     return {
       failed: true,
       infrastructure: false,
+      retryable: false,
       label: `tests exited ${result.status}`,
     };
   }
-  return { failed: false, infrastructure: false, label: "passed" };
+  return {
+    failed: false,
+    infrastructure: false,
+    retryable: false,
+    label: "passed",
+  };
 }
 
 function outputTail(output) {
@@ -541,6 +551,7 @@ async function runOnePack(
     classification = {
       failed: true,
       infrastructure: true,
+      retryable: false,
       label: `cleanup failed: ${cleanupError.message}`,
     };
   }
@@ -560,6 +571,7 @@ async function runOnePack(
     classification = {
       failed: true,
       infrastructure: true,
+      retryable: false,
       label: `artifact preservation failed: ${artifactError.message}`,
     };
   }
@@ -626,7 +638,7 @@ async function runPacks(
     const attempts = [records[index]];
     for (
       let retry = 1;
-      attempts.at(-1).classification.failed && retry <= retryFailedPacks;
+      attempts.at(-1).classification.retryable && retry <= retryFailedPacks;
       retry += 1
     ) {
       const attempt = retry + 1;

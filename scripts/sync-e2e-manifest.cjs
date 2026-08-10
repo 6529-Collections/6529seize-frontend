@@ -154,9 +154,14 @@ function validateRemoteContract(problems, pack, environment) {
       `${packLabel(pack)}: ${environment} packs must select at least one project.`
     );
   }
-  if (pack.workers !== 1) {
+  const maxWorkers =
+    pack.changeScope === "museum" &&
+    pack.alias === "museum-institutional-practice"
+      ? 2
+      : 1;
+  if (pack.workers < 1 || pack.workers > maxWorkers) {
     problems.push(
-      `${packLabel(pack)}: ${environment} packs must set workers=1.`
+      `${packLabel(pack)}: ${environment} packs must set workers between 1 and ${maxWorkers}.`
     );
   }
   for (const [key, value] of Object.entries(expected)) {

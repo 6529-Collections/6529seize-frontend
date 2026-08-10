@@ -15,7 +15,6 @@ export function shouldWithholdKeysAndGatesMedia(
   programSlugs: readonly string[]
 ): boolean {
   return (
-    status !== ACCESSIONED_STATUS &&
-    programSlugs.includes(KEYS_AND_GATES_SLUG)
+    status !== ACCESSIONED_STATUS && programSlugs.includes(KEYS_AND_GATES_SLUG)
   );
 }
