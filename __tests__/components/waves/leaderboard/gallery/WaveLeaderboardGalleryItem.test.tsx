@@ -196,7 +196,7 @@ describe("WaveLeaderboardGalleryItem", () => {
     ).toBeTruthy();
   });
 
-  it("renders matching-height gallery actions in the footer", () => {
+  it("renders accessible-size gallery actions in the footer", () => {
     render(<WaveLeaderboardGalleryItem drop={drop} onDropClick={jest.fn()} />);
 
     const trigger = screen.getByRole("button", {
@@ -214,7 +214,9 @@ describe("WaveLeaderboardGalleryItem", () => {
       "tw-py-0"
     );
     expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
-    expect(voteButton).toHaveClass("tw-box-border", "tw-h-8");
+    expect(trigger.parentElement).toHaveClass("tw-min-h-11");
+    expect(voteButton).toHaveClass("tw-box-border", "tw-min-h-11");
+    expect(voteButton).not.toHaveClass("tw-h-8");
     expect(voteButton).toHaveTextContent("You: 1 NIC");
     expect(
       trigger.compareDocumentPosition(voteButton) &
@@ -425,6 +427,8 @@ describe("WaveLeaderboardGalleryItem", () => {
     const openDropButton = screen.getByRole("button", {
       name: "Open drop media",
     });
+    expect(openDropButton).toHaveClass("tw-size-11");
+    expect(openDropButton).not.toHaveClass("tw-size-8");
     openDropButton.focus();
     await userEvent.keyboard("{Enter}");
     expect(onDropClick).toHaveBeenCalledTimes(1);

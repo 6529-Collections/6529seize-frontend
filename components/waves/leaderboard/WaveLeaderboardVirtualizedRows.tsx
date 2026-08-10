@@ -7,13 +7,7 @@ import { t } from "@/i18n/messages";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Virtualizer } from "@tanstack/react-virtual";
 import type { RefObject, ReactNode } from "react";
-import {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/utils/button/Button";
 
 type LeaderboardVirtualLayout = "list" | "grid" | "gallery";
@@ -87,8 +81,7 @@ const getProjectedLeadingItemCount = ({
       page < firstRetainedPage;
       page++
     ) {
-      leadingItemCount +=
-        ledger.counts.get(page) ?? WAVE_DROPS_PARAMS.limit;
+      leadingItemCount += ledger.counts.get(page) ?? WAVE_DROPS_PARAMS.limit;
     }
   } else if (firstRetainedPage < ledger.firstRetainedPage) {
     for (
@@ -304,8 +297,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     updateScrollMargin();
     if (globalThis.ResizeObserver === undefined) {
       globalThis.addEventListener("resize", updateScrollMargin);
-      return () =>
-        globalThis.removeEventListener("resize", updateScrollMargin);
+      return () => globalThis.removeEventListener("resize", updateScrollMargin);
     }
 
     const observer = new globalThis.ResizeObserver(updateScrollMargin);
@@ -360,8 +352,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
         return;
       }
 
-      const lastVisibleLogicalIndex =
-        (lastChangedRowIndex + 1) * columns - 1;
+      const lastVisibleLogicalIndex = (lastChangedRowIndex + 1) * columns - 1;
       const nextPrefetchBoundary = Math.max(
         0,
         logicalItemCount - NEXT_PAGE_PREFETCH_ROWS * columns
@@ -371,8 +362,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       }
 
       const lastItem = items.at(-1);
-      const lastItemId =
-        lastItem === undefined ? "empty" : getItemId(lastItem);
+      const lastItemId = lastItem === undefined ? "empty" : getItemId(lastItem);
       const nextTriggerKey = `${windowKey}:${leadingItemCount}:${lastItemId}`;
       if (nextTriggerKeyRef.current === nextTriggerKey) {
         return;
@@ -423,8 +413,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     const anchoredDrop = Array.from(
       root.querySelectorAll<HTMLElement>("[data-leaderboard-drop-id]")
     ).find(
-      (candidate) =>
-        candidate.dataset["leaderboardDropId"] === anchor.dropId
+      (candidate) => candidate.dataset["leaderboardDropId"] === anchor.dropId
     );
     if (anchoredDrop) {
       scrollContainer.scrollTo({
@@ -554,7 +543,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
                     aria-setsize={ariaSetSize}
                     data-leaderboard-drop-id={itemId}
                     data-leaderboard-logical-index={logicalIndex}
-                    className="tw-min-w-0"
+                    className="tw-h-full tw-min-w-0"
                   >
                     {renderItem(item)}
                   </div>
