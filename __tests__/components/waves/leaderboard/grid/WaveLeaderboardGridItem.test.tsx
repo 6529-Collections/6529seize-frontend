@@ -221,6 +221,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(footer).toHaveClass("tw-px-3");
     expect(footer).toHaveClass("tw-pt-3");
     expect(footer).toHaveClass("tw-pb-3");
+    expect(footer.firstElementChild).toHaveClass("tw-mb-1");
 
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
