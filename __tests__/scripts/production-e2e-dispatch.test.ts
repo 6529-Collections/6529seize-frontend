@@ -11,8 +11,10 @@ const read = (file: string) =>
 describe("automatic production E2E dispatch", () => {
   const dispatchSource = read("production-e2e-dispatch.yml");
   const e2eSource = read("production-e2e.yml");
+  const completionSource = read("production-authority-complete.yml");
   const dispatch = YAML.parse(dispatchSource);
   const e2e = YAML.parse(e2eSource);
+  const completion = YAML.parse(completionSource);
 
   it("dispatches only successful same-repository main deployments", () => {
     expect(dispatch.on.workflow_run).toMatchObject({
@@ -33,6 +35,96 @@ describe("automatic production E2E dispatch", () => {
     );
     expect(dispatchSource).toContain(
       "inputs:{automatic_deploy_run_id:$deploy_run_id}"
+    );
+    expect(dispatch.concurrency).toEqual({
+      group: "production-e2e-dispatch-${{ github.event.workflow_run.id }}",
+      "cancel-in-progress": false,
+    });
+  });
+
+  it("reuses one exact E2E run and reconciles an ambiguous dispatch response", () => {
+    const job = dispatch.jobs["dispatch-successful-deploy"];
+    const step = job.steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Dispatch exact successful deploy to production E2E"
+    );
+    expect(job["timeout-minutes"]).toBe(120);
+    expect(step.id).toBe("e2e");
+    expect(step.run).toContain("list_exact_runs()");
+    expect(step.run).toContain(".name == $title");
+    expect(step.run).toContain(".display_title == $title");
+    expect(step.run).not.toContain('.name == "Production E2E"');
+    expect(step.run).toContain('created=">=${DEPLOY_CREATED_AT}"');
+    expect(step.run).toContain('if [ "$existing_count" = 1 ]; then');
+    expect(step.run.match(/echo "run_id=\$e2e_run_id"/g)).toHaveLength(2);
+    expect(step.run).toContain("|| dispatch_status=$?");
+    expect(step.run).toContain("for _ in $(seq 1 20); do");
+    expect(step.run).toContain('if [ "$observed_count" -gt 1 ]; then');
+    expect(step.run).toContain(
+      "No exact automatic Production E2E run became visible after dispatch"
+    );
+  });
+
+  it("waits for the exact E2E terminal state and dispatches exact authority completion", () => {
+    const job = dispatch.jobs["dispatch-successful-deploy"];
+    const step = job.steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name ===
+        "Dispatch authority completion after exact terminal E2E"
+    );
+
+    expect(step.env).toEqual(
+      expect.objectContaining({
+        DEPLOY_HEAD_SHA: "${{ github.event.workflow_run.head_sha }}",
+        DEPLOY_WORKFLOW_RUN_ID: "${{ github.event.workflow_run.id }}",
+        E2E_RUN_ID: "${{ steps.e2e.outputs.run_id }}",
+      })
+    );
+    expect(step.run).toContain("for _ in $(seq 1 400); do");
+    expect(step.run).toContain(
+      '.name == ("Production E2E automatic " + $deploy_run_id)'
+    );
+    expect(step.run).toContain(".display_title == .name");
+    expect(step.run).toContain(
+      '.path == ".github/workflows/production-e2e.yml"'
+    );
+    expect(step.run).toContain(".head_sha == $head_sha");
+    expect(step.run).toContain('.actor.login == "github-actions[bot]"');
+    expect(step.run).toContain('if [ "$status" = completed ]; then');
+    expect(step.run).toContain(
+      "actions/workflows/production-authority-complete.yml/dispatches"
+    );
+    expect(step.run).toContain(
+      "{ref:$ref,inputs:{terminal_workflow_run_id:$terminal_run_id}}"
+    );
+    expect(step.run).toContain(
+      "date -u -d '5 seconds ago' +%Y-%m-%dT%H:%M:%SZ"
+    );
+    expect(step.run).toContain(
+      '--arg title "Production authority completion [${E2E_RUN_ID}]"'
+    );
+    expect(step.run).toContain(
+      "No exact authority completion run became visible for E2E"
+    );
+  });
+
+  it("keeps automatic dispatch on protected main through completion", () => {
+    const job = dispatch.jobs["dispatch-successful-deploy"];
+    const step = job.steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Dispatch exact successful deploy to production E2E"
+    );
+
+    const protectedRef = step.env.DEPLOY_REF;
+    expect(protectedRef).toBe("main");
+    expect(step.run).toContain('test "$DEPLOY_REF" = main');
+    expect(step.run).toContain('--arg ref "$DEPLOY_REF"');
+    expect(dispatchSource).not.toContain(
+      "github.event.repository.default_branch"
+    );
+    expect(completion.on.workflow_run.branches).toEqual([protectedRef]);
+    expect(completion.jobs["complete-production-authority"].if).toContain(
+      `github.event.workflow_run.head_branch == '${protectedRef}'`
     );
   });
 
@@ -89,7 +181,10 @@ describe("automatic production E2E dispatch", () => {
     expect(
       e2e.on.workflow_dispatch.inputs.automatic_deploy_run_id.required
     ).toBe(false);
-    expect(resolve.run).toContain('.name == "Web Deploy - PROD"');
+    expect(resolve.run).toContain(
+      '.name == ("Production deploy " + .head_sha + " [frontend-prod-" + ($run_id | tostring) + "]")'
+    );
+    expect(resolve.run).toContain(".display_title == .name");
     expect(resolve.run).toContain(
       '.path == ".github/workflows/build-upload-deploy-prod.yml"'
     );
@@ -97,6 +192,11 @@ describe("automatic production E2E dispatch", () => {
     expect(resolve.run).toContain('.head_branch == "main"');
     expect(resolve.run).toContain("previous_deployed_sha=$previous_sha");
     expect(resolve.run).toContain(".run_started_at < $started_at");
+    expect(resolve.run).toContain(
+      '.name == ("Production deploy " + .head_sha + " [frontend-prod-" + (.id | tostring) + "]")'
+    );
+    expect(resolve.run).not.toContain('.name == "Web Deploy - PROD"');
+    expect(e2eSource).not.toContain('.name == "Web Deploy - PROD"');
     expect(e2eSource).toContain(
       "inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha"
     );
@@ -178,6 +278,10 @@ describe("automatic production E2E dispatch", () => {
         step.name === "Check out immutable isolated verifier tooling"
     );
     const evidence = verifier.steps[evidenceIndex];
+    const qualification = verifier.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Write automatic production qualification record"
+    );
     const report = verifier.steps[reportIndex];
     const result = verifier.steps[resultIndex];
 
@@ -249,6 +353,8 @@ describe("automatic production E2E dispatch", () => {
     expect(evidence.run).toContain("$actual == $selected");
     expect(evidence.run).toContain("$actual == $complete");
     expect(evidence.run).toContain(".release_binding == null");
+    expect(qualification.run).toContain("Accept: application/vnd.github+json");
+    expect(qualification.run).not.toContain("Accept: application/octet-stream");
     expect(report.env.READONLY_RESULT).toContain("needs.readonly.result");
     expect(report.env.READONLY_SOCKET_OUTCOME).toContain(
       "needs.readonly.outputs.socket-outcome"

@@ -2,15 +2,33 @@
 
 import NetworkHealthCTA from "@/components/header/NetworkHealthCTA";
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
+import HeaderPageShareButton from "@/components/header/share/HeaderPageShareButton";
+import { isPageShareSupported } from "@/components/header/share/page-share-support";
 import EnvironmentBadge from "@/components/common/EnvironmentBadge";
+import { getActiveViewFromUrl } from "@/components/navigation/ViewContext";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 interface SmallScreenHeaderProps {
   readonly onMenuToggle: () => void;
   readonly isMenuOpen: boolean;
+}
+
+function SmallScreenPageShareButton() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const activeView = getActiveViewFromUrl({ activeWaveId, searchParams });
+
+  if (!isPageShareSupported({ activeView, pathname, surface: "mobile" })) {
+    return null;
+  }
+
+  return <HeaderPageShareButton isCapacitor={false} />;
 }
 
 export default function SmallScreenHeader({
@@ -40,6 +58,9 @@ export default function SmallScreenHeader({
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
           {isHomeRoute && <NetworkHealthCTA />}
+          <Suspense fallback={null}>
+            <SmallScreenPageShareButton />
+          </Suspense>
           <HeaderSearchButton wave={null} />
           <button
             onClick={onMenuToggle}
