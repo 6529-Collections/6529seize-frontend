@@ -187,7 +187,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
               {summary.description}
             </p>
           )}
-          {canOpenDrop && (
+          {canOpenDrop && !isContentOnlyMode && (
             <button
               type="button"
               onClick={onOpenButtonClick}
