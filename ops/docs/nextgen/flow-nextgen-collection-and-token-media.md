@@ -47,7 +47,11 @@ branches.
    and `Fullscreen`.
 9. Switch token detail views (`About`, `Provenance`, `Display Center`,
    `Rarity`) when needed.
-10. Optionally branch into `/mint` or `/distribution-plan`, then return to
+10. If the token was opened from a profile's Collected tab, use
+    `Back to {profile}'s collected` to restore that list's filters, page, and
+    opened-card position. Direct token visits offer the current owner's
+    Collected view when available.
+11. Optionally branch into `/mint` or `/distribution-plan`, then return to
     collection or token browsing.
 
 ## Route Behavior
@@ -59,6 +63,9 @@ branches.
 - Unsupported token view segments resolve to `About`.
 - If indexed token data is missing or pending, token routes fall back to the
   on-chain token panel.
+- The in-app share action removes profile-return context from token URLs, so a
+  recipient gets the direct-visit owner fallback instead of the sender's list
+  position.
 
 ## Common Scenarios
 
@@ -75,6 +82,10 @@ branches.
 - `Live` mode stays on static image output when no `animation_url` exists.
 - High-res zoom controls stay hidden until the high-res image finishes loading.
 - Previous/next token arrows disable at first/last token positions.
+- The profile-Collected return action remains available while switching token
+  detail views or browsing adjacent tokens.
+- Invalid profile return destinations are ignored. The token page falls back
+  to the current owner's Collected view or the collection-art route.
 
 ## Failure and Recovery
 

@@ -1,6 +1,7 @@
 import { toDataURL } from "qrcode";
 
 import { publicEnv } from "@/config/env";
+import { stripCollectedReturnFromTokenRoute } from "@/helpers/profile-collected-navigation";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import {
   getRefreshToken,
@@ -185,9 +186,12 @@ export function getCurrentPageLocation(): {
   }
 
   const { hash, href, pathname, search } = window.location;
+  const routerPath = stripCollectedReturnFromTokenRoute(
+    `${pathname}${search}${hash}`
+  );
   return {
-    fullUrl: href,
-    routerPath: `${pathname}${search}${hash}`,
+    fullUrl: new URL(routerPath, href).href,
+    routerPath,
   };
 }
 
