@@ -81,4 +81,70 @@ describe("UserPageHeaderBanner", () => {
 
     expect(screen.queryByRole("button")).toBeNull();
   });
+
+  it("keeps mobile artwork full strength and scopes fading to desktop", () => {
+    const { container } = render(
+      <UserPageHeaderBanner
+        profile={{
+          ...baseProfile,
+          banner1: "https://example.com/banner.jpg",
+        }}
+        defaultBanner1="#000"
+        defaultBanner2="#fff"
+        canEdit={false}
+        profileLabel="alice"
+      />
+    );
+
+    const imageLayer = container.querySelector<HTMLElement>(
+      'div[style*="background-image"]'
+    );
+    expect(imageLayer).toHaveClass(
+      "md:tw-mix-blend-lighten",
+      "md:tw-opacity-60"
+    );
+    expect(imageLayer).not.toHaveClass("tw-mix-blend-lighten");
+    expect(imageLayer).not.toHaveClass("tw-opacity-60");
+
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-ring-white/5"]')
+    ).toHaveClass("md:tw-hidden");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-t"]')
+    ).toHaveClass("tw-hidden", "md:tw-block");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-b"]')
+    ).toHaveClass("tw-hidden", "md:tw-block");
+  });
+
+  it("keeps the gradient fallback full strength on mobile", () => {
+    const { container } = render(
+      <UserPageHeaderBanner
+        profile={baseProfile}
+        defaultBanner1="#000"
+        defaultBanner2="#fff"
+        canEdit={false}
+        profileLabel="alice"
+      />
+    );
+
+    const gradientLayer = container.querySelector<HTMLElement>(
+      'div[style*="linear-gradient"]'
+    );
+    expect(gradientLayer).toHaveAttribute(
+      "style",
+      "background: linear-gradient(45deg, #000 0%, #fff 100%);"
+    );
+    expect(gradientLayer).not.toHaveClass("tw-mix-blend-lighten");
+    expect(gradientLayer).not.toHaveClass("tw-opacity-60");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-ring-white/5"]')
+    ).toHaveClass("md:tw-hidden");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-t"]')
+    ).toHaveClass("tw-hidden", "md:tw-block");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-b"]')
+    ).toHaveClass("tw-hidden", "md:tw-block");
+  });
 });

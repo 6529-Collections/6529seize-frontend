@@ -685,6 +685,11 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
   ]);
   expect(
     result.current.waves
+      .filter((wave: any) => wave.sidebarSection === "highly-rated")
+      .every((wave: any) => wave.isInAllWaves === false)
+  ).toBe(true);
+  expect(
+    result.current.waves
       .filter(
         (wave: any) =>
           !wave.isPinned && !wave.subscribed && wave.sidebarSection === "all"
@@ -696,6 +701,57 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
 
   expect(fetchNextAllActivityPage).not.toHaveBeenCalled();
   expect(fetchNextFollowedActivityPage).toHaveBeenCalled();
+});
+
+test("gives joined activity precedence over an existing discovery row", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+
+  const discoverySnapshot = createSidebarWave({
+    id: "overlap",
+    latestDropTimestamp: 400,
+  });
+  const followedSnapshot = createSidebarWave({
+    id: "overlap",
+    latestDropTimestamp: 500,
+    subscribed: true,
+  });
+
+  useWavesV2Mock.mockImplementation(
+    ({ following, overviewType, pageSize }) => ({
+      waves:
+        overviewType === ApiWavesOverviewType.RecentlyDroppedTo && following
+          ? [followedSnapshot]
+          : overviewType === ApiWavesOverviewType.ScoredRecentlyDroppedTo &&
+              pageSize === 10
+            ? [discoverySnapshot]
+            : [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+    })
+  );
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves).toHaveLength(1);
+  expect(result.current.waves[0]).toMatchObject({
+    id: "overlap",
+    isInAllWaves: true,
+    sidebarSection: "all",
+    subscribed: true,
+  });
 });
 
 test("paginates only followed activity in joined mode", () => {
@@ -1047,6 +1103,9 @@ test("keeps highly rated first while bottom all waves use latest activity", () =
     "followed-new",
     "followed-old",
   ]);
+  expect(
+    result.current.waves.find((wave: any) => wave.id === "highly-rated")
+  ).toMatchObject({ isInAllWaves: true, sidebarSection: "highly-rated" });
 });
 
 test("sorts regular all waves by latest activity", () => {

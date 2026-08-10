@@ -51,7 +51,7 @@ describe("one-click production authority completion", () => {
     expect(completion.on.workflow_dispatch).toEqual({
       inputs: {
         terminal_workflow_run_id: {
-          description: "Exact failed production workflow run to release",
+          description: "Exact terminal production workflow run to complete",
           required: true,
           type: "string",
         },
@@ -59,7 +59,7 @@ describe("one-click production authority completion", () => {
     });
     expect(completionJob.if.replace(/\s+/gu, " ").trim()).toBe(
       "(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && " +
-        "(github.actor == 'punk6529' || github.actor == 'prxt6529')) || " +
+        "(github.actor == 'punk6529' || github.actor == 'prxt6529' || github.actor == 'github-actions[bot]')) || " +
         "(github.event_name == 'workflow_run' && " +
         "github.event.workflow_run.head_repository.full_name == github.repository && " +
         "github.event.workflow_run.head_branch == 'main' && " +
@@ -71,6 +71,7 @@ describe("one-click production authority completion", () => {
       .find((line) => line.trimStart().startsWith("if: (github.event_name"));
     expect(dispatchGateLine).toContain("github.actor == 'punk6529'");
     expect(dispatchGateLine).toContain("github.actor == 'prxt6529'");
+    expect(dispatchGateLine).toContain("github.actor == 'github-actions[bot]'");
     expect(dispatchGateLine).toMatch(/# NOSONAR$/u);
     expect(completionJob.if).not.toContain("github.event.workflow_run.name");
     expect(completionJob["runs-on"]).toBe("ubuntu-latest");
@@ -95,7 +96,9 @@ describe("one-click production authority completion", () => {
   });
 
   it("recovers an exact terminal run only from main and an authorized release actor", () => {
-    expect(completion["run-name"]).toBe("Production authority completion");
+    expect(completion["run-name"]).toBe(
+      "Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]"
+    );
     expect(proof.env.WORKFLOW_RUN_ID).toContain(
       "github.event.workflow_run.id || inputs.terminal_workflow_run_id"
     );
@@ -110,12 +113,15 @@ describe("one-click production authority completion", () => {
     expect(proof.run).toContain(
       "Production authority recovery must run from main."
     );
-    expect(proof.run).toContain("punk6529|prxt6529)");
+    expect(proof.run).toContain("punk6529|prxt6529|github-actions\\[bot\\])");
     expect(proof.run).toContain(
       "Actor is not authorized for production authority recovery."
     );
     expect(proof.run).toContain(
       'workflow_path="$(jq -er \'.path | strings\' "$workflow_file")"'
+    );
+    expect(proof.run).toContain(
+      "Automatic authority completion accepts only an exact Production E2E run."
     );
     expect(proof.run).not.toContain("workflow_name=");
   });
@@ -215,7 +221,10 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       'test "$(stat -c %s "$archive_file")" -le "$maximum_size"'
     );
-    expect(completionSource).toContain("Accept: application/octet-stream");
+    expect(
+      completionSource.match(/Accept: application\/vnd\.github\+json/g)
+    ).toHaveLength(2);
+    expect(completionSource).not.toContain("Accept: application/octet-stream");
     expect(completionSource).toContain("len(members) != 1");
     expect(completionSource).toContain("stat.S_IFLNK");
     expect(completionSource).toContain("os.O_EXCL");

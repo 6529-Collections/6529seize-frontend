@@ -8,20 +8,20 @@ on:
   workflow_dispatch:
     inputs:
       terminal_workflow_run_id:
-        description: Exact failed production workflow run to release
+        description: Exact terminal production workflow run to complete
         required: true
         type: string
 
 permissions: {}
 
-run-name: Production authority completion
+run-name: Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]
 
 jobs:
   complete-production-authority:
     name: Complete exact production authority
     # A workflow_dispatch actor is the authenticated dispatcher. This early gate is
     # defense in depth; the shell and authority API independently verify identity.
-    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && (github.actor == 'punk6529' || github.actor == 'prxt6529')) || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && (github.actor == 'punk6529' || github.actor == 'prxt6529' || github.actor == 'github-actions[bot]')) || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -53,7 +53,7 @@ jobs:
               exit 1
             fi
             case "$DISPATCH_ACTOR" in
-              punk6529|prxt6529) ;;
+              punk6529|prxt6529|github-actions\[bot\]) ;;
               *)
                 echo "::error::Actor is not authorized for production authority recovery."
                 exit 1
@@ -68,6 +68,11 @@ jobs:
           workflow_file="$proof_dir/workflow.json"
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}" > "$workflow_file"
           workflow_path="$(jq -er '.path | strings' "$workflow_file")"
+
+          if [ "$EVENT_NAME" = workflow_dispatch ] && [ "$DISPATCH_ACTOR" = 'github-actions[bot]' ] && [ "$workflow_path" != '.github/workflows/production-e2e.yml' ]; then
+            echo "::error::Automatic authority completion accepts only an exact Production E2E run."
+            exit 1
+          fi
 
           if [[ "$workflow_path" != ".github/workflows/build-upload-deploy-prod.yml" && "$workflow_path" != ".github/workflows/production-e2e.yml" ]]; then
             echo "Ignoring an unrelated workflow completion."
@@ -112,7 +117,7 @@ jobs:
             declared_digest="$(jq -r '.digest // empty' "$record_file")"
             declared_size="$(jq -er '.size_in_bytes | numbers' "$record_file")"
             gh api \
-              --header 'Accept: application/octet-stream' \
+              --header 'Accept: application/vnd.github+json' \
               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > "$archive_file"
             test "$(stat -c %s "$archive_file")" -gt 0
             test "$(stat -c %s "$archive_file")" -le "$maximum_size"
@@ -400,7 +405,7 @@ jobs:
             declared_digest="$(jq -r '.digest // empty' "$record_file")"
             declared_size="$(jq -er '.size_in_bytes | numbers' "$record_file")"
             gh api \
-              --header 'Accept: application/octet-stream' \
+              --header 'Accept: application/vnd.github+json' \
               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > "$archive_file"
             test "$(stat -c %s "$archive_file")" -gt 0
             test "$(stat -c %s "$archive_file")" -le "$maximum_size"
