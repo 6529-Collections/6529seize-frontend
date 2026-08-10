@@ -32,9 +32,6 @@ const ART_BLOCKS_PATH_PATTERNS = {
   live: /^\/1\/0x[a-f\d]{40}\/\d+$/u,
   still: /^\/1\/0x[a-f\d]{40}\/\d+\.png$/u,
 } as const;
-const MUSEUM_GENERATED_DERIVATIVE_HOST = "d3lqz0a4bldqgf.cloudfront.net";
-const MUSEUM_GENERATED_DERIVATIVE_PATH_PATTERN =
-  /^\/museum\/programs\/[A-Za-z0-9-]+\/[A-Za-z0-9-]+\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\/(?:[0-9]+)\.(?:webp|png|jpe?g)$/u;
 
 export const MUSEUM_MANIFEST_PATH =
   "release-artifacts/latest/record-manifest.json" as const;
@@ -291,29 +288,4 @@ export function assertApprovedMuseumRepositoryMediaUrl(
   }
   assertGovernedMuseumVisualMediaPath(repositoryPath);
   return buildImmutableMuseumRawUrl(sourceCommit, repositoryPath);
-}
-
-export function assertApprovedMuseumGeneratedDerivativeUrl(
-  url: string
-): string {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    throw new Error("publication_unapproved_museum_media_origin");
-  }
-  if (
-    parsed.protocol !== "https:" ||
-    parsed.hostname !== MUSEUM_GENERATED_DERIVATIVE_HOST ||
-    parsed.toString() !== url ||
-    parsed.username.length > 0 ||
-    parsed.password.length > 0 ||
-    parsed.port.length > 0 ||
-    parsed.search.length > 0 ||
-    parsed.hash.length > 0 ||
-    !MUSEUM_GENERATED_DERIVATIVE_PATH_PATTERN.test(parsed.pathname)
-  ) {
-    throw new Error("publication_unapproved_museum_media_origin");
-  }
-  return url;
 }
