@@ -61,7 +61,7 @@ export default function UserPageHeaderBanner({
         <button
           type="button"
           onClick={() => setIsEditOpen(true)}
-          className="tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0"
+          className="tw-absolute tw-inset-0 tw-z-10 tw-hidden tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0 sm:tw-block"
           aria-label={getUserProfileHeaderMessage(
             "user.profileHeader.banner.edit",
             { name: profileLabel }
@@ -70,7 +70,7 @@ export default function UserPageHeaderBanner({
           <div className="tw-absolute tw-inset-0 tw-bg-black/30 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out hover:tw-opacity-100">
             <div
               aria-hidden="true"
-              className="tw-absolute tw-bottom-4 tw-right-4"
+              className="tw-absolute tw-bottom-4 tw-right-4 md:tw-bottom-auto md:tw-top-4"
             >
               <PencilIcon />
             </div>

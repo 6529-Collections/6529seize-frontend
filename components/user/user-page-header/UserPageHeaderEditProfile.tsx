@@ -4,6 +4,7 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import Button from "@/components/utils/button/Button";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import useCapacitor from "@/hooks/useCapacitor";
 import {
   ChevronRightIcon,
   DocumentTextIcon,
@@ -34,6 +35,7 @@ export default function UserPageHeaderEditProfile({
   defaultBanner1: string;
   defaultBanner2: string;
 }>) {
+  const { isCapacitor } = useCapacitor();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pendingTarget, setPendingTarget] = useState<EditTarget | null>(null);
@@ -96,14 +98,14 @@ export default function UserPageHeaderEditProfile({
     <>
       <Button
         ref={triggerRef}
-        variant="secondary"
-        size="lg"
-        fullWidth
+        variant="tertiary"
+        size="sm"
         onClick={() => setIsMenuOpen(true)}
-        className="sm:tw-hidden"
       >
         <PencilSquareIcon className="tw-size-5" aria-hidden="true" />
-        {getUserProfileHeaderMessage("user.profileHeader.edit.open")}
+        <span className="max-[359px]:tw-sr-only">
+          {getUserProfileHeaderMessage("user.profileHeader.edit.open")}
+        </span>
       </Button>
 
       <MobileWrapperDialog
@@ -112,7 +114,9 @@ export default function UserPageHeaderEditProfile({
         onClose={closeMenu}
         onAfterLeave={openPendingEditor}
         showHeaderCloseButton
-        showDragHandle
+        showDragHandle={isCapacitor}
+        enableDragToClose={isCapacitor}
+        headerClassName={isCapacitor ? undefined : "-tw-mt-2 md:tw-mt-0"}
       >
         <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-px-4 sm:tw-px-6">
           {options.map(({ target, label, Icon }) => (
@@ -165,6 +169,7 @@ export default function UserPageHeaderEditProfile({
         onClose={closeEditor}
         tabletModal
         showHeaderCloseButton
+        headerClassName="-tw-mt-2 md:tw-mt-0"
       >
         <div className="tw-px-4 sm:tw-px-6">
           <UserPageHeaderAboutEdit

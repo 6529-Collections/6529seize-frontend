@@ -89,7 +89,7 @@ export default function UserPageHeaderSubscriptionStatus({
     return (
       <div
         aria-label={t(locale, "subscriptions.coverage.loading")}
-        className="tw-min-h-14 tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm sm:tw-w-72"
+        className="tw-min-h-14 tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm sm:tw-w-[22rem]"
       >
         <div className="tw-h-3.5 tw-w-40 tw-rounded tw-bg-iron-700/80" />
         <div className="tw-mt-1.5 tw-h-3 tw-w-48 tw-rounded tw-bg-iron-800/90" />
@@ -102,7 +102,7 @@ export default function UserPageHeaderSubscriptionStatus({
     return (
       <Link
         href={profileHref}
-        className="tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-text-left tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 desktop-hover:hover:tw-bg-white/[0.06] sm:tw-w-72"
+        className="tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-text-left tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 desktop-hover:hover:tw-bg-white/[0.06] sm:tw-w-[22rem]"
       >
         <span className="tw-min-w-0">
           <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-100">
@@ -152,7 +152,7 @@ export default function UserPageHeaderSubscriptionStatus({
   return (
     <div
       className={clsx(
-        "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-backdrop-blur-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-300 sm:tw-w-auto sm:tw-min-w-72",
+        "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-backdrop-blur-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-300 sm:tw-w-[22rem]",
         STATUS_CONTAINER_RING_CLASSES[presentation.tone]
       )}
     >
@@ -169,7 +169,7 @@ export default function UserPageHeaderSubscriptionStatus({
         <span className="tw-block tw-truncate tw-text-[13px] tw-font-medium tw-text-iron-100">
           {t(locale, "subscriptions.coverage.header.title")}
         </span>
-        <span className="tw-mt-0.5 tw-block tw-truncate tw-text-[11px] tw-text-iron-400">
+        <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-leading-4 tw-text-iron-400">
           {secondaryLine}
         </span>
       </span>

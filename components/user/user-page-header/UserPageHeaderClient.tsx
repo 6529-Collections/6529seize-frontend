@@ -61,7 +61,7 @@ export default function UserPageHeaderClient({
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
-  const { isApp } = useDeviceInfo();
+  const { hasTouchScreen, isApp } = useDeviceInfo();
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
@@ -114,6 +114,7 @@ export default function UserPageHeaderClient({
     () => !!(profile.handle && isMyProfile && !activeProfileProxy),
     [profile.handle, isMyProfile, activeProfileProxy]
   );
+  const canInlineEdit = canEdit && !hasTouchScreen;
 
   const { data: statements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandleOrWallet],
@@ -144,6 +145,7 @@ export default function UserPageHeaderClient({
     () => aboutStatement !== null || canEdit,
     [aboutStatement, canEdit]
   );
+  const hasVisibleAbout = aboutStatement !== null || canInlineEdit;
 
   const websiteAction =
     cmsWebsiteHref && profile.handle
@@ -197,18 +199,18 @@ export default function UserPageHeaderClient({
             profile={profile}
             defaultBanner1={banner1Color}
             defaultBanner2={banner2Color}
-            canEdit={canEdit}
+            canEdit={canInlineEdit}
             profileLabel={profileLabel}
           />
         </div>
 
-        <div className="tw-relative tw-z-20 tw-bg-black md:-tw-mt-[164px] md:tw-bg-transparent">
+        <div className="tw-relative tw-z-20 tw-bg-black md:-tw-mt-[164px] md:tw-pointer-events-none md:tw-bg-transparent">
           <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8">
-            <div className="tw-mb-4 tw-flex tw-flex-col tw-items-start tw-gap-5 md:tw-mb-8 md:tw-flex-row md:tw-items-end">
-              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:-tw-mt-[58px] md:tw-mt-0">
+            <div className="tw-mb-4 tw-flex tw-flex-col tw-items-start tw-gap-5 md:tw-flex-row md:tw-items-end lg:tw-mb-8">
+              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:-tw-mt-[58px] md:tw-mt-0 md:tw-pointer-events-auto">
                 <UserPageHeaderPfpWrapper
                   profile={profile}
-                  canEdit={canEdit}
+                  canEdit={canInlineEdit}
                   profileLabel={profileLabel}
                 >
                   <UserPageHeaderPfp
@@ -220,11 +222,26 @@ export default function UserPageHeaderClient({
                 </UserPageHeaderPfpWrapper>
               </div>
 
+              {canEdit ? (
+                <div
+                  className={`tw-absolute tw-right-4 tw-top-0 sm:tw-right-6 md:tw-right-8 md:tw-pointer-events-auto ${
+                    hasTouchScreen ? "" : "sm:tw-hidden"
+                  }`}
+                >
+                  <UserPageHeaderEditProfile
+                    profile={profile}
+                    statement={aboutStatement}
+                    defaultBanner1={banner1Color}
+                    defaultBanner2={banner2Color}
+                  />
+                </div>
+              ) : null}
+
               <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-6 md:tw-flex-1 md:tw-flex-row md:tw-items-center md:tw-justify-between">
-                <div className="tw-min-w-0">
+                <div className="tw-min-w-0 md:tw-pointer-events-auto">
                   <UserPageHeaderName
                     profile={profile}
-                    canEdit={canEdit}
+                    canEdit={canInlineEdit}
                     mainAddress={mainAddress}
                     level={profile.level}
                     profileEnabledAt={profileEnabledAt}
@@ -233,7 +250,7 @@ export default function UserPageHeaderClient({
                   <div className="tw-mt-1.5">
                     <UserPageHeaderName
                       profile={profile}
-                      canEdit={canEdit}
+                      canEdit={canInlineEdit}
                       mainAddress={mainAddress}
                       level={profile.level}
                       profileEnabledAt={profileEnabledAt}
@@ -242,15 +259,18 @@ export default function UserPageHeaderClient({
                   </div>
                 </div>
 
-                {websiteAction || followHandle || canEdit ? (
-                  <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-flex-col tw-items-stretch tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
-                    {canEdit ? (
-                      <UserPageHeaderEditProfile
-                        profile={profile}
-                        statement={aboutStatement}
-                        defaultBanner1={banner1Color}
-                        defaultBanner2={banner2Color}
-                      />
+                {websiteAction || followHandle || showSubscriptionStatus ? (
+                  <div
+                    className={`tw-w-full tw-flex-shrink-0 tw-flex-col tw-items-stretch tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center md:tw-pointer-events-auto ${
+                      websiteAction || followHandle
+                        ? "tw-flex"
+                        : "tw-hidden lg:tw-flex"
+                    }`}
+                  >
+                    {showSubscriptionStatus ? (
+                      <div className="tw-hidden lg:tw-block">
+                        <UserPageHeaderSubscriptionStatus profile={profile} />
+                      </div>
                     ) : null}
                     {websiteAction ? (
                       <ButtonLink
@@ -284,22 +304,28 @@ export default function UserPageHeaderClient({
             </div>
 
             {showAbout ? (
-              <div>
+              <div className="md:tw-pointer-events-auto">
                 <UserPageHeaderAbout
                   profile={profile}
                   statement={aboutStatement}
-                  canEdit={canEdit}
+                  canEdit={canInlineEdit}
                 />
               </div>
             ) : null}
 
             {showSubscriptionStatus ? (
-              <div className="tw-mt-4">
+              <div
+                className={
+                  hasVisibleAbout
+                    ? "tw-mt-4 md:tw-pointer-events-auto lg:tw-hidden"
+                    : "md:tw-pointer-events-auto lg:tw-hidden"
+                }
+              >
                 <UserPageHeaderSubscriptionStatus profile={profile} />
               </div>
             ) : null}
 
-            <div className="tw-mt-4 tw-flex tw-items-center md:tw-mt-6">
+            <div className="tw-mt-4 tw-flex tw-items-center md:tw-mt-6 md:tw-pointer-events-auto">
               <UserPageHeaderStats
                 profile={profile}
                 handleOrWallet={normalizedHandleOrWallet}
