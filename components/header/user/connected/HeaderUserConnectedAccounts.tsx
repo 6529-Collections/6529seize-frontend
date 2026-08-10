@@ -170,7 +170,7 @@ export default function HeaderUserConnectedAccounts({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1">
-      <div className="tw-flex tw-min-h-8 tw-items-center tw-gap-2 tw-px-3">
+      <div className="tw-flex tw-min-h-8 tw-items-center tw-gap-2 tw-pl-3">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
           {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.profiles")}
         </p>
