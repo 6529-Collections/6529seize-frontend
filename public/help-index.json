@@ -1088,7 +1088,7 @@
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
         "If the connection dialog says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
         "Page sharing is a separate navigation action and never appears in the connection dialog.",
-        "On supported pages, mobile web and the native app use a header Share page button that opens a compact action-only Share dialog."
+        "On supported pages, mobile web and the native app use a header Share page button that opens the platform system share sheet directly without a 6529 Share dialog."
       ],
       "canonical_path": "/",
       "suppress_source_links": true,
@@ -3918,7 +3918,7 @@
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
-        "Mobile-web and native-app page sharing appears next to Search on supported routes and opens a compact action-only Share dialog.",
+        "Mobile-web and native-app page sharing appears next to Search on supported routes and opens the platform system share sheet directly.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
       ],
       "canonical_path": "/waves",
@@ -4007,13 +4007,13 @@
       "facts": [
         "Supported desktop-web pages show a persistent sidebar Share icon that opens a page-sharing-only modal.",
         "The desktop-web Share dialog places the Browser or App QR target and QR code on the left of wider layouts, with equal-width labeled actions on the right; narrow layouts stack these sections.",
-        "Mobile web and the native app use a compact Share dialog with Copy Link, Share on X, Share on Farcaster, and More; it omits the QR controls and Open in 6529 Desktop.",
-        "Desktop and mobile browsers use the Web Share API for More when the secure context, payload support, and document permissions policy allow it; the native app uses Capacitor system sharing.",
+        "Mobile web and the native app open the platform system share sheet directly from the header Share button; they do not open the 6529 Share dialog.",
+        "Desktop web uses the Web Share API for the dialog's More action when the secure context, payload support, and document permissions policy allow it; mobile web invokes the Web Share API directly, and the native app invokes Capacitor sharing directly.",
         "Copy changes to a green Copied state for about 1.5 seconds.",
-        "System sharing uses the browser URL at invocation time, including search parameters and the hash; on NextGen token routes it removes the transient profile Collected return context before sharing. Cancellation is silent, while runtime unavailability hides the action and provides accessible feedback without falling back to Copy.",
+        "System sharing uses the browser URL at invocation time, including search parameters and the hash; on NextGen token routes it removes the transient profile Collected return context before sharing. Cancellation is silent; desktop runtime unavailability hides More and provides accessible feedback, while direct mobile or native failure shows an error without falling back to Copy.",
         "Desktop web supports page sharing on home, while mobile web and the native app hide it there; all three surfaces hide page sharing on Messages, Notifications, and the Messages query view, while Waves and the Waves query view remain shareable.",
         "When a wave is active in the native app, the general Share page button is hidden and the wave-specific arrow share action remains inside the More menu.",
-        "Mobile web and native app sharing use their existing header placement and open the compact Share dialog.",
+        "Mobile web and native app sharing use their existing header placement and open the platform system share sheet directly.",
         "The profile menu contains Profile and Connect Device; connection targets never appear in the Share modal.",
         "Wave-specific link sharing also exists in the wave header.",
         "Use share controls when users ask how to copy a route or send someone a page."

@@ -68,10 +68,10 @@ always use the shareable web URL regardless of the selected QR target. For a
 NextGen token opened from a profile's Collected tab, sharing removes the
 transient profile-return parameter while preserving other route state. Copy
 shows a green `Copied` state for about 1.5 seconds. System sharing reads the
-browser URL again when selected and applies the same cleanup. In the native
-app, `More` uses Capacitor's system share sheet; mobile web opens the Web Share
-API directly from the header button. Native system-share failure never falls
-back to Copy.
+browser URL again when selected and applies the same cleanup. Mobile web opens
+the Web Share API directly from the header button, and the native header button
+opens Capacitor's system share sheet directly. Native system-share failure
+never falls back to Copy.
 
 ## Unsupported Share Pages
 
@@ -141,8 +141,8 @@ No copy-page, social, or current-page Share actions appear in this dialog.
   unrecognized `web-share` policy directive is treated as unknown rather than
   blocked, so browser capability checks remain authoritative without producing
   a warning.
-- In the native app, `More` is omitted when Capacitor reports that system
-  sharing is unavailable.
+- In the native app, the header Share button checks Capacitor availability and
+  reports an error if the platform cannot open its system share sheet.
 
 ## Failure and Recovery
 
