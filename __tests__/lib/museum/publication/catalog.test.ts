@@ -460,7 +460,9 @@ describe("Museum publication catalog boundary", () => {
       "text-normalized deferred media",
       (f: ReturnType<typeof buildFixture>) => ({
         ...f.catalog,
-        mediaAssets: [{ ...f.catalog.mediaAssets[0], byteMode: "lf-normalized" }],
+        mediaAssets: [
+          { ...f.catalog.mediaAssets[0], byteMode: "lf-normalized" },
+        ],
       }),
     ],
     [

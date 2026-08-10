@@ -5,7 +5,10 @@ import { t } from "@/i18n/messages";
 
 export const metadata: Metadata = {
   ...getAppMetadata({
-    title: t(DEFAULT_LOCALE, "museum.network.institutionalPractice.adjacentTitle"),
+    title: t(
+      DEFAULT_LOCALE,
+      "museum.network.institutionalPractice.adjacentTitle"
+    ),
     description: t(
       DEFAULT_LOCALE,
       "museum.network.institutionalPractice.adjacentDescription"

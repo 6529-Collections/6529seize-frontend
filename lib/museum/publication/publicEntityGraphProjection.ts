@@ -66,7 +66,8 @@ interface WorkProjectionContext {
 export function projectMuseumGraph(
   graph: MuseumPublicEntityGraph,
   base: MuseumPublication,
-  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>,
+  catalogMediaAssetPaths: readonly string[] = []
 ): MuseumGraphProjection {
   const typedDocuments = buildMuseumTypedDocumentProjection({
     graph,
@@ -76,7 +77,8 @@ export function projectMuseumGraph(
   const mediaBySubject = projectMediaRelations(
     graph.entities,
     graph,
-    sourceDocuments
+    sourceDocuments,
+    catalogMediaAssetPaths
   );
   const workAliases = mergeWorkAliases([
     ...aliasesForWorks(graph.entities),
@@ -423,10 +425,8 @@ function projectAcquisitions(
           graph.relations
             .filter(
               (relation) =>
-                (relation.relationType ===
-                  "ORGANIZATION_ORIGINATES_PROJECT" ||
-                  relation.relationType ===
-                    "ORGANIZATION_PUBLISHES_PROJECT") &&
+                (relation.relationType === "ORGANIZATION_ORIGINATES_PROJECT" ||
+                  relation.relationType === "ORGANIZATION_PUBLISHES_PROJECT") &&
                 relation.targetEntityId === projectId
             )
             .map((relation) => relation.sourceEntityId)
@@ -538,12 +538,16 @@ function projectPrograms(
       if (sourceDocumentIds.length === 0) {
         throw new Error("public_entity_graph_publication_join_missing");
       }
+      if (entity.statusAsOf === undefined) {
+        throw new Error("public_entity_graph_program_status_as_of");
+      }
       return {
         kind: "acquisition_program" as const,
         id: entity.id,
         slug: entity.slug ?? entity.id,
         title: entity.label,
         status: mapProgramStatus(rawStatus),
+        statusAsOf: entity.statusAsOf,
         acquisitionMethod: "other_authorized_method" as const,
         acquisitionIds: profileStringArray(
           entity,

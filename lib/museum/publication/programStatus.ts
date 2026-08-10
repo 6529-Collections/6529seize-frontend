@@ -1,4 +1,9 @@
-import type { MuseumAcquisitionProgramStatus } from "@/lib/museum/publication/entities";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import type {
+  MuseumAcquisitionProgram,
+  MuseumAcquisitionProgramStatus,
+} from "@/lib/museum/publication/entities";
 
 /**
  * Render the closed public program-status vocabulary as visitor-facing copy.
@@ -9,17 +14,23 @@ export function displayMuseumPublicAcquisitionProgramStatus(
 ): string {
   switch (value) {
     case "proposed":
-      return "Program proposed";
+      return t(DEFAULT_LOCALE, "museum.network.programs.status.proposed");
     case "open":
-      return "Program open";
+      return t(DEFAULT_LOCALE, "museum.network.programs.status.open");
     case "selection_complete":
-      return "Selection complete";
+      return t(
+        DEFAULT_LOCALE,
+        "museum.network.programs.status.selectionComplete"
+      );
     case "acquisition_in_progress":
-      return "Acquisition in progress";
+      return t(
+        DEFAULT_LOCALE,
+        "museum.network.programs.status.acquisitionInProgress"
+      );
     case "completed":
-      return "Program complete";
+      return t(DEFAULT_LOCALE, "museum.network.programs.status.completed");
     case "closed":
-      return "Program closed";
+      return t(DEFAULT_LOCALE, "museum.network.programs.status.closed");
     default:
       throw new Error(`museum_acquisition_program_status:${String(value)}`);
   }
@@ -27,11 +38,7 @@ export function displayMuseumPublicAcquisitionProgramStatus(
 
 /** Read the optional typed program date without borrowing a Work date. */
 export function museumPublicAcquisitionProgramStatusAsOf(
-  program: object | undefined
+  program: MuseumAcquisitionProgram | undefined
 ): string | null {
-  if (program === undefined || !("statusAsOf" in program)) return null;
-  const statusAsOf = program.statusAsOf;
-  return typeof statusAsOf === "string" && statusAsOf.trim().length > 0
-    ? statusAsOf
-    : null;
+  return program?.statusAsOf ?? null;
 }

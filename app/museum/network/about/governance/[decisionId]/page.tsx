@@ -41,7 +41,8 @@ export async function generateMetadata({
       decision?.governanceEffect ??
       t(DEFAULT_LOCALE, "museum.network.governance.description"),
   });
-  return decision === undefined || museumSlug(decision.decisionId) !== decisionId
+  return decision === undefined ||
+    museumSlug(decision.decisionId) !== decisionId
     ? metadata
     : {
         ...metadata,

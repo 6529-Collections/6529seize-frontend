@@ -179,10 +179,11 @@ describe("next-sitemap config", () => {
           data: [],
           next: null,
         },
-        "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false": {
-          data: [],
-          next: false,
-        },
+        "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
+          {
+            data: [],
+            next: false,
+          },
       })
     );
     const museumLocations = paths

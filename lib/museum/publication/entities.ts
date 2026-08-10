@@ -183,6 +183,7 @@ export interface MuseumAcquisitionProgram {
   readonly slug: string;
   readonly title: string;
   readonly status: MuseumAcquisitionProgramStatus;
+  readonly statusAsOf: string;
   readonly acquisitionMethod: MuseumAcquisitionMethod;
   readonly acquisitionIds: readonly string[];
   /** Explicit source/program identifiers accepted as route aliases. */

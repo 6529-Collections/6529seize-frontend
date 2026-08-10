@@ -20,9 +20,7 @@ import {
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
-import {
-  buildMuseumArtistContext,
-} from "@/lib/museum/publication/ia";
+import { buildMuseumArtistContext } from "@/lib/museum/publication/ia";
 import {
   museumArtistHref,
   museumWorkHref,

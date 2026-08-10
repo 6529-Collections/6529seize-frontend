@@ -9,6 +9,7 @@ import { museumPublicationCatalogResolver } from "./catalog";
 import { legacyCaseyPublicationAssembler } from "./legacyCasey";
 import {
   createMuseumLocalFixtureFetch,
+  readMuseumLocalFixtureMediaAssetPaths,
   readMuseumLocalFixtureVisitorPaths,
 } from "./localFixture";
 import { isExactGitCommit } from "./security";
@@ -151,6 +152,10 @@ function createMuseumPublicationSource(): MuseumPublicationSource {
       allowUncataloguedTestFixture: true,
       localFixtureAcceptedPaths:
         readMuseumLocalFixtureVisitorPaths(localFixtureRoot),
+      localFixtureMediaAssetPaths: readMuseumLocalFixtureMediaAssetPaths(
+        localFixtureRoot,
+        localFixtureCommit
+      ),
     });
   }
   return new GitHubMuseumPublicationSource({

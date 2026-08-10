@@ -30,8 +30,7 @@ export const MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES = 512_000 as const;
 export const MUSEUM_PUBLICATION_CANONICALIZATION_ID =
   "0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044" as const;
 const MUSEUM_CATALOG_RAW_BYTE_MODE = "raw" as const;
-const MUSEUM_CATALOG_MEDIA_PATH_PATTERN =
-  /\.(?:avif|gif|jpe?g|pdf|png|webp)$/u;
+const MUSEUM_CATALOG_MEDIA_PATH_PATTERN = /\.(?:avif|gif|jpe?g|pdf|png|webp)$/u;
 export const PUBLICATION_CATALOG_SCHEMA =
   "https://6529networkmuseum.org/schemas/publication-catalog-v1.json" as const;
 export const PUBLICATION_CATALOG_POINTER_SCHEMA =

@@ -1,6 +1,10 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
-import { isExactGitCommit } from "./security";
+import { compareMuseumCatalogPaths } from "./catalog-contract";
+import {
+  assertGovernedMuseumVisualMediaPath,
+  isExactGitCommit,
+} from "./security";
 
 const VISITOR_BUNDLE_PATH = "records/publication/visitor-corpus-bundle-v1.json";
 
@@ -95,6 +99,59 @@ export function readMuseumLocalFixtureVisitorPaths(
     paths.some((path) => path.length === 0)
   ) {
     throw new Error("publication_local_fixture_bundle_paths");
+  }
+  return paths;
+}
+
+/**
+ * Test-only catalog boundary for deferred media. Production receives this
+ * set from the verified publication catalog; a local fixture must opt into
+ * the same exact path set instead of treating every repository file as media.
+ */
+export function readMuseumLocalFixtureMediaAssetPaths(
+  root: string,
+  sourceCommit: string
+): readonly string[] {
+  if (!isExactGitCommit(sourceCommit)) {
+    throw new Error("publication_local_fixture_commit");
+  }
+  const catalogPath = join(
+    root,
+    "release-artifacts",
+    "catalog",
+    `6529NM-PUBCAT-${sourceCommit}.json`
+  );
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- the path is confined to the validated fixture root.
+  if (!existsSync(catalogPath)) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(
+      /* eslint-disable-next-line security/detect-non-literal-fs-filename -- the path is confined to the validated fixture root. */
+      readFileSync(catalogPath, "utf8")
+    ) as unknown;
+  } catch {
+    throw new Error("publication_local_fixture_catalog_json");
+  }
+  if (!isRecord(parsed) || !isRecord(parsed["payload"])) {
+    throw new Error("publication_local_fixture_catalog_shape");
+  }
+  const mediaAssets = parsed["payload"]["media_assets"];
+  if (!Array.isArray(mediaAssets)) {
+    throw new Error("publication_local_fixture_catalog_media_assets");
+  }
+  const paths = mediaAssets.map((entry) => {
+    if (!isRecord(entry) || typeof entry["path"] !== "string") {
+      throw new Error("publication_local_fixture_catalog_media_asset");
+    }
+    assertGovernedMuseumVisualMediaPath(entry["path"]);
+    return entry["path"];
+  });
+  const sorted = [...paths].sort(compareMuseumCatalogPaths);
+  if (
+    new Set(paths).size !== paths.length ||
+    paths.some((path, index) => path !== sorted[index])
+  ) {
+    throw new Error("publication_local_fixture_catalog_media_assets");
   }
   return paths;
 }

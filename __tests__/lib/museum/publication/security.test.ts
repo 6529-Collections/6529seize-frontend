@@ -107,10 +107,14 @@ describe("Museum publication security boundary", () => {
       `https://github.com/6529-Collections/6529networkmuseum/tree/${EXACT_COMMIT}`
     );
     expect(buildImmutableMuseumCommitUrl("main")).toBeNull();
-    expect(buildImmutableMuseumEditUrl(EXACT_COMMIT, "docs/open-museum.md")).toBe(
+    expect(
+      buildImmutableMuseumEditUrl(EXACT_COMMIT, "docs/open-museum.md")
+    ).toBe(
       `https://github.com/6529-Collections/6529networkmuseum/edit/${EXACT_COMMIT}/docs/open-museum.md`
     );
-    expect(buildImmutableMuseumEditUrl("main", "docs/open-museum.md")).toBeNull();
+    expect(
+      buildImmutableMuseumEditUrl("main", "docs/open-museum.md")
+    ).toBeNull();
     expect(buildMuseumMainBlobUrl("CONTRIBUTING.md")).toBe(
       "https://github.com/6529-Collections/6529networkmuseum/blob/main/CONTRIBUTING.md"
     );

@@ -14,6 +14,15 @@ const SUPPORTED_MEDIA_EXTENSIONS = [
   ".svg",
   ".webp",
 ] as const;
+const SUPPORTED_VISUAL_MEDIA_EXTENSIONS = [
+  ".avif",
+  ".gif",
+  ".jpeg",
+  ".jpg",
+  ".png",
+  ".svg",
+  ".webp",
+] as const;
 
 const ART_BLOCKS_HOSTS = {
   live: "generator.artblocks.io",
@@ -76,6 +85,15 @@ export function assertGovernedMuseumMediaPath(path: string): void {
   assertSafeMuseumRepositoryPath(path);
   if (!SUPPORTED_MEDIA_EXTENSIONS.some((suffix) => path.endsWith(suffix))) {
     throw new Error("publication_unsupported_media_extension");
+  }
+}
+
+export function assertGovernedMuseumVisualMediaPath(path: string): void {
+  assertSafeMuseumRepositoryPath(path);
+  if (
+    !SUPPORTED_VISUAL_MEDIA_EXTENSIONS.some((suffix) => path.endsWith(suffix))
+  ) {
+    throw new Error("publication_unsupported_visual_media_extension");
   }
 }
 
@@ -235,6 +253,7 @@ export function assertApprovedArtBlocksUrl(
   if (
     parsed.protocol !== "https:" ||
     parsed.hostname !== expectedHost ||
+    parsed.toString() !== url ||
     parsed.username.length > 0 ||
     parsed.password.length > 0 ||
     parsed.port.length > 0 ||
@@ -246,6 +265,32 @@ export function assertApprovedArtBlocksUrl(
   }
 
   return parsed.toString();
+}
+
+export function assertApprovedArtBlocksMediaUrl(url: string): {
+  readonly url: string;
+  readonly kind: "still" | "live";
+} {
+  for (const kind of ["still", "live"] as const) {
+    try {
+      return { url: assertApprovedArtBlocksUrl(url, kind), kind };
+    } catch {
+      // Try the other exact Art Blocks media shape before failing closed.
+    }
+  }
+  throw new Error("publication_unapproved_media_origin");
+}
+
+export function assertApprovedMuseumRepositoryMediaUrl(
+  sourceCommit: string,
+  repositoryPath: string | null,
+  catalogMediaAssetPaths: ReadonlySet<string>
+): string {
+  if (repositoryPath === null || !catalogMediaAssetPaths.has(repositoryPath)) {
+    throw new Error("publication_unapproved_retained_media_origin");
+  }
+  assertGovernedMuseumVisualMediaPath(repositoryPath);
+  return buildImmutableMuseumRawUrl(sourceCommit, repositoryPath);
 }
 
 export function assertApprovedMuseumGeneratedDerivativeUrl(
@@ -260,6 +305,7 @@ export function assertApprovedMuseumGeneratedDerivativeUrl(
   if (
     parsed.protocol !== "https:" ||
     parsed.hostname !== MUSEUM_GENERATED_DERIVATIVE_HOST ||
+    parsed.toString() !== url ||
     parsed.username.length > 0 ||
     parsed.password.length > 0 ||
     parsed.port.length > 0 ||

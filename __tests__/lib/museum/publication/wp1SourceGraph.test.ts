@@ -28,6 +28,8 @@ import type {
 const WP1_SOURCE_COMMIT = "2733944555ae0f80242ec895558bdb7fba7115d3";
 const C4_CATALOG_COMMIT = "a9a925861c654f71a85f0129ee5c0ba8ee71e9e4";
 const C4_CATALOG_ID = `6529NM-PUBCAT-${WP1_SOURCE_COMMIT}`;
+const C4_MEDIA_ASSET_PATH =
+  "records/proposed-gifts/6529NM-PG-2026-001/public/media/conflict-at-its-edges-cover.png";
 const C4_CATALOG_PATH =
   `release-artifacts/catalog/${C4_CATALOG_ID}.json` as const;
 const C4_POINTER_PATH =
@@ -380,7 +382,8 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     const publication = applyMuseumPublicEntityGraph(
       emptyPublication(fixture),
       graph,
-      fixture.documents
+      fixture.documents,
+      [C4_MEDIA_ASSET_PATH]
     );
     expect(publication.works).toHaveLength(28);
     expect(publication.artists).toHaveLength(21);
@@ -410,6 +413,14 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
         (program) => program.sourceDocumentIds.length > 0
       )
     ).toBe(true);
+    expect(
+      publication.acquisitionPrograms?.find(
+        (program) => program.id === "6529NM-AP-ENT-0002"
+      )
+    ).toMatchObject({
+      status: "selection_complete",
+      statusAsOf: "2026-08-01T15:03:35Z",
+    });
     expect(
       publication.works?.every((work) => work.documentIds.length > 0)
     ).toBe(true);
@@ -719,6 +730,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       allowUncataloguedTestFixture: true,
       localFixtureAcceptedPaths:
         readMuseumLocalFixtureVisitorPaths(SOURCE_ROOT),
+      localFixtureMediaAssetPaths: [C4_MEDIA_ASSET_PATH],
     });
     const result = await source.load();
     if (result.status !== "current") {

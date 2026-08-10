@@ -14,9 +14,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
-import {
-  buildMuseumEntityContext,
-} from "@/lib/museum/publication/ia";
+import { buildMuseumEntityContext } from "@/lib/museum/publication/ia";
 import {
   museumAcquisitionProgramHref,
   museumAcquisitionsHref,
@@ -25,7 +23,11 @@ import {
   museumWorkHrefForSourceId,
   museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
-import type { MuseumPublicWork } from "@/lib/museum/publication/types";
+import type {
+  MuseumAcquisitionProgram,
+  MuseumPublication,
+  MuseumPublicWork,
+} from "@/lib/museum/publication/types";
 import type { MuseumProgram, MuseumView } from "@/lib/museum/types";
 import {
   displayMuseumPublicAcquisitionProgramStatus,
@@ -119,6 +121,34 @@ function publicWorkMedia(work: MuseumPublicWork) {
   return media ?? null;
 }
 
+function worksForAcquisitionProgram(
+  publication: MuseumPublication,
+  program: MuseumAcquisitionProgram | undefined
+): readonly MuseumPublicWork[] {
+  if (program === undefined) return [];
+  const acquisitionIds = new Set(program.acquisitionIds);
+  return (publication.works ?? []).filter(
+    (work) =>
+      work.programIds.includes(program.id) ||
+      work.acquisitionIds.some((acquisitionId) =>
+        acquisitionIds.has(acquisitionId)
+      )
+  );
+}
+
+function acquisitionProgramLifecycle(
+  program: MuseumAcquisitionProgram | undefined,
+  legacy: MuseumProgram | undefined
+): { readonly status?: string; readonly statusAsOf: string | null } {
+  if (program === undefined) {
+    return { statusAsOf: legacy?.statusAsOf ?? null };
+  }
+  return {
+    status: displayMuseumPublicAcquisitionProgramStatus(program.status),
+    statusAsOf: museumPublicAcquisitionProgramStatusAsOf(program),
+  };
+}
+
 export default async function MuseumAcquisitionProgramPage({
   params,
 }: MuseumAcquisitionProgramPageProps) {
@@ -138,25 +168,12 @@ export default async function MuseumAcquisitionProgramPage({
   const legacy = legacyAcquisitionProgram(view, slug);
   if (typed === undefined && legacy === undefined) notFound();
 
-  const typedWorks =
-    typed === undefined
-      ? []
-      : (publication.works ?? []).filter(
-          (work) =>
-            work.programIds.includes(typed.id) ||
-            typed.acquisitionIds.some((acquisitionId) =>
-              work.acquisitionIds.includes(acquisitionId)
-            )
-        );
+  const typedWorks = worksForAcquisitionProgram(publication, typed);
   const selectedWorks =
     typed === undefined ? (legacy?.selectedWorks ?? []) : [];
   const title = typed?.title ?? legacy?.title ?? "";
   const sourcePath = typed?.sourcePaths[0] ?? legacy?.sourcePath ?? null;
-  const typedStatus =
-    typed === undefined
-      ? undefined
-      : displayMuseumPublicAcquisitionProgramStatus(typed.status);
-  const typedStatusAsOf = museumPublicAcquisitionProgramStatusAsOf(typed);
+  const lifecycle = acquisitionProgramLifecycle(typed, legacy);
   const context = buildMuseumEntityContext({
     kind: "acquisition_program",
     id: typed?.id ?? legacy?.programId ?? slug,
@@ -172,9 +189,8 @@ export default async function MuseumAcquisitionProgramPage({
       },
       { label: title },
     ],
-    ...(typedStatus === undefined ? {} : { status: typedStatus }),
-    statusAsOf:
-      typed === undefined ? (legacy?.statusAsOf ?? null) : typedStatusAsOf,
+    ...(lifecycle.status === undefined ? {} : { status: lifecycle.status }),
+    statusAsOf: lifecycle.statusAsOf,
     primaryRelations: typedWorks.flatMap((work) => {
       const relationSourcePath = work.sourcePaths[0];
       return relationSourcePath === undefined

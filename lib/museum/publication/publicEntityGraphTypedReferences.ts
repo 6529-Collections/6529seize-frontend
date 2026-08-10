@@ -37,18 +37,15 @@ export function assertMuseumWorkTypedReferences(
     ])
   );
   const usedRegistryKeys = new Set<string>();
-  for (const work of entities.filter((entity) => entity.entityType === "WORK")) {
+  for (const work of entities.filter(
+    (entity) => entity.entityType === "WORK"
+  )) {
     const context: TypedReferenceValidationContext = {
       declaredSources: new Set(work.sourceRecordIds),
       registry,
       usedRegistryKeys,
     };
-    assertReferenceArray(
-      work,
-      "component_references",
-      "component",
-      context
-    );
+    assertReferenceArray(work, "component_references", "component", context);
     assertReferenceArray(
       work,
       "manifestation_references",

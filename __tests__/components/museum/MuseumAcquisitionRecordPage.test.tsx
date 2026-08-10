@@ -197,10 +197,18 @@ describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Keys and Gates" })).toBeInTheDocument();
-    expect(screen.getByText("No public image is available for this record.")).toBeInTheDocument();
-    expect(screen.getByText("A photographic work from the Keys and Gates program.")).toBeInTheDocument();
-    expect(screen.getAllByText(lifecycle, { exact: true }).length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: "Keys and Gates" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("No public image is available for this record.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("A photographic work from the Keys and Gates program.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(lifecycle, { exact: true }).length
+    ).toBeGreaterThan(0);
     expect(screen.getByText(qualifier, { exact: true })).toBeInTheDocument();
     expectEditorialOrder(workTitle, artistName, lifecycle);
 
@@ -209,14 +217,15 @@ describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
       "selected_through_acquisition_program_acquisition_pending"
     );
     expect(document.body.textContent).not.toContain("https://example.invalid");
-    expect(screen.queryByRole("link", { name: "Open Wave proposal context" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Open Wave proposal context" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders Magnum metadata-only works with the Wave context link only when modeled", () => {
     const workTitle = "Conflict at Its Edges";
     const artistName = "M. Artist";
-    const lifecycle =
-      "Selected by Museum Wave; acquisition review in progress";
+    const lifecycle = "Selected by Museum Wave; acquisition review in progress";
     const workId = "6529NM-W-0024";
 
     render(
@@ -259,18 +268,27 @@ describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: "Wave selection" })).toBeInTheDocument();
-    expect(screen.getByText("No public image is available for this record.")).toBeInTheDocument();
-    expect(screen.getByText("A governed presentation photograph.")).toBeInTheDocument();
-    expect(screen.getAllByText(lifecycle, { exact: true }).length).toBeGreaterThan(0);
-    expect(screen.queryByText("Not yet minted or accessioned.", { exact: true })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Wave selection" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("No public image is available for this record.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("A governed presentation photograph.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(lifecycle, { exact: true }).length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.queryByText("Not yet minted or accessioned.", { exact: true })
+    ).not.toBeInTheDocument();
     expectEditorialOrder(workTitle, artistName, lifecycle);
 
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open Wave proposal context" })).toHaveAttribute(
-      "href",
-      WAVE_CONTEXT_HREF
-    );
+    expect(
+      screen.getByRole("link", { name: "Open Wave proposal context" })
+    ).toHaveAttribute("href", WAVE_CONTEXT_HREF);
     expect(document.body.textContent).not.toContain(
       "selected_by_museum_wave_acquisition_review_in_progress"
     );

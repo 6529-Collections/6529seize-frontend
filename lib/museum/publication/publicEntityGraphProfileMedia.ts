@@ -10,6 +10,7 @@ import {
   requiredString,
   stringArray,
 } from "./publicEntityGraphPrimitives";
+import { assertApprovedArtBlocksMediaUrl } from "./security";
 import {
   isMuseumExternalProposalMediaUrl,
   isMuseumExternalProposalTokenSourceUrl,
@@ -49,8 +50,9 @@ export function validateMediaProfile(media: Record<string, unknown>): void {
     "public_entity_graph_media_affordances",
     false
   );
-  const metadataOnly = !hasDirectVisualAffordance(affordances);
-  assertMediaLocator(uri, repositoryPath, metadataOnly);
+  const visual = media["visual"] === true;
+  const metadataOnly = !(visual && hasDirectVisualAffordance(affordances));
+  assertMediaLocator(uri, repositoryPath, metadataOnly, role);
   const mediaType = requiredString(
     media,
     "media_type",
@@ -85,13 +87,35 @@ export function validateMediaProfile(media: Record<string, unknown>): void {
 function assertMediaLocator(
   uri: string | null,
   repositoryPath: string | null,
-  metadataOnly: boolean
+  metadataOnly: boolean,
+  role: string
 ): void {
   if (uri === null && repositoryPath === null && !metadataOnly) {
     throw new Error("public_entity_graph_media_locator");
   }
   if (repositoryPath !== null) {
     assertMediaSourcePath(repositoryPath, "public_entity_graph_media_path");
+  }
+  if (metadataOnly || role === "historical_wave_proposal_presentation") {
+    return;
+  }
+  if (role === "token_linked_source_media") {
+    if (uri === null || !isArtBlocksMediaUrl(uri)) {
+      throw new Error("public_entity_graph_media_uri");
+    }
+    return;
+  }
+  if (repositoryPath === null) {
+    throw new Error("public_entity_graph_media_path");
+  }
+}
+
+function isArtBlocksMediaUrl(value: string): boolean {
+  try {
+    assertApprovedArtBlocksMediaUrl(value);
+    return true;
+  } catch {
+    return false;
   }
 }
 

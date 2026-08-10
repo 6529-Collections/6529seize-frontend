@@ -514,6 +514,8 @@ export interface MuseumPublicEntityRecord {
     | "relational_only"
     | "reserved_no_instance";
   readonly entityStatus: "published" | "archived";
+  /** Exact source observation time for the typed entity state. */
+  readonly statusAsOf?: string;
   readonly sourcePath: string;
   readonly sourceRecordIds: readonly string[];
   readonly mediaEntityIds?: readonly string[];

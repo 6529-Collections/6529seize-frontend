@@ -128,9 +128,10 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       })
     );
 
-    expect(
-      screen.getByRole("link", { name: "CC BY 4.0" })
-    ).toHaveAttribute("href", licenseUrl);
+    expect(screen.getByRole("link", { name: "CC BY 4.0" })).toHaveAttribute(
+      "href",
+      licenseUrl
+    );
   });
 
   it("links a metadata-only Work license through MuseumRightsLink", async () => {
@@ -145,9 +146,10 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       })
     );
 
-    expect(
-      screen.getByRole("link", { name: "CC BY 4.0" })
-    ).toHaveAttribute("href", licenseUrl);
+    expect(screen.getByRole("link", { name: "CC BY 4.0" })).toHaveAttribute(
+      "href",
+      licenseUrl
+    );
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 

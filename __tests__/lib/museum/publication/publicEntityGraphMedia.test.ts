@@ -106,7 +106,187 @@ function replaceObservationParts(
   return { ...document, sha256: sha256(text), text };
 }
 
+function buildRetainedMediaGraph(input: {
+  readonly role: string;
+  readonly uri: string;
+  readonly repositoryPath?: string;
+}): MuseumPublicEntityGraph {
+  const workId = "6529NM-W-0001";
+  const mediaId = "6529NM-MED-0001";
+  const sourceLocator = {
+    uri: input.uri,
+    repository_path: input.repositoryPath ?? null,
+  };
+  const work: MuseumPublicEntityRecord = {
+    id: workId,
+    entityType: "WORK",
+    label: "A governed work",
+    slug: workId,
+    canonicalRoute: `/museum/network/works/${workId}`,
+    pageExposure: "canonical_page",
+    entityStatus: "published",
+    sourcePath: "records/entities/6529NM-W-0001.json",
+    sourceRecordIds: [workId],
+    profile: {},
+  };
+  const media: MuseumPublicEntityRecord = {
+    id: mediaId,
+    entityType: "MEDIA_REFERENCE",
+    label: "A governed visual source",
+    slug: null,
+    canonicalRoute: null,
+    pageExposure: "relational_only",
+    entityStatus: "published",
+    sourcePath: "records/entities/6529NM-MED-0001.json",
+    sourceRecordIds: [workId],
+    profile: {
+      media: {
+        media_role: input.role,
+        source_locator: sourceLocator,
+        media_type: "image/png",
+        visual: true,
+        width: 1000,
+        height: 1000,
+        accessibility_text: "A governed visual source.",
+        credit: "6529 Network Museum",
+        allowed_ui_affordances: ["view", "thumbnail"],
+        subject_entity_id: workId,
+        rights: { status: "cleared" },
+        source_observation: { status: "retrieved" },
+        fixity: {
+          status: "verified",
+          digest: `sha256:${"a".repeat(64)}`,
+        },
+      },
+    },
+  };
+  const relation: MuseumPublicRelationRecord = {
+    id: "6529NM-REL-0001",
+    relationType: "ENTITY_HAS_MEDIA",
+    sourceEntityId: workId,
+    targetEntityId: mediaId,
+    assertionStatus: "asserted",
+    qualifier: {},
+    sourceRecordIds: [workId],
+    sourcePath: "records/relations/6529NM-REL-0001.json",
+  };
+  return {
+    sourceCommit: "a".repeat(40),
+    entityPaths: [],
+    relationPaths: [],
+    entities: [work, media],
+    relations: [relation],
+    identityInventory: {
+      sourcePath: "schemas/public-entity-identity-inventory.json",
+      inventoryVersion: "1.4.0",
+      curatedAcquisitionIds: [],
+      workAliases: [],
+      acquisitionAliases: [],
+      programAliases: [],
+      routeAliases: [],
+      typedReferenceRegistry: [],
+    },
+    relationIdentityInventory: {
+      sourcePath: "schemas/public-relation-identity-inventory.json",
+      schemaPath: "schemas/public-relation-identity-inventory.schema.json",
+      inventoryVersion: "1.3.0",
+      activeRelationIds: [relation.id],
+      retiredRelationIds: [],
+    },
+  };
+}
+
 describe("Wave publication receipt joins", () => {
+  it("retains only exact official Art Blocks media URLs", () => {
+    const contract = "0x0000000000000000000000000000000000000000";
+    const graph = buildRetainedMediaGraph({
+      role: "token_linked_source_media",
+      uri: `https://media-proxy.artblocks.io/1/${contract}/1.png`,
+    });
+
+    const projected = projectMediaRelations(graph.entities, graph, new Map());
+    expect(projected.get("6529NM-W-0001")?.retained[0]?.url).toBe(
+      `https://media-proxy.artblocks.io/1/${contract}/1.png`
+    );
+
+    const liveGraph = buildRetainedMediaGraph({
+      role: "token_linked_source_media",
+      uri: `https://generator.artblocks.io/1/${contract}/1`,
+    });
+    const live = projectMediaRelations(
+      liveGraph.entities,
+      liveGraph,
+      new Map()
+    );
+    expect(live.get("6529NM-W-0001")?.retained[0]).toMatchObject({
+      kind: "live",
+      url: `https://generator.artblocks.io/1/${contract}/1`,
+    });
+  });
+
+  it("constructs repository media from the exact immutable B URL", () => {
+    const repositoryPath =
+      "records/proposed-gifts/6529NM-PG-2026-001/public/media/approved.png";
+    const graph = buildRetainedMediaGraph({
+      role: "museum_authored_public_graphic",
+      // The source locator is evidence, not the browser authority.
+      uri: "https://github.com/6529-Collections/6529networkmuseum/blob/main/records/proposed-gifts/6529NM-PG-2026-001/public/media/approved.png",
+      repositoryPath,
+    });
+
+    const projected = projectMediaRelations(graph.entities, graph, new Map(), [
+      repositoryPath,
+    ]);
+    expect(projected.get("6529NM-W-0001")?.retained[0]?.url).toBe(
+      `https://raw.githubusercontent.com/6529-Collections/6529networkmuseum/${"a".repeat(40)}/${repositoryPath}`
+    );
+  });
+
+  it("rejects repository media that is outside the catalog media-asset set", () => {
+    const repositoryPath =
+      "records/proposed-gifts/6529NM-PG-2026-001/public/media/approved.png";
+    const graph = buildRetainedMediaGraph({
+      role: "museum_authored_public_graphic",
+      uri: "https://example.test/approved.png",
+      repositoryPath,
+    });
+
+    expect(() =>
+      projectMediaRelations(graph.entities, graph, new Map(), [])
+    ).toThrow("publication_unapproved_retained_media_origin");
+  });
+
+  it("rejects an official external URL under a repository-media role", () => {
+    const graph = buildRetainedMediaGraph({
+      role: "museum_authored_public_graphic",
+      uri: "https://media-proxy.artblocks.io/1/0x0000000000000000000000000000000000000000/1.png",
+    });
+
+    expect(() =>
+      projectMediaRelations(graph.entities, graph, new Map())
+    ).toThrow("publication_unapproved_retained_media_origin");
+  });
+
+  it.each([
+    "http://media-proxy.artblocks.io/1/0x0000000000000000000000000000000000000000/1.png",
+    "javascript:alert(1)",
+    "data:image/png;base64,AAAA",
+    "file:///tmp/approved.png",
+    "https://media-proxy.artblocks.io.evil.test/1/0x0000000000000000000000000000000000000000/1.png",
+    "https://user:pass@media-proxy.artblocks.io/1/0x0000000000000000000000000000000000000000/1.png",
+    "https://media-proxy.artblocks.io:443/1/0x0000000000000000000000000000000000000000/1.png",
+    "https://media-proxy.artblocks.io/1/0x0000000000000000000000000000000000000000/1.png?raw=1",
+    "https://github.com/6529-Collections/6529networkmuseum/blob/main/approved.png",
+  ])("rejects an ungoverned direct visual URI: %s", (uri) => {
+    const graph = buildRetainedMediaGraph({
+      role: "token_linked_source_media",
+      uri,
+    });
+    expect(() =>
+      projectMediaRelations(graph.entities, graph, new Map())
+    ).toThrow("publication_unapproved_media_origin");
+  });
+
   it("requires the complete seven-part receipt and returns five candidate joins", () => {
     const fixture = buildFixture();
 

@@ -50,7 +50,10 @@ export async function generateMetadata({
   });
   return found === null
     ? metadata
-    : { ...metadata, alternates: { canonical: museumResearchHref(found.entry.slug) } };
+    : {
+        ...metadata,
+        alternates: { canonical: museumResearchHref(found.entry.slug) },
+      };
 }
 
 export default async function MuseumResearchDetailPage({

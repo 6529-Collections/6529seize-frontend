@@ -98,9 +98,7 @@ function PossibilitySpaceTable({
                   <td className="tw-p-3 tw-text-iron-300">{row.group}</td>
                   <td className="tw-p-3 tw-text-iron-300">{row.value}</td>
                   <td className="tw-p-3 tw-text-iron-300">
-                    {row.held
-                      ? `◆ ${selectedWork?.title ?? ""}`
-                      : "—"}
+                    {row.held ? `◆ ${selectedWork?.title ?? ""}` : "—"}
                   </td>
                 </tr>
               ))
@@ -124,9 +122,7 @@ function PossibilitySpaceTable({
                       >
                         {axis.label}
                       </th>
-                      <td className="tw-p-3 tw-text-iron-300">
-                        {value.label}
-                      </td>
+                      <td className="tw-p-3 tw-text-iron-300">{value.label}</td>
                       <td className="tw-p-3 tw-tabular-nums tw-text-iron-300">
                         {value.count === undefined
                           ? "—"

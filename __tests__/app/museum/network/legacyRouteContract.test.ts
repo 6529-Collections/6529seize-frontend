@@ -166,20 +166,19 @@ describe("Museum legacy route contract", () => {
         "6529NM-AP-01-OUT-001",
         KEYS_AND_GATES_WORK_ID,
       ],
-      [
-        "Magnum proposal object",
-        "6529NM-PG-2026-001.OBJ-001",
-        MAGNUM_WORK_ID,
-      ],
-    ])("redirects the %s through its canonical Work ID", async (_, alias, workId) => {
-      await expectRedirect(
-        () =>
-          MuseumObjectLegacyRoute({
-            params: Promise.resolve({ objectId: alias }),
-          }),
-        `/museum/network/works/${workId}`
-      );
-    });
+      ["Magnum proposal object", "6529NM-PG-2026-001.OBJ-001", MAGNUM_WORK_ID],
+    ])(
+      "redirects the %s through its canonical Work ID",
+      async (_, alias, workId) => {
+        await expectRedirect(
+          () =>
+            MuseumObjectLegacyRoute({
+              params: Promise.resolve({ objectId: alias }),
+            }),
+          `/museum/network/works/${workId}`
+        );
+      }
+    );
 
     it("404s an unknown generic object alias", async () => {
       await expectNotFound(() =>
@@ -201,16 +200,17 @@ describe("Museum legacy route contract", () => {
       );
     });
 
-    it.each(["6529NM-AP-01-OUT-001", "6529NM-PG-2026-001.OBJ-001", "unknown-object"])(
-      "404s a non-Collection or unknown alias: %s",
-      async (objectId) => {
-        await expectNotFound(() =>
-          MuseumCollectionObjectRoute({
-            params: Promise.resolve({ objectId }),
-          })
-        );
-      }
-    );
+    it.each([
+      "6529NM-AP-01-OUT-001",
+      "6529NM-PG-2026-001.OBJ-001",
+      "unknown-object",
+    ])("404s a non-Collection or unknown alias: %s", async (objectId) => {
+      await expectNotFound(() =>
+        MuseumCollectionObjectRoute({
+          params: Promise.resolve({ objectId }),
+        })
+      );
+    });
   });
 
   describe("acquisition aliases", () => {
@@ -232,7 +232,9 @@ describe("Museum legacy route contract", () => {
       ["accession", MuseumAccessionLegacyRoute],
     ])("404s an unknown %s alias", async (_, route) => {
       await expectNotFound(() =>
-        route({ params: Promise.resolve({ accessionId: "unknown-acquisition" }) })
+        route({
+          params: Promise.resolve({ accessionId: "unknown-acquisition" }),
+        })
       );
     });
 
@@ -295,17 +297,16 @@ describe("Museum legacy route contract", () => {
       MuseumScholarshipAndWritingLegacyPage,
       "/museum/network/research/scholarship-and-writing",
     ],
-    [
-      "methodology",
-      MuseumMethodologyPage,
-      "/museum/network/research",
-    ],
+    ["methodology", MuseumMethodologyPage, "/museum/network/research"],
     [
       "methodology data architecture",
       MuseumDataArchitectureLegacyPage,
       "/museum/network/research/data-architecture",
     ],
-  ])("redirects the legacy %s destination exactly", async (_, route, destination) => {
-    await expectRedirect(() => route(), destination);
-  });
+  ])(
+    "redirects the legacy %s destination exactly",
+    async (_, route, destination) => {
+      await expectRedirect(() => route(), destination);
+    }
+  );
 });

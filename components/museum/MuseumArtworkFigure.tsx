@@ -70,6 +70,11 @@ export function MuseumArtworkFigure({
             </span>
             <Link
               href={href}
+              aria-label={t(
+                DEFAULT_LOCALE,
+                "museum.network.artwork.viewWorkNamed",
+                { title: artwork.title }
+              )}
               className={`group-hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${isHeroCaption ? "tw-mt-px" : "tw-underline tw-underline-offset-4"}`}
             >
               <span>

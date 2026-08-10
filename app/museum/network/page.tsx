@@ -4,6 +4,7 @@ import { MuseumNetworkHomeSecondarySections } from "@/components/museum/MuseumNe
 import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
 import { MuseumProposalImage } from "@/components/museum/MuseumProposalImage";
 import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
+import { MuseumPublicWorkTextFigure } from "@/components/museum/MuseumPublicWorkTextFigure";
 import { MuseumMediaMetadataPlaceholder } from "@/components/museum/MuseumMediaMetadataPlaceholder";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -373,113 +374,93 @@ function acquisitionStatusLabel(status: MuseumPublicAcquisitionStatus): string {
   }
 }
 
-function MuseumAcquisitionStoryMedia({
-  acquisition,
-  publication,
-  view,
-}: {
-  readonly acquisition: MuseumAcquisitionViewModel;
+function typedAcquisitionStoryWork(input: {
+  readonly work: MuseumPublicWork;
   readonly publication: MuseumPublication;
-  readonly view: MuseumView | null;
 }) {
-  const href = museumAcquisitionHref(acquisition.slug);
-  const typedWork = publication.works?.find((work) =>
-    acquisition.workIds.includes(work.id)
+  const { work, publication } = input;
+  if (work.media[0] === undefined && work.mediaMetadata?.[0] === undefined) {
+    return null;
+  }
+  return <MuseumTypedWorkFigure work={work} publication={publication} />;
+}
+
+function MuseumAcquisitionProposalFigure({
+  presentation,
+}: {
+  readonly presentation: MuseumAcquisitionViewModel["presentationMedia"][number];
+}) {
+  const sourceHref = buildMuseumSignedWaveStormDropUrl(
+    presentation.source.waveId,
+    presentation.source.dropId
   );
-  const retained = typedWork?.media[0];
-  if (typedWork !== undefined && retained !== undefined) {
-    return (
-      <MuseumPublicMediaFigure
-        src={retained.url}
-        width={retained.width}
-        height={retained.height}
-        alt={retained.altText ?? ""}
-        href={href}
-        title={acquisition.title}
-        byline={
-          publication.artists.find((artist) => artist.id === typedWork.artistId)
-            ?.preferredName ?? ""
-        }
-      />
-    );
-  }
-  const metadata = typedWork?.mediaMetadata?.[0];
-  if (typedWork !== undefined && metadata !== undefined) {
-    return (
-      <MuseumMediaMetadataPlaceholder
-        title={typedWork.title}
-        metadata={metadata}
-      />
-    );
-  }
-  const presentation = acquisition.presentationMedia[0];
-  if (presentation !== undefined) {
-    const sourceHref = buildMuseumSignedWaveStormDropUrl(
-      presentation.source.waveId,
-      presentation.source.dropId
-    );
-    const canOpenPresentation = presentation.affordances.includes(
-      "open_upstream_presentation"
-    );
-    return (
-      <figure className="tw-m-0 tw-min-w-0">
-        <div className="tw-block">
-          <div className="tw-aspect-square tw-overflow-hidden tw-bg-black">
-            <MuseumProposalImage
-              src={presentation.mediaUrl}
-              alt={presentation.altText}
-              width={presentation.width}
-              height={presentation.height}
-              {...(presentation.sourceByteSize === undefined
-                ? {}
-                : { sourceByteSize: presentation.sourceByteSize })}
-              {...(sourceHref === null || !canOpenPresentation
-                ? {}
-                : {
-                    sourceHref,
-                    sourceLabel: t(
-                      DEFAULT_LOCALE,
-                      "museum.network.acquisitions.openPresentation"
-                    ),
-                  })}
-              className="tw-block tw-h-full tw-w-full tw-object-contain"
-            />
-          </div>
+  const canOpenPresentation = presentation.affordances.includes(
+    "open_upstream_presentation"
+  );
+  return (
+    <figure className="tw-m-0 tw-min-w-0">
+      <div className="tw-block">
+        <div className="tw-aspect-square tw-overflow-hidden tw-bg-black">
+          <MuseumProposalImage
+            src={presentation.mediaUrl}
+            alt={presentation.altText}
+            width={presentation.width}
+            height={presentation.height}
+            {...(presentation.sourceByteSize === undefined
+              ? {}
+              : { sourceByteSize: presentation.sourceByteSize })}
+            {...(sourceHref === null || !canOpenPresentation
+              ? {}
+              : {
+                  sourceHref,
+                  sourceLabel: t(
+                    DEFAULT_LOCALE,
+                    "museum.network.acquisitions.openPresentation"
+                  ),
+                })}
+            className="tw-block tw-h-full tw-w-full tw-object-contain"
+          />
         </div>
-        <figcaption className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-400">
-          <span className="tw-block tw-text-iron-200">
-            {presentation.credit.creditLine}
-          </span>
+      </div>
+      <figcaption className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <span className="tw-block tw-text-iron-200">
+          {presentation.credit.creditLine}
+        </span>
+        <span className="tw-mt-1 tw-block">
+          {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationRights")}
+        </span>
+        {sourceHref === null || !canOpenPresentation ? null : (
           <span className="tw-mt-1 tw-block">
             {t(
               DEFAULT_LOCALE,
-              "museum.network.acquisitions.presentationRights"
+              "museum.network.acquisitions.presentationSource"
             )}
-          </span>
-          {sourceHref === null || !canOpenPresentation ? null : (
-            <span className="tw-mt-1 tw-block">
+            :{" "}
+            <a
+              href={sourceHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
               {t(
                 DEFAULT_LOCALE,
-                "museum.network.acquisitions.presentationSource"
+                "museum.network.acquisitions.openPresentation"
               )}
-              :{" "}
-              <a
-                href={sourceHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              >
-                {t(
-                  DEFAULT_LOCALE,
-                  "museum.network.acquisitions.openPresentation"
-                )}
-              </a>
-            </span>
-          )}
-        </figcaption>
-      </figure>
-    );
-  }
+            </a>
+          </span>
+        )}
+      </figcaption>
+    </figure>
+  );
+}
+
+function legacyAcquisitionStoryMedia(input: {
+  readonly acquisition: MuseumAcquisitionViewModel;
+  readonly publication: MuseumPublication;
+  readonly view: MuseumView | null;
+  readonly href: string;
+}) {
+  const { acquisition, publication, view, href } = input;
   const caseyArtwork = tryCaseyArtworksFromPublication(publication)?.find(
     (artwork) => acquisition.workIds.includes(artwork.objectId)
   );
@@ -495,7 +476,8 @@ function MuseumAcquisitionStoryMedia({
   const outcome = view?.objects.find((object) =>
     acquisition.workIds.includes(object.objectId)
   );
-  return outcome?.media ? (
+  if (outcome?.media === null || outcome?.media === undefined) return null;
+  return (
     <Link
       href={href}
       className="tw-group tw-block tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
@@ -511,7 +493,52 @@ function MuseumAcquisitionStoryMedia({
         {outcome.title}
       </p>
     </Link>
-  ) : null;
+  );
+}
+
+function MuseumAcquisitionStoryMedia({
+  acquisition,
+  publication,
+  view,
+}: {
+  readonly acquisition: MuseumAcquisitionViewModel;
+  readonly publication: MuseumPublication;
+  readonly view: MuseumView | null;
+}) {
+  const href = museumAcquisitionHref(acquisition.slug);
+  const typedWork = publication.works?.find((work) =>
+    acquisition.workIds.includes(work.id)
+  );
+  if (typedWork !== undefined) {
+    const typedPreview = typedAcquisitionStoryWork({
+      work: typedWork,
+      publication,
+    });
+    if (typedPreview !== null) return typedPreview;
+  }
+  const presentation = acquisition.presentationMedia[0];
+  if (presentation !== undefined) {
+    return <MuseumAcquisitionProposalFigure presentation={presentation} />;
+  }
+  if (publication.works !== undefined) {
+    if (typedWork === undefined) return null;
+    const artist = publication.artists.find(
+      (item) => item.id === typedWork.artistId
+    );
+    return (
+      <MuseumPublicWorkTextFigure
+        title={typedWork.title}
+        href={museumWorkHref(typedWork.id)}
+        {...(artist === undefined ? {} : { byline: artist.preferredName })}
+      />
+    );
+  }
+  return legacyAcquisitionStoryMedia({
+    acquisition,
+    publication,
+    view,
+    href,
+  });
 }
 
 function MuseumAcquisitionStories({

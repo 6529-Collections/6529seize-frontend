@@ -151,10 +151,7 @@ export function parseMuseumPublicationManifest(
       )
     )
   );
-  if (
-    manifestSha256 !== null &&
-    digestUtf8(canonicalBody) !== manifestSha256
-  ) {
+  if (manifestSha256 !== null && digestUtf8(canonicalBody) !== manifestSha256) {
     throw new Error("publication_manifest_hash_mismatch");
   }
 
@@ -163,7 +160,7 @@ export function parseMuseumPublicationManifest(
   if (commitmentValue !== undefined && commitmentValue !== null) {
     if (
       !isRecord(commitmentValue) ||
-      Object.keys(commitmentValue).sort().join(",") !==
+      Object.keys(commitmentValue).sort(compareCanonicalStrings).join(",") !==
         "algorithm,canonicalizationId,digest" ||
       commitmentValue["algorithm"] !== 1 ||
       commitmentValue["canonicalizationId"] !==

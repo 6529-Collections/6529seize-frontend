@@ -548,6 +548,14 @@ describe("frontend i18n helpers", () => {
     expect(t("en-US", "museum.network.programs.description")).toBe(
       "Curatorial pathways through which the Museum considers and selects works."
     );
+    expect(
+      t("en-US", "museum.network.artwork.viewWorkNamed", {
+        title: "CENTURY #31",
+      })
+    ).toBe("View work: CENTURY #31");
+    expect(t("en-US", "museum.network.programs.status.selectionComplete")).toBe(
+      "Selection complete"
+    );
   });
 
   it("keeps file-kind labels distinguishable within each locale", () => {

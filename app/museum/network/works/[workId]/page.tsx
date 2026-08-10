@@ -39,7 +39,10 @@ export async function generateMetadata({
 }: MuseumWorkRouteProps): Promise<Metadata> {
   const { workId } = await params;
   const { publicationState } = await getMuseumPublicationBundle();
-  const canonicalId = resolveCanonicalWorkId(publicationState.publication, workId);
+  const canonicalId = resolveCanonicalWorkId(
+    publicationState.publication,
+    workId
+  );
   const metadata = await getMuseumObjectMetadata(canonicalId ?? workId);
   return {
     ...metadata,

@@ -3,7 +3,9 @@ import type {
   MuseumMediaMetadata,
   MuseumMediaMetadataContext,
   MuseumPublicEntityRecord,
+  MuseumRightsCredit,
 } from "./types";
+import { isRecord } from "./publicEntityGraphPrimitives";
 
 interface MuseumMediaProjectionInput {
   readonly width: unknown;
@@ -15,6 +17,39 @@ interface MuseumMediaProjectionInput {
 }
 
 const MUSEUM_WAVE_CURATED_ACQUISITION_ID = "6529NM-CA-2026-003" as const;
+
+export function mediaRightsCredit(
+  creditLine: string,
+  licenseLabel: string | null,
+  sourcePath: string
+): MuseumRightsCredit {
+  return {
+    creditLine,
+    licenseLabel,
+    licenseUrl: null,
+    rightsExpressionId: null,
+    sourcePath,
+  };
+}
+
+export function mediaLicenseLabel(
+  media: Readonly<Record<string, unknown>>
+): string | null {
+  const rights = media["rights"];
+  if (!isRecord(rights)) return null;
+  for (const key of ["license_label", "licenseLabel"]) {
+    const label = rights[key];
+    if (typeof label === "string" && label.trim().length > 0) {
+      return label.trim();
+    }
+  }
+  const notes = rights["notes"];
+  if (typeof notes !== "string") return null;
+  const match = /^Source rights label:\s*(.+?)(?:\.|$)/u.exec(notes);
+  return match?.[1] === undefined || match[1].trim().length === 0
+    ? null
+    : match[1].trim();
+}
 
 export function metadataOnlyMedia(
   mediaEntity: MuseumPublicEntityRecord,

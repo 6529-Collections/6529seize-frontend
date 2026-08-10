@@ -1,6 +1,6 @@
 import {
-  assertApprovedArtBlocksUrl,
-  assertApprovedMuseumGeneratedDerivativeUrl,
+  assertApprovedArtBlocksMediaUrl,
+  assertApprovedMuseumRepositoryMediaUrl,
   buildImmutableMuseumBlobUrl,
 } from "./security";
 import {
@@ -36,6 +36,8 @@ import {
 } from "./publicEntityGraphPrimitives";
 import { requireEntity } from "./publicEntityGraphValidation";
 import {
+  mediaLicenseLabel,
+  mediaRightsCredit,
   metadataOnlyMedia,
   proposalMetadata,
 } from "./publicEntityGraphMediaMetadata";
@@ -108,6 +110,8 @@ export interface MuseumProjectedMedia {
 
 interface MuseumMediaProjectionInput {
   readonly uri: string | null;
+  readonly repositoryPath: string | null;
+  readonly visual: boolean;
   readonly mediaType: string;
   readonly width: unknown;
   readonly height: unknown;
@@ -121,6 +125,7 @@ interface MuseumMediaProjectionContext {
   readonly sourceCommit: string;
   readonly sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>;
   readonly graph: MuseumPublicEntityGraph;
+  readonly catalogMediaAssetPaths: ReadonlySet<string>;
 }
 
 const MUSEUM_WAVE_CURATED_ACQUISITION_ID = "6529NM-CA-2026-003" as const;
@@ -128,7 +133,8 @@ const MUSEUM_WAVE_CURATED_ACQUISITION_ID = "6529NM-CA-2026-003" as const;
 export function projectMediaRelations(
   entities: readonly MuseumPublicEntityRecord[],
   graph: MuseumPublicEntityGraph,
-  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>,
+  catalogMediaAssetPaths: readonly string[] = []
 ): ReadonlyMap<string, MuseumProjectedMedia> {
   const mediaBySubject = new Map<
     string,
@@ -142,6 +148,7 @@ export function projectMediaRelations(
     sourceCommit: graph.sourceCommit,
     sourceDocuments,
     graph,
+    catalogMediaAssetPaths: new Set(catalogMediaAssetPaths),
   };
   for (const relation of graph.relations.filter(
     (candidate) => candidate.relationType === "ENTITY_HAS_MEDIA"
@@ -172,42 +179,6 @@ export function projectMediaRelations(
   return mediaBySubject;
 }
 
-function rightsCredit(
-  creditLine: string,
-  licenseLabel: string | null,
-  sourcePath: string
-): MuseumRightsCredit {
-  return {
-    creditLine,
-    licenseLabel,
-    licenseUrl: null,
-    rightsExpressionId: null,
-    sourcePath,
-  };
-}
-
-function mediaLicenseLabel(
-  media: Readonly<Record<string, unknown>>
-): string | null {
-  const rights = media["rights"];
-  if (isRecord(rights)) {
-    for (const key of ["license_label", "licenseLabel"]) {
-      const label = rights[key];
-      if (typeof label === "string" && label.trim().length > 0) {
-        return label.trim();
-      }
-    }
-    const notes = rights["notes"];
-    if (typeof notes === "string") {
-      const match = /^Source rights label:\s*(.+?)(?:\.|$)/u.exec(notes);
-      if (match?.[1] !== undefined && match[1].trim().length > 0) {
-        return match[1].trim();
-      }
-    }
-  }
-  return null;
-}
-
 function mediaFromEntity(
   mediaEntity: MuseumPublicEntityRecord,
   subjectEntity: MuseumPublicEntityRecord,
@@ -233,6 +204,11 @@ function mediaFromEntity(
     "public_entity_graph_media_locator"
   );
   const uri = optionalString(locator, "uri", "public_entity_graph_media_uri");
+  const repositoryPath = optionalString(
+    locator,
+    "repository_path",
+    "public_entity_graph_media_path"
+  );
   const mediaType = requiredString(
     media,
     "media_type",
@@ -240,6 +216,7 @@ function mediaFromEntity(
   );
   const width = media["width"];
   const height = media["height"];
+  const visual = media["visual"] === true;
   const altText =
     typeof media["accessibility_text"] === "string"
       ? media["accessibility_text"]
@@ -261,6 +238,8 @@ function mediaFromEntity(
   }
   const input: MuseumMediaProjectionInput = {
     uri,
+    repositoryPath,
+    visual,
     mediaType,
     width,
     height,
@@ -276,8 +255,8 @@ function mediaFromEntity(
     mediaEntity,
     subjectEntity.id,
     input,
-    subjectEntity.entityType === "WORK",
-    role
+    role,
+    context
   );
 }
 
@@ -301,7 +280,9 @@ function projectProposalMedia(
     throw new Error("public_entity_graph_media_wave_source_join");
   }
   const metadataOnly =
-    input.uri === null || !input.allowedUiAffordances.includes("view");
+    !input.visual ||
+    (input.uri === null && input.repositoryPath === null) ||
+    !input.allowedUiAffordances.includes("view");
   if (metadataOnly) {
     assertProposalContext(media, subjectEntity, context, waveId, dropId);
     return {
@@ -385,6 +366,7 @@ function assertProposalPresentationInput(
 } {
   if (
     input.uri === null ||
+    !input.visual ||
     typeof input.width !== "number" ||
     typeof input.height !== "number" ||
     input.altText === null
@@ -476,7 +458,7 @@ function assertProposalSourceLocator(input: MuseumMediaProjectionInput): void {
 function proposalAffordances(
   input: MuseumMediaProjectionInput
 ): MuseumExternalProposalPresentationAffordance[] {
-  if (!input.allowedUiAffordances.includes("view")) {
+  if (!input.visual || !input.allowedUiAffordances.includes("view")) {
     throw new Error("public_entity_graph_media_affordance");
   }
   return [
@@ -498,8 +480,8 @@ function projectRetainedMedia(
   mediaEntity: MuseumPublicEntityRecord,
   subjectEntityId: string,
   input: MuseumMediaProjectionInput,
-  requireWorkVisual: boolean,
-  role: string
+  role: string,
+  context: MuseumMediaProjectionContext
 ): {
   readonly retained: MuseumMedia | null;
   readonly presentation: null;
@@ -528,20 +510,27 @@ function projectRetainedMedia(
     "media",
     "public_entity_graph_media"
   );
-  const credit = rightsCredit(
+  const credit = mediaRightsCredit(
     input.creditLine,
     input.licenseLabel,
     mediaEntity.sourcePath
   );
   if (media["media_role"] === "museum_retained_preservation_object") {
-    return projectPreservedMedia(mediaEntity, subjectEntityId, input, credit);
+    return projectPreservedMedia(
+      mediaEntity,
+      subjectEntityId,
+      input,
+      credit,
+      context
+    );
   }
   if (media["media_role"] === "token_linked_source_media") {
+    const approved = assertApprovedArtBlocksMediaUrl(input.uri);
     return {
       retained: {
         id: mediaEntity.id,
         artworkId: subjectEntityId,
-        kind: "still",
+        kind: approved.kind,
         role: "source",
         mediaType: input.mediaType,
         width: input.width,
@@ -550,7 +539,7 @@ function projectRetainedMedia(
         credit,
         sourcePath: mediaEntity.sourcePath,
         custody: "upstream",
-        url: assertApprovedArtBlocksUrl(input.uri, "still"),
+        url: approved.url,
         preservationStatus: "not_retained",
         sha256: null,
         upstreamProvider: "art_blocks",
@@ -559,29 +548,15 @@ function projectRetainedMedia(
       metadata: null,
     };
   }
-  if (media["media_role"] === "museum_generated_public_derivative") {
-    let url: string;
-    try {
-      url = assertApprovedMuseumGeneratedDerivativeUrl(input.uri);
-    } catch {
-      // The current dirty source handoff contains an institution cover with a
-      // repository URI under this role. It is not a Work-level visual join,
-      // so omit that unavailable decorative media while keeping the published
-      // Work contract fail-closed.
-      if (!requireWorkVisual) {
-        return {
-          retained: null,
-          presentation: null,
-          metadata: metadataOnlyMedia(
-            mediaEntity,
-            subjectEntityId,
-            input,
-            role
-          ),
-        };
-      }
-      throw new Error("public_entity_graph_media_unpublishable");
-    }
+  if (
+    media["media_role"] === "museum_generated_public_derivative" ||
+    media["media_role"] === "museum_authored_public_graphic"
+  ) {
+    const url = assertApprovedMuseumRepositoryMediaUrl(
+      context.sourceCommit,
+      input.repositoryPath,
+      context.catalogMediaAssetPaths
+    );
     return {
       retained: {
         id: mediaEntity.id,
@@ -615,7 +590,8 @@ function projectPreservedMedia(
   mediaEntity: MuseumPublicEntityRecord,
   subjectEntityId: string,
   input: MuseumMediaProjectionInput,
-  credit: MuseumRightsCredit
+  credit: MuseumRightsCredit,
+  context: MuseumMediaProjectionContext
 ): {
   readonly retained: MuseumMedia | null;
   readonly presentation: null;
@@ -647,6 +623,11 @@ function projectPreservedMedia(
   if (!/^sha256:[a-f0-9]{64}$/u.test(digest)) {
     return { retained: null, presentation: null, metadata: null };
   }
+  const url = assertApprovedMuseumRepositoryMediaUrl(
+    context.sourceCommit,
+    input.repositoryPath,
+    context.catalogMediaAssetPaths
+  );
   return {
     retained: {
       id: mediaEntity.id,
@@ -660,7 +641,7 @@ function projectPreservedMedia(
       credit,
       sourcePath: mediaEntity.sourcePath,
       custody: "retained",
-      url: input.uri as string,
+      url,
       preservationStatus: "retained_verified",
       sha256: digest as `sha256:${string}`,
       upstreamProvider: null,

@@ -24,9 +24,14 @@ const artwork: CaseyArtwork = {
 
 describe("MuseumArtworkFigure", () => {
   it("gives the Work link a WCAG-sized interactive target", () => {
-    render(<MuseumArtworkFigure artwork={artwork} href="/museum/network/works/6529NM-W-0001" />);
+    render(
+      <MuseumArtworkFigure
+        artwork={artwork}
+        href="/museum/network/works/6529NM-W-0001"
+      />
+    );
 
-    const link = screen.getByRole("link", { name: "View work" });
+    const link = screen.getByRole("link", { name: "View work: Work One" });
     expect(link).toHaveClass("tw-min-h-11");
     expect(link).not.toHaveClass("tw-min-h-6");
   });

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
 import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
+import { MuseumPublicWorkTextFigure } from "@/components/museum/MuseumPublicWorkTextFigure";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -162,44 +163,18 @@ export default async function MuseumCollectionPage() {
                 />
               );
             }
-            const sourceAlias = publication.workAliases?.find(
-              (alias) => alias.workId === work.id
-            )?.sourceObjectId;
-            const legacyArtwork =
-              sourceAlias === undefined
-                ? undefined
-                : publication.artworks.find(
-                    (artwork) => artwork.id === sourceAlias
-                  );
-            const legacyMedia = legacyArtwork?.media[0];
-            if (legacyMedia !== undefined) {
-              return (
-                <MuseumPublicMediaFigure
-                  key={work.id}
-                  src={legacyMedia.url}
-                  width={legacyMedia.width}
-                  height={legacyMedia.height}
-                  alt={legacyMedia.altText ?? ""}
-                  href={museumWorkHref(work.id)}
-                  title={work.title}
-                  byline={legacyMedia.credit.creditLine}
-                />
-              );
-            }
+            const artist = publication.artists.find(
+              (candidate) => candidate.id === work.artistId
+            );
             return (
-              <article
+              <MuseumPublicWorkTextFigure
                 key={work.id}
-                className="tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-py-5"
-              >
-                <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-                  <a
-                    href={museumWorkHref(work.id)}
-                    className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline"
-                  >
-                    {work.title}
-                  </a>
-                </h2>
-              </article>
+                title={work.title}
+                href={museumWorkHref(work.id)}
+                {...(artist === undefined
+                  ? {}
+                  : { byline: artist.preferredName })}
+              />
             );
           })}
         </div>

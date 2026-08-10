@@ -15,9 +15,7 @@ function relationKey(relation: MuseumPublicRelationRecord): string {
   return `${relation.relationType}:${relation.sourceEntityId}:${relation.targetEntityId}`;
 }
 
-function isActivePublicRelation(
-  relation: MuseumPublicRelationRecord
-): boolean {
+function isActivePublicRelation(relation: MuseumPublicRelationRecord): boolean {
   return (
     relation.assertionStatus === "asserted" ||
     relation.assertionStatus === "observed"

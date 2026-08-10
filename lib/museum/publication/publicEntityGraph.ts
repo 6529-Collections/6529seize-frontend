@@ -157,7 +157,8 @@ function documentForPath(
 export function applyMuseumPublicEntityGraph(
   publication: MuseumPublication,
   graph: MuseumPublicEntityGraph,
-  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument> = new Map()
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument> = new Map(),
+  catalogMediaAssetPaths: readonly string[] = []
 ): MuseumPublication {
   if (
     !isExactGitCommit(publication.identity.commit) ||
@@ -165,7 +166,12 @@ export function applyMuseumPublicEntityGraph(
   ) {
     throw new Error("public_entity_graph_commit_mismatch");
   }
-  const projected = projectMuseumGraph(graph, publication, sourceDocuments);
+  const projected = projectMuseumGraph(
+    graph,
+    publication,
+    sourceDocuments,
+    catalogMediaAssetPaths
+  );
   assertTypedPublicationJoins(projected);
   return {
     ...publication,

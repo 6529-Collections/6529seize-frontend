@@ -53,6 +53,12 @@ const ACQUISITION_ALIAS_KINDS = new Set([
   "accession_record",
 ]);
 
+function compareInventoryKeys(left: string, right: string): number {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return left.localeCompare(right);
+}
+
 export function parseMuseumIdentityInventory(
   document: MuseumSourceDocument | undefined,
   entities: readonly MuseumPublicEntityRecord[]
@@ -120,7 +126,10 @@ function parseInventoryJson(
 function assertInventoryVersion(inventory: Record<string, unknown>): void {
   if (
     inventory["$schema"] !== PUBLIC_ENTITY_IDENTITY_INVENTORY_SCHEMA ||
-    !sameIdSet(Object.keys(inventory).sort(), [...INVENTORY_KEYS].sort())
+    !sameIdSet(
+      Object.keys(inventory).sort(compareInventoryKeys),
+      [...INVENTORY_KEYS].sort(compareInventoryKeys)
+    )
   ) {
     throw new Error("public_entity_graph_inventory_shape");
   }
@@ -155,7 +164,7 @@ function assertRetiredIdentities(
       "public_entity_graph_inventory_retired_identities"
     );
     if (
-      !sameIdSet(Object.keys(entry).sort(), [
+      !sameIdSet(Object.keys(entry).sort(compareInventoryKeys), [
         "entity_id",
         "entity_type",
         "reason",
@@ -230,7 +239,7 @@ function assertSourceAliases(
       "public_entity_graph_inventory_source_aliases"
     );
     if (
-      !sameIdSet(Object.keys(entry).sort(), [
+      !sameIdSet(Object.keys(entry).sort(compareInventoryKeys), [
         "alias",
         "alias_type",
         "canonical_entity_id",
@@ -285,7 +294,7 @@ function readTypedReferenceRegistry(
       "public_entity_graph_inventory_typed_references"
     );
     if (
-      !sameIdSet(Object.keys(entry).sort(), [
+      !sameIdSet(Object.keys(entry).sort(compareInventoryKeys), [
         "authoritative_record_id",
         "authoritative_record_type",
         "caip19",

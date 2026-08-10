@@ -64,7 +64,9 @@ const mockedView = jest.mocked(getMuseumView);
 
 const publication = {
   identity: { commit: "a".repeat(40) },
-  artists: [{ id: "ART-0001", slug: "casey-reas", preferredName: "Casey Reas" }],
+  artists: [
+    { id: "ART-0001", slug: "casey-reas", preferredName: "Casey Reas" },
+  ],
   projects: [
     {
       id: "PRJ-0001",
@@ -187,7 +189,10 @@ describe("Network Museum canonical metadata", () => {
     [acquisitionProgramsMetadata, "/museum/network/acquisition-programs"],
     [researchMetadata, "/museum/network/research"],
     [governanceMetadata, "/museum/network/about/governance"],
-    [institutionalPracticeMetadata, "/museum/network/research/institutional-practice"],
+    [
+      institutionalPracticeMetadata,
+      "/museum/network/research/institutional-practice",
+    ],
     [dataArchitectureMetadata, "/museum/network/research/data-architecture"],
     [scholarshipMetadata, "/museum/network/research/scholarship-and-writing"],
     [sourcesMetadata, "/museum/network/research/sources-and-chronology"],
@@ -240,9 +245,7 @@ describe("Network Museum canonical metadata", () => {
           params: Promise.resolve({ slug: "the-system-in-seven-states" }),
         })
       )
-    ).toBe(
-      "/museum/network/acquisitions/the-system-in-seven-states"
-    );
+    ).toBe("/museum/network/acquisitions/the-system-in-seven-states");
     await expect(
       canonical(
         await researchDetailMetadata({

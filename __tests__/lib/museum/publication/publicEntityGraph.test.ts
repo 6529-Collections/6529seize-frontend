@@ -62,6 +62,11 @@ function commonPayload(id: string): Record<string, unknown> {
     record_version: "1.0.0",
     created_at: "2026-08-08T00:00:00Z",
     effective_at: "2026-08-08T00:00:00Z",
+    status_observation: {
+      status_label: "published",
+      observed_at: "2026-08-08T00:00:00Z",
+      evidence_refs: [],
+    },
     source_record_ids: [id],
     evidence_refs: [
       {

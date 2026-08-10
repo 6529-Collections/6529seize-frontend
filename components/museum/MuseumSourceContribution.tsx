@@ -109,9 +109,7 @@ export function MuseumSourceContribution({
       ? null
       : buildImmutableMuseumBlobUrl(commit, pageSource.primaryPath);
   const improvementUrl =
-    pageSource === null
-      ? null
-      : buildMuseumMainEditUrl(pageSource.primaryPath);
+    pageSource === null ? null : buildMuseumMainEditUrl(pageSource.primaryPath);
   const contributionUrl = buildImmutableMuseumBlobUrl(
     commit,
     MUSEUM_CONTRIBUTOR_GUIDE_PATH

@@ -9,6 +9,7 @@ import {
   RELATION_ASSERTION_STATUSES,
 } from "./publicEntityGraphSchema";
 import {
+  assertDateTime,
   assertStringEnum,
   isEntityType,
   isRelationType,
@@ -61,6 +62,20 @@ export function parseMuseumEntityRecord(
     "public_entity_graph_entity_status"
   ) as MuseumPublicEntityRecord["entityStatus"];
   const profile = assertProfile(payload, entityType);
+  const statusObservation = requiredRecord(
+    payload["status_observation"],
+    "public_entity_graph_status_observation"
+  );
+  assertDateTime(
+    statusObservation,
+    "observed_at",
+    "public_entity_graph_status_observed_at"
+  );
+  const statusAsOf = requiredString(
+    statusObservation,
+    "observed_at",
+    "public_entity_graph_status_observed_at"
+  );
   const sourceRecordIds = stringArray(
     payload,
     "source_record_ids",
@@ -85,6 +100,7 @@ export function parseMuseumEntityRecord(
     canonicalRoute: identity.route,
     pageExposure: identity.exposure,
     entityStatus,
+    statusAsOf,
     sourcePath: document.path,
     sourceRecordIds,
     ...(mediaEntityIds.length > 0 ? { mediaEntityIds } : {}),

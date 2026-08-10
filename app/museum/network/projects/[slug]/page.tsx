@@ -210,7 +210,10 @@ export async function generateMetadata({
   });
   return project === undefined
     ? metadata
-    : { ...metadata, alternates: { canonical: museumProjectHref(project.slug) } };
+    : {
+        ...metadata,
+        alternates: { canonical: museumProjectHref(project.slug) },
+      };
 }
 
 export default async function MuseumProjectPage({

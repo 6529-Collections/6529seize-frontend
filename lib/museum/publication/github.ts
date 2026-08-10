@@ -69,6 +69,8 @@ interface GitHubMuseumPublicationSourceOptions {
   ) => MuseumSourceDocument;
   /** Visitor-corpus path boundary for a local review fixture only. */
   readonly localFixtureAcceptedPaths?: readonly string[];
+  /** Deferred-media catalog path boundary for a local review fixture only. */
+  readonly localFixtureMediaAssetPaths?: readonly string[];
 }
 
 function sourceErrorCode(error: unknown): string {
@@ -145,6 +147,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     | ((document: MuseumSourceDocument) => MuseumSourceDocument)
     | undefined;
   private readonly localFixtureAcceptedPaths: ReadonlySet<string> | undefined;
+  private readonly localFixtureMediaAssetPaths: ReadonlySet<string>;
   private readonly catalogCache = new Map<string, MuseumPublicationCatalog>();
 
   constructor(options: GitHubMuseumPublicationSourceOptions) {
@@ -160,6 +163,9 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       options.localFixtureAcceptedPaths === undefined
         ? undefined
         : new Set(options.localFixtureAcceptedPaths);
+    this.localFixtureMediaAssetPaths = new Set(
+      options.localFixtureMediaAssetPaths ?? []
+    );
     const isTestEnvironment = getNodeEnv() === "test";
     const environment = getMuseumPublicationEnvironment();
     const localFixtureEnvironment =
@@ -175,10 +181,11 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     ) {
       throw new Error("publication_uncatalogued_fixture_not_allowed");
     }
-    if (
-      this.localFixtureDocumentTransform !== undefined &&
-      !localFixtureEnvironment
-    ) {
+    const usesLocalFixtureOptions =
+      this.localFixtureDocumentTransform !== undefined ||
+      this.localFixtureAcceptedPaths !== undefined ||
+      this.localFixtureMediaAssetPaths.size > 0;
+    if (usesLocalFixtureOptions && !localFixtureEnvironment) {
       throw new Error("publication_local_fixture_not_allowed");
     }
 
@@ -489,7 +496,14 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     );
     return graph === null
       ? publication
-      : applyMuseumPublicEntityGraph(publication, graph, context.documents);
+      : applyMuseumPublicEntityGraph(
+          publication,
+          graph,
+          context.documents,
+          catalog?.mediaAssets.map((entry) => entry.path) ?? [
+            ...this.localFixtureMediaAssetPaths,
+          ]
+        );
   }
 
   private async resolveCatalog(

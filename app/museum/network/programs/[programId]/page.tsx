@@ -23,8 +23,7 @@ export async function generateMetadata({
   );
   return getAppMetadata({
     title:
-      typedProgram?.title ??
-      t(DEFAULT_LOCALE, "museum.network.programs.title"),
+      typedProgram?.title ?? t(DEFAULT_LOCALE, "museum.network.programs.title"),
     description: t(DEFAULT_LOCALE, "museum.network.programs.description"),
   });
 }

@@ -616,10 +616,9 @@ describe("testing strategy CI plan", () => {
         };
       };
     };
-    const coverageCheckoutSteps =
-      parsedCoverageFloor.jobs["coverage-floor"].steps.filter((step) =>
-        step.uses?.startsWith("actions/checkout@")
-      );
+    const coverageCheckoutSteps = parsedCoverageFloor.jobs[
+      "coverage-floor"
+    ].steps.filter((step) => step.uses?.startsWith("actions/checkout@"));
     const pushSecretScan = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
       "utf8"

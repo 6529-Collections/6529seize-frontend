@@ -439,6 +439,10 @@
       ]
     },
     {
+      "file": "components/museum/MuseumPublicWorkTextFigure.tsx",
+      "surface_ids": ["museum.home", "museum.collection", "museum.acquisition"]
+    },
+    {
       "file": "components/museum/MuseumRelatedEntities.tsx",
       "surface_ids": [
         "museum.artist",
