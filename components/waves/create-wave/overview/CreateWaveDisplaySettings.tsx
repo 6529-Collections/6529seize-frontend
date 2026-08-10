@@ -120,7 +120,7 @@ export default function CreateWaveDisplaySettings({
     } tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
 
   return (
-    <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
+    <div>
       <div className="tw-space-y-3">
         <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
           Display settings

@@ -1008,6 +1008,27 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   save: "Save",
 } as const);
 
+const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages(
+  "waves.create.advanced",
+  {
+    title: "Advanced settings",
+    customized: "Customized",
+    needsAttention: "Needs attention",
+    errorSummary: "Review the highlighted settings before continuing.",
+  } as const
+);
+
+const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages(
+  "waves.create.overview",
+  {
+    "advanced.defaultSummary":
+      "Picture and optional display settings use recommended defaults.",
+    "advanced.customSummary":
+      "Optional picture or display settings have been customized.",
+    picture: "Wave picture",
+  } as const
+);
+
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
   "waves.create.rank.mode",
   {
@@ -2653,6 +2674,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_ACTIONS_MESSAGES,
+  ...WAVE_CREATE_ADVANCED_MESSAGES,
+  ...WAVE_CREATE_OVERVIEW_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
