@@ -231,7 +231,7 @@ async function expectFreshExactSource(
     sourcePanel.getByRole("link", { name: "Contributor guide", exact: true })
   ).toHaveAttribute(
     "href",
-    `https://github.com/${SOURCE_REPOSITORY}/blob/main/CONTRIBUTING.md`
+    `https://github.com/${SOURCE_REPOSITORY}/blob/${commit}/CONTRIBUTING.md`
   );
 
   return commit;

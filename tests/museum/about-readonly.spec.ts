@@ -24,6 +24,10 @@ const EXACT_SOURCE_PATTERN = new RegExp(
   `^https://github\\.com/${SOURCE_REPOSITORY}/blob/[a-f0-9]{40}/docs/open-museum\\.md$`,
   "u"
 );
+const EXACT_CONTRIBUTOR_GUIDE_PATTERN = new RegExp(
+  `^https://github\\.com/${SOURCE_REPOSITORY}/blob/[a-f0-9]{40}/CONTRIBUTING\\.md$`,
+  "u"
+);
 const ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/u,
   /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/u,
@@ -190,7 +194,9 @@ test.describe("Museum About proposition @surface @readonly", () => {
         })
       ).toHaveAttribute(
         "href",
-        `https://github.com/${SOURCE_REPOSITORY}/blob/main/CONTRIBUTING.md`
+        REQUIRED_SOURCE_COMMIT === null
+          ? EXACT_CONTRIBUTOR_GUIDE_PATTERN
+          : `https://github.com/${SOURCE_REPOSITORY}/blob/${REQUIRED_SOURCE_COMMIT}/CONTRIBUTING.md`
       );
     } catch (error) {
       primaryError = error;
