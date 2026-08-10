@@ -2,7 +2,6 @@ import {
   ChatBubbleLeftIcon,
   CheckIcon,
   LinkIcon,
-  ShareIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
@@ -45,11 +44,7 @@ const getWaveLinkActionIcon = ({
   }
 
   if (waveLinkActionMode === "share") {
-    return direct ? (
-      <ShareArrowIcon className={iconClassName} />
-    ) : (
-      <ShareIcon className={iconClassName} />
-    );
+    return <ShareArrowIcon className={iconClassName} />;
   }
 
   return <LinkIcon className={iconClassName} />;

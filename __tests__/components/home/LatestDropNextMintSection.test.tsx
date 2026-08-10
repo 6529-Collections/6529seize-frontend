@@ -19,6 +19,13 @@ jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
   ),
 }));
 
+jest.mock("@/components/home/now-minting/LatestDropAllowlistStatus", () => ({
+  __esModule: true,
+  default: ({ tokenId }: { readonly tokenId: number }) => (
+    <div data-testid="allowlist-status" data-token-id={tokenId} />
+  ),
+}));
+
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
@@ -71,6 +78,10 @@ describe("LatestDropNextMintSection", () => {
       "data-token-id",
       "488"
     );
+    expect(screen.getByTestId("allowlist-status")).toHaveAttribute(
+      "data-token-id",
+      "488"
+    );
     expect(screen.getByText("Mint date")).toBeInTheDocument();
   });
 
@@ -98,6 +109,7 @@ describe("LatestDropNextMintSection", () => {
       screen.queryByRole("link", { name: /The Memes #/ })
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/Card #/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("allowlist-status")).not.toBeInTheDocument();
   });
 
   it("renders the mapped Meme pill as static text on its own detail page", () => {

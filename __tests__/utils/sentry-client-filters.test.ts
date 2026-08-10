@@ -27,6 +27,7 @@ import {
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
+  shouldFilterRabbyChromeUserRejectedRequest,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -242,6 +243,12 @@ describe("sentry-client-filters", () => {
     "undefined is not an object (evaluating 'window.ethereum.emit')";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const rabbyChromeUserRejectedStack = [
+    "Error: User rejected the request.",
+    "    at a (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:123184)",
+    "    at Object.userRejectedRequest (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:124412)",
+    "    at h.dispose (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:297934)",
+  ].join("\n");
   const rabbyMobileUserRejectedStack =
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const rabbyMobileAndroidUserRejectedStack = [
@@ -1539,8 +1546,7 @@ describe("sentry-client-filters", () => {
     osName = "iOS",
     osVersion = "26.5.2",
     includeContexts = true,
-    userAgent =
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
+    userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
     includeUserAgent = false,
     transaction = "/nextgen/collection/:collection/art",
     requestUrl = "https://6529.io/nextgen/collection/pebbles/art",
@@ -2150,6 +2156,34 @@ describe("sentry-client-filters", () => {
       },
       ...overrides,
     }) as TestSentryClientEvent;
+
+  const createRabbyChromeUserRejectedExceptionValue = (
+    overrides: Partial<SentryExceptionValue> = {}
+  ): SentryExceptionValue => ({
+    type: "UnhandledRejection",
+    value: objectCapturedPromiseRejectionMessage,
+    mechanism: {
+      type: "auto.browser.global_handlers.onunhandledrejection",
+      handled: false,
+    },
+    ...overrides,
+  });
+
+  const createRabbyChromeUserRejectedRequestEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [createRabbyChromeUserRejectedExceptionValue()],
+    },
+    extra: {
+      __serialized__: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack,
+      },
+    },
+    ...overrides,
+  });
 
   const createObservedRabbyRainbowKitRawFrames = () => [
     {
@@ -8507,6 +8541,39 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the exact Rabby Chrome user-rejected object rejection", () => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent();
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["a trailing newline", `${rabbyChromeUserRejectedStack}\n`],
+    ["CRLF line endings", rabbyChromeUserRejectedStack.replace(/\n/g, "\r\n")],
+  ])("filters the Rabby Chrome rejection with %s", (_caseName, stack) => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "User rejected the request.",
+          stack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters production RabbyMobile Android user-rejected object rejections from user-agent context", () => {
     // Arrange
     const event = createRabbyMobileUserRejectedRequestEvent({
@@ -8887,6 +8954,96 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the observed Sentry A2 injected-script messaging failure", () => {
+    // Arrange
+    const event: TestSentryClientEvent = {
+      transaction: "/messages",
+      tags: {
+        browser: "Chrome 150.0.0",
+        environment: "production",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                  lineno: 152,
+                  colno: 22,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter the observed Sentry A2 failure with an app-owned exception", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      transaction: "/messages",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                  lineno: 152,
+                  colno: 22,
+                },
+              ],
+            },
+          },
+          {
+            type: "TypeError",
+            value: "App-owned failure",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/messages/MessagesView.tsx",
+                  function: "MessagesView",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters extension messaging failures from browser extension frames", () => {
     // Arrange
     const event = createBrowserExtensionMessagingConnectionEvent({
@@ -8972,6 +9129,167 @@ describe("sentry-client-filters", () => {
                 },
               ],
             },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unobserved injected-script-like app paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script-helper.js",
+                  abs_path: "app:///injected-script-helper.js",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated errors from the observed injected-script path", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Extension message failed for a different reason.",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      source: "event message",
+      eventOverrides: {
+        message: extensionMessagingConnectionFailureMessage,
+      },
+      hint: undefined,
+    },
+    {
+      source: "hint message",
+      eventOverrides: {},
+      hint: {
+        originalException: new Error(
+          extensionMessagingConnectionFailureMessage
+        ),
+      },
+    },
+  ])(
+    "does not filter a conflicting exception with a matching $source",
+    ({ eventOverrides, hint }) => {
+      // Arrange
+      const event = createBrowserExtensionMessagingConnectionEvent({
+        ...eventOverrides,
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value: "Extension message failed for a different reason.",
+              stacktrace: {
+                frames: [
+                  {
+                    filename: "app:///injected-script.js",
+                    abs_path: "app:///injected-script.js",
+                    in_app: true,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+
+      // Act
+      const result = shouldFilterBrowserExtensionMessagingConnectionError(
+        event,
+        hint
+      );
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it("filters a matching event message when the exception value is missing", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      message: extensionMessagingConnectionFailureMessage,
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: undefined,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter frameless extension messaging failures", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
           },
         ],
       },
@@ -9667,6 +9985,168 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "a different code",
+      serialized: {
+        code: 4100,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack,
+      },
+    },
+    {
+      caseName: "a different message",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request",
+        stack: rabbyChromeUserRejectedStack,
+      },
+    },
+    {
+      caseName: "a different extension origin",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack.replace(
+          "acmacodkjbdgmoleebolmdjonilkdbch",
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ),
+      },
+    },
+    {
+      caseName: "a different stack function",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack.replace(
+          "Object.userRejectedRequest",
+          "Object.requestRejected"
+        ),
+      },
+    },
+    {
+      caseName: "a missing serialized stack",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+      },
+    },
+    {
+      caseName: "an additional serialized field",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack,
+        data: null,
+      },
+    },
+    {
+      caseName: "an app-owned serialized frame",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: [
+          rabbyChromeUserRejectedStack,
+          "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+        ].join("\n"),
+      },
+    },
+  ])("keeps Rabby Chrome near-misses with $caseName", ({ serialized }) => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent({
+      extra: { __serialized__: serialized },
+    });
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "a different mechanism",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+        }),
+      ],
+    },
+    {
+      caseName: "a handled mechanism",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: true,
+          },
+        }),
+      ],
+    },
+    {
+      caseName: "a different wrapper",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          value: objectCapturedPromiseRejectionWithoutStackMessage,
+        }),
+      ],
+    },
+    {
+      caseName: "an additional exception",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue(),
+        { type: "Error", value: "Application failure" },
+      ],
+    },
+    {
+      caseName: "an app-owned exception frame",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          stacktrace: {
+            frames: [
+              {
+                filename: "hooks/drops/useDropSignature.ts",
+                abs_path: "hooks/drops/useDropSignature.ts",
+                in_app: true,
+              },
+            ],
+          },
+        }),
+      ],
+    },
+  ])("keeps Rabby Chrome near-misses with $caseName", ({ values }) => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent({
+      exception: { values },
+    });
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("keeps Rabby Chrome rejections with app-owned hint stacks", () => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent();
+    const appError = new Error("Application failure");
+    appError.stack =
+      "Error: Application failure\n    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)";
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event, {
+      originalException: appError,
+    });
 
     // Assert
     expect(result).toBe(false);

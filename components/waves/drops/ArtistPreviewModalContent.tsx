@@ -100,15 +100,6 @@ export const ArtistPreviewModalContent: React.FC<
 
   return (
     <div className="tailwind-scope tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-white/5 tw-bg-[#0E1012] tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
-      {currentContentType === "winners" && (
-        <>
-          {/* Top micro-gradient band for subtle luxe */}
-          <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-12 tw-bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0)_70%)]" />
-          {/* Faint glass film */}
-          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-backdrop-blur-[1px]" />
-        </>
-      )}
-
       {/* Header */}
       <ArtistPreviewModalHeader
         user={hydratedUser}

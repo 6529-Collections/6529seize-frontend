@@ -592,6 +592,24 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
     );
+    const coverageFloor = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/coverage-floor.yml"),
+      "utf8"
+    );
+    const parsedCoverageFloor = YAML.parse(coverageFloor) as {
+      jobs: {
+        "coverage-floor": {
+          steps: Array<{
+            uses?: string;
+            with?: Record<string, unknown>;
+          }>;
+        };
+      };
+    };
+    const coverageCheckoutSteps =
+      parsedCoverageFloor.jobs["coverage-floor"].steps.filter((step) =>
+        step.uses?.startsWith("actions/checkout@")
+      );
     const pushSecretScan = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
       "utf8"
@@ -599,6 +617,11 @@ describe("testing strategy CI plan", () => {
 
     expect(appPrCi.match(/filter: blob:none/gu)).toHaveLength(2);
     expect(appPrCi.match(/fetch-depth: 0/gu)).toHaveLength(2);
+    expect(coverageCheckoutSteps).toHaveLength(1);
+    expect(coverageCheckoutSteps[0]?.with).toMatchObject({
+      "fetch-depth": 0,
+      filter: "blob:none",
+    });
     expect(pushSecretScan).toContain("filter: blob:none");
     expect(pushSecretScan).toContain("fetch-depth: 0");
   });
@@ -660,6 +683,31 @@ describe("testing strategy CI security checks", () => {
         pattern: "named-secret-assignment",
       },
     ]);
+  });
+
+  it("does not treat YAML secret declarations as assigned values", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "reusable.yml"),
+      [
+        "on:",
+        "  workflow_call:",
+        "    secrets:",
+        "      ALCHEMY_API_KEY:",
+        "        required: false",
+        "      SENTRY_AUTH_TOKEN:",
+        "        required: true",
+      ].join("\n")
+    );
+
+    const result = scanFilesForSecrets(
+      [".github/workflows/reusable.yml"],
+      tempDir
+    );
+
+    expect(result).toMatchObject({ ok: true, findings: [] });
   });
 
   it("scans common credential files that do not look like source", () => {

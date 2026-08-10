@@ -8,6 +8,7 @@ jest.mock('framer-motion', () => ({
     div: (props: any) => <div {...props} />,
   },
   AnimatePresence: ({ children }: any) => <>{children}</>,
+  useReducedMotion: () => false,
 }));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <span data-testid="icon" /> }));

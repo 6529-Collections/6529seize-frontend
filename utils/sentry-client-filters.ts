@@ -49,9 +49,12 @@ export {
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterKnownWalletProviderObjectRejection,
-  shouldFilterRabbyMobileRainbowKitNotFoundError,
-  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterWalletConnectStaleSessionTopic,
 } from "./sentry-client-filters/wallets";
+export {
+  shouldFilterRabbyChromeUserRejectedRequest,
+  shouldFilterRabbyMobileRainbowKitNotFoundError,
+  shouldFilterRabbyMobileUserRejectedRequest,
+} from "./sentry-client-filters/rabby";
 export { __testing } from "./sentry-client-filters/testing";
