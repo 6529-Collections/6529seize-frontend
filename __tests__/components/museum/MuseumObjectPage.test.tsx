@@ -129,9 +129,7 @@ function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
 
 describe("MuseumObjectPage canonical typed Work rights", () => {
   it("renders the governed still and never decodes a preceding live locator as an image", async () => {
-    const credit = rightsCredit(
-      "https://creativecommons.org/licenses/by/4.0/"
-    );
+    const credit = rightsCredit("https://creativecommons.org/licenses/by/4.0/");
     const still = retainedMedia(credit);
     render(
       await MuseumObjectPage({
@@ -207,8 +205,16 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       ...publication(selectedWork),
       acquisitionPrograms: [
         {
+          kind: "acquisition_program",
           id: "6529NM-AP-ENT-0002",
           slug: "keys-and-gates",
+          title: "Keys and Gates",
+          status: "selection_complete",
+          statusAsOf: "2026-08-09",
+          acquisitionMethod: "other_authorized_method",
+          acquisitionIds: [],
+          sourceDocumentIds: [],
+          sourcePaths: ["records/entities/6529NM-AP-ENT-0002.json"],
         },
       ],
     } as unknown as MuseumPublication;

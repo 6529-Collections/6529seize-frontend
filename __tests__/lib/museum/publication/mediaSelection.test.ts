@@ -68,10 +68,9 @@ describe("shouldWithholdKeysAndGatesMedia", () => {
       )
     ).toBe(false);
     expect(
-      shouldWithholdKeysAndGatesMedia(
-        "accessioned_into_permanent_collection",
-        ["keys-and-gates"]
-      )
+      shouldWithholdKeysAndGatesMedia("accessioned_into_permanent_collection", [
+        "keys-and-gates",
+      ])
     ).toBe(false);
   });
 });
