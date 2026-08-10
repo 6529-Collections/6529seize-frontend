@@ -171,13 +171,13 @@ export const WaveLeaderboardGridItemViewport: React.FC<
         <div className={`tw-px-3 tw-pb-2 ${hasMedia ? "tw-pt-3" : "tw-pt-4"}`}>
           <h3
             id={titleId}
-            className="tw-mb-0 tw-line-clamp-3 tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
+            className="tw-mb-0 tw-line-clamp-3 tw-break-words tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100"
           >
             {displayTitle}
           </h3>
           {summary.description && (
             <p
-              className={`tw-mb-0 tw-mt-2 tw-break-words tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-300 ${
+              className={`tw-mb-0 tw-mt-2 tw-break-words tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400 ${
                 hasMedia ? "tw-line-clamp-3" : "tw-line-clamp-6"
               }`}
             >

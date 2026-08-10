@@ -301,10 +301,11 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.getByRole("heading", { name: "Bright title" })).toHaveClass(
       "tw-text-iron-100",
-      "tw-text-sm"
+      "tw-text-sm",
+      "tw-font-semibold"
     );
     expect(screen.getByText("Description with external text.")).toHaveClass(
-      "tw-text-iron-300",
+      "tw-text-iron-400",
       "tw-text-xs",
       "tw-line-clamp-6"
     );
