@@ -214,17 +214,43 @@ then the trusted decision client makes one authenticated lookup:
 - unavailable, stale, moved, expired, malformed, ambiguous or
   identity-mismatched evidence fails closed and cannot validate or adopt.
 
-The manual production fallback follows the same build-once principle. Every
-trusted `main` commit starts `production-build-artifact.yml`, which builds the
-production profile without AWS or deployment authority and publishes one
-30-day, exact-SHA artifact with a manifest, package digest, and checksums for
-every file. The production deploy waits briefly for that exact successful
-artifact, reads its originating workflow run back through GitHub, verifies the
-workflow path, event, branch, conclusion, source SHA, manifest contract,
-checksums, package digest, and size, and only then obtains AWS credentials. It
-does not install dependencies or rebuild the application. A missing, expired,
-foreign, unsuccessful, mismatched, or malformed artifact fails before
-production mutation.
+The manual production fallback follows the same build-once principle. An
+authorized production operation explicitly invokes `production-build-artifact.yml`
+with a 40-character `target_sha` and operation-bound `operation_id`; merges to
+`main` never start this builder automatically. `operation_id` is restricted to
+`^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$`: 1–80 ASCII characters, beginning with a
+letter or digit and containing only letters, digits, `.`, `_`, or `-`. The
+builder checks out the protected `origin/main` history, proves that both the
+producer workflow head and target are ancestors of the fetched protected tip
+(so a later `main` descendant is allowed), builds the production profile
+without AWS or Release Bus deployment authority, and publishes one 30-day
+artifact named `production-frontend-<target_sha>-<operation_id>`. Its v2 package
+manifest records the target SHA, `workflow_sha` (the producer run API head,
+which may be newer than the frozen target), `protected_main_sha` (the fetched
+`origin/main` tip used for the ancestry proof), stable operation identity,
+artifact name, package digest, build timestamp, and producer workflow
+run/attempt; the run attempt is evidence, not a new operation identity.
+`SHA256SUMS` covers that manifest and every package file. The reusable
+invocation also returns the explicit artifact ID, artifact digest, producer run
+ID, producer workflow head SHA, protected-main SHA, and run attempt so a
+verifier can bind the selected bytes to the current attempt without discovering
+a newest artifact by name.
+The controller may reuse only an explicit `(run_id, artifact_id, digest)` from
+an earlier attempt of the same operation or from trusted staging/release-
+candidate evidence for the exact target SHA; otherwise it invokes this builder
+once. The production verifier freshly adopts that explicit identity into the
+current operation before obtaining AWS credentials. It does not install
+dependencies or rebuild the application. A missing, expired, foreign,
+unsuccessful, mismatched, or malformed artifact fails before production
+mutation.
+
+The verifier must require the exact producer workflow path, trusted event,
+`main` branch, and same-repository/head-repository identity; bind the API
+run's `head_sha` to manifest `workflow_sha`; and validate the builder's
+`target_sha`-to-`protected_main_sha` ancestry evidence rather than treating
+`workflow_sha` as the target. The verifier branch must therefore consume
+`production-prebuild-v2` and the target-before-operation artifact-name order
+above.
 
 After a successful manual production fallback,
 `production-e2e-dispatch.yml` carries only the completed deploy run ID into

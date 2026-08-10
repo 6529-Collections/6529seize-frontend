@@ -44,13 +44,6 @@ const MANUAL_WORKFLOWS = [
     lane: "STAGING",
     sourceRef: "1a-staging",
   },
-  {
-    environment: "prod",
-    file: "build-upload-deploy-prod.yml",
-    deployJob: "build-upload-deploy",
-    lane: "PRODUCTION",
-    sourceRef: "main",
-  },
 ] as const;
 
 function workflow(file: string): Workflow {
@@ -91,10 +84,10 @@ function runGuard({
   transportFailure = false,
 }: {
   readonly body: unknown;
-  readonly environment: "staging" | "prod";
+  readonly environment: "staging";
   readonly file: string;
   readonly httpStatus?: string;
-  readonly sourceRef: "1a-staging" | "main";
+  readonly sourceRef: "1a-staging";
   readonly runId?: string;
   readonly transportFailure?: boolean;
 }) {
@@ -146,7 +139,7 @@ printf '%s' "$FAKE_HTTP_STATUS"
         RELEASE_BUS_API_URL: "https://release-bus.example.test",
         RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "fixture-workflow-token",
         TARGET_ENVIRONMENT: environment,
-        TARGET_LANE: environment === "staging" ? "STAGING" : "PRODUCTION",
+        TARGET_LANE: "STAGING",
       },
     });
   } finally {
@@ -180,8 +173,8 @@ function terminalNotificationRuns(
   }
   return (
     results["build-upload-deploy"] === "skipped" &&
-    (results["manual-deployment-guard"] === "failure" ||
-      results["assert-main-ref"] === "failure")
+    (results["acquire-production-authority"] === "failure" ||
+      results["resolve-production-artifact"] === "failure")
   );
 }
 
@@ -314,16 +307,24 @@ describe("frontend manual deployment routing guards", () => {
     }
   );
 
-  it("keeps staging and production fallback decisions lane-local", () => {
+  it("keeps staging fallback and production operation authority separate", () => {
     const staging = guardStep("deploy-staging.yml");
-    const production = guardStep("build-upload-deploy-prod.yml");
+    const production = workflowJob(
+      workflow("build-upload-deploy-prod.yml"),
+      "acquire-production-authority"
+    );
+    const productionSource = production.steps
+      .map(({ run }) => run ?? "")
+      .join("\n");
 
     expect(staging.env?.["TARGET_ENVIRONMENT"]).toBe("staging");
-    expect(production.env?.["TARGET_ENVIRONMENT"]).toBe("prod");
     expect(staging.env?.["TARGET_LANE"]).toBe("STAGING");
-    expect(production.env?.["TARGET_LANE"]).toBe("PRODUCTION");
     expect(staging.run).not.toContain("ALL");
-    expect(production.run).not.toContain("ALL");
+    expect(productionSource).toContain(
+      "/deploy/release-bus-v2/production-authority/acquire-bind"
+    );
+    expect(productionSource).not.toContain("manual-deployment-readiness");
+    expect(productionSource).not.toContain("ALL");
   });
 
   it("guards both staging push and workflow-dispatch entry points", () => {
@@ -369,12 +370,12 @@ describe("frontend manual deployment routing guards", () => {
       deploy: "build-upload-deploy",
       terminal: "notify-production-prerequisite-failure",
       needs: [
-        "manual-deployment-guard",
-        "assert-main-ref",
+        "acquire-production-authority",
+        "resolve-production-artifact",
         "build-upload-deploy",
       ],
       condition:
-        "${{ always() && needs.build-upload-deploy.result == 'skipped' && ( needs.manual-deployment-guard.result == 'failure' || needs.assert-main-ref.result == 'failure' ) }}",
+        "${{ always() && needs.build-upload-deploy.result == 'skipped' && ( needs.acquire-production-authority.result == 'failure' || needs.resolve-production-artifact.result == 'failure' ) }}",
       environment: "production",
     },
   ])(
@@ -422,7 +423,7 @@ describe("frontend manual deployment routing guards", () => {
   it.each([
     ["staging guard failure", "staging", "failure", "success", "skipped", true],
     [
-      "production guard failure",
+      "production authority failure",
       "production",
       "failure",
       "success",
@@ -430,7 +431,7 @@ describe("frontend manual deployment routing guards", () => {
       true,
     ],
     [
-      "production main-ref failure",
+      "production artifact resolution failure",
       "production",
       "success",
       "failure",
@@ -468,7 +469,8 @@ describe("frontend manual deployment routing guards", () => {
       expect(
         terminalNotificationRuns(environment, {
           "manual-deployment-guard": guard,
-          "assert-main-ref": mainRef,
+          "acquire-production-authority": guard,
+          "resolve-production-artifact": mainRef,
           "deploy-staging": deployment,
           "build-upload-deploy": deployment,
         })
