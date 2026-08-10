@@ -14,7 +14,12 @@ import {
 } from "@/components/nft-transfer/TransferState";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
+import {
+  getCollectedCardAnchorId,
+  isCollectedCardAnchorId,
+} from "@/helpers/profile-collected-navigation";
 import type { ContractType } from "@/types/enums";
+import { useEffect, useRef } from "react";
 
 const COLLECTED_CARDS_LIST_CLASS =
   "tw-m-0 tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
@@ -33,6 +38,7 @@ export default function UserPageCollectedCards({
   dataTransfer,
   isTransferLoading = false,
   locale = DEFAULT_LOCALE,
+  returnTo,
 }: {
   readonly cards: CollectedCard[];
   readonly totalPages: number;
@@ -43,10 +49,32 @@ export default function UserPageCollectedCards({
   readonly dataTransfer: CollectedCard[];
   readonly isTransferLoading?: boolean | undefined;
   readonly locale?: SupportedLocale | undefined;
+  readonly returnTo?: string | null | undefined;
 }) {
   const transfer = useTransfer();
   const isTransferEnabled = transfer.enabled;
   const listLabel = translate(locale, "user.collected.cards.listLabel");
+  const restoredAnchorRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const anchor = globalThis.location.hash.slice(1);
+    if (
+      !isCollectedCardAnchorId(anchor) ||
+      restoredAnchorRef.current === anchor
+    ) {
+      return;
+    }
+
+    const cardElement = globalThis.document.getElementById(anchor);
+    if (!cardElement) {
+      return;
+    }
+
+    restoredAnchorRef.current = anchor;
+    const cardLink = cardElement.querySelector<HTMLAnchorElement>("a[href]");
+    cardLink?.focus({ preventScroll: true });
+    cardElement.scrollIntoView({ block: "center" });
+  }, [cards]);
 
   return (
     <div>
@@ -79,7 +107,11 @@ export default function UserPageCollectedCards({
               return (
                 <li
                   key={`${card.collection}-${card.token_id}`}
-                  className="tw-min-w-0 tw-list-none"
+                  id={getCollectedCardAnchorId({
+                    collection: card.collection,
+                    tokenId: card.token_id,
+                  })}
+                  className="tw-min-w-0 tw-scroll-mt-24 tw-list-none"
                 >
                   <UserPageCollectedCard
                     card={card}
@@ -91,6 +123,7 @@ export default function UserPageCollectedCards({
                     qtySelected={qty}
                     isTransferLoading={isTransferLoading}
                     locale={locale}
+                    returnTo={returnTo}
                     onToggle={() =>
                       transfer.toggleSelect({
                         key: selKey,

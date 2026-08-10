@@ -1710,6 +1710,8 @@ export const EN_US_MESSAGES = {
   "nextgen.navigation.about": "About",
   "nextgen.navigation.featuredAriaLabel": "NextGen featured",
   "nextgen.navigation.sectionsAriaLabel": "NextGen sections",
+  "nextgen.token.navigation.backToCollected": "Back to {profile}'s collected",
+  "nextgen.token.navigation.viewOwnerCollected": "View {profile}'s collected",
   "nextgen.home.byArtist": "by {artist}",
   "nextgen.home.exploreCollection": "Explore Collection",
   "nextgen.home.summary":
