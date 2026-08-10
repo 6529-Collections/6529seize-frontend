@@ -574,6 +574,48 @@ describe("manifest-driven E2E runner", () => {
     }
   });
 
+  it("does not retry deterministic output-buffer exhaustion", async () => {
+    let calls = 0;
+    const result = await runner.runPacks([samplePacks[0]!], {
+      artifactRoot: null,
+      parallel: 1,
+      retryFailedPacks: 1,
+      forward: [],
+      spawn: () => {
+        calls += 1;
+        return {
+          status: null,
+          signal: null,
+          stdout: "",
+          stderr: "",
+          error: Object.assign(new Error("pack output exceeded the buffer"), {
+            code: "ENOBUFS",
+          }),
+        };
+      },
+      cleanup: () => undefined,
+      preserve: () => "",
+      prepare: () => undefined,
+    });
+
+    expect(calls).toBe(1);
+    expect(result).toMatchObject({
+      failedCount: 1,
+      infrastructureFailureCount: 1,
+      evidence: {
+        serial_retry_limit: 1,
+        results: [
+          {
+            script_key: "test:e2e:staging:smoke",
+            status: "failed",
+            failure_class: "infrastructure",
+            attempt_count: 1,
+          },
+        ],
+      },
+    });
+  });
+
   it("keeps running when the optional GitHub summary cannot be written", async () => {
     const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-summary-"));
     const previousSummary = process.env["GITHUB_STEP_SUMMARY"];

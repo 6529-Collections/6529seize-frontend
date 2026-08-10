@@ -154,6 +154,8 @@ function validateRemoteContract(problems, pack, environment) {
       `${packLabel(pack)}: ${environment} packs must select at least one project.`
     );
   }
+  // The complete institutional desktop/mobile sweep is the sole deployed pack
+  // allowed two Playwright workers; all smaller remote packs stay single-worker.
   const maxWorkers =
     pack.changeScope === "museum" &&
     pack.alias === "museum-institutional-practice"
