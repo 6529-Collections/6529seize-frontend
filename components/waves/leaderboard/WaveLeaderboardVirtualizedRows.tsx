@@ -462,16 +462,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
 
   const ariaSetSize = hasNextPage || hasPreviousPage ? -1 : items.length;
   const gridColumnsClassName = getGridColumnsClassName(columns);
-  // Quick DMs uses an 88px-wide fixed launcher zone on desktop. Keep visual
-  // card layouts out of that rail so footer actions cannot sit behind it.
-  const quickDmSafeGutterClassName =
-    layout !== "list" ? "lg:tw-pr-[5.5rem]" : "";
 
   return (
-    <div
-      ref={rootRef}
-      className={`tw-w-full tw-min-w-0 tw-@container ${quickDmSafeGutterClassName}`}
-    >
+    <div ref={rootRef} className="tw-w-full tw-min-w-0 tw-@container">
       {isFetchingPreviousPage ? (
         <span className="tw-sr-only" role="status" aria-live="polite">
           {t(locale, "waves.leaderboard.loadingEarlier")}

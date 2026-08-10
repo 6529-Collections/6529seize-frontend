@@ -32,6 +32,39 @@ export const QUICK_DM_STORAGE_KEY = "6529.quickDirectMessages.state";
 export const CLOSED_STATE: QuickDmState = { view: "closed", waveId: null };
 export const LIST_STATE: QuickDmState = { view: "list", waveId: null };
 
+const INTERACTIVE_ELEMENT_SELECTOR =
+  'a[href], button, input, select, textarea, [role="button"], [role="link"], [tabindex]:not([tabindex="-1"])';
+
+export const isQuickDmLauncherCoveringInteractiveElement = (
+  launcher: HTMLElement,
+  documentObject: Document = globalThis.document
+): boolean => {
+  const rect = launcher.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) {
+    return false;
+  }
+
+  const inset = Math.min(4, rect.width / 4, rect.height / 4);
+  const samplePoints = [
+    [rect.left + rect.width / 2, rect.top + rect.height / 2],
+    [rect.left + inset, rect.top + inset],
+    [rect.right - inset, rect.top + inset],
+    [rect.left + inset, rect.bottom - inset],
+    [rect.right - inset, rect.bottom - inset],
+  ] as const;
+
+  return samplePoints.some(([x, y]) =>
+    documentObject.elementsFromPoint(x, y).some((element) => {
+      const interactiveElement = element.closest<HTMLElement>(
+        INTERACTIVE_ELEMENT_SELECTOR
+      );
+      return (
+        interactiveElement !== null && !launcher.contains(interactiveElement)
+      );
+    })
+  );
+};
+
 const getBrowserWindow = (): Window | undefined => {
   const browserWindow = globalThis.window as unknown;
   return browserWindow === undefined ? undefined : (browserWindow as Window);

@@ -325,9 +325,6 @@ describe("WaveLeaderboardVirtualizedRows", () => {
     const retryButton = screen.getByRole("button", {
       name: "Retry loading earlier drops",
     });
-    expect(container.firstElementChild?.firstElementChild).toHaveClass(
-      "lg:tw-pr-[5.5rem]"
-    );
     expect(retryButton.parentElement).toHaveAttribute(
       "style",
       expect.stringContaining("grid-column: 1")
@@ -394,9 +391,6 @@ describe("WaveLeaderboardVirtualizedRows", () => {
     const { container } = render(<Harness />);
     const firstRow = container.querySelector<HTMLElement>("[data-index='0']");
 
-    expect(container.firstElementChild?.firstElementChild).toHaveClass(
-      "lg:tw-pr-[5.5rem]"
-    );
     expect(firstRow).not.toBeNull();
     expect(firstRow?.className).toContain("tw-grid-cols-2");
     expect(firstRow?.style.minHeight).toBe("");

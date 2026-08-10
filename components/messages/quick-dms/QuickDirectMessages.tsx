@@ -29,6 +29,7 @@ import { QuickDmLoadingRows } from "./QuickDmPanelPieces";
 import {
   CLOSED_STATE,
   getUnreadCount,
+  isQuickDmLauncherCoveringInteractiveElement,
   isQuickDmState,
   LIST_STATE,
   QUICK_DM_STORAGE_KEY,
@@ -53,6 +54,7 @@ const QUICK_DM_LAUNCHER_CLEARANCE_PX = 88;
 // composer's Post button) so quick DMs never lose their entry point.
 const QUICK_DM_LAUNCHER_SUPPRESSED_CLASS =
   "tw-pointer-events-none tw-opacity-0 focus-within:tw-pointer-events-auto focus-within:tw-opacity-100";
+const QUICK_DM_LAUNCHER_INTERACTIVE_OVERLAP_CLASS = `${QUICK_DM_LAUNCHER_SUPPRESSED_CLASS} focus-within:tw-bottom-auto focus-within:tw-top-24`;
 
 const getDesktopViewportSnapshot = (): boolean => {
   if (typeof window === "undefined") {
@@ -96,6 +98,8 @@ export default function QuickDirectMessages() {
   const shouldLiftLauncher = useWaveDropsScrollControlsVisible();
   const dockedComposers = useWaveComposerDockElements();
   const [isLauncherZoneCovered, setIsLauncherZoneCovered] = useState(false);
+  const [isLauncherCoveringInteractive, setIsLauncherCoveringInteractive] =
+    useState(false);
   const [state, setState] = useState<QuickDmState>(() => readStoredState());
   const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
     useState(false);
@@ -148,6 +152,16 @@ export default function QuickDirectMessages() {
     measureLauncherZone,
     100
   );
+  const measureLauncherInteractiveOverlap = useCallback(() => {
+    const launcher = launcherButtonRef.current;
+    setIsLauncherCoveringInteractive(
+      launcher !== null && isQuickDmLauncherCoveringInteractiveElement(launcher)
+    );
+  }, []);
+  const debouncedMeasureLauncherInteractiveOverlap = useDebouncedCallback(
+    measureLauncherInteractiveOverlap,
+    100
+  );
 
   useEffect(() => {
     // Hidden instances (mobile, logged out, waves disabled) render nothing,
@@ -182,6 +196,52 @@ export default function QuickDirectMessages() {
     isVisible,
     measureLauncherZone,
     debouncedMeasureLauncherZone,
+  ]);
+
+  useEffect(() => {
+    if (!isVisible || state.view !== "closed") {
+      return;
+    }
+
+    const frame = globalThis.window.requestAnimationFrame(
+      measureLauncherInteractiveOverlap
+    );
+    const observer = new MutationObserver(
+      debouncedMeasureLauncherInteractiveOverlap
+    );
+    observer.observe(globalThis.document.body, {
+      childList: true,
+      subtree: true,
+    });
+    globalThis.document.addEventListener(
+      "scroll",
+      debouncedMeasureLauncherInteractiveOverlap,
+      true
+    );
+    globalThis.window.addEventListener(
+      "resize",
+      debouncedMeasureLauncherInteractiveOverlap
+    );
+
+    return () => {
+      globalThis.window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      globalThis.document.removeEventListener(
+        "scroll",
+        debouncedMeasureLauncherInteractiveOverlap,
+        true
+      );
+      globalThis.window.removeEventListener(
+        "resize",
+        debouncedMeasureLauncherInteractiveOverlap
+      );
+      debouncedMeasureLauncherInteractiveOverlap.cancel();
+    };
+  }, [
+    debouncedMeasureLauncherInteractiveOverlap,
+    isVisible,
+    measureLauncherInteractiveOverlap,
+    state.view,
   ]);
 
   const setAndStoreState = useCallback((nextState: QuickDmState) => {
@@ -322,8 +382,15 @@ export default function QuickDirectMessages() {
       shouldLiftLauncher || isLauncherZoneCovered
         ? QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS
         : QUICK_DM_LAUNCHER_RESTING_POSITION_CLASS;
+    let launcherSuppressionClassName = "";
+    if (isLauncherZoneCovered) {
+      launcherSuppressionClassName = QUICK_DM_LAUNCHER_SUPPRESSED_CLASS;
+    } else if (isLauncherCoveringInteractive) {
+      launcherSuppressionClassName =
+        QUICK_DM_LAUNCHER_INTERACTIVE_OVERLAP_CLASS;
+    }
     const launcherPositionClassName = `${QUICK_DM_LAUNCHER_BASE_POSITION_CLASS} ${launcherOffsetClassName}${
-      isLauncherZoneCovered ? ` ${QUICK_DM_LAUNCHER_SUPPRESSED_CLASS}` : ""
+      launcherSuppressionClassName ? ` ${launcherSuppressionClassName}` : ""
     }`;
 
     return (
