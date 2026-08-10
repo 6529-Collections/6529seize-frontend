@@ -15,6 +15,7 @@ import type {
   MuseumPublicWork,
   MuseumPublication,
 } from "./types";
+import { selectMuseumStillMedia } from "./mediaSelection";
 import type { MuseumSelectedWork, MuseumView } from "@/lib/museum/types";
 import {
   MUSEUM_CASEY_ACQUISITION_ID,
@@ -176,7 +177,7 @@ function artistForSourceValue(
 function artworkMedia(
   artwork: MuseumArtwork
 ): MuseumEntityRefMedia | undefined {
-  const media: MuseumMedia | undefined = artwork.media[0];
+  const media: MuseumMedia | undefined = selectMuseumStillMedia(artwork.media);
   if (media === undefined) return undefined;
   return {
     kind: "governed",
@@ -191,7 +192,7 @@ function artworkMedia(
 function publicWorkMedia(
   work: MuseumPublicWork
 ): MuseumEntityRefMedia | undefined {
-  const retained = work.media[0];
+  const retained = selectMuseumStillMedia(work.media);
   if (retained !== undefined) {
     return {
       kind: "governed",

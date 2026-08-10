@@ -31,6 +31,7 @@ import type {
 } from "@/lib/museum/publication/types";
 import type { MuseumView } from "@/lib/museum/types";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 const PRIMARY_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-600 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-border-primary-400 hover:tw-bg-primary-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black";
@@ -115,9 +116,7 @@ function MuseumTypedWorkFigure({
       (value): value is string => value !== undefined && value.trim().length > 0
     )
     .join(" · ");
-  const media = work.media.find(
-    (item) => item.altText !== null && item.altText.trim().length > 0
-  );
+  const media = selectMuseumStillMedia(work.media);
   if (media !== undefined) {
     return (
       <MuseumPublicMediaFigure
@@ -379,7 +378,10 @@ function typedAcquisitionStoryWork(input: {
   readonly publication: MuseumPublication;
 }) {
   const { work, publication } = input;
-  if (work.media[0] === undefined && work.mediaMetadata?.[0] === undefined) {
+  if (
+    selectMuseumStillMedia(work.media) === undefined &&
+    work.mediaMetadata?.[0] === undefined
+  ) {
     return null;
   }
   return <MuseumTypedWorkFigure work={work} publication={publication} />;

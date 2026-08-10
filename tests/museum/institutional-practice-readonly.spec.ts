@@ -21,6 +21,10 @@ const REQUIRED_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
+const CASEY_WORK_HREFS = Array.from(
+  { length: 7 },
+  (_, index) => `/museum/network/works/6529NM-W-${String(index + 1).padStart(4, "0")}`
+);
 const LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
 ];
@@ -284,9 +288,7 @@ async function expectStudyRoute(
 }
 
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
-  test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
-  let sourceCommit: string | null = REQUIRED_SOURCE_COMMIT;
 
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {
@@ -298,7 +300,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the study index, all twenty-seven profiles, and its research apparatus", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(page, INDEX_ROUTE, sourceCommit);
+    await expectStudyRoute(page, INDEX_ROUTE, REQUIRED_SOURCE_COMMIT);
 
     for (const profile of PROFILE_ROUTES) {
       await expect(
@@ -323,7 +325,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     test(`publishes ${profile.title} with lessons and limits`, async ({
       page,
     }) => {
-      sourceCommit = await expectStudyRoute(page, profile, sourceCommit);
+      await expectStudyRoute(page, profile, REQUIRED_SOURCE_COMMIT);
       await expect(
         page.getByText("What the Museum should adopt", { exact: true })
       ).toBeVisible();
@@ -339,7 +341,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the adjacent digital-art and chain-native study", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(page, ADJACENT_ROUTE, sourceCommit);
+    await expectStudyRoute(page, ADJACENT_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("main table").first()).toBeVisible();
     await expect(page.locator(`a[href="${STUDY_PATH}"]`).first()).toBeVisible();
   });
@@ -347,7 +349,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the Museum scholarship and writing standard", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(page, EDITORIAL_ROUTE, sourceCommit);
+    await expectStudyRoute(page, EDITORIAL_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(
       page.getByText("3.3 Forms demonstrated in the comparative study", {
         exact: true,
@@ -357,7 +359,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   });
 
   test("publishes the complete primary-source register", async ({ page }) => {
-    sourceCommit = await expectStudyRoute(page, SOURCE_ROUTE, sourceCommit);
+    await expectStudyRoute(page, SOURCE_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("main table").first()).toBeVisible();
     expect(
       await page.locator('main a[href^="https://"]').count()
@@ -367,31 +369,33 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the Casey artist and gift without production labels", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(
-      page,
-      CASEY_ARTIST_ROUTE,
-      sourceCommit
-    );
+    await expectStudyRoute(page, CASEY_ARTIST_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     await expect(
       page.locator('main a[href^="/museum/network/works/"]')
     ).toHaveCount(7);
-    await expect(page.locator("main figure img")).toHaveCount(0);
+    await expect(page.locator("main figure img")).toHaveCount(7);
+    for (const href of CASEY_WORK_HREFS) {
+      await expect(
+        page.locator(`main figure:has(img):has(a[href="${href}"])`)
+      ).toHaveCount(1);
+    }
 
-    sourceCommit = await expectStudyRoute(page, CASEY_GIFT_ROUTE, sourceCommit);
+    await expectStudyRoute(page, CASEY_GIFT_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     await expect(page.locator("main figure")).toHaveCount(7);
-    await expect(page.locator("main figure img")).toHaveCount(0);
+    await expect(page.locator("main figure img")).toHaveCount(7);
+    for (const href of CASEY_WORK_HREFS) {
+      await expect(
+        page.locator(`main figure:has(img):has(a[href="${href}"])`)
+      ).toHaveCount(1);
+    }
   });
 
   test("publishes the edited Casey source and chronology record", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(
-      page,
-      CASEY_SOURCE_ROUTE,
-      sourceCommit
-    );
+    await expectStudyRoute(page, CASEY_SOURCE_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(
       /shared source, chronology, and factual-boundary matrix/iu
     );
@@ -399,11 +403,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   });
 
   test("publishes Keys and Gates as an art-led program", async ({ page }) => {
-    sourceCommit = await expectStudyRoute(
-      page,
-      KEYS_AND_GATES_ROUTE,
-      sourceCommit
-    );
+    await expectStudyRoute(page, KEYS_AND_GATES_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(
       page.getByRole("heading", {
         level: 2,
@@ -417,7 +417,10 @@ test.describe("Museum institutional-practice publication @surface @large @readon
           exact: true,
         }
       )
-    ).toBeVisible();
+    ).toHaveCount(16);
+    await expect(
+      page.getByText("Not yet minted or accessioned.", { exact: true })
+    ).toHaveCount(16);
     await expect(
       page.locator('main a[href^="/museum/network/works/"]')
     ).toHaveCount(16);
@@ -427,10 +430,10 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes each Keys and Gates selection as a complete work page", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(
+    await expectStudyRoute(
       page,
       KEYS_AND_GATES_OBJECT_ROUTE,
-      sourceCommit
+      REQUIRED_SOURCE_COMMIT
     );
     await expect(page.locator("main figure img")).toHaveCount(0);
     await expect(

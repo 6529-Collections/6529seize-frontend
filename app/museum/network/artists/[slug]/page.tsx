@@ -28,6 +28,7 @@ import {
   museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 interface MuseumArtistPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -210,7 +211,7 @@ function TypedArtistPage({
         </h2>
         <div className="tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
           {works.map((work) => {
-            const media = work.media[0];
+            const media = selectMuseumStillMedia(work.media);
             const presentation = work.presentationMedia?.[0];
             if (media !== undefined) {
               return (

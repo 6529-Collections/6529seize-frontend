@@ -1,4 +1,5 @@
 import MuseumAcquisitionProgramPage from "@/app/museum/network/acquisition-programs/[slug]/page";
+import { render, screen } from "@testing-library/react";
 import { buildMuseumEntityContext } from "@/lib/museum/publication/ia";
 import {
   displayMuseumPublicAcquisitionProgramStatus,
@@ -84,9 +85,10 @@ describe("Museum acquisition program status projection", () => {
       view: { approvedCollections: [], objects: [], programs: [] } as never,
     });
 
-    await MuseumAcquisitionProgramPage({
+    const result = await MuseumAcquisitionProgramPage({
       params: Promise.resolve({ slug: "keys-and-gates" }),
     });
+    render(result);
 
     const context = mockedBuildMuseumEntityContext.mock.calls[0]?.[0];
     expect(context).toEqual(
@@ -102,5 +104,17 @@ describe("Museum acquisition program status projection", () => {
         publication.acquisitionPrograms?.[0]
       )
     ).toBe("2026-08-08T12:00:00Z");
+    expect(
+      screen.getByText(
+        "Selected through an acquisition program; acquisition pending",
+        { exact: true }
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Not yet minted or accessioned.", { exact: true })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "A divergent first Work" })
+    ).toHaveClass("tw-min-h-11");
   });
 });

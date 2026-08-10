@@ -893,10 +893,10 @@ jobs:
         id: museum_publication
         if: matrix.lane == 'playwright-museum'
         env:
-          # Exact canonical C4 qualification. The runtime resolves its pointer
-          # and catalog at C4, then assembles only the immutable B4 corpus.
-          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "a9a925861c654f71a85f0129ee5c0ba8ee71e9e4"
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "2733944555ae0f80242ec895558bdb7fba7115d3"
+          # Exact canonical-C qualification. The runtime resolves the pointer
+          # and catalog at C, then assembles only the immutable reviewed B corpus.
+          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "343f98fcfe1c231755518a513b5af9fc89ac4bed"
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "81c3353b06725582d7d7d7cc297d06ea19ee61bf"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(
@@ -1091,11 +1091,213 @@ jobs:
               exit 1
             fi
           done
-          ./bin/6529 exec playwright test \
-            "${selected_specs[@]}" \
-            --project=web-desktop-chromium \
-            --project=web-mobile-chromium \
-            --workers=1
+          # Keep the exhaustive Museum lane as one required check, but split
+          # its fully parallel deterministic test list across isolated
+          # processes. Every test independently verifies the exact source
+          # commit, so Playwright sharding cannot inherit cross-test state.
+          # Both read-only shards share one exact-source server so the visitor
+          # corpus and route modules are assembled once. Reports, traces, and
+          # logs remain isolated per shard.
+          mkdir -p test-results/app-pr-ci
+          PLAYWRIGHT_SKIP_WEB_SERVER=1 \
+            ./bin/6529 exec playwright test \
+              "${selected_specs[@]}" \
+              --project=web-desktop-chromium \
+              --project=web-mobile-chromium \
+              --workers=1 \
+              --list \
+              --reporter=json \
+              > test-results/app-pr-ci/museum-tests-full.json
+          for shard in 1 2; do
+            PLAYWRIGHT_SKIP_WEB_SERVER=1 \
+              ./bin/6529 exec playwright test \
+                "${selected_specs[@]}" \
+                --project=web-desktop-chromium \
+                --project=web-mobile-chromium \
+                --workers=1 \
+                --list \
+                --shard="${shard}/2" \
+                --reporter=json \
+                > "test-results/app-pr-ci/museum-tests-shard-${shard}.json"
+          done
+          node <<'NODE'
+          const fs = require("node:fs");
+          const outputDir = "test-results/app-pr-ci";
+          const exactCommit = /^[a-f0-9]{40}$/;
+          const catalogCommit = process.env.MUSEUM_PUBLICATION_TEST_COMMIT || "";
+          const sourceCommit = process.env.MUSEUM_PUBLICATION_EXPECTED_COMMIT || "";
+          if (!exactCommit.test(catalogCommit) || !exactCommit.test(sourceCommit)) {
+            throw new Error("Museum shard inventory requires exact catalog and source commits.");
+          }
+          const selection = JSON.parse(
+            fs.readFileSync(`${outputDir}/museum-release-selection.json`, "utf8")
+          );
+          const packSpecs = new Map([
+            ["test:e2e:museum-data-architecture", "museum/data-architecture-readonly.spec.ts"],
+            ["test:e2e:museum-institutional-practice", "museum/institutional-practice-readonly.spec.ts"],
+            ["test:e2e:museum-about", "museum/about-readonly.spec.ts"],
+            ["test:e2e:museum-inside-system", "museum/inside-system-readonly.spec.ts"],
+            ["test:e2e:museum-rights", "museum/rights-readonly.spec.ts"],
+          ]);
+          const expectedSpecs = new Set(["museum/network-ia-readonly.spec.ts"]);
+          for (const pack of selection.selected_packs) {
+            const spec = packSpecs.get(pack);
+            if (!spec) throw new Error(`Unknown Museum pack in shard inventory: ${pack}`);
+            expectedSpecs.add(spec);
+          }
+          function collect(reportPath) {
+            const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+            const entries = [];
+            const visit = (suite) => {
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  if (test.expectedStatus !== "passed") {
+                    throw new Error(
+                      `Museum shard inventory contains a non-passing expected test: ${test.projectName}:${spec.id}`
+                    );
+                  }
+                  entries.push({
+                    file: spec.file,
+                    key: `${test.projectName}:${spec.id}`,
+                    project: test.projectName,
+                    title: spec.title,
+                  });
+                }
+              }
+              for (const child of suite.suites || []) visit(child);
+            };
+            for (const suite of report.suites || []) visit(suite);
+            if (entries.length === 0) throw new Error("Museum shard inventory is empty.");
+            const keys = new Set(entries.map((entry) => entry.key));
+            if (keys.size !== entries.length) {
+              throw new Error("Museum shard inventory contains duplicate test identities.");
+            }
+            return entries;
+          }
+          const full = collect(`${outputDir}/museum-tests-full.json`);
+          const shards = [1, 2].map((shard) =>
+            collect(`${outputDir}/museum-tests-shard-${shard}.json`)
+          );
+          const fullKeys = new Set(full.map((entry) => entry.key));
+          const assigned = new Set();
+          for (const entries of shards) {
+            for (const entry of entries) {
+              if (!fullKeys.has(entry.key) || assigned.has(entry.key)) {
+                throw new Error(`Museum shard overlap or unexpected test: ${entry.key}`);
+              }
+              assigned.add(entry.key);
+            }
+          }
+          const missing = [...fullKeys].filter((key) => !assigned.has(key));
+          if (missing.length > 0 || assigned.size !== fullKeys.size) {
+            throw new Error(`Museum shard coverage is incomplete: ${missing.join(", ")}`);
+          }
+          const expectedProjects = ["web-desktop-chromium", "web-mobile-chromium"];
+          const actualProjects = [...new Set(full.map((entry) => entry.project))].sort();
+          if (JSON.stringify(actualProjects) !== JSON.stringify(expectedProjects)) {
+            throw new Error("Museum shard inventory must cover desktop and mobile Chromium.");
+          }
+          for (const project of expectedProjects) {
+            const files = new Set(
+              full.filter((entry) => entry.project === project).map((entry) => entry.file)
+            );
+            if (
+              files.size !== expectedSpecs.size ||
+              [...expectedSpecs].some((file) => !files.has(file))
+            ) {
+              throw new Error(`Museum shard spec coverage is incomplete for ${project}.`);
+            }
+          }
+          fs.writeFileSync(
+            `${outputDir}/museum-shard-inventory.json`,
+            `${JSON.stringify(
+              {
+                catalog_commit: catalogCommit,
+                contract: "museum-playwright-shard-inventory-v1",
+                full_test_count: full.length,
+                projects: expectedProjects,
+                selection_digest: selection.selection_digest,
+                shards: shards.map((entries, index) => ({
+                  id: `${index + 1}/2`,
+                  test_count: entries.length,
+                  test_keys: entries.map((entry) => entry.key).sort(),
+                })),
+                source_commit: sourceCommit,
+                specs: [...expectedSpecs].sort(),
+              },
+              null,
+              2
+            )}\n`
+          );
+          NODE
+          museum_port=3101
+          museum_base_url="http://localhost:${museum_port}"
+          museum_server_log="test-results/app-pr-ci/museum-server.log"
+          NEXT_DEV_DIST_DIR=".next-playwright-museum-shared" \
+            BASE_ENDPOINT="$museum_base_url" \
+            PORT="$museum_port" \
+            ./bin/6529 run dev > "$museum_server_log" 2>&1 &
+          museum_server_pid="$!"
+          cleanup_museum_server() {
+            if kill -0 "$museum_server_pid" 2>/dev/null; then
+              kill "$museum_server_pid" 2>/dev/null || true
+              wait "$museum_server_pid" 2>/dev/null || true
+            fi
+          }
+          trap cleanup_museum_server EXIT
+          museum_server_ready=false
+          for attempt in $(seq 1 120); do
+            if curl --fail --silent --show-error \
+              "$museum_base_url/museum/network/about" >/dev/null
+            then
+              museum_server_ready=true
+              break
+            fi
+            if ! kill -0 "$museum_server_pid" 2>/dev/null; then
+              cat "$museum_server_log"
+              echo "Museum shard server exited before readiness." >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          if [ "$museum_server_ready" != true ]; then
+            cat "$museum_server_log"
+            echo "Museum shard server did not become ready." >&2
+            exit 1
+          fi
+
+          shard_pids=()
+          for shard in 1 2; do
+            PLAYWRIGHT_SKIP_WEB_SERVER=1 \
+              BASE_ENDPOINT="$museum_base_url" \
+              PLAYWRIGHT_BASE_URL="$museum_base_url" \
+              PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-shard-${shard}" \
+              PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-shard-${shard}" \
+              ./bin/6529 exec playwright test \
+                "${selected_specs[@]}" \
+                --project=web-desktop-chromium \
+                --project=web-mobile-chromium \
+                --shard="${shard}/2" \
+                --workers=1 \
+                > "test-results/app-pr-ci/museum-shard-${shard}.log" 2>&1 &
+            shard_pids+=("$!")
+          done
+
+          shard_status=0
+          for shard_index in 1 2; do
+            if ! wait "${shard_pids[$((shard_index - 1))]}"; then
+              shard_status=1
+              cat "test-results/app-pr-ci/museum-shard-${shard_index}.log"
+            else
+              tail -n 8 "test-results/app-pr-ci/museum-shard-${shard_index}.log"
+            fi
+          done
+          if [ "$shard_status" -ne 0 ]; then
+            cat "$museum_server_log"
+          else
+            tail -n 12 "$museum_server_log"
+          fi
+          exit "$shard_status"
 
       - name: Upload app check artifacts
         if: always()

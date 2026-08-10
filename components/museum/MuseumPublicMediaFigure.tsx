@@ -11,6 +11,7 @@ export function MuseumPublicMediaFigure({
   href,
   title,
   byline,
+  status,
   qualifier,
   sourceHref,
   sourceLabel,
@@ -24,6 +25,7 @@ export function MuseumPublicMediaFigure({
   readonly href?: string;
   readonly title: string;
   readonly byline?: string;
+  readonly status?: string;
   readonly qualifier?: string;
   readonly sourceHref?: string;
   readonly sourceLabel?: string;
@@ -69,6 +71,11 @@ export function MuseumPublicMediaFigure({
         {byline ? (
           <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
             {byline}
+          </span>
+        ) : null}
+        {status ? (
+          <span className="tw-mt-2 tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
+            {status}
           </span>
         ) : null}
         {qualifier ? (

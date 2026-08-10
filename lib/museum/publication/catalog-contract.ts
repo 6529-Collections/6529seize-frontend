@@ -23,7 +23,7 @@ export const MUSEUM_PUBLICATION_BUNDLE_PATH =
 export const MUSEUM_PUBLICATION_BUNDLE_MAX_BYTES = 8_000_000 as const;
 /**
  * Hard response ceiling for the catalog-declared publication inventory.
- * C4 is 163,984 bytes; 500 KiB leaves bounded room for reviewed inventory
+ * The active canonical inventory is 168,956 bytes; 500 KiB leaves bounded room for reviewed inventory
  * growth without allowing an unbounded catalog-controlled allocation.
  */
 export const MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES = 512_000 as const;

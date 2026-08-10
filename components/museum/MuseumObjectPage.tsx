@@ -30,6 +30,7 @@ import type {
   MuseumPublication,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import {
   displayMuseumPublicAcquisitionStatus,
   museumSlugMatches,
@@ -115,7 +116,8 @@ function MuseumCanonicalWorkMedia({
 }: {
   readonly work: MuseumPublicWork;
 }) {
-  if (work.media.length > 0) {
+  const stillMedia = selectMuseumStillMedia(work.media);
+  if (stillMedia !== undefined) {
     return (
       <section
         className="tw-mt-10"
@@ -125,29 +127,27 @@ function MuseumCanonicalWorkMedia({
           {t(DEFAULT_LOCALE, "museum.network.works.title")}
         </h2>
         <div className="tw-grid tw-gap-6 sm:tw-grid-cols-2">
-          {work.media.map((media) => (
-            <figure key={media.id} className="tw-m-0">
+          <figure key={stillMedia.id} className="tw-m-0">
               <div className="tw-overflow-hidden tw-bg-black">
                 <MuseumProgramImage
-                  media={publicWorkMedia(media)}
+                  media={publicWorkMedia(stillMedia)}
                   sizes="(min-width: 640px) 50vw, 100vw"
                 />
               </div>
               <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-                {media.credit.creditLine}
-                {media.credit.licenseLabel === null ? null : (
+                {stillMedia.credit.creditLine}
+                {stillMedia.credit.licenseLabel === null ? null : (
                   <>
                     {" "}
                     <MuseumRightsLink
-                      href={media.credit.licenseUrl ?? undefined}
-                      label={media.credit.licenseLabel}
+                      href={stillMedia.credit.licenseUrl ?? undefined}
+                      label={stillMedia.credit.licenseLabel}
                       className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                     />
                   </>
                 )}
               </figcaption>
             </figure>
-          ))}
         </div>
       </section>
     );

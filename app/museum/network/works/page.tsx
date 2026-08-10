@@ -10,6 +10,7 @@ import {
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
 import type { MuseumMedia } from "@/lib/museum/publication/types";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import {
   museumWorkHref,
   museumWorkHrefForSourceId,
@@ -149,7 +150,7 @@ export default async function MuseumWorksPage() {
 
       <div className="tw-grid tw-min-w-0 tw-gap-5 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
         {publicWorks?.map((work) => {
-          const media = publicWorkMedia(work.media.at(0));
+          const media = publicWorkMedia(selectMuseumStillMedia(work.media));
           const artist =
             publication.artists.find((item) => item.id === work.artistId)
               ?.preferredName ?? work.artistId;

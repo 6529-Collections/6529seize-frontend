@@ -29,6 +29,7 @@ import type {
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
 import type { MuseumView } from "@/lib/museum/types";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 export const metadata: Metadata = {
   ...getAppMetadata({
@@ -137,7 +138,7 @@ function typedAcquisitionWorkPreview(input: {
   readonly eager: boolean;
 }) {
   const { work, publication, acquisitionHref, acquisitionTitle, eager } = input;
-  const media = work.media[0];
+  const media = selectMuseumStillMedia(work.media);
   const mediaMetadata = work.mediaMetadata?.[0];
   const artist = publication.artists.find((item) => item.id === work.artistId);
   if (media !== undefined) {

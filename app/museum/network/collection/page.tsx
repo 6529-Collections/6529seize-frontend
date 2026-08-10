@@ -14,6 +14,7 @@ import {
   museumWorkHrefForSourceId,
 } from "@/lib/museum/publication/routes";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 function MuseumAccessionRecords({
   publication,
@@ -148,7 +149,7 @@ export default async function MuseumCollectionPage() {
         </p>
         <div className="tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-12 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
           {typedHoldings.map((work) => {
-            const media = work.media[0];
+            const media = selectMuseumStillMedia(work.media);
             if (media !== undefined) {
               return (
                 <MuseumPublicMediaFigure

@@ -31,6 +31,7 @@ import type {
 import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
 import { museumDocumentKindLabelKey } from "@/lib/museum/publication/documentLabels";
 import { displayMuseumPublicAcquisitionStatus } from "@/lib/museum/presentation";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 const MUSEUM_OPEN_PRESENTATION_MESSAGE =
   "museum.network.acquisitions.openPresentation";
@@ -66,7 +67,7 @@ function acquisitionMethodLabel(
 }
 
 function artworkMedia(artwork: MuseumArtwork): MuseumProgramMedia | undefined {
-  const media = artwork.media.at(0);
+  const media = selectMuseumStillMedia(artwork.media);
   return media === undefined ? undefined : museumMediaToProgramMedia(media);
 }
 
@@ -153,7 +154,7 @@ function acquisitionPublicWorkCard(
   const artist = publication.artists.find(
     (item) => item.id === publicWork.artistId
   );
-  const media = publicWork.media.at(0);
+  const media = selectMuseumStillMedia(publicWork.media);
   const programMedia =
     media === undefined ? undefined : museumMediaToProgramMedia(media);
   return {

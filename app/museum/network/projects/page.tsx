@@ -11,6 +11,7 @@ import {
   museumProjectHref,
   museumWorkHref,
 } from "@/lib/museum/publication/routes";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 export const metadata: Metadata = {
   ...getAppMetadata({
@@ -44,14 +45,16 @@ export default async function MuseumProjectsPage() {
               candidate.id === project.artistId ||
               project.artistIds?.includes(candidate.id) === true
           );
+          const media =
+            work === undefined ? undefined : selectMuseumStillMedia(work.media);
           return (
             <li key={project.id} className="tw-min-w-0">
-              {work?.media[0] ? (
+              {media !== undefined ? (
                 <MuseumPublicMediaFigure
-                  src={work.media[0].url}
-                  width={work.media[0].width}
-                  height={work.media[0].height}
-                  alt={work.media[0].altText ?? ""}
+                  src={media.url}
+                  width={media.width}
+                  height={media.height}
+                  alt={media.altText ?? ""}
                   href={museumProjectHref(project.slug)}
                   title={project.title}
                   byline={artist?.preferredName ?? ""}

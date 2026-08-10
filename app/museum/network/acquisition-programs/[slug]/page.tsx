@@ -13,6 +13,7 @@ import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { displayMuseumPublicAcquisitionStatus } from "@/lib/museum/presentation";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import { buildMuseumEntityContext } from "@/lib/museum/publication/ia";
 import {
@@ -33,6 +34,7 @@ import {
   displayMuseumPublicAcquisitionProgramStatus,
   museumPublicAcquisitionProgramStatusAsOf,
 } from "@/lib/museum/publication/programStatus";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 interface MuseumAcquisitionProgramPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -117,7 +119,7 @@ export async function generateMetadata({
 }
 
 function publicWorkMedia(work: MuseumPublicWork) {
-  const media = work.media[0];
+  const media = selectMuseumStillMedia(work.media);
   return media ?? null;
 }
 
@@ -276,6 +278,17 @@ export default async function MuseumAcquisitionProgramPage({
           <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
             {typedWorks.map((work) => {
               const media = publicWorkMedia(work);
+              const status = displayMuseumPublicAcquisitionStatus(work.status);
+              const qualifier =
+                work.status ===
+                "selected_through_acquisition_program_acquisition_pending"
+                  ? t(
+                      DEFAULT_LOCALE,
+                      "museum.network.acquisitions.selectedWorkQualifier"
+                    )
+                  : undefined;
+              const mediaQualifierProps =
+                qualifier === undefined ? {} : { qualifier };
               return media ? (
                 <MuseumPublicMediaFigure
                   key={work.id}
@@ -285,15 +298,29 @@ export default async function MuseumAcquisitionProgramPage({
                   alt={media.altText ?? ""}
                   href={museumWorkHref(work.id)}
                   title={work.title}
+                  status={status}
+                  {...mediaQualifierProps}
                 />
               ) : (
-                <Link
+                <article
                   key={work.id}
-                  href={museumWorkHref(work.id)}
-                  className="hover:tw-text-primary-200 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-base tw-font-semibold tw-text-primary-300 tw-underline-offset-4 hover:tw-underline"
+                  className="tw-min-w-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4"
                 >
-                  {work.title}
-                </Link>
+                  <Link
+                    href={museumWorkHref(work.id)}
+                    className="hover:tw-text-primary-200 tw-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-primary-300 tw-underline-offset-4 hover:tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  >
+                    {work.title}
+                  </Link>
+                  <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+                    {status}
+                  </p>
+                  {qualifier === undefined ? null : (
+                    <p className="tw-m-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-500">
+                      {qualifier}
+                    </p>
+                  )}
+                </article>
               );
             })}
           </div>

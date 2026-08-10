@@ -101,6 +101,18 @@ function retainedMedia(credit: MuseumRightsCredit): MuseumMedia {
   };
 }
 
+function liveMedia(credit: MuseumRightsCredit): MuseumMedia {
+  return {
+    ...retainedMedia(credit),
+    id: "6529NM-MED-LIVE-0001",
+    kind: "live",
+    mediaType: "text/html",
+    width: null,
+    height: null,
+    url: "https://generator.artblocks.io/1/0xabc/1",
+  };
+}
+
 function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
   return {
     id: "6529NM-MED-0002",
@@ -116,6 +128,23 @@ function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
 }
 
 describe("MuseumObjectPage canonical typed Work rights", () => {
+  it("renders the governed still and never decodes a preceding live locator as an image", async () => {
+    const credit = rightsCredit(
+      "https://creativecommons.org/licenses/by/4.0/"
+    );
+    const still = retainedMedia(credit);
+    render(
+      await MuseumObjectPage({
+        objectId: "6529NM-W-0001",
+        publication: publication(work([liveMedia(credit), still])),
+        view: null,
+      })
+    );
+
+    expect(screen.getByRole("img")).toHaveAttribute("src", still.url);
+    expect(screen.getAllByRole("img")).toHaveLength(1);
+  });
+
   it("links a visual Work license through MuseumRightsLink", async () => {
     const licenseUrl = "https://creativecommons.org/licenses/by/4.0/";
     render(

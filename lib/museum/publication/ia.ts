@@ -8,6 +8,7 @@ import type {
   MuseumArtist,
   MuseumPublication,
 } from "./types";
+import { selectMuseumStillMedia } from "./mediaSelection";
 import type { MuseumView } from "@/lib/museum/types";
 import {
   museumAcquisitionHref,
@@ -330,7 +331,7 @@ export function buildMuseumArtistRelations(
       });
     });
   const typedRefs = typedWorks.flatMap((work) => {
-    const media = work.media[0];
+    const media = selectMuseumStillMedia(work.media);
     const relation = ref({
       kind: "work" as const,
       id: work.id,
@@ -430,7 +431,7 @@ export function buildMuseumProjectRelations(
   const workRefs = (publication.works ?? [])
     .filter((work) => work.projectId === project.id)
     .flatMap((work) => {
-      const media = work.media[0];
+      const media = selectMuseumStillMedia(work.media);
       const relation = ref({
         kind: "work" as const,
         id: work.id,

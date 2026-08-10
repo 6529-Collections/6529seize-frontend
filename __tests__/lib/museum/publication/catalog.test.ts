@@ -26,7 +26,7 @@ const B = "a".repeat(40);
 const C = "b".repeat(40);
 const SHA_ZERO = `sha256:${"0".repeat(64)}` as `sha256:${string}`;
 const KECCAK_ZERO = `0x${"0".repeat(64)}` as `0x${string}`;
-const C4_PUBLICATION_INVENTORY_FILE_SIZE = 163_984;
+const CANONICAL_PUBLICATION_INVENTORY_FILE_SIZE = 168_956;
 function sha(bytes: Uint8Array): `sha256:${string}` {
   return `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 }
@@ -560,13 +560,13 @@ describe("Museum publication catalog boundary", () => {
     ).toThrow("publication_catalog_bundle_too_large");
   });
 
-  it("accepts the real C4 inventory and hard boundary, then rejects max plus one", () => {
+  it("accepts the canonical inventory and hard boundary, then rejects max plus one", () => {
     const fixture = buildFixture();
-    expect(C4_PUBLICATION_INVENTORY_FILE_SIZE).toBeLessThanOrEqual(
+    expect(CANONICAL_PUBLICATION_INVENTORY_FILE_SIZE).toBeLessThanOrEqual(
       MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES
     );
     for (const fileSize of [
-      C4_PUBLICATION_INVENTORY_FILE_SIZE,
+      CANONICAL_PUBLICATION_INVENTORY_FILE_SIZE,
       MUSEUM_PUBLICATION_INVENTORY_MAX_BYTES,
     ]) {
       expect(() =>

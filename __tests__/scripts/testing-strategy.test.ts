@@ -490,10 +490,10 @@ describe("testing strategy CI plan", () => {
       "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "a9a925861c654f71a85f0129ee5c0ba8ee71e9e4"'
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "343f98fcfe1c231755518a513b5af9fc89ac4bed"'
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "2733944555ae0f80242ec895558bdb7fba7115d3"'
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "81c3353b06725582d7d7d7cc297d06ea19ee61bf"'
     );
     expect(workflow).toContain('case "$selected_pack"');
     expect(workflow).toContain(
@@ -506,7 +506,10 @@ describe("testing strategy CI plan", () => {
     expect(stagingWorkflow).toContain(
       "Unable to prove the deployed parent; retaining every Museum pack."
     );
-    expect(museumSpec).toContain('test.describe.configure({ mode: "serial" })');
+    expect(museumSpec).not.toContain(
+      'test.describe.configure({ mode: "serial" })'
+    );
+    expect(museumSpec).not.toContain("let sourceCommit");
     expect(museumSpec).toContain("for (const profile of PROFILE_ROUTES)");
     expect(aboutSpec).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
     expect(aboutSpec).toContain("museum_publication_expected_commit_not_exact");
@@ -583,6 +586,41 @@ describe("testing strategy CI plan", () => {
     ]);
     expect(museumBrowserRun).toContain("--project=web-desktop-chromium");
     expect(museumBrowserRun).toContain("--project=web-mobile-chromium");
+    expect(museumBrowserRun).toContain("for shard in 1 2");
+    expect(museumBrowserRun).toContain('--shard="${shard}/2"');
+    expect(museumBrowserRun).toContain(
+      'contract: "museum-playwright-shard-inventory-v1"'
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum shard overlap or unexpected test"
+    );
+    expect(museumBrowserRun).toContain("Museum shard coverage is incomplete");
+    expect(museumBrowserRun).toContain(
+      "Museum shard spec coverage is incomplete"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum shard inventory must cover desktop and mobile Chromium"
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-shard-${shard}"'
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-shard-${shard}"'
+    );
+    expect(museumBrowserRun).toContain(
+      'NEXT_DEV_DIST_DIR=".next-playwright-museum-shared"'
+    );
+    expect(museumBrowserRun).toContain(
+      'museum_base_url="http://localhost:${museum_port}"'
+    );
+    expect(museumBrowserRun).toContain("PLAYWRIGHT_SKIP_WEB_SERVER=1");
+    expect(museumBrowserRun).toContain("trap cleanup_museum_server EXIT");
+    expect(museumBrowserRun).toContain(
+      'echo "Museum shard server did not become ready."'
+    );
+    expect(museumBrowserRun).toContain(
+      'cat "test-results/app-pr-ci/museum-shard-${shard_index}.log"'
+    );
     expect(museumBrowserRun).toContain("--workers=1");
     expect(parsed.jobs["installed-checks"]).toMatchObject({
       name: "Installed app checks",

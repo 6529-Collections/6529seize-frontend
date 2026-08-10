@@ -20,6 +20,7 @@ import { getGenerativeStudyByProjectSlug } from "@/lib/museum/generative-studies
 import { getMintedProjectIndex } from "@/lib/museum/generative-studies/minted";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import {
   buildMuseumEntityContext,
   buildMuseumProjectRelations,
@@ -145,7 +146,7 @@ function TypedProjectPage({
         </h2>
         <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
           {works.map((work) => {
-            const media = work.media[0];
+            const media = selectMuseumStillMedia(work.media);
             return media ? (
               <MuseumPublicMediaFigure
                 key={work.id}

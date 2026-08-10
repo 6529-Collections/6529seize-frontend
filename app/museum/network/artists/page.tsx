@@ -12,6 +12,7 @@ import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { museumArtistHref } from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 export const metadata: Metadata = {
   ...getAppMetadata({
@@ -66,11 +67,14 @@ export default async function MuseumArtistsPage() {
             );
             const representative = works.find(
               (work) =>
-                work.media[0] !== undefined ||
+                selectMuseumStillMedia(work.media) !== undefined ||
                 work.presentationMedia?.[0] !== undefined ||
                 work.mediaMetadata?.[0] !== undefined
             );
-            const media = representative?.media[0];
+            const media =
+              representative === undefined
+                ? undefined
+                : selectMuseumStillMedia(representative.media);
             const presentation = representative?.presentationMedia?.[0];
             const metadataRecord = representative?.mediaMetadata?.[0];
             if (media !== undefined) {
