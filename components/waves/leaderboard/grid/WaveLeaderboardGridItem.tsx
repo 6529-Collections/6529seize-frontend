@@ -9,7 +9,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
-import React, { useCallback } from "react";
+import React, { useCallback, useId } from "react";
 import type { WaveLeaderboardGridMode } from "./WaveLeaderboardGrid";
 import { WaveLeaderboardGridItemCompactFooter } from "./WaveLeaderboardGridItemCompactFooter";
 import { WaveLeaderboardGridItemMobileActionsMenu } from "./WaveLeaderboardGridItemMobileActionsMenu";
@@ -26,23 +26,6 @@ interface WaveLeaderboardGridItemProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
-
-const canOpenGridItemFromClick = ({
-  isMenuOpen,
-  target,
-}: {
-  readonly isMenuOpen: boolean;
-  readonly target: HTMLElement;
-}): boolean => {
-  if (isMenuOpen) {
-    return false;
-  }
-
-  return !target.closest("a, button");
-};
-
-const isGridItemOpenKey = (key: string): boolean =>
-  key === "Enter" || key === " ";
 
 export const WaveLeaderboardGridItem: React.FC<
   WaveLeaderboardGridItemProps
@@ -61,6 +44,7 @@ export const WaveLeaderboardGridItem: React.FC<
   const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
   const isMobileScreen = useIsMobileScreen();
   const { hasTouchScreen } = useDeviceInfo();
+  const titleId = useId();
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
     preventDefault: false,
@@ -74,11 +58,8 @@ export const WaveLeaderboardGridItem: React.FC<
   const { canShowVote } = useDropInteractionRules(drop);
   const canShowVotingAction = canShowVote && !isVotingActionLocked;
   const canCopyLink = !drop.id.startsWith("temp-");
-  const hasDesktopContentOnlyActions = canOpenDrop || canShowVotingAction;
   const hasMobileContentOnlyActions =
-    hasDesktopContentOnlyActions || canCopyLink;
-  const showDesktopContentOnlyActions =
-    isContentOnlyMode && !hasTouchScreen && hasDesktopContentOnlyActions;
+    canOpenDrop || canShowVotingAction || canCopyLink;
   const showMobileContentOnlyActions =
     isContentOnlyMode && hasTouchScreen && hasMobileContentOnlyActions;
 
@@ -100,53 +81,18 @@ export const WaveLeaderboardGridItem: React.FC<
     onDropClick(drop);
   }, [drop, isMobileScreen, onDropClick]);
 
-  const onCardClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
-    const target = event.target as HTMLElement;
-    if (
-      !canOpenGridItemFromClick({
-        isMenuOpen: showMobileContentOnlyActions && isActive,
-        target,
-      })
-    ) {
-      return;
-    }
-    openDrop();
-  };
-
-  const onCardKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
-    if (!isGridItemOpenKey(event.key)) {
-      return;
-    }
-
-    const target = event.target as HTMLElement;
-    if (
-      !canOpenGridItemFromClick({
-        isMenuOpen: showMobileContentOnlyActions && isActive,
-        target,
-      })
-    ) {
-      return;
-    }
-
-    event.preventDefault();
-    openDrop();
-  };
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <article
+      aria-labelledby={titleId}
       data-testid={`wave-leaderboard-grid-item-${drop.id}`}
-      onClick={onCardClick}
-      onKeyDown={onCardKeyDown}
-      className="tw-group tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700"
+      className="tw-group tw-flex tw-min-w-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-transition desktop-hover:hover:tw-border-iron-700"
       {...(showMobileContentOnlyActions ? touchHandlers : {})}
     >
       <WaveLeaderboardGridItemViewport
         drop={drop}
+        titleId={titleId}
         isCompactMode={isCompactMode}
         isContentOnlyMode={isContentOnlyMode}
-        showDesktopContentOnlyActions={showDesktopContentOnlyActions}
         canOpenDrop={canOpenDrop}
         canShowVotingAction={canShowVotingAction}
         onOpenDrop={openDrop}
@@ -193,6 +139,6 @@ export const WaveLeaderboardGridItem: React.FC<
           onVoteClick={handleVoteButtonClick}
         />
       )}
-    </div>
+    </article>
   );
 };

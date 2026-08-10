@@ -23,7 +23,11 @@ const createApprovalDrop = (overrides: Record<string, unknown>): any => ({
 
 describe("WaveLeaderboardGalleryItemVotes", () => {
   it("uses bright colors for default variant", () => {
-    const drop: any = { rating: 5, rating_prediction: 6 };
+    const drop: any = {
+      rating: 5,
+      rating_prediction: 6,
+      wave: { voting_credit_type: ApiWaveCreditType.Rep },
+    };
     render(<WaveLeaderboardGalleryItemVotes drop={drop} />);
     expect(screen.getByText("5")).toHaveClass("tw-text-emerald-500");
     expect(screen.queryByText("/")).toBeNull();
@@ -34,9 +38,13 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
   });
 
   it("uses subtle coloring when variant is subtle and rating negative", () => {
-    const drop: any = { rating: -2, rating_prediction: -1 };
+    const drop: any = {
+      rating: -2,
+      rating_prediction: -1,
+      wave: { voting_credit_type: ApiWaveCreditType.Rep },
+    };
     render(<WaveLeaderboardGalleryItemVotes drop={drop} variant="subtle" />);
-    expect(screen.getByText("-2")).toHaveClass("tw-text-iron-200");
+    expect(screen.getByText("-2")).toHaveClass("tw-text-rose-400");
     expect(screen.getByTestId("progress").getAttribute("data-subtle")).toBe(
       "true"
     );
@@ -58,9 +66,7 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
     const progress = screen.getByTestId("progress");
     expect(progress.getAttribute("data-current")).toBe("5");
     expect(progress.getAttribute("data-projected")).toBe("9");
-    expect(progress.getAttribute("data-tooltip-label")).toBe(
-      "Votes given now"
-    );
+    expect(progress.getAttribute("data-tooltip-label")).toBe("Votes now");
   });
 
   it("uses lower realtime votes for approve movement", () => {

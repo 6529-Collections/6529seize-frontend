@@ -453,12 +453,32 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.retryMore": "Reintentar la carga de más drops",
   "waves.leaderboard.loadMore": "Cargar más drops",
   "waves.leaderboard.loadingMoreButton": "Cargando…",
+  "waves.leaderboard.grid.untitled": "Drop sin título",
+  "waves.leaderboard.grid.readFullText": "Leer el texto completo",
+  "waves.leaderboard.grid.open": "Abrir",
+  "waves.leaderboard.grid.openNamed": "Abrir {title}",
+  "waves.leaderboard.grid.authorProfile": "Ver el perfil de {author}",
+  "waves.leaderboard.grid.voters.one": "{count} votante",
+  "waves.leaderboard.grid.voters.other": "{count} votantes",
+  "waves.leaderboard.grid.you": "Tú",
+  "waves.leaderboard.grid.reachedRequired": "Alcanzado / requerido",
+  "waves.leaderboard.grid.currentVote": "Voto actual",
+  "waves.leaderboard.grid.votesNow": "Votos actuales",
+  "waves.leaderboard.grid.status.approved": "Aprobado",
+  "waves.leaderboard.grid.status.approvingIn": "Aprobación en {time}",
+  "waves.leaderboard.grid.status.reachedThreshold": "Umbral alcanzado",
+  "waves.leaderboard.grid.status.closed": "Cerrado",
+  "waves.leaderboard.grid.status.needs": "Faltan {amount}",
+  "waves.leaderboard.grid.voteSummary.approval":
+    "Alcanzados {reached} de {required} {unit}. Estado: {status}.",
+  "waves.leaderboard.grid.voteSummary.approvalWithRealtime":
+    "Alcanzados {reached} de {required} {unit}. Votos actuales: {votesNow} {unit}. Estado: {status}.",
+  "waves.leaderboard.grid.voteSummary.standard":
+    "Voto actual: {current} {unit}. Proyección: {projected} {unit}.",
   "waves.leaderboard.timeline.toggle":
     "Mostrar u ocultar la cronología de decisiones",
-  "waves.leaderboard.timeline.decisionTimeline":
-    "Cronología de decisiones",
-  "waves.leaderboard.timeline.announcementHistory":
-    "Historial de anuncios",
+  "waves.leaderboard.timeline.decisionTimeline": "Cronología de decisiones",
+  "waves.leaderboard.timeline.announcementHistory": "Historial de anuncios",
   "waves.leaderboard.timeline.paused": "En pausa",
   "waves.leaderboard.timeline.nextDecisionAfter":
     "Próxima decisión después del {date}",
@@ -466,8 +486,7 @@ export const ES_ES_MESSAGES = {
     "No hay ninguna decisión programada",
   "waves.leaderboard.timeline.noUpcomingEvents": "No hay próximos eventos",
   "waves.leaderboard.timeline.nextWinner": "Próximo ganador",
-  "waves.leaderboard.timeline.nextWinnerIn":
-    "Próximo ganador en {countdown}",
+  "waves.leaderboard.timeline.nextWinnerIn": "Próximo ganador en {countdown}",
   "waves.leaderboard.timeline.unit.day.one": "{count} día",
   "waves.leaderboard.timeline.unit.day.other": "{count} días",
   "waves.leaderboard.timeline.unit.hour.one": "{count} hora",
