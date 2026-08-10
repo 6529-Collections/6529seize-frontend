@@ -1,8 +1,7 @@
-import type { MuseumMedia } from "./types";
+import type { MuseumMedia, MuseumWorkPublicStatus } from "./types";
 
 const KEYS_AND_GATES_SLUG = "keys-and-gates";
-const SELECTED_ACQUISITION_PENDING_STATUS =
-  "selected_through_acquisition_program_acquisition_pending";
+const ACCESSIONED_STATUS = "accessioned_into_permanent_collection";
 
 /** Selects an explicitly typed still for image presentation; live media is never decoded as an image. */
 export function selectMuseumStillMedia(
@@ -12,11 +11,11 @@ export function selectMuseumStillMedia(
 }
 
 export function shouldWithholdKeysAndGatesMedia(
-  status: string,
+  status: MuseumWorkPublicStatus,
   programSlugs: readonly string[]
 ): boolean {
   return (
-    status === SELECTED_ACQUISITION_PENDING_STATUS &&
+    status !== ACCESSIONED_STATUS &&
     programSlugs.includes(KEYS_AND_GATES_SLUG)
   );
 }

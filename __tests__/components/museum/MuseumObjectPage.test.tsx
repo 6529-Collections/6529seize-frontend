@@ -234,4 +234,41 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       )
     ).toBeInTheDocument();
   });
+
+  it("restores Keys and Gates Work media after accession", async () => {
+    const accessionedWork: MuseumPublicWork = {
+      ...work([retainedMedia(rightsCredit(null))]),
+      programIds: ["6529NM-AP-ENT-0002"],
+    };
+    const accessionedPublication = {
+      ...publication(accessionedWork),
+      acquisitionPrograms: [
+        {
+          kind: "acquisition_program",
+          id: "6529NM-AP-ENT-0002",
+          slug: "keys-and-gates",
+          title: "Keys and Gates",
+          status: "completed",
+          statusAsOf: "2026-08-09",
+          acquisitionMethod: "other_authorized_method",
+          acquisitionIds: [],
+          sourceDocumentIds: [],
+          sourcePaths: ["records/entities/6529NM-AP-ENT-0002.json"],
+        },
+      ],
+    } as unknown as MuseumPublication;
+
+    render(
+      await MuseumObjectPage({
+        objectId: accessionedWork.id,
+        publication: accessionedPublication,
+        view: null,
+      })
+    );
+
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      "https://media.6529.io/governed/work-one.png"
+    );
+  });
 });

@@ -51,10 +51,16 @@ describe("selectMuseumStillMedia", () => {
 });
 
 describe("shouldWithholdKeysAndGatesMedia", () => {
-  it("withholds selected Keys and Gates media until acquisition completes", () => {
+  it("withholds Keys and Gates media until accession completes", () => {
     expect(
       shouldWithholdKeysAndGatesMedia(
         "selected_through_acquisition_program_acquisition_pending",
+        ["keys-and-gates"]
+      )
+    ).toBe(true);
+    expect(
+      shouldWithholdKeysAndGatesMedia(
+        "acquisition_complete_accession_review_in_progress",
         ["keys-and-gates"]
       )
     ).toBe(true);

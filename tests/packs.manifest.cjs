@@ -10,6 +10,7 @@
 
 const DESKTOP = "web-desktop-chromium";
 const MOBILE = "web-mobile-chromium";
+const MUSEUM_INSTITUTIONAL_PRACTICE_TIMEOUT_MINUTES = 30;
 const SIMULATION_PROJECTS = [
   "capacitor-ios-sim",
   "capacitor-android-sim",
@@ -524,7 +525,7 @@ const PACKS = [
       "museum-institutional-practice",
       "Staging Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
-      { timeoutMinutes: 30 }
+      { timeoutMinutes: MUSEUM_INSTITUTIONAL_PRACTICE_TIMEOUT_MINUTES }
     )
   ),
   museumPack(
@@ -625,7 +626,7 @@ const PACKS = [
       "Production Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
       ["cron", "post-deploy", "manual"],
-      30,
+      MUSEUM_INSTITUTIONAL_PRACTICE_TIMEOUT_MINUTES,
       [DESKTOP, MOBILE]
     )
   ),
