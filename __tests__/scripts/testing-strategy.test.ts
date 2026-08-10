@@ -452,6 +452,10 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), "tests/museum/about-readonly.spec.ts"),
       "utf8"
     );
+    const networkIaSpec = fs.readFileSync(
+      path.join(process.cwd(), "tests/museum/network-ia-readonly.spec.ts"),
+      "utf8"
+    );
 
     expect(workflow).toContain("playwright install --with-deps chromium");
     expect(workflow).toContain("test:e2e:smoke");
@@ -513,6 +517,21 @@ describe("testing strategy CI plan", () => {
     expect(museumSpec).toContain("for (const profile of PROFILE_ROUTES)");
     expect(aboutSpec).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
     expect(aboutSpec).toContain("museum_publication_expected_commit_not_exact");
+    expect(networkIaSpec).not.toContain("page.screenshot");
+    expect(networkIaSpec).not.toContain("fullPage:");
+    expect(networkIaSpec).toContain("newCDPSession(page)");
+    expect(networkIaSpec).toContain('cdpSession.send("Page.captureScreenshot"');
+    expect(networkIaSpec).toContain("captureBeyondViewport: false");
+    expect(networkIaSpec).toContain("fromSurface: true");
+    expect(networkIaSpec).toContain(
+      "await cdpSession.detach().catch(() => undefined)"
+    );
+    expect(networkIaSpec).toContain(
+      "const EVIDENCE_SCREENSHOT_TIMEOUT_MS = 15_000;"
+    );
+    expect(networkIaSpec).toContain(
+      "Museum viewport evidence capture timed out after"
+    );
     expect(
       fs.existsSync(
         path.join(
@@ -586,6 +605,8 @@ describe("testing strategy CI plan", () => {
     ]);
     expect(museumBrowserRun).toContain("--project=web-desktop-chromium");
     expect(museumBrowserRun).toContain("--project=web-mobile-chromium");
+    expect(museumBrowserRun).not.toContain("--project=web-desktop-firefox");
+    expect(museumBrowserRun).not.toContain("--project=web-desktop-webkit");
     expect(museumBrowserRun).toContain("for shard in 1 2");
     expect(museumBrowserRun).toContain('--shard="${shard}/2"');
     expect(museumBrowserRun).toContain(
