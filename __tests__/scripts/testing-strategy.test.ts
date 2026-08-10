@@ -459,6 +459,7 @@ describe("testing strategy CI plan", () => {
     for (const museumBrowserSpec of [
       "tests/museum/data-architecture-readonly.spec.ts",
       "tests/museum/institutional-practice-readonly.spec.ts",
+      "tests/museum/network-ia-readonly.spec.ts",
       "tests/museum/about-readonly.spec.ts",
       "tests/museum/inside-system-readonly.spec.ts",
       "tests/museum/rights-readonly.spec.ts",
@@ -483,13 +484,21 @@ describe("testing strategy CI plan", () => {
       "Resolve exact Museum publication for Playwright"
     );
     expect(workflow).toContain(
-      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}"
     );
     expect(workflow).toContain(
-      "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+      "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
+    );
+    expect(workflow).toContain(
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "343f98fcfe1c231755518a513b5af9fc89ac4bed"'
+    );
+    expect(workflow).toContain(
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "81c3353b06725582d7d7d7cc297d06ea19ee61bf"'
     );
     expect(workflow).toContain('case "$selected_pack"');
-    expect(workflow).toContain("selected_specs=()");
+    expect(workflow).toContain(
+      "selected_specs=(tests/museum/network-ia-readonly.spec.ts)"
+    );
     expect(workflow).toContain('[ ! -f "$selected_spec" ]');
     expect(workflow).toContain("./bin/6529 exec playwright test");
     expect(workflow).not.toContain('./bin/6529 run "$selected_pack"');
@@ -497,7 +506,10 @@ describe("testing strategy CI plan", () => {
     expect(stagingWorkflow).toContain(
       "Unable to prove the deployed parent; retaining every Museum pack."
     );
-    expect(museumSpec).toContain('test.describe.configure({ mode: "serial" })');
+    expect(museumSpec).not.toContain(
+      'test.describe.configure({ mode: "serial" })'
+    );
+    expect(museumSpec).not.toContain("let sourceCommit");
     expect(museumSpec).toContain("for (const profile of PROFILE_ROUTES)");
     expect(aboutSpec).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
     expect(aboutSpec).toContain("museum_publication_expected_commit_not_exact");
@@ -565,6 +577,7 @@ describe("testing strategy CI plan", () => {
     expect(
       museumBrowserRun.match(/tests\/museum\/[a-z-]+\.spec\.ts/gu) ?? []
     ).toEqual([
+      "tests/museum/network-ia-readonly.spec.ts",
       "tests/museum/data-architecture-readonly.spec.ts",
       "tests/museum/institutional-practice-readonly.spec.ts",
       "tests/museum/about-readonly.spec.ts",
@@ -573,6 +586,41 @@ describe("testing strategy CI plan", () => {
     ]);
     expect(museumBrowserRun).toContain("--project=web-desktop-chromium");
     expect(museumBrowserRun).toContain("--project=web-mobile-chromium");
+    expect(museumBrowserRun).toContain("for shard in 1 2");
+    expect(museumBrowserRun).toContain('--shard="${shard}/2"');
+    expect(museumBrowserRun).toContain(
+      'contract: "museum-playwright-shard-inventory-v1"'
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum shard overlap or unexpected test"
+    );
+    expect(museumBrowserRun).toContain("Museum shard coverage is incomplete");
+    expect(museumBrowserRun).toContain(
+      "Museum shard spec coverage is incomplete"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum shard inventory must cover desktop and mobile Chromium"
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-shard-${shard}"'
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-shard-${shard}"'
+    );
+    expect(museumBrowserRun).toContain(
+      'NEXT_DEV_DIST_DIR=".next-playwright-museum-shared"'
+    );
+    expect(museumBrowserRun).toContain(
+      'museum_base_url="http://localhost:${museum_port}"'
+    );
+    expect(museumBrowserRun).toContain("PLAYWRIGHT_SKIP_WEB_SERVER=1");
+    expect(museumBrowserRun).toContain("trap cleanup_museum_server EXIT");
+    expect(museumBrowserRun).toContain(
+      'echo "Museum shard server did not become ready."'
+    );
+    expect(museumBrowserRun).toContain(
+      'cat "test-results/app-pr-ci/museum-shard-${shard_index}.log"'
+    );
     expect(museumBrowserRun).toContain("--workers=1");
     expect(parsed.jobs["installed-checks"]).toMatchObject({
       name: "Installed app checks",
@@ -606,10 +654,9 @@ describe("testing strategy CI plan", () => {
         };
       };
     };
-    const coverageCheckoutSteps =
-      parsedCoverageFloor.jobs["coverage-floor"].steps.filter((step) =>
-        step.uses?.startsWith("actions/checkout@")
-      );
+    const coverageCheckoutSteps = parsedCoverageFloor.jobs[
+      "coverage-floor"
+    ].steps.filter((step) => step.uses?.startsWith("actions/checkout@"));
     const pushSecretScan = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
       "utf8"

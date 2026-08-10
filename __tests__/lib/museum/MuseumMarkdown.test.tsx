@@ -5,9 +5,19 @@ const SOURCE_PATH =
   "records/accessions/6529NM.2026.001/public/curatorial-accession-review.md";
 const SOURCE_COMMIT = "b".repeat(40);
 
-function renderMarkdown(markdown: string, sourcePath = SOURCE_PATH) {
+function renderMarkdown(
+  markdown: string,
+  sourcePath = SOURCE_PATH,
+  workHrefs: Readonly<Record<string, string>> = {
+    "6529NM.2026.001.01": "/museum/network/works/6529NM-W-0001",
+  }
+) {
   return render(
-    <MuseumMarkdown sourceCommit={SOURCE_COMMIT} sourcePath={sourcePath}>
+    <MuseumMarkdown
+      sourceCommit={SOURCE_COMMIT}
+      sourcePath={sourcePath}
+      workHrefs={workHrefs}
+    >
       {markdown}
     </MuseumMarkdown>
   );
@@ -19,7 +29,16 @@ describe("MuseumMarkdown public links", () => {
 
     expect(screen.getByRole("link", { name: "Object" })).toHaveAttribute(
       "href",
-      "/museum/network/collection/6529NM.2026.001.01"
+      "/museum/network/works/6529NM-W-0001"
+    );
+  });
+
+  it("does not manufacture a Work route when the canonical join is absent", () => {
+    renderMarkdown("[Object](6529NM.2026.001.01.md)", SOURCE_PATH, {});
+
+    expect(screen.getByRole("link", { name: "Object" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md`
     );
   });
 
@@ -51,7 +70,7 @@ describe("MuseumMarkdown public links", () => {
     );
     expect(screen.getByRole("link", { name: "Matrix" })).toHaveAttribute(
       "href",
-      "/museum/network/stories/source-and-chronology"
+      "/museum/network/research/sources-and-chronology"
     );
   });
 
@@ -142,23 +161,23 @@ describe("MuseumMarkdown public links", () => {
 
     expect(screen.getByRole("link", { name: "Met" })).toHaveAttribute(
       "href",
-      "/museum/network/stories/a-field-of-practice/met"
+      "/museum/network/research/institutional-practice/met"
     );
     expect(screen.getByRole("link", { name: "Sources" })).toHaveAttribute(
       "href",
-      "/museum/network/stories/a-field-of-practice/sources"
+      "/museum/network/research/institutional-practice/sources"
     );
     expect(screen.getByRole("link", { name: "HEK" })).toHaveAttribute(
       "href",
-      "/museum/network/stories/a-field-of-practice/hek-basel"
+      "/museum/network/research/institutional-practice/hek-basel"
     );
     expect(screen.getByRole("link", { name: "Adjacent" })).toHaveAttribute(
       "href",
-      "/museum/network/stories/a-field-of-practice/adjacent-practice"
+      "/museum/network/research/institutional-practice/adjacent-practice"
     );
     expect(screen.getByRole("link", { name: "Standard" })).toHaveAttribute(
       "href",
-      "/museum/network/stories/scholarship-and-writing"
+      "/museum/network/research/scholarship-and-writing"
     );
     expect(screen.getByRole("link", { name: "Inventory" })).toHaveAttribute(
       "href",
@@ -174,7 +193,7 @@ describe("MuseumMarkdown public links", () => {
 
     expect(screen.getByRole("link", { name: "Study" })).toHaveAttribute(
       "href",
-      "/museum/network/stories/a-field-of-practice"
+      "/museum/network/research/institutional-practice"
     );
     expect(screen.getByRole("link", { name: "Contribute" })).toHaveAttribute(
       "href",

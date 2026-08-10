@@ -13,6 +13,7 @@ import {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterBraveWalletPageEvaluationError,
   shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -26,6 +27,7 @@ import {
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
+  shouldFilterRabbyChromeUserRejectedRequest,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -75,6 +77,26 @@ type TwitterConfigRawEventOptions = {
   frames?: SentryStackFrame[] | undefined;
   userAgent?: string | undefined;
   includeAdditionalException?: boolean | undefined;
+};
+type BraveWalletPageEvaluationEventOptions = {
+  message?: string;
+  userAgent?: string;
+  includeRequest?: boolean;
+  exceptionType?: string;
+  mechanismType?: string;
+  handled?: boolean;
+  frameFilename?: string;
+  frameAbsPath?: string;
+  functionName?: string;
+  lineNo?: number;
+  colNo?: number;
+  frames?: SentryStackFrame[];
+  transaction?: string;
+  requestUrl?: string;
+  transactionTag?: string;
+  urlTag?: string;
+  additionalException?: SentryExceptionValue;
+  serializedStack?: string;
 };
 type TwitterCurrentInsetEventOptions = {
   request?: TestSentryClientEvent["request"];
@@ -215,8 +237,18 @@ describe("sentry-client-filters", () => {
     "Network request failed. Please check your connection and try again. (/metrics)";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
+  const braveWalletSelectedAddressMessage =
+    "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')";
+  const braveWalletEmitMessage =
+    "undefined is not an object (evaluating 'window.ethereum.emit')";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const rabbyChromeUserRejectedStack = [
+    "Error: User rejected the request.",
+    "    at a (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:123184)",
+    "    at Object.userRejectedRequest (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:124412)",
+    "    at h.dispose (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:297934)",
+  ].join("\n");
   const rabbyMobileUserRejectedStack =
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
   const rabbyMobileAndroidUserRejectedStack = [
@@ -228,6 +260,8 @@ describe("sentry-client-filters", () => {
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
   const rabbyMobileAndroidUserAgent =
     "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
+  const braveWalletUserAgent =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15 Brave";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const originalNavigatorUserAgent = globalThis.navigator.userAgent;
   const twitterForIphoneUserAgent =
@@ -576,6 +610,80 @@ describe("sentry-client-filters", () => {
       ],
     },
   });
+
+  const createBraveWalletPageEvaluationErrorEvent = ({
+    message = braveWalletSelectedAddressMessage,
+    userAgent = braveWalletUserAgent,
+    includeRequest = true,
+    exceptionType = "TypeError",
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    frameFilename =
+      "app:///waves/00000000-0000-4000-8000-000000000002",
+    frameAbsPath,
+    functionName = "global code",
+    lineNo = 1,
+    colNo = 16,
+    frames,
+    transaction = "/waves/:wave",
+    requestUrl = "/waves/[wave]",
+    transactionTag = transaction,
+    urlTag = requestUrl,
+    additionalException,
+    serializedStack,
+  }: BraveWalletPageEvaluationEventOptions = {}): TestSentryClientEvent => {
+    const defaultFrame: SentryStackFrame = {
+      filename: frameFilename,
+      ...(frameAbsPath === undefined ? {} : { abs_path: frameAbsPath }),
+      function: functionName,
+      lineno: lineNo,
+      colno: colNo,
+      in_app: true,
+    };
+
+    return {
+      transaction,
+      ...(includeRequest
+        ? {
+            request: {
+              url: requestUrl,
+              headers: {
+                "User-Agent": userAgent,
+              },
+            },
+          }
+        : {}),
+      tags: {
+        transaction: transactionTag,
+        url: urlTag,
+      },
+      exception: {
+        values: [
+          {
+            type: exceptionType,
+            value: message,
+            mechanism: {
+              type: mechanismType,
+              handled,
+            },
+            stacktrace: {
+              frames: frames ?? [defaultFrame],
+            },
+          },
+          ...(additionalException ? [additionalException] : []),
+        ],
+      },
+      ...(serializedStack
+        ? {
+            extra: {
+              __serialized__: {
+                stack: serializedStack,
+              },
+            },
+          }
+        : {}),
+    };
+  };
 
   const createInjectedWalletCollisionEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -1438,8 +1546,7 @@ describe("sentry-client-filters", () => {
     osName = "iOS",
     osVersion = "26.5.2",
     includeContexts = true,
-    userAgent =
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
+    userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
     includeUserAgent = false,
     transaction = "/nextgen/collection/:collection/art",
     requestUrl = "https://6529.io/nextgen/collection/pebbles/art",
@@ -2049,6 +2156,34 @@ describe("sentry-client-filters", () => {
       },
       ...overrides,
     }) as TestSentryClientEvent;
+
+  const createRabbyChromeUserRejectedExceptionValue = (
+    overrides: Partial<SentryExceptionValue> = {}
+  ): SentryExceptionValue => ({
+    type: "UnhandledRejection",
+    value: objectCapturedPromiseRejectionMessage,
+    mechanism: {
+      type: "auto.browser.global_handlers.onunhandledrejection",
+      handled: false,
+    },
+    ...overrides,
+  });
+
+  const createRabbyChromeUserRejectedRequestEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    exception: {
+      values: [createRabbyChromeUserRejectedExceptionValue()],
+    },
+    extra: {
+      __serialized__: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack,
+      },
+    },
+    ...overrides,
+  });
 
   const createObservedRabbyRainbowKitRawFrames = () => [
     {
@@ -7822,6 +7957,185 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it.each([
+    braveWalletSelectedAddressMessage,
+    braveWalletEmitMessage,
+  ])("filters the exact Brave Wallet page-evaluation error: %s", (message) => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent({ message });
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event);
+
+    // Assert
+    expect(event.contexts?.["browser"]).toBeUndefined();
+    expect(event.tags?.["browser.name"]).toBeUndefined();
+    expect(event.request?.headers?.["User-Agent"]).toBe(
+      braveWalletUserAgent
+    );
+    expect(result).toBe(true);
+  });
+
+  it("uses the runtime user agent for a Brave Wallet page-evaluation error without request data", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent({
+      includeRequest: false,
+    });
+
+    // Act
+    const result = withRuntimeUserAgent(braveWalletUserAgent, () =>
+      shouldFilterBraveWalletPageEvaluationError(event)
+    );
+
+    // Assert
+    expect(event.request).toBeUndefined();
+    expect(result).toBe(true);
+  });
+
+  it("filters the Brave Wallet page-evaluation error without abs_path", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent();
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event);
+
+    // Assert
+    expect(event.exception?.values?.[0]?.stacktrace?.frames?.[0]).not.toHaveProperty(
+      "abs_path"
+    );
+    expect(result).toBe(true);
+  });
+
+  it("filters the Brave Wallet error with its WebKit page stack in the hint", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent();
+    const originalException = new TypeError(
+      braveWalletSelectedAddressMessage
+    );
+    originalException.stack = [
+      `TypeError: ${braveWalletSelectedAddressMessage}`,
+      "global code@https://6529.io/waves/00000000-0000-4000-8000-000000000002:1:16",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event, {
+      originalException,
+    });
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["a different user agent", { userAgent: "Mozilla/5.0 Chrome/131.0.0.0" }],
+    ["a different message", { message: "window.ethereum is unavailable" }],
+    ["a different exception type", { exceptionType: "Error" }],
+    [
+      "a different mechanism",
+      { mechanismType: "auto.browser.global_handlers.onunhandledrejection" },
+    ],
+    ["a handled exception", { handled: true }],
+    ["a different function", { functionName: "emit" }],
+    ["a different line", { lineNo: 2 }],
+    ["a different column", { colNo: 17 }],
+    [
+      "a different route document",
+      {
+        transaction: "/messages/:wave",
+        requestUrl: "/messages/[wave]",
+        transactionTag: "/messages/:wave",
+        urlTag: "/messages/[wave]",
+      },
+    ],
+    [
+      "an additional frame",
+      {
+        frames: [
+          {
+            filename:
+              "app:///waves/00000000-0000-4000-8000-000000000002",
+            abs_path:
+              "app:///waves/00000000-0000-4000-8000-000000000002",
+            function: "global code",
+            lineno: 1,
+            colno: 16,
+            in_app: true,
+          },
+          {
+            filename: "app:///components/providers/WagmiSetup.tsx",
+            abs_path: "app:///components/providers/WagmiSetup.tsx",
+            function: "installProvider",
+            in_app: true,
+          },
+        ],
+      },
+    ],
+    [
+      "a mismatched absolute path",
+      { frameAbsPath: "app:///waves/another-route" },
+    ],
+    [
+      "a serialized application stack",
+      {
+        serializedStack:
+          "TypeError: application failure\n    at installProvider (app:///components/providers/WagmiSetup.tsx:1:1)",
+      },
+    ],
+  ])(
+    "does not filter the Brave Wallet near miss: %s",
+    (_description, options) => {
+      // Arrange
+      const event = createBraveWalletPageEvaluationErrorEvent(options);
+
+      // Act
+      const result = shouldFilterBraveWalletPageEvaluationError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter the Brave Wallet error when the hint contains an app-owned stack", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent();
+    const originalException = new Error("application failure");
+    originalException.stack =
+      "TypeError: application failure\n    at installProvider (app:///components/providers/WagmiSetup.tsx:1:1)";
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event, {
+      originalException,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the Brave Wallet error when another exception is present", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent({
+      additionalException: {
+        type: "Error",
+        value: "Application wallet failure",
+        stacktrace: {
+          frames: [
+            {
+              filename: "app:///components/providers/WagmiSetup.tsx",
+              abs_path: "app:///components/providers/WagmiSetup.tsx",
+              in_app: true,
+            },
+          ],
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterBraveWalletPageEvaluationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters exact Talisman onboarding errors from extension page.js frames", () => {
     // Arrange
     const event = createTalismanExtensionOnboardingEvent();
@@ -8227,6 +8541,39 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the exact Rabby Chrome user-rejected object rejection", () => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent();
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["a trailing newline", `${rabbyChromeUserRejectedStack}\n`],
+    ["CRLF line endings", rabbyChromeUserRejectedStack.replace(/\n/g, "\r\n")],
+  ])("filters the Rabby Chrome rejection with %s", (_caseName, stack) => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "User rejected the request.",
+          stack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters production RabbyMobile Android user-rejected object rejections from user-agent context", () => {
     // Arrange
     const event = createRabbyMobileUserRejectedRequestEvent({
@@ -8607,6 +8954,96 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the observed Sentry A2 injected-script messaging failure", () => {
+    // Arrange
+    const event: TestSentryClientEvent = {
+      transaction: "/messages",
+      tags: {
+        browser: "Chrome 150.0.0",
+        environment: "production",
+      },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                  lineno: 152,
+                  colno: 22,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter the observed Sentry A2 failure with an app-owned exception", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      transaction: "/messages",
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                  lineno: 152,
+                  colno: 22,
+                },
+              ],
+            },
+          },
+          {
+            type: "TypeError",
+            value: "App-owned failure",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/messages/MessagesView.tsx",
+                  function: "MessagesView",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters extension messaging failures from browser extension frames", () => {
     // Arrange
     const event = createBrowserExtensionMessagingConnectionEvent({
@@ -8692,6 +9129,167 @@ describe("sentry-client-filters", () => {
                 },
               ],
             },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unobserved injected-script-like app paths", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script-helper.js",
+                  abs_path: "app:///injected-script-helper.js",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter unrelated errors from the observed injected-script path", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: "Extension message failed for a different reason.",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      source: "event message",
+      eventOverrides: {
+        message: extensionMessagingConnectionFailureMessage,
+      },
+      hint: undefined,
+    },
+    {
+      source: "hint message",
+      eventOverrides: {},
+      hint: {
+        originalException: new Error(
+          extensionMessagingConnectionFailureMessage
+        ),
+      },
+    },
+  ])(
+    "does not filter a conflicting exception with a matching $source",
+    ({ eventOverrides, hint }) => {
+      // Arrange
+      const event = createBrowserExtensionMessagingConnectionEvent({
+        ...eventOverrides,
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value: "Extension message failed for a different reason.",
+              stacktrace: {
+                frames: [
+                  {
+                    filename: "app:///injected-script.js",
+                    abs_path: "app:///injected-script.js",
+                    in_app: true,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+
+      // Act
+      const result = shouldFilterBrowserExtensionMessagingConnectionError(
+        event,
+        hint
+      );
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it("filters a matching event message when the exception value is missing", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      message: extensionMessagingConnectionFailureMessage,
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: undefined,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter frameless extension messaging failures", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: extensionMessagingConnectionFailureMessage,
           },
         ],
       },
@@ -9387,6 +9985,168 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "a different code",
+      serialized: {
+        code: 4100,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack,
+      },
+    },
+    {
+      caseName: "a different message",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request",
+        stack: rabbyChromeUserRejectedStack,
+      },
+    },
+    {
+      caseName: "a different extension origin",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack.replace(
+          "acmacodkjbdgmoleebolmdjonilkdbch",
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ),
+      },
+    },
+    {
+      caseName: "a different stack function",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack.replace(
+          "Object.userRejectedRequest",
+          "Object.requestRejected"
+        ),
+      },
+    },
+    {
+      caseName: "a missing serialized stack",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+      },
+    },
+    {
+      caseName: "an additional serialized field",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: rabbyChromeUserRejectedStack,
+        data: null,
+      },
+    },
+    {
+      caseName: "an app-owned serialized frame",
+      serialized: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: [
+          rabbyChromeUserRejectedStack,
+          "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+        ].join("\n"),
+      },
+    },
+  ])("keeps Rabby Chrome near-misses with $caseName", ({ serialized }) => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent({
+      extra: { __serialized__: serialized },
+    });
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "a different mechanism",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+        }),
+      ],
+    },
+    {
+      caseName: "a handled mechanism",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: true,
+          },
+        }),
+      ],
+    },
+    {
+      caseName: "a different wrapper",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          value: objectCapturedPromiseRejectionWithoutStackMessage,
+        }),
+      ],
+    },
+    {
+      caseName: "an additional exception",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue(),
+        { type: "Error", value: "Application failure" },
+      ],
+    },
+    {
+      caseName: "an app-owned exception frame",
+      values: [
+        createRabbyChromeUserRejectedExceptionValue({
+          stacktrace: {
+            frames: [
+              {
+                filename: "hooks/drops/useDropSignature.ts",
+                abs_path: "hooks/drops/useDropSignature.ts",
+                in_app: true,
+              },
+            ],
+          },
+        }),
+      ],
+    },
+  ])("keeps Rabby Chrome near-misses with $caseName", ({ values }) => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent({
+      exception: { values },
+    });
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("keeps Rabby Chrome rejections with app-owned hint stacks", () => {
+    // Arrange
+    const event = createRabbyChromeUserRejectedRequestEvent();
+    const appError = new Error("Application failure");
+    appError.stack =
+      "Error: Application failure\n    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)";
+
+    // Act
+    const result = shouldFilterRabbyChromeUserRejectedRequest(event, {
+      originalException: appError,
+    });
 
     // Assert
     expect(result).toBe(false);

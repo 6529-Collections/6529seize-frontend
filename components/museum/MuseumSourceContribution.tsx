@@ -9,7 +9,6 @@ import { resolveMuseumPageSource } from "@/lib/museum/publication/pageSources";
 import { MUSEUM_CONTRIBUTOR_GUIDE_PATH } from "@/lib/museum/publication/openMuseum";
 import {
   buildImmutableMuseumBlobUrl,
-  buildMuseumMainBlobUrl,
   buildMuseumMainEditUrl,
 } from "@/lib/museum/publication/security";
 import type { MuseumPublicationIdentity } from "@/lib/museum/publication/types";
@@ -111,7 +110,10 @@ export function MuseumSourceContribution({
       : buildImmutableMuseumBlobUrl(commit, pageSource.primaryPath);
   const improvementUrl =
     pageSource === null ? null : buildMuseumMainEditUrl(pageSource.primaryPath);
-  const contributionUrl = buildMuseumMainBlobUrl(MUSEUM_CONTRIBUTOR_GUIDE_PATH);
+  const contributionUrl = buildImmutableMuseumBlobUrl(
+    commit,
+    MUSEUM_CONTRIBUTOR_GUIDE_PATH
+  );
   const relatedSources =
     commit === null || pageSource === null
       ? []
@@ -201,12 +203,6 @@ export function MuseumSourceContribution({
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title={path}
-                      aria-label={t(
-                        DEFAULT_LOCALE,
-                        "museum.network.openMuseum.strip.relatedAccessible",
-                        { label: visibleLabel, path }
-                      )}
                       className={LINK_CLASS}
                     >
                       {visibleLabel}

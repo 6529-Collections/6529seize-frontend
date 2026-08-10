@@ -32,6 +32,7 @@ export function createMockMinimalWave(
     isMuted: false,
     waveRep: null,
     waveScore: null,
+    isInAllWaves: true,
     sidebarSection: null,
     followedSubwavesCount: 0,
     latestFollowedSubwaveDropTimestamp: null,

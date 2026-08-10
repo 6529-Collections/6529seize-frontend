@@ -1,3 +1,7 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import type { MuseumPublicAcquisitionStatus } from "@/lib/museum/publication/ia";
+
 export function museumSlug(value: string): string {
   return encodeURIComponent(value.trim());
 }
@@ -56,6 +60,30 @@ export function displayMuseumStatus(value: string): string {
   return value
     .replace(/[_-]+/gu, " ")
     .replace(/\b\w/gu, (letter) => letter.toLocaleUpperCase());
+}
+
+export function displayMuseumPublicAcquisitionStatus(
+  value: MuseumPublicAcquisitionStatus
+): string {
+  switch (value) {
+    case "proposed_in_museum_wave":
+      return t(DEFAULT_LOCALE, "museum.network.acquisitions.proposedStatus");
+    case "selected_by_museum_wave_acquisition_review_in_progress":
+      return t(
+        DEFAULT_LOCALE,
+        "museum.network.acquisitions.selectedWaveStatus"
+      );
+    case "selected_through_acquisition_program_acquisition_pending":
+      return t(DEFAULT_LOCALE, "museum.network.acquisitions.selectedStatus");
+    case "acquisition_complete_accession_review_in_progress":
+      return t(DEFAULT_LOCALE, "museum.network.acquisitions.completeStatus");
+    case "accessioned_into_permanent_collection":
+      return t(DEFAULT_LOCALE, "museum.network.acquisitions.accessionedStatus");
+    case "closed_without_selection":
+      return t(DEFAULT_LOCALE, "museum.network.acquisitions.closedStatus");
+    case "withdrawn":
+      return t(DEFAULT_LOCALE, "museum.network.acquisitions.withdrawnStatus");
+  }
 }
 
 export function statusTone(

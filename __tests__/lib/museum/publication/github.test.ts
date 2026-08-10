@@ -163,6 +163,54 @@ describe("GitHub Museum publication source", () => {
     });
   });
 
+  it.each([
+    ["no content length", null],
+    ["an underreported content length", "1"],
+  ])(
+    "cancels a streamed response that exceeds the byte boundary with %s",
+    async (_label, contentLength) => {
+      const fixture = createCaseyFixture();
+      let cancelled = false;
+      const oversizedFetch: typeof fetch = async (input, init) => {
+        const url = typeof input === "string" ? input : input.toString();
+        if (!url.startsWith("https://api.github.com/")) {
+          return fixture.fetch(input, init);
+        }
+        const body = new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(new Uint8Array(128_000));
+            controller.enqueue(new Uint8Array(128_000));
+            controller.enqueue(new Uint8Array(1));
+          },
+          cancel() {
+            cancelled = true;
+          },
+        });
+        return {
+          ok: true,
+          status: 200,
+          url: "",
+          headers: {
+            get(name: string) {
+              return name.toLowerCase() === "content-length"
+                ? contentLength
+                : null;
+            },
+          },
+          body,
+        } as unknown as Response;
+      };
+
+      await expect(
+        sourceFor(fixture, oversizedFetch).load()
+      ).resolves.toMatchObject({
+        status: "unavailable",
+        errorCode: "publication_response_too_large",
+      });
+      expect(cancelled).toBe(true);
+    }
+  );
+
   it("rejects a response URL that differs from the approved request URL", async () => {
     const fixture = createCaseyFixture();
     const redirectedFetch: typeof fetch = async (input, init) => {

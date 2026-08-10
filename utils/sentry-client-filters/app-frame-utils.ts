@@ -498,7 +498,7 @@ export function hasGifPickerTenorManagerFrame(
   );
 }
 
-export function hasAppOwnedStackPath(value: string | undefined): boolean {
+function hasAppOwnedStackPath(value: string | undefined): boolean {
   const normalized = value?.toLowerCase();
   return (
     !!normalized &&
@@ -515,6 +515,19 @@ export function hasLikelyAppOwnedFrame(
       frames.some((frame) =>
         getFramePaths(frame).some((path) => hasAppOwnedStackPath(path))
       ))
+  );
+}
+
+export function hasAppOwnedStackEvidence(
+  event: SentryClientEvent,
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  return (
+    hasLikelyAppOwnedFrame(frames) ||
+    hasAppOwnedStackPath(serializedStack) ||
+    hasAppOwnedStackPath(getHintExceptionStack(hint))
   );
 }
 

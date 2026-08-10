@@ -41,14 +41,20 @@ export {
 export { shouldFilterPoperBlockerOrphanFetchRejection } from "./sentry-client-filters/extension-fetch";
 export { shouldFilterExpectedWaveRequestReplacementAbort } from "./sentry-client-filters/wave-abort";
 export {
+  shouldFilterBraveWalletPageEvaluationError,
+} from "./sentry-client-filters/brave-wallet";
+export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterKnownWalletProviderObjectRejection,
-  shouldFilterRabbyMobileRainbowKitNotFoundError,
-  shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterWalletConnectStaleSessionTopic,
 } from "./sentry-client-filters/wallets";
+export {
+  shouldFilterRabbyChromeUserRejectedRequest,
+  shouldFilterRabbyMobileRainbowKitNotFoundError,
+  shouldFilterRabbyMobileUserRejectedRequest,
+} from "./sentry-client-filters/rabby";
 export { __testing } from "./sentry-client-filters/testing";

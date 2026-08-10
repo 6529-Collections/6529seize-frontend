@@ -32,7 +32,7 @@ export default function HomePageTextSection() {
             className="tw-relative tw-z-10 tw-mt-6 tw-flex tw-items-center md:tw-mt-8 lg:tw-col-span-5 lg:tw-col-start-8 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-mt-0"
             aria-label="Mission statement"
           >
-            <blockquote className="tw-relative tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/70 tw-bg-iron-950/80 tw-px-4 tw-py-5 tw-shadow-[0_18px_50px_-24px_rgba(0,0,0,0.72)] tw-backdrop-blur-xl">
+            <blockquote className="tw-relative tw-m-0 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/70 tw-bg-iron-950/80 tw-px-4 tw-py-5 tw-shadow-[0_18px_50px_-24px_rgba(0,0,0,0.72)] tw-backdrop-blur-xl">
               <p className="tw-mb-0 tw-mt-0 tw-font-mono tw-text-sm tw-leading-relaxed tw-text-iron-400 md:tw-text-center lg:tw-text-left">
                 We're extending what Bitcoin and Ethereum proved for money and
                 code to human coordination itself, so any activity can be

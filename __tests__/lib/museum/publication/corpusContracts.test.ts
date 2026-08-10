@@ -193,7 +193,7 @@ describe("Museum publication corpus contracts", () => {
     const publication = await loadPublication(withKeysAndGatesDocuments());
     const catalog = buildMuseumPageSourceCatalog(publication);
     const programRoute = resolveMuseumPageSource(
-      "/museum/network/programs/6529NM-AP-01",
+      "/museum/network/acquisition-programs/keys-and-gates",
       catalog
     );
     expect(programRoute).toEqual(
@@ -207,26 +207,16 @@ describe("Museum publication corpus contracts", () => {
         "records/programs/6529NM-AP-01/selected-works.json",
       ])
     );
+    expect(
+      resolveMuseumPageSource("/museum/network/programs/6529NM-AP-01", catalog)
+    ).toBeNull();
 
     const outcomeRoutes = catalog.filter((route) =>
       /^\/museum\/network\/objects\/6529NM-AP-01-OUT-\d{3}$/u.test(
         route.pathname
       )
     );
-    expect(outcomeRoutes).toHaveLength(16);
-    expect(
-      outcomeRoutes.every(
-        (route) =>
-          route.source.primaryPath.startsWith(
-            "records/programs/6529NM-AP-01/outcomes/OUT-"
-          ) &&
-          route.source.relatedSources.some(
-            (source) =>
-              source.path ===
-              "records/programs/6529NM-AP-01/selected-works.json"
-          )
-      )
-    ).toBe(true);
+    expect(outcomeRoutes).toHaveLength(0);
     for (const route of [
       programRoute,
       ...outcomeRoutes.map((item) => item.source),
