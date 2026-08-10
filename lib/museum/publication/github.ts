@@ -40,9 +40,9 @@ import {
   type MuseumPublicationCatalogDocument,
   type MuseumPublicationCatalogResolver,
 } from "./catalog";
-import { getNodeEnv } from "../../../config/env";
 import {
   getMuseumPublicationEnvironment,
+  getMuseumPublicationNodeEnvironment,
   isMuseumLocalFixtureEnvironment,
 } from "../../../config/museumPublicationEnv.server";
 
@@ -166,11 +166,12 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     this.localFixtureMediaAssetPaths = new Set(
       options.localFixtureMediaAssetPaths ?? []
     );
-    const isTestEnvironment = getNodeEnv() === "test";
+    const nodeEnvironment = getMuseumPublicationNodeEnvironment();
+    const isTestEnvironment = nodeEnvironment === "test";
     const environment = getMuseumPublicationEnvironment();
     const localFixtureEnvironment =
       isTestEnvironment ||
-      isMuseumLocalFixtureEnvironment(environment, getNodeEnv());
+      isMuseumLocalFixtureEnvironment(environment, nodeEnvironment);
     this.allowUncataloguedTestFixture =
       options.allowUncataloguedTestFixture ?? isTestEnvironment;
 
