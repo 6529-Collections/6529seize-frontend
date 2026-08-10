@@ -588,6 +588,18 @@ export * from '../models/ReleaseBusV2LaneState';
 export * from '../models/ReleaseBusV2Manifest';
 export * from '../models/ReleaseBusV2ManifestListResponse';
 export * from '../models/ReleaseBusV2Mode';
+export * from '../models/ReleaseBusV2ProductionAuthorityBindRequest';
+export * from '../models/ReleaseBusV2ProductionAuthorityBindResponse';
+export * from '../models/ReleaseBusV2ProductionAuthorityCompleteRequest';
+export * from '../models/ReleaseBusV2ProductionAuthorityCompletionResponse';
+export * from '../models/ReleaseBusV2ProductionAuthorityDenialResponse';
+export * from '../models/ReleaseBusV2ProductionAuthorityEpoch';
+export * from '../models/ReleaseBusV2ProductionAuthorityFailRequest';
+export * from '../models/ReleaseBusV2ProductionAuthorityIdentityRequest';
+export * from '../models/ReleaseBusV2ProductionAuthorityPrepareRequest';
+export * from '../models/ReleaseBusV2ProductionAuthorityPrepareResponse';
+export * from '../models/ReleaseBusV2ProductionAuthorityReauthorizeRequest';
+export * from '../models/ReleaseBusV2ProductionAuthorityResponseIdentity';
 export * from '../models/ReleaseBusV2ProductionSelectionItem';
 export * from '../models/ReleaseBusV2ProductionSelectionRequest';
 export * from '../models/ReleaseBusV2ProductionSelectionResponse';
@@ -1208,6 +1220,18 @@ import { ReleaseBusV2LaneState, ReleaseBusV2LaneStateLaneEnum  , ReleaseBusV2Lan
 import { ReleaseBusV2Manifest  , ReleaseBusV2ManifestLaneEnum   , ReleaseBusV2ManifestStatusEnum             } from '../models/ReleaseBusV2Manifest';
 import { ReleaseBusV2ManifestListResponse } from '../models/ReleaseBusV2ManifestListResponse';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
+import { ReleaseBusV2ProductionAuthorityBindRequest , ReleaseBusV2ProductionAuthorityBindRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityBindRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityBindRequestEnvironmentEnum    , ReleaseBusV2ProductionAuthorityBindRequestSelectionDigestEnum     } from '../models/ReleaseBusV2ProductionAuthorityBindRequest';
+import { ReleaseBusV2ProductionAuthorityBindResponse  , ReleaseBusV2ProductionAuthorityBindResponseRepositoryEnum  , ReleaseBusV2ProductionAuthorityBindResponseEnvironmentEnum       , ReleaseBusV2ProductionAuthorityBindResponseStatusEnum            } from '../models/ReleaseBusV2ProductionAuthorityBindResponse';
+import { ReleaseBusV2ProductionAuthorityCompleteRequest , ReleaseBusV2ProductionAuthorityCompleteRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityCompleteRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityCompleteRequestEnvironmentEnum           } from '../models/ReleaseBusV2ProductionAuthorityCompleteRequest';
+import { ReleaseBusV2ProductionAuthorityCompletionResponse , ReleaseBusV2ProductionAuthorityCompletionResponseStatusEnum         } from '../models/ReleaseBusV2ProductionAuthorityCompletionResponse';
+import { ReleaseBusV2ProductionAuthorityDenialResponse } from '../models/ReleaseBusV2ProductionAuthorityDenialResponse';
+import { ReleaseBusV2ProductionAuthorityEpoch    } from '../models/ReleaseBusV2ProductionAuthorityEpoch';
+import { ReleaseBusV2ProductionAuthorityFailRequest , ReleaseBusV2ProductionAuthorityFailRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityFailRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityFailRequestEnvironmentEnum          , ReleaseBusV2ProductionAuthorityFailRequestReasonCodeEnum   } from '../models/ReleaseBusV2ProductionAuthorityFailRequest';
+import { ReleaseBusV2ProductionAuthorityIdentityRequest , ReleaseBusV2ProductionAuthorityIdentityRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityIdentityRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityIdentityRequestEnvironmentEnum     } from '../models/ReleaseBusV2ProductionAuthorityIdentityRequest';
+import { ReleaseBusV2ProductionAuthorityPrepareRequest , ReleaseBusV2ProductionAuthorityPrepareRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityPrepareRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityPrepareRequestEnvironmentEnum    , ReleaseBusV2ProductionAuthorityPrepareRequestSelectionDigestEnum   } from '../models/ReleaseBusV2ProductionAuthorityPrepareRequest';
+import { ReleaseBusV2ProductionAuthorityPrepareResponse  , ReleaseBusV2ProductionAuthorityPrepareResponseRepositoryEnum  , ReleaseBusV2ProductionAuthorityPrepareResponseEnvironmentEnum       , ReleaseBusV2ProductionAuthorityPrepareResponseStatusEnum            } from '../models/ReleaseBusV2ProductionAuthorityPrepareResponse';
+import { ReleaseBusV2ProductionAuthorityReauthorizeRequest , ReleaseBusV2ProductionAuthorityReauthorizeRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityReauthorizeRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityReauthorizeRequestEnvironmentEnum        } from '../models/ReleaseBusV2ProductionAuthorityReauthorizeRequest';
+import { ReleaseBusV2ProductionAuthorityResponseIdentity  , ReleaseBusV2ProductionAuthorityResponseIdentityRepositoryEnum  , ReleaseBusV2ProductionAuthorityResponseIdentityEnvironmentEnum       , ReleaseBusV2ProductionAuthorityResponseIdentityStatusEnum       } from '../models/ReleaseBusV2ProductionAuthorityResponseIdentity';
 import { ReleaseBusV2ProductionSelectionItem } from '../models/ReleaseBusV2ProductionSelectionItem';
 import { ReleaseBusV2ProductionSelectionRequest } from '../models/ReleaseBusV2ProductionSelectionRequest';
 import { ReleaseBusV2ProductionSelectionResponse , ReleaseBusV2ProductionSelectionResponseQualificationPolicyEnum     } from '../models/ReleaseBusV2ProductionSelectionResponse';
@@ -1410,6 +1434,37 @@ let enumsMap: Set<string> = new Set<string>([
     "ReleaseBusV2ManifestLaneEnum",
     "ReleaseBusV2ManifestStatusEnum",
     "ReleaseBusV2Mode",
+    "ReleaseBusV2ProductionAuthorityBindRequestControllerIdentityEnum",
+    "ReleaseBusV2ProductionAuthorityBindRequestRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityBindRequestEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityBindRequestSelectionDigestEnum",
+    "ReleaseBusV2ProductionAuthorityBindResponseRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityBindResponseEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityBindResponseStatusEnum",
+    "ReleaseBusV2ProductionAuthorityCompleteRequestControllerIdentityEnum",
+    "ReleaseBusV2ProductionAuthorityCompleteRequestRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityCompleteRequestEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityCompletionResponseStatusEnum",
+    "ReleaseBusV2ProductionAuthorityFailRequestControllerIdentityEnum",
+    "ReleaseBusV2ProductionAuthorityFailRequestRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityFailRequestEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityFailRequestReasonCodeEnum",
+    "ReleaseBusV2ProductionAuthorityIdentityRequestControllerIdentityEnum",
+    "ReleaseBusV2ProductionAuthorityIdentityRequestRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityIdentityRequestEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityPrepareRequestControllerIdentityEnum",
+    "ReleaseBusV2ProductionAuthorityPrepareRequestRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityPrepareRequestEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityPrepareRequestSelectionDigestEnum",
+    "ReleaseBusV2ProductionAuthorityPrepareResponseRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityPrepareResponseEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityPrepareResponseStatusEnum",
+    "ReleaseBusV2ProductionAuthorityReauthorizeRequestControllerIdentityEnum",
+    "ReleaseBusV2ProductionAuthorityReauthorizeRequestRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityReauthorizeRequestEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityResponseIdentityRepositoryEnum",
+    "ReleaseBusV2ProductionAuthorityResponseIdentityEnvironmentEnum",
+    "ReleaseBusV2ProductionAuthorityResponseIdentityStatusEnum",
     "ReleaseBusV2ProductionSelectionResponseQualificationPolicyEnum",
     "ReleaseBusV2RegisterRequestRepositoryEnum",
     "ReleaseBusV2StagingStateIdEnum",
@@ -1945,6 +2000,18 @@ let typeMap: {[index: string]: any} = {
     "ReleaseBusV2LaneState": ReleaseBusV2LaneState,
     "ReleaseBusV2Manifest": ReleaseBusV2Manifest,
     "ReleaseBusV2ManifestListResponse": ReleaseBusV2ManifestListResponse,
+    "ReleaseBusV2ProductionAuthorityBindRequest": ReleaseBusV2ProductionAuthorityBindRequest,
+    "ReleaseBusV2ProductionAuthorityBindResponse": ReleaseBusV2ProductionAuthorityBindResponse,
+    "ReleaseBusV2ProductionAuthorityCompleteRequest": ReleaseBusV2ProductionAuthorityCompleteRequest,
+    "ReleaseBusV2ProductionAuthorityCompletionResponse": ReleaseBusV2ProductionAuthorityCompletionResponse,
+    "ReleaseBusV2ProductionAuthorityDenialResponse": ReleaseBusV2ProductionAuthorityDenialResponse,
+    "ReleaseBusV2ProductionAuthorityEpoch": ReleaseBusV2ProductionAuthorityEpoch,
+    "ReleaseBusV2ProductionAuthorityFailRequest": ReleaseBusV2ProductionAuthorityFailRequest,
+    "ReleaseBusV2ProductionAuthorityIdentityRequest": ReleaseBusV2ProductionAuthorityIdentityRequest,
+    "ReleaseBusV2ProductionAuthorityPrepareRequest": ReleaseBusV2ProductionAuthorityPrepareRequest,
+    "ReleaseBusV2ProductionAuthorityPrepareResponse": ReleaseBusV2ProductionAuthorityPrepareResponse,
+    "ReleaseBusV2ProductionAuthorityReauthorizeRequest": ReleaseBusV2ProductionAuthorityReauthorizeRequest,
+    "ReleaseBusV2ProductionAuthorityResponseIdentity": ReleaseBusV2ProductionAuthorityResponseIdentity,
     "ReleaseBusV2ProductionSelectionItem": ReleaseBusV2ProductionSelectionItem,
     "ReleaseBusV2ProductionSelectionRequest": ReleaseBusV2ProductionSelectionRequest,
     "ReleaseBusV2ProductionSelectionResponse": ReleaseBusV2ProductionSelectionResponse,

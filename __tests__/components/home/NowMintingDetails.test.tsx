@@ -16,6 +16,12 @@ const mockLatestDropNextMintSubscribe = jest.fn(
   )
 );
 
+const mockLatestDropAllowlistStatus = jest.fn(
+  ({ tokenId }: { readonly tokenId: number }) => (
+    <div data-testid="allowlist-status" data-token-id={tokenId} />
+  )
+);
+
 jest.mock("next/link", () => {
   const { mockNextLinkComponent } = jest.requireActual(
     "@/__tests__/utils/nextLinkMock"
@@ -48,6 +54,12 @@ jest.mock("@/components/home/now-minting/LatestDropNextMintSubscribe", () => ({
     mockLatestDropNextMintSubscribe(props),
 }));
 
+jest.mock("@/components/home/now-minting/LatestDropAllowlistStatus", () => ({
+  __esModule: true,
+  default: ({ tokenId }: { readonly tokenId: number }) =>
+    mockLatestDropAllowlistStatus({ tokenId }),
+}));
+
 jest.mock("@/components/home/now-minting/NowMintingCountdown", () => ({
   __esModule: true,
   default: () => <div data-testid="countdown" />,
@@ -67,6 +79,7 @@ const baseNft = {
 describe("NowMintingDetails", () => {
   beforeEach(() => {
     mockLatestDropNextMintSubscribe.mockClear();
+    mockLatestDropAllowlistStatus.mockClear();
   });
 
   it("omits file metadata rows when media metadata is missing", () => {
@@ -92,6 +105,10 @@ describe("NowMintingDetails", () => {
     expect(screen.getByTestId("subscribe-section")).toHaveAttribute(
       "data-status-source",
       "none"
+    );
+    expect(screen.getByTestId("allowlist-status")).toHaveAttribute(
+      "data-token-id",
+      "667"
     );
     expect(screen.getByTestId("main-stage-submission")).toBeInTheDocument();
   });

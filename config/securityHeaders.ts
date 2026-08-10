@@ -243,7 +243,7 @@ export function createSecurityHeaders(
         "screen-wake-lock=()",
         "sync-xhr=()",
         "usb=()",
-        "web-share=()",
+        "web-share=(self)",
         "xr-spatial-tracking=()",
       ].join(", "),
     },

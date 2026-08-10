@@ -1,4 +1,4 @@
 "use client";
 
 export { default } from "./header-share/HeaderShareTrigger";
-export { HeaderQRModal } from "./header-share/HeaderQRModal";
+export { HeaderConnectModal } from "./header-share/HeaderQRModal";

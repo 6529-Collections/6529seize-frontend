@@ -2,7 +2,7 @@ import Link from "next/link";
 
 interface MainStageMemeCardLinkProps {
   readonly memeCardId: number | null | undefined;
-  readonly variant?: "compact" | "prominent" | "subtle";
+  readonly variant?: "compact" | "minimal" | "prominent" | "subtle";
 }
 
 interface MainStageMemeCardPillProps extends MainStageMemeCardLinkProps {
@@ -28,14 +28,21 @@ export function MainStageMemeCardPill({
     return null;
   }
 
-  const pillSizeClassName =
-    variant === "prominent"
-      ? "tw-min-h-9 tw-px-4 tw-py-1.5 tw-text-base tw-leading-5"
-      : "tw-px-2.5 tw-py-0.5 tw-text-xs";
+  let pillSizeClassName = "tw-px-2.5 tw-py-0.5 tw-text-xs";
+  if (variant === "prominent") {
+    pillSizeClassName =
+      "tw-min-h-9 tw-px-4 tw-py-1.5 tw-text-base tw-leading-5";
+  } else if (variant === "minimal") {
+    pillSizeClassName = "tw-px-2 tw-py-px tw-text-[11px] tw-leading-4";
+  }
+  const pillToneClassName =
+    variant === "minimal"
+      ? "tw-border-primary-400/25 tw-bg-primary-500/[0.06] tw-font-medium tw-text-primary-300"
+      : "tw-border-primary-400/40 tw-bg-primary-500/10 tw-font-semibold tw-text-primary-300";
   const className =
     variant === "subtle"
       ? "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.14em] tw-text-iron-500"
-      : `tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/10 tw-font-semibold tw-text-primary-300 ${pillSizeClassName}`;
+      : `tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid ${pillToneClassName} ${pillSizeClassName}`;
   const label = `The Memes #${memeCardId}`;
 
   if (!href) {
