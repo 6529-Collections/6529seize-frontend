@@ -38,7 +38,7 @@ export default function UserPageHeaderBanner({
     <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40 md:tw-h-[300px]">
       {scaledBannerUrl ? (
         <div
-          className="tw-absolute tw-inset-0 tw-mix-blend-lighten tw-opacity-60"
+          className="tw-absolute tw-inset-0 md:tw-opacity-60 md:tw-mix-blend-lighten"
           style={{
             backgroundImage: `url(${scaledBannerUrl})`,
             backgroundSize: "cover",
@@ -53,8 +53,9 @@ export default function UserPageHeaderBanner({
           }}
         />
       )}
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-transparent" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-32 tw-bg-gradient-to-b tw-from-black/40 tw-to-transparent" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5 md:tw-hidden" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-hidden tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-transparent md:tw-block" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-hidden tw-h-32 tw-bg-gradient-to-b tw-from-black/40 tw-to-transparent md:tw-block" />
 
       {canEdit && (
         <button
