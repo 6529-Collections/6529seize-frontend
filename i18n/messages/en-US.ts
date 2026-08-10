@@ -1926,6 +1926,17 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
+  "home.mintAllowlist.label": "Your allowlist",
+  "home.mintAllowlist.connectedWallet": "Connected wallet",
+  "home.mintAllowlist.phase": "Phase {number}",
+  "home.mintAllowlist.phasesAriaLabel":
+    "Allowlist phases for the connected wallet",
+  "home.mintAllowlist.checking": "Checking your connected wallet…",
+  "home.mintAllowlist.connectWallet":
+    "Connect a wallet to check your allowlist phase.",
+  "home.mintAllowlist.notFound": "No allowlist phase found for this wallet.",
+  "home.mintAllowlist.unavailable":
+    "Allowlist status is temporarily unavailable.",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
