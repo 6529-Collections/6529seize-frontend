@@ -58,8 +58,11 @@ export const WaveLeaderboardGridItem: React.FC<
   const { canShowVote } = useDropInteractionRules(drop);
   const canShowVotingAction = canShowVote && !isVotingActionLocked;
   const canCopyLink = !drop.id.startsWith("temp-");
+  const hasDesktopContentOnlyActions = canOpenDrop || canShowVotingAction;
   const hasMobileContentOnlyActions =
-    canOpenDrop || canShowVotingAction || canCopyLink;
+    hasDesktopContentOnlyActions || canCopyLink;
+  const showDesktopContentOnlyActions =
+    isContentOnlyMode && !hasTouchScreen && hasDesktopContentOnlyActions;
   const showMobileContentOnlyActions =
     isContentOnlyMode && hasTouchScreen && hasMobileContentOnlyActions;
 
@@ -93,6 +96,7 @@ export const WaveLeaderboardGridItem: React.FC<
         titleId={titleId}
         isCompactMode={isCompactMode}
         isContentOnlyMode={isContentOnlyMode}
+        showDesktopContentOnlyActions={showDesktopContentOnlyActions}
         canOpenDrop={canOpenDrop}
         canShowVotingAction={canShowVotingAction}
         onOpenDrop={openDrop}

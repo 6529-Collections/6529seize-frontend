@@ -479,8 +479,13 @@ describe("WaveLeaderboardGridItem", () => {
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Open hello" })
-    ).toHaveTextContent("Read full text");
+      screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
+    ).toHaveClass(
+      "tw-opacity-0",
+      "group-focus-within:tw-opacity-100",
+      "desktop-hover:group-hover:tw-opacity-100"
+    );
+    expect(screen.getByTestId("open-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
     expect(screen.getByTestId("media")).toBeInTheDocument();
     const mediaWrapper = screen.getByTestId("media")
@@ -743,7 +748,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("mobile-open-action")).toBeInTheDocument();
     expect(screen.getByTestId("mobile-copy-action")).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Vote" })[1]!);
+    fireEvent.click(screen.getByRole("button", { name: "Vote" }));
     expect(screen.getByTestId("modal")).toBeInTheDocument();
     expect(setIsActive).toHaveBeenCalledWith(false);
   });
@@ -793,5 +798,23 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.queryByTestId("open-action")).not.toBeInTheDocument();
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
     expect(screen.queryByTestId("mobile-copy-action")).not.toBeInTheDocument();
+  });
+
+  it("keeps the desktop open action when voting rules hide Vote", () => {
+    useDropInteractionRules.mockReturnValue({ canShowVote: false });
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("open-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
   });
 });

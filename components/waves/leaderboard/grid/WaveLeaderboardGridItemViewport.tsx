@@ -2,6 +2,7 @@
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
@@ -15,6 +16,7 @@ interface WaveLeaderboardGridItemViewportProps {
   readonly titleId: string;
   readonly isCompactMode: boolean;
   readonly isContentOnlyMode: boolean;
+  readonly showDesktopContentOnlyActions: boolean;
   readonly canOpenDrop: boolean;
   readonly canShowVotingAction: boolean;
   readonly onOpenDrop: () => void;
@@ -109,6 +111,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
   titleId,
   isCompactMode,
   isContentOnlyMode,
+  showDesktopContentOnlyActions,
   canOpenDrop,
   canShowVotingAction,
   onOpenDrop,
@@ -203,31 +206,23 @@ export const WaveLeaderboardGridItemViewport: React.FC<
         </h3>
       )}
 
-      {isContentOnlyMode &&
-        (canShowVotingAction || (!showSummary && canOpenDrop)) && (
-          <div className="tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-px-3 tw-py-2">
-            {!showSummary && canOpenDrop && (
-              <button
-                type="button"
-                onClick={onOpenButtonClick}
-                aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
-                  title: displayTitle,
-                })}
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-400 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
-              >
-                {openActionLabel}
-              </button>
-            )}
+      {showDesktopContentOnlyActions && (
+        <div
+          data-testid={`wave-leaderboard-grid-item-content-only-actions-${drop.id}`}
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-10 tw-bg-gradient-to-t tw-from-black/90 tw-via-black/65 tw-to-transparent tw-p-2 tw-opacity-0 tw-transition-opacity tw-duration-200 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100"
+        >
+          <div className="tw-pointer-events-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 [&_button]:tw-min-h-11 [&_button]:tw-min-w-11">
+            {canOpenDrop && <WaveDropActionsOpen drop={drop} />}
             {canShowVotingAction && (
               <VotingModalButton
                 drop={drop}
                 onClick={onVoteButtonClick}
                 variant="subtle"
-                className="tw-ml-auto tw-min-h-11"
               />
             )}
           </div>
-        )}
+        </div>
+      )}
     </div>
   );
 };
