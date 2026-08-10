@@ -5,7 +5,6 @@ import path from "node:path";
 
 type EffectivePlan = {
   checks: {
-    deadcode: { required: boolean };
     release_bus_contract: { required: boolean };
     test_typecheck: { required: boolean };
     playwright_smoke?: { required: boolean };
@@ -62,11 +61,23 @@ describe("effective App PR CI plan", () => {
   it("preserves risk-selected browser checks for ordinary runtime changes", () => {
     const effective = executePlan(["components/header/AppHeader.tsx"]);
 
-    expect(effective.checks.deadcode.required).toBe(false);
     expect(effective.checks.release_bus_contract.required).toBe(false);
     expect(effective.checks.test_typecheck.required).toBe(false);
     expect(effective.checks.playwright_smoke?.required).toBe(true);
     expect(effective.checks.playwright_critical_shell?.required).toBe(true);
+  });
+
+  it("requires the installed quality lane for every pull request", () => {
+    const rawPlan = plan(["README.md"]);
+    rawPlan.checks.install = {
+      required: false,
+      reason: "No installed checks selected.",
+    };
+
+    const effective = executeRawPlan(rawPlan);
+
+    expect(effective.checks.install.required).toBe(true);
+    expect(effective.checks).not.toHaveProperty("deadcode");
   });
 
   it.each([
@@ -127,13 +138,6 @@ describe("effective App PR CI plan", () => {
     "README.md",
   ])("does not run Museum browser coverage for unrelated change %s", (file) => {
     expect(executePlan([file]).checks.playwright_museum.required).toBe(false);
-  });
-
-  it("requires dead-code analysis for dependency changes or deleted runtime source", () => {
-    expect(executePlan(["package.json"]).checks.deadcode.required).toBe(true);
-    expect(
-      executePlan(["lib/removed-runtime-source.ts"]).checks.deadcode.required
-    ).toBe(true);
   });
 
   it.each([

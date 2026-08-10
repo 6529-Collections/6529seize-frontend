@@ -79,7 +79,7 @@ const normalizeDropVoteLogTimestampMs = (
 function VoterAvatar({ identity }: { readonly identity: ApiIdentityOverview }) {
   const label = getIdentityLabel(identity);
   const avatarClassName =
-    "tw-size-7 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/10";
+    "tw-size-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/[0.08]";
 
   if (!identity.pfp) {
     return <div className={avatarClassName} aria-hidden="true" />;
@@ -91,8 +91,8 @@ function VoterAvatar({ identity }: { readonly identity: ApiIdentityOverview }) {
       unoptimized
       src={resolveIpfsUrlSync(identity.pfp)}
       alt={`${label}'s avatar`}
-      width={28}
-      height={28}
+      width={24}
+      height={24}
       className={avatarClassName}
     />
   );
@@ -133,13 +133,13 @@ export function ParticipationDropVoteDetailsVoterRow({
   const voteColorClass = getVoteColorClass(voter.vote);
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-py-2.5 tw-transition-colors hover:tw-bg-white/[0.03]">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-4 tw-py-2 tw-transition-colors hover:tw-bg-white/[0.025]">
       <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
         <VoterAvatar identity={voter.voter} />
         <VoterIdentityLink identity={voter.voter} />
       </div>
       <span
-        className={`tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-tabular-nums ${voteColorClass}`}
+        className={`tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums ${voteColorClass}`}
       >
         {formatSignedVote(voter.vote)} {WAVE_VOTING_LABELS[creditType]}
       </span>
@@ -157,7 +157,7 @@ export function ParticipationDropVoteDetailsLogRow({
   );
 
   return (
-    <div className="tw-px-3 tw-py-2.5 tw-transition-colors hover:tw-bg-white/[0.03]">
+    <div className="tw-px-4 tw-py-2 tw-transition-colors hover:tw-bg-white/[0.025]">
       <div className="tw-flex tw-items-start tw-gap-2.5">
         <VoterAvatar identity={log.voter} />
         <div className="tw-min-w-0 tw-flex-1">

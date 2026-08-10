@@ -394,3 +394,47 @@ publication status.
 - No staging or production environment has been mutated by this six-PR train.
   Final staging, E2E, production, E2E, retained qualification, and developer
   Wave closeout remain required.
+
+## 2026-08-06 live qualification correction
+
+- The six-PR train is now merged through PR #3656 at exact main
+  `ee156caa5b2a9ed2efaee34659f098e916badcb9`.
+- Exact staging deployment and automatic staging E2E passed. Production run
+  31113392584 deployed the exact version; live Elastic Beanstalk and HTTP
+  readbacks are healthy.
+- Final production qualification is blocked by the readiness adapter's
+  double-normalization defect, not by the deployed application. The focused
+  correction and real-adapter regression are the only active hotfix scope.
+- After the hotfix completes its governed release and production E2E, the next
+  workstream is the separately reviewed one-click production operation agreed
+  with the Dev Team. It must use authoritative pre-dispatch drain/acquisition,
+  a bounded cross-repository lane lease and control epoch, an isolated builder
+  without deployment credentials, and a fresh artifact verifier before AWS.
+
+## 2026-08-06 readiness hotfix release and one-click design
+
+- PR #3662 merged as exact frontend main
+  `86f4d4aa2c3927df1ad0823dc12b1c6b9269f03e` after all exact-head product,
+  security, review, signature, and CI gates passed. Production still serves the
+  previously deployed `ee156caa5b2a9ed2efaee34659f098e916badcb9`; the hotfix
+  has not yet mutated production.
+- Exact-tree staging composition
+  `87a80d848e68fcb8f73717e3216fae35feab6e28` has the same tree as hotfix main.
+  Staging run 31117046350 passed the authoritative guard, then failed before
+  checkout or build because GitHub Actions could not download pinned actions
+  during the ongoing Actions incident. No environment mutation occurred.
+- Once GitHub reports Actions recovered, rerun the complete staging workflow so
+  the new attempt executes a fresh guard. Do not use a failed-jobs-only rerun,
+  which could otherwise reuse the earlier attempt's authorization result.
+- The Dev Team discussion in Wave
+  `bf945b75-2912-4ce6-b1f5-95b5b667b7c9` converged on the architecture recorded
+  in `one-click-production-architecture.md`: one frozen protected-main commit,
+  one authoritative cross-repository production lease, explicit artifact
+  identity, isolated build and verification authorities, automatic production
+  E2E, and fail-closed run-attempt renewal before AWS mutation.
+- Measured recent runs predict approximately 21 / 42 / 58 minutes
+  best / median / conservative small-sample p95 when production artifact work
+  overlaps staging. A serialized production build predicts 29 / 56 / 72
+  minutes. The one-click controller removes manual idle and race windows; the
+  25-minute p95 target also requires parallel E2E packs, warm caches or faster
+  runners, and path-scoped Museum coverage.

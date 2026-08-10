@@ -37,9 +37,12 @@ const TRUSTED_REPORT_PRODUCERS = Object.freeze({
     [PRODUCTION_BUILD_WORKFLOW]: Object.freeze({
       events: Object.freeze(["push", "workflow_dispatch"]),
       branches: Object.freeze(["main"]),
-      artifactPattern: /^production-frontend-[a-f0-9]{40}$/,
+      artifactPattern:
+        // eslint-disable-next-line security/detect-unsafe-regex -- Fully anchored and bounded: the only variable suffix is capped at 80 characters.
+        /^production-frontend-[a-f0-9]{40}(?:-[A-Za-z0-9][A-Za-z0-9._-]{0,79})?$/,
       artifactContracts: Object.freeze({
         "production-prebuild-v1": "production-prebuild-v1",
+        "production-prebuild-v2": "production-prebuild-v2",
       }),
     }),
   }),
@@ -356,9 +359,14 @@ function verifyReportRun(options, context) {
     );
   }
   if (options.expectedWorkflowPath === PRODUCTION_BUILD_WORKFLOW) {
+    const legacyName = `production-frontend-${options.expectedSourceSha}`;
+    const operationBoundPrefix = `${legacyName}-`;
     invariant(
-      options.artifactName ===
-        `production-frontend-${options.expectedSourceSha}`,
+      options.artifactName === legacyName ||
+        (options.artifactName.startsWith(operationBoundPrefix) &&
+          /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(
+            options.artifactName.slice(operationBoundPrefix.length)
+          )),
       "production artifact name does not bind the source SHA"
     );
   }
