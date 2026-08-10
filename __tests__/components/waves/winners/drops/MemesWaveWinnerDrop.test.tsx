@@ -381,10 +381,10 @@ describe("MemesWaveWinnersDrop", () => {
         name: "View voters and vote log for 2 voters",
       })
     ).toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-md",
       "tw-border",
-      "tw-border-iron-700",
-      "tw-bg-iron-900/40"
+      "tw-border-white/[0.06]",
+      "tw-bg-white/[0.05]"
     );
   });
 

@@ -235,6 +235,159 @@ describe("sync-agent-files", () => {
       ).toEqual(["local", "staging", "production"]);
       expect(published).toEqual(expectedProduction);
     });
+
+    it("publishes natural multi-wallet consolidation language", () => {
+      const source = JSON.parse(
+        fs.readFileSync(
+          path.join(repoRoot, "ops/help/help-index.json"),
+          "utf8"
+        )
+      );
+      const published = JSON.parse(
+        fs.readFileSync(path.join(repoRoot, "public/help-index.json"), "utf8")
+      );
+      const consolidationRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.register-consolidation-doc"
+        )
+      );
+      const consolidationUseCaseRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.consolidation-use-cases"
+        )
+      );
+      const consolidationRevokeRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.manage-revoke-doc"
+        )
+      );
+      const consolidationUpdateRecords = [source, published].map((index) =>
+        index.records.find(
+          (record: { id: string }) =>
+            record.id === "delegation.manage-update-doc"
+        )
+      );
+      const walletManagementClarificationRecords = [source, published].map(
+        (index) =>
+          index.records.find(
+            (record: { id: string }) =>
+              record.id === "delegation.wallet-management-clarification"
+          )
+      );
+
+      consolidationRecords.forEach((consolidationRecord) => {
+        expect(consolidationRecord?.facts).toEqual(
+          expect.arrayContaining([
+            "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
+          ])
+        );
+        expect(consolidationRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "add another wallet",
+            "add my other wallet",
+            "link two wallets",
+            "link my wallets",
+            "pair two wallets",
+            "set up multiple wallets",
+          ])
+        );
+        expect(consolidationRecord?.aliases).not.toEqual(
+          expect.arrayContaining([
+            "connect another wallet",
+            "connect two wallets",
+            "use multiple wallets",
+            "use more than one wallet",
+          ])
+        );
+        expect(consolidationRecord?.keywords).not.toEqual(
+          expect.arrayContaining([
+            "add",
+            "another",
+            "multiple",
+            "link",
+            "connect",
+          ])
+        );
+      });
+      expect(consolidationRecords[1]).toEqual(consolidationRecords[0]);
+      consolidationUseCaseRecords.forEach((consolidationUseCaseRecord) => {
+        expect(consolidationUseCaseRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "wallet consolidation limit",
+            "maximum consolidation group size",
+            "number of wallets in a consolidation",
+            "number of addresses in a consolidation",
+            "wallet consolidation capacity",
+          ])
+        );
+        expect(consolidationUseCaseRecord?.keywords).toEqual(
+          expect.arrayContaining(["limit", "maximum", "capacity"])
+        );
+        expect(consolidationUseCaseRecord?.facts).toEqual(
+          expect.arrayContaining([
+            "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
+            "More than 3 addresses can have consolidation records, but Seize only counts the last 3 addresses for consolidation purposes.",
+            "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 3 addresses count together.",
+          ])
+        );
+      });
+      expect(consolidationUseCaseRecords[1]).toEqual(
+        consolidationUseCaseRecords[0]
+      );
+      consolidationRevokeRecords.forEach((consolidationRevokeRecord) => {
+        expect(consolidationRevokeRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "remove wallet from consolidation",
+            "unlink consolidated wallet",
+            "detach wallet from consolidation",
+          ])
+        );
+      });
+      expect(consolidationRevokeRecords[1]).toEqual(
+        consolidationRevokeRecords[0]
+      );
+      consolidationUpdateRecords.forEach((consolidationUpdateRecord) => {
+        expect(consolidationUpdateRecord?.aliases).toEqual(
+          expect.arrayContaining([
+            "replace wallet in consolidation",
+            "swap a consolidated wallet",
+            "change wallet in consolidation",
+          ])
+        );
+      });
+      expect(consolidationUpdateRecords[1]).toEqual(
+        consolidationUpdateRecords[0]
+      );
+      walletManagementClarificationRecords.forEach((record) => {
+        expect(record?.aliases).toEqual(
+          expect.arrayContaining([
+            "connect another wallet",
+            "connect two wallets",
+            "wallet connection or consolidation",
+          ])
+        );
+        expect(record?.facts).toEqual(
+          expect.arrayContaining([
+            "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
+            "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
+            "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
+            "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
+          ])
+        );
+        expect(record?.related_paths).toEqual(
+          expect.arrayContaining([
+            "/delegation/delegation-faq/manage-revoke",
+            "/delegation/delegation-faq/manage-update",
+          ])
+        );
+      });
+      expect(walletManagementClarificationRecords[1]).toEqual(
+        walletManagementClarificationRecords[0]
+      );
+    });
   });
 
   describe("robots.txt agent discovery block", () => {

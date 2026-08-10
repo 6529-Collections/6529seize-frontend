@@ -41,8 +41,8 @@ On web layouts, route switching is sidebar-first.
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
-- Utility rows: desktop `Search`, connected-only `Notifications`,
-  connected-only `Profile`, and disconnected-only `Share`.
+- Utility rows: desktop `Search`, `Share` (only on supported desktop-web
+  routes), connected-only `Notifications`, then the profile control.
 - Bottom account area: connect action, loading placeholders, and the connected
   user menu.
 
@@ -58,17 +58,16 @@ On web layouts, route switching is sidebar-first.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.
-- Open connected `Notifications` from the lower row above `Profile`.
-- Open `Share` from the lower row while disconnected, or from the connected
-  user menu on desktop web.
+- Open connected `Notifications` from the lower utility rows.
+- Open `Share` from the desktop sidebar on a supported route.
+- Open `Profile` or `Connect Device` from the connected user menu.
 - Press `⌘K` or `Ctrl+K` when desktop sidebar navigation is mounted.
 
 ## User Journey
 
 1. Open a web route.
 2. Switch primary sections with direct rows.
-3. Use lower utility rows for connected `Notifications`, connected `Profile`,
-   or disconnected `Share`.
+3. Use lower utility rows in `Search`, `Share`, `Notifications`, profile order.
 4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
    `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
@@ -120,11 +119,11 @@ On web layouts, route switching is sidebar-first.
   `Data & Developer Tools` instead of flattening every route into one list.
   `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
-- Open connected `Notifications` from the lower row above `Profile`.
-- Open `Share` to generate QR/deep links for the current route:
-  disconnected desktop web uses the standalone row, while connected desktop
-  web opens `Share` from the user menu.
-- Use connected `Profile` shortcut (handle route first, wallet fallback).
+- Open connected `Notifications` from the lower utility rows.
+- Open `Share` for copy, QR, X, Farcaster, and supported system-share actions
+  using the exact current URL.
+- Select the connected avatar, then `Profile` (handle route first, wallet
+  fallback) or `Connect Device`.
 
 ## Edge Cases
 
@@ -148,18 +147,15 @@ On web layouts, route switching is sidebar-first.
 - The collapsed-row tooltip stays hidden while its flyout is open.
 - Flyouts reposition on sidebar scroll and window resize.
 - `Notifications` row appears only when wallet connection is active.
-- `Profile` row appears only when wallet connection is active.
 - `Drop Forge` appears as a standalone row after `About` only when the
   connected wallet can access the `/drop-forge` landing route.
-- Connected user row opens the account menu on a single activate; a quick
-  second activate cycles to the next connected account when at least two are
-  available.
+- Connected user row opens the account menu immediately on a single activate.
 - The web account dropdown stays horizontally anchored to the connected user
   row when the centered desktop layout adds wide-screen margins.
-- Disconnected `Share` row is hidden in Capacitor/native context and
-  mobile-device web.
-- Connected desktop-web `Share` moves into the user menu and stays hidden until
-  device detection resolves.
+- The desktop-web sidebar `Share` row is hidden in Capacitor/native and
+  mobile-device web contexts. Supported mobile pages expose Share from the
+  header instead. The route rules are documented in
+  [Page Sharing and Device Connection](feature-share-modal.md).
 - `App Wallets` appears inside `About > Delegation & Wallets` only when
   app-wallet support is enabled.
 - On iOS, subscription-related rows show only when country resolves to `US`:
@@ -169,14 +165,14 @@ On web layouts, route switching is sidebar-first.
 ## Failure and Recovery
 
 - While identity data loads, account area shows placeholders.
-- If profile handle is missing, `Profile` route falls back to wallet address.
+- If profile handle is missing, `Profile` falls back to the wallet address.
 - If overlay looks stuck, close with backdrop, `Escape`, or route change.
 - If submenu state looks stale, toggle the group or rail again.
 - If `Drop Forge` is missing, verify the connected wallet can access the landing
   route and wait for permission checks to finish.
-- If `Share` looks missing, check auth/device context: disconnected desktop web
-  uses the standalone row, connected desktop web uses the user menu, and
-  Capacitor/mobile-device web hides it.
+- If the sidebar `Share` row looks missing, check the runtime and route-support
+  list. Mobile web and the native app place page sharing in the header, while
+  unsupported routes intentionally omit it.
 - Opening the target wave/DM thread should clear that wave's unread state and
   refresh unread indicators after read sync. If indicators still look stale,
   open `/notifications` for the target account and retry after refresh.
@@ -203,7 +199,7 @@ On web layouts, route switching is sidebar-first.
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [6529 Apps Page](feature-6529-apps-page.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Network Index](../network/README.md)
