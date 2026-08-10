@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+import { PublicReviewGuidePointList } from "@/components/public-review/PublicReviewGuidePointList";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -38,8 +39,7 @@ const ARTWORK_PARTS = [
   },
   {
     titleKey: "publicReview.overviewGuide.artworkParts.rules.title",
-    descriptionKey:
-      "publicReview.overviewGuide.artworkParts.rules.description",
+    descriptionKey: "publicReview.overviewGuide.artworkParts.rules.description",
   },
   {
     titleKey: "publicReview.overviewGuide.artworkParts.preservation.title",
@@ -99,8 +99,7 @@ const AUDIENCE_PATHS = [
   {
     pageId: "for-artists",
     titleKey: "publicReview.overviewGuide.audiences.artists.title",
-    descriptionKey:
-      "publicReview.overviewGuide.audiences.artists.description",
+    descriptionKey: "publicReview.overviewGuide.audiences.artists.description",
   },
   {
     pageId: "artwork-lifecycle",
@@ -111,8 +110,7 @@ const AUDIENCE_PATHS = [
   {
     pageId: "security-testing-and-known-limitations",
     titleKey: "publicReview.overviewGuide.audiences.auditors.title",
-    descriptionKey:
-      "publicReview.overviewGuide.audiences.auditors.description",
+    descriptionKey: "publicReview.overviewGuide.audiences.auditors.description",
   },
 ] as const satisfies readonly LinkedOverviewItem[];
 
@@ -146,10 +144,7 @@ export function StreamReviewOverviewGuide({
           id="stream-artwork-parts-heading"
           className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
         >
-          {t(
-            DEFAULT_LOCALE,
-            "publicReview.overviewGuide.artworkParts.heading"
-          )}
+          {t(DEFAULT_LOCALE, "publicReview.overviewGuide.artworkParts.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(
@@ -157,27 +152,7 @@ export function StreamReviewOverviewGuide({
             "publicReview.overviewGuide.artworkParts.description"
           )}
         </p>
-        <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-y-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-px-0 tw-py-6">
-          {ARTWORK_PARTS.map((part) => (
-            <li
-              key={part.titleKey}
-              className="tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-gap-3"
-            >
-              <span
-                aria-hidden="true"
-                className="tw-mt-2.5 tw-size-1.5 tw-rounded-full tw-bg-primary-300"
-              />
-              <div>
-                <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-                  {t(DEFAULT_LOCALE, part.titleKey)}
-                </h3>
-                <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
-                  {t(DEFAULT_LOCALE, part.descriptionKey)}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <PublicReviewGuidePointList points={ARTWORK_PARTS} />
       </section>
 
       <section
@@ -210,7 +185,9 @@ export function StreamReviewOverviewGuide({
         </p>
         <ol className="tw-mb-0 tw-mt-7 tw-list-none tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-p-0">
           {ARTWORK_JOURNEY.map((step, index) => {
-            const page = pages.find((candidate) => candidate.id === step.pageId);
+            const page = pages.find(
+              (candidate) => candidate.id === step.pageId
+            );
             if (!page) {
               return null;
             }

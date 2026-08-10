@@ -6,7 +6,10 @@ import { notFound } from "next/navigation";
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
-import { StreamReviewDevelopmentStatus } from "@/components/public-review/StreamReviewDevelopmentStatus";
+import {
+  StreamReviewDevelopmentStatus,
+  StreamReviewReviewerPrompts,
+} from "@/components/public-review/StreamReviewDevelopmentStatus";
 import { StreamReviewForArtistsGuide } from "@/components/public-review/StreamReviewForArtistsGuide";
 import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -33,6 +36,11 @@ import {
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
+
+const DEVELOPMENT_UPDATE_OLD_LOCATION =
+  /The separately dated development update on the current Overview records work\s+completed after this snapshot\./;
+const DEVELOPMENT_UPDATE_CURRENT_LOCATION =
+  "The separately dated development update above records work completed after this snapshot.";
 
 function getStreamReviewMetadata({
   baseEndpoint,
@@ -63,6 +71,23 @@ function getStreamReviewMetadata({
   };
 }
 
+async function loadAvailableStreamEditorialContent({
+  contentVersion,
+  route,
+}: {
+  readonly contentVersion: string;
+  readonly route: StreamReviewRouteModel;
+}): Promise<string | undefined> {
+  try {
+    return await loadStreamEditorialContent(route.page, contentVersion);
+  } catch (error) {
+    if (error instanceof PublicReviewEditorialContentError) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
 async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
@@ -70,37 +95,41 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   if (!reviewVersion) {
     throw new Error("The resolved Stream review version is unavailable.");
   }
-  let editorialMarkdown: string;
-  try {
-    editorialMarkdown = await loadStreamEditorialContent(
-      route.page,
-      contentVersion
-    );
-  } catch (error) {
-    if (error instanceof PublicReviewEditorialContentError) {
-      notFound();
-    }
-    throw error;
+  const [editorialMarkdown, { manifest }, feedbackDestination] =
+    await Promise.all([
+      loadAvailableStreamEditorialContent({ contentVersion, route }),
+      getStreamSolidityReferenceReader().loadManifest(contentVersion),
+      resolveStreamReviewFeedbackDestination(route.baseEndpoint),
+    ]);
+  if (editorialMarkdown === undefined) {
+    notFound();
   }
   const sections = extractPublicReviewSections(editorialMarkdown);
-  const { manifest } =
-    await getStreamSolidityReferenceReader().loadManifest(contentVersion);
   const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
-  const feedbackDestination = await resolveStreamReviewFeedbackDestination(
-    route.baseEndpoint
-  );
   const isCurrentOverview =
     route.page.id === "overview" && route.version === undefined;
   const isCurrentForArtists =
     route.page.id === "for-artists" && route.version === undefined;
+  const isCurrentDevelopmentStatus =
+    route.page.id === "security-testing-and-known-limitations" &&
+    route.version === undefined;
+  const isCurrentCommunityReview =
+    route.page.id === "community-review" && route.version === undefined;
+  const displayedEditorialMarkdown = isCurrentDevelopmentStatus
+    ? editorialMarkdown.replace(
+        DEVELOPMENT_UPDATE_OLD_LOCATION,
+        DEVELOPMENT_UPDATE_CURRENT_LOCATION
+      )
+    : editorialMarkdown;
+  const displayedSections = isCurrentOverview ? [] : sections;
 
   return (
     <PublicReviewShell
-      editorialMarkdown={editorialMarkdown}
+      editorialMarkdown={displayedEditorialMarkdown}
       page={route.page}
       review={STREAM_REVIEW_DEFINITION}
       reviewVersion={reviewVersion}
-      sections={sections}
+      sections={displayedSections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
       introNotice={
@@ -108,20 +137,25 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
           {isCurrentOverview ? (
             <StreamReviewOverviewGuide pages={reviewVersion.pages} />
           ) : null}
-          {isCurrentOverview ? (
+          {isCurrentDevelopmentStatus ? (
             <StreamReviewDevelopmentStatus
-              pages={reviewVersion.pages}
               reviewSourceCommit={manifest.source.commit}
               reviewVersion={contentVersion}
             />
           ) : null}
+          {isCurrentCommunityReview ? (
+            <StreamReviewReviewerPrompts pages={reviewVersion.pages} />
+          ) : null}
           {isCurrentForArtists ? (
             <StreamReviewForArtistsGuide pages={reviewVersion.pages} />
           ) : null}
-          <StreamReviewBotAuthorshipNote />
+          {route.version !== undefined || isCurrentCommunityReview ? (
+            <StreamReviewBotAuthorshipNote />
+          ) : null}
         </>
       }
       showAudiencePaths={!isCurrentOverview}
+      showEditorialContent={!isCurrentOverview}
       source={{
         repository: manifest.source.repository,
         commit: manifest.source.commit,
@@ -134,7 +168,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
             page: route.page,
             version: contentVersion,
           })}
-          sections={sections}
+          sections={displayedSections}
         />
       }
     />
