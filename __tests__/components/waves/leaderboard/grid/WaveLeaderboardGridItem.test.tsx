@@ -242,7 +242,7 @@ describe("WaveLeaderboardGridItem", () => {
             {
               media: [],
               content:
-                "Example title\n\n**Bold** [linked words](https://example.com) remain readable.",
+                "Example title — **Bold** [linked words](https://example.com) remain readable.",
             },
           ],
         }}

@@ -28,7 +28,7 @@ const removeLeadingTitle = (content: string, title: string): string => {
 
   return content
     .slice(title.length)
-    .replace(/^\s*[-:–—]\s*/, "")
+    .replace(/^\s*(?:-|:|–|—)\s*/, "")
     .trimStart();
 };
 
