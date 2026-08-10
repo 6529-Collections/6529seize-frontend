@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
 import {
   COMPATIBILITY_CONTRACT,
   verifyMuseumPublicationCompatibility,
@@ -81,6 +83,52 @@ describe("museum publication compatibility", () => {
       catalog_content_hash: null,
     });
     expect(fixture.calls).toEqual([]);
+  });
+
+  it("exits nonzero and retains the rejected result in output mode", () => {
+    const outputDirectory = fs.mkdtempSync(
+      path.join(process.cwd(), ".tmp-museum-compatibility-")
+    );
+    const outputPath = path.join(outputDirectory, "strict-adapter.json");
+    const environment = { ...process.env, NODE_ENV: "test" };
+    delete environment["PUBLIC_RUNTIME"];
+
+    try {
+      const execution = spawnSync(
+        process.execPath,
+        [
+          require.resolve("tsx/cli"),
+          "scripts/museum-publication-compatibility.ts",
+          "--source-commit",
+          "main",
+          "--output",
+          outputPath,
+        ],
+        {
+          cwd: process.cwd(),
+          encoding: "utf8",
+          env: environment,
+        }
+      );
+      const retainedResult = fs.readFileSync(outputPath, "utf8");
+
+      expect(execution.error).toBeUndefined();
+      expect(execution.status).toBe(1);
+      expect(execution.stderr).toBe("");
+      expect(execution.stdout).toBe(retainedResult);
+      expect(JSON.parse(retainedResult)).toEqual({
+        contract: COMPATIBILITY_CONTRACT,
+        source_commit: "main",
+        accepted: false,
+        adapter_status: "invalid",
+        adapter_error_code: "publication_invalid_commit",
+        publication_commit: null,
+        catalog_id: null,
+        catalog_content_hash: null,
+      });
+    } finally {
+      fs.rmSync(outputDirectory, { recursive: true, force: true });
+    }
   });
 
   it("rejects a current publication without a verified catalog identity", async () => {
