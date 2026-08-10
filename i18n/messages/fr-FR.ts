@@ -449,6 +449,17 @@ export const FR_FR_MESSAGES = {
     "Tout le monde peut voir la Wave et y participer. Vous seul pouvez l’administrer.",
   "waves.create.groups.advanced.customSummary":
     "Les paramètres d’accès ou de modération ont été personnalisés.",
+  "waves.create.dates.title": "Calendrier",
+  "waves.create.dates.description":
+    "Vérifiez le début de la Wave, du vote et des annonces des gagnants.",
+  "waves.create.dates.approve.noEndSummary":
+    "Débute le {start}. Aucune date de fin.",
+  "waves.create.dates.approve.endSummary":
+    "Débute le {start}. Se termine le {end}.",
+  "waves.create.dates.rank.ongoingSummary":
+    "Les soumissions débutent le {submission}. Le vote débute le {voting}. Le classement reste ouvert.",
+  "waves.create.dates.rank.scheduledSummary":
+    "Les soumissions débutent le {submission}. Le vote débute le {voting}. Premiers gagnants : {announcement}.",
   ...FR_FR_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",

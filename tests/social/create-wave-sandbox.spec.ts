@@ -204,6 +204,45 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("summarizes the default rank schedule before detailed calendars", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoCreateWave(page);
+    await page.getByLabel(/Wave Name/).fill("Sandbox Schedule Summary Wave");
+    await page.getByText("Rank", { exact: true }).click();
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Access", level: 2 })
+    ).toBeVisible();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.getByRole("heading", { name: "Schedule", level: 2 })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    const advancedSettings = page.getByRole("button", {
+      name: /Advanced settings/,
+    });
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
+    await expect(advancedSettings).toContainText("First winners");
+    await expect(
+      page.getByRole("button", { name: "Winners Announcements" })
+    ).toBeHidden();
+
+    await advancedSettings.click();
+    await expect(page.getByText("Wave Timeline")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Winners Announcements" })
+    ).toBeVisible();
+    await advancedSettings.click();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.locator("#no-of-applications-allowed-per-participant")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("creates a perpetual rank wave after choosing the mode on the overview", async ({
     baseURL,
     page,
@@ -229,15 +268,25 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await nextStepButton(page).click();
 
-    // Dates step in scheduled mode shows the announcement schedule, expanded
-    // by default; mounting it also defaults the first announcement to a valid
-    // future time, so Next proceeds to the Drops step.
-    await expect(page.getByText("Wave Timeline")).toBeVisible({
+    // Dates starts with a readable summary; the full timeline remains
+    // available without making the default path require any interaction.
+    await expect(
+      page.getByRole("heading", { name: "Schedule", level: 2 })
+    ).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    const scheduleAdvancedSettings = page.getByRole("button", {
+      name: /Advanced settings/,
+    });
+    await expect(scheduleAdvancedSettings).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    await expect(scheduleAdvancedSettings).toContainText("First winners");
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
-    ).toBeVisible();
+    ).toBeHidden();
+    await scheduleAdvancedSettings.click();
     await expect(
       page.getByText("First Winners Announcement").first()
     ).toBeVisible();
@@ -248,7 +297,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
 
     // Go back to the Overview and switch the wave to perpetual ranking.
     await previousStepButton(page).click();
-    await expect(page.getByText("Wave Timeline")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Schedule", level: 2 })
+    ).toBeVisible();
     await previousStepButton(page).click();
     await expect(
       page.getByRole("heading", { name: "Access", level: 2 })
@@ -263,10 +314,16 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await nextStepButton(page).click();
 
-    // The dates step is now purely about dates: no announcement schedule.
-    await expect(page.getByText("Wave Timeline")).toBeVisible({
+    // The schedule summary reflects that perpetual ranking stays open and has
+    // no winner-announcement controls.
+    await expect(
+      page.getByRole("heading", { name: "Schedule", level: 2 })
+    ).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    await expect(
+      page.getByRole("button", { name: /Advanced settings/ })
+    ).toContainText("Ranking stays open");
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
     ).toBeHidden();
@@ -357,7 +414,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
 
     // The first winners announcement defaults ONE WEEK out at 23:59 — the
     // old same-day default produced a wave that ended within hours.
-    await expect(page.getByText("Wave Timeline")).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Schedule", level: 2 })
+    ).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     const expectedDefault = new Date();
@@ -437,14 +496,16 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await nextStepButton(page).click();
 
-    // The Dates step mounts the announcement schedule expanded and defaults
-    // the first announcement to a valid future time.
-    await expect(page.getByText("Wave Timeline")).toBeVisible({
+    // The valid default schedule is summarized without requiring the detailed
+    // timeline to be opened.
+    await expect(
+      page.getByRole("heading", { name: "Schedule", level: 2 })
+    ).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
-    ).toBeVisible();
+    ).toBeHidden();
     await nextStepButton(page).click();
 
     await expect(
@@ -559,10 +620,17 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Wave End", level: 3 })
+      page.getByRole("heading", { name: "Schedule", level: 2 })
     ).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    await expect(
+      page.getByRole("button", { name: /Advanced settings/ })
+    ).toContainText("No end date");
+    await page.getByRole("button", { name: /Advanced settings/ }).click();
+    await expect(
+      page.getByRole("heading", { name: "Wave End", level: 3 })
+    ).toBeVisible();
     await expect(page.getByText("Perpetual Ranking")).toBeHidden();
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
@@ -762,9 +830,18 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await nextStepButton(page).click();
 
-    // Dates: interacting inside the announcements section must not
+    // Dates: open the optional timeline, then interacting inside the
+    // announcements section must not
     // auto-collapse the Wave Timeline section above it — that collapse
     // shifted the whole page mid-tap ("calendar jumping around").
+    const scheduleAdvancedSettings = page.getByRole("button", {
+      name: /Advanced settings/,
+    });
+    await expect(scheduleAdvancedSettings).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    await scheduleAdvancedSettings.click();
     const timelineToggle = page.getByRole("button", { name: /Wave Timeline/ });
     await expect(timelineToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
