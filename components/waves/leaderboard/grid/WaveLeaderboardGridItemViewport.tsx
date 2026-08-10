@@ -85,11 +85,12 @@ const getWaveLeaderboardGridItemSummary = ({
   const derivedTitle =
     explicitTitle ||
     (Array.from(firstBlock).length <= GRID_TITLE_MAX_LENGTH ? firstBlock : "");
-  const descriptionSource = explicitTitle
-    ? removeLeadingTitle(plainContent, explicitTitle)
-    : derivedTitle
-      ? contentBlocks.slice(1).join(" ")
-      : plainContent;
+  let descriptionSource = plainContent;
+  if (explicitTitle) {
+    descriptionSource = removeLeadingTitle(plainContent, explicitTitle);
+  } else if (derivedTitle) {
+    descriptionSource = contentBlocks.slice(1).join(" ");
+  }
 
   return {
     title: derivedTitle

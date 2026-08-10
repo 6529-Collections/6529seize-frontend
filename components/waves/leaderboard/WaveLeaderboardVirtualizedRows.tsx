@@ -462,9 +462,16 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
 
   const ariaSetSize = hasNextPage || hasPreviousPage ? -1 : items.length;
   const gridColumnsClassName = getGridColumnsClassName(columns);
+  // Quick DMs uses an 88px-wide fixed launcher zone on desktop. Keep visual
+  // card layouts out of that rail so footer actions cannot sit behind it.
+  const quickDmSafeGutterClassName =
+    layout !== "list" ? "lg:tw-pr-[5.5rem]" : "";
 
   return (
-    <div ref={rootRef} className="tw-w-full tw-min-w-0 tw-@container">
+    <div
+      ref={rootRef}
+      className={`tw-w-full tw-min-w-0 tw-@container ${quickDmSafeGutterClassName}`}
+    >
       {isFetchingPreviousPage ? (
         <span className="tw-sr-only" role="status" aria-live="polite">
           {t(locale, "waves.leaderboard.loadingEarlier")}
@@ -483,11 +490,62 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
               const itemIndex = logicalIndex - leadingItemCount;
               const item = items[itemIndex];
               const isPlaceholder = logicalIndex < leadingItemCount;
-              const lane = virtualItem.lane ?? logicalIndex % columns;
+              const lane = virtualItem.lane;
               const showPreviousRetry =
                 isPlaceholder &&
                 isFetchPreviousPageError &&
                 logicalIndex === previousRetryVirtualIndex;
+              let columnContent: ReactNode = null;
+
+              if (isPlaceholder) {
+                columnContent = (
+                  <div // NOSONAR -- the placeholder is one virtual list entry.
+                    role={showPreviousRetry ? "listitem" : undefined}
+                    aria-hidden={showPreviousRetry ? undefined : true}
+                    className="tw-pointer-events-auto tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
+                    style={{
+                      gridColumn: lane + 1,
+                      minHeight: virtualItem.size,
+                    }}
+                  >
+                    {showPreviousRetry ? (
+                      <>
+                        <span className="tw-sr-only" role="alert">
+                          {t(locale, "waves.leaderboard.previousLoadError")}
+                        </span>
+                        <Button
+                          onClick={() => {
+                            previousTriggerKeyRef.current = null;
+                            loadPreviousPage();
+                          }}
+                          variant="tertiary"
+                          size="sm"
+                        >
+                          {t(locale, "waves.leaderboard.retryEarlier")}
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="tw-h-full tw-min-h-[24rem] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-900/50" />
+                    )}
+                  </div>
+                );
+              } else if (item !== undefined) {
+                columnContent = (
+                  <div // NOSONAR -- each card is one virtual list entry.
+                    ref={virtualizer.measureElement}
+                    data-index={virtualItem.index}
+                    role="listitem"
+                    aria-posinset={itemIndex + 1}
+                    aria-setsize={ariaSetSize}
+                    data-leaderboard-drop-id={getItemId(item)}
+                    data-leaderboard-logical-index={logicalIndex}
+                    className="tw-pointer-events-auto tw-min-w-0"
+                    style={{ gridColumn: lane + 1 }}
+                  >
+                    {renderItem(item)}
+                  </div>
+                );
+              }
 
               return (
                 <div
@@ -497,51 +555,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
                     transform: `translateY(${virtualItem.start - scrollMargin}px)`,
                   }}
                 >
-                  {isPlaceholder ? (
-                    <div // NOSONAR -- the placeholder is one virtual list entry.
-                      role={showPreviousRetry ? "listitem" : undefined}
-                      aria-hidden={showPreviousRetry ? undefined : true}
-                      className="tw-pointer-events-auto tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
-                      style={{
-                        gridColumn: lane + 1,
-                        minHeight: virtualItem.size,
-                      }}
-                    >
-                      {showPreviousRetry ? (
-                        <>
-                          <span className="tw-sr-only" role="alert">
-                            {t(locale, "waves.leaderboard.previousLoadError")}
-                          </span>
-                          <Button
-                            onClick={() => {
-                              previousTriggerKeyRef.current = null;
-                              loadPreviousPage();
-                            }}
-                            variant="tertiary"
-                            size="sm"
-                          >
-                            {t(locale, "waves.leaderboard.retryEarlier")}
-                          </Button>
-                        </>
-                      ) : (
-                        <div className="tw-h-full tw-min-h-[24rem] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-900/50" />
-                      )}
-                    </div>
-                  ) : item === undefined ? null : (
-                    <div // NOSONAR -- each card is one virtual list entry.
-                      ref={virtualizer.measureElement}
-                      data-index={virtualItem.index}
-                      role="listitem"
-                      aria-posinset={itemIndex + 1}
-                      aria-setsize={ariaSetSize}
-                      data-leaderboard-drop-id={getItemId(item)}
-                      data-leaderboard-logical-index={logicalIndex}
-                      className="tw-pointer-events-auto tw-min-w-0"
-                      style={{ gridColumn: lane + 1 }}
-                    >
-                      {renderItem(item)}
-                    </div>
-                  )}
+                  {columnContent}
                 </div>
               );
             })

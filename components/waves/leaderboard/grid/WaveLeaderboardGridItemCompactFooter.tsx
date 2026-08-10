@@ -24,12 +24,15 @@ interface WaveLeaderboardGridItemCompactFooterProps {
   readonly onVoteButtonClick: () => void;
 }
 
-const getVoteStyle = (userVote: number): string =>
-  userVote < 0
-    ? "tw-text-rose-400"
-    : userVote === 0
-      ? "tw-text-iron-400"
-      : "tw-text-iron-300";
+const getVoteStyle = (userVote: number): string => {
+  if (userVote < 0) {
+    return "tw-text-rose-400";
+  }
+  if (userVote === 0) {
+    return "tw-text-iron-400";
+  }
+  return "tw-text-iron-300";
+};
 
 function GridItemRankBadge({
   drop,
