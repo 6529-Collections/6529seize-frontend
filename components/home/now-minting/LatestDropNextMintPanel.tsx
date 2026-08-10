@@ -22,6 +22,7 @@ import { t } from "@/i18n/messages";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import ArtistPill from "./ArtistPill";
+import LatestDropAllowlistStatus from "./LatestDropAllowlistStatus";
 import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 import NowMintingStatsItem from "./NowMintingStatsItem";
 
@@ -225,10 +226,11 @@ export default function LatestDropNextMintPanel({
               </div>
 
               {nextMintCardId && (
-                <div className="tw-mt-8">
-                  <LatestDropNextMintSubscribe
-                    tokenId={nextMintCardId}
-                  />
+                <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3">
+                  {hasMappedMemeCard ? (
+                    <LatestDropAllowlistStatus tokenId={mappedMemeCardId} />
+                  ) : null}
+                  <LatestDropNextMintSubscribe tokenId={nextMintCardId} />
                 </div>
               )}
             </div>

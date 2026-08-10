@@ -32,7 +32,7 @@ export function ArtistPrevoteCollectedCard({
   }, [card, connectedProfile, isViewerBalanceLoading, viewerBalance]);
 
   return (
-    <div className="tw-flex tw-h-full tw-flex-col">
+    <div className="tw-flex tw-h-full tw-flex-col [&>a]:tw-flex [&>a]:tw-flex-1 [&>a>div]:tw-flex-1">
       <UserPageCollectedCard
         card={cardWithViewerBalance}
         contractType={ContractType.ERC1155}

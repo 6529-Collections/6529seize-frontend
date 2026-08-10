@@ -248,6 +248,7 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ["rankUnranked", "Unranked"],
     ["artwork.createdBy", "Created by"],
     ["artwork.mintDate", "Mint date"],
+    ["artwork.mintDateLabel", "Mint date:"],
     ["artwork.notAvailable", "not available"],
     ["artwork.artistAvatarAlt", "{artist} avatar"],
     ["market.mintPrice", "Mint price"],

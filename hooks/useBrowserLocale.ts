@@ -8,9 +8,24 @@ import {
 } from "@/i18n/locales";
 
 const getBrowserLocale = (): SupportedLocale => {
-  const [preferredLocale] = globalThis.navigator.languages;
+  const browserLanguages: unknown = Reflect.get(
+    globalThis.navigator,
+    "languages"
+  );
+  const browserLanguage: unknown = Reflect.get(
+    globalThis.navigator,
+    "language"
+  );
+  const preferredLocale =
+    Array.isArray(browserLanguages) &&
+    typeof browserLanguages[0] === "string"
+      ? browserLanguages[0]
+      : undefined;
 
-  return normalizeLocale(preferredLocale ?? globalThis.navigator.language);
+  return normalizeLocale(
+    preferredLocale ??
+      (typeof browserLanguage === "string" ? browserLanguage : undefined)
+  );
 };
 
 export const useBrowserLocale = (): SupportedLocale => {
