@@ -961,6 +961,12 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 );
 
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
+  title: "Access",
+  description: "Choose who can access, participate in, and manage this wave.",
+  "advanced.defaultSummary":
+    "Anyone can view and participate. Only you can administer the wave.",
+  "advanced.customSummary":
+    "Access or moderation settings have been customized.",
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   limitedAccessTitle: "Warning: Limited Access",

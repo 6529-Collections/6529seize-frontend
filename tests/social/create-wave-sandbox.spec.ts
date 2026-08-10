@@ -50,8 +50,22 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Who can view" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
+    const accessAdvancedSettings = page.getByRole("button", {
+      name: /Advanced settings/,
+    });
+    await expect(accessAdvancedSettings).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    await expect(accessAdvancedSettings).toContainText(
+      "Anyone can view and participate"
+    );
+    await expect(
+      page.getByRole("heading", { name: "Who can view" })
+    ).toBeHidden();
+    await accessAdvancedSettings.click();
     await expect(
       page.getByRole("heading", { name: "Who can chat" })
     ).toBeVisible();
@@ -148,6 +162,48 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps access simple by default and preserves advanced choices", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoCreateWave(page);
+    await page.getByLabel(/Wave Name/).fill("Sandbox Access Summary Wave");
+    await page.getByText("Chat", { exact: true }).click();
+    await nextStepButton(page).click();
+
+    await expect(
+      page.getByRole("heading", { name: "Access", level: 2 })
+    ).toBeVisible();
+    const advancedSettings = page.getByRole("button", {
+      name: /Advanced settings/,
+    });
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
+    await expect(advancedSettings).toContainText(
+      "Anyone can view and participate"
+    );
+    await expect(
+      page.getByRole("heading", { name: "Who can view" })
+    ).toBeHidden();
+
+    await advancedSettings.click();
+    const adminDeleteToggle = page.getByRole("checkbox", {
+      name: "Allow admins to delete posts",
+    });
+    await expect(adminDeleteToggle).toBeChecked();
+    await page
+      .getByText("Allow admins to delete posts", { exact: true })
+      .click();
+    await expect(adminDeleteToggle).not.toBeChecked();
+    await advancedSettings.click();
+
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
+    await expect(advancedSettings).toContainText("Customized");
+    await advancedSettings.click();
+    await expect(adminDeleteToggle).not.toBeChecked();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("creates a perpetual rank wave after choosing the mode on the overview", async ({
     baseURL,
     page,
@@ -169,7 +225,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Who can vote" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -195,7 +251,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(page.getByText("Wave Timeline")).toBeVisible();
     await previousStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Who can vote" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await previousStepButton(page).click();
     await expect(perpetualRadio).toBeVisible();
@@ -203,7 +259,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(perpetualRadio).toBeChecked();
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Who can vote" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -295,7 +351,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await page.getByText("Rank", { exact: true }).click();
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Who can vote" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -377,7 +433,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Who can vote" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -498,7 +554,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Who can vote" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await nextStepButton(page).click();
 
@@ -544,7 +600,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await page.getByLabel(/Wave Name/).fill("Mobile Sandbox Wave");
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Who can view" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(page.getByText(/Step 2 of \d+/)).toBeVisible();
     await expectNoHorizontalOverflow(page);
@@ -585,7 +641,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
 
     // Groups
     await expect(
-      page.getByRole("heading", { name: "Who can view" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(page.getByText(/Step 2 of 4/)).toBeVisible();
     await expectNoHorizontalOverflow(page);
@@ -702,7 +758,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await nextStepButton(page).click();
 
     await expect(
-      page.getByRole("heading", { name: "Who can vote" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await nextStepButton(page).click();
 
@@ -820,7 +876,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     // Leaving Overview is what arms autosave.
     await nextStepButton(page).click();
     await expect(
-      page.getByRole("heading", { name: "Who can view" })
+      page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
 
     // Wait for the debounced autosave to actually land on disk before
@@ -904,7 +960,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
       await nameField.fill(name);
       await nextStepButton(page).click();
       await expect(
-        page.getByRole("heading", { name: "Who can view" })
+        page.getByRole("heading", { name: "Access", level: 2 })
       ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
       await expect
         .poll(
