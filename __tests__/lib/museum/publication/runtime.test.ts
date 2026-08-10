@@ -383,6 +383,16 @@ describe("Museum publication runtime source ref", () => {
       expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
         "museum_publication_runtime_environment_invalid"
       );
+
+      process.env["PUBLIC_RUNTIME"] = "[]";
+      expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
+        "museum_publication_runtime_environment_invalid"
+      );
+
+      process.env["PUBLIC_RUNTIME"] = JSON.stringify({ NODE_ENV: "bogus" });
+      expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
+        "museum_publication_runtime_environment_invalid"
+      );
     } finally {
       if (previousPublicRuntime === undefined) {
         delete process.env["PUBLIC_RUNTIME"];

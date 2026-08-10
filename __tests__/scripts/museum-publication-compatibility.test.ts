@@ -297,7 +297,10 @@ describe("museum publication compatibility", () => {
       "utf8"
     );
 
-    for (const workflow of [staging, production]) {
+    for (const [workflow, e2eStepName] of [
+      [staging, "name: Run staging packs against staging.6529.io"],
+      [production, "name: Run production-safe read-only packs"],
+    ] as const) {
       expect(workflow).toContain("scripts/museum-publication-compatibility.ts");
       expect(workflow).toContain(
         "MUSEUM_CATALOG_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}"
@@ -315,7 +318,7 @@ describe("museum publication compatibility", () => {
       const resolveIndex = workflow.indexOf(
         "name: Resolve immutable Museum publication provenance"
       );
-      const e2eIndex = workflow.indexOf("name: Run ", resolveIndex);
+      const e2eIndex = workflow.indexOf(e2eStepName, resolveIndex);
       const provenanceIndex = workflow.indexOf(
         "immutable Museum provenance",
         e2eIndex
