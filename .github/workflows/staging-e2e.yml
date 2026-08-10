@@ -571,8 +571,9 @@ jobs:
             jq -e '
               .contract == "release-bus-e2e-runner-capabilities.v1" and
               .features.serial_failed_pack_retry == {
-                version: 1,
-                max_retries: 1
+                version: 2,
+                max_retries: 1,
+                policy: "transient-infrastructure-only"
               }
             ' <<< "$runner_capabilities" >/dev/null
           then

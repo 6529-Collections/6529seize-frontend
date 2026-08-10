@@ -129,9 +129,7 @@ function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
 
 describe("MuseumObjectPage canonical typed Work rights", () => {
   it("renders the governed still and never decodes a preceding live locator as an image", async () => {
-    const credit = rightsCredit(
-      "https://creativecommons.org/licenses/by/4.0/"
-    );
+    const credit = rightsCredit("https://creativecommons.org/licenses/by/4.0/");
     const still = retainedMedia(credit);
     render(
       await MuseumObjectPage({
@@ -195,5 +193,82 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     expect(
       screen.queryByRole("link", { name: "CC BY 4.0" })
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps selected Keys and Gates Work media text-only", async () => {
+    const selectedWork: MuseumPublicWork = {
+      ...work([retainedMedia(rightsCredit(null))]),
+      status: "selected_through_acquisition_program_acquisition_pending",
+      programIds: ["6529NM-AP-ENT-0002"],
+    };
+    const selectedPublication = {
+      ...publication(selectedWork),
+      acquisitionPrograms: [
+        {
+          kind: "acquisition_program",
+          id: "6529NM-AP-ENT-0002",
+          slug: "keys-and-gates",
+          title: "Keys and Gates",
+          status: "selection_complete",
+          statusAsOf: "2026-08-09",
+          acquisitionMethod: "other_authorized_method",
+          acquisitionIds: [],
+          sourceDocumentIds: [],
+          sourcePaths: ["records/entities/6529NM-AP-ENT-0002.json"],
+        },
+      ],
+    } as unknown as MuseumPublication;
+
+    render(
+      await MuseumObjectPage({
+        objectId: selectedWork.id,
+        publication: selectedPublication,
+        view: null,
+      })
+    );
+
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "No visual presentation is available for this work in the current publication."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("restores Keys and Gates Work media after accession", async () => {
+    const accessionedWork: MuseumPublicWork = {
+      ...work([retainedMedia(rightsCredit(null))]),
+      programIds: ["6529NM-AP-ENT-0002"],
+    };
+    const accessionedPublication = {
+      ...publication(accessionedWork),
+      acquisitionPrograms: [
+        {
+          kind: "acquisition_program",
+          id: "6529NM-AP-ENT-0002",
+          slug: "keys-and-gates",
+          title: "Keys and Gates",
+          status: "completed",
+          statusAsOf: "2026-08-09",
+          acquisitionMethod: "other_authorized_method",
+          acquisitionIds: [],
+          sourceDocumentIds: [],
+          sourcePaths: ["records/entities/6529NM-AP-ENT-0002.json"],
+        },
+      ],
+    } as unknown as MuseumPublication;
+
+    render(
+      await MuseumObjectPage({
+        objectId: accessionedWork.id,
+        publication: accessionedPublication,
+        view: null,
+      })
+    );
+
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      "https://media.6529.io/governed/work-one.png"
+    );
   });
 });
