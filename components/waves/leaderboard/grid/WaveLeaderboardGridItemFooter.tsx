@@ -194,6 +194,12 @@ function WaveLeaderboardGridVoteSummary({
     winningThreshold > 0;
   const userVote = drop.context_profile_context?.rating;
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
+  const yourVoteMetric = {
+    label: t(locale, "waves.leaderboard.grid.yourVote"),
+    value: userVote === undefined ? "-" : formatSignedInteger(locale, userVote),
+    numericValue: userVote ?? 0,
+    testId: "your-vote",
+  };
   const primaryMetric = isApproveDrop
     ? t(locale, "waves.leaderboard.grid.reached")
     : t(locale, "waves.leaderboard.grid.current");
@@ -217,13 +223,7 @@ function WaveLeaderboardGridVoteSummary({
         numericValue: drop.realtime_rating,
         testId: "votes-now",
       }
-    : {
-        label: t(locale, "waves.leaderboard.grid.yourVote"),
-        value:
-          userVote === undefined ? "-" : formatSignedInteger(locale, userVote),
-        numericValue: userVote ?? 0,
-        testId: "your-vote",
-      };
+    : yourVoteMetric;
 
   return (
     <div
@@ -255,15 +255,11 @@ function WaveLeaderboardGridVoteSummary({
         />
         {isApproveDrop && (
           <VoteMetric
-            label={t(locale, "waves.leaderboard.grid.yourVote")}
-            value={
-              userVote === undefined
-                ? "-"
-                : formatSignedInteger(locale, userVote)
-            }
+            label={yourVoteMetric.label}
+            value={yourVoteMetric.value}
             unit={votingLabel}
-            isNegative={(userVote ?? 0) < 0}
-            testId="your-vote"
+            isNegative={yourVoteMetric.numericValue < 0}
+            testId={yourVoteMetric.testId}
           />
         )}
       </dl>

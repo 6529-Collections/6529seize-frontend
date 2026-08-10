@@ -242,7 +242,7 @@ describe("WaveLeaderboardGridItem", () => {
             {
               media: [],
               content:
-                "Example title — **Bold** [linked words](https://example.com) remain readable.",
+                "EXAMPLE TITLE — **Bold** [linked words](https://example.com) remain readable.",
             },
           ],
         }}
@@ -254,13 +254,14 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
     expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
     expect(screen.getByText("Bold linked words remain readable.")).toHaveClass(
-      "tw-line-clamp-8"
+      "tw-line-clamp-[8]"
     );
     expect(screen.getAllByText("Example title")).toHaveLength(1);
   });
 
   it("truncates long text previews at a word boundary", () => {
-    render(
+    const onDropClick = jest.fn();
+    const { rerender } = render(
       <WaveLeaderboardGridItem
         drop={{
           ...baseDrop,
@@ -272,13 +273,33 @@ describe("WaveLeaderboardGridItem", () => {
           ],
         }}
         mode="compact"
-        onDropClick={jest.fn()}
+        onDropClick={onDropClick}
       />
     );
 
     const preview = screen.getByText(/readable…$/);
-    expect(preview).toHaveClass("tw-line-clamp-8");
+    expect(preview).toHaveClass("tw-line-clamp-[8]");
     expect(preview.textContent?.length).toBeLessThanOrEqual(321);
+
+    rerender(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          parts: [
+            {
+              media: [],
+              content: `${"a".repeat(319)}🙂${"b".repeat(100)}`,
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={onDropClick}
+      />
+    );
+
+    const unicodePreview = screen.getByText(/🙂…$/u);
+    expect(unicodePreview.textContent).toBe(`${"a".repeat(319)}🙂…`);
+    expect(Array.from(unicodePreview.textContent ?? "")).toHaveLength(321);
   });
 
   it("does not treat preview-only metadata as submitted media", () => {
@@ -567,7 +588,7 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
-    expect(screen.getByText(marketplaceUrl)).toHaveClass("tw-line-clamp-8");
+    expect(screen.getByText(marketplaceUrl)).toHaveClass("tw-line-clamp-[8]");
     expect(screen.queryByTestId("media")).toBeNull();
     expect(screen.queryByRole("link", { name: marketplaceUrl })).toBeNull();
   });
@@ -583,7 +604,7 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
-    expect(screen.queryByText("Open", { selector: "button" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Open/ })).toBeNull();
     expect(screen.queryByTestId("vote-button")).toBeNull();
     expect(screen.queryByTestId("mobile-copy-action")).toBeNull();
   });

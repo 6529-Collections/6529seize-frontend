@@ -22,7 +22,11 @@ const getGridPreviewClassName = (isCompactMode: boolean): string =>
   }`;
 
 const removeLeadingTitle = (content: string, title: string): string => {
-  if (!title || !content.startsWith(title)) {
+  if (!title) {
+    return content;
+  }
+
+  if (content.slice(0, title.length).toLowerCase() !== title.toLowerCase()) {
     return content;
   }
 
@@ -33,17 +37,18 @@ const removeLeadingTitle = (content: string, title: string): string => {
 };
 
 const truncatePreview = (content: string): string => {
-  if (content.length <= GRID_PREVIEW_MAX_LENGTH) {
+  const characters = Array.from(content);
+  if (characters.length <= GRID_PREVIEW_MAX_LENGTH) {
     return content;
   }
 
-  const candidate = content.slice(0, GRID_PREVIEW_MAX_LENGTH + 1);
+  const candidate = characters.slice(0, GRID_PREVIEW_MAX_LENGTH + 1);
   const lastWordBoundary = candidate.lastIndexOf(" ");
   const endIndex =
     lastWordBoundary > GRID_PREVIEW_MAX_LENGTH / 2
       ? lastWordBoundary
       : GRID_PREVIEW_MAX_LENGTH;
-  return `${candidate.slice(0, endIndex).trimEnd()}…`;
+  return `${candidate.slice(0, endIndex).join("").trimEnd()}…`;
 };
 
 const getWaveLeaderboardGridPreviewText = ({
@@ -54,7 +59,7 @@ const getWaveLeaderboardGridPreviewText = ({
   readonly title: string | null | undefined;
 }): string | null => {
   const contentWithoutLinkDestinations = content.replace(
-    /(?<!!)\[([^\]]+)]\((?:\\.|[^)])*\)/g,
+    /(?<!!)\[([^\]]+)]\((?:\\.|[^\\)])*\)/g,
     "$1"
   );
   const plainContent = markdownToPlainText(contentWithoutLinkDestinations);
@@ -104,7 +109,7 @@ export function WaveLeaderboardGridItemViewport({
       <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500">
         {t(locale, "waves.leaderboard.grid.preview")}
       </span>
-      <p className="tw-line-clamp-8 tw-mb-0 tw-mt-3 tw-whitespace-normal tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">
+      <p className="tw-mb-0 tw-mt-3 tw-line-clamp-[8] tw-whitespace-normal tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">
         {previewText ?? t(locale, "waves.leaderboard.grid.previewUnavailable")}
       </p>
     </div>
