@@ -452,6 +452,7 @@ export const EN_GB_MESSAGES = {
   "waves.leaderboard.timeline.status.completed": "Completed",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.detail.live.artwork.mintDateLabel": "Mint date:",
   ...EN_GB_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.filters.triggerAriaLabel": "{filter}: {value}",
   "theMemes.filters.year.label": "Year",
