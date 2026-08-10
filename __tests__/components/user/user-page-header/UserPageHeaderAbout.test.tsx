@@ -62,7 +62,7 @@ describe("UserPageHeaderAbout", () => {
     expect(screen.getByTestId("edit")).toBeInTheDocument();
   });
 
-  it("keeps the statement edit action visible and touch-sized on touch-first devices", () => {
+  it("keeps the inline statement edit action desktop-only", () => {
     render(
       <UserPageHeaderAbout
         profile={profile}
@@ -74,12 +74,10 @@ describe("UserPageHeaderAbout", () => {
     const editButton = screen.getByRole("button", {
       name: "Edit About statement",
     });
-    expect(editButton).toHaveClass("touch-only:tw-pointer-events-auto");
-    expect(editButton).toHaveClass("touch-only:tw-opacity-100");
-    expect(editButton).toHaveClass("touch-only:tw-size-11");
+    expect(editButton).toHaveClass("tw-hidden", "sm:tw-block");
     expect(editButton).toHaveClass(
-      "touch-only:-tw-ml-2",
-      "touch-only:-tw-mt-2.5"
+      "desktop-hover:group-hover:tw-pointer-events-auto",
+      "desktop-hover:group-hover:tw-opacity-100"
     );
   });
 
