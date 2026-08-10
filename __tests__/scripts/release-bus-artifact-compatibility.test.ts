@@ -487,7 +487,7 @@ set -euo pipefail
 if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
   case "\${MOCK_RUNNER_CAPABILITY:-old}" in
     current)
-      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1},"serial_failed_pack_retry":{"version":1,"max_retries":1}}}'
+      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1},"serial_failed_pack_retry":{"version":2,"max_retries":1,"policy":"transient-infrastructure-only"}}}'
       exit 0
       ;;
     incompatible)

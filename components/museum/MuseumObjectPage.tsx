@@ -30,7 +30,10 @@ import type {
   MuseumPublication,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  selectMuseumStillMedia,
+  shouldWithholdKeysAndGatesMedia,
+} from "@/lib/museum/publication/mediaSelection";
 import {
   displayMuseumPublicAcquisitionStatus,
   museumSlugMatches,
@@ -113,10 +116,14 @@ function workQualifierLabel(
 
 function MuseumCanonicalWorkMedia({
   work,
+  withholdVisualMedia,
 }: {
   readonly work: MuseumPublicWork;
+  readonly withholdVisualMedia: boolean;
 }) {
-  const stillMedia = selectMuseumStillMedia(work.media);
+  const stillMedia = withholdVisualMedia
+    ? undefined
+    : selectMuseumStillMedia(work.media);
   if (stillMedia !== undefined) {
     return (
       <section
@@ -128,26 +135,26 @@ function MuseumCanonicalWorkMedia({
         </h2>
         <div className="tw-grid tw-gap-6 sm:tw-grid-cols-2">
           <figure key={stillMedia.id} className="tw-m-0">
-              <div className="tw-overflow-hidden tw-bg-black">
-                <MuseumProgramImage
-                  media={publicWorkMedia(stillMedia)}
-                  sizes="(min-width: 640px) 50vw, 100vw"
-                />
-              </div>
-              <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-                {stillMedia.credit.creditLine}
-                {stillMedia.credit.licenseLabel === null ? null : (
-                  <>
-                    {" "}
-                    <MuseumRightsLink
-                      href={stillMedia.credit.licenseUrl ?? undefined}
-                      label={stillMedia.credit.licenseLabel}
-                      className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                    />
-                  </>
-                )}
-              </figcaption>
-            </figure>
+            <div className="tw-overflow-hidden tw-bg-black">
+              <MuseumProgramImage
+                media={publicWorkMedia(stillMedia)}
+                sizes="(min-width: 640px) 50vw, 100vw"
+              />
+            </div>
+            <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {stillMedia.credit.creditLine}
+              {stillMedia.credit.licenseLabel === null ? null : (
+                <>
+                  {" "}
+                  <MuseumRightsLink
+                    href={stillMedia.credit.licenseUrl ?? undefined}
+                    label={stillMedia.credit.licenseLabel}
+                    className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  />
+                </>
+              )}
+            </figcaption>
+          </figure>
         </div>
       </section>
     );
@@ -242,6 +249,12 @@ function MuseumCanonicalWorkRecordPage({
           work.sourcePaths[0]
         );
   const insideSystemHref = museumWorkInsideSystemHref(work, publication);
+  const withholdVisualMedia = shouldWithholdKeysAndGatesMedia(
+    work.status,
+    (publication.acquisitionPrograms ?? [])
+      .filter((program) => work.programIds.includes(program.id))
+      .map((program) => program.slug)
+  );
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -272,7 +285,10 @@ function MuseumCanonicalWorkRecordPage({
           </p>
         ) : null}
       </header>
-      <MuseumCanonicalWorkMedia work={work} />
+      <MuseumCanonicalWorkMedia
+        work={work}
+        withholdVisualMedia={withholdVisualMedia}
+      />
       {insideSystemHref !== null ? (
         <div className="tw-mt-8">
           <Link
@@ -283,7 +299,8 @@ function MuseumCanonicalWorkRecordPage({
           </Link>
         </div>
       ) : null}
-      {work.presentationMedia !== undefined &&
+      {!withholdVisualMedia &&
+      work.presentationMedia !== undefined &&
       work.presentationMedia.length > 0 ? (
         <section
           className="tw-mt-10"
