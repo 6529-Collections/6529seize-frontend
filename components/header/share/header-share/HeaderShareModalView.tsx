@@ -1,11 +1,13 @@
 import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  ArrowDownTrayIcon,
   ComputerDesktopIcon,
   EllipsisHorizontalIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import Link from "next/link";
 import { type CSSProperties, useEffect, useRef } from "react";
 import { Tooltip } from "react-tooltip";
 
@@ -278,8 +280,11 @@ export function HeaderShareModalView({
       <div
         data-testid="connection-share-notice"
         data-status={status}
-        className="tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-8 tw-text-center"
-        style={squareStyle}
+        className={`tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-5 tw-p-8 tw-text-center ${
+          status === "loading"
+            ? ""
+            : "tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50"
+        }`}
       >
         <div className="tw-flex tw-flex-col tw-gap-2">
           <div className="tw-text-lg tw-font-semibold tw-text-iron-50">
@@ -604,10 +609,26 @@ export function HeaderShareModalView({
     return (
       <div
         data-testid="connection-share-content"
-        className="tw-flex tw-flex-col tw-gap-2"
+        className="tw-relative tw-w-full"
       >
-        {qrContent}
-        {renderConnectionUrl(url)}
+        <div
+          data-testid="connection-share-reserved-space"
+          aria-hidden="true"
+          className="tw-invisible tw-flex tw-w-full tw-flex-col tw-gap-2"
+        >
+          <div className="tw-aspect-square tw-w-full" />
+          <div className="tw-h-10 tw-w-full" />
+        </div>
+        <div className="tw-absolute tw-inset-0">
+          {url ? (
+            <div className="tw-animate-in tw-fade-in tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2 tw-duration-200 motion-reduce:tw-animate-none">
+              {qrContent}
+              {renderConnectionUrl(url)}
+            </div>
+          ) : (
+            content
+          )}
+        </div>
       </div>
     );
   }
@@ -650,13 +671,35 @@ export function HeaderShareModalView({
           data-testid="header-share-modal-content"
           className="tw-flex tw-flex-col tw-gap-3 tw-p-5"
         >
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-            <h2
-              id="header-share-title"
-              className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
-            >
-              {modalTitle}
-            </h2>
+          <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2">
+              <h2
+                id="header-share-title"
+                className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
+              >
+                {modalTitle}
+              </h2>
+              {isConnectMode && (
+                <Link
+                  href="/about/6529-apps"
+                  onClick={onClose}
+                  aria-label={t(
+                    HEADER_SHARE_LOCALE,
+                    "headerShare.connectModal.downloadAppsAriaLabel"
+                  )}
+                  className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                >
+                  <ArrowDownTrayIcon
+                    aria-hidden="true"
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
+                  {t(
+                    HEADER_SHARE_LOCALE,
+                    "headerShare.connectModal.downloadApps"
+                  )}
+                </Link>
+              )}
+            </div>
             <button
               type="button"
               aria-label={closeAriaLabel}
