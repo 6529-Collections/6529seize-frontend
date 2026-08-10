@@ -251,10 +251,12 @@ export default function ParticipationDropVoteDetailsTrigger({
             title="Votes"
             isOpen={isOpen}
             onClose={closeDetails}
+            noPadding
             fixedHeight
             tall
             showScrollbar
-            headerClassName="tw-py-4"
+            headerClassName="tw-pb-0 tw-pt-2"
+            titleClassName="tw-m-0"
           >
             <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
               {detailsContent}
@@ -282,7 +284,7 @@ export default function ParticipationDropVoteDetailsTrigger({
               role="dialog"
               aria-label="Votes"
               tabIndex={-1}
-              className="tw-flex tw-max-h-[26rem] tw-w-[22.5rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/40"
+              className="tw-flex tw-max-h-[26rem] tw-w-[22.5rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0E1012] tw-shadow-[0_16px_48px_rgba(0,0,0,0.48)]"
             >
               {detailsContent}
             </div>
@@ -296,12 +298,15 @@ export default function ParticipationDropVoteDetailsTrigger({
   let densityClassName: string;
   if (isGallery) {
     densityClassName =
-      "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-text-xs tw-leading-4";
+      "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4";
   } else if (isCompact) {
-    densityClassName = "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-xs tw-leading-4";
+    densityClassName = "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-leading-4";
   } else {
-    densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm tw-leading-5";
+    densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-leading-5";
   }
+  const triggerTextSizeClassName = isSmallDensity
+    ? "tw-text-xs"
+    : "tw-text-sm";
   const appearanceClassName = isGallery
     ? "tw-rounded-md tw-border-white/[0.06] tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-white/[0.09] desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-iron-100"
     : "tw-rounded-lg tw-border-iron-700 tw-bg-iron-900/40 tw-shadow-sm desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100";
@@ -324,18 +329,14 @@ export default function ParticipationDropVoteDetailsTrigger({
         className={triggerClassName}
       >
         <span
-          className={
-            isGallery
-              ? "tw-text-[10px] tw-font-semibold tw-text-iron-200"
-              : "tw-font-medium tw-text-iron-50"
-          }
+          className={`${triggerTextSizeClassName} tw-font-normal ${
+            isGallery ? "tw-text-iron-200" : "tw-text-iron-50"
+          }`}
         >
           {formatNumberWithCommas(drop.raters_count)}
         </span>
         <span
-          className={`tw-font-normal tw-text-iron-400 ${
-            isGallery ? "tw-text-[10px]" : ""
-          }`}
+          className={`${triggerTextSizeClassName} tw-font-normal tw-text-iron-400`}
         >
           {drop.raters_count === 1 ? "voter" : "voters"}
         </span>

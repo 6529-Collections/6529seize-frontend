@@ -2,6 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 
+const { OUTPUT_FIELDS } =
+  require("../../ops/scripts/run-one-click-production-children.cjs") as {
+    OUTPUT_FIELDS: readonly string[];
+  };
+
 const workflow = (name: string) =>
   YAML.parse(
     fs.readFileSync(
@@ -69,6 +74,18 @@ describe("one-click production operation", () => {
     expect(childContract).toContain("production-build-artifact.yml");
     expect(childContract).toContain("production-artifact-verifier.yml");
     expect(childContract).toContain("frontend-prod-${normalizedParentRunId}");
+    expect(resolve.outputs).toMatchObject({
+      "artifact-run-attempt":
+        "${{ steps.children.outputs.builder_run_attempt }}",
+      "artifact-run-id": "${{ steps.children.outputs.builder_run_id }}",
+    });
+    for (const expression of Object.values(resolve.outputs)) {
+      const match = String(expression).match(
+        /^\$\{\{ steps\.children\.outputs\.([a-z0-9_]+) \}\}$/u
+      );
+      expect(match).not.toBeNull();
+      expect(OUTPUT_FIELDS).toContain(match?.[1]);
+    }
     expect(`${serialized}\n${childContract}`).not.toMatch(
       /sort_by\(|created_at|\|\s*last/
     );
@@ -116,9 +133,16 @@ describe("one-click production operation", () => {
     expect(downloadSelection?.run).toMatch(
       /rm -rf \.one-click-production\/selection\s+mkdir -p \.one-click-production\/selection/
     );
+    expect(downloadSelection?.run).toContain(
+      "validate-selection-archive-members"
+    );
+    expect(
+      downloadSelection?.run.indexOf("validate-selection-archive-members")
+    ).toBeLessThan(downloadSelection?.run.indexOf("unzip -q") ?? -1);
     expect(downloadArtifact?.run).toMatch(
       /rm -rf production-artifact\s+mkdir -p production-artifact/
     );
+    expect(downloadArtifact?.run).toContain("validate-archive-members");
     expect(downloadArtifact?.run).toContain(
       "zip-container overhead above the 500 MiB package limit"
     );
