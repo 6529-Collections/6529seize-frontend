@@ -1,13 +1,13 @@
 import { render, screen, within } from "@testing-library/react";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import MuseumInstitutionProfilePage, {
   generateMetadata,
-} from "@/app/museum/network/stories/a-field-of-practice/[slug]/page";
-import MuseumAdjacentPracticePage from "@/app/museum/network/stories/a-field-of-practice/adjacent-practice/page";
-import MuseumInstitutionalPracticePage from "@/app/museum/network/stories/a-field-of-practice/page";
-import MuseumInstitutionalPracticeSourcesPage from "@/app/museum/network/stories/a-field-of-practice/sources/page";
-import MuseumScholarshipAndWritingPage from "@/app/museum/network/stories/scholarship-and-writing/page";
+} from "@/app/museum/network/research/institutional-practice/[slug]/page";
+import MuseumAdjacentPracticePage from "@/app/museum/network/research/institutional-practice/adjacent-practice/page";
+import MuseumInstitutionalPracticePage from "@/app/museum/network/research/institutional-practice/page";
+import MuseumInstitutionalPracticeSourcesPage from "@/app/museum/network/research/institutional-practice/sources/page";
+import MuseumScholarshipAndWritingPage from "@/app/museum/network/research/scholarship-and-writing/page";
 import MuseumStoriesPage from "@/app/museum/network/stories/page";
 import { projectInstitutionalPracticeManuscript } from "@/components/museum/InstitutionalPracticeReadingRoom";
 import {
@@ -22,6 +22,9 @@ import { createCaseyFixture } from "../../../lib/museum/publication/fixture";
 jest.mock("next/navigation", () => ({
   notFound: jest.fn(() => {
     throw new Error("not_found");
+  }),
+  permanentRedirect: jest.fn(() => {
+    throw new Error("permanent_redirect");
   }),
 }));
 
@@ -55,6 +58,7 @@ jest.mock("@/components/museum/MuseumArtworkFigure", () => ({
 
 const mockedPublicationState = jest.mocked(getMuseumPublicationState);
 const mockedNotFound = jest.mocked(notFound);
+const mockedPermanentRedirect = jest.mocked(permanentRedirect);
 
 function expectNextLinkWithoutPrefetch(href: string) {
   const link = screen
@@ -257,50 +261,11 @@ describe("Museum institutional-practice reading room", () => {
     jest.clearAllMocks();
   });
 
-  it("keeps the Casey feature first and follows it with restrained research paths", async () => {
-    render(await MuseumStoriesPage());
-
-    const collectionEssayTitle = publication.documents.find(
-      (document) => document.kind === "collection_essay"
-    )?.title;
-    if (collectionEssayTitle === undefined) {
-      throw new Error("test_collection_essay_missing");
-    }
-    const caseyHeading = screen.getByRole("heading", {
-      level: 2,
-      name: collectionEssayTitle,
-    });
-    const studyHeading = screen.getByRole("heading", {
-      level: 2,
-      name: "Museums and practices we study",
-    });
-    expect(
-      caseyHeading.compareDocumentPosition(studyHeading) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-
-    expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: "Museums and practices we study",
-      })
-    ).toBeInTheDocument();
-    expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice"
+  it("permanently redirects the legacy Stories entry point to Research", async () => {
+    await expect(MuseumStoriesPage()).rejects.toThrow("permanent_redirect");
+    expect(mockedPermanentRedirect).toHaveBeenCalledWith(
+      "/museum/network/research"
     );
-    expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice/adjacent-practice"
-    );
-    expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/scholarship-and-writing"
-    );
-    for (const link of screen
-      .getAllByRole("link")
-      .filter((candidate) =>
-        candidate.getAttribute("href")?.startsWith("/museum/network")
-      )) {
-      expect(link).toHaveAttribute("data-prefetch", "false");
-    }
   });
 
   it("renders the adjacent-practice classification as governed scholarship", async () => {
@@ -319,7 +284,7 @@ describe("Museum institutional-practice reading room", () => {
       })
     ).toBeInTheDocument();
     expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice"
+      "/museum/network/research/institutional-practice"
     );
   });
 
@@ -341,9 +306,9 @@ describe("Museum institutional-practice reading room", () => {
         name: "The Museum publishes arguments about art",
       })
     ).toBeInTheDocument();
-    expectNextLinkWithoutPrefetch("/museum/network/stories");
+    expectNextLinkWithoutPrefetch("/museum/network/research");
     expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice"
+      "/museum/network/research/institutional-practice"
     );
   });
 
@@ -369,18 +334,18 @@ describe("Museum institutional-practice reading room", () => {
         within(directory).getByRole("link", { name: profile.document.title })
       ).toHaveAttribute(
         "href",
-        `/museum/network/stories/a-field-of-practice/${profile.slug}`
+        `/museum/network/research/institutional-practice/${profile.slug}`
       );
     }
     expect(
       screen.getByRole("link", { name: "curatorial publication standard" })
     ).toHaveAttribute(
       "href",
-      "/museum/network/stories/scholarship-and-writing"
+      "/museum/network/research/scholarship-and-writing"
     );
-    expectNextLinkWithoutPrefetch("/museum/network/stories");
+    expectNextLinkWithoutPrefetch("/museum/network/research");
     expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice/sources"
+      "/museum/network/research/institutional-practice/sources"
     );
   });
 
@@ -417,22 +382,22 @@ describe("Museum institutional-practice reading room", () => {
       screen.getByRole("link", { name: "Read the primary-source register" })
     ).toHaveAttribute(
       "href",
-      "/museum/network/stories/a-field-of-practice/sources"
+      "/museum/network/research/institutional-practice/sources"
     );
     expect(
       screen.getByRole("link", { name: "Next profile Getty" })
     ).toHaveAttribute(
       "href",
-      "/museum/network/stories/a-field-of-practice/getty"
+      "/museum/network/research/institutional-practice/getty"
     );
     expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice"
+      "/museum/network/research/institutional-practice"
     );
     expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice/sources"
+      "/museum/network/research/institutional-practice/sources"
     );
     expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice/getty"
+      "/museum/network/research/institutional-practice/getty"
     );
   });
 
@@ -462,7 +427,7 @@ describe("Museum institutional-practice reading room", () => {
       "_blank"
     );
     expectNextLinkWithoutPrefetch(
-      "/museum/network/stories/a-field-of-practice"
+      "/museum/network/research/institutional-practice"
     );
   });
 

@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CaseyArtwork } from "@/lib/museum/casey";
 import { MuseumRightsLink } from "./MuseumRightsLink";
+import { MuseumManagedImage } from "./MuseumManagedImage";
 
 export function MuseumArtworkFigure({
   artwork,
@@ -33,14 +33,15 @@ export function MuseumArtworkFigure({
         });
   const image = (
     <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
-      <Image
+      <MuseumManagedImage
         src={artwork.imageUrl}
         alt={artwork.visualDescription}
-        fill
-        priority={eager}
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : "auto"}
         sizes={sizes}
+        failureMessage={t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
+        retryLabel={t(DEFAULT_LOCALE, "museum.network.media.retry")}
         className="tw-object-contain tw-transition-transform tw-duration-300 group-hover:tw-scale-[1.01] motion-reduce:tw-transition-none"
-        unoptimized
       />
     </div>
   );
@@ -55,12 +56,7 @@ export function MuseumArtworkFigure({
     >
       {href ? (
         <>
-          <Link
-            href={href}
-            className="tw-block focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-black"
-          >
-            {image}
-          </Link>
+          {image}
           <figcaption className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
             <span className="tw-min-w-0">
               <span
@@ -74,7 +70,12 @@ export function MuseumArtworkFigure({
             </span>
             <Link
               href={href}
-              className={`group-hover:tw-text-primary-200 tw-inline-flex tw-min-h-6 tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${isHeroCaption ? "tw-mt-px" : "tw-underline tw-underline-offset-4"}`}
+              aria-label={t(
+                DEFAULT_LOCALE,
+                "museum.network.artwork.viewWorkNamed",
+                { title: artwork.title }
+              )}
+              className={`group-hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${isHeroCaption ? "tw-mt-px" : "tw-underline tw-underline-offset-4"}`}
             >
               <span>
                 {t(DEFAULT_LOCALE, "museum.network.artwork.viewWork")}

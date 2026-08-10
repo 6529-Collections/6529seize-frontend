@@ -1,9 +1,17 @@
 import {
   getMuseumPublicationEnvironment,
+  isMuseumLocalFixtureEnvironment,
   type MuseumPublicationEnvironment,
 } from "@/config/museumPublicationEnv.server";
+import { getNodeEnv } from "@/config/env";
 import { GitHubMuseumPublicationSource } from "./github";
+import { museumPublicationCatalogResolver } from "./catalog";
 import { legacyCaseyPublicationAssembler } from "./legacyCasey";
+import {
+  createMuseumLocalFixtureFetch,
+  readMuseumLocalFixtureMediaAssetPaths,
+  readMuseumLocalFixtureVisitorPaths,
+} from "./localFixture";
 import { isExactGitCommit } from "./security";
 import type {
   MuseumLastValidPublication,
@@ -29,11 +37,15 @@ interface MuseumPublicationRuntime {
 }
 
 export function resolveMuseumPublicationRef(
-  environment: MuseumPublicationEnvironment = getMuseumPublicationEnvironment()
+  environment: MuseumPublicationEnvironment = getMuseumPublicationEnvironment(),
+  nodeEnvironment: string | undefined = getNodeEnv()
 ): string {
   const testCommit = environment["MUSEUM_PUBLICATION_TEST_COMMIT"];
   if (testCommit === undefined) {
     return DEFAULT_PUBLICATION_REF;
+  }
+  if (nodeEnvironment === "production") {
+    throw new Error("publication_test_commit_not_allowed_in_production");
   }
   if (environment["PLAYWRIGHT_READONLY"] !== PLAYWRIGHT_READONLY_VALUE) {
     throw new Error("publication_test_commit_requires_readonly");
@@ -56,7 +68,14 @@ export function createMuseumPublicationRuntime(
 
   const load = async (): Promise<MuseumPublicationLoadState> => {
     const currentTime = now();
-    if (cache !== undefined && currentTime - cache.loadedAt <= cache.ttlMs) {
+    const cachedStaleIsExpired =
+      cache?.state.status === "stale" &&
+      currentTime - Date.parse(cache.state.lastValidAcceptedAt) > STALE_TTL_MS;
+    if (
+      cache !== undefined &&
+      !cachedStaleIsExpired &&
+      currentTime - cache.loadedAt <= cache.ttlMs
+    ) {
       return cache.state;
     }
 
@@ -110,10 +129,43 @@ export function createMuseumPublicationRuntime(
   return { load };
 }
 
-const githubPublicationSource = new GitHubMuseumPublicationSource({
-  ref: resolveMuseumPublicationRef(),
-  assembler: legacyCaseyPublicationAssembler,
-});
+function createMuseumPublicationSource(): MuseumPublicationSource {
+  const environment = getMuseumPublicationEnvironment();
+  const localFixtureRoot = environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT;
+  if (localFixtureRoot !== undefined) {
+    const localFixtureCommit =
+      environment.MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT;
+    if (
+      !isMuseumLocalFixtureEnvironment(environment, getNodeEnv()) ||
+      localFixtureCommit === undefined ||
+      !isExactGitCommit(localFixtureCommit)
+    ) {
+      throw new Error("publication_local_fixture_not_allowed");
+    }
+    return new GitHubMuseumPublicationSource({
+      ref: localFixtureCommit,
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: createMuseumLocalFixtureFetch(
+        localFixtureRoot,
+        localFixtureCommit
+      ),
+      allowUncataloguedTestFixture: true,
+      localFixtureAcceptedPaths:
+        readMuseumLocalFixtureVisitorPaths(localFixtureRoot),
+      localFixtureMediaAssetPaths: readMuseumLocalFixtureMediaAssetPaths(
+        localFixtureRoot,
+        localFixtureCommit
+      ),
+    });
+  }
+  return new GitHubMuseumPublicationSource({
+    ref: resolveMuseumPublicationRef(),
+    assembler: legacyCaseyPublicationAssembler,
+    catalogResolver: museumPublicationCatalogResolver,
+  });
+}
+
+const githubPublicationSource = createMuseumPublicationSource();
 
 const museumPublicationRuntime = createMuseumPublicationRuntime(
   githubPublicationSource

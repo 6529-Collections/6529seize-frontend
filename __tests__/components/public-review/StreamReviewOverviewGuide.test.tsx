@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
 import { getStreamReviewVersion } from "@/lib/public-review/streamReviewDefinition";
@@ -86,9 +86,10 @@ describe("StreamReviewOverviewGuide", () => {
       "href",
       "/reviews/6529-stream/curation-and-tdh-authorization"
     );
-    expect(
-      screen.getByRole("link", { name: "Artist guide" })
-    ).toHaveAttribute("href", "/reviews/6529-stream/for-artists");
+    expect(screen.getByRole("link", { name: "Artist guide" })).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/for-artists"
+    );
     const artworkLifecycleLink = screen.getByRole("link", {
       name: "Artwork lifecycle",
     });
@@ -112,7 +113,9 @@ describe("StreamReviewOverviewGuide", () => {
       "href",
       "/reviews/6529-stream/revenue-splits-and-royalties"
     );
-    expect(screen.getByRole("link", { name: "Freeze details" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Freeze details" })
+    ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/freezing-preservation-and-artwork-finality#core-freeze-fixes-a-defined-boundary"
     );
@@ -133,9 +136,7 @@ describe("StreamReviewOverviewGuide", () => {
         "First, the artwork, number of editions, and sale are planned. The result may be decided by the artist, a community vote, or another review process."
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Create the artwork records")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Create the artwork records")).toBeInTheDocument();
     expect(
       screen.getByText(
         "The artwork's contract records are created. These include its details and the wallets and percentages used to split sale money."
@@ -145,13 +146,13 @@ describe("StreamReviewOverviewGuide", () => {
     expect(screen.getByText("Use the permission")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The permission is submitted to the contract. If it passes the checks, the contract mints the token or starts the auction, then marks the permission as used."
+        "The permission is submitted to the contract. If it passes the checks, the contract marks it as used first. It then mints the token or starts the auction."
       )
     ).toBeInTheDocument();
-    expect(screen.getByText("Distribute the payment")).toBeInTheDocument();
+    expect(screen.getByText("Record the payment shares")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The contract splits the sale money according to the artwork's recorded payment settings: which wallets receive a share and how large each share is."
+        "The contract records how much primary-sale money each recipient is owed. The money is not sent automatically. Each recipient withdraws their share later."
       )
     ).toBeInTheDocument();
     expect(
@@ -184,5 +185,10 @@ describe("StreamReviewOverviewGuide", () => {
       "href",
       "/reviews/6529-stream/security-testing-and-known-limitations"
     );
+    const auditorCard = screen
+      .getByRole("heading", { name: "Auditors" })
+      .closest("article");
+    expect(auditorCard).not.toBeNull();
+    expect(within(auditorCard!).getAllByRole("link")).toHaveLength(1);
   });
 });

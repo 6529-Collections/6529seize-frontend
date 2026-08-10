@@ -9,12 +9,12 @@ const EMBEDDED_STATEMENT_FRONT_MATTER = {
   [MUSEUM_OPEN_STATEMENT_PATH]: {
     title: "The record outlives the interface",
     status:
-      "Status: working public operating statement; not an adopted governance policy",
+      "Status: working public operating statement; policy adoption pending",
   },
   [MUSEUM_ONCHAIN_TRANSITION_PATH]: {
     title: "From public repository to on-chain Museum record",
     status:
-      "Status: working public migration statement. Contract design is in progress; audit, deployment, activation, and record migration remain pending.",
+      "Status: working public migration statement. Contract design, audit, deployment, activation, and record migration are pending.",
   },
 } as const;
 
