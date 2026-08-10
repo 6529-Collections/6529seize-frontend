@@ -2,6 +2,10 @@ import HeaderShare, {
   HeaderConnectModal,
 } from "@/components/header/share/HeaderShare";
 import HeaderPageShareButton from "@/components/header/share/HeaderPageShareButton";
+import {
+  getCurrentPageLocation,
+  getCurrentPublicUrl,
+} from "@/components/header/share/header-share/shareUtils";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -345,6 +349,22 @@ describe("HeaderShare", () => {
       })
     );
     expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
+  });
+
+  it("removes transient Collected context from every page-share target", () => {
+    globalThis.window.history.replaceState(
+      {},
+      "",
+      "/nextgen/token/10000000643/rarity?locale=de-DE&returnTo=%2FShelby%2Fcollected%3Fcollection%3Dnextgen%23collected-card-nextgen-10000000643#details"
+    );
+
+    expect(getCurrentPageLocation()).toEqual({
+      fullUrl: `${testOrigin}/nextgen/token/10000000643/rarity?locale=de-DE#details`,
+      routerPath: "/nextgen/token/10000000643/rarity?locale=de-DE#details",
+    });
+    expect(getCurrentPublicUrl()).toBe(
+      "https://test.6529.io/nextgen/token/10000000643/rarity?locale=de-DE#details"
+    );
   });
 
   it("reports unavailable direct mobile sharing without opening a modal", async () => {
