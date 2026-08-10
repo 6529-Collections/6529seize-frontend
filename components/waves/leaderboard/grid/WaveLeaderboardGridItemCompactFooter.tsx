@@ -102,7 +102,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
   return (
     <div
       data-testid={`wave-leaderboard-grid-item-footer-${drop.id}`}
-      className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3 tw-pt-3"
+      className="tw-rounded-b-lg tw-bg-iron-950/50 tw-px-3 tw-pb-3 tw-pt-1"
     >
       <div className="tw-mb-1 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
         <div className="tw-min-w-0 tw-flex-1">
