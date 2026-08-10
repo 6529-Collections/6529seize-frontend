@@ -57,20 +57,20 @@ describe("Museum data architecture publication", () => {
     expect(catalog).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          pathname: "/museum/network/methodology/data-architecture",
+          pathname: "/museum/network/research/data-architecture",
           source: expect.objectContaining({
             primaryPath: "docs/data-architecture.md",
           }),
         }),
         expect.objectContaining({
-          pathname: "/museum/network/methodology/data-architecture/premis",
+          pathname: "/museum/network/research/data-architecture/premis",
           source: expect.objectContaining({
             primaryPath: "docs/data-architecture/premis.md",
           }),
         }),
         expect.objectContaining({
           pathname:
-            "/museum/network/methodology/data-architecture/casey-reas-implementation",
+            "/museum/network/research/data-architecture/casey-reas-implementation",
           source: expect.objectContaining({
             primaryPath: "docs/data-architecture/casey-reas-implementation.md",
             relatedSources: expect.arrayContaining([

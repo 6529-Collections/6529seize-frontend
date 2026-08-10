@@ -59,7 +59,7 @@ const outcome: MuseumObjectRecord = {
 };
 
 describe("MuseumProgramOutcomePage", () => {
-  it("keeps selected unminted Keys and Gates outcomes text-only", () => {
+  it("presents the photograph before its evidence and preserves selection boundaries", () => {
     render(
       <MuseumProgramOutcomePage
         outcome={outcome}
@@ -70,21 +70,26 @@ describe("MuseumProgramOutcomePage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Take the Key!" })
     ).toBeInTheDocument();
+    const image = screen.getByRole("img", {
+      name: "A figure stands before a bright gate in a dark stone hall.",
+    });
+    expect(image).toHaveAttribute(
+      "src",
+      "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-640.webp"
+    );
+    expect(image).toHaveAttribute(
+      "srcset",
+      expect.stringContaining("work-2400.webp 2400w")
+    );
+    expect(image).toHaveAttribute("width", "640");
+    expect(image).toHaveAttribute("height", "427");
     expect(
-      screen.queryByRole("img", {
-        name: "A figure stands before a bright gate in a dark stone hall.",
-      })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", {
+      screen.getByRole("link", {
         name: "Open submitted high-resolution image",
       })
-    ).not.toBeInTheDocument();
+    ).toHaveAttribute("href", outcome.media?.sourceUrl);
     expect(screen.getByText("Selected; unminted")).toBeInTheDocument();
     expect(screen.getByText("A Keys and Gates winner")).toBeInTheDocument();
-    expect(
-      screen.getByText(/submitted image remains off this public view/u)
-    ).toBeInTheDocument();
     expect(
       screen.getByText("A door becomes a question of passage.")
     ).toBeInTheDocument();
@@ -95,10 +100,10 @@ describe("MuseumProgramOutcomePage", () => {
     );
     expect(
       screen.getByRole("link", { name: "Back to Keys and Gates" })
-    ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-01");
+    ).toHaveAttribute("href", "/museum/network/acquisitions/keys-and-gates");
   });
 
-  it("keeps media visible for other programs", () => {
+  it("does not apply Keys and Gates status copy to another program", () => {
     render(
       <MuseumProgramOutcomePage
         outcome={{ ...outcome, programId: "6529NM-AP-02" }}
@@ -110,20 +115,10 @@ describe("MuseumProgramOutcomePage", () => {
       screen.queryByText("A Keys and Gates winner")
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("img", {
-        name: "A figure stands before a bright gate in a dark stone hall.",
-      })
-    ).toHaveAttribute(
-      "src",
-      "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-640.webp"
+      screen.queryByRole("link", { name: "Back to program" })
+    ).not.toBeInTheDocument();
+    expect(document.querySelector('a[href^="/museum/network/programs/"]')).toBe(
+      null
     );
-    expect(
-      screen.getByRole("link", {
-        name: "Open submitted high-resolution image",
-      })
-    ).toHaveAttribute("href", outcome.media?.sourceUrl);
-    expect(
-      screen.getByRole("link", { name: "Back to program" })
-    ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-02");
   });
 });

@@ -120,6 +120,18 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "waves.leaderboard.timeline.nextWinner")).toBe(
       "Prochain gagnant"
     );
+    expect(t("en-GB", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Mint date:"
+    );
+    expect(t("fr-FR", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Date de mint :"
+    );
+    expect(t("es-ES", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Fecha de mint:"
+    );
+    expect(t("de-DE", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Mint-Datum:"
+    );
     expect(t("es-ES", "waves.leaderboard.timeline.status.completed")).toBe(
       "Completado"
     );
@@ -542,6 +554,20 @@ describe("frontend i18n helpers", () => {
     expect(EN_US_MESSAGES).not.toHaveProperty("clear");
     expect(EN_US_MESSAGES).not.toHaveProperty("clearShort");
     expect(EN_US_MESSAGES).not.toHaveProperty("close");
+  });
+
+  it("keeps Museum program copy in sentence case", () => {
+    expect(t("en-US", "museum.network.programs.description")).toBe(
+      "Curatorial pathways through which the Museum considers and selects works."
+    );
+    expect(
+      t("en-US", "museum.network.artwork.viewWorkNamed", {
+        title: "CENTURY #31",
+      })
+    ).toBe("View work: CENTURY #31");
+    expect(t("en-US", "museum.network.programs.status.selectionComplete")).toBe(
+      "Selection complete"
+    );
   });
 
   it("keeps file-kind labels distinguishable within each locale", () => {

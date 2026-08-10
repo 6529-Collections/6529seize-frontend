@@ -72,6 +72,10 @@ right sidebar, and what users see for loading and empty states.
   link use their own row below the drop metadata. The frontend uses only the
   explicit mapping returned in the V2 submission context; it never infers a
   Meme ID from winner order. The link is omitted when no mapping is known.
+- Mapped Main Stage winner cards also show the Meme card's scheduled `Mint date`
+  in the viewer's local timezone and locale. This is separate from the decision
+  date shown above the winner group. The mint date is omitted when no explicit
+  Meme card mapping is known.
 - A mapped Meme card page also shows a `Main Stage Submission` action beside
   `Distribution Plan` in the market overview panel to the right of the artwork.
   It opens the winning drop in The Memes Main Stage. Older cards without an

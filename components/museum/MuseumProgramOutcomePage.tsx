@@ -18,9 +18,10 @@ export function MuseumProgramOutcomePage({
   readonly sourceCommit: string;
 }) {
   const isKeysAndGates = outcome.programId === KEYS_AND_GATES_PROGRAM_ID;
-  const programHref = `/museum/network/programs/${encodeURIComponent(
-    outcome.programId ?? KEYS_AND_GATES_PROGRAM_ID
-  )}`;
+  const programHref =
+    outcome.programId === KEYS_AND_GATES_PROGRAM_ID
+      ? "/museum/network/acquisitions/keys-and-gates"
+      : null;
   const sourceHref = buildImmutableMuseumBlobUrl(
     sourceCommit,
     outcome.sourcePath
@@ -28,17 +29,19 @@ export function MuseumProgramOutcomePage({
 
   return (
     <article className="tw-min-w-0">
-      <Link
-        href={programHref}
-        className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-      >
-        {t(
-          DEFAULT_LOCALE,
-          isKeysAndGates
-            ? "museum.network.objects.backToKeysAndGates"
-            : "museum.network.objects.backToProgram"
-        )}
-      </Link>
+      {programHref === null ? null : (
+        <Link
+          href={programHref}
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {t(
+            DEFAULT_LOCALE,
+            isKeysAndGates
+              ? "museum.network.objects.backToKeysAndGates"
+              : "museum.network.objects.backToProgram"
+          )}
+        </Link>
+      )}
 
       <header className="tw-mb-8 tw-mt-6">
         <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-primary-300">
@@ -47,35 +50,9 @@ export function MuseumProgramOutcomePage({
         <h1 className="tw-m-0 tw-mt-2 tw-max-w-4xl tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
           {outcome.title}
         </h1>
-        <div className="tw-mt-5">
-          <MuseumStatusBadge
-            label={displayMuseumStatus(outcome.status)}
-            tone={statusTone(outcome.status)}
-          />
-        </div>
       </header>
 
-      {isKeysAndGates && (
-        <section
-          aria-label={t(
-            DEFAULT_LOCALE,
-            "museum.network.objects.winnerStatusLabel"
-          )}
-          className="tw-mb-8 tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-primary-400/10 tw-p-5"
-        >
-          <p className="tw-text-primary-200 tw-m-0 tw-text-sm tw-font-semibold">
-            {t(DEFAULT_LOCALE, "museum.network.objects.winnerStatusTitle")}
-          </p>
-          <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-200">
-            {t(
-              DEFAULT_LOCALE,
-              "museum.network.objects.winnerStatusDescription"
-            )}
-          </p>
-        </section>
-      )}
-
-      {!isKeysAndGates && outcome.media && (
+      {outcome.media && (
         <figure className="tw-m-0 tw-min-w-0">
           <div className="tw-relative tw-h-[min(80vh,60rem)] tw-min-h-96 tw-w-full tw-overflow-hidden tw-bg-black">
             <MuseumProgramImage
@@ -99,6 +76,33 @@ export function MuseumProgramOutcomePage({
             </a>
           </figcaption>
         </figure>
+      )}
+
+      <div className="tw-mt-8">
+        <MuseumStatusBadge
+          label={displayMuseumStatus(outcome.status)}
+          tone={statusTone(outcome.status)}
+        />
+      </div>
+
+      {isKeysAndGates && (
+        <section
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "museum.network.objects.winnerStatusLabel"
+          )}
+          className="tw-mt-6 tw-border-l-2 tw-border-primary-300 tw-py-1 tw-pl-5"
+        >
+          <p className="tw-text-primary-200 tw-m-0 tw-text-sm tw-font-semibold">
+            {t(DEFAULT_LOCALE, "museum.network.objects.winnerStatusTitle")}
+          </p>
+          <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.objects.winnerStatusDescription"
+            )}
+          </p>
+        </section>
       )}
 
       <div className="tw-mt-12 tw-grid tw-gap-10 lg:tw-grid-cols-[minmax(0,1fr)_18rem] lg:tw-gap-16">

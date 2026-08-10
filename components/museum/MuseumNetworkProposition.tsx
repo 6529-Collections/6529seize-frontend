@@ -69,7 +69,7 @@ const PRESENT_STATE = [
     titleKey: "museum.network.proposition.today.governance.title",
     bodyKey: "museum.network.proposition.today.governance.body",
     actionKey: "museum.network.proposition.today.governance.action",
-    href: "/museum/network/governance",
+    href: "/museum/network/about/governance",
     external: false,
   },
   {
@@ -83,7 +83,7 @@ const PRESENT_STATE = [
     titleKey: "museum.network.proposition.today.rights.title",
     bodyKey: "museum.network.proposition.today.rights.body",
     actionKey: "museum.network.proposition.today.rights.action",
-    href: "/museum/network/rights",
+    href: "/museum/network/research/rights",
     external: false,
   },
 ] as const;

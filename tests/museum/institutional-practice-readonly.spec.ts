@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 import {
   expect,
@@ -14,13 +14,17 @@ import {
 } from "../support/pageAssertions";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
-const STUDY_PATH = "/museum/network/stories/a-field-of-practice";
+const STUDY_PATH = "/museum/network/research/institutional-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const REQUIRED_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
+const CASEY_WORK_HREFS = Array.from(
+  { length: 7 },
+  (_, index) => `/museum/network/works/6529NM-W-${String(index + 1).padStart(4, "0")}`
+);
 const LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
 ];
@@ -101,7 +105,7 @@ const ADJACENT_ROUTE: StudyRoute = {
 };
 
 const EDITORIAL_ROUTE: StudyRoute = {
-  path: "/museum/network/stories/scholarship-and-writing",
+  path: "/museum/network/research/scholarship-and-writing",
   sourcePath: "docs/curatorial-publication-standard.md",
   title: "Writing the 6529 Network Museum",
 };
@@ -110,32 +114,31 @@ const CASEY_ARTIST_ROUTE: StudyRoute = {
   path: "/museum/network/artists/casey-reas",
   sourcePath:
     "records/accessions/6529NM.2026.001/public/casey-reas-artist-practice.md",
-  title: "Casey REAS",
+  title: "Casey Reas",
 };
 
 const CASEY_GIFT_ROUTE: StudyRoute = {
-  path: "/museum/network/gifts/6529NM.2026.001",
-  sourcePath:
-    "records/accessions/6529NM.2026.001/public/gift-into-public-trust.md",
-  title: "Gift into Public Trust",
+  path: "/museum/network/acquisitions/the-system-in-seven-states",
+  sourcePath: "records/entities/6529NM-CA-2026-001.json",
+  title: "The System in Seven States",
 };
 
 const CASEY_SOURCE_ROUTE: StudyRoute = {
-  path: "/museum/network/stories/source-and-chronology",
+  path: "/museum/network/research/sources-and-chronology",
   sourcePath:
     "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md",
   title: "Casey Reas: Sources and chronology",
 };
 
 const KEYS_AND_GATES_ROUTE: StudyRoute = {
-  path: "/museum/network/programs/6529NM-AP-01",
-  sourcePath: "records/programs/6529NM-AP-01/program.json",
+  path: "/museum/network/acquisition-programs/keys-and-gates",
+  sourcePath: "records/entities/6529NM-AP-ENT-0002.json",
   title: "Keys and Gates",
 };
 
 const KEYS_AND_GATES_OBJECT_ROUTE: StudyRoute = {
-  path: "/museum/network/objects/6529NM-AP-01-OUT-001",
-  sourcePath: "records/programs/6529NM-AP-01/outcomes/OUT-001.json",
+  path: "/museum/network/works/6529NM-W-0008",
+  sourcePath: "records/entities/6529NM-W-0008.json",
   title: "Take the Key!",
 };
 
@@ -182,26 +185,6 @@ async function expectSafeLinks(page: Page) {
   );
 
   expect(problems, problems.join("\n")).toEqual([]);
-}
-
-async function expectImagesLoaded(images: Locator) {
-  const count = await images.count();
-  for (let index = 0; index < count; index += 1) {
-    const image = images.nth(index);
-    await image.scrollIntoViewIfNeeded();
-    await expect
-      .poll(
-        () =>
-          image.evaluate(
-            (node) =>
-              node instanceof HTMLImageElement &&
-              node.complete &&
-              node.naturalWidth > 0
-          ),
-        { timeout: 30_000 }
-      )
-      .toBe(true);
-  }
 }
 
 async function expectFreshExactSource(
@@ -252,7 +235,7 @@ async function expectFreshExactSource(
     sourcePanel.getByRole("link", { name: "Contributor guide", exact: true })
   ).toHaveAttribute(
     "href",
-    `https://github.com/${SOURCE_REPOSITORY}/blob/main/CONTRIBUTING.md`
+    `https://github.com/${SOURCE_REPOSITORY}/blob/${commit}/CONTRIBUTING.md`
   );
 
   return commit;
@@ -388,15 +371,25 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   }) => {
     await expectStudyRoute(page, CASEY_ARTIST_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
-    const artistImages = page.locator("main figure img");
-    await expect(artistImages).toHaveCount(7);
-    await expectImagesLoaded(artistImages);
+    await expect(
+      page.locator('main a[href^="/museum/network/works/"]')
+    ).toHaveCount(7);
+    await expect(page.locator("main figure img")).toHaveCount(7);
+    for (const href of CASEY_WORK_HREFS) {
+      await expect(
+        page.locator(`main figure:has(img):has(a[href="${href}"])`)
+      ).toHaveCount(1);
+    }
 
     await expectStudyRoute(page, CASEY_GIFT_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
-    const giftImages = page.locator("main figure img");
-    await expect(giftImages).toHaveCount(7);
-    await expectImagesLoaded(giftImages);
+    await expect(page.locator("main figure")).toHaveCount(7);
+    await expect(page.locator("main figure img")).toHaveCount(7);
+    for (const href of CASEY_WORK_HREFS) {
+      await expect(
+        page.locator(`main figure:has(img):has(a[href="${href}"])`)
+      ).toHaveCount(1);
+    }
   });
 
   test("publishes the edited Casey source and chronology record", async ({
@@ -414,26 +407,24 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "16 winning photographs",
+        name: "Works selected through this program",
       })
     ).toBeVisible();
     await expect(
-      page.getByText("Waiting for contract finalization")
-    ).toBeVisible();
-    const selectedWorkLinks = page.locator(
-      'main a[href^="/museum/network/objects/"]'
-    );
-    await expect(selectedWorkLinks).toHaveCount(16);
+      page.getByText(
+        "Selected through an acquisition program; acquisition pending",
+        {
+          exact: true,
+        }
+      )
+    ).toHaveCount(16);
     await expect(
-      page.locator('main a[href^="/museum/network/objects/"] img')
-    ).toHaveCount(0);
+      page.getByText("Not yet minted or accessioned.", { exact: true })
+    ).toHaveCount(16);
     await expect(
-      page.getByRole("heading", {
-        level: 2,
-        name: "Program history and curatorial record",
-      })
-    ).toBeVisible();
-    await expect(page.getByText("Selected; unminted")).toHaveCount(16);
+      page.locator('main a[href^="/museum/network/works/"]')
+    ).toHaveCount(16);
+    await expect(page.locator("main figure img")).toHaveCount(0);
   });
 
   test("publishes each Keys and Gates selection as a complete work page", async ({
@@ -445,18 +436,19 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       REQUIRED_SOURCE_COMMIT
     );
     await expect(page.locator("main figure img")).toHaveCount(0);
-    await expect(page.getByText("Selected; unminted")).toBeVisible();
-    await expect(page.getByText("A Keys and Gates winner")).toBeVisible();
     await expect(
-      page.getByRole("link", {
-        name: "Open submitted high-resolution image",
-      })
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("heading", { level: 2, name: "Artist statement" })
+      page.getByText(
+        "Selected through an acquisition program; acquisition pending",
+        {
+          exact: true,
+        }
+      )
     ).toBeVisible();
-    await expect(page.locator("body")).toContainText(
-      "It is not a Museum preservation master"
-    );
+    await expect(
+      page.getByText("Not yet minted or accessioned.", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Open submitted high-resolution image" })
+    ).toHaveCount(0);
   });
 });

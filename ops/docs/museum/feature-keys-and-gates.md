@@ -13,21 +13,20 @@ acquisition and accession checks follow a future mint.
 
 ## Location in the Site
 
-The program is at `/museum/network/programs/6529NM-AP-01`. Each winner links to
-an artwork page under `/museum/network/objects/`.
+The program is at `/museum/network/acquisition-programs/keys-and-gates`. Each
+winner links to a canonical Work record under `/museum/network/works/`.
 
 ## Entry Points
 
-- Open **Museum**, then **Programs**, then **Keys and Gates**.
+- Open **Museum**, then **Acquisition programs**, then **Keys and Gates**.
 - Follow a direct link to the Keys and Gates program.
 - Open an individual winner from a shared artwork link.
 
 ## User Journey
 
-1. Read the program banner to see the sixteen-work result and current contract
-   dependency.
-2. Review the three-stage journey: chosen by TDH, mint on 6529Stream, then
-   acquire and accession.
+1. Read the program record to see the sixteen-work result and current status.
+2. Review the work-level status and the not-yet-minted-or-accessioned
+   qualifier.
 3. Browse the text-only winner grid and open an individual record.
 4. On the artwork page, read the artist statement and recorded selection
    details without treating submitted media as Museum-held art.
@@ -49,8 +48,9 @@ Museum's collection.
 
 ### Checking whether a winner is in the collection
 
-Use the status text on the program or artwork page. A Keys and Gates winner is
-still `Selected; unminted` until primary mint evidence and the later Museum
+Use the status text on the program or Work page. A Keys and Gates winner is
+still `Selected through an acquisition program; acquisition pending` and `Not
+yet minted or accessioned` until primary mint evidence and the later Museum
 acquisition and accession checks exist. Selection alone does not make the work
 a Museum holding.
 

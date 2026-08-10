@@ -74,6 +74,7 @@ const READONLY_SPECS = {
   searchWaves: ["tests/social/search-waves-readonly.spec.ts"],
   museumInstitutionalPractice: [
     "tests/museum/institutional-practice-readonly.spec.ts",
+    "tests/museum/network-ia-readonly.spec.ts",
   ],
   museumAbout: ["tests/museum/about-readonly.spec.ts"],
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
