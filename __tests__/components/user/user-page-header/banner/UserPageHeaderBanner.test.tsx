@@ -82,7 +82,7 @@ describe("UserPageHeaderBanner", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 
-  it("keeps mobile artwork full strength and scopes fading to desktop", () => {
+  it("keeps mobile artwork full strength under the shared bottom fade", () => {
     const { container } = render(
       <UserPageHeaderBanner
         profile={{
@@ -111,13 +111,13 @@ describe("UserPageHeaderBanner", () => {
     ).toHaveClass("md:tw-hidden");
     expect(
       container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-t"]')
-    ).toHaveClass("tw-hidden", "md:tw-block");
+    ).not.toHaveClass("tw-hidden", "md:tw-block");
     expect(
       container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-b"]')
     ).toHaveClass("tw-hidden", "md:tw-block");
   });
 
-  it("keeps the gradient fallback full strength on mobile", () => {
+  it("keeps the gradient fallback full strength under the shared bottom fade", () => {
     const { container } = render(
       <UserPageHeaderBanner
         profile={baseProfile}
@@ -142,7 +142,7 @@ describe("UserPageHeaderBanner", () => {
     ).toHaveClass("md:tw-hidden");
     expect(
       container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-t"]')
-    ).toHaveClass("tw-hidden", "md:tw-block");
+    ).not.toHaveClass("tw-hidden", "md:tw-block");
     expect(
       container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-b"]')
     ).toHaveClass("tw-hidden", "md:tw-block");
