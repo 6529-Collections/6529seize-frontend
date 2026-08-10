@@ -4,6 +4,10 @@ import {
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
 import { NEXTGEN_CONTRACT } from "@/constants/constants";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNextgenTokenPageJsonLd } from "@/lib/structured-data/nextgen";
@@ -84,10 +88,19 @@ export async function generateMetadata({
 
 export default async function NextGenTokenPage({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ token: string; view?: string[] | undefined }>;
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { token, view } = await params;
+  const resolvedSearchParams = await searchParams;
+  const rawReturnTo = resolvedSearchParams[PROFILE_COLLECTED_RETURN_PARAM];
+  const returnToValue = Array.isArray(rawReturnTo)
+    ? rawReturnTo[0]
+    : rawReturnTo;
+  const returnTo =
+    getProfileCollectedReturnContext(returnToValue)?.href ?? null;
   const headers = await getAppCommonHeaders();
   const data = await fetchTokenData(token, headers);
   if (!data) {
@@ -115,6 +128,7 @@ export default async function NextGenTokenPage({
         tokenCount={data.tokenCount}
         collection={data.collection}
         view={resolvedView}
+        returnTo={returnTo}
       />
     </>
   );
