@@ -34,7 +34,10 @@ import {
   displayMuseumPublicAcquisitionProgramStatus,
   museumPublicAcquisitionProgramStatusAsOf,
 } from "@/lib/museum/publication/programStatus";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  selectMuseumStillMedia,
+  shouldWithholdKeysAndGatesMedia,
+} from "@/lib/museum/publication/mediaSelection";
 
 interface MuseumAcquisitionProgramPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -277,7 +280,11 @@ export default async function MuseumAcquisitionProgramPage({
           </h2>
           <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
             {typedWorks.map((work) => {
-              const media = publicWorkMedia(work);
+              const media = shouldWithholdKeysAndGatesMedia(work.status, [
+                typed?.slug ?? slug,
+              ])
+                ? null
+                : publicWorkMedia(work);
               const status = displayMuseumPublicAcquisitionStatus(work.status);
               const qualifier =
                 work.status ===

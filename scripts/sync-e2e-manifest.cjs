@@ -154,9 +154,16 @@ function validateRemoteContract(problems, pack, environment) {
       `${packLabel(pack)}: ${environment} packs must select at least one project.`
     );
   }
-  if (pack.workers !== 1) {
+  // The complete institutional desktop/mobile sweep is the sole deployed pack
+  // allowed two Playwright workers; all smaller remote packs stay single-worker.
+  const maxWorkers =
+    pack.changeScope === "museum" &&
+    pack.alias === "museum-institutional-practice"
+      ? 2
+      : 1;
+  if (pack.workers < 1 || pack.workers > maxWorkers) {
     problems.push(
-      `${packLabel(pack)}: ${environment} packs must set workers=1.`
+      `${packLabel(pack)}: ${environment} packs must set workers between 1 and ${maxWorkers}.`
     );
   }
   for (const [key, value] of Object.entries(expected)) {
