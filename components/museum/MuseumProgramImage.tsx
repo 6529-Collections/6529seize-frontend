@@ -1,5 +1,7 @@
-/* eslint-disable @next/next/no-img-element -- Museum media is already width-bounded, content-addressed, and format-optimized at the governed CDN URLs. */
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { MuseumProgramMedia } from "@/lib/museum/types";
+import { MuseumManagedImage } from "./MuseumManagedImage";
 
 export function MuseumProgramImage({
   media,
@@ -27,17 +29,17 @@ export function MuseumProgramImage({
           .join(", ");
 
   return (
-    <img
+    <MuseumManagedImage
       src={sourceUrl}
-      srcSet={srcSet}
-      sizes={srcSet === undefined ? undefined : sizes}
-      width={sourceWidth}
-      height={sourceHeight}
+      {...(srcSet === undefined ? {} : { srcSet, sizes })}
+      {...(sourceWidth === undefined ? {} : { width: sourceWidth })}
+      {...(sourceHeight === undefined ? {} : { height: sourceHeight })}
       alt={media.altText}
       loading={eager ? "eager" : "lazy"}
       fetchPriority={eager ? "high" : "auto"}
-      decoding="async"
-      className={className}
+      failureMessage={t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
+      retryLabel={t(DEFAULT_LOCALE, "museum.network.media.retry")}
+      {...(className === undefined ? {} : { className })}
     />
   );
 }

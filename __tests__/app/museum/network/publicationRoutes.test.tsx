@@ -5,7 +5,7 @@ import MuseumAboutPage from "@/app/museum/network/about/page";
 import MuseumNetworkPage from "@/app/museum/network/page";
 import MuseumProjectPage from "@/app/museum/network/projects/[slug]/page";
 import MuseumGenerativeSystemPage from "@/app/museum/network/projects/[slug]/system/page";
-import MuseumSourceAndChronologyPage from "@/app/museum/network/stories/source-and-chronology/page";
+import MuseumSourceAndChronologyPage from "@/app/museum/network/research/sources-and-chronology/page";
 import { MuseumGiftPage } from "@/components/museum/MuseumGiftPage";
 import type { CaseyArtwork } from "@/lib/museum/casey";
 import {
@@ -110,7 +110,10 @@ describe("Museum finished publication routes", () => {
       screen.getByRole("link", {
         name: "Read the source and chronology matrix",
       })
-    ).toHaveAttribute("href", "/museum/network/stories/source-and-chronology");
+    ).toHaveAttribute(
+      "href",
+      "/museum/network/research/sources-and-chronology"
+    );
     expect(
       screen.getByRole("link", { name: "Enter the system" })
     ).toHaveAttribute("href", "/museum/network/projects/century/system");
@@ -191,7 +194,7 @@ describe("Museum finished publication routes", () => {
       "href",
       MUSEUM_SAFE_ETHERSCAN_URL
     );
-    expect(screen.getAllByTestId("museum-artwork-figure")).toHaveLength(7);
+    expect(screen.getAllByTestId("museum-artwork-figure")).toHaveLength(8);
   });
 
   it("uses the governed gift narrative as the gift-page publication", async () => {
@@ -302,7 +305,7 @@ describe("Museum finished publication routes", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "It is meaningfully network-governed, but not yet fully decentralized. Governance outcomes are not yet canonical on-chain institutional records. Repository maintainers publish the current record, and Museum Safe signers execute Ethereum transactions."
+        "It is meaningfully network-governed and moving toward fuller decentralization. Governance outcomes remain institutional records published by repository maintainers, while Museum Safe signers execute Ethereum transactions."
       )
     ).toBeInTheDocument();
     expect(

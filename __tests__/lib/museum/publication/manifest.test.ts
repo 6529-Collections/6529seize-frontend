@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
+import { keccak256, toBytes } from "viem";
 import { parseMuseumPublicationManifest } from "@/lib/museum/publication";
+import { MUSEUM_PUBLICATION_CANONICALIZATION_ID } from "@/lib/museum/publication/catalog-contract";
 
 const MANIFEST_TYPE = "6529NM_RECORD_MANIFEST";
 const MANIFEST_VERSION = "1.0.0";
@@ -62,13 +64,33 @@ describe("Museum publication manifest parser", () => {
         { size: 1, path: "z.md" },
         { size: 2, path: "a.md" },
       ],
-      manifest_commitment: { digest: "0xcommitment" },
+      manifest_commitment: {
+        algorithm: 1,
+        canonicalizationId: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
+        digest: keccak256(toBytes(canonicalBody)),
+      },
       manifest_sha256: sha256(canonicalBody),
     });
 
     expect(parsed.entries.map(({ path }) => path)).toEqual(["a.md", "z.md"]);
-    expect(parsed.manifestCommitment).toBe("0xcommitment");
+    expect(parsed.manifestCommitment).toBe(keccak256(toBytes(canonicalBody)));
     expect(parsed.manifestSha256).toBe(sha256(canonicalBody));
+  });
+
+  it("rejects a drifted manifest JCS/Keccak commitment", () => {
+    const canonicalBody =
+      '{"entries":[{"path":"records/object.json","size":10}],"manifest_type":"6529NM_RECORD_MANIFEST","manifest_version":"1.0.0"}';
+    expect(() =>
+      parseMuseumPublicationManifest({
+        ...baseManifest(),
+        manifest_sha256: sha256(canonicalBody),
+        manifest_commitment: {
+          algorithm: 1,
+          canonicalizationId: MUSEUM_PUBLICATION_CANONICALIZATION_ID,
+          digest: `0x${"0".repeat(64)}`,
+        },
+      })
+    ).toThrow("publication_manifest_commitment_mismatch");
   });
 
   it("rejects a non-integer number in the canonical manifest body", () => {

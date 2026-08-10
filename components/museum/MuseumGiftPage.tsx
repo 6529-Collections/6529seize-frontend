@@ -7,6 +7,13 @@ import { MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
 import { MuseumSourceMatrixLink } from "./MuseumSourceMatrixLink";
 import { MuseumInsideSystemDirectory } from "./MuseumInsideSystem";
+import { MuseumBreadcrumbs } from "./MuseumBreadcrumbs";
+import { MuseumEntityContext } from "./MuseumEntityContext";
+import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
+import {
+  museumWorkHrefForSourceId,
+  museumWorkHrefIndex,
+} from "@/lib/museum/publication/routes";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -31,10 +38,15 @@ export function getMuseumGiftMetadata(accessionId: string): Metadata {
   });
 }
 
+/** @api Compatibility component retained for explicit legacy route tests. */
 export async function MuseumGiftPage({
   accessionId,
+  canonicalTitle,
+  acquisitionContext,
 }: {
   readonly accessionId: string;
+  readonly canonicalTitle?: string;
+  readonly acquisitionContext?: MuseumAcquisitionViewModel;
 }) {
   if (accessionId !== CASEY_ACCESSION_ID) {
     notFound();
@@ -45,6 +57,7 @@ export async function MuseumGiftPage({
     return <MuseumPublicationUnavailable />;
   }
   const publication = publicationState.publication;
+  const workHrefs = museumWorkHrefIndex(publication);
   const artworks = tryCaseyArtworksFromPublication(publication);
   if (artworks === null) {
     return <MuseumPublicationUnavailable />;
@@ -74,10 +87,38 @@ export async function MuseumGiftPage({
     return <MuseumPublicationUnavailable />;
   }
 
+  const title = canonicalTitle ?? giftNarrative.title;
+  const context = acquisitionContext
+    ? {
+        ...acquisitionContext,
+        status: t(
+          DEFAULT_LOCALE,
+          "museum.network.acquisitions.accessionedStatus"
+        ),
+        breadcrumbs: [
+          { label: "6529 Network Museum", href: "/museum/network" },
+          {
+            label: t(DEFAULT_LOCALE, "museum.network.acquisitions.title"),
+            href: "/museum/network/acquisitions",
+          },
+          { label: title },
+        ],
+      }
+    : null;
+
   return (
     <article className="tw-min-w-0">
+      {context ? (
+        <MuseumBreadcrumbs
+          ariaLabel={t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.breadcrumbs"
+          )}
+          items={context.breadcrumbs}
+        />
+      ) : null}
       <Link
-        href="/museum/network/collection"
+        href="/museum/network/acquisitions"
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         {t(DEFAULT_LOCALE, "museum.network.gift.backToCollection")}
@@ -88,7 +129,7 @@ export async function MuseumGiftPage({
             {t(DEFAULT_LOCALE, "museum.network.gift.eyebrow")}
           </p>
           <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-5xl">
-            {giftNarrative.title}
+            {title}
           </h1>
         </div>
         <dl className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0">
@@ -119,6 +160,21 @@ export async function MuseumGiftPage({
         </dl>
       </header>
 
+      {context ? (
+        <MuseumEntityContext
+          context={context}
+          labels={{
+            ariaLabel: t(
+              DEFAULT_LOCALE,
+              "museum.network.accessibility.entityContext"
+            ),
+            status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
+            statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
+            source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
+          }}
+        />
+      ) : null}
+
       <section className="tw-mt-12" aria-labelledby="gift-works-title">
         <h2
           id="gift-works-title"
@@ -127,15 +183,21 @@ export async function MuseumGiftPage({
           {t(DEFAULT_LOCALE, "museum.network.gift.sevenWorks")}
         </h2>
         <div className="tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-          {artworks.map((artwork, index) => (
-            <MuseumArtworkFigure
-              key={artwork.objectId}
-              artwork={artwork}
-              eager={index < 3}
-              href={`/museum/network/collection/${encodeURIComponent(artwork.objectId)}`}
-              sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
-            />
-          ))}
+          {artworks.map((artwork, index) => {
+            const href = museumWorkHrefForSourceId(
+              publication,
+              artwork.objectId
+            );
+            return (
+              <MuseumArtworkFigure
+                key={artwork.objectId}
+                artwork={artwork}
+                eager={index < 3}
+                {...(href === null ? {} : { href })}
+                sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -180,6 +242,7 @@ export async function MuseumGiftPage({
           embeddedDocument
           sourceCommit={publication.identity.commit}
           sourcePath={giftNarrative.sourcePath}
+          workHrefs={workHrefs}
         >
           {giftNarrative.markdown}
         </MuseumMarkdown>
@@ -240,6 +303,7 @@ export async function MuseumGiftPage({
                     <MuseumMarkdown
                       sourceCommit={publication.identity.commit}
                       sourcePath={document.sourcePath}
+                      workHrefs={workHrefs}
                     >
                       {document.markdown}
                     </MuseumMarkdown>

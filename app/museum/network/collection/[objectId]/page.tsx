@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import {
-  getMuseumObjectMetadata,
-  MuseumObjectPage,
-} from "@/components/museum/MuseumObjectPage";
+import { notFound, permanentRedirect } from "next/navigation";
+import { getMuseumObjectMetadata } from "@/components/museum/MuseumObjectPage";
+import { museumCollectionWorkHrefForSourceId } from "@/lib/museum/publication/routes";
+import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 
 interface MuseumObjectRouteProps {
   readonly params: Promise<{ objectId: string }>;
@@ -19,5 +19,13 @@ export default async function MuseumCollectionObjectRoute({
   params,
 }: MuseumObjectRouteProps) {
   const { objectId } = await params;
-  return <MuseumObjectPage objectId={objectId} />;
+  const { publicationState, view } = await getMuseumPublicationBundle();
+  if (publicationState.publication === null) notFound();
+  const href = museumCollectionWorkHrefForSourceId(
+    publicationState.publication,
+    objectId,
+    view
+  );
+  if (href === null) notFound();
+  permanentRedirect(href);
 }
