@@ -173,7 +173,9 @@ describe("ApprovalDropVoteSummary", () => {
     const current = screen.getByText("5");
     const status = screen.getByText("Needs 3");
     expect(current).toHaveClass("tw-text-iron-200");
+    expect(current.parentElement).toHaveClass("tw-gap-y-0.5");
     expect(current.parentElement).not.toBe(status.parentElement);
+    expect(status.parentElement).toHaveClass("tw-gap-2");
     expect(status).toHaveClass("tw-whitespace-nowrap");
     expect(
       screen.getByRole("group", {

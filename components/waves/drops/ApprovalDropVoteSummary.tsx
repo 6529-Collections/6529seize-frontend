@@ -162,13 +162,13 @@ export default function ApprovalDropVoteSummary({
       <div
         role="group"
         aria-label={voteSummaryLabel}
-        className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-1.5"
+        className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2"
       >
         <div
           aria-hidden="true"
-          className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-1.5"
+          className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2"
         >
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0.5">
             <span
               className={`tw-font-mono tw-text-sm tw-font-bold ${getCurrentValueClass(
                 {
