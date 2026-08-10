@@ -17,17 +17,29 @@ describe("UserPageHeaderAboutStatement", () => {
     expect(screen.getByText("Hello there")).toBeInTheDocument();
   });
 
-  it("toggles long statement expansion", async () => {
+  it("toggles overflowing statement expansion", async () => {
+    const clientHeightSpy = jest
+      .spyOn(HTMLElement.prototype, "clientHeight", "get")
+      .mockReturnValue(100);
+    const scrollHeightSpy = jest
+      .spyOn(HTMLElement.prototype, "scrollHeight", "get")
+      .mockReturnValue(200);
     const statement: CicStatement = { statement_value: "a".repeat(241) } as any;
-    render(<UserPageHeaderAboutStatement statement={statement} />);
 
-    const toggle = screen.getByRole("button", { name: "See more" });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    try {
+      render(<UserPageHeaderAboutStatement statement={statement} />);
 
-    await userEvent.click(toggle);
-    expect(screen.getByRole("button", { name: "See less" })).toHaveAttribute(
-      "aria-expanded",
-      "true"
-    );
+      const toggle = screen.getByRole("button", { name: "See more" });
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+      await userEvent.click(toggle);
+      expect(screen.getByRole("button", { name: "See less" })).toHaveAttribute(
+        "aria-expanded",
+        "true"
+      );
+    } finally {
+      clientHeightSpy.mockRestore();
+      scrollHeightSpy.mockRestore();
+    }
   });
 });
