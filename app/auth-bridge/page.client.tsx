@@ -15,23 +15,32 @@ import { getAuthJwt } from "@/services/auth/auth.utils";
  * The token is placed in the fragment (not the query string) so it never
  * hits server logs — it is purely client-side.
  *
- * Redirect targets are validated against an allowlist to prevent open
- * redirect attacks. New community apps can be added to AUTH_BRIDGE_ALLOWLIST.
+ * Redirect targets are validated against an exact-URI allowlist to prevent
+ * open redirect attacks. Because Arweave is a public content gateway where
+ * anyone can host arbitrary pages, we match exact redirect URIs (not whole
+ * origins) to ensure only approved application endpoints receive the JWT.
+ *
+ * To add a new community app, add its exact callback URI to
+ * AUTH_BRIDGE_ALLOWED_REDIRECT_URIS.
  */
 
-// Allowlist of approved redirect targets.
-// To add a new community app, add its origin here.
-const AUTH_BRIDGE_ALLOWLIST: string[] = [
-  "https://arweave.net",
-  // Add more approved community app origins here
-];
+// Allowlist of approved redirect URIs (exact match, not origin-level).
+// Each entry must be the full callback URL the app will use to receive the token.
+const AUTH_BRIDGE_ALLOWED_REDIRECT_URIS = new Set<string>([
+  // Add approved community app callback URIs here, e.g.:
+  // "https://arweave.net/XXXX-specific-transaction-id",
+]);
 
 function isAllowedRedirect(target: string): boolean {
   try {
     const url = new URL(target);
-    return AUTH_BRIDGE_ALLOWLIST.some(
-      (allowed) => url.origin === allowed
-    );
+    // Reject if the target has a query string or fragment
+    // (the fragment will be appended by us with the token)
+    if (url.search !== "" || url.hash !== "") {
+      return false;
+    }
+    // Exact URI match only — no origin-level wildcards
+    return AUTH_BRIDGE_ALLOWED_REDIRECT_URIS.has(url.toString());
   } catch {
     return false;
   }
@@ -68,17 +77,15 @@ export default function AuthBridgePageClient() {
       setStatus("error");
       setMessage("You are not logged in. Please sign in to 6529.io first.");
       // Auto-redirect to home after 3 seconds
-      setTimeout(() => {
+      const redirectTimer = window.setTimeout(() => {
         window.location.href = "/";
       }, 3000);
-      return;
+      return () => window.clearTimeout(redirectTimer);
     }
 
     // Redirect back to the requesting app with token in the URL fragment
-    const separator = redirectTarget.includes("#") ? "&" : "#";
-    const redirectUrl = `${redirectTarget}${separator}t=${encodeURIComponent(jwt)}`;
+    const redirectUrl = `${redirectTarget}#t=${encodeURIComponent(jwt)}`;
 
-    // Clear the fragment from the address bar after redirect
     window.location.replace(redirectUrl);
     setStatus("done");
   }, [searchParams]);
