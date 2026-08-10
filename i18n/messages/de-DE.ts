@@ -484,6 +484,7 @@ export const DE_DE_MESSAGES = {
   "waves.poll.status.updated": "Aktualisiert",
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
+  "theMemes.detail.live.artwork.mintDateLabel": "Mint-Datum:",
   ...DE_DE_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Meme-Sortierung",
   "theMemes.sorting.sortBy": "Sortieren nach",

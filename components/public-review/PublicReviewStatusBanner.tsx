@@ -74,10 +74,12 @@ const AUDIT_LABELS = {
 export function PublicReviewStatusBanner({
   review,
   displayedVersion,
+  isVersionedRoute = false,
   source,
 }: {
   readonly review: PublicReviewDefinition;
   readonly displayedVersion: string;
+  readonly isVersionedRoute?: boolean;
   readonly source?: PublicReviewSource | undefined;
 }) {
   const displayedReviewVersion = review.versions.find(
@@ -90,23 +92,20 @@ export function PublicReviewStatusBanner({
   const shortCommit = resolvedSource.commit.slice(0, 10);
   const sourceUrl = `https://github.com/${resolvedSource.repository}/tree/${resolvedSource.commit}`;
   const lifecycleCopy = LIFECYCLE_COPY[displayedReviewVersion.status];
-  const isHistoricalVersion = displayedVersion !== review.activeVersion;
 
   return (
     <section
       aria-label={t(DEFAULT_LOCALE, "publicReview.status.heading")}
       className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.1] tw-py-4 tw-@container"
     >
-      <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 @[860px]:tw-flex-row @[860px]:tw-items-start @[860px]:tw-justify-between @[860px]:tw-gap-8">
-        <div className="tw-min-w-0 @[860px]:tw-max-w-2xl">
-          <p className="tw-m-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-amber-300">
-            {t(DEFAULT_LOCALE, lifecycleCopy.label)}
-          </p>
-          <p className="tw-mb-0 tw-mt-1.5 tw-text-[0.8125rem] tw-leading-5 tw-text-iron-400">
-            {t(DEFAULT_LOCALE, lifecycleCopy.explanation)}
-          </p>
-        </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 @[860px]:tw-flex-none @[860px]:tw-justify-end">
+      <div className="tw-grid tw-w-full tw-gap-3 @[860px]:tw-grid-cols-[minmax(0,1fr)_auto] @[860px]:tw-gap-x-8 @[860px]:tw-gap-y-1.5">
+        <p className="tw-m-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-amber-300">
+          {t(DEFAULT_LOCALE, lifecycleCopy.label)}
+        </p>
+        <p className="tw-m-0 tw-min-w-0 tw-text-[0.8125rem] tw-leading-5 tw-text-iron-400 @[860px]:tw-col-span-2">
+          {t(DEFAULT_LOCALE, lifecycleCopy.explanation)}
+        </p>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 @[860px]:tw-col-start-2 @[860px]:tw-row-start-1 @[860px]:tw-justify-end">
           <span className={`${STATUS_ITEM} tw-text-sky-300`}>
             {t(
               DEFAULT_LOCALE,
@@ -119,12 +118,14 @@ export function PublicReviewStatusBanner({
               AUDIT_LABELS[displayedReviewVersion.auditStatus]
             )}
           </span>
-          <span className={`${STATUS_ITEM} tw-text-iron-400`}>
-            {t(DEFAULT_LOCALE, "publicReview.status.version", {
-              version: displayedVersion,
-            })}
-          </span>
-          {isHistoricalVersion ? (
+          {isVersionedRoute ? (
+            <span className={`${STATUS_ITEM} tw-text-iron-400`}>
+              {t(DEFAULT_LOCALE, "publicReview.status.version", {
+                version: displayedVersion,
+              })}
+            </span>
+          ) : null}
+          {isVersionedRoute ? (
             <Link
               href={`/reviews/${review.slug}`}
               className={`${STATUS_ITEM} tw-text-violet-300 tw-no-underline hover:tw-text-violet-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}

@@ -120,6 +120,18 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "waves.leaderboard.timeline.nextWinner")).toBe(
       "Prochain gagnant"
     );
+    expect(t("en-GB", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Mint date:"
+    );
+    expect(t("fr-FR", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Date de mint :"
+    );
+    expect(t("es-ES", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Fecha de mint:"
+    );
+    expect(t("de-DE", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Mint-Datum:"
+    );
     expect(t("es-ES", "waves.leaderboard.timeline.status.completed")).toBe(
       "Completado"
     );
