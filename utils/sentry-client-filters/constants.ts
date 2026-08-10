@@ -249,6 +249,7 @@ export const extensionMessagingConnectionFailureMessage =
   "Could not establish connection. Receiving end does not exist.";
 export const extensionMessagingContentScriptPaths = new Set([
   "app:///content-scripts/content.js",
+  "app:///injected-script.js",
 ]);
 export const injectedScriptBundlePathToken = "injectedscript.bundle.js";
 export const injectedScriptSendMessageError =
