@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { museumPublicationCatalogResolver } from "../lib/museum/publication/catalog";
 import { GitHubMuseumPublicationSource } from "../lib/museum/publication/github";
 import { legacyCaseyPublicationAssembler } from "../lib/museum/publication/legacyCasey";
 import { isExactGitCommit } from "../lib/museum/publication/security";
@@ -14,6 +15,8 @@ interface MuseumPublicationCompatibilityResult {
   readonly adapter_status: "current" | "stale" | "unavailable" | "invalid";
   readonly adapter_error_code: string | null;
   readonly publication_commit: string | null;
+  readonly catalog_id: string | null;
+  readonly catalog_content_hash: string | null;
 }
 
 interface VerifyMuseumPublicationCompatibilityOptions {
@@ -31,13 +34,16 @@ function invalidResult(
     adapter_status: "invalid",
     adapter_error_code: "publication_invalid_commit",
     publication_commit: null,
+    catalog_id: null,
+    catalog_content_hash: null,
   };
 }
 
 /**
  * Binds the strict frontend publication adapter to one immutable canonical
- * Museum source commit. Callers must resolve source main before invoking this
- * function; it deliberately does not accept a branch name or a moving ref.
+ * Museum catalog/control commit. Callers must resolve source main before
+ * invoking this function; the verified catalog supplies the distinct
+ * publication/source commit returned as `publication_commit`.
  */
 export async function verifyMuseumPublicationCompatibility(
   options: VerifyMuseumPublicationCompatibilityOptions
@@ -49,6 +55,7 @@ export async function verifyMuseumPublicationCompatibility(
   const state = await new GitHubMuseumPublicationSource({
     ref: options.sourceCommit,
     assembler: legacyCaseyPublicationAssembler,
+    catalogResolver: museumPublicationCatalogResolver,
     ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
   }).load();
 
@@ -60,12 +67,18 @@ export async function verifyMuseumPublicationCompatibility(
       adapter_status: state.status,
       adapter_error_code: state.errorCode ?? "publication_source_unavailable",
       publication_commit: null,
+      catalog_id: null,
+      catalog_content_hash: null,
     };
   }
 
+  const identity = state.publication.identity;
+  const publicationCommit = identity.commit;
   const identityMatches =
-    state.publication.identity.commit === options.sourceCommit &&
-    state.publication.identity.requestedRef === options.sourceCommit;
+    identity.requestedRef === options.sourceCommit &&
+    isExactGitCommit(publicationCommit) &&
+    identity.catalogId === `6529NM-PUBCAT-${publicationCommit}` &&
+    /^0x[a-f0-9]{64}$/u.test(identity.catalogContentHash ?? "");
   return {
     contract: COMPATIBILITY_CONTRACT,
     source_commit: options.sourceCommit,
@@ -74,7 +87,9 @@ export async function verifyMuseumPublicationCompatibility(
     adapter_error_code: identityMatches
       ? null
       : "publication_source_identity_mismatch",
-    publication_commit: state.publication.identity.commit,
+    publication_commit: publicationCommit,
+    catalog_id: identity.catalogId ?? null,
+    catalog_content_hash: identity.catalogContentHash ?? null,
   };
 }
 
