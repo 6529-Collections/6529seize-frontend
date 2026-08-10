@@ -33,6 +33,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - `Rank`
   - `Approve`
 - `Show outcomes` for `Rank` and `Approve` waves.
+- `Compact proposal cards` for `Rank` and `Approve` waves:
+  - defaults to off
+  - when enabled, published proposals use compact previews that open the
+    complete original proposal
 - Approve tab labels for `Approve` waves:
   - proposals tab defaults to `Proposals`
   - approved tab defaults to `Approved`
@@ -60,6 +64,9 @@ Set the wave name, optional image, and wave type before moving to later steps.
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
 - `Show outcomes` defaults to on. Turning it off hides outcome displays after
   the wave is created.
+- `Compact proposal cards` defaults to off. Enabling it stores the Wave-level
+  display choice when the Wave is created; it does not alter Chat messages or
+  specialized Memes, Curation, and Quorum presentations.
 
 ## Failure and Recovery
 
@@ -82,4 +89,5 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
+- [Compact Proposal Cards](../drop-actions/feature-proposal-cards.md)
 - [Docs Home](../../README.md)

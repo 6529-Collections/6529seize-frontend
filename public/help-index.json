@@ -2084,6 +2084,45 @@
       "tags": ["waves", "drop", "glossary", "concept"]
     },
     {
+      "id": "waves.proposal-cards",
+      "kind": "ui_affordance",
+      "title": "Compact proposal cards",
+      "aliases": [
+        "proposal card",
+        "proposal cards",
+        "compact proposal",
+        "open full proposal",
+        "network museum proposals"
+      ],
+      "keywords": [
+        "waves",
+        "proposal",
+        "compact",
+        "card",
+        "preview",
+        "approved",
+        "winner",
+        "museum",
+        "create"
+      ],
+      "facts": [
+        "The 6529 Network Museum Wave shows published proposals as compact cards while normal Chat messages remain normal messages.",
+        "Other existing standard Waves keep their current presentation unless the Wave is explicitly configured to use compact proposal cards.",
+        "A compact card uses the proposal's stored title or first authored non-empty line, an excerpt from the original authored text, real multipart/media/attachment counts, and at most one ready static image preview.",
+        "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
+        "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
+        "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
+        "Wave creators can enable Compact proposal cards in the Overview step for a Rank or Approve Wave; the setting defaults to off and is stored as Wave metadata."
+      ],
+      "canonical_path": "/waves/5f207393-5418-4a75-8738-e40edb44a94d",
+      "related_paths": ["/waves", "/waves?create=wave", "/waves/create"],
+      "tags": ["waves", "proposal", "cards", "museum", "ui"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-proposal-cards.md",
+        "ops/docs/waves/create/feature-overview-step.md"
+      ]
+    },
+    {
       "id": "waves.subwaves.unread-count",
       "kind": "ui_affordance",
       "title": "Parent wave unread subwave count",
