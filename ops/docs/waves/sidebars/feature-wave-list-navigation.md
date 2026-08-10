@@ -14,6 +14,10 @@ Wave and DM rows in the left list control which thread is open.
 - In `Worth Checking Out`, each avatar and its overlaid score shield form one
   wave navigation link. Hovering or focusing the combined link shows score
   details without creating a competing click target.
+- `Worth Checking Out` is an overlapping discovery view: every recommended
+  wave also appears in the `All` list at its recent-activity position. The
+  `Joined` list includes only waves the user has joined, so discovery-only
+  recommendations stay out of that bottom list.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
 - Browser back/forward keeps the active row and URL in sync.

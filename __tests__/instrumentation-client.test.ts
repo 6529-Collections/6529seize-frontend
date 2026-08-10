@@ -40,6 +40,12 @@ describe("instrumentation-client", () => {
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
     "Error: The provider is disconnected from all chains.\n    at o (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/background.js:2:7356292)";
+  const rabbyChromeUserRejectedStack = [
+    "Error: User rejected the request.",
+    "    at a (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:123184)",
+    "    at Object.userRejectedRequest (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:124412)",
+    "    at h.dispose (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:297934)",
+  ].join("\n");
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
   const gifPickerTenorUndefinedTagsMessage =
@@ -411,6 +417,33 @@ describe("instrumentation-client", () => {
           },
         },
       ],
+    },
+  });
+
+  const createRabbyChromeUserRejectedEvent = (
+    exceptionValueOverrides: Record<string, unknown> = {},
+    serializedStack = rabbyChromeUserRejectedStack
+  ) => ({
+    event_id: "rabby-chrome-user-rejected",
+    exception: {
+      values: [
+        {
+          type: "UnhandledRejection",
+          value: objectCapturedPromiseRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          ...exceptionValueOverrides,
+        },
+      ],
+    },
+    extra: {
+      __serialized__: {
+        code: 4001,
+        message: "User rejected the request.",
+        stack: serializedStack,
+      },
     },
   });
 
@@ -1041,6 +1074,49 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the exact Rabby Chrome user-rejected object rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyChromeUserRejectedEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps Rabby Chrome user rejections with app-owned frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyChromeUserRejectedEvent({
+      stacktrace: {
+        frames: [
+          {
+            filename: "hooks/drops/useDropSignature.ts",
+            abs_path: "hooks/drops/useDropSignature.ts",
+            in_app: true,
+          },
+        ],
+      },
+    });
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps Rabby Chrome user rejections with app-owned serialized frames", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyChromeUserRejectedEvent(
+      {},
+      [
+        rabbyChromeUserRejectedStack,
+        "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+      ].join("\n")
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops unsupported wallet_revokePermissions provider rejections", () => {
