@@ -288,6 +288,9 @@ function HeaderQRModal({
       walletAddress,
       routerPath,
     });
+    if (isStaleGeneration()) {
+      return;
+    }
     await Promise.all([
       prepareMobileConnectionShare({
         connectionUrl: generatedConnectionAppUrl,

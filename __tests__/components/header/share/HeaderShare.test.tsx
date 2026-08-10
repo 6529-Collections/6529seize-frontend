@@ -1508,6 +1508,76 @@ describe("HeaderShare", () => {
       ).not.toHaveBeenCalled();
     });
 
+    it("does not publish a legacy Desktop URL from a stale generation", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const firstAddress = "0x1111111111111111111111111111111111111111";
+      const secondAddress = "0x2222222222222222222222222222222222222222";
+      let activeAddress = firstAddress;
+      let resolveFirstMobileShare!: (share: unknown) => void;
+      const firstMobileShare = new Promise<unknown>((resolve) => {
+        resolveFirstMobileShare = resolve;
+      });
+      mockAuthUtils.getRefreshToken.mockReturnValue(
+        "stale-local-legacy-refresh-token"
+      );
+      mockAuthUtils.getWalletAddress.mockImplementation(() => activeAddress);
+      mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
+        isAuthenticated: true,
+        hasValidWalletAuth: false,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: activeAddress,
+        hasInitializationError: false,
+        initializationError: null,
+      }));
+      sessionV2.createConnectionShare
+        .mockImplementationOnce(() => firstMobileShare)
+        .mockImplementationOnce(() => createPendingPromise());
+
+      const { rerender } = renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+      );
+
+      activeAddress = secondAddress;
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <HeaderShare />
+        </QueryClientProvider>
+      );
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+      );
+
+      await act(async () => {
+        resolveFirstMobileShare({
+          connection_share_code: "stale-first-mobile-share-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: firstAddress,
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=stale-first-mobile-share-code",
+        });
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await userEvent.click(screen.getByRole("button", { name: "Desktop" }));
+
+      expect(
+        screen.queryByTitle(/stale-local-legacy-refresh-token/)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText("Preparing Device Connection")
+      ).toBeInTheDocument();
+      expect(
+        sessionV2.createLegacyDesktopConnectionShare
+      ).not.toHaveBeenCalled();
+    });
+
     it("ignores a local legacy refresh token for v2 Desktop connection sharing", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       mockAuthUtils.getRefreshToken.mockReturnValue(

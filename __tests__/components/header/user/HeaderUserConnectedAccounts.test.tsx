@@ -62,7 +62,10 @@ describe("HeaderUserConnectedAccounts", () => {
   it("keeps a single profile visually neutral and hides multi-profile actions", () => {
     renderAccounts({ accounts: [activeAccount] });
 
-    expect(screen.getByText("Profiles")).toBeInTheDocument();
+    const profilesHeading = screen.getByText("Profiles");
+    expect(profilesHeading).toBeInTheDocument();
+    expect(profilesHeading.parentElement).toHaveClass("tw-pl-3");
+    expect(profilesHeading.parentElement).not.toHaveClass("tw-px-3");
     const addProfile = screen.getByRole("button", { name: "Add profile" });
     expect(addProfile).toBeInTheDocument();
     expect(addProfile.parentElement).toHaveClass("tw-ml-auto");
