@@ -91,7 +91,7 @@ export default function UserPageHeaderEditProfile({
 
   const closeEditor = () => {
     setActiveTarget(null);
-    globalThis.requestAnimationFrame?.(() => triggerRef.current?.focus());
+    globalThis.requestAnimationFrame(() => triggerRef.current?.focus());
   };
 
   return (
