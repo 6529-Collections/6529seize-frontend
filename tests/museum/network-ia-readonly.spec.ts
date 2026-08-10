@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+
 import type { Page, TestInfo } from "@playwright/test";
 
 import {
@@ -14,6 +16,7 @@ const SOURCE_COMMIT =
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
+const EVIDENCE_SCREENSHOT_TIMEOUT_MS = 15_000;
 const MUSEUM_WAVE_ID = "5f207393-5418-4a75-8738-e40edb44a94d";
 const MAGNUM_DROP_ID = "002bfa4f-8416-48bf-b35e-38f354e9a9f0";
 const MAGNUM_WAVE_CONTEXT_HREF = `https://6529.io/waves/${MUSEUM_WAVE_ID}?drop=${MAGNUM_DROP_ID}`;
@@ -32,10 +35,35 @@ async function openRoute(page: Page, path: string) {
 }
 
 async function retainScreenshot(page: Page, testInfo: TestInfo, name: string) {
-  await page.screenshot({
-    path: testInfo.outputPath(`${name}.png`),
-    fullPage: testInfo.project.name !== MOBILE_PROJECT,
-  });
+  const cdpSession = await page.context().newCDPSession(page);
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    const capture = await Promise.race([
+      cdpSession.send("Page.captureScreenshot", {
+        captureBeyondViewport: false,
+        format: "png",
+        fromSurface: true,
+      }),
+      new Promise<never>((_resolve, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(
+            new Error(
+              `Museum viewport evidence capture timed out after ${EVIDENCE_SCREENSHOT_TIMEOUT_MS}ms: ${name}`
+            )
+          );
+        }, EVIDENCE_SCREENSHOT_TIMEOUT_MS);
+      }),
+    ]);
+
+    await writeFile(
+      testInfo.outputPath(`${name}.png`),
+      Buffer.from(capture.data, "base64")
+    );
+  } finally {
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
+    await cdpSession.detach().catch(() => undefined);
+  }
 }
 
 async function expectMuseumNavigation(page: Page, activeLabel: string | null) {
@@ -67,6 +95,10 @@ async function expectNoDeadLinks(page: Page) {
 }
 
 test.describe("Museum public IA rendered contract @surface @readonly", () => {
+  test.skip(
+    ({ browserName }) => browserName !== "chromium",
+    "Retained Museum evidence uses the Chromium CDP in the exact desktop/mobile matrix."
+  );
   test.skip(
     SOURCE_COMMIT === null,
     "Requires the exact WP-1 source commit selected by the publication test harness."

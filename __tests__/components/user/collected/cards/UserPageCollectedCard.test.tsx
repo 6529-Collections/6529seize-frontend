@@ -380,6 +380,33 @@ describe("UserPageCollectedCard", () => {
     expect(link).toHaveAttribute("href", "/the-memes/1");
   });
 
+  it("includes the profile collected return target for NextGen cards", () => {
+    render(
+      <UserPageCollectedCard
+        card={{
+          ...memeCard,
+          collection: CollectedCollectionType.NEXTGEN,
+          token_id: 10000000643,
+        }}
+        contractType={ContractType.ERC721}
+        showDataRow={true}
+        interactiveMode="link"
+        onToggle={() => {}}
+        onIncQty={() => {}}
+        onDecQty={() => {}}
+        copiesMax={1}
+        returnTo="/Shelby/collected?collection=nextgen&page=3"
+      />
+    );
+
+    const href = screen.getByRole("link").getAttribute("href");
+    const url = new URL(href ?? "", "https://6529.io");
+    expect(url.pathname).toBe("/nextgen/token/10000000643");
+    expect(url.searchParams.get("returnTo")).toBe(
+      "/Shelby/collected?collection=nextgen&page=3#collected-card-nextgen-10000000643"
+    );
+  });
+
   it("calls onToggle and onDecQty when decrementing from qtySelected 1 for ERC1155", async () => {
     const user = userEvent.setup();
     const mockOnToggle = jest.fn();

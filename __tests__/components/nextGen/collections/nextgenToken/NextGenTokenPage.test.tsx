@@ -125,6 +125,7 @@ const baseProps = {
   tokenCount: 2,
   view: NextgenCollectionView.ABOUT,
   setView: jest.fn(),
+  returnTo: null as string | null,
 };
 
 function renderComponent(props?: Partial<typeof baseProps>) {
@@ -134,6 +135,7 @@ function renderComponent(props?: Partial<typeof baseProps>) {
 describe("NextGenTokenPage", () => {
   beforeEach(() => {
     mockConnectedAddress.value = undefined;
+    mockIsNullAddress.mockReturnValue(false);
   });
 
   describe("rendering", () => {
@@ -155,6 +157,49 @@ describe("NextGenTokenPage", () => {
     it("renders back to collection link", () => {
       renderComponent();
       expect(screen.getByTestId("back")).toBeInTheDocument();
+    });
+
+    it("returns to the originating profile collected card", () => {
+      renderComponent({
+        returnTo:
+          "/Shelby/collected?collection=nextgen&page=3#collected-card-nextgen-1",
+      });
+
+      expect(
+        screen.getByRole("link", { name: "Back to Shelby's collected" })
+      ).toHaveAttribute(
+        "href",
+        "/Shelby/collected?collection=nextgen&page=3#collected-card-nextgen-1"
+      );
+    });
+
+    it("links direct visitors to the current owner's collected view", () => {
+      renderComponent({
+        token: {
+          ...baseProps.token,
+          handle: "Shelby",
+          normalised_handle: "shelby",
+        },
+      });
+
+      expect(
+        screen.getByRole("link", { name: "View Shelby's collected" })
+      ).toHaveAttribute("href", "/shelby/collected?collection=nextgen");
+    });
+
+    it("rejects an invalid return target and uses the owner fallback", () => {
+      renderComponent({
+        returnTo: "//example.com/Shelby/collected",
+        token: {
+          ...baseProps.token,
+          handle: "Shelby",
+          normalised_handle: "shelby",
+        },
+      });
+
+      expect(
+        screen.getByRole("link", { name: "View Shelby's collected" })
+      ).toHaveAttribute("href", "/shelby/collected?collection=nextgen");
     });
 
     it("renders token art component", () => {

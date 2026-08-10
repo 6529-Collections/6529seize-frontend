@@ -21,9 +21,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
-import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import NextGenTokenArt from "./NextGenTokenArt";
+import NextGenTokenCollectionLinks from "./NextGenTokenCollectionLinks";
 import NextgenTokenRarity, {
   NextgenTokenTraits,
 } from "./NextGenTokenProperties";
@@ -37,6 +37,7 @@ interface Props {
   tokenCount: number;
   view: NextgenCollectionView;
   setView: (view: NextgenCollectionView) => void;
+  returnTo?: string | null | undefined;
 }
 
 export default function NextGenTokenPage(props: Readonly<Props>) {
@@ -260,7 +261,11 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     return (
       <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8">
         <section className="tw-py-6 sm:tw-py-8">
-          <NextGenBackToCollectionPageLink collection={props.collection} />
+          <NextGenTokenCollectionLinks
+            collection={props.collection}
+            token={props.token}
+            returnTo={props.returnTo}
+          />
           <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-gap-4">
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
               <h1 className="tw-m-0 tw-truncate tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
