@@ -81,7 +81,8 @@ function gitHarness({ tracked = false, sameTree = true } = {}) {
   const mergeContent = jest
     .fn()
     .mockReturnValueOnce(SHA_B)
-    .mockReturnValueOnce(SHA_C);
+    .mockReturnValueOnce(SHA_C)
+    .mockReturnValue(SHA_D);
   const composition = Buffer.from(
     JSON.stringify({
       version: 1,
