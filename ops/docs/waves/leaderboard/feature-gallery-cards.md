@@ -52,11 +52,13 @@ works from the card.
 - Known MIME values show tooltip labels like `Image - PNG`, `Video - MP4`, and
   `Interactive - GLB`.
 - Unknown or missing MIME values still show a badge tooltip as `Unknown`.
-- On narrow/mobile layouts, long titles and author handles truncate inside the
-  card and vote/rater rows wrap instead of forcing horizontal overflow.
+- Long titles wrap inside the card, author handles truncate, and vote/rater rows
+  wrap instead of forcing horizontal overflow.
 - On touch devices, dragging vertically on card media continues page scrolling;
   a tap still opens the drop detail.
 - On non-touch devices, sort changes briefly highlight card media to signal reordering.
+- Desktop gallery layouts leave space beside the rightmost cards for the
+  floating Quick DM control.
 
 ## Edge Cases
 
@@ -78,7 +80,8 @@ works from the card.
 ## Limitations / Notes
 
 - Scope is memes leaderboard `Grid view` card behavior only.
-- Non-memes `Grid` and `Content only` views are separate surfaces.
+- Non-memes `Grid` and `Content only` views use the separate
+  [Wave Leaderboard Grid Cards](feature-grid-cards.md) behavior.
 - Sort and price filter behavior is owned by `feature-sort-and-group-filters.md`.
 - Cross-view loading and empty-state ownership is in `feature-drop-states.md`.
 
@@ -86,6 +89,7 @@ works from the card.
 
 - [Wave Leaderboards Index](README.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
+- [Wave Leaderboard Grid Cards](feature-grid-cards.md)
 - [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Drop Actions: Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)

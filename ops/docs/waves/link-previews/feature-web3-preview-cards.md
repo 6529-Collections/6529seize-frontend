@@ -16,7 +16,6 @@ external preview or a plain link.
 - Direct messages: `/messages/{waveId}`
 - Home-style markdown cards that reuse link-preview rendering:
   - Boosted cards on `/`
-  - Wave leaderboard grid cards
 
 ## Supported URL Patterns
 
