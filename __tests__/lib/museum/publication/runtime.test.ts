@@ -8,6 +8,10 @@ import {
   type MuseumPublicationLoadState,
   type MuseumPublicationSource,
 } from "@/lib/museum/publication";
+import {
+  getMuseumPublicationNodeEnvironment,
+  isMuseumLocalFixtureEnvironment,
+} from "@/config/museumPublicationEnv.server";
 import { createCaseyFixture } from "./fixture";
 
 type CurrentState = Extract<
@@ -270,6 +274,36 @@ describe("Museum publication runtime", () => {
       expect.objectContaining({ publication })
     );
   });
+
+  it("does not extend last-valid eligibility through a cached stale response", async () => {
+    let now = Date.parse("2026-08-02T12:00:00.000Z");
+    const { load, source } = mockedSource();
+    const acceptedAt = new Date(now).toISOString();
+    load
+      .mockResolvedValueOnce(currentState(publication))
+      .mockResolvedValueOnce({
+        status: "stale",
+        publication,
+        errorCode: "publication_github_http_503",
+        failedAt: "2026-08-03T11:59:50.000Z",
+        lastValidAcceptedAt: acceptedAt,
+      })
+      .mockResolvedValueOnce(unavailableState("publication_github_http_503"));
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0
+    );
+
+    await runtime.load();
+    now += 24 * 60 * 60 * 1000 - 10_000;
+    await expect(runtime.load()).resolves.toMatchObject({ status: "stale" });
+    now += 10_001;
+    await expect(runtime.load()).resolves.toMatchObject({
+      status: "unavailable",
+    });
+    expect(load).toHaveBeenNthCalledWith(3, undefined);
+  });
 });
 
 describe("Museum publication runtime source ref", () => {
@@ -304,5 +338,65 @@ describe("Museum publication runtime source ref", () => {
         MUSEUM_PUBLICATION_TEST_COMMIT: "main",
       })
     ).toThrow("publication_test_commit_not_exact");
+  });
+
+  it("rejects an exact test catalog commit in production", () => {
+    expect(() =>
+      resolveMuseumPublicationRef(
+        {
+          PLAYWRIGHT_READONLY: "1",
+          MUSEUM_PUBLICATION_TEST_COMMIT:
+            "66c9eb9fa8c1512ca9450108151d2d7a037c4f31",
+        },
+        "production"
+      )
+    ).toThrow("publication_test_commit_not_allowed_in_production");
+  });
+
+  it("keeps uncatalogued local fixtures out of every production phase", () => {
+    const environment = {
+      PLAYWRIGHT_READONLY: "1",
+      MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT: "fixture",
+    } as const;
+
+    expect(isMuseumLocalFixtureEnvironment(environment, "test")).toBe(true);
+    expect(isMuseumLocalFixtureEnvironment(environment, "development")).toBe(
+      true
+    );
+    expect(isMuseumLocalFixtureEnvironment(environment, "production")).toBe(
+      false
+    );
+  });
+
+  it("reads the publication node environment without requiring unrelated public endpoints", () => {
+    const environment: NodeJS.ProcessEnv = {
+      ...process.env,
+      NODE_ENV: "production",
+      PUBLIC_RUNTIME: JSON.stringify({ NODE_ENV: "local" }),
+    };
+    const replacement = jest.replaceProperty(process, "env", environment);
+    try {
+      expect(getMuseumPublicationNodeEnvironment()).toBe("local");
+
+      environment["PUBLIC_RUNTIME"] = "{}";
+      expect(getMuseumPublicationNodeEnvironment()).toBe("production");
+
+      environment["PUBLIC_RUNTIME"] = "not-json";
+      expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
+        "museum_publication_runtime_environment_invalid"
+      );
+
+      environment["PUBLIC_RUNTIME"] = "[]";
+      expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
+        "museum_publication_runtime_environment_invalid"
+      );
+
+      environment["PUBLIC_RUNTIME"] = JSON.stringify({ NODE_ENV: "bogus" });
+      expect(() => getMuseumPublicationNodeEnvironment()).toThrow(
+        "museum_publication_runtime_environment_invalid"
+      );
+    } finally {
+      replacement.restore();
+    }
   });
 });

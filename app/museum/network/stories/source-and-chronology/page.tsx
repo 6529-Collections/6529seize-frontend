@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -14,7 +15,7 @@ export const metadata: Metadata = getAppMetadata({
   description: t(DEFAULT_LOCALE, "museum.network.research.description"),
 });
 
-export default async function MuseumSourceAndChronologyPage() {
+export async function renderMuseumSourceAndChronologyPage() {
   const publicationState = await getMuseumPublicationState();
   if (publicationState.publication === null) {
     return <MuseumPublicationUnavailable />;
@@ -41,7 +42,7 @@ export default async function MuseumSourceAndChronologyPage() {
   return (
     <article className="tw-min-w-0">
       <Link
-        href="/museum/network/stories"
+        href="/museum/network/research"
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         {t(DEFAULT_LOCALE, "museum.network.research.backToStories")}
@@ -91,4 +92,8 @@ export default async function MuseumSourceAndChronologyPage() {
       </section>
     </article>
   );
+}
+
+export default function MuseumSourceAndChronologyLegacyPage() {
+  permanentRedirect("/museum/network/research/sources-and-chronology");
 }

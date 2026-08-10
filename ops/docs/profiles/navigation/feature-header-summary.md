@@ -68,6 +68,8 @@ The profile header appears on profile routes under `/{user}` and shows:
   value.
 - Long About text (`>240` chars) is clamped on mobile with `See more` /
   `See less`; desktop stays expanded.
+- Mobile profile banners show the artwork at full strength. Desktop banners use
+  dark gradients where profile content overlaps the artwork.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity
   counts.

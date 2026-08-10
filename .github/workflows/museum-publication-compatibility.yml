@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       source_commit:
-        description: Exact canonical 6529networkmuseum main commit to validate.
+        description: Exact canonical 6529networkmuseum catalog/control commit to validate.
         required: true
         type: string
   repository_dispatch:
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       source_commit:
-        description: Exact canonical 6529networkmuseum main commit; blank resolves current main.
+        description: Exact canonical 6529networkmuseum catalog/control commit; blank resolves current main.
         required: false
         type: string
       run_full_sweep:
@@ -81,6 +81,7 @@ jobs:
       contents: read
     outputs:
       frontend_commit: ${{ steps.frontend.outputs.frontend_commit }}
+      publication_commit: ${{ steps.adapter.outputs.publication_commit }}
     steps:
       - name: Check out current frontend main
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -115,6 +116,7 @@ jobs:
       - name: Install frozen dependencies
         run: ./bin/6529 install:frozen
       - name: Validate exact source through the strict adapter
+        id: adapter
         env:
           FRONTEND_COMMIT: ${{ steps.frontend.outputs.frontend_commit }}
           MUSEUM_PUBLICATION_COMPATIBILITY_COMMIT: ${{ needs.resolve-canonical-source.outputs.source_commit }}
@@ -132,7 +134,7 @@ jobs:
               --arg contract "museum-publication-compatibility-v1" \
               --arg source_commit "$MUSEUM_PUBLICATION_COMPATIBILITY_COMMIT" \
               --arg error_code "publication_compatibility_runner_failed" \
-              "{contract:\$contract,source_commit:\$source_commit,accepted:false,adapter_status:\"unavailable\",adapter_error_code:\$error_code,publication_commit:null}" \
+              "{contract:\$contract,source_commit:\$source_commit,accepted:false,adapter_status:\"unavailable\",adapter_error_code:\$error_code,publication_commit:null,catalog_id:null,catalog_content_hash:null}" \
               > museum-publication-compatibility-artifacts/strict-adapter.json
           fi
           jq --arg frontend_commit "$FRONTEND_COMMIT" \
@@ -141,6 +143,20 @@ jobs:
             > museum-publication-compatibility-artifacts/strict-adapter.tmp.json
           mv museum-publication-compatibility-artifacts/strict-adapter.tmp.json \
             museum-publication-compatibility-artifacts/strict-adapter.json
+          if [ "$adapter_exit" -eq 0 ]; then
+            jq -e --arg source_commit "$MUSEUM_PUBLICATION_COMPATIBILITY_COMMIT" '
+              .contract == "museum-publication-compatibility-v1" and
+              .source_commit == $source_commit and
+              .accepted == true and
+              .adapter_status == "current" and
+              .adapter_error_code == null and
+              (.publication_commit | test("^[a-f0-9]{40}$")) and
+              .catalog_id == ("6529NM-PUBCAT-" + .publication_commit) and
+              (.catalog_content_hash | test("^0x[a-f0-9]{64}$"))
+            ' museum-publication-compatibility-artifacts/strict-adapter.json >/dev/null
+            publication_commit="$(jq -r .publication_commit museum-publication-compatibility-artifacts/strict-adapter.json)"
+            echo "publication_commit=$publication_commit" >> "$GITHUB_OUTPUT"
+          fi
           exit "$adapter_exit"
       - name: Upload strict-adapter evidence
         if: always()
@@ -193,7 +209,7 @@ jobs:
         id: sweep
         continue-on-error: true
         env:
-          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ needs.resolve-canonical-source.outputs.source_commit }}
+          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ needs.strict-adapter.outputs.publication_commit }}
         run: |
           set -euo pipefail
           ./bin/6529 run e2e:packs -- \

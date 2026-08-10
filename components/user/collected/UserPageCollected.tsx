@@ -19,6 +19,7 @@ import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { buildProfileCollectedReturnPath } from "@/helpers/profile-collected-navigation";
 import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { normalizeLocale } from "@/i18n/locales";
@@ -80,6 +81,10 @@ export default function UserPageCollected({
   const router = useRouter();
   const user = params?.["user"]?.toString().toLowerCase() ?? "";
   const locale = normalizeLocale(searchParams.get("locale"));
+  const collectedReturnTo = buildProfileCollectedReturnPath({
+    pathname,
+    searchParams: searchParams.toString(),
+  });
 
   const getFilters = useCallback((): ProfileCollectedFilters => {
     const addressParam = searchParams.get(SEARCH_PARAMS_FIELDS.address);
@@ -653,6 +658,7 @@ export default function UserPageCollected({
                 dataTransfer={dataTransfer ?? []}
                 isTransferLoading={isFetchingTransfer}
                 locale={locale}
+                returnTo={collectedReturnTo}
               />
             )}
           </div>

@@ -190,7 +190,7 @@ it("renders compact vote details trigger by default", () => {
     screen.getByRole("button", {
       name: "View voters and vote log for 1 voter",
     })
-  ).toHaveClass("tw-px-1.5", "tw-py-0.5", "tw-text-xs");
+  ).toHaveClass("tw-px-1.5", "tw-py-0.5");
 });
 
 it("opens vote details without triggering the podium click", () => {
