@@ -33,6 +33,7 @@ import {
   getShouldLoadMainWaves,
   getViewerIdentityKey,
   isKnownWaveForCurrentViewer,
+  SIDEBAR_DISCOVERY_SECTION_ALL,
   SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
   type SidebarDiscoverySection,
   type SidebarWaveWithDiscoverySection,
@@ -44,6 +45,7 @@ export type { SidebarDiscoverySection } from "./useWavesList.helpers";
 type EnhancedWave = SidebarWave & {
   readonly isPinned: boolean;
   readonly isOfficial?: boolean;
+  readonly isInAllWaves?: boolean;
   readonly sidebarSection?: SidebarDiscoverySection;
 };
 
@@ -207,8 +209,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     enabled: shouldLoadMainWaves && isJoinedMode,
   });
   const mainWaves = useMemo<SidebarWaveWithDiscoverySection[]>(() => {
-    // Keep the highly-rated slice before the broader activity list:
-    // duplicate wave ids retain their first sidebarSection during merge.
+    // Keep discovery first so the later activity source provides the freshest
+    // duplicate payload. The merge below resolves overlapping membership.
     return buildMainWaves({
       shouldLoadMainWaves,
       isJoinedMode,
@@ -422,13 +424,25 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       const sidebarSection: SidebarDiscoverySection | undefined = (
         wave as SidebarWaveWithDiscoverySection
       ).sidebarSection;
+      const isInAllWaves =
+        existingWave?.isInAllWaves === true ||
+        (wave as SidebarWaveWithDiscoverySection).isInAllWaves === true;
 
       const nextLatestFollowedSubwaveDropTimestamp = Math.max(
         existingWave?.latestFollowedSubwaveDropTimestamp ?? 0,
         wave.latestFollowedSubwaveDropTimestamp ?? 0
       );
-      const preservedSidebarSection =
-        existingWave?.sidebarSection ?? sidebarSection ?? "all";
+      const hasHighlyRatedSection =
+        existingWave?.sidebarSection ===
+          SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED ||
+        sidebarSection === SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED;
+      const hasAllSection =
+        existingWave?.sidebarSection === SIDEBAR_DISCOVERY_SECTION_ALL ||
+        sidebarSection === SIDEBAR_DISCOVERY_SECTION_ALL;
+      let preservedSidebarSection = SIDEBAR_DISCOVERY_SECTION_ALL;
+      if (hasHighlyRatedSection && (!isJoinedMode || !hasAllSection)) {
+        preservedSidebarSection = SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED;
+      }
       const isPinned = pinnedWavesSet.has(wave.id);
 
       // The current source has the freshest wave payload; the fields below
@@ -454,6 +468,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
           existingWave?.firstUnreadFollowedSubwaveDropSerialNo ?? null,
           wave.firstUnreadFollowedSubwaveDropSerialNo
         ),
+        isInAllWaves,
         isPinned,
         sidebarSection: preservedSidebarSection,
       });
@@ -508,6 +523,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     pinnedIds,
     announcementWave,
     isAnnouncementsWave,
+    isJoinedMode,
     shouldLoadMainWaves,
   ]);
 

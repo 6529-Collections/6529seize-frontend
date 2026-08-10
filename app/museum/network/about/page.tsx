@@ -7,10 +7,13 @@ import { t } from "@/i18n/messages";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.proposition.title"),
-  description: t(DEFAULT_LOCALE, "museum.network.proposition.metadata"),
-});
+export const metadata: Metadata = {
+  ...getAppMetadata({
+    title: t(DEFAULT_LOCALE, "museum.network.proposition.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.proposition.metadata"),
+  }),
+  alternates: { canonical: "/museum/network/about" },
+};
 
 export default async function MuseumAboutPage() {
   const publicationState = await getMuseumPublicationState();

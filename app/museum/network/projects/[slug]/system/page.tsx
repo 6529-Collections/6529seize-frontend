@@ -9,6 +9,7 @@ import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
 import { getGenerativeStudyByProjectSlug } from "@/lib/museum/generative-studies";
 import { getMintedProjectIndex } from "@/lib/museum/generative-studies/minted";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { museumWorkHrefForSourceId } from "@/lib/museum/publication/routes";
 
 interface MuseumGenerativeSystemPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -22,7 +23,9 @@ export async function generateMetadata({
 }: MuseumGenerativeSystemPageProps): Promise<Metadata> {
   const { slug } = await params;
   const study = getGenerativeStudyByProjectSlug(slug);
-  return getAppMetadata({
+  const publication = (await getMuseumPublicationState()).publication;
+  const project = publication?.projects.find((item) => item.slug === slug);
+  const metadata = getAppMetadata({
     title:
       study === null
         ? t(DEFAULT_LOCALE, "museum.network.insideSystem.title")
@@ -33,6 +36,14 @@ export async function generateMetadata({
       study?.thesis ??
       t(DEFAULT_LOCALE, "museum.network.insideSystem.description"),
   });
+  return project === undefined || study === null
+    ? metadata
+    : {
+        ...metadata,
+        alternates: {
+          canonical: `/museum/network/projects/${encodeURIComponent(project.slug)}/system`,
+        },
+      };
 }
 
 export default async function MuseumGenerativeSystemPage({
@@ -54,7 +65,7 @@ export default async function MuseumGenerativeSystemPage({
   if (project === undefined || study === null) {
     notFound();
   }
-  if (project.id !== study.projectId) {
+  if (project.id !== study.projectId && project.slug !== study.projectSlug) {
     notFound();
   }
   const caseyArtworks = tryCaseyArtworksFromPublication(
@@ -66,6 +77,21 @@ export default async function MuseumGenerativeSystemPage({
   const artworks = caseyArtworks.filter((artwork) =>
     project.artworkIds.includes(artwork.objectId)
   );
+  const workHrefs = Object.fromEntries(
+    artworks.flatMap((artwork) => {
+      const href = museumWorkHrefForSourceId(
+        publicationState.publication,
+        artwork.objectId
+      );
+      return href === null ? [] : [[artwork.objectId, href]];
+    })
+  );
+  if (
+    publicationState.publication.works !== undefined &&
+    Object.keys(workHrefs).length !== artworks.length
+  ) {
+    return <MuseumPublicationUnavailable />;
+  }
   const mintedIndex = getMintedProjectIndex(slug);
   if (mintedIndex === null) {
     notFound();
@@ -83,6 +109,7 @@ export default async function MuseumGenerativeSystemPage({
       artworks={artworks}
       mintedIndex={mintedIndex}
       initialWorkId={initialWorkId}
+      workHrefs={workHrefs}
     />
   );
 }

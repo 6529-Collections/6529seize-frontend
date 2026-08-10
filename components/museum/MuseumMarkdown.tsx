@@ -15,7 +15,10 @@ interface MuseumMarkdownProps {
   readonly embeddedDocument?: boolean | undefined;
   readonly sourceCommit: string | null;
   readonly sourcePath?: string | undefined;
+  readonly workHrefs?: Readonly<Record<string, string>> | undefined;
 }
+
+const EMPTY_WORK_HREFS: Readonly<Record<string, string>> = {};
 
 function withoutEmbeddedDocumentTitle(markdown: string): string {
   const lines = markdown.replace(/^\uFEFF/u, "").split(/\r?\n/u);
@@ -41,7 +44,7 @@ const PROJECT_ROUTE_BY_DOCUMENT = new Map([
 ]);
 
 const INSTITUTIONAL_PRACTICE_ROUTE =
-  "/museum/network/stories/a-field-of-practice";
+  "/museum/network/research/institutional-practice";
 const INSTITUTIONAL_PRACTICE_PROFILE_ROUTE_BY_PATH = new Map([
   ["records/institutional-practice/profiles/met.md", "met"],
   ["records/institutional-practice/profiles/getty.md", "getty"],
@@ -116,15 +119,15 @@ const DATA_ARCHITECTURE_STANDARD_SLUG_SET = new Set<string>(
 const RIGHTS_ROUTE_BY_PATH = new Map([
   [
     "records/institutional-practice/rights-and-licenses.md",
-    "/museum/network/rights",
+    "/museum/network/research/rights",
   ],
   [
     "records/institutional-practice/rights-for-artists.md",
-    "/museum/network/rights/artists",
+    "/museum/network/research/rights/artists",
   ],
   [
     "records/institutional-practice/rights-for-collectors.md",
-    "/museum/network/rights/collectors",
+    "/museum/network/research/rights/collectors",
   ],
 ]);
 
@@ -139,7 +142,7 @@ function institutionalPracticeRoute(repositoryPath: string): string | null {
     return `${INSTITUTIONAL_PRACTICE_ROUTE}/adjacent-practice`;
   }
   if (repositoryPath === CURATORIAL_PUBLICATION_STANDARD_PATH) {
-    return "/museum/network/stories/scholarship-and-writing";
+    return "/museum/network/research/scholarship-and-writing";
   }
   const profileSlug =
     INSTITUTIONAL_PRACTICE_PROFILE_ROUTE_BY_PATH.get(repositoryPath);
@@ -149,7 +152,7 @@ function institutionalPracticeRoute(repositoryPath: string): string | null {
 }
 
 function dataArchitectureRoute(repositoryPath: string): string | null {
-  const root = "/museum/network/methodology/data-architecture";
+  const root = "/museum/network/research/data-architecture";
   if (repositoryPath === DATA_ARCHITECTURE_OVERVIEW_PATH) return root;
   if (repositoryPath === DATA_ARCHITECTURE_CASEY_PATH) {
     return `${root}/casey-reas-implementation`;
@@ -169,7 +172,10 @@ function dataArchitectureRoute(repositoryPath: string): string | null {
     : null;
 }
 
-function publicMuseumRoute(url: string): string | null {
+function publicMuseumRoute(
+  url: string,
+  workHrefs: Readonly<Record<string, string>>
+): string | null {
   const withoutFragment = url.split("#", 1)[0] ?? "";
   const rightsRoute = RIGHTS_ROUTE_BY_PATH.get(withoutFragment);
   if (rightsRoute !== undefined) {
@@ -187,7 +193,7 @@ function publicMuseumRoute(url: string): string | null {
   const fileName = withoutFragment.split("/").at(-1) ?? "";
   const objectMatch = CASEY_OBJECT_DOCUMENT_PATTERN.exec(fileName);
   if (objectMatch?.[1]) {
-    return `/museum/network/collection/${encodeURIComponent(objectMatch[1])}`;
+    return workHrefs[objectMatch[1]] ?? null;
   }
   if (fileName === "casey-reas-artist-practice.md") {
     return "/museum/network/artists/casey-reas";
@@ -199,7 +205,7 @@ function publicMuseumRoute(url: string): string | null {
     return `/museum/network/gifts/${CASEY_ACCESSION_ID}#gift-narrative-title`;
   }
   if (fileName === "source-and-chronology-matrix.md") {
-    return "/museum/network/stories/source-and-chronology";
+    return "/museum/network/research/sources-and-chronology";
   }
   const projectSlug = PROJECT_ROUTE_BY_DOCUMENT.get(fileName);
   if (projectSlug !== undefined) {
@@ -294,7 +300,8 @@ function externalUrlTransform(url: string): string | null {
 function repositoryRelativeUrlTransform(
   url: string,
   sourcePath?: string,
-  sourceCommit?: string | null
+  sourceCommit?: string | null,
+  workHrefs: Readonly<Record<string, string>> = EMPTY_WORK_HREFS
 ): string {
   if (!sourcePath) {
     return "";
@@ -303,7 +310,7 @@ function repositoryRelativeUrlTransform(
   if (repositoryPath === null) {
     return "";
   }
-  const museumRoute = publicMuseumRoute(repositoryPath);
+  const museumRoute = publicMuseumRoute(repositoryPath, workHrefs);
   if (museumRoute !== null) {
     return museumRoute;
   }
@@ -321,7 +328,8 @@ function repositoryRelativeUrlTransform(
 function safeUrlTransform(
   url: string,
   sourcePath?: string,
-  sourceCommit?: string | null
+  sourceCommit?: string | null,
+  workHrefs: Readonly<Record<string, string>> = EMPTY_WORK_HREFS
 ): string {
   if (url.startsWith("#")) {
     return url;
@@ -337,7 +345,12 @@ function safeUrlTransform(
   if (externalUrl !== null) {
     return externalUrl;
   }
-  return repositoryRelativeUrlTransform(url, sourcePath, sourceCommit);
+  return repositoryRelativeUrlTransform(
+    url,
+    sourcePath,
+    sourceCommit,
+    workHrefs
+  );
 }
 
 function MuseumMarkdownLink({
@@ -478,6 +491,7 @@ export function MuseumMarkdown({
   embeddedDocument = false,
   sourceCommit,
   sourcePath,
+  workHrefs = EMPTY_WORK_HREFS,
 }: MuseumMarkdownProps) {
   return (
     <div className={`tw-space-y-4 ${className}`}>
@@ -487,7 +501,9 @@ export function MuseumMarkdown({
         }
         rehypePlugins={[rehypeSanitize]}
         remarkPlugins={[remarkGfm]}
-        urlTransform={(url) => safeUrlTransform(url, sourcePath, sourceCommit)}
+        urlTransform={(url) =>
+          safeUrlTransform(url, sourcePath, sourceCommit, workHrefs)
+        }
       >
         {embeddedDocument ? withoutEmbeddedDocumentTitle(children) : children}
       </ReactMarkdown>

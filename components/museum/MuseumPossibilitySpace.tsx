@@ -17,7 +17,10 @@ interface MuseumPossibilitySpaceProps {
   readonly locale: SupportedLocale;
   readonly mintedIndex: MuseumMintedProjectIndex;
   readonly initialWorkId?: string | undefined;
+  readonly workHrefs?: Readonly<Record<string, string>>;
 }
+
+const EMPTY_WORK_HREFS: Readonly<Record<string, string>> = {};
 
 const controlClass =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-4 tw-text-sm tw-font-semibold tw-transition-colors motion-reduce:tw-transition-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
@@ -95,9 +98,7 @@ function PossibilitySpaceTable({
                   <td className="tw-p-3 tw-text-iron-300">{row.group}</td>
                   <td className="tw-p-3 tw-text-iron-300">{row.value}</td>
                   <td className="tw-p-3 tw-text-iron-300">
-                    {row.held
-                      ? `◆ ${selectedWork?.title ?? ""}`
-                      : "—"}
+                    {row.held ? `◆ ${selectedWork?.title ?? ""}` : "—"}
                   </td>
                 </tr>
               ))
@@ -121,9 +122,7 @@ function PossibilitySpaceTable({
                       >
                         {axis.label}
                       </th>
-                      <td className="tw-p-3 tw-text-iron-300">
-                        {value.label}
-                      </td>
+                      <td className="tw-p-3 tw-text-iron-300">{value.label}</td>
                       <td className="tw-p-3 tw-tabular-nums tw-text-iron-300">
                         {value.count === undefined
                           ? "—"
@@ -155,6 +154,7 @@ export function MuseumPossibilitySpace({
   locale,
   mintedIndex,
   initialWorkId,
+  workHrefs = EMPTY_WORK_HREFS,
 }: MuseumPossibilitySpaceProps) {
   const defaultPosition =
     study.heldPositions.find(
@@ -188,6 +188,7 @@ export function MuseumPossibilitySpace({
         locale={locale}
         selectedWorkId={selectedWorkId}
         onSelectWork={selectWork}
+        workHrefs={workHrefs}
       />
 
       <MuseumProjectSystemVisual

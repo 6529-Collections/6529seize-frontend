@@ -67,11 +67,9 @@ function DevelopmentList({
 }
 
 export function StreamReviewDevelopmentStatus({
-  pages,
   reviewSourceCommit,
   reviewVersion,
 }: {
-  readonly pages: readonly PublicReviewPageDefinition[];
   readonly reviewSourceCommit: string;
   readonly reviewVersion: string;
 }) {
@@ -163,58 +161,68 @@ export function StreamReviewDevelopmentStatus({
           })}
         </p>
       </section>
-
-      <section
-        aria-labelledby="stream-review-questions-heading"
-        className="tw-mt-8"
-      >
-        <h2
-          id="stream-review-questions-heading"
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.development.reviewQuestionsHeading")}
-        </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(
-            DEFAULT_LOCALE,
-            "publicReview.development.reviewQuestionsDescription"
-          )}
-        </p>
-        <div className="tw-mt-6 tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
-          {status.reviewerPrompts.map((prompt) => {
-            const page = pages.find(
-              (candidate) => candidate.id === prompt.pageId
-            );
-            if (!page) {
-              return null;
-            }
-            return (
-              <article
-                key={prompt.id}
-                className="tw-grid tw-gap-2 tw-py-5 sm:tw-grid-cols-[9rem_minmax(0,1fr)_auto] sm:tw-items-center sm:tw-gap-5"
-              >
-                <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
-                  {prompt.title}
-                </h3>
-                <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-                  {prompt.question}
-                </p>
-                <Link
-                  href={`${getStreamReviewPageHref({ page })}#${prompt.sectionId}`}
-                  aria-label={t(
-                    DEFAULT_LOCALE,
-                    "publicReview.development.readQuestionLabel",
-                    { title: prompt.title }
-                  )}
-                  className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-self-start tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-justify-self-end"
-                >
-                  {t(DEFAULT_LOCALE, "publicReview.development.readQuestion")}
-                </Link>
-              </article>
-            );
-          })}
-        </div>
-      </section>
     </div>
+  );
+}
+
+export function StreamReviewReviewerPrompts({
+  pages,
+}: {
+  readonly pages: readonly PublicReviewPageDefinition[];
+}) {
+  const status = STREAM_REVIEW_DEVELOPMENT_STATUS;
+
+  return (
+    <section
+      aria-labelledby="stream-review-questions-heading"
+      className="tw-mt-8 tw-w-full tw-max-w-[52rem]"
+    >
+      <h2
+        id="stream-review-questions-heading"
+        className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
+      >
+        {t(DEFAULT_LOCALE, "publicReview.development.reviewQuestionsHeading")}
+      </h2>
+      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(
+          DEFAULT_LOCALE,
+          "publicReview.development.reviewQuestionsDescription"
+        )}
+      </p>
+      <div className="tw-mt-6 tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
+        {status.reviewerPrompts.map((prompt) => {
+          const page = pages.find(
+            (candidate) => candidate.id === prompt.pageId
+          );
+          if (!page) {
+            return null;
+          }
+          return (
+            <article
+              key={prompt.id}
+              className="tw-grid tw-gap-2 tw-py-5 sm:tw-grid-cols-[9rem_minmax(0,1fr)_auto] sm:tw-items-center sm:tw-gap-5"
+            >
+              <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+                {prompt.title}
+              </h3>
+              <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+                {prompt.question}
+              </p>
+              <Link
+                href={`${getStreamReviewPageHref({ page })}#${prompt.sectionId}`}
+                aria-label={t(
+                  DEFAULT_LOCALE,
+                  "publicReview.development.readQuestionLabel",
+                  { title: prompt.title }
+                )}
+                className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-self-start tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-justify-self-end"
+              >
+                {t(DEFAULT_LOCALE, "publicReview.development.readQuestion")}
+              </Link>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }

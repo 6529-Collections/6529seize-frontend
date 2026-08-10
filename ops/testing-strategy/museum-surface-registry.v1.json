@@ -17,8 +17,16 @@
       "kind": "page"
     },
     { "id": "museum.collection", "title": "Collection", "kind": "page" },
+    { "id": "museum.work", "title": "Works", "kind": "page" },
     { "id": "museum.accession", "title": "Accessions", "kind": "page" },
+    { "id": "museum.acquisition", "title": "Acquisitions", "kind": "page" },
+    {
+      "id": "museum.acquisition.program",
+      "title": "Acquisition programs",
+      "kind": "page"
+    },
     { "id": "museum.artist", "title": "Artists", "kind": "page" },
+    { "id": "museum.organization", "title": "Organizations", "kind": "page" },
     { "id": "museum.project", "title": "Projects", "kind": "page" },
     { "id": "museum.system", "title": "Inside the System", "kind": "research" },
     { "id": "museum.gift", "title": "Gifts", "kind": "page" },
@@ -40,6 +48,7 @@
       "title": "Research source table",
       "kind": "research"
     },
+    { "id": "museum.research", "title": "Research", "kind": "research" },
     { "id": "museum.governance", "title": "Governance", "kind": "governance" },
     {
       "id": "museum.methodology",
@@ -54,6 +63,16 @@
       "surface_ids": ["museum.about.proposition"]
     },
     {
+      "file": "app/museum/network/about/governance/[decisionId]/page.tsx",
+      "path": "/museum/network/about/governance/[decisionId]",
+      "surface_ids": ["museum.governance"]
+    },
+    {
+      "file": "app/museum/network/about/governance/page.tsx",
+      "path": "/museum/network/about/governance",
+      "surface_ids": ["museum.governance"]
+    },
+    {
       "file": "app/museum/network/accessions/[accessionId]/page.tsx",
       "path": "/museum/network/accessions/[accessionId]",
       "surface_ids": ["museum.accession"]
@@ -62,6 +81,26 @@
       "file": "app/museum/network/accessions/page.tsx",
       "path": "/museum/network/accessions",
       "surface_ids": ["museum.accession"]
+    },
+    {
+      "file": "app/museum/network/acquisition-programs/[slug]/page.tsx",
+      "path": "/museum/network/acquisition-programs/[slug]",
+      "surface_ids": ["museum.acquisition.program"]
+    },
+    {
+      "file": "app/museum/network/acquisition-programs/page.tsx",
+      "path": "/museum/network/acquisition-programs",
+      "surface_ids": ["museum.acquisition.program"]
+    },
+    {
+      "file": "app/museum/network/acquisitions/[slug]/page.tsx",
+      "path": "/museum/network/acquisitions/[slug]",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "app/museum/network/acquisitions/page.tsx",
+      "path": "/museum/network/acquisitions",
+      "surface_ids": ["museum.acquisition"]
     },
     {
       "file": "app/museum/network/artists/[slug]/page.tsx",
@@ -129,6 +168,16 @@
       "surface_ids": ["museum.object"]
     },
     {
+      "file": "app/museum/network/organizations/[slug]/page.tsx",
+      "path": "/museum/network/organizations/[slug]",
+      "surface_ids": ["museum.organization"]
+    },
+    {
+      "file": "app/museum/network/organizations/page.tsx",
+      "path": "/museum/network/organizations",
+      "surface_ids": ["museum.organization"]
+    },
+    {
       "file": "app/museum/network/page.tsx",
       "path": "/museum/network",
       "surface_ids": ["museum.home"]
@@ -154,6 +203,81 @@
       "surface_ids": ["museum.system"]
     },
     {
+      "file": "app/museum/network/projects/page.tsx",
+      "path": "/museum/network/projects",
+      "surface_ids": ["museum.project"]
+    },
+    {
+      "file": "app/museum/network/research/[slug]/page.tsx",
+      "path": "/museum/network/research/[slug]",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "app/museum/network/research/data-architecture/[slug]/page.tsx",
+      "path": "/museum/network/research/data-architecture/[slug]",
+      "surface_ids": ["museum.methodology"]
+    },
+    {
+      "file": "app/museum/network/research/data-architecture/page.tsx",
+      "path": "/museum/network/research/data-architecture",
+      "surface_ids": ["museum.methodology"]
+    },
+    {
+      "file": "app/museum/network/research/institutional-practice/[slug]/page.tsx",
+      "path": "/museum/network/research/institutional-practice/[slug]",
+      "surface_ids": ["museum.institutional.profile"]
+    },
+    {
+      "file": "app/museum/network/research/institutional-practice/adjacent-practice/page.tsx",
+      "path": "/museum/network/research/institutional-practice/adjacent-practice",
+      "surface_ids": ["museum.institutional.index"]
+    },
+    {
+      "file": "app/museum/network/research/institutional-practice/page.tsx",
+      "path": "/museum/network/research/institutional-practice",
+      "surface_ids": ["museum.institutional.index"]
+    },
+    {
+      "file": "app/museum/network/research/institutional-practice/sources/page.tsx",
+      "path": "/museum/network/research/institutional-practice/sources",
+      "surface_ids": ["museum.research.source-table"]
+    },
+    {
+      "file": "app/museum/network/research/rights/[expressionId]/page.tsx",
+      "path": "/museum/network/research/rights/[expressionId]",
+      "surface_ids": ["museum.rights"]
+    },
+    {
+      "file": "app/museum/network/research/rights/artists/page.tsx",
+      "path": "/museum/network/research/rights/artists",
+      "surface_ids": ["museum.rights"]
+    },
+    {
+      "file": "app/museum/network/research/rights/collectors/page.tsx",
+      "path": "/museum/network/research/rights/collectors",
+      "surface_ids": ["museum.rights"]
+    },
+    {
+      "file": "app/museum/network/research/rights/page.tsx",
+      "path": "/museum/network/research/rights",
+      "surface_ids": ["museum.rights"]
+    },
+    {
+      "file": "app/museum/network/research/scholarship-and-writing/page.tsx",
+      "path": "/museum/network/research/scholarship-and-writing",
+      "surface_ids": ["museum.research.source-table"]
+    },
+    {
+      "file": "app/museum/network/research/sources-and-chronology/page.tsx",
+      "path": "/museum/network/research/sources-and-chronology",
+      "surface_ids": ["museum.research.source-table"]
+    },
+    {
+      "file": "app/museum/network/research/page.tsx",
+      "path": "/museum/network/research",
+      "surface_ids": ["museum.research"]
+    },
+    {
       "file": "app/museum/network/rights/[expressionId]/page.tsx",
       "path": "/museum/network/rights/[expressionId]",
       "surface_ids": ["museum.rights"]
@@ -172,6 +296,16 @@
       "file": "app/museum/network/rights/page.tsx",
       "path": "/museum/network/rights",
       "surface_ids": ["museum.rights"]
+    },
+    {
+      "file": "app/museum/network/works/[workId]/page.tsx",
+      "path": "/museum/network/works/[workId]",
+      "surface_ids": ["museum.work"]
+    },
+    {
+      "file": "app/museum/network/works/page.tsx",
+      "path": "/museum/network/works",
+      "surface_ids": ["museum.work"]
     },
     {
       "file": "app/museum/network/stories/a-field-of-practice/[slug]/page.tsx",
@@ -239,7 +373,13 @@
     },
     {
       "file": "components/museum/MuseumArtworkFigure.tsx",
-      "surface_ids": ["museum.collection", "museum.object", "museum.program"]
+      "surface_ids": [
+        "museum.collection",
+        "museum.object",
+        "museum.program",
+        "museum.work",
+        "museum.acquisition"
+      ]
     },
     {
       "file": "components/museum/MuseumArtworkViewer.tsx",
@@ -261,6 +401,56 @@
     {
       "file": "components/museum/MuseumGiftPage.tsx",
       "surface_ids": ["museum.gift"]
+    },
+    {
+      "file": "components/museum/MuseumManagedImage.tsx",
+      "surface_ids": [
+        "museum.work",
+        "museum.acquisition",
+        "museum.acquisition.program"
+      ]
+    },
+    {
+      "file": "components/museum/MuseumMediaMetadataPlaceholder.tsx",
+      "surface_ids": ["museum.artist", "museum.work", "museum.acquisition"]
+    },
+    {
+      "file": "components/museum/MuseumAcquisitionRecordPage.tsx",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "components/museum/MuseumBreadcrumbs.tsx",
+      "surface_ids": ["museum.shell"]
+    },
+    {
+      "file": "components/museum/MuseumEntityContext.tsx",
+      "surface_ids": ["museum.shell"]
+    },
+    {
+      "file": "components/museum/MuseumProposalImage.tsx",
+      "surface_ids": ["museum.work", "museum.acquisition"]
+    },
+    {
+      "file": "components/museum/MuseumPublicMediaFigure.tsx",
+      "surface_ids": [
+        "museum.work",
+        "museum.acquisition",
+        "museum.acquisition.program"
+      ]
+    },
+    {
+      "file": "components/museum/MuseumPublicWorkTextFigure.tsx",
+      "surface_ids": ["museum.home", "museum.collection", "museum.acquisition"]
+    },
+    {
+      "file": "components/museum/MuseumRelatedEntities.tsx",
+      "surface_ids": [
+        "museum.artist",
+        "museum.project",
+        "museum.work",
+        "museum.acquisition",
+        "museum.organization"
+      ]
     },
     {
       "file": "components/museum/MuseumHeldPositionSelection.tsx",
@@ -299,6 +489,10 @@
     {
       "file": "components/museum/MuseumNetworkProposition.tsx",
       "surface_ids": ["museum.about.proposition"]
+    },
+    {
+      "file": "components/museum/MuseumNetworkHomeSecondarySections.tsx",
+      "surface_ids": ["museum.home"]
     },
     {
       "file": "components/museum/MuseumObjectPage.tsx",
@@ -416,6 +610,20 @@
         "museum.gift",
         "museum.program",
         "museum.object"
+      ]
+    },
+    {
+      "file": "tests/museum/network-ia-readonly.spec.ts",
+      "surface_ids": [
+        "museum.shell",
+        "museum.home",
+        "museum.collection",
+        "museum.artist",
+        "museum.acquisition",
+        "museum.research",
+        "museum.about.proposition",
+        "museum.work",
+        "museum.organization"
       ]
     },
     {

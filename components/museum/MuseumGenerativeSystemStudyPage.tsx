@@ -15,11 +15,13 @@ export function MuseumGenerativeSystemStudyPage({
   artworks,
   mintedIndex,
   initialWorkId,
+  workHrefs,
 }: {
   readonly study: MuseumGenerativeStudy;
   readonly artworks: readonly CaseyArtwork[];
   readonly mintedIndex: MuseumMintedProjectIndex;
   readonly initialWorkId?: string | undefined;
+  readonly workHrefs: Readonly<Record<string, string>>;
 }) {
   return (
     <article className="tw-min-w-0">
@@ -56,19 +58,24 @@ export function MuseumGenerativeSystemStudyPage({
         )}
         className={`tw-mt-10 tw-grid tw-min-w-0 tw-gap-6 ${artworks.length > 1 ? "sm:tw-grid-cols-3" : "tw-max-w-3xl"}`}
       >
-        {artworks.map((artwork) => (
-          <MuseumArtworkFigure
-            key={artwork.objectId}
-            artwork={artwork}
-            eager
-            href={`/museum/network/collection/${encodeURIComponent(artwork.objectId)}`}
-            sizes={
-              artworks.length > 1
-                ? "(min-width: 640px) 33vw, 100vw"
-                : "(min-width: 768px) 48rem, 100vw"
-            }
-          />
-        ))}
+        {artworks.flatMap((artwork) => {
+          const href = workHrefs[artwork.objectId];
+          return href === undefined
+            ? []
+            : [
+                <MuseumArtworkFigure
+                  key={artwork.objectId}
+                  artwork={artwork}
+                  eager
+                  href={href}
+                  sizes={
+                    artworks.length > 1
+                      ? "(min-width: 640px) 33vw, 100vw"
+                      : "(min-width: 768px) 48rem, 100vw"
+                  }
+                />,
+              ];
+        })}
       </section>
 
       <MuseumPossibilitySpace
@@ -76,6 +83,7 @@ export function MuseumGenerativeSystemStudyPage({
         locale={DEFAULT_LOCALE}
         mintedIndex={mintedIndex}
         initialWorkId={initialWorkId}
+        workHrefs={workHrefs}
       />
 
       <section

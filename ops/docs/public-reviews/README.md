@@ -60,23 +60,27 @@ Every page includes:
 - a persistent status area showing the lifecycle, deployment, and audit states;
   Stream currently shows **Public review**, **Preparing for launch**, and
   **Audit planned**
-- a consistent **Review**, **Technical reference**, and **Public feedback**
-  switcher below the status area
-- the review version and a link to the exact source snapshot
+- consistent **Technical reference**, **All public feedback**, and **Review
+  history** destinations on current pages
+- a link to the exact source snapshot; saved snapshot pages also show their
+  exact review version and a link back to the current review
 - navigation across the fourteen pages in the current version snapshot
-- an on-page contents list generated from the editorial headings
+- an on-page contents list generated from the displayed editorial headings;
+  the simplified current Overview intentionally has no technical subsection list
 - previous and next page controls
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview begins with a plain definition of Stream, five important
+The current overview contains a plain definition of Stream, five important
 parts of a Stream artwork, a seven-step artwork journey, and focused
-starting points for artists, collectors and minters, and auditors. A dated
-development update and six plain-language review questions follow that
-introduction. The current **For Artists** page starts with a plain artist guide
-covering the artwork package, approval journey, change boundaries, other actors,
-sales, payments, and finality. Its detailed versioned editorial remains below
-as the technical evidence. The generated technical reference lets reviewers
+starting points for artists, collectors and minters, and auditors. It ends
+after those audience paths. The secondary **Review history** destination opens
+the immutable technical Overview for the active snapshot. The current **For
+Artists** page starts with a plain artist guide
+covering six questions: artwork and identity; editions and minting; artist
+approval; sales, payments, and royalties; what can still change; and files and
+artwork history. Its detailed versioned editorial remains below as the technical
+evidence. The generated technical reference lets reviewers
 inspect Solidity files, definitions, functions, events, errors, and other
 declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100
@@ -84,11 +88,20 @@ matching records at a time.
 
 ## Implementation and Evidence Status
 
-After the plain-language introduction, the current Overview shows a separately
-dated development update. It summarizes recent work, active work, launch
-requirements, evidence counts, and the source commit checked for that update.
-The introduction and update are shown only on the unversioned Overview.
-Immutable version routes continue to describe their exact review snapshot.
+The current **Where Development Stands** page begins with a separately dated
+development update. It summarizes recent work, active work, launch requirements,
+evidence counts, and the source commit checked for that update. The current
+**Community Review** page begins with six plain-language review questions and
+the authorship disclosure. The development update and review questions appear
+only on their current, unversioned routes. Immutable version routes keep their
+exact editorial snapshot and historical authorship disclosure.
+
+The plain Overview guide appears only on the unversioned Overview and replaces
+the versioned technical Overview there. Its on-page section navigation and
+feedback section choices therefore omit the hidden technical headings. A link
+from the current review-wide navigation opens its immutable technical editorial.
+Immutable version routes show their exact review version and continue to
+describe their exact review snapshot.
 The plain artist guide follows the same rule: it appears only on the current,
 unversioned **For Artists** route, while immutable version routes continue to
 render their exact editorial snapshot without the guide.
@@ -217,8 +230,10 @@ page. Reviewers can load older feedback in additional 50-message pages or open
 the full ledger for cross-page filters and exports. Closing and reopening the
 rail preserves an in-progress draft.
 
-Technical-reference feedback uses the same page-scoped projection. Overview
-comments stay on the technical overview, while definition, declaration,
+Technical-reference feedback uses the same page-scoped projection. The current
+Overview accepts page-level feedback without offering its hidden technical
+sections; immutable Overview routes retain their section-specific feedback.
+Definition, declaration,
 function, event, interface, and source comments additionally match their exact
 immutable source identity instead of appearing on every page of the same type.
 
