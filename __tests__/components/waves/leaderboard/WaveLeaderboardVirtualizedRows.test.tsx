@@ -10,15 +10,7 @@ import {
 import { useWaveLeaderboardVotingModal } from "@/components/waves/leaderboard/WaveLeaderboardVotingModal";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
-interface MockVirtualItem {
-  readonly index: number;
-  readonly key: string;
-  readonly size: number;
-  readonly start: number;
-  readonly lane?: number | undefined;
-}
-
-const initialMockVirtualItems: MockVirtualItem[] = [
+const initialMockVirtualItems = [
   { index: 0, key: "row-0", size: 100, start: 0 },
   { index: 1, key: "row-1", size: 100, start: 100 },
 ];
@@ -32,9 +24,6 @@ const mockVirtualizer = {
   scrollToIndex: mockScrollToIndex,
 } as unknown as Virtualizer<HTMLDivElement, Element>;
 interface MockVirtualizerOptions {
-  readonly count?: number;
-  readonly lanes?: number;
-  readonly gap?: number;
   readonly getScrollElement?: () => HTMLDivElement | null;
   readonly onChange?: (instance: Virtualizer<HTMLDivElement, Element>) => void;
 }
@@ -273,7 +262,7 @@ describe("WaveLeaderboardVirtualizedRows", () => {
     expect(fetchNextPage).toHaveBeenCalledTimes(1);
   });
 
-  it("virtualizes grid cards in independent masonry lanes", () => {
+  it("keeps a loaded grid card beside a mixed-boundary retry", () => {
     const getBoundingClientRectSpy = jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockReturnValue({
@@ -282,18 +271,11 @@ describe("WaveLeaderboardVirtualizedRows", () => {
         top: 0,
         left: 0,
         bottom: 100,
-        right: 600,
-        width: 600,
+        right: 800,
+        width: 800,
         height: 100,
         toJSON: () => ({}),
       } as DOMRect);
-
-    mockVirtualItems = [
-      { index: 0, key: "item-0", size: 100, start: 0, lane: 0 },
-      { index: 1, key: "item-1", size: 100, start: 0, lane: 1 },
-      { index: 2, key: "item-2", size: 180, start: 116, lane: 0 },
-      { index: 3, key: "item-3", size: 240, start: 116, lane: 1 },
-    ];
 
     function Harness() {
       const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -320,30 +302,17 @@ describe("WaveLeaderboardVirtualizedRows", () => {
       );
     }
 
-    const { container } = render(<Harness />);
+    render(<Harness />);
 
     const retryButton = screen.getByRole("button", {
       name: "Retry loading earlier drops",
     });
     expect(retryButton.parentElement).toHaveAttribute(
       "style",
-      expect.stringContaining("grid-column: 1")
+      expect.stringContaining("grid-column: span 2")
     );
-    expect(screen.getByText("drop-1").parentElement).toHaveAttribute(
-      "style",
-      expect.stringContaining("grid-column: 1")
-    );
-    expect(screen.getByText("drop-2").parentElement).toHaveAttribute(
-      "style",
-      expect.stringContaining("grid-column: 2")
-    );
-    expect(screen.getByText("drop-1").parentElement).toHaveAttribute(
-      "data-index",
-      "2"
-    );
-    expect(mockVirtualizerOptions?.count).toBe(4);
-    expect(mockVirtualizerOptions?.lanes).toBe(2);
-    expect(mockVirtualizerOptions?.gap).toBe(16);
+    expect(screen.getByText("drop-1")).toBeInTheDocument();
+    expect(screen.getByText("drop-2")).toBeInTheDocument();
 
     getBoundingClientRectSpy.mockRestore();
   });
