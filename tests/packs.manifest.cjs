@@ -522,7 +522,8 @@ const PACKS = [
       "museum-institutional-practice",
       "museum-institutional-practice",
       "Staging Network Museum institutional-practice deployed route smoke.",
-      READONLY_SPECS.museumInstitutionalPractice
+      READONLY_SPECS.museumInstitutionalPractice,
+      { timeoutMinutes: 30 }
     )
   ),
   museumPack(

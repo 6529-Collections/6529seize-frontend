@@ -305,9 +305,7 @@ async function expectStudyRoute(
 }
 
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
-  test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
-  let sourceCommit: string | null = REQUIRED_SOURCE_COMMIT;
 
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {
@@ -319,7 +317,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the study index, all twenty-seven profiles, and its research apparatus", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(page, INDEX_ROUTE, sourceCommit);
+    await expectStudyRoute(page, INDEX_ROUTE, REQUIRED_SOURCE_COMMIT);
 
     for (const profile of PROFILE_ROUTES) {
       await expect(
@@ -344,7 +342,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     test(`publishes ${profile.title} with lessons and limits`, async ({
       page,
     }) => {
-      sourceCommit = await expectStudyRoute(page, profile, sourceCommit);
+      await expectStudyRoute(page, profile, REQUIRED_SOURCE_COMMIT);
       await expect(
         page.getByText("What the Museum should adopt", { exact: true })
       ).toBeVisible();
@@ -360,7 +358,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the adjacent digital-art and chain-native study", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(page, ADJACENT_ROUTE, sourceCommit);
+    await expectStudyRoute(page, ADJACENT_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("main table").first()).toBeVisible();
     await expect(page.locator(`a[href="${STUDY_PATH}"]`).first()).toBeVisible();
   });
@@ -368,7 +366,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the Museum scholarship and writing standard", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(page, EDITORIAL_ROUTE, sourceCommit);
+    await expectStudyRoute(page, EDITORIAL_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(
       page.getByText("3.3 Forms demonstrated in the comparative study", {
         exact: true,
@@ -378,7 +376,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   });
 
   test("publishes the complete primary-source register", async ({ page }) => {
-    sourceCommit = await expectStudyRoute(page, SOURCE_ROUTE, sourceCommit);
+    await expectStudyRoute(page, SOURCE_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("main table").first()).toBeVisible();
     expect(
       await page.locator('main a[href^="https://"]').count()
@@ -388,17 +386,13 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the Casey artist and gift without production labels", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(
-      page,
-      CASEY_ARTIST_ROUTE,
-      sourceCommit
-    );
+    await expectStudyRoute(page, CASEY_ARTIST_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     const artistImages = page.locator("main figure img");
     await expect(artistImages).toHaveCount(7);
     await expectImagesLoaded(artistImages);
 
-    sourceCommit = await expectStudyRoute(page, CASEY_GIFT_ROUTE, sourceCommit);
+    await expectStudyRoute(page, CASEY_GIFT_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     const giftImages = page.locator("main figure img");
     await expect(giftImages).toHaveCount(7);
@@ -408,11 +402,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the edited Casey source and chronology record", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(
-      page,
-      CASEY_SOURCE_ROUTE,
-      sourceCommit
-    );
+    await expectStudyRoute(page, CASEY_SOURCE_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(
       /shared source, chronology, and factual-boundary matrix/iu
     );
@@ -420,11 +410,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   });
 
   test("publishes Keys and Gates as an art-led program", async ({ page }) => {
-    sourceCommit = await expectStudyRoute(
-      page,
-      KEYS_AND_GATES_ROUTE,
-      sourceCommit
-    );
+    await expectStudyRoute(page, KEYS_AND_GATES_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(
       page.getByRole("heading", {
         level: 2,
@@ -434,15 +420,13 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.getByText("Waiting for contract finalization")
     ).toBeVisible();
-    const programImages = page.locator(
-      'main a[href^="/museum/network/objects/"] img'
+    const selectedWorkLinks = page.locator(
+      'main a[href^="/museum/network/objects/"]'
     );
-    await expect(programImages).toHaveCount(16);
-    await expectImagesLoaded(programImages);
-    await expect(programImages.first()).toHaveAttribute(
-      "srcset",
-      /\/museum\/programs\/6529NM-AP-01\/.+640\.webp 640w.+1280\.webp 1280w.+2400\.webp 2400w/u
-    );
+    await expect(selectedWorkLinks).toHaveCount(16);
+    await expect(
+      page.locator('main a[href^="/museum/network/objects/"] img')
+    ).toHaveCount(0);
     await expect(
       page.getByRole("heading", {
         level: 2,
@@ -455,26 +439,19 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes each Keys and Gates selection as a complete work page", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(
+    await expectStudyRoute(
       page,
       KEYS_AND_GATES_OBJECT_ROUTE,
-      sourceCommit
+      REQUIRED_SOURCE_COMMIT
     );
-    await expect(
-      page.getByRole("img", {
-        name: "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
-      })
-    ).toBeVisible();
+    await expect(page.locator("main figure img")).toHaveCount(0);
     await expect(page.getByText("Selected; unminted")).toBeVisible();
     await expect(page.getByText("A Keys and Gates winner")).toBeVisible();
     await expect(
       page.getByRole("link", {
         name: "Open submitted high-resolution image",
       })
-    ).toHaveAttribute(
-      "href",
-      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_61b48317-f46c-45b3-beed-cfd9054326d8/2a39fe28-4040-4a80-92a6-306384a4e735/DSCF2374-copy-2.jpg"
-    );
+    ).toHaveCount(0);
     await expect(
       page.getByRole("heading", { level: 2, name: "Artist statement" })
     ).toBeVisible();

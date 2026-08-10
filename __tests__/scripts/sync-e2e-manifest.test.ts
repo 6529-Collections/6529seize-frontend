@@ -94,6 +94,17 @@ describe("E2E pack manifest", () => {
     );
   });
 
+  it("gives the deployed institutional-practice sweeps enough time", () => {
+    for (const scriptKey of [
+      "test:e2e:staging:museum-institutional-practice",
+      "test:e2e:production:museum-institutional-practice",
+    ]) {
+      expect(
+        packs.find((pack) => pack.scriptKey === scriptKey)?.timeoutMinutes
+      ).toBe(30);
+    }
+  });
+
   it("rejects missing, unknown, or overbroad Museum change scopes", () => {
     const museumPack = clonePack(
       packs.find(

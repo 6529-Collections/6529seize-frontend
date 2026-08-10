@@ -229,7 +229,7 @@ export default async function MuseumProgramDetailPage({
               eyebrow={work.recordId}
               title={work.title}
               description={work.artist}
-              media={work.media ?? undefined}
+              media={isKeysAndGates ? undefined : (work.media ?? undefined)}
               meta={
                 work.winnerPlace === null
                   ? undefined

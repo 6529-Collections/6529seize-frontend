@@ -75,7 +75,7 @@ export function MuseumProgramOutcomePage({
         </section>
       )}
 
-      {outcome.media && (
+      {!isKeysAndGates && outcome.media && (
         <figure className="tw-m-0 tw-min-w-0">
           <div className="tw-relative tw-h-[min(80vh,60rem)] tw-min-h-96 tw-w-full tw-overflow-hidden tw-bg-black">
             <MuseumProgramImage

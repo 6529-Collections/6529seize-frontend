@@ -84,7 +84,7 @@
         "The complete institutional proposition is at /museum/network/about. It explains what Network holding means, the absence of fractional or economic claims for members, the Museum's present delegated operating boundaries, the on-chain direction, and the permanence objective.",
         "Keys and Gates is published at /museum/network/programs/6529NM-AP-01 with all sixteen TDH-selected winning photographs and a clear three-stage journey from selection to future mint and then Museum acquisition and accession checks.",
         "The sixteen Keys and Gates winners remain selected and unminted while the 6529Stream contract is finalized; they are not yet purchased, in Museum custody, or accessioned.",
-        "Keys and Gates uses uncropped responsive CloudFront presentation images for browsing, while each artwork page offers a separate link to the submitted high-resolution source; neither file is represented as a Museum preservation master.",
+        "Keys and Gates winner pages are text-only while the works remain selected and unminted: submitted images are neither displayed nor linked until mint, acquisition, custody, rights, and accession evidence supports revisiting the presentation.",
         "Collection means accessioned holdings: visitors can browse artworks at /museum/network/collection and open an artwork dossier at /museum/network/collection/[object-id].",
         "Artist, project, and gift routes connect the art to onsite curatorial writing, provenance, rights, and collection care without making raw records the primary experience.",
         "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
