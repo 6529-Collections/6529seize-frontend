@@ -16,6 +16,7 @@ const ARTIFACT_WORKFLOW_PATH =
 const MAX_PACKAGE_BYTES = 500 * 1024 * 1024;
 const SELECTION_ARTIFACT_NAME_PREFIX = "one-click-production-selection-";
 const SELECTION_CONTRACT = "production-artifact-selection-v1";
+const SELECTION_FILE = "selection.json";
 const SELECTION_SCHEMA_VERSION = 1;
 const VERIFIER_WORKFLOW_PATH =
   ".github/workflows/production-artifact-verifier.yml";
@@ -25,7 +26,13 @@ const EXPECTED_ARTIFACT_FILES = Object.freeze([
   "manifest.json",
   "target/package.zip",
 ]);
-const EXPECTED_ARTIFACT_DIRECTORIES = new Set(["target"]);
+const EXPECTED_ARTIFACT_DIRECTORIES = new Set([
+  "target",
+  "target/_next",
+  "target/_next/static",
+]);
+const EXPECTED_STATIC_ASSET_PREFIX = "target/_next/static/";
+const EXPECTED_SELECTION_FILES = Object.freeze(["SHA256SUMS", SELECTION_FILE]);
 
 const SHA_RE = /^[a-f0-9]{40}$/u;
 const DIGEST_RE = /^sha256:[a-f0-9]{64}$/u;
@@ -289,7 +296,7 @@ function canonicalJson(value) {
   return JSON.stringify(canonicalize(value));
 }
 
-function validateArchiveMemberPath(member) {
+function validateArchiveMemberPath(member, contract) {
   assert(
     typeof member === "string" && member.length > 0,
     "archive member path must be non-empty"
@@ -325,12 +332,16 @@ function validateArchiveMemberPath(member) {
 
   if (isDirectory) {
     assert(
-      EXPECTED_ARTIFACT_DIRECTORIES.has(relativePath),
+      contract.directories.has(relativePath) ||
+        (contract.directoryPrefix !== null &&
+          relativePath.startsWith(contract.directoryPrefix)),
       `archive member directory is outside the closed artifact root: ${member}`
     );
   } else {
     assert(
-      EXPECTED_ARTIFACT_FILES.includes(relativePath),
+      contract.files.includes(relativePath) ||
+        (contract.filePrefix !== null &&
+          relativePath.startsWith(contract.filePrefix)),
       `archive member is outside the closed artifact root: ${member}`
     );
   }
@@ -338,7 +349,7 @@ function validateArchiveMemberPath(member) {
   return { isDirectory, relativePath };
 }
 
-function validateArchiveMembers(memberList) {
+function validateClosedArchiveMembers(memberList, contract) {
   assert(
     typeof memberList === "string" && memberList.length > 0,
     "archive member list is required"
@@ -350,20 +361,43 @@ function validateArchiveMembers(memberList) {
   assert(lines.length > 0, "archive member list is empty");
 
   const seen = new Set();
+  const seenPaths = new Set();
   for (const member of lines) {
-    const normalized = validateArchiveMemberPath(member);
+    const normalized = validateArchiveMemberPath(member, contract);
+    assert(
+      !seenPaths.has(normalized.relativePath),
+      `duplicate archive member path: ${member}`
+    );
+    seenPaths.add(normalized.relativePath);
     const key = `${normalized.isDirectory ? "directory" : "file"}:${normalized.relativePath}`;
-    assert(!seen.has(key), `duplicate archive member: ${member}`);
     seen.add(key);
   }
 
-  for (const requiredFile of EXPECTED_ARTIFACT_FILES) {
+  for (const requiredFile of contract.files) {
     assert(
       seen.has(`file:${requiredFile}`),
       `archive is missing required member: ${requiredFile}`
     );
   }
   return [...seen];
+}
+
+function validateArchiveMembers(memberList) {
+  return validateClosedArchiveMembers(memberList, {
+    directories: EXPECTED_ARTIFACT_DIRECTORIES,
+    directoryPrefix: EXPECTED_STATIC_ASSET_PREFIX,
+    filePrefix: EXPECTED_STATIC_ASSET_PREFIX,
+    files: EXPECTED_ARTIFACT_FILES,
+  });
+}
+
+function validateSelectionArchiveMembers(memberList) {
+  return validateClosedArchiveMembers(memberList, {
+    directories: new Set(),
+    directoryPrefix: null,
+    filePrefix: null,
+    files: EXPECTED_SELECTION_FILES,
+  });
 }
 
 function validateVerifierInputs(options) {
@@ -871,12 +905,14 @@ function validateExtractedArtifact(root) {
     "manifest.json",
     "target/package.zip",
   ]);
-  assertExactRegularFiles(
-    checksums.files,
-    EXPECTED_ARTIFACT_FILES.filter(
-      (relativePath) => relativePath !== "SHA256SUMS"
-    ),
-    "artifact"
+  const unexpectedFiles = checksums.files.filter(
+    (relativePath) =>
+      !EXPECTED_ARTIFACT_FILES.includes(relativePath) &&
+      !relativePath.startsWith(EXPECTED_STATIC_ASSET_PREFIX)
+  );
+  assert(
+    unexpectedFiles.length === 0,
+    `artifact regular-file membership is outside the closed artifact root: ${unexpectedFiles[0]}`
   );
   return checksums;
 }
@@ -1097,7 +1133,7 @@ function verifyArtifact(options) {
   writeJson(options.output, selection);
   writeTextFile(
     options.checksumsOutput,
-    `${sha256File(options.output)}  selection.json\n`
+    `${sha256File(options.output)}  ${SELECTION_FILE}\n`
   );
   return selection;
 }
@@ -1294,15 +1330,15 @@ function verifySelection(options) {
   verifyArchiveDigest(options.archive, artifact);
   const rootPath = path.resolve(options.selectionRoot);
   requireRegularDirectory(rootPath, "selection artifact root");
-  const selectionChecksums = verifyChecksums(rootPath, ["selection.json"]);
+  const selectionChecksums = verifyChecksums(rootPath, [SELECTION_FILE]);
   assertExactRegularFiles(
     selectionChecksums.files,
-    ["selection.json"],
+    [SELECTION_FILE],
     "selection artifact"
   );
 
   const selection = readJson(
-    safeArtifactPath(rootPath, "selection.json"),
+    safeArtifactPath(rootPath, SELECTION_FILE),
     "production artifact selection"
   );
   const selectionRunMetadata = readJson(
@@ -1411,6 +1447,7 @@ function commonVerifierOptions(args) {
 function usage() {
   return `Usage:
   node ops/scripts/verify-production-artifact-selection.cjs validate-archive-members --archive-members <file>
+  node ops/scripts/verify-production-artifact-selection.cjs validate-selection-archive-members --archive-members <file>
   node ops/scripts/verify-production-artifact-selection.cjs validate-extracted-artifact --artifact-root <dir>
   node ops/scripts/verify-production-artifact-selection.cjs validate-inputs --target-sha <sha> --operation-id <id> --artifact-run-id <id> --artifact-run-attempt <n> --artifact-id <id> --artifact-api-digest sha256:<digest> --artifact-name <name> --repository <owner/name>
   node ops/scripts/verify-production-artifact-selection.cjs verify-metadata --target-sha <sha> --operation-id <id> --artifact-run-id <id> --artifact-run-attempt <n> --artifact-id <id> --artifact-api-digest sha256:<digest> --artifact-name <name> --repository <owner/name> --run-metadata <file> --artifact-metadata <file>
@@ -1434,6 +1471,20 @@ function main(argv = process.argv.slice(2)) {
             readTextFile(
               requiredArg(args, "archive-members"),
               "archive member list"
+            )
+          )
+        )}\n`
+      );
+      return;
+    }
+
+    if (command === "validate-selection-archive-members") {
+      process.stdout.write(
+        `${JSON.stringify(
+          validateSelectionArchiveMembers(
+            readTextFile(
+              requiredArg(args, "archive-members"),
+              "selection archive member list"
             )
           )
         )}\n`
@@ -1563,6 +1614,7 @@ module.exports = {
   main,
   validateArchiveMembers,
   validateExtractedArtifact,
+  validateSelectionArchiveMembers,
   validateVerifierInputs,
   verifyArtifact,
   verifyChecksums,

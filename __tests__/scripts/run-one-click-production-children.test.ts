@@ -283,7 +283,6 @@ function artifactRecord(
     digest: selection ? SELECTION_ARTIFACT_DIGEST : BUILDER_ARTIFACT_DIGEST,
     workflow_run: {
       id: Number(selection ? VERIFIER_RUN_ID : BUILDER_RUN_ID),
-      run_attempt: selection ? VERIFIER_RUN_ATTEMPT : BUILDER_RUN_ATTEMPT,
       head_sha: selection ? VERIFIER_SHA : LATER_MAIN_SHA,
     },
     ...overrides,

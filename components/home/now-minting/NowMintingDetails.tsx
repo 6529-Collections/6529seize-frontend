@@ -6,11 +6,12 @@ import {
   getFileMimeTypeFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
+import LatestDropAllowlistStatus from "./LatestDropAllowlistStatus";
+import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 import NowMintingCountdown from "./NowMintingCountdown";
 import NowMintingDetailsAccordion from "./NowMintingDetailsAccordion";
 import NowMintingHeader from "./NowMintingHeader";
 import NowMintingStatsGrid from "./NowMintingStatsGrid";
-import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 
 interface NowMintingDetailsProps {
   readonly nft: ApiMemesExtendedData;
@@ -35,10 +36,8 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           mediaMimeType={fileMimeType}
         />
         <NowMintingStatsGrid nftId={nft.id} floorPrice={floorPrice} />
-        <LatestDropNextMintSubscribe
-          tokenId={nft.id}
-          statusSource="none"
-        />
+        <LatestDropAllowlistStatus tokenId={nft.id} />
+        <LatestDropNextMintSubscribe tokenId={nft.id} statusSource="none" />
         <NowMintingDetailsAccordion
           nftId={nft.id}
           mintDate={nft.mint_date ?? undefined}
