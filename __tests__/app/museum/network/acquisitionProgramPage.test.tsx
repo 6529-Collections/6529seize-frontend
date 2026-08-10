@@ -67,7 +67,31 @@ describe("Museum acquisition program status projection", () => {
           programIds: ["6529NM-AP-ENT-0002"],
           acquisitionIds: [],
           sourcePaths: ["records/entities/6529NM-W-0020.json"],
-          media: [],
+          media: [
+            {
+              id: "6529NM-MED-0020",
+              artworkId: "6529NM-W-0020",
+              kind: "still",
+              role: "source",
+              mediaType: "image/jpeg",
+              width: 1200,
+              height: 800,
+              altText: "A submitted Keys and Gates photograph.",
+              credit: {
+                creditLine: "The participating artist.",
+                licenseLabel: "All Rights Reserved",
+                licenseUrl: null,
+                rightsExpressionId: null,
+                sourcePath: "records/entities/6529NM-MED-0020.json",
+              },
+              sourcePath: "records/entities/6529NM-MED-0020.json",
+              custody: "upstream",
+              url: "https://media.example.test/keys-and-gates.jpg",
+              preservationStatus: "not_retained",
+              sha256: null,
+              upstreamProvider: null,
+            },
+          ],
         },
       ],
       documents: [],
@@ -116,5 +140,6 @@ describe("Museum acquisition program status projection", () => {
     expect(
       screen.getByRole("link", { name: "A divergent first Work" })
     ).toHaveClass("tw-min-h-11");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 });

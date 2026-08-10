@@ -10,7 +10,12 @@ jest.mock(
   "@/components/header/user/connected/HeaderUserConnectedAccounts",
   () => (props: any) => (
     <div data-testid="connected-accounts">
-      <button onClick={props.onAddAccount}>Add</button>
+      {props.canAddAccount && (
+        <button onClick={props.onAddAccount}>Add profile</button>
+      )}
+      {props.accounts?.length > 1 && (
+        <button onClick={props.onSignOutAll}>Sign out all</button>
+      )}
       <button
         onClick={() => {
           const nextAccount = props.accounts?.find(
@@ -141,9 +146,7 @@ describe("HeaderUserMenuDropdown", () => {
     });
 
     const profileLink = screen.getByRole("link", { name: "Profile" });
-    const logoutButton = screen.getByRole("button", {
-      name: "Disconnect & Logout",
-    });
+    const logoutButton = screen.getByRole("button", { name: "Logout" });
     expect(profileLink).toHaveAttribute("href", "/alice");
     expect(profileLink).not.toHaveAttribute("title");
     expect(profileLink).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
@@ -370,9 +373,54 @@ describe("HeaderUserMenuDropdown", () => {
     });
 
     expect(screen.getByTestId("connected-accounts")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add profile" }));
     await waitFor(() => {
       expect(seizeAddConnectedAccount).toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it("moves multi-profile sign out all to the profiles header", async () => {
+    const seizeDisconnectAndLogoutAll = jest.fn().mockResolvedValue(undefined);
+    const { onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+      connectedAccounts: [
+        { address: "0xabc", role: null, isActive: true, isConnected: true },
+        { address: "0xdef", role: null, isActive: false, isConnected: true },
+      ],
+      seizeDisconnectAndLogoutAll,
+    });
+
+    expect(
+      screen.queryByRole("button", { name: "Sign Out All Profiles" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Sign out all" }));
+
+    await waitFor(() => {
+      expect(seizeDisconnectAndLogoutAll).toHaveBeenCalledTimes(1);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  it("keeps Logout available for multiple profiles", async () => {
+    const seizeDisconnectAndLogout = jest.fn().mockResolvedValue(undefined);
+    const { onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+      connectedAccounts: [
+        { address: "0xabc", role: null, isActive: true, isConnected: true },
+        { address: "0xdef", role: null, isActive: false, isConnected: true },
+      ],
+      seizeDisconnectAndLogout,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Logout" }));
+
+    await waitFor(() => {
+      expect(seizeDisconnectAndLogout).toHaveBeenCalledTimes(1);
       expect(onClose).toHaveBeenCalled();
     });
   });

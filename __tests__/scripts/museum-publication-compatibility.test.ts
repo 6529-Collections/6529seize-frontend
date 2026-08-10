@@ -15,16 +15,18 @@ const PUBLICATION_COMMIT = "b".repeat(40);
 const CATALOG_CONTENT_HASH = `0x${"c".repeat(64)}`;
 
 describe("museum publication compatibility", () => {
-  it("keeps managed and foreign hold detection bound to the exact bot identity", () => {
+  it("keeps managed holds bound to GitHub Actions' exact API identities", () => {
     const workflow = fs.readFileSync(
       ".github/workflows/museum-publication-compatibility.yml",
       "utf8"
     );
-    expect(workflow).toMatch(
-      /\.author\.login == \\?"github-actions\[bot\]\\?"/u
+    expect(workflow).toContain(
+      `managed_authors='["app/github-actions","github-actions[bot]"]'`
     );
-    expect(workflow).toMatch(
-      /\.author\.login != \\?"github-actions\[bot\]\\?"/u
+    expect(workflow).toContain("$authors | index($author)");
+    expect(workflow).toContain("max_by(.number).number");
+    expect(workflow).toContain(
+      "Superseded by active automated Museum hold #${primary_issue_number}."
     );
     expect(workflow).not.toContain("github-actions[bot)");
   });
