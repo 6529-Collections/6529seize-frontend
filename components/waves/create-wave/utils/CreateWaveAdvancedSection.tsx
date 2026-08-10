@@ -18,8 +18,8 @@ export default function CreateWaveAdvancedSection({
 }) {
   const locale = useBrowserLocale();
   const contentId = useId();
-  const [isOpen, setIsOpen] = useState(hasError);
-  const [previousHasError, setPreviousHasError] = useState(hasError);
+  const [isOpen, setIsOpen] = useState(false);
+  const [previousHasError, setPreviousHasError] = useState(false);
 
   // Validation must reveal hidden controls before the parent flow focuses the
   // first invalid field. Latch the section open so fixing the first character
@@ -81,14 +81,13 @@ export default function CreateWaveAdvancedSection({
           }`}
         />
       </button>
-      {isExpanded ? (
-        <div
-          id={contentId}
-          className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-4"
-        >
-          {children}
-        </div>
-      ) : null}
+      <div
+        id={contentId}
+        hidden={!isExpanded}
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-4"
+      >
+        {children}
+      </div>
     </section>
   );
 }

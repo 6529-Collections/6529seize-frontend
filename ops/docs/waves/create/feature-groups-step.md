@@ -2,8 +2,9 @@
 
 ## Overview
 
-Use `Groups` to set who can view, drop, vote, chat, and administer a wave.
-This step is user-reachable for `Chat`, `Rank`, and `Approve`.
+Use `Groups` to review or customize who can view, drop, vote, chat, and
+administer a wave. This step is user-reachable for `Chat`, `Rank`, and
+`Approve`.
 
 ## Location in the Site
 
@@ -28,6 +29,11 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## What You Configure
 
+- The default view is a compact `Access` summary. It explains that anyone can
+  view and participate, while only the creator can administer the wave.
+- Expand `Advanced settings` to customize access or moderation. The disclosure
+  shows `Customized` whenever a group, chat, or admin-delete setting differs
+  from its default.
 - Helper copy clarifies that `Who can view` controls who can access the wave,
   and that followers who can view the wave may get a notification when it is
   created.
@@ -83,7 +89,10 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Limitations / Notes
 
-- `Groups` only selects existing groups; it does not create or edit groups.
+- The inline group builder can select an existing group or create an identity,
+  NFT, or combined group without leaving wave creation.
+- Collapsing `Advanced settings` does not clear selected groups or an in-progress
+  inline group configuration.
 - `Approve` uses the same group rows as `Rank`.
 
 ## Related Pages

@@ -436,6 +436,13 @@ export const ES_ES_MESSAGES = {
   "waves.create.overview.advanced.customSummary":
     "Se han personalizado opciones de imagen o visualización.",
   "waves.create.overview.picture": "Imagen de la Wave",
+  "waves.create.groups.title": "Acceso",
+  "waves.create.groups.description":
+    "Elige quién puede acceder, participar y gestionar esta Wave.",
+  "waves.create.groups.advanced.defaultSummary":
+    "Cualquiera puede ver la Wave y participar. Solo tú puedes administrarla.",
+  "waves.create.groups.advanced.customSummary":
+    "Se han personalizado los ajustes de acceso o moderación.",
   ...ES_ES_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
   "memes.quickVote.unrated": "{count} sin valorar",

@@ -423,6 +423,13 @@ export const EN_GB_MESSAGES = {
   "waves.create.overview.advanced.customSummary":
     "Optional picture or display settings have been customised.",
   "waves.create.overview.picture": "Wave picture",
+  "waves.create.groups.title": "Access",
+  "waves.create.groups.description":
+    "Choose who can access, participate in, and manage this wave.",
+  "waves.create.groups.advanced.defaultSummary":
+    "Anyone can view and participate. Only you can administer the wave.",
+  "waves.create.groups.advanced.customSummary":
+    "Access or moderation settings have been customised.",
   ...EN_GB_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",
