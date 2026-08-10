@@ -3,7 +3,8 @@
 ## Overview
 
 `Overview` is the first step in wave creation.
-Set the wave name, optional image, and wave type before moving to later steps.
+Set the wave name and type before moving to later steps. Optional picture,
+display, and label controls stay available under `Advanced settings`.
 
 ## Location in the Site
 
@@ -22,17 +23,26 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
 
-## What You Can Set
+## Essential Setup
 
 - `Name` (required)
-- `Wave Profile Picture` (optional)
-  - upload by click
-  - or drag and drop
 - `Wave Type`
   - `Chat`
   - `Rank`
   - `Approve`
-- `Show outcomes` for `Rank` and `Approve` waves.
+- `Ranking mode` for `Rank` waves:
+  - `Announce Winners`
+  - `Perpetual Ranking`
+
+## Advanced Settings
+
+`Advanced settings` starts collapsed so the normal path shows only the
+essential choices. Its summary always remains visible.
+
+- `Wave picture` (optional)
+  - upload by click
+  - or drag and drop
+- Submission-button label for `Rank` and `Approve` waves.
 - `Compact proposal cards` for `Rank` and `Approve` waves:
   - defaults to off
   - when enabled, published proposals use compact previews that open the
@@ -42,6 +52,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - approved tab defaults to `Approved`
 - Uploaded image shows a preview; `Delete` removes it.
 - File input and drag-drop both use the first selected file.
+- When any optional value differs from its default, the collapsed section shows
+  `Customized` so a resumed draft cannot silently carry hidden configuration.
 
 ## Navigation Behavior
 
@@ -52,6 +64,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - On large screens, the step rail can reopen completed steps, including
   `Overview`.
 - On smaller screens, use `Previous` from later steps to return to `Overview`.
+- `Advanced settings` is a keyboard-operable disclosure with an exposed
+  expanded/collapsed state.
 
 ## Validation and State Rules
 
@@ -62,16 +76,20 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
 - Changing wave type resets all non-overview settings to that type's defaults
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
-- `Show outcomes` defaults to on. Turning it off hides outcome displays after
-  the wave is created.
 - `Compact proposal cards` defaults to off. Enabling it stores the Wave-level
   display choice when the Wave is created; it does not alter Chat messages or
   specialized Memes, Curation, and Quorum presentations.
+- If an advanced label is invalid, `Next` opens `Advanced settings`, shows
+  `Needs attention`, and moves focus to the first invalid field.
+- Loading a draft preserves its optional display and label values. Wave picture
+  files and the description are not stored in on-device drafts.
 
 ## Failure and Recovery
 
 - If `Next` does not advance, confirm name is present and `<= 250` characters.
 - If upload validation fails, pick a supported file under `10MB` and retry.
+- If `Advanced settings` opens after `Next`, correct the highlighted label and
+  try again.
 - If type changes reset later steps, confirm the final type first, then
   reconfigure later steps.
 - If stale modal state appears, close create-wave to clear the `create` query,

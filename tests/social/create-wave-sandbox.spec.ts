@@ -620,6 +620,63 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps optional Overview settings collapsed and reveals hidden errors", async ({
+    page,
+  }) => {
+    await gotoCreateWave(page);
+
+    const advancedSettings = page.getByRole("button", {
+      name: /Advanced settings/,
+    });
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator("#pfp-upload-input")).toBeHidden();
+
+    await page.getByLabel(/Wave Name/).fill("Advanced Overview Wave");
+    await page.getByText("Approve", { exact: true }).click();
+
+    // The disclosure is operable without a pointer and exposes its state.
+    await advancedSettings.focus();
+    await page.keyboard.press("Enter");
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "true");
+
+    const compactProposalCards = page.getByLabel("Compact proposal cards");
+    const submissionLabel = page.getByLabel("Submission button label");
+    await expect(compactProposalCards).toBeVisible();
+    await compactProposalCards.check();
+    await submissionLabel.fill("Submit idea");
+
+    await advancedSettings.click();
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
+    await expect(advancedSettings).toContainText("Customized");
+    await expect(compactProposalCards).toBeHidden();
+
+    // Programmatic draft hydration can contain a value longer than the input's
+    // maxLength. Model that old/nonconforming state and make sure validation
+    // opens the hidden section before the flow focuses the invalid field.
+    await advancedSettings.click();
+    await submissionLabel.evaluate((element) => {
+      const input = element as HTMLInputElement;
+      const valueSetter = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      )?.set;
+      valueSetter?.call(input, "A".repeat(25));
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await expect(submissionLabel).toHaveValue("A".repeat(25));
+    await advancedSettings.click();
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
+
+    await nextStepButton(page).click();
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "true");
+    await expect(advancedSettings).toContainText("Needs attention");
+    await expect(
+      page.getByText("Label must be 24 characters or fewer.")
+    ).toBeVisible();
+    await expect(submissionLabel).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("keeps rank date and outcome layouts stable on phone screens", async ({
     page,
   }) => {
@@ -752,6 +809,14 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
 
     const draftName = "Draft Resume Wave";
     await page.locator("#create-wave-name").fill(draftName);
+    await page.getByText("Rank", { exact: true }).click();
+    const overviewAdvancedSettings = page.getByRole("button", {
+      name: /Advanced settings/,
+    });
+    await overviewAdvancedSettings.click();
+    await page.getByLabel("Compact proposal cards").check();
+    await overviewAdvancedSettings.click();
+    await expect(overviewAdvancedSettings).toContainText("Customized");
     // Leaving Overview is what arms autosave.
     await nextStepButton(page).click();
     await expect(
@@ -792,6 +857,13 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
       .getByRole("button", { name: new RegExp(`^${draftName}`) })
       .click();
     await expect(page.locator("#create-wave-name")).toHaveValue(draftName);
+    await expect(overviewAdvancedSettings).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    await expect(overviewAdvancedSettings).toContainText("Customized");
+    await overviewAdvancedSettings.click();
+    await expect(page.getByLabel("Compact proposal cards")).toBeChecked();
 
     // Deleting the only draft removes the whole Saved Drafts card.
     await page.reload({ waitUntil: "domcontentloaded" });

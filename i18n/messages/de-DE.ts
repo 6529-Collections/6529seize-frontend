@@ -424,6 +424,16 @@ export const DE_DE_MESSAGES = {
   "waves.create.actions.next": "Weiter",
   "waves.create.actions.previous": "Zurück",
   "waves.create.actions.save": "Speichern",
+  "waves.create.advanced.title": "Erweiterte Einstellungen",
+  "waves.create.advanced.customized": "Angepasst",
+  "waves.create.advanced.needsAttention": "Prüfen",
+  "waves.create.advanced.errorSummary":
+    "Prüfe die markierten Einstellungen, bevor du fortfährst.",
+  "waves.create.overview.advanced.defaultSummary":
+    "Bild und optionale Anzeigeeinstellungen verwenden die empfohlenen Standardwerte.",
+  "waves.create.overview.advanced.customSummary":
+    "Optionale Bild- oder Anzeigeeinstellungen wurden angepasst.",
+  "waves.create.overview.picture": "Wave-Bild",
   ...DE_DE_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
