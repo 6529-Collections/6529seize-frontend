@@ -1267,31 +1267,77 @@ jobs:
           fi
 
           shard_pids=()
+          shard_logs=()
+          shard_status_files=()
           for shard in 1 2; do
-            PLAYWRIGHT_SKIP_WEB_SERVER=1 \
-              BASE_ENDPOINT="$museum_base_url" \
-              PLAYWRIGHT_BASE_URL="$museum_base_url" \
-              PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-shard-${shard}" \
-              PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-shard-${shard}" \
-              ./bin/6529 exec playwright test \
-                "${selected_specs[@]}" \
-                --project=web-desktop-chromium \
-                --project=web-mobile-chromium \
-                --shard="${shard}/2" \
-                --workers=1 \
-                > "test-results/app-pr-ci/museum-shard-${shard}.log" 2>&1 &
+            shard_log="test-results/app-pr-ci/museum-shard-${shard}.log"
+            shard_status_file="test-results/app-pr-ci/museum-shard-${shard}.status"
+            (
+              set +e
+              set -o pipefail
+              PLAYWRIGHT_SKIP_WEB_SERVER=1 \
+                BASE_ENDPOINT="$museum_base_url" \
+                PLAYWRIGHT_BASE_URL="$museum_base_url" \
+                PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-shard-${shard}" \
+                PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-shard-${shard}" \
+                timeout --signal=TERM --kill-after=30s 25m \
+                ./bin/6529 exec playwright test \
+                  "${selected_specs[@]}" \
+                  --project=web-desktop-chromium \
+                  --project=web-mobile-chromium \
+                  --shard="${shard}/2" \
+                  --workers=1 \
+                  2>&1 \
+                | sed -u "s/^/[museum shard ${shard}\/2] /" \
+                | tee "$shard_log"
+              shard_exit="${PIPESTATUS[0]}"
+              printf '%s\n' "$shard_exit" > "$shard_status_file"
+              exit "$shard_exit"
+            ) &
             shard_pids+=("$!")
+            shard_logs+=("$shard_log")
+            shard_status_files+=("$shard_status_file")
           done
+
+          monitor_museum_shards() {
+            local elapsed=0
+            while true; do
+              sleep 60
+              elapsed=$((elapsed + 60))
+              local active_shards=()
+              for shard_index in 1 2; do
+                if kill -0 "${shard_pids[$((shard_index - 1))]}" 2>/dev/null; then
+                  active_shards+=("${shard_index}/2")
+                fi
+              done
+              if [ "${#active_shards[@]}" -eq 0 ]; then
+                return
+              fi
+              echo "::notice::Museum shards still running after ${elapsed}s: ${active_shards[*]}"
+            done
+          }
+          monitor_museum_shards &
+          museum_progress_pid="$!"
 
           shard_status=0
           for shard_index in 1 2; do
             if ! wait "${shard_pids[$((shard_index - 1))]}"; then
               shard_status=1
-              cat "test-results/app-pr-ci/museum-shard-${shard_index}.log"
+              shard_exit="$(cat "${shard_status_files[$((shard_index - 1))]}" 2>/dev/null || printf 'unknown')"
+              if [ "$shard_exit" = 124 ]; then
+                echo "::error::Museum shard ${shard_index}/2 exceeded its 25-minute timeout."
+              else
+                echo "::error::Museum shard ${shard_index}/2 failed with exit ${shard_exit}."
+              fi
+              tail -n 80 "${shard_logs[$((shard_index - 1))]}"
             else
-              tail -n 8 "test-results/app-pr-ci/museum-shard-${shard_index}.log"
+              tail -n 8 "${shard_logs[$((shard_index - 1))]}"
             fi
           done
+          if kill -0 "$museum_progress_pid" 2>/dev/null; then
+            kill "$museum_progress_pid" 2>/dev/null || true
+          fi
+          wait "$museum_progress_pid" 2>/dev/null || true
           if [ "$shard_status" -ne 0 ]; then
             cat "$museum_server_log"
           else

@@ -640,7 +640,20 @@ describe("testing strategy CI plan", () => {
       'echo "Museum shard server did not become ready."'
     );
     expect(museumBrowserRun).toContain(
-      'cat "test-results/app-pr-ci/museum-shard-${shard_index}.log"'
+      "timeout --signal=TERM --kill-after=30s 25m"
+    );
+    expect(museumBrowserRun).toContain(
+      '| sed -u "s/^/[museum shard ${shard}\\/2] /"'
+    );
+    expect(museumBrowserRun).toContain('| tee "$shard_log"');
+    expect(museumBrowserRun).toContain(
+      "Museum shards still running after ${elapsed}s"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum shard ${shard_index}/2 exceeded its 25-minute timeout."
+    );
+    expect(museumBrowserRun).toContain(
+      'tail -n 80 "${shard_logs[$((shard_index - 1))]}"'
     );
     expect(museumBrowserRun).toContain("--workers=1");
     expect(parsed.jobs["installed-checks"]).toMatchObject({
