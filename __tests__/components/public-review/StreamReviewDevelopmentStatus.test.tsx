@@ -30,7 +30,7 @@ describe("StreamReviewDevelopmentStatus", () => {
         name: "Before launch, Stream still needs:",
       })
     ).toBeInTheDocument();
-    expect(within(launchReadiness).getAllByRole("listitem")).toHaveLength(4);
+    expect(within(launchReadiness).getAllByRole("listitem")).toHaveLength(3);
     expect(
       screen.getByText(
         "This page explains what works, what is still uncertain, and what must happen before Stream can launch."

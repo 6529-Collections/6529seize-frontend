@@ -10,8 +10,6 @@ export const PUBLIC_REVIEW_DEVELOPMENT_MESSAGES = {
     "Testing with real services and marketplaces.",
   "publicReview.development.beforeLaunch.launchSetup":
     "A final, verified launch setup.",
-  "publicReview.development.beforeLaunch.blockers":
-    "All serious release blockers resolved.",
   "publicReview.development.pagePurpose":
     "This page explains what works, what is still uncertain, and what must happen before Stream can launch.",
   "publicReview.development.lastChecked": "Last checked",

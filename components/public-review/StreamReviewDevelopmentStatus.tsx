@@ -11,7 +11,6 @@ const BEFORE_LAUNCH_ITEMS = [
   "publicReview.development.beforeLaunch.audit",
   "publicReview.development.beforeLaunch.liveTesting",
   "publicReview.development.beforeLaunch.launchSetup",
-  "publicReview.development.beforeLaunch.blockers",
 ] as const;
 
 export function StreamReviewDevelopmentStatus() {

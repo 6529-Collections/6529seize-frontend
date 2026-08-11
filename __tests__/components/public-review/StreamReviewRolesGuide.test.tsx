@@ -16,9 +16,15 @@ describe("StreamReviewRolesGuide", () => {
     render(<StreamReviewRolesGuide pages={ACTIVE_REVIEW_VERSION.pages} />);
 
     for (const section of STREAM_REVIEW_ROLES_GUIDE_SECTIONS) {
-      expect(
-        screen.getByRole("heading", { level: 2, name: section.title })
-      ).toHaveAttribute("id", section.id);
+      const heading = screen.getByRole("heading", {
+        level: 2,
+        name: section.title,
+      });
+      expect(heading).toHaveAttribute("id", section.id);
+      expect(heading.closest("section")).toHaveAttribute(
+        "aria-labelledby",
+        section.id
+      );
     }
 
     for (const status of [

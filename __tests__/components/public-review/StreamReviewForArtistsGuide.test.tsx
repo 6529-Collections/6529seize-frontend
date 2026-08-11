@@ -4,6 +4,7 @@ import {
   STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
   StreamReviewForArtistsGuide,
 } from "@/components/public-review/StreamReviewForArtistsGuide";
+import { StreamReviewForArtistsDetails } from "@/components/public-review/StreamReviewForArtistsDetails";
 import { getStreamReviewVersion } from "@/lib/public-review/streamReviewDefinition";
 
 const ACTIVE_REVIEW_VERSION = getStreamReviewVersion();
@@ -355,5 +356,21 @@ describe("StreamReviewForArtistsGuide", () => {
         name: "Continue to the contract details",
       })
     ).toHaveAttribute("href", "#your-collection-has-a-durable-identity");
+  });
+
+  it("co-renders the contract-detail target linked by the guide", () => {
+    render(
+      <>
+        <StreamReviewForArtistsGuide pages={ACTIVE_REVIEW_VERSION.pages} />
+        <StreamReviewForArtistsDetails />
+      </>
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Continue to the contract details" })
+    ).toHaveAttribute("href", "#your-collection-has-a-durable-identity");
+    expect(
+      document.getElementById("your-collection-has-a-durable-identity")
+    ).toHaveClass("tw-scroll-mt-24");
   });
 });
