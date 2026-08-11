@@ -906,6 +906,35 @@ If the transaction succeeds, the token and the records for that path update toge
 The accepted design also requires valid artist permission for an artist-bound collection. The reviewed contracts do not yet enforce that check.
 
 **Why this matters:** A collector cannot receive a half-finished mint.`,
+  "publicReview.pages.artworkLifecycle.currentTokenIdentitySection": `## 7. The minted token gets a permanent ID
+
+### What happens
+
+When a mint succeeds, the Core gives the token two numbers:
+
+- a global ID across all Stream tokens; and
+- a serial number inside its collection.
+
+Both numbers stay with the token for its full history.
+
+### What happens if the token is burned
+
+Stream keeps two supply counts:
+
+- **Minted ever:** every token successfully minted, including burned tokens.
+- **Live supply:** tokens that have not been burned.
+
+Burning removes the token from current ownership and lowers the live supply.
+
+It does not lower the minted-ever count or make room for a replacement mint.
+
+The token’s ID, collection link, serial number, and burn record remain stored. Its ID is never reused.
+
+**Why this matters:** Burning a token does not erase its history or change the identity of other tokens.
+
+### Technical details
+
+The Core stores the collection ID and collection serial directly for each token. It does not calculate them from the token ID. This matches the accepted ADR design.`,
   "publicReview.pages.forArtists.title": "For Artists",
   "publicReview.pages.forArtists.summary":
     "For artists considering or preparing to publish their work through Stream.",

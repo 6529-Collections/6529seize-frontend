@@ -90,7 +90,7 @@ jest.mock("@/lib/public-review/editorialContent", () => ({
       return "# Editorial title\n\nThe separately dated development update on the current Overview records work\ncompleted after this snapshot.\n\n## Technical section\n\nBody.";
     }
     if (page.id === "artwork-lifecycle") {
-      return "# Artwork lifecycle\n\nA Stream artwork moves through a sequence of deliberate commitments. Collection\nidentity comes first. Artwork materials, distribution, payment, randomness, and\nmetadata are then assembled around it. Supply and Core configuration can later\nbe closed, preservation evidence can accumulate, and a final ceremony can make\nthe remaining artwork state terminal.\n\nThat sequence is a major part of the design. “Minted,” “sold,” “frozen,”\n“preserved,” and “final” describe different facts. Keeping them separate makes\neach commitment visible and reviewable.\n\nThis page follows one collection through the lifecycle and explains what each\nstage protects.\n\n## 1. The collection receives a permanent identity\n\nOld technical identity copy.\n\n## 2. The artwork package is assembled\n\nOld artwork package copy.\n\n## 3. The artist can approve a specific state\n\nOld artist approval copy.\n\n## 4. A distribution policy is selected\n\nDistribution body.\n\n## 5. Curation becomes a bound authorization\n\nOld curation copy.\n\n## 6. The selected mint lane executes atomically\n\nOld mint execution copy.";
+      return "# Artwork lifecycle\n\nA Stream artwork moves through a sequence of deliberate commitments. Collection\nidentity comes first. Artwork materials, distribution, payment, randomness, and\nmetadata are then assembled around it. Supply and Core configuration can later\nbe closed, preservation evidence can accumulate, and a final ceremony can make\nthe remaining artwork state terminal.\n\nThat sequence is a major part of the design. “Minted,” “sold,” “frozen,”\n“preserved,” and “final” describe different facts. Keeping them separate makes\neach commitment visible and reviewable.\n\nThis page follows one collection through the lifecycle and explains what each\nstage protects.\n\n## 1. The collection receives a permanent identity\n\nOld technical identity copy.\n\n## 2. The artwork package is assembled\n\nOld artwork package copy.\n\n## 3. The artist can approve a specific state\n\nOld artist approval copy.\n\n## 4. A distribution policy is selected\n\nDistribution body.\n\n## 5. Curation becomes a bound authorization\n\nOld curation copy.\n\n## 6. The selected mint lane executes atomically\n\nOld mint execution copy.\n\n## 7. The token receives a permanent identity\n\nOld token identity copy.";
     }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
@@ -299,12 +299,27 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "Old mint execution copy."
     );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "7. The minted token gets a permanent ID"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "every token successfully minted, including burned tokens."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "It does not lower the minted-ever count or make room for a replacement mint."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Burning a token does not erase its history or change the identity of other tokens."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old token identity copy."
+    );
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "sequence of deliberate commitments"
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "7"
+      "8"
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
@@ -443,6 +458,12 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
       "Old mint execution copy."
     );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "7. The token receives a permanent identity"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old token identity copy."
+    );
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "The lifecycle in one minute"
     );
@@ -464,9 +485,12 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "The mint completes fully or not at all"
     );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The minted token gets a permanent ID"
+    );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "6"
+      "7"
     );
   });
 
