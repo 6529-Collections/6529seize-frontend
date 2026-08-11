@@ -27,12 +27,13 @@ with cause filters, grouped reactions, and inline drop previews.
   remains visible while the site restores an existing wallet in a new tab or
   completes an active connect/reconnect attempt. The disconnected wallet prompt
   is shown only after that process finishes without valid auth.
-- Wallet missing: `Connect your wallet to view notifications.` with
-  `Reconnect wallet`.
+- Wallet missing: `This content is only available to connected wallets.` with
+  `Connect your wallet to continue.` and the wallet connect action.
+- Wallet connected without a profile:
+  `You need to set up a profile to continue.` with
+  `Create a profile to access notifications.` and `Create profile`. The action
+  opens the connected wallet's profile setup route.
 - Profile loading: `Loading profile...`.
-- Handle resolution failure:
-  `We couldn't determine your profile handle. Please reconnect to continue.`
-  with `Reconnect wallet`.
 - Proxy profile active:
   `Notifications are not available while you are using a profile proxy.` with
   `Switch to primary profile`.

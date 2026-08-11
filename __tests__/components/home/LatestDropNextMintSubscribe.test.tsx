@@ -89,6 +89,15 @@ function expectReadonlySubscriptionToggle(
   expect(triggerElement).toContainElement(toggle);
   expect(toggle).toHaveAttribute("aria-hidden", "true");
   expect(toggle).toHaveAttribute("data-checked", checked ? "true" : "false");
+
+  const thumb = screen.getByTestId("readonly-subscription-toggle-thumb");
+  expect(toggle).toContainElement(thumb);
+  if (checked) {
+    expect(thumb).toHaveClass("tw-translate-x-4", "tw-bg-white");
+  } else {
+    expect(thumb).toHaveClass("tw-translate-x-0", "tw-bg-iron-400");
+    expect(thumb).not.toHaveClass("tw-bg-white");
+  }
 }
 
 describe("LatestDropNextMintSubscribe", () => {
