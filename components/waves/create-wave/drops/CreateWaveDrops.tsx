@@ -105,12 +105,6 @@ export default function CreateWaveDrops({
         />
       )}
       <CreateWaveAdvancedSection
-        summary={t(
-          locale,
-          isCustomized
-            ? "waves.create.drops.advanced.customSummary"
-            : "waves.create.drops.advanced.defaultSummary"
-        )}
         isCustomized={isCustomized}
         hasError={hasAdvancedError}
       >

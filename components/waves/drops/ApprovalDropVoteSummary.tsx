@@ -279,9 +279,7 @@ export default function ApprovalDropVoteSummary({
               numberWeight={emphasizeCurrent ? "semibold" : undefined}
             />
           </div>
-          <span
-            className={`tw-text-sm tw-font-normal ${summaryStatusClass}`}
-          >
+          <span className={`tw-text-sm tw-font-normal ${summaryStatusClass}`}>
             {statusLabel}
           </span>
         </div>

@@ -81,9 +81,7 @@ export default function CreateWaveDatesApproveStart({
             className="tw-mr-2 tw-size-4 tw-text-primary-400"
           />
           <div>
-            <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">
-              Wave Starts
-            </p>
+            <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">Wave Starts</p>
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-50">
               {startDateFormatted}
             </p>

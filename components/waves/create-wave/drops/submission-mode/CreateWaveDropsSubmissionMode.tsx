@@ -218,9 +218,9 @@ export default function CreateWaveDropsSubmissionMode({
   return (
     <div className="tw-flex tw-flex-col">
       <div className="tw-space-y-1">
-        <p className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           Submission type
-        </p>
+        </h3>
         <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
           Choose whether participants submit drops or nominate identities.
         </p>

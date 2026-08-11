@@ -134,6 +134,13 @@ export interface WaveProposalCardRecipe {
   readonly showMediaThumbnail: boolean;
 }
 
+export type WaveProposalCardPresentation =
+  | {
+      readonly version: 1;
+      readonly layout: "full";
+    }
+  | WaveProposalCardRecipe;
+
 export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
   /** Omitted in older saved drafts; absence preserves the standard display. */

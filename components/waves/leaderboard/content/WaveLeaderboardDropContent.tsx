@@ -40,7 +40,7 @@ export const WaveLeaderboardDropContent: React.FC<
 
   if (contentPresentation === "proposalCard") {
     return (
-      <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-1">
+      <div className="tw-mt-1.5 tw-flex tw-flex-col tw-gap-y-1">
         <ProposalCardContent
           drop={drop}
           textFooter={<WaveDropActionsOpen drop={drop} variant="readFull" />}

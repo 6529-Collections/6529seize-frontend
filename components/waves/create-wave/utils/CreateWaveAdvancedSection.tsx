@@ -49,10 +49,8 @@ export default function CreateWaveAdvancedSection({
         type="button"
         aria-expanded={isExpanded}
         aria-controls={contentId}
-        onClick={() =>
-          setIsOpen((current) => (hasError ? true : !current))
-        }
-        className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-iron-900 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
+        onClick={() => setIsOpen((current) => (hasError ? true : !current))}
+        className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-left tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none"
       >
         <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0">
           <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-4">

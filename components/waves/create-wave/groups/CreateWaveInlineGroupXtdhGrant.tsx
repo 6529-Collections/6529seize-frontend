@@ -235,11 +235,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
                 })}
               </div>
             </div>
-            <Button
-              variant="tertiary"
-              size="md"
-              onClick={onResetFilters}
-            >
+            <Button variant="tertiary" size="md" onClick={onResetFilters}>
               Clear filters
             </Button>
           </div>

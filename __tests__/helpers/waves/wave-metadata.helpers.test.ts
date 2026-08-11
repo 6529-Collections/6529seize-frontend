@@ -11,6 +11,9 @@ import {
   getWaveCustomRulesMetadataUpdate,
   getWaveOutcomeVisibilityFromMetadata,
   getWaveOutcomeVisibilityMetadataUpdate,
+  getWaveProposalCardConfigFromMetadata,
+  getWaveProposalCardMetadataRequest,
+  getWaveProposalCardMetadataUpdate,
   getWaveProposalCardRecipeFromMetadata,
   getWaveProposalCardsEnabledFromMetadata,
   getWaveSubmissionButtonLabelFromMetadata,
@@ -232,6 +235,108 @@ describe("wave-metadata.helpers", () => {
         },
       ])
     ).toBeNull();
+  });
+
+  it("lets explicit full presentation override the Network Museum fallback", () => {
+    const metadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+        data_value: '{"version":1,"layout":"full"}',
+      },
+    ];
+
+    expect(
+      getWaveProposalCardConfigFromMetadata(
+        INITIAL_PROPOSAL_CARD_WAVE_ID,
+        metadata
+      )
+    ).toEqual({
+      mode: "standard",
+      excerptMaxCharacters: 360,
+      showMediaThumbnail: true,
+    });
+    expect(
+      getWaveProposalCardRecipeFromMetadata(
+        INITIAL_PROPOSAL_CARD_WAVE_ID,
+        metadata
+      )
+    ).toBeNull();
+  });
+
+  it("creates explicit metadata updates for existing wave settings", () => {
+    const summaryConfig = {
+      mode: "custom" as const,
+      excerptMaxCharacters: 240,
+      showMediaThumbnail: false,
+    };
+
+    expect(getWaveProposalCardMetadataRequest(summaryConfig)).toEqual({
+      data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+      data_value:
+        '{"version":1,"layout":"summary","excerpt_max_characters":240,"show_media_thumbnail":false}',
+    });
+    expect(
+      getWaveProposalCardMetadataUpdate({
+        waveId: INITIAL_PROPOSAL_CARD_WAVE_ID,
+        metadata: [],
+        proposalCards: {
+          mode: "standard",
+          excerptMaxCharacters: 360,
+          showMediaThumbnail: true,
+        },
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+          data_value: '{"version":1,"layout":"full"}',
+        },
+      ],
+      deleteIds: [],
+    });
+  });
+
+  it("replaces legacy proposal-card metadata and skips unchanged recipes", () => {
+    const legacyMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+        data_value: "true",
+      },
+    ];
+    const defaultSummary = {
+      mode: "custom" as const,
+      excerptMaxCharacters: 360,
+      showMediaThumbnail: true,
+    };
+
+    expect(
+      getWaveProposalCardMetadataUpdate({
+        waveId: "legacy-wave",
+        metadata: legacyMetadata,
+        proposalCards: defaultSummary,
+      })
+    ).toEqual({ create: [], deleteIds: [] });
+    expect(
+      getWaveProposalCardMetadataUpdate({
+        waveId: "legacy-wave",
+        metadata: legacyMetadata,
+        proposalCards: {
+          ...defaultSummary,
+          excerptMaxCharacters: 240,
+        },
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+          data_value:
+            '{"version":1,"layout":"summary","excerpt_max_characters":240,"show_media_thumbnail":true}',
+        },
+      ],
+      deleteIds: [7],
+    });
   });
 
   it("rolls compact cards out only to Network Museum when metadata is absent", () => {

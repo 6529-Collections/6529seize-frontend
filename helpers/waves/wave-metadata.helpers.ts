@@ -7,6 +7,7 @@ import type {
   CreateWaveApproveDisplayConfig,
   CreateWaveDisplayConfig,
   CreateWaveProposalCardConfig,
+  WaveProposalCardPresentation,
   WaveProposalCardRecipe,
 } from "@/types/waves.types";
 import {
@@ -44,7 +45,6 @@ export const WAVE_DISPLAY_METADATA_KEYS = {
 
 const HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE = "false";
 const ENABLED_PROPOSAL_CARDS_METADATA_VALUE = "true";
-const DISABLED_PROPOSAL_CARDS_METADATA_VALUE = "false";
 // Existing rollout targets predate this metadata key. New Waves opt in through
 // persisted metadata, and an explicit metadata value always wins over this set.
 export const INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS: ReadonlySet<string> =
@@ -96,6 +96,11 @@ interface WaveCustomRulesMetadataUpdate {
 }
 
 interface WaveSubmissionButtonLabelMetadataUpdate {
+  readonly create: ApiCreateWaveMetadataRequest[];
+  readonly deleteIds: number[];
+}
+
+interface WaveProposalCardMetadataUpdate {
   readonly create: ApiCreateWaveMetadataRequest[];
   readonly deleteIds: number[];
 }
@@ -230,12 +235,17 @@ const getSubmissionButtonLabelMetadataRequest = (
   };
 };
 
-interface StoredProposalCardRecipeV1 {
-  readonly version: 1;
-  readonly layout: "summary";
-  readonly excerpt_max_characters: number;
-  readonly show_media_thumbnail: boolean;
-}
+type StoredProposalCardPresentationV1 =
+  | {
+      readonly version: 1;
+      readonly layout: "full";
+    }
+  | {
+      readonly version: 1;
+      readonly layout: "summary";
+      readonly excerpt_max_characters: number;
+      readonly show_media_thumbnail: boolean;
+    };
 
 const getEffectiveCreateWaveProposalCardConfig = (
   display: CreateWaveDisplayConfig
@@ -254,19 +264,7 @@ const getProposalCardsMetadataRequest = (
     return null;
   }
 
-  const recipe: StoredProposalCardRecipeV1 = {
-    version: 1,
-    layout: "summary",
-    excerpt_max_characters: normalizeProposalCardExcerptMaxCharacters(
-      proposalCards.excerptMaxCharacters
-    ),
-    show_media_thumbnail: proposalCards.showMediaThumbnail,
-  };
-
-  return {
-    data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
-    data_value: JSON.stringify(recipe),
-  };
+  return getWaveProposalCardMetadataRequest(proposalCards);
 };
 
 export const getCreateWaveDisplayMetadataRequests = ({
@@ -493,9 +491,9 @@ export const getWaveOutcomeVisibilityFromMetadata = (
     })
   );
 
-const parseProposalCardRecipe = (
+const parseProposalCardPresentation = (
   value: string | null | undefined
-): WaveProposalCardRecipe | null => {
+): WaveProposalCardPresentation | null => {
   if (!value) {
     return null;
   }
@@ -507,7 +505,19 @@ const parseProposalCardRecipe = (
       parsed === null ||
       !("version" in parsed) ||
       parsed.version !== 1 ||
-      !("layout" in parsed) ||
+      !("layout" in parsed)
+    ) {
+      return null;
+    }
+
+    if (parsed.layout === "full") {
+      return {
+        version: 1,
+        layout: "full",
+      };
+    }
+
+    if (
       parsed.layout !== "summary" ||
       !("excerpt_max_characters" in parsed) ||
       typeof parsed.excerpt_max_characters !== "number" ||
@@ -530,16 +540,39 @@ const parseProposalCardRecipe = (
   }
 };
 
-export const getWaveProposalCardRecipeFromMetadata = (
+const getDefaultProposalCardConfig = (): CreateWaveProposalCardConfig => ({
+  mode: "custom",
+  excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
+  showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
+});
+
+const getStandardProposalCardConfig = (): CreateWaveProposalCardConfig => ({
+  mode: "standard",
+  excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
+  showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
+});
+
+export const getWaveProposalCardConfigFromMetadata = (
   waveId: string | null | undefined,
   metadata: readonly ApiWaveMetadata[] | null | undefined
-): WaveProposalCardRecipe | null => {
-  const recipeRow = getLatestMetadataItem({
+): CreateWaveProposalCardConfig => {
+  const presentationRow = getLatestMetadataItem({
     metadata,
     dataKey: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
   });
-  if (recipeRow) {
-    return parseProposalCardRecipe(recipeRow.data_value);
+  if (presentationRow) {
+    const presentation = parseProposalCardPresentation(
+      presentationRow.data_value
+    );
+    if (presentation?.layout === "summary") {
+      return {
+        mode: "custom",
+        excerptMaxCharacters: presentation.excerptMaxCharacters,
+        showMediaThumbnail: presentation.showMediaThumbnail,
+      };
+    }
+
+    return getStandardProposalCardConfig();
   }
 
   const legacyRow = getLatestMetadataItem({
@@ -548,24 +581,104 @@ export const getWaveProposalCardRecipeFromMetadata = (
   });
   if (legacyRow) {
     const value = legacyRow.data_value.trim().toLowerCase();
-
-    if (value === ENABLED_PROPOSAL_CARDS_METADATA_VALUE) {
-      return DEFAULT_PROPOSAL_CARD_RECIPE;
-    }
-
-    if (value === DISABLED_PROPOSAL_CARDS_METADATA_VALUE) {
-      return null;
-    }
-
-    // An explicit but unsupported legacy value must not opt a wave in.
-    return null;
+    return value === ENABLED_PROPOSAL_CARDS_METADATA_VALUE
+      ? getDefaultProposalCardConfig()
+      : getStandardProposalCardConfig();
   }
 
   const normalizedWaveId = waveId?.trim().toLowerCase();
   return normalizedWaveId &&
     INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS.has(normalizedWaveId)
-    ? DEFAULT_PROPOSAL_CARD_RECIPE
-    : null;
+    ? getDefaultProposalCardConfig()
+    : getStandardProposalCardConfig();
+};
+
+export function getWaveProposalCardMetadataRequest(
+  proposalCards: CreateWaveProposalCardConfig
+): ApiCreateWaveMetadataRequest {
+  const presentation: StoredProposalCardPresentationV1 =
+    proposalCards.mode === "custom"
+      ? {
+          version: 1,
+          layout: "summary",
+          excerpt_max_characters: normalizeProposalCardExcerptMaxCharacters(
+            proposalCards.excerptMaxCharacters
+          ),
+          show_media_thumbnail: proposalCards.showMediaThumbnail,
+        }
+      : {
+          version: 1,
+          layout: "full",
+        };
+
+  return {
+    data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+    data_value: JSON.stringify(presentation),
+  };
+}
+
+const areProposalCardConfigsEqual = (
+  first: CreateWaveProposalCardConfig,
+  second: CreateWaveProposalCardConfig
+): boolean => {
+  if (first.mode !== second.mode) {
+    return false;
+  }
+
+  return (
+    first.mode === "standard" ||
+    (normalizeProposalCardExcerptMaxCharacters(first.excerptMaxCharacters) ===
+      normalizeProposalCardExcerptMaxCharacters(second.excerptMaxCharacters) &&
+      first.showMediaThumbnail === second.showMediaThumbnail)
+  );
+};
+
+export const getWaveProposalCardMetadataUpdate = ({
+  waveId,
+  metadata,
+  proposalCards,
+}: {
+  readonly waveId: string | null | undefined;
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly proposalCards: CreateWaveProposalCardConfig;
+}): WaveProposalCardMetadataUpdate => {
+  const current = getWaveProposalCardConfigFromMetadata(waveId, metadata);
+  if (areProposalCardConfigsEqual(current, proposalCards)) {
+    return { create: [], deleteIds: [] };
+  }
+
+  const rows = [
+    ...getApproveWaveDisplayMetadataRows({
+      metadata,
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+    }),
+    ...getApproveWaveDisplayMetadataRows({
+      metadata,
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+    }),
+  ];
+
+  return {
+    create: [getWaveProposalCardMetadataRequest(proposalCards)],
+    deleteIds: rows.map((row) => row.id),
+  };
+};
+
+export const getWaveProposalCardRecipeFromMetadata = (
+  waveId: string | null | undefined,
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): WaveProposalCardRecipe | null => {
+  const proposalCards = getWaveProposalCardConfigFromMetadata(waveId, metadata);
+  if (proposalCards.mode !== "custom") {
+    return null;
+  }
+
+  return {
+    version: 1,
+    layout: "summary",
+    excerptMaxCharacters: proposalCards.excerptMaxCharacters,
+    showMediaThumbnail: proposalCards.showMediaThumbnail,
+  };
 };
 
 export const getWaveProposalCardsEnabledFromMetadata = (

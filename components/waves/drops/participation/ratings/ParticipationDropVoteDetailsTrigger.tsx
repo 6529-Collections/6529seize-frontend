@@ -307,9 +307,7 @@ export default function ParticipationDropVoteDetailsTrigger({
   } else {
     densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-leading-5";
   }
-  const triggerTextSizeClassName = isSmallDensity
-    ? "tw-text-xs"
-    : "tw-text-sm";
+  const triggerTextSizeClassName = isSmallDensity ? "tw-text-xs" : "tw-text-sm";
   let appearanceClassName: string;
   if (isGallery) {
     appearanceClassName =

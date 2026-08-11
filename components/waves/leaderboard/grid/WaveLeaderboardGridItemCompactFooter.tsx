@@ -181,7 +181,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
           </span>
         )}
         {canShowVotingAction && (
-          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
+          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end">
             <VotingModalButton
               drop={drop}
               onClick={onVoteButtonClick}

@@ -145,7 +145,7 @@ export default function ProposalCardContent({
       >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
           <h3
-            className={`tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-break-words tw-text-pretty tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 ${
+            className={`tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-text-pretty tw-break-words tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 ${
               isCompact
                 ? "tw-text-sm !tw-leading-snug"
                 : "tw-text-base !tw-leading-[1.3] sm:tw-text-lg"
@@ -155,7 +155,7 @@ export default function ProposalCardContent({
           </h3>
           {viewModel.excerpt ? (
             <p
-              className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-break-words tw-text-pretty tw-leading-[1.6] tw-tracking-normal tw-text-iron-300 ${
+              className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-text-pretty tw-break-words tw-leading-[1.6] tw-tracking-normal tw-text-iron-300 ${
                 isCompact
                   ? "tw-mt-1 tw-line-clamp-2 tw-text-xs"
                   : "tw-mt-1.5 tw-line-clamp-3 tw-text-sm"

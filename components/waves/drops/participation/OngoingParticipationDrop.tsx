@@ -117,8 +117,7 @@ function OngoingParticipationDropInner({
     : false;
   const showIdentity = identityMode !== "hidden";
   const isChatProposal =
-    contentPresentation === "proposalCard" &&
-    location === DropLocation.WAVE;
+    contentPresentation === "proposalCard" && location === DropLocation.WAVE;
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
@@ -214,10 +213,7 @@ function OngoingParticipationDropInner({
     <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-gap-y-1 tw-border-0 tw-bg-transparent tw-px-4 tw-pt-3 tw-text-left">
       <ProposalCardContextLabel />
       {content}
-      <ProposalCardReadFullButton
-        drop={drop}
-        onReadFull={onDropContentClick}
-      />
+      <ProposalCardReadFullButton drop={drop} onReadFull={onDropContentClick} />
     </div>
   ) : (
     <div
@@ -321,6 +317,7 @@ function OngoingParticipationDropInner({
             voteAction={voteAction}
             contentPresentation={contentPresentation}
             indentContent={!isChatProposal}
+            inlineVotingActions={location === DropLocation.WAVE}
             showInteractions={showInteractions}
             winningThreshold={winningThreshold}
             winningThresholdMinDurationMs={winningThresholdMinDurationMs}

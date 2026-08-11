@@ -15,6 +15,7 @@ interface ParticipationDropFooterProps {
   readonly voteAction?: ReactNode;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly indentContent?: boolean | undefined;
+  readonly inlineVotingActions?: boolean | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -27,6 +28,7 @@ export default function ParticipationDropFooter({
   voteAction,
   contentPresentation = "default",
   indentContent = true,
+  inlineVotingActions = false,
   showInteractions = true,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -54,6 +56,7 @@ export default function ParticipationDropFooter({
     hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
   const isProposalCard = contentPresentation === "proposalCard";
   const isChatProposal = isProposalCard && !indentContent;
+  const useInlineVotingLayout = isChatProposal || inlineVotingActions;
   const hasChatVotingSurface =
     isChatProposal && (shouldShowVoteFooter || shouldShowRatingsOnlyFooter);
   const contentOffsetClass = indentContent
@@ -88,7 +91,7 @@ export default function ParticipationDropFooter({
         >
           <div
             className={`tw-flex tw-gap-x-4 ${
-              isChatProposal
+              useInlineVotingLayout
                 ? "tw-items-center tw-justify-between"
                 : "tw-flex-col tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between"
             }`}
@@ -96,7 +99,7 @@ export default function ParticipationDropFooter({
             {shouldShowRatings && (
               <div
                 className={
-                  isChatProposal
+                  useInlineVotingLayout
                     ? "tw-min-w-0 tw-flex-1 tw-px-4"
                     : "tw-px-4"
                 }
@@ -115,7 +118,7 @@ export default function ParticipationDropFooter({
             {hasVoteAction && (
               <div
                 className={
-                  isChatProposal
+                  useInlineVotingLayout
                     ? "tw-ml-auto tw-flex tw-w-auto tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-1.5 tw-border-0 tw-px-4 tw-pt-0"
                     : `tw-flex tw-w-full tw-items-center ${primaryActionsJustificationClass} tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-justify-center @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0`
                 }

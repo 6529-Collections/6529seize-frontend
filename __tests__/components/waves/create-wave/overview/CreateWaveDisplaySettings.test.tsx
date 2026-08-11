@@ -7,9 +7,7 @@ import type { CreateWaveDisplayConfig } from "@/types/waves.types";
 
 describe("CreateWaveDisplaySettings", () => {
   const openAdvancedSettings = () => {
-    fireEvent.click(
-      screen.getByRole("button", { name: /advanced settings/i })
-    );
+    fireEvent.click(screen.getByRole("button", { name: /advanced settings/i }));
   };
 
   const baseDisplay: CreateWaveDisplayConfig = {
@@ -102,9 +100,7 @@ describe("CreateWaveDisplaySettings", () => {
 
     openAdvancedSettings();
 
-    expect(
-      screen.getByRole("radio", { name: /^Full proposal/ })
-    ).toBeChecked();
+    expect(screen.getByRole("radio", { name: /^Full proposal/ })).toBeChecked();
     expect(
       screen.queryByLabelText("Maximum proposal preview characters")
     ).not.toBeInTheDocument();
@@ -192,9 +188,7 @@ describe("CreateWaveDisplaySettings", () => {
 
     openAdvancedSettings();
 
-    const input = screen.getByLabelText(
-      "Maximum proposal preview characters"
-    );
+    const input = screen.getByLabelText("Maximum proposal preview characters");
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input).toHaveAccessibleDescription(
       "Enter a whole number from 120 to 1000."

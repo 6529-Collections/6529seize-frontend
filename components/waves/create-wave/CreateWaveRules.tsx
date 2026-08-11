@@ -57,11 +57,11 @@ export default function CreateWaveRules({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-8">
-      <div>
-        <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
+      <div className="tw-space-y-1">
+        <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
           Rules
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
+        <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
           Automatic rules are generated from the wave setup. Add creator rules
           only for wave-specific requirements that are not already covered.
         </p>
@@ -78,7 +78,7 @@ export default function CreateWaveRules({
           <div>
             <label
               htmlFor="create-wave-custom-rules"
-              className="tw-mb-0 tw-block tw-text-lg tw-font-semibold tw-text-iron-100"
+              className="tw-m-0 tw-block tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
             >
               Display-only creator rules
             </label>

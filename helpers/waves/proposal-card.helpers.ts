@@ -7,7 +7,7 @@ import { markdownToPlainText } from "./waveDescriptionPreview";
 const PROPOSAL_CARD_TITLE_MAX_LENGTH = 180;
 export const PROPOSAL_CARD_EXCERPT_MIN_LENGTH = 120;
 export const PROPOSAL_CARD_EXCERPT_MAX_LENGTH = 1000;
-export const PROPOSAL_CARD_EXCERPT_DEFAULT_LENGTH = 360;
+const PROPOSAL_CARD_EXCERPT_DEFAULT_LENGTH = 360;
 
 export const isValidProposalCardExcerptMaxCharacters = (
   value: number

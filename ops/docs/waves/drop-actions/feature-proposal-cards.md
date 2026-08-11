@@ -17,7 +17,8 @@ presentations are not changed by this setting.
 The Network Museum Wave predates the Create Wave recipe control. The frontend
 therefore recognizes its existing Wave ID as a compatibility fallback and
 applies the default summary recipe (`360` characters with the first ready still
-image enabled). Explicit recipe metadata takes precedence over that fallback.
+image enabled). Wave admins can replace that fallback from the Wave's `Settings`
+sidebar, and the saved choice then takes precedence.
 
 ## Location in the Site
 
@@ -38,6 +39,8 @@ image enabled). Explicit recipe metadata takes precedence over that fallback.
 - While creating a `Rank` or `Approve` Wave, open `Advanced settings` in
   `Overview`. New Waves default to `Summary card`; choose `Full proposal` to
   keep the previous full-content presentation.
+- For an existing standard `Rank` or `Approve` Wave, open the right sidebar,
+  select `Settings`, and edit `Proposal cards` under `Display`.
 
 ## User Journey
 
@@ -47,6 +50,11 @@ image enabled). Explicit recipe metadata takes precedence over that fallback.
 3. Select the card with pointer, touch, `Enter`, or `Space`.
 4. Read the complete original proposal in the focused drop view.
 5. Close the focused view to return to the proposal list.
+
+To change an existing Wave, an admin opens `Settings` -> `Display` ->
+`Proposal cards`, chooses `Full proposal` or `Summary card`, adjusts the summary
+options when shown, and saves. The proposal views update to use the saved
+presentation.
 
 ## Common Scenarios
 
@@ -61,10 +69,14 @@ image enabled). Explicit recipe metadata takes precedence over that fallback.
   contains those items.
 - A proposal with ready static image media can show one preview image. Animated,
   processing, or failed media is not used as the card preview.
-- The Wave creator can choose the proposal-preview text limit and whether the
-  first ready still image appears beside proposal summaries in chat and list
-  views. Full proposal media is unchanged. Layout, typography, spacing, and
-  image placement are consistent system defaults rather than per-Wave controls.
+- Wave creators and admins can choose the proposal-preview text limit and
+  whether the first ready still image appears beside proposal summaries in chat
+  and list views. Full proposal media is unchanged. Layout, typography,
+  spacing, and image placement are consistent system defaults rather than
+  per-Wave controls.
+- Choosing `Full proposal` hides the summary-only text and image controls.
+- The proposal-card setting is not shown for Chat Waves or the specialized
+  Memes, Curation, and Quorum presentations.
 - The text limit must be a whole number from `120` to `1000`. Invalid values
   block forward navigation instead of being silently accepted.
 - Very short proposals remain compact and do not receive invented descriptive
@@ -95,6 +107,8 @@ image enabled). Explicit recipe metadata takes precedence over that fallback.
   unavailable or loading state while the surrounding drop remains readable.
 - If a newly created Wave does not show summary cards, confirm `Summary card`
   was selected before creation and refresh the Wave.
+- If an existing Wave's setting cannot be saved, the editor stays available for
+  another attempt and the previous presentation remains in effect.
 
 ## Limitations / Notes
 
@@ -104,6 +118,9 @@ image enabled). Explicit recipe metadata takes precedence over that fallback.
   display preference.
 - Creating a Wave persists Summary card as a versioned Wave metadata recipe.
   Full proposal creates no recipe and keeps the previous presentation.
+- Saving either choice from an existing Wave's `Settings` sidebar makes that
+  choice explicit. This lets a compatibility Wave such as the Network Museum
+  switch to `Full proposal` or use different Summary card options.
 - This card presentation is reusable across standard proposal-bearing Waves but
   is not a replacement for specialized Memes, Curation, or Quorum designs.
 

@@ -107,9 +107,7 @@ const getOverviewValidationErrors = ({
   if (
     overview.type !== ApiWaveType.Chat &&
     proposalCards?.mode === "custom" &&
-    !isValidProposalCardExcerptMaxCharacters(
-      proposalCards.excerptMaxCharacters
-    )
+    !isValidProposalCardExcerptMaxCharacters(proposalCards.excerptMaxCharacters)
   ) {
     errors.push(
       CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID

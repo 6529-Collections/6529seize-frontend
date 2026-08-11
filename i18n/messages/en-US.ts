@@ -547,6 +547,14 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   characters: "characters",
   excerptRangeError: "Enter a whole number from {min} to {max}.",
   mediaLabel: "Image on summary card",
+  "settings.editLabel": "Edit proposal card settings",
+  "settings.layoutLabel": "Proposal layout",
+  "settings.rowLabel": "Proposal cards",
+  "settings.toastAuthFailed":
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  "settings.toastSaveFailedTitle":
+    "Couldn't save these proposal card settings.",
+  "settings.toastRetry": PLEASE_TRY_AGAIN,
   tabLabelsLabel: "Tab labels",
   tabLabelsDescription: "Names shown on this wave's tabs.",
   approvalsTabLabel: "Approvals tab label",
@@ -1035,22 +1043,16 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   save: "Save",
 } as const);
 
-const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages(
-  "waves.create.advanced",
-  {
-    title: "Advanced settings",
-    customized: "Customized",
-    needsAttention: "Needs attention",
-    errorSummary: "Review the highlighted settings before continuing.",
-  } as const
-);
+const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
+  title: "Advanced settings",
+  customized: "Customized",
+  needsAttention: "Needs attention",
+  errorSummary: "Review the highlighted settings before continuing.",
+} as const);
 
-const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages(
-  "waves.create.overview",
-  {
-    picture: "Wave Profile Picture",
-  } as const
-);
+const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  picture: "Wave Profile Picture",
+} as const);
 
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
   "waves.create.rank.mode",

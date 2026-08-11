@@ -440,7 +440,7 @@ export default function CreateWaveDisplaySettings({
                       type="checkbox"
                       checked={proposalCards.showMediaThumbnail}
                       onChange={onProposalCardMediaThumbnailChange}
-                      className="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+                      className="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
                     />
                   </label>
                 </div>
@@ -462,7 +462,7 @@ export default function CreateWaveDisplaySettings({
             <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-500">
               {t(DEFAULT_LOCALE, "waves.proposalCard.tabLabelsDescription")}
             </p>
-            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+            <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
               <div className="tw-group tw-relative tw-w-full">
                 <input
                   id="create-wave-approvals-tab-label"

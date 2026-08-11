@@ -450,10 +450,8 @@ export const EN_GB_MESSAGES = {
   "waves.leaderboard.timeline.decisionTimeline": "Decision Timeline",
   "waves.leaderboard.timeline.announcementHistory": "Announcement history",
   "waves.leaderboard.timeline.paused": "Paused",
-  "waves.leaderboard.timeline.nextDecisionAfter":
-    "Next decision after {date}",
-  "waves.leaderboard.timeline.noDecisionScheduled":
-    "No decision scheduled",
+  "waves.leaderboard.timeline.nextDecisionAfter": "Next decision after {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled": "No decision scheduled",
   "waves.leaderboard.timeline.noUpcomingEvents": "No upcoming events",
   "waves.leaderboard.timeline.nextWinner": "Next winner",
   "waves.leaderboard.timeline.nextWinnerIn": "Next winner in {countdown}",

@@ -2106,14 +2106,15 @@
         "create"
       ],
       "facts": [
-        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so the frontend recognizes its Wave ID as a compatibility fallback and applies the default Summary card recipe: 360 characters with the first ready still image enabled. Explicit recipe metadata takes precedence.",
+        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so it uses a compatibility fallback: Summary card with 360 characters and the first ready still image enabled. A Wave admin can replace that fallback from Settings, and the saved choice takes precedence.",
         "Other existing standard Waves keep their current presentation unless the Wave is explicitly configured to use custom proposal cards.",
         "A compact card uses the proposal's stored title or first authored non-empty line, an excerpt from the original authored text, real multipart/media/attachment counts, and at most one ready static image preview.",
         "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
         "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
         "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
         "Wave creators can choose Full proposal or Summary card under Advanced settings in the Overview step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
-        "Summary card stores a versioned Wave metadata recipe. The proposal-text limit must be a whole number from 120 to 1000, and the image control determines whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits block forward navigation. Full proposal media is unchanged."
+        "Wave admins can change the same presentation later from the right sidebar under Settings, Display, Proposal cards. This control is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
+        "Summary card lets the admin set a proposal-text limit from 120 to 1000 characters and choose whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits cannot be saved. Full proposal media is unchanged."
       ],
       "canonical_path": "/waves/5f207393-5418-4a75-8738-e40edb44a94d",
       "related_paths": ["/waves", "/waves?create=wave", "/waves/create"],
