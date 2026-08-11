@@ -10,7 +10,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { CompactMenu } from "@/components/compact-menu";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
@@ -55,7 +55,7 @@ import {
 } from "./app-header-wave-preview";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
-import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "./profile-activation.constants";
+import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -69,10 +69,6 @@ const HEADER_RESTRICTION_BUTTON_CLASS =
 interface HeaderConnectedAccount {
   readonly address: string;
   readonly isActive: boolean;
-}
-
-interface HeaderTimeoutRef {
-  current: ReturnType<typeof setTimeout> | null;
 }
 
 interface HeaderProfileSource {
@@ -453,49 +449,6 @@ const switchToNextConnectedAccount = ({
   }
 };
 
-const handleProfileActivate = ({
-  canSwitchAccount,
-  profileClickTimeoutRef,
-  clearActivationCapture,
-  openMenu,
-  closeMenu,
-  switchConnectedAccount,
-}: {
-  readonly canSwitchAccount: boolean;
-  readonly profileClickTimeoutRef: HeaderTimeoutRef;
-  readonly clearActivationCapture: () => void;
-  readonly openMenu: () => void;
-  readonly closeMenu: () => void;
-  readonly switchConnectedAccount: () => boolean;
-}) => {
-  if (!canSwitchAccount) {
-    clearActivationCapture();
-    if (profileClickTimeoutRef.current) {
-      clearTimeout(profileClickTimeoutRef.current);
-      profileClickTimeoutRef.current = null;
-    }
-    openMenu();
-    return;
-  }
-
-  if (profileClickTimeoutRef.current) {
-    clearActivationCapture();
-    clearTimeout(profileClickTimeoutRef.current);
-    profileClickTimeoutRef.current = null;
-
-    if (switchConnectedAccount()) {
-      closeMenu();
-    }
-    return;
-  }
-
-  openMenu();
-  profileClickTimeoutRef.current = setTimeout(() => {
-    profileClickTimeoutRef.current = null;
-    clearActivationCapture();
-  }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
-};
-
 export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
@@ -511,11 +464,6 @@ export default function AppHeader() {
     connectedAccountUnreadNotifications,
     seizeSwitchConnectedAccount,
   } = useSeizeConnectContext();
-  const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
-  const profileButtonRef = useRef<HTMLButtonElement>(null);
-  const profileActivationCaptureCleanupRef = useRef<(() => void) | null>(null);
   const { connectedProfile, activeProfileProxy } = useAuth();
   const pathname = usePathname();
   const params = useParams();
@@ -524,16 +472,6 @@ export default function AppHeader() {
     handleOrWallet: address ?? null,
     initialProfile: null,
   });
-
-  useEffect(
-    () => () => {
-      if (profileClickTimeoutRef.current) {
-        clearTimeout(profileClickTimeoutRef.current);
-      }
-      profileActivationCaptureCleanupRef.current?.();
-    },
-    []
-  );
 
   const pfp = getHeaderProfilePfp({ activeProfileProxy, profile });
   const resolvedPfp = pfp ? resolveIpfsUrlSync(pfp) : null;
@@ -646,10 +584,6 @@ export default function AppHeader() {
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
   const openMenu = () => setMenuOpen(true);
   const closeMenu = () => setMenuOpen(false);
-  const clearProfileActivationCapture = () => {
-    profileActivationCaptureCleanupRef.current?.();
-    profileActivationCaptureCleanupRef.current = null;
-  };
   const switchConnectedAccount = () =>
     switchToNextConnectedAccount({
       connectedAccounts,
@@ -658,58 +592,12 @@ export default function AppHeader() {
         console.error("Failed to switch connected account from header", error);
       },
     });
-  const startProfileActivationCapture = () => {
-    const profileButtonRect = profileButtonRef.current?.getBoundingClientRect();
-    if (!profileButtonRect) {
-      return;
-    }
-
-    const captureNextClick = (event: MouseEvent) => {
-      const isWithinProfileButton =
-        event.clientX >= profileButtonRect.left &&
-        event.clientX <= profileButtonRect.right &&
-        event.clientY >= profileButtonRect.top &&
-        event.clientY <= profileButtonRect.bottom;
-
-      clearProfileActivationCapture();
-      if (profileClickTimeoutRef.current) {
-        clearTimeout(profileClickTimeoutRef.current);
-        profileClickTimeoutRef.current = null;
-      }
-
-      if (!isWithinProfileButton) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      if (switchConnectedAccount()) {
-        closeMenu();
-      }
-    };
-
-    document.addEventListener("click", captureNextClick, true);
-    profileActivationCaptureCleanupRef.current = () => {
-      document.removeEventListener("click", captureNextClick, true);
-    };
-  };
-  const onProfileActivate = () => {
-    if (
-      hasMultipleConnectedAccounts &&
-      !profileClickTimeoutRef.current
-    ) {
-      startProfileActivationCapture();
-    }
-
-    handleProfileActivate({
-      canSwitchAccount: hasMultipleConnectedAccounts,
-      profileClickTimeoutRef,
-      clearActivationCapture: clearProfileActivationCapture,
-      openMenu,
-      closeMenu,
-      switchConnectedAccount,
-    });
-  };
+  const { onProfileActivate, profileButtonRef } = useProfileDoubleActivate({
+    canSwitchAccount: hasMultipleConnectedAccounts,
+    openMenu,
+    closeMenu,
+    switchConnectedAccount,
+  });
 
   const finalTitle = getHeaderTitle({
     pathname,

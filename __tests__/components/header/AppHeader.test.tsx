@@ -318,7 +318,33 @@ describe("AppHeader", () => {
     fireEvent.click(screen.getByTestId("sidebar"), {
       clientX: 30,
       clientY: 30,
+      detail: 1,
     });
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
+    jest.useRealTimers();
+  });
+
+  it("switches on repeated keyboard activation", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open menu (double-click to switch accounts)",
+    });
+    fireEvent.click(profileButton, { detail: 0 });
+    fireEvent.click(profileButton, { detail: 0 });
 
     expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
     expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
