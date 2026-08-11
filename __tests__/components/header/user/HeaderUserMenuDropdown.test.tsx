@@ -18,6 +18,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { mainnet } from "viem/chains";
 
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
   <div data-testid="item" />
@@ -275,7 +276,7 @@ function renderWebSidebar(options: RenderOptions) {
     })
   );
   mockUseChainSwitcher.mockReturnValue({
-    chains: [],
+    chains: [mainnet],
     currentChainName: "Ethereum",
     nextChainName: "Polygon",
     switchToNextChain: jest.fn(() => false),
@@ -454,7 +455,7 @@ describe("HeaderUserMenuDropdown", () => {
       })
     );
     mockUseChainSwitcher.mockReturnValue({
-      chains: [],
+      chains: [mainnet],
       currentChainName: "Ethereum",
       nextChainName: "Polygon",
       switchToNextChain: jest.fn(() => false),
