@@ -1,35 +1,59 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import type { AuthContextType } from "@/components/auth/authTypes";
+import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
 import WebSidebarUser from "@/components/layout/sidebar/WebSidebarUser";
+import { useChainSwitcher } from "@/components/header/useChainSwitcher";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { mainnet } from "viem/chains";
 
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
   <div data-testid="item" />
 ));
 jest.mock(
   "@/components/header/user/connected/HeaderUserConnectedAccounts",
-  () => (props: any) => (
-    <div data-testid="connected-accounts">
-      {props.canAddAccount && (
-        <button onClick={props.onAddAccount}>Add profile</button>
-      )}
-      {props.accounts?.length > 1 && (
-        <button onClick={props.onSignOutAll}>Sign out all</button>
-      )}
-      <button
-        onClick={() => {
-          const nextAccount = props.accounts?.find(
-            (account: { isActive: boolean }) => !account.isActive
-          );
-          if (nextAccount) {
-            props.onSelectAccount(nextAccount.address);
-          }
-        }}
-      >
-        Switch
-      </button>
-    </div>
-  )
+  () =>
+    (props: {
+      readonly accounts: SeizeConnectContextType["connectedAccounts"];
+      readonly canAddAccount: boolean;
+      readonly onAddAccount: () => void;
+      readonly onSignOutAll: () => void;
+      readonly onSelectAccount: (address: string) => void;
+    }) => (
+      <div data-testid="connected-accounts">
+        {props.canAddAccount && (
+          <button onClick={props.onAddAccount}>Add profile</button>
+        )}
+        {props.accounts?.length > 1 && (
+          <button onClick={props.onSignOutAll}>Sign out all</button>
+        )}
+        <button
+          onClick={() => {
+            const nextAccount = props.accounts?.find(
+              (account: { isActive: boolean }) => !account.isActive
+            );
+            if (nextAccount) {
+              props.onSelectAccount(nextAccount.address);
+            }
+          }}
+        >
+          Switch
+        </button>
+      </div>
+    )
 );
 jest.mock("@/components/auth/SeizeConnectContext");
 jest.mock("@/components/header/useChainSwitcher", () => ({
@@ -67,26 +91,220 @@ jest.mock("@/hooks/useIdentity", () => ({
 }));
 jest.mock("react-use", () => ({ useClickAway: jest.fn() }));
 
-const {
-  useSeizeConnectContext: mockConnect,
-} = require("@/components/auth/SeizeConnectContext");
-const { useChainSwitcher } = require("@/components/header/useChainSwitcher");
+const mockConnect = jest.mocked(useSeizeConnectContext);
+const mockUseChainSwitcher = jest.mocked(useChainSwitcher);
 
-const profileBase = {
+const profileBase: ApiIdentity = {
+  id: "profile-1",
   handle: "alice",
-  wallets: [{ wallet: "0xabc", display: "Alice" }],
-} as any;
+  normalised_handle: "alice",
+  pfp: null,
+  cic: 0,
+  rep: 0,
+  level: 0,
+  tdh: 0,
+  tdh_rate: 0,
+  xtdh: 0,
+  xtdh_rate: 0,
+  consolidation_key: "profile-1",
+  display: "Alice",
+  primary_wallet: "0xabc",
+  banner1: null,
+  banner2: null,
+  classification: ApiProfileClassification.Pseudonym,
+  sub_classification: null,
+  wallets: [{ wallet: "0xabc", display: "Alice", tdh: 0 }],
+  active_main_stage_submission_ids: [],
+  winner_main_stage_drop_ids: [],
+  artist_of_prevote_cards: [],
+  profile_wave_id: null,
+  is_wave_creator: false,
+};
 
-function renderDropdown(options: any) {
-  mockConnect.mockReturnValue({
+const profileMin: ApiProfileMin = {
+  id: "profile-min-1",
+  handle: "proxy",
+  pfp: null,
+  banner1_color: null,
+  banner2_color: null,
+  cic: 0,
+  rep: 0,
+  tdh: 0,
+  tdh_rate: 0,
+  xtdh: 0,
+  xtdh_rate: 0,
+  level: 0,
+  classification: ApiProfileClassification.Pseudonym,
+  sub_classification: null,
+  primary_address: "0xproxy",
+  subscribed_actions: [],
+  archived: false,
+  active_main_stage_submission_ids: [],
+  winner_main_stage_drop_ids: [],
+  artist_of_prevote_cards: [],
+  profile_wave_id: null,
+  is_wave_creator: false,
+};
+
+const profileProxy: ApiProfileProxy = {
+  id: "proxy-1",
+  granted_to: profileMin,
+  created_at: 0,
+  created_by: profileMin,
+  actions: [],
+};
+
+type ConnectedAccount = SeizeConnectContextType["connectedAccounts"][number];
+
+function connectedAccount(
+  address: string,
+  isActive: boolean
+): ConnectedAccount {
+  return {
+    address,
+    role: null,
+    profileId: null,
+    profileHandle: null,
+    isActive,
+    isConnected: true,
+  };
+}
+
+interface RenderOptions {
+  readonly address?: string | undefined;
+  readonly isAuthenticated?: boolean | undefined;
+  readonly isConnected?: boolean | undefined;
+  readonly isCollapsed?: boolean | undefined;
+  readonly connectedAccounts?: readonly ConnectedAccount[] | undefined;
+  readonly canAddConnectedAccount?: boolean | undefined;
+  readonly seizeAddConnectedAccount?: (() => void) | undefined;
+  readonly seizeConnect?: (() => void) | undefined;
+  readonly seizeConnectFresh?: (() => Promise<void>) | undefined;
+  readonly seizeDisconnect?: (() => Promise<void>) | undefined;
+  readonly seizeDisconnectAndLogout?: (() => Promise<void>) | undefined;
+  readonly seizeDisconnectAndLogoutAll?: (() => Promise<void>) | undefined;
+  readonly seizeSwitchConnectedAccount?:
+    | ((address: string) => void)
+    | undefined;
+  readonly requestSessionUpgrade?:
+    | (() => Promise<{ success: boolean }>)
+    | undefined;
+  readonly sessionUpgradeRequired?: boolean | undefined;
+  readonly chains?: readonly { readonly id: number; readonly name: string }[];
+  readonly currentChainName?: string | undefined;
+  readonly nextChainName?: string | undefined;
+  readonly switchToNextChain?: (() => boolean) | undefined;
+  readonly profile?: ApiIdentity | undefined;
+  readonly onOpenConnect?: (() => void) | undefined;
+}
+
+function createConnectContext(
+  overrides: Partial<SeizeConnectContextType> = {}
+): SeizeConnectContextType {
+  const address = overrides.address ?? "0xabc";
+  return {
+    address,
+    walletName: undefined,
+    walletIcon: undefined,
+    isSafeWallet: false,
+    seizeConnect: jest.fn(),
+    seizeConnectFresh: jest.fn().mockResolvedValue(undefined),
+    seizeDisconnect: jest.fn().mockResolvedValue(undefined),
+    seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
+    seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
+    seizeAcceptConnection: jest.fn(),
+    seizeConnectOpen: false,
+    isConnected: true,
+    canSignActiveWallet: true,
+    hasActiveWalletAddress: Boolean(address),
+    hasValidWalletAuth: true,
+    isAuthenticated: true,
+    connectionState: "connected",
+    walletState: address
+      ? { status: "connected", address }
+      : { status: "disconnected" },
+    hasInitializationError: false,
+    initializationError: undefined,
+    connectedAccounts: [],
+    seizeSwitchConnectedAccount: jest.fn(),
+    seizeAddConnectedAccount: jest.fn(),
+    canAddConnectedAccount: false,
+    connectedAccountUnreadNotifications: {},
+    ...overrides,
+  };
+}
+
+function createAuthContext(
+  overrides: Partial<AuthContextType> = {}
+): AuthContextType {
+  return {
+    connectedProfile: profileBase,
+    isAuthenticated: true,
+    fetchingProfile: false,
+    connectionStatus: ProfileConnectedStatus.HAVE_PROFILE,
+    receivedProfileProxies: [profileProxy],
+    activeProfileProxy: null,
+    showWaves: true,
+    sessionUpgradeRequired: false,
+    requestAuth: jest.fn().mockResolvedValue({ success: true }),
+    requestSessionUpgrade: jest.fn().mockResolvedValue({ success: true }),
+    setToast: jest.fn(),
+    setActiveProfileProxy: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+}
+
+function renderWebSidebar(options: RenderOptions) {
+  const setToast = jest.fn();
+  mockConnect.mockReturnValue(
+    createConnectContext({
+      address: options.address ?? "0xabc",
+      isAuthenticated: true,
+      hasValidWalletAuth: true,
+      isConnected: true,
+      connectedAccounts: options.connectedAccounts ?? [],
+      connectedAccountUnreadNotifications: {},
+      canAddConnectedAccount: false,
+      seizeConnect: jest.fn(),
+      seizeConnectFresh: jest.fn().mockResolvedValue(undefined),
+      seizeAddConnectedAccount: jest.fn(),
+      seizeDisconnect: jest.fn().mockResolvedValue(undefined),
+      seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
+      seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
+      seizeSwitchConnectedAccount:
+        options.seizeSwitchConnectedAccount ?? jest.fn(),
+    })
+  );
+  mockUseChainSwitcher.mockReturnValue({
+    chains: [mainnet],
+    currentChainName: "Ethereum",
+    nextChainName: "Polygon",
+    switchToNextChain: jest.fn(() => false),
+  });
+
+  render(
+    <AuthContext.Provider value={createAuthContext({ setToast })}>
+      <WebSidebarUser
+        isCollapsed={options.isCollapsed ?? false}
+        profile={profileBase}
+      />
+    </AuthContext.Provider>
+  );
+
+  return { setToast };
+}
+
+function renderDropdown(options: RenderOptions) {
+  const connectContext = createConnectContext({
     address: options.address,
     isAuthenticated: options.isAuthenticated ?? !!options.address,
-    isConnected: options.isConnected,
+    isConnected: options.isConnected ?? Boolean(options.address),
     connectedAccounts: options.connectedAccounts ?? [],
     canAddConnectedAccount: options.canAddConnectedAccount ?? false,
     seizeAddConnectedAccount: options.seizeAddConnectedAccount || jest.fn(),
     seizeConnect: options.seizeConnect || jest.fn(),
-    seizeConnectFresh: options.seizeConnectFresh || jest.fn(),
+    seizeConnectFresh:
+      options.seizeConnectFresh || jest.fn().mockResolvedValue(undefined),
     seizeDisconnect:
       options.seizeDisconnect || jest.fn().mockResolvedValue(undefined),
     seizeDisconnectAndLogout:
@@ -98,16 +316,18 @@ function renderDropdown(options: any) {
     seizeSwitchConnectedAccount:
       options.seizeSwitchConnectedAccount || jest.fn(),
   });
-  const authValue = {
-    activeProfileProxy: null,
-    setActiveProfileProxy: jest.fn(),
-    receivedProfileProxies: [{ id: "proxy-1" }],
-    requestSessionUpgrade: options.requestSessionUpgrade || jest.fn(),
+  mockConnect.mockReturnValue(connectContext);
+  const authValue = createAuthContext({
+    requestSessionUpgrade:
+      options.requestSessionUpgrade ||
+      jest.fn().mockResolvedValue({ success: true }),
     sessionUpgradeRequired: options.sessionUpgradeRequired ?? false,
     setToast: jest.fn(),
-  } as any;
-  (useChainSwitcher as jest.Mock).mockReturnValue({
-    chains: options.chains ?? [],
+  });
+  mockUseChainSwitcher.mockReturnValue({
+    chains: (options.chains ?? []) as ReturnType<
+      typeof useChainSwitcher
+    >["chains"],
     currentChainName: options.currentChainName ?? "Ethereum",
     nextChainName: options.nextChainName ?? "Polygon",
     switchToNextChain: options.switchToNextChain || jest.fn(() => false),
@@ -117,13 +337,13 @@ function renderDropdown(options: any) {
     <AuthContext.Provider value={authValue}>
       <HeaderUserMenuDropdown
         isOpen
-        profile={options.profile}
+        profile={options.profile ?? profileBase}
         onClose={onClose}
         onOpenConnect={options.onOpenConnect}
       />
     </AuthContext.Provider>
   );
-  return { onClose, ...authValue, ...mockConnect.mock.results[0].value };
+  return { onClose, ...authValue, ...connectContext };
 }
 
 afterEach(() => jest.clearAllMocks());
@@ -216,42 +436,33 @@ describe("HeaderUserMenuDropdown", () => {
   });
 
   it("opens the connect modal through the desktop account menu", () => {
-    mockConnect.mockReturnValue({
-      address: "0xabc",
-      isAuthenticated: true,
-      hasValidWalletAuth: true,
-      isConnected: true,
-      connectedAccounts: [],
-      connectedAccountUnreadNotifications: {},
-      canAddConnectedAccount: false,
-      seizeConnect: jest.fn(),
-      seizeConnectFresh: jest.fn(),
-      seizeAddConnectedAccount: jest.fn(),
-      seizeDisconnect: jest.fn(),
-      seizeDisconnectAndLogout: jest.fn(),
-      seizeDisconnectAndLogoutAll: jest.fn(),
-      seizeSwitchConnectedAccount: jest.fn(),
-    });
-    (useChainSwitcher as jest.Mock).mockReturnValue({
-      chains: [],
+    mockConnect.mockReturnValue(
+      createConnectContext({
+        address: "0xabc",
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        isConnected: true,
+        connectedAccounts: [],
+        connectedAccountUnreadNotifications: {},
+        canAddConnectedAccount: false,
+        seizeConnect: jest.fn(),
+        seizeConnectFresh: jest.fn().mockResolvedValue(undefined),
+        seizeAddConnectedAccount: jest.fn(),
+        seizeDisconnect: jest.fn().mockResolvedValue(undefined),
+        seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
+        seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
+        seizeSwitchConnectedAccount: jest.fn(),
+      })
+    );
+    mockUseChainSwitcher.mockReturnValue({
+      chains: [mainnet],
       currentChainName: "Ethereum",
       nextChainName: "Polygon",
-      switchToNextChain: jest.fn(),
+      switchToNextChain: jest.fn(() => false),
     });
 
     render(
-      <AuthContext.Provider
-        value={
-          {
-            activeProfileProxy: null,
-            setActiveProfileProxy: jest.fn(),
-            receivedProfileProxies: [],
-            requestSessionUpgrade: jest.fn(),
-            sessionUpgradeRequired: false,
-            setToast: jest.fn(),
-          } as any
-        }
-      >
+      <AuthContext.Provider value={createAuthContext()}>
         <WebSidebarUser isCollapsed={false} profile={profileBase} />
       </AuthContext.Provider>
     );
@@ -262,6 +473,77 @@ describe("HeaderUserMenuDropdown", () => {
     expect(
       screen.getByRole("dialog", { name: "Connect Device modal" })
     ).toBeInTheDocument();
+  });
+
+  it("switches to the next profile on a desktop sidebar double-click", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    renderWebSidebar({
+      connectedAccounts: [
+        connectedAccount("0xabc", true),
+        connectedAccount("0xdef", false),
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: /double-click to switch profiles/i,
+    });
+    fireEvent.click(profileButton);
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(profileButton);
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(profileButton).toHaveAttribute("aria-expanded", "false");
+    jest.useRealTimers();
+  });
+
+  it("closes the desktop account menu when the next click is after the switch window", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    renderWebSidebar({
+      connectedAccounts: [
+        connectedAccount("0xabc", true),
+        connectedAccount("0xdef", false),
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: /double-click to switch profiles/i,
+    });
+    fireEvent.click(profileButton);
+
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
+    act(() => {
+      jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
+    });
+
+    expect(PROFILE_DOUBLE_ACTIVATE_DELAY_MS).toBe(400);
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(profileButton);
+
+    expect(profileButton).toHaveAttribute("aria-expanded", "false");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it("opens immediately without profile switching when only one profile is connected", () => {
+    const seizeSwitchConnectedAccount = jest.fn();
+    renderWebSidebar({
+      connectedAccounts: [connectedAccount("0xabc", true)],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open account and profiles menu",
+    });
+    fireEvent.click(profileButton);
+
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
   });
 
   it("connects wallet when not connected", async () => {
@@ -365,9 +647,7 @@ describe("HeaderUserMenuDropdown", () => {
       profile: profileBase,
       address: "0xabc",
       isConnected: true,
-      connectedAccounts: [
-        { address: "0xabc", role: null, isActive: true, isConnected: true },
-      ],
+      connectedAccounts: [connectedAccount("0xabc", true)],
       canAddConnectedAccount: true,
       seizeAddConnectedAccount,
     });
@@ -387,8 +667,8 @@ describe("HeaderUserMenuDropdown", () => {
       address: "0xabc",
       isConnected: true,
       connectedAccounts: [
-        { address: "0xabc", role: null, isActive: true, isConnected: true },
-        { address: "0xdef", role: null, isActive: false, isConnected: true },
+        connectedAccount("0xabc", true),
+        connectedAccount("0xdef", false),
       ],
       seizeDisconnectAndLogoutAll,
     });
@@ -411,8 +691,8 @@ describe("HeaderUserMenuDropdown", () => {
       address: "0xabc",
       isConnected: true,
       connectedAccounts: [
-        { address: "0xabc", role: null, isActive: true, isConnected: true },
-        { address: "0xdef", role: null, isActive: false, isConnected: true },
+        connectedAccount("0xabc", true),
+        connectedAccount("0xdef", false),
       ],
       seizeDisconnectAndLogout,
     });
@@ -435,8 +715,8 @@ describe("HeaderUserMenuDropdown", () => {
       address: "0xabc",
       isConnected: true,
       connectedAccounts: [
-        { address: "0xabc", role: null, isActive: true, isConnected: true },
-        { address: "0xdef", role: null, isActive: false, isConnected: true },
+        connectedAccount("0xabc", true),
+        connectedAccount("0xdef", false),
       ],
       seizeSwitchConnectedAccount,
     });

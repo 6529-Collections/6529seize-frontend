@@ -5,6 +5,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useIdentity } from "@/hooks/useIdentity";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "@/components/auth/Auth";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 function AppSidebarConnectedAccountAvatar({
   address,
@@ -75,14 +79,20 @@ function AppSidebarConnectedAccountAvatar({
   );
 }
 
-export default function AppSidebarConnectedAccounts() {
+export default function AppSidebarConnectedAccounts({
+  onNavigate,
+}: {
+  readonly onNavigate?: (() => void) | undefined;
+}) {
   const {
     connectedAccounts,
     connectedAccountUnreadNotifications,
     canAddConnectedAccount,
     seizeAddConnectedAccount,
     seizeSwitchConnectedAccount,
+    seizeConnectOpen,
   } = useSeizeConnectContext();
+  const { setToast } = useAuth();
   const availableConnectedAccounts = connectedAccounts ?? [];
 
   const additionalAccounts = availableConnectedAccounts.filter(
@@ -91,6 +101,41 @@ export default function AppSidebarConnectedAccounts() {
   if (additionalAccounts.length === 0 && !canAddConnectedAccount) {
     return null;
   }
+
+  const handleSelectAccount = (address: string): void => {
+    try {
+      seizeSwitchConnectedAccount(address);
+      onNavigate?.();
+    } catch (error) {
+      console.error("Failed to switch connected account:", error);
+      setToast({
+        message: t(DEFAULT_LOCALE, "appSidebar.accountSwitchFailed"),
+        type: "error",
+      });
+    }
+  };
+
+  const handleAddAccount = (): void => {
+    if (seizeConnectOpen) {
+      return;
+    }
+    try {
+      seizeAddConnectedAccount();
+      onNavigate?.();
+    } catch (error) {
+      console.error("Failed to open connected account flow:", error);
+      setToast({
+        message: t(DEFAULT_LOCALE, "appSidebar.accountConnectionFailed"),
+        type: "error",
+      });
+    }
+  };
+
+  const addAccountLabel = t(DEFAULT_LOCALE, "headerUserMenu.addProfile");
+  const openingAccountLabel = t(
+    DEFAULT_LOCALE,
+    "appSidebar.openingAccountConnection"
+  );
 
   return (
     <div className="tw-ml-auto tw-flex tw-items-center tw-gap-2">
@@ -104,18 +149,29 @@ export default function AppSidebarConnectedAccounts() {
               account.address.toLowerCase()
             ] ?? 0
           }
-          onSelect={seizeSwitchConnectedAccount}
+          onSelect={handleSelectAccount}
         />
       ))}
       {canAddConnectedAccount ? (
         <button
           type="button"
-          onClick={seizeAddConnectedAccount}
-          className="tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-100 tw-ring-1 tw-ring-iron-500 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          aria-label="Add account"
-          title="Add account"
+          onClick={handleAddAccount}
+          disabled={seizeConnectOpen}
+          className="tw-touch-action-manipulation tw-flex tw-h-12 tw-w-12 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-100 tw-ring-1 tw-ring-iron-500 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-iron-700 disabled:tw-cursor-wait disabled:tw-opacity-60"
+          aria-busy={seizeConnectOpen}
+          aria-label={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
+          title={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
         >
-          <span className="tw-text-2xl tw-leading-none">+</span>
+          {seizeConnectOpen ? (
+            <ArrowPathIcon
+              className="tw-size-5 tw-animate-spin motion-reduce:tw-animate-none"
+              aria-hidden="true"
+            />
+          ) : (
+            <span className="tw-text-2xl tw-leading-none" aria-hidden="true">
+              +
+            </span>
+          )}
         </button>
       ) : null}
     </div>

@@ -4,6 +4,8 @@ import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface UserSetUpProfileCtaProps {
   readonly className?: string | undefined;
@@ -24,9 +26,9 @@ export function shouldShowUserSetUpProfileCta({
 }: UserSetUpProfileCtaVisibilityInput): boolean {
   return Boolean(
     !fetchingProfile &&
-      hasValidWalletAuth !== false &&
-      !connectedProfileHandle &&
-      address
+    hasValidWalletAuth !== false &&
+    !connectedProfileHandle &&
+    address
   );
 }
 
@@ -35,6 +37,7 @@ export default function UserSetUpProfileCta({
 }: UserSetUpProfileCtaProps) {
   const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
+  const locale = useBrowserLocale();
 
   const show = shouldShowUserSetUpProfileCta({
     address,
@@ -52,12 +55,8 @@ export default function UserSetUpProfileCta({
 
   return (
     <div className={wrapperClassName}>
-      <ButtonLink
-        href={`/${address.toLowerCase()}`}
-        variant="action"
-        size="md"
-      >
-        Create profile
+      <ButtonLink href={`/${address.toLowerCase()}`} variant="action" size="md">
+        {t(locale, "profileSetup.createAction")}
       </ButtonLink>
     </div>
   );

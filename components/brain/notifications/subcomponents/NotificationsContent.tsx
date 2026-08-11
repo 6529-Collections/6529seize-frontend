@@ -10,13 +10,10 @@ import NotificationsStateMessage from "./NotificationsStateMessage";
 
 interface NotificationsContentProps {
   readonly isLoadingProfile: boolean;
-  readonly hasConnectedProfile: boolean;
-  readonly hasProfileHandle: boolean;
   readonly showProxyDisabledState: boolean;
   readonly showErrorState: boolean;
   readonly resolvedErrorMessage: string;
   readonly handleRetry: () => void;
-  readonly handleAuthRetry: () => void;
   readonly handleProxyDisable: () => void;
   readonly showLoader: boolean;
   readonly showNoItems: boolean;
@@ -29,13 +26,10 @@ interface NotificationsContentProps {
 
 export default function NotificationsContent({
   isLoadingProfile,
-  hasConnectedProfile,
-  hasProfileHandle,
   showProxyDisabledState,
   showErrorState,
   resolvedErrorMessage,
   handleRetry,
-  handleAuthRetry,
   handleProxyDisable,
   showLoader,
   showNoItems,
@@ -50,24 +44,6 @@ export default function NotificationsContent({
       <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-py-8">
         <SpinnerLoader text="Loading profile..." />
       </div>
-    );
-  }
-
-  if (!hasConnectedProfile) {
-    return (
-      <NotificationsStateMessage
-        message="Connect your wallet to view notifications."
-        action={{ label: "Reconnect wallet", handler: handleAuthRetry }}
-      />
-    );
-  }
-
-  if (!hasProfileHandle) {
-    return (
-      <NotificationsStateMessage
-        message="We couldn't determine your profile handle. Please reconnect to continue."
-        action={{ label: "Reconnect wallet", handler: handleAuthRetry }}
-      />
     );
   }
 

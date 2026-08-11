@@ -134,13 +134,10 @@ export default function Notifications({
         >
           <NotificationsContent
             isLoadingProfile={contentState.isLoadingProfile}
-            hasConnectedProfile={contentState.hasConnectedProfile}
-            hasProfileHandle={contentState.hasProfileHandle}
             showProxyDisabledState={contentState.showProxyDisabledState}
             showErrorState={contentState.showErrorState}
             resolvedErrorMessage={contentState.resolvedErrorMessage}
             handleRetry={handlers.handleRetry}
-            handleAuthRetry={handlers.handleAuthRetry}
             handleProxyDisable={handlers.handleProxyDisable}
             showLoader={contentState.showLoader}
             showNoItems={contentState.showNoItems}
