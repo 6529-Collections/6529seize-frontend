@@ -3,15 +3,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UnlockAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 
-jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: (props: any) => <svg {...props} />,
-}));
-
-jest.mock("@/components/app-wallets/AppWallet.module.css", () => ({
-  newWalletInput: "newWalletInput",
-  modalContent: "modalContent",
-}));
-
 const decryptData = jest.fn();
 const areEqualAddresses = jest.fn();
 
@@ -53,7 +44,7 @@ describe("UnlockAppWalletModal", () => {
       />
     );
 
-    const input = screen.getByPlaceholderText("******");
+    const input = screen.getByLabelText("Wallet Password");
     await user.type(input, "bad pass");
 
     await waitFor(() => {
@@ -80,7 +71,7 @@ describe("UnlockAppWalletModal", () => {
       />
     );
 
-    const input = screen.getByPlaceholderText("******");
+    const input = screen.getByLabelText("Wallet Password");
     await user.type(input, "secret");
     await user.click(screen.getByRole("button", { name: "Unlock" }));
 

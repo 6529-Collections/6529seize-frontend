@@ -10,6 +10,8 @@ import ConnectWallet from "../../common/ConnectWallet";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 // Main layout content that uses the Layout context
 function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
@@ -57,8 +59,8 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
     if (contentState === "needs-profile") {
       return (
         <ConnectWallet
-          title="You need to set up a profile to continue."
-          description="Create a profile to access messages."
+          title={t(DEFAULT_LOCALE, "profileSetup.requiredTitle")}
+          description={t(DEFAULT_LOCALE, "profileSetup.messagesDescription")}
           action={<UserSetUpProfileCta />}
         />
       );
