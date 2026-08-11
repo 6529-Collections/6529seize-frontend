@@ -227,8 +227,6 @@ describe("DefaultWinnerDrop", () => {
     renderWithEmojiProvider(
       <DefaultWinnerDrop
         drop={drop}
-        previousDrop={null}
-        nextDrop={null}
         showWaveInfo={false}
         activeDrop={null}
         showReplyAndQuote={false}

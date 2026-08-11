@@ -6,12 +6,14 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 const hook = jest.fn();
-const proposalCardPresentationHook = jest.fn(() => "default");
+const proposalCardPresentationHook = jest.fn(
+  (_waveId: string | null | undefined) => "default"
+);
 let mockVirtualizedRowsProps: any;
 
 jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
-  useWaveProposalCardPresentation: (...args: any[]) =>
-    proposalCardPresentationHook(...args),
+  useWaveProposalCardPresentation: (waveId: string | null | undefined) =>
+    proposalCardPresentationHook(waveId),
 }));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => {
