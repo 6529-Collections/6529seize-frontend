@@ -74,7 +74,7 @@ export default function CreateWaveGroupSearchField({
         />
       </div>
 
-      <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
+      <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400">
         {search.helperText}
       </p>
     </div>

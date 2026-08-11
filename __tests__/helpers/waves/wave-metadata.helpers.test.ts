@@ -1,5 +1,6 @@
 import {
   DEFAULT_APPROVE_WAVE_TAB_LABELS,
+  INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS,
   WAVE_DISPLAY_METADATA_KEYS,
   getApproveWaveDisplayMetadataDraft,
   getApproveWaveDisplayMetadataUpdate,
@@ -10,6 +11,11 @@ import {
   getWaveCustomRulesMetadataUpdate,
   getWaveOutcomeVisibilityFromMetadata,
   getWaveOutcomeVisibilityMetadataUpdate,
+  getWaveProposalCardConfigFromMetadata,
+  getWaveProposalCardMetadataRequest,
+  getWaveProposalCardMetadataUpdate,
+  getWaveProposalCardRecipeFromMetadata,
+  getWaveProposalCardsEnabledFromMetadata,
   getWaveSubmissionButtonLabelFromMetadata,
   getWaveSubmissionButtonLabelMetadataDraft,
   getWaveSubmissionButtonLabelMetadataUpdate,
@@ -17,9 +23,19 @@ import {
 } from "@/helpers/waves/wave-metadata.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
+import type { CreateWaveDisplayConfig } from "@/types/waves.types";
+
+const INITIAL_PROPOSAL_CARD_WAVE_ID = [
+  ...INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS,
+][0]!;
 
 describe("wave-metadata.helpers", () => {
-  const defaultDisplay = {
+  const defaultDisplay: CreateWaveDisplayConfig = {
+    proposalCards: {
+      mode: "standard",
+      excerptMaxCharacters: 360,
+      showMediaThumbnail: true,
+    },
     customRules: null,
     outcomesVisible: true,
     submissionButtonLabel: null,
@@ -155,6 +171,211 @@ describe("wave-metadata.helpers", () => {
         data_value: "Apply",
       },
     ]);
+  });
+
+  it("persists a versioned proposal-card recipe only for custom non-chat waves", () => {
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Approve,
+        display: {
+          ...defaultDisplay,
+          proposalCards: {
+            mode: "custom",
+            excerptMaxCharacters: 420,
+            showMediaThumbnail: false,
+          },
+        },
+      })
+    ).toContainEqual({
+      data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+      data_value:
+        '{"version":1,"layout":"summary","excerpt_max_characters":420,"show_media_thumbnail":false}',
+    });
+
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Chat,
+        display: {
+          ...defaultDisplay,
+          proposalCards: {
+            mode: "custom",
+            excerptMaxCharacters: 420,
+            showMediaThumbnail: false,
+          },
+        },
+      })
+    ).toEqual([]);
+  });
+
+  it("reads and normalizes the versioned proposal-card recipe", () => {
+    expect(
+      getWaveProposalCardRecipeFromMetadata("custom-wave", [
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+          data_value:
+            '{"version":1,"layout":"summary","excerpt_max_characters":80,"show_media_thumbnail":false}',
+        },
+      ])
+    ).toEqual({
+      version: 1,
+      layout: "summary",
+      excerptMaxCharacters: 120,
+      showMediaThumbnail: false,
+    });
+  });
+
+  it("fails closed for malformed or unsupported explicit recipes", () => {
+    expect(
+      getWaveProposalCardRecipeFromMetadata(INITIAL_PROPOSAL_CARD_WAVE_ID, [
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+          data_value: '{"version":2,"layout":"summary"}',
+        },
+      ])
+    ).toBeNull();
+  });
+
+  it("lets explicit full presentation override the Network Museum fallback", () => {
+    const metadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+        data_value: '{"version":1,"layout":"full"}',
+      },
+    ];
+
+    expect(
+      getWaveProposalCardConfigFromMetadata(
+        INITIAL_PROPOSAL_CARD_WAVE_ID,
+        metadata
+      )
+    ).toEqual({
+      mode: "standard",
+      excerptMaxCharacters: 360,
+      showMediaThumbnail: true,
+    });
+    expect(
+      getWaveProposalCardRecipeFromMetadata(
+        INITIAL_PROPOSAL_CARD_WAVE_ID,
+        metadata
+      )
+    ).toBeNull();
+  });
+
+  it("creates explicit metadata updates for existing wave settings", () => {
+    const summaryConfig = {
+      mode: "custom" as const,
+      excerptMaxCharacters: 240,
+      showMediaThumbnail: false,
+    };
+
+    expect(getWaveProposalCardMetadataRequest(summaryConfig)).toEqual({
+      data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+      data_value:
+        '{"version":1,"layout":"summary","excerpt_max_characters":240,"show_media_thumbnail":false}',
+    });
+    expect(
+      getWaveProposalCardMetadataUpdate({
+        waveId: INITIAL_PROPOSAL_CARD_WAVE_ID,
+        metadata: [],
+        proposalCards: {
+          mode: "standard",
+          excerptMaxCharacters: 360,
+          showMediaThumbnail: true,
+        },
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+          data_value: '{"version":1,"layout":"full"}',
+        },
+      ],
+      deleteIds: [],
+    });
+  });
+
+  it("replaces legacy proposal-card metadata and skips unchanged recipes", () => {
+    const legacyMetadata = [
+      {
+        id: 7,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+        data_value: "true",
+      },
+    ];
+    const defaultSummary = {
+      mode: "custom" as const,
+      excerptMaxCharacters: 360,
+      showMediaThumbnail: true,
+    };
+
+    expect(
+      getWaveProposalCardMetadataUpdate({
+        waveId: "legacy-wave",
+        metadata: legacyMetadata,
+        proposalCards: defaultSummary,
+      })
+    ).toEqual({ create: [], deleteIds: [] });
+    expect(
+      getWaveProposalCardMetadataUpdate({
+        waveId: "legacy-wave",
+        metadata: legacyMetadata,
+        proposalCards: {
+          ...defaultSummary,
+          excerptMaxCharacters: 240,
+        },
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+          data_value:
+            '{"version":1,"layout":"summary","excerpt_max_characters":240,"show_media_thumbnail":true}',
+        },
+      ],
+      deleteIds: [7],
+    });
+  });
+
+  it("rolls compact cards out only to Network Museum when metadata is absent", () => {
+    expect(
+      getWaveProposalCardsEnabledFromMetadata(INITIAL_PROPOSAL_CARD_WAVE_ID, [])
+    ).toBe(true);
+    expect(
+      getWaveProposalCardsEnabledFromMetadata("another-standard-wave", [])
+    ).toBe(false);
+  });
+
+  it("respects explicit proposal-card metadata without changing malformed defaults", () => {
+    expect(
+      getWaveProposalCardsEnabledFromMetadata("another-standard-wave", [
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+          data_value: " true ",
+        },
+      ])
+    ).toBe(true);
+    expect(
+      getWaveProposalCardsEnabledFromMetadata(INITIAL_PROPOSAL_CARD_WAVE_ID, [
+        {
+          id: 2,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+          data_value: "false",
+        },
+      ])
+    ).toBe(false);
+    expect(
+      getWaveProposalCardsEnabledFromMetadata("another-standard-wave", [
+        {
+          id: 3,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+          data_value: "compact",
+        },
+      ])
+    ).toBe(false);
   });
 
   it("creates custom rules metadata for chat waves without outcome or approve metadata", () => {

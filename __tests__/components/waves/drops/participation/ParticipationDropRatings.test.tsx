@@ -29,6 +29,7 @@ describe("ParticipationDropRatings", () => {
       winningThreshold: 12,
       winningThresholdMinDurationMs: undefined,
       isVotingClosed: false,
+      emphasizeCurrent: false,
     });
   });
 
@@ -42,6 +43,7 @@ describe("ParticipationDropRatings", () => {
       winningThreshold: undefined,
       winningThresholdMinDurationMs: undefined,
       isVotingClosed: true,
+      emphasizeCurrent: false,
     });
   });
 });

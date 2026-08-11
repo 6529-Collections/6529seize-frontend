@@ -103,10 +103,10 @@ export default function GroupCreateNfts({
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           Required NFTs
         </p>
-        <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
           {t(DEFAULT_LOCALE, "groups.nftOwnership.description")}
         </p>
       </div>

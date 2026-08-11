@@ -82,9 +82,7 @@ const getWaveLeaderboardGridItemSummary = ({
 }): GridItemSummary => {
   const contentBlocks = content
     .split(/\n\s*\n/)
-    .map((block) =>
-      markdownToPlainText(block, GRID_SUMMARY_MARKDOWN_OPTIONS)
-    )
+    .map((block) => markdownToPlainText(block, GRID_SUMMARY_MARKDOWN_OPTIONS))
     .filter((block) => block.length > 0);
   const plainContent = markdownToPlainText(
     content,
@@ -154,7 +152,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
     : previewImageUrl;
   const showSummary = !isContentOnlyMode || !hasMedia;
   const openActionLabel = hasTextContent
-    ? t(locale, "waves.leaderboard.grid.readFullText")
+    ? t(locale, "waves.leaderboard.grid.readFull")
     : t(locale, "waves.leaderboard.grid.open");
   const onOpenButtonClick = useCallback<
     React.MouseEventHandler<HTMLButtonElement>

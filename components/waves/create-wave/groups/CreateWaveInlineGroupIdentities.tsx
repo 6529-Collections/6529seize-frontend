@@ -2,6 +2,7 @@
 
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useAuth } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
 import GroupCreateIdentitiesSearch from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch";
 import type { GroupCreateIdentitiesSearchResultsLayout } from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems";
@@ -13,11 +14,13 @@ export default function CreateWaveInlineGroupIdentities({
   identities,
   onIdentitySelect,
   onRemove,
+  onCancel,
   resultsLayout = "popover",
 }: {
   readonly identities: readonly CommunityMemberMinimal[];
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
   readonly onRemove: (wallet: string) => void;
+  readonly onCancel?: (() => void) | undefined;
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
 }) {
   const { connectedProfile } = useAuth();
@@ -70,23 +73,32 @@ export default function CreateWaveInlineGroupIdentities({
   return (
     <div className="tw-space-y-5">
       <div className="tw-space-y-4">
-        <GroupCreateIdentitiesSearch
-          selectedWallets={selectedWallets}
-          onIdentitySelect={onIdentitySelect}
-          placeholder="Search identities..."
-          hideLabel={true}
-          inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
-          iconClassName="tw-top-3.5 tw-text-iron-500"
-          resultsLayout={resultsLayout}
-        />
+        <div className="tw-flex tw-items-start tw-gap-3">
+          <div className="tw-min-w-0 tw-flex-1">
+            <GroupCreateIdentitiesSearch
+              selectedWallets={selectedWallets}
+              onIdentitySelect={onIdentitySelect}
+              placeholder="Search identities..."
+              hideLabel={true}
+              inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
+              iconClassName="tw-top-3.5 tw-text-iron-500"
+              resultsLayout={resultsLayout}
+            />
+          </div>
+          {onCancel && (
+            <Button variant="secondary" size="xs" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+        </div>
         {showHelperRow && (
           <div
-            className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-px-1 ${
+            className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 ${
               identitiesHelperText ? "tw-justify-between" : "tw-justify-end"
             }`}
           >
             {identitiesHelperText && (
-              <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+              <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
                 {identitiesHelperText}
               </p>
             )}
@@ -144,7 +156,7 @@ export default function CreateWaveInlineGroupIdentities({
         <p
           role="status"
           aria-live="polite"
-          className="tw-mb-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]"
+          className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]"
         >
           {t(
             DEFAULT_LOCALE,

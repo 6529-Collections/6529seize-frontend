@@ -6,25 +6,31 @@ export default function CreateWaveInlineGroupExpandedPanel({
   onCancel,
   cancelClassName = "",
   cancelLabel = "Cancel",
+  showCancel = true,
 }: {
   readonly children: ReactNode;
   readonly onCancel: () => void;
   readonly cancelClassName?: string;
   readonly cancelLabel?: string;
+  readonly showCancel?: boolean;
 }) {
   return (
     <div className="tw-relative tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-5">
-      <div className="tw-flex tw-items-start tw-gap-3">
-        <div className="tw-min-w-0 tw-flex-1">{children}</div>
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={onCancel}
-          className={cancelClassName}
-        >
-          {cancelLabel}
-        </Button>
-      </div>
+      {showCancel ? (
+        <div className="tw-flex tw-items-start tw-gap-3">
+          <div className="tw-min-w-0 tw-flex-1">{children}</div>
+          <Button
+            variant="secondary"
+            size="xs"
+            onClick={onCancel}
+            className={cancelClassName}
+          >
+            {cancelLabel}
+          </Button>
+        </div>
+      ) : (
+        children
+      )}
     </div>
   );
 }

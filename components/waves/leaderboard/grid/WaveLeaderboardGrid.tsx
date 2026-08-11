@@ -8,6 +8,7 @@ import {
   useWaveDropsLeaderboard,
   WAVE_DROPS_LEADERBOARD_MAX_PAGES,
 } from "@/hooks/useWaveDropsLeaderboard";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import React, { useMemo } from "react";
 import {
   useLeaderboardLeadingItemCount,
@@ -54,6 +55,8 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
     wave.wave.type === ApiWaveType.Approve
       ? wave.wave.winning_threshold_min_duration_ms
       : null;
+  const isProposalCard =
+    useWaveProposalCardPresentation(wave.id) === "proposalCard";
   const {
     drops,
     pageMetadata,
@@ -146,6 +149,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
             isVotingControlsLocked={isVotingControlsLocked}
             winningThreshold={winningThreshold}
             winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            emphasizeCurrent={isProposalCard}
             onDropClick={onDropClick}
             onVoteClick={openVotingModal}
           />
