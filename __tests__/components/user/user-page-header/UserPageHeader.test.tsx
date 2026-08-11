@@ -130,7 +130,7 @@ describe("UserPageHeader", () => {
     );
 
     expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
-    expect(screen.getByTestId("subscription-status")).toBeInTheDocument();
+    expect(screen.getAllByTestId("subscription-status")).toHaveLength(2);
   });
 
   it("renders profile website link when a primary CMS site exists", () => {

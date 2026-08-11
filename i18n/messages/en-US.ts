@@ -807,6 +807,14 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.doxxing.title": "Error: Doxxing of Another Person",
   "aboutEdit.errors.doxxing.value":
     "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system. We have a strong cultural value around respecting pseudonymity, so we'd appreciate it if you adjusted your text.",
+  "edit.open": "Edit profile",
+  "edit.title": "Edit profile",
+  "edit.banner": "Profile cover",
+  "edit.pfp": "Profile picture",
+  "edit.name": "Profile name",
+  "edit.classification": "Classification",
+  "edit.about": "About",
+  "edit.aboutTitle": "Edit About",
 } as const);
 
 const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
@@ -1986,6 +1994,7 @@ export const EN_US_MESSAGES = {
   "subscriptions.coverage.action.topUpSubscriptions": "Top up subscriptions",
   "subscriptions.coverage.action.manage": "Manage",
   "subscriptions.coverage.action.reviewSettings": "Review settings",
+  "subscriptions.coverage.header.title": "Subscriptions",
   "subscriptions.coverage.mode.automatic": "Automatic",
   "subscriptions.coverage.mode.manual": "Manual",
   "subscriptions.coverage.mode.notConfigured": "Not configured",
