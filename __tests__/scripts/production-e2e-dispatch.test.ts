@@ -53,9 +53,10 @@ describe("automatic post-deploy E2E", () => {
       const resolve = job.steps.find(
         (step: { name?: string }) => step.name === "Resolve exact deployed SHA"
       );
-      const checkout = job.steps.find(
+      const sourceMaterialization = job.steps.find(
         (step: { name?: string }) =>
-          step.name === "Check out exact deployed source"
+          step.name === "Check out exact deployed source" ||
+          step.name === "Materialize exact deployed source"
       );
       expect(
         workflow.on.workflow_dispatch.inputs.automatic_deploy_run_id.required
@@ -66,7 +67,18 @@ describe("automatic post-deploy E2E", () => {
       expect(resolve.run).toContain(`.head_branch == "${branch}"`);
       expect(resolve.run).toContain('.conclusion == "success"');
       expect(resolve.run).toContain(".repository.full_name == $repository");
-      expect(checkout.with.ref).toBe("${{ steps.source.outputs.sha }}");
+      if (_environment === "production") {
+        expect(sourceMaterialization.run).toContain(
+          'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
+        );
+        expect(sourceMaterialization.env.EXPECTED_SHA).toBe(
+          "${{ steps.source.outputs.sha }}"
+        );
+      } else {
+        expect(sourceMaterialization.with.ref).toBe(
+          "${{ steps.source.outputs.sha }}"
+        );
+      }
       expect(source).toContain(
         'test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"'
       );

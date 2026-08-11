@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -15,6 +16,51 @@ const WORKFLOW_PATH = path.join(
   "workflows",
   "production-artifact-verifier.yml"
 );
+const REPOSITORY = "6529-Collections/6529seize-frontend";
+const WORKFLOW_SHA = "a".repeat(40);
+const ARTIFACT_DIGEST = `sha256:${"b".repeat(64)}`;
+const ARTIFACT_ID = "456";
+const ARTIFACT_NAME = `production-frontend-${"c".repeat(40)}-123`;
+
+function verifyMetadata(run: Record<string, unknown>) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "production-metadata-"));
+  const verifierRoot = path.join(root, "production-artifact-verifier");
+  fs.mkdirSync(verifierRoot);
+  fs.writeFileSync(path.join(verifierRoot, "run.json"), JSON.stringify(run));
+  fs.writeFileSync(
+    path.join(verifierRoot, "artifact.json"),
+    JSON.stringify({
+      id: Number(ARTIFACT_ID),
+      name: ARTIFACT_NAME,
+      expired: false,
+      digest: ARTIFACT_DIGEST,
+      workflow_run: { id: 123 },
+    })
+  );
+  const parsedWorkflow = YAML.parse(fs.readFileSync(WORKFLOW_PATH, "utf8"));
+  const identityStep = parsedWorkflow.jobs.verify.steps.find(
+    (step: { name?: string }) =>
+      step.name === "Verify builder and artifact identity"
+  );
+  try {
+    execFileSync("bash", ["-c", identityStep.run], {
+      env: {
+        ...process.env,
+        ARTIFACT_DIGEST,
+        ARTIFACT_ID,
+        ARTIFACT_NAME,
+        ARTIFACT_RUN_ATTEMPT: "1",
+        ARTIFACT_RUN_ID: "123",
+        ARTIFACT_WORKFLOW_SHA: WORKFLOW_SHA,
+        GITHUB_REPOSITORY: REPOSITORY,
+        RUNNER_TEMP: root,
+      },
+      stdio: "pipe",
+    });
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
 
 function withArtifact(run: (root: string) => void) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "production-artifact-"));
@@ -67,11 +113,66 @@ describe("production artifact verifier", () => {
     expect(source).toContain(
       'test "$ARTIFACT_NAME" = "production-frontend-${TARGET_SHA}-${ARTIFACT_RUN_ID}"'
     );
+    expect(source).toContain(
+      '.path == ".github/workflows/production-build-artifact.yml"'
+    );
+    expect(source).toContain(
+      '.path == ".github/workflows/build-upload-deploy-prod.yml"'
+    );
+    expect(source).toContain(".referenced_workflows | type == \"array\"");
+    expect(source).toContain(
+      '$repository + "/.github/workflows/production-build-artifact.yml"'
+    );
+    expect(source).toContain(".sha == $workflow_sha");
     expect(source).toContain('test "$(sha256sum "$root/artifact.zip"');
     expect(source).toContain("sha256sum -c SHA256SUMS");
     expect(source).toContain('artifact_contract == "production-deployment-v1"');
     expect(source).toContain("compare/${TARGET_SHA}...${current_main_sha}");
     expect(source).not.toMatch(/release[-_ ]bus|operation_id|authority/i);
+  });
+
+  it("accepts only a direct builder or an exact caller-to-builder reference", () => {
+    const baseRun = {
+      id: 123,
+      run_attempt: 1,
+      event: "workflow_dispatch",
+      head_branch: "main",
+      head_sha: WORKFLOW_SHA,
+      repository: { full_name: REPOSITORY },
+      head_repository: { full_name: REPOSITORY },
+      status: "completed",
+      conclusion: "success",
+    };
+    expect(() =>
+      verifyMetadata({
+        ...baseRun,
+        path: ".github/workflows/production-build-artifact.yml",
+      })
+    ).not.toThrow();
+    expect(() =>
+      verifyMetadata({
+        ...baseRun,
+        path: ".github/workflows/build-upload-deploy-prod.yml",
+        referenced_workflows: [
+          {
+            path: `${REPOSITORY}/.github/workflows/production-build-artifact.yml@main`,
+            sha: WORKFLOW_SHA,
+          },
+        ],
+      })
+    ).not.toThrow();
+    expect(() =>
+      verifyMetadata({
+        ...baseRun,
+        path: ".github/workflows/build-upload-deploy-prod.yml",
+        referenced_workflows: [
+          {
+            path: `${REPOSITORY}/.github/workflows/production-build-artifact.yml@main`,
+            sha: "d".repeat(40),
+          },
+        ],
+      })
+    ).toThrow();
   });
 
   it("accepts only the closed production archive shape", () => {
@@ -95,11 +196,25 @@ describe("production artifact verifier", () => {
     expect(() => verifier.validateArchiveMembers("manifest.json\n")).toThrow(
       "missing required file"
     );
+    expect(() =>
+      verifier.validateArchiveMembers(`${members}\ntarget\\windows-path.js\n`)
+    ).toThrow("not a relative POSIX path");
+    expect(() =>
+      verifier.validateArchiveMembers(`${members}\n/absolute-path.js\n`)
+    ).toThrow("not a relative POSIX path");
+    expect(() =>
+      verifier.validateArchiveMembers(`${members}\ntarget/.\n`)
+    ).toThrow("unsafe path segment");
   });
 
-  it("rejects unexpected files and symbolic links after extraction", () => {
+  it("rejects missing, unexpected, and non-regular entries after extraction", () => {
     withArtifact((root) => {
       expect(verifier.validateExtractedArtifact(root)).toBe(true);
+      fs.rmSync(path.join(root, "manifest.json"));
+      expect(() => verifier.validateExtractedArtifact(root)).toThrow(
+        "missing required file"
+      );
+      fs.writeFileSync(path.join(root, "manifest.json"), "{}\n");
       fs.writeFileSync(path.join(root, "unexpected.txt"), "no\n");
       expect(() => verifier.validateExtractedArtifact(root)).toThrow(
         "outside the production artifact contract"
@@ -112,6 +227,22 @@ describe("production artifact verifier", () => {
       expect(() => verifier.validateExtractedArtifact(root)).toThrow(
         "symbolic link"
       );
+      fs.rmSync(path.join(root, "target", "linked"));
+      const fifoPath = path.join(
+        root,
+        "target",
+        "_next",
+        "static",
+        "unsupported-entry"
+      );
+      try {
+        execFileSync("mkfifo", [fifoPath]);
+        expect(() => verifier.validateExtractedArtifact(root)).toThrow(
+          "unsupported filesystem entry"
+        );
+      } finally {
+        fs.rmSync(fifoPath, { force: true });
+      }
     });
   });
 });

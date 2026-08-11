@@ -108,6 +108,35 @@ describe("frontend deployment workflow contract", () => {
     }
   });
 
+  it("keeps exact-production provenance and late downgrade guards fail-closed", () => {
+    const production = readWorkflow("build-upload-deploy-prod.yml").source;
+    const verifier = readWorkflow("production-artifact-verifier.yml").source;
+    const productionE2e = readWorkflow("production-e2e.yml").source;
+
+    expect(verifier).toContain(
+      '.path == ".github/workflows/production-build-artifact.yml"'
+    );
+    expect(verifier).toContain(
+      '.path == ".github/workflows/build-upload-deploy-prod.yml"'
+    );
+    expect(verifier).toContain(
+      '$repository + "/.github/workflows/production-build-artifact.yml"'
+    );
+    expect(verifier).toContain(".sha == $workflow_sha");
+    expect(production).toContain(
+      "refusing to announce stale production $COMMIT_SHA"
+    );
+    expect(production).toContain(
+      "refusing to overwrite it with $COMMIT_SHA"
+    );
+    expect(productionE2e).toContain(
+      "git fetch --no-tags --depth=1 origin \"$EXPECTED_SHA\""
+    );
+    expect(productionE2e).not.toMatch(
+      /uses: actions\/checkout@[^\n]+\n\s+with:\n\s+ref: \$\{\{ steps\.source\.outputs\.sha \}\}/u
+    );
+  });
+
   it("keeps exact source-commit copies of every modified workflow", () => {
     for (const workflow of modifiedWorkflows) {
       const archived = fs.readFileSync(

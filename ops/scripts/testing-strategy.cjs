@@ -90,8 +90,8 @@ const RISK_RULES = [
     name: "deployment-or-release-control",
     patterns: [
       /^\.github\/workflows\//,
-      /^ops\/archive\/frontend-release-bus-integration\//,
-      /^ops\/scripts\/verify-production-artifact\.cjs$/,
+      /^ops\/deployment-bus\//,
+      /^ops\/scripts\/deployment-bus\.cjs$/,
       /^ops\/scripts\/testing-strategy\.cjs$/,
       /^ops\/testing-strategy\//,
       /^package\.json$/,

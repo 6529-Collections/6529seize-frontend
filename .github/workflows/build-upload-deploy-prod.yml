@@ -266,6 +266,21 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          git fetch --no-tags origin main
+          current_main_sha="$(git rev-parse origin/main)"
+          if [ "$current_main_sha" != "$COMMIT_SHA" ]; then
+            echo "::error::main advanced to $current_main_sha before the version announcement; refusing to announce stale production $COMMIT_SHA."
+            exit 1
+          fi
+          current_version="$(aws elasticbeanstalk describe-environments \
+            --environment-names "$BEANSTALK_ENV_NAME" \
+            --query 'Environments[0].VersionLabel' \
+            --output text)"
+          if [ "$current_version" != "$COMMIT_SHA" ]; then
+            echo "::error::Production advanced to $current_version before the version announcement; refusing to overwrite it with $COMMIT_SHA."
+            exit 1
+          fi
+
           announcement_file="current-production-version.json"
           published_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           announced_host="$(node -e 'process.stdout.write(new URL(process.env.ANNOUNCED_VERSION_ENDPOINT).hostname)')"

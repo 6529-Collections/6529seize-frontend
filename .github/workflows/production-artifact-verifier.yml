@@ -142,8 +142,17 @@ jobs:
             --arg workflow_sha "$ARTIFACT_WORKFLOW_SHA" '
               .id == ($run_id | tonumber) and
               .run_attempt == $run_attempt and
-              (.path == ".github/workflows/build-upload-deploy-prod.yml" or
-               .path == ".github/workflows/production-build-artifact.yml") and
+              (
+                .path == ".github/workflows/production-build-artifact.yml" or
+                (
+                  .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                  (.referenced_workflows | type == "array") and
+                  any(.referenced_workflows[]?;
+                    (.path | split("@")[0]) == ($repository + "/.github/workflows/production-build-artifact.yml") and
+                    .sha == $workflow_sha
+                  )
+                )
+              ) and
               .event == "workflow_dispatch" and
               .head_branch == "main" and
               .head_sha == $workflow_sha and

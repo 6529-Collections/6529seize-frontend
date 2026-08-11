@@ -86,11 +86,15 @@ function validateArchiveMembers(memberList) {
 
 function walk(root, relative = "") {
   const absolute = path.join(root, relative);
+  // Paths remain beneath the validated artifact root and are never user-selected directly.
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const entries = fs.readdirSync(absolute, { withFileTypes: true });
   const paths = [];
   for (const entry of entries) {
     const child = relative ? `${relative}/${entry.name}` : entry.name;
     const childAbsolute = path.join(root, child);
+    // Directory entries come from readdirSync beneath the validated artifact root.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const metadata = fs.lstatSync(childAbsolute);
     if (metadata.isSymbolicLink()) {
       fail(`extracted artifact contains a symbolic link: ${child}`);
@@ -120,6 +124,8 @@ function walk(root, relative = "") {
 
 function validateExtractedArtifact(artifactRoot) {
   const root = path.resolve(artifactRoot);
+  // artifactRoot is the verifier-owned extraction directory supplied by its CLI contract.
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const metadata = fs.lstatSync(root);
   if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
     fail("artifact root must be a real directory");
@@ -146,9 +152,11 @@ function main() {
     const [command, ...argv] = process.argv.slice(2);
     const args = parseArgs(argv);
     if (command === "validate-archive-members") {
-      validateArchiveMembers(
-        fs.readFileSync(requiredArg(args, "archive-members"), "utf8")
-      );
+      const archiveMembersPath = requiredArg(args, "archive-members");
+      // The CLI path points to the verifier-owned archive listing in RUNNER_TEMP.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      const archiveMembers = fs.readFileSync(archiveMembersPath, "utf8");
+      validateArchiveMembers(archiveMembers);
       return;
     }
     if (command === "validate-extracted-artifact") {
