@@ -15,6 +15,7 @@ import { t } from "@/i18n/messages";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import {
   Suspense,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -54,7 +55,6 @@ const QUICK_DM_LAUNCHER_CLEARANCE_PX = 88;
 // composer's Post button) so quick DMs never lose their entry point.
 const QUICK_DM_LAUNCHER_SUPPRESSED_CLASS =
   "tw-pointer-events-none tw-opacity-0 focus-within:tw-pointer-events-auto focus-within:tw-opacity-100";
-const QUICK_DM_LAUNCHER_INTERACTIVE_OVERLAP_CLASS = `${QUICK_DM_LAUNCHER_SUPPRESSED_CLASS} focus-within:tw-bottom-auto focus-within:tw-top-24`;
 
 const getDesktopViewportSnapshot = (): boolean => {
   if (typeof window === "undefined") {
@@ -89,6 +89,52 @@ const useIsQuickDmDesktop = (): boolean => {
   return !isApp && !isMobileDevice && isDesktopViewport;
 };
 
+const useIsQuickDmLauncherCoveringInteractive = ({
+  isEnabled,
+  launcherButtonRef,
+}: {
+  readonly isEnabled: boolean;
+  readonly launcherButtonRef: RefObject<HTMLButtonElement | null>;
+}): boolean => {
+  const [isCoveringInteractive, setIsCoveringInteractive] = useState(false);
+  const measureOverlap = useCallback(() => {
+    const launcher = launcherButtonRef.current;
+    setIsCoveringInteractive(
+      launcher !== null && isQuickDmLauncherCoveringInteractiveElement(launcher)
+    );
+  }, [launcherButtonRef]);
+  const debouncedMeasureOverlap = useDebouncedCallback(measureOverlap, 100);
+
+  useEffect(() => {
+    if (!isEnabled) {
+      return;
+    }
+
+    const frame = globalThis.window.requestAnimationFrame(measureOverlap);
+    const observer = new MutationObserver(debouncedMeasureOverlap);
+    observer.observe(globalThis.document.body, {
+      childList: true,
+      subtree: true,
+    });
+    globalThis.document.addEventListener("scroll", debouncedMeasureOverlap, true);
+    globalThis.window.addEventListener("resize", debouncedMeasureOverlap);
+
+    return () => {
+      globalThis.window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      globalThis.document.removeEventListener(
+        "scroll",
+        debouncedMeasureOverlap,
+        true
+      );
+      globalThis.window.removeEventListener("resize", debouncedMeasureOverlap);
+      debouncedMeasureOverlap.cancel();
+    };
+  }, [debouncedMeasureOverlap, isEnabled, measureOverlap]);
+
+  return isCoveringInteractive;
+};
+
 export default function QuickDirectMessages() {
   const { connectedProfile, showWaves } = useAuth();
   const isDesktop = useIsQuickDmDesktop();
@@ -98,8 +144,6 @@ export default function QuickDirectMessages() {
   const shouldLiftLauncher = useWaveDropsScrollControlsVisible();
   const dockedComposers = useWaveComposerDockElements();
   const [isLauncherZoneCovered, setIsLauncherZoneCovered] = useState(false);
-  const [isLauncherCoveringInteractive, setIsLauncherCoveringInteractive] =
-    useState(false);
   const [state, setState] = useState<QuickDmState>(() => readStoredState());
   const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
     useState(false);
@@ -109,6 +153,11 @@ export default function QuickDirectMessages() {
 
   const waves = directMessages.list;
   const isVisible = Boolean(isDesktop && connectedProfile?.handle && showWaves);
+  const isLauncherCoveringInteractive =
+    useIsQuickDmLauncherCoveringInteractive({
+      isEnabled: isVisible && state.view === "closed",
+      launcherButtonRef,
+    });
   const selectedWave = useMemo(
     () => waves.find((wave) => wave.id === state.waveId) ?? null,
     [state.waveId, waves]
@@ -152,17 +201,6 @@ export default function QuickDirectMessages() {
     measureLauncherZone,
     100
   );
-  const measureLauncherInteractiveOverlap = useCallback(() => {
-    const launcher = launcherButtonRef.current;
-    setIsLauncherCoveringInteractive(
-      launcher !== null && isQuickDmLauncherCoveringInteractiveElement(launcher)
-    );
-  }, []);
-  const debouncedMeasureLauncherInteractiveOverlap = useDebouncedCallback(
-    measureLauncherInteractiveOverlap,
-    100
-  );
-
   useEffect(() => {
     // Hidden instances (mobile, logged out, waves disabled) render nothing,
     // so they skip measuring and never attach observers.
@@ -196,52 +234,6 @@ export default function QuickDirectMessages() {
     isVisible,
     measureLauncherZone,
     debouncedMeasureLauncherZone,
-  ]);
-
-  useEffect(() => {
-    if (!isVisible || state.view !== "closed") {
-      return;
-    }
-
-    const frame = globalThis.window.requestAnimationFrame(
-      measureLauncherInteractiveOverlap
-    );
-    const observer = new MutationObserver(
-      debouncedMeasureLauncherInteractiveOverlap
-    );
-    observer.observe(globalThis.document.body, {
-      childList: true,
-      subtree: true,
-    });
-    globalThis.document.addEventListener(
-      "scroll",
-      debouncedMeasureLauncherInteractiveOverlap,
-      true
-    );
-    globalThis.window.addEventListener(
-      "resize",
-      debouncedMeasureLauncherInteractiveOverlap
-    );
-
-    return () => {
-      globalThis.window.cancelAnimationFrame(frame);
-      observer.disconnect();
-      globalThis.document.removeEventListener(
-        "scroll",
-        debouncedMeasureLauncherInteractiveOverlap,
-        true
-      );
-      globalThis.window.removeEventListener(
-        "resize",
-        debouncedMeasureLauncherInteractiveOverlap
-      );
-      debouncedMeasureLauncherInteractiveOverlap.cancel();
-    };
-  }, [
-    debouncedMeasureLauncherInteractiveOverlap,
-    isVisible,
-    measureLauncherInteractiveOverlap,
-    state.view,
   ]);
 
   const setAndStoreState = useCallback((nextState: QuickDmState) => {
@@ -379,16 +371,14 @@ export default function QuickDirectMessages() {
     // While the launcher zone is covered it reveals at the lifted offset on
     // focus, clear of the docked composer's Post button.
     const launcherOffsetClassName =
-      shouldLiftLauncher || isLauncherZoneCovered
+      shouldLiftLauncher ||
+      isLauncherZoneCovered ||
+      isLauncherCoveringInteractive
         ? QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS
         : QUICK_DM_LAUNCHER_RESTING_POSITION_CLASS;
-    let launcherSuppressionClassName = "";
-    if (isLauncherZoneCovered) {
-      launcherSuppressionClassName = QUICK_DM_LAUNCHER_SUPPRESSED_CLASS;
-    } else if (isLauncherCoveringInteractive) {
-      launcherSuppressionClassName =
-        QUICK_DM_LAUNCHER_INTERACTIVE_OVERLAP_CLASS;
-    }
+    const launcherSuppressionClassName = isLauncherZoneCovered
+      ? QUICK_DM_LAUNCHER_SUPPRESSED_CLASS
+      : "";
     const launcherPositionClassName = `${QUICK_DM_LAUNCHER_BASE_POSITION_CLASS} ${launcherOffsetClassName}${
       launcherSuppressionClassName ? ` ${launcherSuppressionClassName}` : ""
     }`;

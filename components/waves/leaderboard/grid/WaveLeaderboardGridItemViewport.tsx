@@ -54,16 +54,20 @@ const truncateAtWord = (content: string, maxLength: number): string => {
 };
 
 const removeLeadingTitle = (content: string, title: string): string => {
-  const contentPrefix = content.slice(0, title.length);
+  const normalizedContent = content.normalize("NFC");
+  const normalizedTitle = title.normalize("NFC");
+  const contentPrefix = normalizedContent.slice(0, normalizedTitle.length);
   const isSameTitle =
-    title.length > 0 &&
-    contentPrefix.localeCompare(title, "en-US", { sensitivity: "base" }) === 0;
+    normalizedTitle.length > 0 &&
+    contentPrefix.localeCompare(normalizedTitle, "en-US", {
+      sensitivity: "base",
+    }) === 0;
 
   if (!isSameTitle) {
     return content;
   }
 
-  return content
+  return normalizedContent
     .slice(contentPrefix.length)
     .replace(/^\s*(?:-|:|–|—)\s*/, "")
     .trimStart();

@@ -52,4 +52,26 @@ describe("isQuickDmLauncherCoveringInteractiveElement", () => {
       isQuickDmLauncherCoveringInteractiveElement(launcher, documentObject)
     ).toBe(false);
   });
+
+  it("ignores a launcher without visible geometry", () => {
+    const launcher = document.createElement("div");
+    jest.spyOn(launcher, "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    const elementsFromPoint = jest.fn();
+    const documentObject = { elementsFromPoint } as unknown as Document;
+
+    expect(
+      isQuickDmLauncherCoveringInteractiveElement(launcher, documentObject)
+    ).toBe(false);
+    expect(elementsFromPoint).not.toHaveBeenCalled();
+  });
 });

@@ -35,6 +35,22 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
     expect(progress.getAttribute("data-current")).toBe("5");
     expect(progress.getAttribute("data-projected")).toBe("6");
     expect(progress.getAttribute("data-subtle")).toBe("false");
+    expect(
+      screen.getByRole("group", {
+        name: "Current vote: 5 Rep. Projected: 6 Rep.",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("distinguishes a negative default rating", () => {
+    const drop: any = {
+      rating: -2,
+      rating_prediction: -1,
+      wave: { voting_credit_type: ApiWaveCreditType.Rep },
+    };
+    render(<WaveLeaderboardGalleryItemVotes drop={drop} />);
+
+    expect(screen.getByText("-2")).toHaveClass("tw-text-rose-400");
   });
 
   it("uses subtle coloring when variant is subtle and rating negative", () => {

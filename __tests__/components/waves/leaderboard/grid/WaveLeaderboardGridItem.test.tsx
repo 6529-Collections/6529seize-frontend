@@ -339,6 +339,28 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByText("Description remains intact.")).toBeVisible();
   });
 
+  it("removes a canonically equivalent title by its normalized length", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          title: "CAFÉ",
+          parts: [
+            {
+              media: [],
+              content: "cafe\u0301 — Decomposed title remains intact.",
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "CAFÉ" })).toBeVisible();
+    expect(screen.getByText("Decomposed title remains intact.")).toBeVisible();
+  });
+
   it("does not open compact drops from footer vote action", () => {
     const onDropClick = jest.fn();
 
