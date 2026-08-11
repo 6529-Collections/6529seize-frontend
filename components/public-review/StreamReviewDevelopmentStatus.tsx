@@ -3,9 +3,7 @@ import Link from "next/link";
 import { formatDate, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  STREAM_REVIEW_DEVELOPMENT_STATUS,
-} from "@/lib/public-review/streamReviewDevelopmentStatus.server";
+import { STREAM_REVIEW_DEVELOPMENT_STATUS } from "@/lib/public-review/streamReviewDevelopmentStatus.server";
 import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 

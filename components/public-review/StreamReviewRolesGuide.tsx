@@ -106,8 +106,7 @@ const PLANNED_ROLES = [
   {
     statusKey: "publicReview.rolesGuide.status.planned.title",
     titleKey: "publicReview.rolesGuide.future.revenueAdapter.title",
-    descriptionKey:
-      "publicReview.rolesGuide.future.revenueAdapter.description",
+    descriptionKey: "publicReview.rolesGuide.future.revenueAdapter.description",
   },
   {
     statusKey: OPEN_STATUS_TITLE_KEY,
@@ -117,8 +116,7 @@ const PLANNED_ROLES = [
   {
     statusKey: OPEN_STATUS_TITLE_KEY,
     titleKey: "publicReview.rolesGuide.future.artistRecovery.title",
-    descriptionKey:
-      "publicReview.rolesGuide.future.artistRecovery.description",
+    descriptionKey: "publicReview.rolesGuide.future.artistRecovery.description",
   },
   {
     statusKey: OPEN_STATUS_TITLE_KEY,
@@ -147,8 +145,7 @@ const OUTSIDE_RESPONSIBILITIES = [
   },
   {
     titleKey: "publicReview.rolesGuide.outside.marketplaces.title",
-    descriptionKey:
-      "publicReview.rolesGuide.outside.marketplaces.description",
+    descriptionKey: "publicReview.rolesGuide.outside.marketplaces.description",
   },
 ] as const satisfies readonly RolesGuideItem[];
 
@@ -218,7 +215,11 @@ export const STREAM_REVIEW_ROLES_GUIDE_SECTIONS = [
   },
 ] as const satisfies readonly PublicReviewSectionDefinition[];
 
-function RolesGuideList({ items }: { readonly items: readonly RolesGuideItem[] }) {
+function RolesGuideList({
+  items,
+}: {
+  readonly items: readonly RolesGuideItem[];
+}) {
   return (
     <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-2">
       {items.map((item) => (
@@ -305,7 +306,7 @@ export function StreamReviewRolesGuide({
               key={status.titleKey}
               className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/20 tw-p-4"
             >
-              <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-primary-200">
+              <h3 className="tw-text-primary-200 tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em]">
                 {t(DEFAULT_LOCALE, status.titleKey)}
               </h3>
               <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -335,11 +336,11 @@ export function StreamReviewRolesGuide({
           descriptionKey="publicReview.rolesGuide.inactive.description"
           section={STREAM_REVIEW_ROLES_GUIDE_SECTIONS[2]}
         />
-        <p className="tw-mb-0 tw-mt-7 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-primary-200">
+        <p className="tw-text-primary-200 tw-mb-0 tw-mt-7 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em]">
           {t(DEFAULT_LOCALE, "publicReview.rolesGuide.status.connected.title")}
         </p>
         <RolesGuideList items={CONNECTED_ROLES} />
-        <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-primary-200">
+        <p className="tw-text-primary-200 tw-mb-0 tw-mt-8 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em]">
           {t(DEFAULT_LOCALE, "publicReview.rolesGuide.status.source.title")}
         </p>
         <RolesGuideList items={SOURCE_ROLES} />

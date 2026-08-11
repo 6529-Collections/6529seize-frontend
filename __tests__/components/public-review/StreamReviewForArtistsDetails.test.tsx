@@ -36,11 +36,15 @@ describe("StreamReviewForArtistsDetails", () => {
   it("states the narrow approval, sale, royalty, and finality limits", () => {
     render(<StreamReviewForArtistsDetails />);
 
-    expect(screen.getByText("Maximum collection purchases")).toBeInTheDocument();
+    expect(
+      screen.getByText("Maximum collection purchases")
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/one authorization can mint only one token/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/reviewed sale paths use ETH/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/reviewed sale paths use ETH/i)
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/Marketplaces choose whether to pay it/i)
     ).toBeInTheDocument();

@@ -229,20 +229,14 @@ describe("renderStreamReviewRoutePage", () => {
       "What proof exists that it is safe and ready."
     );
     expect(editorialCopy).toHaveTextContent("Working in the reviewed flow");
-    expect(editorialCopy).toHaveTextContent(
-      "What works in the reviewed flow"
-    );
+    expect(editorialCopy).toHaveTextContent("What works in the reviewed flow");
     expect(editorialCopy).toHaveTextContent("Artwork identity and history");
     expect(editorialCopy).toHaveTextContent(
       "a freeze is not complete artwork finality."
     );
-    expect(editorialCopy).toHaveTextContent(
-      "Fixed-price sales and auctions"
-    );
+    expect(editorialCopy).toHaveTextContent("Fixed-price sales and auctions");
     expect(editorialCopy).toHaveTextContent("Payments and royalties");
-    expect(editorialCopy).toHaveTextContent(
-      "Safety controls and preservation"
-    );
+    expect(editorialCopy).toHaveTextContent("Safety controls and preservation");
     expect(editorialCopy).toHaveTextContent(
       "ADR proposals are not working features."
     );
@@ -269,9 +263,7 @@ describe("renderStreamReviewRoutePage", () => {
     expect(editorialCopy).toHaveTextContent(
       "Governance and contract replacements"
     );
-    expect(editorialCopy).toHaveTextContent(
-      "Artwork protection and records"
-    );
+    expect(editorialCopy).toHaveTextContent("Artwork protection and records");
     expect(editorialCopy).toHaveTextContent("Minting rules");
     expect(editorialCopy).toHaveTextContent("Randomness and metadata");
     expect(editorialCopy).toHaveTextContent(
@@ -296,9 +288,7 @@ describe("renderStreamReviewRoutePage", () => {
       "Planned work has an approved design direction"
     );
     expect(editorialCopy).toHaveTextContent("Not final");
-    expect(editorialCopy).toHaveTextContent(
-      "Artist permissions and recovery"
-    );
+    expect(editorialCopy).toHaveTextContent("Artist permissions and recovery");
     expect(editorialCopy).toHaveTextContent("Payments and sale types");
     expect(editorialCopy).toHaveTextContent(
       "Mint records and artwork recovery"
@@ -359,9 +349,7 @@ describe("renderStreamReviewRoutePage", () => {
     expect(editorialCopy).toHaveTextContent("Known limitations");
     expect(editorialCopy).toHaveTextContent("Tokens and minting");
     expect(editorialCopy).toHaveTextContent("Payments and auctions");
-    expect(editorialCopy).toHaveTextContent(
-      "Governance and contract size"
-    );
+    expect(editorialCopy).toHaveTextContent("Governance and contract size");
     expect(editorialCopy).toHaveTextContent("Artwork and metadata");
     expect(editorialCopy).toHaveTextContent(
       "Proposed ADRs are not counted as fixes."
@@ -411,9 +399,7 @@ describe("renderStreamReviewRoutePage", () => {
     expect(editorialCopy).not.toHaveTextContent(
       "This register centralizes release state."
     );
-    expect(editorialCopy).not.toHaveTextContent(
-      "The repository contains:"
-    );
+    expect(editorialCopy).not.toHaveTextContent("The repository contains:");
     expect(editorialCopy).not.toHaveTextContent(
       "The separately dated development update"
     );
@@ -463,10 +449,10 @@ describe("renderStreamReviewRoutePage", () => {
       "1. The collection gets a permanent identity"
     );
     expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
-      "Before anything is minted or sold, Stream gives the collection a permanent ID."
+      "Before anything is minted or sold, Stream gives the collection a permanent ID in the Core."
     );
     expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
-      "Why this matters: The artwork keeps one clear identity even when the tools around it change."
+      "**Why this matters:** The artwork keeps one clear identity even when the tools around it change."
     );
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "Old technical identity copy."
@@ -598,7 +584,7 @@ describe("renderStreamReviewRoutePage", () => {
       "13. Supply closes"
     );
     expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
-      "The current setFinalSupply function does not emit its own supply-closed event."
+      "The current `setFinalSupply` function does not emit its own supply-closed event."
     );
     expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
       "14. The Core is permanently frozen"
@@ -779,7 +765,7 @@ describe("renderStreamReviewRoutePage", () => {
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
-      "publicReview.pages.artworkLifecycle.summary"
+      "publicReview.pages.overviewNarrative.summary"
     );
   });
 

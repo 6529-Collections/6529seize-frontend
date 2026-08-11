@@ -157,8 +157,7 @@ const OTHER_ACTORS = [
 const PERMANENCE_CHECKLIST = [
   {
     titleKey: "publicReview.forArtistsGuide.permanence.files.title",
-    descriptionKey:
-      "publicReview.forArtistsGuide.permanence.files.description",
+    descriptionKey: "publicReview.forArtistsGuide.permanence.files.description",
   },
   {
     titleKey: "publicReview.forArtistsGuide.permanence.fingerprints.title",
@@ -172,8 +171,7 @@ const PERMANENCE_CHECKLIST = [
   },
   {
     titleKey: "publicReview.forArtistsGuide.permanence.delay.title",
-    descriptionKey:
-      "publicReview.forArtistsGuide.permanence.delay.description",
+    descriptionKey: "publicReview.forArtistsGuide.permanence.delay.description",
   },
 ] as const satisfies readonly ArtistGuideCopyItem[];
 
@@ -259,7 +257,7 @@ export function StreamReviewForArtistsGuide({
                 aria-hidden="true"
                 className="tw-flex tw-h-full tw-flex-col tw-items-center"
               >
-                <span className="tw-relative tw-z-10 tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/10 tw-font-mono tw-text-xs tw-font-semibold tw-text-primary-200 tw-shadow-[0_0_0_5px_rgba(9,9,11,0.9)] sm:tw-size-12">
+                <span className="tw-text-primary-200 tw-relative tw-z-10 tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/10 tw-font-mono tw-text-xs tw-font-semibold tw-shadow-[0_0_0_5px_rgba(9,9,11,0.9)] sm:tw-size-12">
                   {formatInteger(DEFAULT_LOCALE, index + 1)}
                 </span>
                 {index < ARTIST_JOURNEY.length - 1 ? (
@@ -339,9 +337,10 @@ export function StreamReviewForArtistsGuide({
         </p>
         <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-2">
           {OTHER_ACTORS.map((actor) => {
-            const page = actor.pageId !== undefined
-              ? pages.find((candidate) => candidate.id === actor.pageId)
-              : undefined;
+            const page =
+              actor.pageId !== undefined
+                ? pages.find((candidate) => candidate.id === actor.pageId)
+                : undefined;
             return (
               <article
                 key={actor.titleKey}

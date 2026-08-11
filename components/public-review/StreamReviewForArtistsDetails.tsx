@@ -29,15 +29,13 @@ const BASIS_COPY: Record<
   },
   accepted: {
     labelKey: "publicReview.forArtistsDetails.basis.accepted.label",
-    descriptionKey:
-      "publicReview.forArtistsDetails.basis.accepted.description",
+    descriptionKey: "publicReview.forArtistsDetails.basis.accepted.description",
     className:
       "tw-border-orange-300/25 tw-bg-orange-300/[0.08] tw-text-orange-200",
   },
   proposed: {
     labelKey: "publicReview.forArtistsDetails.basis.proposed.label",
-    descriptionKey:
-      "publicReview.forArtistsDetails.basis.proposed.description",
+    descriptionKey: "publicReview.forArtistsDetails.basis.proposed.description",
     className: "tw-border-white/15 tw-bg-white/[0.04] tw-text-iron-300",
   },
 };

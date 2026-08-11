@@ -191,9 +191,7 @@ describe("StreamReviewForArtistsGuide", () => {
     );
     expect(
       sectionHeadings.indexOf("Who else can affect your artwork?")
-    ).toBeLessThan(
-      sectionHeadings.indexOf("How sales and payments work")
-    );
+    ).toBeLessThan(sectionHeadings.indexOf("How sales and payments work"));
     expect(sectionHeadings.indexOf("How sales and payments work")).toBeLessThan(
       sectionHeadings.indexOf("What can still change?")
     );
