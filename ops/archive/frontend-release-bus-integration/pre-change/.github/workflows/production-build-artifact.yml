@@ -1,0 +1,348 @@
+name: Build Production Artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: Exact 40-character commit SHA to build
+        required: true
+        type: string
+      operation_id:
+        description: Operation identity; 1-80 ASCII letters, digits, dot, underscore, or hyphen
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      target_sha:
+        description: Exact 40-character commit SHA to build
+        required: true
+        type: string
+      operation_id:
+        description: Operation identity; 1-80 ASCII letters, digits, dot, underscore, or hyphen
+        required: true
+        type: string
+    secrets:
+      ALCHEMY_API_KEY:
+        required: false
+      AWS_RUM_APP_ID:
+        required: false
+      AWS_RUM_REGION:
+        required: false
+      AWS_RUM_SAMPLE_RATE:
+        required: false
+      GIPHY_API_KEY:
+        required: false
+      NEXT_PUBLIC_MIXPANEL_TOKEN:
+        required: false
+      SENTRY_AUTH_TOKEN:
+        required: false
+      SENTRY_DSN:
+        required: false
+    outputs:
+      artifact_id:
+        description: GitHub artifact ID for the uploaded exact artifact
+        value: ${{ jobs.build-production-artifact.outputs.artifact_id }}
+      artifact_digest:
+        description: GitHub artifact digest for the uploaded exact artifact
+        value: ${{ jobs.build-production-artifact.outputs.artifact_digest }}
+      artifact_name:
+        description: Exact operation-bound artifact name
+        value: ${{ jobs.build-production-artifact.outputs.artifact_name }}
+      package_sha256:
+        description: SHA-256 digest of target/package.zip
+        value: ${{ jobs.build-production-artifact.outputs.package_sha256 }}
+      producer_run_attempt:
+        description: GitHub producer workflow run attempt
+        value: ${{ jobs.build-production-artifact.outputs.producer_run_attempt }}
+      producer_run_id:
+        description: GitHub producer workflow run ID
+        value: ${{ jobs.build-production-artifact.outputs.producer_run_id }}
+      operation_id:
+        description: Stable operation-bound identity
+        value: ${{ jobs.build-production-artifact.outputs.operation_id }}
+      protected_main_sha:
+        description: Fresh protected origin/main commit used for ancestry proof
+        value: ${{ jobs.build-production-artifact.outputs.protected_main_sha }}
+      target_sha:
+        description: Exact built commit SHA
+        value: ${{ jobs.build-production-artifact.outputs.target_sha }}
+      workflow_sha:
+        description: Producer workflow run API head SHA
+        value: ${{ jobs.build-production-artifact.outputs.workflow_sha }}
+
+run-name: Build production artifact ${{ inputs.target_sha }} [${{ inputs.operation_id }}]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-artifact-${{ inputs.target_sha }}-${{ inputs.operation_id }}
+  cancel-in-progress: false
+
+env:
+  API_ENDPOINT: "https://api.6529.io"
+  WS_ENDPOINT: "wss://ws.6529.io"
+  ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+  BASE_ENDPOINT: "https://6529.io"
+  NEXTGEN_CHAIN_ID: "1"
+  MOBILE_APP_SCHEME: "mobile6529"
+  CORE_SCHEME: "core6529"
+  IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
+  IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
+  ASSETS_FROM_S3: "true"
+  ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
+
+jobs:
+  build-production-artifact:
+    name: Build exact production artifact
+    runs-on: ${{ vars.PRODUCTION_BUILD_RUNNER || vars.CI_BUILD_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    outputs:
+      artifact_name: ${{ steps.validate-inputs.outputs.artifact_name }}
+      operation_id: ${{ steps.validate-inputs.outputs.operation_id }}
+      package_sha256: ${{ steps.package.outputs.package_sha256 }}
+      target_sha: ${{ steps.validate-inputs.outputs.target_sha }}
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+      artifact_digest: ${{ steps.upload.outputs.artifact-digest }}
+      producer_run_id: ${{ github.run_id }}
+      producer_run_attempt: ${{ github.run_attempt }}
+      protected_main_sha: ${{ steps.verify-target.outputs.protected_main_sha }}
+      workflow_sha: ${{ steps.validate-inputs.outputs.workflow_sha }}
+
+    steps:
+      - name: Validate exact build inputs
+        id: validate-inputs
+        env:
+          OPERATION_ID: ${{ inputs.operation_id }}
+          PRODUCER_RUN_ATTEMPT: ${{ github.run_attempt }}
+          PRODUCER_RUN_ID: ${{ github.run_id }}
+          TARGET_SHA: ${{ inputs.target_sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "::error::target_sha must be a lowercase 40-character commit SHA."
+            exit 1
+          fi
+          if ! [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "::error::workflow SHA is malformed."
+            exit 1
+          fi
+          if ! [[ "$OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$ ]]; then
+            echo "::error::operation_id must be 1-80 artifact-safe characters."
+            exit 1
+          fi
+          if ! [[ "$PRODUCER_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]; then
+            echo "::error::GitHub workflow run ID is malformed."
+            exit 1
+          fi
+          if ! [[ "$PRODUCER_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]]; then
+            echo "::error::GitHub workflow run attempt is malformed."
+            exit 1
+          fi
+          artifact_name="production-frontend-${TARGET_SHA}-${OPERATION_ID}"
+          if ! [[ "$artifact_name" =~ ^[A-Za-z0-9._-]{1,180}$ ]]; then
+            echo "::error::Derived production artifact name is invalid."
+            exit 1
+          fi
+          {
+            echo "TARGET_SHA=$TARGET_SHA"
+            echo "OPERATION_ID=$OPERATION_ID"
+            echo "ARTIFACT_NAME=$artifact_name"
+            echo "WORKFLOW_SHA=$WORKFLOW_SHA"
+          } >> "$GITHUB_ENV"
+          {
+            echo "artifact_name=$artifact_name"
+            echo "operation_id=$OPERATION_ID"
+            echo "target_sha=$TARGET_SHA"
+            echo "workflow_sha=$WORKFLOW_SHA"
+          } >> "$GITHUB_OUTPUT"
+
+      # This workflow checks out only the protected main history. It has no
+      # AWS or Release Bus mutation credentials.
+      - name: Checkout protected main history
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify target SHA is in protected main history
+        id: verify-target
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          auth_header="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git -c "http.extraheader=AUTHORIZATION: basic ${auth_header}" \
+            fetch --no-tags --prune --no-recurse-submodules origin \
+            "+refs/heads/main:refs/remotes/origin/main"
+          git show-ref --verify --quiet refs/remotes/origin/main
+          main_sha="$(git rev-parse --verify refs/remotes/origin/main)"
+          git cat-file -e "${WORKFLOW_SHA}^{commit}"
+          if ! git merge-base --is-ancestor "$WORKFLOW_SHA" "$main_sha"; then
+            echo "::error::workflow SHA is not in the fetched origin/main history."
+            exit 1
+          fi
+          git cat-file -e "${TARGET_SHA}^{commit}"
+          if ! git merge-base --is-ancestor "$TARGET_SHA" "$main_sha"; then
+            echo "::error::target_sha is not in the fetched origin/main history."
+            exit 1
+          fi
+          git checkout --detach "$TARGET_SHA"
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          echo "PROTECTED_MAIN_SHA=$main_sha" >> "$GITHUB_ENV"
+          echo "protected_main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+          echo "Verified $TARGET_SHA as an ancestor of origin/main at $main_sha."
+
+      - name: Capture deterministic production build timestamp
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          build_timestamp="$(git show -s --format=%cI "$TARGET_SHA")"
+          [[ "$build_timestamp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T ]]
+          echo "VERSION_BUILD_TIMESTAMP=$build_timestamp" >> "$GITHUB_ENV"
+
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+
+      - name: Install Socket Firewall
+        id: socket-firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install frozen dependencies
+        env:
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Lint package.json versions
+        run: ./bin/6529 lint:package-json
+
+      - name: Build exact production bytes
+        env:
+          NODE_ENV: "production"
+          VERSION: ${{ inputs.target_sha }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}
+          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: ./bin/6529 run build:ci
+
+      - name: Package exact production bytes
+        id: package
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TARGET_SHA"
+          rm -rf production-artifact .production-bundle
+          mkdir -p production-artifact/target/_next .production-bundle/.next
+
+          test -f .next/standalone/server.js
+          cp -r .next/standalone/. .production-bundle/
+          cp -r .next/static production-artifact/target/_next/
+          cp -r .next/static .production-bundle/.next/
+          cp Procfile .production-bundle/
+          cp -r .ebextensions .production-bundle/
+          if [ -d .platform ]; then cp -r .platform .production-bundle/; fi
+          find .production-bundle -xtype l -delete
+
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then
+              cp ".next/$file" ".production-bundle/.next/$file"
+            fi
+          done
+
+          node scripts/package-public-review-artifacts.cjs prepare \
+            --profile production \
+            --bundle-root .production-bundle
+          test -z "$(find production-artifact/target/_next -type l -print -quit)"
+          (cd .production-bundle && zip -qry ../production-artifact/target/package.zip .)
+
+          zip_listing="$(mktemp)"
+          zip_extract="$(mktemp -d)"
+          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
+          unzip -Z1 production-artifact/target/package.zip > "$zip_listing"
+          node scripts/package-public-review-artifacts.cjs assert-listing \
+            --profile production \
+            --bundle-root .production-bundle \
+            --listing-file "$zip_listing"
+          unzip -q production-artifact/target/package.zip -d "$zip_extract"
+          node scripts/package-public-review-artifacts.cjs assert-zip \
+            --profile production \
+            --bundle-root .production-bundle \
+            --listing-file "$zip_listing" \
+            --extracted-root "$zip_extract"
+
+          package_size="$(stat -c%s production-artifact/target/package.zip)"
+          test "$package_size" -le $((500 * 1024 * 1024))
+          package_digest="$(sha256sum production-artifact/target/package.zip | cut -d' ' -f1)"
+          jq -n \
+            --arg artifact_name "$ARTIFACT_NAME" \
+            --arg package_digest "$package_digest" \
+            --arg build_timestamp "$VERSION_BUILD_TIMESTAMP" \
+            --arg operation_id "$OPERATION_ID" \
+            --arg producer_run_id "$GITHUB_RUN_ID" \
+            --argjson producer_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg protected_main_sha "$PROTECTED_MAIN_SHA" \
+            --arg target_sha "$TARGET_SHA" \
+            --arg workflow_sha "$WORKFLOW_SHA" \
+            '{schema_version:2,artifact_contract:"production-prebuild-v2",repository:"frontend",artifact_name:$artifact_name,source_sha:$target_sha,target_sha:$target_sha,operation_id:$operation_id,workflow_sha:$workflow_sha,protected_main_sha:$protected_main_sha,workflow_run_id:$producer_run_id,run_attempt:$producer_run_attempt,environment:"production",package_sha256:$package_digest,build_timestamp:$build_timestamp}' \
+            > production-artifact/manifest.json
+          node ops/scripts/artifact-portability.cjs inventory \
+            --manifest production-artifact/manifest.json \
+            --package production-artifact/target/package.zip \
+            --extracted-root "$zip_extract" \
+            --runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json" \
+            --assets-flag "$zip_extract/.next/ASSETS_FROM_S3" \
+            --source-root . \
+            --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+            --environment production \
+            --node-version "$(node --version)" \
+            --pnpm-version "$(pnpm --version)" \
+            --output production-artifact/artifact-portability.json
+          (
+            cd production-artifact
+            find manifest.json artifact-portability.json target -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > SHA256SUMS
+          )
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
+          echo "package_sha256=$package_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Upload exact production artifact
+        id: upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-frontend-${{ inputs.target_sha }}-${{ inputs.operation_id }}
+          path: production-artifact
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

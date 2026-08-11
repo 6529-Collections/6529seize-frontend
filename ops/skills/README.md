@@ -12,9 +12,8 @@ This folder stores repo-local Codex skills and agent guidance.
   6529 frontend workstreams from instruction to validated closeout.
 - [Commit Docs Updater](commit-docs-updater/SKILL.md):
   maintains user-facing Markdown documentation under `ops/docs/`.
-- [Deploy 6529](deploy-6529/SKILL.md): carries approved frontend or
-  coordinated frontend/backend releases through merge, staging, production,
-  E2E validation, and deployment coordination.
+- [Deploy 6529](deploy-6529/SKILL.md): operates the approved frontend
+  exact-SHA staging and production paths and their automatic E2E.
 - [Design UI/UX](design-ui-ux/SKILL.md): guides frontend UI changes against
   repo-specific design, Tailwind-first migration, responsive layout,
   interaction-state, media, and visual evidence standards.

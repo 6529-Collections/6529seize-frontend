@@ -89,8 +89,9 @@ Triggers:
 - PR merged to `main`.
 - Manual dispatch.
 - Applying a staging queue label.
-- A scheduled bus that follows the current release authority documented in
-  `ops/docs/developer/simple-release-bus-v2.md`.
+- A scheduled queue evaluation that never deploys production and ultimately
+  uses the canonical `1a-staging` push path documented in
+  `ops/docs/developer/frontend-deployment.md`.
 
 Behavior:
 

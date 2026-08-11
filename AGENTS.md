@@ -1,50 +1,22 @@
 # AGENTS.md
 
-## Simple Release Bus v2
+## Frontend deployment paths
 
-- Simple Release Bus v2 is the only automated release bus.
-- Before staging, production, promotion, or release mutation, run
-  `./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follow
-  `deploy-6529`.
-- Route only from the helper's two effective lane states. When the target lane
-  is `ON`, use v2. When it is `OFF`, use serialized manual fallback only when
-  `changeable: true`, no hidden emergency fence blocks fallback, the target
-  environment lock is free, no mutation/E2E workflow is active, and every
-  already-dispatched exact operation is terminal. Both lanes `OFF` means full
-  manual fallback.
-- There is no inferred control-plane or self-upgrade exception. While a target
-  lane is `ON`, every deploy for that environment—including API,
-  `releaseBus`, cleaner/reconciler, and other control-plane changes—must go
-  through Release Bus with a valid operation identity. A manual workflow is
-  fallback only after the helper authoritatively reports the affected lane
-  `OFF` with `changeable: true`, the helper has verified that no hidden
-  emergency fence blocks fallback, and its drain gate passes. Legacy manual
-  workflows must enforce the same exact-run readiness gate before checkout,
-  build, ref, credential, or deployment mutation. If Release Bus cannot safely
-  self-deploy while `ON`, stop for explicit owner direction; never infer an
-  exception from the component or GitHub actor.
-- Staging `ON` accepts exact candidates. Production `ON` requires a separate
-  exact-SHA production action after `STAGING_VALIDATED`.
-- Raw mode and `ALL` are internal emergency fences, not normal routing or UI
-  controls. Never bypass them. Use the backend fast-off helper only for an
-  emergency hard stop.
-- In manual fallback, dispatch backend `Deploy a service` workflows one at a
-  time and wait for exact success before starting the next. Shared concurrency
-  can cancel sibling service runs, including independent DAG-frontier units.
-- For coupled work, declare backend dependencies and preserve backend-before-
-  frontend ordering. Within v2, only independent backend DAG frontier units run
-  together.
-- `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
-  bound E2E, and never infer production readiness from staging validation.
-- Normal train preflight reuses exact-head/merge-tree PR CI evidence, not
-  environment-incompatible artifact bytes. It builds only the target
-  environment profile and emits an immutable environment-bound manifest.
-  Repository-wide lint, typecheck, test inventory, and full Jest matrices
-  remain PR CI gates and must not return to the normal staging or production
-  train critical path.
-- Never cancel another actor's workflow, force-push a shared ref, or bypass exact
-  SHA/artifact checks. Never author or post release notes manually; preserve the
-  autonomous bot's complete grouping metadata and finalize signal.
+- A push to `1a-staging` is the canonical staging entry point. `Web Deploy -
+STAGING` builds and deploys that exact commit, then its successful run starts
+  automatic `Staging E2E` through the existing dispatcher.
+- `Web Deploy - PROD` is the canonical production entry point. It is manually
+  dispatched on `main`, builds and independently verifies the exact artifact,
+  rejects stale-main and downgrade attempts, deploys it, then starts automatic
+  `Production E2E` through the existing dispatcher.
+- A push or merge to `main` does not deploy production. Do not add a production
+  push trigger or treat a manual E2E run as deployment evidence.
+- Preserve exact-SHA checkout, artifact identity and checksum verification,
+  workflow concurrency, deployment-version checks, and post-deploy E2E.
+- Never cancel another actor's workflow, force-push a shared ref, bypass exact
+  artifact checks, or dispatch a deployment without the user's explicit
+  authorization. Follow `ops/skills/deploy-6529/SKILL.md` and
+  `ops/docs/developer/frontend-deployment.md` for operations and recovery.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -264,8 +236,8 @@ is available, use it; otherwise read the relevant files in
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
   - `ops/skills/write-skills/SKILL.md` for repo-local skill work.
-- For merge, staging, production, or release-lane work, read
-  `ops/docs/developer/simple-release-bus-v2.md` and
+- For merge, staging, production, or deployment work, read
+  `ops/docs/developer/frontend-deployment.md` and
   `ops/skills/deploy-6529/SKILL.md` before acting.
 - Operational plans, roadmaps, runbooks, workstream state, and agent process
   docs belong under `ops/`, not top-level `docs/`.

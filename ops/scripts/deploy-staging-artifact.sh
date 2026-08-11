@@ -46,7 +46,7 @@ sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
   exit 1
 }
 
-release_root="$REPO_DIR/.release-bus"
+release_root="$REPO_DIR/.deployment-artifact"
 release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
 release_dir="$release_root/releases/$release_id"
 release_app="$release_dir/app"

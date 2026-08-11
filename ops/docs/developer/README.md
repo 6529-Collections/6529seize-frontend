@@ -13,15 +13,14 @@ and product-impact operations.
 
 ## Flows
 
-- [Simple Release Bus v2](simple-release-bus-v2.md)
+- [Frontend deployment](frontend-deployment.md)
 - [Build-runner benchmark and activation](runner-activation-playbook.md)
 - [Device farm QA](device-farm-qa.md)
 - [Product-impact Mixpanel runbook](product-impact-mixpanel-runbook.md)
 
 ## Troubleshooting
 
-- Use the failure and rollback sections in
-  [Simple Release Bus v2](simple-release-bus-v2.md) for deployment recovery.
+- Use the recovery section in [Frontend deployment](frontend-deployment.md).
 
 ## Stubs
 
