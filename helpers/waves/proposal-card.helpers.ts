@@ -179,9 +179,7 @@ export const getProposalCardViewModel = (
   const lines = authoredText.split(/\r?\n/);
   const firstMeaningfulLine = getFirstMeaningfulLine(lines);
   const nativeTitle = drop.title?.trim() ?? "";
-  const titleSource = nativeTitle
-    ? nativeTitle
-    : (firstMeaningfulLine?.text ?? "");
+  const titleSource = nativeTitle || firstMeaningfulLine?.text || "";
   const title = titleSource
     ? truncateAtWord(
         normalizePlainText(titleSource),

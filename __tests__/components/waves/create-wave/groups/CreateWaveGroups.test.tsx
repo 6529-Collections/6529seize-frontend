@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import CreateWaveGroups from "@/components/waves/create-wave/groups/CreateWaveGroups";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_GROUPS } from "@/helpers/waves/waves.constants";
@@ -13,7 +13,7 @@ jest.mock(
 );
 
 describe("CreateWaveGroups", () => {
-  it("keeps default access controls collapsed until requested", () => {
+  it("shows the default access controls without an extra disclosure", () => {
     render(
       <CreateWaveGroups
         waveName="Test Wave"
@@ -36,20 +36,18 @@ describe("CreateWaveGroups", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Access" })).toBeVisible();
-    const disclosure = screen.getByRole("button", {
-      name: /Advanced settings/,
-    });
-    expect(disclosure).toHaveAttribute("aria-expanded", "false");
-    expect(disclosure).toHaveTextContent("Anyone can view and participate");
-    expect(screen.getAllByTestId("group")[0]).not.toBeVisible();
-
-    fireEvent.click(disclosure);
-
-    expect(disclosure).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getAllByTestId("group")[0]).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: /Advanced settings/ })
+    ).toBeNull();
+    expect(screen.getAllByTestId("group")).toHaveLength(
+      CREATE_WAVE_GROUPS[ApiWaveType.Chat].length
+    );
+    for (const group of screen.getAllByTestId("group")) {
+      expect(group).toBeVisible();
+    }
   });
 
-  it("marks customized access and renders the restricted warning", () => {
+  it("renders the restricted warning alongside the access controls", () => {
     const groups = { admin: "1", canView: "2" } as any;
     render(
       <CreateWaveGroups
@@ -69,8 +67,5 @@ describe("CreateWaveGroups", () => {
       CREATE_WAVE_GROUPS[ApiWaveType.Rank].length
     );
     expect(screen.getByTestId("warning")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Advanced settings/ })
-    ).toHaveTextContent("Customized");
   });
 });
