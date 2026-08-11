@@ -1,0 +1,1 @@
+export const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 400;

@@ -1054,6 +1054,7 @@
       "facts": [
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
+        "In the app sidebar, selecting another connected profile switches to it and closes the drawer; the add-profile button closes the drawer as the wallet connection flow opens.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "Some write actions, settings, and subscriptions require a connected profile."
@@ -4212,6 +4213,7 @@
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
+        "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
         "Cause filters include Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
         "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
