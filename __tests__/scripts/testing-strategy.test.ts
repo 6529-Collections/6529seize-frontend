@@ -654,6 +654,7 @@ describe("testing strategy CI plan", () => {
       'NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}"'
     );
     expect(museumBrowserRun).toContain("./bin/6529 run dev");
+    expect(museumBrowserRun).not.toContain("PORT_SEARCH_LIMIT=0");
     expect(museumBrowserRun).toContain("PLAYWRIGHT_SKIP_WEB_SERVER=1");
     expect(museumBrowserRun).toContain("trap cleanup_museum_server EXIT");
     expect(museumBrowserRun).toContain(
