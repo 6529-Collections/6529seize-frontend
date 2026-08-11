@@ -1,9 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import CreateWaveDates from "@/components/waves/create-wave/dates/CreateWaveDates";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
-import { getDefaultFirstDecisionTime } from "@/components/waves/create-wave/services/waveDecisionService";
 
 jest.mock(
   "@/components/waves/create-wave/dates/CreateWaveDatesApprove",
@@ -30,7 +29,7 @@ const baseDates: CreateWaveDatesConfig = {
 };
 
 describe("CreateWaveDates", () => {
-  it("summarizes the default schedule before showing detailed controls", () => {
+  it("shows the schedule controls as the primary step content", () => {
     const now = Date.now();
     render(
       <CreateWaveDates
@@ -39,7 +38,6 @@ describe("CreateWaveDates", () => {
           ...baseDates,
           submissionStartDate: now,
           votingStartDate: now,
-          firstDecisionTime: getDefaultFirstDecisionTime(now),
         }}
         errors={[]}
         setDates={jest.fn()}
@@ -47,17 +45,10 @@ describe("CreateWaveDates", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Schedule" })).toBeVisible();
-    const disclosure = screen.getByRole("button", {
-      name: /Advanced settings/,
-    });
-    expect(disclosure).toHaveAttribute("aria-expanded", "false");
-    expect(disclosure).toHaveTextContent("First winners");
-    expect(screen.getByTestId("rank-dates")).not.toBeVisible();
-
-    fireEvent.click(disclosure);
-
-    expect(disclosure).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByTestId("rank-dates")).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: /Advanced settings/ })
+    ).not.toBeInTheDocument();
   });
 
   it("renders approve dates flow for approve waves", () => {
@@ -105,9 +96,6 @@ describe("CreateWaveDates", () => {
       "1"
     );
     expect(screen.getByTestId("rank-dates")).toBeVisible();
-    expect(
-      screen.getByRole("button", { name: /Advanced settings/ })
-    ).toHaveTextContent("Needs attention");
   });
 
   it("keeps non-approve waves on the rank flow", () => {
