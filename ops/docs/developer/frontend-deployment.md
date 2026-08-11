@@ -28,7 +28,9 @@ environment lock and accepts only the run ID of a completed, successful,
 canonical staging deploy job whose exact version is still live; arbitrary
 source SHAs and non-`main` workflow refs are not accepted. The staging
 access-code secret is exposed only to the final test step after this source
-authorization succeeds.
+authorization succeeds. The CI-wave finalizer runs after build, deployment, and
+automatic E2E: it reports success only when all three succeeded and reports
+failure when any of them failed or was skipped by an upstream failure.
 
 ## Production path
 
@@ -60,7 +62,10 @@ the `web-deploy-prod` environment lock. A later production deployment therefore
 cannot change the environment during automatic E2E. Manual production E2E
 recovery also acquires that lock and accepts only a canonical run ID whose
 production deploy job succeeded and whose exact version is still live. Manual
-recovery must run the trusted E2E workflow from `main`.
+recovery must run the trusted E2E workflow from `main`. The CI-wave finalizer
+runs after the builder, independent verifier, deployment, and automatic E2E;
+it sends the success and release-notes notification only when every required
+job succeeded, and otherwise sends the corresponding failure notification.
 
 ## Concurrency and recovery
 
@@ -71,6 +76,9 @@ recovery must run the trusted E2E workflow from `main`.
 - All groups use `cancel-in-progress: false`; queued work is not evidence that
   an earlier running workflow may be cancelled.
 - A failed build or verifier run cannot reach deployment credentials.
+- CI-wave completion notifications are final workflow outcomes: upstream
+  build/verifier/deploy failures and automatic E2E failures produce failure,
+  while success is emitted only after automatic E2E succeeds.
 - A production target outside current `main` history or a downgrade rejection
   requires a fresh explicit production decision; do not bypass the guard.
 - A successful deploy with failed E2E is reported as deployed but unvalidated.

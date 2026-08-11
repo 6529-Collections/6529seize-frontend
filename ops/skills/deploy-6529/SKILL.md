@@ -29,7 +29,8 @@ runs `Web Deploy - STAGING` (`.github/workflows/deploy-staging.yml`), which:
 3. uploads and verifies the immutable artifact;
 4. deploys that version to staging; and
 5. calls reusable `Staging E2E` for that exact SHA before the canonical workflow
-   releases the staging environment lock.
+   releases the staging environment lock, then reports the complete pipeline
+   outcome to the CI wave.
 
 Do not manually dispatch the staging workflow after pushing. A manual dispatch
 is a recovery/rerun entry point only and still rejects any ref other than
@@ -52,7 +53,8 @@ Before dispatching, require explicit production authorization, fetch current
    ancestor of the target SHA;
 5. deploys the verified artifact; and
 6. calls reusable `Production E2E` for that exact SHA before the canonical
-   workflow releases the production environment lock.
+   workflow releases the production environment lock, then reports the
+   complete pipeline outcome to the CI wave.
 
 Never substitute a branch name for the frozen target SHA or bypass the
 independent verifier. A manual E2E recovery run must identify a canonical run
@@ -64,7 +66,8 @@ select an arbitrary source SHA or a non-`main` workflow ref.
 - A failed build or verifier run has no deployment authority. Fix the source or
   retry the exact canonical workflow as explicitly authorized.
 - If staging or production deploy succeeds but E2E fails, report the exact
-  deploy SHA and the E2E failure separately; do not silently redeploy.
+  deploy SHA and the E2E failure separately; the final CI-wave notification is
+  failure, and operators must not silently redeploy.
 - If production rejects a target that left current `main` history or a
   downgrade, resolve current `main` and the deployed production SHA before
   asking for a new explicit dispatch.
