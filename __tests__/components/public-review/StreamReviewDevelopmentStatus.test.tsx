@@ -1,6 +1,6 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 import {
   StreamReviewDevelopmentStatus,
@@ -11,6 +11,10 @@ import { STREAM_REVIEW_PAGES } from "@/lib/public-review/streamReviewDefinition"
 describe("StreamReviewDevelopmentStatus", () => {
   it("answers launch readiness in plain language", () => {
     render(<StreamReviewDevelopmentStatus />);
+
+    const launchReadiness = screen.getByRole("region", {
+      name: "Is Stream ready to launch?",
+    });
 
     expect(
       screen.getByRole("heading", { name: "Is Stream ready to launch?" })
@@ -34,7 +38,22 @@ describe("StreamReviewDevelopmentStatus", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Last checked")).toBeInTheDocument();
     expect(screen.getByText("Open release blockers")).toBeInTheDocument();
-    expect(screen.getByText("10")).toBeInTheDocument();
+    expect(within(launchReadiness).getByText("10")).toBeInTheDocument();
+    expect(
+      within(launchReadiness).queryByRole("link", {
+        name: "Development source (opens in a new tab)",
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      within(launchReadiness).queryAllByRole("link", {
+        name: /Open supporting evidence for .*\(opens in a new tab\)/,
+      })
+    ).toHaveLength(0);
+    expect(
+      within(launchReadiness).queryByText(
+        /The detailed review below is version/
+      )
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Where your input would help" })
     ).not.toBeInTheDocument();

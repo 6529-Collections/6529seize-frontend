@@ -16,6 +16,9 @@ describe("StreamReviewOverviewGuide", () => {
       screen.queryByRole("heading", { name: "What is Stream?" })
     ).not.toBeInTheDocument();
     expect(
+      screen.queryByText(/Stream is a proposed system/)
+    ).not.toBeInTheDocument();
+    expect(
       screen.getByRole("heading", {
         name: "A Stream artwork is more than the media you see",
       })
