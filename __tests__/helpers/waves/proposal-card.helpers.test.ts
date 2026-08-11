@@ -104,6 +104,31 @@ describe("getProposalCardViewModel", () => {
     expect(result.excerpt).toMatch(/…$/);
   });
 
+  it("uses the recipe excerpt limit", () => {
+    const result = getProposalCardViewModel(
+      makeDrop({
+        title: "Configurable proposal",
+        parts: [
+          {
+            part_id: 1,
+            content: Array.from({ length: 80 }, () => "proposal").join(" "),
+            media: [],
+            attachments: [],
+          },
+        ],
+      }),
+      {
+        version: 1,
+        layout: "summary",
+        excerptMaxCharacters: 140,
+        showMediaThumbnail: true,
+      }
+    );
+
+    expect(result.excerpt?.length).toBeLessThanOrEqual(141);
+    expect(result.excerpt).toMatch(/…$/);
+  });
+
   it("reports only real multipart, media, and attachment counts", () => {
     const result = getProposalCardViewModel(
       makeDrop({
@@ -201,5 +226,28 @@ describe("getProposalCardViewModel", () => {
     expect(result.previewImage).toEqual({
       url: "ready.jpg",
     });
+  });
+
+  it("omits the preview when the recipe disables media thumbnails", () => {
+    const result = getProposalCardViewModel(
+      makeDrop({
+        parts: [
+          {
+            part_id: 1,
+            content: "Proposal title",
+            media: [{ url: "ready.jpg", mime_type: "image/jpeg" }],
+            attachments: [],
+          },
+        ],
+      }),
+      {
+        version: 1,
+        layout: "summary",
+        excerptMaxCharacters: 360,
+        showMediaThumbnail: false,
+      }
+    );
+
+    expect(result.previewImage).toBeNull();
   });
 });

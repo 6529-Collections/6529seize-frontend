@@ -35,7 +35,12 @@ import WaveDropReply from "../WaveDropReply";
 import WinnerDropBadge from "./WinnerDropBadge";
 import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
 import { getWinnerVisibleMetadata } from "@/components/waves/winners/identity/winnerIdentity.helpers";
-import type { DropContentPresentation } from "../dropContentPresentation";
+import {
+  PROPOSAL_CARD_SURFACE_CLASS,
+  type DropContentPresentation,
+} from "../dropContentPresentation";
+import ProposalCardContextLabel from "../proposal/ProposalCardContextLabel";
+import ProposalCardReadFullButton from "../proposal/ProposalCardReadFullButton";
 
 const getRankHoverClass = (rank: number | null): string => {
   return getRankHoverBorderClass(rank);
@@ -120,7 +125,10 @@ const DefaultWinnerDropInner = ({
 
   const decisionTime = drop.winning_context?.decision_time;
   const showIdentity = identityMode !== "hidden";
-  const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
+  const isChatProposal =
+    contentPresentation === "proposalCard" && location === DropLocation.WAVE;
+  const shouldOffsetRows =
+    showIdentity && !inlineAuthorOnDesktop && !isChatProposal;
 
   const visibleMetadata = getWinnerVisibleMetadata({
     wave: drop.wave,
@@ -129,9 +137,13 @@ const DefaultWinnerDropInner = ({
   const getBackgroundColorClass = (_loc: DropLocation): string =>
     "tw-bg-iron-950";
 
-  const bgColorClass = isActiveDrop
-    ? "tw-bg-[#3CCB7F]/10"
-    : getBackgroundColorClass(location);
+  let bgColorClass = getBackgroundColorClass(location);
+  if (contentPresentation === "proposalCard") {
+    bgColorClass = PROPOSAL_CARD_SURFACE_CLASS;
+  }
+  if (isActiveDrop) {
+    bgColorClass = "tw-bg-[#3CCB7F]/10";
+  }
 
   const handleLongPress = useCallback(() => {
     if (!showInteractions || !canUseTouchActionSheet) return;
@@ -178,6 +190,13 @@ const DefaultWinnerDropInner = ({
         timestampLayout={timestampLayout}
       />
     );
+  const detachedProposalHeader =
+    isChatProposal && showIdentity ? (
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-pb-2">
+        <WaveDropAuthorPfp drop={drop} />
+        <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
+      </div>
+    ) : null;
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
   useWaveDropMobileMenuController({
@@ -197,138 +216,168 @@ const DefaultWinnerDropInner = ({
         location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
       }`}
     >
-      <div
-        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid ${getRankStaticBorderClass(
-          effectiveRank
-        )} tw-px-4 tw-py-3 ${bgColorClass} ${getRankHoverClass(effectiveRank)}`}
-        style={{
-          ...getDropStyles(isActiveDrop),
-          transition: "box-shadow 0.2s ease, background-color 0.2s ease",
-        }}
-      >
-        {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
-          <WaveDropReply
-            onReplyClick={onReplyClick}
-            dropId={drop.reply_to.drop_id}
-            dropPartId={drop.reply_to.drop_part_id}
-            maybeDrop={
-              drop.reply_to.drop
-                ? { ...drop.reply_to.drop, wave: drop.wave }
-                : null
-            }
-          />
-        )}
+      <div className="tw-group tw-relative tw-w-full">
+        {detachedProposalHeader}
 
         <div
-          className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left ${
-            inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
-          }`}
+          className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid ${getRankStaticBorderClass(
+            effectiveRank
+          )} tw-px-4 tw-py-3 ${
+            isChatProposal
+              ? "sm:tw-ml-[3.25rem] sm:tw-w-[calc(100%-3.25rem)]"
+              : ""
+          } ${bgColorClass} ${getRankHoverClass(effectiveRank)}`}
+          style={{
+            ...getDropStyles(isActiveDrop),
+            transition: "box-shadow 0.2s ease, background-color 0.2s ease",
+          }}
         >
-          {inlineAuthorOnDesktop
-            ? showIdentity && (
-                <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
-                  <WaveDropAuthorPfp drop={drop} />
-                  <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
-                </div>
-              )
-            : showIdentity && <WaveDropAuthorPfp drop={drop} />}
-          <div className="tw-flex tw-w-full tw-flex-col">
-            <div className="tw-flex tw-flex-col tw-items-start">
-              {showIdentity && !inlineAuthorOnDesktop && identityHeader}
-              {identityMode === "default" &&
-                showWaveInfo &&
-                (() => {
-                  const waveDetails = drop.wave as unknown as {
-                    chat?:
-                      | {
-                          scope?:
-                            | {
-                                group?:
-                                  | {
-                                      is_direct_message?: boolean | undefined;
-                                    }
-                                  | undefined;
-                              }
-                            | undefined;
-                        }
-                      | undefined;
-                  };
-                  const isDirectMessage =
-                    waveDetails.chat?.scope?.group?.is_direct_message ?? false;
-                  const waveHref = getWaveRoute({
-                    waveId: drop.wave.id,
-                    isDirectMessage,
-                    isApp: false,
-                  });
-                  return (
-                    <Link
-                      href={waveHref}
-                      onClick={(e) => e.stopPropagation()}
-                      className="tw-mt-0.5 tw-text-xs tw-leading-none tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
-                    >
-                      {drop.wave.name}
-                    </Link>
-                  );
-                })()}
-            </div>
-            <div className={showIdentity ? "tw-mt-2" : ""}>
-              <WaveDropContent
-                drop={drop}
-                activePartIndex={activePartIndex}
-                setActivePartIndex={setActivePartIndex}
-                onDropContentClick={onDropContentClick}
-                onQuoteClick={onQuoteClick}
-                onLongPress={handleLongPress}
-                setLongPressTriggered={setLongPressTriggered}
-                isCompetitionDrop={true}
-                mediaImageScale={mediaImageScale}
-                fullWidthMedia={fullWidthMedia}
-                fullWidthLinkPreviews={fullWidthLinkPreviews}
-                hasTouch={showInteractions && canUseTouchActionSheet}
-                embedPath={embedPath}
-                quotePath={quotePath}
-                embedDepth={embedDepth}
-                maxEmbedDepth={maxEmbedDepth}
-                contentPresentation={contentPresentation}
-              />
-            </div>
-          </div>
-        </div>
-        {canUseDesktopHoverActions && showInteractions && showReplyAndQuote && (
-          <div className="tw-absolute tw-right-0 tw-top-1">
-            <WaveDropActions
-              drop={drop}
-              activePartIndex={activePartIndex}
-              onReply={handleOnReply}
+          {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
+            <WaveDropReply
+              onReplyClick={onReplyClick}
+              dropId={drop.reply_to.drop_id}
+              dropPartId={drop.reply_to.drop_part_id}
+              maybeDrop={
+                drop.reply_to.drop
+                  ? { ...drop.reply_to.drop, wave: drop.wave }
+                  : null
+              }
             />
-          </div>
-        )}
-        <div
-          className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
-        >
-          <WaveWinnerIdentity drop={drop} variant="full" cardVariant="chat" />
-          {visibleMetadata.length > 0 && (
-            <WaveDropMetadata metadata={visibleMetadata} />
           )}
-          {showInteractions && (
-            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-              {!!drop.raters_count && (
-                <WaveDropRatings
+
+          <div
+            className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left ${
+              inlineAuthorOnDesktop || isChatProposal
+                ? "tw-flex-col tw-gap-y-2"
+                : "tw-gap-x-3"
+            }`}
+          >
+            {!isChatProposal &&
+              (inlineAuthorOnDesktop
+                ? showIdentity && (
+                    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+                      <WaveDropAuthorPfp drop={drop} />
+                      <div className="tw-min-w-0 tw-flex-1">
+                        {identityHeader}
+                      </div>
+                    </div>
+                  )
+                : showIdentity && <WaveDropAuthorPfp drop={drop} />)}
+            <div className="tw-flex tw-w-full tw-flex-col">
+              <div className="tw-flex tw-flex-col tw-items-start">
+                {showIdentity &&
+                  !inlineAuthorOnDesktop &&
+                  !isChatProposal &&
+                  identityHeader}
+                {identityMode === "default" &&
+                  showWaveInfo &&
+                  (() => {
+                    const waveDetails = drop.wave as unknown as {
+                      chat?:
+                        | {
+                            scope?:
+                              | {
+                                  group?:
+                                    | {
+                                        is_direct_message?: boolean | undefined;
+                                      }
+                                    | undefined;
+                                }
+                              | undefined;
+                          }
+                        | undefined;
+                    };
+                    const isDirectMessage =
+                      waveDetails.chat?.scope?.group?.is_direct_message ??
+                      false;
+                    const waveHref = getWaveRoute({
+                      waveId: drop.wave.id,
+                      isDirectMessage,
+                      isApp: false,
+                    });
+                    return (
+                      <Link
+                        href={waveHref}
+                        onClick={(e) => e.stopPropagation()}
+                        className="tw-mt-0.5 tw-text-xs tw-leading-none tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+                      >
+                        {drop.wave.name}
+                      </Link>
+                    );
+                  })()}
+              </div>
+              <div
+                className={`tw-flex tw-flex-col ${
+                  isChatProposal ? "tw-gap-y-1" : "tw-gap-y-2"
+                } ${showIdentity && !isChatProposal ? "tw-mt-2" : ""}`}
+              >
+                {isChatProposal && <ProposalCardContextLabel />}
+                <WaveDropContent
                   drop={drop}
-                  winningThreshold={winningThreshold}
+                  activePartIndex={activePartIndex}
+                  setActivePartIndex={setActivePartIndex}
+                  onDropContentClick={onDropContentClick}
+                  onQuoteClick={onQuoteClick}
+                  onLongPress={handleLongPress}
+                  setLongPressTriggered={setLongPressTriggered}
+                  isCompetitionDrop={true}
+                  mediaImageScale={mediaImageScale}
+                  fullWidthMedia={fullWidthMedia}
+                  fullWidthLinkPreviews={fullWidthLinkPreviews}
+                  hasTouch={showInteractions && canUseTouchActionSheet}
+                  embedPath={embedPath}
+                  quotePath={quotePath}
+                  embedDepth={embedDepth}
+                  maxEmbedDepth={maxEmbedDepth}
+                  contentPresentation={contentPresentation}
                 />
-              )}
-              <WaveDropReactions drop={drop} />
+                {isChatProposal && (
+                  <ProposalCardReadFullButton
+                    drop={drop}
+                    onReadFull={onDropContentClick}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+          {canUseDesktopHoverActions &&
+            showInteractions &&
+            showReplyAndQuote && (
+              <div className="tw-absolute tw-right-0 tw-top-1">
+                <WaveDropActions
+                  drop={drop}
+                  activePartIndex={activePartIndex}
+                  onReply={handleOnReply}
+                />
+              </div>
+            )}
+          <div
+            className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
+          >
+            <WaveWinnerIdentity drop={drop} variant="full" cardVariant="chat" />
+            {visibleMetadata.length > 0 && (
+              <WaveDropMetadata metadata={visibleMetadata} />
+            )}
+            {showInteractions && (
+              <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                {!!drop.raters_count && (
+                  <WaveDropRatings
+                    drop={drop}
+                    winningThreshold={winningThreshold}
+                  />
+                )}
+                <WaveDropReactions drop={drop} />
+              </div>
+            )}
+          </div>
+          {hasDropFooter(footer) && (
+            <div
+              className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
+            >
+              {footer}
             </div>
           )}
         </div>
-        {hasDropFooter(footer) && (
-          <div
-            className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
-          >
-            {footer}
-          </div>
-        )}
       </div>
     </div>
   );

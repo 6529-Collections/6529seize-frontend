@@ -11,9 +11,14 @@ import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
 import RankScheduleModeSelector from "./type/RankScheduleModeSelector";
+import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
-  compactProposalCards: false,
+  proposalCards: {
+    mode: "standard",
+    excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
+    showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
+  },
   customRules: null,
   outcomesVisible: true,
   submissionButtonLabel: null,

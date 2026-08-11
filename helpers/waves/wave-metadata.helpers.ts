@@ -6,7 +6,13 @@ import { t } from "@/i18n/messages";
 import type {
   CreateWaveApproveDisplayConfig,
   CreateWaveDisplayConfig,
+  CreateWaveProposalCardConfig,
+  WaveProposalCardRecipe,
 } from "@/types/waves.types";
+import {
+  DEFAULT_PROPOSAL_CARD_RECIPE,
+  normalizeProposalCardExcerptMaxCharacters,
+} from "./proposal-card.helpers";
 import { WaveSubmissionExperience } from "./wave-submission-experience.helpers";
 
 export const APPROVE_WAVE_TAB_LABEL_MAX_LENGTH = 24;
@@ -30,6 +36,7 @@ export const WAVE_DISPLAY_METADATA_KEYS = {
   approvalsTabLabel: "wave_display.approve.tabs.approvals_label",
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
   submissionButtonLabel: "wave_display.submission.button_label",
+  proposalCardRecipe: "wave_display.proposals.card_recipe",
   compactProposalCards: "wave_display.proposals.compact",
   customRules: "wave_display.rules.custom",
   outcomesVisible: "wave_display.outcomes.visible",
@@ -223,16 +230,42 @@ const getSubmissionButtonLabelMetadataRequest = (
   };
 };
 
+interface StoredProposalCardRecipeV1 {
+  readonly version: 1;
+  readonly layout: "summary";
+  readonly excerpt_max_characters: number;
+  readonly show_media_thumbnail: boolean;
+}
+
+const getEffectiveCreateWaveProposalCardConfig = (
+  display: CreateWaveDisplayConfig
+): CreateWaveProposalCardConfig =>
+  display.proposalCards ?? {
+    mode: display.compactProposalCards === true ? "custom" : "standard",
+    excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
+    showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
+  };
+
 const getProposalCardsMetadataRequest = (
-  compactProposalCards: boolean | null | undefined
+  display: CreateWaveDisplayConfig
 ): ApiCreateWaveMetadataRequest | null => {
-  if (compactProposalCards !== true) {
+  const proposalCards = getEffectiveCreateWaveProposalCardConfig(display);
+  if (proposalCards.mode !== "custom") {
     return null;
   }
 
+  const recipe: StoredProposalCardRecipeV1 = {
+    version: 1,
+    layout: "summary",
+    excerpt_max_characters: normalizeProposalCardExcerptMaxCharacters(
+      proposalCards.excerptMaxCharacters
+    ),
+    show_media_thumbnail: proposalCards.showMediaThumbnail,
+  };
+
   return {
-    data_key: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
-    data_value: ENABLED_PROPOSAL_CARDS_METADATA_VALUE,
+    data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+    data_value: JSON.stringify(recipe),
   };
 };
 
@@ -271,7 +304,7 @@ export const getCreateWaveDisplayMetadataRequests = ({
   const proposalCardsRequest =
     waveType === ApiWaveType.Chat
       ? null
-      : getProposalCardsMetadataRequest(display.compactProposalCards);
+      : getProposalCardsMetadataRequest(display);
   const requests = [
     outcomeVisibilityRequest,
     customRulesRequest,
@@ -460,30 +493,85 @@ export const getWaveOutcomeVisibilityFromMetadata = (
     })
   );
 
-export const getWaveProposalCardsEnabledFromMetadata = (
-  waveId: string | null | undefined,
-  metadata: readonly ApiWaveMetadata[] | null | undefined
-): boolean => {
-  const value = getLatestMetadataValue({
-    metadata,
-    dataKey: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
-  })
-    ?.trim()
-    .toLowerCase();
-
-  if (value === ENABLED_PROPOSAL_CARDS_METADATA_VALUE) {
-    return true;
+const parseProposalCardRecipe = (
+  value: string | null | undefined
+): WaveProposalCardRecipe | null => {
+  if (!value) {
+    return null;
   }
 
-  if (value === DISABLED_PROPOSAL_CARDS_METADATA_VALUE) {
-    return false;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      !("version" in parsed) ||
+      parsed.version !== 1 ||
+      !("layout" in parsed) ||
+      parsed.layout !== "summary" ||
+      !("excerpt_max_characters" in parsed) ||
+      typeof parsed.excerpt_max_characters !== "number" ||
+      !("show_media_thumbnail" in parsed) ||
+      typeof parsed.show_media_thumbnail !== "boolean"
+    ) {
+      return null;
+    }
+
+    return {
+      version: 1,
+      layout: "summary",
+      excerptMaxCharacters: normalizeProposalCardExcerptMaxCharacters(
+        parsed.excerpt_max_characters
+      ),
+      showMediaThumbnail: parsed.show_media_thumbnail,
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const getWaveProposalCardRecipeFromMetadata = (
+  waveId: string | null | undefined,
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): WaveProposalCardRecipe | null => {
+  const recipeRow = getLatestMetadataItem({
+    metadata,
+    dataKey: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
+  });
+  if (recipeRow) {
+    return parseProposalCardRecipe(recipeRow.data_value);
+  }
+
+  const legacyRow = getLatestMetadataItem({
+    metadata,
+    dataKey: WAVE_DISPLAY_METADATA_KEYS.compactProposalCards,
+  });
+  if (legacyRow) {
+    const value = legacyRow.data_value.trim().toLowerCase();
+
+    if (value === ENABLED_PROPOSAL_CARDS_METADATA_VALUE) {
+      return DEFAULT_PROPOSAL_CARD_RECIPE;
+    }
+
+    if (value === DISABLED_PROPOSAL_CARDS_METADATA_VALUE) {
+      return null;
+    }
+
+    // An explicit but unsupported legacy value must not opt a wave in.
+    return null;
   }
 
   const normalizedWaveId = waveId?.trim().toLowerCase();
-  return normalizedWaveId
-    ? INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS.has(normalizedWaveId)
-    : false;
+  return normalizedWaveId &&
+    INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS.has(normalizedWaveId)
+    ? DEFAULT_PROPOSAL_CARD_RECIPE
+    : null;
 };
+
+export const getWaveProposalCardsEnabledFromMetadata = (
+  waveId: string | null | undefined,
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): boolean => getWaveProposalCardRecipeFromMetadata(waveId, metadata) !== null;
 
 export const getWaveOutcomeVisibilityMetadataUpdate = ({
   metadata,

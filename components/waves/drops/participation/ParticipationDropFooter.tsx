@@ -4,11 +4,14 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { Children, type ReactNode } from "react";
 import WaveDropReactions from "../WaveDropReactions";
+import type { DropContentPresentation } from "../dropContentPresentation";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
 interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
   readonly voteAction?: ReactNode;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly indentContent?: boolean | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -19,6 +22,8 @@ interface ParticipationDropFooterProps {
 export default function ParticipationDropFooter({
   drop,
   voteAction,
+  contentPresentation = "default",
+  indentContent = true,
   showInteractions = true,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -44,6 +49,10 @@ export default function ParticipationDropFooter({
   const shouldShowReactionsFooter = hasReactions;
   const shouldShowReactionsBeforeVoteFooter =
     hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
+  const isProposalCard = contentPresentation === "proposalCard";
+  const contentOffsetClass = indentContent
+    ? "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
+    : "tw-w-full";
 
   if (!showInteractions) {
     return <div className="tw-pb-4" />;
@@ -52,14 +61,20 @@ export default function ParticipationDropFooter({
   return (
     <>
       {shouldShowReactionsBeforeVoteFooter && (
-        <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+        <div
+          className={`${contentOffsetClass} tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4`}
+        >
           <WaveDropReactions drop={drop} />
         </div>
       )}
 
       {shouldShowVoteFooter && (
         <div
-          className="tw-mt-4 tw-@container sm:tw-ml-[3.25rem]"
+          className={`${isProposalCard ? "tw-mt-2" : "tw-mt-4"} tw-@container ${indentContent ? "sm:tw-ml-[3.25rem]" : ""} ${
+            isProposalCard
+              ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
+              : ""
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between">
@@ -71,6 +86,7 @@ export default function ParticipationDropFooter({
                   winningThreshold={winningThreshold}
                   winningThresholdMinDurationMs={winningThresholdMinDurationMs}
                   isVotingClosed={isVotingClosed}
+                  emphasizeCurrent={isProposalCard}
                 />
               </div>
             )}
@@ -88,19 +104,28 @@ export default function ParticipationDropFooter({
 
       {/* Show ratings if no vote button */}
       {shouldShowRatingsOnlyFooter && (
-        <div className="tw-ml-[3.25rem] tw-mt-4 tw-px-4">
+        <div
+          className={`${indentContent ? "tw-ml-[3.25rem]" : ""} ${isProposalCard ? "tw-mt-2" : "tw-mt-4"} tw-px-4 ${
+            isProposalCard
+              ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
+              : ""
+          }`}
+        >
           <ParticipationDropRatings
             drop={drop}
             rank={drop.rank}
             winningThreshold={winningThreshold}
             winningThresholdMinDurationMs={winningThresholdMinDurationMs}
             isVotingClosed={isVotingClosed}
+            emphasizeCurrent={isProposalCard}
           />
         </div>
       )}
 
       {shouldShowReactionsFooter && !shouldShowReactionsBeforeVoteFooter && (
-        <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+        <div
+          className={`${contentOffsetClass} tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4`}
+        >
           <WaveDropReactions drop={drop} />
         </div>
       )}

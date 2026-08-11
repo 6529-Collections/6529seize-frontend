@@ -474,7 +474,7 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.loadMore": "Cargar más drops",
   "waves.leaderboard.loadingMoreButton": "Cargando…",
   "waves.leaderboard.grid.untitled": "Drop sin título",
-  "waves.leaderboard.grid.readFullText": "Leer el texto completo",
+  "waves.leaderboard.grid.readFull": "Leer todo",
   "waves.leaderboard.grid.open": "Abrir",
   "waves.leaderboard.grid.openNamed": "Abrir {title}",
   "waves.leaderboard.grid.authorProfile": "Ver el perfil de {author}",

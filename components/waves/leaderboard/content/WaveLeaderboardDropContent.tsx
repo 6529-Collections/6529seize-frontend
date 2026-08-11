@@ -6,11 +6,11 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import { useRouter } from "next/navigation";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
-  readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaContainerHeightClassName?: string | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
@@ -20,7 +20,6 @@ export const WaveLeaderboardDropContent: React.FC<
   WaveLeaderboardDropContentProps
 > = ({
   drop,
-  onDropClick,
   isCompetitionDrop = false,
   mediaContainerHeightClassName,
   contentPresentation = "default",
@@ -29,11 +28,6 @@ export const WaveLeaderboardDropContent: React.FC<
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
-    if (contentPresentation === "proposalCard" && onDropClick) {
-      onDropClick(clickedDrop);
-      return;
-    }
-
     const href = getWaveRoute({
       waveId: clickedDrop.wave.id,
       serialNo: clickedDrop.serial_no,
@@ -57,6 +51,9 @@ export const WaveLeaderboardDropContent: React.FC<
         mediaContainerHeightClassName={mediaContainerHeightClassName}
         contentPresentation={contentPresentation}
       />
+      {contentPresentation === "proposalCard" && (
+        <WaveDropActionsOpen drop={drop} variant="readFull" />
+      )}
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         <WaveDropReactions drop={drop} />
       </div>

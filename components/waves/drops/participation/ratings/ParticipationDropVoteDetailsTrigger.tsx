@@ -19,7 +19,7 @@ import { createPortal } from "react-dom";
 import { ParticipationDropVoteDetailsContent } from "./ParticipationDropVoteDetailsContent";
 
 type VoteDetailsTab = "voters" | "logs";
-type VoteDetailsTriggerDensity = "default" | "compact" | "gallery";
+type VoteDetailsTriggerDensity = "default" | "compact" | "gallery" | "tight";
 
 interface ParticipationDropVoteDetailsTriggerProps {
   readonly drop: ApiDrop;
@@ -294,6 +294,7 @@ export default function ParticipationDropVoteDetailsTrigger({
       : null;
   const isCompact = density === "compact";
   const isGallery = density === "gallery";
+  const isTight = density === "tight";
   const isSmallDensity = isCompact || isGallery;
   let densityClassName: string;
   if (isGallery) {
@@ -301,6 +302,8 @@ export default function ParticipationDropVoteDetailsTrigger({
       "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4";
   } else if (isCompact) {
     densityClassName = "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-leading-4";
+  } else if (isTight) {
+    densityClassName = "tw-gap-1 tw-px-2 tw-py-1 tw-leading-5";
   } else {
     densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-leading-5";
   }

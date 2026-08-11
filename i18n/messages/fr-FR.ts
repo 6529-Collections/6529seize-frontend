@@ -481,7 +481,7 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.loadMore": "Charger plus de drops",
   "waves.leaderboard.loadingMoreButton": "Chargement…",
   "waves.leaderboard.grid.untitled": "Drop sans titre",
-  "waves.leaderboard.grid.readFullText": "Lire le texte intégral",
+  "waves.leaderboard.grid.readFull": "Tout lire",
   "waves.leaderboard.grid.open": "Ouvrir",
   "waves.leaderboard.grid.openNamed": "Ouvrir {title}",
   "waves.leaderboard.grid.authorProfile": "Voir le profil de {author}",

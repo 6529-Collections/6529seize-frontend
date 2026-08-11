@@ -476,7 +476,7 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   loadMore: "Load more drops",
   loadingMoreButton: "Loading more…",
   "grid.untitled": "Untitled drop",
-  "grid.readFullText": "Read full text",
+  "grid.readFull": "Read full",
   "grid.open": "Open",
   "grid.openNamed": "Open {title}",
   "grid.authorProfile": "View {author}'s profile",
@@ -525,9 +525,10 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
 } as const);
 
 const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
-  badge: "Proposal",
+  contextLabel: "Proposal",
+  readFull: "Read full",
+  readFullNamed: "Read full: {title}",
   untitledProposal: "Untitled proposal",
-  openFullProposal: "Open full proposal",
   previewAlt: "Media preview for {title}",
   "part.one": "{count} part",
   "part.other": "{count} parts",
@@ -535,6 +536,17 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   "media.other": "{count} media items",
   "attachment.one": "{count} attachment",
   "attachment.other": "{count} attachments",
+  appearanceLabel: "Proposal card appearance",
+  appearanceDescription: "Choose how proposals will appear across this wave.",
+  "mode.standard.label": "Standard",
+  "mode.standard.description": "Use the default proposal presentation.",
+  "mode.custom.label": "Custom",
+  "mode.custom.description": "Use a concise summary card across this wave.",
+  excerptLabel: "Show full text after",
+  excerptDescription: "Longer proposal text is shortened at this limit.",
+  characters: "characters",
+  mediaLabel: "Show media thumbnail",
+  mediaDescription: "Use the first available static image as a preview.",
 } as const);
 
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(

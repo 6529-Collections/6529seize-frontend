@@ -37,6 +37,11 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - `Perpetual Ranking`
 - `Show outcomes` for `Rank` and `Approve` waves.
 - Submission-button label for `Rank` and `Approve` waves.
+- `Proposal card appearance` for `Rank` and `Approve` waves:
+  - `Standard` is the default and keeps the normal proposal presentation
+  - `Custom` applies a reusable summary-card recipe across the Wave
+  - the initial custom recipe controls the authored-text character limit and
+    whether the first ready static image appears as a media thumbnail
 - Approve tab labels for `Approve` waves:
   - proposals tab defaults to `Proposals`
   - approved tab defaults to `Approved`
@@ -64,6 +69,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
 - `Show outcomes` defaults to on. Turning it off hides outcome displays after
   the wave is created.
+- `Proposal card appearance` defaults to `Standard`. Choosing `Custom` stores a
+  versioned Wave-level display recipe when the Wave is created. It does not
+  alter Chat messages or specialized Memes, Curation, and Quorum
+  presentations.
 
 ## Failure and Recovery
 
@@ -86,5 +95,5 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
-- [Compact Proposal Cards](../drop-actions/feature-proposal-cards.md)
+- [Custom Proposal Cards](../drop-actions/feature-proposal-cards.md)
 - [Docs Home](../../README.md)

@@ -1,5 +1,9 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import {
+  PROPOSAL_CARD_SURFACE_CLASS,
+  type DropContentPresentation,
+} from "../dropContentPresentation";
 import { DropLocation } from "../drop.types";
 import { getRankHoverBorderClass } from "../dropRankStyles";
 
@@ -8,6 +12,9 @@ interface ParticipationDropContainerProps {
   readonly isActiveDrop: boolean;
   readonly location: DropLocation;
   readonly children: React.ReactNode;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly alignCardWithContent?: boolean | undefined;
+  readonly leadingContent?: React.ReactNode | undefined;
   readonly useRankStyles?: boolean | undefined;
   readonly floatingActions?: React.ReactNode | undefined;
 }
@@ -50,11 +57,17 @@ const getDropStyles = ({
 
 const getBackgroundClass = ({
   isActiveDrop,
+  contentPresentation,
 }: {
   isActiveDrop: boolean;
+  contentPresentation: DropContentPresentation;
 }): string => {
   if (isActiveDrop) {
     return "tw-bg-[#3CCB7F]/10";
+  }
+
+  if (contentPresentation === "proposalCard") {
+    return PROPOSAL_CARD_SURFACE_CLASS;
   }
 
   return "tw-bg-iron-950";
@@ -65,6 +78,9 @@ export default function ParticipationDropContainer({
   isActiveDrop,
   location,
   children,
+  contentPresentation = "default",
+  alignCardWithContent = false,
+  leadingContent,
   useRankStyles = true,
   floatingActions,
 }: ParticipationDropContainerProps) {
@@ -74,7 +90,13 @@ export default function ParticipationDropContainer({
     rank: useRankStyles ? drop.rank : null,
     isDrop,
   });
-  const backgroundClass = getBackgroundClass({ isActiveDrop });
+  const backgroundClass = getBackgroundClass({
+    isActiveDrop,
+    contentPresentation,
+  });
+  const cardWidthClass = alignCardWithContent
+    ? "tw-w-full sm:tw-ml-[3.25rem] sm:tw-w-[calc(100%-3.25rem)]"
+    : "tw-w-full";
 
   return (
     <div
@@ -82,8 +104,9 @@ export default function ParticipationDropContainer({
     >
       <div className="tw-group tw-relative tw-w-full">
         {floatingActions}
+        {leadingContent}
         <div
-          className={`tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl ${backgroundClass} ${dropStyles} tw-border-solid tw-transition-[box-shadow,background-color,border-color] tw-duration-200 tw-ease-out`}
+          className={`tw-flex ${cardWidthClass} tw-flex-col tw-overflow-hidden tw-rounded-xl ${backgroundClass} ${dropStyles} tw-border-solid tw-transition-[box-shadow,background-color,border-color] tw-duration-200 tw-ease-out`}
         >
           {children}
         </div>

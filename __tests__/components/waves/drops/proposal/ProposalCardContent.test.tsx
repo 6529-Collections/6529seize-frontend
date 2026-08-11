@@ -1,6 +1,17 @@
 import { render, screen } from "@testing-library/react";
 import ProposalCardContent from "@/components/waves/drops/proposal/ProposalCardContent";
 
+let mockProposalCardRecipe: {
+  readonly version: 1;
+  readonly layout: "summary";
+  readonly excerptMaxCharacters: number;
+  readonly showMediaThumbnail: boolean;
+} | null = null;
+
+jest.mock("@/hooks/waves/useWaveProposalCardRecipe", () => ({
+  useWaveProposalCardRecipe: () => mockProposalCardRecipe,
+}));
+
 jest.mock("@/components/common/FallbackImage", () => ({
   FallbackImage: ({
     fallbackSrc,
@@ -13,6 +24,7 @@ jest.mock("@/components/common/FallbackImage", () => ({
 
 const proposal = {
   id: "proposal-1",
+  wave: { id: "wave-1" },
   title: null,
   parts_count: 3,
   parts: [
@@ -34,10 +46,16 @@ const proposal = {
 } as any;
 
 describe("ProposalCardContent", () => {
+  beforeEach(() => {
+    mockProposalCardRecipe = null;
+  });
+
   it("renders authored compact content and only real proposal context", () => {
     render(<ProposalCardContent drop={proposal} />);
 
-    expect(screen.getByText("Proposal")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Proposal", { exact: true })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: "Donation Proposal: Token #0",
@@ -51,7 +69,7 @@ describe("ProposalCardContent", () => {
     expect(screen.getByText("3 parts")).toBeInTheDocument();
     expect(screen.getByText("2 media items")).toBeInTheDocument();
     expect(screen.getByText("1 attachment")).toBeInTheDocument();
-    expect(screen.getByText("Open full proposal")).toBeInTheDocument();
+    expect(screen.queryByText("Read full")).not.toBeInTheDocument();
     expect(
       screen.getByRole("img", {
         name: "Media preview for Donation Proposal: Token #0",
@@ -83,5 +101,22 @@ describe("ProposalCardContent", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("1 part")).not.toBeInTheDocument();
     expect(screen.queryByText(/summary/i)).not.toBeInTheDocument();
+  });
+
+  it("applies the wave recipe to the rendered card", () => {
+    mockProposalCardRecipe = {
+      version: 1,
+      layout: "summary",
+      excerptMaxCharacters: 360,
+      showMediaThumbnail: false,
+    };
+
+    render(<ProposalCardContent drop={proposal} />);
+
+    expect(
+      screen.queryByRole("img", {
+        name: "Media preview for Donation Proposal: Token #0",
+      })
+    ).not.toBeInTheDocument();
   });
 });

@@ -9,7 +9,10 @@ import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOpti
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
-import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import {
+  PROPOSAL_CARD_SURFACE_CLASS,
+  type DropContentPresentation,
+} from "@/components/waves/drops/dropContentPresentation";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -65,6 +68,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
   const suppressNextClickRef = React.useRef(false);
+  const isProposalCard = contentPresentation === "proposalCard";
 
   const handleInteractionStart = React.useCallback(() => {
     suppressNextClickRef.current = true;
@@ -110,7 +114,10 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   }, [handleMobileMenuOpenChange]);
 
   const getBorderClasses = () => {
-    return "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden desktop-hover:hover:tw-border-iron-700";
+    const backgroundClass =
+      isProposalCard ? PROPOSAL_CARD_SURFACE_CLASS : "tw-bg-iron-950";
+
+    return `tw-rounded-xl ${backgroundClass} tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden desktop-hover:hover:tw-border-iron-700`;
   };
 
   const handleVoteButtonClick = () => {
@@ -158,7 +165,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               />
               <div className="tw-flex tw-items-center">
                 <div className="tw-hidden tw-h-8 lg:tw-block">
-                  <WaveDropActionsOpen drop={drop} />
+                  {!isProposalCard && <WaveDropActionsOpen drop={drop} />}
                 </div>
                 <div className="tw-hidden tw-h-8 lg:tw-block">
                   {canDelete && <WaveDropActionsOptions drop={drop} />}
@@ -167,18 +174,24 @@ export const DefaultWaveLeaderboardDrop: React.FC<
             </div>
             <WaveLeaderboardDropContent
               drop={drop}
-              onDropClick={onDropClick}
               isCompetitionDrop={true}
               mediaContainerHeightClassName={mediaContainerHeightClassName}
               contentPresentation={contentPresentation}
             />
-            <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0">
+            <div
+              className={`tw-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 ${
+                isProposalCard
+                  ? "tw-ml-[-3.25rem] tw-mt-4 tw-w-[calc(100%+3.25rem)] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pl-[3.25rem] tw-pt-3"
+                  : "tw-mt-3 tw-w-full"
+              }`}
+            >
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
                 <WaveLeaderboardDropRaters
                   drop={drop}
                   winningThreshold={winningThreshold}
                   winningThresholdMinDurationMs={winningThresholdMinDurationMs}
                   isVotingClosed={isVotingClosed}
+                  emphasizeCurrent={isProposalCard}
                 />
               </div>
               <div

@@ -98,7 +98,11 @@ describe("useWaveConfig", () => {
         maxWinners: null,
       });
       expect(result.current.config.display).toEqual({
-        compactProposalCards: false,
+        proposalCards: {
+          mode: "standard",
+          excerptMaxCharacters: 360,
+          showMediaThumbnail: true,
+        },
         customRules: null,
         submissionButtonLabel: null,
         approve: {

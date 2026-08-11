@@ -1,12 +1,13 @@
-# Compact Proposal Cards
+# Custom Proposal Cards
 
 Parent: [Wave Drop Actions Index](README.md)
 
 ## Overview
 
-Standard `Rank` and `Approve` Waves can present published proposals as compact
-cards. A card is a reading entry point: selecting it opens the complete original
-proposal with its full markdown, media, attachments, and multipart navigation.
+Standard `Rank` and `Approve` Waves can present published proposals with a
+reusable summary-card recipe. A card is a reading entry point: selecting it
+opens the complete original proposal with its full markdown, media, attachments,
+and multipart navigation.
 
 The 6529 Network Museum uses compact proposal cards. Other existing standard
 Waves keep their current drop presentation unless they are explicitly configured
@@ -29,8 +30,8 @@ presentations are not changed by this setting.
   cards.
 - Select a quoted proposal or a same-origin proposal preview inside another
   drop.
-- The Create Wave flow does not currently expose a compact-proposal-card
-  control.
+- While creating a `Rank` or `Approve` Wave, open `Proposal card appearance` in
+  `Overview` and choose `Custom`.
 
 ## User Journey
 
@@ -54,6 +55,9 @@ presentations are not changed by this setting.
   contains those items.
 - A proposal with ready static image media can show one preview image. Animated,
   processing, or failed media is not used as the card preview.
+- The Wave creator can choose the authored-text character limit and whether the
+  media thumbnail appears. Layout, typography, spacing, and image placement are
+  consistent system defaults rather than per-Wave controls.
 - Very short proposals remain compact and do not receive invented descriptive
   text.
 - The surrounding proposal row keeps its existing author, date, status, vote,
@@ -80,17 +84,17 @@ presentations are not changed by this setting.
 - If a proposal does not open, retry the card or use its existing open action.
 - If a quoted proposal is unavailable, the quote area can show the existing
   unavailable or loading state while the surrounding drop remains readable.
-- If a newly created Wave does not show compact cards, confirm the setting was
-  enabled before creation and refresh the Wave.
+- If a newly created Wave does not show custom cards, confirm `Custom` was
+  selected before creation and refresh the Wave.
 
 ## Limitations / Notes
 
 - Compact cards do not generate summaries, categories, decision metadata, or
   proposal-specific labels beyond what the Wave and proposal already provide.
-- The compact/full choice applies per Wave; it is not a personal display
+- The Standard/Custom choice applies per Wave; it is not a personal display
   preference.
-- Creating a Wave persists the choice as Wave metadata. Disabling the setting
-  keeps the standard presentation.
+- Creating a Wave persists Custom as a versioned Wave metadata recipe. Standard
+  creates no recipe and keeps the standard presentation.
 - This card presentation is reusable across standard proposal-bearing Waves but
   is not a replacement for specialized Memes, Curation, or Quorum designs.
 

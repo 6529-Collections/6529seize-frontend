@@ -3,8 +3,12 @@
 import { FallbackImage } from "@/components/common/FallbackImage";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getProposalCardViewModel } from "@/helpers/waves/proposal-card.helpers";
+import {
+  DEFAULT_PROPOSAL_CARD_RECIPE,
+  getProposalCardViewModel,
+} from "@/helpers/waves/proposal-card.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveProposalCardRecipe } from "@/hooks/waves/useWaveProposalCardRecipe";
 import { t } from "@/i18n/messages";
 import { useMemo } from "react";
 
@@ -12,7 +16,9 @@ interface ProposalCardContentProps {
   readonly drop: Pick<
     ApiDrop,
     "id" | "title" | "parts" | "parts_count" | "nft_links"
-  >;
+  > & {
+    readonly wave?: Pick<ApiDrop["wave"], "id"> | undefined;
+  };
   readonly density?: "default" | "compact" | undefined;
 }
 
@@ -39,7 +45,12 @@ export default function ProposalCardContent({
   density = "default",
 }: ProposalCardContentProps) {
   const locale = useBrowserLocale();
-  const viewModel = useMemo(() => getProposalCardViewModel(drop), [drop]);
+  const recipe = useWaveProposalCardRecipe(drop.wave?.id);
+  const viewModel = useMemo(
+    () =>
+      getProposalCardViewModel(drop, recipe ?? DEFAULT_PROPOSAL_CARD_RECIPE),
+    [drop, recipe]
+  );
   const title =
     viewModel.title ?? t(locale, "waves.proposalCard.untitledProposal");
   const isCompact = density === "compact";
@@ -73,19 +84,16 @@ export default function ProposalCardContent({
   return (
     <div
       data-testid={`proposal-card-content-${drop.id}`}
-      className={`tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/80 tw-bg-iron-900/60 ${
-        isCompact ? "tw-p-3" : "tw-p-3 sm:tw-p-4"
-      }`}
+      className={`tw-w-full ${isCompact ? "tw-py-0.5" : "tw-py-1"}`}
     >
-      <div className="tw-flex tw-min-w-0 tw-items-stretch tw-gap-3">
+      <div
+        className={`tw-flex tw-min-w-0 tw-items-start ${
+          isCompact ? "tw-gap-3" : "tw-gap-4"
+        }`}
+      >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
-          <div>
-            <span className="tw-inline-flex tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.14em] tw-text-iron-300">
-              {t(locale, "waves.proposalCard.badge")}
-            </span>
-          </div>
           <h3
-            className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-mt-2 tw-line-clamp-2 tw-break-words tw-font-semibold tw-leading-snug tw-text-iron-50 ${
+            className={`tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-break-words tw-font-semibold tw-leading-snug tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 ${
               isCompact ? "tw-text-sm" : "tw-text-base sm:tw-text-lg"
             }`}
           >
@@ -93,10 +101,10 @@ export default function ProposalCardContent({
           </h3>
           {viewModel.excerpt ? (
             <p
-              className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-mt-2 tw-break-words tw-leading-relaxed tw-text-iron-300 ${
+              className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-break-words tw-leading-relaxed tw-text-iron-300 ${
                 isCompact
-                  ? "tw-line-clamp-2 tw-text-xs"
-                  : "tw-line-clamp-3 tw-text-sm"
+                  ? "tw-mt-1 tw-line-clamp-2 tw-text-xs"
+                  : "tw-mt-1.5 tw-line-clamp-3 tw-text-sm"
               }`}
             >
               {viewModel.excerpt}
@@ -114,29 +122,12 @@ export default function ProposalCardContent({
               ))}
             </div>
           ) : null}
-          <div className="desktop-hover:group-hover:tw-text-primary-200 tw-mt-3 tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-text-primary-300 tw-transition-colors">
-            <span>{t(locale, "waves.proposalCard.openFullProposal")}</span>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 20 20"
-              fill="none"
-              className="tw-size-4 tw-flex-shrink-0"
-            >
-              <path
-                d="M7.5 4.5 13 10l-5.5 5.5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
         </div>
 
         {viewModel.previewImage ? (
           <div
             className={`tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-700 ${
-              isCompact ? "tw-size-20" : "tw-h-28 tw-w-24 sm:tw-w-32"
+              isCompact ? "tw-size-20" : "tw-size-24"
             }`}
           >
             <FallbackImage
@@ -147,7 +138,7 @@ export default function ProposalCardContent({
               fallbackSrc={viewModel.previewImage.url}
               alt={t(locale, "waves.proposalCard.previewAlt", { title })}
               fill
-              sizes={isCompact ? "80px" : "128px"}
+              sizes={isCompact ? "80px" : "96px"}
               className="tw-object-cover"
             />
           </div>

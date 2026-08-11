@@ -53,8 +53,9 @@ describe("useWaveProposalCardPresentation", () => {
       data: [
         {
           id: 1,
-          data_key: "wave_display.proposals.compact",
-          data_value: "true",
+          data_key: "wave_display.proposals.card_recipe",
+          data_value:
+            '{"version":1,"layout":"summary","excerpt_max_characters":420,"show_media_thumbnail":false}',
         },
       ],
     });

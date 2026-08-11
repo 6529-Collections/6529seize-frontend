@@ -472,7 +472,7 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.loadMore": "Weitere Drops laden",
   "waves.leaderboard.loadingMoreButton": "Wird geladen…",
   "waves.leaderboard.grid.untitled": "Unbenannter Drop",
-  "waves.leaderboard.grid.readFullText": "Vollständigen Text lesen",
+  "waves.leaderboard.grid.readFull": "Vollständig lesen",
   "waves.leaderboard.grid.open": "Öffnen",
   "waves.leaderboard.grid.openNamed": "{title} öffnen",
   "waves.leaderboard.grid.authorProfile": "Profil von {author} ansehen",

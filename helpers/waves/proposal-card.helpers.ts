@@ -1,10 +1,33 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
+import type { WaveProposalCardRecipe } from "@/types/waves.types";
 import { markdownToPlainText } from "./waveDescriptionPreview";
 
 const PROPOSAL_CARD_TITLE_MAX_LENGTH = 180;
-const PROPOSAL_CARD_EXCERPT_MAX_LENGTH = 360;
+export const PROPOSAL_CARD_EXCERPT_MIN_LENGTH = 120;
+export const PROPOSAL_CARD_EXCERPT_MAX_LENGTH = 1000;
+export const PROPOSAL_CARD_EXCERPT_DEFAULT_LENGTH = 360;
+
+export const DEFAULT_PROPOSAL_CARD_RECIPE: WaveProposalCardRecipe = {
+  version: 1,
+  layout: "summary",
+  excerptMaxCharacters: PROPOSAL_CARD_EXCERPT_DEFAULT_LENGTH,
+  showMediaThumbnail: true,
+};
+
+export const normalizeProposalCardExcerptMaxCharacters = (
+  value: number | null | undefined
+): number => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return PROPOSAL_CARD_EXCERPT_DEFAULT_LENGTH;
+  }
+
+  return Math.min(
+    PROPOSAL_CARD_EXCERPT_MAX_LENGTH,
+    Math.max(PROPOSAL_CARD_EXCERPT_MIN_LENGTH, Math.round(value))
+  );
+};
 
 interface ProposalCardPreviewImage {
   readonly url: string;
@@ -118,7 +141,8 @@ const getProposalCardPreviewImage = (
 };
 
 export const getProposalCardViewModel = (
-  drop: ProposalCardDrop
+  drop: ProposalCardDrop,
+  recipe: WaveProposalCardRecipe = DEFAULT_PROPOSAL_CARD_RECIPE
 ): ProposalCardViewModel => {
   const authoredText = getAuthoredText(drop);
   const lines = authoredText.split(/\r?\n/);
@@ -148,7 +172,10 @@ export const getProposalCardViewModel = (
 
   const plainExcerpt = normalizePlainText(excerptSource);
   const excerpt = plainExcerpt
-    ? truncateAtWord(plainExcerpt, PROPOSAL_CARD_EXCERPT_MAX_LENGTH)
+    ? truncateAtWord(
+        plainExcerpt,
+        normalizeProposalCardExcerptMaxCharacters(recipe.excerptMaxCharacters)
+      )
     : null;
   const mediaCount = drop.parts.reduce(
     (count, part) => count + part.media.length,
@@ -162,7 +189,9 @@ export const getProposalCardViewModel = (
   return {
     title,
     excerpt,
-    previewImage: getProposalCardPreviewImage(drop),
+    previewImage: recipe.showMediaThumbnail
+      ? getProposalCardPreviewImage(drop)
+      : null,
     partCount: Math.max(drop.parts_count, drop.parts.length),
     mediaCount,
     attachmentCount,

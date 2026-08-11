@@ -2,10 +2,16 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
+import type { CreateWaveDisplayConfig } from "@/types/waves.types";
 
 describe("CreateWaveDisplaySettings", () => {
-  const baseDisplay = {
-    compactProposalCards: false,
+  const baseDisplay: CreateWaveDisplayConfig = {
+    proposalCards: {
+      mode: "standard",
+      excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
+      showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
+    },
     customRules: null,
     outcomesVisible: true,
     submissionButtonLabel: null,
@@ -77,7 +83,7 @@ describe("CreateWaveDisplaySettings", () => {
     });
   });
 
-  it("lets proposal-bearing waves opt into the reusable compact-card display", () => {
+  it("keeps proposal cards standard by default and reveals the custom recipe", () => {
     const onChange = jest.fn();
     render(
       <CreateWaveDisplaySettings
@@ -88,16 +94,61 @@ describe("CreateWaveDisplaySettings", () => {
       />
     );
 
-    const checkbox = screen.getByRole("checkbox", {
-      name: "Compact proposal cards Show published proposals as compact previews that open to the complete original proposal.",
-    });
-    expect(checkbox).not.toBeChecked();
+    expect(screen.getByRole("radio", { name: "Standard" })).toBeChecked();
+    expect(
+      screen.queryByLabelText("Show full text after")
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(checkbox);
+    fireEvent.click(screen.getByRole("radio", { name: "Custom" }));
 
     expect(onChange).toHaveBeenCalledWith({
       ...baseDisplay,
-      compactProposalCards: true,
+      proposalCards: {
+        ...baseDisplay.proposalCards!,
+        mode: "custom",
+      },
+    });
+  });
+
+  it("updates the custom recipe fields", () => {
+    const onChange = jest.fn();
+    const customDisplay: CreateWaveDisplayConfig = {
+      ...baseDisplay,
+      proposalCards: {
+        mode: "custom",
+        excerptMaxCharacters: 360,
+        showMediaThumbnail: true,
+      },
+    };
+    render(
+      <CreateWaveDisplaySettings
+        display={customDisplay}
+        errors={[]}
+        onChange={onChange}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Show full text after"), {
+      target: { value: "480" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...customDisplay,
+      proposalCards: {
+        ...customDisplay.proposalCards!,
+        excerptMaxCharacters: 480,
+      },
+    });
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /media thumbnail/i }));
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...customDisplay,
+      proposalCards: {
+        ...customDisplay.proposalCards!,
+        showMediaThumbnail: false,
+      },
     });
   });
 
