@@ -106,9 +106,9 @@ describe("production artifact verifier", () => {
       group: "production-artifact-verifier-${{ inputs.artifact_id }}",
       "cancel-in-progress": false,
     });
-    expect(source).toContain("actions/artifacts/\${ARTIFACT_ID}");
+    expect(source).toContain("actions/artifacts/${ARTIFACT_ID}");
     expect(source).toContain(
-      "actions/runs/\${ARTIFACT_RUN_ID}/attempts/\${ARTIFACT_RUN_ATTEMPT}"
+      "actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}"
     );
     expect(source).toContain(
       'test "$ARTIFACT_NAME" = "production-frontend-${TARGET_SHA}-${ARTIFACT_RUN_ID}"'

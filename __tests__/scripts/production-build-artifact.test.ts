@@ -77,7 +77,10 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).toContain("aws s3 sync production-artifact/target");
     expect(deploySource).toContain("Refuse stale main or production downgrade");
     expect(deploySource).toContain(
-      'if [ "$current_main_sha" != "$COMMIT_SHA" ]'
+      'if ! git merge-base --is-ancestor "$COMMIT_SHA" "$current_main_sha"; then'
+    );
+    expect(deploySource).not.toContain(
+      'if [ "$current_main_sha" != "$COMMIT_SHA" ]; then'
     );
     expect(deploySource).toContain(
       'git merge-base --is-ancestor "$current_version" "$COMMIT_SHA"'
