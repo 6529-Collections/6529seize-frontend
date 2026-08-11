@@ -92,11 +92,12 @@ function expectReadonlySubscriptionToggle(
 
   const thumb = screen.getByTestId("readonly-subscription-toggle-thumb");
   expect(toggle).toContainElement(thumb);
-  expect(thumb).toHaveClass(
-    checked ? "tw-translate-x-4" : "tw-translate-x-0",
-    checked ? "tw-bg-iron-50" : "tw-bg-iron-400"
-  );
-  expect(thumb).not.toHaveClass("tw-bg-primary-200");
+  if (checked) {
+    expect(thumb).toHaveClass("tw-translate-x-4", "tw-bg-white");
+  } else {
+    expect(thumb).toHaveClass("tw-translate-x-0", "tw-bg-iron-400");
+    expect(thumb).not.toHaveClass("tw-bg-white");
+  }
 }
 
 describe("LatestDropNextMintSubscribe", () => {

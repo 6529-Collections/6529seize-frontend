@@ -7,6 +7,8 @@ const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
 const setToastMock = jest.fn();
 const mockMarkMobileLaunchStep = jest.fn();
 const mockScheduleMobileLaunchFlush = jest.fn();
+const mockRouterReplace = jest.fn();
+let mockSearchParams = new URLSearchParams();
 const mockAuthContextValue = {
   connectedProfile: { handle: "bob", id: "1" } as {
     handle: string;
@@ -47,8 +49,8 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: jest.fn() }),
-  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ replace: mockRouterReplace }),
+  useSearchParams: () => mockSearchParams,
   usePathname: () => "/notifications",
 }));
 
@@ -182,6 +184,8 @@ describe("Notifications component", () => {
     setToastMock.mockClear();
     mockMarkMobileLaunchStep.mockClear();
     mockScheduleMobileLaunchFlush.mockClear();
+    mockRouterReplace.mockClear();
+    mockSearchParams = new URLSearchParams();
     mockAuthContextValue.connectedProfile = { handle: "bob", id: "1" };
     mockAuthContextValue.isAuthenticated = true;
     mockSeizeConnectContextValue.address =
@@ -343,5 +347,69 @@ describe("Notifications component", () => {
         title: "Couldn't mark notifications as read.",
       })
     );
+  });
+
+  it("automatically marks notifications for each authentication scope", async () => {
+    mockSuccessfulNotificationsQuery();
+    const { rerender } = render(
+      <Notifications activeDrop={null} setActiveDrop={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalledWith({
+        authScope: "0x00000000000000000000000000000000000000aa",
+      });
+    });
+
+    mockSeizeConnectContextValue.address =
+      "0x00000000000000000000000000000000000000BB";
+    rerender(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalledWith({
+        authScope: "0x00000000000000000000000000000000000000bb",
+      });
+    });
+    expect(mutateAsyncMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not mark the new wallet after a stale reload refetch resolves", async () => {
+    mockSearchParams = new URLSearchParams("reload=true");
+    let resolveFirstRefetch!: () => void;
+    const firstRefetch = new Promise<void>((resolve) => {
+      resolveFirstRefetch = resolve;
+    });
+    const refetch = jest
+      .fn()
+      .mockImplementationOnce(() => firstRefetch)
+      .mockImplementation(() => new Promise<void>(() => undefined));
+    useNotificationsQueryMock.mockReturnValue({
+      items: ["a"],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn().mockResolvedValue(undefined),
+      refetch,
+      isInitialQueryDone: true,
+      isSuccess: true,
+      error: null,
+    });
+
+    const { rerender } = render(
+      <Notifications activeDrop={null} setActiveDrop={jest.fn()} />
+    );
+    await waitFor(() => expect(refetch).toHaveBeenCalledTimes(1));
+
+    mockSeizeConnectContextValue.address =
+      "0x00000000000000000000000000000000000000BB";
+    rerender(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+    await waitFor(() => expect(refetch).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      resolveFirstRefetch();
+      await firstRefetch;
+    });
+
+    expect(mutateAsyncMock).not.toHaveBeenCalled();
   });
 });

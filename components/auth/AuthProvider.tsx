@@ -698,25 +698,14 @@ export default function Auth({
     !canSignActiveWallet &&
     getSessionClientType() === "web";
 
-  // Computed modal visibility to prevent flickering during rapid state changes
-  const shouldShowSignModal = useMemo(() => {
-    const shouldHideDuringValidation =
+  const shouldShowSignModal =
+    showSignModal &&
+    !isSigningOutAll &&
+    !(
       authLoadingState === "validating" &&
-      signModalReason !== "session-upgrade";
-    return (
-      showSignModal &&
-      !isSigningOutAll &&
-      !shouldHideDuringValidation &&
-      (connectionState === "connected" || isDisconnectedWebSessionUpgradePrompt)
-    );
-  }, [
-    authLoadingState,
-    connectionState,
-    isDisconnectedWebSessionUpgradePrompt,
-    isSigningOutAll,
-    showSignModal,
-    signModalReason,
-  ]);
+      signModalReason !== "session-upgrade"
+    ) &&
+    (connectionState === "connected" || isDisconnectedWebSessionUpgradePrompt);
 
   useEffect(() => {
     syncVisibleAuthPromptTracking({
@@ -785,7 +774,6 @@ export default function Auth({
       showWaves,
     ]
   );
-
   return (
     <AuthContext.Provider value={authContextValue}>
       {children}

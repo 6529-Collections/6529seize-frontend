@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -31,8 +32,6 @@ import { getNotificationErrorDetails } from "../utils/getNotificationErrorDetail
 
 interface NotificationsContentState {
   readonly isLoadingProfile: boolean;
-  readonly hasConnectedProfile: boolean;
-  readonly hasProfileHandle: boolean;
   readonly showProxyDisabledState: boolean;
   readonly showErrorState: boolean;
   readonly resolvedErrorMessage: string;
@@ -42,7 +41,6 @@ interface NotificationsContentState {
 
 interface NotificationsHandlers {
   readonly handleRetry: () => void;
-  readonly handleAuthRetry: () => void;
   readonly handleProxyDisable: () => void;
 }
 
@@ -92,7 +90,7 @@ export const useNotificationsController =
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const hasMarkedAllAsReadRef = useRef(false);
+    const lastMarkedAllAsReadScopeRef = useRef<string | null>(null);
     const errorToastShownRef = useRef(false);
     const reauthTriggeredRef = useRef(false);
     const timeoutToastShownRef = useRef(false);
@@ -116,7 +114,7 @@ export const useNotificationsController =
     const currentNotificationAuthScopeRef = useRef<string | null>(
       notificationAuthScope
     );
-    useEffect(() => {
+    useLayoutEffect(() => {
       currentNotificationAuthScopeRef.current = notificationAuthScope;
     }, [notificationAuthScope]);
     const isCurrentNotificationAuthScope = useCallback(
@@ -125,8 +123,6 @@ export const useNotificationsController =
       []
     );
     const isLoadingProfile = fetchingProfile && !connectedProfile;
-    const hasConnectedProfile = !!connectedProfile;
-    const hasProfileHandle = !!connectedProfile?.handle;
 
     useSetTitle("Notifications | My Stream | Brain");
 
@@ -163,11 +159,14 @@ export const useNotificationsController =
       if (!isAuthenticated || !notificationAuthScope) {
         return;
       }
-      if (reload === "true" || hasMarkedAllAsReadRef.current) {
+      if (
+        reload === "true" ||
+        lastMarkedAllAsReadScopeRef.current === notificationAuthScope
+      ) {
         return;
       }
 
-      hasMarkedAllAsReadRef.current = true;
+      lastMarkedAllAsReadScopeRef.current = notificationAuthScope;
       const markNotificationsAsRead = async (): Promise<void> => {
         try {
           await markAllAsRead({ authScope: notificationAuthScope });
@@ -182,10 +181,10 @@ export const useNotificationsController =
     }, [isAuthenticated, markAllAsRead, notificationAuthScope, reload]);
 
     useEffect(() => {
-      if (!isAuthenticated) {
-        hasMarkedAllAsReadRef.current = false;
+      if (!isAuthenticated || !notificationAuthScope) {
+        lastMarkedAllAsReadScopeRef.current = null;
       }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, notificationAuthScope]);
 
     const {
       items,
@@ -262,7 +261,10 @@ export const useNotificationsController =
 
       refetch()
         .then(() => {
-          hasMarkedAllAsReadRef.current = true;
+          if (!isCurrentNotificationAuthScope(notificationAuthScope)) {
+            return undefined;
+          }
+          lastMarkedAllAsReadScopeRef.current = notificationAuthScope;
           return markAllAsRead({ authScope: notificationAuthScope });
         })
         .catch((error) => {
@@ -274,6 +276,7 @@ export const useNotificationsController =
     }, [
       pathname,
       isAuthenticated,
+      isCurrentNotificationAuthScope,
       markAllAsRead,
       notificationAuthScope,
       refetch,
@@ -386,18 +389,6 @@ export const useNotificationsController =
       });
     }, [refetch]);
 
-    const handleAuthRetry = useCallback(() => {
-      requestAuth().catch((error) => {
-        console.error("Failed to re-authenticate:", error);
-        setToast({
-          type: "error",
-          title: "Couldn't reconnect your wallet.",
-          description: "Check your wallet and try again.",
-          details: getToastErrorDetails(error, DEFAULT_ERROR_MESSAGE),
-        });
-      });
-    }, [requestAuth, setToast]);
-
     const handleProxyDisable = useCallback(() => {
       setActiveProfileProxy(null).catch((error) => {
         console.error("Failed to switch to primary profile:", error);
@@ -436,8 +427,6 @@ export const useNotificationsController =
     const contentState = useMemo<NotificationsContentState>(
       () => ({
         isLoadingProfile,
-        hasConnectedProfile,
-        hasProfileHandle,
         showProxyDisabledState,
         showErrorState,
         resolvedErrorMessage,
@@ -445,8 +434,6 @@ export const useNotificationsController =
         showNoItems,
       }),
       [
-        hasConnectedProfile,
-        hasProfileHandle,
         isLoadingProfile,
         resolvedErrorMessage,
         showErrorState,
@@ -459,10 +446,9 @@ export const useNotificationsController =
     const handlers = useMemo(
       () => ({
         handleRetry,
-        handleAuthRetry,
         handleProxyDisable,
       }),
-      [handleAuthRetry, handleProxyDisable, handleRetry]
+      [handleProxyDisable, handleRetry]
     );
 
     const pagination = useMemo(

@@ -11,7 +11,6 @@ import { HeaderConnectModal } from "@/components/header/share/HeaderShare";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
-import { CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS } from "@/components/header/connected-profile.constants";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserLevel from "@/components/user/utils/level/UserLevel";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
@@ -25,6 +24,7 @@ import { useIdentity } from "@/hooks/useIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
 
 interface WebSidebarUserProps {
   readonly isCollapsed: boolean;
@@ -56,15 +56,6 @@ function WebSidebarUser({
   const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-
-  useEffect(
-    () => () => {
-      if (profileClickTimeoutRef.current) {
-        clearTimeout(profileClickTimeoutRef.current);
-      }
-    },
-    []
-  );
   // Click away that properly handles button clicks
   useClickAway(dropdownRef, (event) => {
     if (
@@ -94,6 +85,15 @@ function WebSidebarUser({
   useEffect(() => {
     setAvatarSrc(resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP);
   }, [resolvedPfp]);
+
+  useEffect(
+    () => () => {
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   if (!address) {
     return (
@@ -160,14 +160,14 @@ function WebSidebarUser({
       (connectedAccountUnreadNotifications?.[account.address.toLowerCase()] ??
         0) > 0
   );
+  const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
 
   const toggleUserMenu = () => {
     setShowUserMenu((current) => !current);
   };
-  const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
 
   const switchToNextConnectedAccount = (): boolean => {
-    if (connectedAccounts.length < 2) {
+    if (!hasMultipleConnectedAccounts) {
       return false;
     }
 
@@ -177,21 +177,30 @@ function WebSidebarUser({
     const currentIndex = Math.max(activeIndex, 0);
     const nextAccount =
       connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
+
     if (!nextAccount) {
       return false;
     }
 
     try {
       seizeSwitchConnectedAccount(nextAccount.address);
+      setShowUserMenu(false);
       return true;
     } catch (error) {
-      console.error("Failed to switch connected account from sidebar", error);
+      console.error(
+        "Failed to switch connected account from desktop sidebar",
+        error
+      );
       return false;
     }
   };
 
-  const onProfileActivate = () => {
+  const handleProfileActivate = () => {
     if (!hasMultipleConnectedAccounts) {
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+        profileClickTimeoutRef.current = null;
+      }
       toggleUserMenu();
       return;
     }
@@ -200,16 +209,14 @@ function WebSidebarUser({
       clearTimeout(profileClickTimeoutRef.current);
       profileClickTimeoutRef.current = null;
 
-      if (!switchToNextConnectedAccount()) {
-        toggleUserMenu();
-      }
+      switchToNextConnectedAccount();
       return;
     }
 
+    toggleUserMenu();
     profileClickTimeoutRef.current = setTimeout(() => {
       profileClickTimeoutRef.current = null;
-      toggleUserMenu();
-    }, CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS);
+    }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
   };
 
   const onOpenConnect = () => {
@@ -222,11 +229,16 @@ function WebSidebarUser({
     <div className={containerClasses}>
       <button
         ref={buttonRef}
-        onClick={onProfileActivate}
+        onClick={handleProfileActivate}
         className={`tw-group/user tw-mt-1 tw-w-full tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 ${
           isCollapsed ? "" : "desktop-hover:hover:tw-bg-iron-900"
         }`}
-        aria-label={t(DEFAULT_LOCALE, "webSidebar.accountMenu.openAriaLabel")}
+        aria-label={t(
+          DEFAULT_LOCALE,
+          hasMultipleConnectedAccounts
+            ? "webSidebar.accountMenu.openWithSwitchAriaLabel"
+            : "webSidebar.accountMenu.openAriaLabel"
+        )}
         aria-expanded={showUserMenu}
         aria-controls="user-menu"
       >
