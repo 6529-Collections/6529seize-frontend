@@ -33,6 +33,13 @@ let mockWagmiAccount: {
 };
 
 let mockAppKitState: { open: boolean };
+let mockWalletInfo:
+  | {
+      name?: string;
+      icon?: string;
+    }
+  | undefined;
+let mockIsSafeWallet: boolean;
 
 jest.mock("@reown/appkit/react", () => ({
   useAppKit: () => ({
@@ -44,7 +51,7 @@ jest.mock("@reown/appkit/react", () => ({
     disconnect: mockDisconnect,
   }),
   useWalletInfo: () => ({
-    walletInfo: undefined,
+    walletInfo: mockWalletInfo,
   }),
 }));
 
@@ -118,7 +125,7 @@ jest.mock("@/utils/security-logger", () => ({
 }));
 
 jest.mock("@/utils/wallet-detection", () => ({
-  isSafeWalletInfo: () => false,
+  isSafeWalletInfo: () => mockIsSafeWallet,
 }));
 
 jest.mock("@/components/auth/error-boundary", () => ({
@@ -149,8 +156,12 @@ function LogoutAllStateProbe() {
   const {
     connectedAccounts,
     hasValidWalletAuth,
+    address,
     isSigningOutAll,
+    isSafeWallet,
     seizeDisconnectAndLogoutAll,
+    walletIcon,
+    walletName,
   } = useSeizeConnectContext();
 
   return (
@@ -163,6 +174,10 @@ function LogoutAllStateProbe() {
       <div data-testid="connected-account-count">
         {connectedAccounts.length}
       </div>
+      <div data-testid="address">{address ?? "none"}</div>
+      <div data-testid="wallet-name">{walletName ?? "none"}</div>
+      <div data-testid="wallet-icon">{walletIcon ?? "none"}</div>
+      <div data-testid="safe-wallet">{isSafeWallet.toString()}</div>
     </>
   );
 }
@@ -213,6 +228,8 @@ describe("SeizeConnectProvider add-account flow", () => {
       },
     };
     mockAppKitState = { open: false };
+    mockWalletInfo = undefined;
+    mockIsSafeWallet = false;
     mockDisconnect.mockResolvedValue(undefined);
     const sessionV2 = require("@/services/auth/session-v2.utils");
     sessionV2.getSessionClientType.mockReturnValue("native");
@@ -618,6 +635,12 @@ describe("SeizeConnectProvider add-account flow", () => {
     const accounts = [ACTIVE_ADDRESS, addressB];
     let resolveFirstRevocation!: () => void;
 
+    mockWalletInfo = {
+      name: "Test wallet",
+      icon: "https://example.com/wallet.png",
+    };
+    mockIsSafeWallet = true;
+
     authUtils.getConnectedWalletAccounts.mockImplementation(() =>
       accounts.map((address: string) => ({
         address,
@@ -647,6 +670,12 @@ describe("SeizeConnectProvider add-account flow", () => {
       </SeizeConnectProvider>
     );
 
+    await waitFor(() => {
+      expect(screen.getByTestId("wallet-name")).toHaveTextContent(
+        "Test wallet"
+      );
+    });
+
     fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
 
     await waitFor(() => {
@@ -656,6 +685,10 @@ describe("SeizeConnectProvider add-account flow", () => {
     expect(screen.getByTestId("connected-account-count")).toHaveTextContent(
       "0"
     );
+    expect(screen.getByTestId("address")).toHaveTextContent("none");
+    expect(screen.getByTestId("wallet-name")).toHaveTextContent("none");
+    expect(screen.getByTestId("wallet-icon")).toHaveTextContent("none");
+    expect(screen.getByTestId("safe-wallet")).toHaveTextContent("false");
     expect(authUtils.clearAllWalletAuth).not.toHaveBeenCalled();
 
     await act(async () => {

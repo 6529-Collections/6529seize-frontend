@@ -705,14 +705,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
-      address: activeAddress,
-      walletName: isActiveWalletConnected
+      address: isSigningOutAll ? undefined : activeAddress,
+      walletName: !isSigningOutAll && isActiveWalletConnected
         ? appKitModalState.walletName
         : undefined,
-      walletIcon: isActiveWalletConnected
+      walletIcon: !isSigningOutAll && isActiveWalletConnected
         ? appKitModalState.walletIcon
         : undefined,
-      isSafeWallet: isActiveWalletConnected
+      isSafeWallet: !isSigningOutAll && isActiveWalletConnected
         ? appKitModalState.isSafeWallet
         : false,
       seizeConnect,
