@@ -9,20 +9,32 @@ interface MarkdownLinkMatch {
   readonly urlEnd: number;
 }
 
-const findBalancedParenthesisEnd = (
+export interface MarkdownToPlainTextOptions {
+  readonly includeImageUrls?: boolean;
+  readonly includeLinkDestinations?: boolean;
+}
+
+const findBalancedDelimiterEnd = (
   input: string,
-  startIndex: number
+  startIndex: number,
+  openDelimiter: string,
+  closeDelimiter: string
 ): number | null => {
   let depth = 1;
 
   for (let cursor = startIndex; cursor < input.length; cursor += 1) {
     const char = input[cursor];
-    if (char === "(") {
+    if (char === "\\") {
+      cursor += 1;
+      continue;
+    }
+
+    if (char === openDelimiter) {
       depth += 1;
       continue;
     }
 
-    if (char === ")") {
+    if (char === closeDelimiter) {
       depth -= 1;
       if (depth === 0) {
         return cursor;
@@ -37,13 +49,18 @@ const parseMarkdownLinkAt = (
   input: string,
   openBracket: number
 ): MarkdownLinkMatch | null => {
-  const closeBracket = input.indexOf("]", openBracket + 1);
-  if (closeBracket === -1 || input[closeBracket + 1] !== "(") {
+  const closeBracket = findBalancedDelimiterEnd(
+    input,
+    openBracket + 1,
+    "[",
+    "]"
+  );
+  if (closeBracket === null || input[closeBracket + 1] !== "(") {
     return null;
   }
 
   const urlStart = closeBracket + 2;
-  const urlEnd = findBalancedParenthesisEnd(input, urlStart);
+  const urlEnd = findBalancedDelimiterEnd(input, urlStart, "(", ")");
   if (urlEnd === null) {
     return null;
   }
@@ -63,20 +80,24 @@ const parseMarkdownLinkAt = (
 const formatMarkdownLink = (
   label: string,
   url: string,
-  isImage: boolean
+  isImage: boolean,
+  options: MarkdownToPlainTextOptions
 ): string => {
   if (isImage) {
-    return url;
+    return options.includeImageUrls === false ? "" : url;
   }
 
-  if (label && url) {
+  if (label && url && options.includeLinkDestinations !== false) {
     return `${label} (${url})`;
   }
 
-  return label || url;
+  return label || (options.includeLinkDestinations === false ? "" : url);
 };
 
-const replaceMarkdownLinks = (input: string): string => {
+const replaceMarkdownLinks = (
+  input: string,
+  options: MarkdownToPlainTextOptions
+): string => {
   let result = "";
   let cursor = 0;
 
@@ -97,15 +118,18 @@ const replaceMarkdownLinks = (input: string): string => {
     result += input.slice(cursor, match.segmentStart);
     const label = input.slice(match.labelStart, match.labelEnd);
     const url = input.slice(match.urlStart, match.urlEnd);
-    result += formatMarkdownLink(label, url, match.isImage);
+    result += formatMarkdownLink(label, url, match.isImage, options);
     cursor = match.urlEnd + 1;
   }
 
   return result;
 };
 
-export const markdownToPlainText = (markdown: string): string => {
-  const withoutLinks = replaceMarkdownLinks(markdown);
+export const markdownToPlainText = (
+  markdown: string,
+  options: MarkdownToPlainTextOptions = {}
+): string => {
+  const withoutLinks = replaceMarkdownLinks(markdown, options);
 
   return withoutLinks
     .replaceAll(/```([\s\S]*?)```/g, "$1")

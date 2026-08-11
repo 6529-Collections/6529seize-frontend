@@ -320,7 +320,7 @@ describe("WaveLeaderboardVirtualizedRows", () => {
       );
     }
 
-    const { container } = render(<Harness />);
+    render(<Harness />);
 
     const retryButton = screen.getByRole("button", {
       name: "Retry loading earlier drops",

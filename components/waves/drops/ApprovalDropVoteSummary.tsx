@@ -141,9 +141,10 @@ export default function ApprovalDropVoteSummary({
   const totalVoteClass = current < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
 
   if (variant === "compact") {
+    const realtimeRating =
+      typeof drop.realtime_rating === "number" ? drop.realtime_rating : null;
     const hasRealtimeRating =
-      typeof drop.realtime_rating === "number" &&
-      drop.realtime_rating !== current;
+      realtimeRating !== null && realtimeRating !== current;
     const voteSummaryLabel = t(
       locale,
       hasRealtimeRating
@@ -152,7 +153,8 @@ export default function ApprovalDropVoteSummary({
       {
         reached: formatInteger(locale, current),
         required: formatInteger(locale, winningThreshold),
-        votesNow: formatInteger(locale, drop.realtime_rating),
+        votesNow:
+          realtimeRating === null ? "" : formatInteger(locale, realtimeRating),
         unit: votingLabel,
         status: statusLabel,
       }
@@ -188,7 +190,7 @@ export default function ApprovalDropVoteSummary({
             {hasRealtimeRating && (
               <DropVoteProgressing
                 current={current}
-                projected={drop.realtime_rating}
+                projected={realtimeRating}
                 tooltipLabel={t(locale, "waves.leaderboard.grid.votesNow")}
                 subtle={subtle}
               />

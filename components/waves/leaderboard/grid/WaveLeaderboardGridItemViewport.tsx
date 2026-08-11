@@ -30,6 +30,10 @@ interface GridItemSummary {
 
 const GRID_TITLE_MAX_LENGTH = 160;
 const GRID_DESCRIPTION_MAX_LENGTH = 260;
+const GRID_SUMMARY_MARKDOWN_OPTIONS = {
+  includeImageUrls: false,
+  includeLinkDestinations: false,
+} as const;
 
 const getGridMediaWrapperClassName = (isCompactMode: boolean): string =>
   `tw-relative tw-flex tw-aspect-square tw-min-h-[14rem] tw-items-center tw-justify-center tw-overflow-hidden md:tw-min-h-[15rem] ${
@@ -49,22 +53,18 @@ const truncateAtWord = (content: string, maxLength: number): string => {
   return `${candidate.slice(0, endIndex).join("").trimEnd()}…`;
 };
 
-const removeMarkdownLinkDestinations = (content: string): string =>
-  content
-    .replace(/!\[[^\]]*]\((?:\\.|[^\\)])*\)/g, "")
-    .replace(/(?<!!)\[([^\]]+)]\((?:\\.|[^\\)])*\)/g, "$1");
-
 const removeLeadingTitle = (content: string, title: string): string => {
-  if (
-    title.length === 0 ||
-    content.slice(0, title.length).toLocaleLowerCase() !==
-      title.toLocaleLowerCase()
-  ) {
+  const contentPrefix = content.slice(0, title.length);
+  const isSameTitle =
+    title.length > 0 &&
+    contentPrefix.localeCompare(title, "en-US", { sensitivity: "base" }) === 0;
+
+  if (!isSameTitle) {
     return content;
   }
 
   return content
-    .slice(title.length)
+    .slice(contentPrefix.length)
     .replace(/^\s*(?:-|:|–|—)\s*/, "")
     .trimStart();
 };
@@ -76,13 +76,20 @@ const getWaveLeaderboardGridItemSummary = ({
   readonly content: string;
   readonly title: string | null | undefined;
 }): GridItemSummary => {
-  const normalizedContent = removeMarkdownLinkDestinations(content);
-  const contentBlocks = normalizedContent
+  const contentBlocks = content
     .split(/\n\s*\n/)
-    .map((block) => markdownToPlainText(block))
+    .map((block) =>
+      markdownToPlainText(block, GRID_SUMMARY_MARKDOWN_OPTIONS)
+    )
     .filter((block) => block.length > 0);
-  const plainContent = markdownToPlainText(normalizedContent);
-  const explicitTitle = markdownToPlainText(title?.trim() ?? "");
+  const plainContent = markdownToPlainText(
+    content,
+    GRID_SUMMARY_MARKDOWN_OPTIONS
+  );
+  const explicitTitle = markdownToPlainText(
+    title?.trim() ?? "",
+    GRID_SUMMARY_MARKDOWN_OPTIONS
+  );
   const firstBlock = contentBlocks[0] ?? "";
   const derivedTitle =
     explicitTitle ||

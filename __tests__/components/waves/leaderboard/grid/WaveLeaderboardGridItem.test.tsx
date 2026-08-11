@@ -219,7 +219,7 @@ describe("WaveLeaderboardGridItem", () => {
     const footer = screen.getByTestId("wave-leaderboard-grid-item-footer-d1");
     expect(footer).toBeInTheDocument();
     expect(footer).toHaveClass("tw-px-3");
-    expect(footer).toHaveClass("tw-pt-3");
+    expect(footer).toHaveClass("tw-pt-1");
     expect(footer).toHaveClass("tw-pb-3");
     expect(footer.firstElementChild).toHaveClass("tw-mb-1");
 
@@ -291,7 +291,7 @@ describe("WaveLeaderboardGridItem", () => {
             {
               media: [],
               content:
-                "**Bright title**\n\nDescription with [external text](https://example.com/hidden).",
+                "**Bright title**\n\nDescription with [external text](https://example.com/path_(hidden)).",
             },
           ],
         }}
@@ -311,8 +311,32 @@ describe("WaveLeaderboardGridItem", () => {
       "tw-line-clamp-6"
     );
     expect(screen.queryByRole("link", { name: "external text" })).toBeNull();
-    expect(screen.queryByText(/example\.com\/hidden/)).toBeNull();
+    expect(screen.getByRole("article")).not.toHaveTextContent(
+      "example.com/path_(hidden)"
+    );
     expect(screen.getAllByText("Bright title")).toHaveLength(1);
+  });
+
+  it("removes a case-insensitive non-ASCII title without clipping content", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          title: "İSTANBUL",
+          parts: [
+            {
+              media: [],
+              content: "istanbul — Description remains intact.",
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "İSTANBUL" })).toBeVisible();
+    expect(screen.getByText("Description remains intact.")).toBeVisible();
   });
 
   it("does not open compact drops from footer vote action", () => {
