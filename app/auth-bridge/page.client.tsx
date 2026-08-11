@@ -20,16 +20,22 @@ import { getAuthJwt } from "@/services/auth/auth.utils";
  * anyone can host arbitrary pages, we match exact redirect URIs (not whole
  * origins) to ensure only approved application endpoints receive the JWT.
  *
- * To add a new community app, add its exact callback URI to
- * AUTH_BRIDGE_ALLOWED_REDIRECT_URIS.
+ * The allowlist is populated from the NEXT_PUBLIC_AUTH_BRIDGE_ALLOWLIST
+ * environment variable — a comma-separated list of exact callback URIs.
+ * This lets the team add/remove community apps without a code change.
+ *
+ * Example .env:
+ *   NEXT_PUBLIC_AUTH_BRIDGE_ALLOWLIST=https://arweave.net/XXXX,https://myapp.com/auth/callback
  */
 
-// Allowlist of approved redirect URIs (exact match, not origin-level).
-// Each entry must be the full callback URL the app will use to receive the token.
-const AUTH_BRIDGE_ALLOWED_REDIRECT_URIS = new Set<string>([
-  // Add approved community app callback URIs here, e.g.:
-  // "https://arweave.net/XXXX-specific-transaction-id",
-]);
+// Parse the allowlist from the public env var at module load time.
+// Comma-separated, trimmed, empty entries skipped.
+const AUTH_BRIDGE_ALLOWED_REDIRECT_URIS = new Set<string>(
+  (process.env.NEXT_PUBLIC_AUTH_BRIDGE_ALLOWLIST ?? "")
+    .split(",")
+    .map((uri) => uri.trim())
+    .filter(Boolean)
+);
 
 function isAllowedRedirect(target: string): boolean {
   try {
@@ -59,6 +65,14 @@ export default function AuthBridgePageClient() {
     if (!redirectTarget) {
       setStatus("error");
       setMessage("Missing redirect target.");
+      return;
+    }
+
+    if (AUTH_BRIDGE_ALLOWED_REDIRECT_URIS.size === 0) {
+      setStatus("error");
+      setMessage(
+        "Auth bridge is not configured. Set NEXT_PUBLIC_AUTH_BRIDGE_ALLOWLIST to enable community app authentication."
+      );
       return;
     }
 
