@@ -144,7 +144,10 @@ function getDisplayedEditorialMarkdown({
   readonly source: StreamReviewSource;
 }): string {
   if (currentPages.artworkLifecycle) {
-    return getCurrentArtworkLifecycleEditorialMarkdown({ editorialMarkdown });
+    return getCurrentArtworkLifecycleEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
   }
   if (currentPages.developmentStatus) {
     return getCurrentDevelopmentEditorialMarkdown({

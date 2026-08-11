@@ -32,7 +32,7 @@ The Core stores the collection ID and its basic information. Each token later re
 
 ### Technical details
 
-The Core is the shared ERC-721 NFT contract. [\`StreamCore.createCollection\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L336) creates the collection. [\`setCollectionData\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L379) stores its artist and supply settings.`,
+The Core is the shared ERC-721 NFT contract. [\`StreamCore.createCollection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L336) creates the collection. [\`setCollectionData\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L379) stores its artist and supply settings.`,
   "publicReview.pages.artworkLifecycle.currentArtworkPackageSection": `## 2. The artwork package is prepared
 
 ### What happens
@@ -133,7 +133,7 @@ The paths do not share every check or counter. Each path must be reviewed on its
 
 ### Technical details
 
-The signed-drop and auction path uses [\`StreamMinter\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMinter.sol). The manager path uses [\`StreamMintManager\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMintManager.sol) and [\`StreamMintLedger\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMintLedger.sol). The Core keeps the token identity while these outside modules apply minting policy.`,
+The signed-drop and auction path uses [\`StreamMinter\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMinter.sol). The manager path uses [\`StreamMintManager\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol) and [\`StreamMintLedger\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintLedger.sol). The Core keeps the token identity while these outside modules apply minting policy.`,
   "publicReview.pages.artworkLifecycle.currentCurationSection": `## 5. The selected drop receives signed approval
 
 ### What happens

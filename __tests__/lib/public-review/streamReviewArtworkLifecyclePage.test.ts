@@ -8,7 +8,7 @@ import {
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
 
-async function loadArtworkLifecycleEditorial(): Promise<string> {
+async function loadArtworkLifecycleEditorial() {
   const reviewVersion = getStreamReviewVersion(
     STREAM_REVIEW_DEFINITION.activeVersion
   );
@@ -21,16 +21,22 @@ async function loadArtworkLifecycleEditorial(): Promise<string> {
   if (page === undefined) {
     throw new Error("The artwork lifecycle test page is unavailable.");
   }
-  return loadStreamEditorialContent(page, reviewVersion.version);
+  return {
+    editorialMarkdown: await loadStreamEditorialContent(
+      page,
+      reviewVersion.version
+    ),
+    source: reviewVersion.source,
+  };
 }
 
 describe("getCurrentArtworkLifecycleEditorialMarkdown", () => {
   it("applies every current-page replacement to the real editorial snapshot", async () => {
-    const editorialMarkdown = await loadArtworkLifecycleEditorial();
+    const input = await loadArtworkLifecycleEditorial();
 
     for (const locale of SUPPORTED_LOCALES) {
       const currentMarkdown = getCurrentArtworkLifecycleEditorialMarkdown({
-        editorialMarkdown,
+        ...input,
         locale,
       });
 
@@ -49,15 +55,37 @@ describe("getCurrentArtworkLifecycleEditorialMarkdown", () => {
     }
   });
 
+  it("builds contract links from the current source context", async () => {
+    const input = await loadArtworkLifecycleEditorial();
+    const repository = "example/Stream";
+    const commit = "a".repeat(40);
+
+    const currentMarkdown = getCurrentArtworkLifecycleEditorialMarkdown({
+      ...input,
+      source: { repository, commit },
+    });
+
+    expect(currentMarkdown).toContain(
+      `https://github.com/${repository}/blob/${commit}/smart-contracts/StreamCore.sol#L336`
+    );
+    expect(currentMarkdown).toContain(
+      `https://github.com/${repository}/blob/${commit}/smart-contracts/StreamMintManager.sol`
+    );
+    expect(currentMarkdown).not.toContain(
+      "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+    );
+  });
+
   it("fails loudly when a required source section no longer matches", async () => {
-    const editorialMarkdown = await loadArtworkLifecycleEditorial();
-    const changedEditorial = editorialMarkdown.replace(
+    const input = await loadArtworkLifecycleEditorial();
+    const changedEditorial = input.editorialMarkdown.replace(
       "## 4. A distribution policy is selected",
       "## 4. Distribution policy"
     );
 
     expect(() =>
       getCurrentArtworkLifecycleEditorialMarkdown({
+        ...input,
         editorialMarkdown: changedEditorial,
       })
     ).toThrow(

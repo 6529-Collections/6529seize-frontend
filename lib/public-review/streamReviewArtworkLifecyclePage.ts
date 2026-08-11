@@ -71,13 +71,24 @@ const CURRENT_SECTIONS = [
 const ARTWORK_LIFECYCLE_REMAINING_SECTIONS =
   /## 8\. Randomness enters a recorded lifecycle[\s\S]*$/;
 
+type ArtworkLifecycleSource = {
+  readonly commit: string;
+  readonly repository: string;
+};
+
 export function getCurrentArtworkLifecycleEditorialMarkdown({
   editorialMarkdown,
   locale = DEFAULT_LOCALE,
+  source,
 }: {
   readonly editorialMarkdown: string;
   readonly locale?: SupportedLocale | undefined;
+  readonly source: ArtworkLifecycleSource;
 }): string {
+  const sourceParams = {
+    sourceCommit: source.commit,
+    sourceRepository: source.repository,
+  };
   const withCurrentIntro = replaceRequiredEditorialMarkdown(
     editorialMarkdown,
     ARTWORK_LIFECYCLE_OLD_INTRO,
@@ -89,7 +100,7 @@ export function getCurrentArtworkLifecycleEditorialMarkdown({
       replaceRequiredEditorialMarkdown(
         markdown,
         section.pattern,
-        `${t(locale, section.messageKey)}\n\n`,
+        `${t(locale, section.messageKey, sourceParams)}\n\n`,
         section.name
       ),
     withCurrentIntro
