@@ -98,13 +98,18 @@ matching records at a time.
 
 ## Implementation and Evidence Status
 
-The current **Where Development Stands** page begins with a separately dated
-development update. It summarizes recent work, active work, launch requirements,
-evidence counts, and the source commit checked for that update. The current
-**Community Review** page begins with six plain-language review questions and
-the authorship disclosure. The development update and review questions appear
-only on their current, unversioned routes. Immutable version routes keep their
-exact editorial snapshot and historical authorship disclosure.
+The current **Where Development Stands** page begins with a direct launch answer:
+Stream is not ready yet. It lists the four remaining launch gates in plain
+language and shows the last checked date plus the open release-blocker count.
+The next sections explain the scope and use five plain progress labels both in
+the guide and as later section names. They keep built code separate from safety
+evidence and accepted plans separate from unaccepted designs. A plain proof
+table then explains what each kind of evidence shows and does not show. Exact
+commit and Git tree values follow under **Technical details**.
+The current **Community Review** page begins with six plain-language review
+questions and the authorship disclosure. The launch answer and review questions
+appear only on their current, unversioned routes. Immutable version routes keep
+their exact editorial snapshot and historical authorship disclosure.
 
 The plain Overview guide appears only on the unversioned Overview and replaces
 the versioned technical Overview there. Its on-page section navigation and
@@ -129,10 +134,12 @@ The active review centralizes snapshot implementation and evidence status on
 Testing and audit remain a separate evidence dimension. Topical pages use
 precise verbs next to each claim and link to the canonical ledger.
 
-The daily update source is
+The development-status source is
 `config/public-reviews/6529-stream.development-status.json`. A routine update
 changes its canonical UTC timestamp, exact Stream source commit, plain-language
-items, evidence counts, and evidence links in one reviewed JSON file. Run
+items, evidence counts, and evidence links in one reviewed JSON file. The
+current page uses its checked date and open-blocker count in the plain launch
+answer. Run
 `./bin/6529 run public-review:knowledge` and
 `./bin/6529 run help-index:sync` after each update. The parser validates the
 record shape, identifiers, source identity, timestamp, counts, internal review

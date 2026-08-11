@@ -1244,27 +1244,261 @@ Reviewers should test what happens when:
   "publicReview.pages.communityReview.title": "Community Review",
   "publicReview.pages.communityReview.summary":
     "How to examine the proposal, frame actionable feedback, and follow the review record.",
-  "publicReview.development.heading": "Development update",
-  "publicReview.development.checkedAt": "Checked {date}",
-  "publicReview.development.source": "Development source",
-  "publicReview.development.finishedRecently": "Finished recently",
-  "publicReview.development.workingOn": "Working on now",
-  "publicReview.development.beforeLaunch": "Still needed before launch",
-  "publicReview.development.evidenceSummary":
-    "Evidence checklist: {complete} complete, {pending} under review, and {missing} remaining. {blockers} recorded issues currently prevent release.",
-  "publicReview.development.openEvidence": "Open the supporting evidence",
-  "publicReview.development.openEvidenceLabel":
-    "Open supporting evidence for {item} (opens in a new tab)",
-  "publicReview.development.snapshotNote":
-    "The detailed review below is version {version}, pinned to contract source {commit}.",
+  "publicReview.development.heading": "Is Stream ready to launch?",
+  "publicReview.development.answer": "Not yet.",
+  "publicReview.development.summary":
+    "Stream has working contracts and many tests. But important safety checks are still missing.",
+  "publicReview.development.beforeLaunch":
+    "Before launch, Stream still needs:",
+  "publicReview.development.beforeLaunch.audit":
+    "An independent security audit.",
+  "publicReview.development.beforeLaunch.liveTesting":
+    "Testing with real services and marketplaces.",
+  "publicReview.development.beforeLaunch.launchSetup":
+    "A final, verified launch setup.",
+  "publicReview.development.beforeLaunch.blockers":
+    "All serious release blockers resolved.",
+  "publicReview.development.pagePurpose":
+    "This page explains what works, what is still uncertain, and what must happen before Stream can launch.",
+  "publicReview.development.lastChecked": "Last checked",
+  "publicReview.development.openBlockers": "Open release blockers",
+  "publicReview.development.editorial.scopeHeading":
+    "What this review covers",
+  "publicReview.development.editorial.scopeSummary":
+    "Stream was not live when this review was created, and no Stream contracts held funds.",
+  "publicReview.development.editorial.progress.heading":
+    "How we describe progress",
+  "publicReview.development.editorial.progress.intro":
+    "We track two separate things:",
+  "publicReview.development.editorial.progress.built":
+    "What has been built.",
+  "publicReview.development.editorial.progress.proof":
+    "What proof exists that it is safe and ready.",
+  "publicReview.development.editorial.progress.caveat":
+    "A progress label shows how far the work has moved. It does not mean Stream is ready to launch.",
+  "publicReview.development.editorial.progress.labelHeading": "Label",
+  "publicReview.development.editorial.progress.meaningHeading":
+    "What it means",
+  "publicReview.development.editorial.progress.working.label":
+    "Working in the reviewed flow",
+  "publicReview.development.editorial.progress.working.meaning":
+    "Built and connected in the full user path described here.",
+  "publicReview.development.editorial.progress.connected.label":
+    "Connected to selected parts",
+  "publicReview.development.editorial.progress.connected.meaning":
+    "Built and connected to some Stream parts. The full user path may still be incomplete.",
+  "publicReview.development.editorial.progress.code.label": "Code exists",
+  "publicReview.development.editorial.progress.code.meaning":
+    "The code exists in the reviewed version. Launch setup and safety proof may still be missing.",
+  "publicReview.development.editorial.progress.plan.label": "Accepted plan",
+  "publicReview.development.editorial.progress.plan.meaning":
+    "The design direction is accepted. Complete code or connection proof is still missing.",
+  "publicReview.development.editorial.progress.open.label": "Not final",
+  "publicReview.development.editorial.progress.open.meaning":
+    "The design is still open, or the work belongs to a later version.",
+  "publicReview.development.editorial.working.heading":
+    "What works in the reviewed flow",
+  "publicReview.development.editorial.working.intro":
+    "These paths are connected in the exact reviewed setup. This is a rehearsal, not a live launch.",
+  "publicReview.development.editorial.working.identity.heading":
+    "Artwork identity and history",
+  "publicReview.development.editorial.working.identity.summary":
+    "Core keeps each token's identity, collection, supply, artist approval, metadata state, and burn history. It also records collection freezes, but a freeze is not complete artwork finality.",
+  "publicReview.development.editorial.working.sales.heading":
+    "Fixed-price sales and auctions",
+  "publicReview.development.editorial.working.sales.summary":
+    "A fixed-price sale checks a signed approval and uses the existing minting contract. An auction creates the token inside the auction contract before bidding starts.",
+  "publicReview.development.editorial.working.payments.heading":
+    "Payments and royalties",
+  "publicReview.development.editorial.working.payments.summary":
+    "Fixed-price sales record credits for the seller, protocol, and curator reserve. Auctions track bidder refunds. Core reports one royalty receiver and a 6.9% royalty for every token; the newer revenue resolver, which stores revenue rules, is not used for this check.",
+  "publicReview.development.editorial.working.safety.heading":
+    "Safety controls and preservation",
+  "publicReview.development.editorial.working.safety.summary":
+    "The admin contract can pause everything or selected actions. Separate roles control emergency pauses and unpausing. Core and the preservation-record contract are included, but artwork recovery and every launch role are not yet proven.",
+  "publicReview.development.editorial.working.boundary":
+    "Only connected behavior is counted here. ADR proposals are not working features.",
+  "publicReview.development.editorial.working.setupLink":
+    "See the exact rehearsal setup",
+  "publicReview.development.editorial.connected.heading":
+    "Connected to selected parts",
+  "publicReview.development.editorial.connected.intro":
+    "Some newer systems are connected to selected contracts. The main Drop and Auction flow does not use them yet.",
+  "publicReview.development.editorial.connected.minting.heading":
+    "A newer minting path",
+  "publicReview.development.editorial.connected.minting.summary":
+    "The mint manager and ledger control who may mint, when minting is open, and supply limits. The ledger keeps past-mint counters. The manager is connected to Core and can update the ledger.",
+  "publicReview.development.editorial.connected.minting.missing":
+    "Signed Drops still use the existing minting contract. The old and new minting paths remain separate.",
+  "publicReview.development.editorial.connected.minting.link":
+    "Learn how the two minting paths differ",
+  "publicReview.development.editorial.connected.payments.heading":
+    "A newer payment path",
+  "publicReview.development.editorial.connected.payments.summary":
+    "The reviewed setup includes newer contracts for payment rules, payment splits, allowed assets, and sale settlement.",
+  "publicReview.development.editorial.connected.payments.missing":
+    "Drops and Auctions still keep their own payment records, and settlement has no configured caller. Sale credits, payment splits, and Core's royalty information remain separate paths.",
+  "publicReview.development.editorial.connected.payments.link":
+    "Learn how the payment paths differ",
+  "publicReview.development.editorial.connected.boundary":
+    "These connections do not prove a complete user flow. ADR proposals are not counted here.",
+  "publicReview.development.editorial.code.heading": "Code exists",
+  "publicReview.development.editorial.code.intro":
+    "The reviewed source contains these features. The exact launch setup has not been proven to use them.",
+  "publicReview.development.editorial.code.existsLabel": "What exists:",
+  "publicReview.development.editorial.code.missingLabel":
+    "What is missing:",
+  "publicReview.development.editorial.code.governance.heading":
+    "Governance and contract replacements",
+  "publicReview.development.editorial.code.governance.exists":
+    "Governance code can delay, cancel, expire, or block actions. It can permanently freeze selected functions and close the initial setup stage. A registry can record each contract's identity, code, status, and approved replacement.",
+  "publicReview.development.editorial.code.governance.missing":
+    "The launch setup has not been proven to include the complete contract list, roles, delays, settings, and replacement paths.",
+  "publicReview.development.editorial.code.artwork.heading":
+    "Artwork protection and records",
+  "publicReview.development.editorial.code.artwork.exists":
+    "Artwork code can delay a permanent final state and allow cancellation or guardian blocking before it becomes final. Other code controls artwork and preservation writers and can create permanent metadata snapshots.",
+  "publicReview.development.editorial.code.artwork.missing":
+    "The launch setup has not been proven to use these systems. Final artwork data, writers, permissions, live providers, and recovery are not fully defined or independently reviewed.",
+  "publicReview.development.editorial.code.minting.heading":
+    "Minting rules",
+  "publicReview.development.editorial.code.minting.exists":
+    "Some governed settings can only increase after a delay, by no more than double, with no emergency shortcut. The minting system can check permissions, limits, and counters, then prepare and complete a mint as one operation.",
+  "publicReview.development.editorial.code.minting.missing":
+    "The full settings list is not bound to the launch setup. Signed Drops still use the older minting path, and some planned gate protections are not implemented.",
+  "publicReview.development.editorial.code.randomness.heading":
+    "Randomness and metadata",
+  "publicReview.development.editorial.code.randomness.exists":
+    "Randomness code tracks waiting, completed, stale, and failed requests and reuses the same random result for a retry. Metadata code supports data stored on the blockchain or outside it, plus scripts, images, attributes, and update notices.",
+  "publicReview.development.editorial.code.randomness.missing":
+    "Live randomness funding, callbacks, monitoring, stale-request rules, and recovery are not proven. Metadata still needs real-world proof with public services, browsers, marketplaces, large responses, and long-term storage.",
+  "publicReview.development.editorial.code.boundary":
+    "This is available code, not active launch protection. ADR proposals are not counted as working features.",
+  "publicReview.development.editorial.plan.heading": "Accepted plan",
+  "publicReview.development.editorial.plan.intro":
+    "The direction is accepted, but complete code and launch proof are still missing.",
+  "publicReview.development.editorial.plan.plannedLabel":
+    "What is planned:",
+  "publicReview.development.editorial.plan.whyLabel": "Why it helps:",
+  "publicReview.development.editorial.plan.missingLabel":
+    "What is still missing:",
+  "publicReview.development.editorial.plan.revenue.heading":
+    "Safer revenue checks",
+  "publicReview.development.editorial.plan.revenue.planned":
+    "An immutable validation contract would check revenue changes. It would hold no funds, roles, or Stream data and could read only from approved contracts with fixed code.",
+  "publicReview.development.editorial.plan.revenue.why":
+    "The revenue resolver would stay in control and reject failed checks, changed code, or bad answers before saving anything.",
+  "publicReview.development.editorial.plan.revenue.missing":
+    "The final validation contract and matching resolver code do not exist in this reviewed version. Their interface and code need independent approval. Recovery would also require a new resolver, continuity proof, registry approval, and a governed Core update.",
+  "publicReview.development.editorial.plan.metadata.heading":
+    "Metadata refresh from approved contracts",
+  "publicReview.development.editorial.plan.metadata.planned":
+    "Approved Stream contracts will be able to send standard metadata refresh notices for one token or a group of tokens.",
+  "publicReview.development.editorial.plan.metadata.reason":
+    "Marketplaces and other services can learn that token metadata changed and should be loaded again.",
+  "publicReview.development.editorial.plan.metadata.missing":
+    "Core currently sends these notices only for its own changes. The new public helpers do not exist. Permissions, lifecycle rules, token limits, abuse protection, implementation, and tests are still required.",
+  "publicReview.development.editorial.plan.metadata.link":
+    "Learn more about metadata refresh",
+  "publicReview.development.editorial.plan.roles.heading":
+    "Exact launch roles",
+  "publicReview.development.editorial.plan.roles.planned":
+    "The launch design lists 37 roles. Each must be connected to exact accounts or contracts, allowed actions, scopes, delays, and removal rules.",
+  "publicReview.development.editorial.plan.roles.reason":
+    "The launch team and reviewers can see exactly who can do what.",
+  "publicReview.development.editorial.plan.roles.missing":
+    "The final launch candidate has not yet proven all 37 role assignments and limits.",
+  "publicReview.development.editorial.plan.boundary":
+    "\"Accepted plan\" means the direction is agreed. It does not mean the work is built, connected, tested, or ready for launch.",
+  "publicReview.development.editorial.open.heading": "Not final",
+  "publicReview.development.editorial.open.intro":
+    "These are proposals or later-version ideas. They are not launch features.",
+  "publicReview.development.editorial.open.proposalLabel":
+    "What is proposed:",
+  "publicReview.development.editorial.open.missingLabel":
+    "What is missing:",
+  "publicReview.development.editorial.open.artist.heading":
+    "Artist permissions and recovery",
+  "publicReview.development.editorial.open.artist.proposal":
+    "ADR 0022 proposes an immutable, stateless validation adapter. It would not be registered, store data, or hold authority. The artist registry would remain the only authority and state owner.",
+  "publicReview.development.editorial.open.artist.missing":
+    "The adapter is not implemented and needs separate approval. Broader rules for collaborators, delegates, guardians, estates, sanctions, disputes, and account recovery are also not final.",
+  "publicReview.development.editorial.open.payments.heading":
+    "Payments and sale types",
+  "publicReview.development.editorial.open.payments.proposal":
+    "A proposed ERC-20 token sale contract would check the payer's signed payment instruction and be the only Stream contract allowed to pull the payment. Settlement would only record and distribute it.",
+  "publicReview.development.editorial.open.payments.missing":
+    "The verifier and complete sale path are not implemented. Dutch auctions, private sales, refund windows, sealed bids, raffles, burn-to-mint, and ERC-20 bidding are proposed or deferred, not current candidate features.",
+  "publicReview.development.editorial.open.records.heading":
+    "Mint records and artwork recovery",
+  "publicReview.development.editorial.open.records.proposal":
+    "ADR 0018 would make the ledger the permanent owner of each batch replay record and connect the ledger record to each token's prepared-mint event. ADR 0020 would preserve the original artwork-finality record and add governed recovery history without replacing or hiding the original.",
+  "publicReview.development.editorial.open.records.missing":
+    "Both proposals still need acceptance and implementation.",
+  "publicReview.development.editorial.open.randomness.heading":
+    "Randomness recovery and providers",
+  "publicReview.development.editorial.open.randomness.proposal":
+    "One proposal would add a fixed waiting period and one limited recovery step for stale randomness requests.",
+  "publicReview.development.editorial.open.randomness.missing":
+    "In the current code, a stale request is final for that token. RandomizerNXT code exists at the reviewed commit, but it is not an approved production provider in the reviewed release policy.",
+  "publicReview.development.editorial.open.boundary":
+    "None of these proposals are protections provided by the launch candidate.",
+  "publicReview.development.editorial.proof.heading": "What counts as proof",
+  "publicReview.development.editorial.proof.intro":
+    "Not all proof tells us the same thing. Each step answers a different question.",
+  "publicReview.development.editorial.proof.adrBoundary":
+    "ADR means Architecture Decision Record. It records a design or proposal; it does not prove that the design is built or ready to launch.",
+  "publicReview.development.editorial.proof.proofHeading": "Proof",
+  "publicReview.development.editorial.proof.meaningHeading":
+    "What it tells us",
+  "publicReview.development.editorial.proof.limitHeading":
+    "What it does not prove",
+  "publicReview.development.editorial.proof.code.label":
+    "Code exists in the reviewed version",
+  "publicReview.development.editorial.proof.code.meaning":
+    "The code or generated file exists in the exact version we reviewed.",
+  "publicReview.development.editorial.proof.code.limit":
+    "That it is connected, configured, safe, or meant for launch.",
+  "publicReview.development.editorial.proof.tests.label": "Local tests pass",
+  "publicReview.development.editorial.proof.tests.meaning":
+    "The listed tests passed in the project's test environment.",
+  "publicReview.development.editorial.proof.tests.limit":
+    "That every path is covered or real services work the same way.",
+  "publicReview.development.editorial.proof.setup.label":
+    "Launch setup checked",
+  "publicReview.development.editorial.proof.setup.meaning":
+    "Addresses, code versions, roles, permissions, settings, and connections match one release candidate.",
+  "publicReview.development.editorial.proof.setup.limit":
+    "That marketplaces and other outside services work correctly.",
+  "publicReview.development.editorial.proof.services.label":
+    "Real services tested",
+  "publicReview.development.editorial.proof.services.meaning":
+    "The chosen wallets, marketplaces, public services, storage, and operating processes work outside local tests.",
+  "publicReview.development.editorial.proof.services.limit":
+    "That the full protocol has been reviewed.",
+  "publicReview.development.editorial.proof.audit.label":
+    "Independent audit completed",
+  "publicReview.development.editorial.proof.audit.meaning":
+    "Independent experts reviewed the exact candidate. Findings and fixes were recorded.",
+  "publicReview.development.editorial.proof.audit.limit":
+    "That future changes or daily operations are automatically safe.",
+  "publicReview.development.editorial.proof.current":
+    "Right now, Stream has strong code and local-test proof.",
+  "publicReview.development.editorial.proof.remaining":
+    "Proof for one exact launch setup, real services, deployment, and an independent audit is still incomplete.",
+  "publicReview.development.editorial.technicalHeading": "Technical details",
+  "publicReview.development.editorial.technicalSummary":
+    "All findings on this page refer to one exact version of Stream's code.",
+  "publicReview.development.editorial.commitLabel": "Commit",
+  "publicReview.development.editorial.treeLabel": "Git tree",
+  "publicReview.development.editorial.updateRequired":
+    "If the code changes, this review must be updated.",
   "publicReview.development.reviewQuestionsHeading":
     "Where your input would help",
   "publicReview.development.reviewQuestionsDescription":
     "Choose the question closest to your experience. Each one explains the issue in plain language and links to the relevant evidence.",
   "publicReview.development.readQuestion": "Open this question",
   "publicReview.development.readQuestionLabel": "Open this question: {title}",
-  "publicReview.development.sourceLabel":
-    "Development source (opens in a new tab)",
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",

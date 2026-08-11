@@ -42,10 +42,6 @@ import {
 } from "@/lib/public-review/streamReviewDefinition";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
 
-const DEVELOPMENT_UPDATE_OLD_LOCATION =
-  /The separately dated development update on the current Overview records work\s+completed after this snapshot\./;
-const DEVELOPMENT_UPDATE_CURRENT_LOCATION =
-  "The separately dated development update above records work completed after this snapshot.";
 const ARTWORK_LIFECYCLE_OLD_INTRO = `A Stream artwork moves through a sequence of deliberate commitments. Collection
 identity comes first. Artwork materials, distribution, payment, randomness, and
 metadata are then assembled around it. Supply and Core configuration can later
@@ -74,6 +70,585 @@ const ARTWORK_LIFECYCLE_TOKEN_IDENTITY_SECTION =
   /## 7\. The token receives a permanent identity[\s\S]*?(?=## 8\.|$)/;
 const ARTWORK_LIFECYCLE_REMAINING_SECTIONS =
   /## 8\. Randomness enters a recorded lifecycle[\s\S]*$/;
+const DEVELOPMENT_EDITORIAL_OPENING =
+  /^(# [^\n]+\n\n)[\s\S]*?(?=^## Working in the rehearsal)/m;
+const DEVELOPMENT_WORKING_SECTION =
+  /^## Working in the rehearsal\n\n[\s\S]*?(?=^## Connected for integration)/m;
+const DEVELOPMENT_CONNECTED_SECTION =
+  /^## Connected for integration\n\n[\s\S]*?(?=^## Source-implemented systems)/m;
+const DEVELOPMENT_CODE_SECTION =
+  /^## Source-implemented systems\n\n[\s\S]*?(?=^## Planned for release)/m;
+const DEVELOPMENT_PLAN_SECTION =
+  /^## Planned for release\n\n[\s\S]*?(?=^## Under discussion)/m;
+const DEVELOPMENT_OPEN_SECTION =
+  /^## Under discussion\n\n[\s\S]*?(?=^## Test evidence)/m;
+
+const DEVELOPMENT_PROGRESS_ROWS = [
+  {
+    sourceHeading: "Working in the rehearsal",
+    label: "publicReview.development.editorial.progress.working.label",
+    meaning: "publicReview.development.editorial.progress.working.meaning",
+  },
+  {
+    sourceHeading: "Connected for integration",
+    label: "publicReview.development.editorial.progress.connected.label",
+    meaning: "publicReview.development.editorial.progress.connected.meaning",
+  },
+  {
+    sourceHeading: "Source-implemented systems",
+    label: "publicReview.development.editorial.progress.code.label",
+    meaning: "publicReview.development.editorial.progress.code.meaning",
+  },
+  {
+    sourceHeading: "Planned for release",
+    label: "publicReview.development.editorial.progress.plan.label",
+    meaning: "publicReview.development.editorial.progress.plan.meaning",
+  },
+  {
+    sourceHeading: "Under discussion",
+    label: "publicReview.development.editorial.progress.open.label",
+    meaning: "publicReview.development.editorial.progress.open.meaning",
+  },
+] as const;
+
+const DEVELOPMENT_PROOF_ROWS = [
+  {
+    label: "publicReview.development.editorial.proof.code.label",
+    meaning: "publicReview.development.editorial.proof.code.meaning",
+    limit: "publicReview.development.editorial.proof.code.limit",
+  },
+  {
+    label: "publicReview.development.editorial.proof.tests.label",
+    meaning: "publicReview.development.editorial.proof.tests.meaning",
+    limit: "publicReview.development.editorial.proof.tests.limit",
+  },
+  {
+    label: "publicReview.development.editorial.proof.setup.label",
+    meaning: "publicReview.development.editorial.proof.setup.meaning",
+    limit: "publicReview.development.editorial.proof.setup.limit",
+  },
+  {
+    label: "publicReview.development.editorial.proof.services.label",
+    meaning: "publicReview.development.editorial.proof.services.meaning",
+    limit: "publicReview.development.editorial.proof.services.limit",
+  },
+  {
+    label: "publicReview.development.editorial.proof.audit.label",
+    meaning: "publicReview.development.editorial.proof.audit.meaning",
+    limit: "publicReview.development.editorial.proof.audit.limit",
+  },
+] as const;
+
+function getCurrentDevelopmentEditorialMarkdown({
+  editorialMarkdown,
+  source,
+}: {
+  readonly editorialMarkdown: string;
+  readonly source: {
+    readonly commit: string;
+    readonly repository: string;
+    readonly tree: string;
+  };
+}): string {
+  const sourceUrl = `https://github.com/${source.repository}/tree/${source.commit}`;
+  const rehearsalSourceUrl = `https://github.com/${source.repository}/blob/${source.commit}/script/RehearseDeployment.s.sol#L169-L270`;
+  const progressRows = DEVELOPMENT_PROGRESS_ROWS.map(
+    ({ label, meaning }) =>
+      `| **${t(DEFAULT_LOCALE, label)}** | ${t(DEFAULT_LOCALE, meaning)} |`
+  ).join("\n");
+  const proofRows = DEVELOPMENT_PROOF_ROWS.map(
+    ({ label, limit, meaning }) =>
+      `| **${t(DEFAULT_LOCALE, label)}** | ${t(DEFAULT_LOCALE, meaning)} | ${t(
+        DEFAULT_LOCALE,
+        limit
+      )} |`
+  ).join("\n");
+  const plainOpening = [
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.scopeHeading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.scopeSummary"),
+    "",
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.progress.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.progress.intro"),
+    "",
+    `- ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.progress.built"
+    )}`,
+    `- ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.progress.proof"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.progress.caveat"),
+    "",
+    `| ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.progress.labelHeading"
+    )} | ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.progress.meaningHeading"
+    )} |`,
+    "| --- | --- |",
+    progressRows,
+    "",
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.proof.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.proof.intro"),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.proof.adrBoundary"),
+    "",
+    `| ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.proof.proofHeading"
+    )} | ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.proof.meaningHeading"
+    )} | ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.proof.limitHeading"
+    )} |`,
+    "| --- | --- | --- |",
+    proofRows,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.proof.current"),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.proof.remaining"),
+    "",
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.technicalHeading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.technicalSummary"),
+    "",
+    `- ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.commitLabel"
+    )}: [\`${source.commit}\`](${sourceUrl})`,
+    `- ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.treeLabel"
+    )}: \`${source.tree}\``,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.updateRequired"),
+  ].join("\n");
+
+  const markdownWithPlainOpening = editorialMarkdown.replace(
+    DEVELOPMENT_EDITORIAL_OPENING,
+    (_match, title: string) => `${title}${plainOpening}\n\n`
+  );
+  const plainWorkingSection = [
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.working.intro"),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.identity.heading"
+    )}`,
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.identity.summary"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.sales.heading"
+    )}`,
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.sales.summary"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.payments.heading"
+    )}`,
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.payments.summary"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.safety.heading"
+    )}`,
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.safety.summary"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.working.boundary"),
+    "",
+    `[${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.working.setupLink"
+    )}](${rehearsalSourceUrl}).`,
+  ].join("\n");
+  const markdownWithPlainWorkingSection = markdownWithPlainOpening.replace(
+    DEVELOPMENT_WORKING_SECTION,
+    `${plainWorkingSection}\n\n`
+  );
+  const plainConnectedSection = [
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.connected.intro"),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.minting.heading"
+    )}`,
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.minting.summary"
+    ),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.minting.missing"
+    ),
+    "",
+    `[${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.minting.link"
+    )}](./tokens-collections-and-minting#the-two-source-mint-lanes).`,
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.payments.heading"
+    )}`,
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.payments.summary"
+    ),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.payments.missing"
+    ),
+    "",
+    `[${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.connected.payments.link"
+    )}](./revenue-splits-and-royalties).`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.connected.boundary"),
+  ].join("\n");
+  const markdownWithPlainConnectedSection =
+    markdownWithPlainWorkingSection.replace(
+      DEVELOPMENT_CONNECTED_SECTION,
+      `${plainConnectedSection}\n\n`
+    );
+  const plainCodeSection = [
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.intro"),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.governance.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.existsLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.governance.exists"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.governance.missing"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.artwork.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.existsLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.artwork.exists"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.artwork.missing"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.minting.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.existsLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.minting.exists"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.minting.missing"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.randomness.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.existsLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.randomness.exists"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.code.randomness.missing"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.code.boundary"),
+  ].join("\n");
+  const markdownWithPlainCodeSection = markdownWithPlainConnectedSection.replace(
+    DEVELOPMENT_CODE_SECTION,
+    `${plainCodeSection}\n\n`
+  );
+  const plainPlanSection = [
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.intro"),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.revenue.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.plannedLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.revenue.planned"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.whyLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.revenue.why"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.revenue.missing"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.metadata.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.plannedLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.metadata.planned"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.whyLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.metadata.reason"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.metadata.missing"
+    ),
+    "",
+    `[${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.metadata.link"
+    )}](./metadata-scripts-and-dependencies#refresh-events-tell-consumers-that-state-changed).`,
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.roles.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.plannedLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.roles.planned"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.whyLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.roles.reason"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.plan.roles.missing"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.plan.boundary"),
+  ].join("\n");
+  const markdownWithPlainPlanSection = markdownWithPlainCodeSection.replace(
+    DEVELOPMENT_PLAN_SECTION,
+    `${plainPlanSection}\n\n`
+  );
+  const plainOpenSection = [
+    `## ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.intro"),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.artist.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.proposalLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.artist.proposal"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.artist.missing"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.payments.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.proposalLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.payments.proposal"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.payments.missing"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.records.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.proposalLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.records.proposal"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.records.missing"
+    ),
+    "",
+    `### ${t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.randomness.heading"
+    )}`,
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.proposalLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.randomness.proposal"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.missingLabel"),
+    "",
+    t(
+      DEFAULT_LOCALE,
+      "publicReview.development.editorial.open.randomness.missing"
+    ),
+    "",
+    t(DEFAULT_LOCALE, "publicReview.development.editorial.open.boundary"),
+  ].join("\n");
+  const markdownWithPlainOpenSection = markdownWithPlainPlanSection.replace(
+    DEVELOPMENT_OPEN_SECTION,
+    `${plainOpenSection}\n\n`
+  );
+
+  return DEVELOPMENT_PROGRESS_ROWS.reduce(
+    (markdown, { label, sourceHeading }) =>
+      markdown.replace(
+        `## ${sourceHeading}`,
+        `## ${t(DEFAULT_LOCALE, label)}`
+      ),
+    markdownWithPlainOpenSection
+  );
+}
 
 function getStreamReviewMetadata({
   baseEndpoint,
@@ -215,10 +790,10 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     );
   }
   if (isCurrentDevelopmentStatus) {
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      DEVELOPMENT_UPDATE_OLD_LOCATION,
-      DEVELOPMENT_UPDATE_CURRENT_LOCATION
-    );
+    displayedEditorialMarkdown = getCurrentDevelopmentEditorialMarkdown({
+      editorialMarkdown: displayedEditorialMarkdown,
+      source: manifest.source,
+    });
   }
   const displayedPage: typeof route.page = isCurrentArtworkLifecycle
     ? {
@@ -249,10 +824,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
             <StreamReviewOverviewGuide pages={reviewVersion.pages} />
           ) : null}
           {isCurrentDevelopmentStatus ? (
-            <StreamReviewDevelopmentStatus
-              reviewSourceCommit={manifest.source.commit}
-              reviewVersion={contentVersion}
-            />
+            <StreamReviewDevelopmentStatus />
           ) : null}
           {isCurrentCommunityReview ? (
             <StreamReviewReviewerPrompts pages={reviewVersion.pages} />
