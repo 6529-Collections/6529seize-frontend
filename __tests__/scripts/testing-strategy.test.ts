@@ -501,8 +501,9 @@ describe("testing strategy CI plan", () => {
     );
     expect(workflow).toContain('case "$selected_pack"');
     expect(workflow).toContain(
-      "selected_specs=(tests/museum/network-ia-readonly.spec.ts)"
+      "museum_gate_spec=tests/museum/network-ia-readonly.spec.ts"
     );
+    expect(workflow).toContain("selected_specs=()");
     expect(workflow).toContain('[ ! -f "$selected_spec" ]');
     expect(workflow).toContain("./bin/6529 exec playwright test");
     expect(workflow).not.toContain('./bin/6529 run "$selected_pack"');
@@ -621,6 +622,20 @@ describe("testing strategy CI plan", () => {
     );
     expect(museumBrowserRun).toContain(
       "Museum shard inventory must cover desktop and mobile Chromium"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum fail-fast gate must cover Network IA on desktop and mobile Chromium"
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-gate"'
+    );
+    expect(museumBrowserRun).toContain(
+      "timeout --signal=TERM --kill-after=30s 10m"
+    );
+    expect(museumBrowserRun).toContain("--retries=0");
+    expect(museumBrowserRun).toContain("--max-failures=1");
+    expect(museumBrowserRun).toContain(
+      "Museum Network IA gate exceeded its 10-minute timeout."
     );
     expect(museumBrowserRun).toContain(
       'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-shard-${shard}"'
