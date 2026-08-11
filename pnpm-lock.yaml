@@ -37,29 +37,29 @@ importers:
         specifier: 1.11.1
         version: 1.11.1
       '@capacitor/app':
-        specifier: 7.0.1
-        version: 7.0.1(@capacitor/core@7.4.1)
+        specifier: 8.1.1
+        version: 8.1.1(@capacitor/core@8.5.0)
       '@capacitor/barcode-scanner':
-        specifier: 2.2.6
-        version: 2.2.6(@capacitor/core@7.4.1)
+        specifier: 3.1.0
+        version: 3.1.0(@capacitor/core@8.5.0)
       '@capacitor/core':
-        specifier: 7.4.1
-        version: 7.4.1
+        specifier: 8.5.0
+        version: 8.5.0
       '@capacitor/device':
-        specifier: 7.0.1
-        version: 7.0.1(@capacitor/core@7.4.1)
+        specifier: 8.0.3
+        version: 8.0.3(@capacitor/core@8.5.0)
       '@capacitor/filesystem':
-        specifier: 7.1.2
-        version: 7.1.2(@capacitor/core@7.4.1)
+        specifier: 8.1.2
+        version: 8.1.2(@capacitor/core@8.5.0)
       '@capacitor/keyboard':
-        specifier: 7.0.6
-        version: 7.0.6(@capacitor/core@7.4.1)
+        specifier: 8.0.5
+        version: 8.0.5(@capacitor/core@8.5.0)
       '@capacitor/push-notifications':
-        specifier: 7.0.1
-        version: 7.0.1(@capacitor/core@7.4.1)
+        specifier: 8.1.2
+        version: 8.1.2(@capacitor/core@8.5.0)
       '@capacitor/share':
-        specifier: 7.0.1
-        version: 7.0.1(@capacitor/core@7.4.1)
+        specifier: 8.0.1
+        version: 8.0.1(@capacitor/core@8.5.0)
       '@dnd-kit/core':
         specifier: 6.3.1
         version: 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -172,8 +172,8 @@ importers:
         specifier: 1.18.0
         version: 1.18.0
       capacitor-secure-storage-plugin:
-        specifier: 0.11.0
-        version: 0.11.0(@capacitor/core@7.4.1)
+        specifier: 0.13.0
+        version: 0.13.0(@capacitor/core@8.5.0)
       chart.js:
         specifier: 4.5.1
         version: 4.5.1
@@ -788,43 +788,43 @@ packages:
   '@borewit/text-codec@0.2.2':
     resolution: {integrity: sha512-DDaRehssg1aNrH4+2hnj1B7vnUGEjU6OIlyRdkMd0aUdIUvKXrJfXsy8LVtXAy7DRvYVluWbMspsRhz2lcW0mQ==}
 
-  '@capacitor/app@7.0.1':
-    resolution: {integrity: sha512-ArlVZAAla4MwQoKh26x2AaTDOBh5Vhp1VhMKR3RwqZSsZnazKTFGNrPbr9Ez5r1knnEDfApyjwp1uZnXK1WTYQ==}
+  '@capacitor/app@8.1.1':
+    resolution: {integrity: sha512-xM2ZTX5jK60tFtmjsmJv+Cdj1Qsb6NcavkqmdEnCPQBeya9oKhamZJxYOnQNj1ZvcJM7sWfG6BEtSLx42pisbA==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/barcode-scanner@2.2.6':
-    resolution: {integrity: sha512-qiRpCwFuT1eeWTdnWVRyH55ec4nlTQTVG53LWAvgqShH7m4GIIzpPl/XtziEyaEmc89hJF4czufCdGbWDj4xsw==}
+  '@capacitor/barcode-scanner@3.1.0':
+    resolution: {integrity: sha512-uE4njvsQGVfhjChg5ZU8ayYX9i2LM9Dg9/TWXG/L1s+pRVR5JG6PxsC3dCuKa9F6OVCYrKcEmdSi3E6KT+fMbg==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/core@7.4.1':
-    resolution: {integrity: sha512-0ap4FzPJItaeg3QiiS1WguPNHY2aD67fQ9wr7DojCRzTFuNXQPvFB6lBkqlrVeQyJ9jCw0KV/LXv25oXjDcsyA==}
+  '@capacitor/core@8.5.0':
+    resolution: {integrity: sha512-Ca4krtqH1hothjtBIwf2J2TW7IhYq1ujp8QeItTiJohNsqij8ja2DYYH3DU0l8RmxCWaBAFTGA2TgOgOMCSNsQ==}
 
-  '@capacitor/device@7.0.1':
-    resolution: {integrity: sha512-ImjR2LmCEhbckYtOHXTfi5v6B7d4HPX9uKIAQs7wzzmE+yRRXuUTEzARBQ00dZDInAInkbuyQRdjwPTSHZUpnw==}
+  '@capacitor/device@8.0.3':
+    resolution: {integrity: sha512-rliPCCZwxtjU6200jJNDAsQhioyozV3fGgiP+NgRqtDOI7i+Jdz+DYNwEup+3MGZZ4NEmkuFaBeWLM3T01vJRg==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/filesystem@7.1.2':
-    resolution: {integrity: sha512-Goy8t8+n58iTMjsq4cQgrvk+JB373BlsshNrPBTFIHgB2ilEasWDeHN1XXCocEZo0sDCEMKq3ujyzunssHjxVw==}
+  '@capacitor/filesystem@8.1.2':
+    resolution: {integrity: sha512-doaaMfGoFR2hWU6aV6u83I+5ZsGyJVq+Gz4r9lMpJzUKMm1eMu0hLnFdV1aXZlU9FlK/RndFrVD8oRZfNOqWgQ==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/keyboard@7.0.6':
-    resolution: {integrity: sha512-mH9EHo4EnBA9zJAi6domGVB/PdEkcm0h27nJDHG4Y3fd2oKsheCxDRXlYrbgj8hcyQPe0cGWqAfzfwKzkWQoFQ==}
+  '@capacitor/keyboard@8.0.5':
+    resolution: {integrity: sha512-oFXygC4eKYA5l2MdpTR06L2M/4x6e2SLD5yS1T9+UBDKTkzyvhWKEhbYLUaTIBPpLKqlfGudJw1X73S1H9eUzQ==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/push-notifications@7.0.1':
-    resolution: {integrity: sha512-nSHsMSrTHX5pOkX1Khse75/uvSx/JTcXG+9aT6a66CvzalH6MCs0ha8Jv+xu0k9xW8caO+qSUMjfj5Oy82Uxmw==}
+  '@capacitor/push-notifications@8.1.2':
+    resolution: {integrity: sha512-TQl4XxqJfNF+KbSYBFMXYYT5WXUaleVKXlByhh/8+KySMVNjp+l5OqAUoGe/sY1IAnGXEuUeCjA/WLZEVvGwrA==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/share@7.0.1':
-    resolution: {integrity: sha512-7GAtWrb2inEWohC8E7mx38qAX6D9yqPDDnUtJaZ8JRpo15jjFRS40Cx388M8h4NlBWjV5NU3qf1sHXnyOBSJ5g==}
+  '@capacitor/share@8.0.1':
+    resolution: {integrity: sha512-3cSBKBCJVon54rKDROP2rqGyeGks4pBh9TbaEk9S375Kbek/ZHe72N50zIa0Vn9Eac/SuhwgehO/mmA4CsUOiw==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
@@ -4564,10 +4564,10 @@ packages:
   caniuse-lite@1.0.30001806:
     resolution: {integrity: sha512-72Cuvd95zbSYPKq6Fhg8eDJRlzgWDf7/mtoZv6Qe/DYNCEBdNxoA3+rZAU2ZhGCpZlns3EssFavaZomckT5Uuw==}
 
-  capacitor-secure-storage-plugin@0.11.0:
-    resolution: {integrity: sha512-1fs+RifRlKia+7U68Ekm+5FrX5OiWK/MBvtFdfFR2t7enh3rrIHuemA1+0Rkl3IWcQ6XOcL/6lOb5elZq9IMTA==}
+  capacitor-secure-storage-plugin@0.13.0:
+    resolution: {integrity: sha512-+rLC/9Z0LTaRRt6L6HjBwcDh5gqgI3NPmDSwo4hk41XQOy3EBrRo81VleIqFsowsMA3oMT+E59Bl8/HiWk0nhQ==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -9297,39 +9297,39 @@ snapshots:
 
   '@borewit/text-codec@0.2.2': {}
 
-  '@capacitor/app@7.0.1(@capacitor/core@7.4.1)':
+  '@capacitor/app@8.1.1(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
 
-  '@capacitor/barcode-scanner@2.2.6(@capacitor/core@7.4.1)':
+  '@capacitor/barcode-scanner@3.1.0(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
       html5-qrcode: 2.3.8
 
-  '@capacitor/core@7.4.1':
+  '@capacitor/core@8.5.0':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/device@7.0.1(@capacitor/core@7.4.1)':
+  '@capacitor/device@8.0.3(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
 
-  '@capacitor/filesystem@7.1.2(@capacitor/core@7.4.1)':
+  '@capacitor/filesystem@8.1.2(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
       '@capacitor/synapse': 1.0.4
 
-  '@capacitor/keyboard@7.0.6(@capacitor/core@7.4.1)':
+  '@capacitor/keyboard@8.0.5(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
 
-  '@capacitor/push-notifications@7.0.1(@capacitor/core@7.4.1)':
+  '@capacitor/push-notifications@8.1.2(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
 
-  '@capacitor/share@7.0.1(@capacitor/core@7.4.1)':
+  '@capacitor/share@8.0.1(@capacitor/core@8.5.0)':
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
 
   '@capacitor/synapse@1.0.4': {}
 
@@ -14630,9 +14630,9 @@ snapshots:
 
   caniuse-lite@1.0.30001806: {}
 
-  capacitor-secure-storage-plugin@0.11.0(@capacitor/core@7.4.1):
+  capacitor-secure-storage-plugin@0.13.0(@capacitor/core@8.5.0):
     dependencies:
-      '@capacitor/core': 7.4.1
+      '@capacitor/core': 8.5.0
 
   ccount@2.0.1: {}
 
