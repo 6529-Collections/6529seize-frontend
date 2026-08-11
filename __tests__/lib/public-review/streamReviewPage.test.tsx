@@ -56,7 +56,7 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
     readonly editorialMarkdown: string;
     readonly feedbackSlot: React.ReactNode;
     readonly introNotice?: React.ReactNode;
-    readonly page: { readonly summaryKey: string };
+    readonly page: Pick<PublicReviewPageDefinition, "summaryKey">;
     readonly outroNotice?: React.ReactNode;
     readonly sections: readonly unknown[];
     readonly showEditorialContent?: boolean;
@@ -183,6 +183,7 @@ import {
   loadStreamEditorialContent,
   PublicReviewEditorialContentError,
 } from "@/lib/public-review/editorialContent";
+import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import { renderStreamReviewRoutePage } from "@/lib/public-review/streamReviewPage";
 
 const loadStreamEditorialContentMock = jest.mocked(loadStreamEditorialContent);

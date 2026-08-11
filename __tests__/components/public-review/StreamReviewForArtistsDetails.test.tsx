@@ -17,10 +17,18 @@ describe("StreamReviewForArtistsDetails", () => {
         level: 2,
         name: section.title,
       });
-      const target =
-        heading.id === section.id ? heading : heading.closest("section");
+      const target = container.querySelector(`[id="${section.id}"]`);
       expect(target).toHaveAttribute("id", section.id);
       expect(target).toHaveClass("tw-scroll-mt-24");
+      if (target?.tagName === "SECTION") {
+        expect(target).toHaveAttribute(
+          "aria-labelledby",
+          `${section.id}-heading`
+        );
+        expect(heading).toHaveAttribute("id", `${section.id}-heading`);
+      } else {
+        expect(target).toBe(heading);
+      }
     }
     expect(container.querySelectorAll("section[id]")).toHaveLength(15);
     expect(
