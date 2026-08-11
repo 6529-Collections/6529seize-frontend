@@ -265,11 +265,11 @@ function renderWebSidebar(options: RenderOptions) {
       connectedAccountUnreadNotifications: {},
       canAddConnectedAccount: false,
       seizeConnect: jest.fn(),
-      seizeConnectFresh: jest.fn(),
+      seizeConnectFresh: jest.fn().mockResolvedValue(undefined),
       seizeAddConnectedAccount: jest.fn(),
-      seizeDisconnect: jest.fn(),
-      seizeDisconnectAndLogout: jest.fn(),
-      seizeDisconnectAndLogoutAll: jest.fn(),
+      seizeDisconnect: jest.fn().mockResolvedValue(undefined),
+      seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
+      seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
       seizeSwitchConnectedAccount:
         options.seizeSwitchConnectedAccount ?? jest.fn(),
     })
@@ -278,7 +278,7 @@ function renderWebSidebar(options: RenderOptions) {
     chains: [],
     currentChainName: "Ethereum",
     nextChainName: "Polygon",
-    switchToNextChain: jest.fn(),
+    switchToNextChain: jest.fn(() => false),
   });
 
   render(
@@ -297,12 +297,13 @@ function renderDropdown(options: RenderOptions) {
   const connectContext = createConnectContext({
     address: options.address,
     isAuthenticated: options.isAuthenticated ?? !!options.address,
-    isConnected: options.isConnected,
+    isConnected: options.isConnected ?? Boolean(options.address),
     connectedAccounts: options.connectedAccounts ?? [],
     canAddConnectedAccount: options.canAddConnectedAccount ?? false,
     seizeAddConnectedAccount: options.seizeAddConnectedAccount || jest.fn(),
     seizeConnect: options.seizeConnect || jest.fn(),
-    seizeConnectFresh: options.seizeConnectFresh || jest.fn(),
+    seizeConnectFresh:
+      options.seizeConnectFresh || jest.fn().mockResolvedValue(undefined),
     seizeDisconnect:
       options.seizeDisconnect || jest.fn().mockResolvedValue(undefined),
     seizeDisconnectAndLogout:
@@ -316,7 +317,9 @@ function renderDropdown(options: RenderOptions) {
   });
   mockConnect.mockReturnValue(connectContext);
   const authValue = createAuthContext({
-    requestSessionUpgrade: options.requestSessionUpgrade || jest.fn(),
+    requestSessionUpgrade:
+      options.requestSessionUpgrade ||
+      jest.fn().mockResolvedValue({ success: true }),
     sessionUpgradeRequired: options.sessionUpgradeRequired ?? false,
     setToast: jest.fn(),
   });
@@ -442,11 +445,11 @@ describe("HeaderUserMenuDropdown", () => {
         connectedAccountUnreadNotifications: {},
         canAddConnectedAccount: false,
         seizeConnect: jest.fn(),
-        seizeConnectFresh: jest.fn(),
+        seizeConnectFresh: jest.fn().mockResolvedValue(undefined),
         seizeAddConnectedAccount: jest.fn(),
-        seizeDisconnect: jest.fn(),
-        seizeDisconnectAndLogout: jest.fn(),
-        seizeDisconnectAndLogoutAll: jest.fn(),
+        seizeDisconnect: jest.fn().mockResolvedValue(undefined),
+        seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
+        seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
         seizeSwitchConnectedAccount: jest.fn(),
       })
     );
@@ -454,7 +457,7 @@ describe("HeaderUserMenuDropdown", () => {
       chains: [],
       currentChainName: "Ethereum",
       nextChainName: "Polygon",
-      switchToNextChain: jest.fn(),
+      switchToNextChain: jest.fn(() => false),
     });
 
     render(
