@@ -362,7 +362,7 @@ export function StreamReviewForArtistsGuide({
         <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-2">
           {OTHER_ACTORS.map((actor) => {
             const page =
-              actor.pageId !== undefined
+              actor.pageId
                 ? pages.find((candidate) => candidate.id === actor.pageId)
                 : undefined;
             return (
