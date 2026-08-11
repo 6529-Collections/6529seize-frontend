@@ -79,9 +79,11 @@ action.
   - connected profile card avatar can show unread count badge (`1-99+`) for
     the active account
   - additional connected account avatars can show unread count badges (`1-99+`)
-    and can be selected for account switch
+    and can be selected for account switch; a successful switch closes the app
+    sidebar so the newly active profile is immediately visible in the page
   - when fewer than five connected profiles are stored, a `+` button appears
-    beside the additional-account avatars
+    beside the additional-account avatars; selecting it closes the sidebar as
+    the connection flow opens and shows a busy state while that flow is open
 - Network label:
   - when the wallet has more than one supported chain, the footer shows
     `Network: {currentChain}` above the switch action
@@ -96,7 +98,8 @@ action.
    to reopen wallet connect and authorize another account.
 5. Use connected-account controls:
    - select another connected account from the web dropdown, or
-   - use app account switch controls in the app sidebar footer.
+   - use app account switch controls in the app sidebar footer; the sidebar
+     closes after a successful selection.
 6. Use session actions:
    - `Disconnect Wallet` (web only): disconnect wallet without full logout.
    - `Profile`: open the active profile.

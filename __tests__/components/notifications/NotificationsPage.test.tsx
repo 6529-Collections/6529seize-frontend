@@ -1,9 +1,14 @@
 import NotificationsPage from "@/components/notifications/NotificationsPage";
+import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
+}));
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
 }));
 
 jest.mock("@/components/brain/notifications", () => ({
@@ -18,7 +23,26 @@ jest.mock("@/components/brain/content/BrainContent", () => ({
 
 jest.mock("@/components/common/ConnectWallet", () => ({
   __esModule: true,
-  default: () => <div>Connect wallet gate</div>,
+  default: ({
+    title = "Connect wallet gate",
+    description,
+    action,
+  }: {
+    title?: string;
+    description?: string;
+    action?: React.ReactNode;
+  }) => (
+    <div>
+      <div>{title}</div>
+      {description ? <div>{description}</div> : null}
+      {action}
+    </div>
+  ),
+}));
+
+jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
+  __esModule: true,
+  default: () => <button type="button">Create profile</button>,
 }));
 
 jest.mock("@/hooks/useDropModal", () => ({
@@ -45,8 +69,16 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 }));
 
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
+const useAuthMock = jest.mocked(useAuth);
 
 describe("NotificationsPage", () => {
+  beforeEach(() => {
+    useAuthMock.mockReturnValue({
+      connectedProfile: { handle: "alice" },
+      fetchingProfile: false,
+    } as ReturnType<typeof useAuth>);
+  });
+
   it.each(["initializing", "connecting"] as const)(
     "shows a neutral loader while wallet auth is %s",
     (connectionState) => {
@@ -89,5 +121,29 @@ describe("NotificationsPage", () => {
     render(<NotificationsPage />);
 
     expect(screen.getByText("Notifications feed")).toBeInTheDocument();
+  });
+
+  it("shows the create-profile gate when the wallet has no profile", () => {
+    useSeizeConnectContextMock.mockReturnValue({
+      connectionState: "connected",
+      hasValidWalletAuth: true,
+    } as ReturnType<typeof useSeizeConnectContext>);
+    useAuthMock.mockReturnValue({
+      connectedProfile: null,
+      fetchingProfile: false,
+    } as ReturnType<typeof useAuth>);
+
+    render(<NotificationsPage />);
+
+    expect(
+      screen.getByText("You need to set up a profile to continue.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Create a profile to access notifications.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Create profile" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Notifications feed")).not.toBeInTheDocument();
   });
 });

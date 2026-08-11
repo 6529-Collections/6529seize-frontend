@@ -14,9 +14,14 @@ import ConnectWallet from "@/components/common/ConnectWallet";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
+import { useAuth } from "@/components/auth/Auth";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export default function NotificationsPage() {
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
+  const { connectedProfile, fetchingProfile } = useAuth();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const { activeDrop: modalDrop, isDropOpen, onDropClose } = useDropModal();
   const { isApp } = useDeviceInfo();
@@ -41,6 +46,16 @@ export default function NotificationsPage() {
 
   if (!hasValidWalletAuth) {
     return <ConnectWallet />;
+  }
+
+  if (!fetchingProfile && !connectedProfile?.handle) {
+    return (
+      <ConnectWallet
+        title={t(DEFAULT_LOCALE, "profileSetup.requiredTitle")}
+        description={t(DEFAULT_LOCALE, "profileSetup.notificationsDescription")}
+        action={<UserSetUpProfileCta />}
+      />
+    );
   }
 
   return (
