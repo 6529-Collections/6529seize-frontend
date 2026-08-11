@@ -260,6 +260,7 @@ jobs:
           hold_label="release-bus-museum-hold"
           hold_title="[Release Bus] Museum qualification hold"
           marker="<!-- release-bus-museum-hold:v1 -->"
+          managed_authors='["app/github-actions","github-actions[bot]"]'
           mkdir -p museum-release-hold-artifacts
 
           labels="$(gh label list --repo "$FRONTEND_REPOSITORY" --search "$hold_label" --limit 100 --json name)"
@@ -280,18 +281,20 @@ jobs:
           managed_issues="$(
             # shellcheck disable=SC2016
             jq -c \
-            --arg title "$hold_title" \
-            --arg marker "$marker" \
-            "[.[] | select(.title == \$title and (.body | contains(\$marker)) and .author.login == \"github-actions[bot]\")]" \
-            <<< "$open_issues"
+              --arg title "$hold_title" \
+              --arg marker "$marker" \
+              --argjson authors "$managed_authors" \
+              '[.[] | .author.login as $author | select(.title == $title and (.body | contains($marker)) and (($authors | index($author)) != null))]' \
+              <<< "$open_issues"
           )"
           foreign_issues="$(
             # shellcheck disable=SC2016
             jq -c \
-            --arg title "$hold_title" \
-            --arg marker "$marker" \
-            '[.[] | select(.title != $title or (.body | contains($marker) | not) or .author.login != "github-actions[bot]") ]' \
-            <<< "$open_issues"
+              --arg title "$hold_title" \
+              --arg marker "$marker" \
+              --argjson authors "$managed_authors" \
+              '[.[] | .author.login as $author | select(.title != $title or (.body | contains($marker) | not) or (($authors | index($author)) == null))]' \
+              <<< "$open_issues"
           )"
 
           sweep_passed=false
@@ -332,12 +335,21 @@ jobs:
               "$GITHUB_RUN_ID")"
             existing_numbers="$(jq -r '.[].number' <<< "$managed_issues")"
             if [ -n "$existing_numbers" ]; then
-              while IFS= read -r issue_number; do
-                [ -z "$issue_number" ] && continue
-                gh issue comment "$issue_number" \
+              primary_issue_number="$(jq -r 'max_by(.number).number' <<< "$managed_issues")"
+              gh issue comment "$primary_issue_number" \
+                --repo "$FRONTEND_REPOSITORY" \
+                --body "${marker} Sweep remains failing for ${SOURCE_COMMIT}: adapter=${ADAPTER_RESULT}, broad=${SWEEP_RESULT}/${SWEEP_OUTCOME}."
+              while IFS= read -r duplicate_issue_number; do
+                [ -z "$duplicate_issue_number" ] && continue
+                gh issue close "$duplicate_issue_number" \
                   --repo "$FRONTEND_REPOSITORY" \
-                  --body "${marker} Sweep remains failing for ${SOURCE_COMMIT}: adapter=${ADAPTER_RESULT}, broad=${SWEEP_RESULT}/${SWEEP_OUTCOME}."
-              done <<< "$existing_numbers"
+                  --comment "${marker} Superseded by active automated Museum hold #${primary_issue_number}."
+              done < <(
+                jq -r \
+                  --argjson primary "$primary_issue_number" \
+                  '.[] | select(.number != $primary) | .number' \
+                  <<< "$managed_issues"
+              )
             else
               gh issue create \
                 --repo "$FRONTEND_REPOSITORY" \

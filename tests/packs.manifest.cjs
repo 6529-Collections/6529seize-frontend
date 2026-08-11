@@ -92,7 +92,7 @@ function localPack(scriptKey, description, specs, tweaks = {}) {
     ...(specs ? { specs } : {}),
     ...tweaks,
     projects: tweaks.projects ?? [DESKTOP, MOBILE],
-    workers: 1,
+    workers: tweaks.workers ?? 1,
     timeoutMinutes: tweaks.timeoutMinutes ?? 15,
   };
 }
@@ -136,7 +136,7 @@ function stagingPack(alias, suffix, description, specs, tweaks = {}) {
     specs,
     ...tweaks,
     projects: tweaks.projects ?? [DESKTOP, MOBILE],
-    workers: 1,
+    workers: tweaks.workers ?? 1,
     timeoutMinutes: tweaks.timeoutMinutes ?? 15,
   };
 }
@@ -523,7 +523,8 @@ const PACKS = [
       "museum-institutional-practice",
       "museum-institutional-practice",
       "Staging Network Museum institutional-practice deployed route smoke.",
-      READONLY_SPECS.museumInstitutionalPractice
+      READONLY_SPECS.museumInstitutionalPractice,
+      { workers: 2 }
     )
   ),
   museumPack(
@@ -618,16 +619,17 @@ const PACKS = [
       [DESKTOP, MOBILE]
     )
   ),
-  museumPack(
-    productionPack(
+  museumPack({
+    ...productionPack(
       "museum-institutional-practice",
       "Production Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
       ["cron", "post-deploy", "manual"],
       30,
       [DESKTOP, MOBILE]
-    )
-  ),
+    ),
+    workers: 2,
+  }),
   museumPack(
     productionPack(
       "museum-about",

@@ -48,12 +48,12 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       />
     );
 
-    expect(
-      screen.getByText("Automatic · 0.18 ETH · 2 drops funded")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Running low · through The Memes #560, Oct 12, 2026")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Subscriptions")).toBeInTheDocument();
+    const status = screen.getByText(
+      "Running low · through The Memes #560, Oct 12, 2026"
+    );
+    expect(status).toBeInTheDocument();
+    expect(status).not.toHaveClass("tw-truncate");
     expect(screen.getByRole("link", { name: "Top up" })).toHaveAttribute(
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"

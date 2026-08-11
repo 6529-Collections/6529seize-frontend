@@ -460,17 +460,34 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.retryMore": "Réessayer de charger d’autres drops",
   "waves.leaderboard.loadMore": "Charger plus de drops",
   "waves.leaderboard.loadingMoreButton": "Chargement…",
+  "waves.leaderboard.grid.untitled": "Drop sans titre",
+  "waves.leaderboard.grid.readFullText": "Lire le texte intégral",
+  "waves.leaderboard.grid.open": "Ouvrir",
+  "waves.leaderboard.grid.openNamed": "Ouvrir {title}",
+  "waves.leaderboard.grid.authorProfile": "Voir le profil de {author}",
+  "waves.leaderboard.grid.voters.one": "{count} votant",
+  "waves.leaderboard.grid.voters.other": "{count} votants",
+  "waves.leaderboard.grid.you": "Vous",
+  "waves.leaderboard.grid.votesNow": "Votes actuels",
+  "waves.leaderboard.grid.status.approved": "Approuvé",
+  "waves.leaderboard.grid.status.approvingIn": "Approbation dans {time}",
+  "waves.leaderboard.grid.status.reachedThreshold": "Seuil atteint",
+  "waves.leaderboard.grid.status.closed": "Fermé",
+  "waves.leaderboard.grid.status.needs": "Manque {amount}",
+  "waves.leaderboard.grid.voteSummary.approval":
+    "{reached} sur {required} {unit} atteints. Statut : {status}.",
+  "waves.leaderboard.grid.voteSummary.approvalWithRealtime":
+    "{reached} sur {required} {unit} atteints. Votes actuels : {votesNow} {unit}. Statut : {status}.",
+  "waves.leaderboard.grid.voteSummary.standard":
+    "Vote actuel : {current} {unit}. Projection : {projected} {unit}.",
   "waves.leaderboard.timeline.toggle":
     "Afficher ou masquer la chronologie des décisions",
-  "waves.leaderboard.timeline.decisionTimeline":
-    "Chronologie des décisions",
-  "waves.leaderboard.timeline.announcementHistory":
-    "Historique des annonces",
+  "waves.leaderboard.timeline.decisionTimeline": "Chronologie des décisions",
+  "waves.leaderboard.timeline.announcementHistory": "Historique des annonces",
   "waves.leaderboard.timeline.paused": "En pause",
   "waves.leaderboard.timeline.nextDecisionAfter":
     "Prochaine décision après le {date}",
-  "waves.leaderboard.timeline.noDecisionScheduled":
-    "Aucune décision planifiée",
+  "waves.leaderboard.timeline.noDecisionScheduled": "Aucune décision planifiée",
   "waves.leaderboard.timeline.noUpcomingEvents": "Aucun événement à venir",
   "waves.leaderboard.timeline.nextWinner": "Prochain gagnant",
   "waves.leaderboard.timeline.nextWinnerIn":

@@ -96,8 +96,11 @@ the `More` menu.
 2. Select `Connect Device`.
 3. The `Connect Device` dialog defaults to `Mobile`; select `Desktop` when
    needed. The target tabs appear without an additional heading above them.
-4. Mobile displays the existing one-time session-v2 connection QR code.
-5. Desktop keeps the same square dimensions but uses a dark-bordered handoff
+4. Use the muted `Download apps` text link and download icon beside the dialog
+   title to close the connection dialog and open the 6529 Apps page in the same
+   tab.
+5. Mobile displays the existing one-time session-v2 connection QR code.
+6. Desktop keeps the same square dimensions but uses a dark-bordered handoff
    card with a 6529 Desktop logo and compact white launch label. The entire card
    opens 6529 Desktop, not only the visible label.
 
@@ -133,8 +136,11 @@ No copy-page, social, or current-page Share actions appear in this dialog.
 - Desktop is hidden as a connection target when already running in Electron.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
   or unavailable states without revealing page-sharing controls. These notice
-  states retain the QR panel's proportions but do not reserve blank footer
-  space when no connection link is available.
+  states retain the final connection area's footprint. The unframed loading
+  message remains visible until the Mobile QR has been generated and decoded,
+  then the complete QR and connection-link row fade in together. The dialog
+  does not resize between loading and ready states. Actionable authentication
+  and unavailable notices retain their framed treatment.
 - In browsers, `More` is omitted in an insecure context, when the Web Share API
   is absent, when the browser rejects the title and URL payload, or when the
   document permissions policy recognizes and blocks system sharing. An

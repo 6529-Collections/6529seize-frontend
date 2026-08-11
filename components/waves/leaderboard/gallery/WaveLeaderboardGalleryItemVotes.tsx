@@ -1,7 +1,10 @@
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import ApprovalDropVoteSummary from "@/components/waves/drops/ApprovalDropVoteSummary";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardGalleryItemVotesProps {
   readonly drop: ExtendedDrop;
@@ -18,6 +21,7 @@ export default function WaveLeaderboardGalleryItemVotes({
   winningThresholdMinDurationMs,
   isVotingClosed = false,
 }: WaveLeaderboardGalleryItemVotesProps) {
+  const locale = useBrowserLocale();
   const displayWinningThreshold =
     typeof winningThreshold === "number" &&
     Number.isFinite(winningThreshold) &&
@@ -41,28 +45,47 @@ export default function WaveLeaderboardGalleryItemVotes({
 
   const current = drop.rating;
   const isPositive = current >= 0;
+  const projected = drop.rating_prediction;
+  const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
 
   const getColorClass = () => {
+    if (!isPositive) {
+      return "tw-text-rose-400";
+    }
     if (variant === "subtle") {
       return "tw-text-iron-200";
     }
-    return isPositive ? "tw-text-emerald-500" : "tw-text-rose-500";
+    return "tw-text-emerald-500";
   };
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
-      <span
-        className={`tw-text-sm tw-font-semibold tw-tabular-nums ${getColorClass()}`}
+    <div
+      role="group"
+      aria-label={t(locale, "waves.leaderboard.grid.voteSummary.standard", {
+        current: formatInteger(locale, current),
+        projected: formatInteger(locale, projected),
+        unit: votingLabel,
+      })}
+      className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
+    >
+      <div
+        aria-hidden="true"
+        className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
       >
-        {formatNumberWithCommas(current)}
-      </span>
-      <DropVoteProgressing
-        current={current}
-        projected={drop.rating_prediction}
-        subtle={variant === "subtle"}
-        numberFont="sans"
-        numberWeight="semibold"
-      />
+        <span
+          className={`tw-text-sm tw-font-semibold tw-tabular-nums ${getColorClass()}`}
+        >
+          {formatInteger(locale, current)}
+        </span>
+        <DropVoteProgressing
+          current={current}
+          projected={projected}
+          projectedLabel={formatInteger(locale, projected)}
+          subtle={variant === "subtle"}
+          numberFont="sans"
+          numberWeight="semibold"
+        />
+      </div>
     </div>
   );
 }
