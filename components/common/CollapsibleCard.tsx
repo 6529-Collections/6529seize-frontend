@@ -79,7 +79,11 @@ export default function CollapsibleCard({
             </m.span>
             <span
               id={titleId}
-              className="tw-min-w-0 tw-text-base tw-font-semibold tw-text-iron-300"
+              className={`tw-min-w-0 tw-font-semibold ${
+                compactHeader
+                  ? "tw-text-sm tw-leading-4 tw-text-iron-200"
+                  : "tw-text-base tw-text-iron-300"
+              }`}
             >
               {title}
             </span>
