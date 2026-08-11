@@ -8,7 +8,10 @@ export function getRequiredEditorialMatch(
   pattern: RegExp,
   sectionName: string
 ): RegExpMatchArray {
-  const match = markdown.match(pattern);
+  const initialLastIndex = pattern.lastIndex;
+  pattern.lastIndex = 0;
+  const match = pattern.exec(markdown);
+  pattern.lastIndex = initialLastIndex;
   if (match === null) {
     throw new Error(`${TRANSFORMATION_ERROR}: ${sectionName}.`);
   }
