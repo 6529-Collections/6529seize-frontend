@@ -36,6 +36,7 @@ interface SeizeConnectProviderEffectsParams {
   readonly isAddingConnectedAccountRef: MutableRefObject<boolean>;
   readonly isConnectIntentWaitingForAppKit: boolean;
   readonly isInitialized: boolean;
+  readonly isSigningOutAll: boolean;
   readonly isMountedRef: MutableRefObject<boolean>;
   readonly refreshStoredConnectedAccounts: () => void;
   readonly retryConnectTimeoutRef: MutableRefObject<NodeJS.Timeout | null>;
@@ -324,6 +325,7 @@ export function useSeizeConnectProviderEffects({
   isAddingConnectedAccountRef,
   isConnectIntentWaitingForAppKit,
   isInitialized,
+  isSigningOutAll,
   isMountedRef,
   refreshStoredConnectedAccounts,
   retryConnectTimeoutRef,
@@ -371,7 +373,11 @@ export function useSeizeConnectProviderEffects({
   }, [refreshStoredConnectedAccounts]);
 
   useEffect(() => {
-    if (!isInitialized) {
+    if (!isInitialized || isSigningOutAll) {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
+      }
       return;
     }
 
@@ -408,6 +414,7 @@ export function useSeizeConnectProviderEffects({
     account.isConnected,
     account.status,
     isInitialized,
+    isSigningOutAll,
     storedConnectedAccounts,
     walletState,
     setConnected,
