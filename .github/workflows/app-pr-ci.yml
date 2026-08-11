@@ -725,7 +725,7 @@ jobs:
 
       - name: Restore Next.js build cache
         id: nextjs_build_cache
-        if: matrix.lane == 'build'
+        if: matrix.lane == 'build' || matrix.lane == 'playwright-museum'
         uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ github.workspace }}/.next/cache
@@ -1060,8 +1060,7 @@ jobs:
       - name: Run Network Museum Playwright packs
         if: matrix.lane == 'playwright-museum'
         env:
-          NEXT_DEV_DIST_DIR: ".next-playwright-museum"
-          NODE_ENV: "development"
+          NODE_ENV: "production"
           PLAYWRIGHT_READONLY: "1"
           MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}
           MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}
@@ -1093,12 +1092,12 @@ jobs:
             fi
           done
           # Keep the exhaustive Museum lane as one required check. Run the
-          # route-heavy IA contract first and serially so cold route assembly
-          # cannot make desktop and mobile contend for the shared dev server.
-          # Split the remaining deterministic list across isolated processes.
-          # Every test independently verifies the exact source commit, so
-          # Playwright sharding cannot inherit cross-test state. Reports,
-          # traces, and logs remain isolated per execution group.
+          # route-heavy IA contract first and serially, then run the remaining
+          # desktop/mobile groups concurrently against one production build.
+          # The production server does not compile routes on demand, avoiding
+          # cross-browser Turbopack navigation races while retaining parallel
+          # browser coverage. One Playwright process owns the parallel phase so
+          # --max-failures stops every worker immediately after the first error.
           mkdir -p test-results/app-pr-ci
           PLAYWRIGHT_SKIP_WEB_SERVER=1 \
             ./bin/6529 exec playwright test \
@@ -1119,18 +1118,15 @@ jobs:
               --list \
               --reporter=json \
               > test-results/app-pr-ci/museum-tests-gate.json
-          for shard in 1 2; do
-            PLAYWRIGHT_SKIP_WEB_SERVER=1 \
-              ./bin/6529 exec playwright test \
-                "${selected_specs[@]}" \
-                --project=web-desktop-chromium \
-                --project=web-mobile-chromium \
-                --workers=1 \
-                --list \
-                --shard="${shard}/2" \
-                --reporter=json \
-                > "test-results/app-pr-ci/museum-tests-shard-${shard}.json"
-          done
+          PLAYWRIGHT_SKIP_WEB_SERVER=1 \
+            ./bin/6529 exec playwright test \
+              "${selected_specs[@]}" \
+              --project=web-desktop-chromium \
+              --project=web-mobile-chromium \
+              --workers=2 \
+              --list \
+              --reporter=json \
+              > test-results/app-pr-ci/museum-tests-remaining.json
           node <<'NODE'
           const fs = require("node:fs");
           const outputDir = "test-results/app-pr-ci";
@@ -1187,22 +1183,20 @@ jobs:
           }
           const full = collect(`${outputDir}/museum-tests-full.json`);
           const gate = collect(`${outputDir}/museum-tests-gate.json`);
-          const shards = [1, 2].map((shard) =>
-            collect(`${outputDir}/museum-tests-shard-${shard}.json`)
-          );
+          const remaining = collect(`${outputDir}/museum-tests-remaining.json`);
           const fullKeys = new Set(full.map((entry) => entry.key));
           const assigned = new Set();
-          for (const entries of [gate, ...shards]) {
+          for (const entries of [gate, remaining]) {
             for (const entry of entries) {
               if (!fullKeys.has(entry.key) || assigned.has(entry.key)) {
-                throw new Error(`Museum shard overlap or unexpected test: ${entry.key}`);
+                throw new Error(`Museum execution overlap or unexpected test: ${entry.key}`);
               }
               assigned.add(entry.key);
             }
           }
           const missing = [...fullKeys].filter((key) => !assigned.has(key));
           if (missing.length > 0 || assigned.size !== fullKeys.size) {
-            throw new Error(`Museum shard coverage is incomplete: ${missing.join(", ")}`);
+            throw new Error(`Museum execution coverage is incomplete: ${missing.join(", ")}`);
           }
           const expectedProjects = ["web-desktop-chromium", "web-mobile-chromium"];
           const actualProjects = [...new Set(full.map((entry) => entry.project))].sort();
@@ -1224,15 +1218,15 @@ jobs:
               files.size !== expectedSpecs.size ||
               [...expectedSpecs].some((file) => !files.has(file))
             ) {
-              throw new Error(`Museum shard spec coverage is incomplete for ${project}.`);
+              throw new Error(`Museum execution spec coverage is incomplete for ${project}.`);
             }
           }
           fs.writeFileSync(
-            `${outputDir}/museum-shard-inventory.json`,
+            `${outputDir}/museum-execution-inventory.json`,
             `${JSON.stringify(
               {
                 catalog_commit: catalogCommit,
-                contract: "museum-playwright-shard-inventory-v1",
+                contract: "museum-playwright-inventory-v2",
                 full_test_count: full.length,
                 gate: {
                   id: "network-ia",
@@ -1241,11 +1235,11 @@ jobs:
                 },
                 projects: expectedProjects,
                 selection_digest: selection.selection_digest,
-                shards: shards.map((entries, index) => ({
-                  id: `${index + 1}/2`,
-                  test_count: entries.length,
-                  test_keys: entries.map((entry) => entry.key).sort(),
-                })),
+                remaining: {
+                  test_count: remaining.length,
+                  test_keys: remaining.map((entry) => entry.key).sort(),
+                  workers: 2,
+                },
                 source_commit: sourceCommit,
                 specs: [...expectedSpecs].sort(),
               },
@@ -1254,17 +1248,19 @@ jobs:
             )}\n`
           );
           NODE
-          museum_port=3101
+          museum_port=3001
           museum_base_url="http://localhost:${museum_port}"
           museum_server_log="test-results/app-pr-ci/museum-server.log"
-          NEXT_DEV_DIST_DIR=".next-playwright-museum-shared" \
-            BASE_ENDPOINT="$museum_base_url" \
+          ./bin/6529 run build:env-schema
+          BASE_ENDPOINT="https://6529.io" \
+            ./bin/6529 run base-build
+          BASE_ENDPOINT="https://6529.io" \
             PORT="$museum_port" \
-            ./bin/6529 run dev > "$museum_server_log" 2>&1 &
+            setsid ./bin/6529 run start:standalone > "$museum_server_log" 2>&1 &
           museum_server_pid="$!"
           cleanup_museum_server() {
             if kill -0 "$museum_server_pid" 2>/dev/null; then
-              kill "$museum_server_pid" 2>/dev/null || true
+              kill -- "-$museum_server_pid" 2>/dev/null || true
               wait "$museum_server_pid" 2>/dev/null || true
             fi
           }
@@ -1279,14 +1275,14 @@ jobs:
             fi
             if ! kill -0 "$museum_server_pid" 2>/dev/null; then
               cat "$museum_server_log"
-              echo "Museum shard server exited before readiness." >&2
+              echo "Museum production server exited before readiness." >&2
               exit 1
             fi
             sleep 1
           done
           if [ "$museum_server_ready" != true ]; then
             cat "$museum_server_log"
-            echo "Museum shard server did not become ready." >&2
+            echo "Museum production server did not become ready." >&2
             exit 1
           fi
 
@@ -1322,86 +1318,39 @@ jobs:
           fi
           tail -n 12 "$museum_gate_log"
 
-          shard_pids=()
-          shard_logs=()
-          shard_status_files=()
-          for shard in 1 2; do
-            shard_log="test-results/app-pr-ci/museum-shard-${shard}.log"
-            shard_status_file="test-results/app-pr-ci/museum-shard-${shard}.status"
-            (
-              set +e
-              set -o pipefail
-              PLAYWRIGHT_SKIP_WEB_SERVER=1 \
-                BASE_ENDPOINT="$museum_base_url" \
-                PLAYWRIGHT_BASE_URL="$museum_base_url" \
-                PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-shard-${shard}" \
-                PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-shard-${shard}" \
-                timeout --signal=TERM --kill-after=30s 25m \
-                ./bin/6529 exec playwright test \
-                  "${selected_specs[@]}" \
-                  --project=web-desktop-chromium \
-                  --project=web-mobile-chromium \
-                  --shard="${shard}/2" \
-                  --workers=1 \
-                  --retries=0 \
-                  --max-failures=1 \
-                  2>&1 \
-                | sed -u "s/^/[museum shard ${shard}\/2] /" \
-                | tee "$shard_log"
-              shard_exit="${PIPESTATUS[0]}"
-              printf '%s\n' "$shard_exit" > "$shard_status_file"
-              exit "$shard_exit"
-            ) &
-            shard_pids+=("$!")
-            shard_logs+=("$shard_log")
-            shard_status_files+=("$shard_status_file")
-          done
-
-          monitor_museum_shards() {
-            local elapsed=0
-            while true; do
-              sleep 60
-              elapsed=$((elapsed + 60))
-              local active_shards=()
-              for shard_index in 1 2; do
-                if kill -0 "${shard_pids[$((shard_index - 1))]}" 2>/dev/null; then
-                  active_shards+=("${shard_index}/2")
-                fi
-              done
-              if [ "${#active_shards[@]}" -eq 0 ]; then
-                return
-              fi
-              echo "::notice::Museum shards still running after ${elapsed}s: ${active_shards[*]}"
-            done
-          }
-          monitor_museum_shards &
-          museum_progress_pid="$!"
-
-          shard_status=0
-          for shard_index in 1 2; do
-            if ! wait "${shard_pids[$((shard_index - 1))]}"; then
-              shard_status=1
-              shard_exit="$(cat "${shard_status_files[$((shard_index - 1))]}" 2>/dev/null || printf 'unknown')"
-              if [ "$shard_exit" = 124 ]; then
-                echo "::error::Museum shard ${shard_index}/2 exceeded its 25-minute timeout."
-              else
-                echo "::error::Museum shard ${shard_index}/2 failed with exit ${shard_exit}."
-              fi
-              tail -n 80 "${shard_logs[$((shard_index - 1))]}"
+          museum_remaining_log="test-results/app-pr-ci/museum-remaining.log"
+          set +e
+          PLAYWRIGHT_SKIP_WEB_SERVER=1 \
+            BASE_ENDPOINT="$museum_base_url" \
+            PLAYWRIGHT_BASE_URL="$museum_base_url" \
+            PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-remaining" \
+            PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-remaining" \
+            timeout --signal=TERM --kill-after=30s 15m \
+            ./bin/6529 exec playwright test \
+              "${selected_specs[@]}" \
+              --project=web-desktop-chromium \
+              --project=web-mobile-chromium \
+              --workers=2 \
+              --retries=0 \
+              --max-failures=1 \
+              2>&1 \
+            | sed -u 's/^/[museum remaining] /' \
+            | tee "$museum_remaining_log"
+          museum_remaining_exit="${PIPESTATUS[0]}"
+          set -e
+          if [ "$museum_remaining_exit" -ne 0 ]; then
+            if [ "$museum_remaining_exit" -eq 124 ]; then
+              echo "::error::Remaining Museum coverage exceeded its 15-minute timeout."
             else
-              tail -n 8 "${shard_logs[$((shard_index - 1))]}"
+              echo "::error::Remaining Museum coverage failed with exit ${museum_remaining_exit}."
             fi
-          done
-          if kill -0 "$museum_progress_pid" 2>/dev/null; then
-            kill "$museum_progress_pid" 2>/dev/null || true
-          fi
-          wait "$museum_progress_pid" 2>/dev/null || true
-          if [ "$shard_status" -ne 0 ]; then
+            tail -n 120 "$museum_remaining_log"
             cat "$museum_server_log"
           else
+            tail -n 12 "$museum_remaining_log"
             tail -n 12 "$museum_server_log"
           fi
-          exit "$shard_status"
+          exit "$museum_remaining_exit"
 
       - name: Upload app check artifacts
         if: always()
