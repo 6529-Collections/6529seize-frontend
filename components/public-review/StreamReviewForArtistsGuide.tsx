@@ -13,8 +13,8 @@ type ArtistGuideCopyItem = {
   readonly descriptionKey: MessageKey;
 };
 
-type ArtistGuideLinkedItem = ArtistGuideCopyItem & {
-  readonly pageId: string;
+type ArtistGuideActorItem = ArtistGuideCopyItem & {
+  readonly pageId?: string;
 };
 
 const ARTWORK_PARTS = [
@@ -27,21 +27,20 @@ const ARTWORK_PARTS = [
     descriptionKey: "publicReview.forArtistsGuide.artwork.editions.description",
   },
   {
-    titleKey: "publicReview.forArtistsGuide.artwork.approval.title",
-    descriptionKey: "publicReview.forArtistsGuide.artwork.approval.description",
-  },
-  {
     titleKey: "publicReview.forArtistsGuide.artwork.sales.title",
     descriptionKey: "publicReview.forArtistsGuide.artwork.sales.description",
   },
   {
-    titleKey: "publicReview.forArtistsGuide.artwork.control.title",
-    descriptionKey: "publicReview.forArtistsGuide.artwork.control.description",
+    titleKey: "publicReview.forArtistsGuide.artwork.payments.title",
+    descriptionKey: "publicReview.forArtistsGuide.artwork.payments.description",
   },
   {
-    titleKey: "publicReview.forArtistsGuide.artwork.preservation.title",
-    descriptionKey:
-      "publicReview.forArtistsGuide.artwork.preservation.description",
+    titleKey: "publicReview.forArtistsGuide.artwork.approval.title",
+    descriptionKey: "publicReview.forArtistsGuide.artwork.approval.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.artwork.control.title",
+    descriptionKey: "publicReview.forArtistsGuide.artwork.control.description",
   },
 ] as const satisfies readonly ArtistGuideCopyItem[];
 
@@ -73,14 +72,41 @@ const ARTIST_JOURNEY = [
 ] as const satisfies readonly ArtistGuideCopyItem[];
 
 const APPROVAL_CHECKLIST = [
-  "publicReview.forArtistsGuide.approval.identity",
-  "publicReview.forArtistsGuide.approval.materials",
-  "publicReview.forArtistsGuide.approval.supply",
-  "publicReview.forArtistsGuide.approval.sale",
-  "publicReview.forArtistsGuide.approval.payments",
-  "publicReview.forArtistsGuide.approval.roles",
-  "publicReview.forArtistsGuide.approval.finality",
-] as const satisfies readonly MessageKey[];
+  {
+    titleKey: "publicReview.forArtistsGuide.approval.signing.title",
+    descriptionKey: "publicReview.forArtistsGuide.approval.signing.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.approval.artworkSupply.title",
+    descriptionKey:
+      "publicReview.forArtistsGuide.approval.artworkSupply.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.approval.salePayments.title",
+    descriptionKey:
+      "publicReview.forArtistsGuide.approval.salePayments.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.approval.powerFinality.title",
+    descriptionKey:
+      "publicReview.forArtistsGuide.approval.powerFinality.description",
+  },
+] as const satisfies readonly ArtistGuideCopyItem[];
+
+const SALE_STAGES = [
+  {
+    titleKey: "publicReview.forArtistsGuide.sales.buy.title",
+    descriptionKey: "publicReview.forArtistsGuide.sales.buy.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.sales.money.title",
+    descriptionKey: "publicReview.forArtistsGuide.sales.money.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.sales.royalties.title",
+    descriptionKey: "publicReview.forArtistsGuide.sales.royalties.description",
+  },
+] as const satisfies readonly ArtistGuideCopyItem[];
 
 const CHANGE_STAGES = [
   {
@@ -107,6 +133,11 @@ const OTHER_ACTORS = [
     descriptionKey: "publicReview.forArtistsGuide.actors.community.description",
   },
   {
+    pageId: undefined,
+    titleKey: "publicReview.forArtistsGuide.actors.signer.title",
+    descriptionKey: "publicReview.forArtistsGuide.actors.signer.description",
+  },
+  {
     pageId: "roles-and-trust",
     titleKey: "publicReview.forArtistsGuide.actors.operators.title",
     descriptionKey: "publicReview.forArtistsGuide.actors.operators.description",
@@ -121,14 +152,30 @@ const OTHER_ACTORS = [
     titleKey: "publicReview.forArtistsGuide.actors.services.title",
     descriptionKey: "publicReview.forArtistsGuide.actors.services.description",
   },
-] as const satisfies readonly ArtistGuideLinkedItem[];
+] as const satisfies readonly ArtistGuideActorItem[];
 
 const PERMANENCE_CHECKLIST = [
-  "publicReview.forArtistsGuide.permanence.files",
-  "publicReview.forArtistsGuide.permanence.fingerprints",
-  "publicReview.forArtistsGuide.permanence.supply",
-  "publicReview.forArtistsGuide.permanence.delay",
-] as const satisfies readonly MessageKey[];
+  {
+    titleKey: "publicReview.forArtistsGuide.permanence.files.title",
+    descriptionKey:
+      "publicReview.forArtistsGuide.permanence.files.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.permanence.fingerprints.title",
+    descriptionKey:
+      "publicReview.forArtistsGuide.permanence.fingerprints.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.permanence.record.title",
+    descriptionKey:
+      "publicReview.forArtistsGuide.permanence.record.description",
+  },
+  {
+    titleKey: "publicReview.forArtistsGuide.permanence.delay.title",
+    descriptionKey:
+      "publicReview.forArtistsGuide.permanence.delay.description",
+  },
+] as const satisfies readonly ArtistGuideCopyItem[];
 
 function GuideLink({ page }: { readonly page: PublicReviewPageDefinition }) {
   return (
@@ -164,28 +211,7 @@ export function StreamReviewForArtistsGuide({
 
   return (
     <div className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
-      <section aria-labelledby="stream-artist-guide-heading">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.eyebrow")}
-        </p>
-        <h2
-          id="stream-artist-guide-heading"
-          className="tw-mb-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.heading")}
-        </h2>
-        <p className="tw-mb-0 tw-mt-5 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-200">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.description")}
-        </p>
-        <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.reviewContext")}
-        </p>
-      </section>
-
-      <section
-        aria-labelledby="stream-artist-artwork-heading"
-        className="tw-mt-14"
-      >
+      <section aria-labelledby="stream-artist-artwork-heading">
         <h2
           id="stream-artist-artwork-heading"
           className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
@@ -217,16 +243,30 @@ export function StreamReviewForArtistsGuide({
             "publicReview.forArtistsGuide.journey.description"
           )}
         </p>
-        <ol className="tw-mb-0 tw-mt-7 tw-list-none tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-p-0">
+        <ol
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.journey.listLabel"
+          )}
+          className="tw-mb-0 tw-mt-7 tw-list-none tw-space-y-3 tw-p-0"
+        >
           {ARTIST_JOURNEY.map((step, index) => (
             <li
               key={step.titleKey}
-              className="tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 tw-py-5 sm:tw-grid-cols-[2.5rem_minmax(0,1fr)] sm:tw-gap-5"
+              className="tw-grid tw-grid-cols-[2.5rem_minmax(0,1fr)] tw-gap-4 sm:tw-grid-cols-[3rem_minmax(0,1fr)] sm:tw-gap-5"
             >
-              <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/10 tw-font-mono tw-text-xs tw-font-semibold tw-text-primary-300">
-                {formatInteger(DEFAULT_LOCALE, index + 1)}
-              </span>
-              <div>
+              <div
+                aria-hidden="true"
+                className="tw-flex tw-h-full tw-flex-col tw-items-center"
+              >
+                <span className="tw-relative tw-z-10 tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/10 tw-font-mono tw-text-xs tw-font-semibold tw-text-primary-200 tw-shadow-[0_0_0_5px_rgba(9,9,11,0.9)] sm:tw-size-12">
+                  {formatInteger(DEFAULT_LOCALE, index + 1)}
+                </span>
+                {index < ARTIST_JOURNEY.length - 1 ? (
+                  <span className="tw-mt-2 tw-w-px tw-flex-1 tw-bg-gradient-to-b tw-from-primary-400/50 tw-to-white/[0.08]" />
+                ) : null}
+              </div>
+              <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.09] tw-bg-iron-950/60 tw-p-4 sm:tw-p-5">
                 <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
                   {t(DEFAULT_LOCALE, step.titleKey)}
                 </h3>
@@ -237,6 +277,9 @@ export function StreamReviewForArtistsGuide({
             </li>
           ))}
         </ol>
+        <p className="tw-mb-0 tw-mt-5 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.06] tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-ml-[4.25rem] sm:tw-p-5">
+          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.journey.important")}
+        </p>
       </section>
 
       <section
@@ -255,11 +298,97 @@ export function StreamReviewForArtistsGuide({
             "publicReview.forArtistsGuide.approval.description"
           )}
         </p>
-        <ul className="tw-mb-0 tw-mt-5 tw-grid tw-gap-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-grid-cols-2">
+        <ul
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.approval.listLabel"
+          )}
+          className="tw-mb-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-2"
+        >
           {APPROVAL_CHECKLIST.map((item) => (
-            <li key={item}>{t(DEFAULT_LOCALE, item)}</li>
+            <li
+              key={item.titleKey}
+              className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/20 tw-p-4"
+            >
+              <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                {t(DEFAULT_LOCALE, item.titleKey)}
+              </h3>
+              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+                {t(DEFAULT_LOCALE, item.descriptionKey)}
+              </p>
+            </li>
           ))}
         </ul>
+        <p className="tw-mb-0 tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.09] tw-pt-4 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-200">
+          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.approval.note")}
+        </p>
+      </section>
+
+      <section
+        aria-labelledby="stream-artist-actors-heading"
+        className="tw-mt-14"
+      >
+        <h2
+          id="stream-artist-actors-heading"
+          className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.actors.heading")}
+        </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.actors.description")}
+        </p>
+        <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-2">
+          {OTHER_ACTORS.map((actor) => {
+            const page = actor.pageId
+              ? pages.find((candidate) => candidate.id === actor.pageId)
+              : undefined;
+            return (
+              <article
+                key={actor.titleKey}
+                className="tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.09] tw-bg-iron-950/60 tw-p-5"
+              >
+                <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                  {t(DEFAULT_LOCALE, actor.titleKey)}
+                </h3>
+                <p className="tw-mb-0 tw-mt-2 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-400">
+                  {t(DEFAULT_LOCALE, actor.descriptionKey)}
+                </p>
+                {page ? <GuideLink page={page} /> : null}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="stream-artist-sales-heading"
+        className="tw-mt-14"
+      >
+        <h2
+          id="stream-artist-sales-heading"
+          className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.sales.heading")}
+        </h2>
+        <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-3">
+          {SALE_STAGES.map((stage) => (
+            <article
+              key={stage.titleKey}
+              className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.09] tw-bg-iron-950/60 tw-p-5"
+            >
+              <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                {t(DEFAULT_LOCALE, stage.titleKey)}
+              </h3>
+              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(DEFAULT_LOCALE, stage.descriptionKey)}
+              </p>
+            </article>
+          ))}
+        </div>
+        <div className="tw-flex tw-flex-col tw-items-start sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5">
+          {salesPage ? <GuideLink page={salesPage} /> : null}
+          {revenuePage ? <GuideLink page={revenuePage} /> : null}
+        </div>
       </section>
 
       <section
@@ -293,97 +422,79 @@ export function StreamReviewForArtistsGuide({
             </article>
           ))}
         </div>
-        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.changes.caveat")}
-        </p>
       </section>
 
       <section
-        aria-labelledby="stream-artist-actors-heading"
+        aria-labelledby="stream-artist-permanence-heading"
         className="tw-mt-14"
       >
         <h2
-          id="stream-artist-actors-heading"
+          id="stream-artist-permanence-heading"
           className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
         >
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.actors.heading")}
+          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.permanence.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.actors.description")}
+          {t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.permanence.description"
+          )}
         </p>
         <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-2">
-          {OTHER_ACTORS.map((actor) => {
-            const page = pages.find(
-              (candidate) => candidate.id === actor.pageId
-            );
-            if (!page) {
-              return null;
-            }
-            return (
-              <article
-                key={actor.pageId}
-                className="tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.09] tw-bg-iron-950/60 tw-p-5"
-              >
-                <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-                  {t(DEFAULT_LOCALE, actor.titleKey)}
-                </h3>
-                <p className="tw-mb-0 tw-mt-2 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-400">
-                  {t(DEFAULT_LOCALE, actor.descriptionKey)}
-                </p>
-                <GuideLink page={page} />
-              </article>
-            );
-          })}
+          {PERMANENCE_CHECKLIST.map((item) => (
+            <article
+              key={item.titleKey}
+              className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.09] tw-bg-iron-950/60 tw-p-5"
+            >
+              <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                {t(DEFAULT_LOCALE, item.titleKey)}
+              </h3>
+              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(DEFAULT_LOCALE, item.descriptionKey)}
+              </p>
+            </article>
+          ))}
         </div>
+        <aside
+          aria-labelledby="stream-artist-permanence-review-status-heading"
+          className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.06] tw-p-4 sm:tw-p-5"
+        >
+          <h3
+            id="stream-artist-permanence-review-status-heading"
+            className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+          >
+            {t(
+              DEFAULT_LOCALE,
+              "publicReview.forArtistsGuide.permanence.reviewStatus.title"
+            )}
+          </h3>
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(
+              DEFAULT_LOCALE,
+              "publicReview.forArtistsGuide.permanence.reviewStatus.description"
+            )}
+          </p>
+        </aside>
+        {finalityPage ? <GuideLink page={finalityPage} /> : null}
       </section>
 
-      <div className="tw-mt-14 tw-grid tw-gap-8 sm:tw-grid-cols-2">
-        <section aria-labelledby="stream-artist-sales-heading">
-          <h2
-            id="stream-artist-sales-heading"
-            className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
-          >
-            {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.sales.heading")}
-          </h2>
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(
-              DEFAULT_LOCALE,
-              "publicReview.forArtistsGuide.sales.description"
-            )}
-          </p>
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.sales.royalties")}
-          </p>
-          <div className="tw-flex tw-flex-col tw-items-start">
-            {salesPage ? <GuideLink page={salesPage} /> : null}
-            {revenuePage ? <GuideLink page={revenuePage} /> : null}
-          </div>
-        </section>
-
-        <section aria-labelledby="stream-artist-permanence-heading">
-          <h2
-            id="stream-artist-permanence-heading"
-            className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
-          >
-            {t(
-              DEFAULT_LOCALE,
-              "publicReview.forArtistsGuide.permanence.heading"
-            )}
-          </h2>
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(
-              DEFAULT_LOCALE,
-              "publicReview.forArtistsGuide.permanence.description"
-            )}
-          </p>
-          <ul className="tw-mb-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400">
-            {PERMANENCE_CHECKLIST.map((item) => (
-              <li key={item}>{t(DEFAULT_LOCALE, item)}</li>
-            ))}
-          </ul>
-          {finalityPage ? <GuideLink page={finalityPage} /> : null}
-        </section>
-      </div>
+      <section
+        aria-labelledby="stream-artist-next-step-heading"
+        className="tw-mt-14 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.06] tw-p-5 sm:tw-p-7"
+      >
+        <h2
+          id="stream-artist-next-step-heading"
+          className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.nextStep.heading")}
+        </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(
+            DEFAULT_LOCALE,
+            "publicReview.forArtistsGuide.nextStep.description"
+          )}
+        </p>
+      </section>
 
       <section
         aria-labelledby="stream-artist-evidence-heading"

@@ -71,16 +71,24 @@ Every page includes:
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview contains a plain definition of Stream, five important
-parts of a Stream artwork, a seven-step artwork journey, and focused
-starting points for artists, collectors and minters, and auditors. It ends
-after those audience paths. The secondary **Review history** destination opens
-the immutable technical Overview for the active snapshot. The current **For
-Artists** page starts with a plain artist guide
-covering six questions: artwork and identity; editions and minting; artist
-approval; sales, payments, and royalties; what can still change; and files and
-artwork history. Its detailed versioned editorial remains below as the technical
-evidence. The generated technical reference lets reviewers
+The current overview opens with a broad introduction for artists, collectors,
+and the wider community, followed by five important parts of a Stream artwork,
+a seven-step artwork journey, and focused starting points for artists,
+collectors and minters, and auditors. It ends after those audience paths. The
+secondary **Review history** destination opens the immutable technical Overview
+for the active snapshot. The current **For Artists** page starts with a plain
+artist guide covering six decisions: what artwork to publish; whether it is
+unique or an edition; how collectors can get it; where the money goes; what the
+artist approves; and what can change or become permanent. A six-stage guide
+shows how the artwork moves through Stream and keeps finality separate from
+ending minting, freezing settings, and recording preservation evidence. A
+focused approval checklist separates the details covered by the artist's wallet
+signature from the wider artwork plan. A three-part sales and payments guide
+now follows that checklist before the page explains what can still change. A
+four-part roles summary explains how
+the community, signing wallet, Stream operators, guardian, and outside services
+can affect what happens. Its detailed versioned editorial remains below as the
+technical evidence. The generated technical reference lets reviewers
 inspect Solidity files, definitions, functions, events, errors, and other
 declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100
