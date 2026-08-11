@@ -80,6 +80,7 @@ export default function WaveLeaderboardGalleryItemVotes({
         <DropVoteProgressing
           current={current}
           projected={projected}
+          projectedLabel={formatInteger(locale, projected)}
           subtle={variant === "subtle"}
           numberFont="sans"
           numberWeight="semibold"

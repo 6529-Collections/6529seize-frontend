@@ -72,6 +72,7 @@ describe("ApprovalDropVoteSummary", () => {
     const progress = screen.getByTestId("progress");
     expect(progress).toHaveAttribute("data-current", "5");
     expect(progress).toHaveAttribute("data-projected", "9");
+    expect(progress).toHaveAttribute("data-projected-label", "9");
     expect(progress).toHaveAttribute("data-tooltip-label", "Votes given now");
     expect(progress).toHaveAttribute("data-compact", "true");
   });

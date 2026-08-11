@@ -40,7 +40,11 @@ export const isQuickDmLauncherCoveringInteractiveElement = (
   documentObject: Document = globalThis.document
 ): boolean => {
   const rect = launcher.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) {
+  if (
+    rect.width <= 0 ||
+    rect.height <= 0 ||
+    typeof documentObject.elementsFromPoint !== "function"
+  ) {
     return false;
   }
 

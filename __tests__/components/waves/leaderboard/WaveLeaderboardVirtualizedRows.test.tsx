@@ -35,6 +35,7 @@ interface MockVirtualizerOptions {
   readonly count?: number;
   readonly lanes?: number;
   readonly gap?: number;
+  readonly overscan?: number;
   readonly getScrollElement?: () => HTMLDivElement | null;
   readonly onChange?: (instance: Virtualizer<HTMLDivElement, Element>) => void;
 }
@@ -344,6 +345,7 @@ describe("WaveLeaderboardVirtualizedRows", () => {
     expect(mockVirtualizerOptions?.count).toBe(4);
     expect(mockVirtualizerOptions?.lanes).toBe(2);
     expect(mockVirtualizerOptions?.gap).toBe(16);
+    expect(mockVirtualizerOptions?.overscan).toBe(4);
 
     getBoundingClientRectSpy.mockRestore();
   });

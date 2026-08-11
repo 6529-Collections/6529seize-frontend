@@ -394,6 +394,13 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     ]
   );
 
+  let virtualizerOverscan = 2;
+  if (layout === "list") {
+    virtualizerOverscan = 4;
+  } else if (isMasonryLayout) {
+    virtualizerOverscan = columns * 2;
+  }
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: virtualItemCount,
@@ -402,7 +409,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     getItemKey: getVirtualRowKey,
     lanes: isMasonryLayout ? columns : 1,
     gap: isMasonryLayout ? 16 : 0,
-    overscan: layout === "list" ? 4 : 2,
+    overscan: virtualizerOverscan,
     scrollMargin,
     onChange: handleVirtualizerChange,
   });

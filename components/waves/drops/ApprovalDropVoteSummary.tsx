@@ -191,6 +191,7 @@ export default function ApprovalDropVoteSummary({
               <DropVoteProgressing
                 current={current}
                 projected={realtimeRating}
+                projectedLabel={formatInteger(locale, realtimeRating)}
                 tooltipLabel={t(locale, "waves.leaderboard.grid.votesNow")}
                 subtle={subtle}
               />

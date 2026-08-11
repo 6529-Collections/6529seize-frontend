@@ -74,4 +74,26 @@ describe("isQuickDmLauncherCoveringInteractiveElement", () => {
     ).toBe(false);
     expect(elementsFromPoint).not.toHaveBeenCalled();
   });
+
+  it("ignores overlap when elementsFromPoint is unavailable", () => {
+    const launcher = document.createElement("div");
+    jest.spyOn(launcher, "getBoundingClientRect").mockReturnValue({
+      left: 100,
+      right: 156,
+      top: 200,
+      bottom: 256,
+      width: 56,
+      height: 56,
+      x: 100,
+      y: 200,
+      toJSON: () => ({}),
+    });
+
+    expect(
+      isQuickDmLauncherCoveringInteractiveElement(
+        launcher,
+        {} as unknown as Document
+      )
+    ).toBe(false);
+  });
 });

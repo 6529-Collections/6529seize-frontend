@@ -10,6 +10,7 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
       data-testid="progress"
       data-current={props.current}
       data-projected={props.projected}
+      data-projected-label={props.projectedLabel ?? ""}
       data-subtle={props.subtle}
       data-tooltip-label={props.tooltipLabel}
     />
@@ -34,6 +35,7 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
     const progress = screen.getByTestId("progress");
     expect(progress.getAttribute("data-current")).toBe("5");
     expect(progress.getAttribute("data-projected")).toBe("6");
+    expect(progress.getAttribute("data-projected-label")).toBe("6");
     expect(progress.getAttribute("data-subtle")).toBe("false");
     expect(
       screen.getByRole("group", {
