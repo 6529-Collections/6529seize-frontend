@@ -431,18 +431,10 @@ export const ES_ES_MESSAGES = {
   "waves.create.advanced.needsAttention": "Requiere atención",
   "waves.create.advanced.errorSummary":
     "Revisa los ajustes señalados antes de continuar.",
-  "waves.create.overview.advanced.defaultSummary":
-    "La imagen y los ajustes opcionales de visualización usan los valores recomendados.",
-  "waves.create.overview.advanced.customSummary":
-    "Se han personalizado opciones de imagen o visualización.",
   "waves.create.overview.picture": "Imagen de la Wave",
   "waves.create.groups.title": "Acceso",
   "waves.create.groups.description":
     "Elige quién puede acceder, participar y gestionar esta Wave.",
-  "waves.create.groups.advanced.defaultSummary":
-    "Cualquiera puede ver la Wave y participar. Solo tú puedes administrarla.",
-  "waves.create.groups.advanced.customSummary":
-    "Se han personalizado los ajustes de acceso o moderación.",
   "waves.create.dates.title": "Calendario",
   "waves.create.dates.description":
     "Revisa cuándo empieza la Wave, comienza la votación y se anuncian los ganadores.",

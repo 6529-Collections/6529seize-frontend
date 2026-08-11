@@ -437,18 +437,10 @@ export const FR_FR_MESSAGES = {
   "waves.create.advanced.needsAttention": "À vérifier",
   "waves.create.advanced.errorSummary":
     "Vérifiez les paramètres signalés avant de continuer.",
-  "waves.create.overview.advanced.defaultSummary":
-    "L’image et les options d’affichage facultatives utilisent les valeurs recommandées.",
-  "waves.create.overview.advanced.customSummary":
-    "Des options facultatives d’image ou d’affichage ont été personnalisées.",
   "waves.create.overview.picture": "Image de la Wave",
   "waves.create.groups.title": "Accès",
   "waves.create.groups.description":
     "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
-  "waves.create.groups.advanced.defaultSummary":
-    "Tout le monde peut voir la Wave et y participer. Vous seul pouvez l’administrer.",
-  "waves.create.groups.advanced.customSummary":
-    "Les paramètres d’accès ou de modération ont été personnalisés.",
   "waves.create.dates.title": "Calendrier",
   "waves.create.dates.description":
     "Vérifiez le début de la Wave, du vote et des annonces des gagnants.",

@@ -81,7 +81,7 @@ export default function CreateWaveDates({
         <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-white">
           {t(locale, "waves.create.dates.title")}
         </h2>
-        <p className="tw-mb-0 tw-text-sm tw-leading-relaxed tw-text-iron-400">
+        <p className="tw-mb-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
           {t(locale, "waves.create.dates.description")}
         </p>
       </div>

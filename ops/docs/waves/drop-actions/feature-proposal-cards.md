@@ -29,8 +29,8 @@ presentations are not changed by this setting.
   cards.
 - Select a quoted proposal or a same-origin proposal preview inside another
   drop.
-- While creating a `Rank` or `Approve` Wave, enable `Compact proposal cards` in
-  `Overview`.
+- The Create Wave flow does not currently expose a compact-proposal-card
+  control.
 
 ## User Journey
 

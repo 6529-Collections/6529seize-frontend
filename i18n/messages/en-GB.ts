@@ -418,18 +418,10 @@ export const EN_GB_MESSAGES = {
   "waves.create.advanced.needsAttention": "Needs attention",
   "waves.create.advanced.errorSummary":
     "Review the highlighted settings before continuing.",
-  "waves.create.overview.advanced.defaultSummary":
-    "Picture and optional display settings use recommended defaults.",
-  "waves.create.overview.advanced.customSummary":
-    "Optional picture or display settings have been customised.",
-  "waves.create.overview.picture": "Wave picture",
+  "waves.create.overview.picture": "Wave profile picture",
   "waves.create.groups.title": "Access",
   "waves.create.groups.description":
     "Choose who can access, participate in, and manage this wave.",
-  "waves.create.groups.advanced.defaultSummary":
-    "Anyone can view and participate. Only you can administer the wave.",
-  "waves.create.groups.advanced.customSummary":
-    "Access or moderation settings have been customised.",
   "waves.create.dates.title": "Schedule",
   "waves.create.dates.description":
     "Review when this wave opens, voting begins, and winners are announced.",

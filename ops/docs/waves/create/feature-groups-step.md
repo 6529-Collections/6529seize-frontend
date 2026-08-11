@@ -29,11 +29,9 @@ administer a wave. This step is user-reachable for `Chat`, `Rank`, and
 
 ## What You Configure
 
-- The default view is a compact `Access` summary. It explains that anyone can
-  view and participate, while only the creator can administer the wave.
-- Expand `Advanced settings` to customize access or moderation. The disclosure
-  shows `Customized` whenever a group, chat, or admin-delete setting differs
-  from its default.
+- All access and moderation rows are visible when the step opens. Each row
+  groups its permission name, current scope, and related actions so the page can
+  be scanned from `Who can view` through `Admin` without opening a disclosure.
 - Helper copy clarifies that `Who can view` controls who can access the wave,
   and that followers who can view the wave may get a notification when it is
   created.
@@ -91,8 +89,6 @@ administer a wave. This step is user-reachable for `Chat`, `Rank`, and
 
 - The inline group builder can select an existing group or create an identity,
   NFT, or combined group without leaving wave creation.
-- Collapsing `Advanced settings` does not clear selected groups or an in-progress
-  inline group configuration.
 - `Approve` uses the same group rows as `Rank`.
 
 ## Related Pages

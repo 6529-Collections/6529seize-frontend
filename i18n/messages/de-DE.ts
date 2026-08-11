@@ -429,18 +429,10 @@ export const DE_DE_MESSAGES = {
   "waves.create.advanced.needsAttention": "Prüfen",
   "waves.create.advanced.errorSummary":
     "Prüfe die markierten Einstellungen, bevor du fortfährst.",
-  "waves.create.overview.advanced.defaultSummary":
-    "Bild und optionale Anzeigeeinstellungen verwenden die empfohlenen Standardwerte.",
-  "waves.create.overview.advanced.customSummary":
-    "Optionale Bild- oder Anzeigeeinstellungen wurden angepasst.",
   "waves.create.overview.picture": "Wave-Bild",
   "waves.create.groups.title": "Zugriff",
   "waves.create.groups.description":
     "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
-  "waves.create.groups.advanced.defaultSummary":
-    "Alle können die Wave sehen und teilnehmen. Nur du kannst sie verwalten.",
-  "waves.create.groups.advanced.customSummary":
-    "Zugriffs- oder Moderationseinstellungen wurden angepasst.",
   "waves.create.dates.title": "Zeitplan",
   "waves.create.dates.description":
     "Prüfe, wann diese Wave startet, die Abstimmung beginnt und Gewinner bekannt gegeben werden.",

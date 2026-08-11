@@ -535,9 +535,6 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   "media.other": "{count} media items",
   "attachment.one": "{count} attachment",
   "attachment.other": "{count} attachments",
-  settingLabel: "Compact proposal cards",
-  settingDescription:
-    "Show published proposals as compact previews that open to the complete original proposal.",
 } as const);
 
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
@@ -991,10 +988,6 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
   description: "Choose who can access, participate in, and manage this wave.",
-  "advanced.defaultSummary":
-    "Anyone can view and participate. Only you can administer the wave.",
-  "advanced.customSummary":
-    "Access or moderation settings have been customized.",
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   limitedAccessTitle: "Warning: Limited Access",
@@ -1039,11 +1032,7 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages(
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages(
   "waves.create.overview",
   {
-    "advanced.defaultSummary":
-      "Picture and optional display settings use recommended defaults.",
-    "advanced.customSummary":
-      "Optional picture or display settings have been customized.",
-    picture: "Wave picture",
+    picture: "Wave Profile Picture",
   } as const
 );
 

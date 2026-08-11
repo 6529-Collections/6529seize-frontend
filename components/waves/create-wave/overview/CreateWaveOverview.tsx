@@ -1,4 +1,4 @@
-import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import type {
   CreateWaveDisplayConfig,
   WaveOverviewConfig,
@@ -6,7 +6,6 @@ import type {
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import CreateWaveDisplaySettings from "./CreateWaveDisplaySettings";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
@@ -23,13 +22,6 @@ const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
     approvedTabLabel: "",
   },
 };
-
-const ADVANCED_OVERVIEW_ERRORS = new Set<CREATE_WAVE_VALIDATION_ERROR>([
-  CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG,
-  CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG,
-  CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE,
-  CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED,
-]);
 
 export default function CreateWaveOverview({
   overview,
@@ -63,23 +55,6 @@ export default function CreateWaveOverview({
       [key]: value,
     });
 
-  const isProposalWave =
-    overview.type === ApiWaveType.Rank ||
-    overview.type === ApiWaveType.Approve;
-  const hasCustomApproveLabels =
-    overview.type === ApiWaveType.Approve &&
-    (display.approve.approvalsTabLabel.trim().length > 0 ||
-      display.approve.approvedTabLabel.trim().length > 0);
-  const isAdvancedCustomized =
-    overview.image !== null ||
-    (isProposalWave &&
-      ((display.submissionButtonLabel?.trim().length ?? 0) > 0 ||
-        display.compactProposalCards === true ||
-        hasCustomApproveLabels));
-  const hasAdvancedError = errors.some((error) =>
-    ADVANCED_OVERVIEW_ERRORS.has(error)
-  );
-
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveNameInput
@@ -87,6 +62,20 @@ export default function CreateWaveOverview({
         name={overview.name}
         errors={errors}
       />
+      <div className="tw-space-y-3">
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+          {t(locale, "waves.create.overview.picture")}
+        </p>
+        <CreateWaveImageInput
+          imageToShow={overview.image}
+          setFile={(file) =>
+            onChange({
+              key: "image",
+              value: file,
+            })
+          }
+        />
+      </div>
       <CreateWaveType
         selected={overview.typeSelected ? overview.type : null}
         errors={errors}
@@ -102,41 +91,15 @@ export default function CreateWaveOverview({
           onChange={onOngoingRankingChange}
         />
       )}
-      <CreateWaveAdvancedSection
-        summary={t(
-          locale,
-          isAdvancedCustomized
-            ? "waves.create.overview.advanced.customSummary"
-            : "waves.create.overview.advanced.defaultSummary"
-        )}
-        isCustomized={isAdvancedCustomized}
-        hasError={hasAdvancedError}
-      >
-        <div className="tw-flex tw-flex-col tw-gap-y-6">
-          <div className="tw-space-y-3">
-            <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
-              {t(locale, "waves.create.overview.picture")}
-            </p>
-            <CreateWaveImageInput
-              imageToShow={overview.image}
-              setFile={(file) =>
-                onChange({
-                  key: "image",
-                  value: file,
-                })
-              }
-            />
-          </div>
-          {isProposalWave ? (
-            <CreateWaveDisplaySettings
-              display={display}
-              errors={errors}
-              onChange={setDisplay}
-              waveType={overview.type}
-            />
-          ) : null}
-        </div>
-      </CreateWaveAdvancedSection>
+      {overview.type === ApiWaveType.Rank ||
+      overview.type === ApiWaveType.Approve ? (
+        <CreateWaveDisplaySettings
+          display={display}
+          errors={errors}
+          onChange={setDisplay}
+          waveType={overview.type}
+        />
+      ) : null}
     </div>
   );
 }

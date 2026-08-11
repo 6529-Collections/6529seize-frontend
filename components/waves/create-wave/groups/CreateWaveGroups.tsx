@@ -1,7 +1,7 @@
 "use client";
 
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { CREATE_WAVE_GROUPS } from "@/helpers/waves/waves.constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -11,7 +11,6 @@ import type {
   WaveGroupsConfig,
 } from "@/types/waves.types";
 import CreateWaveWarning from "../utils/CreateWaveWarning";
-import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import CreateWaveGroup from "./CreateWaveGroup";
 
 export default function CreateWaveGroups({
@@ -44,71 +43,51 @@ export default function CreateWaveGroups({
 }) {
   const locale = useBrowserLocale();
   const isRestrictedGroup = !!groups.admin && !!groups.canView;
-  const hasCustomGroup = Object.values(groups).some(
-    (groupId) => groupId !== null
-  );
-  const isCustomized =
-    hasCustomGroup ||
-    (waveType !== ApiWaveType.Chat && !chatEnabled) ||
-    !adminCanDeleteDrops;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
-      <div>
-        <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-white">
+      <div className="tw-flex tw-flex-col tw-gap-y-2">
+        <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
           {t(locale, "waves.create.groups.title")}
         </h2>
-        <p className="tw-mb-0 tw-text-sm tw-leading-relaxed tw-text-iron-400">
+        <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
           {t(locale, "waves.create.groups.description")}
         </p>
+        <p className="tw-m-0 tw-text-pretty tw-text-xs tw-leading-relaxed tw-text-iron-500">
+          {t(locale, "waves.create.groups.accessHelper", {
+            viewGroupName: "Who can view",
+          })}
+        </p>
       </div>
-      <CreateWaveAdvancedSection
-        summary={t(
-          locale,
-          isCustomized
-            ? "waves.create.groups.advanced.customSummary"
-            : "waves.create.groups.advanced.defaultSummary"
-        )}
-        isCustomized={isCustomized}
-        hasError={false}
-      >
-        <div className="tw-flex tw-flex-col tw-gap-y-6">
-          <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400">
-            {t(locale, "waves.create.groups.accessHelper", {
+      {CREATE_WAVE_GROUPS[waveType].map((groupType) => (
+        <CreateWaveGroup
+          key={groupType}
+          waveName={waveName}
+          groupType={groupType}
+          waveType={waveType}
+          chatEnabled={chatEnabled}
+          groupsCache={groupsCache}
+          groups={groups}
+          adminCanDeleteDrops={adminCanDeleteDrops}
+          setChatEnabled={setChatEnabled}
+          onGroupSelect={(group) => onGroupSelect({ group, groupType })}
+          onInlineGroupCreate={onInlineGroupCreate}
+          setDropsAdminCanDelete={setDropsAdminCanDelete}
+        />
+      ))}
+      {isRestrictedGroup && (
+        <CreateWaveWarning
+          title={t(locale, "waves.create.groups.limitedAccessTitle")}
+          description={t(
+            locale,
+            "waves.create.groups.limitedAccessDescription",
+            {
               viewGroupName: "Who can view",
-            })}
-          </p>
-          {CREATE_WAVE_GROUPS[waveType].map((groupType) => (
-            <CreateWaveGroup
-              key={groupType}
-              waveName={waveName}
-              groupType={groupType}
-              waveType={waveType}
-              chatEnabled={chatEnabled}
-              groupsCache={groupsCache}
-              groups={groups}
-              adminCanDeleteDrops={adminCanDeleteDrops}
-              setChatEnabled={setChatEnabled}
-              onGroupSelect={(group) => onGroupSelect({ group, groupType })}
-              onInlineGroupCreate={onInlineGroupCreate}
-              setDropsAdminCanDelete={setDropsAdminCanDelete}
-            />
-          ))}
-          {isRestrictedGroup && (
-            <CreateWaveWarning
-              title={t(locale, "waves.create.groups.limitedAccessTitle")}
-              description={t(
-                locale,
-                "waves.create.groups.limitedAccessDescription",
-                {
-                  viewGroupName: "Who can view",
-                  adminGroupName: "Admin",
-                }
-              )}
-            />
+              adminGroupName: "Admin",
+            }
           )}
-        </div>
-      </CreateWaveAdvancedSection>
+        />
+      )}
     </div>
   );
 }

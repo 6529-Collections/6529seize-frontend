@@ -95,15 +95,6 @@ export default function CreateWaveDisplaySettings({
     });
   };
 
-  const onCompactProposalCardsChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    onChange({
-      ...display,
-      compactProposalCards: event.target.checked,
-    });
-  };
-
   const inputClasses = ({
     hasError,
     hasValue,
@@ -117,40 +108,48 @@ export default function CreateWaveDisplaySettings({
         : "tw-border-white/5 tw-caret-primary-400 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-500/50 focus:tw-ring-primary-400"
     } ${
       hasValue ? "tw-text-primary-400 focus:tw-text-white" : "tw-text-white"
-    } tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
+    } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
 
   return (
     <div>
       <div className="tw-space-y-3">
-        <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
           Display settings
         </p>
         <div className="tw-space-y-2">
-          <label
-            htmlFor="create-wave-submission-button-label"
-            className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
-          >
-            {t(DEFAULT_LOCALE, "waves.submissionButtonLabel.label")}
-          </label>
-          <input
-            id="create-wave-submission-button-label"
-            type="text"
-            autoComplete="off"
-            maxLength={WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH}
-            value={submissionButtonLabel}
-            onChange={onSubmissionButtonLabelChange}
-            placeholder={getDefaultWaveSubmissionButtonLabel(
-              WaveSubmissionExperience.DEFAULT
-            )}
-            aria-invalid={Boolean(submissionLabelErrorMessage)}
-            aria-describedby={
-              submissionLabelErrorMessage ? submissionLabelErrorId : undefined
-            }
-            className={inputClasses({
-              hasError: Boolean(submissionLabelErrorMessage),
-              hasValue: submissionButtonLabel.length > 0,
-            })}
-          />
+          <div className="tw-group tw-relative tw-w-full">
+            <input
+              id="create-wave-submission-button-label"
+              type="text"
+              autoComplete="off"
+              maxLength={WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH}
+              value={submissionButtonLabel}
+              onChange={onSubmissionButtonLabelChange}
+              placeholder={getDefaultWaveSubmissionButtonLabel(
+                WaveSubmissionExperience.DEFAULT
+              )}
+              aria-invalid={Boolean(submissionLabelErrorMessage)}
+              aria-describedby={
+                submissionLabelErrorMessage
+                  ? submissionLabelErrorId
+                  : undefined
+              }
+              className={inputClasses({
+                hasError: Boolean(submissionLabelErrorMessage),
+                hasValue: submissionButtonLabel.length > 0,
+              })}
+            />
+            <label
+              htmlFor="create-wave-submission-button-label"
+              className={`tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
+                submissionLabelErrorMessage
+                  ? "tw-text-error peer-focus:tw-text-error"
+                  : "tw-text-iron-500 peer-focus:tw-text-primary-400"
+              }`}
+            >
+              {t(DEFAULT_LOCALE, "waves.submissionButtonLabel.label")}
+            </label>
+          </div>
           <CommonAnimationHeight>
             {submissionLabelErrorMessage ? (
               <div
@@ -178,26 +177,6 @@ export default function CreateWaveDisplaySettings({
             ) : null}
           </CommonAnimationHeight>
         </div>
-        <label
-          htmlFor="create-wave-compact-proposal-cards"
-          className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-justify-between tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-3 tw-transition-colors desktop-hover:hover:tw-border-iron-600"
-        >
-          <span className="tw-min-w-0">
-            <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
-              {t(DEFAULT_LOCALE, "waves.proposalCard.settingLabel")}
-            </span>
-            <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-              {t(DEFAULT_LOCALE, "waves.proposalCard.settingDescription")}
-            </span>
-          </span>
-          <input
-            id="create-wave-compact-proposal-cards"
-            type="checkbox"
-            checked={display.compactProposalCards === true}
-            onChange={onCompactProposalCardsChange}
-            className="tw-form-checkbox tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
-          />
-        </label>
         {showApproveTabLabels ? (
           <>
             <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">

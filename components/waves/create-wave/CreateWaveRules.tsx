@@ -61,7 +61,7 @@ export default function CreateWaveRules({
         <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
           Rules
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
           Automatic rules are generated from the wave setup. Add creator rules
           only for wave-specific requirements that are not already covered.
         </p>

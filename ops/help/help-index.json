@@ -2116,7 +2116,7 @@
         "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
         "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
         "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
-        "Wave creators can enable Compact proposal cards under Advanced settings in the Overview step for a Rank or Approve Wave; the setting defaults to off and is stored as Wave metadata."
+        "The Create Wave flow does not currently expose a Compact proposal cards control."
       ],
       "canonical_path": "/waves/5f207393-5418-4a75-8738-e40edb44a94d",
       "related_paths": ["/waves", "/waves?create=wave", "/waves/create"],
@@ -2211,9 +2211,9 @@
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
-        "Overview keeps the required name, wave type, and Rank ranking mode visible; optional picture, display, and label controls are under Advanced settings.",
-        "Advanced settings shows Customized when a draft or current setup contains non-default optional values, and opens automatically when a hidden field needs attention.",
-        "The Groups step starts with a compact Access summary; expand Advanced settings to customize who can view, participate in, or administer the wave.",
+        "Overview shows the wave name, picture, type, Rank ranking mode, and relevant proposal display settings without an Advanced settings section.",
+        "On steps that use Advanced settings, the disclosure shows Customized for non-default values and opens automatically when a hidden field needs attention.",
+        "The Groups step shows all access and moderation rows immediately, organized from Who can view through Admin without an Advanced settings disclosure.",
         "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
