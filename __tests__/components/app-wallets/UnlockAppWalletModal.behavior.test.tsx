@@ -86,4 +86,42 @@ describe("UnlockAppWalletModal", () => {
       expect(onHide).toHaveBeenCalled();
     });
   }, 30000);
+
+  test("prevents dismissal while wallet unlock is pending", async () => {
+    let resolveDecryption: (address: string) => void = () => {};
+    decryptData.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveDecryption = resolve;
+      })
+    );
+    areEqualAddresses.mockReturnValue(true);
+    const onHide = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <UnlockAppWalletModal
+        show
+        address="0x1"
+        address_hashed="enc"
+        onUnlock={jest.fn()}
+        onHide={onHide}
+      />
+    );
+
+    await user.type(screen.getByLabelText("Wallet Password"), "secret");
+    await user.click(screen.getByRole("button", { name: "Unlock" }));
+    await waitFor(() => expect(decryptData).toHaveBeenCalled());
+
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+    for (const closeButton of screen.getAllByRole("button", {
+      name: "Close wallet dialog",
+    })) {
+      expect(closeButton).toBeDisabled();
+    }
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onHide).not.toHaveBeenCalled();
+
+    resolveDecryption("0x1");
+    await waitFor(() => expect(onHide).toHaveBeenCalledTimes(1));
+  }, 30000);
 });

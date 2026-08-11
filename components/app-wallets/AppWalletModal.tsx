@@ -35,6 +35,7 @@ function AppWalletModalShell(
     show: boolean;
     title: string;
     onHide: () => void;
+    dismissDisabled?: boolean;
     children: ReactNode;
     footer: ReactNode;
   }>
@@ -42,7 +43,14 @@ function AppWalletModalShell(
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
-  const { children, footer, onHide, show, title } = props;
+  const {
+    children,
+    dismissDisabled = false,
+    footer,
+    onHide,
+    show,
+    title,
+  } = props;
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -96,7 +104,9 @@ function AppWalletModalShell(
       className="tailwind-scope tw-relative tw-m-0 tw-h-[100dvh] tw-max-h-none tw-w-screen tw-max-w-none tw-overflow-y-auto tw-border-none tw-bg-transparent tw-p-0 tw-text-inherit backdrop:tw-bg-black/75 backdrop:tw-backdrop-blur-sm"
       onCancel={(event) => {
         event.preventDefault();
-        onHide();
+        if (!dismissDisabled) {
+          onHide();
+        }
       }}
     >
       <button
@@ -104,6 +114,7 @@ function AppWalletModalShell(
         aria-label={t(DEFAULT_LOCALE, "appWallet.modal.close")}
         className="tw-absolute tw-inset-0 tw-cursor-default tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0"
         onClick={onHide}
+        disabled={dismissDisabled}
         tabIndex={-1}
       />
       <div className="tw-relative tw-z-10 tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-px-4 tw-pb-[max(1rem,env(safe-area-inset-bottom,0px))] tw-pt-[max(1rem,env(safe-area-inset-top,0px))]">
@@ -119,6 +130,7 @@ function AppWalletModalShell(
               type="button"
               aria-label={t(DEFAULT_LOCALE, "appWallet.modal.close")}
               onClick={onHide}
+              disabled={dismissDisabled}
               className="tw--mr-2 tw-inline-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/5 active:tw-text-iron-100 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-100"
             >
               <XMarkIcon className="tw-size-5" aria-hidden="true" />
@@ -210,14 +222,16 @@ export function CreateAppWalletModal(
     }
 
     setIsAdding(true);
+    try {
+      const success = await createAppWallet(walletName, walletPass);
+      if (!success) {
+        setToast({
+          message: t(DEFAULT_LOCALE, "appWallet.modal.createFailed"),
+          type: "error",
+        });
+        return;
+      }
 
-    const success = await createAppWallet(walletName, walletPass);
-    if (!success) {
-      setToast({
-        message: t(DEFAULT_LOCALE, "appWallet.modal.createFailed"),
-        type: "error",
-      });
-    } else {
       setToast({
         title: t(DEFAULT_LOCALE, "appWallet.modal.createSuccess"),
         description: t(
@@ -228,8 +242,14 @@ export function CreateAppWalletModal(
         type: "success",
       });
       handleHide(true);
+    } catch {
+      setToast({
+        message: t(DEFAULT_LOCALE, "appWallet.modal.createFailed"),
+        type: "error",
+      });
+    } finally {
+      setIsAdding(false);
     }
-    setIsAdding(false);
   }, [createAppWallet, handleHide, setToast, walletName, walletPass]);
 
   const handleImport = useCallback(async () => {
@@ -245,27 +265,35 @@ export function CreateAppWalletModal(
     }
 
     setIsAdding(true);
+    try {
+      const success = await importAppWallet(
+        walletName,
+        walletPass,
+        importData.address,
+        importData.mnemonic,
+        importData.privateKey
+      );
+      if (!success) {
+        setToast({
+          message: t(DEFAULT_LOCALE, "appWallet.modal.importFailed"),
+          type: "error",
+        });
+        return;
+      }
 
-    const success = await importAppWallet(
-      walletName,
-      walletPass,
-      importData.address,
-      importData.mnemonic,
-      importData.privateKey
-    );
-    if (!success) {
-      setToast({
-        message: t(DEFAULT_LOCALE, "appWallet.modal.importFailed"),
-        type: "error",
-      });
-    } else {
       setToast({
         message: t(DEFAULT_LOCALE, "appWallet.modal.importSuccess"),
         type: "success",
       });
       handleHide(true);
+    } catch {
+      setToast({
+        message: t(DEFAULT_LOCALE, "appWallet.modal.importFailed"),
+        type: "error",
+      });
+    } finally {
+      setIsAdding(false);
     }
-    setIsAdding(false);
   }, [
     handleHide,
     importAppWallet,
@@ -279,6 +307,7 @@ export function CreateAppWalletModal(
     <AppWalletModalShell
       show={show}
       onHide={() => handleHide()}
+      dismissDisabled={isAdding}
       title={t(
         DEFAULT_LOCALE,
         importData
@@ -290,6 +319,7 @@ export function CreateAppWalletModal(
           <Button
             type="button"
             onClick={() => handleHide()}
+            disabled={isAdding}
             variant="secondary"
             size="md"
           >
@@ -339,7 +369,6 @@ export function CreateAppWalletModal(
           </label>
           <input
             id={walletNameId}
-            autoFocus
             autoComplete="off"
             type="text"
             placeholder={t(
@@ -347,7 +376,7 @@ export function CreateAppWalletModal(
               "appWallet.modal.walletNamePlaceholder"
             )}
             value={walletName}
-            aria-invalid={error && errorField === "name" ? true : undefined}
+            aria-invalid={Boolean(error && errorField === "name") || undefined}
             aria-describedby={feedbackId}
             className={APP_WALLET_INPUT_CLASS_NAME}
             onChange={(e) => {
@@ -383,7 +412,7 @@ export function CreateAppWalletModal(
               )}
               value={walletPass}
               aria-invalid={
-                error && errorField === "password" ? true : undefined
+                Boolean(error && errorField === "password") || undefined
               }
               aria-describedby={feedbackId}
               className={`${APP_WALLET_INPUT_CLASS_NAME} tw-pr-12`}
@@ -555,12 +584,14 @@ export function UnlockAppWalletModal(
     <AppWalletModalShell
       show={show}
       onHide={() => handleHide()}
+      dismissDisabled={unlocking}
       title={t(DEFAULT_LOCALE, "appWallet.modal.unlockTitle")}
       footer={
         <>
           <Button
             type="button"
             onClick={() => handleHide()}
+            disabled={unlocking}
             variant="secondary"
             size="md"
           >
@@ -594,7 +625,6 @@ export function UnlockAppWalletModal(
             <input
               ref={inputRef}
               id={walletPasswordId}
-              autoFocus
               autoComplete="current-password"
               type={passHidden ? "password" : "text"}
               placeholder={t(
@@ -602,7 +632,7 @@ export function UnlockAppWalletModal(
                 "appWallet.modal.passwordPlaceholder"
               )}
               value={walletPass}
-              aria-invalid={error ? true : undefined}
+              aria-invalid={Boolean(error) || undefined}
               aria-describedby={feedbackId}
               className={`${APP_WALLET_INPUT_CLASS_NAME} tw-pr-12`}
               onChange={(e) => {
