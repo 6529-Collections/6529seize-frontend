@@ -73,6 +73,14 @@ jest.mock("@/components/public-review/StreamReviewOverviewGuide", () => ({
   StreamReviewOverviewGuide: () => <div>Overview guide</div>,
 }));
 
+jest.mock("@/components/public-review/StreamReviewRolesGuide", () => ({
+  STREAM_REVIEW_ROLES_GUIDE_SECTIONS: [
+    { id: "start-with-status", title: "Start with status" },
+    { id: "main-risks", title: "Main risks" },
+  ],
+  StreamReviewRolesGuide: () => <div>Roles guide</div>,
+}));
+
 jest.mock("@/lib/public-review/editorialContent", () => ({
   loadStreamEditorialContent: jest.fn(async (page: { readonly id: string }) =>
     page.id === "security-testing-and-known-limitations"
@@ -214,6 +222,29 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("1");
   });
 
+  it("replaces the current roles editorial with a status-first guide", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "roles-and-trust",
+        }),
+      })
+    );
+
+    expect(screen.getByText("Roles guide")).toBeInTheDocument();
+    expect(screen.queryByText("Authorship note")).not.toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-editorial-visible",
+      "false"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "2"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("2");
+  });
+
   it("keeps immutable Overview routes unchanged", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -255,6 +286,29 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-editorial-visible",
       "true"
+    );
+  });
+
+  it("keeps immutable roles routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "roles-and-trust",
+          version: "2026-08-01.1",
+        }),
+      })
+    );
+
+    expect(screen.queryByText("Roles guide")).not.toBeInTheDocument();
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-editorial-visible",
+      "true"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "1"
     );
   });
 });

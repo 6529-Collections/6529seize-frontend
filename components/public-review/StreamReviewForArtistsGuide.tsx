@@ -14,7 +14,7 @@ type ArtistGuideCopyItem = {
 };
 
 type ArtistGuideActorItem = ArtistGuideCopyItem & {
-  readonly pageId?: string;
+  readonly pageId?: string | undefined;
 };
 
 const ARTWORK_PARTS = [
@@ -339,7 +339,7 @@ export function StreamReviewForArtistsGuide({
         </p>
         <div className="tw-mt-7 tw-grid tw-gap-3 sm:tw-grid-cols-2">
           {OTHER_ACTORS.map((actor) => {
-            const page = actor.pageId
+            const page = actor.pageId !== undefined
               ? pages.find((candidate) => candidate.id === actor.pageId)
               : undefined;
             return (

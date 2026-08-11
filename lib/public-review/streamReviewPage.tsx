@@ -13,6 +13,10 @@ import {
 import { StreamReviewForArtistsDetails } from "@/components/public-review/StreamReviewForArtistsDetails";
 import { StreamReviewForArtistsGuide } from "@/components/public-review/StreamReviewForArtistsGuide";
 import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
+import {
+  STREAM_REVIEW_ROLES_GUIDE_SECTIONS,
+  StreamReviewRolesGuide,
+} from "@/components/public-review/StreamReviewRolesGuide";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -111,6 +115,8 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     route.page.id === "overview" && route.version === undefined;
   const isCurrentForArtists =
     route.page.id === "for-artists" && route.version === undefined;
+  const isCurrentRoles =
+    route.page.id === "roles-and-trust" && route.version === undefined;
   const isCurrentDevelopmentStatus =
     route.page.id === "security-testing-and-known-limitations" &&
     route.version === undefined;
@@ -122,7 +128,12 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
         DEVELOPMENT_UPDATE_CURRENT_LOCATION
       )
     : editorialMarkdown;
-  const displayedSections = isCurrentOverview ? [] : sections;
+  let displayedSections: readonly (typeof sections)[number][] = sections;
+  if (isCurrentOverview) {
+    displayedSections = [];
+  } else if (isCurrentRoles) {
+    displayedSections = STREAM_REVIEW_ROLES_GUIDE_SECTIONS;
+  }
 
   return (
     <PublicReviewShell
@@ -153,13 +164,18 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
               <StreamReviewForArtistsDetails />
             </>
           ) : null}
+          {isCurrentRoles ? (
+            <StreamReviewRolesGuide pages={reviewVersion.pages} />
+          ) : null}
           {route.version !== undefined || isCurrentCommunityReview ? (
             <StreamReviewBotAuthorshipNote />
           ) : null}
         </>
       }
       showAudiencePaths={!isCurrentOverview}
-      showEditorialContent={!isCurrentOverview && !isCurrentForArtists}
+      showEditorialContent={
+        !isCurrentOverview && !isCurrentForArtists && !isCurrentRoles
+      }
       source={{
         repository: manifest.source.repository,
         commit: manifest.source.commit,

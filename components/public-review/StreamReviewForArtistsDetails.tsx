@@ -266,7 +266,7 @@ function ArtistDetailPoints({
   ordered = false,
   pointKeys,
 }: {
-  readonly ordered?: boolean;
+  readonly ordered?: boolean | undefined;
   readonly pointKeys: readonly MessageKey[];
 }) {
   const List = ordered ? "ol" : "ul";

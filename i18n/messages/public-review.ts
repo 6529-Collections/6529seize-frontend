@@ -554,6 +554,154 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Which sale and payment settings should become permanent?",
   "publicReview.forArtistsDetails.questions.point.finality":
     "Would the finality process give you confidence, or add too much work?",
+  "publicReview.rolesGuide.status.heading": "Start with status",
+  "publicReview.rolesGuide.status.description":
+    "Stream is still being prepared. A role may exist in the code without being active in the current rehearsal. Check the label before treating a power as available.",
+  "publicReview.rolesGuide.status.working.title": "Working in rehearsal",
+  "publicReview.rolesGuide.status.working.description":
+    "Connected to the current rehearsal path.",
+  "publicReview.rolesGuide.status.connected.title":
+    "Connected for integration",
+  "publicReview.rolesGuide.status.connected.description":
+    "Connected to selected contracts, but not used by every current path.",
+  "publicReview.rolesGuide.status.source.title": "Built in source",
+  "publicReview.rolesGuide.status.source.description":
+    "The code exists. Final accounts, settings, and release wiring are not proven.",
+  "publicReview.rolesGuide.status.planned.title": "Planned",
+  "publicReview.rolesGuide.status.planned.description":
+    "The design is accepted. Complete code or wiring is still missing.",
+  "publicReview.rolesGuide.status.open.title": "Still open",
+  "publicReview.rolesGuide.status.open.description":
+    "No final design decision has been made.",
+  "publicReview.rolesGuide.current.heading":
+    "Working in the current rehearsal",
+  "publicReview.rolesGuide.current.description":
+    "These are the main powers used by the current signed Drop and auction path.",
+  "publicReview.rolesGuide.current.artist.title": "Artist",
+  "publicReview.rolesGuide.current.artist.description":
+    "Signs one exact collection state. The signature covers specific collection facts, not every later action.",
+  "publicReview.rolesGuide.current.collector.title": "Collector",
+  "publicReview.rolesGuide.current.collector.description":
+    "Can mint with a valid signed permission, bid, withdraw, transfer, or burn when the current rules allow it.",
+  "publicReview.rolesGuide.current.signer.title": "Stream sale signer",
+  "publicReview.rolesGuide.current.signer.description":
+    "Approves one exact fixed-price mint or auction. Changing the signer also changes the signer version, so old permissions stop working.",
+  "publicReview.rolesGuide.current.admins.title": "Owner and administrators",
+  "publicReview.rolesGuide.current.admins.description":
+    "The owner assigns roles. A global administrator has broad power. A function administrator is limited to one named action on one contract.",
+  "publicReview.rolesGuide.current.pause.title":
+    "Pause and restart administrators",
+  "publicReview.rolesGuide.current.pause.description":
+    "A pause guardian can stop configured operations. A separate administrator decides when to restart them.",
+  "publicReview.rolesGuide.current.anyone.title": "Anyone",
+  "publicReview.rolesGuide.current.anyone.description":
+    "Anyone may settle an auction after it ends. The winner and payment amounts come from contract state.",
+  "publicReview.rolesGuide.inactive.heading":
+    "Built but not active in the current path",
+  "publicReview.rolesGuide.inactive.description":
+    "These roles exist in source or selected integrations. They are not all used by the current signed sale path.",
+  "publicReview.rolesGuide.inactive.mint.title": "Mint manager",
+  "publicReview.rolesGuide.inactive.mint.description":
+    "Can prepare and execute mints under policy and counter checks. The current signed Drop still uses the older mint route.",
+  "publicReview.rolesGuide.inactive.revenue.title":
+    "Revenue resolver and split contracts",
+  "publicReview.rolesGuide.inactive.revenue.description":
+    "Connect to selected parts of Stream. Current Drops and auctions still record sale credits inside their own contracts.",
+  "publicReview.rolesGuide.inactive.governance.title": "Governance roles",
+  "publicReview.rolesGuide.inactive.governance.description":
+    "Separate roles can propose, cancel, veto, and execute delayed changes. Final accounts, targets, delays, and value limits are not yet bound.",
+  "publicReview.rolesGuide.inactive.records.title": "Record writers",
+  "publicReview.rolesGuide.inactive.records.description":
+    "Code limits who may add each kind of record. Final record types, permission providers, and grants are not yet bound.",
+  "publicReview.rolesGuide.inactive.modules.title":
+    "Module and successor roles",
+  "publicReview.rolesGuide.inactive.modules.description":
+    "Code can record a replacement service while keeping the older service visible. The final module map and handover evidence are not yet proven.",
+  "publicReview.rolesGuide.inactive.randomness.title": "Randomness roles",
+  "publicReview.rolesGuide.inactive.randomness.description":
+    "Code separates randomness setup and delivery. Live provider setup, funding, monitoring, and recovery remain unproven.",
+  "publicReview.rolesGuide.future.heading": "Planned or still open",
+  "publicReview.rolesGuide.future.description":
+    "The ADRs describe these ideas. They must not be shown as protection that Stream already provides.",
+  "publicReview.rolesGuide.future.revenueAdapter.title":
+    "Revenue validation adapter",
+  "publicReview.rolesGuide.future.revenueAdapter.description":
+    "The design is accepted, but the complete adapter and matching resolver are not implemented in this snapshot.",
+  "publicReview.rolesGuide.future.artistAdapter.title":
+    "Artist identity adapter",
+  "publicReview.rolesGuide.future.artistAdapter.description":
+    "ADR 0022 proposes this check. It is not approved or implemented as a current protection.",
+  "publicReview.rolesGuide.future.artistRecovery.title":
+    "Artist authority and recovery",
+  "publicReview.rolesGuide.future.artistRecovery.description":
+    "Delegates, guardians, estates, sanctions, disputes, and recovery do not yet have a complete design.",
+  "publicReview.rolesGuide.future.finalityRecovery.title":
+    "Finality recovery record",
+  "publicReview.rolesGuide.future.finalityRecovery.description":
+    "ADR 0020 proposes a visible recovery record that keeps the original finality history. It is not implemented.",
+  "publicReview.rolesGuide.outside.heading":
+    "Responsibilities outside the contracts",
+  "publicReview.rolesGuide.outside.description":
+    "Smart contracts cannot control every part of Stream. These duties still depend on people and services.",
+  "publicReview.rolesGuide.outside.community.title":
+    "Community decisions and TDH",
+  "publicReview.rolesGuide.outside.community.description":
+    "Curation and TDH decisions happen outside the contracts before a sale permission is signed.",
+  "publicReview.rolesGuide.outside.signing.title": "Signer security",
+  "publicReview.rolesGuide.outside.signing.description":
+    "People and services must protect signing keys, rotate them after a problem, and watch for unexpected permissions.",
+  "publicReview.rolesGuide.outside.services.title":
+    "Storage and public services",
+  "publicReview.rolesGuide.outside.services.description":
+    "Artwork storage, websites, browsers, RPC nodes, and indexers must remain available and show the correct data.",
+  "publicReview.rolesGuide.outside.operations.title":
+    "Deployment and incident response",
+  "publicReview.rolesGuide.outside.operations.description":
+    "Safe owners, deployment teams, and monitors need clear owners, recovery steps, and public evidence.",
+  "publicReview.rolesGuide.outside.marketplaces.title": "Marketplaces",
+  "publicReview.rolesGuide.outside.marketplaces.description":
+    "Stream can report royalty information. A marketplace still decides whether to pay it.",
+  "publicReview.rolesGuide.risks.heading": "Main risks",
+  "publicReview.rolesGuide.risks.description":
+    "A clear role name does not guarantee that the power is safe. Review the full action and its limits.",
+  "publicReview.rolesGuide.risks.admin.title": "A role is too broad",
+  "publicReview.rolesGuide.risks.admin.description":
+    "A global or function role may reach more actions than people expect.",
+  "publicReview.rolesGuide.risks.signer.title": "A signer is stolen or wrong",
+  "publicReview.rolesGuide.risks.signer.description":
+    "A stolen key or bad signing service may approve a sale the community did not choose.",
+  "publicReview.rolesGuide.risks.pause.title": "A pause blocks safe exits",
+  "publicReview.rolesGuide.risks.pause.description":
+    "An emergency stop may also block refunds, withdrawals, settlement, or unfinished mints.",
+  "publicReview.rolesGuide.risks.artist.title":
+    "The artist approves less than the page suggests",
+  "publicReview.rolesGuide.risks.artist.description":
+    "The product may imply broad approval even when the signature covers only a small set of facts.",
+  "publicReview.rolesGuide.risks.status.title":
+    "Source code is mistaken for an active protection",
+  "publicReview.rolesGuide.risks.status.description":
+    "A control may exist in Solidity without being connected, configured, or ready for release.",
+  "publicReview.rolesGuide.risks.successor.title":
+    "Old and new services overlap",
+  "publicReview.rolesGuide.risks.successor.description":
+    "A replacement service may accept the same permission or responsibility as the service it replaces.",
+  "publicReview.rolesGuide.questions.heading": "Questions for reviewers",
+  "publicReview.rolesGuide.questions.description":
+    "These decisions should be clear before deployment.",
+  "publicReview.rolesGuide.questions.global":
+    "Which broad administrator roles should end before launch?",
+  "publicReview.rolesGuide.questions.delay":
+    "Which changes need a public waiting period?",
+  "publicReview.rolesGuide.questions.artist":
+    "Which actions need approval from both the artist and Stream operators?",
+  "publicReview.rolesGuide.questions.pause":
+    "Can collectors still settle, withdraw, or receive refunds during a pause?",
+  "publicReview.rolesGuide.questions.successor":
+    "What public evidence is required before a replacement service becomes active?",
+  "publicReview.rolesGuide.evidence.heading": "Check the detailed evidence",
+  "publicReview.rolesGuide.evidence.description":
+    "Use the development and governance pages to check the exact code status, open risks, and release evidence.",
+  "publicReview.rolesGuide.evidence.readPage": "Read {page}",
   "publicReview.pages.overviewNarrative.title": "Overview",
   "publicReview.pages.overviewNarrative.summary":
     "An introduction to Stream and its public review for artists, collectors, and the wider community.",
