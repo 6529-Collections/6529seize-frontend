@@ -92,4 +92,17 @@ describe("getCurrentArtworkLifecycleEditorialMarkdown", () => {
       "The current Stream review editorial transformation is out of date: distribution."
     );
   });
+
+  it("fails loudly when unexpected source content follows the reviewed ending", async () => {
+    const input = await loadArtworkLifecycleEditorial();
+
+    expect(() =>
+      getCurrentArtworkLifecycleEditorialMarkdown({
+        ...input,
+        editorialMarkdown: `${input.editorialMarkdown}\n## Appendix\n\nNew source content.`,
+      })
+    ).toThrow(
+      "The current Stream review editorial transformation is out of date: artwork lifecycle ending."
+    );
+  });
 });

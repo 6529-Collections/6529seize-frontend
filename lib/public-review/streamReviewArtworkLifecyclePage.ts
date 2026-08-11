@@ -2,7 +2,10 @@ import "next/dist/compiled/server-only";
 
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { replaceRequiredEditorialMarkdown } from "@/lib/public-review/editorialReplacement";
+import {
+  getRequiredEditorialMatch,
+  replaceRequiredEditorialMarkdown,
+} from "@/lib/public-review/editorialReplacement";
 
 const ARTWORK_LIFECYCLE_OLD_INTRO = `A Stream artwork moves through a sequence of deliberate commitments. Collection
 identity comes first. Artwork materials, distribution, payment, randomness, and
@@ -70,6 +73,8 @@ const CURRENT_SECTIONS = [
 
 const ARTWORK_LIFECYCLE_REMAINING_SECTIONS =
   /## 8\. Randomness enters a recorded lifecycle[\s\S]*$/;
+const ARTWORK_LIFECYCLE_EXPECTED_END =
+  /7\. What invariants must hold before a successor module becomes current\?\s*$/;
 
 type ArtworkLifecycleSource = {
   readonly commit: string;
@@ -89,6 +94,11 @@ export function getCurrentArtworkLifecycleEditorialMarkdown({
     sourceCommit: source.commit,
     sourceRepository: source.repository,
   };
+  getRequiredEditorialMatch(
+    editorialMarkdown,
+    ARTWORK_LIFECYCLE_EXPECTED_END,
+    "artwork lifecycle ending"
+  );
   const withCurrentIntro = replaceRequiredEditorialMarkdown(
     editorialMarkdown,
     ARTWORK_LIFECYCLE_OLD_INTRO,
