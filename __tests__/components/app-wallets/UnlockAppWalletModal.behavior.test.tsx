@@ -45,6 +45,8 @@ describe("UnlockAppWalletModal", () => {
     );
 
     const input = screen.getByLabelText("Wallet Password");
+    expect(screen.getByTestId("app-wallet-modal-actions").tagName).toBe("DIV");
+    expect(screen.getByRole("dialog").querySelector("footer")).toBeNull();
     await user.type(input, "bad pass");
 
     await waitFor(() => {

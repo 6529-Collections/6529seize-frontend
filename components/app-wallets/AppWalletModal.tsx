@@ -125,9 +125,12 @@ function AppWalletModalShell(
             </button>
           </header>
           <div className="tw-px-5 tw-py-5 sm:tw-px-6">{children}</div>
-          <footer className="tw-flex tw-flex-col tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-5 tw-py-4 sm:tw-flex-row sm:tw-px-6 [&>button]:tw-w-full sm:[&>button]:tw-w-auto">
+          <div
+            data-testid="app-wallet-modal-actions"
+            className="tw-flex tw-flex-col tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-5 tw-py-4 sm:tw-flex-row sm:tw-px-6 [&>button]:tw-w-full sm:[&>button]:tw-w-auto"
+          >
             {footer}
-          </footer>
+          </div>
         </section>
       </div>
     </dialog>,
