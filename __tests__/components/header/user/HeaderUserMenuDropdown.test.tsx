@@ -335,10 +335,7 @@ describe("HeaderUserMenuDropdown", () => {
       name: /double-click to switch profiles/i,
     });
     fireEvent.click(profileButton);
-    act(() => {
-      jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS - 1);
-    });
-    expect(profileButton).toHaveAttribute("aria-expanded", "false");
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
 
     fireEvent.click(profileButton);
 
@@ -347,7 +344,7 @@ describe("HeaderUserMenuDropdown", () => {
     jest.useRealTimers();
   });
 
-  it("opens the desktop account menu after one click and the shared delay", () => {
+  it("opens the desktop account menu immediately and retains the shared click window", () => {
     jest.useFakeTimers();
     renderWebSidebar({
       connectedAccounts: [
@@ -360,6 +357,8 @@ describe("HeaderUserMenuDropdown", () => {
       name: /double-click to switch profiles/i,
     });
     fireEvent.click(profileButton);
+
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
     act(() => {
       jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
     });
