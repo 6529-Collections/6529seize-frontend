@@ -46,17 +46,16 @@ export default function UserPageHeaderPfpWrapper({
   }
 
   return (
-    <div className="tw-inline-flex tw-w-fit">
+    <div className="tw-relative tw-inline-flex tw-w-fit">
+      {children}
       <button
         type="button"
         onClick={() => setIsEditPfpOpen(true)}
-        className="tw-group tw-relative tw-inline-flex tw-w-fit tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-group tw-absolute tw-inset-0 tw-hidden tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-block"
         aria-label={getUserProfileHeaderMessage("user.profileHeader.pfp.edit", {
           name: profileLabel,
         })}
       >
-        {children}
-
         <div
           aria-hidden="true"
           className="tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-bg-black/50 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out group-focus-visible:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-bg-transparent touch-only:tw-opacity-100 motion-reduce:tw-transition-none"

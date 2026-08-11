@@ -77,23 +77,23 @@ export default function UserPageHeaderName({
             canEdit={canEdit}
             profileLabel={displayName}
           >
-            <div className="tw-block tw-text-[13px] tw-font-medium tw-leading-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50">
+            <div className="tw-block tw-text-[13px] tw-font-medium tw-leading-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-50">
               {CLASSIFICATIONS[profile.classification].title}
             </div>
           </UserPageClassificationWrapper>
           {profileEnabledLabel && (
-            <span className="tw-text-iron-700">&bull;</span>
-          )}
-          {profileEnabledLabel && (
-            <p
-              className="tw-m-0 tw-text-[13px] tw-font-normal tw-leading-4 tw-text-white/50"
-              suppressHydrationWarning
-            >
-              {getUserProfileHeaderMessage(
-                "user.profileHeader.name.profileEnabled",
-                { date: profileEnabledLabel }
-              )}
-            </p>
+            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+              <span className="tw-text-iron-700">&bull;</span>
+              <p
+                className="tw-m-0 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-4 tw-text-white/50"
+                suppressHydrationWarning
+              >
+                {getUserProfileHeaderMessage(
+                  "user.profileHeader.name.profileEnabled",
+                  { date: profileEnabledLabel }
+                )}
+              </p>
+            </div>
           )}
         </div>
       )}
