@@ -54,9 +54,30 @@ type ProposalCardDrop = Pick<
   "title" | "parts" | "parts_count" | "nft_links"
 >;
 
+const replaceHtmlTagsWithSpaces = (value: string): string => {
+  let result = "";
+  let cursor = 0;
+
+  while (cursor < value.length) {
+    const tagStart = value.indexOf("<", cursor);
+    if (tagStart === -1) {
+      return result + value.slice(cursor);
+    }
+
+    const tagEnd = value.indexOf(">", tagStart + 1);
+    if (tagEnd === -1) {
+      return result + value.slice(cursor);
+    }
+
+    result += `${value.slice(cursor, tagStart)} `;
+    cursor = tagEnd + 1;
+  }
+
+  return result;
+};
+
 const normalizePlainText = (value: string): string =>
-  markdownToPlainText(value)
-    .replaceAll(/<[^>]*>/g, " ")
+  replaceHtmlTagsWithSpaces(markdownToPlainText(value))
     .replaceAll(/\s+/g, " ")
     .trim();
 

@@ -63,6 +63,27 @@ describe("getProposalCardViewModel", () => {
     );
   });
 
+  it("removes authored HTML tags without changing their text", () => {
+    const result = getProposalCardViewModel(
+      makeDrop({
+        title: "Formatted proposal",
+        parts: [
+          {
+            part_id: 1,
+            content:
+              "Keep <strong>this authored text</strong> and <em>its emphasis</em> intact.",
+            media: [],
+            attachments: [],
+          },
+        ],
+      })
+    );
+
+    expect(result.excerpt).toBe(
+      "Keep this authored text and its emphasis intact."
+    );
+  });
+
   it("keeps a very short proposal compact and does not fabricate an excerpt", () => {
     const result = getProposalCardViewModel(
       makeDrop({
