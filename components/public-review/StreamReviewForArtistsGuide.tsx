@@ -5,10 +5,8 @@ import { PublicReviewGuidePointList } from "@/components/public-review/PublicRev
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import type {
-  PublicReviewPageDefinition,
-  PublicReviewSectionDefinition,
-} from "@/lib/public-review/publicReviewTypes";
+import { createDefaultLocalePublicReviewSections } from "@/lib/public-review/publicReviewSections";
+import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
 
 type ArtistGuideCopyItem = {
@@ -20,44 +18,20 @@ type ArtistGuideActorItem = ArtistGuideCopyItem & {
   readonly pageId?: string | undefined;
 };
 
-export const STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS = [
-  {
-    id: "stream-artist-artwork-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.artwork.heading"),
-  },
-  {
-    id: "stream-artist-journey-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.journey.heading"),
-  },
-  {
-    id: "stream-artist-approval-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.approval.heading"),
-  },
-  {
-    id: "stream-artist-actors-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.actors.heading"),
-  },
-  {
-    id: "stream-artist-sales-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.sales.heading"),
-  },
-  {
-    id: "stream-artist-changes-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.changes.heading"),
-  },
-  {
-    id: "stream-artist-permanence-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.permanence.heading"),
-  },
-  {
-    id: "stream-artist-next-step-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.nextStep.heading"),
-  },
-  {
-    id: "stream-artist-evidence-heading",
-    title: t(DEFAULT_LOCALE, "publicReview.forArtistsGuide.evidence.heading"),
-  },
-] as const satisfies readonly PublicReviewSectionDefinition[];
+const FOR_ARTISTS_GUIDE_SECTION_KEYS = [
+  ["stream-artist-artwork-heading", "publicReview.forArtistsGuide.artwork.heading"],
+  ["stream-artist-journey-heading", "publicReview.forArtistsGuide.journey.heading"],
+  ["stream-artist-approval-heading", "publicReview.forArtistsGuide.approval.heading"],
+  ["stream-artist-actors-heading", "publicReview.forArtistsGuide.actors.heading"],
+  ["stream-artist-sales-heading", "publicReview.forArtistsGuide.sales.heading"],
+  ["stream-artist-changes-heading", "publicReview.forArtistsGuide.changes.heading"],
+  ["stream-artist-permanence-heading", "publicReview.forArtistsGuide.permanence.heading"],
+  ["stream-artist-next-step-heading", "publicReview.forArtistsGuide.nextStep.heading"],
+  ["stream-artist-evidence-heading", "publicReview.forArtistsGuide.evidence.heading"],
+] as const satisfies readonly (readonly [string, MessageKey])[];
+
+export const STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS =
+  createDefaultLocalePublicReviewSections(FOR_ARTISTS_GUIDE_SECTION_KEYS);
 
 const ARTWORK_PARTS = [
   {

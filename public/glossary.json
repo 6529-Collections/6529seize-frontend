@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-29T09:23:18.000Z",
+  "generated_at": "2026-08-11T15:28:47.000Z",
   "base_url": "https://6529.io",
   "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
   "source": "/help-index.json",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PublicReviewGuidePointList } from "@/components/public-review/PublicReviewGuidePointList";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { createDefaultLocalePublicReviewSections } from "@/lib/public-review/publicReviewSections";
 import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
@@ -184,36 +185,18 @@ const REVIEW_QUESTIONS = [
   "publicReview.rolesGuide.questions.successor",
 ] as const satisfies readonly MessageKey[];
 
-export const STREAM_REVIEW_ROLES_GUIDE_SECTIONS = [
-  {
-    id: "start-with-status",
-    title: t(DEFAULT_LOCALE, "publicReview.rolesGuide.status.heading"),
-  },
-  {
-    id: "working-in-the-current-rehearsal",
-    title: t(DEFAULT_LOCALE, "publicReview.rolesGuide.current.heading"),
-  },
-  {
-    id: "built-but-not-active-in-the-current-path",
-    title: t(DEFAULT_LOCALE, "publicReview.rolesGuide.inactive.heading"),
-  },
-  {
-    id: "planned-or-still-open",
-    title: t(DEFAULT_LOCALE, "publicReview.rolesGuide.future.heading"),
-  },
-  {
-    id: "responsibilities-outside-the-contracts",
-    title: t(DEFAULT_LOCALE, "publicReview.rolesGuide.outside.heading"),
-  },
-  {
-    id: "main-risks",
-    title: t(DEFAULT_LOCALE, "publicReview.rolesGuide.risks.heading"),
-  },
-  {
-    id: "questions-for-reviewers",
-    title: t(DEFAULT_LOCALE, "publicReview.rolesGuide.questions.heading"),
-  },
-] as const satisfies readonly PublicReviewSectionDefinition[];
+const ROLES_GUIDE_SECTION_KEYS = [
+  ["start-with-status", "publicReview.rolesGuide.status.heading"],
+  ["working-in-the-current-rehearsal", "publicReview.rolesGuide.current.heading"],
+  ["built-but-not-active-in-the-current-path", "publicReview.rolesGuide.inactive.heading"],
+  ["planned-or-still-open", "publicReview.rolesGuide.future.heading"],
+  ["responsibilities-outside-the-contracts", "publicReview.rolesGuide.outside.heading"],
+  ["main-risks", "publicReview.rolesGuide.risks.heading"],
+  ["questions-for-reviewers", "publicReview.rolesGuide.questions.heading"],
+] as const satisfies readonly (readonly [string, MessageKey])[];
+
+export const STREAM_REVIEW_ROLES_GUIDE_SECTIONS =
+  createDefaultLocalePublicReviewSections(ROLES_GUIDE_SECTION_KEYS);
 
 function RolesGuideList({
   items,
