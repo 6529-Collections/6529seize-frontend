@@ -123,8 +123,11 @@ test.describe("Museum About proposition @surface @readonly", () => {
       const hierarchy = await page.evaluate(() => {
         const heading = document.querySelector("header h1");
         const lead = document.querySelector("header h1 + p");
-        const sectionHeading = document.querySelector("section h2");
-        const sectionBody = document.querySelector("section p");
+        const museumSection = document.querySelector(
+          '[aria-labelledby="museum-of-network-title"]'
+        );
+        const sectionHeading = museumSection?.querySelector("h2");
+        const sectionBody = museumSection?.querySelector("p");
         if (!heading || !lead || !sectionHeading || !sectionBody) {
           throw new Error("museum_about_readability_elements_missing");
         }
