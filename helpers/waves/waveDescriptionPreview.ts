@@ -9,7 +9,7 @@ interface MarkdownLinkMatch {
   readonly urlEnd: number;
 }
 
-export interface MarkdownToPlainTextOptions {
+interface MarkdownToPlainTextOptions {
   readonly includeImageUrls?: boolean;
   readonly includeLinkDestinations?: boolean;
 }
