@@ -9,7 +9,7 @@ if (!ACTIVE_REVIEW_VERSION) {
 }
 
 describe("StreamReviewForArtistsGuide", () => {
-  it("explains the artist journey before handing off to technical evidence", () => {
+  it("explains the artist journey before handing off to contract details", () => {
     render(<StreamReviewForArtistsGuide pages={ACTIVE_REVIEW_VERSION.pages} />);
 
     expect(
@@ -204,7 +204,7 @@ describe("StreamReviewForArtistsGuide", () => {
       sectionHeadings.indexOf("Before your artwork becomes final")
     ).toBeLessThan(sectionHeadings.indexOf("Your next step"));
     expect(sectionHeadings.indexOf("Your next step")).toBeLessThan(
-      sectionHeadings.indexOf("Want the technical evidence?")
+      sectionHeadings.indexOf("Read the contract details")
     );
     expect(
       screen.getByRole("heading", { level: 2, name: "What can still change?" })
@@ -345,7 +345,7 @@ describe("StreamReviewForArtistsGuide", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Continue to the detailed contract review",
+        name: "Continue to the contract details",
       })
     ).toHaveAttribute("href", "#your-collection-has-a-durable-identity");
   });

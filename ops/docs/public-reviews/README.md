@@ -87,8 +87,10 @@ signature from the wider artwork plan. A three-part sales and payments guide
 now follows that checklist before the page explains what can still change. A
 four-part roles summary explains how
 the community, signing wallet, Stream operators, guardian, and outside services
-can affect what happens. Its detailed versioned editorial remains below as the
-technical evidence. The generated technical reference lets reviewers
+can affect what happens. It then presents the technical detail in fifteen short
+sections. The sections use reviewed-code, accepted-design, and still-proposed
+labels so readers can tell what is safe to rely on. The generated technical
+reference lets reviewers
 inspect Solidity files, definitions, functions, events, errors, and other
 declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100
@@ -110,8 +112,9 @@ feedback section choices therefore omit the hidden technical headings. A link
 from the current review-wide navigation opens its immutable technical editorial.
 Immutable version routes show their exact review version and continue to
 describe their exact review snapshot.
-The plain artist guide follows the same rule: it appears only on the current,
-unversioned **For Artists** route, while immutable version routes continue to
+The plain artist guide and its short technical detail layer follow the same
+rule: they appear only on the current, unversioned **For Artists** route and
+replace the versioned editorial there. Immutable version routes continue to
 render their exact editorial snapshot without the guide.
 
 The active review centralizes snapshot implementation and evidence status on

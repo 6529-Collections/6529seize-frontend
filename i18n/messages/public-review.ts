@@ -315,12 +315,245 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.forArtistsGuide.nextStep.description":
     "Review the exact approval package. If it matches the plan you accept, sign it. If anything is missing or unclear, ask for a corrected version.",
   "publicReview.forArtistsGuide.readPage": "Read {page}",
-  "publicReview.forArtistsGuide.evidence.heading":
-    "Want the technical evidence?",
+  "publicReview.forArtistsGuide.evidence.heading": "Read the contract details",
   "publicReview.forArtistsGuide.evidence.description":
-    "The detailed review below explains how the current contracts try to provide this artist experience. It includes the proposed mechanisms, source links, open questions, and known limits.",
+    "The short sections below show what is in the reviewed code, what comes from accepted design decisions, and what is still proposed.",
   "publicReview.forArtistsGuide.evidence.action":
-    "Continue to the detailed contract review",
+    "Continue to the contract details",
+  "publicReview.forArtistsDetails.heading": "How to read the details",
+  "publicReview.forArtistsDetails.description":
+    "The labels show what kind of evidence each section uses. A section can use more than one.",
+  "publicReview.forArtistsDetails.basis.code.label": "Reviewed code",
+  "publicReview.forArtistsDetails.basis.code.description":
+    "Includes behavior present in the pinned contract snapshot.",
+  "publicReview.forArtistsDetails.basis.accepted.label": "Accepted design",
+  "publicReview.forArtistsDetails.basis.accepted.description":
+    "Includes decisions approved in an ADR. They may not be complete in the pinned code.",
+  "publicReview.forArtistsDetails.basis.proposed.label": "Still proposed",
+  "publicReview.forArtistsDetails.basis.proposed.description":
+    "Includes ideas that are not approved or safe to rely on yet.",
+  "publicReview.forArtistsDetails.identity.title":
+    "Your collection has a durable identity",
+  "publicReview.forArtistsDetails.identity.intro":
+    "Stream is designed around one shared ERC-721 Core contract. It gives every token a global ID and a serial number inside its collection.",
+  "publicReview.forArtistsDetails.identity.point.artist":
+    "The Core records the collection and its artist wallet.",
+  "publicReview.forArtistsDetails.identity.point.burn":
+    "The collection link stays in the contract's history after a token is burned.",
+  "publicReview.forArtistsDetails.identity.point.modules":
+    "Sale, rendering, and randomness contracts can change without changing this Core identity.",
+  "publicReview.forArtistsDetails.identity.outro":
+    "Stream is not deployed yet. This describes the reviewed design, not a live guarantee.",
+  "publicReview.forArtistsDetails.approval.title":
+    "Approving a specific collection state",
+  "publicReview.forArtistsDetails.approval.intro":
+    "The current artist signature approves one exact collection state. It also binds the network and Core contract.",
+  "publicReview.forArtistsDetails.approval.point.artist": "Artist wallet",
+  "publicReview.forArtistsDetails.approval.point.freeze":
+    "Collection freeze fingerprint",
+  "publicReview.forArtistsDetails.approval.point.purchases":
+    "Maximum collection purchases",
+  "publicReview.forArtistsDetails.approval.point.supply":
+    "Total collection supply",
+  "publicReview.forArtistsDetails.approval.point.delay":
+    "Delay before final supply",
+  "publicReview.forArtistsDetails.approval.outro":
+    "If one value changes, the old signature stays with the old state. This signature does not directly approve every file, sale rule, payment share, or finality action. Check those separately.",
+  "publicReview.forArtistsDetails.scope.title":
+    "The scope of artist approval",
+  "publicReview.forArtistsDetails.scope.intro":
+    "Today's signature is narrow. The wider design is still deciding which other actions need a fresh artist signature.",
+  "publicReview.forArtistsDetails.scope.point.files":
+    "Artwork files and manifests",
+  "publicReview.forArtistsDetails.scope.point.supply": "Final supply",
+  "publicReview.forArtistsDetails.scope.point.sale":
+    "Sale and payment rules",
+  "publicReview.forArtistsDetails.scope.point.randomness":
+    "Randomness provider",
+  "publicReview.forArtistsDetails.scope.point.freeze": "Core freeze",
+  "publicReview.forArtistsDetails.scope.point.finality": "Artwork finality",
+  "publicReview.forArtistsDetails.scope.point.recovery":
+    "Recovery that changes what viewers receive",
+  "publicReview.forArtistsDetails.scope.outro":
+    "These are open design questions, not current guarantees. A guardian may stop a planned action, but should not be able to replace it with different artwork.",
+  "publicReview.forArtistsDetails.statements.title":
+    "Statements made in the artist's name",
+  "publicReview.forArtistsDetails.statements.intro":
+    "Stream separates records by who is allowed to speak: artist, owner, institution, independent reviewer, and other roles.",
+  "publicReview.forArtistsDetails.statements.rules":
+    "The reviewed code limits who can submit protected record types. An ordinary admin cannot automatically submit an artist statement.",
+  "publicReview.forArtistsDetails.statements.point.author":
+    "Who submitted the statement",
+  "publicReview.forArtistsDetails.statements.point.authority":
+    "Which wallet or authority allowed it",
+  "publicReview.forArtistsDetails.statements.point.subject":
+    "Which collection or token it concerns",
+  "publicReview.forArtistsDetails.statements.point.change":
+    "Whether it can be revised, locked, or replaced by a newer record",
+  "publicReview.forArtistsDetails.statements.outro":
+    "A record can prove who submitted a claim. It cannot prove that the claim is true. Rights, archive, and provenance claims still need outside evidence.",
+  "publicReview.forArtistsDetails.files.title":
+    "Artwork files, scripts, and token data",
+  "publicReview.forArtistsDetails.files.intro":
+    "The artwork may depend on more than one image. It can include scripts, fonts, libraries, token data, and outside files.",
+  "publicReview.forArtistsDetails.files.check":
+    "Before approval or finality, ask for one clear file list. It should show:",
+  "publicReview.forArtistsDetails.files.point.parts":
+    "Every required file and script",
+  "publicReview.forArtistsDetails.files.point.order":
+    "The order in which scripts run",
+  "publicReview.forArtistsDetails.files.point.versions":
+    "The version of each dependency",
+  "publicReview.forArtistsDetails.files.point.locations":
+    "Where each file can be found",
+  "publicReview.forArtistsDetails.files.point.hashes":
+    "A fingerprint for the exact bytes",
+  "publicReview.forArtistsDetails.files.point.rebuild":
+    "Instructions for recreating the work",
+  "publicReview.forArtistsDetails.files.outro":
+    "A matching fingerprint shows that a file has not changed. It does not keep the file available.",
+  "publicReview.forArtistsDetails.editions.title":
+    "One-of-ones and editions",
+  "publicReview.forArtistsDetails.editions.intro":
+    "The Core can hold a one-of-one or an edition. Check:",
+  "publicReview.forArtistsDetails.editions.point.maximum":
+    "The maximum number of tokens",
+  "publicReview.forArtistsDetails.editions.point.minted":
+    "How many tokens have ever been minted",
+  "publicReview.forArtistsDetails.editions.point.live":
+    "How many live tokens remain after burns",
+  "publicReview.forArtistsDetails.editions.point.paths":
+    "Every remaining way to mint",
+  "publicReview.forArtistsDetails.editions.point.control":
+    "Who can change supply or mint rules",
+  "publicReview.forArtistsDetails.editions.point.close":
+    "What closes minting for good",
+  "publicReview.forArtistsDetails.editions.outro":
+    "Burning a token removes its ownership record. It does not erase mint history or restore the used mint allowance.",
+  "publicReview.forArtistsDetails.mint.title": "Choosing who can mint",
+  "publicReview.forArtistsDetails.mint.intro":
+    "Artwork identity and mint rules are separate. Mint rules can include times, supply limits, wallet limits, eligibility checks, and an approved signer.",
+  "publicReview.forArtistsDetails.mint.authorization":
+    "In the current signed Drop path, one authorization can mint only one token. An edition needs several authorizations or another approved mint path.",
+  "publicReview.forArtistsDetails.mint.outro":
+    "Before launch, check who can authorize a mint and how used, expired, or cancelled permissions are blocked.",
+  "publicReview.forArtistsDetails.curation.title": "Curation and TDH",
+  "publicReview.forArtistsDetails.curation.intro":
+    "Community curation and TDH happen outside the contracts.",
+  "publicReview.forArtistsDetails.curation.signature":
+    "If a work is selected, a Stream signing wallet signs the exact mint or auction terms. The contract checks that signature.",
+  "publicReview.forArtistsDetails.curation.limit":
+    "The contract can check that the signed terms were not changed. It cannot check whether the community process was fair or the selection was correct.",
+  "publicReview.forArtistsDetails.sales.title":
+    "Fixed-price sales and auctions",
+  "publicReview.forArtistsDetails.sales.intro":
+    "The reviewed sale paths use ETH. Before launch, check:",
+  "publicReview.forArtistsDetails.sales.point.fixed":
+    "Fixed price: token, price, payer, recipient, deadline, payment shares, and cancellation state",
+  "publicReview.forArtistsDetails.sales.point.auction":
+    "Auction: reserve, end time, extension rule, token custody, refunds, cancellation boundary, and no-bid result",
+  "publicReview.forArtistsDetails.sales.point.cancel":
+    "An auction can be cancelled only before its first valid bid and before it ends",
+  "publicReview.forArtistsDetails.sales.outro":
+    "The contracts record proceeds and refunds as credits. Each person withdraws their own credit later. One failed withdrawal does not block the sale.",
+  "publicReview.forArtistsDetails.revenue.title":
+    "Revenue, collaborators, and royalties",
+  "publicReview.forArtistsDetails.revenue.intro":
+    "Primary-sale money can be shared among the artist, collaborators, curator, protocol, and other recipients.",
+  "publicReview.forArtistsDetails.revenue.paths":
+    "The reviewed code has native ETH credit paths for Drops and Auctions. It also has a separate revenue resolver and split-wallet foundation. These are different payment paths.",
+  "publicReview.forArtistsDetails.revenue.point.people":
+    "Every recipient and share",
+  "publicReview.forArtistsDetails.revenue.point.profile":
+    "Which payment profile applies",
+  "publicReview.forArtistsDetails.revenue.point.change":
+    "Who can change the profile and when",
+  "publicReview.forArtistsDetails.revenue.point.rounding":
+    "How rounding, remaining funds, and withdrawals work",
+  "publicReview.forArtistsDetails.revenue.point.royalty":
+    "The royalty receiver and rate",
+  "publicReview.forArtistsDetails.revenue.outro":
+    "Stream can publish ERC-2981 royalty information. Marketplaces choose whether to pay it.",
+  "publicReview.forArtistsDetails.randomness.title": "Randomness",
+  "publicReview.forArtistsDetails.randomness.intro":
+    "If the artwork uses randomness, check the provider and failure plan before minting.",
+  "publicReview.forArtistsDetails.randomness.point.state":
+    "The reviewed code records whether a request is waiting, complete, stale, or received but not fully processed",
+  "publicReview.forArtistsDetails.randomness.point.result":
+    "It stores a fingerprint of the provider result and the seed made from it",
+  "publicReview.forArtistsDetails.randomness.point.retry":
+    "If local processing fails, a retry uses the same saved seed. It does not ask for a new random result",
+  "publicReview.forArtistsDetails.randomness.point.control":
+    "Check who can change the provider, what happens to unfinished requests, and who pays provider fees",
+  "publicReview.forArtistsDetails.freeze.title": "Freezing the work",
+  "publicReview.forArtistsDetails.freeze.intro":
+    "Four steps are easy to confuse:",
+  "publicReview.forArtistsDetails.freeze.point.supply":
+    "Final supply: no more tokens can be minted",
+  "publicReview.forArtistsDetails.freeze.point.core":
+    "Core freeze: locks the collection fields covered by the Core contract",
+  "publicReview.forArtistsDetails.freeze.point.preservation":
+    "Preservation records: save evidence about the files needed to understand or recreate the work",
+  "publicReview.forArtistsDetails.freeze.point.finality":
+    "Artwork finality: a delayed step intended to close the remaining ways the artwork can change",
+  "publicReview.forArtistsDetails.freeze.separate":
+    "These are separate. Completing one does not complete the others.",
+  "publicReview.forArtistsDetails.freeze.check":
+    "Before freeze or finality, check the files, fingerprints, supply, randomness, payments, open mint and sale paths, and who can still make changes.",
+  "publicReview.forArtistsDetails.freeze.limit":
+    "Accepted ADRs describe stronger freeze and finality goals. The current public review has not yet proved that every artwork-changing path is closed. Do not rely on finality until the technical review is complete.",
+  "publicReview.forArtistsDetails.lifetime.title":
+    "Collaborators, delegation, recovery, and estates",
+  "publicReview.forArtistsDetails.lifetime.intro":
+    "The current artist approval is not a complete lifetime authority system. A future system may need:",
+  "publicReview.forArtistsDetails.lifetime.point.collaborators":
+    "Collaborators with narrow roles",
+  "publicReview.forArtistsDetails.lifetime.point.delegation":
+    "Delegated signing powers",
+  "publicReview.forArtistsDetails.lifetime.point.recovery":
+    "Wallet recovery and key changes",
+  "publicReview.forArtistsDetails.lifetime.point.estates":
+    "Estate instructions and successor roles",
+  "publicReview.forArtistsDetails.lifetime.point.disputes":
+    "Rules for disputes and sanctions",
+  "publicReview.forArtistsDetails.lifetime.status":
+    "ADR 0022's registry and helper design is still proposed. It is not approved or implemented.",
+  "publicReview.forArtistsDetails.lifetime.question":
+    "The key question: can someone recover access without gaining power to replace the artwork or rewrite its history?",
+  "publicReview.forArtistsDetails.design.title": "Design position",
+  "publicReview.forArtistsDetails.design.intro":
+    "Artists should never have to sign a hash they cannot understand. Before a wallet asks for a signature, the screen should show:",
+  "publicReview.forArtistsDetails.design.point.work":
+    "The exact artwork and version",
+  "publicReview.forArtistsDetails.design.point.files":
+    "The files and token supply",
+  "publicReview.forArtistsDetails.design.point.sale":
+    "The sale and payment rules",
+  "publicReview.forArtistsDetails.design.point.randomness":
+    "The randomness provider",
+  "publicReview.forArtistsDetails.design.point.power":
+    "Who can change what",
+  "publicReview.forArtistsDetails.design.point.permanent":
+    "What becomes permanent",
+  "publicReview.forArtistsDetails.design.outro":
+    "The goal is simple: every important choice should be visible before it becomes final.",
+  "publicReview.forArtistsDetails.questions.title": "Questions for artists",
+  "publicReview.forArtistsDetails.questions.intro":
+    "These decisions are still worth discussing:",
+  "publicReview.forArtistsDetails.questions.point.signature":
+    "Which actions must need your signature?",
+  "publicReview.forArtistsDetails.questions.point.shared":
+    "Which actions should also need approval from the people who run Stream?",
+  "publicReview.forArtistsDetails.questions.point.collaborators":
+    "What should a collaborator be allowed to do?",
+  "publicReview.forArtistsDetails.questions.point.recovery":
+    "What recovery and estate process would you trust?",
+  "publicReview.forArtistsDetails.questions.point.preservation":
+    "What evidence would you need before freezing the work?",
+  "publicReview.forArtistsDetails.questions.point.payments":
+    "Which sale and payment settings should become permanent?",
+  "publicReview.forArtistsDetails.questions.point.finality":
+    "Would the finality process give you confidence, or add too much work?",
   "publicReview.pages.overviewNarrative.title": "Overview",
   "publicReview.pages.overviewNarrative.summary":
     "An introduction to Stream and its public review for artists, collectors, and the wider community.",

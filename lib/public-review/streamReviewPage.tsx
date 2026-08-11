@@ -10,6 +10,7 @@ import {
   StreamReviewDevelopmentStatus,
   StreamReviewReviewerPrompts,
 } from "@/components/public-review/StreamReviewDevelopmentStatus";
+import { StreamReviewForArtistsDetails } from "@/components/public-review/StreamReviewForArtistsDetails";
 import { StreamReviewForArtistsGuide } from "@/components/public-review/StreamReviewForArtistsGuide";
 import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -147,7 +148,10 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
             <StreamReviewReviewerPrompts pages={reviewVersion.pages} />
           ) : null}
           {isCurrentForArtists ? (
-            <StreamReviewForArtistsGuide pages={reviewVersion.pages} />
+            <>
+              <StreamReviewForArtistsGuide pages={reviewVersion.pages} />
+              <StreamReviewForArtistsDetails />
+            </>
           ) : null}
           {route.version !== undefined || isCurrentCommunityReview ? (
             <StreamReviewBotAuthorshipNote />
@@ -155,7 +159,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
         </>
       }
       showAudiencePaths={!isCurrentOverview}
-      showEditorialContent={!isCurrentOverview}
+      showEditorialContent={!isCurrentOverview && !isCurrentForArtists}
       source={{
         repository: manifest.source.repository,
         commit: manifest.source.commit,

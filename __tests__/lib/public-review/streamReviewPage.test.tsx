@@ -65,6 +65,10 @@ jest.mock("@/components/public-review/StreamReviewForArtistsGuide", () => ({
   StreamReviewForArtistsGuide: () => <div>Artist guide</div>,
 }));
 
+jest.mock("@/components/public-review/StreamReviewForArtistsDetails", () => ({
+  StreamReviewForArtistsDetails: () => <div>Artist details</div>,
+}));
+
 jest.mock("@/components/public-review/StreamReviewOverviewGuide", () => ({
   StreamReviewOverviewGuide: () => <div>Overview guide</div>,
 }));
@@ -186,6 +190,30 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.queryByText("Development update")).not.toBeInTheDocument();
   });
 
+  it("replaces the current For Artists editorial with plain-language details", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "for-artists",
+        }),
+      })
+    );
+
+    expect(screen.getByText("Artist guide")).toBeInTheDocument();
+    expect(screen.getByText("Artist details")).toBeInTheDocument();
+    expect(screen.queryByText("Authorship note")).not.toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-editorial-visible",
+      "false"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "1"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("1");
+  });
+
   it("keeps immutable Overview routes unchanged", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -207,6 +235,26 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
       "1"
+    );
+  });
+
+  it("keeps immutable For Artists routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "for-artists",
+          version: "2026-08-01.1",
+        }),
+      })
+    );
+
+    expect(screen.queryByText("Artist guide")).not.toBeInTheDocument();
+    expect(screen.queryByText("Artist details")).not.toBeInTheDocument();
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-editorial-visible",
+      "true"
     );
   });
 });
