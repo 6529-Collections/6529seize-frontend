@@ -32,6 +32,10 @@ import {
   PublicReviewEditorialContentError,
 } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import type {
+  PublicReviewPageDefinition,
+  PublicReviewSectionDefinition,
+} from "@/lib/public-review/publicReviewTypes";
 import { getCurrentArtworkLifecycleEditorialMarkdown } from "@/lib/public-review/streamReviewArtworkLifecyclePage";
 import { getCurrentCommunityReviewEditorialMarkdown } from "@/lib/public-review/streamReviewCommunityPage";
 import { getCurrentDevelopmentEditorialMarkdown } from "@/lib/public-review/streamReviewDevelopmentPage";
@@ -97,6 +101,154 @@ async function loadAvailableStreamEditorialContent({
   }
 }
 
+type CurrentStreamReviewPages = {
+  readonly artworkLifecycle: boolean;
+  readonly communityReview: boolean;
+  readonly developmentStatus: boolean;
+  readonly forArtists: boolean;
+  readonly overview: boolean;
+  readonly roles: boolean;
+};
+
+type StreamReviewSource = {
+  readonly commit: string;
+  readonly repository: string;
+  readonly tree: string;
+};
+
+function getCurrentStreamReviewPages(
+  route: StreamReviewRouteModel
+): CurrentStreamReviewPages {
+  const pageId = route.page.id;
+  const isCurrent = route.version === undefined;
+  return {
+    artworkLifecycle: isCurrent && pageId === "artwork-lifecycle",
+    communityReview: isCurrent && pageId === "community-review",
+    developmentStatus:
+      isCurrent && pageId === "security-testing-and-known-limitations",
+    forArtists: isCurrent && pageId === "for-artists",
+    overview: isCurrent && pageId === "overview",
+    roles: isCurrent && pageId === "roles-and-trust",
+  };
+}
+
+function getDisplayedEditorialMarkdown({
+  contentVersion,
+  currentPages,
+  editorialMarkdown,
+  source,
+}: {
+  readonly contentVersion: string;
+  readonly currentPages: CurrentStreamReviewPages;
+  readonly editorialMarkdown: string;
+  readonly source: StreamReviewSource;
+}): string {
+  if (currentPages.artworkLifecycle) {
+    return getCurrentArtworkLifecycleEditorialMarkdown({ editorialMarkdown });
+  }
+  if (currentPages.developmentStatus) {
+    return getCurrentDevelopmentEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
+  if (currentPages.communityReview) {
+    return getCurrentCommunityReviewEditorialMarkdown({
+      reviewVersion: contentVersion,
+      source,
+    });
+  }
+  return editorialMarkdown;
+}
+
+function getDisplayedPage(
+  page: PublicReviewPageDefinition,
+  currentPages: CurrentStreamReviewPages
+): PublicReviewPageDefinition {
+  if (!currentPages.artworkLifecycle) {
+    return page;
+  }
+  return {
+    ...page,
+    summaryKey: "publicReview.pages.artworkLifecycle.currentSummary",
+  };
+}
+
+function getDisplayedSections({
+  currentPages,
+  editorialMarkdown,
+}: {
+  readonly currentPages: CurrentStreamReviewPages;
+  readonly editorialMarkdown: string;
+}): readonly PublicReviewSectionDefinition[] {
+  if (currentPages.overview) {
+    return [];
+  }
+  if (currentPages.forArtists) {
+    return [
+      ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
+      ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
+    ];
+  }
+  if (currentPages.roles) {
+    return STREAM_REVIEW_ROLES_GUIDE_SECTIONS;
+  }
+  return extractPublicReviewSections(editorialMarkdown);
+}
+
+function getDisplayedFeedbackConfig({
+  feedbackConfig,
+  pageId,
+  sections,
+}: {
+  readonly feedbackConfig: Awaited<
+    ReturnType<typeof createStreamReviewFeedbackConfig>
+  >;
+  readonly pageId: string;
+  readonly sections: readonly PublicReviewSectionDefinition[];
+}) {
+  return {
+    ...feedbackConfig,
+    pages: feedbackConfig.pages.map((configuredPage) =>
+      configuredPage.value === pageId
+        ? {
+            ...configuredPage,
+            sectionValues: sections.map((section) => section.id),
+          }
+        : configuredPage
+    ),
+  };
+}
+
+function StreamReviewIntroNotice({
+  currentPages,
+  isVersioned,
+  pages,
+}: {
+  readonly currentPages: CurrentStreamReviewPages;
+  readonly isVersioned: boolean;
+  readonly pages: readonly PublicReviewPageDefinition[];
+}) {
+  return (
+    <>
+      {currentPages.overview ? <StreamReviewOverviewGuide pages={pages} /> : null}
+      {currentPages.developmentStatus ? (
+        <StreamReviewDevelopmentStatus />
+      ) : null}
+      {currentPages.forArtists ? (
+        <>
+          <StreamReviewForArtistsGuide pages={pages} />
+          <StreamReviewForArtistsDetails />
+        </>
+      ) : null}
+      {currentPages.roles ? <StreamReviewRolesGuide pages={pages} /> : null}
+      {isVersioned || currentPages.communityReview ? (
+        <StreamReviewBotAuthorshipNote />
+      ) : null}
+    </>
+  );
+}
+
 async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
@@ -114,66 +266,23 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     notFound();
   }
   const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
-  const isCurrentOverview =
-    route.page.id === "overview" && route.version === undefined;
-  const isCurrentArtworkLifecycle =
-    route.page.id === "artwork-lifecycle" && route.version === undefined;
-  const isCurrentForArtists =
-    route.page.id === "for-artists" && route.version === undefined;
-  const isCurrentRoles =
-    route.page.id === "roles-and-trust" && route.version === undefined;
-  const isCurrentDevelopmentStatus =
-    route.page.id === "security-testing-and-known-limitations" &&
-    route.version === undefined;
-  const isCurrentCommunityReview =
-    route.page.id === "community-review" && route.version === undefined;
-  let displayedEditorialMarkdown = editorialMarkdown;
-  if (isCurrentArtworkLifecycle) {
-    displayedEditorialMarkdown =
-      getCurrentArtworkLifecycleEditorialMarkdown({
-        editorialMarkdown: displayedEditorialMarkdown,
-      });
-  }
-  if (isCurrentDevelopmentStatus) {
-    displayedEditorialMarkdown = getCurrentDevelopmentEditorialMarkdown({
-      editorialMarkdown: displayedEditorialMarkdown,
-      source: manifest.source,
-    });
-  } else if (isCurrentCommunityReview) {
-    displayedEditorialMarkdown = getCurrentCommunityReviewEditorialMarkdown({
-      reviewVersion: contentVersion,
-      source: manifest.source,
-    });
-  }
-  const displayedPage: typeof route.page = isCurrentArtworkLifecycle
-    ? {
-        ...route.page,
-        summaryKey: "publicReview.pages.artworkLifecycle.currentSummary",
-      }
-    : route.page;
-  const sections = extractPublicReviewSections(displayedEditorialMarkdown);
-  let displayedSections: readonly (typeof sections)[number][] = sections;
-  if (isCurrentOverview) {
-    displayedSections = [];
-  } else if (isCurrentForArtists) {
-    displayedSections = [
-      ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
-      ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
-    ];
-  } else if (isCurrentRoles) {
-    displayedSections = STREAM_REVIEW_ROLES_GUIDE_SECTIONS;
-  }
-  const displayedFeedbackConfig = {
-    ...feedbackConfig,
-    pages: feedbackConfig.pages.map((configuredPage) =>
-      configuredPage.value === route.page.id
-        ? {
-            ...configuredPage,
-            sectionValues: displayedSections.map((section) => section.id),
-          }
-        : configuredPage
-    ),
-  };
+  const currentPages = getCurrentStreamReviewPages(route);
+  const displayedEditorialMarkdown = getDisplayedEditorialMarkdown({
+    contentVersion,
+    currentPages,
+    editorialMarkdown,
+    source: manifest.source,
+  });
+  const displayedPage = getDisplayedPage(route.page, currentPages);
+  const displayedSections = getDisplayedSections({
+    currentPages,
+    editorialMarkdown: displayedEditorialMarkdown,
+  });
+  const displayedFeedbackConfig = getDisplayedFeedbackConfig({
+    feedbackConfig,
+    pageId: route.page.id,
+    sections: displayedSections,
+  });
 
   return (
     <PublicReviewShell
@@ -185,35 +294,22 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       routeVersion={route.version}
       displayedVersion={contentVersion}
       introNotice={
-        <>
-          {isCurrentOverview ? (
-            <StreamReviewOverviewGuide pages={reviewVersion.pages} />
-          ) : null}
-          {isCurrentDevelopmentStatus ? (
-            <StreamReviewDevelopmentStatus />
-          ) : null}
-          {isCurrentForArtists ? (
-            <>
-              <StreamReviewForArtistsGuide pages={reviewVersion.pages} />
-              <StreamReviewForArtistsDetails />
-            </>
-          ) : null}
-          {isCurrentRoles ? (
-            <StreamReviewRolesGuide pages={reviewVersion.pages} />
-          ) : null}
-          {route.version !== undefined || isCurrentCommunityReview ? (
-            <StreamReviewBotAuthorshipNote />
-          ) : null}
-        </>
+        <StreamReviewIntroNotice
+          currentPages={currentPages}
+          isVersioned={route.version !== undefined}
+          pages={reviewVersion.pages}
+        />
       }
       outroNotice={
-        isCurrentCommunityReview ? (
+        currentPages.communityReview ? (
           <StreamReviewReviewerPrompts pages={reviewVersion.pages} />
         ) : null
       }
-      showAudiencePaths={!isCurrentOverview}
+      showAudiencePaths={!currentPages.overview}
       showEditorialContent={
-        !isCurrentOverview && !isCurrentForArtists && !isCurrentRoles
+        !currentPages.overview &&
+        !currentPages.forArtists &&
+        !currentPages.roles
       }
       source={{
         repository: manifest.source.repository,
