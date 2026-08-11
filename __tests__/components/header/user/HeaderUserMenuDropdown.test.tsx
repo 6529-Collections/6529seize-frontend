@@ -1,7 +1,14 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
 import WebSidebarUser from "@/components/layout/sidebar/WebSidebarUser";
+import { CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS } from "@/components/header/connected-profile.constants";
 
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
   <div data-testid="item" />
@@ -126,7 +133,10 @@ function renderDropdown(options: any) {
   return { onClose, ...authValue, ...mockConnect.mock.results[0].value };
 }
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => {
+  jest.useRealTimers();
+  jest.clearAllMocks();
+});
 
 describe("HeaderUserMenuDropdown", () => {
   it("shows profile handle as label", () => {
@@ -262,6 +272,92 @@ describe("HeaderUserMenuDropdown", () => {
     expect(
       screen.getByRole("dialog", { name: "Connect Device modal" })
     ).toBeInTheDocument();
+  });
+
+  it("opens the desktop account menu after one avatar click", () => {
+    jest.useFakeTimers();
+    mockConnect.mockReturnValue({
+      address: "0xabc",
+      isAuthenticated: true,
+      hasValidWalletAuth: true,
+      isConnected: true,
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      connectedAccountUnreadNotifications: {},
+      seizeSwitchConnectedAccount: jest.fn(),
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            activeProfileProxy: null,
+            setActiveProfileProxy: jest.fn(),
+            receivedProfileProxies: [],
+            requestSessionUpgrade: jest.fn(),
+            sessionUpgradeRequired: false,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <WebSidebarUser isCollapsed={false} profile={profileBase} />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /account.*menu/i }));
+    act(() => jest.advanceTimersByTime(399));
+    expect(screen.queryByTestId("connected-accounts")).not.toBeInTheDocument();
+
+    act(() => jest.advanceTimersByTime(1));
+    expect(screen.getByTestId("connected-accounts")).toBeInTheDocument();
+  });
+
+  it("switches to the next profile after two desktop avatar clicks", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    mockConnect.mockReturnValue({
+      address: "0xabc",
+      isAuthenticated: true,
+      hasValidWalletAuth: true,
+      isConnected: true,
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      connectedAccountUnreadNotifications: {},
+      seizeSwitchConnectedAccount,
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            activeProfileProxy: null,
+            setActiveProfileProxy: jest.fn(),
+            receivedProfileProxies: [],
+            requestSessionUpgrade: jest.fn(),
+            sessionUpgradeRequired: false,
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <WebSidebarUser isCollapsed={false} profile={profileBase} />
+      </AuthContext.Provider>
+    );
+
+    const profileButton = screen.getByRole("button", {
+      name: /account.*menu/i,
+    });
+    fireEvent.click(profileButton);
+    fireEvent.click(profileButton);
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    act(() =>
+      jest.advanceTimersByTime(CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS)
+    );
+    expect(screen.queryByTestId("connected-accounts")).not.toBeInTheDocument();
   });
 
   it("connects wallet when not connected", async () => {

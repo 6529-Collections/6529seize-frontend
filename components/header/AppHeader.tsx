@@ -55,6 +55,7 @@ import {
 } from "./app-header-wave-preview";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
+import { CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS } from "./connected-profile.constants";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -62,7 +63,6 @@ const COLLECTION_TITLES: Record<string, string> = {
   "meme-lab": "Meme Lab",
   nextgen: "NextGen",
 };
-const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
 const HEADER_RESTRICTION_BUTTON_CLASS =
   "tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-black tw-p-0 tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50";
 
@@ -482,7 +482,7 @@ const handleProfileActivate = ({
   profileClickTimeoutRef.current = setTimeout(() => {
     profileClickTimeoutRef.current = null;
     openMenu();
-  }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
+  }, CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS);
 };
 
 export default function AppHeader() {
@@ -631,7 +631,12 @@ export default function AppHeader() {
   );
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
   const openMenu = () => setMenuOpen(true);
-  const onProfileActivate = () =>
+  const onProfileActivate = () => {
+    if (!hasMultipleConnectedAccounts) {
+      openMenu();
+      return;
+    }
+
     handleProfileActivate({
       address,
       profileClickTimeoutRef,
@@ -648,6 +653,7 @@ export default function AppHeader() {
           },
         }),
     });
+  };
 
   const finalTitle = getHeaderTitle({
     pathname,

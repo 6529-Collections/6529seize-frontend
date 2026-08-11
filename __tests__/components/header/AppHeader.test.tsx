@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import React from "react";
 import AppHeader from "@/components/header/AppHeader";
+import { CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS } from "@/components/header/connected-profile.constants";
 
 const mockShare = jest.fn();
 const mockNativeCanShare = jest.fn();
@@ -20,7 +21,9 @@ let mockWaveDropAction: any = null;
 
 jest.mock("@/components/header/AppSidebar", () => ({
   __esModule: true,
-  default: (props: any) => <div data-testid="sidebar" {...props} />,
+  default: (props: any) => (
+    <div data-testid="sidebar" data-open={props.open ? "true" : "false"} />
+  ),
 }));
 jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   __esModule: true,
@@ -163,6 +166,8 @@ function setup(opts: any) {
     isAuthenticated: opts.isAuthenticated ?? false,
     isConnected: opts.isConnected ?? false,
     connectedAccounts: opts.connectedAccounts ?? [],
+    connectedAccountUnreadNotifications:
+      opts.connectedAccountUnreadNotifications ?? {},
     seizeSwitchConnectedAccount: opts.seizeSwitchConnectedAccount ?? jest.fn(),
   });
   (useAuth as jest.Mock).mockReturnValue({
@@ -250,7 +255,82 @@ describe("AppHeader", () => {
     document.title = "6529";
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
+
+  it("uses a shared 400 ms connected-profile double-click delay", () => {
+    expect(CONNECTED_PROFILE_DOUBLE_CLICK_DELAY_MS).toBe(400);
+  });
+
+  it("opens the app menu immediately when only one profile is connected", () => {
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      connectedAccounts: [{ address: "0xabc", isActive: true }],
+      seizeSwitchConnectedAccount,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("data-open", "true");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
+  });
+
+  it("opens the app menu after one profile click", () => {
+    jest.useFakeTimers();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Open menu (double-click to switch accounts)",
+      })
+    );
+    act(() => jest.advanceTimersByTime(399));
+    expect(screen.getByTestId("sidebar")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
+
+    act(() => jest.advanceTimersByTime(1));
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("data-open", "true");
+  });
+
+  it("switches to the next connected profile after two profile clicks", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open menu (double-click to switch accounts)",
+    });
+    fireEvent.click(profileButton);
+    fireEvent.click(profileButton);
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    act(() => jest.advanceTimersByTime(400));
+    expect(screen.getByTestId("sidebar")).toHaveAttribute(
+      "data-open",
+      "false"
+    );
+  });
 
   it("shows menu icon on root page even with history", () => {
     setup({ address: null, asPath: "/notifications", canGoBack: true });
