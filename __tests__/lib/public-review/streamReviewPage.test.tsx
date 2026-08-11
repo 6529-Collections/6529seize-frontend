@@ -31,12 +31,14 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
     editorialMarkdown,
     feedbackSlot,
     introNotice,
+    page,
     sections,
     showEditorialContent,
   }: {
     readonly editorialMarkdown: string;
     readonly feedbackSlot: React.ReactNode;
     readonly introNotice?: React.ReactNode;
+    readonly page: { readonly summaryKey: string };
     readonly sections: readonly unknown[];
     readonly showEditorialContent?: boolean;
   }) => (
@@ -44,6 +46,7 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
       data-testid="review-shell"
       data-editorial-visible={showEditorialContent !== false}
       data-section-count={sections.length}
+      data-summary-key={page.summaryKey}
     >
       {introNotice}
       <div data-testid="editorial-copy">{editorialMarkdown}</div>
@@ -82,11 +85,15 @@ jest.mock("@/components/public-review/StreamReviewRolesGuide", () => ({
 }));
 
 jest.mock("@/lib/public-review/editorialContent", () => ({
-  loadStreamEditorialContent: jest.fn(async (page: { readonly id: string }) =>
-    page.id === "security-testing-and-known-limitations"
-      ? "# Editorial title\n\nThe separately dated development update on the current Overview records work\ncompleted after this snapshot.\n\n## Technical section\n\nBody."
-      : "# Editorial title\n\n## Technical section\n\nBody."
-  ),
+  loadStreamEditorialContent: jest.fn(async (page: { readonly id: string }) => {
+    if (page.id === "security-testing-and-known-limitations") {
+      return "# Editorial title\n\nThe separately dated development update on the current Overview records work\ncompleted after this snapshot.\n\n## Technical section\n\nBody.";
+    }
+    if (page.id === "artwork-lifecycle") {
+      return "# Artwork lifecycle\n\nA Stream artwork moves through a sequence of deliberate commitments. Collection\nidentity comes first. Artwork materials, distribution, payment, randomness, and\nmetadata are then assembled around it. Supply and Core configuration can later\nbe closed, preservation evidence can accumulate, and a final ceremony can make\nthe remaining artwork state terminal.\n\nThat sequence is a major part of the design. “Minted,” “sold,” “frozen,”\n“preserved,” and “final” describe different facts. Keeping them separate makes\neach commitment visible and reviewable.\n\nThis page follows one collection through the lifecycle and explains what each\nstage protects.\n\n## 1. The collection receives a permanent identity\n\nOld technical identity copy.\n\n## 2. The artwork package is assembled\n\nOld artwork package copy.\n\n## 3. The artist can approve a specific state\n\nOld artist approval copy.\n\n## 4. A distribution policy is selected\n\nDistribution body.\n\n## 5. Curation becomes a bound authorization\n\nOld curation copy.\n\n## 6. The selected mint lane executes atomically\n\nOld mint execution copy.";
+    }
+    return "# Editorial title\n\n## Technical section\n\nBody.";
+  }),
   PublicReviewEditorialContentError: class extends Error {},
 }));
 
@@ -183,6 +190,128 @@ describe("renderStreamReviewRoutePage", () => {
     );
   });
 
+  it("shows the plain-language opening on the current Artwork Lifecycle page", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "artwork-lifecycle",
+        }),
+      })
+    );
+
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The lifecycle in one minute"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A Stream artwork is built step by step."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Minted, sold, frozen, preserved, and final are different stages."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "1. The collection gets a permanent identity"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Before anything is minted or sold, Stream gives the collection a permanent ID."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Why this matters: The artwork keeps one clear identity even when the tools around it change."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old technical identity copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "2. The artwork package is prepared"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A Stream artwork is more than an image."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A tool can be replaced without giving the artwork a new identity."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old artwork package copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "3. The artist can sign the current setup"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "This signature is evidence only."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A missing or outdated signature does not pause or stop minting."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A successful mint changes the live supply and token metadata."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old artist approval copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "4. The minting rules are chosen"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The same permission can cover later mints while the policy stays the same."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "An ADR, or Architecture Decision Record, is an accepted design decision."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The paths do not share every check or counter. Each path must be reviewed on its own."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Distribution body."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "5. The selected drop receives signed approval"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "TDH, which means Total Days Held."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The signer is a wallet trusted to approve the result."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The contract does not choose the artist, calculate TDH, or decide whether the result is fair."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "In this path, one approval covers one token. After a successful use, it cannot be used again."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old curation copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "6. The mint completes fully or not at all"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "All checks and changes happen in one blockchain transaction."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "These paths do not use the same approval or counters."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The reviewed contracts do not yet enforce that check."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A collector cannot receive a half-finished mint."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old mint execution copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "sequence of deliberate commitments"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "7"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.artworkLifecycle.currentSummary"
+    );
+  });
+
   it("puts current reviewer prompts and authorship on Community Review", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -266,6 +395,78 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
       "1"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.artworkLifecycle.summary"
+    );
+  });
+
+  it("keeps immutable Artwork Lifecycle routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          version: "2026-08-01.1",
+          page: "artwork-lifecycle",
+        }),
+      })
+    );
+
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A Stream artwork moves through a sequence of deliberate commitments."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old technical identity copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old artwork package copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old artist approval copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "4. A distribution policy is selected"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Distribution body."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "5. Curation becomes a bound authorization"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old curation copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "6. The selected mint lane executes atomically"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old mint execution copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The lifecycle in one minute"
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Before anything is minted or sold, Stream gives the collection a permanent ID."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "A Stream artwork is more than an image."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The artist can sign the current setup"
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The minting rules are chosen"
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The selected drop receives signed approval"
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The mint completes fully or not at all"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "6"
     );
   });
 

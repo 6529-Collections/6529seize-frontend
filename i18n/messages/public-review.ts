@@ -708,6 +708,204 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.pages.artworkLifecycle.title": "Artwork Lifecycle",
   "publicReview.pages.artworkLifecycle.summary":
     "How an artwork moves from preparation through minting, preservation, and finality.",
+  "publicReview.pages.artworkLifecycle.currentSummary":
+    "This page is for artists, collectors, and people reviewing Stream. It explains how a Stream artwork moves from setup to its final state. No contract knowledge is needed.",
+  "publicReview.pages.artworkLifecycle.currentIntro":
+    "## The lifecycle in one minute\n\nA Stream artwork is built step by step.\n\nFirst, the collection gets a permanent identity in the Core. The Core is the shared home for all Stream tokens. Next, the artwork files, minting rules, payments, and other details are added. The artwork can then be minted or sold.\n\nLater, supply can close, key details can be locked, and preservation records can be added. Only then can the artwork reach its final state.\n\nMinted, sold, frozen, preserved, and final are different stages. This page explains what each stage means and why it matters.",
+  "publicReview.pages.artworkLifecycle.currentIdentitySection": `## 1. The collection gets a permanent identity
+
+### What happens
+
+Before anything is minted or sold, Stream gives the collection a permanent ID in the Core.
+
+The ID stays the same even if the collection later uses a different minting or sale tool.
+
+### Who creates it
+
+An account with permission to create collections starts it. Stream then records the artist, supply limit, purchase limit, and the wait before supply can become final.
+
+### What the current contract records
+
+The Core stores the collection ID and its basic information. Each token later receives:
+
+- one ID across all Stream tokens; and
+- one serial number inside its collection.
+
+**Why this matters:** The artwork keeps one clear identity even when the tools around it change.
+
+### Technical details
+
+The Core is the shared ERC-721 NFT contract. [\`StreamCore.createCollection\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L336) creates the collection. [\`setCollectionData\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L379) stores its artist and supply settings.`,
+  "publicReview.pages.artworkLifecycle.currentArtworkPackageSection": `## 2. The artwork package is prepared
+
+### What happens
+
+A Stream artwork is more than an image. Its package can include:
+
+- artwork files, such as images, animation, and code;
+- details, such as its name, traits, and collection;
+- supply, minting, and sale rules;
+- payment details;
+- randomness rules, if the artwork uses them; and
+- preservation and final-state records.
+
+### Who controls each part
+
+Different records can have different approved writers. For example, an artist controls an artist statement. An independent institution can add preservation evidence.
+
+### What stays permanent
+
+The token’s identity stays in the Core. Other tools, such as a display module or randomness service, may need a replacement years later.
+
+The current contracts keep these parts separate and restrict who may write each kind of record.
+
+**Why this matters:** A tool can be replaced without giving the artwork a new identity.
+
+### Technical details
+
+Display, sale, randomness, and preservation features can live in separate modules. Record-family checks keep artist, owner, institution, observer, rights, and archive records with their approved writers.`,
+  "publicReview.pages.artworkLifecycle.currentArtistApprovalSection": `## 3. The artist can sign the current setup
+
+### What happens
+
+The artist can sign one exact snapshot of the collection.
+
+That snapshot includes:
+
+- the artist’s wallet;
+- collection information, scripts, and dependencies;
+- current live supply and token metadata;
+- randomness settings; and
+- purchase, supply, and final-supply settings.
+
+A successful mint changes the live supply and token metadata. The old signature then stops matching the current snapshot.
+
+### Who decides
+
+Only the recorded artist can approve the snapshot. The artist can sign directly or provide a signed message that another account submits.
+
+### What the current contract does
+
+The contract stores the approved snapshot and can report whether it still matches the current state.
+
+This signature is evidence only. The minting paths do not check it. A missing or outdated signature does not pause or stop minting.
+
+### How this differs from the ADR design
+
+This snapshot signature is not the mint-policy approval required by the accepted design. That separate approval is explained in the next section.
+
+**Why this matters:** People can see what the artist signed without mistaking the signature for permission to mint.
+
+### Technical details
+
+The current snapshot signature uses EIP-712. It is tied to the chain and Core contract. It supports ordinary wallets and ERC-1271 smart-contract wallets. The snapshot includes the collection-freeze manifest hash, which changes when live supply or live token metadata changes.`,
+  "publicReview.pages.artworkLifecycle.currentDistributionSection": `## 4. The minting rules are chosen
+
+### What happens
+
+Before collectors can mint, rules are set for:
+
+- the type of release;
+- its opening and closing time;
+- who may mint;
+- the price; and
+- supply and wallet limits.
+
+### Who decides
+
+Accounts with the required Stream roles configure the current contracts.
+
+The accepted design adds an artist check. For an artist-bound collection, the artist must approve the mint policy or give someone limited signed permission to act for them.
+
+An ADR, or Architecture Decision Record, is an accepted design decision. It describes the target design, which may be ahead of the reviewed code.
+
+The artist permission must be checked before every mint. The same permission can cover later mints while the policy stays the same. A new permission is needed when the policy changes.
+
+The reviewed contracts do not yet enforce this artist-permission check.
+
+### What the current contracts check
+
+The reviewed code has two separate minting paths:
+
+- The signed-drop and auction path checks its own sale time and supply rules.
+- The manager path checks phases, approved executors, optional access gates, policy details, and usage limits.
+
+The paths do not share every check or counter. Each path must be reviewed on its own.
+
+**Why this matters:** Minting tools can change without changing the token’s permanent identity, but every path must enforce the right limits.
+
+### Technical details
+
+The signed-drop and auction path uses [\`StreamMinter\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMinter.sol). The manager path uses [\`StreamMintManager\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMintManager.sol) and [\`StreamMintLedger\`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMintLedger.sol). The Core keeps the token identity while these outside modules apply minting policy.`,
+  "publicReview.pages.artworkLifecycle.currentCurationSection": `## 5. The selected drop receives signed approval
+
+### What happens
+
+The community process applies its curation rules outside the blockchain. These rules may use TDH, which means Total Days Held. TDH measures how long eligible assets have been held.
+
+A service then prepares the exact sale details. An approved signer signs them. The signer is a wallet trusted to approve the result.
+
+### Who decides
+
+The community process chooses the artist, calculates TDH, and applies its fairness rules. The signer approves the exact action created from that result.
+
+The contract does not choose the artist, calculate TDH, or decide whether the result is fair.
+
+### What the current contract checks
+
+The signed approval fixes:
+
+- the blockchain and Stream contract;
+- the collection and artwork;
+- who pays and who receives the token;
+- the fixed price or starting auction terms;
+- when the approval expires; and
+- a unique ID that prevents reuse.
+
+Before the sale starts, the contract checks the signer and every signed detail. Changing the artwork, buyer, price, sale type, or deadline makes the approval invalid.
+
+In this path, one approval covers one token. After a successful use, it cannot be used again.
+
+**Why this matters:** The contract can only start the sale with the terms that were approved.`,
+  "publicReview.pages.artworkLifecycle.currentMintExecutionSection": `## 6. The mint completes fully or not at all
+
+### What happens
+
+The chosen minting path checks its rules and asks the Core to create the token.
+
+### What each path checks
+
+**Signed-drop and auction path**
+
+- The drop contract checks the signed approval, sale details, and any required payment.
+- The minter checks that minting is not paused, the minting window is open, and enough supply remains.
+- The Core applies its own collection and token checks.
+
+**Manager path**
+
+- The manager checks the active phase, approved executor, optional access rules, expected policy, and quantity.
+- The ledger records the limits used by that path.
+- The manager and Core prepare and complete the token in the same transaction.
+
+These paths do not use the same approval or counters.
+
+### What happens if a check fails
+
+All checks and changes happen in one blockchain transaction. If a check fails, the whole transaction is cancelled:
+
+- no token is created;
+- supply does not change;
+- the signed-drop approval stays unused, if that path was used;
+- manager counters return to their earlier values, if that path was used; and
+- no payment credit is recorded, if that path creates one.
+
+If the transaction succeeds, the token and the records for that path update together.
+
+### Missing ADR check
+
+The accepted design also requires valid artist permission for an artist-bound collection. The reviewed contracts do not yet enforce that check.
+
+**Why this matters:** A collector cannot receive a half-finished mint.`,
   "publicReview.pages.forArtists.title": "For Artists",
   "publicReview.pages.forArtists.summary":
     "For artists considering or preparing to publish their work through Stream.",
