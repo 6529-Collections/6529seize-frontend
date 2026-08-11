@@ -15,6 +15,7 @@ import type { NotificationDisplayItem } from "@/types/feed.types";
 import type { NotificationFilter } from "../NotificationsCauseFilter";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
@@ -63,6 +64,14 @@ interface UseNotificationsControllerResult {
   readonly markNotificationIdsAsRead: (ids: number[]) => Promise<void>;
 }
 
+interface NotificationAuthScope {
+  readonly authScope: string;
+}
+
+interface MarkNotificationIdsAsReadVariables extends NotificationAuthScope {
+  readonly ids: number[];
+}
+
 export const useNotificationsController =
   (): UseNotificationsControllerResult => {
     const {
@@ -74,6 +83,8 @@ export const useNotificationsController =
       setToast,
       setActiveProfileProxy,
     } = useContext(AuthContext);
+    const { address: connectedAddress, isSigningOutAll } =
+      useSeizeConnectContext();
     const { notificationsViewStyle } = useLayout();
     const { removeAllDeliveredNotifications } = useNotificationsContext();
     const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
@@ -96,7 +107,23 @@ export const useNotificationsController =
     const reload = searchParams?.get("reload") ?? undefined;
     const isAuthenticated =
       (isAuthContextAuthenticated ?? !!connectedProfile?.handle) &&
-      !activeProfileProxy;
+      !activeProfileProxy &&
+      !isSigningOutAll;
+    const notificationAuthScope =
+      isAuthenticated && connectedAddress
+        ? connectedAddress.toLowerCase()
+        : null;
+    const currentNotificationAuthScopeRef = useRef<string | null>(
+      notificationAuthScope
+    );
+    useEffect(() => {
+      currentNotificationAuthScopeRef.current = notificationAuthScope;
+    }, [notificationAuthScope]);
+    const isCurrentNotificationAuthScope = useCallback(
+      (authScope: string): boolean =>
+        currentNotificationAuthScopeRef.current === authScope,
+      []
+    );
     const isLoadingProfile = fetchingProfile && !connectedProfile;
     const hasConnectedProfile = !!connectedProfile;
     const hasProfileHandle = !!connectedProfile?.handle;
@@ -104,11 +131,14 @@ export const useNotificationsController =
     useSetTitle("Notifications | My Stream | Brain");
 
     const { mutateAsync: markAllAsRead } = useMutation({
-      mutationFn: async () =>
+      mutationFn: async (_variables: NotificationAuthScope) =>
         await commonApiPostWithoutBodyAndResponse({
           endpoint: `notifications/read`,
         }),
-      onSuccess: async () => {
+      onSuccess: async (_data, { authScope }) => {
+        if (!isCurrentNotificationAuthScope(authScope)) {
+          return;
+        }
         try {
           invalidateNotifications();
           await removeAllDeliveredNotifications();
@@ -116,7 +146,10 @@ export const useNotificationsController =
           console.error("Failed to clear delivered notifications:", error);
         }
       },
-      onError: (error) => {
+      onError: (error, { authScope }) => {
+        if (!isCurrentNotificationAuthScope(authScope)) {
+          return;
+        }
         setToast({
           type: "error",
           title: "Couldn't mark notifications as read.",
@@ -127,7 +160,7 @@ export const useNotificationsController =
     });
 
     useEffect(() => {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || !notificationAuthScope) {
         return;
       }
       if (reload === "true" || hasMarkedAllAsReadRef.current) {
@@ -135,13 +168,18 @@ export const useNotificationsController =
       }
 
       hasMarkedAllAsReadRef.current = true;
-      const id = setTimeout(() => {
-        markAllAsRead().catch((error) => {
+      const markNotificationsAsRead = async (): Promise<void> => {
+        try {
+          await markAllAsRead({ authScope: notificationAuthScope });
+        } catch (error: unknown) {
           console.error("Failed to mark notifications as read:", error);
-        });
+        }
+      };
+      const id = setTimeout(() => {
+        void markNotificationsAsRead();
       }, 0);
       return () => clearTimeout(id);
-    }, [isAuthenticated, markAllAsRead, reload]);
+    }, [isAuthenticated, markAllAsRead, notificationAuthScope, reload]);
 
     useEffect(() => {
       if (!isAuthenticated) {
@@ -170,7 +208,7 @@ export const useNotificationsController =
     const rawItems = rawItemsFromQuery ?? items;
 
     const { mutateAsync: markNotificationIdsAsRead } = useMutation({
-      mutationFn: async (ids: number[]) => {
+      mutationFn: async ({ ids }: MarkNotificationIdsAsReadVariables) => {
         await Promise.all(
           ids.map((id) =>
             commonApiPostWithoutBodyAndResponse({
@@ -179,7 +217,10 @@ export const useNotificationsController =
           )
         );
       },
-      onSuccess: async () => {
+      onSuccess: async (_data, { authScope }) => {
+        if (!isCurrentNotificationAuthScope(authScope)) {
+          return;
+        }
         try {
           invalidateNotifications();
           await removeAllDeliveredNotifications();
@@ -187,7 +228,10 @@ export const useNotificationsController =
           console.error("Failed to clear delivered notifications:", error);
         }
       },
-      onError: (error) => {
+      onError: (error, { authScope }) => {
+        if (!isCurrentNotificationAuthScope(authScope)) {
+          return;
+        }
         setToast({
           type: "error",
           title: "Couldn't mark notifications as read.",
@@ -211,7 +255,7 @@ export const useNotificationsController =
         router.replace(newUrl, { scroll: false });
       };
 
-      if (!isAuthenticated) {
+      if (!isAuthenticated || !notificationAuthScope) {
         clearReloadParam();
         return;
       }
@@ -219,7 +263,7 @@ export const useNotificationsController =
       refetch()
         .then(() => {
           hasMarkedAllAsReadRef.current = true;
-          return markAllAsRead();
+          return markAllAsRead({ authScope: notificationAuthScope });
         })
         .catch((error) => {
           console.error("Error during refetch:", error);
@@ -231,6 +275,7 @@ export const useNotificationsController =
       pathname,
       isAuthenticated,
       markAllAsRead,
+      notificationAuthScope,
       refetch,
       reload,
       router,
@@ -439,6 +484,11 @@ export const useNotificationsController =
       contentState,
       handlers,
       markNotificationIdsAsRead: (ids: number[]) =>
-        markNotificationIdsAsRead(ids),
+        notificationAuthScope
+          ? markNotificationIdsAsRead({
+              ids,
+              authScope: notificationAuthScope,
+            })
+          : Promise.resolve(),
     };
   };

@@ -65,6 +65,8 @@ action.
   - wallet disconnected: `Connect Wallet`, `Logout`
   - `Logout` signs out the active profile; multi-account sessions switch to the
     next available profile afterward
+  - `Sign out all` presents one signing-out transition; profiles are revoked
+    without exposing each remaining profile as an intermediate active account
 - Network controls:
   - when the connected wallet has more than one supported chain, the dropdown
     shows `Network: {currentChain}`
@@ -106,7 +108,7 @@ action.
      chain switching is available.
    - `Logout`: sign out the active profile.
    - `Sign out all` (multi-profile web sessions only): clear all connected
-     profiles at once.
+     profiles in one visible transition without switching through them.
 7. During known-account switch handoff, active account state stays pinned to
    the stored active wallet until the new selection settles.
 8. Review unread indicators in account selectors:

@@ -79,6 +79,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     useState(false);
   const [isConnectIntentWaitingForAppKit, setIsConnectIntentWaitingForAppKit] =
     useState(false);
+  const [isSigningOutAll, setIsSigningOutAll] = useState(false);
 
   // Use consolidated wallet state management
   const {
@@ -97,11 +98,28 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const connectIntentHandoffTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isAddingConnectedAccountRef = useRef(false);
   const isMountedRef = useRef(true);
+  const isSigningOutAllRef = useRef(false);
   const { agentLoginImpersonatedAddress, impersonatedAddress } =
     getSeizeConnectImpersonation();
 
   const refreshStoredConnectedAccounts = useCallback(() => {
     setStoredConnectedAccounts(getConnectedWalletAccounts());
+  }, []);
+
+  const beginSigningOutAll = useCallback((): boolean => {
+    if (isSigningOutAllRef.current) {
+      return false;
+    }
+    isSigningOutAllRef.current = true;
+    setIsSigningOutAll(true);
+    return true;
+  }, []);
+
+  const finishSigningOutAll = useCallback((): void => {
+    isSigningOutAllRef.current = false;
+    if (isMountedRef.current) {
+      setIsSigningOutAll(false);
+    }
   }, []);
 
   const clearConnectIntentHandoffTimeout = useCallback((): void => {
@@ -157,6 +175,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isAddingConnectedAccountRef,
     isConnectIntentWaitingForAppKit,
     isInitialized,
+    isSigningOutAll,
     isMountedRef,
     refreshStoredConnectedAccounts,
     retryConnectTimeoutRef,
@@ -381,39 +400,53 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   ]);
 
   const seizeDisconnectAndLogoutAll = useCallback(async (): Promise<void> => {
-    try {
-      await disconnect();
-    } catch (error: unknown) {
-      const walletError = createWalletError(
-        WalletDisconnectionError,
-        "disconnect wallet during logout all profiles",
-        error
-      );
-      logError("seizeDisconnectAndLogoutAll", walletError);
-
-      throw new AuthenticationError(
-        "Cannot complete sign out: wallet disconnection failed. User may still have active wallet connection.",
-        walletError
-      );
+    if (!beginSigningOutAll()) {
+      return;
     }
 
     try {
-      await clearAllAuthenticatedProfiles();
-      refreshStoredConnectedAccounts();
-      setDisconnected();
-    } catch (error: unknown) {
-      if (error instanceof AuthenticationError) {
-        throw error;
+      try {
+        await disconnect();
+      } catch (error: unknown) {
+        const walletError = createWalletError(
+          WalletDisconnectionError,
+          "disconnect wallet during logout all profiles",
+          error
+        );
+        logError("seizeDisconnectAndLogoutAll", walletError);
+
+        throw new AuthenticationError(
+          "Cannot complete sign out: wallet disconnection failed. User may still have active wallet connection.",
+          walletError
+        );
       }
 
-      const authError = new AuthenticationError(
-        "Failed to clear all authenticated profiles after successful wallet disconnect",
-        error
-      );
-      logError("seizeDisconnectAndLogoutAll", authError);
-      throw authError;
+      try {
+        await clearAllAuthenticatedProfiles();
+        refreshStoredConnectedAccounts();
+        setDisconnected();
+      } catch (error: unknown) {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
+
+        const authError = new AuthenticationError(
+          "Failed to clear all authenticated profiles after successful wallet disconnect",
+          error
+        );
+        logError("seizeDisconnectAndLogoutAll", authError);
+        throw authError;
+      }
+    } finally {
+      finishSigningOutAll();
     }
-  }, [disconnect, refreshStoredConnectedAccounts, setDisconnected]);
+  }, [
+    beginSigningOutAll,
+    disconnect,
+    finishSigningOutAll,
+    refreshStoredConnectedAccounts,
+    setDisconnected,
+  ]);
 
   const seizeAcceptConnection = useCallback(
     (address: string): void => {
@@ -611,6 +644,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   ]);
 
   const connectedAccounts = useMemo(() => {
+    if (isSigningOutAll) {
+      return [];
+    }
     return storedConnectedAccounts.map((storedAccount) => {
       const isActive =
         !!activeAddress &&
@@ -631,10 +667,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         isConnected: isConnectedForAccount,
       };
     });
-  }, [activeAddress, liveConnectedAddress, storedConnectedAccounts]);
+  }, [
+    activeAddress,
+    isSigningOutAll,
+    liveConnectedAddress,
+    storedConnectedAccounts,
+  ]);
 
   const activeStoredAccount = useMemo(() => {
-    if (!activeAddress) {
+    if (!activeAddress || isSigningOutAll) {
       return null;
     }
 
@@ -645,19 +686,23 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           normalizeAddress(activeAddress)
       ) ?? null
     );
-  }, [activeAddress, storedConnectedAccounts]);
+  }, [activeAddress, isSigningOutAll, storedConnectedAccounts]);
 
-  const hasActiveWalletAddress = !!activeAddress;
+  const hasActiveWalletAddress = !isSigningOutAll && !!activeAddress;
   const hasValidWalletAuth = useMemo(
     () =>
+      !isSigningOutAll &&
       isAuthAddressAuthorized({
         address: activeAddress,
         connectedAccounts: storedConnectedAccounts,
       }),
-    [activeAddress, storedConnectedAccounts]
+    [activeAddress, isSigningOutAll, storedConnectedAccounts]
   );
 
   const jwtPollingStoredConnectedAccounts = useMemo(() => {
+    if (isSigningOutAll) {
+      return [];
+    }
     if (!activeAddress) {
       return storedConnectedAccounts;
     }
@@ -674,6 +719,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [
     activeAddress,
     activeStoredAccount?.profileHandle,
+    isSigningOutAll,
     storedConnectedAccounts,
   ]);
 
@@ -738,10 +784,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAddConnectedAccount,
       seizeConnectOpen:
         appKitModalState.isOpen || isConnectIntentWaitingForAppKit,
-      isConnected: isActiveWalletConnected,
-      canSignActiveWallet: isActiveWalletConnected,
+      isConnected: !isSigningOutAll && isActiveWalletConnected,
+      canSignActiveWallet: !isSigningOutAll && isActiveWalletConnected,
       hasActiveWalletAddress,
       hasValidWalletAuth,
+      isSigningOutAll,
       isAuthenticated: hasValidWalletAuth,
       connectionState: walletState.status, // Unified state machine
       walletState, // Expose unified state for advanced consumers
@@ -755,6 +802,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       activeAddress,
       hasActiveWalletAddress,
       hasValidWalletAuth,
+      isSigningOutAll,
       isActiveWalletConnected,
       connectedAccounts,
       appKitModalState.walletName,

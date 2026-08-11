@@ -1056,6 +1056,7 @@
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
+        "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],

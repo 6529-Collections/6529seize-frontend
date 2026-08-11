@@ -74,6 +74,7 @@ jest.mock("@/hooks/useUnreadNotifications", () => ({
 jest.mock("@/services/auth/auth.utils", () => ({
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
   canStoreAnotherWalletAccount: jest.fn(() => true),
+  clearAllWalletAuth: jest.fn(),
   clearAgentLoginActiveAddress: jest.fn(),
   getAgentLoginActiveAddress: jest.fn(() => null),
   getConnectedWalletAccounts: jest.fn(() => [
@@ -144,6 +145,28 @@ function LogoutAllButton() {
   );
 }
 
+function LogoutAllStateProbe() {
+  const {
+    connectedAccounts,
+    hasValidWalletAuth,
+    isSigningOutAll,
+    seizeDisconnectAndLogoutAll,
+  } = useSeizeConnectContext();
+
+  return (
+    <>
+      <button onClick={() => void seizeDisconnectAndLogoutAll()}>
+        Logout all
+      </button>
+      <div data-testid="signing-out">{isSigningOutAll.toString()}</div>
+      <div data-testid="has-valid-auth">{hasValidWalletAuth.toString()}</div>
+      <div data-testid="connected-account-count">
+        {connectedAccounts.length}
+      </div>
+    </>
+  );
+}
+
 function LogoutButton() {
   const { seizeDisconnectAndLogout } = useSeizeConnectContext();
 
@@ -163,6 +186,22 @@ describe("SeizeConnectProvider add-account flow", () => {
     jest.useFakeTimers();
     jest.clearAllMocks();
 
+    const authUtils = require("@/services/auth/auth.utils");
+    authUtils.canStoreAnotherWalletAccount.mockReturnValue(true);
+    authUtils.clearAllWalletAuth.mockReset().mockResolvedValue(undefined);
+    authUtils.getConnectedWalletAccounts.mockReset().mockReturnValue([
+      {
+        address: ACTIVE_ADDRESS,
+        refreshToken: "refresh-token",
+        role: null,
+        jwt: null,
+        profileId: null,
+        profileHandle: null,
+      },
+    ]);
+    authUtils.getWalletAddress.mockReset().mockReturnValue(ACTIVE_ADDRESS);
+    authUtils.removeAuthJwt.mockReset().mockResolvedValue(undefined);
+
     mockAppKitAccount = {
       address: ACTIVE_ADDRESS,
       isConnected: true,
@@ -177,7 +216,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     mockDisconnect.mockResolvedValue(undefined);
     const sessionV2 = require("@/services/auth/session-v2.utils");
     sessionV2.getSessionClientType.mockReturnValue("native");
-    sessionV2.logoutSessionV2.mockResolvedValue(undefined);
+    sessionV2.logoutSessionV2.mockReset().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -454,14 +493,14 @@ describe("SeizeConnectProvider add-account flow", () => {
         address,
         refreshToken: null,
         role: null,
-        jwt: null,
+        jwt: `jwt-${address}`,
         profileId: null,
         profileHandle: null,
       }))
     );
     authUtils.getWalletAddress.mockImplementation(() => accounts[0] ?? null);
-    authUtils.removeAuthJwt.mockImplementation(() => {
-      accounts.shift();
+    authUtils.clearAllWalletAuth.mockImplementation(() => {
+      accounts.splice(0, accounts.length);
     });
     sessionV2.logoutSessionV2.mockResolvedValue(undefined);
 
@@ -492,7 +531,7 @@ describe("SeizeConnectProvider add-account flow", () => {
       address: addressC,
       allSessions: true,
     });
-    expect(authUtils.removeAuthJwt).toHaveBeenCalledTimes(3);
+    expect(authUtils.clearAllWalletAuth).toHaveBeenCalledTimes(1);
   });
 
   it("continues logout all cleanup when one account revocation fails", async () => {
@@ -507,14 +546,14 @@ describe("SeizeConnectProvider add-account flow", () => {
         address,
         refreshToken: null,
         role: null,
-        jwt: null,
+        jwt: `jwt-${address}`,
         profileId: null,
         profileHandle: null,
       }))
     );
     authUtils.getWalletAddress.mockImplementation(() => accounts[0] ?? null);
-    authUtils.removeAuthJwt.mockImplementation(() => {
-      accounts.shift();
+    authUtils.clearAllWalletAuth.mockImplementation(() => {
+      accounts.splice(0, accounts.length);
     });
     sessionV2.logoutSessionV2
       .mockRejectedValueOnce(revokeError)
@@ -531,7 +570,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     });
 
     await waitFor(() =>
-      expect(authUtils.removeAuthJwt).toHaveBeenCalledTimes(2)
+      expect(authUtils.clearAllWalletAuth).toHaveBeenCalledTimes(1)
     );
 
     expect(sessionV2.logoutSessionV2).toHaveBeenCalledTimes(2);
@@ -548,7 +587,7 @@ describe("SeizeConnectProvider add-account flow", () => {
 
     authUtils.getConnectedWalletAccounts.mockReturnValue([]);
     authUtils.getWalletAddress.mockImplementation(() => activeAddress);
-    authUtils.removeAuthJwt.mockImplementation(() => {
+    authUtils.clearAllWalletAuth.mockImplementation(() => {
       activeAddress = null;
     });
     sessionV2.logoutSessionV2.mockResolvedValue(undefined);
@@ -563,10 +602,69 @@ describe("SeizeConnectProvider add-account flow", () => {
       fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
     });
 
-    await waitFor(() => expect(authUtils.removeAuthJwt).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(authUtils.clearAllWalletAuth).toHaveBeenCalled()
+    );
     expect(sessionV2.logoutSessionV2).toHaveBeenCalledWith({
       address: ACTIVE_ADDRESS,
       allSessions: true,
     });
+  });
+
+  it("publishes one unauthenticated signing-out state while logout all is pending", async () => {
+    const addressB = "0x00000000000000000000000000000000000000BB";
+    const authUtils = require("@/services/auth/auth.utils");
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    const accounts = [ACTIVE_ADDRESS, addressB];
+    let resolveFirstRevocation!: () => void;
+
+    authUtils.getConnectedWalletAccounts.mockImplementation(() =>
+      accounts.map((address: string) => ({
+        address,
+        refreshToken: null,
+        role: null,
+        jwt: `jwt-${address}`,
+        profileId: null,
+        profileHandle: null,
+      }))
+    );
+    authUtils.getWalletAddress.mockImplementation(() => accounts[0] ?? null);
+    authUtils.clearAllWalletAuth.mockImplementation(() => {
+      accounts.splice(0, accounts.length);
+    });
+    sessionV2.logoutSessionV2
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstRevocation = resolve;
+          })
+      )
+      .mockResolvedValue(undefined);
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutAllStateProbe />
+      </SeizeConnectProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("signing-out")).toHaveTextContent("true");
+    });
+    expect(screen.getByTestId("has-valid-auth")).toHaveTextContent("false");
+    expect(screen.getByTestId("connected-account-count")).toHaveTextContent(
+      "0"
+    );
+    expect(authUtils.clearAllWalletAuth).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveFirstRevocation();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("signing-out")).toHaveTextContent("false");
+    });
+    expect(authUtils.clearAllWalletAuth).toHaveBeenCalledTimes(1);
   });
 });

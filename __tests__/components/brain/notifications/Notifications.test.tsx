@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 const mutateAsyncMock = jest.fn();
@@ -7,6 +7,30 @@ const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
 const setToastMock = jest.fn();
 const mockMarkMobileLaunchStep = jest.fn();
 const mockScheduleMobileLaunchFlush = jest.fn();
+const mockAuthContextValue = {
+  connectedProfile: { handle: "bob", id: "1" } as {
+    handle: string;
+    id: string;
+  } | null,
+  isAuthenticated: true,
+  activeProfileProxy: null,
+  fetchingProfile: false,
+  requestAuth: requestAuthMock,
+  setToast: setToastMock,
+  setActiveProfileProxy: setActiveProfileProxyMock,
+};
+const mockSeizeConnectContextValue = {
+  address: "0x00000000000000000000000000000000000000AA" as string | undefined,
+  isSigningOutAll: false,
+};
+
+interface MockMutationConfig {
+  readonly onError?:
+    | ((error: unknown, variables: { readonly authScope: string }) => void)
+    | undefined;
+}
+
+const mockMutationConfigs: MockMutationConfig[] = [];
 
 jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
   markMobileLaunchStep: (...args: unknown[]) =>
@@ -16,7 +40,10 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
 }));
 
 jest.mock("@tanstack/react-query", () => ({
-  useMutation: () => ({ mutateAsync: mutateAsyncMock }),
+  useMutation: (config: MockMutationConfig) => {
+    mockMutationConfigs.push(config);
+    return { mutateAsync: mutateAsyncMock };
+  },
 }));
 
 jest.mock("next/navigation", () => ({
@@ -30,14 +57,7 @@ const setTitleMock = jest.fn();
 jest.mock("@/components/auth/Auth", () => {
   const React = require("react");
   return {
-    AuthContext: React.createContext({
-      connectedProfile: { handle: "bob", id: "1" },
-      activeProfileProxy: null,
-      fetchingProfile: false,
-      requestAuth: requestAuthMock,
-      setToast: setToastMock,
-      setActiveProfileProxy: setActiveProfileProxyMock,
-    }),
+    AuthContext: React.createContext(mockAuthContextValue),
     useAuth: () => ({
       setTitle: setTitleMock,
       requestAuth: requestAuthMock,
@@ -46,6 +66,10 @@ jest.mock("@/components/auth/Auth", () => {
     }),
   };
 });
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => mockSeizeConnectContextValue,
+}));
 
 const invalidateNotifications = jest.fn();
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => {
@@ -146,6 +170,7 @@ const mockSuccessfulNotificationsQuery = () => {
 
 describe("Notifications component", () => {
   beforeEach(() => {
+    mockMutationConfigs.length = 0;
     mutateAsyncMock.mockClear();
     mutateAsyncMock.mockResolvedValue(undefined);
     useNotificationsQueryMock.mockReset();
@@ -157,6 +182,11 @@ describe("Notifications component", () => {
     setToastMock.mockClear();
     mockMarkMobileLaunchStep.mockClear();
     mockScheduleMobileLaunchFlush.mockClear();
+    mockAuthContextValue.connectedProfile = { handle: "bob", id: "1" };
+    mockAuthContextValue.isAuthenticated = true;
+    mockSeizeConnectContextValue.address =
+      "0x00000000000000000000000000000000000000AA";
+    mockSeizeConnectContextValue.isSigningOutAll = false;
     useDeviceInfoMock.mockReturnValue(getDefaultDeviceInfo());
   });
 
@@ -263,5 +293,55 @@ describe("Notifications component", () => {
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
+  });
+
+  it("does not show a mark-read error after its auth scope signs out", async () => {
+    mockSuccessfulNotificationsQuery();
+    const { rerender } = render(
+      <Notifications activeDrop={null} setActiveDrop={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
+    const markAllMutation = mockMutationConfigs[0];
+    const variables = mutateAsyncMock.mock.calls[0]?.[0] as {
+      readonly authScope: string;
+    };
+
+    mockAuthContextValue.connectedProfile = null;
+    mockAuthContextValue.isAuthenticated = false;
+    mockSeizeConnectContextValue.isSigningOutAll = true;
+    rerender(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+
+    act(() => {
+      markAllMutation?.onError?.("Unauthorized", variables);
+    });
+
+    expect(setToastMock).not.toHaveBeenCalled();
+  });
+
+  it("shows a mark-read error when its auth scope remains current", async () => {
+    mockSuccessfulNotificationsQuery();
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+
+    await waitFor(() => {
+      expect(mutateAsyncMock).toHaveBeenCalled();
+    });
+    const markAllMutation = mockMutationConfigs[0];
+    const variables = mutateAsyncMock.mock.calls[0]?.[0] as {
+      readonly authScope: string;
+    };
+
+    act(() => {
+      markAllMutation?.onError?.("Unauthorized", variables);
+    });
+
+    expect(setToastMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "error",
+        title: "Couldn't mark notifications as read.",
+      })
+    );
   });
 });
