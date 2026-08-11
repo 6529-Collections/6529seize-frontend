@@ -314,6 +314,71 @@ describe("renderStreamReviewRoutePage", () => {
     expect(editorialCopy).toHaveTextContent(
       "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100"
     );
+    expect(editorialCopy).toHaveTextContent("Test evidence");
+    expect(editorialCopy).toHaveTextContent("What this proves");
+    expect(editorialCopy).toHaveTextContent("Known test gaps");
+    expect(editorialCopy).toHaveTextContent("Static analysis");
+    expect(editorialCopy).toHaveTextContent(
+      "30 open High or Medium findings: 3 High and 27 Medium"
+    );
+    expect(editorialCopy).toHaveTextContent("Known limitations");
+    expect(editorialCopy).toHaveTextContent("Tokens and minting");
+    expect(editorialCopy).toHaveTextContent("Payments and auctions");
+    expect(editorialCopy).toHaveTextContent(
+      "Governance and contract size"
+    );
+    expect(editorialCopy).toHaveTextContent("Artwork and metadata");
+    expect(editorialCopy).toHaveTextContent(
+      "Proposed ADRs are not counted as fixes."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "ADR 0018 proposes one durable joined record, but it is not accepted or implemented."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "ADR 0016 accepts this Core-only design"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Collection freeze is a separate protection."
+    );
+    expect(editorialCopy).toHaveTextContent("The release standard");
+    expect(editorialCopy).toHaveTextContent("Contract bytecode size");
+    expect(editorialCopy).toHaveTextContent(
+      "Neither contract exists at the pinned commit."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Evidence required for the exact release candidate"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Evidence still required from real services"
+    );
+    expect(editorialCopy).toHaveTextContent("Independent audit");
+    expect(editorialCopy).toHaveTextContent("Release blockers");
+    expect(editorialCopy).toHaveTextContent("Threat model");
+    expect(editorialCopy).toHaveTextContent("Review priorities");
+    expect(editorialCopy).toHaveTextContent("Public findings");
+    expect(editorialCopy).toHaveTextContent("Feedback destinations");
+    expect(editorialCopy).toHaveTextContent("Questions for reviewers");
+    expect(editorialText.indexOf("Test evidence")).toBeLessThan(
+      editorialText.indexOf("Known limitations")
+    );
+    expect(editorialText.indexOf("The release standard")).toBeLessThan(
+      editorialText.indexOf("Release blockers")
+    );
+    expect(editorialText.indexOf("Release blockers")).toBeLessThan(
+      editorialText.indexOf("Review priorities")
+    );
+    expect(editorialText.indexOf("Public findings")).toBeLessThan(
+      editorialText.indexOf("Questions for reviewers")
+    );
+    expect(
+      editorialText.indexOf("19d4bbf5-86ec-4053-a5f2-bb28d7a2f780")
+    ).toBeGreaterThan(editorialText.indexOf("Public findings"));
+    expect(editorialCopy).not.toHaveTextContent(
+      "This register centralizes release state."
+    );
+    expect(editorialCopy).not.toHaveTextContent(
+      "The repository contains:"
+    );
     expect(editorialCopy).not.toHaveTextContent(
       "The separately dated development update"
     );
@@ -330,10 +395,10 @@ describe("renderStreamReviewRoutePage", () => {
     expect(editorialCopy).not.toHaveTextContent("Under discussion");
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "10"
+      "22"
     );
     expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
-      "10"
+      "22"
     );
   });
 
