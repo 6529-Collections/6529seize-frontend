@@ -1,13 +1,13 @@
 "use client";
 
 import type { CicStatement } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useState } from "react";
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
 import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
 import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 enum AboutStatementView {
@@ -28,17 +28,11 @@ function UserPageHeaderAboutContent({
     AboutStatementView.STATEMENT
   );
 
-  const toggleView = () => {
-    if (view === AboutStatementView.STATEMENT) {
-      setView(AboutStatementView.EDIT);
-    } else {
-      setView(AboutStatementView.STATEMENT);
-    }
-  };
+  const closeEditor = () => setView(AboutStatementView.STATEMENT);
 
   const onEditClick = () => {
     if (view === AboutStatementView.STATEMENT) {
-      toggleView();
+      setView(AboutStatementView.EDIT);
     }
   };
   const editActionLabel = getUserProfileHeaderMessage(
@@ -47,7 +41,7 @@ function UserPageHeaderAboutContent({
 
   return (
     <>
-      {view === AboutStatementView.STATEMENT && (
+      {view === AboutStatementView.STATEMENT && statement && (
         <div className="tw-max-w-2xl">
           <div
             className={[
@@ -57,24 +51,13 @@ function UserPageHeaderAboutContent({
               .filter(Boolean)
               .join(" ")}
           >
-            {canEdit && !statement ? (
-              <button
-                type="button"
-                onClick={onEditClick}
-                aria-label={editActionLabel}
-                className="tw-flex-1 tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
-              >
-                <UserPageHeaderAboutStatement statement={statement} />
-              </button>
-            ) : (
-              <UserPageHeaderAboutStatement statement={statement} />
-            )}
+            <UserPageHeaderAboutStatement statement={statement} />
             {canEdit && statement && (
               <button
                 type="button"
                 onClick={onEditClick}
                 aria-label={editActionLabel}
-                className="tw-pointer-events-none tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 group-focus-within:tw-pointer-events-auto group-focus-within:tw-opacity-100 focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-iron-200 touch-only:-tw-ml-2 touch-only:-tw-mt-2.5 touch-only:tw-pointer-events-auto touch-only:tw-flex touch-only:tw-size-11 touch-only:tw-items-center touch-only:tw-justify-center touch-only:tw-opacity-100"
+                className="tw-pointer-events-none tw-hidden tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-block sm:group-focus-within:tw-pointer-events-auto sm:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-iron-200"
               >
                 <span aria-hidden="true">
                   <PencilIcon size={PencilIconSize.SMALL} />
@@ -85,14 +68,34 @@ function UserPageHeaderAboutContent({
         </div>
       )}
 
-      {view === AboutStatementView.EDIT && (
-        <div>
-          <UserPageHeaderAboutEdit
-            profile={profile}
-            statement={statement}
-            onClose={() => setView(AboutStatementView.STATEMENT)}
-          />
+      {view === AboutStatementView.STATEMENT && canEdit && !statement && (
+        <div className="tw-hidden tw-max-w-2xl sm:tw-block">
+          <button
+            type="button"
+            onClick={onEditClick}
+            aria-label={editActionLabel}
+            className="tw-group tw-border-none tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          >
+            <UserPageHeaderAboutStatement statement={statement} />
+          </button>
         </div>
+      )}
+
+      {view === AboutStatementView.EDIT && (
+        <>
+          {statement && (
+            <div className="sm:tw-hidden">
+              <UserPageHeaderAboutStatement statement={statement} />
+            </div>
+          )}
+          <div className="tw-hidden sm:tw-block">
+            <UserPageHeaderAboutEdit
+              profile={profile}
+              statement={statement}
+              onClose={closeEditor}
+            />
+          </div>
+        </>
       )}
     </>
   );

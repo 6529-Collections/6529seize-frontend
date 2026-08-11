@@ -193,14 +193,13 @@ export default function ProfileActivityLogs({
         {withFilters && !withMatterFilter && (
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
             {initialParams.handleOrWallet && (
-              <div className="tw-flex-shrink-0">
+              <div className="tw-w-full sm:tw-w-fit">
                 <CommonTabs
                   items={DIRECTION_TAB_ITEMS}
                   activeItem={targetType}
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
                   size="sm"
-                  fill={false}
                 />
               </div>
             )}
