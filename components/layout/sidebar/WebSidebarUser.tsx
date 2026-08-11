@@ -213,7 +213,7 @@ function WebSidebarUser({
       return;
     }
 
-    setShowUserMenu(true);
+    toggleUserMenu();
     profileClickTimeoutRef.current = setTimeout(() => {
       profileClickTimeoutRef.current = null;
     }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
