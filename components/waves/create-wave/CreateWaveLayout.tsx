@@ -37,8 +37,8 @@ export default function CreateWaveLayout({
           onStep={(targetStep) => setStep(targetStep, "backward")}
         />
       </div>
-      <div className="tw-min-w-0 tw-flex-1 tw-bg-iron-950 tw-shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
-        <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-bg-iron-950 tw-shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
+        <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-1 tw-flex-col">
           {/* Joined to the top of the flow: the compact step progress pins to
               the top of the create-wave scrollport (mirror of the sticky
               footer), so it reads as one header row with the app shell's back
