@@ -38,11 +38,6 @@ jest.mock(
   }
 );
 
-jest.mock(
-  "@/components/waves/drops/proposal/ProposalCardContent",
-  () => (props: any) => <div data-testid="proposal-card">{props.drop.id}</div>
-);
-
 jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
   <div data-testid="rank" />
 ));
@@ -95,8 +90,12 @@ jest.mock("@/components/voting", () => ({
 
 jest.mock("@/components/voting/VotingModalButton", () => ({
   __esModule: true,
-  default: ({ onClick }: any) => (
-    <button data-testid="vote-button" onClick={onClick}>
+  default: ({ onClick, className }: any) => (
+    <button
+      data-testid="vote-button"
+      data-class-name={className}
+      onClick={onClick}
+    >
       Vote
     </button>
   ),
@@ -154,6 +153,9 @@ describe("WaveLeaderboardGridItem", () => {
     },
     author: { handle: "alice" },
     context_profile_context: { curatable: true, curated: false },
+    raters_count: 7,
+    rating: 10,
+    rating_prediction: 10,
     mentioned_users: [],
     mentioned_waves: [],
     referenced_nfts: [],
@@ -180,7 +182,7 @@ describe("WaveLeaderboardGridItem", () => {
     useDropInteractionRules.mockReturnValue({ canShowVote: true });
   });
 
-  it("renders compact media cards with clipped text and footer actions", () => {
+  it("renders a bounded summary and preserves compact footer controls", () => {
     render(
       <WaveLeaderboardGridItem
         drop={baseDrop}
@@ -199,39 +201,36 @@ describe("WaveLeaderboardGridItem", () => {
     expect(mediaWrapper).toHaveClass("tw-justify-center");
     expect(mediaWrapper).toHaveClass("tw-min-h-[14rem]");
     expect(mediaWrapper).toHaveClass("md:tw-min-h-[15rem]");
-    expect(screen.getByTestId("markdown")).toBeInTheDocument();
-    const markdownInner = screen.getByTestId("markdown")
-      .parentElement as HTMLElement;
-    const markdownViewport = markdownInner.parentElement as HTMLElement;
-    const textWrapper = markdownViewport.parentElement as HTMLElement;
-    expect(textWrapper).toHaveClass("tw-px-3");
-    expect(textWrapper).toHaveClass("tw-pt-2");
-    expect(textWrapper).toHaveClass("tw-pb-4");
-    expect(markdownViewport).toHaveClass("tw-max-h-28");
-    expect(markdownViewport).toHaveClass("tw-overflow-hidden");
-    expect(markdownViewport).not.toHaveClass("tw-overflow-y-auto");
-    expect(markdownViewport).not.toHaveClass("tw-scrollbar-thin");
-    expect(markdownViewport.querySelector(".tw-bg-gradient-to-t")).toBeNull();
-    expect(
-      screen.getByRole("button", { name: "Read full text" })
-    ).toBeInTheDocument();
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+    expect(markdownProps).toBeUndefined();
+    expect(screen.getByRole("heading", { name: "hello" })).toHaveClass(
+      "tw-text-sm",
+      "tw-text-iron-100"
+    );
+    expect(screen.getByText("Read full text")).toHaveClass(
+      "tw-text-xs",
+      "tw-text-primary-400",
+      "tw-min-h-11"
+    );
     expect(screen.getByTestId("rank")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
+    expect(screen.getByLabelText("7 voters")).toBeInTheDocument();
     const footer = screen.getByTestId("wave-leaderboard-grid-item-footer-d1");
     expect(footer).toBeInTheDocument();
     expect(footer).toHaveClass("tw-px-3");
-    expect(footer).toHaveClass("tw-pt-3");
+    expect(footer).toHaveClass("tw-pt-1");
     expect(footer).toHaveClass("tw-pb-3");
+    expect(footer.firstElementChild).toHaveClass("tw-mb-1");
 
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
-    const content = viewport.firstElementChild as HTMLElement;
     expect(card).toHaveClass("tw-p-0");
     expect(card).toHaveClass("tw-border");
     expect(card).toHaveClass("tw-bg-iron-950");
+    expect(card).not.toHaveAttribute("role", "button");
+    expect(card).not.toHaveAttribute("tabindex");
     expect(viewport).toHaveClass("tw-bg-iron-950");
-    expect(content).toHaveClass("tw-space-y-3");
   });
 
   it("opens compact media text through the read action", () => {
@@ -245,7 +244,7 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Read full text" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open hello" }));
 
     expect(onDropClick).toHaveBeenCalledTimes(1);
     expect(onDropClick).toHaveBeenCalledWith(baseDrop);
@@ -259,36 +258,7 @@ describe("WaveLeaderboardGridItem", () => {
     );
   });
 
-  it("renders proposal cards without the full inline content and opens by keyboard", () => {
-    const onDropClick = jest.fn();
-    render(
-      <WaveLeaderboardGridItem
-        drop={baseDrop}
-        mode="compact"
-        contentPresentation="proposalCard"
-        onDropClick={onDropClick}
-      />
-    );
-
-    expect(screen.getByTestId("proposal-card")).toHaveTextContent("d1");
-    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
-
-    fireEvent.keyDown(screen.getByTestId("wave-leaderboard-grid-item-d1"), {
-      key: "Enter",
-    });
-
-    expect(onDropClick).toHaveBeenCalledWith(baseDrop);
-    expect(startDropOpen).toHaveBeenCalledWith(
-      expect.objectContaining({
-        dropId: "d1",
-        waveId: "w1",
-        source: "leaderboard_grid",
-      })
-    );
-  });
-
-  it("does not show the read action for compact media cards without text", () => {
+  it("shows a plain open action for compact media cards without text", () => {
     render(
       <WaveLeaderboardGridItem
         drop={{
@@ -305,9 +275,90 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
+    expect(screen.queryByText("Read full text")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Read full text" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: "Open Untitled drop" })
+    ).toHaveTextContent("Open");
+  });
+
+  it("separates the brighter title from the quieter plain-text description", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          title: "Bright title",
+          parts: [
+            {
+              media: [],
+              content:
+                "**Bright title**\n\nDescription with [external text](https://example.com/path_(hidden)).",
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "Bright title" })).toHaveClass(
+      "tw-text-iron-100",
+      "tw-text-sm",
+      "tw-font-semibold"
+    );
+    expect(screen.getByText("Description with external text.")).toHaveClass(
+      "tw-text-iron-400",
+      "tw-text-xs",
+      "tw-line-clamp-6"
+    );
+    expect(screen.queryByRole("link", { name: "external text" })).toBeNull();
+    expect(screen.getByRole("article")).not.toHaveTextContent(
+      "example.com/path_(hidden)"
+    );
+    expect(screen.getAllByText("Bright title")).toHaveLength(1);
+  });
+
+  it("removes a case-insensitive non-ASCII title without clipping content", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          title: "İSTANBUL",
+          parts: [
+            {
+              media: [],
+              content: "istanbul — Description remains intact.",
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "İSTANBUL" })).toBeVisible();
+    expect(screen.getByText("Description remains intact.")).toBeVisible();
+  });
+
+  it("removes a canonically equivalent title by its normalized length", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          title: "CAFÉ",
+          parts: [
+            {
+              media: [],
+              content: "cafe\u0301 — Decomposed title remains intact.",
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "CAFÉ" })).toBeVisible();
+    expect(screen.getByText("Decomposed title remains intact.")).toBeVisible();
   });
 
   it("does not open compact drops from footer vote action", () => {
@@ -325,6 +376,26 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(onDropClick).not.toHaveBeenCalled();
     expect(startDropOpen).not.toHaveBeenCalled();
+  });
+
+  it("keeps the current user's vote separate from the total and voter count", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          context_profile_context: {
+            ...baseDrop.context_profile_context,
+            rating: -4,
+          },
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("You:")).toBeInTheDocument();
+    expect(screen.getByText("-4 NIC")).toHaveClass("tw-text-rose-400");
+    expect(screen.getByLabelText("7 voters")).toBeInTheDocument();
   });
 
   it("hides vote actions when voting is closed", () => {
@@ -453,11 +524,13 @@ describe("WaveLeaderboardGridItem", () => {
     expect(
       screen.queryByTestId("wave-leaderboard-grid-item-footer-d1")
     ).not.toBeInTheDocument();
-    const contentOnlyActions = screen.getByTestId(
-      "wave-leaderboard-grid-item-content-only-actions-d1"
+    expect(
+      screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
+    ).toHaveClass(
+      "tw-opacity-0",
+      "group-focus-within:tw-opacity-100",
+      "desktop-hover:group-hover:tw-opacity-100"
     );
-    expect(contentOnlyActions).toBeInTheDocument();
-    expect(contentOnlyActions).toHaveClass("tw-z-0");
     expect(screen.getByTestId("open-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
     expect(screen.getByTestId("media")).toBeInTheDocument();
@@ -473,7 +546,6 @@ describe("WaveLeaderboardGridItem", () => {
 
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
-    const content = viewport.firstElementChild as HTMLElement;
     expect(card).toHaveClass("tw-p-0");
     expect(card).not.toHaveClass("tw-p-2");
     expect(card).toHaveClass("tw-border");
@@ -485,16 +557,11 @@ describe("WaveLeaderboardGridItem", () => {
     expect(viewport).not.toHaveClass("tw-p-3");
     expect(viewport).not.toHaveClass("tw-rounded-lg");
     expect(viewport).not.toHaveClass("tw-bg-iron-900/50");
-    expect(content).toHaveClass("tw-space-y-1");
-    expect(content).not.toHaveClass("tw-space-y-3");
     expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Read full text" })
-    ).not.toBeInTheDocument();
     expect(markdownProps).toBeUndefined();
   });
 
-  it("renders compact text-only drops without a media block", () => {
+  it("renders a compact plain-text summary without a media block", () => {
     render(
       <WaveLeaderboardGridItem
         drop={{
@@ -507,16 +574,12 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
-    expect(screen.getByTestId("markdown")).toBeInTheDocument();
-    const markdownViewport = screen.getByTestId("markdown").parentElement
-      ?.parentElement as HTMLElement;
-    expect(markdownViewport).toHaveClass("tw-max-h-56");
-    expect(markdownViewport).toHaveClass("tw-overflow-hidden");
-    expect(markdownViewport).not.toHaveClass("tw-overflow-y-auto");
-    expect(markdownViewport).not.toHaveClass("tw-scrollbar-thin");
+    expect(screen.getByRole("heading", { name: "hello" })).toBeInTheDocument();
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+    expect(markdownProps).toBeUndefined();
   });
 
-  it("renders markdown for content-only text-only drops", () => {
+  it("renders a bounded summary for content-only text-only drops", () => {
     render(
       <WaveLeaderboardGridItem
         drop={{
@@ -529,10 +592,9 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
-    expect(screen.getByTestId("markdown")).toBeInTheDocument();
-    const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
-    const viewport = card.firstElementChild as HTMLElement;
-    expect(viewport).toHaveClass("tw-max-h-[20rem]");
+    expect(screen.getByRole("heading", { name: "hello" })).toBeInTheDocument();
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+    expect(markdownProps).toBeUndefined();
   });
 
   it("does not render preview-only metadata as media", () => {
@@ -549,7 +611,8 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
-    expect(screen.getByTestId("markdown")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "hello" })).toBeInTheDocument();
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
   });
 
   it("passes preview image metadata to non-image media", () => {
@@ -612,7 +675,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
   });
 
-  it("opens drop on click", () => {
+  it("keeps the card surface inert and opens through the named action", () => {
     const onDropClick = jest.fn();
 
     render(
@@ -624,6 +687,10 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     fireEvent.click(screen.getByTestId("wave-leaderboard-grid-item-d1"));
+    expect(onDropClick).not.toHaveBeenCalled();
+    expect(startDropOpen).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open hello" }));
     expect(onDropClick).toHaveBeenCalledWith(baseDrop);
     expect(startDropOpen).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -678,22 +745,29 @@ describe("WaveLeaderboardGridItem", () => {
     );
   });
 
-  it("does not open drop when clicking links or action buttons", () => {
+  it("does not mount markdown links and keeps voting independent from opening", () => {
     const onDropClick = jest.fn();
 
     render(
       <WaveLeaderboardGridItem
         drop={{
           ...baseDrop,
-          parts: [{ media: [], content: "hello" }],
+          title: "hello",
+          parts: [
+            {
+              media: [],
+              content:
+                "hello\n\nRead [the source](https://example.com/source) safely.",
+            },
+          ],
         }}
         mode="content_only"
         onDropClick={onDropClick}
       />
     );
 
-    fireEvent.click(screen.getByTestId("markdown-link"));
-    fireEvent.click(screen.getByTestId("open-action"));
+    expect(screen.queryByTestId("markdown-link")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "the source" })).toBeNull();
     fireEvent.click(screen.getByTestId("vote-button"));
 
     expect(onDropClick).not.toHaveBeenCalled();
@@ -767,11 +841,26 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
-    expect(
-      screen.queryByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
-    ).not.toBeInTheDocument();
     expect(screen.queryByTestId("open-action")).not.toBeInTheDocument();
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
     expect(screen.queryByTestId("mobile-copy-action")).not.toBeInTheDocument();
+  });
+
+  it("keeps the desktop open action when voting rules hide Vote", () => {
+    useDropInteractionRules.mockReturnValue({ canShowVote: false });
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("open-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
   });
 });

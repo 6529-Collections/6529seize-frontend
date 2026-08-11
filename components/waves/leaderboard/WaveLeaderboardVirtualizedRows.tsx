@@ -215,7 +215,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   const columnsRef = useRef(columns);
   const [scrollMargin, setScrollMargin] = useState(0);
   const logicalItemCount = leadingItemCount + items.length;
+  const isMasonryLayout = layout === "grid";
   const rowCount = Math.ceil(logicalItemCount / columns);
+  const virtualItemCount = isMasonryLayout ? logicalItemCount : rowCount;
   const estimateRowHeight = estimatedRowHeight ?? getEstimatedRowHeight(layout);
 
   const captureVisibleAnchor = useCallback(() => {
@@ -339,7 +341,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       const lastChangedRowIndex = changedRows.at(-1)?.index ?? -1;
 
       if (hasPreviousPage && !isFetchingPreviousPage) {
-        const firstVisibleLogicalIndex = firstChangedRowIndex * columns;
+        const firstVisibleLogicalIndex = isMasonryLayout
+          ? firstChangedRowIndex
+          : firstChangedRowIndex * columns;
         const previousPrefetchBoundary =
           leadingItemCount + PREVIOUS_PAGE_PREFETCH_ROWS * columns;
         const previousTriggerKey = `${windowKey}:${leadingItemCount}`;
@@ -356,7 +360,9 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
         return;
       }
 
-      const lastVisibleLogicalIndex = (lastChangedRowIndex + 1) * columns - 1;
+      const lastVisibleLogicalIndex = isMasonryLayout
+        ? lastChangedRowIndex
+        : (lastChangedRowIndex + 1) * columns - 1;
       const nextPrefetchBoundary = Math.max(
         0,
         logicalItemCount - NEXT_PAGE_PREFETCH_ROWS * columns
@@ -382,6 +388,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       hasPreviousPage,
       isFetchingNextPage,
       isFetchingPreviousPage,
+      isMasonryLayout,
       items,
       leadingItemCount,
       loadNextPage,
@@ -391,19 +398,30 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
     ]
   );
 
+  let virtualizerOverscan = 2;
+  if (layout === "list") {
+    virtualizerOverscan = 4;
+  } else if (isMasonryLayout) {
+    virtualizerOverscan = columns * 2;
+  }
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
-    count: rowCount,
+    count: virtualItemCount,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => estimateRowHeight,
     getItemKey: getVirtualRowKey,
-    overscan: layout === "list" ? 4 : 2,
+    lanes: isMasonryLayout ? columns : 1,
+    gap: isMasonryLayout ? 16 : 0,
+    overscan: virtualizerOverscan,
     scrollMargin,
     onChange: handleVirtualizerChange,
   });
   const virtualRows = virtualizer.getVirtualItems();
-  const previousRetryRowIndex = virtualRows.find(
-    (virtualRow) => virtualRow.index * columns < leadingItemCount
+  const previousRetryVirtualIndex = virtualRows.find(
+    (virtualRow) =>
+      (isMasonryLayout ? virtualRow.index : virtualRow.index * columns) <
+      leadingItemCount
   )?.index;
 
   useLayoutEffect(() => {
@@ -435,13 +453,19 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
       return;
     }
 
-    virtualizer.scrollToIndex(Math.floor(anchor.logicalIndex / columns), {
-      align: "start",
-    });
+    virtualizer.scrollToIndex(
+      isMasonryLayout
+        ? anchor.logicalIndex
+        : Math.floor(anchor.logicalIndex / columns),
+      {
+        align: "start",
+      }
+    );
   }, [
     columns,
     getItemId,
     items,
+    isMasonryLayout,
     leadingItemCount,
     scrollContainerRef,
     virtualizer,
@@ -464,99 +488,175 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
         className="tw-relative tw-w-full tw-min-w-0"
         style={{ height: virtualizer.getTotalSize() }}
       >
-        {virtualRows.map((virtualRow) => {
-          const rowStart = virtualRow.index * columns;
-          const logicalIndexes = Array.from(
-            { length: columns },
-            (_, columnIndex) => rowStart + columnIndex
-          ).filter((logicalIndex) => logicalIndex < logicalItemCount);
-          const hasLoadedItem = logicalIndexes.some(
-            (logicalIndex) => logicalIndex >= leadingItemCount
-          );
-          const placeholderLogicalIndexes = logicalIndexes.filter(
-            (logicalIndex) => logicalIndex < leadingItemCount
-          );
-          const loadedLogicalIndexes = logicalIndexes.filter(
-            (logicalIndex) => logicalIndex >= leadingItemCount
-          );
-          const showPreviousRetry =
-            isFetchPreviousPageError &&
-            virtualRow.index === previousRetryRowIndex &&
-            placeholderLogicalIndexes.length > 0;
+        {isMasonryLayout
+          ? virtualRows.map((virtualItem) => {
+              const logicalIndex = virtualItem.index;
+              const itemIndex = logicalIndex - leadingItemCount;
+              const item = items[itemIndex];
+              const isPlaceholder = logicalIndex < leadingItemCount;
+              const lane = virtualItem.lane;
+              const showPreviousRetry =
+                isPlaceholder &&
+                isFetchPreviousPageError &&
+                logicalIndex === previousRetryVirtualIndex;
+              let columnContent: ReactNode = null;
 
-          return (
-            <div
-              key={virtualRow.key}
-              ref={hasLoadedItem ? virtualizer.measureElement : undefined}
-              data-index={virtualRow.index}
-              className={`tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 tw-pb-4 ${gridColumnsClassName}`}
-              style={{
-                minHeight:
-                  (layout === "gallery" || measureLoadedRowsAtNaturalHeight) &&
-                  hasLoadedItem
-                    ? undefined
-                    : virtualRow.size,
-                transform: `translateY(${virtualRow.start - scrollMargin}px)`,
-              }}
-            >
-              {showPreviousRetry ? (
-                <div // NOSONAR -- the retry is one virtual list entry.
-                  role="listitem"
-                  className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
-                  style={{
-                    gridColumn: `span ${placeholderLogicalIndexes.length}`,
-                  }}
-                >
-                  <span className="tw-sr-only" role="alert">
-                    {t(locale, "waves.leaderboard.previousLoadError")}
-                  </span>
-                  <Button
-                    onClick={() => {
-                      previousTriggerKeyRef.current = null;
-                      loadPreviousPage();
+              if (isPlaceholder) {
+                columnContent = (
+                  <div // NOSONAR -- the placeholder is one virtual list entry.
+                    role={showPreviousRetry ? "listitem" : undefined}
+                    aria-hidden={showPreviousRetry ? undefined : true}
+                    className="tw-pointer-events-auto tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
+                    style={{
+                      gridColumn: lane + 1,
+                      minHeight: virtualItem.size,
                     }}
-                    variant="tertiary"
-                    size="sm"
                   >
-                    {t(locale, "waves.leaderboard.retryEarlier")}
-                  </Button>
-                </div>
-              ) : (
-                placeholderLogicalIndexes.map((logicalIndex) => (
-                  <div
-                    key={`placeholder-${logicalIndex}`}
-                    aria-hidden="true"
-                    className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
-                  >
-                    <div className="tw-h-full tw-min-h-[24rem] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-900/50" />
+                    {showPreviousRetry ? (
+                      <>
+                        <span className="tw-sr-only" role="alert">
+                          {t(locale, "waves.leaderboard.previousLoadError")}
+                        </span>
+                        <Button
+                          onClick={() => {
+                            previousTriggerKeyRef.current = null;
+                            loadPreviousPage();
+                          }}
+                          variant="tertiary"
+                          size="sm"
+                        >
+                          {t(locale, "waves.leaderboard.retryEarlier")}
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="tw-h-full tw-min-h-[24rem] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-900/50" />
+                    )}
                   </div>
-                ))
-              )}
-              {loadedLogicalIndexes.map((logicalIndex) => {
-                const itemIndex = logicalIndex - leadingItemCount;
-                const item = items[itemIndex];
-                if (item === undefined) {
-                  return null;
-                }
-
-                const itemId = getItemId(item);
-                return (
+                );
+              } else if (item !== undefined) {
+                columnContent = (
                   <div // NOSONAR -- each card is one virtual list entry.
-                    key={itemId}
+                    ref={virtualizer.measureElement}
+                    data-index={virtualItem.index}
                     role="listitem"
                     aria-posinset={itemIndex + 1}
                     aria-setsize={ariaSetSize}
-                    data-leaderboard-drop-id={itemId}
+                    data-leaderboard-drop-id={getItemId(item)}
                     data-leaderboard-logical-index={logicalIndex}
-                    className="tw-min-w-0"
+                    className="tw-pointer-events-auto tw-min-w-0"
+                    style={{ gridColumn: lane + 1 }}
                   >
                     {renderItem(item)}
                   </div>
                 );
-              })}
-            </div>
-          );
-        })}
+              }
+
+              return (
+                <div
+                  key={virtualItem.key}
+                  className={`tw-pointer-events-none tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 ${gridColumnsClassName}`}
+                  style={{
+                    transform: `translateY(${virtualItem.start - scrollMargin}px)`,
+                  }}
+                >
+                  {columnContent}
+                </div>
+              );
+            })
+          : virtualRows.map((virtualRow) => {
+              const rowStart = virtualRow.index * columns;
+              const logicalIndexes = Array.from(
+                { length: columns },
+                (_, columnIndex) => rowStart + columnIndex
+              ).filter((logicalIndex) => logicalIndex < logicalItemCount);
+              const hasLoadedItem = logicalIndexes.some(
+                (logicalIndex) => logicalIndex >= leadingItemCount
+              );
+              const placeholderLogicalIndexes = logicalIndexes.filter(
+                (logicalIndex) => logicalIndex < leadingItemCount
+              );
+              const loadedLogicalIndexes = logicalIndexes.filter(
+                (logicalIndex) => logicalIndex >= leadingItemCount
+              );
+              const showPreviousRetry =
+                isFetchPreviousPageError &&
+                virtualRow.index === previousRetryVirtualIndex &&
+                placeholderLogicalIndexes.length > 0;
+
+              return (
+                <div
+                  key={virtualRow.key}
+                  ref={hasLoadedItem ? virtualizer.measureElement : undefined}
+                  data-index={virtualRow.index}
+                  className={`tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 tw-pb-4 ${gridColumnsClassName}`}
+                  style={{
+                    minHeight:
+                      (layout === "gallery" ||
+                        measureLoadedRowsAtNaturalHeight) &&
+                      hasLoadedItem
+                        ? undefined
+                        : virtualRow.size,
+                    transform: `translateY(${virtualRow.start - scrollMargin}px)`,
+                  }}
+                >
+                  {showPreviousRetry ? (
+                    <div // NOSONAR -- the retry is one virtual list entry.
+                      role="listitem"
+                      className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
+                      style={{
+                        gridColumn: `span ${placeholderLogicalIndexes.length}`,
+                      }}
+                    >
+                      <span className="tw-sr-only" role="alert">
+                        {t(locale, "waves.leaderboard.previousLoadError")}
+                      </span>
+                      <Button
+                        onClick={() => {
+                          previousTriggerKeyRef.current = null;
+                          loadPreviousPage();
+                        }}
+                        variant="tertiary"
+                        size="sm"
+                      >
+                        {t(locale, "waves.leaderboard.retryEarlier")}
+                      </Button>
+                    </div>
+                  ) : (
+                    placeholderLogicalIndexes.map((logicalIndex) => (
+                      <div
+                        key={`placeholder-${logicalIndex}`}
+                        aria-hidden="true"
+                        className="tw-flex tw-min-h-[24rem] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950"
+                      >
+                        <div className="tw-h-full tw-min-h-[24rem] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-iron-900/50" />
+                      </div>
+                    ))
+                  )}
+                  {loadedLogicalIndexes.map((logicalIndex) => {
+                    const itemIndex = logicalIndex - leadingItemCount;
+                    const item = items[itemIndex];
+                    if (item === undefined) {
+                      return null;
+                    }
+
+                    const itemId = getItemId(item);
+                    return (
+                      <div // NOSONAR -- each card is one virtual list entry.
+                        key={itemId}
+                        role="listitem"
+                        aria-posinset={itemIndex + 1}
+                        aria-setsize={ariaSetSize}
+                        data-leaderboard-drop-id={itemId}
+                        data-leaderboard-logical-index={logicalIndex}
+                        className="tw-min-w-0"
+                      >
+                        {renderItem(item)}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
       </div>
 
       {isFetchingNextPage ? (

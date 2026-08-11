@@ -1,24 +1,50 @@
 "use client";
 
 import type { CicStatement } from "@/entities/IProfile";
-import { useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
-export default function UserPageHeaderAboutStatement({
-  statement,
+function useStatementOverflow(element: HTMLDivElement | null): boolean {
+  const getSnapshot = useCallback(() => {
+    if (!element) {
+      return false;
+    }
+
+    return element.scrollHeight > element.clientHeight + 1;
+  }, [element]);
+
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (!element) {
+        return () => {};
+      }
+
+      if (typeof ResizeObserver === "undefined") {
+        globalThis.addEventListener("resize", onStoreChange);
+        return () => globalThis.removeEventListener("resize", onStoreChange);
+      }
+
+      const resizeObserver = new ResizeObserver(onStoreChange);
+      resizeObserver.observe(element);
+      return () => resizeObserver.disconnect();
+    },
+    [element]
+  );
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
+}
+
+function UserPageHeaderAboutStatementContent({
+  statementValue,
 }: {
-  readonly statement: CicStatement | null;
+  readonly statementValue: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  if (!statement) {
-    return (
-      <div className="tw-text-sm tw-italic tw-text-iron-500 tw-transition tw-duration-200 group-focus-within:tw-text-iron-300 group-hover:tw-text-iron-300">
-        {getUserProfileHeaderMessage("user.profileHeader.about.empty")}
-      </div>
-    );
-  }
+  const [statementElement, setStatementElement] =
+    useState<HTMLDivElement | null>(null);
+  const hasOverflow = useStatementOverflow(statementElement);
 
-  const showToggle = statement.statement_value.length > 240;
+  const showToggle = expanded || hasOverflow;
   const clampClass = expanded
     ? "tw-line-clamp-none"
     : "tw-line-clamp-6 md:tw-line-clamp-none";
@@ -26,9 +52,10 @@ export default function UserPageHeaderAboutStatement({
   return (
     <div className="tw-space-y-2">
       <div
+        ref={setStatementElement}
         className={`tw-mb-0 tw-whitespace-pre-line tw-text-md tw-font-normal tw-leading-relaxed tw-text-iron-400 ${clampClass}`}
       >
-        {statement.statement_value}
+        {statementValue}
       </div>
       {showToggle && (
         <button
@@ -48,5 +75,26 @@ export default function UserPageHeaderAboutStatement({
         </button>
       )}
     </div>
+  );
+}
+
+export default function UserPageHeaderAboutStatement({
+  statement,
+}: {
+  readonly statement: CicStatement | null;
+}) {
+  if (!statement) {
+    return (
+      <div className="tw-text-sm tw-italic tw-text-iron-500 tw-transition tw-duration-200 group-focus-within:tw-text-iron-300 group-hover:tw-text-iron-300">
+        {getUserProfileHeaderMessage("user.profileHeader.about.empty")}
+      </div>
+    );
+  }
+
+  return (
+    <UserPageHeaderAboutStatementContent
+      key={`${statement.id}:${statement.statement_value}`}
+      statementValue={statement.statement_value}
+    />
   );
 }
