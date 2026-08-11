@@ -9,7 +9,7 @@ export default function ProposalCardContextLabel() {
   return (
     <div
       data-testid="proposal-card-context-label"
-      className="tw-inline-flex tw-w-fit tw-items-center tw-gap-2"
+      className="tw-mb-2 tw-inline-flex tw-w-fit tw-items-center tw-gap-2"
     >
       <span
         aria-hidden="true"

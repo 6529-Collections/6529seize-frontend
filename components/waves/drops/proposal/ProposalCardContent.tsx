@@ -10,7 +10,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveProposalCardRecipe } from "@/hooks/waves/useWaveProposalCardRecipe";
 import { t } from "@/i18n/messages";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 
 interface ProposalCardContentProps {
   readonly drop: Pick<
@@ -20,6 +20,7 @@ interface ProposalCardContentProps {
     readonly wave?: Pick<ApiDrop["wave"], "id"> | undefined;
   };
   readonly density?: "default" | "compact" | undefined;
+  readonly textFooter?: ReactNode | undefined;
 }
 
 const getCountLabel = ({
@@ -40,9 +41,80 @@ const getCountLabel = ({
   readonly locale: ReturnType<typeof useBrowserLocale>;
 }): string => t(locale, count === 1 ? one : other, { count });
 
+type ProposalCardViewModel = ReturnType<typeof getProposalCardViewModel>;
+
+const getMediaCountLabel = (
+  viewModel: ProposalCardViewModel,
+  locale: ReturnType<typeof useBrowserLocale>
+): string | null => {
+  if (viewModel.mediaCount === 0) {
+    return null;
+  }
+
+  return getCountLabel({
+    count: viewModel.mediaCount,
+    one: "waves.proposalCard.media.one",
+    other: "waves.proposalCard.media.other",
+    locale,
+  });
+};
+
+const getContextLabels = ({
+  viewModel,
+  mediaCountLabel,
+  locale,
+}: {
+  readonly viewModel: ProposalCardViewModel;
+  readonly mediaCountLabel: string | null;
+  readonly locale: ReturnType<typeof useBrowserLocale>;
+}): readonly string[] => {
+  const labels: string[] = [];
+
+  if (viewModel.partCount > 1) {
+    labels.push(
+      getCountLabel({
+        count: viewModel.partCount,
+        one: "waves.proposalCard.part.one",
+        other: "waves.proposalCard.part.other",
+        locale,
+      })
+    );
+  }
+
+  if (viewModel.previewImage === null && mediaCountLabel !== null) {
+    labels.push(mediaCountLabel);
+  }
+
+  if (viewModel.attachmentCount > 0) {
+    labels.push(
+      getCountLabel({
+        count: viewModel.attachmentCount,
+        one: "waves.proposalCard.attachment.one",
+        other: "waves.proposalCard.attachment.other",
+        locale,
+      })
+    );
+  }
+
+  return labels;
+};
+
+const ProposalCardTextFooter = ({
+  children,
+}: {
+  readonly children: ReactNode | undefined;
+}) => {
+  if (children === null || children === undefined) {
+    return null;
+  }
+
+  return <div className="tw-mt-1">{children}</div>;
+};
+
 export default function ProposalCardContent({
   drop,
   density = "default",
+  textFooter,
 }: ProposalCardContentProps) {
   const locale = useBrowserLocale();
   const recipe = useWaveProposalCardRecipe(drop.wave?.id);
@@ -54,32 +126,12 @@ export default function ProposalCardContent({
   const title =
     viewModel.title ?? t(locale, "waves.proposalCard.untitledProposal");
   const isCompact = density === "compact";
-  const contextLabels = [
-    viewModel.partCount > 1
-      ? getCountLabel({
-          count: viewModel.partCount,
-          one: "waves.proposalCard.part.one",
-          other: "waves.proposalCard.part.other",
-          locale,
-        })
-      : null,
-    viewModel.mediaCount > 0
-      ? getCountLabel({
-          count: viewModel.mediaCount,
-          one: "waves.proposalCard.media.one",
-          other: "waves.proposalCard.media.other",
-          locale,
-        })
-      : null,
-    viewModel.attachmentCount > 0
-      ? getCountLabel({
-          count: viewModel.attachmentCount,
-          one: "waves.proposalCard.attachment.one",
-          other: "waves.proposalCard.attachment.other",
-          locale,
-        })
-      : null,
-  ].filter((label): label is string => label !== null);
+  const mediaCountLabel = getMediaCountLabel(viewModel, locale);
+  const contextLabels = getContextLabels({
+    viewModel,
+    mediaCountLabel,
+    locale,
+  });
 
   return (
     <div
@@ -93,15 +145,17 @@ export default function ProposalCardContent({
       >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
           <h3
-            className={`tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-break-words tw-font-semibold tw-leading-snug tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 ${
-              isCompact ? "tw-text-sm" : "tw-text-base sm:tw-text-lg"
+            className={`tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-2 tw-break-words tw-text-pretty tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 ${
+              isCompact
+                ? "tw-text-sm !tw-leading-snug"
+                : "tw-text-base !tw-leading-[1.3] sm:tw-text-lg"
             }`}
           >
             {title}
           </h3>
           {viewModel.excerpt ? (
             <p
-              className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-break-words tw-leading-relaxed tw-text-iron-300 ${
+              className={`tw-[overflow-wrap:anywhere] tw-mb-0 tw-break-words tw-text-pretty tw-leading-[1.6] tw-tracking-normal tw-text-iron-300 ${
                 isCompact
                   ? "tw-mt-1 tw-line-clamp-2 tw-text-xs"
                   : "tw-mt-1.5 tw-line-clamp-3 tw-text-sm"
@@ -122,25 +176,33 @@ export default function ProposalCardContent({
               ))}
             </div>
           ) : null}
+          <ProposalCardTextFooter>{textFooter}</ProposalCardTextFooter>
         </div>
 
         {viewModel.previewImage ? (
-          <div
-            className={`tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-700 ${
-              isCompact ? "tw-size-20" : "tw-size-24"
-            }`}
-          >
-            <FallbackImage
-              primarySrc={getScaledImageUri(
-                viewModel.previewImage.url,
-                ImageScale.AUTOx450
-              )}
-              fallbackSrc={viewModel.previewImage.url}
-              alt={t(locale, "waves.proposalCard.previewAlt", { title })}
-              fill
-              sizes={isCompact ? "80px" : "96px"}
-              className="tw-object-cover"
-            />
+          <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center">
+            <div
+              className={`tw-relative tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-700 ${
+                isCompact ? "tw-size-20" : "tw-size-24"
+              }`}
+            >
+              <FallbackImage
+                primarySrc={getScaledImageUri(
+                  viewModel.previewImage.url,
+                  ImageScale.AUTOx450
+                )}
+                fallbackSrc={viewModel.previewImage.url}
+                alt={t(locale, "waves.proposalCard.previewAlt", { title })}
+                fill
+                sizes={isCompact ? "80px" : "96px"}
+                className="tw-object-cover"
+              />
+            </div>
+            {mediaCountLabel ? (
+              <span className="tw-mt-1.5 tw-text-center tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-500">
+                {mediaCountLabel}
+              </span>
+            ) : null}
           </div>
         ) : null}
       </div>

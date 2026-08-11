@@ -11,7 +11,7 @@ export default function CreateWaveAdvancedSection({
   hasError,
   children,
 }: {
-  readonly summary: string;
+  readonly summary?: string;
   readonly isCustomized: boolean;
   readonly hasError: boolean;
   readonly children: ReactNode;
@@ -32,6 +32,9 @@ export default function CreateWaveAdvancedSection({
   }
 
   const isExpanded = isOpen || hasError;
+  const detail = hasError
+    ? t(locale, "waves.create.advanced.errorSummary")
+    : summary;
 
   let status: string | null = null;
   if (hasError) {
@@ -41,7 +44,7 @@ export default function CreateWaveAdvancedSection({
   }
 
   return (
-    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40">
+    <section className="tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-transition-colors desktop-hover:hover:tw-border-white/20">
       <button
         type="button"
         aria-expanded={isExpanded}
@@ -49,11 +52,11 @@ export default function CreateWaveAdvancedSection({
         onClick={() =>
           setIsOpen((current) => (hasError ? true : !current))
         }
-        className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.025] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
+        className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-iron-900 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
       >
-        <span className="tw-min-w-0">
-          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+        <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0">
+          <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-4">
+            <span className="tw-text-sm tw-font-semibold tw-leading-4 tw-text-iron-200">
               {t(locale, "waves.create.advanced.title")}
             </span>
             {status ? (
@@ -68,11 +71,11 @@ export default function CreateWaveAdvancedSection({
               </span>
             ) : null}
           </span>
-          <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-            {hasError
-              ? t(locale, "waves.create.advanced.errorSummary")
-              : summary}
-          </span>
+          {detail ? (
+            <span className="tw-block tw-text-xs tw-leading-4 tw-text-iron-400">
+              {detail}
+            </span>
+          ) : null}
         </span>
         <ChevronDownIcon
           aria-hidden="true"
@@ -84,7 +87,7 @@ export default function CreateWaveAdvancedSection({
       <div
         id={contentId}
         hidden={!isExpanded}
-        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-4"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-transparent tw-p-4"
       >
         {children}
       </div>

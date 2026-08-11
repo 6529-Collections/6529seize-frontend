@@ -8,6 +8,7 @@ import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import ProposalCardContent from "@/components/waves/drops/proposal/ProposalCardContent";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
@@ -37,6 +38,20 @@ export const WaveLeaderboardDropContent: React.FC<
     router.push(href);
   };
 
+  if (contentPresentation === "proposalCard") {
+    return (
+      <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-1">
+        <ProposalCardContent
+          drop={drop}
+          textFooter={<WaveDropActionsOpen drop={drop} variant="readFull" />}
+        />
+        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+          <WaveDropReactions drop={drop} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-1">
       <WaveDropContent
@@ -51,9 +66,6 @@ export const WaveLeaderboardDropContent: React.FC<
         mediaContainerHeightClassName={mediaContainerHeightClassName}
         contentPresentation={contentPresentation}
       />
-      {contentPresentation === "proposalCard" && (
-        <WaveDropActionsOpen drop={drop} variant="readFull" />
-      )}
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         <WaveDropReactions drop={drop} />
       </div>

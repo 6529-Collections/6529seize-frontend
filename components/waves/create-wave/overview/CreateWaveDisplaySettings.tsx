@@ -1,5 +1,5 @@
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
-import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
+import CreateWaveAdvancedSection from "@/components/waves/create-wave/utils/CreateWaveAdvancedSection";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import {
   DEFAULT_PROPOSAL_CARD_RECIPE,
@@ -10,7 +10,6 @@ import {
   APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
   DEFAULT_APPROVE_WAVE_TAB_LABELS,
   WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH,
-  getEffectiveApproveWaveTabLabels,
   getDefaultWaveSubmissionButtonLabel,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -54,6 +53,43 @@ const getApproveErrorMessage = (
   return null;
 };
 
+function ProposalCardAppearancePreview({
+  mode,
+}: {
+  readonly mode: CreateWaveProposalCardMode;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className="tw-mb-3 tw-h-24 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-3"
+    >
+      {mode === "standard" ? (
+        <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <span className="tw-size-4 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-650" />
+            <span className="tw-h-1.5 tw-w-16 tw-rounded-full tw-bg-iron-650" />
+          </div>
+          <div className="tw-mt-2 tw-space-y-1.5">
+            <span className="tw-block tw-h-1.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-1.5 tw-w-11/12 tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-1.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-1.5 tw-w-3/4 tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-1.5 tw-w-5/6 tw-rounded-full tw-bg-iron-800" />
+          </div>
+        </div>
+      ) : (
+        <div className="tw-flex tw-h-full tw-items-center tw-gap-3">
+          <div className="tw-min-w-0 tw-flex-1">
+            <span className="tw-block tw-h-2 tw-w-2/3 tw-rounded-full tw-bg-iron-650" />
+            <span className="tw-mt-2 tw-block tw-h-1.5 tw-w-4/5 tw-rounded-full tw-bg-iron-800" />
+          </div>
+          <span className="tw-size-11 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CreateWaveDisplaySettings({
   display,
   errors,
@@ -69,6 +105,9 @@ export default function CreateWaveDisplaySettings({
   const hasSubmissionLabelError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
   );
+  const hasProposalCardExcerptError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID
+  );
   const approveErrorMessage = getApproveErrorMessage(errors);
   const submissionLabelErrorMessage = hasSubmissionLabelError
     ? t(DEFAULT_LOCALE, "waves.submissionButtonLabel.errorTooLong", {
@@ -77,13 +116,31 @@ export default function CreateWaveDisplaySettings({
     : null;
   const approveErrorId = "create-wave-display-settings-error";
   const submissionLabelErrorId = "create-wave-submission-button-label-error";
+  const proposalCardExcerptErrorId =
+    "create-wave-proposal-card-excerpt-length-error";
   const submissionButtonLabel = display.submissionButtonLabel ?? "";
-  const labels = getEffectiveApproveWaveTabLabels(display.approve);
   const proposalCards = display.proposalCards ?? {
     mode: display.compactProposalCards === true ? "custom" : "standard",
     excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
     showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
   };
+  const isDisplaySettingsCustomized =
+    submissionButtonLabel.length > 0 ||
+    (showApproveTabLabels &&
+      (display.approve.approvalsTabLabel.length > 0 ||
+        display.approve.approvedTabLabel.length > 0)) ||
+    Boolean(
+      display.proposalCards &&
+      (proposalCards.mode !== "custom" ||
+        proposalCards.excerptMaxCharacters !==
+          DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters ||
+        proposalCards.showMediaThumbnail !==
+          DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail)
+    );
+  const hasDisplaySettingsError =
+    hasSubmissionLabelError ||
+    hasProposalCardExcerptError ||
+    approveErrorMessage !== null;
 
   const onLabelChange =
     (key: keyof CreateWaveApproveDisplayConfig) =>
@@ -161,10 +218,20 @@ export default function CreateWaveDisplaySettings({
       hasValue ? "tw-text-primary-400 focus:tw-text-white" : "tw-text-white"
     } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
 
+  const floatingLabelClasses = (hasError = false) =>
+    `tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-whitespace-nowrap tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
+      hasError
+        ? "tw-text-error peer-focus:tw-text-error"
+        : "tw-text-iron-500 peer-focus:tw-text-primary-400"
+    }`;
+
   return (
-    <div>
-      <div className="tw-space-y-3">
-        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
+    <CreateWaveAdvancedSection
+      isCustomized={isDisplaySettingsCustomized}
+      hasError={hasDisplaySettingsError}
+    >
+      <div className="tw-space-y-4">
+        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
           Display settings
         </p>
         <div className="tw-space-y-2">
@@ -181,9 +248,7 @@ export default function CreateWaveDisplaySettings({
               )}
               aria-invalid={Boolean(submissionLabelErrorMessage)}
               aria-describedby={
-                submissionLabelErrorMessage
-                  ? submissionLabelErrorId
-                  : undefined
+                submissionLabelErrorMessage ? submissionLabelErrorId : undefined
               }
               className={inputClasses({
                 hasError: Boolean(submissionLabelErrorMessage),
@@ -192,11 +257,9 @@ export default function CreateWaveDisplaySettings({
             />
             <label
               htmlFor="create-wave-submission-button-label"
-              className={`tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
-                submissionLabelErrorMessage
-                  ? "tw-text-error peer-focus:tw-text-error"
-                  : "tw-text-iron-500 peer-focus:tw-text-primary-400"
-              }`}
+              className={floatingLabelClasses(
+                Boolean(submissionLabelErrorMessage)
+              )}
             >
               {t(DEFAULT_LOCALE, "waves.submissionButtonLabel.label")}
             </label>
@@ -229,136 +292,178 @@ export default function CreateWaveDisplaySettings({
           </CommonAnimationHeight>
         </div>
         <fieldset className="tw-m-0 tw-border-0 tw-p-0">
-          <legend className="tw-float-left tw-mb-0 tw-w-full tw-text-sm tw-font-medium tw-text-iron-400">
+          <legend className="tw-text-sm tw-font-semibold tw-text-iron-200">
             {t(DEFAULT_LOCALE, "waves.proposalCard.appearanceLabel")}
           </legend>
-          <div className="tw-clear-both tw-space-y-3 tw-pt-1">
-            <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-500">
-              {t(DEFAULT_LOCALE, "waves.proposalCard.appearanceDescription")}
-            </p>
-            <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 [&>div]:tw-rounded-xl [&>div]:tw-px-3 [&>div]:tw-py-3 [&>div]:tw-shadow-none">
-              {(["standard", "custom"] as const).map((mode) => {
-                const isSelected = proposalCards.mode === mode;
-                const isStandard = mode === "standard";
-                const title = t(
-                  DEFAULT_LOCALE,
-                  isStandard
-                    ? "waves.proposalCard.mode.standard.label"
-                    : "waves.proposalCard.mode.custom.label"
-                );
-                const description = t(
-                  DEFAULT_LOCALE,
-                  isStandard
-                    ? "waves.proposalCard.mode.standard.description"
-                    : "waves.proposalCard.mode.custom.description"
-                );
+          <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
+            {(["standard", "custom"] as const).map((mode) => {
+              const isSelected = proposalCards.mode === mode;
+              const isStandard = mode === "standard";
+              const title = t(
+                DEFAULT_LOCALE,
+                isStandard
+                  ? "waves.proposalCard.mode.standard.label"
+                  : "waves.proposalCard.mode.custom.label"
+              );
+              const description = t(
+                DEFAULT_LOCALE,
+                isStandard
+                  ? "waves.proposalCard.mode.standard.description"
+                  : "waves.proposalCard.mode.custom.description"
+              );
 
-                return (
-                  <CommonBorderedRadioButton
-                    key={mode}
-                    type={mode}
-                    selected={proposalCards.mode}
-                    variant="subtle"
-                    name="proposal-card-appearance"
-                    ariaLabel={title}
-                    onChange={onProposalCardModeChange}
-                  >
+              return (
+                <label
+                  key={mode}
+                  className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-transition tw-duration-300 tw-ease-out ${
+                    isSelected
+                      ? "tw-border-primary-400 tw-bg-iron-900 tw-shadow-inner"
+                      : "tw-border-white/10 tw-bg-iron-900/60 hover:tw-border-white/20 hover:tw-bg-iron-900"
+                  }`}
+                >
+                  <ProposalCardAppearancePreview mode={mode} />
+                  <div className="tw-flex tw-items-start tw-gap-3">
+                    <input
+                      id={mode}
+                      type="radio"
+                      name="proposal-card-appearance"
+                      checked={isSelected}
+                      onChange={() => onProposalCardModeChange(mode)}
+                      className="tw-peer tw-sr-only"
+                    />
+                    <span
+                      aria-hidden="true"
+                      className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+                        isSelected
+                          ? "tw-border-primary-400 tw-bg-primary-500/10"
+                          : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
+                      }`}
+                    >
+                      <span
+                        className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
+                          isSelected ? "tw-scale-100" : "tw-scale-0"
+                        }`}
+                      />
+                    </span>
                     <div className="tw-min-w-0 tw-whitespace-normal">
                       <span
-                        className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                        className={`tw-block tw-text-sm tw-font-medium ${
                           isSelected
-                            ? "tw-text-white"
+                            ? "tw-text-primary-400"
                             : "tw-text-iron-300 group-hover:tw-text-white"
                         }`}
                       >
                         {title}
                       </span>
                       <p
-                        className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-medium tw-leading-4 ${
+                        className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-normal tw-leading-4 ${
                           isSelected ? "tw-text-iron-300" : "tw-text-iron-500"
                         }`}
                       >
                         {description}
                       </p>
                     </div>
-                  </CommonBorderedRadioButton>
-                );
-              })}
-            </div>
-            <CommonAnimationHeight>
-              {proposalCards.mode === "custom" ? (
-                <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 sm:tw-grid-cols-2">
-                  <div className="tw-space-y-2">
-                    <label
-                      htmlFor="create-wave-proposal-card-excerpt-length"
-                      className="tw-block tw-text-sm tw-font-medium tw-text-iron-300"
-                    >
-                      {t(DEFAULT_LOCALE, "waves.proposalCard.excerptLabel")}
-                    </label>
-                    <div className="tw-flex tw-items-center tw-gap-3">
-                      <input
-                        id="create-wave-proposal-card-excerpt-length"
-                        type="number"
-                        inputMode="numeric"
-                        min={PROPOSAL_CARD_EXCERPT_MIN_LENGTH}
-                        max={PROPOSAL_CARD_EXCERPT_MAX_LENGTH}
-                        step={20}
-                        value={proposalCards.excerptMaxCharacters}
-                        onChange={onProposalCardExcerptLengthChange}
-                        className={`${inputClasses({
-                          hasError: false,
-                          hasValue: false,
-                        })} tw-max-w-32`}
-                      />
-                      <span className="tw-text-sm tw-text-iron-400">
-                        {t(DEFAULT_LOCALE, "waves.proposalCard.characters")}
-                      </span>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+          <CommonAnimationHeight>
+            {proposalCards.mode === "custom" ? (
+              <div className="tw-pt-3">
+                <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-3 sm:tw-grid-cols-2 sm:tw-gap-0">
+                  <div className="tw-min-w-0 sm:tw-pr-4">
+                    <div className="tw-flex tw-min-h-10 tw-items-center tw-justify-between tw-gap-3">
+                      <label
+                        htmlFor="create-wave-proposal-card-excerpt-length"
+                        className="tw-text-sm tw-font-medium tw-text-iron-300"
+                      >
+                        {t(DEFAULT_LOCALE, "waves.proposalCard.excerptLabel")}
+                      </label>
+                      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+                        <input
+                          id="create-wave-proposal-card-excerpt-length"
+                          type="number"
+                          inputMode="numeric"
+                          min={PROPOSAL_CARD_EXCERPT_MIN_LENGTH}
+                          max={PROPOSAL_CARD_EXCERPT_MAX_LENGTH}
+                          step={1}
+                          value={proposalCards.excerptMaxCharacters}
+                          onChange={onProposalCardExcerptLengthChange}
+                          aria-label={t(
+                            DEFAULT_LOCALE,
+                            "waves.proposalCard.excerptInputAriaLabel"
+                          )}
+                          aria-invalid={hasProposalCardExcerptError}
+                          aria-describedby={
+                            hasProposalCardExcerptError
+                              ? proposalCardExcerptErrorId
+                              : undefined
+                          }
+                          className={`${inputClasses({
+                            hasError: hasProposalCardExcerptError,
+                            hasValue: false,
+                          })} !tw-h-9 !tw-w-20 !tw-bg-iron-950 !tw-px-3 !tw-py-1 focus:!tw-bg-iron-950`}
+                        />
+                        <span className="tw-text-xs tw-leading-5 tw-text-iron-500">
+                          {t(DEFAULT_LOCALE, "waves.proposalCard.characters")}
+                        </span>
+                      </div>
                     </div>
-                    <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-500">
-                      {t(
-                        DEFAULT_LOCALE,
-                        "waves.proposalCard.excerptDescription"
-                      )}
-                    </p>
+                    <CommonAnimationHeight>
+                      {hasProposalCardExcerptError ? (
+                        <p
+                          id={proposalCardExcerptErrorId}
+                          className="tw-mb-0 tw-mt-1 tw-text-xs tw-font-medium tw-leading-5 tw-text-error"
+                        >
+                          {t(
+                            DEFAULT_LOCALE,
+                            "waves.proposalCard.excerptRangeError",
+                            {
+                              min: PROPOSAL_CARD_EXCERPT_MIN_LENGTH,
+                              max: PROPOSAL_CARD_EXCERPT_MAX_LENGTH,
+                            }
+                          )}
+                        </p>
+                      ) : null}
+                    </CommonAnimationHeight>
                   </div>
                   <label
                     htmlFor="create-wave-proposal-card-media-thumbnail"
-                    className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-justify-between tw-gap-4 sm:tw-pt-7"
+                    className="tw-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3 sm:tw-border-l sm:tw-border-t-0 sm:tw-pl-4 sm:tw-pt-0"
                   >
-                    <span className="tw-min-w-0">
-                      <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
-                        {t(DEFAULT_LOCALE, "waves.proposalCard.mediaLabel")}
-                      </span>
-                      <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
-                        {t(
-                          DEFAULT_LOCALE,
-                          "waves.proposalCard.mediaDescription"
-                        )}
-                      </span>
+                    <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                      {t(DEFAULT_LOCALE, "waves.proposalCard.mediaLabel")}
                     </span>
                     <input
                       id="create-wave-proposal-card-media-thumbnail"
                       type="checkbox"
                       checked={proposalCards.showMediaThumbnail}
                       onChange={onProposalCardMediaThumbnailChange}
-                      className="tw-form-checkbox tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+                      className="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
                     />
                   </label>
                 </div>
-              ) : null}
-            </CommonAnimationHeight>
-          </div>
+              </div>
+            ) : null}
+          </CommonAnimationHeight>
         </fieldset>
         {showApproveTabLabels ? (
-          <>
-            <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
-              <div className="tw-space-y-2">
-                <label
-                  htmlFor="create-wave-approvals-tab-label"
-                  className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
-                >
-                  Approvals tab label
-                </label>
+          <section
+            aria-labelledby="create-wave-tab-labels-heading"
+            className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4"
+          >
+            <h4
+              id="create-wave-tab-labels-heading"
+              className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200"
+            >
+              {t(DEFAULT_LOCALE, "waves.proposalCard.tabLabelsLabel")}
+            </h4>
+            <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-500">
+              {t(DEFAULT_LOCALE, "waves.proposalCard.tabLabelsDescription")}
+            </p>
+            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+              <div className="tw-group tw-relative tw-w-full">
                 <input
                   id="create-wave-approvals-tab-label"
                   type="text"
@@ -376,14 +481,14 @@ export default function CreateWaveDisplaySettings({
                     hasValue: display.approve.approvalsTabLabel.length > 0,
                   })}
                 />
-              </div>
-              <div className="tw-space-y-2">
                 <label
-                  htmlFor="create-wave-approved-tab-label"
-                  className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
+                  htmlFor="create-wave-approvals-tab-label"
+                  className={floatingLabelClasses(Boolean(approveErrorMessage))}
                 >
-                  Approved tab label
+                  {t(DEFAULT_LOCALE, "waves.proposalCard.approvalsTabLabel")}
                 </label>
+              </div>
+              <div className="tw-group tw-relative tw-w-full">
                 <input
                   id="create-wave-approved-tab-label"
                   type="text"
@@ -401,18 +506,13 @@ export default function CreateWaveDisplaySettings({
                     hasValue: display.approve.approvedTabLabel.length > 0,
                   })}
                 />
+                <label
+                  htmlFor="create-wave-approved-tab-label"
+                  className={floatingLabelClasses(Boolean(approveErrorMessage))}
+                >
+                  {t(DEFAULT_LOCALE, "waves.proposalCard.approvedTabLabel")}
+                </label>
               </div>
-            </div>
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-400">
-              <span className="tw-rounded-md tw-bg-iron-900 tw-px-3 tw-py-1.5">
-                Chat
-              </span>
-              <span className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-iron-200">
-                {labels.approvals}
-              </span>
-              <span className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-iron-200">
-                {labels.approved}
-              </span>
             </div>
             <CommonAnimationHeight>
               {approveErrorMessage ? (
@@ -440,9 +540,9 @@ export default function CreateWaveDisplaySettings({
                 </div>
               ) : null}
             </CommonAnimationHeight>
-          </>
+          </section>
         ) : null}
       </div>
-    </div>
+    </CreateWaveAdvancedSection>
   );
 }

@@ -45,12 +45,12 @@ export default function CreateWaveTypeInputs({
           >
             <div className="tw-min-w-0 tw-whitespace-normal">
               <span
-                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${titleColorClass}`}
+                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-medium ${titleColorClass}`}
               >
                 {WAVE_LABELS[waveType]}
               </span>
               <p
-                className={`tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-leading-4 ${descriptionColorClass}`}
+                className={`tw-mb-0 tw-mt-2 tw-text-xs tw-font-normal tw-leading-4 ${descriptionColorClass}`}
               >
                 {waveTypeDescriptions[waveType]}
               </p>

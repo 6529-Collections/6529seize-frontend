@@ -99,7 +99,7 @@ describe("useWaveConfig", () => {
       });
       expect(result.current.config.display).toEqual({
         proposalCards: {
-          mode: "standard",
+          mode: "custom",
           excerptMaxCharacters: 360,
           showMediaThumbnail: true,
         },

@@ -1,4 +1,4 @@
-# Custom Proposal Cards
+# Summary Proposal Cards
 
 Parent: [Wave Drop Actions Index](README.md)
 
@@ -13,6 +13,11 @@ The 6529 Network Museum uses compact proposal cards. Other existing standard
 Waves keep their current drop presentation unless they are explicitly configured
 to use cards. Chat messages and the specialized Memes, Curation, and Quorum
 presentations are not changed by this setting.
+
+The Network Museum Wave predates the Create Wave recipe control. The frontend
+therefore recognizes its existing Wave ID as a compatibility fallback and
+applies the default summary recipe (`360` characters with the first ready still
+image enabled). Explicit recipe metadata takes precedence over that fallback.
 
 ## Location in the Site
 
@@ -30,8 +35,9 @@ presentations are not changed by this setting.
   cards.
 - Select a quoted proposal or a same-origin proposal preview inside another
   drop.
-- While creating a `Rank` or `Approve` Wave, open `Proposal card appearance` in
-  `Overview` and choose `Custom`.
+- While creating a `Rank` or `Approve` Wave, open `Advanced settings` in
+  `Overview`. New Waves default to `Summary card`; choose `Full proposal` to
+  keep the previous full-content presentation.
 
 ## User Journey
 
@@ -55,9 +61,12 @@ presentations are not changed by this setting.
   contains those items.
 - A proposal with ready static image media can show one preview image. Animated,
   processing, or failed media is not used as the card preview.
-- The Wave creator can choose the authored-text character limit and whether the
-  media thumbnail appears. Layout, typography, spacing, and image placement are
-  consistent system defaults rather than per-Wave controls.
+- The Wave creator can choose the proposal-preview text limit and whether the
+  first ready still image appears beside proposal summaries in chat and list
+  views. Full proposal media is unchanged. Layout, typography, spacing, and
+  image placement are consistent system defaults rather than per-Wave controls.
+- The text limit must be a whole number from `120` to `1000`. Invalid values
+  block forward navigation instead of being silently accepted.
 - Very short proposals remain compact and do not receive invented descriptive
   text.
 - The surrounding proposal row keeps its existing author, date, status, vote,
@@ -84,17 +93,17 @@ presentations are not changed by this setting.
 - If a proposal does not open, retry the card or use its existing open action.
 - If a quoted proposal is unavailable, the quote area can show the existing
   unavailable or loading state while the surrounding drop remains readable.
-- If a newly created Wave does not show custom cards, confirm `Custom` was
-  selected before creation and refresh the Wave.
+- If a newly created Wave does not show summary cards, confirm `Summary card`
+  was selected before creation and refresh the Wave.
 
 ## Limitations / Notes
 
 - Compact cards do not generate summaries, categories, decision metadata, or
   proposal-specific labels beyond what the Wave and proposal already provide.
-- The Standard/Custom choice applies per Wave; it is not a personal display
-  preference.
-- Creating a Wave persists Custom as a versioned Wave metadata recipe. Standard
-  creates no recipe and keeps the standard presentation.
+- The Full proposal/Summary card choice applies per Wave; it is not a personal
+  display preference.
+- Creating a Wave persists Summary card as a versioned Wave metadata recipe.
+  Full proposal creates no recipe and keeps the previous presentation.
 - This card presentation is reusable across standard proposal-bearing Waves but
   is not a replacement for specialized Memes, Curation, or Quorum designs.
 

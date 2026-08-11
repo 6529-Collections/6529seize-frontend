@@ -4,7 +4,10 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { Children, type ReactNode } from "react";
 import WaveDropReactions from "../WaveDropReactions";
-import type { DropContentPresentation } from "../dropContentPresentation";
+import {
+  PROPOSAL_CARD_FOOTER_CLASS,
+  type DropContentPresentation,
+} from "../dropContentPresentation";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
 interface ParticipationDropFooterProps {
@@ -50,9 +53,19 @@ export default function ParticipationDropFooter({
   const shouldShowReactionsBeforeVoteFooter =
     hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
   const isProposalCard = contentPresentation === "proposalCard";
+  const isChatProposal = isProposalCard && !indentContent;
+  const hasChatVotingSurface =
+    isChatProposal && (shouldShowVoteFooter || shouldShowRatingsOnlyFooter);
   const contentOffsetClass = indentContent
     ? "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]"
     : "tw-w-full";
+  let proposalFooterSurfaceClass = "";
+  if (isChatProposal) {
+    proposalFooterSurfaceClass = `${PROPOSAL_CARD_FOOTER_CLASS} tw-py-3`;
+  } else if (isProposalCard) {
+    proposalFooterSurfaceClass =
+      "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3";
+  }
 
   if (!showInteractions) {
     return <div className="tw-pb-4" />;
@@ -70,16 +83,24 @@ export default function ParticipationDropFooter({
 
       {shouldShowVoteFooter && (
         <div
-          className={`${isProposalCard ? "tw-mt-2" : "tw-mt-4"} tw-@container ${indentContent ? "sm:tw-ml-[3.25rem]" : ""} ${
-            isProposalCard
-              ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
-              : ""
-          }`}
+          className={`${isProposalCard ? "tw-mt-2" : "tw-mt-4"} tw-@container ${indentContent ? "sm:tw-ml-[3.25rem]" : ""} ${proposalFooterSurfaceClass}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between">
+          <div
+            className={`tw-flex tw-gap-x-4 ${
+              isChatProposal
+                ? "tw-items-center tw-justify-between"
+                : "tw-flex-col tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between"
+            }`}
+          >
             {shouldShowRatings && (
-              <div className="tw-px-4">
+              <div
+                className={
+                  isChatProposal
+                    ? "tw-min-w-0 tw-flex-1 tw-px-4"
+                    : "tw-px-4"
+                }
+              >
                 <ParticipationDropRatings
                   drop={drop}
                   rank={drop.rank}
@@ -93,7 +114,11 @@ export default function ParticipationDropFooter({
 
             {hasVoteAction && (
               <div
-                className={`tw-flex tw-w-full tw-items-center ${primaryActionsJustificationClass} tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-justify-center @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0`}
+                className={
+                  isChatProposal
+                    ? "tw-ml-auto tw-flex tw-w-auto tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-1.5 tw-border-0 tw-px-4 tw-pt-0"
+                    : `tw-flex tw-w-full tw-items-center ${primaryActionsJustificationClass} tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-justify-center @[700px]:tw-border-none @[700px]:tw-px-4 @[700px]:tw-pt-0`
+                }
               >
                 {normalizedVoteAction}
               </div>
@@ -105,11 +130,7 @@ export default function ParticipationDropFooter({
       {/* Show ratings if no vote button */}
       {shouldShowRatingsOnlyFooter && (
         <div
-          className={`${indentContent ? "tw-ml-[3.25rem]" : ""} ${isProposalCard ? "tw-mt-2" : "tw-mt-4"} tw-px-4 ${
-            isProposalCard
-              ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
-              : ""
-          }`}
+          className={`${indentContent ? "tw-ml-[3.25rem]" : ""} ${isProposalCard ? "tw-mt-2" : "tw-mt-4"} tw-px-4 ${proposalFooterSurfaceClass}`}
         >
           <ParticipationDropRatings
             drop={drop}
@@ -130,7 +151,9 @@ export default function ParticipationDropFooter({
         </div>
       )}
 
-      {!shouldShowReactionsFooter && <div className="tw-pb-4" />}
+      {!shouldShowReactionsFooter && !hasChatVotingSurface && (
+        <div className="tw-pb-4" />
+      )}
     </>
   );
 }

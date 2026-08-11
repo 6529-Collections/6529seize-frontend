@@ -1,6 +1,7 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
+  CHAT_PROPOSAL_CARD_SURFACE_CLASS,
   PROPOSAL_CARD_SURFACE_CLASS,
   type DropContentPresentation,
 } from "../dropContentPresentation";
@@ -26,10 +27,12 @@ const getDropStyles = ({
   isActiveDrop,
   rank,
   isDrop,
+  isChatProposal,
 }: {
   isActiveDrop: boolean;
   rank: number | null;
   isDrop: boolean;
+  isChatProposal: boolean;
 }): string => {
   if (!isDrop) {
     return "";
@@ -37,6 +40,10 @@ const getDropStyles = ({
 
   if (isActiveDrop) {
     return ACTIVE_DROP_STYLES;
+  }
+
+  if (isChatProposal) {
+    return CHAT_PROPOSAL_CARD_SURFACE_CLASS;
   }
 
   if (rank === null) {
@@ -58,12 +65,18 @@ const getDropStyles = ({
 const getBackgroundClass = ({
   isActiveDrop,
   contentPresentation,
+  isChatProposal,
 }: {
   isActiveDrop: boolean;
   contentPresentation: DropContentPresentation;
+  isChatProposal: boolean;
 }): string => {
   if (isActiveDrop) {
     return "tw-bg-[#3CCB7F]/10";
+  }
+
+  if (isChatProposal) {
+    return "";
   }
 
   if (contentPresentation === "proposalCard") {
@@ -85,14 +98,18 @@ export default function ParticipationDropContainer({
   floatingActions,
 }: ParticipationDropContainerProps) {
   const isDrop = drop.drop_type === ApiDropType.Participatory;
+  const isChatProposal =
+    contentPresentation === "proposalCard" && alignCardWithContent;
   const dropStyles = getDropStyles({
     isActiveDrop,
     rank: useRankStyles ? drop.rank : null,
     isDrop,
+    isChatProposal,
   });
   const backgroundClass = getBackgroundClass({
     isActiveDrop,
     contentPresentation,
+    isChatProposal,
   });
   const cardWidthClass = alignCardWithContent
     ? "tw-w-full sm:tw-ml-[3.25rem] sm:tw-w-[calc(100%-3.25rem)]"
@@ -106,7 +123,7 @@ export default function ParticipationDropContainer({
         {floatingActions}
         {leadingContent}
         <div
-          className={`tw-flex ${cardWidthClass} tw-flex-col tw-overflow-hidden tw-rounded-xl ${backgroundClass} ${dropStyles} tw-border-solid tw-transition-[box-shadow,background-color,border-color] tw-duration-200 tw-ease-out`}
+          className={`tw-flex ${cardWidthClass} tw-flex-col tw-overflow-hidden tw-rounded-xl ${backgroundClass} ${dropStyles} tw-border-solid tw-transition-[box-shadow,background-color,border-color] ${isChatProposal ? "tw-duration-300" : "tw-duration-200"} tw-ease-out`}
         >
           {children}
         </div>

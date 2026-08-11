@@ -100,7 +100,7 @@ export function useWaveConfig() {
       },
       display: {
         proposalCards: {
-          mode: "standard",
+          mode: "custom",
           excerptMaxCharacters:
             DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
           showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,

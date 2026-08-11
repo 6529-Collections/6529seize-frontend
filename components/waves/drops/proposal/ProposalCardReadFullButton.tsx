@@ -1,6 +1,7 @@
 "use client";
 
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getProposalCardViewModel } from "@/helpers/waves/proposal-card.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -19,10 +20,9 @@ export default function ProposalCardReadFullButton({
     return null;
   }
 
-  let title = drop.title?.trim();
-  if (!title) {
-    title = t(locale, "waves.proposalCard.untitledProposal");
-  }
+  const title =
+    getProposalCardViewModel(drop).title ??
+    t(locale, "waves.proposalCard.untitledProposal");
 
   return (
     <button
@@ -33,7 +33,7 @@ export default function ProposalCardReadFullButton({
         event.stopPropagation();
         onReadFull(drop);
       }}
-      className="tw-inline-flex tw-min-h-9 tw-w-fit tw-items-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-400 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
+      className="tw-inline-flex tw-min-h-6 tw-w-fit tw-items-start tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-leading-5 tw-text-primary-400 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
     >
       {t(locale, "waves.proposalCard.readFull")}
     </button>

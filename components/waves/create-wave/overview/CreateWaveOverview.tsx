@@ -15,7 +15,7 @@ import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.help
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
   proposalCards: {
-    mode: "standard",
+    mode: "custom",
     excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
     showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
   },

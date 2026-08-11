@@ -537,16 +537,20 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   "attachment.one": "{count} attachment",
   "attachment.other": "{count} attachments",
   appearanceLabel: "Proposal card appearance",
-  appearanceDescription: "Choose how proposals will appear across this wave.",
-  "mode.standard.label": "Standard",
-  "mode.standard.description": "Use the default proposal presentation.",
-  "mode.custom.label": "Custom",
-  "mode.custom.description": "Use a concise summary card across this wave.",
-  excerptLabel: "Show full text after",
-  excerptDescription: "Longer proposal text is shortened at this limit.",
+  "mode.standard.label": "Full proposal",
+  "mode.standard.description": "Show original content directly in the feed.",
+  "mode.custom.label": "Summary card",
+  "mode.custom.description":
+    "Show a title, shortened text, and an optional image.",
+  excerptLabel: "Text preview limit",
+  excerptInputAriaLabel: "Maximum proposal preview characters",
   characters: "characters",
-  mediaLabel: "Show media thumbnail",
-  mediaDescription: "Use the first available static image as a preview.",
+  excerptRangeError: "Enter a whole number from {min} to {max}.",
+  mediaLabel: "Image on summary card",
+  tabLabelsLabel: "Tab labels",
+  tabLabelsDescription: "Names shown on this wave's tabs.",
+  approvalsTabLabel: "Approvals tab label",
+  approvedTabLabel: "Approved tab label",
 } as const);
 
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
@@ -1062,6 +1066,10 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
 );
 
 const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
+  title: "Drops",
+  description: "Choose what participants can submit to this wave.",
+  "advanced.defaultSummary": "No additional submission requirements.",
+  "advanced.customSummary": "Submission requirements customized.",
   identityDuplicatesRequireWinners:
     "Perpetual ranking waves never announce winners, so identities can't be resubmitted “after a win”. Choose a different re-submission rule.",
 } as const);

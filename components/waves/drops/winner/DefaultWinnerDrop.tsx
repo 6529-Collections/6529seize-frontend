@@ -36,6 +36,8 @@ import WinnerDropBadge from "./WinnerDropBadge";
 import { WaveWinnerIdentity } from "@/components/waves/winners/identity/WaveWinnerIdentity";
 import { getWinnerVisibleMetadata } from "@/components/waves/winners/identity/winnerIdentity.helpers";
 import {
+  CHAT_PROPOSAL_CARD_SURFACE_CLASS,
+  PROPOSAL_CARD_FOOTER_CLASS,
   PROPOSAL_CARD_SURFACE_CLASS,
   type DropContentPresentation,
 } from "../dropContentPresentation";
@@ -139,7 +141,7 @@ const DefaultWinnerDropInner = ({
 
   let bgColorClass = getBackgroundColorClass(location);
   if (contentPresentation === "proposalCard") {
-    bgColorClass = PROPOSAL_CARD_SURFACE_CLASS;
+    bgColorClass = isChatProposal ? "" : PROPOSAL_CARD_SURFACE_CLASS;
   }
   if (isActiveDrop) {
     bgColorClass = "tw-bg-[#3CCB7F]/10";
@@ -197,6 +199,14 @@ const DefaultWinnerDropInner = ({
         <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
       </div>
     ) : null;
+  const interactionsRow = showInteractions ? (
+    <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+      {!!drop.raters_count && (
+        <WaveDropRatings drop={drop} winningThreshold={winningThreshold} />
+      )}
+      <WaveDropReactions drop={drop} />
+    </div>
+  ) : null;
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
   useWaveDropMobileMenuController({
@@ -220,16 +230,20 @@ const DefaultWinnerDropInner = ({
         {detachedProposalHeader}
 
         <div
-          className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid ${getRankStaticBorderClass(
-            effectiveRank
-          )} tw-px-4 tw-py-3 ${
+          className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl ${
+            isChatProposal && !isActiveDrop
+              ? CHAT_PROPOSAL_CARD_SURFACE_CLASS
+              : `tw-border tw-border-solid ${getRankStaticBorderClass(effectiveRank)} ${getRankHoverClass(effectiveRank)}`
+          } tw-px-4 tw-py-3 ${
             isChatProposal
               ? "sm:tw-ml-[3.25rem] sm:tw-w-[calc(100%-3.25rem)]"
               : ""
-          } ${bgColorClass} ${getRankHoverClass(effectiveRank)}`}
+          } ${bgColorClass}`}
           style={{
             ...getDropStyles(isActiveDrop),
-            transition: "box-shadow 0.2s ease, background-color 0.2s ease",
+            transition: isChatProposal
+              ? "box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease"
+              : "box-shadow 0.2s ease, background-color 0.2s ease",
           }}
         >
           {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
@@ -358,18 +372,15 @@ const DefaultWinnerDropInner = ({
             {visibleMetadata.length > 0 && (
               <WaveDropMetadata metadata={visibleMetadata} />
             )}
-            {showInteractions && (
-              <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-                {!!drop.raters_count && (
-                  <WaveDropRatings
-                    drop={drop}
-                    winningThreshold={winningThreshold}
-                  />
-                )}
-                <WaveDropReactions drop={drop} />
-              </div>
-            )}
+            {!isChatProposal && interactionsRow}
           </div>
+          {isChatProposal && interactionsRow && (
+            <div
+              className={`-tw-mx-4 tw-mt-3 tw-px-4 tw-py-3 ${PROPOSAL_CARD_FOOTER_CLASS} ${hasDropFooter(footer) ? "" : "-tw-mb-3"}`}
+            >
+              {interactionsRow}
+            </div>
+          )}
           {hasDropFooter(footer) && (
             <div
               className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}

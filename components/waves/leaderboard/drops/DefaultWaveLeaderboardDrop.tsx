@@ -10,7 +10,7 @@ import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMen
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import {
-  PROPOSAL_CARD_SURFACE_CLASS,
+  PROPOSAL_LIST_CARD_SURFACE_CLASS,
   type DropContentPresentation,
 } from "@/components/waves/drops/dropContentPresentation";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -115,9 +115,12 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 
   const getBorderClasses = () => {
     const backgroundClass =
-      isProposalCard ? PROPOSAL_CARD_SURFACE_CLASS : "tw-bg-iron-950";
+      isProposalCard ? PROPOSAL_LIST_CARD_SURFACE_CLASS : "tw-bg-iron-950";
+    const paddingClass = isProposalCard
+      ? "tw-px-4 tw-pb-3 tw-pt-4 md:tw-px-5"
+      : "tw-p-4 md:tw-px-5";
 
-    return `tw-rounded-xl ${backgroundClass} tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden desktop-hover:hover:tw-border-iron-700`;
+    return `tw-rounded-xl ${backgroundClass} ${paddingClass} tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden desktop-hover:hover:tw-border-iron-700`;
   };
 
   const handleVoteButtonClick = () => {
@@ -181,10 +184,16 @@ export const DefaultWaveLeaderboardDrop: React.FC<
             <div
               className={`tw-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0 ${
                 isProposalCard
-                  ? "tw-ml-[-3.25rem] tw-mt-4 tw-w-[calc(100%+3.25rem)] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pl-[3.25rem] tw-pt-3"
+                  ? "tw-relative tw-ml-[-3.25rem] tw-mt-1 tw-w-[calc(100%+3.25rem)] tw-pl-[3.25rem] tw-pt-3"
                   : "tw-mt-3 tw-w-full"
               }`}
             >
+              {isProposalCard && (
+                <span
+                  aria-hidden="true"
+                  className="tw-pointer-events-none tw-absolute tw-left-[-1rem] tw-right-[-1rem] tw-top-0 tw-h-px tw-bg-iron-800/60 md:tw-left-[-1.25rem] md:tw-right-[-1.25rem]"
+                />
+              )}
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
                 <WaveLeaderboardDropRaters
                   drop={drop}

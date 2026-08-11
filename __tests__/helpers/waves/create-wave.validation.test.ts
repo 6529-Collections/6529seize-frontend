@@ -58,6 +58,11 @@ describe("create-wave.validation", () => {
     outcomes: [{ id: 1 }],
     approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
     display: {
+      proposalCards: {
+        mode: "custom",
+        excerptMaxCharacters: 360,
+        showMediaThumbnail: true,
+      },
       customRules: null,
       outcomesVisible: true,
       submissionButtonLabel: null,
@@ -305,6 +310,102 @@ describe("create-wave.validation", () => {
 
     expect(errors).not.toContain(
       CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
+    );
+  });
+
+  it.each([0, 3, 119, 360.5, 1001])(
+    "rejects invalid summary-card text limit %s",
+    (excerptMaxCharacters) => {
+      const config = {
+        ...baseConfig,
+        display: {
+          ...baseConfig.display,
+          proposalCards: {
+            ...baseConfig.display.proposalCards,
+            excerptMaxCharacters,
+          },
+        },
+      };
+
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.OVERVIEW,
+        config,
+      });
+
+      expect(errors).toContain(
+        CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID
+      );
+    }
+  );
+
+  it.each([120, 360, 1000])(
+    "allows summary-card text limit %s",
+    (excerptMaxCharacters) => {
+      const config = {
+        ...baseConfig,
+        display: {
+          ...baseConfig.display,
+          proposalCards: {
+            ...baseConfig.display.proposalCards,
+            excerptMaxCharacters,
+          },
+        },
+      };
+
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.OVERVIEW,
+        config,
+      });
+
+      expect(errors).not.toContain(
+        CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID
+      );
+    }
+  );
+
+  it("ignores an unused summary-card text limit for Full proposal", () => {
+    const config = {
+      ...baseConfig,
+      display: {
+        ...baseConfig.display,
+        proposalCards: {
+          ...baseConfig.display.proposalCards,
+          mode: "standard",
+          excerptMaxCharacters: 0,
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID
+    );
+  });
+
+  it("ignores proposal-card settings for Chat waves", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Chat },
+      display: {
+        ...baseConfig.display,
+        proposalCards: {
+          ...baseConfig.display.proposalCards,
+          excerptMaxCharacters: 0,
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID
     );
   });
 

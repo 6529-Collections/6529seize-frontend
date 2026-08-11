@@ -9,6 +9,13 @@ export const PROPOSAL_CARD_EXCERPT_MIN_LENGTH = 120;
 export const PROPOSAL_CARD_EXCERPT_MAX_LENGTH = 1000;
 export const PROPOSAL_CARD_EXCERPT_DEFAULT_LENGTH = 360;
 
+export const isValidProposalCardExcerptMaxCharacters = (
+  value: number
+): boolean =>
+  Number.isInteger(value) &&
+  value >= PROPOSAL_CARD_EXCERPT_MIN_LENGTH &&
+  value <= PROPOSAL_CARD_EXCERPT_MAX_LENGTH;
+
 export const DEFAULT_PROPOSAL_CARD_RECIPE: WaveProposalCardRecipe = {
   version: 1,
   layout: "summary",

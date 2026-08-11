@@ -33,7 +33,7 @@ import type {
 } from "../drop.types";
 import { DropLocation, hasDropFooter } from "../drop.types";
 import {
-  PROPOSAL_CARD_SURFACE_CLASS,
+  CHAT_PROPOSAL_CARD_SURFACE_CLASS,
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
@@ -167,7 +167,7 @@ function EndedParticipationDropInner({
 
   let dropBackgroundClass = getDropLocationBackground();
   if (isChatProposal) {
-    dropBackgroundClass = `${PROPOSAL_CARD_SURFACE_CLASS} tw-ring-1 tw-ring-inset tw-ring-iron-800`;
+    dropBackgroundClass = CHAT_PROPOSAL_CARD_SURFACE_CLASS;
   }
   if (isActiveDrop) {
     dropBackgroundClass = "tw-bg-[#3CCB7F]/10";
@@ -293,7 +293,7 @@ function EndedParticipationDropInner({
         {detachedProposalHeader}
 
         <div
-          className={`tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${
+          className={`tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors ${isChatProposal ? "tw-duration-300" : "tw-duration-200"} tw-ease-linear ${
             isChatProposal
               ? "sm:tw-ml-[3.25rem] sm:tw-w-[calc(100%-3.25rem)]"
               : ""

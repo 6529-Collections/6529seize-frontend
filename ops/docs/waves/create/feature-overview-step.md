@@ -36,13 +36,20 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - `Announce Winners`
   - `Perpetual Ranking`
 - `Show outcomes` for `Rank` and `Approve` waves.
-- Submission-button label for `Rank` and `Approve` waves.
+- `Display settings` inside `Advanced settings` for `Rank` and `Approve` waves:
+  - submission-button label
+  - proposal-card appearance
+  - Approve tab labels for `Approve` waves
 - `Proposal card appearance` for `Rank` and `Approve` waves:
-  - `Standard` is the default and keeps the normal proposal presentation
-  - `Custom` applies a reusable summary-card recipe across the Wave
-  - the initial custom recipe controls the authored-text character limit and
-    whether the first ready static image appears as a media thumbnail
-- Approve tab labels for `Approve` waves:
+  - open `Advanced settings` to change the proposal-card presentation
+  - `Summary card` is the default for new waves and applies a reusable compact
+    presentation in chat and list views
+  - `Full proposal` keeps the previous full-content presentation
+  - `Text preview limit` accepts a whole-number proposal-text limit
+    from `120` to `1000` characters and controls whether the first ready still
+    image appears beside the summary
+- Approve tab labels:
+  - appear in their own `Tab labels` group under `Advanced settings`
   - proposals tab defaults to `Proposals`
   - approved tab defaults to `Approved`
 - Uploaded image shows a preview; `Delete` removes it.
@@ -62,6 +69,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 - Empty name blocks forward navigation and shows `Name is required`.
 - Name length above `250` characters blocks forward navigation.
+- A Summary card proposal-text limit outside `120`–`1000`, or a value that is
+  not a whole number, blocks forward navigation and focuses the invalid field.
 - Image upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP` only.
 - Unsupported image formats show toast: `Invalid file type`.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
@@ -69,9 +78,11 @@ Set the wave name, optional image, and wave type before moving to later steps.
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
 - `Show outcomes` defaults to on. Turning it off hides outcome displays after
   the wave is created.
-- `Proposal card appearance` defaults to `Standard`. Choosing `Custom` stores a
-  versioned Wave-level display recipe when the Wave is created. It does not
-  alter Chat messages or specialized Memes, Curation, and Quorum
+- `Proposal card appearance` is inside `Advanced settings` and defaults to
+  `Summary card` for newly created Waves. The default stores a versioned
+  Wave-level display recipe when the Wave is created. Existing Waves and older
+  drafts without this setting keep the `Full proposal` presentation. It does
+  not alter Chat messages or specialized Memes, Curation, and Quorum
   presentations.
 
 ## Failure and Recovery
@@ -95,5 +106,5 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
-- [Custom Proposal Cards](../drop-actions/feature-proposal-cards.md)
+- [Summary Proposal Cards](../drop-actions/feature-proposal-cards.md)
 - [Docs Home](../../README.md)

@@ -263,7 +263,7 @@ export default function CreateWaveVoting({
               onChange={onTypeChange}
             >
               <span
-                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-medium ${
                   selectedType === votingType
                     ? "tw-text-white"
                     : "tw-text-iron-300 group-hover:tw-text-white"

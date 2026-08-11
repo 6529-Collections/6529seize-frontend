@@ -6,6 +6,12 @@ import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.help
 import type { CreateWaveDisplayConfig } from "@/types/waves.types";
 
 describe("CreateWaveDisplaySettings", () => {
+  const openAdvancedSettings = () => {
+    fireEvent.click(
+      screen.getByRole("button", { name: /advanced settings/i })
+    );
+  };
+
   const baseDisplay: CreateWaveDisplayConfig = {
     proposalCards: {
       mode: "standard",
@@ -21,7 +27,7 @@ describe("CreateWaveDisplaySettings", () => {
     },
   };
 
-  it("shows default approve labels in the preview", () => {
+  it("shows default approve labels in the fields", () => {
     render(
       <CreateWaveDisplaySettings
         display={baseDisplay}
@@ -31,8 +37,8 @@ describe("CreateWaveDisplaySettings", () => {
       />
     );
 
-    expect(screen.getByText("Proposals")).toBeInTheDocument();
-    expect(screen.getByText("Approved")).toBeInTheDocument();
+    openAdvancedSettings();
+
     expect(screen.getByPlaceholderText("Proposals")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Approved")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Drop")).toBeInTheDocument();
@@ -83,7 +89,7 @@ describe("CreateWaveDisplaySettings", () => {
     });
   });
 
-  it("keeps proposal cards standard by default and reveals the custom recipe", () => {
+  it("switches from full proposal to the summary-card recipe", () => {
     const onChange = jest.fn();
     render(
       <CreateWaveDisplaySettings
@@ -94,12 +100,16 @@ describe("CreateWaveDisplaySettings", () => {
       />
     );
 
-    expect(screen.getByRole("radio", { name: "Standard" })).toBeChecked();
+    openAdvancedSettings();
+
     expect(
-      screen.queryByLabelText("Show full text after")
+      screen.getByRole("radio", { name: /^Full proposal/ })
+    ).toBeChecked();
+    expect(
+      screen.queryByLabelText("Maximum proposal preview characters")
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("radio", { name: "Custom" }));
+    fireEvent.click(screen.getByRole("radio", { name: /^Summary card/ }));
 
     expect(onChange).toHaveBeenCalledWith({
       ...baseDisplay,
@@ -129,9 +139,14 @@ describe("CreateWaveDisplaySettings", () => {
       />
     );
 
-    fireEvent.change(screen.getByLabelText("Show full text after"), {
-      target: { value: "480" },
-    });
+    openAdvancedSettings();
+
+    fireEvent.change(
+      screen.getByLabelText("Maximum proposal preview characters"),
+      {
+        target: { value: "480" },
+      }
+    );
 
     expect(onChange).toHaveBeenCalledWith({
       ...customDisplay,
@@ -141,7 +156,11 @@ describe("CreateWaveDisplaySettings", () => {
       },
     });
 
-    fireEvent.click(screen.getByRole("checkbox", { name: /media thumbnail/i }));
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: /image on summary card/i,
+      })
+    );
 
     expect(onChange).toHaveBeenLastCalledWith({
       ...customDisplay,
@@ -150,6 +169,36 @@ describe("CreateWaveDisplaySettings", () => {
         showMediaThumbnail: false,
       },
     });
+  });
+
+  it("associates an invalid summary text limit with its recovery message", () => {
+    render(
+      <CreateWaveDisplaySettings
+        display={{
+          ...baseDisplay,
+          proposalCards: {
+            mode: "custom",
+            excerptMaxCharacters: 0,
+            showMediaThumbnail: true,
+          },
+        }}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID,
+        ]}
+        onChange={jest.fn()}
+        waveType={ApiWaveType.Rank}
+      />
+    );
+
+    openAdvancedSettings();
+
+    const input = screen.getByLabelText(
+      "Maximum proposal preview characters"
+    );
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAccessibleDescription(
+      "Enter a whole number from 120 to 1000."
+    );
   });
 
   it("stores an empty submission button label as null", () => {
