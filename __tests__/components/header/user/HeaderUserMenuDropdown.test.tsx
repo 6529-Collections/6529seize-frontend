@@ -499,13 +499,15 @@ describe("HeaderUserMenuDropdown", () => {
     jest.useRealTimers();
   });
 
-  it("opens the desktop account menu immediately and retains the shared click window", () => {
+  it("closes the desktop account menu when the next click is after the switch window", () => {
     jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
     renderWebSidebar({
       connectedAccounts: [
         connectedAccount("0xabc", true),
         connectedAccount("0xdef", false),
       ],
+      seizeSwitchConnectedAccount,
     });
 
     const profileButton = screen.getByRole("button", {
@@ -520,6 +522,11 @@ describe("HeaderUserMenuDropdown", () => {
 
     expect(PROFILE_DOUBLE_ACTIVATE_DELAY_MS).toBe(400);
     expect(profileButton).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.click(profileButton);
+
+    expect(profileButton).toHaveAttribute("aria-expanded", "false");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
     jest.useRealTimers();
   });
 
