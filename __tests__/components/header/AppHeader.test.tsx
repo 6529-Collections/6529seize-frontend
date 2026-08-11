@@ -282,7 +282,7 @@ describe("AppHeader", () => {
     expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
   });
 
-  it("opens immediately, then switches and closes on a second tap", () => {
+  it("switches when the second tap lands on the drawer over the profile button", () => {
     jest.useFakeTimers();
     const seizeSwitchConnectedAccount = jest.fn();
     setup({
@@ -299,12 +299,52 @@ describe("AppHeader", () => {
     const profileButton = screen.getByRole("button", {
       name: "Open menu (double-click to switch accounts)",
     });
+    jest.spyOn(profileButton, "getBoundingClientRect").mockReturnValue({
+      bottom: 50,
+      height: 40,
+      left: 10,
+      right: 50,
+      top: 10,
+      width: 40,
+      x: 10,
+      y: 10,
+      toJSON: () => ({}),
+    });
     fireEvent.click(profileButton);
 
     expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
     expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
 
-    fireEvent.click(profileButton);
+    fireEvent.click(screen.getByTestId("sidebar"), {
+      clientX: 30,
+      clientY: 30,
+      detail: 1,
+    });
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
+    jest.useRealTimers();
+  });
+
+  it("switches on repeated keyboard activation", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open menu (double-click to switch accounts)",
+    });
+    fireEvent.click(profileButton, { detail: 0 });
+    fireEvent.click(profileButton, { detail: 0 });
 
     expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
     expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
