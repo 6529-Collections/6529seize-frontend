@@ -187,6 +187,7 @@ jobs:
           retention-days: 30
 
   deploy-staging:
+    name: Deploy exact staging artifact
     needs: build-staging-artifact
     runs-on: ubuntu-latest
     timeout-minutes: 75
@@ -594,3 +595,12 @@ jobs:
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ github.sha }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+  automatic-staging-e2e:
+    name: Automatic staging E2E
+    needs: deploy-staging
+    uses: ./.github/workflows/staging-e2e.yml
+    with:
+      trusted_deployed_sha: ${{ github.sha }}
+      pack: all
+    secrets: inherit

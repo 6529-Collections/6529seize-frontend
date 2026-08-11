@@ -136,8 +136,8 @@ jobs:
           set -euo pipefail
           git fetch --no-tags origin main
           current_main_sha="$(git rev-parse origin/main)"
-          if [ "$current_main_sha" != "$COMMIT_SHA" ]; then
-            echo "::error::main advanced to $current_main_sha after this run selected $COMMIT_SHA; refusing a stale production deployment."
+          if ! git merge-base --is-ancestor "$COMMIT_SHA" "$current_main_sha"; then
+            echo "::error::Selected production SHA $COMMIT_SHA is no longer in current main history at $current_main_sha."
             exit 1
           fi
 
@@ -266,12 +266,6 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          git fetch --no-tags origin main
-          current_main_sha="$(git rev-parse origin/main)"
-          if [ "$current_main_sha" != "$COMMIT_SHA" ]; then
-            echo "::error::main advanced to $current_main_sha before the version announcement; refusing to announce stale production $COMMIT_SHA."
-            exit 1
-          fi
           current_version="$(aws elasticbeanstalk describe-environments \
             --environment-names "$BEANSTALK_ENV_NAME" \
             --query 'Environments[0].VersionLabel' \
@@ -352,3 +346,10 @@ jobs:
           CI_PIPELINES_SHA: ${{ github.sha }}
           CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+  automatic-production-e2e:
+    name: Automatic production E2E
+    needs: build-upload-deploy
+    uses: ./.github/workflows/production-e2e.yml
+    with:
+      trusted_deployed_sha: ${{ github.sha }}

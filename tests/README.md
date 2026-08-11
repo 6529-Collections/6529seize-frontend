@@ -165,9 +165,9 @@ App PR CI:
   and exact staging changes. Unrelated changes exclude it; explicit manual
   Museum selection remains available.
 - Uploaded PR CI artifacts are short-term debugging evidence. Deployment
-  workflows separately upload exact-version and readiness evidence for the
-  canonical deploy run; these artifacts do not replace the automatic
-  Playwright pack result.
+  workflows separately upload exact-version and readiness evidence, then keep
+  the environment lock through the automatic Playwright pack continuation;
+  those artifacts do not replace the E2E result.
 
 WCAG and i18n route evidence:
 

@@ -28,8 +28,8 @@ runs `Web Deploy - STAGING` (`.github/workflows/deploy-staging.yml`), which:
 2. builds and packages those exact bytes;
 3. uploads and verifies the immutable artifact;
 4. deploys that version to staging; and
-5. causes `Staging E2E Dispatch` to start `Staging E2E` for the exact successful
-   deployment run.
+5. calls reusable `Staging E2E` for that exact SHA before the canonical workflow
+   releases the staging environment lock.
 
 Do not manually dispatch the staging workflow after pushing. A manual dispatch
 is a recovery/rerun entry point only and still rejects any ref other than
@@ -47,16 +47,17 @@ Before dispatching, require explicit production authorization, fetch current
 1. calls `Build Production Artifact` for that exact main-history SHA;
 2. independently verifies the run, artifact ID, API digest, manifest,
    checksums, package bytes, portability record, and current-main ancestry;
-3. refuses the run if `main` advanced while it was queued;
-4. refuses to deploy if the currently announced production version is not an
+3. permits `main` to advance only while the selected SHA remains in its history;
+4. refuses to deploy if the currently deployed production version is not an
    ancestor of the target SHA;
 5. deploys the verified artifact; and
-6. causes `Production E2E Dispatch` to start `Production E2E` for the exact
-   successful deployment run.
+6. calls reusable `Production E2E` for that exact SHA before the canonical
+   workflow releases the production environment lock.
 
 Never substitute a branch name for the frozen target SHA or bypass the
-independent verifier. Do not manually dispatch production E2E as proof of a
-deployment unless this is an explicitly authorized recovery investigation.
+independent verifier. A manual E2E recovery run must identify a canonical run
+whose deployment job succeeded and whose exact version is still live; it cannot
+select an arbitrary source SHA or a non-`main` workflow ref.
 
 ## Recovery and closeout
 
@@ -64,8 +65,9 @@ deployment unless this is an explicitly authorized recovery investigation.
   retry the exact canonical workflow as explicitly authorized.
 - If staging or production deploy succeeds but E2E fails, report the exact
   deploy SHA and the E2E failure separately; do not silently redeploy.
-- If production rejects a stale target or downgrade, resolve current `main` and
-  the announced production SHA before asking for a new explicit dispatch.
+- If production rejects a target that left current `main` history or a
+  downgrade, resolve current `main` and the deployed production SHA before
+  asking for a new explicit dispatch.
 - Report the exact SHA, workflow/run links, deployed version, automatic E2E
   result, and any durable blocker.
 

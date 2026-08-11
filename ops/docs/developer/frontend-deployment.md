@@ -20,10 +20,15 @@ run-bound artifact, verifies the manifest, package digest, portability record,
 and checksums before AWS credentials are configured. Elastic Beanstalk and the
 public version endpoint must both report the same exact SHA.
 
-After success, `Staging E2E Dispatch` passes the deploy run ID to `Staging E2E`.
-The E2E workflow re-reads that run, requires the canonical workflow path,
-repository, branch, successful conclusion, and 40-character head SHA, then
-checks out and tests that exact deployed source.
+After the deployment succeeds, the canonical workflow calls reusable `Staging
+E2E` with that exact SHA before it releases the `staging-deploy` environment
+lock. A later staging deployment therefore cannot change the environment while
+automatic E2E validates it. A manual E2E recovery run acquires the same
+environment lock and accepts only the run ID of a completed, successful,
+canonical staging deploy job whose exact version is still live; arbitrary
+source SHAs and non-`main` workflow refs are not accepted. The staging
+access-code secret is exposed only to the final test step after this source
+authorization succeeds.
 
 ## Production path
 
@@ -42,26 +47,32 @@ digest.
 
 The deploy job independently downloads and checks the same artifact before
 obtaining AWS credentials. Immediately before mutation it fetches current
-`main` and refuses to continue if the queued target is no longer its head. It
-also reads the currently announced production SHA and requires that SHA to be
-an ancestor of the target, preventing an older version from being deployed over
-a newer one. Elastic Beanstalk and the public version endpoint must both report
-the exact target SHA after deployment.
+`main` and requires the selected target to remain in its history; harmless
+advancement of `main` does not invalidate the frozen artifact. It also reads
+the deployed production SHA and requires that SHA to be an ancestor of the
+target, preventing an older version from being deployed over a newer one.
+Elastic Beanstalk and the public version endpoint must both report the exact
+target SHA after deployment.
 
-After success, `Production E2E Dispatch` passes the deploy run ID to
-`Production E2E`. As in staging, the E2E workflow re-reads the exact successful
-canonical deploy run and tests its exact head SHA.
+After deployment and version announcement succeed, the canonical workflow
+calls reusable `Production E2E` with the exact deployed SHA before releasing
+the `web-deploy-prod` environment lock. A later production deployment therefore
+cannot change the environment during automatic E2E. Manual production E2E
+recovery also acquires that lock and accepts only a canonical run ID whose
+production deploy job succeeded and whose exact version is still live. Manual
+recovery must run the trusted E2E workflow from `main`.
 
 ## Concurrency and recovery
 
-- Staging deployment uses the `staging-deploy` concurrency group.
-- Production deployment uses `web-deploy-prod`.
-- Staging and production E2E use `staging-e2e` and `production-e2e`.
-- All four groups use `cancel-in-progress: false`; queued work is not evidence
-  that an earlier run may be cancelled.
+- Each canonical deployment holds `staging-deploy` or `web-deploy-prod` from
+  build through its automatic E2E continuation.
+- Automatic E2E additionally uses `staging-e2e` or `production-e2e`; manual E2E
+  acquires the corresponding deployment group so it cannot overlap mutation.
+- All groups use `cancel-in-progress: false`; queued work is not evidence that
+  an earlier running workflow may be cancelled.
 - A failed build or verifier run cannot reach deployment credentials.
-- A stale production target or downgrade rejection requires a fresh explicit
-  production decision; do not bypass the guard.
+- A production target outside current `main` history or a downgrade rejection
+  requires a fresh explicit production decision; do not bypass the guard.
 - A successful deploy with failed E2E is reported as deployed but unvalidated.
   Do not silently redeploy or substitute a manual E2E run for the automatic
   run's result.

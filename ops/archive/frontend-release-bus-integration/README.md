@@ -22,8 +22,10 @@ so GitHub Actions cannot discover or execute it.
 - `pre-change/.github/workflows/` contains exact source-commit copies of every
   active deployment, E2E, artifact, or adjacent CI workflow modified by the
   removal PR.
-- `removed/.github/workflows/` contains the frontend-only Release Bus and
-  production-authority workflows removed from active use.
+- `removed/.github/workflows/` contains the frontend-only Release Bus,
+  production-authority, and former post-completion staging E2E dispatcher
+  workflows removed from active use. The corresponding production E2E
+  dispatcher is retained as its exact source-commit copy under `pre-change/`.
 - `removed/ops/`, `removed/scripts/`, and `removed/__tests__/` contain the
   frontend-only Release Bus models, scripts, fixtures, safety helper version,
   and tests removed or replaced in active paths. The generic artifact archive
@@ -44,7 +46,9 @@ production authority completion, deployment-bus manifests, operation-bound
 artifact selection, Release Bus status/readiness helpers, or their dedicated
 contract tests. The old Museum publication hold coupling was also removed from
 the active compatibility workflow; its independent strict-adapter and deployed
-read-only sweep remain active.
+read-only sweep remain active. Post-completion E2E dispatcher workflows are
+also inactive: each canonical deployment now calls its reusable E2E workflow
+before releasing the environment lock.
 
 The current frontend paths are documented in
 `ops/docs/developer/frontend-deployment.md`:

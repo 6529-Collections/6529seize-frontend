@@ -20,18 +20,40 @@ const readWorkflow = (name: string) => {
   return { source, workflow: YAML.parse(source) };
 };
 
-const modifiedWorkflows = [
-  "app-pr-ci.yml",
-  "artifact-portability-report.yml",
-  "build-upload-deploy-prod.yml",
-  "deploy-staging.yml",
-  "museum-publication-compatibility.yml",
-  "production-artifact-verifier.yml",
-  "production-build-artifact.yml",
-  "production-e2e-dispatch.yml",
-  "production-e2e.yml",
-  "staging-e2e.yml",
-];
+const workflowArchives = new Map([
+  ["app-pr-ci.yml", "pre-change/.github/workflows/app-pr-ci.yml"],
+  [
+    "artifact-portability-report.yml",
+    "pre-change/.github/workflows/artifact-portability-report.yml",
+  ],
+  [
+    "build-upload-deploy-prod.yml",
+    "pre-change/.github/workflows/build-upload-deploy-prod.yml",
+  ],
+  ["deploy-staging.yml", "pre-change/.github/workflows/deploy-staging.yml"],
+  [
+    "museum-publication-compatibility.yml",
+    "pre-change/.github/workflows/museum-publication-compatibility.yml",
+  ],
+  [
+    "production-artifact-verifier.yml",
+    "pre-change/.github/workflows/production-artifact-verifier.yml",
+  ],
+  [
+    "production-build-artifact.yml",
+    "pre-change/.github/workflows/production-build-artifact.yml",
+  ],
+  [
+    "production-e2e-dispatch.yml",
+    "pre-change/.github/workflows/production-e2e-dispatch.yml",
+  ],
+  ["production-e2e.yml", "pre-change/.github/workflows/production-e2e.yml"],
+  [
+    "staging-e2e-dispatch.yml",
+    "removed/.github/workflows/staging-e2e-dispatch.yml",
+  ],
+  ["staging-e2e.yml", "pre-change/.github/workflows/staging-e2e.yml"],
+]);
 
 const guidanceCopies = new Map([
   ["AGENTS.md", "AGENTS.md"],
@@ -96,9 +118,7 @@ describe("frontend deployment workflow contract", () => {
       "deploy-staging.yml",
       "production-artifact-verifier.yml",
       "production-build-artifact.yml",
-      "production-e2e-dispatch.yml",
       "production-e2e.yml",
-      "staging-e2e-dispatch.yml",
       "staging-e2e.yml",
     ];
     const forbidden =
@@ -106,6 +126,73 @@ describe("frontend deployment workflow contract", () => {
     for (const workflow of activePaths) {
       expect(readWorkflow(workflow).source).not.toMatch(forbidden);
     }
+  });
+
+  it("holds each environment lock through its matching automatic E2E", () => {
+    const staging = readWorkflow("deploy-staging.yml").workflow;
+    const stagingE2e = readWorkflow("staging-e2e.yml");
+    const production = readWorkflow("build-upload-deploy-prod.yml").workflow;
+    const productionE2e = readWorkflow("production-e2e.yml");
+
+    expect(staging.jobs["automatic-staging-e2e"]).toMatchObject({
+      needs: "deploy-staging",
+      uses: "./.github/workflows/staging-e2e.yml",
+      with: {
+        pack: "all",
+        trusted_deployed_sha: "${{ github.sha }}",
+      },
+    });
+    expect(production.jobs["automatic-production-e2e"]).toMatchObject({
+      needs: "build-upload-deploy",
+      uses: "./.github/workflows/production-e2e.yml",
+      with: { trusted_deployed_sha: "${{ github.sha }}" },
+    });
+
+    for (const e2e of [stagingE2e, productionE2e]) {
+      expect(
+        e2e.workflow.on.workflow_call.inputs.trusted_deployed_sha.required
+      ).toBe(true);
+      expect(
+        e2e.workflow.on.workflow_dispatch.inputs.automatic_deploy_run_id
+          .required
+      ).toBe(true);
+      expect(
+        e2e.workflow.on.workflow_dispatch.inputs.target_sha
+      ).toBeUndefined();
+      expect(e2e.source).not.toContain("MANUAL_TARGET_SHA");
+    }
+
+    expect(stagingE2e.workflow.concurrency.group).toContain("staging-e2e");
+    expect(stagingE2e.workflow.concurrency.group).toContain("staging-deploy");
+    expect(productionE2e.workflow.concurrency.group).toContain(
+      "production-e2e"
+    );
+    expect(productionE2e.workflow.concurrency.group).toContain(
+      "web-deploy-prod"
+    );
+    expect(
+      fs.existsSync(
+        path.join(ROOT, ".github", "workflows", "staging-e2e-dispatch.yml")
+      )
+    ).toBe(false);
+    expect(
+      fs.existsSync(
+        path.join(ROOT, ".github", "workflows", "production-e2e-dispatch.yml")
+      )
+    ).toBe(false);
+  });
+
+  it("exposes the staging access code only after deployed-source authorization", () => {
+    const stagingE2e = readWorkflow("staging-e2e.yml").workflow;
+    const job = stagingE2e.jobs["staging-packs"];
+    const runPacks = job.steps.find(
+      (step: { name?: string }) => step.name === "Run read-only staging packs"
+    );
+
+    expect(job.env.PLAYWRIGHT_STAGING_ACCESS_CODE).toBeUndefined();
+    expect(runPacks.env.PLAYWRIGHT_STAGING_ACCESS_CODE).toBe(
+      "${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}"
+    );
   });
 
   it("keeps exact-production provenance and late downgrade guards fail-closed", () => {
@@ -124,13 +211,15 @@ describe("frontend deployment workflow contract", () => {
     );
     expect(verifier).toContain(".sha == $workflow_sha");
     expect(production).toContain(
-      "refusing to announce stale production $COMMIT_SHA"
+      'git merge-base --is-ancestor "$COMMIT_SHA" "$current_main_sha"'
     );
-    expect(production).toContain(
-      "refusing to overwrite it with $COMMIT_SHA"
+    expect(production).not.toContain(
+      'test "$current_main_sha" = "$COMMIT_SHA"'
     );
+    expect(production).not.toContain("refusing to announce stale production");
+    expect(production).toContain("refusing to overwrite it with $COMMIT_SHA");
     expect(productionE2e).toContain(
-      "git fetch --no-tags --depth=1 origin \"$EXPECTED_SHA\""
+      'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
     );
     expect(productionE2e).not.toMatch(
       /uses: actions\/checkout@[^\n]+\n\s+with:\n\s+ref: \$\{\{ steps\.source\.outputs\.sha \}\}/u
@@ -138,10 +227,8 @@ describe("frontend deployment workflow contract", () => {
   });
 
   it("keeps exact source-commit copies of every modified workflow", () => {
-    for (const workflow of modifiedWorkflows) {
-      const archived = fs.readFileSync(
-        path.join(ARCHIVE, "pre-change", ".github", "workflows", workflow)
-      );
+    for (const [workflow, archivePath] of workflowArchives) {
+      const archived = fs.readFileSync(path.join(ARCHIVE, archivePath));
       const original = execFileSync(
         "git",
         ["show", `${SOURCE_COMMIT}:.github/workflows/${workflow}`],
@@ -180,6 +267,7 @@ describe("frontend deployment workflow contract", () => {
       "release-bus-v2-advance-staging-ref.yml",
       "release-bus-v2-compose.yml",
       "release-bus-v2-preflight.yml",
+      "staging-e2e-dispatch.yml",
     ]);
     for (const workflow of removed) {
       expect(

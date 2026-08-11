@@ -202,8 +202,8 @@ through [Procfile](Procfile).
 Repository and deployment helper details, including `ghruns`, `ghdeploy`,
 `6529 staging`, and PM2 launch examples, are documented in
 [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
-The exact-SHA staging and production deployment paths and their automatic E2E
-follow-up are documented in
+The exact-SHA staging and production deployment paths and their serialized
+automatic E2E follow-up are documented in
 [ops/docs/developer/frontend-deployment.md](ops/docs/developer/frontend-deployment.md).
 
 ## Contributing

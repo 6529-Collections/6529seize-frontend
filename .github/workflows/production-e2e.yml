@@ -1,25 +1,30 @@
 name: Production E2E
 
 on:
+  workflow_call:
+    inputs:
+      trusted_deployed_sha:
+        description: Exact SHA deployed by the calling canonical production workflow
+        type: string
+        required: true
   workflow_dispatch:
     inputs:
-      target_sha:
-        description: Optional exact SHA for a manual read-only run
-        type: string
-        required: false
       automatic_deploy_run_id:
-        description: Internal successful Web Deploy - PROD run ID
+        description: Successful Web Deploy - PROD run ID to validate again
         type: string
-        required: false
+        required: true
 
 permissions:
   actions: read
   contents: read
 
-run-name: Production E2E ${{ inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id) || 'manual' }}
+run-name: Production E2E ${{ inputs.trusted_deployed_sha && 'automatic' || 'manual' }}
 
 concurrency:
-  group: production-e2e
+  # Automatic E2E runs while the caller owns web-deploy-prod. Manual recovery
+  # runs acquire web-deploy-prod themselves so deployment cannot change the
+  # environment while it is being validated.
+  group: ${{ inputs.trusted_deployed_sha != '' && 'production-e2e' || 'web-deploy-prod' }}
   cancel-in-progress: false
 
 jobs:
@@ -37,10 +42,15 @@ jobs:
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           GH_TOKEN: ${{ github.token }}
-          MANUAL_TARGET_SHA: ${{ inputs.target_sha }}
+          TRUSTED_DEPLOYED_SHA: ${{ inputs.trusted_deployed_sha }}
         run: |
           set -euo pipefail
-          if [ -n "$AUTOMATIC_DEPLOY_RUN_ID" ]; then
+          if [ -n "$TRUSTED_DEPLOYED_SHA" ]; then
+            [[ "$TRUSTED_DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
+            test -z "$AUTOMATIC_DEPLOY_RUN_ID"
+            deployed_sha="$TRUSTED_DEPLOYED_SHA"
+          else
+            test "$GITHUB_REF" = refs/heads/main
             [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
             gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
             deployed_sha="$(jq -er \
@@ -50,17 +60,49 @@ jobs:
                   .event == "workflow_dispatch" and
                   .head_branch == "main" and
                   .status == "completed" and
-                  .conclusion == "success" and
                   .repository.full_name == $repository and
                   .head_repository.full_name == $repository and
+                  (.run_attempt | type == "number" and . >= 1 and . <= 1000000) and
                   (.head_sha | test("^[a-f0-9]{40}$"))
                 ) | .head_sha
               ' "$RUNNER_TEMP/deploy-run.json")"
-          else
-            deployed_sha="${MANUAL_TARGET_SHA:-$GITHUB_SHA}"
-            [[ "$deployed_sha" =~ ^[a-f0-9]{40}$ ]]
+            deploy_run_attempt="$(jq -er '.run_attempt' "$RUNNER_TEMP/deploy-run.json")"
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}/attempts/${deploy_run_attempt}/jobs?per_page=100" \
+              > "$RUNNER_TEMP/deploy-jobs.json"
+            jq -e '
+              [.jobs[] | select(
+                .name == "Deploy verified production artifact" and
+                .status == "completed" and
+                .conclusion == "success"
+              )] | length == 1
+            ' "$RUNNER_TEMP/deploy-jobs.json" >/dev/null
           fi
           echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Check out trusted version verifier
+        if: inputs.trusted_deployed_sha == ''
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: main
+          persist-credentials: false
+          sparse-checkout: |
+            ops/scripts/cli-args.cjs
+            ops/scripts/verify-deployment-version.cjs
+          sparse-checkout-cone-mode: false
+
+      - name: Require the selected production deployment to still be live
+        if: inputs.trusted_deployed_sha == ''
+        env:
+          EXPECTED_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          node ops/scripts/verify-deployment-version.cjs \
+            --base-url https://6529.io \
+            --expected-version "$EXPECTED_SHA" \
+            --attempts 1 \
+            --delay-ms 1000 \
+            --timeout-ms 10000 \
+            --output "$RUNNER_TEMP/manual-production-version.json"
 
       - name: Materialize exact deployed source
         env:

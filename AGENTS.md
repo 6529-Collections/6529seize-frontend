@@ -3,12 +3,13 @@
 ## Frontend deployment paths
 
 - A push to `1a-staging` is the canonical staging entry point. `Web Deploy -
-STAGING` builds and deploys that exact commit, then its successful run starts
-  automatic `Staging E2E` through the existing dispatcher.
+STAGING` builds and deploys that exact commit, then calls automatic `Staging
+  E2E` before releasing the staging environment lock.
 - `Web Deploy - PROD` is the canonical production entry point. It is manually
   dispatched on `main`, builds and independently verifies the exact artifact,
-  rejects stale-main and downgrade attempts, deploys it, then starts automatic
-  `Production E2E` through the existing dispatcher.
+  requires the selected SHA to remain in current `main` history, rejects
+  downgrade attempts, deploys it, then calls automatic `Production E2E` before
+  releasing the production environment lock.
 - A push or merge to `main` does not deploy production. Do not add a production
   push trigger or treat a manual E2E run as deployment evidence.
 - Preserve exact-SHA checkout, artifact identity and checksum verification,
