@@ -3,15 +3,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UnlockAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 
-jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: (props: any) => <svg {...props} />,
-}));
-
-jest.mock("@/components/app-wallets/AppWallet.module.css", () => ({
-  newWalletInput: "newWalletInput",
-  modalContent: "modalContent",
-}));
-
 const decryptData = jest.fn();
 const areEqualAddresses = jest.fn();
 
@@ -53,7 +44,9 @@ describe("UnlockAppWalletModal", () => {
       />
     );
 
-    const input = screen.getByPlaceholderText("******");
+    const input = screen.getByLabelText("Wallet Password");
+    expect(screen.getByTestId("app-wallet-modal-actions").tagName).toBe("DIV");
+    expect(screen.getByRole("dialog").querySelector("footer")).toBeNull();
     await user.type(input, "bad pass");
 
     await waitFor(() => {
@@ -80,7 +73,7 @@ describe("UnlockAppWalletModal", () => {
       />
     );
 
-    const input = screen.getByPlaceholderText("******");
+    const input = screen.getByLabelText("Wallet Password");
     await user.type(input, "secret");
     await user.click(screen.getByRole("button", { name: "Unlock" }));
 
@@ -92,5 +85,43 @@ describe("UnlockAppWalletModal", () => {
       expect(onUnlock).toHaveBeenCalledWith("secret");
       expect(onHide).toHaveBeenCalled();
     });
+  }, 30000);
+
+  test("prevents dismissal while wallet unlock is pending", async () => {
+    let resolveDecryption: (address: string) => void = () => {};
+    decryptData.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveDecryption = resolve;
+      })
+    );
+    areEqualAddresses.mockReturnValue(true);
+    const onHide = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <UnlockAppWalletModal
+        show
+        address="0x1"
+        address_hashed="enc"
+        onUnlock={jest.fn()}
+        onHide={onHide}
+      />
+    );
+
+    await user.type(screen.getByLabelText("Wallet Password"), "secret");
+    await user.click(screen.getByRole("button", { name: "Unlock" }));
+    await waitFor(() => expect(decryptData).toHaveBeenCalled());
+
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+    for (const closeButton of screen.getAllByRole("button", {
+      name: "Close wallet dialog",
+    })) {
+      expect(closeButton).toBeDisabled();
+    }
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(onHide).not.toHaveBeenCalled();
+
+    resolveDecryption("0x1");
+    await waitFor(() => expect(onHide).toHaveBeenCalledTimes(1));
   }, 30000);
 });
