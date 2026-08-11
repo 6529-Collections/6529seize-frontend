@@ -53,11 +53,13 @@ function setup(options: any) {
       options.connectedAccountUnreadNotifications ?? {},
     connectedAccounts: options.connectedAccounts ?? [],
     canAddConnectedAccount: options.canAddConnectedAccount ?? false,
+    seizeConnectOpen: options.seizeConnectOpen ?? false,
     seizeAddConnectedAccount: jest.fn(),
     seizeSwitchConnectedAccount: jest.fn(),
   });
   (useAuth as jest.Mock).mockReturnValue({
     activeProfileProxy: options.activeProfileProxy,
+    setToast: jest.fn(),
   });
   (useIdentity as jest.Mock).mockReturnValue({ profile: options.profile });
   return render(<AppSidebarUserInfo onNavigate={options.onNavigate} />);

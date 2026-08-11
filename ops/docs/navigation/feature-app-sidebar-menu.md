@@ -29,7 +29,8 @@ standalone row after `About`.
 ## Entry Points
 
 - Open an app-layout route where the top-left control is menu/avatar.
-- Tap the menu/avatar button.
+- Tap the menu/avatar button once to open the drawer. With multiple connected
+  profiles, double-tap within 400 ms to switch to the next profile.
 - Choose a direct row, the connected avatar shortcut, or a grouped route.
 - Close with close button, backdrop tap, right-to-left swipe, or route
   selection.
@@ -134,6 +135,12 @@ standalone row after `About`.
 
 - If drawer state looks stuck, close with backdrop/icon/swipe and reopen.
 - If route change does not apply, reopen the drawer and select the route again.
+- Selecting another connected profile closes the drawer after the switch. If
+  the switch fails, the drawer remains open and shows error feedback.
+- Selecting the account `+` closes the drawer before the wallet connection
+  flow appears; while that flow is open, the control is disabled with busy
+  feedback. If the flow cannot open, the drawer remains open and shows error
+  feedback.
 - If profile access is missing, connect wallet first or use the header avatar
   once a connected profile is available.
 - If `Drop Forge` is missing, verify the connected wallet can access the
