@@ -456,17 +456,20 @@ const switchToNextConnectedAccount = ({
 const handleProfileActivate = ({
   canSwitchAccount,
   profileClickTimeoutRef,
+  clearActivationCapture,
   openMenu,
   closeMenu,
   switchConnectedAccount,
 }: {
   readonly canSwitchAccount: boolean;
   readonly profileClickTimeoutRef: HeaderTimeoutRef;
+  readonly clearActivationCapture: () => void;
   readonly openMenu: () => void;
   readonly closeMenu: () => void;
   readonly switchConnectedAccount: () => boolean;
 }) => {
   if (!canSwitchAccount) {
+    clearActivationCapture();
     if (profileClickTimeoutRef.current) {
       clearTimeout(profileClickTimeoutRef.current);
       profileClickTimeoutRef.current = null;
@@ -476,6 +479,7 @@ const handleProfileActivate = ({
   }
 
   if (profileClickTimeoutRef.current) {
+    clearActivationCapture();
     clearTimeout(profileClickTimeoutRef.current);
     profileClickTimeoutRef.current = null;
 
@@ -488,6 +492,7 @@ const handleProfileActivate = ({
   openMenu();
   profileClickTimeoutRef.current = setTimeout(() => {
     profileClickTimeoutRef.current = null;
+    clearActivationCapture();
   }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
 };
 
@@ -509,6 +514,8 @@ export default function AppHeader() {
   const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const profileActivationCaptureCleanupRef = useRef<(() => void) | null>(null);
   const { connectedProfile, activeProfileProxy } = useAuth();
   const pathname = usePathname();
   const params = useParams();
@@ -523,6 +530,7 @@ export default function AppHeader() {
       if (profileClickTimeoutRef.current) {
         clearTimeout(profileClickTimeoutRef.current);
       }
+      profileActivationCaptureCleanupRef.current?.();
     },
     []
   );
@@ -638,24 +646,70 @@ export default function AppHeader() {
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
   const openMenu = () => setMenuOpen(true);
   const closeMenu = () => setMenuOpen(false);
-  const onProfileActivate = () =>
+  const clearProfileActivationCapture = () => {
+    profileActivationCaptureCleanupRef.current?.();
+    profileActivationCaptureCleanupRef.current = null;
+  };
+  const switchConnectedAccount = () =>
+    switchToNextConnectedAccount({
+      connectedAccounts,
+      seizeSwitchConnectedAccount,
+      onFailure: (error) => {
+        console.error("Failed to switch connected account from header", error);
+      },
+    });
+  const startProfileActivationCapture = () => {
+    const profileButtonRect = profileButtonRef.current?.getBoundingClientRect();
+    if (!profileButtonRect) {
+      return;
+    }
+
+    const captureNextClick = (event: MouseEvent) => {
+      const isWithinProfileButton =
+        event.clientX >= profileButtonRect.left &&
+        event.clientX <= profileButtonRect.right &&
+        event.clientY >= profileButtonRect.top &&
+        event.clientY <= profileButtonRect.bottom;
+
+      clearProfileActivationCapture();
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+        profileClickTimeoutRef.current = null;
+      }
+
+      if (!isWithinProfileButton) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (switchConnectedAccount()) {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener("click", captureNextClick, true);
+    profileActivationCaptureCleanupRef.current = () => {
+      document.removeEventListener("click", captureNextClick, true);
+    };
+  };
+  const onProfileActivate = () => {
+    if (
+      hasMultipleConnectedAccounts &&
+      !profileClickTimeoutRef.current
+    ) {
+      startProfileActivationCapture();
+    }
+
     handleProfileActivate({
       canSwitchAccount: hasMultipleConnectedAccounts,
       profileClickTimeoutRef,
+      clearActivationCapture: clearProfileActivationCapture,
       openMenu,
       closeMenu,
-      switchConnectedAccount: () =>
-        switchToNextConnectedAccount({
-          connectedAccounts,
-          seizeSwitchConnectedAccount,
-          onFailure: (error) => {
-            console.error(
-              "Failed to switch connected account from header",
-              error
-            );
-          },
-        }),
+      switchConnectedAccount,
     });
+  };
 
   const finalTitle = getHeaderTitle({
     pathname,
@@ -688,6 +742,7 @@ export default function AppHeader() {
             <BackButton />
           ) : (
             <button
+              ref={profileButtonRef}
               type="button"
               aria-label={
                 hasMultipleConnectedAccounts
