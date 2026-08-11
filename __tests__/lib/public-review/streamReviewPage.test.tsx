@@ -90,7 +90,7 @@ jest.mock("@/lib/public-review/editorialContent", () => ({
       return "# Editorial title\n\nThe separately dated development update on the current Overview records work\ncompleted after this snapshot.\n\n## Technical section\n\nBody.";
     }
     if (page.id === "artwork-lifecycle") {
-      return "# Artwork lifecycle\n\nA Stream artwork moves through a sequence of deliberate commitments. Collection\nidentity comes first. Artwork materials, distribution, payment, randomness, and\nmetadata are then assembled around it. Supply and Core configuration can later\nbe closed, preservation evidence can accumulate, and a final ceremony can make\nthe remaining artwork state terminal.\n\nThat sequence is a major part of the design. “Minted,” “sold,” “frozen,”\n“preserved,” and “final” describe different facts. Keeping them separate makes\neach commitment visible and reviewable.\n\nThis page follows one collection through the lifecycle and explains what each\nstage protects.\n\n## 1. The collection receives a permanent identity\n\nOld technical identity copy.\n\n## 2. The artwork package is assembled\n\nOld artwork package copy.\n\n## 3. The artist can approve a specific state\n\nOld artist approval copy.\n\n## 4. A distribution policy is selected\n\nDistribution body.\n\n## 5. Curation becomes a bound authorization\n\nOld curation copy.\n\n## 6. The selected mint lane executes atomically\n\nOld mint execution copy.\n\n## 7. The token receives a permanent identity\n\nOld token identity copy.";
+      return "# Artwork lifecycle\n\nA Stream artwork moves through a sequence of deliberate commitments. Collection\nidentity comes first. Artwork materials, distribution, payment, randomness, and\nmetadata are then assembled around it. Supply and Core configuration can later\nbe closed, preservation evidence can accumulate, and a final ceremony can make\nthe remaining artwork state terminal.\n\nThat sequence is a major part of the design. “Minted,” “sold,” “frozen,”\n“preserved,” and “final” describe different facts. Keeping them separate makes\neach commitment visible and reviewable.\n\nThis page follows one collection through the lifecycle and explains what each\nstage protects.\n\n## 1. The collection receives a permanent identity\n\nOld technical identity copy.\n\n## 2. The artwork package is assembled\n\nOld artwork package copy.\n\n## 3. The artist can approve a specific state\n\nOld artist approval copy.\n\n## 4. A distribution policy is selected\n\nDistribution body.\n\n## 5. Curation becomes a bound authorization\n\nOld curation copy.\n\n## 6. The selected mint lane executes atomically\n\nOld mint execution copy.\n\n## 7. The token receives a permanent identity\n\nOld token identity copy.\n\n## 8. Randomness enters a recorded lifecycle\n\nOld randomness copy.\n\n## 9. Metadata turns stored state into an artwork description\n\nOld metadata copy.\n\n## 10. Sale value becomes explicit liabilities\n\nOld payment copy.\n\n## 11. An auction reaches a terminal outcome\n\nOld auction copy.\n\n## 12. Burning preserves token history\n\nOld burning copy.\n\n## 13. Supply is closed\n\nOld supply copy.\n\n## 14. The permanent Core boundary is frozen\n\nOld Core freeze copy.\n\n## 15. Preservation evidence remains available to grow\n\nOld preservation copy.\n\n## 16. Artwork finality becomes a visible ceremony\n\nOld finality copy.\n\n## 17. Successor modules can carry future duties\n\nOld successor copy.\n\n## What collectors should see\n\nOld collector copy.\n\n## Failure modes reviewers should test\n\nOld failure-mode copy.\n\n## Questions for reviewers\n\nOld reviewer questions.";
     }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
@@ -190,7 +190,7 @@ describe("renderStreamReviewRoutePage", () => {
     );
   });
 
-  it("shows the plain-language opening on the current Artwork Lifecycle page", async () => {
+  it("shows plain-language copy on the current Artwork Lifecycle page", async () => {
     render(
       await renderStreamReviewRoutePage({
         params: Promise.resolve({
@@ -314,12 +314,84 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "Old token identity copy."
     );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "8. Randomness is requested and recorded"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A technical retry cannot become a hidden redraw."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "9. Metadata describes the artwork"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A hash can prove that retrieved bytes are correct, but it cannot keep those bytes available."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "10. Sale money becomes balances to withdraw"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The current sale paths do not use those modules everywhere yet."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "11. An auction ends once"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The same token or payment cannot be handled twice."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "12. Burning affects more than ownership"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "A later valid randomness answer can be kept for audit, but it cannot bring the token back."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "13. Supply closes"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The current setFinalSupply function does not emit its own supply-closed event."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "14. The Core is permanently frozen"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Core freeze is not the same as full artwork finality."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "15. Preservation records can still be added"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Long-term preservation needs both proof and access to the real artwork materials."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "16. Artwork finality is the last ceremony"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The same unchanged record does not automatically need a new signature."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "17. Replaceable modules can have successors"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Signatures for an old contract do not automatically become valid in a new one."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "What collectors should be able to see"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Technical review checklist"
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old randomness copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Old reviewer questions."
+    );
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "sequence of deliberate commitments"
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "8"
+      "21"
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
@@ -464,6 +536,24 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
       "Old token identity copy."
     );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "8. Randomness enters a recorded lifecycle"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old randomness copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "17. Successor modules can carry future duties"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old successor copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Failure modes reviewers should test"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old reviewer questions."
+    );
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "The lifecycle in one minute"
     );
@@ -488,9 +578,15 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
       "The minted token gets a permanent ID"
     );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Randomness is requested and recorded"
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "Artwork finality is the last ceremony"
+    );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "7"
+      "20"
     );
   });
 

@@ -72,6 +72,8 @@ const ARTWORK_LIFECYCLE_MINT_EXECUTION_SECTION =
   /## 6\. The selected mint lane executes atomically[\s\S]*?(?=## 7\.|$)/;
 const ARTWORK_LIFECYCLE_TOKEN_IDENTITY_SECTION =
   /## 7\. The token receives a permanent identity[\s\S]*?(?=## 8\.|$)/;
+const ARTWORK_LIFECYCLE_REMAINING_SECTIONS =
+  /## 8\. Randomness enters a recorded lifecycle[\s\S]*$/;
 
 function getStreamReviewMetadata({
   baseEndpoint,
@@ -203,6 +205,13 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
         DEFAULT_LOCALE,
         "publicReview.pages.artworkLifecycle.currentTokenIdentitySection"
       )}\n\n`
+    );
+    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
+      ARTWORK_LIFECYCLE_REMAINING_SECTIONS,
+      t(
+        DEFAULT_LOCALE,
+        "publicReview.pages.artworkLifecycle.currentRemainingSections"
+      )
     );
   }
   if (isCurrentDevelopmentStatus) {
