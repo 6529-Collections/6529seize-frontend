@@ -457,11 +457,13 @@ const handleProfileActivate = ({
   canSwitchAccount,
   profileClickTimeoutRef,
   openMenu,
+  closeMenu,
   switchConnectedAccount,
 }: {
   readonly canSwitchAccount: boolean;
   readonly profileClickTimeoutRef: HeaderTimeoutRef;
   readonly openMenu: () => void;
+  readonly closeMenu: () => void;
   readonly switchConnectedAccount: () => boolean;
 }) => {
   if (!canSwitchAccount) {
@@ -477,15 +479,15 @@ const handleProfileActivate = ({
     clearTimeout(profileClickTimeoutRef.current);
     profileClickTimeoutRef.current = null;
 
-    if (!switchConnectedAccount()) {
-      openMenu();
+    if (switchConnectedAccount()) {
+      closeMenu();
     }
     return;
   }
 
+  openMenu();
   profileClickTimeoutRef.current = setTimeout(() => {
     profileClickTimeoutRef.current = null;
-    openMenu();
   }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
 };
 
@@ -635,11 +637,13 @@ export default function AppHeader() {
   );
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
   const openMenu = () => setMenuOpen(true);
+  const closeMenu = () => setMenuOpen(false);
   const onProfileActivate = () =>
     handleProfileActivate({
       canSwitchAccount: hasMultipleConnectedAccounts,
       profileClickTimeoutRef,
       openMenu,
+      closeMenu,
       switchConnectedAccount: () =>
         switchToNextConnectedAccount({
           connectedAccounts,

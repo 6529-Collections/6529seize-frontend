@@ -282,7 +282,7 @@ describe("AppHeader", () => {
     expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
   });
 
-  it("uses the shared delay to distinguish a single tap from profile switching", () => {
+  it("opens immediately, then switches and closes on a second tap", () => {
     jest.useFakeTimers();
     const seizeSwitchConnectedAccount = jest.fn();
     setup({
@@ -300,11 +300,8 @@ describe("AppHeader", () => {
       name: "Open menu (double-click to switch accounts)",
     });
     fireEvent.click(profileButton);
-    act(() => {
-      jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS - 1);
-    });
 
-    expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
     expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
 
     fireEvent.click(profileButton);
@@ -314,7 +311,7 @@ describe("AppHeader", () => {
     jest.useRealTimers();
   });
 
-  it("opens the account menu after the shared delay for a single tap", () => {
+  it("opens the account menu immediately and retains the shared tap window", () => {
     jest.useFakeTimers();
     setup({
       address: "0xabc",
@@ -331,6 +328,8 @@ describe("AppHeader", () => {
         name: "Open menu (double-click to switch accounts)",
       })
     );
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
     act(() => {
       jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
     });

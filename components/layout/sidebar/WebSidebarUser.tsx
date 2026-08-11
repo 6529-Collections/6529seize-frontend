@@ -209,15 +209,13 @@ function WebSidebarUser({
       clearTimeout(profileClickTimeoutRef.current);
       profileClickTimeoutRef.current = null;
 
-      if (!switchToNextConnectedAccount()) {
-        setShowUserMenu(true);
-      }
+      switchToNextConnectedAccount();
       return;
     }
 
+    setShowUserMenu(true);
     profileClickTimeoutRef.current = setTimeout(() => {
       profileClickTimeoutRef.current = null;
-      toggleUserMenu();
     }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
   };
 
