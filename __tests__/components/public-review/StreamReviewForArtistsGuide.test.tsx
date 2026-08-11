@@ -41,7 +41,7 @@ describe("StreamReviewForArtistsGuide", () => {
       "Where does the money go?",
       "What are you approving?",
       "What can change or become permanent?",
-    ]) {
+    ] as const) {
       expect(
         screen.getByRole("heading", { level: 3, name: heading })
       ).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe("StreamReviewForArtistsGuide", () => {
         "Power and finality",
         "Check who can change, pause, or restart each part. Check what every permanent step locks.",
       ],
-    ]) {
+    ] as const) {
       expect(
         screen.getByRole("heading", { level: 3, name: heading })
       ).toBeInTheDocument();
@@ -186,7 +186,7 @@ describe("StreamReviewForArtistsGuide", () => {
         "Later royalties",
         "Stream can show royalty information for later marketplace sales. The marketplace decides whether to pay it.",
       ],
-    ]) {
+    ] as const) {
       expect(
         screen.getByRole("heading", { level: 3, name: heading })
       ).toBeInTheDocument();
@@ -234,7 +234,7 @@ describe("StreamReviewForArtistsGuide", () => {
         "After artwork finality",
         "Finality is designed to lock the artwork records it covers. Before this happens, a waiting period lets the guardian stop a suspicious finality action.",
       ],
-    ]) {
+    ] as const) {
       expect(
         screen.getByRole("heading", { level: 3, name: heading })
       ).toBeInTheDocument();
@@ -268,7 +268,7 @@ describe("StreamReviewForArtistsGuide", () => {
         "Use the waiting period",
         "Finality has a delay so you and other reviewers can find mistakes. A guardian can stop the action during this time, but cannot replace it with different artwork or terms.",
       ],
-    ]) {
+    ] as const) {
       expect(
         screen.getByRole("heading", { level: 3, name: heading })
       ).toBeInTheDocument();
@@ -325,7 +325,7 @@ describe("StreamReviewForArtistsGuide", () => {
         "Outside services",
         "File storage, websites, services that provide random results, and marketplaces work outside the contracts. Stream can record links and evidence. It cannot keep a service online or force a marketplace to pay royalties.",
       ],
-    ]) {
+    ] as const) {
       expect(
         screen.getByRole("heading", { level: 3, name: heading })
       ).toBeInTheDocument();

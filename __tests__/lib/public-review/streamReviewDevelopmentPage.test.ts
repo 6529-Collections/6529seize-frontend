@@ -11,7 +11,10 @@ async function loadDevelopmentEditorial() {
   const reviewVersion = getStreamReviewVersion(
     STREAM_REVIEW_DEFINITION.activeVersion
   );
-  const page = reviewVersion?.pages.find(
+  if (reviewVersion === undefined) {
+    throw new Error("The active Stream review version is unavailable.");
+  }
+  const page = reviewVersion.pages.find(
     (candidate) =>
       candidate.id === "security-testing-and-known-limitations"
   );
