@@ -26,6 +26,7 @@ import {
   PublicReviewEditorialContentError,
 } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import { getCurrentCommunityReviewEditorialMarkdown } from "@/lib/public-review/streamReviewCommunityPage";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
@@ -1137,6 +1138,11 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       editorialMarkdown: displayedEditorialMarkdown,
       source: manifest.source,
     });
+  } else if (isCurrentCommunityReview) {
+    displayedEditorialMarkdown = getCurrentCommunityReviewEditorialMarkdown({
+      reviewVersion: contentVersion,
+      source: manifest.source,
+    });
   }
   const displayedPage: typeof route.page = isCurrentArtworkLifecycle
     ? {
@@ -1151,6 +1157,20 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   } else if (isCurrentRoles) {
     displayedSections = STREAM_REVIEW_ROLES_GUIDE_SECTIONS;
   }
+  const displayedFeedbackConfig =
+    isCurrentDevelopmentStatus || isCurrentCommunityReview
+      ? {
+          ...feedbackConfig,
+          pages: feedbackConfig.pages.map((configuredPage) =>
+            configuredPage.value === route.page.id
+              ? {
+                  ...configuredPage,
+                  sectionValues: displayedSections.map((section) => section.id),
+                }
+              : configuredPage
+          ),
+        }
+      : feedbackConfig;
 
   return (
     <PublicReviewShell
@@ -1169,9 +1189,6 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
           {isCurrentDevelopmentStatus ? (
             <StreamReviewDevelopmentStatus />
           ) : null}
-          {isCurrentCommunityReview ? (
-            <StreamReviewReviewerPrompts pages={reviewVersion.pages} />
-          ) : null}
           {isCurrentForArtists ? (
             <>
               <StreamReviewForArtistsGuide pages={reviewVersion.pages} />
@@ -1186,6 +1203,11 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
           ) : null}
         </>
       }
+      outroNotice={
+        isCurrentCommunityReview ? (
+          <StreamReviewReviewerPrompts pages={reviewVersion.pages} />
+        ) : null
+      }
       showAudiencePaths={!isCurrentOverview}
       showEditorialContent={
         !isCurrentOverview && !isCurrentForArtists && !isCurrentRoles
@@ -1196,7 +1218,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       }}
       feedbackSlot={
         <PublicReviewEditorialFeedback
-          config={feedbackConfig}
+          config={displayedFeedbackConfig}
           destination={feedbackDestination}
           page={createStreamEditorialFeedbackPageContext({
             page: route.page,

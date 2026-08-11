@@ -20,10 +20,27 @@ jest.mock("@/config/publicReviews", () => ({
 
 jest.mock("@/components/public-review/PublicReviewEditorialFeedback", () => ({
   PublicReviewEditorialFeedback: ({
+    config,
+    page,
     sections,
   }: {
+    readonly config: {
+      readonly pages: readonly {
+        readonly sectionValues?: readonly string[] | undefined;
+        readonly value: string;
+      }[];
+    };
+    readonly page: { readonly pageId: string };
     readonly sections: readonly unknown[];
-  }) => <div data-testid="feedback-section-count">{sections.length}</div>,
+  }) => (
+    <>
+      <div data-testid="feedback-section-count">{sections.length}</div>
+      <div data-testid="configured-feedback-section-count">
+        {config.pages.find((candidate) => candidate.value === page.pageId)
+          ?.sectionValues?.length ?? 0}
+      </div>
+    </>
+  ),
 }));
 
 jest.mock("@/components/public-review/PublicReviewShell", () => ({
@@ -32,6 +49,7 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
     feedbackSlot,
     introNotice,
     page,
+    outroNotice,
     sections,
     showEditorialContent,
   }: {
@@ -39,6 +57,7 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
     readonly feedbackSlot: React.ReactNode;
     readonly introNotice?: React.ReactNode;
     readonly page: { readonly summaryKey: string };
+    readonly outroNotice?: React.ReactNode;
     readonly sections: readonly unknown[];
     readonly showEditorialContent?: boolean;
   }) => (
@@ -50,6 +69,7 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
     >
       {introNotice}
       <div data-testid="editorial-copy">{editorialMarkdown}</div>
+      {outroNotice}
       {feedbackSlot}
     </div>
   ),
@@ -98,8 +118,23 @@ jest.mock("@/lib/public-review/editorialContent", () => ({
 }));
 
 jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
-  createStreamEditorialFeedbackPageContext: jest.fn(() => ({})),
-  createStreamReviewFeedbackConfig: jest.fn(async () => ({})),
+  createStreamEditorialFeedbackPageContext: jest.fn(
+    ({ page }: { readonly page: { readonly id: string } }) => ({
+      pageId: page.id,
+    })
+  ),
+  createStreamReviewFeedbackConfig: jest.fn(async () => ({
+    pages: [
+      {
+        value: "security-testing-and-known-limitations",
+        sectionValues: ["old-development-section"],
+      },
+      {
+        value: "community-review",
+        sectionValues: ["technical-section"],
+      },
+    ],
+  })),
   resolveStreamReviewFeedbackDestination: jest.fn(async () => ({})),
 }));
 
@@ -400,6 +435,9 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
       "22"
     );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("22");
   });
 
   it("shows plain-language copy on the current Artwork Lifecycle page", async () => {
@@ -611,7 +649,7 @@ describe("renderStreamReviewRoutePage", () => {
     );
   });
 
-  it("puts current reviewer prompts and authorship on Community Review", async () => {
+  it("puts a plain current guide before the Community Review prompts", async () => {
     render(
       await renderStreamReviewRoutePage({
         params: Promise.resolve({
@@ -621,9 +659,53 @@ describe("renderStreamReviewRoutePage", () => {
       })
     );
 
+    const shell = screen.getByTestId("review-shell");
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    const shellText = shell.textContent ?? "";
+
     expect(screen.getByText("Reviewer prompts")).toBeInTheDocument();
     expect(screen.getByText("Authorship note")).toBeInTheDocument();
     expect(screen.queryByText("Launch readiness")).not.toBeInTheDocument();
+    expect(editorialCopy).toHaveTextContent(
+      "How to participate in the community review"
+    );
+    expect(editorialCopy).toHaveTextContent("What to review");
+    expect(editorialCopy).toHaveTextContent(
+      "Before reporting a security issue"
+    );
+    expect(editorialCopy).toHaveTextContent("How to submit feedback");
+    expect(editorialCopy).toHaveTextContent(
+      "The current frontend does not yet record accepted, rejected, confirmed, or fixed states."
+    );
+    expect(editorialCopy).toHaveTextContent("Its only report state is `NEW`.");
+    expect(editorialCopy).toHaveTextContent(
+      "The stored context does not include the frontend commit or the full wording shown on screen."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "The current process compares review versions manually."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Independent experts must still audit the exact release candidate"
+    );
+    expect(editorialCopy).toHaveTextContent("2026-08-01.1");
+    expect(editorialCopy).toHaveTextContent(
+      "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+    );
+    expect(editorialCopy).not.toHaveTextContent("Technical section");
+    expect(editorialCopy).not.toHaveTextContent("Body.");
+    expect(shellText.indexOf("Authorship note")).toBeLessThan(
+      shellText.indexOf("How to participate in the community review")
+    );
+    expect(
+      shellText.indexOf("How to participate in the community review")
+    ).toBeLessThan(shellText.indexOf("Reviewer prompts"));
+    expect(shell).toHaveAttribute("data-section-count", "12");
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
+      "12"
+    );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("12");
   });
 
   it("replaces the current For Artists editorial with plain-language details", async () => {
@@ -867,6 +949,32 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
       "8"
+    );
+  });
+
+  it("keeps immutable Community Review routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          version: "2026-08-01.1",
+          page: "community-review",
+        }),
+      })
+    );
+
+    expect(screen.queryByText("Reviewer prompts")).not.toBeInTheDocument();
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Technical section"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent("Body.");
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "How to submit feedback"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "1"
     );
   });
 });

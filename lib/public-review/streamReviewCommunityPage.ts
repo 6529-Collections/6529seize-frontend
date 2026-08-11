@@ -1,0 +1,255 @@
+import "next/dist/compiled/server-only";
+
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+
+type MessageParams = Record<string, string | number>;
+
+function copy(key: MessageKey, params: MessageParams = {}): string {
+  return t(DEFAULT_LOCALE, key, params);
+}
+
+function bullets(keys: readonly MessageKey[]): string[] {
+  return keys.map((key) => `- ${copy(key)}`);
+}
+
+function steps(keys: readonly MessageKey[]): string[] {
+  return keys.map((key, index) => `${index + 1}. ${copy(key)}`);
+}
+
+function getParticipationSections(): string[] {
+  return [
+    `## ${copy("publicReview.community.editorial.people.heading")}`,
+    "",
+    copy("publicReview.community.editorial.people.intro"),
+    "",
+    ...bullets([
+      "publicReview.community.editorial.people.artists",
+      "publicReview.community.editorial.people.collectors",
+      "publicReview.community.editorial.people.engineers",
+      "publicReview.community.editorial.people.product",
+      "publicReview.community.editorial.people.community",
+    ]),
+    "",
+    copy("publicReview.community.editorial.people.outro"),
+    "",
+    `## ${copy("publicReview.community.editorial.scope.heading")}`,
+    "",
+    copy("publicReview.community.editorial.scope.intro"),
+    "",
+    ...bullets([
+      "publicReview.community.editorial.scope.artist",
+      "publicReview.community.editorial.scope.sales",
+      "publicReview.community.editorial.scope.services",
+      "publicReview.community.editorial.scope.artwork",
+      "publicReview.community.editorial.scope.governance",
+      "publicReview.community.editorial.scope.evidence",
+    ]),
+    "",
+    copy("publicReview.community.editorial.scope.question"),
+    "",
+    `## ${copy("publicReview.community.editorial.safety.heading")}`,
+    "",
+    copy("publicReview.community.editorial.safety.policy"),
+    "",
+    copy("publicReview.community.editorial.safety.neverShare"),
+    "",
+    ...bullets([
+      "publicReview.community.editorial.safety.credentials",
+      "publicReview.community.editorial.safety.personal",
+      "publicReview.community.editorial.safety.unrelated",
+      "publicReview.community.editorial.safety.attack",
+    ]),
+    "",
+    copy("publicReview.community.editorial.safety.otherProtocol"),
+    "",
+    `## ${copy("publicReview.community.editorial.submit.heading")}`,
+    "",
+    copy("publicReview.community.editorial.submit.intro"),
+    "",
+    ...steps([
+      "publicReview.community.editorial.submit.page",
+      "publicReview.community.editorial.submit.section",
+      "publicReview.community.editorial.submit.classify",
+      "publicReview.community.editorial.submit.explain",
+      "publicReview.community.editorial.submit.send",
+    ]),
+    "",
+    copy("publicReview.community.editorial.submit.crossModule"),
+    "",
+    copy("publicReview.community.editorial.submit.short"),
+    "",
+    `## ${copy("publicReview.community.editorial.type.heading")}`,
+    "",
+    copy("publicReview.community.editorial.type.intro"),
+    "",
+    ...bullets([
+      "publicReview.community.editorial.type.question",
+      "publicReview.community.editorial.type.documentation",
+      "publicReview.community.editorial.type.artist",
+      "publicReview.community.editorial.type.product",
+      "publicReview.community.editorial.type.protocol",
+      "publicReview.community.editorial.type.bug",
+      "publicReview.community.editorial.type.security",
+      "publicReview.community.editorial.type.testing",
+      "publicReview.community.editorial.type.accessibility",
+    ]),
+    "",
+    copy("publicReview.community.editorial.type.outro"),
+    "",
+    `## ${copy("publicReview.community.editorial.impact.heading")}`,
+    "",
+    copy("publicReview.community.editorial.impact.intro"),
+    "",
+    ...bullets([
+      "publicReview.community.editorial.impact.critical",
+      "publicReview.community.editorial.impact.high",
+      "publicReview.community.editorial.impact.medium",
+      "publicReview.community.editorial.impact.low",
+      "publicReview.community.editorial.impact.informational",
+      "publicReview.community.editorial.impact.unknown",
+    ]),
+    "",
+    copy("publicReview.community.editorial.impact.outro"),
+  ];
+}
+
+function getReportingSections(): string[] {
+  return [
+    "",
+    `## ${copy("publicReview.community.editorial.report.heading")}`,
+    "",
+    copy("publicReview.community.editorial.report.intro"),
+    "",
+    ...steps([
+      "publicReview.community.editorial.report.expected",
+      "publicReview.community.editorial.report.observed",
+      "publicReview.community.editorial.report.affected",
+      "publicReview.community.editorial.report.preconditions",
+      "publicReview.community.editorial.report.consequence",
+      "publicReview.community.editorial.report.reproduction",
+      "publicReview.community.editorial.report.fix",
+    ]),
+    "",
+    copy("publicReview.community.editorial.report.product"),
+    "",
+    copy("publicReview.community.editorial.report.artist"),
+    "",
+    `## ${copy("publicReview.community.editorial.technical.heading")}`,
+    "",
+    copy("publicReview.community.editorial.technical.intro"),
+    "",
+    ...bullets([
+      "publicReview.community.editorial.technical.reference",
+      "publicReview.community.editorial.technical.commit",
+      "publicReview.community.editorial.technical.order",
+      "publicReview.community.editorial.technical.state",
+      "publicReview.community.editorial.technical.test",
+    ]),
+    "",
+    copy("publicReview.community.editorial.technical.paths"),
+    "",
+    `## ${copy("publicReview.community.editorial.after.heading")}`,
+    "",
+    copy("publicReview.community.editorial.after.new"),
+    "",
+    copy("publicReview.community.editorial.after.replies"),
+    "",
+    copy("publicReview.community.editorial.after.currentLimit"),
+    "",
+    copy("publicReview.community.editorial.after.future"),
+  ];
+}
+
+function getRecordSections(): string[] {
+  return [
+    "",
+    `## ${copy("publicReview.community.editorial.record.heading")}`,
+    "",
+    copy("publicReview.community.editorial.record.intro"),
+    "",
+    ...bullets([
+      "publicReview.community.editorial.record.schema",
+      "publicReview.community.editorial.record.type",
+      "publicReview.community.editorial.record.severity",
+      "publicReview.community.editorial.record.context",
+    ]),
+    "",
+    copy("publicReview.community.editorial.record.contextDetail"),
+    "",
+    copy("publicReview.community.editorial.record.visible"),
+    "",
+    copy("publicReview.community.editorial.record.limit"),
+    "",
+    copy("publicReview.community.editorial.record.filters"),
+    "",
+    `## ${copy("publicReview.community.editorial.versions.heading")}`,
+    "",
+    copy("publicReview.community.editorial.versions.new"),
+    "",
+    copy("publicReview.community.editorial.versions.old"),
+    "",
+    copy("publicReview.community.editorial.versions.manual"),
+    "",
+    copy("publicReview.community.editorial.versions.carry"),
+    "",
+    `## ${copy("publicReview.community.editorial.audit.heading")}`,
+    "",
+    copy("publicReview.community.editorial.audit.intro"),
+    "",
+    `### ${copy("publicReview.community.editorial.audit.currentHeading")}`,
+    "",
+    ...bullets([
+      "publicReview.community.editorial.audit.inventory",
+      "publicReview.community.editorial.audit.reports",
+      "publicReview.community.editorial.audit.filters",
+      "publicReview.community.editorial.audit.export",
+    ]),
+    "",
+    copy("publicReview.community.editorial.audit.limit"),
+    "",
+    `### ${copy("publicReview.community.editorial.audit.closeoutHeading")}`,
+    "",
+    ...bullets([
+      "publicReview.community.editorial.audit.candidate",
+      "publicReview.community.editorial.audit.versions",
+      "publicReview.community.editorial.audit.risks",
+      "publicReview.community.editorial.audit.fixes",
+      "publicReview.community.editorial.audit.auditReport",
+      "publicReview.community.editorial.audit.blockers",
+      "publicReview.community.editorial.audit.archive",
+    ]),
+    "",
+    copy("publicReview.community.editorial.audit.outro"),
+  ];
+}
+
+export function getCurrentCommunityReviewEditorialMarkdown({
+  reviewVersion,
+  source,
+}: {
+  readonly reviewVersion: string;
+  readonly source: {
+    readonly commit: string;
+    readonly repository: string;
+  };
+}): string {
+  const sourceLink = `[\`${source.commit}\`](https://github.com/${source.repository}/tree/${source.commit})`;
+
+  return [
+    `# ${copy("publicReview.community.editorial.heading")}`,
+    "",
+    copy("publicReview.community.editorial.intro.purpose"),
+    "",
+    copy("publicReview.community.editorial.intro.noCode"),
+    "",
+    copy("publicReview.community.editorial.intro.source", {
+      reviewVersion,
+      sourceLink,
+    }),
+    "",
+    ...getParticipationSections(),
+    ...getReportingSections(),
+    ...getRecordSections(),
+  ].join("\n");
+}
