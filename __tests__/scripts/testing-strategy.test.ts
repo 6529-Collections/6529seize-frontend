@@ -586,7 +586,7 @@ describe("testing strategy CI plan", () => {
         }),
         expect.objectContaining({
           name: "Run Network Museum Playwright packs",
-          if: "matrix.lane == 'playwright-museum'",
+          if: "startsWith(matrix.lane, 'playwright-museum-')",
         }),
       ])
     );
@@ -604,12 +604,19 @@ describe("testing strategy CI plan", () => {
       "tests/museum/inside-system-readonly.spec.ts",
       "tests/museum/rights-readonly.spec.ts",
     ]);
-    expect(museumBrowserRun).toContain("--project=web-desktop-chromium");
-    expect(museumBrowserRun).toContain("--project=web-mobile-chromium");
+    expect(workflow).toContain('lane: "playwright-museum-desktop"');
+    expect(workflow).toContain('label: "Network Museum desktop"');
+    expect(workflow).toContain('museum_project: "web-desktop-chromium"');
+    expect(workflow).toContain('lane: "playwright-museum-mobile"');
+    expect(workflow).toContain('label: "Network Museum mobile"');
+    expect(workflow).toContain('museum_project: "web-mobile-chromium"');
+    expect(museumBrowserRun).toContain('--project="$MUSEUM_PROJECT"');
+    expect(museumBrowserRun).not.toContain("--project=web-desktop-chromium");
+    expect(museumBrowserRun).not.toContain("--project=web-mobile-chromium");
     expect(museumBrowserRun).not.toContain("--project=web-desktop-firefox");
     expect(museumBrowserRun).not.toContain("--project=web-desktop-webkit");
     expect(museumBrowserRun).toContain(
-      'contract: "museum-playwright-inventory-v2"'
+      'contract: "museum-playwright-isolated-project-v3"'
     );
     expect(museumBrowserRun).toContain(
       "Museum execution overlap or unexpected test"
@@ -621,10 +628,10 @@ describe("testing strategy CI plan", () => {
       "Museum execution spec coverage is incomplete"
     );
     expect(museumBrowserRun).toContain(
-      "Museum shard inventory must cover desktop and mobile Chromium"
+      "Museum execution inventory must cover only ${project}"
     );
     expect(museumBrowserRun).toContain(
-      "Museum fail-fast gate must cover Network IA on desktop and mobile Chromium"
+      "Museum fail-fast gate must cover Network IA on ${project}"
     );
     expect(museumBrowserRun).toContain(
       'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-gate"'
@@ -635,7 +642,7 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).toContain("--retries=0");
     expect(museumBrowserRun).toContain("--max-failures=1");
     expect(museumBrowserRun).toContain(
-      "Museum Network IA gate exceeded its 10-minute timeout."
+      "Museum $MUSEUM_PROJECT Network IA gate exceeded its 10-minute timeout."
     );
     expect(museumBrowserRun).toContain(
       'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-remaining"'
@@ -643,38 +650,37 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).toContain(
       'PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-remaining"'
     );
-    expect(museumBrowserRun).toContain("./bin/6529 run build:env-schema");
-    expect(museumBrowserRun).toContain("./bin/6529 run base-build");
     expect(museumBrowserRun).toContain(
-      "setsid ./bin/6529 run start:standalone"
+      'NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}"'
     );
-    expect(museumBrowserRun).toContain(
-      'museum_base_url="http://localhost:${museum_port}"'
-    );
+    expect(museumBrowserRun).toContain("./bin/6529 run dev");
     expect(museumBrowserRun).toContain("PLAYWRIGHT_SKIP_WEB_SERVER=1");
     expect(museumBrowserRun).toContain("trap cleanup_museum_server EXIT");
-    expect(museumBrowserRun).toContain('kill -- "-$museum_server_pid"');
     expect(museumBrowserRun).toContain(
-      'echo "Museum production server did not become ready."'
+      'echo "Museum server did not become ready for $MUSEUM_PROJECT."'
     );
     expect(museumBrowserRun).toContain(
       "timeout --signal=TERM --kill-after=30s 15m"
     );
     expect(museumBrowserRun).toContain(
-      "| sed -u 's/^/[museum remaining] /'"
+      '| sed -u "s/^/[museum $MUSEUM_PROJECT remaining] /"'
     );
     expect(museumBrowserRun).toContain('| tee "$museum_remaining_log"');
     expect(museumBrowserRun).toContain(
-      "Remaining Museum coverage exceeded its 15-minute timeout."
+      "Museum $MUSEUM_PROJECT remaining coverage exceeded its 15-minute timeout."
     );
     expect(museumBrowserRun).toContain(
-      "Remaining Museum coverage failed with exit ${museum_remaining_exit}."
+      "Museum $MUSEUM_PROJECT remaining coverage failed with exit ${museum_remaining_exit}."
     );
     expect(museumBrowserRun).toContain(
       'tail -n 120 "$museum_remaining_log"'
     );
     expect(museumBrowserRun).toContain("--workers=1");
-    expect(museumBrowserRun).toContain("--workers=2");
+    expect(museumBrowserRun).not.toContain("--workers=2");
+    expect(museumBrowserRun).not.toContain("wait -n");
+    expect(museumBrowserRun).not.toContain("setsid");
+    expect(museumBrowserRun).not.toContain("./bin/6529 run base-build");
+    expect(museumBrowserRun).not.toContain("start:standalone");
     expect(parsed.jobs["installed-checks"]).toMatchObject({
       name: "Installed app checks",
       needs: ["plan", "app-checks"],
