@@ -119,8 +119,16 @@ export default function AppSidebarConnectedAccounts({
     if (seizeConnectOpen) {
       return;
     }
-    seizeAddConnectedAccount();
-    onNavigate?.();
+    try {
+      seizeAddConnectedAccount();
+      onNavigate?.();
+    } catch (error) {
+      console.error("Failed to open connected account flow:", error);
+      setToast({
+        message: t(DEFAULT_LOCALE, "appSidebar.accountConnectionFailed"),
+        type: "error",
+      });
+    }
   };
 
   const addAccountLabel = t(DEFAULT_LOCALE, "headerUserMenu.addProfile");

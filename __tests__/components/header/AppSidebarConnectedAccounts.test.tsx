@@ -43,18 +43,20 @@ function setUpContext({ connectOpen = false }: { connectOpen?: boolean } = {}) {
     seizeAddConnectedAccount: addAccount,
     seizeSwitchConnectedAccount: switchAccount,
     seizeConnectOpen: connectOpen,
-  } as ReturnType<typeof useSeizeConnectContext>);
+  } as unknown as ReturnType<typeof useSeizeConnectContext>);
 }
 
 describe("AppSidebarConnectedAccounts", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setUpContext();
-    useAuthMock.mockReturnValue({ setToast } as ReturnType<typeof useAuth>);
+    useAuthMock.mockReturnValue({
+      setToast,
+    } as unknown as ReturnType<typeof useAuth>);
     useIdentityMock.mockReturnValue({
       profile: { handle: "second" },
       isLoading: false,
-    } as ReturnType<typeof useIdentity>);
+    } as unknown as ReturnType<typeof useIdentity>);
   });
 
   it("switches profiles and closes the sidebar", async () => {
@@ -89,6 +91,22 @@ describe("AppSidebarConnectedAccounts", () => {
     expect(
       screen.getByRole("button", { name: "Opening account connection" })
     ).toBeDisabled();
+  });
+
+  it("keeps the sidebar open and reports a failed add-profile flow", async () => {
+    const onNavigate = jest.fn();
+    addAccount.mockImplementation(() => {
+      throw new Error("connect failed");
+    });
+
+    render(<AppSidebarConnectedAccounts onNavigate={onNavigate} />);
+    await userEvent.click(screen.getByRole("button", { name: "Add profile" }));
+
+    expect(onNavigate).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledWith({
+      message: "Failed to open the account connection. Please try again.",
+      type: "error",
+    });
   });
 
   it("keeps the sidebar open and reports a failed switch", async () => {

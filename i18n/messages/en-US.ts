@@ -1924,6 +1924,8 @@ export const EN_US_MESSAGES = {
   "appSidebar.openingAccountConnection": "Opening account connection",
   "appSidebar.accountSwitchFailed":
     "Failed to switch connected account. Please try again.",
+  "appSidebar.accountConnectionFailed":
+    "Failed to open the account connection. Please try again.",
   "headerUserMenu.switchToProfile": "Switch to {profile} ({wallet})",
   "headerUserMenu.signOutAll": "Sign out all",
   "headerUserMenu.logout": "Logout",

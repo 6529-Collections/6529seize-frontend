@@ -138,6 +138,7 @@ standalone row after `About`.
   the switch fails, the drawer remains open and shows error feedback.
 - Selecting the account `+` closes the drawer before the wallet connection
   flow appears; while that flow is open, the control is disabled with busy
+  feedback. If the flow cannot open, the drawer remains open and shows error
   feedback.
 - If profile access is missing, connect wallet first or use the header avatar
   once a connected profile is available.
