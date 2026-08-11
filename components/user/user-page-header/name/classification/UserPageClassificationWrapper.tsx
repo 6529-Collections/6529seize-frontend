@@ -28,7 +28,8 @@ export default function UserPageClassificationWrapper({
   }
 
   return (
-    <div className="tw-inline-flex tw-items-center">
+    <div className="tw-group tw-relative tw-inline-flex tw-items-center">
+      {children}
       <button
         type="button"
         onClick={() => setIsEditOpen(true)}
@@ -36,12 +37,11 @@ export default function UserPageClassificationWrapper({
           "user.profileHeader.classification.edit",
           { name: profileLabel }
         )}
-        className="tw-group tw-relative tw-m-0 tw-inline-flex tw-min-h-6 tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
+        className="tw-absolute tw-inset-0 tw-m-0 tw-hidden tw-min-h-6 tw-border-none tw-bg-transparent tw-p-0 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-block"
       >
-        {children}
         <span
           aria-hidden="true"
-          className="tw-absolute -tw-left-5 tw-top-1/2 tw-hidden tw-size-4 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-text-iron-400 group-hover:tw-flex group-focus-visible:tw-flex"
+          className="tw-absolute -tw-left-5 tw-top-1/2 tw-hidden tw-size-4 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-text-iron-400 group-hover:tw-flex group-focus-within:tw-flex"
         >
           <PencilIcon size={PencilIconSize.SMALL} />
         </span>
