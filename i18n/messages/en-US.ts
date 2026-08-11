@@ -1930,6 +1930,8 @@ export const EN_US_MESSAGES = {
   "headerUserMenu.signOutAll": "Sign out all",
   "headerUserMenu.logout": "Logout",
   "webSidebar.accountMenu.openAriaLabel": "Open account and profiles menu",
+  "webSidebar.accountMenu.openWithSwitchAriaLabel":
+    "Open account and profiles menu (double-click to switch profiles)",
   "headerPageShare.trigger.ariaLabel": "Share page",
   "headerPageShare.trigger.title": "Share page",
   "headerWaveLinkAction.share": "Share wave",

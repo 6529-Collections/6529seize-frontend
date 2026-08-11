@@ -55,6 +55,7 @@ import {
 } from "./app-header-wave-preview";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "./profile-activation.constants";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -62,7 +63,6 @@ const COLLECTION_TITLES: Record<string, string> = {
   "meme-lab": "Meme Lab",
   nextgen: "NextGen",
 };
-const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
 const HEADER_RESTRICTION_BUTTON_CLASS =
   "tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-black tw-p-0 tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50";
 
@@ -454,17 +454,21 @@ const switchToNextConnectedAccount = ({
 };
 
 const handleProfileActivate = ({
-  address,
+  canSwitchAccount,
   profileClickTimeoutRef,
   openMenu,
   switchConnectedAccount,
 }: {
-  readonly address: string | null | undefined;
+  readonly canSwitchAccount: boolean;
   readonly profileClickTimeoutRef: HeaderTimeoutRef;
   readonly openMenu: () => void;
   readonly switchConnectedAccount: () => boolean;
 }) => {
-  if (!address) {
+  if (!canSwitchAccount) {
+    if (profileClickTimeoutRef.current) {
+      clearTimeout(profileClickTimeoutRef.current);
+      profileClickTimeoutRef.current = null;
+    }
     openMenu();
     return;
   }
@@ -633,7 +637,7 @@ export default function AppHeader() {
   const openMenu = () => setMenuOpen(true);
   const onProfileActivate = () =>
     handleProfileActivate({
-      address,
+      canSwitchAccount: hasMultipleConnectedAccounts,
       profileClickTimeoutRef,
       openMenu,
       switchConnectedAccount: () =>

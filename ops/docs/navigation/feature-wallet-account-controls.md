@@ -17,8 +17,12 @@ action.
 ## Entry Points
 
 - Web disconnected: select `Connect` in the sidebar account area.
-- Web connected: single-activate the user row to open the account dropdown.
-- App layout: open the menu/avatar button, then use footer account actions.
+- Web connected: single-activate the user row to open the account dropdown;
+  with multiple connected profiles, double-click within 400 ms to switch to
+  the next profile.
+- App layout: single-tap the menu/avatar button to open the drawer; with
+  multiple connected profiles, double-tap within 400 ms to switch to the next
+  profile. Then use footer account actions as needed.
 - Connected multi-profile surfaces: use `+` on web or in the app footer when
   another connected profile slot is available.
 - Web proxy switching: select an identity row in the web dropdown.
@@ -31,7 +35,11 @@ action.
   - expanded sidebar button: `Connect`
   - collapsed sidebar icon button tooltip: `Connect Wallet`
 - Connected:
-  - single activate opens the account dropdown immediately
+  - with one connected profile, single activate opens the account dropdown
+    immediately
+  - with multiple connected profiles, single activate opens the dropdown after
+    the shared 400 ms double-activation window; double activate switches to the
+    next connected profile without opening the dropdown
   - collapsed-rail hover visibly highlights the avatar without opening the
     dropdown
   - avatar can show a small unread dot when another connected account has
@@ -93,7 +101,9 @@ action.
 
 1. Open account controls from web sidebar or app sidebar footer.
 2. Connect wallet if needed.
-3. On web, single-activate the user row to open the dropdown.
+3. Single-activate the web user row or app header avatar to open its account
+   surface. With multiple connected profiles, double-activate within 400 ms to
+   switch to the next profile instead.
 4. If another profile slot is available, use `+` on web or in the app footer
    to reopen wallet connect and authorize another account.
 5. Use connected-account controls:

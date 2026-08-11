@@ -29,7 +29,8 @@ standalone row after `About`.
 ## Entry Points
 
 - Open an app-layout route where the top-left control is menu/avatar.
-- Tap the menu/avatar button.
+- Tap the menu/avatar button once to open the drawer. With multiple connected
+  profiles, double-tap within 400 ms to switch to the next profile.
 - Choose a direct row, the connected avatar shortcut, or a grouped route.
 - Close with close button, backdrop tap, right-to-left swipe, or route
   selection.

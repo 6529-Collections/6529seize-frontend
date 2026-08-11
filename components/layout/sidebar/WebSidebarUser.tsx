@@ -24,6 +24,7 @@ import { useIdentity } from "@/hooks/useIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
 
 interface WebSidebarUserProps {
   readonly isCollapsed: boolean;
@@ -48,9 +49,13 @@ function WebSidebarUser({
     isConnected,
     connectedAccounts,
     connectedAccountUnreadNotifications,
+    seizeSwitchConnectedAccount,
   } = useSeizeConnectContext();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   // Click away that properly handles button clicks
   useClickAway(dropdownRef, (event) => {
     if (
@@ -80,6 +85,15 @@ function WebSidebarUser({
   useEffect(() => {
     setAvatarSrc(resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP);
   }, [resolvedPfp]);
+
+  useEffect(
+    () => () => {
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   if (!address) {
     return (
@@ -146,9 +160,65 @@ function WebSidebarUser({
       (connectedAccountUnreadNotifications?.[account.address.toLowerCase()] ??
         0) > 0
   );
+  const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
 
   const toggleUserMenu = () => {
     setShowUserMenu((current) => !current);
+  };
+
+  const switchToNextConnectedAccount = (): boolean => {
+    if (!hasMultipleConnectedAccounts) {
+      return false;
+    }
+
+    const activeIndex = connectedAccounts.findIndex(
+      (account) => account.isActive
+    );
+    const currentIndex = Math.max(activeIndex, 0);
+    const nextAccount =
+      connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
+
+    if (!nextAccount) {
+      return false;
+    }
+
+    try {
+      seizeSwitchConnectedAccount(nextAccount.address);
+      setShowUserMenu(false);
+      return true;
+    } catch (error) {
+      console.error(
+        "Failed to switch connected account from desktop sidebar",
+        error
+      );
+      return false;
+    }
+  };
+
+  const handleProfileActivate = () => {
+    if (!hasMultipleConnectedAccounts) {
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+        profileClickTimeoutRef.current = null;
+      }
+      toggleUserMenu();
+      return;
+    }
+
+    if (profileClickTimeoutRef.current) {
+      clearTimeout(profileClickTimeoutRef.current);
+      profileClickTimeoutRef.current = null;
+
+      if (!switchToNextConnectedAccount()) {
+        setShowUserMenu(true);
+      }
+      return;
+    }
+
+    profileClickTimeoutRef.current = setTimeout(() => {
+      profileClickTimeoutRef.current = null;
+      toggleUserMenu();
+    }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
   };
 
   const onOpenConnect = () => {
@@ -161,11 +231,16 @@ function WebSidebarUser({
     <div className={containerClasses}>
       <button
         ref={buttonRef}
-        onClick={toggleUserMenu}
+        onClick={handleProfileActivate}
         className={`tw-group/user tw-mt-1 tw-w-full tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 ${
           isCollapsed ? "" : "desktop-hover:hover:tw-bg-iron-900"
         }`}
-        aria-label={t(DEFAULT_LOCALE, "webSidebar.accountMenu.openAriaLabel")}
+        aria-label={t(
+          DEFAULT_LOCALE,
+          hasMultipleConnectedAccounts
+            ? "webSidebar.accountMenu.openWithSwitchAriaLabel"
+            : "webSidebar.accountMenu.openAriaLabel"
+        )}
         aria-expanded={showUserMenu}
         aria-controls="user-menu"
       >

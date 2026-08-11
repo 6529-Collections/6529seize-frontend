@@ -1,7 +1,14 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { AuthContext } from "@/components/auth/Auth";
 import WebSidebarUser from "@/components/layout/sidebar/WebSidebarUser";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
 
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
   <div data-testid="item" />
@@ -76,6 +83,55 @@ const profileBase = {
   handle: "alice",
   wallets: [{ wallet: "0xabc", display: "Alice" }],
 } as any;
+
+function renderWebSidebar(options: any) {
+  const setToast = jest.fn();
+  mockConnect.mockReturnValue({
+    address: options.address ?? "0xabc",
+    isAuthenticated: true,
+    hasValidWalletAuth: true,
+    isConnected: true,
+    connectedAccounts: options.connectedAccounts ?? [],
+    connectedAccountUnreadNotifications: {},
+    canAddConnectedAccount: false,
+    seizeConnect: jest.fn(),
+    seizeConnectFresh: jest.fn(),
+    seizeAddConnectedAccount: jest.fn(),
+    seizeDisconnect: jest.fn(),
+    seizeDisconnectAndLogout: jest.fn(),
+    seizeDisconnectAndLogoutAll: jest.fn(),
+    seizeSwitchConnectedAccount:
+      options.seizeSwitchConnectedAccount ?? jest.fn(),
+  });
+  (useChainSwitcher as jest.Mock).mockReturnValue({
+    chains: [],
+    currentChainName: "Ethereum",
+    nextChainName: "Polygon",
+    switchToNextChain: jest.fn(),
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          activeProfileProxy: null,
+          setActiveProfileProxy: jest.fn(),
+          receivedProfileProxies: [],
+          requestSessionUpgrade: jest.fn(),
+          sessionUpgradeRequired: false,
+          setToast,
+        } as any
+      }
+    >
+      <WebSidebarUser
+        isCollapsed={options.isCollapsed ?? false}
+        profile={profileBase}
+      />
+    </AuthContext.Provider>
+  );
+
+  return { setToast };
+}
 
 function renderDropdown(options: any) {
   mockConnect.mockReturnValue({
@@ -262,6 +318,73 @@ describe("HeaderUserMenuDropdown", () => {
     expect(
       screen.getByRole("dialog", { name: "Connect Device modal" })
     ).toBeInTheDocument();
+  });
+
+  it("switches to the next profile on a desktop sidebar double-click", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    renderWebSidebar({
+      connectedAccounts: [
+        { address: "0xabc", isActive: true, isConnected: true },
+        { address: "0xdef", isActive: false, isConnected: true },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: /double-click to switch profiles/i,
+    });
+    fireEvent.click(profileButton);
+    act(() => {
+      jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS - 1);
+    });
+    expect(profileButton).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(profileButton);
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(profileButton).toHaveAttribute("aria-expanded", "false");
+    jest.useRealTimers();
+  });
+
+  it("opens the desktop account menu after one click and the shared delay", () => {
+    jest.useFakeTimers();
+    renderWebSidebar({
+      connectedAccounts: [
+        { address: "0xabc", isActive: true, isConnected: true },
+        { address: "0xdef", isActive: false, isConnected: true },
+      ],
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: /double-click to switch profiles/i,
+    });
+    fireEvent.click(profileButton);
+    act(() => {
+      jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
+    });
+
+    expect(PROFILE_DOUBLE_ACTIVATE_DELAY_MS).toBe(400);
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
+    jest.useRealTimers();
+  });
+
+  it("opens immediately without profile switching when only one profile is connected", () => {
+    const seizeSwitchConnectedAccount = jest.fn();
+    renderWebSidebar({
+      connectedAccounts: [
+        { address: "0xabc", isActive: true, isConnected: true },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open account and profiles menu",
+    });
+    fireEvent.click(profileButton);
+
+    expect(profileButton).toHaveAttribute("aria-expanded", "true");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
   });
 
   it("connects wallet when not connected", async () => {
