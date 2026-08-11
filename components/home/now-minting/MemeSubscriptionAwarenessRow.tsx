@@ -51,8 +51,8 @@ function ReadonlySubscriptionToggle({
             className={clsx(
               "tw-size-3.5 tw-rounded-full tw-ring-1 tw-ring-inset tw-transition-transform",
               checked
-                ? "tw-translate-x-4 tw-bg-white tw-ring-black/15 tw-shadow-[0_1px_4px_rgba(0,0,0,0.55)]"
-                : "tw-translate-x-0 tw-bg-iron-400 tw-ring-black/10 tw-shadow-sm"
+                ? "tw-translate-x-4 tw-bg-white tw-shadow-[0_1px_4px_rgba(0,0,0,0.55)] tw-ring-black/[15%]"
+                : "tw-translate-x-0 tw-bg-iron-400 tw-shadow-sm tw-ring-black/10"
             )}
           />
         </span>

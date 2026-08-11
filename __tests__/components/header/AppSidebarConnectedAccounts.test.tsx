@@ -3,6 +3,9 @@ import userEvent from "@testing-library/user-event";
 import AppSidebarConnectedAccounts from "@/components/header/AppSidebarConnectedAccounts";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import type { AuthContextType } from "@/components/auth/authTypes";
+import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
 import { useIdentity } from "@/hooks/useIdentity";
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -25,15 +28,44 @@ const addAccount = jest.fn();
 const setToast = jest.fn();
 
 function setUpContext({ connectOpen = false }: { connectOpen?: boolean } = {}) {
-  useSeizeConnectContextMock.mockReturnValue({
+  const context: SeizeConnectContextType = {
+    address: "0x1111111111111111111111111111111111111111",
+    walletName: undefined,
+    walletIcon: undefined,
+    isSafeWallet: false,
+    seizeConnect: jest.fn(),
+    seizeConnectFresh: jest.fn().mockResolvedValue(undefined),
+    seizeDisconnect: jest.fn().mockResolvedValue(undefined),
+    seizeDisconnectAndLogout: jest.fn().mockResolvedValue(undefined),
+    seizeDisconnectAndLogoutAll: jest.fn().mockResolvedValue(undefined),
+    seizeAcceptConnection: jest.fn(),
+    seizeConnectOpen: connectOpen,
+    isConnected: true,
+    canSignActiveWallet: true,
+    hasActiveWalletAddress: true,
+    hasValidWalletAuth: true,
+    isAuthenticated: true,
+    connectionState: "connected",
+    walletState: {
+      status: "connected",
+      address: "0x1111111111111111111111111111111111111111",
+    },
+    hasInitializationError: false,
+    initializationError: undefined,
     connectedAccounts: [
       {
         address: "0x1111111111111111111111111111111111111111",
+        role: null,
+        profileId: "profile-1",
+        profileHandle: "first",
         isActive: true,
         isConnected: true,
       },
       {
         address: "0x2222222222222222222222222222222222222222",
+        role: null,
+        profileId: "profile-2",
+        profileHandle: "second",
         isActive: false,
         isConnected: true,
       },
@@ -42,17 +74,29 @@ function setUpContext({ connectOpen = false }: { connectOpen?: boolean } = {}) {
     canAddConnectedAccount: true,
     seizeAddConnectedAccount: addAccount,
     seizeSwitchConnectedAccount: switchAccount,
-    seizeConnectOpen: connectOpen,
-  } as unknown as ReturnType<typeof useSeizeConnectContext>);
+  };
+  useSeizeConnectContextMock.mockReturnValue(context);
 }
 
 describe("AppSidebarConnectedAccounts", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setUpContext();
-    useAuthMock.mockReturnValue({
+    const authContext: AuthContextType = {
+      connectedProfile: null,
+      isAuthenticated: true,
+      fetchingProfile: false,
+      connectionStatus: ProfileConnectedStatus.HAVE_PROFILE,
+      receivedProfileProxies: [],
+      activeProfileProxy: null,
+      showWaves: true,
+      sessionUpgradeRequired: false,
+      requestAuth: jest.fn().mockResolvedValue({ success: true }),
+      requestSessionUpgrade: jest.fn().mockResolvedValue({ success: true }),
       setToast,
-    } as unknown as ReturnType<typeof useAuth>);
+      setActiveProfileProxy: jest.fn().mockResolvedValue(undefined),
+    };
+    useAuthMock.mockReturnValue(authContext);
     useIdentityMock.mockReturnValue({
       profile: { handle: "second" },
       isLoading: false,
