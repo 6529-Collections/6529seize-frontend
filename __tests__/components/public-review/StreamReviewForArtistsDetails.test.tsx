@@ -20,6 +20,7 @@ describe("StreamReviewForArtistsDetails", () => {
       const target =
         heading.id === section.id ? heading : heading.closest("section");
       expect(target).toHaveAttribute("id", section.id);
+      expect(target).toHaveClass("tw-scroll-mt-24");
     }
     expect(container.querySelectorAll("section[id]")).toHaveLength(15);
     expect(

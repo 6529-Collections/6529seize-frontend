@@ -310,7 +310,7 @@ export function StreamReviewForArtistsDetails() {
       >
         <h2
           id={ARTIST_DETAILS_HEADING_ID}
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
+          className="tw-m-0 tw-scroll-mt-24 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
         >
           {t(DEFAULT_LOCALE, "publicReview.forArtistsDetails.heading")}
         </h2>
