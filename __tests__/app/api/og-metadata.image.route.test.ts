@@ -52,6 +52,11 @@ jest.mock("next/server", () => ({
   NextResponse: MockNextResponse,
 }));
 
+const mockUnstableRethrow = jest.fn();
+jest.mock("next/navigation", () => ({
+  unstable_rethrow: (error: unknown) => mockUnstableRethrow(error),
+}));
+
 import { GET } from "@/app/api/og-metadata/image/route";
 import { fetchPublicUrl } from "@/lib/security/urlGuard";
 import type { NextRequest } from "next/server";
@@ -122,6 +127,23 @@ const mockImageResponse = (
 describe("/api/og-metadata/image", () => {
   beforeEach(() => {
     mockFetchPublicUrl.mockReset();
+    mockUnstableRethrow.mockReset();
+  });
+
+  it("rethrows Next.js framework errors instead of converting them to image errors", async () => {
+    const frameworkError = new Error("Dynamic server usage");
+    const request = {
+      get nextUrl() {
+        throw frameworkError;
+      },
+    } as NextRequest;
+    mockUnstableRethrow.mockImplementationOnce((error: unknown) => {
+      throw error;
+    });
+
+    await expect(GET(request)).rejects.toBe(frameworkError);
+    expect(mockUnstableRethrow).toHaveBeenCalledWith(frameworkError);
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
   });
 
   it("normalizes source images up to 50 MiB for drop OG previews", async () => {

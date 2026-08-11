@@ -47,10 +47,11 @@ function ReadonlySubscriptionToggle({
           )}
         >
           <span
+            data-testid="readonly-subscription-toggle-thumb"
             className={clsx(
               "tw-size-3.5 tw-rounded-full tw-shadow-sm tw-transition-transform",
               checked
-                ? "tw-translate-x-4 tw-bg-primary-200"
+                ? "tw-translate-x-4 tw-bg-iron-50"
                 : "tw-translate-x-0 tw-bg-iron-400"
             )}
           />
