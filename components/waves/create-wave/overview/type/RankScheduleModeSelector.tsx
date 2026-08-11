@@ -57,7 +57,7 @@ export default function RankScheduleModeSelector({
       </legend>
       <p
         aria-hidden="true"
-        className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-400"
+        className="tw-m-0 tw-mb-3 tw-text-base tw-font-semibold tw-text-iron-100"
       >
         {t(DEFAULT_LOCALE, "waves.create.rank.mode.legend")}
       </p>
@@ -67,9 +67,7 @@ export default function RankScheduleModeSelector({
           const titleColorClass = isSelected
             ? "tw-text-white"
             : "tw-text-iron-300 group-hover:tw-text-white";
-          const descriptionColorClass = isSelected
-            ? "tw-text-iron-300"
-            : "tw-text-iron-500";
+          const descriptionColorClass = "tw-text-iron-500";
 
           return (
             <CommonBorderedRadioButton
@@ -83,12 +81,12 @@ export default function RankScheduleModeSelector({
             >
               <div className="tw-min-w-0 tw-whitespace-normal">
                 <span
-                  className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${titleColorClass}`}
+                  className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-medium ${titleColorClass}`}
                 >
                   {title}
                 </span>
                 <p
-                  className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-medium tw-leading-4 ${descriptionColorClass}`}
+                  className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-normal tw-leading-4 ${descriptionColorClass}`}
                 >
                   {description}
                 </p>

@@ -19,6 +19,7 @@ interface WaveLeaderboardGridItemCompactFooterProps {
   readonly drop: ExtendedDrop;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
+  readonly emphasizeCurrent?: boolean | undefined;
   readonly isVotingClosed: boolean;
   readonly canShowVotingAction: boolean;
   readonly onVoteButtonClick: () => void;
@@ -74,6 +75,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
   drop,
   winningThreshold,
   winningThresholdMinDurationMs,
+  emphasizeCurrent = false,
   isVotingClosed,
   canShowVotingAction,
   onVoteButtonClick,
@@ -140,6 +142,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
             winningThreshold={winningThreshold}
             winningThresholdMinDurationMs={winningThresholdMinDurationMs}
             isVotingClosed={isVotingClosed}
+            emphasizeCurrent={emphasizeCurrent}
           />
         </div>
         <div
@@ -178,7 +181,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
           </span>
         )}
         {canShowVotingAction && (
-          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
+          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end">
             <VotingModalButton
               drop={drop}
               onClick={onVoteButtonClick}

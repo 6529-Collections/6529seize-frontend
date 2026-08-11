@@ -6,8 +6,23 @@ import { t } from "@/i18n/messages";
 import type {
   CreateWaveApproveDisplayConfig,
   CreateWaveDisplayConfig,
+  CreateWaveProposalCardConfig,
 } from "@/types/waves.types";
+import { DEFAULT_PROPOSAL_CARD_RECIPE } from "./proposal-card.helpers";
+import {
+  getWaveProposalCardMetadataRequest,
+  WAVE_PROPOSAL_CARD_METADATA_KEYS,
+} from "./wave-proposal-card-metadata.helpers";
 import { WaveSubmissionExperience } from "./wave-submission-experience.helpers";
+
+export {
+  getWaveProposalCardConfigFromMetadata,
+  getWaveProposalCardMetadataRequest,
+  getWaveProposalCardMetadataUpdate,
+  getWaveProposalCardRecipeFromMetadata,
+  getWaveProposalCardsEnabledFromMetadata,
+  INITIAL_COMPACT_PROPOSAL_CARD_WAVE_IDS,
+} from "./wave-proposal-card-metadata.helpers";
 
 export const APPROVE_WAVE_TAB_LABEL_MAX_LENGTH = 24;
 export const WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH = 24;
@@ -30,6 +45,8 @@ export const WAVE_DISPLAY_METADATA_KEYS = {
   approvalsTabLabel: "wave_display.approve.tabs.approvals_label",
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
   submissionButtonLabel: "wave_display.submission.button_label",
+  proposalCardRecipe: WAVE_PROPOSAL_CARD_METADATA_KEYS.proposalCardRecipe,
+  compactProposalCards: WAVE_PROPOSAL_CARD_METADATA_KEYS.compactProposalCards,
   customRules: "wave_display.rules.custom",
   outcomesVisible: "wave_display.outcomes.visible",
 } as const;
@@ -216,6 +233,26 @@ const getSubmissionButtonLabelMetadataRequest = (
   };
 };
 
+const getEffectiveCreateWaveProposalCardConfig = (
+  display: CreateWaveDisplayConfig
+): CreateWaveProposalCardConfig =>
+  display.proposalCards ?? {
+    mode: display.compactProposalCards === true ? "custom" : "standard",
+    excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
+    showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
+  };
+
+const getProposalCardsMetadataRequest = (
+  display: CreateWaveDisplayConfig
+): ApiCreateWaveMetadataRequest | null => {
+  const proposalCards = getEffectiveCreateWaveProposalCardConfig(display);
+  if (proposalCards.mode !== "custom") {
+    return null;
+  }
+
+  return getWaveProposalCardMetadataRequest(proposalCards);
+};
+
 export const getCreateWaveDisplayMetadataRequests = ({
   display,
   waveType,
@@ -248,10 +285,15 @@ export const getCreateWaveDisplayMetadataRequests = ({
     waveType === ApiWaveType.Chat
       ? null
       : getSubmissionButtonLabelMetadataRequest(display.submissionButtonLabel);
+  const proposalCardsRequest =
+    waveType === ApiWaveType.Chat
+      ? null
+      : getProposalCardsMetadataRequest(display);
   const requests = [
     outcomeVisibilityRequest,
     customRulesRequest,
     submissionButtonLabelRequest,
+    proposalCardsRequest,
   ].filter(
     (request): request is ApiCreateWaveMetadataRequest => request !== null
   );

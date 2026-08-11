@@ -476,7 +476,7 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   loadMore: "Load more drops",
   loadingMoreButton: "Loading more…",
   "grid.untitled": "Untitled drop",
-  "grid.readFullText": "Read full text",
+  "grid.readFull": "Read full",
   "grid.open": "Open",
   "grid.openNamed": "Open {title}",
   "grid.authorProfile": "View {author}'s profile",
@@ -522,6 +522,43 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyLink: "Copy link",
   copied: "Copied!",
   copyFailed: "Copy failed",
+} as const);
+
+const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
+  contextLabel: "Proposal",
+  readFull: "Read full",
+  readFullNamed: "Read full: {title}",
+  untitledProposal: "Untitled proposal",
+  previewAlt: "Media preview for {title}",
+  "part.one": "{count} part",
+  "part.other": "{count} parts",
+  "media.one": "{count} media item",
+  "media.other": "{count} media items",
+  "attachment.one": "{count} attachment",
+  "attachment.other": "{count} attachments",
+  appearanceLabel: "Proposal card appearance",
+  "mode.standard.label": "Full proposal",
+  "mode.standard.description": "Show original content directly in the feed.",
+  "mode.custom.label": "Summary card",
+  "mode.custom.description":
+    "Show a title, shortened text, and an optional image.",
+  excerptLabel: "Text preview limit",
+  excerptInputAriaLabel: "Maximum proposal preview characters",
+  characters: "characters",
+  excerptRangeError: "Enter a whole number from {min} to {max}.",
+  mediaLabel: "Image on summary card",
+  "settings.editLabel": "Edit proposal card settings",
+  "settings.layoutLabel": "Proposal layout",
+  "settings.rowLabel": "Proposal cards",
+  "settings.toastAuthFailed":
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  "settings.toastSaveFailedTitle":
+    "Couldn't save these proposal card settings.",
+  "settings.toastRetry": PLEASE_TRY_AGAIN,
+  tabLabelsLabel: "Tab labels",
+  tabLabelsDescription: "Names shown on this wave's tabs.",
+  approvalsTabLabel: "Approvals tab label",
+  approvedTabLabel: "Approved tab label",
 } as const);
 
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
@@ -973,6 +1010,8 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 );
 
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
+  title: "Access",
+  description: "Choose who can access, participate in, and manage this wave.",
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   limitedAccessTitle: "Warning: Limited Access",
@@ -984,12 +1023,35 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
+const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
+  title: "Schedule",
+  description:
+    "Review when this wave opens, voting begins, and winners are announced.",
+  "approve.noEndSummary": "Starts {start}. No end date.",
+  "approve.endSummary": "Starts {start}. Ends {end}.",
+  "rank.ongoingSummary":
+    "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
+  "rank.scheduledSummary":
+    "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
+} as const);
+
 const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   cancel: "Cancel",
   complete: "Complete",
   next: "Next",
   previous: "Previous",
   save: "Save",
+} as const);
+
+const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
+  title: "Advanced settings",
+  customized: "Customized",
+  needsAttention: "Needs attention",
+  errorSummary: "Review the highlighted settings before continuing.",
+} as const);
+
+const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  picture: "Wave Profile Picture",
 } as const);
 
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
@@ -1006,6 +1068,10 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
 );
 
 const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
+  title: "Drops",
+  description: "Choose what participants can submit to this wave.",
+  "advanced.defaultSummary": "No additional submission requirements.",
+  "advanced.customSummary": "Submission requirements customized.",
   identityDuplicatesRequireWinners:
     "Perpetual ranking waves never announce winners, so identities can't be resubmitted “after a win”. Choose a different re-submission rule.",
 } as const);
@@ -2680,7 +2746,10 @@ export const EN_US_MESSAGES = {
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_ACTIONS_MESSAGES,
+  ...WAVE_CREATE_ADVANCED_MESSAGES,
+  ...WAVE_CREATE_OVERVIEW_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
+  ...WAVE_CREATE_DATES_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
@@ -2729,6 +2798,7 @@ export const EN_US_MESSAGES = {
   ...WAVES_MOBILE_MESSAGES,
   ...WAVE_LEADERBOARD_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_PROPOSAL_CARD_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,

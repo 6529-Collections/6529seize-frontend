@@ -27,6 +27,7 @@ import {
   normalizeWaveSubmissionButtonLabel,
   normalizeWaveTabLabel,
 } from "./wave-metadata.helpers";
+import { isValidProposalCardExcerptMaxCharacters } from "./proposal-card.helpers";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {
   NAME_REQUIRED = "NAME_REQUIRED",
@@ -69,6 +70,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   APPROVE_WAVE_TAB_LABELS_DUPLICATE = "APPROVE_WAVE_TAB_LABELS_DUPLICATE",
   APPROVE_WAVE_TAB_LABEL_RESERVED = "APPROVE_WAVE_TAB_LABEL_RESERVED",
   SUBMISSION_BUTTON_LABEL_TOO_LONG = "SUBMISSION_BUTTON_LABEL_TOO_LONG",
+  PROPOSAL_CARD_EXCERPT_LENGTH_INVALID = "PROPOSAL_CARD_EXCERPT_LENGTH_INVALID",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -99,6 +101,17 @@ const getOverviewValidationErrors = ({
       WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH
   ) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG);
+  }
+
+  const proposalCards = display?.proposalCards;
+  if (
+    overview.type !== ApiWaveType.Chat &&
+    proposalCards?.mode === "custom" &&
+    !isValidProposalCardExcerptMaxCharacters(proposalCards.excerptMaxCharacters)
+  ) {
+    errors.push(
+      CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID
+    );
   }
 
   if (overview.type === ApiWaveType.Approve) {

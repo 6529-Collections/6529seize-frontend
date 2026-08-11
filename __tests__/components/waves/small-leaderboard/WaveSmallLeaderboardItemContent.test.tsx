@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveSmallLeaderboardItemContent } from "@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
@@ -6,6 +6,10 @@ import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submi
 jest.mock("@/components/waves/drops/WaveDropPartContentMedias", () => () => (
   <div data-testid="medias" />
 ));
+jest.mock(
+  "@/components/waves/drops/proposal/ProposalCardContent",
+  () => (props: any) => <div data-testid="proposal-card">{props.drop.id}</div>
+);
 const waveDropPartContentMarkdownMock = jest.fn(() => (
   <div data-testid="markdown" />
 ));
@@ -99,5 +103,38 @@ describe("WaveSmallLeaderboardItemContent", () => {
         contentPresentation: "quorumCompact",
       })
     );
+  });
+
+  it("uses the shared proposal card and retains the existing open action", async () => {
+    const onDropClick = jest.fn();
+    const user = userEvent.setup();
+    render(
+      <WaveSmallLeaderboardItemContent
+        drop={{ ...baseDrop, id: "proposal-1" }}
+        onDropClick={onDropClick}
+        contentPresentation="proposalCard"
+      />
+    );
+
+    await user.click(screen.getByTestId("proposal-card"));
+
+    expect(onDropClick).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("medias")).not.toBeInTheDocument();
+  });
+
+  it("opens a proposal card from the keyboard", () => {
+    const onDropClick = jest.fn();
+    render(
+      <WaveSmallLeaderboardItemContent
+        drop={{ ...baseDrop, id: "proposal-1" }}
+        onDropClick={onDropClick}
+        contentPresentation="proposalCard"
+      />
+    );
+
+    fireEvent.keyDown(screen.getByRole("button"), { key: " " });
+
+    expect(onDropClick).toHaveBeenCalledTimes(1);
   });
 });

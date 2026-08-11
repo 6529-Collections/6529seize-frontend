@@ -4,6 +4,18 @@ import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 
 let markdownProps: any;
+let mockProposalCardPresentation = "default";
+
+jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
+  useWaveProposalCardPresentation: () => mockProposalCardPresentation,
+}));
+
+jest.mock(
+  "@/components/waves/drops/proposal/ProposalCardContent",
+  () => (props: any) => (
+    <div data-testid="proposal-card">{props.drop.parts[0]?.content}</div>
+  )
+);
 
 jest.mock(
   "@/components/drops/view/part/DropPartMarkdownWithPropLogger",
@@ -23,6 +35,7 @@ jest.mock("next/link", () => ({ children, href }: any) => (
 
 beforeEach(() => {
   markdownProps = undefined;
+  mockProposalCardPresentation = "default";
 });
 
 test("renders loading placeholder when drop missing", () => {
@@ -134,6 +147,50 @@ test("displays quoted part content", () => {
   render(<WaveDropQuote drop={drop} partId={5} onQuoteClick={jest.fn()} />);
   expect(screen.getByTestId("markdown")).toHaveTextContent("text");
   expect(markdownProps.quotePath).toContain("w1:42");
+});
+
+test("uses the reusable compact card for a quoted proposal in an opted-in wave", () => {
+  mockProposalCardPresentation = "proposalCard";
+  const drop = {
+    id: "proposal-1",
+    drop_type: "PARTICIPATORY",
+    serial_no: 42,
+    wave: { id: "network-museum", name: "Network Museum" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [{ part_id: 1, content: "Complete authored proposal" }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+  } as any;
+
+  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
+
+  expect(screen.getByTestId("proposal-card")).toHaveTextContent(
+    "Complete authored proposal"
+  );
+  expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+});
+
+test("keeps quoted chat messages normal in an opted-in proposal wave", () => {
+  mockProposalCardPresentation = "proposalCard";
+  const drop = {
+    id: "chat-1",
+    drop_type: "CHAT",
+    serial_no: 43,
+    wave: { id: "network-museum", name: "Network Museum" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [{ part_id: 1, content: "Normal chat message" }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+  } as any;
+
+  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
+
+  expect(screen.getByTestId("markdown")).toHaveTextContent(
+    "Normal chat message"
+  );
+  expect(screen.queryByTestId("proposal-card")).not.toBeInTheDocument();
 });
 
 test("updates quoted part when partId changes on rerender", () => {

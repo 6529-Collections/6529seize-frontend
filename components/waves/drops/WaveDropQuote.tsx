@@ -19,6 +19,9 @@ import {
   useWaveDropQuoteDisplay,
   WaveDropQuoteDisplayProvider,
 } from "./WaveDropQuoteDisplayContext";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import ProposalCardContent from "./proposal/ProposalCardContent";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -150,6 +153,9 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
 }) => {
   const { onCardActionsActiveChange } = useLinkPreviewContext();
   const { flattenWhenAuthorSameAs } = useWaveDropQuoteDisplay();
+  const proposalCardPresentation = useWaveProposalCardPresentation(
+    drop?.wave.id
+  );
   const quotedPart = useMemo<ApiDropPart | null>(() => {
     if (!drop) {
       return null;
@@ -246,27 +252,32 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     );
   }
 
-  const quoteContent = (
-    <WaveDropQuoteDisplayProvider flattenWhenAuthorSameAs={null}>
-      <DropPartMarkdownWithPropLogger
-        partContent={quotedPart?.content ?? ""}
-        mentionedUsers={drop?.mentioned_users ?? []}
-        mentionedGroups={drop?.mentioned_groups ?? []}
-        mentionedWaves={drop?.mentioned_waves ?? []}
-        referencedNfts={drop?.referenced_nfts ?? []}
-        nftLinks={drop?.nft_links}
-        textSize="sm"
-        onQuoteClick={onQuoteClick}
-        currentDropId={drop?.id}
-        embedPath={embedPath}
-        quotePath={effectiveQuotePath}
-        embedDepth={embedDepth}
-        maxEmbedDepth={maxEmbedDepth}
-        hideLinkPreviews={hideLinkPreviews}
-        onLinkCardActionsActiveChange={resolvedOnLinkCardActionsActiveChange}
-      />
-    </WaveDropQuoteDisplayProvider>
-  );
+  const quoteContent =
+    drop !== null &&
+    drop.drop_type !== ApiDropType.Chat &&
+    proposalCardPresentation === "proposalCard" ? (
+      <ProposalCardContent drop={drop} density="compact" />
+    ) : (
+      <WaveDropQuoteDisplayProvider flattenWhenAuthorSameAs={null}>
+        <DropPartMarkdownWithPropLogger
+          partContent={quotedPart?.content ?? ""}
+          mentionedUsers={drop?.mentioned_users ?? []}
+          mentionedGroups={drop?.mentioned_groups ?? []}
+          mentionedWaves={drop?.mentioned_waves ?? []}
+          referencedNfts={drop?.referenced_nfts ?? []}
+          nftLinks={drop?.nft_links}
+          textSize="sm"
+          onQuoteClick={onQuoteClick}
+          currentDropId={drop?.id}
+          embedPath={embedPath}
+          quotePath={effectiveQuotePath}
+          embedDepth={embedDepth}
+          maxEmbedDepth={maxEmbedDepth}
+          hideLinkPreviews={hideLinkPreviews}
+          onLinkCardActionsActiveChange={resolvedOnLinkCardActionsActiveChange}
+        />
+      </WaveDropQuoteDisplayProvider>
+    );
 
   if (shouldFlattenQuote) {
     return quoteContent;

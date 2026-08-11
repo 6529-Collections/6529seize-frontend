@@ -37,6 +37,7 @@ threads.
 ### Reading, media, and link actions
 
 - [Wave Drop Content Display](feature-content-display.md)
+- [Compact Proposal Cards](feature-proposal-cards.md)
 - [Wave Drop Reply Preview Rows](feature-reply-preview-rows.md)
 - [Wave Drop Image Viewer and Scaling](feature-image-viewer-and-scaling.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)

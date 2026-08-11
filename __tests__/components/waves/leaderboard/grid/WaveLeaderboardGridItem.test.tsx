@@ -207,7 +207,7 @@ describe("WaveLeaderboardGridItem", () => {
       "tw-text-sm",
       "tw-text-iron-100"
     );
-    expect(screen.getByText("Read full text")).toHaveClass(
+    expect(screen.getByText("Read full")).toHaveClass(
       "tw-text-xs",
       "tw-text-primary-400",
       "tw-min-h-11"

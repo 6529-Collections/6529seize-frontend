@@ -22,7 +22,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="tw-flex tw-w-full tw-flex-wrap tw-justify-between tw-gap-y-2 xl:tw-flex-nowrap"
+      className="tw-flex tw-min-h-10 tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-y-2 xl:tw-flex-nowrap"
     >
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 xl:tw-w-auto">
         <WaveWinnersDropHeaderAuthorHandle winner={winner} />
