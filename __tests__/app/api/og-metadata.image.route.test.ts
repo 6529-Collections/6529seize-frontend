@@ -136,7 +136,7 @@ describe("/api/og-metadata/image", () => {
       get nextUrl() {
         throw frameworkError;
       },
-    } as NextRequest;
+    } as unknown as NextRequest;
     mockUnstableRethrow.mockImplementationOnce((error: unknown) => {
       throw error;
     });
