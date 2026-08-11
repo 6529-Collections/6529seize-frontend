@@ -228,6 +228,30 @@ describe("getProposalCardViewModel", () => {
     });
   });
 
+  it("falls back to the first still NFT preview candidate", () => {
+    const result = getProposalCardViewModel(
+      makeDrop({
+        nft_links: [
+          {
+            data: {
+              media_preview: {
+                status: ApiNftLinkMediaPreviewStatusEnum.Ready,
+                small_url: "animated.gif",
+                thumb_url: "ready-thumb.jpg",
+                card_url: "ready-card.jpg",
+                mime_type: "image/jpeg",
+              },
+            },
+          },
+        ],
+      })
+    );
+
+    expect(result.previewImage).toEqual({
+      url: "ready-thumb.jpg",
+    });
+  });
+
   it("omits the preview when the recipe disables media thumbnails", () => {
     const result = getProposalCardViewModel(
       makeDrop({

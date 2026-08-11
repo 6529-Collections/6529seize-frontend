@@ -132,14 +132,17 @@ const getProposalCardPreviewImage = (
       continue;
     }
 
-    const url = [preview.small_url, preview.thumb_url, preview.card_url]
-      .map((candidate) => candidate?.trim() ?? "")
-      .find((candidate) => candidate.length > 0);
     const previewMimeType = preview.mime_type?.trim() ?? "";
     const mimeType =
       previewMimeType.length > 0 ? previewMimeType : "image/jpeg";
+    const url = [preview.small_url, preview.thumb_url, preview.card_url]
+      .map((candidate) => candidate?.trim() ?? "")
+      .find(
+        (candidate) =>
+          candidate.length > 0 && isStaticImage(mimeType, candidate)
+      );
 
-    if (url && isStaticImage(mimeType, url)) {
+    if (url) {
       return { url };
     }
   }
