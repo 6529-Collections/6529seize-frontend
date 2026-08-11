@@ -56,11 +56,19 @@ const getLatestMetadataItem = ({
   readonly dataKey: string;
 }): ApiWaveMetadata | null => {
   const rows = getMetadataRows({ metadata, dataKey });
-  if (!rows.length) {
+  const firstRow = rows[0];
+  if (!firstRow) {
     return null;
   }
 
-  return rows.reduce((latest, item) => (item.id > latest.id ? item : latest));
+  let latest = firstRow;
+  for (const item of rows) {
+    if (item.id > latest.id) {
+      latest = item;
+    }
+  }
+
+  return latest;
 };
 
 const parseProposalCardPresentation = (
