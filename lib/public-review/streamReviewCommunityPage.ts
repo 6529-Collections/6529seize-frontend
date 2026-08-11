@@ -17,6 +17,41 @@ function steps(keys: readonly MessageKey[]): string[] {
   return keys.map((key, index) => `${index + 1}. ${copy(key)}`);
 }
 
+function getListSection({
+  headingKey,
+  introKey,
+  list,
+  paragraphKeys = [],
+}: {
+  readonly headingKey: MessageKey;
+  readonly introKey: MessageKey;
+  readonly list: readonly string[];
+  readonly paragraphKeys?: readonly MessageKey[] | undefined;
+}): string[] {
+  return [
+    `## ${copy(headingKey)}`,
+    "",
+    copy(introKey),
+    "",
+    ...list,
+    ...paragraphKeys.flatMap((key) => ["", copy(key)]),
+    "",
+  ];
+}
+
+function getParagraphSection(
+  headingKey: MessageKey,
+  paragraphKeys: readonly MessageKey[]
+): string[] {
+  return [
+    `## ${copy(headingKey)}`,
+    "",
+    ...paragraphKeys.flatMap((key, index) =>
+      index === 0 ? [copy(key)] : ["", copy(key)]
+    ),
+  ];
+}
+
 function getParticipationSections(): string[] {
   return [
     `## ${copy("publicReview.community.editorial.people.heading")}`,
@@ -63,101 +98,90 @@ function getParticipationSections(): string[] {
     "",
     copy("publicReview.community.editorial.safety.otherProtocol"),
     "",
-    `## ${copy("publicReview.community.editorial.submit.heading")}`,
-    "",
-    copy("publicReview.community.editorial.submit.intro"),
-    "",
-    ...steps([
-      "publicReview.community.editorial.submit.page",
-      "publicReview.community.editorial.submit.section",
-      "publicReview.community.editorial.submit.classify",
-      "publicReview.community.editorial.submit.explain",
-      "publicReview.community.editorial.submit.send",
-    ]),
-    "",
-    copy("publicReview.community.editorial.submit.crossModule"),
-    "",
-    copy("publicReview.community.editorial.submit.short"),
-    "",
-    `## ${copy("publicReview.community.editorial.type.heading")}`,
-    "",
-    copy("publicReview.community.editorial.type.intro"),
-    "",
-    ...bullets([
-      "publicReview.community.editorial.type.question",
-      "publicReview.community.editorial.type.documentation",
-      "publicReview.community.editorial.type.artist",
-      "publicReview.community.editorial.type.product",
-      "publicReview.community.editorial.type.protocol",
-      "publicReview.community.editorial.type.bug",
-      "publicReview.community.editorial.type.security",
-      "publicReview.community.editorial.type.testing",
-      "publicReview.community.editorial.type.accessibility",
-    ]),
-    "",
-    copy("publicReview.community.editorial.type.outro"),
-    "",
-    `## ${copy("publicReview.community.editorial.impact.heading")}`,
-    "",
-    copy("publicReview.community.editorial.impact.intro"),
-    "",
-    ...bullets([
-      "publicReview.community.editorial.impact.critical",
-      "publicReview.community.editorial.impact.high",
-      "publicReview.community.editorial.impact.medium",
-      "publicReview.community.editorial.impact.low",
-      "publicReview.community.editorial.impact.informational",
-      "publicReview.community.editorial.impact.unknown",
-    ]),
-    "",
-    copy("publicReview.community.editorial.impact.outro"),
+    ...getListSection({
+      headingKey: "publicReview.community.editorial.submit.heading",
+      introKey: "publicReview.community.editorial.submit.intro",
+      list: steps([
+        "publicReview.community.editorial.submit.page",
+        "publicReview.community.editorial.submit.section",
+        "publicReview.community.editorial.submit.classify",
+        "publicReview.community.editorial.submit.explain",
+        "publicReview.community.editorial.submit.send",
+      ]),
+      paragraphKeys: [
+        "publicReview.community.editorial.submit.crossModule",
+        "publicReview.community.editorial.submit.short",
+      ],
+    }),
+    ...getListSection({
+      headingKey: "publicReview.community.editorial.type.heading",
+      introKey: "publicReview.community.editorial.type.intro",
+      list: bullets([
+        "publicReview.community.editorial.type.question",
+        "publicReview.community.editorial.type.documentation",
+        "publicReview.community.editorial.type.artist",
+        "publicReview.community.editorial.type.product",
+        "publicReview.community.editorial.type.protocol",
+        "publicReview.community.editorial.type.bug",
+        "publicReview.community.editorial.type.security",
+        "publicReview.community.editorial.type.testing",
+        "publicReview.community.editorial.type.accessibility",
+      ]),
+      paragraphKeys: ["publicReview.community.editorial.type.outro"],
+    }),
+    ...getListSection({
+      headingKey: "publicReview.community.editorial.impact.heading",
+      introKey: "publicReview.community.editorial.impact.intro",
+      list: bullets([
+        "publicReview.community.editorial.impact.critical",
+        "publicReview.community.editorial.impact.high",
+        "publicReview.community.editorial.impact.medium",
+        "publicReview.community.editorial.impact.low",
+        "publicReview.community.editorial.impact.informational",
+        "publicReview.community.editorial.impact.unknown",
+      ]),
+      paragraphKeys: ["publicReview.community.editorial.impact.outro"],
+    }),
   ];
 }
 
 function getReportingSections(): string[] {
   return [
-    "",
-    `## ${copy("publicReview.community.editorial.report.heading")}`,
-    "",
-    copy("publicReview.community.editorial.report.intro"),
-    "",
-    ...steps([
-      "publicReview.community.editorial.report.expected",
-      "publicReview.community.editorial.report.observed",
-      "publicReview.community.editorial.report.affected",
-      "publicReview.community.editorial.report.preconditions",
-      "publicReview.community.editorial.report.consequence",
-      "publicReview.community.editorial.report.reproduction",
-      "publicReview.community.editorial.report.fix",
+    ...getListSection({
+      headingKey: "publicReview.community.editorial.report.heading",
+      introKey: "publicReview.community.editorial.report.intro",
+      list: steps([
+        "publicReview.community.editorial.report.expected",
+        "publicReview.community.editorial.report.observed",
+        "publicReview.community.editorial.report.affected",
+        "publicReview.community.editorial.report.preconditions",
+        "publicReview.community.editorial.report.consequence",
+        "publicReview.community.editorial.report.reproduction",
+        "publicReview.community.editorial.report.fix",
+      ]),
+      paragraphKeys: [
+        "publicReview.community.editorial.report.product",
+        "publicReview.community.editorial.report.artist",
+      ],
+    }),
+    ...getListSection({
+      headingKey: "publicReview.community.editorial.technical.heading",
+      introKey: "publicReview.community.editorial.technical.intro",
+      list: bullets([
+        "publicReview.community.editorial.technical.reference",
+        "publicReview.community.editorial.technical.commit",
+        "publicReview.community.editorial.technical.order",
+        "publicReview.community.editorial.technical.state",
+        "publicReview.community.editorial.technical.test",
+      ]),
+      paragraphKeys: ["publicReview.community.editorial.technical.paths"],
+    }),
+    ...getParagraphSection("publicReview.community.editorial.after.heading", [
+      "publicReview.community.editorial.after.new",
+      "publicReview.community.editorial.after.replies",
+      "publicReview.community.editorial.after.currentLimit",
+      "publicReview.community.editorial.after.future",
     ]),
-    "",
-    copy("publicReview.community.editorial.report.product"),
-    "",
-    copy("publicReview.community.editorial.report.artist"),
-    "",
-    `## ${copy("publicReview.community.editorial.technical.heading")}`,
-    "",
-    copy("publicReview.community.editorial.technical.intro"),
-    "",
-    ...bullets([
-      "publicReview.community.editorial.technical.reference",
-      "publicReview.community.editorial.technical.commit",
-      "publicReview.community.editorial.technical.order",
-      "publicReview.community.editorial.technical.state",
-      "publicReview.community.editorial.technical.test",
-    ]),
-    "",
-    copy("publicReview.community.editorial.technical.paths"),
-    "",
-    `## ${copy("publicReview.community.editorial.after.heading")}`,
-    "",
-    copy("publicReview.community.editorial.after.new"),
-    "",
-    copy("publicReview.community.editorial.after.replies"),
-    "",
-    copy("publicReview.community.editorial.after.currentLimit"),
-    "",
-    copy("publicReview.community.editorial.after.future"),
   ];
 }
 

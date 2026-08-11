@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import type { PublicReviewSectionDefinition } from "@/lib/public-review/publicReviewTypes";
 
 type ArtistDetailBasis = "code" | "accepted" | "proposed";
 
@@ -13,6 +14,8 @@ type ArtistDetailSection = {
   readonly ordered?: boolean;
 };
 
+const ARTIST_DETAILS_HEADING_ID = "stream-artist-details-heading";
+
 const BASIS_COPY: Record<
   ArtistDetailBasis,
   {
@@ -25,7 +28,7 @@ const BASIS_COPY: Record<
     labelKey: "publicReview.forArtistsDetails.basis.code.label",
     descriptionKey: "publicReview.forArtistsDetails.basis.code.description",
     className:
-      "tw-border-primary-400/25 tw-bg-primary-400/[0.08] tw-text-primary-200",
+      "tw-border-primary-400/25 tw-bg-primary-400/[0.08] tw-text-primary-300",
   },
   accepted: {
     labelKey: "publicReview.forArtistsDetails.basis.accepted.label",
@@ -260,6 +263,18 @@ const DETAIL_SECTIONS: readonly ArtistDetailSection[] = [
   },
 ];
 
+export const STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS: readonly PublicReviewSectionDefinition[] =
+  [
+    {
+      id: ARTIST_DETAILS_HEADING_ID,
+      title: t(DEFAULT_LOCALE, "publicReview.forArtistsDetails.heading"),
+    },
+    ...DETAIL_SECTIONS.map((section) => ({
+      id: section.id,
+      title: t(DEFAULT_LOCALE, section.titleKey),
+    })),
+  ];
+
 function ArtistDetailPoints({
   ordered = false,
   pointKeys,
@@ -290,11 +305,11 @@ export function StreamReviewForArtistsDetails() {
   return (
     <div className="tw-mt-16 tw-w-full tw-max-w-[52rem]">
       <section
-        aria-labelledby="stream-artist-details-heading"
+        aria-labelledby={ARTIST_DETAILS_HEADING_ID}
         className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.09] tw-bg-iron-950/60 tw-p-5 sm:tw-p-7"
       >
         <h2
-          id="stream-artist-details-heading"
+          id={ARTIST_DETAILS_HEADING_ID}
           className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
         >
           {t(DEFAULT_LOCALE, "publicReview.forArtistsDetails.heading")}
@@ -330,8 +345,8 @@ export function StreamReviewForArtistsDetails() {
             aria-labelledby={`${section.id}-heading`}
             className={
               index === 0
-                ? "scroll-mt-24"
-                : "scroll-mt-24 tw-mt-12 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-12"
+                ? "tw-scroll-mt-24"
+                : "tw-mt-12 tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-12"
             }
           >
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">

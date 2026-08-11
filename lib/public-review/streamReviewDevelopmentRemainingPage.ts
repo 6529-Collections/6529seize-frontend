@@ -1,13 +1,30 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
+type DevelopmentSource = {
+  readonly commit: string;
+  readonly repository: string;
+};
+
 const copy = (key: MessageKey) => t(DEFAULT_LOCALE, key);
 const bullets = (keys: readonly MessageKey[]) =>
   keys.map((key) => `- ${copy(key)}`);
 const questions = (keys: readonly MessageKey[]) =>
   keys.map((key, index) => `${index + 1}. ${copy(key)}`);
+const bulletSubsection = (
+  headingKey: MessageKey,
+  bulletKeys: readonly MessageKey[]
+): readonly string[] => [
+  `### ${copy(headingKey)}`,
+  "",
+  ...bullets(bulletKeys),
+  "",
+];
 
-function getTestsAndLimitations(): readonly string[] {
+function getTestsAndLimitations(
+  source: DevelopmentSource
+): readonly string[] {
+  const sourceRoot = `https://github.com/${source.repository}/blob/${source.commit}`;
   return [
     `## ${copy("publicReview.development.editorial.remaining.tests.heading")}`,
     "",
@@ -58,7 +75,7 @@ function getTestsAndLimitations(): readonly string[] {
     "",
     copy("publicReview.development.editorial.remaining.static.register"),
     "",
-    `[${copy("publicReview.development.editorial.remaining.static.link")}](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/ops/SLITHER_BASELINE.json).`,
+    `[${copy("publicReview.development.editorial.remaining.static.link")}](${sourceRoot}/ops/SLITHER_BASELINE.json).`,
     "",
     `## ${copy("publicReview.development.editorial.remaining.limitations.heading")}`,
     "",
@@ -122,7 +139,8 @@ function getTestsAndLimitations(): readonly string[] {
   ];
 }
 
-function getReleaseEvidence(): readonly string[] {
+function getReleaseEvidence(source: DevelopmentSource): readonly string[] {
+  const sourceRoot = `https://github.com/${source.repository}/blob/${source.commit}`;
   return [
     `## ${copy("publicReview.development.editorial.remaining.standard.heading")}`,
     "",
@@ -144,71 +162,71 @@ function getReleaseEvidence(): readonly string[] {
     "",
     copy("publicReview.development.editorial.remaining.bytecode.notBuilt"),
     "",
-    `[${copy("publicReview.development.editorial.remaining.bytecode.link")}](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/release-artifacts/latest/bytecode-release-proof.json).`,
+    `[${copy("publicReview.development.editorial.remaining.bytecode.link")}](${sourceRoot}/release-artifacts/latest/bytecode-release-proof.json).`,
     "",
     `## ${copy("publicReview.development.editorial.remaining.candidate.heading")}`,
     "",
     copy("publicReview.development.editorial.remaining.candidate.intro"),
     "",
-    `### ${copy("publicReview.development.editorial.remaining.candidate.codeHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.candidate.code.hashes",
-      "publicReview.development.editorial.remaining.candidate.code.deployment",
-      "publicReview.development.editorial.remaining.candidate.code.graph",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.candidate.authorityHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.candidate.authority.roles",
-      "publicReview.development.editorial.remaining.candidate.authority.records",
-      "publicReview.development.editorial.remaining.candidate.authority.governance",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.candidate.externalHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.candidate.external.randomness",
-      "publicReview.development.editorial.remaining.candidate.external.money",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.candidate.deploymentHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.candidate.deployment.sealing",
-      "publicReview.development.editorial.remaining.candidate.deployment.readback",
-    ]),
-    "",
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.candidate.codeHeading",
+      [
+        "publicReview.development.editorial.remaining.candidate.code.hashes",
+        "publicReview.development.editorial.remaining.candidate.code.deployment",
+        "publicReview.development.editorial.remaining.candidate.code.graph",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.candidate.authorityHeading",
+      [
+        "publicReview.development.editorial.remaining.candidate.authority.roles",
+        "publicReview.development.editorial.remaining.candidate.authority.records",
+        "publicReview.development.editorial.remaining.candidate.authority.governance",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.candidate.externalHeading",
+      [
+        "publicReview.development.editorial.remaining.candidate.external.randomness",
+        "publicReview.development.editorial.remaining.candidate.external.money",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.candidate.deploymentHeading",
+      [
+        "publicReview.development.editorial.remaining.candidate.deployment.sealing",
+        "publicReview.development.editorial.remaining.candidate.deployment.readback",
+      ]
+    ),
     copy("publicReview.development.editorial.remaining.candidate.independent"),
     "",
     `## ${copy("publicReview.development.editorial.remaining.external.heading")}`,
     "",
     copy("publicReview.development.editorial.remaining.external.intro"),
     "",
-    `### ${copy("publicReview.development.editorial.remaining.external.chainHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.external.chain.testnet",
-      "publicReview.development.editorial.remaining.external.chain.wallets",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.external.servicesHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.external.services.randomness",
-      "publicReview.development.editorial.remaining.external.services.marketplaces",
-      "publicReview.development.editorial.remaining.external.services.rpc",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.external.operationsHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.external.operations.preservation",
-      "publicReview.development.editorial.remaining.external.operations.auctions",
-      "publicReview.development.editorial.remaining.external.operations.continuity",
-    ]),
-    "",
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.external.chainHeading",
+      [
+        "publicReview.development.editorial.remaining.external.chain.testnet",
+        "publicReview.development.editorial.remaining.external.chain.wallets",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.external.servicesHeading",
+      [
+        "publicReview.development.editorial.remaining.external.services.randomness",
+        "publicReview.development.editorial.remaining.external.services.marketplaces",
+        "publicReview.development.editorial.remaining.external.services.rpc",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.external.operationsHeading",
+      [
+        "publicReview.development.editorial.remaining.external.operations.preservation",
+        "publicReview.development.editorial.remaining.external.operations.auctions",
+        "publicReview.development.editorial.remaining.external.operations.continuity",
+      ]
+    ),
     copy("publicReview.development.editorial.remaining.external.coverage"),
     "",
     `## ${copy("publicReview.development.editorial.remaining.audit.heading")}`,
@@ -228,65 +246,65 @@ function getBlockersAndQuestions(): readonly string[] {
     "",
     copy("publicReview.development.editorial.remaining.blockers.intro"),
     "",
-    `### ${copy("publicReview.development.editorial.remaining.blockers.codeHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.blockers.code.findings",
-      "publicReview.development.editorial.remaining.blockers.code.finalSupply",
-      "publicReview.development.editorial.remaining.blockers.code.governance",
-      "publicReview.development.editorial.remaining.blockers.code.bytecode",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.blockers.pathHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.blockers.path.minting",
-      "publicReview.development.editorial.remaining.blockers.path.accounting",
-      "publicReview.development.editorial.remaining.blockers.path.royalties",
-      "publicReview.development.editorial.remaining.blockers.path.adapter",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.blockers.setupHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.blockers.setup.randomness",
-      "publicReview.development.editorial.remaining.blockers.setup.finality",
-      "publicReview.development.editorial.remaining.blockers.setup.deployment",
-      "publicReview.development.editorial.remaining.blockers.setup.preservation",
-      "publicReview.development.editorial.remaining.blockers.setup.feedback",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.blockers.reviewHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.blockers.review.audit",
-      "publicReview.development.editorial.remaining.blockers.review.version",
-    ]),
-    "",
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.blockers.codeHeading",
+      [
+        "publicReview.development.editorial.remaining.blockers.code.findings",
+        "publicReview.development.editorial.remaining.blockers.code.finalSupply",
+        "publicReview.development.editorial.remaining.blockers.code.governance",
+        "publicReview.development.editorial.remaining.blockers.code.bytecode",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.blockers.pathHeading",
+      [
+        "publicReview.development.editorial.remaining.blockers.path.minting",
+        "publicReview.development.editorial.remaining.blockers.path.accounting",
+        "publicReview.development.editorial.remaining.blockers.path.royalties",
+        "publicReview.development.editorial.remaining.blockers.path.adapter",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.blockers.setupHeading",
+      [
+        "publicReview.development.editorial.remaining.blockers.setup.randomness",
+        "publicReview.development.editorial.remaining.blockers.setup.finality",
+        "publicReview.development.editorial.remaining.blockers.setup.deployment",
+        "publicReview.development.editorial.remaining.blockers.setup.preservation",
+        "publicReview.development.editorial.remaining.blockers.setup.feedback",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.blockers.reviewHeading",
+      [
+        "publicReview.development.editorial.remaining.blockers.review.audit",
+        "publicReview.development.editorial.remaining.blockers.review.version",
+      ]
+    ),
     copy("publicReview.development.editorial.remaining.blockers.outro"),
     "",
     `## ${copy("publicReview.development.editorial.remaining.threats.heading")}`,
     "",
     copy("publicReview.development.editorial.remaining.threats.intro"),
     "",
-    `### ${copy("publicReview.development.editorial.remaining.threats.attackersHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.threats.attackers.people",
-      "publicReview.development.editorial.remaining.threats.attackers.chain",
-      "publicReview.development.editorial.remaining.threats.attackers.signatures",
-      "publicReview.development.editorial.remaining.threats.attackers.money",
-    ]),
-    "",
-    `### ${copy("publicReview.development.editorial.remaining.threats.systemsHeading")}`,
-    "",
-    ...bullets([
-      "publicReview.development.editorial.remaining.threats.systems.accounts",
-      "publicReview.development.editorial.remaining.threats.systems.services",
-      "publicReview.development.editorial.remaining.threats.systems.metadata",
-      "publicReview.development.editorial.remaining.threats.systems.config",
-    ]),
-    "",
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.threats.attackersHeading",
+      [
+        "publicReview.development.editorial.remaining.threats.attackers.people",
+        "publicReview.development.editorial.remaining.threats.attackers.chain",
+        "publicReview.development.editorial.remaining.threats.attackers.signatures",
+        "publicReview.development.editorial.remaining.threats.attackers.money",
+      ]
+    ),
+    ...bulletSubsection(
+      "publicReview.development.editorial.remaining.threats.systemsHeading",
+      [
+        "publicReview.development.editorial.remaining.threats.systems.accounts",
+        "publicReview.development.editorial.remaining.threats.systems.services",
+        "publicReview.development.editorial.remaining.threats.systems.metadata",
+        "publicReview.development.editorial.remaining.threats.systems.config",
+      ]
+    ),
     `### ${copy("publicReview.development.editorial.remaining.threats.mistakesHeading")}`,
     "",
     copy("publicReview.development.editorial.remaining.threats.mistakes"),
@@ -331,7 +349,7 @@ function getBlockersAndQuestions(): readonly string[] {
     "",
     copy("publicReview.development.editorial.remaining.findings.policy"),
     "",
-    `[${copy("publicReview.development.editorial.remaining.findings.guide")}](./community-review#public-conduct-and-sensitive-information).`,
+    `[${copy("publicReview.development.editorial.remaining.findings.guide")}](./community-review#before-reporting-a-security-issue).`,
     "",
     copy("publicReview.development.editorial.remaining.findings.response"),
     "",
@@ -358,10 +376,12 @@ function getBlockersAndQuestions(): readonly string[] {
   ];
 }
 
-export function getCurrentDevelopmentRemainingMarkdown(): string {
+export function getCurrentDevelopmentRemainingMarkdown(
+  source: DevelopmentSource
+): string {
   return [
-    ...getTestsAndLimitations(),
-    ...getReleaseEvidence(),
+    ...getTestsAndLimitations(source),
+    ...getReleaseEvidence(source),
     ...getBlockersAndQuestions(),
   ].join("\n");
 }

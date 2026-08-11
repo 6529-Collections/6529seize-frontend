@@ -99,7 +99,7 @@ matching records at a time.
 ## Implementation and Evidence Status
 
 The current **Where Development Stands** page begins with a direct launch answer:
-Stream is not ready yet. It lists the four remaining launch gates in plain
+Stream is not ready yet. It lists the three remaining launch gates in plain
 language and shows the last checked date plus the open release-blocker count.
 The next sections explain the scope and use five plain progress labels both in
 the guide and as later section names. They keep built code separate from safety

@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
-import { StreamReviewForArtistsDetails } from "@/components/public-review/StreamReviewForArtistsDetails";
+import {
+  STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
+  StreamReviewForArtistsDetails,
+} from "@/components/public-review/StreamReviewForArtistsDetails";
 
 describe("StreamReviewForArtistsDetails", () => {
   it("keeps the full technical review in plain language", () => {
@@ -9,6 +12,15 @@ describe("StreamReviewForArtistsDetails", () => {
     expect(
       screen.getByRole("heading", { name: "How to read the details" })
     ).toBeInTheDocument();
+    for (const section of STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS) {
+      const heading = screen.getByRole("heading", {
+        level: 2,
+        name: section.title,
+      });
+      const target =
+        heading.id === section.id ? heading : heading.closest("section");
+      expect(target).toHaveAttribute("id", section.id);
+    }
     expect(container.querySelectorAll("section[id]")).toHaveLength(15);
     expect(
       screen.getByRole("heading", {

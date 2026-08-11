@@ -1,5 +1,9 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import {
+  getRequiredEditorialMatch,
+  replaceRequiredEditorialMarkdown,
+} from "@/lib/public-review/editorialReplacement";
 import { getCurrentDevelopmentRemainingMarkdown } from "@/lib/public-review/streamReviewDevelopmentRemainingPage";
 
 const DEVELOPMENT_EDITORIAL_OPENING =
@@ -26,27 +30,22 @@ const DEVELOPMENT_OPEN_MISSING_LABEL: MessageKey =
 
 const DEVELOPMENT_PROGRESS_ROWS = [
   {
-    sourceHeading: "Working in the rehearsal",
     label: "publicReview.development.editorial.progress.working.label",
     meaning: "publicReview.development.editorial.progress.working.meaning",
   },
   {
-    sourceHeading: "Connected for integration",
     label: "publicReview.development.editorial.progress.connected.label",
     meaning: "publicReview.development.editorial.progress.connected.meaning",
   },
   {
-    sourceHeading: "Source-implemented systems",
     label: "publicReview.development.editorial.progress.code.label",
     meaning: "publicReview.development.editorial.progress.code.meaning",
   },
   {
-    sourceHeading: "Planned for release",
     label: "publicReview.development.editorial.progress.plan.label",
     meaning: "publicReview.development.editorial.progress.plan.meaning",
   },
   {
-    sourceHeading: "Under discussion",
     label: "publicReview.development.editorial.progress.open.label",
     meaning: "publicReview.development.editorial.progress.open.meaning",
   },
@@ -563,47 +562,62 @@ export function getCurrentDevelopmentEditorialMarkdown({
         limit
       )} |`
   ).join("\n");
-  const markdownWithPlainOpening = editorialMarkdown.replace(
+  const openingMatch = getRequiredEditorialMatch(
+    editorialMarkdown,
     DEVELOPMENT_EDITORIAL_OPENING,
-    (_match, title: string) =>
-      `${title}${getDevelopmentOpening({
-        progressRows,
-        proofRows,
-        source,
-        sourceUrl,
-      })}\n\n`
+    "development opening"
   );
-  const markdownWithPlainWorkingSection = markdownWithPlainOpening.replace(
+  const title = openingMatch[1];
+  if (title === undefined) {
+    throw new Error("The current Stream review title is unavailable.");
+  }
+  const markdownWithPlainOpening = replaceRequiredEditorialMarkdown(
+    editorialMarkdown,
+    DEVELOPMENT_EDITORIAL_OPENING,
+    `${title}${getDevelopmentOpening({
+      progressRows,
+      proofRows,
+      source,
+      sourceUrl,
+    })}\n\n`,
+    "development opening"
+  );
+  const markdownWithPlainWorkingSection = replaceRequiredEditorialMarkdown(
+    markdownWithPlainOpening,
     DEVELOPMENT_WORKING_SECTION,
-    `${getDevelopmentWorkingSection(rehearsalSourceUrl)}\n\n`
+    `${getDevelopmentWorkingSection(rehearsalSourceUrl)}\n\n`,
+    "development working section"
   );
   const markdownWithPlainConnectedSection =
-    markdownWithPlainWorkingSection.replace(
+    replaceRequiredEditorialMarkdown(
+      markdownWithPlainWorkingSection,
       DEVELOPMENT_CONNECTED_SECTION,
-      `${getDevelopmentConnectedSection()}\n\n`
+      `${getDevelopmentConnectedSection()}\n\n`,
+      "development connected section"
     );
   const markdownWithPlainCodeSection =
-    markdownWithPlainConnectedSection.replace(
+    replaceRequiredEditorialMarkdown(
+      markdownWithPlainConnectedSection,
       DEVELOPMENT_CODE_SECTION,
-      `${getDevelopmentCodeSection()}\n\n`
+      `${getDevelopmentCodeSection()}\n\n`,
+      "development code section"
     );
-  const markdownWithPlainPlanSection = markdownWithPlainCodeSection.replace(
+  const markdownWithPlainPlanSection = replaceRequiredEditorialMarkdown(
+    markdownWithPlainCodeSection,
     DEVELOPMENT_PLAN_SECTION,
-    `${getDevelopmentPlanSection()}\n\n`
+    `${getDevelopmentPlanSection()}\n\n`,
+    "development plan section"
   );
-  const markdownWithPlainOpenSection = markdownWithPlainPlanSection.replace(
+  const markdownWithPlainOpenSection = replaceRequiredEditorialMarkdown(
+    markdownWithPlainPlanSection,
     DEVELOPMENT_OPEN_SECTION,
-    `${getDevelopmentOpenSection()}\n\n`
+    `${getDevelopmentOpenSection()}\n\n`,
+    "development open section"
   );
-  const markdownWithPlainRemainingSections =
-    markdownWithPlainOpenSection.replace(
-      DEVELOPMENT_REMAINING_SECTIONS,
-      getCurrentDevelopmentRemainingMarkdown()
-    );
-
-  return DEVELOPMENT_PROGRESS_ROWS.reduce(
-    (markdown, { label, sourceHeading }) =>
-      markdown.replace(`## ${sourceHeading}`, `## ${t(DEFAULT_LOCALE, label)}`),
-    markdownWithPlainRemainingSections
+  return replaceRequiredEditorialMarkdown(
+    markdownWithPlainOpenSection,
+    DEVELOPMENT_REMAINING_SECTIONS,
+    getCurrentDevelopmentRemainingMarkdown(source),
+    "development remaining sections"
   );
 }

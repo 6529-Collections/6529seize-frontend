@@ -306,7 +306,7 @@ export function StreamReviewRolesGuide({
               key={status.titleKey}
               className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/20 tw-p-4"
             >
-              <h3 className="tw-text-primary-200 tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em]">
+              <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-primary-300">
                 {t(DEFAULT_LOCALE, status.titleKey)}
               </h3>
               <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -336,11 +336,11 @@ export function StreamReviewRolesGuide({
           descriptionKey="publicReview.rolesGuide.inactive.description"
           section={STREAM_REVIEW_ROLES_GUIDE_SECTIONS[2]}
         />
-        <p className="tw-text-primary-200 tw-mb-0 tw-mt-7 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em]">
+        <p className="tw-mb-0 tw-mt-7 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "publicReview.rolesGuide.status.connected.title")}
         </p>
         <RolesGuideList items={CONNECTED_ROLES} />
-        <p className="tw-text-primary-200 tw-mb-0 tw-mt-8 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em]">
+        <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "publicReview.rolesGuide.status.source.title")}
         </p>
         <RolesGuideList items={SOURCE_ROLES} />

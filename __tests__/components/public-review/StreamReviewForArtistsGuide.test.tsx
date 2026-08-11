@@ -1,6 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 
-import { StreamReviewForArtistsGuide } from "@/components/public-review/StreamReviewForArtistsGuide";
+import {
+  STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
+  StreamReviewForArtistsGuide,
+} from "@/components/public-review/StreamReviewForArtistsGuide";
 import { getStreamReviewVersion } from "@/lib/public-review/streamReviewDefinition";
 
 const ACTIVE_REVIEW_VERSION = getStreamReviewVersion();
@@ -11,6 +14,12 @@ if (!ACTIVE_REVIEW_VERSION) {
 describe("StreamReviewForArtistsGuide", () => {
   it("explains the artist journey before handing off to contract details", () => {
     render(<StreamReviewForArtistsGuide pages={ACTIVE_REVIEW_VERSION.pages} />);
+
+    for (const section of STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS) {
+      expect(
+        screen.getByRole("heading", { level: 2, name: section.title })
+      ).toHaveAttribute("id", section.id);
+    }
 
     expect(
       screen.queryByRole("heading", { name: "Your artwork, your choices" })

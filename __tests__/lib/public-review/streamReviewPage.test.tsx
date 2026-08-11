@@ -85,10 +85,18 @@ jest.mock("@/components/public-review/StreamReviewDevelopmentStatus", () => ({
 }));
 
 jest.mock("@/components/public-review/StreamReviewForArtistsGuide", () => ({
+  STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS: [
+    { id: "artist-guide-overview", title: "Artist guide overview" },
+    { id: "artist-guide-evidence", title: "Artist guide evidence" },
+  ],
   StreamReviewForArtistsGuide: () => <div>Artist guide</div>,
 }));
 
 jest.mock("@/components/public-review/StreamReviewForArtistsDetails", () => ({
+  STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS: [
+    { id: "artist-detail-overview", title: "Artist detail overview" },
+    { id: "artist-detail-evidence", title: "Artist detail evidence" },
+  ],
   StreamReviewForArtistsDetails: () => <div>Artist details</div>,
 }));
 
@@ -125,6 +133,22 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
   ),
   createStreamReviewFeedbackConfig: jest.fn(async () => ({
     pages: [
+      {
+        value: "overview",
+        sectionValues: ["old-overview-section"],
+      },
+      {
+        value: "artwork-lifecycle",
+        sectionValues: ["old-artwork-section"],
+      },
+      {
+        value: "for-artists",
+        sectionValues: ["old-artist-section"],
+      },
+      {
+        value: "roles-and-trust",
+        sectionValues: ["old-roles-section"],
+      },
       {
         value: "security-testing-and-known-limitations",
         sectionValues: ["old-development-section"],
@@ -199,6 +223,9 @@ describe("renderStreamReviewRoutePage", () => {
       "0"
     );
     expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("0");
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("0");
   });
 
   it("puts the current launch answer on Where Development Stands", async () => {
@@ -633,6 +660,12 @@ describe("renderStreamReviewRoutePage", () => {
       "data-summary-key",
       "publicReview.pages.artworkLifecycle.currentSummary"
     );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
+      "21"
+    );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("21");
   });
 
   it("puts a plain current guide before the Community Review prompts", async () => {
@@ -713,9 +746,12 @@ describe("renderStreamReviewRoutePage", () => {
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "1"
+      "4"
     );
-    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("1");
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("4");
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("4");
   });
 
   it("replaces the current roles editorial with a status-first guide", async () => {
@@ -739,6 +775,9 @@ describe("renderStreamReviewRoutePage", () => {
       "2"
     );
     expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("2");
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("2");
   });
 
   it("keeps immutable Overview routes unchanged", async () => {

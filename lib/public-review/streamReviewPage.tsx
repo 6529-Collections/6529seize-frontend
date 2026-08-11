@@ -10,8 +10,14 @@ import {
   StreamReviewDevelopmentStatus,
   StreamReviewReviewerPrompts,
 } from "@/components/public-review/StreamReviewDevelopmentStatus";
-import { StreamReviewForArtistsDetails } from "@/components/public-review/StreamReviewForArtistsDetails";
-import { StreamReviewForArtistsGuide } from "@/components/public-review/StreamReviewForArtistsGuide";
+import {
+  STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
+  StreamReviewForArtistsDetails,
+} from "@/components/public-review/StreamReviewForArtistsDetails";
+import {
+  STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
+  StreamReviewForArtistsGuide,
+} from "@/components/public-review/StreamReviewForArtistsGuide";
 import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
 import {
   STREAM_REVIEW_ROLES_GUIDE_SECTIONS,
@@ -26,6 +32,7 @@ import {
   PublicReviewEditorialContentError,
 } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import { getCurrentArtworkLifecycleEditorialMarkdown } from "@/lib/public-review/streamReviewArtworkLifecyclePage";
 import { getCurrentCommunityReviewEditorialMarkdown } from "@/lib/public-review/streamReviewCommunityPage";
 import { getCurrentDevelopmentEditorialMarkdown } from "@/lib/public-review/streamReviewDevelopmentPage";
 import {
@@ -43,35 +50,6 @@ import {
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
-
-const ARTWORK_LIFECYCLE_OLD_INTRO = `A Stream artwork moves through a sequence of deliberate commitments. Collection
-identity comes first. Artwork materials, distribution, payment, randomness, and
-metadata are then assembled around it. Supply and Core configuration can later
-be closed, preservation evidence can accumulate, and a final ceremony can make
-the remaining artwork state terminal.
-
-That sequence is a major part of the design. “Minted,” “sold,” “frozen,”
-“preserved,” and “final” describe different facts. Keeping them separate makes
-each commitment visible and reviewable.
-
-This page follows one collection through the lifecycle and explains what each
-stage protects.`;
-const ARTWORK_LIFECYCLE_IDENTITY_SECTION =
-  /## 1\. The collection receives a permanent identity[\s\S]*?(?=## 2\.)/;
-const ARTWORK_LIFECYCLE_PACKAGE_SECTION =
-  /## 2\. The artwork package is assembled[\s\S]*?(?=## 3\.)/;
-const ARTWORK_LIFECYCLE_ARTIST_APPROVAL_SECTION =
-  /## 3\. The artist can approve a specific state[\s\S]*?(?=## 4\.)/;
-const ARTWORK_LIFECYCLE_DISTRIBUTION_SECTION =
-  /## 4\. A distribution policy is selected[\s\S]*?(?=## 5\.|$)/;
-const ARTWORK_LIFECYCLE_CURATION_SECTION =
-  /## 5\. Curation becomes a bound authorization[\s\S]*?(?=## 6\.|$)/;
-const ARTWORK_LIFECYCLE_MINT_EXECUTION_SECTION =
-  /## 6\. The selected mint lane executes atomically[\s\S]*?(?=## 7\.|$)/;
-const ARTWORK_LIFECYCLE_TOKEN_IDENTITY_SECTION =
-  /## 7\. The token receives a permanent identity[\s\S]*?(?=## 8\.|$)/;
-const ARTWORK_LIFECYCLE_REMAINING_SECTIONS =
-  /## 8\. Randomness enters a recorded lifecycle[\s\S]*$/;
 
 function getStreamReviewMetadata({
   baseEndpoint,
@@ -151,66 +129,10 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     route.page.id === "community-review" && route.version === undefined;
   let displayedEditorialMarkdown = editorialMarkdown;
   if (isCurrentArtworkLifecycle) {
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_OLD_INTRO,
-      t(DEFAULT_LOCALE, "publicReview.pages.artworkLifecycle.currentIntro")
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_IDENTITY_SECTION,
-      `${t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentIdentitySection"
-      )}\n\n`
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_PACKAGE_SECTION,
-      `${t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentArtworkPackageSection"
-      )}\n\n`
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_ARTIST_APPROVAL_SECTION,
-      `${t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentArtistApprovalSection"
-      )}\n\n`
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_DISTRIBUTION_SECTION,
-      `${t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentDistributionSection"
-      )}\n\n`
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_CURATION_SECTION,
-      `${t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentCurationSection"
-      )}\n\n`
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_MINT_EXECUTION_SECTION,
-      `${t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentMintExecutionSection"
-      )}\n\n`
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_TOKEN_IDENTITY_SECTION,
-      `${t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentTokenIdentitySection"
-      )}\n\n`
-    );
-    displayedEditorialMarkdown = displayedEditorialMarkdown.replace(
-      ARTWORK_LIFECYCLE_REMAINING_SECTIONS,
-      t(
-        DEFAULT_LOCALE,
-        "publicReview.pages.artworkLifecycle.currentRemainingSections"
-      )
-    );
+    displayedEditorialMarkdown =
+      getCurrentArtworkLifecycleEditorialMarkdown({
+        editorialMarkdown: displayedEditorialMarkdown,
+      });
   }
   if (isCurrentDevelopmentStatus) {
     displayedEditorialMarkdown = getCurrentDevelopmentEditorialMarkdown({
@@ -233,23 +155,25 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   let displayedSections: readonly (typeof sections)[number][] = sections;
   if (isCurrentOverview) {
     displayedSections = [];
+  } else if (isCurrentForArtists) {
+    displayedSections = [
+      ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
+      ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
+    ];
   } else if (isCurrentRoles) {
     displayedSections = STREAM_REVIEW_ROLES_GUIDE_SECTIONS;
   }
-  const displayedFeedbackConfig =
-    isCurrentDevelopmentStatus || isCurrentCommunityReview
-      ? {
-          ...feedbackConfig,
-          pages: feedbackConfig.pages.map((configuredPage) =>
-            configuredPage.value === route.page.id
-              ? {
-                  ...configuredPage,
-                  sectionValues: displayedSections.map((section) => section.id),
-                }
-              : configuredPage
-          ),
-        }
-      : feedbackConfig;
+  const displayedFeedbackConfig = {
+    ...feedbackConfig,
+    pages: feedbackConfig.pages.map((configuredPage) =>
+      configuredPage.value === route.page.id
+        ? {
+            ...configuredPage,
+            sectionValues: displayedSections.map((section) => section.id),
+          }
+        : configuredPage
+    ),
+  };
 
   return (
     <PublicReviewShell
