@@ -17,7 +17,7 @@ import {
   MUSEUM_DATA_ARCHITECTURE_STANDARDS,
 } from "@/lib/museum/publication/dataArchitectureContract";
 
-const BASE_PATH = "/museum/network/methodology/data-architecture";
+const BASE_PATH = "/museum/network/research/data-architecture";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;

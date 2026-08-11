@@ -38,7 +38,7 @@ describe("Museum rights reading room", () => {
     expect(guideLinks).toHaveLength(2);
     expect(guideLinks[0]).toHaveAttribute(
       "href",
-      "/museum/network/rights/artists"
+      "/museum/network/research/rights/artists"
     );
 
     rerender(<MuseumRightsDirectory handbook={publication.rightsHandbook} />);

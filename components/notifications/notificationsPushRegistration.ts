@@ -68,9 +68,11 @@ const PUSH_REGISTRATION_MAX_RETRY_AFTER_MS = 10000;
 const IOS_PUSH_PERMISSION_HELPER_APPLICATION_ERROR_MESSAGE =
   "Couldn’t communicate with a helper application.";
 // Capacitor also drops the underlying NSError metadata for registration
-// failures, so classify only the exact observed localized message.
-const IOS_PUSH_REGISTRATION_SECURE_CONNECTION_ERROR_MESSAGE =
-  "An SSL error has occurred and a secure connection to the server cannot be made.";
+// failures, so classify only the exact observed localized messages.
+const IOS_PUSH_REGISTRATION_SECURE_CONNECTION_ERROR_MESSAGES = new Set([
+  "an ssl error has occurred and a secure connection to the server cannot be made.",
+  "a tls error caused the secure connection to fail.",
+]);
 
 const DELEGATE_ERROR_PATTERNS = [
   "capacitorDidRegisterForRemoteNotifications",
@@ -312,8 +314,9 @@ const isTransientPushRegistrationError = (error: unknown): boolean => {
   }
 
   if (
-    normalizedMessage ===
-    IOS_PUSH_REGISTRATION_SECURE_CONNECTION_ERROR_MESSAGE.toLowerCase()
+    IOS_PUSH_REGISTRATION_SECURE_CONNECTION_ERROR_MESSAGES.has(
+      normalizedMessage
+    )
   ) {
     return true;
   }

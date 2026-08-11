@@ -52,7 +52,7 @@ profile menu. Mobile web and native apps open page sharing from the app header.
    height. On narrow screens, the sections stack inside a narrower dialog and
    retain a fixed compact QR.
 4. In the desktop dialog, choose an action:
-   - `Copy Link` copies the exact current URL
+   - `Copy Link` copies the current shareable URL
    - `Open in 6529 Desktop` opens the same route in the desktop app
    - `Share on X` opens an X composer
    - `Share on Farcaster` opens a Farcaster composer
@@ -60,16 +60,18 @@ profile menu. Mobile web and native apps open page sharing from the app header.
 4. Close with the close button, backdrop, or `Escape`.
 
 The QR code is visible in the desktop-web dialog. Browser mode contains
-the complete current URL, including pathname, search parameters, and hash
+the complete shareable URL, including pathname, search parameters, and hash
 fragment. App mode uses the existing `mobile6529://navigate` deep-link shape
 with that same route. The Desktop action uses the corresponding
 `core6529://navigate` route. Copy, social composer links, and system sharing
-always use the shareable web URL regardless of the selected QR target. Copy
+always use the shareable web URL regardless of the selected QR target. For a
+NextGen token opened from a profile's Collected tab, sharing removes the
+transient profile-return parameter while preserving other route state. Copy
 shows a green `Copied` state for about 1.5 seconds. System sharing reads the
-browser URL again when selected, so it includes the current pathname, search
-parameters, and hash fragment. In the native app, `More` uses Capacitor's
-system share sheet; mobile web opens the Web Share API directly from the header
-button. Native system-share failure never falls back to Copy.
+browser URL again when selected and applies the same cleanup. Mobile web opens
+the Web Share API directly from the header button, and the native header button
+opens Capacitor's system share sheet directly. Native system-share failure
+never falls back to Copy.
 
 ## Unsupported Share Pages
 
@@ -94,8 +96,11 @@ the `More` menu.
 2. Select `Connect Device`.
 3. The `Connect Device` dialog defaults to `Mobile`; select `Desktop` when
    needed. The target tabs appear without an additional heading above them.
-4. Mobile displays the existing one-time session-v2 connection QR code.
-5. Desktop keeps the same square dimensions but uses a dark-bordered handoff
+4. Use the muted `Download apps` text link and download icon beside the dialog
+   title to close the connection dialog and open the 6529 Apps page in the same
+   tab.
+5. Mobile displays the existing one-time session-v2 connection QR code.
+6. Desktop keeps the same square dimensions but uses a dark-bordered handoff
    card with a 6529 Desktop logo and compact white launch label. The entire card
    opens 6529 Desktop, not only the visible label.
 
@@ -106,7 +111,7 @@ No copy-page, social, or current-page Share actions appear in this dialog.
 - Use `Copy Link` when you want the URL on the clipboard; system-share failures
   never trigger Copy automatically.
 - Use X to open a prefilled composer with the page title on one line and the
-  exact current URL on the next. Farcaster opens a composer containing the
+  current shareable URL on the next. Farcaster opens a composer containing the
   current page.
 - On mobile web or in the native app, select the header Share button to choose
   an installed application from the platform share sheet.
@@ -131,16 +136,19 @@ No copy-page, social, or current-page Share actions appear in this dialog.
 - Desktop is hidden as a connection target when already running in Electron.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
   or unavailable states without revealing page-sharing controls. These notice
-  states retain the QR panel's proportions but do not reserve blank footer
-  space when no connection link is available.
+  states retain the final connection area's footprint. The unframed loading
+  message remains visible until the Mobile QR has been generated and decoded,
+  then the complete QR and connection-link row fade in together. The dialog
+  does not resize between loading and ready states. Actionable authentication
+  and unavailable notices retain their framed treatment.
 - In browsers, `More` is omitted in an insecure context, when the Web Share API
   is absent, when the browser rejects the title and URL payload, or when the
   document permissions policy recognizes and blocks system sharing. An
   unrecognized `web-share` policy directive is treated as unknown rather than
   blocked, so browser capability checks remain authoritative without producing
   a warning.
-- In the native app, `More` is omitted when Capacitor reports that system
-  sharing is unavailable.
+- In the native app, the header Share button checks Capacitor availability and
+  reports an error if the platform cannot open its system share sheet.
 
 ## Failure and Recovery
 

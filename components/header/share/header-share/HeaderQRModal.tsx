@@ -33,6 +33,7 @@ import {
   buildNavigateDeepLinkUrl,
   buildNativeConnectionShareUrls,
   buildRouterPath,
+  createReadyQrCodeSource,
   getCurrentPageLocation,
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
@@ -287,24 +288,55 @@ function HeaderQRModal({
       walletAddress,
       routerPath,
     });
-    await generateLegacyDesktopConnectionShareUrl({
-      coreScheme,
-      isStaleGeneration,
-      signal,
-      walletAddress,
-      routerPath,
-    });
-
-    if (!isStaleGeneration() && generatedConnectionAppUrl) {
-      generateQrCodeSource({
-        url: generatedConnectionAppUrl,
-        setSource: setShareConnectionSrc,
-        clearSource: () => setShareConnectionSrc(""),
-        staleGeneration: isStaleGeneration,
-        signal,
-        errorMessage: "Failed to generate share connection QR code",
-      });
+    if (isStaleGeneration()) {
+      return;
     }
+    await Promise.all([
+      prepareMobileConnectionShare({
+        connectionUrl: generatedConnectionAppUrl,
+        isStaleGeneration,
+        signal,
+      }),
+      generateLegacyDesktopConnectionShareUrl({
+        coreScheme,
+        isStaleGeneration,
+        signal,
+        walletAddress,
+        routerPath,
+      }),
+    ]);
+  }
+
+  async function prepareMobileConnectionShare({
+    connectionUrl,
+    isStaleGeneration,
+    signal,
+  }: {
+    readonly connectionUrl: string;
+    readonly isStaleGeneration: IsStaleGeneration;
+    readonly signal?: AbortSignal | undefined;
+  }): Promise<void> {
+    if (!connectionUrl || isStaleGeneration()) {
+      return;
+    }
+
+    const qrSource = await createReadyQrCodeSource({
+      url: connectionUrl,
+      staleGeneration: isStaleGeneration,
+      signal,
+      errorMessage: "Failed to generate share connection QR code",
+    });
+    if (isStaleGeneration()) {
+      return;
+    }
+    if (!qrSource) {
+      setUnavailableMobileConnectionShare("error");
+      return;
+    }
+
+    setShareConnectionAppUrl(connectionUrl);
+    setShareConnectionSrc(qrSource);
+    setMobileConnectionShareStatus("ready");
   }
 
   async function generateNativeConnectionShareUrl({
@@ -380,8 +412,6 @@ function HeaderQRModal({
       });
 
       terminalConnectionShareFailuresRef.current.delete(failureKey);
-      setMobileConnectionShareStatus("ready");
-      setShareConnectionAppUrl(shareUrls.appUrl);
       return shareUrls.appUrl;
     } catch (error: unknown) {
       if (isStaleGeneration() || isAbortError(error, signal)) {

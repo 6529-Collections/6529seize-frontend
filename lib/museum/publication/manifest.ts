@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { keccak256, toBytes } from "viem";
+import { MUSEUM_PUBLICATION_CANONICALIZATION_ID } from "./catalog-contract";
 import { assertSafeMuseumRepositoryPath } from "./security";
 import type { MuseumSha256 } from "./types";
 
@@ -46,11 +48,17 @@ function canonicalNumber(value: number): string {
 function canonicalRecord(value: Record<string, unknown>): string {
   const properties = Object.keys(value)
     .sort(compareCanonicalStrings)
-    .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`);
+    .map((key) => `${JSON.stringify(key)}:${canonicalMuseumJson(value[key])}`);
   return `{${properties.join(",")}}`;
 }
 
-function canonicalJson(value: unknown): string {
+/**
+ * Canonical JSON used by the reviewed Museum commitments. The source catalog
+ * decoder supplies the exact commitment fields; this helper is exported so
+ * that the catalog boundary can verify the payload it has decoded without
+ * making route code responsible for hashing.
+ */
+export function canonicalMuseumJson(value: unknown): string {
   if (value === null) {
     return "null";
   }
@@ -63,7 +71,7 @@ function canonicalJson(value: unknown): string {
       return canonicalNumber(value);
     case "object":
       return Array.isArray(value)
-        ? `[${value.map(canonicalJson).join(",")}]`
+        ? `[${value.map(canonicalMuseumJson).join(",")}]`
         : canonicalRecord(value as Record<string, unknown>);
     case "bigint":
     case "function":
@@ -136,29 +144,43 @@ export function parseMuseumPublicationManifest(
     throw new Error("publication_manifest_hash_invalid");
   }
 
-  if (manifestSha256 !== null) {
-    const canonicalBody = canonicalJson(
-      Object.fromEntries(
-        Object.entries(value).filter(
-          ([key]) => key !== "manifest_commitment" && key !== "manifest_sha256"
-        )
+  const canonicalBody = canonicalMuseumJson(
+    Object.fromEntries(
+      Object.entries(value).filter(
+        ([key]) => key !== "manifest_commitment" && key !== "manifest_sha256"
       )
-    );
-    if (digestUtf8(canonicalBody) !== manifestSha256) {
-      throw new Error("publication_manifest_hash_mismatch");
-    }
+    )
+  );
+  if (manifestSha256 !== null && digestUtf8(canonicalBody) !== manifestSha256) {
+    throw new Error("publication_manifest_hash_mismatch");
   }
 
   const commitmentValue = value["manifest_commitment"];
-  const commitment = isRecord(commitmentValue)
-    ? commitmentValue["digest"]
-    : null;
+  let commitment: string | null = null;
+  if (commitmentValue !== undefined && commitmentValue !== null) {
+    if (
+      !isRecord(commitmentValue) ||
+      Object.keys(commitmentValue).sort(compareCanonicalStrings).join(",") !==
+        "algorithm,canonicalizationId,digest" ||
+      commitmentValue["algorithm"] !== 1 ||
+      commitmentValue["canonicalizationId"] !==
+        MUSEUM_PUBLICATION_CANONICALIZATION_ID ||
+      typeof commitmentValue["digest"] !== "string" ||
+      !/^0x[a-f0-9]{64}$/u.test(commitmentValue["digest"])
+    ) {
+      throw new Error("publication_manifest_commitment_invalid");
+    }
+    if (keccak256(toBytes(canonicalBody)) !== commitmentValue["digest"]) {
+      throw new Error("publication_manifest_commitment_mismatch");
+    }
+    commitment = commitmentValue["digest"];
+  }
 
   return {
     manifestType,
     manifestVersion,
     manifestSha256,
-    manifestCommitment: typeof commitment === "string" ? commitment : null,
+    manifestCommitment: commitment,
     entries: [...entries].sort((left, right) =>
       compareCanonicalStrings(left.path, right.path)
     ),

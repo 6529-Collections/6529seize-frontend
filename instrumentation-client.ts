@@ -29,6 +29,7 @@ import {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterBraveWalletPageEvaluationError,
   shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
@@ -42,6 +43,7 @@ import {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyChromeUserRejectedRequest,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,
@@ -144,11 +146,19 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterBraveWalletPageEvaluationError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
     return true;
   }
 
   if (shouldFilterKnownWalletProviderObjectRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterRabbyChromeUserRejectedRequest(event, hint)) {
     return true;
   }
 

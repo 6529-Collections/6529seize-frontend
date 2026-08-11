@@ -10,7 +10,7 @@ import type {
 import { parseInstitutionalPracticeHeading } from "@/lib/museum/publication/institutionalPracticeMarkdown";
 import { MuseumMarkdown } from "./MuseumMarkdown";
 
-const STUDY_ROUTE = "/museum/network/stories/a-field-of-practice";
+const STUDY_ROUTE = "/museum/network/research/institutional-practice";
 const STUDY_PATH = "records/institutional-practice/a-field-of-practice.md";
 const ADJACENT_PRACTICE_PATH =
   "records/institutional-practice/adjacent-chain-native-practice.md";

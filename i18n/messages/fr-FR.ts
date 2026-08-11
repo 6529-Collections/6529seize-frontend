@@ -493,6 +493,7 @@ export const FR_FR_MESSAGES = {
   "waves.poll.status.updated": "Mis à jour",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.detail.live.artwork.mintDateLabel": "Date de mint :",
   ...FR_FR_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Tri des memes",
   "theMemes.sorting.sortBy": "Trier par",

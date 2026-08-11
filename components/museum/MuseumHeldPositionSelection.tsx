@@ -10,6 +10,7 @@ interface MuseumHeldPositionSelectionProps {
   readonly locale: SupportedLocale;
   readonly selectedWorkId: string;
   readonly onSelectWork: (objectId: string) => void;
+  readonly workHrefs: Readonly<Record<string, string>>;
 }
 
 const controlClass =
@@ -24,6 +25,7 @@ export function MuseumHeldPositionSelection({
   locale,
   selectedWorkId,
   onSelectWork,
+  workHrefs,
 }: MuseumHeldPositionSelectionProps) {
   const selectedPosition =
     study.heldPositions.find(
@@ -31,6 +33,7 @@ export function MuseumHeldPositionSelection({
     ) ?? study.heldPositions[0];
 
   if (selectedPosition === undefined) return null;
+  const selectedWorkHref = workHrefs[selectedPosition.objectId];
 
   return (
     <section
@@ -72,12 +75,14 @@ export function MuseumHeldPositionSelection({
             })}
           </div>
         ) : null}
-        <Link
-          href={`/museum/network/collection/${encodeURIComponent(selectedPosition.objectId)}`}
-          className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          {t(locale, "museum.network.insideSystem.viewObject")}
-        </Link>
+        {selectedWorkHref === undefined ? null : (
+          <Link
+            href={selectedWorkHref}
+            className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {t(locale, "museum.network.insideSystem.viewObject")}
+          </Link>
+        )}
       </div>
       <div>
         <dl className="tw-m-0 tw-grid tw-gap-x-5 tw-gap-y-4 sm:tw-grid-cols-2 xl:tw-grid-cols-3">

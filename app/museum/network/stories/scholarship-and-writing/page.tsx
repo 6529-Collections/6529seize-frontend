@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import {
   InstitutionalPracticeManuscript,
   InstitutionalPracticePublicationLine,
@@ -23,7 +24,7 @@ export const metadata: Metadata = getAppMetadata({
   ),
 });
 
-export default async function MuseumScholarshipAndWritingPage() {
+export async function renderMuseumScholarshipAndWritingPage() {
   const publicationState = await getMuseumPublicationState();
   const publication = publicationState.publication;
   if (!institutionalPracticePublicationIsComplete(publication)) {
@@ -39,14 +40,11 @@ export default async function MuseumScholarshipAndWritingPage() {
   return (
     <article className="tw-min-w-0">
       <Link
-        href="/museum/network/stories"
+        href="/museum/network/research"
         prefetch={false}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
-        {t(
-          DEFAULT_LOCALE,
-          "museum.network.institutionalPractice.backToStories"
-        )}
+        {t(DEFAULT_LOCALE, "museum.network.research.back")}
       </Link>
       <header className="tw-mt-6 tw-max-w-4xl">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
@@ -71,7 +69,7 @@ export default async function MuseumScholarshipAndWritingPage() {
       </div>
       <div className="tw-mt-10 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
         <Link
-          href="/museum/network/stories/a-field-of-practice"
+          href="/museum/network/research/institutional-practice"
           prefetch={false}
           className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
@@ -80,4 +78,8 @@ export default async function MuseumScholarshipAndWritingPage() {
       </div>
     </article>
   );
+}
+
+export default function MuseumScholarshipAndWritingLegacyPage() {
+  permanentRedirect("/museum/network/research/scholarship-and-writing");
 }
