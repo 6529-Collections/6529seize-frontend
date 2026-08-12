@@ -206,7 +206,9 @@ describe("production artifact verifier", () => {
       verifier.validateArchiveMembers(`${members}\ntarget/.\n`)
     ).toThrow("unsafe path segment");
     expect(() =>
-      verifier.validateArchiveMembers(`${members}\ntarget/_next/static/bad\tname.js\n`)
+      verifier.validateArchiveMembers(
+        `${members}\ntarget/_next/static/bad\tname.js\n`
+      )
     ).toThrow("control characters");
   });
 

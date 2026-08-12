@@ -84,6 +84,14 @@ function validateArchiveMembers(memberList) {
   return true;
 }
 
+function validateExtractedEntryName(name) {
+  if (/\0|[\u0001-\u001f\u007f]/u.test(name)) {
+    fail(
+      `extracted artifact contains a control character in a name: ${JSON.stringify(name)}`
+    );
+  }
+}
+
 function walk(root, relative = "") {
   const absolute = path.join(root, relative);
   // Paths remain beneath the validated artifact root and are never user-selected directly.
@@ -91,11 +99,7 @@ function walk(root, relative = "") {
   const entries = fs.readdirSync(absolute, { withFileTypes: true });
   const paths = [];
   for (const entry of entries) {
-    if (/\0|[\u0001-\u001f\u007f]/u.test(entry.name)) {
-      fail(
-        `extracted artifact contains a control character in a name: ${JSON.stringify(entry.name)}`
-      );
-    }
+    validateExtractedEntryName(entry.name);
     const child = relative ? `${relative}/${entry.name}` : entry.name;
     const childAbsolute = path.join(root, child);
     // Directory entries come from readdirSync beneath the validated artifact root.
