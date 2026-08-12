@@ -18,6 +18,7 @@ const ACTIVE_ADDRESS = "0x00000000000000000000000000000000000000AA";
 const SECOND_ADDRESS = "0x00000000000000000000000000000000000000BB";
 
 const mockOpen = jest.fn();
+const mockClose = jest.fn();
 const mockDisconnect = jest.fn();
 const mockLogError = jest.fn();
 const mockLogSecurityEvent = jest.fn();
@@ -45,6 +46,7 @@ let mockIsSafeWallet: boolean;
 
 jest.mock("@reown/appkit/react", () => ({
   useAppKit: () => ({
+    close: mockClose,
     open: mockOpen,
   }),
   useAppKitAccount: () => mockAppKitAccount,
@@ -248,6 +250,7 @@ describe("SeizeConnectProvider add-account flow", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    mockClose.mockResolvedValue(undefined);
 
     const authUtils = require("@/services/auth/auth.utils");
     authUtils.canStoreAnotherWalletAccount.mockReturnValue(true);
@@ -429,6 +432,27 @@ describe("SeizeConnectProvider add-account flow", () => {
 
     expect(mockOpen).toHaveBeenCalledTimes(1);
     expect(mockLogError).not.toHaveBeenCalled();
+  });
+
+  it("clears add-account state when disconnect throws synchronously", () => {
+    mockDisconnect.mockImplementation(() => {
+      throw new Error("synchronous disconnect failure");
+    });
+
+    render(
+      <SeizeConnectProvider>
+        <AddAccountButton />
+      </SeizeConnectProvider>
+    );
+
+    const addAccountButton = screen.getByRole("button", {
+      name: "Add account",
+    });
+    expect(() => fireEvent.click(addAccountButton)).not.toThrow();
+    expect(mockLogError).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(addAccountButton);
+    expect(mockDisconnect).toHaveBeenCalledTimes(2);
   });
 
   it("keeps the disconnect-then-connect flow for browser-wallet connectors", async () => {
@@ -742,7 +766,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     const authUtils = require("@/services/auth/auth.utils");
     const sessionV2 = require("@/services/auth/session-v2.utils");
     const accounts = [ACTIVE_ADDRESS, addressB];
-    let resolveFirstRevocation!: () => void;
+    const firstRevocation = createDeferred<void>();
 
     mockWalletInfo = {
       name: "Test wallet",
@@ -765,12 +789,7 @@ describe("SeizeConnectProvider add-account flow", () => {
       accounts.splice(0, accounts.length);
     });
     sessionV2.logoutSessionV2
-      .mockImplementationOnce(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveFirstRevocation = resolve;
-          })
-      )
+      .mockImplementationOnce(() => firstRevocation.promise)
       .mockResolvedValue(undefined);
 
     render(
@@ -818,7 +837,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     expect(authUtils.setActiveWalletAccount).not.toHaveBeenCalled();
 
     await act(async () => {
-      resolveFirstRevocation();
+      firstRevocation.resolve();
     });
 
     await waitFor(() => {
@@ -830,14 +849,9 @@ describe("SeizeConnectProvider add-account flow", () => {
   it("cancels delayed add-account work and ignores wallet events during logout all", async () => {
     const authUtils = require("@/services/auth/auth.utils");
     const sessionV2 = require("@/services/auth/session-v2.utils");
-    let resolveRevocation!: () => void;
+    const revocation = createDeferred<void>();
 
-    sessionV2.logoutSessionV2.mockImplementationOnce(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveRevocation = resolve;
-        })
-    );
+    sessionV2.logoutSessionV2.mockImplementationOnce(() => revocation.promise);
 
     render(
       <SeizeConnectProvider>
@@ -871,7 +885,42 @@ describe("SeizeConnectProvider add-account flow", () => {
     expect(mockOpen).not.toHaveBeenCalled();
 
     await act(async () => {
-      resolveRevocation();
+      revocation.resolve();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("signing-out")).toHaveTextContent("false");
+    });
+  });
+
+  it("closes the connect modal when sign-out starts while it is opening", async () => {
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    const modalOpen = createDeferred<void>();
+    const revocation = createDeferred<void>();
+    mockOpen.mockImplementationOnce(() => modalOpen.promise);
+    sessionV2.logoutSessionV2.mockImplementationOnce(() => revocation.promise);
+
+    render(
+      <SeizeConnectProvider>
+        <AccountMutationButtons />
+        <LogoutAllStateProbe />
+      </SeizeConnectProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Connect" }));
+    await waitFor(() => expect(mockOpen).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("signing-out")).toHaveTextContent("true");
+    });
+
+    await act(async () => {
+      modalOpen.resolve();
+    });
+    await waitFor(() => expect(mockClose).toHaveBeenCalledTimes(1));
+
+    await act(async () => {
+      revocation.resolve();
     });
     await waitFor(() => {
       expect(screen.getByTestId("signing-out")).toHaveTextContent("false");

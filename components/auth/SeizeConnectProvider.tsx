@@ -249,6 +249,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (hasSignOutAllGenerationChanged(signOutGeneration)) {
           clearConnectIntentWaitingForAppKit();
+          await appKitModalBridgeStore.close();
           return;
         }
 

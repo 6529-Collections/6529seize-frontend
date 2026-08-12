@@ -186,7 +186,15 @@ export function useAddConnectedAccount({
       logError("seizeAddConnectedAccount", walletError);
     };
 
-    disconnect()
+    let disconnectPromise: Promise<unknown>;
+    try {
+      disconnectPromise = disconnect();
+    } catch (error: unknown) {
+      handleDisconnectFailure(error);
+      return;
+    }
+
+    disconnectPromise
       .then(() => {
         if (!isCurrentAttempt()) {
           return;
