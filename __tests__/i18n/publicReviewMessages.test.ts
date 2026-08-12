@@ -3,6 +3,7 @@ import { t } from "@/i18n/messages";
 import { PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES } from "@/i18n/messages/public-review-artists-and-roles";
 import { PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES } from "@/i18n/messages/public-review-artwork-lifecycle";
 import { PUBLIC_REVIEW_COMMUNITY_MESSAGES } from "@/i18n/messages/public-review-community";
+import { PUBLIC_REVIEW_CURATION_TDH_MESSAGES } from "@/i18n/messages/public-review-curation-tdh";
 import { PUBLIC_REVIEW_DEVELOPMENT_MESSAGES } from "@/i18n/messages/public-review-development";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 
@@ -10,6 +11,7 @@ const SPLIT_PUBLIC_REVIEW_MESSAGES = [
   PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES,
   PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES,
   PUBLIC_REVIEW_COMMUNITY_MESSAGES,
+  PUBLIC_REVIEW_CURATION_TDH_MESSAGES,
   PUBLIC_REVIEW_DEVELOPMENT_MESSAGES,
 ] as const;
 
@@ -35,6 +37,7 @@ describe("split public-review messages", () => {
       "publicReview.rolesGuide.status.heading",
       "publicReview.development.heading",
       "publicReview.community.editorial.heading",
+      "publicReview.pages.curationAndTdhAuthorization.currentSummary",
     ] as const;
 
     for (const locale of SUPPORTED_LOCALES) {

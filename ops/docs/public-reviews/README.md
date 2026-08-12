@@ -122,6 +122,13 @@ rule: they appear only on the current, unversioned **For Artists** route and
 replace the versioned editorial there. Immutable version routes continue to
 render their exact editorial snapshot without the guide.
 
+The current, unversioned **Curation and TDH Authorization** page follows the
+same snapshot boundary. It replaces the active snapshot's editorial with a
+plain, status-first explanation while keeping the existing section anchors.
+It separates ADR 0001's accepted design from behavior proven by the pinned
+Solidity, and separates both from launch, audit, and offchain evidence. Saved
+version routes keep their exact historical editorial.
+
 The active review centralizes snapshot implementation and evidence status on
 **Where Development Stands**. It separates five implementation states:
 

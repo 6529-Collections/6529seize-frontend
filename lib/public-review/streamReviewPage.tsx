@@ -38,6 +38,7 @@ import type {
 } from "@/lib/public-review/publicReviewTypes";
 import { getCurrentArtworkLifecycleEditorialMarkdown } from "@/lib/public-review/streamReviewArtworkLifecyclePage";
 import { getCurrentCommunityReviewEditorialMarkdown } from "@/lib/public-review/streamReviewCommunityPage";
+import { getCurrentCurationTdhEditorialMarkdown } from "@/lib/public-review/streamReviewCurationTdhPage";
 import { getCurrentDevelopmentEditorialMarkdown } from "@/lib/public-review/streamReviewDevelopmentPage";
 import {
   createStreamEditorialFeedbackPageContext,
@@ -104,6 +105,7 @@ async function loadAvailableStreamEditorialContent({
 type CurrentStreamReviewPages = {
   readonly artworkLifecycle: boolean;
   readonly communityReview: boolean;
+  readonly curationAndTdhAuthorization: boolean;
   readonly developmentStatus: boolean;
   readonly forArtists: boolean;
   readonly overview: boolean;
@@ -124,6 +126,8 @@ function getCurrentStreamReviewPages(
   return {
     artworkLifecycle: isCurrent && pageId === "artwork-lifecycle",
     communityReview: isCurrent && pageId === "community-review",
+    curationAndTdhAuthorization:
+      isCurrent && pageId === "curation-and-tdh-authorization",
     developmentStatus:
       isCurrent && pageId === "security-testing-and-known-limitations",
     forArtists: isCurrent && pageId === "for-artists",
@@ -155,6 +159,12 @@ function getDisplayedEditorialMarkdown({
       source,
     });
   }
+  if (currentPages.curationAndTdhAuthorization) {
+    return getCurrentCurationTdhEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
   if (currentPages.communityReview) {
     return getCurrentCommunityReviewEditorialMarkdown({
       reviewVersion: contentVersion,
@@ -168,13 +178,20 @@ function getDisplayedPage(
   page: PublicReviewPageDefinition,
   currentPages: CurrentStreamReviewPages
 ): PublicReviewPageDefinition {
-  if (!currentPages.artworkLifecycle) {
-    return page;
+  if (currentPages.artworkLifecycle) {
+    return {
+      ...page,
+      summaryKey: "publicReview.pages.artworkLifecycle.currentSummary",
+    };
   }
-  return {
-    ...page,
-    summaryKey: "publicReview.pages.artworkLifecycle.currentSummary",
-  };
+  if (currentPages.curationAndTdhAuthorization) {
+    return {
+      ...page,
+      summaryKey:
+        "publicReview.pages.curationAndTdhAuthorization.currentSummary",
+    };
+  }
+  return page;
 }
 
 function getDisplayedSections({

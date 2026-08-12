@@ -120,9 +120,17 @@ jest.mock("@/lib/public-review/editorialContent", () => ({
     if (page.id === "artwork-lifecycle") {
       return "# Artwork lifecycle\n\nA Stream artwork moves through a sequence of deliberate commitments. Collection\nidentity comes first. Artwork materials, distribution, payment, randomness, and\nmetadata are then assembled around it. Supply and Core configuration can later\nbe closed, preservation evidence can accumulate, and a final ceremony can make\nthe remaining artwork state terminal.\n\nThat sequence is a major part of the design. “Minted,” “sold,” “frozen,”\n“preserved,” and “final” describe different facts. Keeping them separate makes\neach commitment visible and reviewable.\n\nThis page follows one collection through the lifecycle and explains what each\nstage protects.\n\n## 1. The collection receives a permanent identity\n\nOld technical identity copy.\n\n## 2. The artwork package is assembled\n\nOld artwork package copy.\n\n## 3. The artist can approve a specific state\n\nOld artist approval copy.\n\n## 4. A distribution policy is selected\n\nDistribution body.\n\n## 5. Curation becomes a bound authorization\n\nOld curation copy.\n\n## 6. The selected mint lane executes atomically\n\nOld mint execution copy.\n\n## 7. The token receives a permanent identity\n\nOld token identity copy.\n\n## 8. Randomness enters a recorded lifecycle\n\nOld randomness copy.\n\n## 9. Metadata turns stored state into an artwork description\n\nOld metadata copy.\n\n## 10. Sale value becomes explicit liabilities\n\nOld payment copy.\n\n## 11. An auction reaches a terminal outcome\n\nOld auction copy.\n\n## 12. Burning preserves token history\n\nOld burning copy.\n\n## 13. Supply is closed\n\nOld supply copy.\n\n## 14. The permanent Core boundary is frozen\n\nOld Core freeze copy.\n\n## 15. Preservation evidence remains available to grow\n\nOld preservation copy.\n\n## 16. Artwork finality becomes a visible ceremony\n\nOld finality copy.\n\n## 17. Successor modules can carry future duties\n\nOld successor copy.\n\n## What collectors should see\n\nOld collector copy.\n\n## Failure modes reviewers should test\n\nOld failure-mode copy.\n\n## Questions for reviewers\n\n7. What invariants must hold before a successor module becomes current?";
     }
+    if (page.id === "curation-and-tdh-authorization") {
+      return "# Community curation, TDH, and signed authorization\n\nArchived curation introduction.\n\n## Questions for reviewers\n\nArchived curation question.";
+    }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
   PublicReviewEditorialContentError: class extends Error {},
+}));
+
+jest.mock("@/lib/public-review/streamReviewCurationTdhPage", () => ({
+  getCurrentCurationTdhEditorialMarkdown: () =>
+    "# Community curation, TDH, and signed authorization\n\n**The answer in one minute**\n\nThe contract does **not** choose the artist, calculate TDH, or decide whether the community process was fair.\n\n## Questions for reviewers\n\nWhich real-service, launch-configuration, and independent-audit checks remain before this flow can be trusted?",
 }));
 
 jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
@@ -140,6 +148,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "artwork-lifecycle",
         sectionValues: ["old-artwork-section"],
+      },
+      {
+        value: "curation-and-tdh-authorization",
+        sectionValues: ["old-curation-section"],
       },
       {
         value: "for-artists",
@@ -728,6 +740,39 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("12");
   });
 
+  it("shows plain copy only on the current Curation and TDH page", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "curation-and-tdh-authorization",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent("The answer in one minute");
+    expect(editorialCopy).toHaveTextContent(
+      "The contract does not choose the artist, calculate TDH, or decide whether the community process was fair."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Which real-service, launch-configuration, and independent-audit checks remain before this flow can be trusted?"
+    );
+    expect(editorialCopy).not.toHaveTextContent(
+      "Archived curation introduction."
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.curationAndTdhAuthorization.currentSummary"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
+      "1"
+    );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("1");
+  });
+
   it("replaces the current For Artists editorial with plain-language details", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -907,6 +952,27 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
       "20"
+    );
+  });
+
+  it("keeps immutable Curation and TDH routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          version: "2026-08-01.1",
+          page: "curation-and-tdh-authorization",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent("Archived curation introduction.");
+    expect(editorialCopy).toHaveTextContent("Archived curation question.");
+    expect(editorialCopy).not.toHaveTextContent("The answer in one minute");
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.curationAndTdhAuthorization.summary"
     );
   });
 
