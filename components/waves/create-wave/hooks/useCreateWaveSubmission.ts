@@ -1,4 +1,4 @@
-import { useContext, useState, type RefObject } from "react";
+import { useContext, useRef, useState, type RefObject } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -13,37 +13,101 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { CreateWaveDescriptionHandles } from "../description/CreateWaveDescription";
 import { getCreateWaveDropRequest } from "../services/createWaveDropRequest";
 import { multiPartUpload } from "../services/multiPartUpload";
 import { useAddWaveMutation } from "../services/waveApiService";
-import { getAdminGroupId } from "../services/waveGroupService";
+import {
+  getAdminGroupId,
+  WaveAdminGroupError,
+} from "../services/waveGroupService";
 
 interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
   readonly onSuccess?: (() => void) | undefined;
   readonly parentWaveId?: string | null | undefined;
+  readonly parentAdminGroupId?: string | null | undefined;
 }
+
+const getAdminGroupErrorToast = (error: unknown, locale: SupportedLocale) => {
+  if (!(error instanceof WaveAdminGroupError)) {
+    return {
+      type: "error" as const,
+      title: t(locale, "waves.create.groups.error.createAdmin.title"),
+      description: t(
+        locale,
+        "waves.create.groups.error.createAdmin.description"
+      ),
+      details: getToastErrorDetails(
+        error,
+        t(locale, "waves.create.groups.error.fallbackDetails")
+      ),
+    };
+  }
+
+  if (error.reason === "missing-primary-wallet") {
+    return {
+      type: "error" as const,
+      title: t(locale, "waves.create.groups.error.missingWallet.title"),
+      description: t(
+        locale,
+        "waves.create.groups.error.missingWallet.description"
+      ),
+    };
+  }
+
+  const isPublishFailure = error.reason === "publish-personal-group";
+
+  return {
+    type: "error" as const,
+    title: t(
+      locale,
+      isPublishFailure
+        ? "waves.create.groups.error.publishAdmin.title"
+        : "waves.create.groups.error.createAdmin.title"
+    ),
+    description: t(
+      locale,
+      isPublishFailure
+        ? "waves.create.groups.error.publishAdmin.description"
+        : "waves.create.groups.error.createAdmin.description"
+    ),
+    details: getToastErrorDetails(
+      error.cause,
+      t(locale, "waves.create.groups.error.fallbackDetails")
+    ),
+  };
+};
 
 export function useCreateWaveSubmission({
   config,
   descriptionRef,
   onSuccess,
   parentWaveId,
+  parentAdminGroupId,
 }: UseCreateWaveSubmissionParams) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { waitAndInvalidateDrops, onWaveCreated, onGroupCreate } = useContext(
     ReactQueryWrapperContext
   );
   const [submitting, setSubmitting] = useState(false);
+  const submissionInProgressRef = useRef(false);
   const [showDropError, setShowDropError] = useState(false);
   const { submit: submitInlineGroup } = useGroupMutations({
     requestAuth,
     onGroupCreate,
   });
+  const finishSubmitting = () => {
+    submissionInProgressRef.current = false;
+    setSubmitting(false);
+  };
 
   const addWaveMutation = useAddWaveMutation({
     onSuccess: async (response, variables) => {
@@ -89,7 +153,7 @@ export function useCreateWaveSubmission({
       });
     },
     onSettled: () => {
-      setSubmitting(false);
+      finishSubmitting();
     },
   });
 
@@ -128,19 +192,24 @@ export function useCreateWaveSubmission({
   };
 
   const onComplete = async (): Promise<void> => {
+    if (submissionInProgressRef.current) {
+      return;
+    }
+
+    submissionInProgressRef.current = true;
     setSubmitting(true);
     let mutationStarted = false;
 
     try {
       const { success } = await requestAuth();
       if (!success) {
-        setSubmitting(false);
+        finishSubmitting();
         return;
       }
 
       const drop = descriptionRef.current?.getDropSnapshot() ?? null;
       if (drop === null || drop.parts.length === 0) {
-        setSubmitting(false);
+        finishSubmitting();
         setShowDropError(true);
         return;
       }
@@ -150,25 +219,20 @@ export function useCreateWaveSubmission({
           message: "Wait for image uploads to finish.",
           type: "error",
         });
-        setSubmitting(false);
+        finishSubmitting();
         return;
       }
 
       const adminGroupId = await getAdminGroupId({
-        adminGroupId: config.groups.admin,
+        adminGroupId: config.groups.admin ?? parentAdminGroupId ?? null,
         primaryWallet: connectedProfile?.primary_wallet,
         handle: connectedProfile?.handle ?? undefined,
         onError: (error) => {
-          setToast({
-            type: "error",
-            title: "Couldn't get the admin group.",
-            description: "Please check the group setup and try again.",
-            details: getToastErrorDetails(error, "Could not get admin group."),
-          });
+          setToast(getAdminGroupErrorToast(error, locale));
         },
       });
       if (!adminGroupId) {
-        setSubmitting(false);
+        finishSubmitting();
         return;
       }
 
@@ -209,7 +273,7 @@ export function useCreateWaveSubmission({
           description: "Please try again.",
           details: getToastErrorDetails(error, "Could not create wave."),
         });
-        setSubmitting(false);
+        finishSubmitting();
       }
     }
   };

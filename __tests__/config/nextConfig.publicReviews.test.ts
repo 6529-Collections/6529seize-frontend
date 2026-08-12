@@ -14,7 +14,12 @@ describe("public review standalone packaging", () => {
       ""
     );
 
-    expect(config.outputFileTracingIncludes).toBeUndefined();
+    expect(config.outputFileTracingIncludes).toEqual({
+      "/api/og-metadata/image": [
+        "node_modules/@img/sharp-libvips-*/**/*",
+        "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
+      ],
+    });
     expect(config.outputFileTracingExcludes).toEqual({
       "/*": ["content/public-reviews/**/*", "public/review-data/**/*"],
     });

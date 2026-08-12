@@ -45,7 +45,7 @@ describe("MuseumProposalImage", () => {
 
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     const viewButton = screen.getByRole("button", {
-      name: "Show historical Wave proposal image · loads 16.9 MB",
+      name: "View image · loads 16.9 MB",
     });
     fireEvent.click(viewButton);
     const image = screen.getByRole("img");

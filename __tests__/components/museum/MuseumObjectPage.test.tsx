@@ -7,6 +7,7 @@ import type {
   MuseumPublicWork,
   MuseumRightsCredit,
 } from "@/lib/museum/publication/types";
+import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
 
 const SOURCE_COMMIT = "a".repeat(40);
 
@@ -113,7 +114,10 @@ function liveMedia(credit: MuseumRightsCredit): MuseumMedia {
   };
 }
 
-function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
+function metadata(
+  credit: MuseumRightsCredit,
+  sourceRecordIds = ["6529NM-W-0001"]
+): MuseumMediaMetadata {
   return {
     id: "6529NM-MED-0002",
     artworkId: "6529NM-W-0001",
@@ -124,6 +128,64 @@ function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
     altText: "A governed metadata-only artwork image.",
     credit,
     sourcePath: "records/entities/6529NM-MED-0002.json",
+    sourceRecordIds,
+  };
+}
+
+const reviewedProgramMedia: MuseumProgramMedia = {
+  sourceUrl:
+    "https://d3lqz0a4bldqgf.cloudfront.net/drops/keys-and-gates-source.jpg",
+  sourceMimeType: "image/jpeg",
+  sourceSha256: "sha256:" + "b".repeat(64),
+  sourceByteSize: 12000000,
+  sourceWidth: 6000,
+  sourceHeight: 4000,
+  altText: "A selected photographic work from Keys and Gates.",
+  altTextStatus: "reviewed_visual_description",
+  variants: [
+    {
+      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp",
+      width: 640,
+      height: 427,
+      mimeType: "image/webp",
+      sha256: "sha256:" + "c".repeat(64),
+      byteSize: 32000,
+    },
+  ],
+};
+
+function viewWithReviewedProgramMedia(objectId: string): MuseumView {
+  return {
+    sourceState: "fresh",
+    release: null,
+    mission: null,
+    policies: [],
+    methodology: [],
+    governance: [],
+    approvedCollections: [],
+    programs: [],
+    accessions: [],
+    objects: [
+      {
+        objectId,
+        accessionLotId: null,
+        title: "Selected work",
+        artist: "Artist name",
+        artistStatement: null,
+        classification: "Photography",
+        status: "selected_unminted",
+        statusAsOf: "2026-08-09",
+        programId: "6529NM-AP-01",
+        media: reviewedProgramMedia,
+        selectionPlace: 1,
+        selectionDate: "2026-07-09",
+        selectionSourceUrl: null,
+        rightsStatus: "reviewed for contextual presentation",
+        scope: "Selected work",
+        sourcePath: "records/programs/6529NM-AP-01/outcomes/OUT-001.json",
+        record: {},
+      },
+    ],
   };
 }
 
@@ -195,11 +257,12 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("keeps selected Keys and Gates Work media text-only", async () => {
+  it("keeps selected Keys and Gates Work media fail-closed without reviewed program media", async () => {
     const selectedWork: MuseumPublicWork = {
-      ...work([retainedMedia(rightsCredit(null))]),
+      ...work([], [metadata(rightsCredit(null))]),
       status: "selected_through_acquisition_program_acquisition_pending",
       programIds: ["6529NM-AP-ENT-0002"],
+      sourceRecordIds: ["6529NM-AP-01-OUT-001"],
     };
     const selectedPublication = {
       ...publication(selectedWork),
@@ -229,10 +292,82 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
 
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(
-      screen.getByText(
-        "No visual presentation is available for this work in the current publication."
-      )
+      screen.getByText("No public image is available for this record.")
     ).toBeInTheDocument();
+  });
+
+  it("uses reviewed responsive program media when a selected Work is metadata-only", async () => {
+    const selectedWork: MuseumPublicWork = {
+      ...work(
+        [],
+        [
+          metadata(
+            {
+              ...rightsCredit(null),
+              creditLine: "Wrong metadata entry.",
+            },
+            ["unrelated-source-record"]
+          ),
+          metadata(rightsCredit(null), ["6529NM-AP-01-OUT-001"]),
+        ]
+      ),
+      status: "selected_through_acquisition_program_acquisition_pending",
+      programIds: ["6529NM-AP-ENT-0002"],
+      sourceRecordIds: ["6529NM-AP-01-OUT-001"],
+    };
+
+    render(
+      await MuseumObjectPage({
+        objectId: selectedWork.id,
+        publication: publication(selectedWork),
+        view: viewWithReviewedProgramMedia("6529NM-AP-01-OUT-001"),
+      })
+    );
+
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute(
+      "src",
+      "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp"
+    );
+    expect(image).toHaveAttribute("srcset");
+    expect(
+      screen.getAllByText("Artist name, Work title.").length
+    ).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("Wrong metadata entry.")).not.toBeInTheDocument();
+    expect(screen.getByText("CC BY 4.0")).toBeInTheDocument();
+  });
+
+  it("omits an unrelated metadata credit for reviewed program media", async () => {
+    const selectedWork: MuseumPublicWork = {
+      ...work(
+        [],
+        [
+          metadata(
+            {
+              ...rightsCredit(null),
+              creditLine: "Unrelated metadata credit.",
+            },
+            ["unrelated-source-record"]
+          ),
+        ]
+      ),
+      status: "selected_through_acquisition_program_acquisition_pending",
+      programIds: ["6529NM-AP-ENT-0002"],
+      sourceRecordIds: ["6529NM-AP-01-OUT-001"],
+    };
+
+    render(
+      await MuseumObjectPage({
+        objectId: selectedWork.id,
+        publication: publication(selectedWork),
+        view: viewWithReviewedProgramMedia("6529NM-AP-01-OUT-001"),
+      })
+    );
+
+    expect(screen.getByRole("img")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Unrelated metadata credit.")
+    ).not.toBeInTheDocument();
   });
 
   it("restores Keys and Gates Work media after accession", async () => {

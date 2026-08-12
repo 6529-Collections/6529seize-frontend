@@ -117,6 +117,8 @@ export interface MuseumMediaMetadata {
   readonly altText: string | null;
   readonly credit: MuseumRightsCredit;
   readonly sourcePath: string;
+  /** Exact source records that establish this metadata-only media relation. */
+  readonly sourceRecordIds?: readonly string[];
   readonly context?: MuseumMediaMetadataContext;
 }
 

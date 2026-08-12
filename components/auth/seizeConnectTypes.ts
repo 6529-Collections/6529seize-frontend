@@ -69,6 +69,9 @@ export interface SeizeConnectContextType {
   /** Whether the active wallet address has valid auth state */
   hasValidWalletAuth: boolean;
 
+  /** Whether the sign-out-all transaction is currently in progress */
+  isSigningOutAll: boolean;
+
   /** @deprecated Use hasActiveWalletAddress or hasValidWalletAuth. */
   isAuthenticated: boolean;
 
