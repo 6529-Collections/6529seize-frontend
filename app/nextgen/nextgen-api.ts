@@ -3,11 +3,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 const NEXTGEN_API_MAX_ATTEMPTS = 3;
 const NEXTGEN_API_INITIAL_RETRY_DELAY_MS = 250;
 
-type ApiStatusError = {
+type ApiStatusError = Error & {
   readonly status?: unknown;
-  readonly response?: {
-    readonly status?: unknown;
-  };
 };
 
 interface NextGenApiRequest {
@@ -16,17 +13,29 @@ interface NextGenApiRequest {
 }
 
 function getApiErrorStatus(error: unknown): number | null {
-  if (typeof error !== "object" || error === null) {
+  if (!(error instanceof Error) || error.name !== "ApiError") {
     return null;
   }
 
   const statusError = error as ApiStatusError;
-  const status = statusError.status ?? statusError.response?.status;
+  const status = statusError.status;
   return typeof status === "number" && Number.isInteger(status) ? status : null;
 }
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+function isNetworkError(error: unknown): boolean {
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  return (
+    error instanceof Error &&
+    (error.message.startsWith("Network request failed.") ||
+      error.message.startsWith("Network error:"))
+  );
 }
 
 function isRetryableError(error: unknown): boolean {
@@ -35,7 +44,7 @@ function isRetryableError(error: unknown): boolean {
   }
 
   const status = getApiErrorStatus(error);
-  return status === null || status === 429 || status >= 500;
+  return isNetworkError(error) || status === 429 || (status ?? 0) >= 500;
 }
 
 function wait(delayMs: number): Promise<void> {

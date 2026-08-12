@@ -4,11 +4,9 @@ import type {
   NextGenTrait,
 } from "@/entities/INextgen";
 import { isEmptyObject } from "@/helpers/Helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
-import {
-  fetchNextGenApi,
-  fetchNextGenApiOrNull,
-} from "../../../nextgen-api";
+import { fetchNextGenApiOrNull } from "../../../nextgen-api";
 
 interface TokenData {
   tokenId: number;
@@ -32,7 +30,7 @@ export async function fetchTokenData(
   let collectionId: number;
 
   if (token && !token.pending) {
-    traits = await fetchNextGenApi<NextGenTrait[]>({
+    traits = await commonApiFetch<NextGenTrait[]>({
       endpoint: `nextgen/tokens/${token.id}/traits`,
       headers,
     }).catch(() => []);
