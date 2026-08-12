@@ -2210,6 +2210,7 @@
       ],
       "facts": [
         "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
+        "On web, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
         "The app full-page create route remains /waves/create where app mode uses it.",
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],

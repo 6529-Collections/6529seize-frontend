@@ -421,6 +421,8 @@ export const ES_ES_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Puedes subir un archivo GIF en su lugar.",
   "common.close": "Cerrar",
+  "waves.create.dialog.subwaveTitle": "Crear subwave",
+  "waves.create.dialog.waveTitle": "Crear wave",
   "waves.create.actions.cancel": "Cancelar",
   "waves.create.actions.complete": "Completar",
   "waves.create.actions.next": "Siguiente",
