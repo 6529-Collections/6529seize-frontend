@@ -143,12 +143,3 @@
   media. The help corpus now describes the reviewed Keys and Gates surrogates
   and the exact Conflict accession-processing status, removing the obsolete
   text-only and acquisition-review statements.
-- Staging qualification of frontend main `9354f35f8ed1e5932a1a32bad0ae6f564b2c5b3e`
-  passed, but retained mobile accession evidence showed that the canonical first
-  Conflict work is the 16.9 MB Palmyra master. Its intentional load control left
-  the opening gallery field without an immediately visible photograph. The
-  downstream accession projection now leads the public exhibition sequence with
-  the first reviewed, immediately viewable work and otherwise preserves canonical
-  order. Palmyra remains in the accession and retains its explicit high-resolution
-  control. Focused component and browser contracts require both properties before
-  the corrected release can advance.

@@ -414,17 +414,17 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       Boolean(
         worksSection !== null &&
-        (worksSection.compareDocumentPosition(curatorialHeading) &
-          Node.DOCUMENT_POSITION_FOLLOWING) !==
-          0
+          (worksSection.compareDocumentPosition(curatorialHeading) &
+            Node.DOCUMENT_POSITION_FOLLOWING) !==
+            0
       )
     ).toBe(true);
     expect(
       Boolean(
         recordSection !== null &&
-        (curatorialHeading.compareDocumentPosition(recordSection) &
-          Node.DOCUMENT_POSITION_FOLLOWING) !==
-          0
+          (curatorialHeading.compareDocumentPosition(recordSection) &
+            Node.DOCUMENT_POSITION_FOLLOWING) !==
+            0
       )
     ).toBe(true);
   });
@@ -454,8 +454,7 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
   it("renders Conflict at Its Edges as a visual Wave-selected acquisition", () => {
     const workTitle = "Conflict at Its Edges";
     const artistName = "M. Artist";
-    const lifecycle =
-      "Selected by Museum Wave; accession processing in progress";
+    const lifecycle = "Selected by Museum Wave; accession processing in progress";
     const workId = "6529NM-W-0024";
     const presentation = presentationMedia();
 
@@ -512,85 +511,6 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(document.body.textContent).not.toContain(
       "selected_by_museum_wave_acquisition_review_in_progress"
     );
-  });
-
-  it("leads an exhibition with an immediately viewable work while preserving the accession order", () => {
-    const gated = presentationMedia();
-    const immediatelyViewable: MuseumExternalProposalPresentationMedia = {
-      ...presentationMedia(),
-      id: "media-wave-proposal-viewable",
-      mediaUrl: "https://museum.test/conflict/border.jpg",
-      sourceByteSize: 800_000,
-      altText: "A patrol moves through a desert border landscape.",
-      source: {
-        ...presentationMedia().source,
-        partId: 2,
-        mediaRecordPath: "records/entities/media-wave-proposal-viewable.json",
-      },
-    };
-    const gatedWorkId = "6529NM-W-0028";
-    const viewableWorkId = "6529NM-W-0024";
-
-    render(
-      <MuseumAcquisitionRecordPage
-        acquisition={acquisition(
-          "acquisition-wave-selection",
-          "conflict-at-its-edges",
-          "Conflict at Its Edges",
-          "selected_by_museum_wave_acquisition_review_in_progress",
-          gatedWorkId,
-          { workIds: [gatedWorkId, viewableWorkId] }
-        )}
-        publication={publication(
-          [artist("artist-m", "M. Artist")],
-          [
-            {
-              ...work(
-                gatedWorkId,
-                "Palmyra, Syria",
-                "artist-m",
-                "selected_by_museum_wave_acquisition_review_in_progress",
-                metadata(
-                  "media-palmyra",
-                  gatedWorkId,
-                  "© artist / Magnum Photos.",
-                  gated.altText
-                )
-              ),
-              presentationMedia: [gated],
-            },
-            {
-              ...work(
-                viewableWorkId,
-                "Patrolling the border",
-                "artist-m",
-                "selected_by_museum_wave_acquisition_review_in_progress",
-                metadata(
-                  "media-border",
-                  viewableWorkId,
-                  "© artist / Magnum Photos.",
-                  immediatelyViewable.altText
-                )
-              ),
-              presentationMedia: [immediatelyViewable],
-            },
-          ]
-        )}
-        view={null}
-        sourceCommit={"b".repeat(40)}
-      />
-    );
-
-    const figures = document.querySelectorAll("#acquisition-works figure");
-    expect(figures).toHaveLength(2);
-    expect(figures[0]).toHaveTextContent("Patrolling the border");
-    expect(figures[1]).toHaveTextContent("Palmyra, Syria");
-    expect(
-      screen.getByRole("img", { name: immediatelyViewable.altText })
-    ).toHaveAttribute("src", immediatelyViewable.mediaUrl);
-    expect(
-      screen.getByRole("button", { name: "View image · loads 16.5 MB" })
-    ).toBeInTheDocument();
   });
 
   it("fails closed when selected program media has no reviewed derivatives", () => {

@@ -1,5 +1,4 @@
 import { MuseumRelatedEntities } from "./MuseumRelatedEntities";
-import { MUSEUM_PROPOSAL_INTENT_VIEW_BYTES } from "./MuseumProposalImage";
 import type { AcquisitionWorkCard } from "./acquisition/MuseumAcquisitionExhibition";
 import { MuseumAcquisitionRecordDocuments } from "./acquisition/MuseumAcquisitionRecordDocuments";
 import { MuseumAcquisitionRecordHeader } from "./acquisition/MuseumAcquisitionRecordHeader";
@@ -138,26 +137,6 @@ function acquisitionWorkCards(
   return records;
 }
 
-function exhibitionWorkCards(
-  cards: readonly AcquisitionWorkCard[]
-): readonly AcquisitionWorkCard[] {
-  if (cards.length < 2) return cards;
-  const firstImmediatelyViewableIndex = cards.findIndex((card) => {
-    if (card.media !== undefined) return true;
-    const sourceByteSize = card.presentationMedia?.sourceByteSize;
-    return (
-      typeof sourceByteSize === "number" &&
-      sourceByteSize < MUSEUM_PROPOSAL_INTENT_VIEW_BYTES
-    );
-  });
-  if (firstImmediatelyViewableIndex <= 0) return cards;
-  return [
-    cards[firstImmediatelyViewableIndex] as AcquisitionWorkCard,
-    ...cards.slice(0, firstImmediatelyViewableIndex),
-    ...cards.slice(firstImmediatelyViewableIndex + 1),
-  ];
-}
-
 function acquisitionPublicWorkCard(
   publication: MuseumPublication,
   workId: string,
@@ -267,7 +246,6 @@ export function MuseumAcquisitionRecordPage({
   );
   const workHrefs = museumWorkHrefIndex(publication, view);
   const workCards = acquisitionWorkCards(publication, acquisition, view);
-  const displayedWorkCards = exhibitionWorkCards(workCards);
   const coveredPresentationIds = new Set(
     workCards.flatMap((work) =>
       work.presentationMedia === undefined ? [] : [work.presentationMedia.id]
@@ -305,7 +283,7 @@ export function MuseumAcquisitionRecordPage({
         workCount={workCards.length}
       />
       <MuseumAcquisitionRecordWorkSection
-        workCards={displayedWorkCards}
+        workCards={workCards}
         additionalPresentationMedia={additionalPresentationMedia}
         artFirst={artFirst}
       />
