@@ -888,6 +888,33 @@ describe("Wave publication receipt joins", () => {
         unrelatedDocuments
       )
     ).toThrow("public_entity_graph_media_accession_record");
+
+    for (const [validTimestamp, invalidTimestamp] of [
+      ["2026-08-08T10:15:02.0167151Z", "not-a-fixity-timestamp"],
+      ["2026-08-12T07:37:56.984246Z", "2026-02-30T07:37:56Z"],
+    ] as const) {
+      const invalidMedia = JSON.parse(
+        JSON.stringify(media).replaceAll(validTimestamp, invalidTimestamp)
+      ) as MuseumPublicEntityRecord;
+      const invalidGraph = {
+        ...graph,
+        entities: [work, invalidMedia],
+      } satisfies MuseumPublicEntityGraph;
+      const invalidDocument = {
+        ...amendmentDocument,
+        text: amendmentDocument.text.replaceAll(
+          validTimestamp,
+          invalidTimestamp
+        ),
+      };
+      expect(() =>
+        projectMediaRelations(
+          invalidGraph.entities,
+          invalidGraph,
+          new Map([[MEDIA_CONTINUITY_AMENDMENT_PATH, invalidDocument]])
+        )
+      ).toThrow("public_entity_graph_media_accession_record");
+    }
   });
 
   it("rejects a historical Wave locator without its accession token-source binding", () => {

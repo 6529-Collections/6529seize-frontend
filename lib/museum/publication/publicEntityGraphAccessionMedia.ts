@@ -76,7 +76,7 @@ export function accessionMediaFacts(
     fixity["algorithm"] !== "sha256" ||
     typeof fixity["digest"] !== "string" ||
     !/^sha256:[a-f0-9]{64}$/u.test(fixity["digest"]) ||
-    typeof fixity["verified_at"] !== "string" ||
+    !isExactUtcTimestamp(fixity["verified_at"]) ||
     rights["status"] !== "restricted" ||
     sourceObservation["status"] !== "mutable_external" ||
     !isMuseumExternalProposalMediaUrl(historicalWaveUri) ||
@@ -135,8 +135,7 @@ function assertActiveDisplaySourceAmendment(input: {
     !/^records\/proposed-gifts\/[^/]+\/public\/scholarship\/machine\/media-source-continuity-amendment\.json$/u.test(
       amendmentPath
     ) ||
-    typeof observedAt !== "string" ||
-    !Number.isFinite(Date.parse(observedAt))
+    !isExactUtcTimestamp(observedAt)
   ) {
     throw new Error("public_entity_graph_media_accession_record");
   }
@@ -183,6 +182,49 @@ function assertActiveDisplaySourceAmendment(input: {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isExactUtcTimestamp(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  if (value.length < 20 || value.length > 30 || !value.endsWith("Z")) {
+    return false;
+  }
+  const fraction = value.slice(19, -1);
+  if (
+    fraction !== "" &&
+    (!fraction.startsWith(".") ||
+      fraction.length < 2 ||
+      fraction.length > 10 ||
+      !/^[0-9]+$/u.test(fraction.slice(1)))
+  ) {
+    return false;
+  }
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/u.exec(
+      value.slice(0, 19)
+    );
+  if (match === null) return false;
+
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText] =
+    match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const timestamp = new Date(0);
+  timestamp.setUTCFullYear(year, month - 1, day);
+  timestamp.setUTCHours(hour, minute, second, 0);
+
+  return (
+    timestamp.getUTCFullYear() === year &&
+    timestamp.getUTCMonth() === month - 1 &&
+    timestamp.getUTCDate() === day &&
+    timestamp.getUTCHours() === hour &&
+    timestamp.getUTCMinutes() === minute &&
+    timestamp.getUTCSeconds() === second
+  );
 }
 
 function requiredPositiveInteger(
