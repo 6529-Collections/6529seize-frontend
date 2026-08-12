@@ -184,6 +184,15 @@ function MuseumCanonicalWorkMedia({
       </section>
     );
   }
+  // A reviewed Wave presentation is the public image for this downstream
+  // accession record. Its dedicated figure follows immediately below; do not
+  // put a metadata-only placeholder in front of it.
+  if (
+    work.presentationMedia !== undefined &&
+    work.presentationMedia.length > 0
+  ) {
+    return null;
+  }
   const metadata = work.mediaMetadata?.[0];
   if (metadata !== undefined) {
     return (

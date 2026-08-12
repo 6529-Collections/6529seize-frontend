@@ -64,3 +64,27 @@
 - Staging deployment and E2E: pending
 - Production deployment and E2E: pending
 - Final exact-tree inspection caught a still-present featured-work class-token defect despite the earlier resolved review thread: `tw-min-w-0` and the featured centering/width utilities were concatenated. The follow-up restores the separator and adds an exact component assertion for the four featured-layout classes. The focused acquisition suite passes 5/5, changed lint passes, and whitespace passes. A fresh exact-head CI run is required.
+- Retained hosted screenshots then exposed a deeper false-green gate: the
+  Museum browser lane was pinned to the pre-media catalog/source pair and its
+  contracts explicitly required zero images on the Keys and Gates program and
+  Work routes and on the Conflict at Its Edges Work route. The protected
+  fixture now advances to catalog Candidate C `459cdfd41145f0ea55ec5687508222de6b673252`
+  and reviewed source Candidate B `2da150eacf951d977f6c430b1e21c118687a0c32`.
+  Browser contracts now require all 16 reviewed Keys and Gates images, all five
+  signed-Wave Conflict images, representative Work images, natural art-first
+  acquisition pages, curatorial reading, a collapsed accession record, and
+  retained desktop/mobile evidence.
+- Removed the inherited rule that suppressed Keys and Gates imagery until
+  accession. Reviewed display authority and accession state are separate
+  facts: the images are public while the lifecycle labels continue to say that
+  minting and accession are pending. Conflict Work pages likewise no longer
+  place a metadata-only placeholder before an available reviewed Wave image.
+- Downstream accession work is the governing boundary for scholarship, media,
+  rights, provenance, technical review, accessibility, preservation, and
+  public-catalogue construction. The public experience is produced from that
+  accession package; it is not a separate ungoverned presentation layer.
+- Corrective local validation: 4 focused suites and 69 tests passed; changed
+  lint, changed typecheck across 1,535 files, and whitespace checks passed.
+  Local full-route rendering remains dependent on the shared local backend;
+  the authoritative exact-catalog browser qualification is the fresh hosted
+  desktop/mobile lane.

@@ -904,8 +904,8 @@ jobs:
         env:
           # Exact canonical-C qualification. The runtime resolves the pointer
           # and catalog at C, then assembles only the immutable reviewed B corpus.
-          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "343f98fcfe1c231755518a513b5af9fc89ac4bed"
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "81c3353b06725582d7d7d7cc297d06ea19ee61bf"
+          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "459cdfd41145f0ea55ec5687508222de6b673252"
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "2da150eacf951d977f6c430b1e21c118687a0c32"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(

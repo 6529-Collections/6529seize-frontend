@@ -212,10 +212,15 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       page.getByText("Selected through", { exact: true })
     ).toBeVisible();
     await expect(
+      page.getByRole("img", {
+        name: "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+      })
+    ).toBeVisible();
+    await expect(
       page.getByText("No public image is available for this record.", {
         exact: true,
       })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: /historical proposal image/u })
     ).toHaveCount(0);
@@ -227,7 +232,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       page.getByText("No public image is available for this record.", {
         exact: true,
       })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByText(
         "Selected by Museum Wave; acquisition review in progress",
@@ -241,7 +246,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         name: "Historical Wave proposal presentation",
         exact: true,
       })
-    ).toHaveCount(0);
+    ).toHaveCount(1);
     await expect(
       page.getByRole("button", { name: /historical proposal image/u })
     ).toHaveCount(0);
@@ -250,7 +255,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).toHaveCount(0);
     await expect(
       page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
-    ).toHaveCount(0);
+    ).toHaveCount(1);
     await expect(page.locator("[download]")).toHaveCount(0);
     await expect(
       page.locator(`a[href="${MAGNUM_WAVE_CONTEXT_HREF}"]`)
@@ -264,7 +269,42 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(
       page.getByRole("link", { name: "Wave proposal, part 6", exact: true })
     ).toHaveCount(1);
-    await retainScreenshot(page, testInfo, "museum-work-magnum-metadata-only");
+    await retainScreenshot(page, testInfo, "museum-work-conflict-at-its-edges");
+    await expectNoHorizontalOverflow(page);
+
+    await openRoute(page, "/museum/network/acquisitions/keys-and-gates");
+    await expect(
+      page.getByRole("heading", { name: "Keys and Gates", exact: true })
+    ).toBeVisible();
+    await expect(page.locator("#acquisition-works figure img")).toHaveCount(16);
+    await expect(
+      page.getByRole("heading", { name: "Curatorial reading", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.locator("details#acquisition-record")
+    ).not.toHaveAttribute("open");
+    await retainScreenshot(page, testInfo, "museum-acquisition-keys-and-gates");
+    await expectNoHorizontalOverflow(page);
+
+    await openRoute(page, "/museum/network/acquisitions/conflict-at-its-edges");
+    await expect(
+      page.getByRole("heading", {
+        name: "Conflict at Its Edges",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(page.locator("#acquisition-works figure img")).toHaveCount(5);
+    await expect(
+      page.getByRole("heading", { name: "Curatorial reading", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.locator("details#acquisition-record")
+    ).not.toHaveAttribute("open");
+    await retainScreenshot(
+      page,
+      testInfo,
+      "museum-acquisition-conflict-at-its-edges"
+    );
     await expectNoHorizontalOverflow(page);
 
     await openRoute(page, "/museum/network/works/6529NM-W-0027");

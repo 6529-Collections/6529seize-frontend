@@ -13,6 +13,7 @@ import {
   MUSEUM_PROPOSAL_INTENT_VIEW_BYTES,
 } from "../MuseumProposalImage";
 import { MuseumProgramImage } from "../MuseumProgramImage";
+import { MuseumRightsLink } from "../MuseumRightsLink";
 
 const MUSEUM_OPEN_PRESENTATION_MESSAGE =
   "museum.network.acquisitions.openPresentation";
@@ -193,7 +194,12 @@ export function AcquisitionWorkFigure({
   );
   return (
     <figure
-      className={`tw-m-0 tw-min-w-0${featured ? " tw-mx-auto tw-w-full tw-max-w-5xl" : ""}`}
+      className={[
+        "tw-m-0 tw-min-w-0",
+        featured ? "tw-mx-auto tw-w-full tw-max-w-5xl" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       {requiresIntent || metadataOnly ? (
         <div className="tw-group tw-block">{media}</div>
@@ -208,7 +214,7 @@ export function AcquisitionWorkFigure({
       <figcaption className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4">
         <Link
           href={work.href}
-          className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {work.title}
         </Link>
@@ -225,36 +231,11 @@ export function AcquisitionWorkFigure({
             {work.statusQualifier}
           </span>
         ) : null}
-        {work.presentationMedia ? (
-          <div className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
-            <span className="tw-block tw-text-iron-300">
-              {work.presentationMedia.credit.creditLine}
-            </span>
-            <span className="tw-mt-1 tw-block">
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.acquisitions.presentationRights"
-              )}
-            </span>
-            {presentationSourceHref === null || !canOpenPresentation ? null : (
-              <span className="tw-mt-1 tw-block">
-                {t(
-                  DEFAULT_LOCALE,
-                  "museum.network.acquisitions.presentationSource"
-                )}
-                :{" "}
-                <a
-                  href={presentationSourceHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                >
-                  {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
-                </a>
-              </span>
-            )}
-          </div>
-        ) : null}
+        <AcquisitionWorkCredit
+          work={work}
+          presentationSourceHref={presentationSourceHref}
+          canOpenPresentation={canOpenPresentation}
+        />
         {!exhibitionPresentation && work.meta ? (
           <span className="tw-mt-1 tw-block tw-text-xs tw-text-iron-500">
             {work.meta}
@@ -262,6 +243,63 @@ export function AcquisitionWorkFigure({
         ) : null}
       </figcaption>
     </figure>
+  );
+}
+
+function AcquisitionWorkCredit({
+  work,
+  presentationSourceHref,
+  canOpenPresentation,
+}: {
+  readonly work: AcquisitionWorkCard;
+  readonly presentationSourceHref: string | null;
+  readonly canOpenPresentation: boolean;
+}) {
+  if (work.presentationMedia !== undefined) {
+    return (
+      <div className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
+        <span className="tw-block tw-text-iron-300">
+          {work.presentationMedia.credit.creditLine}
+        </span>
+        <span className="tw-mt-1 tw-block">
+          {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationRights")}
+        </span>
+        {presentationSourceHref === null || !canOpenPresentation ? null : (
+          <span className="tw-mt-1 tw-block">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitions.presentationSource"
+            )}
+            :{" "}
+            <a
+              href={presentationSourceHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
+            </a>
+          </span>
+        )}
+      </div>
+    );
+  }
+  if (work.media === undefined || work.mediaMetadata === undefined) return null;
+  return (
+    <div className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
+      <span className="tw-block tw-text-iron-300">
+        {work.mediaMetadata.credit.creditLine}
+      </span>
+      {work.mediaMetadata.credit.licenseLabel === null ? null : (
+        <span className="tw-mt-1 tw-block">
+          <MuseumRightsLink
+            href={work.mediaMetadata.credit.licenseUrl ?? undefined}
+            label={work.mediaMetadata.credit.licenseLabel}
+            className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          />
+        </span>
+      )}
+    </div>
   );
 }
 

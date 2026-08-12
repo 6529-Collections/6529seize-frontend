@@ -140,6 +140,10 @@ describe("Museum acquisition program status projection", () => {
     expect(
       screen.getByRole("link", { name: "A divergent first Work" })
     ).toHaveClass("tw-min-h-11");
-    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("img", {
+        name: "A submitted Keys and Gates photograph.",
+      })
+    ).toBeInTheDocument();
   });
 });

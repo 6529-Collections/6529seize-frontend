@@ -10,6 +10,10 @@ import {
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
 import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
+import {
+  AcquisitionWorkFigure,
+  type AcquisitionWorkCard,
+} from "@/components/museum/acquisition/MuseumAcquisitionExhibition";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -34,10 +38,8 @@ import {
   displayMuseumPublicAcquisitionProgramStatus,
   museumPublicAcquisitionProgramStatusAsOf,
 } from "@/lib/museum/publication/programStatus";
-import {
-  selectMuseumStillMedia,
-  shouldWithholdKeysAndGatesMedia,
-} from "@/lib/museum/publication/mediaSelection";
+import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 interface MuseumAcquisitionProgramPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -280,11 +282,19 @@ export default async function MuseumAcquisitionProgramPage({
           </h2>
           <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
             {typedWorks.map((work) => {
-              const media = shouldWithholdKeysAndGatesMedia(work.status, [
-                typed?.slug ?? slug,
-              ])
-                ? null
-                : publicWorkMedia(work);
+              const canonicalMedia = publicWorkMedia(work);
+              const reviewedProgramMedia = findReviewedProgramMediaMatch(view, [
+                work.id,
+                ...(work.sourceRecordIds ?? []),
+              ]);
+              const programMediaMetadata =
+                reviewedProgramMedia === null
+                  ? undefined
+                  : work.mediaMetadata?.find((candidate) =>
+                      candidate.sourceRecordIds?.includes(
+                        reviewedProgramMedia.sourceRecordId
+                      )
+                    );
               const status = displayMuseumPublicAcquisitionStatus(work.status);
               const qualifier =
                 work.status ===
@@ -296,19 +306,42 @@ export default async function MuseumAcquisitionProgramPage({
                   : undefined;
               const mediaQualifierProps =
                 qualifier === undefined ? {} : { qualifier };
-              return media ? (
-                <MuseumPublicMediaFigure
-                  key={work.id}
-                  src={media.url}
-                  width={media.width}
-                  height={media.height}
-                  alt={media.altText ?? ""}
-                  href={museumWorkHref(work.id)}
-                  title={work.title}
-                  status={status}
-                  {...mediaQualifierProps}
-                />
-              ) : (
+              if (canonicalMedia !== null) {
+                return (
+                  <MuseumPublicMediaFigure
+                    key={work.id}
+                    src={canonicalMedia.url}
+                    width={canonicalMedia.width}
+                    height={canonicalMedia.height}
+                    alt={canonicalMedia.altText ?? ""}
+                    href={museumWorkHref(work.id)}
+                    title={work.title}
+                    status={status}
+                    {...mediaQualifierProps}
+                  />
+                );
+              }
+              if (reviewedProgramMedia !== null) {
+                const artist = publication.artists.find(
+                  (candidate) => candidate.id === work.artistId
+                );
+                const card: AcquisitionWorkCard = {
+                  id: work.id,
+                  href: museumWorkHref(work.id),
+                  title: work.title,
+                  artist: artist?.preferredName ?? work.artistId,
+                  media: reviewedProgramMedia.media,
+                  ...(programMediaMetadata === undefined
+                    ? {}
+                    : { mediaMetadata: programMediaMetadata }),
+                  status,
+                  ...(qualifier === undefined
+                    ? {}
+                    : { statusQualifier: qualifier }),
+                };
+                return <AcquisitionWorkFigure key={work.id} work={card} />;
+              }
+              return (
                 <article
                   key={work.id}
                   className="tw-min-w-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4"
