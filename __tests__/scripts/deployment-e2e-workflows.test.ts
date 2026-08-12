@@ -46,6 +46,18 @@ describe("serialized post-deploy E2E", () => {
   );
 
   it.each([
+    ["staging", stagingDeploy, stagingE2e],
+    ["production", productionDeploy, productionE2e],
+  ])(
+    "grants the %s reusable E2E every requested workflow permission",
+    (_environment, deploy, e2e) => {
+      expect(deploy.workflow.permissions).toEqual(
+        expect.objectContaining(e2e.workflow.permissions)
+      );
+    }
+  );
+
+  it.each([
     [
       "production",
       productionE2e,
