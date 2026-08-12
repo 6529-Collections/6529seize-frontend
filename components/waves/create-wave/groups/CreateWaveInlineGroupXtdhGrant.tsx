@@ -130,10 +130,10 @@ export default function CreateWaveInlineGroupXtdhGrant({
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           xTDH Grant Beneficiary
         </p>
-        <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
           Require identities to be beneficiaries of a selected xTDH grant.
         </p>
       </div>
@@ -235,11 +235,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
                 })}
               </div>
             </div>
-            <Button
-              variant="tertiary"
-              size="md"
-              onClick={onResetFilters}
-            >
+            <Button variant="tertiary" size="md" onClick={onResetFilters}>
               Clear filters
             </Button>
           </div>

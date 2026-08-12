@@ -57,7 +57,7 @@ export default function CreateWaveModal({
             className="tw-flex tw-max-h-[calc(100svh-env(safe-area-inset-top)-2rem)] tw-w-full tw-max-w-5xl tw-flex-col tw-overflow-hidden tw-rounded-3xl tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-8 tw-py-5">
+            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-between tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-8 tw-py-5">
               <h2 className="tw-mb-0 tw-text-[17px] tw-font-bold tw-tracking-wide tw-text-white">
                 {parentWaveId ? "Create subwave" : "Create Wave"}
               </h2>
