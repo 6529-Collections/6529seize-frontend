@@ -12,7 +12,6 @@ import { getAddress, isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import {
-  canStoreAnotherWalletAccount,
   clearAgentLoginActiveAddress,
   type ConnectedWalletAccount,
   getConnectedWalletAccounts,
@@ -55,6 +54,7 @@ import {
   useConsolidatedWalletState,
 } from "./seizeConnectWalletState";
 import { getSeizeConnectImpersonation } from "./seizeConnectImpersonation";
+import { useAddConnectedAccount } from "./useAddConnectedAccount";
 import { useSignOutAllTransaction } from "./useSignOutAllTransaction";
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -104,13 +104,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setStoredConnectedAccounts(getConnectedWalletAccounts());
   }, []);
 
-  const { isSigningOutAll, seizeDisconnectAndLogoutAll } =
-    useSignOutAllTransaction({
-      disconnect,
-      isMountedRef,
-      refreshStoredConnectedAccounts,
-      setDisconnected,
-    });
+  const {
+    getSignOutAllGeneration,
+    hasSignOutAllGenerationChanged,
+    isSigningOutAll,
+    isSigningOutAllRef,
+    seizeDisconnectAndLogoutAll,
+  } = useSignOutAllTransaction({
+    disconnect,
+    isMountedRef,
+    refreshStoredConnectedAccounts,
+    setDisconnected,
+  });
 
   const clearConnectIntentHandoffTimeout = useCallback((): void => {
     if (connectIntentHandoffTimeoutRef.current) {
@@ -125,6 +130,22 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsConnectIntentWaitingForAppKit(false);
     }
   }, [clearConnectIntentHandoffTimeout]);
+
+  useEffect(() => {
+    if (!isSigningOutAll) {
+      return;
+    }
+
+    if (retryConnectTimeoutRef.current) {
+      clearTimeout(retryConnectTimeoutRef.current);
+      retryConnectTimeoutRef.current = null;
+    }
+    isAddingConnectedAccountRef.current = false;
+    addFlowOriginAddressRef.current = null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sign-out must immediately hide the pending add-account state.
+    setIsAddingConnectedAccount(false);
+    clearConnectIntentWaitingForAppKit();
+  }, [clearConnectIntentWaitingForAppKit, isSigningOutAll]);
 
   useEffect(() => {
     if (appKitBootstrapStatus === "error" && hasTerminalBootstrapError) {
@@ -166,6 +187,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isConnectIntentWaitingForAppKit,
     isInitialized,
     isSigningOutAll,
+    isSigningOutAllRef,
     isMountedRef,
     refreshStoredConnectedAccounts,
     retryConnectTimeoutRef,
@@ -196,6 +218,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const openConnectModal = useCallback(
     async (source: string): Promise<void> => {
+      if (isSigningOutAllRef.current) {
+        return;
+      }
+      const signOutGeneration = getSignOutAllGeneration();
+
       try {
         clearConnectIntentHandoffTimeout();
         setIsConnectIntentWaitingForAppKit(true);
@@ -206,10 +233,24 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!isMountedRef.current) {
           return;
         }
+        if (hasSignOutAllGenerationChanged(signOutGeneration)) {
+          clearConnectIntentWaitingForAppKit();
+          return;
+        }
 
         const openAppKit = await appKitModalBridgeStore.waitForOpen();
 
+        if (hasSignOutAllGenerationChanged(signOutGeneration)) {
+          clearConnectIntentWaitingForAppKit();
+          return;
+        }
+
         await openAppKit({ view: "Connect" });
+
+        if (hasSignOutAllGenerationChanged(signOutGeneration)) {
+          clearConnectIntentWaitingForAppKit();
+          return;
+        }
 
         logSecurityEvent(
           SecurityEventType.WALLET_MODAL_OPENED,
@@ -229,8 +270,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [
       clearConnectIntentHandoffTimeout,
       clearConnectIntentWaitingForAppKit,
+      getSignOutAllGeneration,
+      hasSignOutAllGenerationChanged,
       appKitModalBridgeStore,
       isAppKitReady,
+      isSigningOutAllRef,
       scheduleConnectIntentHandoffFallback,
       waitForAppKitReady,
     ]
@@ -238,6 +282,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeConnectOrThrow = useCallback(
     async (source: string): Promise<void> => {
+      if (isSigningOutAllRef.current) {
+        return;
+      }
+
       // Log connection attempt for security monitoring
       logSecurityEvent(
         SecurityEventType.WALLET_CONNECTION_ATTEMPT,
@@ -246,28 +294,19 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
       await openConnectModal(source);
     },
-    [openConnectModal]
+    [isSigningOutAllRef, openConnectModal]
   );
 
   const seizeConnect = useCallback((): void => {
     seizeConnectOrThrow("seizeConnect").then(undefined, () => undefined);
   }, [seizeConnectOrThrow]);
 
-  const handleAddConnectedAccountConnectFailure = useCallback(
-    (clearAddConnectedAccountGuard: () => void, error: unknown): void => {
-      clearAddConnectedAccountGuard();
-      setIsAddingConnectedAccount(false);
-      const connectionError = createWalletError(
-        WalletConnectionError,
-        "start add-account connection flow",
-        error
-      );
-      logError("seizeAddConnectedAccount", connectionError);
-    },
-    []
-  );
-
   const seizeConnectFresh = useCallback(async (): Promise<void> => {
+    if (isSigningOutAllRef.current) {
+      return;
+    }
+    const signOutGeneration = getSignOutAllGeneration();
+
     const liveConnectedWallet =
       account.address && account.isConnected && isAddress(account.address)
         ? getAddress(account.address)
@@ -294,7 +333,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       setTimeout(resolve, CONNECT_AFTER_DISCONNECT_DELAY_MS);
     });
 
-    if (!isMountedRef.current) {
+    if (
+      !isMountedRef.current ||
+      hasSignOutAllGenerationChanged(signOutGeneration)
+    ) {
       return;
     }
 
@@ -303,11 +345,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     account.address,
     account.isConnected,
     disconnect,
+    getSignOutAllGeneration,
+    hasSignOutAllGenerationChanged,
     isActiveAppWalletConnector,
+    isSigningOutAllRef,
     seizeConnectOrThrow,
   ]);
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
+    if (isSigningOutAllRef.current) {
+      return;
+    }
+
     const hasLiveProviderConnection = !!(
       account.address &&
       account.isConnected &&
@@ -334,9 +383,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     account.isConnected,
     disconnect,
     isActiveWalletConnected,
+    isSigningOutAllRef,
   ]);
 
   const seizeDisconnectAndLogout = useCallback(async (): Promise<void> => {
+    if (isSigningOutAllRef.current) {
+      return;
+    }
+
     // CRITICAL: Wallet disconnect MUST succeed before auth cleanup
     try {
       await disconnect();
@@ -384,6 +438,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [
     disconnect,
+    isSigningOutAllRef,
     refreshStoredConnectedAccounts,
     setConnected,
     setDisconnected,
@@ -391,6 +446,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const seizeAcceptConnection = useCallback(
     (address: string): void => {
+      if (isSigningOutAllRef.current) {
+        return;
+      }
+
       // Extract diagnostic data before validation check
       const addressLength = address.length;
       const addressFormat = address.startsWith("0x") ? "hex_prefixed" : "other";
@@ -426,11 +485,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       setConnected(checksummedAddress);
       refreshStoredConnectedAccounts();
     },
-    [refreshStoredConnectedAccounts, setConnected]
+    [isSigningOutAllRef, refreshStoredConnectedAccounts, setConnected]
   );
 
   const seizeSwitchConnectedAccount = useCallback(
     (address: string): void => {
+      if (isSigningOutAllRef.current) {
+        return;
+      }
+
       if (!isAddress(address)) {
         throw new AuthenticationError(
           "Cannot switch account: invalid Ethereum address format."
@@ -455,134 +518,34 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       refreshStoredConnectedAccounts();
       setConnected(checksummedAddress);
     },
-    [activeAddress, refreshStoredConnectedAccounts, setConnected]
+    [
+      activeAddress,
+      isSigningOutAllRef,
+      refreshStoredConnectedAccounts,
+      setConnected,
+    ]
   );
 
   const canAddConnectedAccount =
     storedConnectedAccounts.length < MAX_CONNECTED_PROFILES;
-
-  const openAddConnectedAccountModal = useCallback(
-    (clearAddConnectedAccountGuard: () => void): void => {
-      seizeConnectOrThrow("seizeAddConnectedAccount").catch(
-        (error: unknown) => {
-          handleAddConnectedAccountConnectFailure(
-            clearAddConnectedAccountGuard,
-            error
-          );
-        }
-      );
-    },
-    [handleAddConnectedAccountConnectFailure, seizeConnectOrThrow]
-  );
-
-  const seizeAddConnectedAccount = useCallback((): void => {
-    const clearAddConnectedAccountGuard = (): void => {
-      isAddingConnectedAccountRef.current = false;
-      addFlowOriginAddressRef.current = null;
-      if (retryConnectTimeoutRef.current) {
-        clearTimeout(retryConnectTimeoutRef.current);
-        retryConnectTimeoutRef.current = null;
-      }
-    };
-
-    if (!canAddConnectedAccount || !canStoreAnotherWalletAccount()) {
-      return;
-    }
-
-    const liveConnectedWallet =
-      account.address && account.isConnected && isAddress(account.address)
-        ? getAddress(account.address)
-        : null;
-    const addFlowOriginAddress = addFlowOriginAddressRef.current;
-    const addFlowReturnedToOrigin =
-      !appKitModalState.isOpen &&
-      !isConnectIntentWaitingForAppKit &&
-      !!liveConnectedWallet &&
-      !!addFlowOriginAddress &&
-      normalizeAddress(liveConnectedWallet) ===
-        normalizeAddress(addFlowOriginAddress);
-    const hasStaleAddConnectedAccountGuard =
-      isAddingConnectedAccountRef.current &&
-      (!isAddingConnectedAccount ||
-        addFlowReturnedToOrigin ||
-        (!appKitModalState.isOpen &&
-          !isConnectIntentWaitingForAppKit &&
-          !retryConnectTimeoutRef.current &&
-          !liveConnectedWallet &&
-          account.status !== "connecting" &&
-          account.status !== "reconnecting"));
-
-    if (hasStaleAddConnectedAccountGuard) {
-      clearAddConnectedAccountGuard();
-      setIsAddingConnectedAccount(false);
-    }
-
-    if (isAddingConnectedAccountRef.current) {
-      return;
-    }
-
-    if (!liveConnectedWallet || isActiveAppWalletConnector) {
-      isAddingConnectedAccountRef.current = true;
-      addFlowOriginAddressRef.current = liveConnectedWallet;
-      setIsAddingConnectedAccount(true);
-
-      openAddConnectedAccountModal(clearAddConnectedAccountGuard);
-      return;
-    }
-
-    isAddingConnectedAccountRef.current = true;
-    addFlowOriginAddressRef.current = liveConnectedWallet;
-    setIsAddingConnectedAccount(true);
-
-    if (retryConnectTimeoutRef.current) {
-      clearTimeout(retryConnectTimeoutRef.current);
-      retryConnectTimeoutRef.current = null;
-    }
-
-    try {
-      disconnect()
-        .then(() => {
-          retryConnectTimeoutRef.current = setTimeout(() => {
-            retryConnectTimeoutRef.current = null;
-            if (!isMountedRef.current) {
-              clearAddConnectedAccountGuard();
-              return;
-            }
-            openAddConnectedAccountModal(clearAddConnectedAccountGuard);
-          }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
-        })
-        .catch((error: unknown) => {
-          clearAddConnectedAccountGuard();
-          setIsAddingConnectedAccount(false);
-          const walletError = createWalletError(
-            WalletDisconnectionError,
-            "disconnect wallet before adding account",
-            error
-          );
-          logError("seizeAddConnectedAccount", walletError);
-        });
-    } catch (error: unknown) {
-      clearAddConnectedAccountGuard();
-      setIsAddingConnectedAccount(false);
-      const walletError = createWalletError(
-        WalletDisconnectionError,
-        "disconnect wallet before adding account",
-        error
-      );
-      logError("seizeAddConnectedAccount", walletError);
-    }
-  }, [
-    account.address,
-    account.isConnected,
-    account.status,
+  const seizeAddConnectedAccount = useAddConnectedAccount({
+    account,
+    addFlowOriginAddressRef,
+    appKitModalOpen: appKitModalState.isOpen,
     canAddConnectedAccount,
     disconnect,
+    getSignOutAllGeneration,
+    hasSignOutAllGenerationChanged,
     isActiveAppWalletConnector,
     isAddingConnectedAccount,
+    isAddingConnectedAccountRef,
     isConnectIntentWaitingForAppKit,
-    openAddConnectedAccountModal,
-    appKitModalState.isOpen,
-  ]);
+    isMountedRef,
+    isSigningOutAllRef,
+    retryConnectTimeoutRef,
+    seizeConnectOrThrow,
+    setIsAddingConnectedAccount,
+  });
 
   const connectedAccounts = useMemo(() => {
     if (isSigningOutAll) {
@@ -705,14 +668,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
-      address: activeAddress,
-      walletName: isActiveWalletConnected
+      address: isSigningOutAll ? undefined : activeAddress,
+      walletName: !isSigningOutAll && isActiveWalletConnected
         ? appKitModalState.walletName
         : undefined,
-      walletIcon: isActiveWalletConnected
+      walletIcon: !isSigningOutAll && isActiveWalletConnected
         ? appKitModalState.walletIcon
         : undefined,
-      isSafeWallet: isActiveWalletConnected
+      isSafeWallet: !isSigningOutAll && isActiveWalletConnected
         ? appKitModalState.isSafeWallet
         : false,
       seizeConnect,
