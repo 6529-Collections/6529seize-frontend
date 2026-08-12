@@ -102,6 +102,14 @@ rules, explains the two source mint paths, and labels the proposed ADR 0018
 replay change as unimplemented. It keeps the snapshot's section anchors for
 feedback. Immutable version routes retain the original technical editorial.
 
+The current **Changes, Emergencies, and Future Contracts** page starts with a
+short explanation of setup sealing, delayed governance, incident pauses,
+permanent powers, and replacement contracts. It keeps current Solidity,
+accepted ADR design, open risks, and launch evidence separate. In particular,
+it explains that the pinned executor's 30-day successor class and the module
+registry's 48-hour registration path are separate code paths that still need an
+exact launch changeover catalog.
+
 ## Implementation and Evidence Status
 
 The current **Where Development Stands** page begins with a direct launch answer:
@@ -127,6 +135,9 @@ The plain artist guide and its short technical detail layer follow the same
 rule: they appear only on the current, unversioned **For Artists** route and
 replace the versioned editorial there. Immutable version routes continue to
 render their exact editorial snapshot without the guide.
+The plain governance explanation follows the same current-route rule. Immutable
+**Changes, Emergencies, and Future Contracts** routes keep their exact saved
+editorial instead of receiving later wording.
 
 The current, unversioned **Curation and TDH Authorization** page follows the
 same snapshot boundary. It replaces the active snapshot's editorial with a

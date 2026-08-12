@@ -218,6 +218,13 @@ jest.mock("@/lib/public-review/streamReviewCurationTdhPage", () => ({
     "# Community curation, TDH, and signed authorization\n\n**The answer in one minute**\n\nThe artwork decision happens before Stream is involved.\n\nStream receives signed artwork and sale details for creating an NFT or starting an auction. The signature confirms that Stream’s approved signer has authorized those exact details.\n\nNothing happens automatically. Someone submits the signed details to the Stream contract. For a paid mint, the signed payer must submit them and pay the exact price. For a free mint or auction, any account may submit them.\n\nThe contract then confirms who signed the details, whether the deadline has passed, and whether the permission was cancelled or used before. If every check passes, it creates the NFT or starts the auction.\n\n## Questions for reviewers\n\nWhich real-service, launch-configuration, and independent-audit checks remain before this flow can be trusted?",
 }));
 
+jest.mock("@/lib/public-review/streamReviewGovernancePage", () => ({
+  getCurrentGovernanceEditorialMarkdown: jest.fn(
+    () =>
+      "# Changes, Emergencies, and Future Contracts\n\n## The short answer\n\nPlain current governance copy.\n\n## Current code boundary\n\nThe 30-day class and module registration are separate."
+  ),
+}));
+
 jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
   createStreamEditorialFeedbackPageContext: jest.fn(
     ({ page }: { readonly page: { readonly id: string } }) => ({
@@ -249,6 +256,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "tokens-collections-and-minting",
         sectionValues: ["old-tokens-section"],
+      },
+      {
+        value: "governance-pausing-and-successors",
+        sectionValues: ["old-governance-section"],
       },
       {
         value: "security-testing-and-known-limitations",
@@ -1004,6 +1015,30 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("2");
   });
 
+  it("replaces only the current governance route with plain copy", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "governance-pausing-and-successors",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent("The short answer");
+    expect(editorialCopy).toHaveTextContent("Current code boundary");
+    expect(editorialCopy).not.toHaveTextContent("Technical section");
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "2"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("2");
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("2");
+  });
+
   it("keeps immutable Overview routes unchanged", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -1232,6 +1267,30 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-editorial-visible",
       "true"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "1"
+    );
+  });
+
+  it("keeps immutable governance routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "governance-pausing-and-successors",
+          version: "2026-08-01.1",
+        }),
+      })
+    );
+
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Technical section"
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The short answer"
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",

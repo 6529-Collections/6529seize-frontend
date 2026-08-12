@@ -41,6 +41,7 @@ import { getCurrentCommunityReviewEditorialMarkdown } from "@/lib/public-review/
 import { getCurrentCurationTdhEditorialMarkdown } from "@/lib/public-review/streamReviewCurationTdhPage";
 import { getCurrentDevelopmentEditorialMarkdown } from "@/lib/public-review/streamReviewDevelopmentPage";
 import { getCurrentTokensMintingEditorialMarkdown } from "@/lib/public-review/streamReviewTokensMintingPage";
+import { getCurrentGovernanceEditorialMarkdown } from "@/lib/public-review/streamReviewGovernancePage";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
@@ -114,6 +115,7 @@ type CurrentStreamReviewPages = {
   readonly curationAndTdhAuthorization: boolean;
   readonly developmentStatus: boolean;
   readonly forArtists: boolean;
+  readonly governance: boolean;
   readonly overview: boolean;
   readonly roles: boolean;
   readonly tokensAndMinting: boolean;
@@ -138,6 +140,8 @@ function getCurrentStreamReviewPages(
     developmentStatus:
       isCurrent && pageId === "security-testing-and-known-limitations",
     forArtists: isCurrent && pageId === "for-artists",
+    governance:
+      isCurrent && pageId === "governance-pausing-and-successors",
     overview: isCurrent && pageId === "overview",
     roles: isCurrent && pageId === "roles-and-trust",
     tokensAndMinting: isCurrent && pageId === "tokens-collections-and-minting",
@@ -169,6 +173,12 @@ function getDisplayedEditorialMarkdown({
   }
   if (currentPages.curationAndTdhAuthorization) {
     return getCurrentCurationTdhEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
+  if (currentPages.governance) {
+    return getCurrentGovernanceEditorialMarkdown({
       editorialMarkdown,
       source,
     });

@@ -311,6 +311,7 @@
         "The current Tokens, Collections, and Minting page starts with a one-minute explanation, then separates permanent Core identity from replaceable minting rules. It explains the two source mint paths, supply and counter rules, the proposed ADR 0018 replay change, the zero-mint supply-closure gap, and reviewer questions. Archived version routes keep their exact editorial snapshot.",
         "The current For Artists page begins with a plain artist guide covering the artwork plan, its lifecycle, approval, roles, sales, changes, and permanence. It then replaces the archived technical text with fifteen short sections. The sections use Reviewed code, Accepted design, and Still proposed labels. They cover identity, artist approval, records, artwork files, editions, minting, curation, sales, revenue, randomness, freezing, lifetime authority, design goals, and artist questions. Archived version routes keep their exact editorial snapshot.",
         "The current Who Can Do What page replaces the archived technical text with a plain status-first guide. It separates powers working in the current rehearsal, connected for integration, built in source, planned, and still open. It also explains duties outside the contracts, main risks, and reviewer questions. Archived version routes keep their exact editorial snapshot.",
+        "The current Changes, Emergencies, and Future Contracts page starts with a short explanation of setup sealing, delayed changes, pauses, permanent powers, and replacement contracts. It separates current code, accepted ADR 0017, open governance risks, and launch evidence. It also explains that the 30-day successor class and 48-hour module registration are separate in the pinned source. Archived version routes keep their exact editorial snapshot.",
         "The current Where Development Stands page begins by answering whether Stream is ready to launch. It says not yet, lists the three remaining launch gates in plain language, and shows the last checked date plus the open release-blocker count. The next sections explain what the review covers, use five plain progress labels, and explain what each kind of proof shows and does not show. Built code stays separate from safety evidence, accepted plans stay separate from unaccepted designs, and ADRs are not treated as implementation or launch proof. The exact commit and Git tree follow under Technical details.",
         "The current Community Review page begins with six focused review questions and the review authorship disclosure.",
         "Fourteen editorial pages explain artwork lifecycle, artist controls, responsibilities, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, contract changes, current development, and community review.",
@@ -355,6 +356,7 @@
         "lib/public-review/streamReviewTokensMintingPage.ts",
         "config/public-reviews/6529-stream.development-status.json",
         "lib/public-review/streamReviewCurationTdhPage.ts",
+        "lib/public-review/streamReviewGovernancePage.ts",
         "ops/docs/public-reviews/README.md"
       ]
     },
