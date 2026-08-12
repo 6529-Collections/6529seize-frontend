@@ -180,6 +180,14 @@ function validateWaveProposalMediaProfile(
     "public_entity_graph_media_publication"
   );
   const hasDirectVisualLocator = hasDirectVisualAffordance(affordances);
+  const tokenSource = media["token_source_locator"];
+  const tokenSourceUri = isRecord(tokenSource)
+    ? optionalString(
+        tokenSource,
+        "uri",
+        "public_entity_graph_media_token_source_uri"
+      )
+    : null;
   if (
     new Set(affordances).size !== affordances.length ||
     affordances.some((affordance) => !isAllowedProposalAffordance(affordance))
@@ -187,13 +195,20 @@ function validateWaveProposalMediaProfile(
     throw new Error("public_entity_graph_media_proposal_contract");
   }
   if (!hasDirectVisualLocator) {
-    if (uri !== null && !isMuseumExternalProposalTokenSourceUrl(uri)) {
+    if (uri !== null && !isMuseumExternalProposalMediaUrl(uri)) {
       throw new Error("public_entity_graph_media_proposal_contract");
     }
     assertWaveProposalRights(rights);
     return;
   }
-  if (uri === null || !isApprovedWaveLocator(uri)) {
+  if (uri === null || !isMuseumExternalProposalMediaUrl(uri)) {
+    throw new Error("public_entity_graph_media_proposal_contract");
+  }
+  if (
+    affordances.includes("view") &&
+    (tokenSourceUri === null ||
+      !isMuseumExternalProposalTokenSourceUrl(tokenSourceUri))
+  ) {
     throw new Error("public_entity_graph_media_proposal_contract");
   }
   if (
@@ -216,13 +231,6 @@ function assertWaveProposalRights(rights: Record<string, unknown>): void {
 function hasDirectVisualAffordance(affordances: readonly string[]): boolean {
   return affordances.some((affordance) =>
     ["view", "thumbnail", "hero"].includes(affordance)
-  );
-}
-
-function isApprovedWaveLocator(value: string): boolean {
-  return (
-    isMuseumExternalProposalTokenSourceUrl(value) ||
-    isMuseumExternalProposalMediaUrl(value)
   );
 }
 
