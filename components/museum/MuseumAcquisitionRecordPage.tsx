@@ -142,14 +142,14 @@ function exhibitionWorkCards(
   cards: readonly AcquisitionWorkCard[]
 ): readonly AcquisitionWorkCard[] {
   if (cards.length < 2) return cards;
-  const firstImmediatelyViewableIndex = cards.findIndex(
-    (card) =>
-      card.media !== undefined ||
-      (card.presentationMedia !== undefined &&
-        (card.presentationMedia.sourceByteSize === undefined ||
-          card.presentationMedia.sourceByteSize <
-            MUSEUM_PROPOSAL_INTENT_VIEW_BYTES))
-  );
+  const firstImmediatelyViewableIndex = cards.findIndex((card) => {
+    if (card.media !== undefined) return true;
+    const sourceByteSize = card.presentationMedia?.sourceByteSize;
+    return (
+      typeof sourceByteSize === "number" &&
+      sourceByteSize < MUSEUM_PROPOSAL_INTENT_VIEW_BYTES
+    );
+  });
   if (firstImmediatelyViewableIndex <= 0) return cards;
   return [
     cards[firstImmediatelyViewableIndex] as AcquisitionWorkCard,

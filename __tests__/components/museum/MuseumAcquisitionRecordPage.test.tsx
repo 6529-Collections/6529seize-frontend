@@ -553,7 +553,7 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
                 metadata(
                   "media-palmyra",
                   gatedWorkId,
-                  "? artist / Magnum Photos.",
+                  "© artist / Magnum Photos.",
                   gated.altText
                 )
               ),
@@ -568,7 +568,7 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
                 metadata(
                   "media-border",
                   viewableWorkId,
-                  "? artist / Magnum Photos.",
+                  "© artist / Magnum Photos.",
                   immediatelyViewable.altText
                 )
               ),
@@ -589,7 +589,7 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
       screen.getByRole("img", { name: immediatelyViewable.altText })
     ).toHaveAttribute("src", immediatelyViewable.mediaUrl);
     expect(
-      screen.getByRole("button", { name: "View image ? loads 16.5 MB" })
+      screen.getByRole("button", { name: "View image · loads 16.5 MB" })
     ).toBeInTheDocument();
   });
 
