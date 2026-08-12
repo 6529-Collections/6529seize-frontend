@@ -257,7 +257,7 @@ describe("BottomNavigation", () => {
       "tw-pointer-events-none"
     );
     expect(container.querySelector("nav")).toHaveClass(
-      "tw-pb-[max(calc(max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))-0.875rem),0px)]"
+      "tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),var(--safe-area-inset-bottom,0px),0px)]"
     );
     expect(container.querySelector("nav")).not.toHaveClass("tw-h-[85px]");
     expect(
