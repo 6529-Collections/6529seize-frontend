@@ -753,7 +753,7 @@ describe("renderStreamReviewRoutePage", () => {
     const editorialCopy = screen.getByTestId("editorial-copy");
     expect(editorialCopy).toHaveTextContent("The answer in one minute");
     expect(editorialCopy).toHaveTextContent(
-      "The contract does not choose the artist, calculate TDH, or decide whether the community process was fair."
+      "The contract does **not** choose the artist, calculate TDH, or decide whether the community process was fair."
     );
     expect(editorialCopy).toHaveTextContent(
       "Which real-service, launch-configuration, and independent-audit checks remain before this flow can be trusted?"
