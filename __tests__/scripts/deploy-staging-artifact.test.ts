@@ -86,7 +86,11 @@ describe("staging immutable artifact deployment", () => {
 
     expect(build.needs).toBeUndefined();
     expect(build.permissions).toEqual({ contents: "read" });
+    expect(build.env.NEXTGEN_CHAIN_ID).toBe(
+      "${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}"
+    );
     expect(buildSource).not.toContain("secrets.");
+    expect(buildSource).not.toContain("11155111");
     expect(buildStep.run).toContain("./bin/6529 run base-build");
     expect(buildStep.run).not.toContain("./bin/6529 run build\n");
     expect(buildStep.run).toContain(

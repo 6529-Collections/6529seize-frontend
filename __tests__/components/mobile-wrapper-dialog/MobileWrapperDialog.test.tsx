@@ -58,7 +58,7 @@ describe("MobileWrapperDialog", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
       expect(
-        screen.getByRole("button", { name: "Close panel" })
+        screen.getByRole("button", { name: "Close" })
       ).toBeInTheDocument();
     });
 
@@ -73,7 +73,7 @@ describe("MobileWrapperDialog", () => {
       );
 
       const desktopCloseButton = screen
-        .getAllByRole("button", { name: "Close panel" })
+        .getAllByRole("button", { name: "Close" })
         .find((button) => button.classList.contains("md:tw-inline-flex"));
 
       expect(desktopCloseButton).toHaveClass("!tw-rounded-lg");
@@ -173,7 +173,7 @@ describe("MobileWrapperDialog", () => {
         />
       );
 
-      const closeButton = screen.getByRole("button", { name: "Close panel" });
+      const closeButton = screen.getByRole("button", { name: "Close" });
       await user.click(closeButton);
 
       expect(onClose).toHaveBeenCalled();
@@ -221,7 +221,7 @@ describe("MobileWrapperDialog", () => {
     it("close button can receive focus", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
-      const closeButton = screen.getByRole("button", { name: "Close panel" });
+      const closeButton = screen.getByRole("button", { name: "Close" });
       closeButton.focus();
 
       expect(closeButton).toHaveFocus();
