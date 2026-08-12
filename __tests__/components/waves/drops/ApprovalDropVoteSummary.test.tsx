@@ -72,10 +72,8 @@ describe("ApprovalDropVoteSummary", () => {
     const progress = screen.getByTestId("progress");
     expect(progress).toHaveAttribute("data-current", "5");
     expect(progress).toHaveAttribute("data-projected", "9");
-    expect(progress).toHaveAttribute(
-      "data-tooltip-label",
-      "Votes given now"
-    );
+    expect(progress).toHaveAttribute("data-projected-label", "9");
+    expect(progress).toHaveAttribute("data-tooltip-label", "Votes given now");
     expect(progress).toHaveAttribute("data-compact", "true");
   });
 
@@ -140,10 +138,7 @@ describe("ApprovalDropVoteSummary", () => {
     expect(progress).toHaveAttribute("data-current", "70022534");
     expect(progress).toHaveAttribute("data-projected", "77694101");
     expect(progress).toHaveAttribute("data-projected-label", "77.7M");
-    expect(progress).toHaveAttribute(
-      "data-tooltip-label",
-      "Votes given now"
-    );
+    expect(progress).toHaveAttribute("data-tooltip-label", "Votes given now");
     expect(progress).toHaveAttribute("data-compact", "true");
   });
 
@@ -176,7 +171,18 @@ describe("ApprovalDropVoteSummary", () => {
       />
     );
 
-    expect(screen.getByText("5")).toHaveClass("tw-text-iron-200");
+    const current = screen.getByText("5");
+    const status = screen.getByText("Needs 3");
+    expect(current).toHaveClass("tw-text-iron-200");
+    expect(current.parentElement).toHaveClass("tw-gap-y-0.5");
+    expect(current.parentElement).not.toBe(status.parentElement);
+    expect(status.parentElement).toHaveClass("tw-gap-2");
+    expect(status).toHaveClass("tw-whitespace-nowrap");
+    expect(
+      screen.getByRole("group", {
+        name: /Reached 5 of 8 Rep.*Votes now: 9 Rep.*Needs 3/,
+      })
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", {
         name: "View voters and vote log for 2 voters",

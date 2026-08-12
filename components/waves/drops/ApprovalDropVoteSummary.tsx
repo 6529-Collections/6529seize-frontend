@@ -11,7 +11,11 @@ import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useApprovalDropStatus } from "@/hooks/waves/useApprovalDropStatus";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import ParticipationDropVoteDetailsTrigger from "./participation/ratings/ParticipationDropVoteDetailsTrigger";
 
 type ApprovalDropVoteSummaryVariant =
@@ -31,26 +35,31 @@ interface ApprovalDropVoteSummaryProps {
   readonly subtle?: boolean | undefined;
 }
 
-const getApprovalStatusLabel = (status: ApprovalDropStatus): string => {
+const getApprovalStatusLabel = (
+  locale: SupportedLocale,
+  status: ApprovalDropStatus
+): string => {
   if (status.kind === "approved") {
-    return "Approved";
+    return t(locale, "waves.leaderboard.grid.status.approved");
   }
 
   if (status.kind === "approving") {
-    return `Approving in ${formatApprovalCountdownTime(
-      status.countdownMs ?? 0
-    )}`;
+    return t(locale, "waves.leaderboard.grid.status.approvingIn", {
+      time: formatApprovalCountdownTime(status.countdownMs ?? 0),
+    });
   }
 
   if (status.kind === "reached_threshold") {
-    return "Reached threshold";
+    return t(locale, "waves.leaderboard.grid.status.reachedThreshold");
   }
 
   if (status.kind === "closed") {
-    return "Closed";
+    return t(locale, "waves.leaderboard.grid.status.closed");
   }
 
-  return `Needs ${formatNumberWithCommas(status.remaining ?? 0)}`;
+  return t(locale, "waves.leaderboard.grid.status.needs", {
+    amount: formatInteger(locale, status.remaining ?? 0),
+  });
 };
 
 const getApprovalStatusClass = ({
@@ -82,11 +91,15 @@ const getCurrentValueClass = ({
   readonly current: number;
   readonly subtle: boolean;
 }): string => {
+  if (current < 0) {
+    return "tw-text-rose-400";
+  }
+
   if (subtle) {
     return "tw-text-iron-200";
   }
 
-  return current < 0 ? "tw-text-rose-500" : "tw-text-emerald-500";
+  return "tw-text-emerald-500";
 };
 
 const formatSignedVote = (vote: number): string => {
@@ -108,6 +121,7 @@ export default function ApprovalDropVoteSummary({
   showUserVote = variant !== "compact",
   subtle = false,
 }: ApprovalDropVoteSummaryProps) {
+  const locale = useBrowserLocale();
   const approvalStatus = useApprovalDropStatus({
     drop,
     isClosed: isVotingClosed,
@@ -115,7 +129,7 @@ export default function ApprovalDropVoteSummary({
     winningThresholdMinDurationMs,
   });
   const current = approvalStatus.current;
-  const statusLabel = getApprovalStatusLabel(approvalStatus);
+  const statusLabel = getApprovalStatusLabel(locale, approvalStatus);
   const statusClass = getApprovalStatusClass({
     kind: approvalStatus.kind,
     subtle,
@@ -127,35 +141,68 @@ export default function ApprovalDropVoteSummary({
   const totalVoteClass = current < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
 
   if (variant === "compact") {
+    const realtimeRating =
+      typeof drop.realtime_rating === "number" ? drop.realtime_rating : null;
+    const hasRealtimeRating =
+      realtimeRating !== null && realtimeRating !== current;
+    const voteSummaryLabel = t(
+      locale,
+      hasRealtimeRating
+        ? "waves.leaderboard.grid.voteSummary.approvalWithRealtime"
+        : "waves.leaderboard.grid.voteSummary.approval",
+      {
+        reached: formatInteger(locale, current),
+        required: formatInteger(locale, winningThreshold),
+        votesNow:
+          realtimeRating === null ? "" : formatInteger(locale, realtimeRating),
+        unit: votingLabel,
+        status: statusLabel,
+      }
+    );
+
     return (
-      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
-        <span
-          className={`tw-font-mono tw-text-sm tw-font-bold ${getCurrentValueClass(
-            {
-              current,
-              subtle,
-            }
-          )}`}
+      <div
+        role="group"
+        aria-label={voteSummaryLabel}
+        className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2"
+      >
+        <div
+          aria-hidden="true"
+          className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2"
         >
-          {formatNumberWithCommas(current)}
-        </span>
-        <span className="tw-font-mono tw-text-sm tw-font-bold tw-text-iron-500">
-          /
-        </span>
-        <span className="tw-font-mono tw-text-sm tw-font-bold tw-text-iron-200">
-          {formatNumberWithCommas(winningThreshold)}
-        </span>
-        <DropVoteProgressing
-          current={current}
-          projected={drop.realtime_rating}
-          tooltipLabel="Votes given now"
-          subtle={subtle}
-        />
-        <span
-          className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${statusClass}`}
-        >
-          {statusLabel}
-        </span>
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0.5">
+            <span
+              className={`tw-font-mono tw-text-sm tw-font-bold ${getCurrentValueClass(
+                {
+                  current,
+                  subtle,
+                }
+              )}`}
+            >
+              {formatInteger(locale, current)}
+            </span>
+            <span className="tw-font-mono tw-text-sm tw-font-bold tw-text-iron-500">
+              /
+            </span>
+            <span className="tw-font-mono tw-text-sm tw-font-bold tw-text-iron-200">
+              {formatInteger(locale, winningThreshold)}
+            </span>
+            {hasRealtimeRating && (
+              <DropVoteProgressing
+                current={current}
+                projected={realtimeRating}
+                projectedLabel={formatInteger(locale, realtimeRating)}
+                tooltipLabel={t(locale, "waves.leaderboard.grid.votesNow")}
+                subtle={subtle}
+              />
+            )}
+          </div>
+          <span
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${statusClass}`}
+          >
+            {statusLabel}
+          </span>
+        </div>
         {showVoters && (
           <ParticipationDropVoteDetailsTrigger drop={drop} density="compact" />
         )}

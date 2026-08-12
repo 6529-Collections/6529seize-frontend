@@ -152,7 +152,7 @@ export default function AppSidebarUserInfo({
             </div>
           </div>
         </div>
-        <AppSidebarConnectedAccounts />
+        <AppSidebarConnectedAccounts onNavigate={onNavigate} />
       </div>
       <AppSidebarUserStats
         handle={handleOrWallet}
