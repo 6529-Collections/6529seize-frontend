@@ -24,6 +24,15 @@ describe("shared Next config", () => {
     });
   });
 
+  it("includes Sharp libvips assets in the OG image route trace", () => {
+    expect(sharedConfig(publicEnv, "").outputFileTracingIncludes).toEqual({
+      "/api/og-metadata/image": [
+        "node_modules/@img/sharp-libvips-*/**/*",
+        "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
+      ],
+    });
+  });
+
   it("lets staging packaging inject canonical public-review inputs", () => {
     const stagingEnv = {
       ...publicEnv,

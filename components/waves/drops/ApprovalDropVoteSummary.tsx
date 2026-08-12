@@ -32,7 +32,6 @@ interface ApprovalDropVoteSummaryProps {
   readonly variant: ApprovalDropVoteSummaryVariant;
   readonly showVoters?: boolean | undefined;
   readonly showUserVote?: boolean | undefined;
-  readonly emphasizeCurrent?: boolean | undefined;
   readonly subtle?: boolean | undefined;
 }
 
@@ -120,7 +119,6 @@ export default function ApprovalDropVoteSummary({
   variant,
   showVoters = variant !== "compact",
   showUserVote = variant !== "compact",
-  emphasizeCurrent = false,
   subtle = false,
 }: ApprovalDropVoteSummaryProps) {
   const locale = useBrowserLocale();
@@ -186,11 +184,7 @@ export default function ApprovalDropVoteSummary({
             <span className="tw-font-mono tw-text-sm tw-font-bold tw-text-iron-500">
               /
             </span>
-            <span
-              className={`tw-font-mono tw-text-sm tw-font-bold ${
-                emphasizeCurrent ? "tw-text-iron-400" : "tw-text-iron-200"
-              }`}
-            >
+            <span className="tw-font-mono tw-text-sm tw-font-bold tw-text-iron-200">
               {formatInteger(locale, winningThreshold)}
             </span>
             {hasRealtimeRating && (
@@ -220,76 +214,53 @@ export default function ApprovalDropVoteSummary({
     const scoreLabel = `${formatNumberWithCommas(
       current
     )} / ${formatNumberWithCommas(winningThreshold)} ${votingLabel}`;
-    const leaderboardGapClass = emphasizeCurrent ? "tw-gap-x-6" : "tw-gap-x-4";
     const wrapperClassName =
       variant === "chat"
         ? "tw-flex tw-min-w-0 tw-w-full tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5"
-        : `tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-y-2 tw-text-sm tw-leading-5 sm:tw-justify-end ${leaderboardGapClass}`;
-    const summaryStatusClass =
-      emphasizeCurrent && approvalStatus.kind === "needs"
-        ? "tw-text-iron-400"
-        : statusClass;
+        : "tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5 sm:tw-justify-end";
 
     return (
       <div className={wrapperClassName}>
         <div
-          className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-y-1 ${
-            emphasizeCurrent ? "tw-gap-x-5" : "tw-gap-x-2"
-          }`}
+          className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
           title={scoreLabel}
         >
           <span className="tw-sr-only">{scoreLabel}</span>
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <span
-              aria-hidden="true"
-              className={`tw-font-medium tw-tabular-nums ${totalVoteClass}`}
-            >
-              {formatLargeNumber(current)}
-            </span>
-            <span
-              aria-hidden="true"
-              className="tw-font-medium tw-text-iron-500"
-            >
-              /
-            </span>
-            <span
-              aria-hidden="true"
-              className={`tw-font-medium tw-tabular-nums ${
-                emphasizeCurrent ? "tw-text-iron-400" : "tw-text-iron-50"
-              }`}
-            >
-              {formatLargeNumber(winningThreshold)}
-            </span>
-            <span
-              aria-hidden="true"
-              className="tw-font-medium tw-text-iron-400"
-            >
-              {votingLabel}
-            </span>
-            <DropVoteProgressing
-              current={current}
-              projected={drop.realtime_rating}
-              projectedLabel={
-                typeof drop.realtime_rating === "number"
-                  ? formatLargeNumber(drop.realtime_rating)
-                  : undefined
-              }
-              tooltipLabel="Votes given now"
-              compact
-              numberWeight={emphasizeCurrent ? "semibold" : undefined}
-            />
-          </div>
-          <span className={`tw-text-sm tw-font-normal ${summaryStatusClass}`}>
-            {statusLabel}
+          <span
+            aria-hidden="true"
+            className={`tw-font-medium tw-tabular-nums ${totalVoteClass}`}
+          >
+            {formatLargeNumber(current)}
           </span>
+          <span aria-hidden="true" className="tw-font-medium tw-text-iron-500">
+            /
+          </span>
+          <span
+            aria-hidden="true"
+            className="tw-font-medium tw-tabular-nums tw-text-iron-50"
+          >
+            {formatLargeNumber(winningThreshold)}
+          </span>
+          <span aria-hidden="true" className="tw-font-medium tw-text-iron-400">
+            {votingLabel}
+          </span>
+          <DropVoteProgressing
+            current={current}
+            projected={drop.realtime_rating}
+            projectedLabel={
+              typeof drop.realtime_rating === "number"
+                ? formatLargeNumber(drop.realtime_rating)
+                : undefined
+            }
+            tooltipLabel="Votes given now"
+            compact
+          />
+          <span className={`tw-font-normal ${statusClass}`}>{statusLabel}</span>
         </div>
 
         {showVoters && (
           <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap">
-            <ParticipationDropVoteDetailsTrigger
-              drop={drop}
-              density={emphasizeCurrent ? "tight" : undefined}
-            />
+            <ParticipationDropVoteDetailsTrigger drop={drop} />
           </div>
         )}
 

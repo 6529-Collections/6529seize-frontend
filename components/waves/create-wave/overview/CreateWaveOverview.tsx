@@ -4,21 +4,13 @@ import type {
   WaveOverviewConfig,
 } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 import CreateWaveDisplaySettings from "./CreateWaveDisplaySettings";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
 import RankScheduleModeSelector from "./type/RankScheduleModeSelector";
-import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
-  proposalCards: {
-    mode: "custom",
-    excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
-    showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
-  },
   customRules: null,
   outcomesVisible: true,
   submissionButtonLabel: null,
@@ -47,7 +39,6 @@ export default function CreateWaveOverview({
     | undefined;
   readonly onOngoingRankingChange?: (ongoingRanking: boolean) => void;
 }) {
-  const locale = useBrowserLocale();
   const onChange = <K extends keyof WaveOverviewConfig>({
     key,
     value,
@@ -68,8 +59,8 @@ export default function CreateWaveOverview({
         errors={errors}
       />
       <div className="tw-space-y-3">
-        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
-          {t(locale, "waves.create.overview.picture")}
+        <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+          Wave Profile Picture
         </p>
         <CreateWaveImageInput
           imageToShow={overview.image}

@@ -2,20 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
-import type { CreateWaveDisplayConfig } from "@/types/waves.types";
 
 describe("CreateWaveDisplaySettings", () => {
-  const openAdvancedSettings = () => {
-    fireEvent.click(screen.getByRole("button", { name: /advanced settings/i }));
-  };
-
-  const baseDisplay: CreateWaveDisplayConfig = {
-    proposalCards: {
-      mode: "standard",
-      excerptMaxCharacters: DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
-      showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
-    },
+  const baseDisplay = {
     customRules: null,
     outcomesVisible: true,
     submissionButtonLabel: null,
@@ -25,7 +14,7 @@ describe("CreateWaveDisplaySettings", () => {
     },
   };
 
-  it("shows default approve labels in the fields", () => {
+  it("shows default approve labels in the preview", () => {
     render(
       <CreateWaveDisplaySettings
         display={baseDisplay}
@@ -35,8 +24,8 @@ describe("CreateWaveDisplaySettings", () => {
       />
     );
 
-    openAdvancedSettings();
-
+    expect(screen.getByText("Proposals")).toBeInTheDocument();
+    expect(screen.getByText("Approved")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Proposals")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Approved")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Drop")).toBeInTheDocument();
@@ -85,114 +74,6 @@ describe("CreateWaveDisplaySettings", () => {
       ...baseDisplay,
       submissionButtonLabel: "Apply",
     });
-  });
-
-  it("switches from full proposal to the summary-card recipe", () => {
-    const onChange = jest.fn();
-    render(
-      <CreateWaveDisplaySettings
-        display={baseDisplay}
-        errors={[]}
-        onChange={onChange}
-        waveType={ApiWaveType.Approve}
-      />
-    );
-
-    openAdvancedSettings();
-
-    expect(screen.getByRole("radio", { name: /^Full proposal/ })).toBeChecked();
-    expect(
-      screen.queryByLabelText("Maximum proposal preview characters")
-    ).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("radio", { name: /^Summary card/ }));
-
-    expect(onChange).toHaveBeenCalledWith({
-      ...baseDisplay,
-      proposalCards: {
-        ...baseDisplay.proposalCards!,
-        mode: "custom",
-      },
-    });
-  });
-
-  it("updates the custom recipe fields", () => {
-    const onChange = jest.fn();
-    const customDisplay: CreateWaveDisplayConfig = {
-      ...baseDisplay,
-      proposalCards: {
-        mode: "custom",
-        excerptMaxCharacters: 360,
-        showMediaThumbnail: true,
-      },
-    };
-    render(
-      <CreateWaveDisplaySettings
-        display={customDisplay}
-        errors={[]}
-        onChange={onChange}
-        waveType={ApiWaveType.Rank}
-      />
-    );
-
-    openAdvancedSettings();
-
-    fireEvent.change(
-      screen.getByLabelText("Maximum proposal preview characters"),
-      {
-        target: { value: "480" },
-      }
-    );
-
-    expect(onChange).toHaveBeenCalledWith({
-      ...customDisplay,
-      proposalCards: {
-        ...customDisplay.proposalCards!,
-        excerptMaxCharacters: 480,
-      },
-    });
-
-    fireEvent.click(
-      screen.getByRole("checkbox", {
-        name: /image on summary card/i,
-      })
-    );
-
-    expect(onChange).toHaveBeenLastCalledWith({
-      ...customDisplay,
-      proposalCards: {
-        ...customDisplay.proposalCards!,
-        showMediaThumbnail: false,
-      },
-    });
-  });
-
-  it("associates an invalid summary text limit with its recovery message", () => {
-    render(
-      <CreateWaveDisplaySettings
-        display={{
-          ...baseDisplay,
-          proposalCards: {
-            mode: "custom",
-            excerptMaxCharacters: 0,
-            showMediaThumbnail: true,
-          },
-        }}
-        errors={[
-          CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID,
-        ]}
-        onChange={jest.fn()}
-        waveType={ApiWaveType.Rank}
-      />
-    );
-
-    openAdvancedSettings();
-
-    const input = screen.getByLabelText("Maximum proposal preview characters");
-    expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(input).toHaveAccessibleDescription(
-      "Enter a whole number from 120 to 1000."
-    );
   });
 
   it("stores an empty submission button label as null", () => {

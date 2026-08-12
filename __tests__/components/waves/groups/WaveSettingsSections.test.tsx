@@ -255,8 +255,6 @@ describe("WaveSettingsSections", () => {
     expect(screen.getByText("Shown")).toBeInTheDocument();
     expect(screen.getByText("Submission button")).toBeInTheDocument();
     expect(screen.getByText("Drop")).toBeInTheDocument();
-    expect(screen.getByText("Proposal cards")).toBeInTheDocument();
-    expect(screen.getByText("Full proposal")).toBeInTheDocument();
     expect(screen.getByText("Approve after")).toBeInTheDocument();
     expect(screen.getByText("12 approvals")).toBeInTheDocument();
     expect(screen.getByText("Hold time")).toBeInTheDocument();
@@ -277,57 +275,6 @@ describe("WaveSettingsSections", () => {
     expect(screen.queryByText("Approval rule")).not.toBeInTheDocument();
     expect(screen.queryByText("Approve after")).not.toBeInTheDocument();
     expect(fetchWaveMetadataMock).toHaveBeenCalledWith({ waveId: "wave-1" });
-  });
-
-  it("validates and saves summary-card settings for wave admins", async () => {
-    const user = userEvent.setup();
-    createWaveMetadataMock.mockImplementationOnce(async ({ body }) => {
-      const created = { id: 10, ...body };
-      waveMetadata = [created];
-      return created;
-    });
-    const { requestAuth } = renderSettings({
-      wave: makeWave({
-        canAdmin: true,
-        waveType: ApiWaveType.Approve,
-        winningThreshold: 12,
-      }),
-    });
-
-    await user.click(
-      await screen.findByRole("button", {
-        name: "Edit proposal card settings",
-      })
-    );
-    await user.click(screen.getByRole("radio", { name: "Summary card" }));
-
-    const previewLimit = screen.getByRole("spinbutton", {
-      name: "Text preview limit characters",
-    });
-    await user.clear(previewLimit);
-    await user.type(previewLimit, "10");
-
-    expect(
-      screen.getByText("Enter a whole number from 120 to 1000.")
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
-
-    await user.clear(previewLimit);
-    await user.type(previewLimit, "120");
-    await user.click(screen.getByRole("button", { name: "Save" }));
-
-    await waitFor(() => {
-      expect(requestAuth).toHaveBeenCalledTimes(1);
-      expect(createWaveMetadataMock).toHaveBeenCalledWith({
-        waveId: "wave-1",
-        body: {
-          data_key: WAVE_DISPLAY_METADATA_KEYS.proposalCardRecipe,
-          data_value:
-            '{"version":1,"layout":"summary","excerpt_max_characters":120,"show_media_thumbnail":true}',
-        },
-      });
-    });
-    expect(await screen.findByText("Summary card")).toBeInTheDocument();
   });
 
   it("hides outcome visibility for perpetual rank waves", () => {

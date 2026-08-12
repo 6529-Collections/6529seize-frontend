@@ -19,7 +19,6 @@ import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.valid
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useMemeCardCount } from "./useMemeCardCount";
 import { getDefaultFirstDecisionTime } from "../services/waveDecisionService";
-import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
 
 // Stable empty reference so the derived `errors` keeps identity while there
 // is nothing to show (no surfaced errors), avoiding needless re-renders.
@@ -99,12 +98,6 @@ export function useWaveConfig() {
         maxWinners: null,
       },
       display: {
-        proposalCards: {
-          mode: "custom",
-          excerptMaxCharacters:
-            DEFAULT_PROPOSAL_CARD_RECIPE.excerptMaxCharacters,
-          showMediaThumbnail: DEFAULT_PROPOSAL_CARD_RECIPE.showMediaThumbnail,
-        },
         customRules: null,
         outcomesVisible: true,
         submissionButtonLabel: null,

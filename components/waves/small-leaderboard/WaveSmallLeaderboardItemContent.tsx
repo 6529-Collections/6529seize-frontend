@@ -6,20 +6,12 @@ import {
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import Image from "next/image";
 import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
 import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
-import ProposalCardContent from "@/components/waves/drops/proposal/ProposalCardContent";
 
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;
@@ -47,35 +39,6 @@ export const WaveSmallLeaderboardItemContent: React.FC<
   const isStorm = drop.parts.length > 1;
   const haveMetadata = !!drop.metadata.length;
   const haveMedia = !!drop.parts.filter((part) => !!part.media.length).length;
-
-  const openProposalCard = (event: MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-    onDropClick();
-  };
-
-  const openProposalCardByKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    onDropClick();
-  };
-
-  if (contentPresentation === "proposalCard") {
-    return (
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={openProposalCard}
-        onKeyDown={openProposalCardByKeyboard}
-        className="tw-cursor-pointer tw-rounded-xl focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-      >
-        <ProposalCardContent drop={drop} density="compact" />
-      </div>
-    );
-  }
 
   return (
     <div>

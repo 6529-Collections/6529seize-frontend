@@ -424,24 +424,6 @@ export const DE_DE_MESSAGES = {
   "waves.create.actions.next": "Weiter",
   "waves.create.actions.previous": "Zurück",
   "waves.create.actions.save": "Speichern",
-  "waves.create.advanced.title": "Erweiterte Einstellungen",
-  "waves.create.advanced.customized": "Angepasst",
-  "waves.create.advanced.needsAttention": "Prüfen",
-  "waves.create.advanced.errorSummary":
-    "Prüfe die markierten Einstellungen, bevor du fortfährst.",
-  "waves.create.overview.picture": "Wave-Bild",
-  "waves.create.groups.title": "Zugriff",
-  "waves.create.groups.description":
-    "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
-  "waves.create.dates.title": "Zeitplan",
-  "waves.create.dates.description":
-    "Prüfe, wann diese Wave startet, die Abstimmung beginnt und Gewinner bekannt gegeben werden.",
-  "waves.create.dates.approve.noEndSummary": "Startet {start}. Kein Enddatum.",
-  "waves.create.dates.approve.endSummary": "Startet {start}. Endet {end}.",
-  "waves.create.dates.rank.ongoingSummary":
-    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Das Ranking bleibt offen.",
-  "waves.create.dates.rank.scheduledSummary":
-    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Erste Gewinner: {announcement}.",
   ...DE_DE_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
@@ -470,7 +452,7 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.loadMore": "Weitere Drops laden",
   "waves.leaderboard.loadingMoreButton": "Wird geladen…",
   "waves.leaderboard.grid.untitled": "Unbenannter Drop",
-  "waves.leaderboard.grid.readFull": "Vollständig lesen",
+  "waves.leaderboard.grid.readFullText": "Vollständigen Text lesen",
   "waves.leaderboard.grid.open": "Öffnen",
   "waves.leaderboard.grid.openNamed": "{title} öffnen",
   "waves.leaderboard.grid.authorProfile": "Profil von {author} ansehen",

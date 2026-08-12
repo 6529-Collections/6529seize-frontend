@@ -106,25 +106,6 @@ describe("ParticipationDropFooter", () => {
     );
   });
 
-  it("keeps chat proposal ratings and vote action on one row", () => {
-    render(
-      <ParticipationDropFooter
-        drop={createDrop()}
-        voteAction={<button data-testid="vote-action" type="button" />}
-        contentPresentation="proposalCard"
-        indentContent={false}
-      />
-    );
-
-    const actionRow = screen.getByTestId("vote-action").parentElement;
-    const footerRow = actionRow?.parentElement;
-
-    expect(actionRow).toHaveClass("tw-ml-auto", "tw-w-auto", "tw-border-0");
-    expect(actionRow).not.toHaveClass("tw-w-full", "tw-border-t");
-    expect(footerRow).toHaveClass("tw-items-center", "tw-justify-between");
-    expect(footerRow).not.toHaveClass("tw-flex-col");
-  });
-
   it("keeps approval reactions above the approval footer controls", () => {
     render(
       <ParticipationDropFooter

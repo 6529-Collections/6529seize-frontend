@@ -432,26 +432,6 @@ export const FR_FR_MESSAGES = {
   "waves.create.actions.next": "Suivant",
   "waves.create.actions.previous": "Précédent",
   "waves.create.actions.save": "Enregistrer",
-  "waves.create.advanced.title": "Paramètres avancés",
-  "waves.create.advanced.customized": "Personnalisé",
-  "waves.create.advanced.needsAttention": "À vérifier",
-  "waves.create.advanced.errorSummary":
-    "Vérifiez les paramètres signalés avant de continuer.",
-  "waves.create.overview.picture": "Image de la Wave",
-  "waves.create.groups.title": "Accès",
-  "waves.create.groups.description":
-    "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
-  "waves.create.dates.title": "Calendrier",
-  "waves.create.dates.description":
-    "Vérifiez le début de la Wave, du vote et des annonces des gagnants.",
-  "waves.create.dates.approve.noEndSummary":
-    "Débute le {start}. Aucune date de fin.",
-  "waves.create.dates.approve.endSummary":
-    "Débute le {start}. Se termine le {end}.",
-  "waves.create.dates.rank.ongoingSummary":
-    "Les soumissions débutent le {submission}. Le vote débute le {voting}. Le classement reste ouvert.",
-  "waves.create.dates.rank.scheduledSummary":
-    "Les soumissions débutent le {submission}. Le vote débute le {voting}. Premiers gagnants : {announcement}.",
   ...FR_FR_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
@@ -481,7 +461,7 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.loadMore": "Charger plus de drops",
   "waves.leaderboard.loadingMoreButton": "Chargement…",
   "waves.leaderboard.grid.untitled": "Drop sans titre",
-  "waves.leaderboard.grid.readFull": "Tout lire",
+  "waves.leaderboard.grid.readFullText": "Lire le texte intégral",
   "waves.leaderboard.grid.open": "Ouvrir",
   "waves.leaderboard.grid.openNamed": "Ouvrir {title}",
   "waves.leaderboard.grid.authorProfile": "Voir le profil de {author}",

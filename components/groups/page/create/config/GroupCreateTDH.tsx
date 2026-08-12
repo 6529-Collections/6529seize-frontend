@@ -29,12 +29,12 @@ export default function GroupCreateTDH({
       <div className="tw-mb-4">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
           <div>
-            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
               {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
                 ? "TDH + xTDH"
                 : tdh.inclusion_strategy}
             </p>
-            <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
               Set the group&apos;s minimum{" "}
               {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
                 ? "TDH + xTDH"

@@ -15,7 +15,6 @@ import { MemesWaveSmallLeaderboardDrop } from "@/components/waves/small-leaderbo
 import { QuorumWaveSmallLeaderboardDrop } from "@/components/waves/small-leaderboard/QuorumWaveSmallLeaderboardDrop";
 import { DefaultWaveLeaderboardDrop } from "./drops/DefaultWaveLeaderboardDrop";
 import { QuorumWaveLeaderboardDrop } from "./drops/QuorumWaveLeaderboardDrop";
-import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 
 interface WaveLeaderboardDropRendererProps {
   readonly drop: ExtendedDrop;
@@ -75,41 +74,6 @@ const DefaultLeaderboardDropRenderer: React.FC<
     />
   );
 };
-
-const ProposalCardLeaderboardDropRenderer: React.FC<
-  WaveLeaderboardDropRendererProps
-> = ({
-  drop,
-  onDropClick,
-  onVoteClick,
-  isVotingClosed,
-  isVotingControlsLocked,
-  winningThreshold,
-  winningThresholdMinDurationMs,
-}) => {
-  return (
-    <DefaultWaveLeaderboardDrop
-      drop={drop}
-      onDropClick={onDropClick}
-      onVoteClick={onVoteClick}
-      isVotingClosed={isVotingClosed}
-      isVotingControlsLocked={isVotingControlsLocked}
-      winningThreshold={winningThreshold}
-      winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-      mediaContainerHeightClassName="tw-h-96"
-      contentPresentation="proposalCard"
-    />
-  );
-};
-
-const ProposalCardSmallLeaderboardDropRenderer: React.FC<
-  WaveSmallLeaderboardDropRendererProps
-> = (props) => (
-  <DefaultWaveSmallLeaderboardDrop
-    {...props}
-    contentPresentation="proposalCard"
-  />
-);
 
 const QuorumLeaderboardDropRenderer: React.FC<
   WaveLeaderboardDropRendererProps
@@ -174,7 +138,6 @@ export const useWaveLeaderboardRendererSet = (
   waveId: string | null | undefined
 ): ResolvedWaveLeaderboardRendererSet => {
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
-  const proposalCardPresentation = useWaveProposalCardPresentation(waveId);
 
   return useMemo(() => {
     const variant = resolveWaveParticipationVariant({
@@ -185,25 +148,9 @@ export const useWaveLeaderboardRendererSet = (
       isQuorumWave,
     });
 
-    const rendererSet = WAVE_LEADERBOARD_RENDERERS[variant];
-
-    if (variant === "default" && proposalCardPresentation === "proposalCard") {
-      return {
-        variant,
-        LeaderboardDrop: ProposalCardLeaderboardDropRenderer,
-        SmallLeaderboardDrop: ProposalCardSmallLeaderboardDropRenderer,
-      };
-    }
-
     return {
       variant,
-      ...rendererSet,
+      ...WAVE_LEADERBOARD_RENDERERS[variant],
     };
-  }, [
-    isCurationWave,
-    isMemesWave,
-    isQuorumWave,
-    proposalCardPresentation,
-    waveId,
-  ]);
+  }, [isCurationWave, isMemesWave, isQuorumWave, waveId]);
 };

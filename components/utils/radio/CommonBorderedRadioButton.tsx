@@ -21,7 +21,7 @@ function getWrapperClasses({
   readonly isSubtle: boolean;
 }) {
   if (isSelected && isSubtle) {
-    return "tw-rounded-xl tw-border-primary-400 tw-bg-iron-900 tw-shadow-inner";
+    return "tw-rounded-xl tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30 tw-shadow-inner";
   }
 
   if (isSelected) {
@@ -31,8 +31,8 @@ function getWrapperClasses({
   if (isSubtle) {
     const hoverClasses = disabled
       ? ""
-      : "hover:tw-border-white/20 hover:tw-bg-iron-900";
-    return `tw-rounded-xl tw-border-white/10 tw-bg-iron-900/60 tw-shadow-none ${hoverClasses}`;
+      : "hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10";
+    return `tw-rounded-xl tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 tw-shadow-inner ${hoverClasses}`;
   }
 
   const hoverClasses = disabled ? "" : "hover:tw-ring-iron-650";
@@ -96,9 +96,7 @@ export default function CommonBorderedRadioButton<T extends string>({
       onClick={onSelectedChange}
       className={`${wrapperClasses} tw-group tw-relative tw-flex tw-flex-1 ${
         isSubtle ? "tw-items-start" : "tw-items-center"
-      } tw-gap-x-3 tw-border tw-border-solid tw-px-4 tw-py-4 ${
-        isSubtle ? "" : "tw-ring-1 tw-ring-inset"
-      } tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
+      } tw-gap-x-3 tw-border tw-border-solid tw-px-4 tw-py-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
         disabled ? "tw-cursor-not-allowed tw-opacity-50" : "tw-cursor-pointer"
       }`}
     >
@@ -133,7 +131,7 @@ export default function CommonBorderedRadioButton<T extends string>({
         </span>
       )}
       <div className="tw-flex tw-items-center tw-truncate tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out">
-        <div className="tw-flex tw-flex-col tw-truncate tw-text-sm tw-font-medium tw-transition tw-duration-300 tw-ease-out">
+        <div className="tw-flex tw-flex-col tw-truncate tw-text-base tw-font-semibold tw-transition tw-duration-300 tw-ease-out">
           {label ? (
             <span
               className={`${labelClasses} ${

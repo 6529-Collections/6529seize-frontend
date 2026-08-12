@@ -6,9 +6,6 @@ The `Dates` step sets timing for `Rank` and `Approve` waves.
 `Rank` waves set submission, voting, and winner announcement timing.
 `Approve` waves set when the wave opens and an optional end date.
 
-The default view is a compact `Schedule` summary built from the current draft
-values. Expand `Advanced settings` only when the default timing needs to change.
-
 If recurring announcements are enabled, this step can also set an optional
 `Wave End Date`.
 
@@ -28,11 +25,6 @@ If recurring announcements are enabled, this step can also set an optional
   moved past it.
 
 ## User Journey
-
-For either wave type, first review the schedule summary. If it is correct,
-continue without opening the detailed calendars. If it needs adjustment, expand
-`Advanced settings`; collapsing it later preserves every entered date, interval,
-and recurring-cycle choice.
 
 For `Rank` waves:
 
@@ -80,8 +72,6 @@ For `Approve` waves:
 
 ## Failure and Recovery
 
-- A hidden date validation error automatically opens `Advanced settings` and
-  marks it `Needs attention`.
 - If `Next` does not advance, verify:
   - submission start <= voting start
   - first announcement is not before voting start
@@ -98,8 +88,8 @@ For `Approve` waves:
 - `Chat` waves skip `Dates`.
 - Additional announcements are interval-based; there is no standalone timestamp
   list.
-- Saved create-wave drafts preserve date values for later recovery on the same
-  device.
+- Create-step state is local to the active create session; closing the create
+  modal/page resets draft values.
 
 ## Related Pages
 

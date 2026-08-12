@@ -44,7 +44,6 @@ export default function CreateWaveDraftsSection({
       }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded((previous) => !previous)}
-      compactHeader={true}
     >
       <div className="tw-px-5 tw-pb-5">
         <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-normal tw-text-iron-400">

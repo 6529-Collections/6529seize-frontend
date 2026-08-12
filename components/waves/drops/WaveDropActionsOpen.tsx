@@ -5,20 +5,17 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { Tooltip } from "react-tooltip";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import ProposalCardReadFullButton from "./proposal/ProposalCardReadFullButton";
 
 interface WaveDropActionsOpenProps {
   readonly drop: ExtendedDrop;
   readonly isDropdownItem?: boolean | undefined;
   readonly onOpen?: (() => void) | undefined;
-  readonly variant?: "icon" | "readFull";
 }
 
 const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
   drop,
   isDropdownItem = false,
   onOpen,
-  variant = "icon",
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -33,18 +30,6 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
 
   if (!canBeOpened) {
     return null;
-  }
-
-  if (variant === "readFull") {
-    return (
-      <ProposalCardReadFullButton
-        drop={drop}
-        onReadFull={(targetDrop) => {
-          onDropClick(targetDrop);
-          onOpen?.();
-        }}
-      />
-    );
   }
 
   if (isDropdownItem) {

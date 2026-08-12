@@ -272,7 +272,7 @@ describe("CreateWaveDescription", () => {
       "tw-mb-0",
       "tw-text-base",
       "tw-font-normal",
-      "tw-text-iron-300"
+      "tw-text-iron-400"
     );
   });
 });

@@ -2,14 +2,11 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useId, useState } from "react";
 import type { ComponentPropsWithoutRef, FocusEvent, MouseEvent } from "react";
 
-interface TooltipIconButtonProps extends Omit<
-  ComponentPropsWithoutRef<"button">,
-  "children"
-> {
+interface TooltipIconButtonProps
+  extends Omit<ComponentPropsWithoutRef<"button">, "children"> {
   readonly icon: IconDefinition;
   readonly tooltipText: string;
   readonly iconClassName?: string | undefined;
@@ -31,7 +28,6 @@ export default function TooltipIconButton({
   onBlur,
   onMouseEnter,
   onMouseLeave,
-  "aria-label": ariaLabel,
   "aria-describedby": ariaDescribedByProp,
   ...rest
 }: TooltipIconButtonProps) {
@@ -42,7 +38,9 @@ export default function TooltipIconButton({
   const ariaDescribedBy = [ariaDescribedByProp, tooltipElementId]
     .filter(Boolean)
     .join(" ");
-  const buttonClassName = `tw-relative tw-inline-flex tw-size-6 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-leading-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${className ?? ""}`;
+  const buttonClassName = className
+    ? `tw-relative tw-cursor-pointer tw-bg-transparent tw-border-none tw-p-0 ${className}`
+    : "tw-relative tw-cursor-pointer tw-bg-transparent tw-border-none tw-p-0";
   const showTooltip = isHovered || isFocused;
 
   const getPositionClasses = () => {
@@ -88,23 +86,19 @@ export default function TooltipIconButton({
       type={type}
       className={buttonClassName}
       tabIndex={tabIndex}
-      aria-label={ariaLabel ?? tooltipText}
       aria-describedby={ariaDescribedBy}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
       onBlur={handleBlur}
       onClick={handleClick}
-      {...rest}
-    >
+      {...rest}>
       <FontAwesomeIcon icon={icon} className={iconClassName} />
       {showTooltip && (
         <div
           id={tooltipElementId}
           role="tooltip"
-          style={TOOLTIP_STYLES}
-          className={`tw-absolute ${getPositionClasses()} ${tooltipWidth} tw-max-w-[calc(100vw-2rem)] tw-whitespace-normal tw-text-left tw-leading-4`}
-        >
+          className={`tw-absolute ${getPositionClasses()} ${tooltipWidth} tw-p-3 tw-bg-iron-900 tw-text-iron-100 tw-text-xs tw-rounded-lg tw-shadow-lg tw-z-10`}>
           {tooltipText}
         </div>
       )}

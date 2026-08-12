@@ -4,11 +4,8 @@ Parent: [Wave Drop Actions Index](README.md)
 
 ## Overview
 
-Standard Wave and direct-message drop cards render full body text inline.
-There is no `Show full post` or collapse toggle for long bodies. Published
-proposals in a standard Wave configured for compact proposal cards are the
-exception: list, winner, approved, and quoted-preview surfaces show an authored
-preview card, and selecting it opens the complete original proposal.
+Wave and direct-message drop cards render full body text inline.
+There is no `Show full post` or collapse toggle for long bodies.
 
 The shared body renderer handles markdown, mentions, emoji shortcodes, and links.
 Multipart drops ("storms") stay in one card while users switch parts.
@@ -28,8 +25,7 @@ Multipart drops ("storms") stay in one card while users switch parts.
 ## User Journey
 
 1. Open a thread and locate a drop.
-2. Read full content inline in the card, or select a configured compact proposal
-   card to open the complete proposal.
+2. Read full content inline in the card.
 3. Use markdown links, mentions, and quoted-drop content from the body.
 4. If the drop is a storm, switch parts with previous/next controls and the part counter.
 5. In click-through surfaces, open drop detail only when no text is selected.
@@ -39,8 +35,6 @@ Multipart drops ("storms") stay in one card while users switch parts.
 ## Common Scenarios
 
 - Full markdown body renders inline, including headings, lists, quotes, and code.
-- Normal messages remain full inline content even when the Wave uses compact
-  cards for published proposals.
 - Ordered lists accept both `1.` and `1)` markers and keep the chosen delimiter
   when rendered.
 - Code blocks use syntax highlighting when available.
@@ -85,10 +79,7 @@ Multipart drops ("storms") stay in one card while users switch parts.
 
 ## Limitations / Notes
 
-- Users cannot collapse long posts back to shortened previews in standard drop
-  cards.
-- Compact proposal cards are a per-Wave proposal presentation, not a generic
-  long-post collapse control.
+- Users cannot collapse long posts back to shortened previews in standard drop cards.
 - Mention links render only when the drop includes matching mention data.
 - This page covers shared body rendering. Provider-specific preview behavior and image-viewer controls are documented in separate pages.
 
@@ -102,5 +93,4 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - [Wave Drop Image Viewer and Scaling](feature-image-viewer-and-scaling.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
 - [Wave Drop Link Preview Toggle](../link-previews/feature-link-preview-toggle.md)
-- [Compact Proposal Cards](feature-proposal-cards.md)
 - [Wave Drop External Link Previews](../link-previews/feature-external-link-previews.md)

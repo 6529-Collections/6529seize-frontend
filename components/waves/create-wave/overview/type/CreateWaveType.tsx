@@ -18,7 +18,7 @@ export default function CreateWaveType({
 
   return (
     <div className="tw-space-y-3">
-      <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+      <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
         Wave Type
       </p>
       <div
@@ -30,7 +30,7 @@ export default function CreateWaveType({
       {isTypeError && (
         <p
           id={errorId}
-          className="tw-m-0 tw-text-xs tw-font-medium tw-text-red"
+          className="tw-mb-0 tw-text-xs tw-font-medium tw-text-red"
         >
           Please choose a wave type to continue.
         </p>

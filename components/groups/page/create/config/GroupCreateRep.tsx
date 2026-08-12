@@ -36,10 +36,10 @@ export default function GroupCreateRep({
         <div className="tw-flex tw-flex-col">
           <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
             <div>
-              <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+              <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
                 Rep
               </p>
-              <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+              <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
                 Set the giver, rep category, and minimum rep.
               </p>
             </div>

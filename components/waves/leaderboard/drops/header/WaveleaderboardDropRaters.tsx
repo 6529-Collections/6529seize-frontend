@@ -14,7 +14,6 @@ interface WaveLeaderboardDropRatersProps {
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
-  readonly emphasizeCurrent?: boolean | undefined;
 }
 
 export const WaveLeaderboardDropRaters: React.FC<
@@ -24,7 +23,6 @@ export const WaveLeaderboardDropRaters: React.FC<
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
-  emphasizeCurrent = false,
 }) => {
   const displayWinningThreshold =
     typeof winningThreshold === "number" &&
@@ -42,7 +40,6 @@ export const WaveLeaderboardDropRaters: React.FC<
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         variant="leaderboard"
-        emphasizeCurrent={emphasizeCurrent}
       />
     );
   }

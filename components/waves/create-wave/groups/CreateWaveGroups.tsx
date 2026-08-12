@@ -1,10 +1,8 @@
-"use client";
-
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { CREATE_WAVE_GROUPS } from "@/helpers/waves/waves.constants";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
   CreateWaveGroupConfigType,
@@ -41,24 +39,15 @@ export default function CreateWaveGroups({
   readonly setChatEnabled: (enabled: boolean) => void;
   readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
 }) {
-  const locale = useBrowserLocale();
   const isRestrictedGroup = !!groups.admin && !!groups.canView;
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
-      <div className="tw-flex tw-flex-col tw-gap-y-2">
-        <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
-          {t(locale, "waves.create.groups.title")}
-        </h2>
-        <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
-          {t(locale, "waves.create.groups.description")}
-        </p>
-        <p className="tw-m-0 tw-text-pretty tw-text-xs tw-leading-relaxed tw-text-iron-500">
-          {t(locale, "waves.create.groups.accessHelper", {
-            viewGroupName: "Who can view",
-          })}
-        </p>
-      </div>
+      <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400">
+        {t(DEFAULT_LOCALE, "waves.create.groups.accessHelper", {
+          viewGroupName: "Who can view",
+        })}
+      </p>
       {CREATE_WAVE_GROUPS[waveType].map((groupType) => (
         <CreateWaveGroup
           key={groupType}
@@ -77,9 +66,9 @@ export default function CreateWaveGroups({
       ))}
       {isRestrictedGroup && (
         <CreateWaveWarning
-          title={t(locale, "waves.create.groups.limitedAccessTitle")}
+          title={t(DEFAULT_LOCALE, "waves.create.groups.limitedAccessTitle")}
           description={t(
-            locale,
+            DEFAULT_LOCALE,
             "waves.create.groups.limitedAccessDescription",
             {
               viewGroupName: "Who can view",

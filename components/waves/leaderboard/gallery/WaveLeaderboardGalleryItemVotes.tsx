@@ -12,7 +12,6 @@ interface WaveLeaderboardGalleryItemVotesProps {
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
-  readonly emphasizeCurrent?: boolean | undefined;
 }
 
 export default function WaveLeaderboardGalleryItemVotes({
@@ -21,7 +20,6 @@ export default function WaveLeaderboardGalleryItemVotes({
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
-  emphasizeCurrent = false,
 }: WaveLeaderboardGalleryItemVotesProps) {
   const locale = useBrowserLocale();
   const displayWinningThreshold =
@@ -40,7 +38,6 @@ export default function WaveLeaderboardGalleryItemVotes({
         variant="compact"
         showVoters={false}
         showUserVote={false}
-        emphasizeCurrent={emphasizeCurrent}
         subtle={variant === "subtle"}
       />
     );

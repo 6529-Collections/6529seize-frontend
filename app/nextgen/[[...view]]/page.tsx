@@ -7,18 +7,18 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNextgenLandingPageJsonLd } from "@/lib/structured-data/nextgen";
+import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";
 import { getNextgenTitle } from "../title-utils";
-import { fetchNextGenApi } from "../nextgen-api";
 import NextGenPageClient from "./NextGenPageClient";
 import { getNextGenView } from "./view-utils";
 
 async function fetchFeaturedNextGenCollection(
   headers: Record<string, string>
 ): Promise<NextGenCollection> {
-  return await fetchNextGenApi<NextGenCollection>({
+  return await commonApiFetch<NextGenCollection>({
     endpoint: `nextgen/featured`,
-    headers,
+    headers: headers,
   });
 }
 

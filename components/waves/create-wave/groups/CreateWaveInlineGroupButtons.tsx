@@ -17,7 +17,7 @@ export function ActionButton({
 }) {
   const stateClasses = active
     ? "tw-border-primary-500/50 tw-bg-primary-500/10 tw-text-primary-400 desktop-hover:hover:tw-border-primary-400/70 desktop-hover:hover:tw-bg-primary-500/15 desktop-hover:hover:tw-text-primary-300"
-    : "tw-border-white/10 tw-bg-iron-800 tw-text-iron-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
+    : "tw-border-white/5 tw-bg-iron-950 tw-text-iron-300 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100";
 
   return (
     <button

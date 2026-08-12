@@ -180,8 +180,6 @@ interface WaveLeaderboardVirtualizedRowsProps<TItem> {
   readonly isFetchNextPageError: boolean;
   readonly isFetchPreviousPageError: boolean;
   readonly autoLoadNext?: boolean | undefined;
-  readonly estimatedRowHeight?: number | undefined;
-  readonly measureLoadedRowsAtNaturalHeight?: boolean | undefined;
 }
 
 export function WaveLeaderboardVirtualizedRows<TItem>({
@@ -201,8 +199,6 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   isFetchNextPageError,
   isFetchPreviousPageError,
   autoLoadNext = false,
-  estimatedRowHeight,
-  measureLoadedRowsAtNaturalHeight = false,
 }: WaveLeaderboardVirtualizedRowsProps<TItem>) {
   const locale = useBrowserLocale();
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -218,7 +214,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   const isMasonryLayout = layout === "grid";
   const rowCount = Math.ceil(logicalItemCount / columns);
   const virtualItemCount = isMasonryLayout ? logicalItemCount : rowCount;
-  const estimateRowHeight = estimatedRowHeight ?? getEstimatedRowHeight(layout);
+  const estimateRowHeight = getEstimatedRowHeight(layout);
 
   const captureVisibleAnchor = useCallback(() => {
     const root = rootRef.current;
@@ -591,9 +587,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
                   className={`tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 tw-pb-4 ${gridColumnsClassName}`}
                   style={{
                     minHeight:
-                      (layout === "gallery" ||
-                        measureLoadedRowsAtNaturalHeight) &&
-                      hasLoadedItem
+                      layout === "gallery" && hasLoadedItem
                         ? undefined
                         : virtualRow.size,
                     transform: `translateY(${virtualRow.start - scrollMargin}px)`,

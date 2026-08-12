@@ -12,7 +12,6 @@ import type {
   DropLocation,
   DropTimestampLayout,
 } from "../drop.types";
-import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 
 interface WinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -45,17 +44,12 @@ interface WinnerDropProps {
 
 const WinnerDrop = (props: WinnerDropProps) => {
   const { isMemesWave } = useSeizeSettings();
-  const contentPresentation = useWaveProposalCardPresentation(
-    props.drop.wave.id
-  );
 
   if (isMemesWave(props.drop.wave.id.toLowerCase())) {
     return <MemeWinnerDrop {...props} />;
   }
 
-  return (
-    <DefaultWinnerDrop {...props} contentPresentation={contentPresentation} />
-  );
+  return <DefaultWinnerDrop {...props} />;
 };
 
 export default memo(WinnerDrop);

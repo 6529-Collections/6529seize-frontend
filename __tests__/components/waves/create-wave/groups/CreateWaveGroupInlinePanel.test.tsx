@@ -29,11 +29,6 @@ jest.mock(
           >
             add identity
           </button>
-          {props.onCancel && (
-            <button type="button" onClick={props.onCancel}>
-              Cancel
-            </button>
-          )}
         </div>
       );
     }

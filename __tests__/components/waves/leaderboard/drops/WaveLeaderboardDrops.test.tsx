@@ -6,15 +6,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 const hook = jest.fn();
-const proposalCardPresentationHook = jest.fn(
-  (_waveId: string | null | undefined) => "default"
-);
-let mockVirtualizedRowsProps: any;
-
-jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
-  useWaveProposalCardPresentation: (waveId: string | null | undefined) =>
-    proposalCardPresentationHook(waveId),
-}));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => {
   const actual = jest.requireActual(
@@ -37,30 +28,29 @@ jest.mock(
       hasNextPage,
       fetchNextPage,
       autoLoadNext,
-      ...props
-    }: any) => {
-      mockVirtualizedRowsProps = props;
-      return (
-        <div>
-          {items.map((item: any) => (
-            <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
-          ))}
-          {autoLoadNext && hasNextPage ? (
-            <button onClick={fetchNextPage}>Trigger next page</button>
-          ) : null}
-        </div>
-      );
-    },
+    }: any) => (
+      <div>
+        {items.map((item: any) => (
+          <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
+        ))}
+        {autoLoadNext && hasNextPage ? (
+          <button onClick={fetchNextPage}>Trigger next page</button>
+        ) : null}
+      </div>
+    ),
   })
 );
-jest.mock("@/components/waves/leaderboard/WaveLeaderboardVotingModal", () => ({
-  useWaveLeaderboardVotingModal: () => ({
-    votingDrop: null,
-    openVotingModal: jest.fn(),
-    closeVotingModal: jest.fn(),
-  }),
-  WaveLeaderboardVotingModal: () => null,
-}));
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
+  () => ({
+    useWaveLeaderboardVotingModal: () => ({
+      votingDrop: null,
+      openVotingModal: jest.fn(),
+      closeVotingModal: jest.fn(),
+    }),
+    WaveLeaderboardVotingModal: () => null,
+  })
+);
 
 jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrop", () => ({
   WaveLeaderboardDrop: (props: any) => (
@@ -124,11 +114,6 @@ const renderComp = (
 };
 
 describe("WaveLeaderboardDrops", () => {
-  beforeEach(() => {
-    proposalCardPresentationHook.mockReturnValue("default");
-    mockVirtualizedRowsProps = undefined;
-  });
-
   it("shows loading when fetching and empty", () => {
     renderComp({
       drops: [],
@@ -163,23 +148,6 @@ describe("WaveLeaderboardDrops", () => {
     expect(screen.getByText("d1")).toBeInTheDocument();
     screen.getByRole("button", { name: "Trigger next page" }).click();
     expect(fetchNextPage).toHaveBeenCalled();
-  });
-
-  it("uses compact virtual rows for proposal-card presentation", () => {
-    proposalCardPresentationHook.mockReturnValue("proposalCard");
-
-    renderComp({
-      drops: [{ id: "d1" }],
-      isFetching: false,
-      isFetchingNextPage: false,
-      fetchNextPage: jest.fn(),
-      hasNextPage: false,
-    });
-
-    expect(mockVirtualizedRowsProps.estimatedRowHeight).toBe(360);
-    expect(mockVirtualizedRowsProps.measureLoadedRowsAtNaturalHeight).toBe(
-      true
-    );
   });
 
   it("passes drop clicks through to the parent handler", () => {

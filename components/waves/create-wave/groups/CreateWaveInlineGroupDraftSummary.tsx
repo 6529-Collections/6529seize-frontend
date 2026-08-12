@@ -26,7 +26,7 @@ export default function CreateWaveInlineGroupDraftSummary({
   return (
     <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-5">
       {!isValid && (
-        <p className="tw-m-0 tw-mb-3 tw-text-xs tw-text-iron-400">
+        <p className="tw-mb-3 tw-text-xs tw-text-iron-400">
           <span className="tw-font-semibold tw-text-iron-300">
             Not ready yet.
           </span>{" "}
@@ -37,10 +37,10 @@ export default function CreateWaveInlineGroupDraftSummary({
       )}
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
+          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-500">
             Create this new group
           </p>
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-500">
+          <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
             {draftSummary}
           </p>
         </div>

@@ -78,9 +78,9 @@ export default function CreateWaveGroup({
   const suggestedName = buildInlineGroupName({ waveName, groupLabel });
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-3">
+    <div className="tw-flex tw-flex-col tw-gap-y-4">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+        <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
           {groupLabel}
         </h3>
         {isNotChatWave && groupType === CreateWaveGroupConfigType.CAN_CHAT && (

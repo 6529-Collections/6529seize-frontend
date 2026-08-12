@@ -401,13 +401,13 @@ export default function GroupAssignmentPanel({
   return (
     <div
       ref={panelRef}
-      className={`tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition-all tw-duration-300 ${
+      className={`tw-relative tw-flex tw-flex-col tw-gap-5 tw-rounded-xl tw-border tw-border-solid tw-p-5 tw-transition-all tw-duration-300 ${
         isExpandedPanel
           ? "tw-border-white/10 tw-bg-iron-900 tw-shadow-2xl"
-          : "tw-border-white/5 tw-bg-iron-900/60"
+          : "tw-border-white/5 tw-bg-iron-900/60 tw-shadow-inner"
       }`}
     >
-      <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
+      <div className="tw-relative tw-flex tw-flex-col tw-gap-5">
         <CreateWaveInlineGroupHeader
           currentGroupLabel={currentGroupLabel}
           unsavedGroupDescription={unsavedGroupDescription}
@@ -426,13 +426,12 @@ export default function GroupAssignmentPanel({
         {displayedBuilder.panel === "identity" ? (
           <CreateWaveInlineGroupExpandedPanel
             onCancel={onCancelPanel}
-            showCancel={false}
+            cancelClassName="tw-mt-3"
           >
             <CreateWaveInlineGroupIdentities
               identities={displayedBuilder.identities}
               onIdentitySelect={addIdentity}
               onRemove={removeIdentity}
-              onCancel={onCancelPanel}
             />
           </CreateWaveInlineGroupExpandedPanel>
         ) : null}

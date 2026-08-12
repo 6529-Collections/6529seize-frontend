@@ -11,9 +11,6 @@ jest.mock("@/hooks/waves/useWaveDecisions", () => ({
   useWaveDecisions: jest.fn(),
 }));
 jest.mock("@/hooks/useWave");
-jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
-  useWaveProposalCardPresentation: () => mockProposalCardPresentation,
-}));
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useWaveOutcomeVisibility: () => mockOutcomesVisible,
   useWaveSubmissionButtonLabelOverride: () => null,
@@ -38,13 +35,11 @@ jest.mock("@/components/waves/winners/drops/WaveWinnersDrops", () => ({
 
 const wave = { id: "w1", wave: { type: ApiWaveType.Rank } } as any;
 let mockOutcomesVisible = true;
-let mockProposalCardPresentation = "default";
 
 describe("WaveWinners", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockOutcomesVisible = true;
-    mockProposalCardPresentation = "default";
   });
 
   it("renders timeline when multi decision", () => {
@@ -163,38 +158,6 @@ describe("WaveWinners", () => {
       loadAllPages: true,
       pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
     });
-  });
-
-  it("uses proposal cards for approved drops in an opted-in standard wave", () => {
-    mockProposalCardPresentation = "proposalCard";
-    (useWave as jest.Mock).mockReturnValue({
-      decisions: { multiDecision: true },
-      isQuorumWave: false,
-    });
-    (useWaveDecisions as jest.Mock).mockReturnValue({
-      decisionPoints: [
-        {
-          decision_time: 1,
-          winners: [{ drop: { id: "d1" }, place: 1, awards: [] }],
-        },
-      ],
-      isFetching: false,
-      isLoadingAllPages: false,
-    });
-
-    render(
-      <WaveWinners
-        wave={{ ...wave, wave: { type: ApiWaveType.Approve } }}
-        onDropClick={jest.fn()}
-      />
-    );
-
-    expect(Drops).toHaveBeenCalledWith(
-      expect.objectContaining({
-        contentPresentation: "proposalCard",
-        isApprovalWave: true,
-      })
-    );
   });
 
   it("uses quorum compact content for quorum approve waves", () => {

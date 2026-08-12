@@ -12,7 +12,6 @@ import type {
   DropLocation,
   DropTimestampLayout,
 } from "../drop.types";
-import type { DropContentPresentation } from "../dropContentPresentation";
 
 interface DefaultParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -36,7 +35,6 @@ interface DefaultParticipationDropProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
-  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export default function ParticipationDrop(

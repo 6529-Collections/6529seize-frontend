@@ -8,7 +8,6 @@ interface ParticipationDropRatingsProps {
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
-  readonly emphasizeCurrent?: boolean | undefined;
 }
 
 export const ParticipationDropRatings: React.FC<
@@ -19,7 +18,6 @@ export const ParticipationDropRatings: React.FC<
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
-  emphasizeCurrent = false,
 }) => {
   return (
     <ParticipationDropRatingsContainer
@@ -28,7 +26,6 @@ export const ParticipationDropRatings: React.FC<
       winningThreshold={winningThreshold}
       winningThresholdMinDurationMs={winningThresholdMinDurationMs}
       isVotingClosed={isVotingClosed}
-      emphasizeCurrent={emphasizeCurrent}
     />
   );
 };

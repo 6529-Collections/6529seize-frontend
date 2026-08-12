@@ -413,24 +413,6 @@ export const EN_GB_MESSAGES = {
   "waves.create.actions.next": "Next",
   "waves.create.actions.previous": "Previous",
   "waves.create.actions.save": "Save",
-  "waves.create.advanced.title": "Advanced settings",
-  "waves.create.advanced.customized": "Customised",
-  "waves.create.advanced.needsAttention": "Needs attention",
-  "waves.create.advanced.errorSummary":
-    "Review the highlighted settings before continuing.",
-  "waves.create.overview.picture": "Wave profile picture",
-  "waves.create.groups.title": "Access",
-  "waves.create.groups.description":
-    "Choose who can access, participate in, and manage this wave.",
-  "waves.create.dates.title": "Schedule",
-  "waves.create.dates.description":
-    "Review when this wave opens, voting begins, and winners are announced.",
-  "waves.create.dates.approve.noEndSummary": "Starts {start}. No end date.",
-  "waves.create.dates.approve.endSummary": "Starts {start}. Ends {end}.",
-  "waves.create.dates.rank.ongoingSummary":
-    "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
-  "waves.create.dates.rank.scheduledSummary":
-    "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
   ...EN_GB_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",
@@ -450,8 +432,10 @@ export const EN_GB_MESSAGES = {
   "waves.leaderboard.timeline.decisionTimeline": "Decision Timeline",
   "waves.leaderboard.timeline.announcementHistory": "Announcement history",
   "waves.leaderboard.timeline.paused": "Paused",
-  "waves.leaderboard.timeline.nextDecisionAfter": "Next decision after {date}",
-  "waves.leaderboard.timeline.noDecisionScheduled": "No decision scheduled",
+  "waves.leaderboard.timeline.nextDecisionAfter":
+    "Next decision after {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled":
+    "No decision scheduled",
   "waves.leaderboard.timeline.noUpcomingEvents": "No upcoming events",
   "waves.leaderboard.timeline.nextWinner": "Next winner",
   "waves.leaderboard.timeline.nextWinnerIn": "Next winner in {countdown}",
