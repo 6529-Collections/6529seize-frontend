@@ -135,12 +135,12 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
     () => getWaveProposalCardConfigFromMetadata(wave.id, metadata),
     [metadata, wave.id]
   );
-  const [draft, setDraftState] = useState<ProposalCardDraft>(() =>
+  const [draftState, setDraftState] = useState<ProposalCardDraft>(() =>
     getDraft(proposalCards)
   );
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const draftConfig = getConfig(draft);
+  const draftConfig = getConfig(draftState);
   const pendingUpdate = draftConfig
     ? getWaveProposalCardMetadataUpdate({
         waveId: wave.id,
@@ -230,9 +230,9 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
       !metadataQuery.isLoading &&
       !metadataQuery.isError &&
       canEditWave({ connectedProfile, activeProfileProxy, wave }),
-    draft,
+    draft: draftState,
     editLabel: t(locale, "waves.proposalCard.settings.editLabel"),
-    hasExcerptError: draft.mode === "custom" && draftConfig === null,
+    hasExcerptError: draftState.mode === "custom" && draftConfig === null,
     isSaving,
     isSupported,
     resetEditor,
