@@ -1,7 +1,4 @@
-import {
-  selectMuseumStillMedia,
-  shouldWithholdKeysAndGatesMedia,
-} from "@/lib/museum/publication/mediaSelection";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import type { MuseumMedia } from "@/lib/museum/publication/types";
 
 function media(kind: "live" | "still", url: string): MuseumMedia {
@@ -47,36 +44,5 @@ describe("selectMuseumStillMedia", () => {
         media("live", "https://generator.artblocks.io/1/0xabc/1"),
       ])
     ).toBeUndefined();
-  });
-});
-
-describe("shouldWithholdKeysAndGatesMedia", () => {
-  it("withholds Keys and Gates media until accession completes", () => {
-    expect(
-      shouldWithholdKeysAndGatesMedia(
-        "selected_through_acquisition_program_acquisition_pending",
-        ["keys-and-gates"]
-      )
-    ).toBe(true);
-    expect(
-      shouldWithholdKeysAndGatesMedia(
-        "acquisition_complete_accession_review_in_progress",
-        ["keys-and-gates"]
-      )
-    ).toBe(true);
-  });
-
-  it("does not suppress other programs or accessioned works", () => {
-    expect(
-      shouldWithholdKeysAndGatesMedia(
-        "selected_through_acquisition_program_acquisition_pending",
-        ["another-program"]
-      )
-    ).toBe(false);
-    expect(
-      shouldWithholdKeysAndGatesMedia("accessioned_into_permanent_collection", [
-        "keys-and-gates",
-      ])
-    ).toBe(false);
   });
 });

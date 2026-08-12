@@ -98,16 +98,16 @@ export interface MuseumExternalProposalPresentationSource {
   readonly kind: "signed_wave_storm";
   readonly waveId: string;
   readonly dropId: string;
-  /** Exact part in the immutable Wave publication observation. */
+  /** Exact part recorded by the downstream accession media review. */
   readonly partId: number;
   readonly serial: number | null;
   /** Exact upstream proposal record joined to this presentation. */
   readonly publicationRecordId: string;
   /** Exact curated-acquisition context that authorizes this presentation. */
   readonly contextEntityId: string;
-  /** Immutable Wave publication-observation path for the exact presentation URL. */
+  /** Immutable reviewed MEDIA_REFERENCE path for the exact presentation URL. */
   readonly sourcePath: string;
-  /** Immutable MEDIA_REFERENCE path carrying the token/source locator and rights. */
+  /** Immutable MEDIA_REFERENCE path carrying the source locator and rights. */
   readonly mediaRecordPath: string;
   readonly sourceCommit: string;
 }
@@ -132,9 +132,10 @@ export interface MuseumExternalProposalPresentationRights {
 }
 
 /**
- * Media used to present a proposal before the Museum has acquired it.
- * The literal policies prevent consumers from treating an external Storm as
- * retained Museum media or as a downloadable publication asset.
+ * Accession-reviewed media used to present a selected acquisition while title,
+ * custody, formal accession, and Collection membership remain in progress.
+ * The literal policies prevent consumers from treating an external Wave image
+ * as retained Museum media or as a downloadable publication asset.
  */
 export interface MuseumExternalProposalPresentationMedia {
   readonly id: string;
@@ -142,8 +143,8 @@ export interface MuseumExternalProposalPresentationMedia {
   /** Exact governed upstream media URI; never a Museum derivative or IIIF URL. */
   readonly mediaUrl: string;
   readonly mediaMimeType: "image/jpeg" | "image/png" | "image/webp";
-  /** Optional source-declared byte size used only for an intentional-view gate. */
-  readonly sourceByteSize?: number;
+  /** Reviewed observed byte size used for the intentional-view safety gate. */
+  readonly sourceByteSize: number;
   readonly width: number;
   readonly height: number;
   readonly altText: string;
@@ -313,10 +314,9 @@ export function isMuseumExternalProposalPresentationMedia(
     (candidate["mediaMimeType"] === "image/jpeg" ||
       candidate["mediaMimeType"] === "image/png" ||
       candidate["mediaMimeType"] === "image/webp") &&
-    (sourceByteSize === undefined ||
-      (typeof sourceByteSize === "number" &&
-        Number.isSafeInteger(sourceByteSize) &&
-        sourceByteSize > 0)) &&
+    typeof sourceByteSize === "number" &&
+    Number.isSafeInteger(sourceByteSize) &&
+    sourceByteSize > 0 &&
     typeof candidate["width"] === "number" &&
     Number.isSafeInteger(candidate["width"]) &&
     candidate["width"] > 0 &&
