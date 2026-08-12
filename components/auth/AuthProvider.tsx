@@ -100,6 +100,7 @@ export default function Auth({
     seizeConnect,
     seizeDisconnect,
     seizeDisconnectAndLogout,
+    isSigningOutAll,
     isSafeWallet,
     connectionState,
   } = useSeizeConnectContext();
@@ -133,12 +134,16 @@ export default function Auth({
     profile: loadedProfile,
     address,
   });
-  const connectedProfile = isConnectedProfileForAddress ? loadedProfile : null;
+  const connectedProfile =
+    !isSigningOutAll && isConnectedProfileForAddress ? loadedProfile : null;
   const isConnectedProfileSettling = Boolean(
-    address && loadedProfile && !isConnectedProfileForAddress
+    !isSigningOutAll &&
+    address &&
+    loadedProfile &&
+    !isConnectedProfileForAddress
   );
   const isFetchingConnectedProfile =
-    fetchingProfile || isConnectedProfileSettling;
+    !isSigningOutAll && (fetchingProfile || isConnectedProfileSettling);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
@@ -378,6 +383,10 @@ export default function Auth({
     // Clear previous operations when dependencies change
     abortCurrentAuthOperation();
 
+    if (isSigningOutAll) {
+      return undefined;
+    }
+
     // Don't start validation during transitional states
     if (connectionState === "connecting") {
       return undefined;
@@ -485,6 +494,7 @@ export default function Auth({
     enableWalletAuthentication,
     isAddressAuthorized,
     isConnected,
+    isSigningOutAll,
     hasActiveWalletAddress,
     canSignActiveWallet,
     abortCurrentAuthOperation,
@@ -688,23 +698,14 @@ export default function Auth({
     !canSignActiveWallet &&
     getSessionClientType() === "web";
 
-  // Computed modal visibility to prevent flickering during rapid state changes
-  const shouldShowSignModal = useMemo(() => {
-    const shouldHideDuringValidation =
+  const shouldShowSignModal =
+    showSignModal &&
+    !isSigningOutAll &&
+    !(
       authLoadingState === "validating" &&
-      signModalReason !== "session-upgrade";
-    return (
-      showSignModal &&
-      !shouldHideDuringValidation &&
-      (connectionState === "connected" || isDisconnectedWebSessionUpgradePrompt)
-    );
-  }, [
-    authLoadingState,
-    connectionState,
-    isDisconnectedWebSessionUpgradePrompt,
-    showSignModal,
-    signModalReason,
-  ]);
+      signModalReason !== "session-upgrade"
+    ) &&
+    (connectionState === "connected" || isDisconnectedWebSessionUpgradePrompt);
 
   useEffect(() => {
     syncVisibleAuthPromptTracking({
@@ -773,7 +774,6 @@ export default function Auth({
       showWaves,
     ]
   );
-
   return (
     <AuthContext.Provider value={authContextValue}>
       {children}
