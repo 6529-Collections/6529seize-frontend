@@ -1,4 +1,6 @@
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   Dialog,
   DialogPanel,
@@ -635,10 +637,12 @@ export default function MobileWrapperDialog({
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
-  closeLabel = "Close panel",
+  closeLabel,
   dismissible = true,
 }: MobileWrapperDialogProps) {
+  const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const {
     canDragToClose,
     dragOffset,
@@ -730,7 +734,7 @@ export default function MobileWrapperDialog({
                       tabletModal={tabletModal}
                       onClose={handleClose}
                       mobileCloseButtonClassName={mobileCloseButtonClassName}
-                      closeLabel={closeLabel}
+                      closeLabel={resolvedCloseLabel}
                     />
                     <div className={surfaceClassNames} style={surfaceStyle}>
                       <div
@@ -750,7 +754,7 @@ export default function MobileWrapperDialog({
                             headerCloseButtonClassName
                           }
                           titleClassName={titleClassName}
-                          closeLabel={closeLabel}
+                          closeLabel={resolvedCloseLabel}
                         />
                         {children}
                       </div>
