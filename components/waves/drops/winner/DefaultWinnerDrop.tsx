@@ -42,6 +42,7 @@ import {
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import ProposalCardContextLabel from "../proposal/ProposalCardContextLabel";
+import ProposalCardDetachedHeader from "../proposal/ProposalCardDetachedHeader";
 import ProposalCardReadFullButton from "../proposal/ProposalCardReadFullButton";
 
 const getRankHoverClass = (rank: number | null): string => {
@@ -194,10 +195,10 @@ const DefaultWinnerDropInner = ({
     );
   const detachedProposalHeader =
     isChatProposal && showIdentity ? (
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-pb-2">
-        <WaveDropAuthorPfp drop={drop} />
-        <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
-      </div>
+      <ProposalCardDetachedHeader
+        drop={drop}
+        identityHeader={identityHeader}
+      />
     ) : null;
   const interactionsRow = showInteractions ? (
     <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">

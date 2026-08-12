@@ -7,7 +7,7 @@ import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/co
 import GroupCreateIdentitiesSearch from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch";
 import type { GroupCreateIdentitiesSearchResultsLayout } from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function CreateWaveInlineGroupIdentities({
@@ -24,6 +24,7 @@ export default function CreateWaveInlineGroupIdentities({
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
 }) {
   const { connectedProfile } = useAuth();
+  const locale = useBrowserLocale();
   const selectedWallets = identities.map((identity) => identity.wallet);
   const currentUserIdentity: CommunityMemberMinimal | null =
     connectedProfile?.primary_wallet
@@ -47,7 +48,7 @@ export default function CreateWaveInlineGroupIdentities({
     );
   const identitiesHelperText =
     identities.length === 0
-      ? t(DEFAULT_LOCALE, "waves.create.groups.inlineIdentities.emptyHelper")
+      ? t(locale, "waves.create.groups.inlineIdentities.emptyHelper")
       : null;
   const showHelperRow = !!identitiesHelperText || !!currentUserIdentity;
   const showCurrentUserExcludedWarning =
@@ -87,7 +88,7 @@ export default function CreateWaveInlineGroupIdentities({
           </div>
           {onCancel && (
             <Button variant="secondary" size="xs" onClick={onCancel}>
-              Cancel
+              {t(locale, "waves.create.actions.cancel")}
             </Button>
           )}
         </div>
@@ -159,7 +160,7 @@ export default function CreateWaveInlineGroupIdentities({
           className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]"
         >
           {t(
-            DEFAULT_LOCALE,
+            locale,
             "waves.create.groups.inlineIdentities.creatorExcludedWarning"
           )}
         </p>

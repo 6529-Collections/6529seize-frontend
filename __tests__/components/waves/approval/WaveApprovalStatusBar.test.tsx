@@ -257,6 +257,11 @@ describe("WaveApprovalStatusBar", () => {
       name: "Approval status",
     });
     const statusItems = statusGroup.firstElementChild;
+    expect(statusItems).toHaveClass(
+      "tw-grid-cols-2",
+      "tw-items-baseline",
+      "tw-gap-y-2"
+    );
     const labels = Array.from(statusItems?.children ?? [])
       .map((item) => item.firstElementChild?.textContent)
       .filter(Boolean);
@@ -268,6 +273,7 @@ describe("WaveApprovalStatusBar", () => {
       "Approval window",
     ]);
     expect(screen.getByText("10 TDH + XTDH")).toBeInTheDocument();
+    expect(screen.getByText("10 TDH + XTDH")).not.toHaveClass("tw-text-sm");
     expect(
       within(statusGroup).queryByRole("button", { name: "Approval rules" })
     ).not.toBeInTheDocument();

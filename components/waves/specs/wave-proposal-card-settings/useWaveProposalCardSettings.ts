@@ -13,9 +13,10 @@ import {
   getWaveProposalCardMetadataUpdate,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWave } from "@/hooks/useWave";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   createWaveMetadata,
@@ -63,9 +64,12 @@ const getConfig = (
   };
 };
 
-const getValueLabel = (proposalCards: CreateWaveProposalCardConfig): string => {
+const getValueLabel = (
+  proposalCards: CreateWaveProposalCardConfig,
+  locale: SupportedLocale
+): string => {
   return t(
-    DEFAULT_LOCALE,
+    locale,
     proposalCards.mode === "standard"
       ? "waves.proposalCard.mode.standard.label"
       : "waves.proposalCard.mode.custom.label"
@@ -92,24 +96,29 @@ const replaceProposalCardMetadata = async ({
   let didDeleteExistingSettings = false;
 
   try {
+    didDeleteExistingSettings = update.deleteIds.length > 0;
     await Promise.all(
       update.deleteIds.map((metadataId) =>
         deleteWaveMetadata({ waveId, metadataId })
       )
     );
-    didDeleteExistingSettings = update.deleteIds.length > 0;
     await Promise.all(
       update.create.map((body) => createWaveMetadata({ waveId, body }))
     );
   } catch (writeError) {
     if (didDeleteExistingSettings) {
-      await createWaveMetadata({ waveId, body: rollbackBody });
+      try {
+        await createWaveMetadata({ waveId, body: rollbackBody });
+      } catch {
+        // Preserve the original write failure when the best-effort rollback fails.
+      }
     }
     throw writeError;
   }
 };
 
 export function useWaveProposalCardSettings(wave: ApiWave) {
+  const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
     useAuth();
@@ -165,7 +174,7 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
           const { success } = await requestAuth();
           if (!success) {
             const message = t(
-              DEFAULT_LOCALE,
+              locale,
               "waves.proposalCard.settings.toastAuthFailed"
             );
             setSaveError(message);
@@ -178,13 +187,10 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
             metadata,
             proposalCards: draftConfig,
           });
-          await queryClient.invalidateQueries({
-            queryKey: [QueryKey.WAVE_METADATA, { wave_id: wave.id }],
-          });
           closeEditor();
         } catch (error) {
           const message = t(
-            DEFAULT_LOCALE,
+            locale,
             "waves.proposalCard.settings.toastSaveFailedTitle"
           );
           setSaveError(message);
@@ -192,7 +198,7 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
             type: "error",
             title: message,
             description: t(
-              DEFAULT_LOCALE,
+              locale,
               "waves.proposalCard.settings.toastRetry"
             ),
             details: getToastErrorDetails(error, getErrorMessage(error)),
@@ -210,6 +216,7 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
     [
       draftConfig,
       hasPendingChanges,
+      locale,
       metadata,
       queryClient,
       requestAuth,
@@ -224,16 +231,16 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
       !metadataQuery.isError &&
       canEditWave({ connectedProfile, activeProfileProxy, wave }),
     draft,
-    editLabel: t(DEFAULT_LOCALE, "waves.proposalCard.settings.editLabel"),
+    editLabel: t(locale, "waves.proposalCard.settings.editLabel"),
     hasExcerptError: draft.mode === "custom" && draftConfig === null,
     isSaving,
     isSupported,
     resetEditor,
-    rowLabel: t(DEFAULT_LOCALE, "waves.proposalCard.settings.rowLabel"),
+    rowLabel: t(locale, "waves.proposalCard.settings.rowLabel"),
     saveError,
     saveSettings,
     setDraft,
     submitDisabled: !draftConfig || !hasPendingChanges,
-    valueLabel: getValueLabel(proposalCards),
+    valueLabel: getValueLabel(proposalCards, locale),
   };
 }

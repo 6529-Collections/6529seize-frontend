@@ -2,9 +2,9 @@
 
 ## Overview
 
-Use `Groups` to review or customize who can view, drop, vote, chat, and
-administer a wave. This step is user-reachable for `Chat`, `Rank`, and
-`Approve`.
+Use `Groups` to review or customize wave access and permissions, including
+viewing, dropping, voting, chatting, and administration where supported. This
+step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Location in the Site
 

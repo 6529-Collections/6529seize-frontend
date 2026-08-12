@@ -55,7 +55,7 @@ export default function CreateWaveGroups({
         </p>
         <p className="tw-m-0 tw-text-pretty tw-text-xs tw-leading-relaxed tw-text-iron-500">
           {t(locale, "waves.create.groups.accessHelper", {
-            viewGroupName: "Who can view",
+            viewGroupName: t(locale, "waves.create.groups.viewGroupName"),
           })}
         </p>
       </div>
@@ -82,8 +82,8 @@ export default function CreateWaveGroups({
             locale,
             "waves.create.groups.limitedAccessDescription",
             {
-              viewGroupName: "Who can view",
-              adminGroupName: "Admin",
+              viewGroupName: t(locale, "waves.create.groups.viewGroupName"),
+              adminGroupName: t(locale, "waves.create.groups.adminGroupName"),
             }
           )}
         />

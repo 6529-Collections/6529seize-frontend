@@ -45,9 +45,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - `Summary card` is the default for new waves and applies a reusable compact
     presentation in chat and list views
   - `Full proposal` keeps the previous full-content presentation
-  - `Text preview limit` accepts a whole-number proposal-text limit
-    from `120` to `1000` characters and controls whether the first ready still
-    image appears beside the summary
+  - `Text preview limit` accepts a whole-number proposal-text limit from `120`
+    to `1000` characters and controls excerpt length
+  - `Image on summary card` controls whether the first ready still image
+    appears beside the summary
 - Approve tab labels:
   - appear in their own `Tab labels` group under `Advanced settings`
   - proposals tab defaults to `Proposals`
@@ -81,9 +82,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - `Proposal card appearance` is inside `Advanced settings` and defaults to
   `Summary card` for newly created Waves. The default stores a versioned
   Wave-level display recipe when the Wave is created. Existing Waves and older
-  drafts without this setting keep the `Full proposal` presentation. It does
-  not alter Chat messages or specialized Memes, Curation, and Quorum
-  presentations.
+  drafts without this setting keep the `Full proposal` presentation. The 6529
+  Network Museum compatibility fallback uses `Summary card` until an explicit
+  setting is saved. The setting does not alter Chat messages or specialized
+  Memes, Curation, and Quorum presentations.
 
 ## Failure and Recovery
 

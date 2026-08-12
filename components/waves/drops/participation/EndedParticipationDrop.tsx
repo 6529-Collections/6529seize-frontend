@@ -38,6 +38,7 @@ import {
 } from "../dropContentPresentation";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
 import ProposalCardContextLabel from "../proposal/ProposalCardContextLabel";
+import ProposalCardDetachedHeader from "../proposal/ProposalCardDetachedHeader";
 import ProposalCardReadFullButton from "../proposal/ProposalCardReadFullButton";
 import {
   getParticipationIdentityProfile,
@@ -256,10 +257,10 @@ function EndedParticipationDropInner({
   );
   const detachedProposalHeader =
     isChatProposal && showIdentity ? (
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-pb-2">
-        <WaveDropAuthorPfp drop={drop} />
-        <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
-      </div>
+      <ProposalCardDetachedHeader
+        drop={drop}
+        identityHeader={identityHeader}
+      />
     ) : null;
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 

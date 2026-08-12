@@ -1,23 +1,96 @@
+import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { ApiAttachmentKind } from "@/generated/models/ApiAttachmentKind";
+import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
+import { ApiAttachmentUploadMimeType } from "@/generated/models/ApiAttachmentUploadMimeType";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import type { ApiDropPart } from "@/generated/models/ApiDropPart";
+import type { ApiNftLinkMediaPreview } from "@/generated/models/ApiNftLinkMediaPreview";
 import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import { getProposalCardViewModel } from "@/helpers/waves/proposal-card.helpers";
 
-const makeDrop = (overrides: Record<string, unknown> = {}) =>
-  ({
+type ProposalCardDropFixture = Pick<
+  ApiDrop,
+  "title" | "parts" | "parts_count" | "nft_links"
+>;
+
+type ProposalCardPartFixture = Omit<ApiDropPart, "quoted_drop"> & {
+  readonly quoted_drop?: ApiDropPart["quoted_drop"];
+};
+
+type ProposalCardDropOverrides = Partial<
+  Omit<ProposalCardDropFixture, "parts">
+> & {
+  readonly parts?: readonly ProposalCardPartFixture[];
+};
+
+const makeAttachment = (fileName: string): ApiAttachment => ({
+  attachment_id: fileName,
+  file_name: fileName,
+  mime_type: ApiAttachmentUploadMimeType.ApplicationPdf,
+  kind: ApiAttachmentKind.Pdf,
+  status: ApiAttachmentStatus.Ready,
+});
+
+const makeMediaPreview = (
+  overrides: Partial<ApiNftLinkMediaPreview>
+): ApiNftLinkMediaPreview => ({
+  status: ApiNftLinkMediaPreviewStatusEnum.Pending,
+  kind: "image",
+  card_url: null,
+  thumb_url: null,
+  small_url: null,
+  width: null,
+  height: null,
+  mime_type: null,
+  ...overrides,
+});
+
+const makeNftLink = (
+  mediaPreview: ApiNftLinkMediaPreview
+): NonNullable<ApiDrop["nft_links"]>[number] => ({
+  url_in_text: "https://example.com/nft",
+  data: {
+    canonical_id: "nft:example",
+    platform: "example",
+    chain: null,
+    contract: null,
+    token: null,
+    name: null,
+    description: null,
+    media_uri: null,
+    last_error_message: null,
+    price: null,
+    price_currency: null,
+    last_successfully_updated: null,
+    failed_since: null,
+    media_preview: mediaPreview,
+  },
+});
+
+const makeDrop = (
+  overrides: ProposalCardDropOverrides = {}
+): ProposalCardDropFixture => {
+  const defaultParts: readonly ProposalCardPartFixture[] = [
+    {
+      part_id: 1,
+      content: null,
+      media: [],
+      attachments: [],
+    },
+  ];
+
+  return {
     title: null,
     parts_count: 1,
-    parts: [
-      {
-        part_id: 1,
-        content: null,
-        media: [],
-        attachments: [],
-        quoted_drop: null,
-      },
-    ],
     nft_links: [],
     ...overrides,
-  }) as any;
+    parts: (overrides.parts ?? defaultParts).map((part) => ({
+      ...part,
+      quoted_drop: part.quoted_drop ?? null,
+    })),
+  };
+};
 
 describe("getProposalCardViewModel", () => {
   it("uses the native title and removes only a matching authored heading", () => {
@@ -162,13 +235,16 @@ describe("getProposalCardViewModel", () => {
               { url: "first.jpg", mime_type: "image/jpeg" },
               { url: "clip.mp4", mime_type: "video/mp4" },
             ],
-            attachments: [{ name: "terms.pdf" }],
+            attachments: [makeAttachment("terms.pdf")],
           },
           {
             part_id: 2,
             content: "Second part",
             media: [{ url: "second.png", mime_type: "image/png" }],
-            attachments: [{ name: "one.txt" }, { name: "two.txt" }],
+            attachments: [
+              makeAttachment("one.pdf"),
+              makeAttachment("two.pdf"),
+            ],
           },
         ],
       })
@@ -222,24 +298,20 @@ describe("getProposalCardViewModel", () => {
     const result = getProposalCardViewModel(
       makeDrop({
         nft_links: [
-          {
-            data: {
-              media_preview: {
+          makeNftLink(
+            makeMediaPreview({
                 status: ApiNftLinkMediaPreviewStatusEnum.Processing,
                 small_url: "processing.jpg",
                 mime_type: "image/jpeg",
-              },
-            },
-          },
-          {
-            data: {
-              media_preview: {
+            })
+          ),
+          makeNftLink(
+            makeMediaPreview({
                 status: ApiNftLinkMediaPreviewStatusEnum.Ready,
                 small_url: "ready.jpg",
                 mime_type: "image/jpeg",
-              },
-            },
-          },
+            })
+          ),
         ],
       })
     );
@@ -253,17 +325,15 @@ describe("getProposalCardViewModel", () => {
     const result = getProposalCardViewModel(
       makeDrop({
         nft_links: [
-          {
-            data: {
-              media_preview: {
+          makeNftLink(
+            makeMediaPreview({
                 status: ApiNftLinkMediaPreviewStatusEnum.Ready,
                 small_url: "animated.gif",
                 thumb_url: "ready-thumb.jpg",
                 card_url: "ready-card.jpg",
                 mime_type: "image/jpeg",
-              },
-            },
-          },
+            })
+          ),
         ],
       })
     );

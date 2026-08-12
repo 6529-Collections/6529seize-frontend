@@ -4,6 +4,7 @@ import { DefaultSingleWaveDrop } from "@/components/waves/drop/DefaultSingleWave
 import DefaultParticipationDrop from "@/components/waves/drops/participation/DefaultParticipationDrop";
 import { useWaveParticipationRendererSet } from "@/components/waves/drops/participation/participationRendererRegistry";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
+import type { ComponentProps } from "react";
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
@@ -46,9 +47,13 @@ jest.mock("@/components/waves/drop/QuorumSingleWaveDrop", () => ({
   QuorumSingleWaveDrop: jest.fn(),
 }));
 
-const mockUseSeizeSettings = useSeizeSettings as jest.Mock;
+const mockUseSeizeSettings = useSeizeSettings as jest.MockedFunction<
+  typeof useSeizeSettings
+>;
 const mockUseWaveProposalCardPresentation =
-  useWaveProposalCardPresentation as jest.Mock;
+  useWaveProposalCardPresentation as jest.MockedFunction<
+    typeof useWaveProposalCardPresentation
+  >;
 
 describe("useWaveParticipationRendererSet", () => {
   beforeEach(() => {
@@ -85,7 +90,13 @@ describe("useWaveParticipationRendererSet", () => {
     );
     const ParticipationDrop = result.current.ParticipationDrop;
 
-    render(<ParticipationDrop {...({ drop: {} } as any)} />);
+    render(
+      <ParticipationDrop
+        {...({ drop: {} } as ComponentProps<
+          typeof DefaultParticipationDrop
+        >)}
+      />
+    );
 
     expect(DefaultParticipationDrop).toHaveBeenCalledWith(
       expect.objectContaining({ contentPresentation: "proposalCard" }),

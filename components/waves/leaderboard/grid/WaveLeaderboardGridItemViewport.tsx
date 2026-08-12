@@ -9,6 +9,7 @@ import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import React, { useCallback, useMemo } from "react";
 
 interface WaveLeaderboardGridItemViewportProps {
@@ -203,9 +204,10 @@ export const WaveLeaderboardGridItemViewport: React.FC<
               aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
                 title: displayTitle,
               })}
-              className="tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-400 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
+              className="tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-0.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-400 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
             >
               {openActionLabel}
+              <ChevronRightIcon aria-hidden="true" className="tw-size-3.5" />
             </button>
           )}
         </div>
@@ -220,14 +222,10 @@ export const WaveLeaderboardGridItemViewport: React.FC<
           data-testid={`wave-leaderboard-grid-item-content-only-actions-${drop.id}`}
           className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-10 tw-bg-gradient-to-t tw-from-black/90 tw-via-black/65 tw-to-transparent tw-p-2 tw-opacity-0 tw-transition-opacity tw-duration-200 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100"
         >
-          <div className="tw-pointer-events-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 [&_button]:tw-min-h-11 [&_button]:tw-min-w-11">
+          <div className="tw-pointer-events-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 [&_button]:tw-min-w-11">
             {canOpenDrop && <WaveDropActionsOpen drop={drop} />}
             {canShowVotingAction && (
-              <VotingModalButton
-                drop={drop}
-                onClick={onVoteButtonClick}
-                variant="subtle"
-              />
+              <VotingModalButton drop={drop} onClick={onVoteButtonClick} />
             )}
           </div>
         </div>

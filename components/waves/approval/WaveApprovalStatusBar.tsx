@@ -117,18 +117,16 @@ const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
   withSeparator = false,
 }) => (
   <div
-    className={`tw-flex tw-min-w-0 tw-items-baseline tw-gap-1.5 tw-text-left tw-leading-5 ${
+    className={`tw-flex tw-min-w-0 tw-items-baseline tw-gap-1.5 tw-text-left tw-text-xs tw-leading-5 ${
       withSeparator
         ? "md:tw-border-0 md:tw-border-l md:tw-border-solid md:tw-border-iron-700 md:tw-pl-3"
         : ""
     }`}
   >
-    <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
+    <span className="tw-shrink-0 tw-whitespace-nowrap tw-font-medium tw-text-iron-500">
       {label}
     </span>{" "}
-    <span
-      className={`tw-min-w-0 tw-text-sm tw-font-semibold ${valueClassName}`}
-    >
+    <span className={`tw-min-w-0 tw-font-semibold ${valueClassName}`}>
       {value}
     </span>
   </div>
@@ -605,7 +603,7 @@ export default function WaveApprovalStatusBar({
         aria-label="Approval status"
         className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
       >
-        <div className="tw-grid tw-grid-cols-2 tw-items-center tw-gap-x-3 tw-gap-y-1 md:tw-flex md:tw-flex-wrap md:tw-gap-x-3">
+        <div className="tw-grid tw-grid-cols-2 tw-items-baseline tw-gap-x-4 tw-gap-y-2 md:tw-flex md:tw-flex-wrap md:tw-items-center md:tw-gap-x-3 md:tw-gap-y-1">
           <ApprovalStatusItem
             label="Credit needed"
             value={thresholdValueLabel}

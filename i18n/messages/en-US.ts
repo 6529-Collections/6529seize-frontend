@@ -559,6 +559,9 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   tabLabelsDescription: "Names shown on this wave's tabs.",
   approvalsTabLabel: "Approvals tab label",
   approvedTabLabel: "Approved tab label",
+  "tabLabels.errorTooLong": "Labels must be {max} characters or fewer.",
+  "tabLabels.errorDuplicate": "Use two different tab labels.",
+  "tabLabels.errorReserved": "Labels cannot match existing tabs.",
 } as const);
 
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
@@ -1012,6 +1015,8 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
   description: "Choose who can access, participate in, and manage this wave.",
+  viewGroupName: "Who can view",
+  adminGroupName: "Admin",
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   limitedAccessTitle: "Warning: Limited Access",
@@ -1029,6 +1034,7 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
     "Review when this wave opens, voting begins, and winners are announced.",
   "approve.noEndSummary": "Starts {start}. No end date.",
   "approve.endSummary": "Starts {start}. Ends {end}.",
+  "approve.endInfoLabel": "About wave end",
   "rank.ongoingSummary":
     "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
   "rank.scheduledSummary":
@@ -1052,6 +1058,7 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
 
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
   picture: "Wave Profile Picture",
+  displaySettings: "Display settings",
 } as const);
 
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
@@ -1072,6 +1079,9 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
   description: "Choose what participants can submit to this wave.",
   "advanced.defaultSummary": "No additional submission requirements.",
   "advanced.customSummary": "Submission requirements customized.",
+  "maxSimultaneousSubmissions.label": "Max simultaneous submissions",
+  "maxSimultaneousSubmissions.description":
+    "Maximum number of simultaneous submissions per participant. Optional. Unlimited if left blank.",
   identityDuplicatesRequireWinners:
     "Perpetual ranking waves never announce winners, so identities can't be resubmitted “after a win”. Choose a different re-submission rule.",
 } as const);

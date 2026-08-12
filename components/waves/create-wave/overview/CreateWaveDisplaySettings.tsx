@@ -14,7 +14,8 @@ import {
 } from "@/helpers/waves/wave-metadata.helpers";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
   CreateWaveApproveDisplayConfig,
@@ -24,14 +25,17 @@ import type {
 import type { ChangeEvent } from "react";
 
 const getApproveErrorMessage = (
-  errors: readonly CREATE_WAVE_VALIDATION_ERROR[]
+  errors: readonly CREATE_WAVE_VALIDATION_ERROR[],
+  locale: SupportedLocale
 ): string | null => {
   if (
     errors.includes(
       CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
     )
   ) {
-    return `Labels must be ${APPROVE_WAVE_TAB_LABEL_MAX_LENGTH} characters or fewer.`;
+    return t(locale, "waves.proposalCard.tabLabels.errorTooLong", {
+      max: APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
+    });
   }
 
   if (
@@ -39,7 +43,7 @@ const getApproveErrorMessage = (
       CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
     )
   ) {
-    return "Use two different tab labels.";
+    return t(locale, "waves.proposalCard.tabLabels.errorDuplicate");
   }
 
   if (
@@ -47,7 +51,7 @@ const getApproveErrorMessage = (
       CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
     )
   ) {
-    return "Labels cannot match existing tabs.";
+    return t(locale, "waves.proposalCard.tabLabels.errorReserved");
   }
 
   return null;
@@ -101,6 +105,7 @@ export default function CreateWaveDisplaySettings({
   readonly onChange: (display: CreateWaveDisplayConfig) => void;
   readonly waveType: ApiWaveType;
 }) {
+  const locale = useBrowserLocale();
   const showApproveTabLabels = waveType === ApiWaveType.Approve;
   const hasSubmissionLabelError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_BUTTON_LABEL_TOO_LONG
@@ -108,9 +113,9 @@ export default function CreateWaveDisplaySettings({
   const hasProposalCardExcerptError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.PROPOSAL_CARD_EXCERPT_LENGTH_INVALID
   );
-  const approveErrorMessage = getApproveErrorMessage(errors);
+  const approveErrorMessage = getApproveErrorMessage(errors, locale);
   const submissionLabelErrorMessage = hasSubmissionLabelError
-    ? t(DEFAULT_LOCALE, "waves.submissionButtonLabel.errorTooLong", {
+    ? t(locale, "waves.submissionButtonLabel.errorTooLong", {
         max: WAVE_SUBMISSION_BUTTON_LABEL_MAX_LENGTH,
       })
     : null;
@@ -232,7 +237,7 @@ export default function CreateWaveDisplaySettings({
     >
       <div className="tw-space-y-4">
         <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
-          Display settings
+          {t(locale, "waves.create.overview.displaySettings")}
         </p>
         <div className="tw-space-y-2">
           <div className="tw-group tw-relative tw-w-full">
@@ -261,7 +266,7 @@ export default function CreateWaveDisplaySettings({
                 Boolean(submissionLabelErrorMessage)
               )}
             >
-              {t(DEFAULT_LOCALE, "waves.submissionButtonLabel.label")}
+              {t(locale, "waves.submissionButtonLabel.label")}
             </label>
           </div>
           <CommonAnimationHeight>
@@ -293,20 +298,20 @@ export default function CreateWaveDisplaySettings({
         </div>
         <fieldset className="tw-m-0 tw-border-0 tw-p-0">
           <legend className="tw-text-sm tw-font-semibold tw-text-iron-200">
-            {t(DEFAULT_LOCALE, "waves.proposalCard.appearanceLabel")}
+            {t(locale, "waves.proposalCard.appearanceLabel")}
           </legend>
           <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
             {(["standard", "custom"] as const).map((mode) => {
               const isSelected = proposalCards.mode === mode;
               const isStandard = mode === "standard";
               const title = t(
-                DEFAULT_LOCALE,
+                locale,
                 isStandard
                   ? "waves.proposalCard.mode.standard.label"
                   : "waves.proposalCard.mode.custom.label"
               );
               const description = t(
-                DEFAULT_LOCALE,
+                locale,
                 isStandard
                   ? "waves.proposalCard.mode.standard.description"
                   : "waves.proposalCard.mode.custom.description"
@@ -378,7 +383,7 @@ export default function CreateWaveDisplaySettings({
                         htmlFor="create-wave-proposal-card-excerpt-length"
                         className="tw-text-sm tw-font-medium tw-text-iron-300"
                       >
-                        {t(DEFAULT_LOCALE, "waves.proposalCard.excerptLabel")}
+                        {t(locale, "waves.proposalCard.excerptLabel")}
                       </label>
                       <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
                         <input
@@ -391,7 +396,7 @@ export default function CreateWaveDisplaySettings({
                           value={proposalCards.excerptMaxCharacters}
                           onChange={onProposalCardExcerptLengthChange}
                           aria-label={t(
-                            DEFAULT_LOCALE,
+                            locale,
                             "waves.proposalCard.excerptInputAriaLabel"
                           )}
                           aria-invalid={hasProposalCardExcerptError}
@@ -406,7 +411,7 @@ export default function CreateWaveDisplaySettings({
                           })} !tw-h-9 !tw-w-20 !tw-bg-iron-950 !tw-px-3 !tw-py-1 focus:!tw-bg-iron-950`}
                         />
                         <span className="tw-text-xs tw-leading-5 tw-text-iron-500">
-                          {t(DEFAULT_LOCALE, "waves.proposalCard.characters")}
+                          {t(locale, "waves.proposalCard.characters")}
                         </span>
                       </div>
                     </div>
@@ -417,7 +422,7 @@ export default function CreateWaveDisplaySettings({
                           className="tw-mb-0 tw-mt-1 tw-text-xs tw-font-medium tw-leading-5 tw-text-error"
                         >
                           {t(
-                            DEFAULT_LOCALE,
+                            locale,
                             "waves.proposalCard.excerptRangeError",
                             {
                               min: PROPOSAL_CARD_EXCERPT_MIN_LENGTH,
@@ -433,7 +438,7 @@ export default function CreateWaveDisplaySettings({
                     className="tw-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3 sm:tw-border-l sm:tw-border-t-0 sm:tw-pl-4 sm:tw-pt-0"
                   >
                     <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
-                      {t(DEFAULT_LOCALE, "waves.proposalCard.mediaLabel")}
+                      {t(locale, "waves.proposalCard.mediaLabel")}
                     </span>
                     <input
                       id="create-wave-proposal-card-media-thumbnail"
@@ -457,10 +462,10 @@ export default function CreateWaveDisplaySettings({
               id="create-wave-tab-labels-heading"
               className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200"
             >
-              {t(DEFAULT_LOCALE, "waves.proposalCard.tabLabelsLabel")}
+              {t(locale, "waves.proposalCard.tabLabelsLabel")}
             </h4>
             <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-500">
-              {t(DEFAULT_LOCALE, "waves.proposalCard.tabLabelsDescription")}
+              {t(locale, "waves.proposalCard.tabLabelsDescription")}
             </p>
             <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
               <div className="tw-group tw-relative tw-w-full">
@@ -485,7 +490,7 @@ export default function CreateWaveDisplaySettings({
                   htmlFor="create-wave-approvals-tab-label"
                   className={floatingLabelClasses(Boolean(approveErrorMessage))}
                 >
-                  {t(DEFAULT_LOCALE, "waves.proposalCard.approvalsTabLabel")}
+                  {t(locale, "waves.proposalCard.approvalsTabLabel")}
                 </label>
               </div>
               <div className="tw-group tw-relative tw-w-full">
@@ -510,7 +515,7 @@ export default function CreateWaveDisplaySettings({
                   htmlFor="create-wave-approved-tab-label"
                   className={floatingLabelClasses(Boolean(approveErrorMessage))}
                 >
-                  {t(DEFAULT_LOCALE, "waves.proposalCard.approvedTabLabel")}
+                  {t(locale, "waves.proposalCard.approvedTabLabel")}
                 </label>
               </div>
             </div>

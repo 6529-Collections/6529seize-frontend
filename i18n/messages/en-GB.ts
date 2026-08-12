@@ -419,18 +419,70 @@ export const EN_GB_MESSAGES = {
   "waves.create.advanced.errorSummary":
     "Review the highlighted settings before continuing.",
   "waves.create.overview.picture": "Wave profile picture",
+  "waves.create.overview.displaySettings": "Display settings",
   "waves.create.groups.title": "Access",
   "waves.create.groups.description":
     "Choose who can access, participate in, and manage this wave.",
+  "waves.create.groups.viewGroupName": "Who can view",
+  "waves.create.groups.adminGroupName": "Admin",
   "waves.create.dates.title": "Schedule",
   "waves.create.dates.description":
     "Review when this wave opens, voting begins, and winners are announced.",
   "waves.create.dates.approve.noEndSummary": "Starts {start}. No end date.",
   "waves.create.dates.approve.endSummary": "Starts {start}. Ends {end}.",
+  "waves.create.dates.approve.endInfoLabel": "About wave end",
   "waves.create.dates.rank.ongoingSummary":
     "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
   "waves.create.dates.rank.scheduledSummary":
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
+  "waves.create.drops.maxSimultaneousSubmissions.label":
+    "Max simultaneous submissions",
+  "waves.create.drops.maxSimultaneousSubmissions.description":
+    "Maximum number of simultaneous submissions per participant. Optional. Unlimited if left blank.",
+  "waves.proposalCard.contextLabel": "Proposal",
+  "waves.proposalCard.readFull": "Read full",
+  "waves.proposalCard.readFullNamed": "Read full: {title}",
+  "waves.proposalCard.untitledProposal": "Untitled proposal",
+  "waves.proposalCard.previewAlt": "Media preview for {title}",
+  "waves.proposalCard.part.one": "{count} part",
+  "waves.proposalCard.part.other": "{count} parts",
+  "waves.proposalCard.media.one": "{count} media item",
+  "waves.proposalCard.media.other": "{count} media items",
+  "waves.proposalCard.attachment.one": "{count} attachment",
+  "waves.proposalCard.attachment.other": "{count} attachments",
+  "waves.proposalCard.appearanceLabel": "Proposal card appearance",
+  "waves.proposalCard.mode.standard.label": "Full proposal",
+  "waves.proposalCard.mode.standard.description":
+    "Show original content directly in the feed.",
+  "waves.proposalCard.mode.custom.label": "Summary card",
+  "waves.proposalCard.mode.custom.description":
+    "Show a title, shortened text, and an optional image.",
+  "waves.proposalCard.excerptLabel": "Text preview limit",
+  "waves.proposalCard.excerptInputAriaLabel":
+    "Maximum proposal preview characters",
+  "waves.proposalCard.characters": "characters",
+  "waves.proposalCard.excerptRangeError":
+    "Enter a whole number from {min} to {max}.",
+  "waves.proposalCard.mediaLabel": "Image on summary card",
+  "waves.proposalCard.settings.editLabel": "Edit proposal card settings",
+  "waves.proposalCard.settings.layoutLabel": "Proposal layout",
+  "waves.proposalCard.settings.rowLabel": "Proposal cards",
+  "waves.proposalCard.settings.toastAuthFailed":
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  "waves.proposalCard.settings.toastSaveFailedTitle":
+    "Couldn't save these proposal card settings.",
+  "waves.proposalCard.settings.toastRetry": "Please try again.",
+  "waves.proposalCard.tabLabelsLabel": "Tab labels",
+  "waves.proposalCard.tabLabelsDescription":
+    "Names shown on this wave's tabs.",
+  "waves.proposalCard.approvalsTabLabel": "Approvals tab label",
+  "waves.proposalCard.approvedTabLabel": "Approved tab label",
+  "waves.proposalCard.tabLabels.errorTooLong":
+    "Labels must be {max} characters or fewer.",
+  "waves.proposalCard.tabLabels.errorDuplicate":
+    "Use two different tab labels.",
+  "waves.proposalCard.tabLabels.errorReserved":
+    "Labels cannot match existing tabs.",
   ...EN_GB_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} left this round",
   "memes.quickVote.unrated": "{count} unrated",

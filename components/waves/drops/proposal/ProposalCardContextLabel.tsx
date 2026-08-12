@@ -17,7 +17,7 @@ export default function ProposalCardContextLabel() {
       >
         <span className="tw-size-1.5 tw-rounded-full tw-bg-primary-300 tw-shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
       </span>
-      <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-leading-none tw-tracking-[0.2em] tw-text-primary-300">
+      <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-leading-none tw-tracking-[0.14em] tw-text-primary-300">
         {t(locale, "waves.proposalCard.contextLabel")}
       </span>
     </div>

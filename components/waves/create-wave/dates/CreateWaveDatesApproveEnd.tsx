@@ -8,6 +8,8 @@ import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import TimePicker from "@/components/common/TimePicker";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   clampApproveWaveEndDate,
   getEarliestApproveWaveEndTimestamp,
@@ -38,6 +40,7 @@ export default function CreateWaveDatesApproveEnd({
   errors,
   setDates,
 }: CreateWaveDatesApproveEndProps) {
+  const locale = useBrowserLocale();
   const endDate = dates.endDate;
   const selectedEndDate =
     endDate !== null && Number.isFinite(endDate) ? endDate : null;
@@ -121,7 +124,10 @@ export default function CreateWaveDatesApproveEnd({
               tooltipText={END_DATE_TOOLTIP_TEXT}
               tooltipPosition="bottom"
               tooltipWidth="tw-w-80"
-              aria-label="About wave end"
+              aria-label={t(
+                locale,
+                "waves.create.dates.approve.endInfoLabel"
+              )}
               className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-leading-none"
             />
           </div>

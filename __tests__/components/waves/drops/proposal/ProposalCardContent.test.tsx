@@ -1,5 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import ProposalCardContent from "@/components/waves/drops/proposal/ProposalCardContent";
+import { ApiAttachmentKind } from "@/generated/models/ApiAttachmentKind";
+import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
+import { ApiAttachmentUploadMimeType } from "@/generated/models/ApiAttachmentUploadMimeType";
+import type { ComponentProps } from "react";
+
+type ProposalCardDrop = ComponentProps<typeof ProposalCardContent>["drop"];
 
 let mockProposalCardRecipe: {
   readonly version: 1;
@@ -33,17 +39,27 @@ const proposal = {
       content:
         "# Donation Proposal: Token #0\n\nThis is authored proposal text, not a generated summary.",
       media: [{ url: "token.jpg", mime_type: "image/jpeg" }],
-      attachments: [{ name: "terms.pdf" }],
+      attachments: [
+        {
+          attachment_id: "terms.pdf",
+          file_name: "terms.pdf",
+          mime_type: ApiAttachmentUploadMimeType.ApplicationPdf,
+          kind: ApiAttachmentKind.Pdf,
+          status: ApiAttachmentStatus.Ready,
+        },
+      ],
+      quoted_drop: null,
     },
     {
       part_id: 2,
       content: "Supporting details",
       media: [{ url: "detail.mp4", mime_type: "video/mp4" }],
       attachments: [],
+      quoted_drop: null,
     },
   ],
   nft_links: [],
-} as any;
+} satisfies ProposalCardDrop;
 
 describe("ProposalCardContent", () => {
   beforeEach(() => {
@@ -90,6 +106,7 @@ describe("ProposalCardContent", () => {
               content: "Approve the archive transfer.",
               media: [],
               attachments: [],
+              quoted_drop: null,
             },
           ],
         }}

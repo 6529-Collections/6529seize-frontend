@@ -214,7 +214,8 @@ describe("WaveLeaderboardGalleryItem", () => {
       "tw-py-0"
     );
     expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
-    expect(voteButton).toHaveClass("tw-box-border", "tw-h-8");
+    expect(voteButton).toHaveClass("tw-box-border");
+    expect(voteButton).not.toHaveClass("tw-h-8");
     expect(voteButton).toHaveTextContent("You: 1 NIC");
     expect(
       trigger.compareDocumentPosition(voteButton) &

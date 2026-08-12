@@ -11,7 +11,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
   type MouseEvent,
 } from "react";
 import { Tooltip } from "react-tooltip";
@@ -48,32 +47,20 @@ export const WaveSmallLeaderboardItemContent: React.FC<
   const haveMetadata = !!drop.metadata.length;
   const haveMedia = !!drop.parts.filter((part) => !!part.media.length).length;
 
-  const openProposalCard = (event: MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-    onDropClick();
-  };
-
-  const openProposalCardByKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
-
-    event.preventDefault();
+  const openProposalCard = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onDropClick();
   };
 
   if (contentPresentation === "proposalCard") {
     return (
-      <div
-        role="button"
-        tabIndex={0}
+      <button
+        type="button"
         onClick={openProposalCard}
-        onKeyDown={openProposalCardByKeyboard}
-        className="tw-cursor-pointer tw-rounded-xl focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       >
         <ProposalCardContent drop={drop} density="compact" />
-      </div>
+      </button>
     );
   }
 

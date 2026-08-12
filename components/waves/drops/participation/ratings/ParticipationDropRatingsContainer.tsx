@@ -66,6 +66,7 @@ export default function ParticipationDropRatingsContainer({
           rank={rank}
           theme={theme}
           ratingsData={ratingsData}
+          emphasizeCurrent={emphasizeCurrent}
         />
       </div>
       <ParticipationDropRatingsUserSection

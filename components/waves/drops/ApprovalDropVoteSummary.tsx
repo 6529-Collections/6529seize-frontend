@@ -204,7 +204,7 @@ export default function ApprovalDropVoteSummary({
             )}
           </div>
           <span
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${statusClass}`}
+            className={`tw-whitespace-nowrap tw-text-xs tw-font-normal ${statusClass}`}
           >
             {statusLabel}
           </span>
@@ -242,19 +242,19 @@ export default function ApprovalDropVoteSummary({
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             <span
               aria-hidden="true"
-              className={`tw-font-medium tw-tabular-nums ${totalVoteClass}`}
+              className={`tw-font-mono tw-font-medium ${totalVoteClass}`}
             >
               {formatLargeNumber(current)}
             </span>
             <span
               aria-hidden="true"
-              className="tw-font-medium tw-text-iron-500"
+              className="tw-font-mono tw-font-medium tw-text-iron-500"
             >
               /
             </span>
             <span
               aria-hidden="true"
-              className={`tw-font-medium tw-tabular-nums ${
+              className={`tw-font-mono tw-font-medium ${
                 emphasizeCurrent ? "tw-text-iron-400" : "tw-text-iron-50"
               }`}
             >
@@ -262,7 +262,7 @@ export default function ApprovalDropVoteSummary({
             </span>
             <span
               aria-hidden="true"
-              className="tw-font-medium tw-text-iron-400"
+              className="tw-font-normal tw-text-iron-400"
             >
               {votingLabel}
             </span>
@@ -274,7 +274,7 @@ export default function ApprovalDropVoteSummary({
                   ? formatLargeNumber(drop.realtime_rating)
                   : undefined
               }
-              tooltipLabel="Votes given now"
+              tooltipLabel={t(locale, "waves.leaderboard.grid.votesNow")}
               compact
               numberWeight={emphasizeCurrent ? "semibold" : undefined}
             />
@@ -300,10 +300,11 @@ export default function ApprovalDropVoteSummary({
                 {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
               </span>
               <span
-                className={`tw-whitespace-nowrap tw-font-medium ${userVoteClass}`}
+                className={`tw-whitespace-nowrap tw-font-mono tw-font-medium ${userVoteClass}`}
               >
-                {formatSignedVote(userVote)} {votingLabel}
-              </span>
+                {formatSignedVote(userVote)}
+              </span>{" "}
+              <span className={userVoteClass}>{votingLabel}</span>
             </span>
           </div>
         )}
@@ -318,12 +319,12 @@ export default function ApprovalDropVoteSummary({
     <div className={wrapperClassName}>
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
         <div className="tw-relative tw-inline-flex tw-items-center tw-gap-x-1.5">
-          <span className={`tw-font-medium ${totalVoteClass}`}>
+          <span className={`tw-font-mono tw-font-medium ${totalVoteClass}`}>
             {current < 0 && "-"}
             {formatNumberWithCommas(Math.abs(current))}
           </span>
-          <span className="tw-font-medium tw-text-iron-500">/</span>
-          <span className="tw-font-medium tw-text-iron-50">
+          <span className="tw-font-mono tw-font-medium tw-text-iron-500">/</span>
+          <span className="tw-font-mono tw-font-medium tw-text-iron-50">
             {formatNumberWithCommas(winningThreshold)}
           </span>
           <DropVoteProgressing
@@ -350,9 +351,10 @@ export default function ApprovalDropVoteSummary({
             <span className="tw-font-normal tw-text-iron-400">
               {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
             </span>
-            <span className={`tw-font-medium ${userVoteClass}`}>
-              {formatSignedVote(userVote)} {votingLabel}
-            </span>
+            <span className={`tw-font-mono tw-font-medium ${userVoteClass}`}>
+              {formatSignedVote(userVote)}
+            </span>{" "}
+            <span className={userVoteClass}>{votingLabel}</span>
           </span>
         </div>
       )}
