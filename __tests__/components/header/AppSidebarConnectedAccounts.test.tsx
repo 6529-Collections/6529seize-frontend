@@ -44,6 +44,7 @@ function setUpContext({ connectOpen = false }: { connectOpen?: boolean } = {}) {
     canSignActiveWallet: true,
     hasActiveWalletAddress: true,
     hasValidWalletAuth: true,
+    isSigningOutAll: false,
     isAuthenticated: true,
     connectionState: "connected",
     walletState: {
