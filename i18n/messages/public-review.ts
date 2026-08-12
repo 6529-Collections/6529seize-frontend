@@ -1,3 +1,8 @@
+import { PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES } from "@/i18n/messages/public-review-artists-and-roles";
+import { PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES } from "@/i18n/messages/public-review-artwork-lifecycle";
+import { PUBLIC_REVIEW_COMMUNITY_MESSAGES } from "@/i18n/messages/public-review-community";
+import { PUBLIC_REVIEW_DEVELOPMENT_MESSAGES } from "@/i18n/messages/public-review-development";
+
 export const PUBLIC_REVIEW_MESSAGES = {
   "navigation.nfts.theMemes": "The Memes",
   "navigation.nfts.gradient": "6529 Gradient",
@@ -88,11 +93,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.pages.overview.title": "Overview",
   "publicReview.pages.overview.summary":
     "A map of the full protocol, its present review state, and the decisions the community is being asked to examine.",
-  "publicReview.overviewGuide.whatIs.heading": "What is Stream?",
-  "publicReview.overviewGuide.whatIs.description":
-    "Stream is a proposed system for publishing and selling digital art. It keeps the artwork, its history, and its important rules connected over time—from launch and sales to long-term preservation.",
-  "publicReview.overviewGuide.whatIs.reviewContext":
-    "This site is the public review of the smart contracts behind Stream. It explains what the code can enforce and what still depends on people or outside systems.",
   "publicReview.overviewGuide.artworkParts.heading":
     "A Stream artwork is more than the media you see",
   "publicReview.overviewGuide.artworkParts.description":
@@ -169,214 +169,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.overviewGuide.audiences.auditors.description":
     "Start with known limits, test evidence, and the risks that still block release.",
   "publicReview.overviewGuide.startPage": "Start with {page}",
-  "publicReview.forArtistsGuide.eyebrow": "A simple guide for artists",
-  "publicReview.forArtistsGuide.heading": "Your artwork, your choices",
-  "publicReview.forArtistsGuide.description":
-    "You define the artwork and approve the plan. Stream records the sale rules and what later becomes final.",
-  "publicReview.forArtistsGuide.reviewContext":
-    "Stream is still being designed. This guide explains the intended artist experience in plain language. The sections below explain how the contracts work in more detail.",
-  "publicReview.forArtistsGuide.artwork.heading": "Your artwork in Stream",
-  "publicReview.forArtistsGuide.artwork.description":
-    "An artwork in Stream includes its media, identity, edition size, artist approval, and sale and payment rules. Its records also show important changes and what later became final.",
-  "publicReview.forArtistsGuide.artwork.identity.title": "Artwork and identity",
-  "publicReview.forArtistsGuide.artwork.identity.description":
-    "The artwork has its own identity. Its records show who the artist is, which files belong to the artwork, and which tokens were created from it.",
-  "publicReview.forArtistsGuide.artwork.editions.title": "Editions and minting",
-  "publicReview.forArtistsGuide.artwork.editions.description":
-    "You choose whether it is a one-of-one or an edition, how many can exist, and how minting works. Artists can use randomness to generate a result for each token. The random value is saved, so the result can be recreated later.",
-  "publicReview.forArtistsGuide.artwork.approval.title": "Your approval",
-  "publicReview.forArtistsGuide.artwork.approval.description":
-    "Your wallet approves one version of the artwork, including how many tokens can exist. If those details change, your old approval no longer applies. Without a new approval, the changed version is not approved by you.",
-  "publicReview.forArtistsGuide.artwork.sales.title":
-    "Sales, payments, and royalties",
-  "publicReview.forArtistsGuide.artwork.sales.description":
-    "The plan states how collectors first receive tokens: through a fixed-price mint or an auction. It also states the price, currency, and who receives the money. Later sales may pay royalties, but marketplaces do not always pay them.",
-  "publicReview.forArtistsGuide.artwork.control.title": "What can still change",
-  "publicReview.forArtistsGuide.artwork.control.description":
-    "Before the artwork becomes final, details such as file links, token supply, minting, and sale settings can still be corrected or completed. Changes stay in the artwork's history. Some changes make the artist's old approval no longer apply.",
-  "publicReview.forArtistsGuide.artwork.preservation.title":
-    "Files and artwork history",
-  "publicReview.forArtistsGuide.artwork.preservation.description":
-    "The artwork's records can show where its files are stored and how to check that they have not changed. They can also include artist statements, authenticity details, and exhibition history. The files themselves still need reliable long-term storage.",
-  "publicReview.forArtistsGuide.journey.heading": "Your journey",
-  "publicReview.forArtistsGuide.journey.description":
-    "Along the way, its details are reviewed and approved, and collectors can mint or buy under the sale rules. After the final checks, further changes to the artwork itself are meant to stop.",
-  "publicReview.forArtistsGuide.journey.prepare.title": "Prepare",
-  "publicReview.forArtistsGuide.journey.prepare.description":
-    "Gather the artwork files and everything they need to work. Choose the edition size, who should be credited, and how collectors can mint or buy at launch. Decide where the files will be stored and who receives the mint money.",
-  "publicReview.forArtistsGuide.journey.review.title": "Review",
-  "publicReview.forArtistsGuide.journey.review.description":
-    "Check one readable plan showing the artwork identity, supply, sale terms, payments, roles, and future change powers.",
-  "publicReview.forArtistsGuide.journey.approve.title": "Approve",
-  "publicReview.forArtistsGuide.journey.approve.description":
-    "Use your wallet to sign the exact collection state you accept. If the plan changes, the new state needs its own approval.",
-  "publicReview.forArtistsGuide.journey.select.title": "Community selection",
-  "publicReview.forArtistsGuide.journey.select.description":
-    "The community evaluates the work outside the contracts. If it passes that process, a wallet Stream trusts signs a launch permission containing the exact artwork and launch terms.",
-  "publicReview.forArtistsGuide.journey.launch.title": "Launch",
-  "publicReview.forArtistsGuide.journey.launch.description":
-    "Stream checks the signed permission before launch. Collectors can then mint or buy under the approved sale rules.",
-  "publicReview.forArtistsGuide.journey.finalize.title": "Finalize",
-  "publicReview.forArtistsGuide.journey.finalize.description":
-    "After the work and its dependencies are checked, the finality process is meant to close the remaining artwork-changing paths.",
-  "publicReview.forArtistsGuide.approval.heading": "Before you approve",
-  "publicReview.forArtistsGuide.approval.description":
-    "Your wallet signature should cover one exact plan. Check these items before signing:",
-  "publicReview.forArtistsGuide.approval.identity":
-    "The correct artwork and collection identity",
-  "publicReview.forArtistsGuide.approval.materials":
-    "Every file, script, and outside dependency the work needs",
-  "publicReview.forArtistsGuide.approval.supply":
-    "The maximum supply and every open way to mint",
-  "publicReview.forArtistsGuide.approval.sale":
-    "The sale type, price or auction rules, currency, and refund rules",
-  "publicReview.forArtistsGuide.approval.payments":
-    "Every payment recipient and their share",
-  "publicReview.forArtistsGuide.approval.roles":
-    "Who can still change, pause, or operate each part",
-  "publicReview.forArtistsGuide.approval.finality":
-    "Which later actions cannot be undone",
-  "publicReview.forArtistsGuide.changes.heading": "What can change?",
-  "publicReview.forArtistsGuide.changes.description":
-    "The answer depends on where the artwork is in its life. The simple model is:",
-  "publicReview.forArtistsGuide.changes.beforeLaunch.title": "Before launch",
-  "publicReview.forArtistsGuide.changes.beforeLaunch.description":
-    "Allowed settings can still be prepared or corrected. You can refuse to approve a plan that is wrong.",
-  "publicReview.forArtistsGuide.changes.afterLaunch.title":
-    "After minting starts",
-  "publicReview.forArtistsGuide.changes.afterLaunch.description":
-    "Minted history, payments, and signed actions remain recorded. Some settings or operating roles may still be active.",
-  "publicReview.forArtistsGuide.changes.afterFinality.title": "After finality",
-  "publicReview.forArtistsGuide.changes.afterFinality.description":
-    "The design is meant to close the remaining artwork-affecting changes and leave a record people can verify later.",
-  "publicReview.forArtistsGuide.changes.caveat":
-    "The exact boundary between editable and permanent is still under review. Check the technical evidence below before relying on any specific promise.",
-  "publicReview.forArtistsGuide.actors.heading": "Who else has power?",
-  "publicReview.forArtistsGuide.actors.description":
-    "Your approval matters, but Stream also depends on other people, roles, and services. Their powers should be visible before you sign.",
-  "publicReview.forArtistsGuide.actors.community.title":
-    "Community and trusted signer",
-  "publicReview.forArtistsGuide.actors.community.description":
-    "The community decides curation outside the contracts. A separate trusted wallet turns an accepted result into the signed permission Stream can check.",
-  "publicReview.forArtistsGuide.actors.operators.title":
-    "Stream operators and governance",
-  "publicReview.forArtistsGuide.actors.operators.description":
-    "These roles operate shared parts of the system and can make only the changes their contract permissions allow.",
-  "publicReview.forArtistsGuide.actors.guardian.title": "Guardian",
-  "publicReview.forArtistsGuide.actors.guardian.description":
-    "A guardian may stop a suspicious delayed action. That safety role should not be able to invent new artwork content for you.",
-  "publicReview.forArtistsGuide.actors.services.title": "Outside services",
-  "publicReview.forArtistsGuide.actors.services.description":
-    "Storage, websites, randomness providers, and marketplaces supply things the contracts cannot guarantee by themselves.",
-  "publicReview.forArtistsGuide.sales.heading": "Sales and payments",
-  "publicReview.forArtistsGuide.sales.description":
-    "A launch may use a fixed price or an auction. The plan should make the price, currency, custody, cancellation rules, recipients, and payment shares clear. Primary-sale money can be recorded as amounts each recipient withdraws.",
-  "publicReview.forArtistsGuide.sales.royalties":
-    "Stream can state the intended royalty, but it cannot force every outside marketplace to pay it.",
-  "publicReview.forArtistsGuide.permanence.heading":
-    "Making the work permanent",
-  "publicReview.forArtistsGuide.permanence.description":
-    "Finality is the last check before the artwork record is meant to stop changing. A digital fingerprint can prove that a file matches, but it does not keep that file online.",
-  "publicReview.forArtistsGuide.permanence.files":
-    "Confirm that every required file and dependency can still be retrieved.",
-  "publicReview.forArtistsGuide.permanence.fingerprints":
-    "Confirm that the recorded fingerprints match the intended materials.",
-  "publicReview.forArtistsGuide.permanence.supply":
-    "Confirm the final supply, mint history, payments, and any randomness results.",
-  "publicReview.forArtistsGuide.permanence.delay":
-    "Use the finality delay to find mistakes before the last change paths close.",
-  "publicReview.forArtistsGuide.readPage": "Read {page}",
-  "publicReview.forArtistsGuide.evidence.heading":
-    "Want the technical evidence?",
-  "publicReview.forArtistsGuide.evidence.description":
-    "The detailed review below explains how the current contracts try to provide this artist experience. It includes the proposed mechanisms, source links, open questions, and known limits.",
-  "publicReview.forArtistsGuide.evidence.action":
-    "Continue to the detailed contract review",
-  "publicReview.pages.overviewNarrative.title": "Overview",
-  "publicReview.pages.overviewNarrative.summary":
-    "How Stream is designed to help artists publish and sell digital art while keeping each artwork's identity, sale rules, and history clear over time.",
-  "publicReview.pages.artworkLifecycle.title": "Artwork Lifecycle",
-  "publicReview.pages.artworkLifecycle.summary":
-    "How an artwork moves from preparation through minting, preservation, and finality.",
-  "publicReview.pages.forArtists.title": "For Artists",
-  "publicReview.pages.forArtists.summary":
-    "What the artist chooses, confirms, must check, and cannot undo.",
-  "publicReview.pages.rolesAndTrust.title": "Roles and Trust",
-  "publicReview.pages.rolesAndTrust.summary":
-    "Every role that can act, what it can change, and where trust remains.",
-  "publicReview.pages.whoCanDoWhat.title": "Who Can Do What",
-  "publicReview.pages.whoCanDoWhat.summary":
-    "Who can act, what each person or contract can change, and how those powers end.",
-  "publicReview.pages.curationAndTdhAuthorization.title":
-    "Curation and TDH Authorization",
-  "publicReview.pages.curationAndTdhAuthorization.summary":
-    "How offchain curation and TDH decisions become signed onchain authorization.",
-  "publicReview.pages.tokensCollectionsAndMinting.title":
-    "Tokens, Collections, and Minting",
-  "publicReview.pages.tokensCollectionsAndMinting.summary":
-    "The shared ERC-721 system for collections, token issuance, supply, and mint controls.",
-  "publicReview.pages.fixedPriceSalesAndAuctions.title":
-    "Fixed-Price Sales and Auctions",
-  "publicReview.pages.fixedPriceSalesAndAuctions.summary":
-    "The sale mechanisms, bidding rules, settlement paths, and edge cases.",
-  "publicReview.pages.revenueSplitsAndRoyalties.title":
-    "Revenue, Splits, and Royalties",
-  "publicReview.pages.revenueSplitsAndRoyalties.summary":
-    "Where primary-sale funds and secondary royalties go, and how recipients are configured.",
-  "publicReview.pages.randomness.title": "Randomness",
-  "publicReview.pages.randomness.summary":
-    "How unpredictable values enter the protocol and which outcomes depend on them.",
-  "publicReview.pages.metadataScriptsAndDependencies.title":
-    "Metadata, Scripts, and Dependencies",
-  "publicReview.pages.metadataScriptsAndDependencies.summary":
-    "How token presentation, generative scripts, and external dependencies are stored and referenced.",
-  "publicReview.pages.freezingPreservationAndArtworkFinality.title":
-    "Freezing, Preservation, and Artwork Finality",
-  "publicReview.pages.freezingPreservationAndArtworkFinality.summary":
-    "The mechanisms that move artwork data from editable to permanently fixed.",
-  "publicReview.pages.governancePausingAndSuccessors.title":
-    "Governance, Pausing, and Successors",
-  "publicReview.pages.governancePausingAndSuccessors.summary":
-    "How governance acts, emergencies are handled, and successor contracts are recognized.",
-  "publicReview.pages.changesEmergenciesAndFutureContracts.title":
-    "Changes, Emergencies, and Future Contracts",
-  "publicReview.pages.changesEmergenciesAndFutureContracts.summary":
-    "How Stream announces changes, stops problems, replaces service contracts, and ends powers permanently.",
-  "publicReview.pages.securityTestingAndKnownLimitations.title":
-    "Security, Testing, and Known Limitations",
-  "publicReview.pages.securityTestingAndKnownLimitations.summary":
-    "Current engineering evidence, unresolved findings, constraints, and pre-audit caveats.",
-  "publicReview.pages.currentImplementationAndReadiness.title":
-    "Current Implementation and Readiness",
-  "publicReview.pages.currentImplementationAndReadiness.summary":
-    "The authoritative record of what is connected, implemented, proposed, tested, audited, and still required before release.",
-  "publicReview.pages.whereDevelopmentStands.title": "Where Development Stands",
-  "publicReview.pages.whereDevelopmentStands.summary":
-    "What worked in this review snapshot, what was being connected, and the evidence required before launch.",
-  "publicReview.pages.communityReview.title": "Community Review",
-  "publicReview.pages.communityReview.summary":
-    "How to examine the proposal, frame actionable feedback, and follow the review record.",
-  "publicReview.development.heading": "Development update",
-  "publicReview.development.checkedAt": "Checked {date}",
-  "publicReview.development.source": "Development source",
-  "publicReview.development.finishedRecently": "Finished recently",
-  "publicReview.development.workingOn": "Working on now",
-  "publicReview.development.beforeLaunch": "Still needed before launch",
-  "publicReview.development.evidenceSummary":
-    "Evidence checklist: {complete} complete, {pending} under review, and {missing} remaining. {blockers} recorded issues currently prevent release.",
-  "publicReview.development.openEvidence": "Open the supporting evidence",
-  "publicReview.development.openEvidenceLabel":
-    "Open supporting evidence for {item} (opens in a new tab)",
-  "publicReview.development.snapshotNote":
-    "The detailed review below is version {version}, pinned to contract source {commit}.",
-  "publicReview.development.reviewQuestionsHeading":
-    "Where your input would help",
-  "publicReview.development.reviewQuestionsDescription":
-    "Choose the question closest to your experience. Each one explains the issue in plain language and links to the relevant evidence.",
-  "publicReview.development.readQuestion": "Open this question",
-  "publicReview.development.readQuestionLabel": "Open this question: {title}",
-  "publicReview.development.sourceLabel":
-    "Development source (opens in a new tab)",
+  ...PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES,
+  ...PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES,
+  ...PUBLIC_REVIEW_COMMUNITY_MESSAGES,
+  ...PUBLIC_REVIEW_DEVELOPMENT_MESSAGES,
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",
