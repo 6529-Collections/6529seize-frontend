@@ -1,6 +1,6 @@
 "use client";
 
-import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useEffect } from "react";
 import { getAddress, isAddress } from "viem";
 import {
@@ -26,21 +26,21 @@ interface SeizeConnectProviderEffectsParams {
     readonly isConnected?: boolean | undefined;
     readonly status?: string | undefined;
   };
-  readonly addFlowOriginAddressRef: MutableRefObject<string | null>;
+  readonly addFlowOriginAddressRef: RefObject<string | null>;
   readonly agentLoginImpersonatedAddress: string | undefined;
   readonly clearConnectIntentHandoffTimeout: () => void;
   readonly clearConnectIntentWaitingForAppKit: () => void;
-  readonly debounceTimeoutRef: MutableRefObject<NodeJS.Timeout | null>;
+  readonly debounceTimeoutRef: RefObject<NodeJS.Timeout | null>;
   readonly impersonatedAddress: string | undefined;
   readonly isAddingConnectedAccount: boolean;
-  readonly isAddingConnectedAccountRef: MutableRefObject<boolean>;
+  readonly isAddingConnectedAccountRef: RefObject<boolean>;
   readonly isConnectIntentWaitingForAppKit: boolean;
   readonly isInitialized: boolean;
   readonly isSigningOutAll: boolean;
-  readonly isSigningOutAllRef: MutableRefObject<boolean>;
-  readonly isMountedRef: MutableRefObject<boolean>;
+  readonly isSigningOutAllRef: RefObject<boolean>;
+  readonly isMountedRef: RefObject<boolean>;
   readonly refreshStoredConnectedAccounts: () => void;
-  readonly retryConnectTimeoutRef: MutableRefObject<NodeJS.Timeout | null>;
+  readonly retryConnectTimeoutRef: RefObject<NodeJS.Timeout | null>;
   readonly setConnected: (address: string) => void;
   readonly setConnecting: () => void;
   readonly setDisconnected: () => void;
@@ -57,7 +57,7 @@ type AccountSnapshot = SeizeConnectProviderEffectsParams["account"];
 
 interface WalletStateSyncParams {
   readonly account: AccountSnapshot;
-  readonly addFlowOriginAddressRef: MutableRefObject<string | null>;
+  readonly addFlowOriginAddressRef: RefObject<string | null>;
   readonly agentLoginImpersonatedAddress: string | undefined;
   readonly impersonatedAddress: string | undefined;
   readonly isAddingConnectedAccount: boolean;
