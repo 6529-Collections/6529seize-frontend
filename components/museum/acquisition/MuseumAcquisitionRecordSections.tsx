@@ -62,25 +62,38 @@ export function AcquisitionDocumentSection({
   document,
   sourceCommit,
   workHrefs,
+  headingLevel = "h3",
+  sectionClassName = "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 first:tw-border-t-0 first:tw-pt-0",
 }: {
   readonly document: MuseumPublication["documents"][number];
   readonly sourceCommit: string;
   readonly workHrefs: Readonly<Record<string, string>>;
+  readonly headingLevel?: "h2" | "h3";
+  readonly sectionClassName?: string;
 }) {
   return (
     <section
-      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 first:tw-border-t-0 first:tw-pt-0"
+      className={sectionClassName}
       aria-labelledby={`acquisition-document-${document.id}`}
     >
       <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
         {t(DEFAULT_LOCALE, museumDocumentKindLabelKey(document.kind))}
       </p>
-      <h3
-        id={`acquisition-document-${document.id}`}
-        className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-      >
-        {document.title}
-      </h3>
+      {headingLevel === "h2" ? (
+        <h2
+          id={`acquisition-document-${document.id}`}
+          className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
+        >
+          {document.title}
+        </h2>
+      ) : (
+        <h3
+          id={`acquisition-document-${document.id}`}
+          className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
+        >
+          {document.title}
+        </h3>
+      )}
       {document.kind === "source_record" ? (
         <div className="tw-mt-6">
           <MuseumJsonDisclosure

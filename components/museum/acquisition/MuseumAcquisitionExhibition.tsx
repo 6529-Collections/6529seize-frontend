@@ -267,9 +267,11 @@ export function AcquisitionWorkFigure({
 
 function AcquisitionProgramMedia({
   media,
+  eager,
   exhibitionPresentation,
 }: {
   readonly media: MuseumProgramMedia;
+  readonly eager: boolean;
   readonly exhibitionPresentation: boolean;
 }) {
   return (
@@ -288,6 +290,7 @@ function AcquisitionProgramMedia({
       <MuseumProgramImage
         media={media}
         sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+        eager={eager}
         className={
           exhibitionPresentation
             ? "tw-block tw-h-auto tw-w-full tw-object-contain tw-transition-transform tw-duration-300 group-hover:tw-scale-[1.01] motion-reduce:tw-transition-none"
@@ -365,6 +368,7 @@ function AcquisitionWorkMedia({
     return (
       <AcquisitionProgramMedia
         media={work.media}
+        eager={eager}
         exhibitionPresentation={exhibitionPresentation}
       />
     );

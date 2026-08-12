@@ -97,6 +97,7 @@ function acquisition(
   options: {
     readonly programId?: string | null;
     readonly sourceDocumentIds?: readonly string[];
+    readonly workIds?: readonly string[];
   } = {}
 ): MuseumAcquisitionViewModel {
   return {
@@ -122,7 +123,7 @@ function acquisition(
     artistIds: [],
     organizationIds: [],
     projectIds: [],
-    workIds: [workId],
+    workIds: options.workIds ?? [workId],
     accessionLotIds: [],
     sourceDocumentIds: options.sourceDocumentIds ?? [],
     sourcePaths: [],
@@ -161,6 +162,25 @@ function programMedia(sourceUrl: string, altText: string): MuseumProgramMedia {
     sourceHeight: 1600,
     altText,
     altTextStatus: "governed_artwork_description",
+    variants: [
+      {
+        url: sourceUrl,
+        width: 640,
+        height: 427,
+        mimeType: "image/webp",
+        sha256: null,
+        byteSize: 120_000,
+      },
+    ],
+  };
+}
+
+function programMediaWithoutDerivatives(
+  sourceUrl: string,
+  altText: string
+): MuseumProgramMedia {
+  return {
+    ...programMedia(sourceUrl, altText),
     variants: [],
   };
 }
@@ -373,6 +393,12 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       screen.getByRole("heading", { name: "Curatorial reading" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Works in this acquisition" })
+    ).toHaveAttribute("href", "#acquisition-works");
+    expect(
+      screen.getByRole("link", { name: "Curatorial reading" })
+    ).toHaveAttribute("href", "#acquisition-curatorial-reading");
     const record = document.querySelector("details#acquisition-record");
     expect(record).not.toBeNull();
     expect(record).not.toHaveAttribute("open");
@@ -385,6 +411,28 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(bodyText.indexOf("Curatorial reading")).toBeLessThan(
       bodyText.indexOf("Accession record and sources")
     );
+  });
+
+  it("omits the works anchor when the acquisition has no work records", () => {
+    render(
+      <MuseumAcquisitionRecordPage
+        acquisition={acquisition(
+          "acquisition-empty",
+          "empty-acquisition",
+          "Empty acquisition",
+          "selected_through_acquisition_program_acquisition_pending",
+          "unused-work-id",
+          { workIds: [] }
+        )}
+        publication={publication([], [])}
+        view={null}
+        sourceCommit={"a".repeat(40)}
+      />
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "Works in this acquisition" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders Conflict at Its Edges as a visual Wave-selected acquisition", () => {
@@ -444,6 +492,54 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(document.body.textContent).not.toContain(
       "selected_by_museum_wave_acquisition_review_in_progress"
     );
+  });
+
+  it("fails closed when selected program media has no reviewed derivatives", () => {
+    const workId = "6529NM-W-0008";
+    const media = programMediaWithoutDerivatives(
+      "https://museum.test/keys-and-gates/0008.webp",
+      "A photographic work from the Keys and Gates program."
+    );
+
+    render(
+      <MuseumAcquisitionRecordPage
+        acquisition={acquisition(
+          "acquisition-keys-and-gates",
+          "keys-and-gates",
+          "Keys and Gates",
+          "selected_through_acquisition_program_acquisition_pending",
+          workId,
+          { programId: "program-keys" }
+        )}
+        publication={publication(
+          [artist("artist-anni", "Anni Artist")],
+          [
+            work(
+              workId,
+              "A Door Opens",
+              "artist-anni",
+              "selected_through_acquisition_program_acquisition_pending",
+              metadata(
+                "media-keys-and-gates",
+                workId,
+                "© participating artists / Keys and Gates.",
+                media.altText
+              ),
+              { programIds: ["program-keys"] }
+            ),
+          ]
+        )}
+        view={museumView(workId, media)}
+        sourceCommit={"a".repeat(40)}
+      />
+    );
+
+    expect(
+      screen.queryByRole("img", { name: media.altText })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("No public image is available for this record.")
+    ).toBeInTheDocument();
   });
 
   it("keeps Casey's completed accession on the established record layout", () => {

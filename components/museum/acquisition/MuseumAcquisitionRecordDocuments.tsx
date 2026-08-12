@@ -1,5 +1,4 @@
 import { MuseumEntityContext } from "../MuseumEntityContext";
-import { MuseumJsonDisclosure, MuseumMarkdown } from "../MuseumMarkdown";
 import {
   AcquisitionDocumentSection,
   AcquisitionRecordSummary,
@@ -11,7 +10,6 @@ import type {
   MuseumEntityContextModel,
 } from "@/lib/museum/publication/ia";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
-import { museumDocumentKindLabelKey } from "@/lib/museum/publication/documentLabels";
 
 type AcquisitionDocument = MuseumPublication["documents"][number];
 type AcquisitionProgram = Parameters<
@@ -135,39 +133,14 @@ export function MuseumAcquisitionRecordDocuments({
         />
       </div>
       {acquisitionDocuments.map((document) => (
-        <section
+        <AcquisitionDocumentSection
           key={document.id}
-          className="tw-mt-14 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
-          aria-labelledby={`acquisition-document-${document.id}`}
-        >
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            {t(DEFAULT_LOCALE, museumDocumentKindLabelKey(document.kind))}
-          </p>
-          <h2
-            id={`acquisition-document-${document.id}`}
-            className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
-          >
-            {document.title}
-          </h2>
-          {document.kind === "source_record" ? (
-            <div className="tw-mt-6">
-              <MuseumJsonDisclosure
-                label={document.title}
-                sourceJson={document.markdown}
-              />
-            </div>
-          ) : (
-            <MuseumMarkdown
-              className="tw-mt-6"
-              embeddedDocument
-              sourceCommit={sourceCommit}
-              sourcePath={document.sourcePath}
-              workHrefs={workHrefs}
-            >
-              {document.markdown}
-            </MuseumMarkdown>
-          )}
-        </section>
+          document={document}
+          sourceCommit={sourceCommit}
+          workHrefs={workHrefs}
+          headingLevel="h2"
+          sectionClassName="tw-mt-14 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        />
       ))}
     </>
   );

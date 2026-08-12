@@ -13,11 +13,13 @@ export function MuseumAcquisitionRecordHeader({
   context,
   artFirst,
   curatorialDocumentCount,
+  workCount,
 }: {
   readonly acquisition: MuseumAcquisitionViewModel;
   readonly context: MuseumEntityContextModel;
   readonly artFirst: boolean;
   readonly curatorialDocumentCount: number;
+  readonly workCount: number;
 }) {
   return (
     <>
@@ -65,15 +67,17 @@ export function MuseumAcquisitionRecordHeader({
           aria-label={t(DEFAULT_LOCALE, "museum.network.acquisitions.title")}
           className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-border-y tw-border-solid tw-border-iron-800 tw-py-3 tw-text-sm"
         >
-          <a
-            href="#acquisition-works-title"
-            className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
-          </a>
+          {workCount === 0 ? null : (
+            <a
+              href="#acquisition-works"
+              className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
+            </a>
+          )}
           {curatorialDocumentCount === 0 ? null : (
             <a
-              href="#acquisition-curatorial-reading-title"
+              href="#acquisition-curatorial-reading"
               className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
               {t(

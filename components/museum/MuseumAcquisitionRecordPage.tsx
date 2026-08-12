@@ -74,14 +74,17 @@ function selectedProgramMediaForSourceIds(
           ? []
           : [selectedWork.outcomePath]),
       ];
+      const sourceMatches = selectedValues.some(
+        (value) =>
+          exactIds.has(value.trim()) ||
+          normalizedIds.has(sourceIdentifier(value))
+      );
       if (
-        selectedValues.some(
-          (value) =>
-            exactIds.has(value.trim()) ||
-            normalizedIds.has(sourceIdentifier(value))
-        )
+        sourceMatches &&
+        selectedWork.media !== null &&
+        selectedWork.media.variants.length > 0
       ) {
-        return selectedWork.media ?? undefined;
+        return selectedWork.media;
       }
     }
   }
@@ -277,6 +280,7 @@ export function MuseumAcquisitionRecordPage({
         context={context}
         artFirst={artFirst}
         curatorialDocumentCount={curatorialDocuments.length}
+        workCount={workCards.length}
       />
       <MuseumAcquisitionRecordWorkSection
         workCards={workCards}
