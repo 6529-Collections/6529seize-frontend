@@ -48,8 +48,9 @@
 
 - Reviewed source Candidate B: `2da150eacf951d977f6c430b1e21c118687a0c32`
 - Active publication catalog Candidate C: `459cdfd41145f0ea55ec5687508222de6b673252`
-- Canonical Museum merge: pending
-- Frontend PR: #3716; exact review follow-up head pending signed commit
+- Canonical Museum merge: `43596a5185efa72efad30be228953ebd6296b66d`
+- Frontend PR: #3716; reviewed runtime head before this release-ledger update:
+  `2fd87afcebce235fc805d996230161a7aed3bd15`
 - Frontend merge: pending
 - Staging deployment and E2E: pending
 - Production deployment and E2E: pending
