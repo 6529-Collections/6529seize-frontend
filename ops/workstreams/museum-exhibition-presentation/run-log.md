@@ -43,6 +43,10 @@
   surfaces, 57 routes, 8 support files, 48 components, and 6 E2E specs.
   Changed-file lint, changed-file typecheck across 1,535 files, and whitespace
   checks passed.
+- Hosted exact-head App CI run 31551730393 failed at the shared Knip gate only:
+  `MuseumReviewedProgramMediaMatch` did not need to be exported. The interface
+  is now module-private. Downstream App jobs were cancelled by that shared
+  preflight and did not report independent product failures.
 
 ## Release identities
 

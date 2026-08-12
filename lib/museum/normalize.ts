@@ -727,7 +727,7 @@ export function findReviewedProgramMedia(
   return findReviewedProgramMediaMatch(view, sourceRecordIds)?.media ?? null;
 }
 
-export interface MuseumReviewedProgramMediaMatch {
+interface MuseumReviewedProgramMediaMatch {
   readonly media: MuseumProgramMedia;
   /** The exact source record ID that admitted the reviewed program media. */
   readonly sourceRecordId: string;
