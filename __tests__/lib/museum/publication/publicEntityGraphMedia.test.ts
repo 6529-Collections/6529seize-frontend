@@ -675,7 +675,11 @@ describe("Wave publication receipt joins", () => {
           media_role: "historical_wave_proposal_presentation",
           publication_boundary: "historical_wave_proposal_context",
           source_locator: {
-            uri: "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/4526b19e-76df-493b-86ac-105782c061ea/magnum-75-104.jpg",
+            uri: "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/palmyra/magnum-75-104.jpg",
+            repository_path: null,
+          },
+          token_source_locator: {
+            uri: "https://arweave.net/oz0t0DJj2BgFCux1WXskxisxvzV2KA0ukqaVbQ1Ckco",
             repository_path: null,
           },
           media_type: "image/jpeg",
@@ -697,6 +701,18 @@ describe("Wave publication receipt joins", () => {
             algorithm: "sha256",
             digest: `sha256:${"a".repeat(64)}`,
             verified_at: "2026-08-08T10:15:02.0167151Z",
+          },
+          token_source_fixity: {
+            status: "verified",
+            algorithm: "sha256",
+            digest: `sha256:${"a".repeat(64)}`,
+            verified_at: "2026-08-08T10:15:02.0167151Z",
+          },
+          active_display_source_amendment: {
+            amendment_id: "6529NM-MEDIA-CONT-AMD-2026-08-12-001",
+            path: "records/proposed-gifts/6529NM-PG-2026-001/public/scholarship/machine/media-source-continuity-amendment.json",
+            status: "active_downstream_accession_display_source",
+            observed_at: "2026-08-12T07:37:56.984246Z",
           },
           subject_entity_id: workId,
           allowed_ui_affordances: [
@@ -775,11 +791,13 @@ describe("Wave publication receipt joins", () => {
           sourcePath: `records/entities/${mediaId}.json`,
           mediaRecordPath: `records/entities/${mediaId}.json`,
         }),
+        mediaUrl:
+          "https://arweave.net/oz0t0DJj2BgFCux1WXskxisxvzV2KA0ukqaVbQ1Ckco",
       }),
     ]);
   });
 
-  it("keeps an Arweave token locator as evidence rather than presentation media", () => {
+  it("rejects a historical Wave locator without its accession token-source binding", () => {
     const workId = "6529NM-W-0028";
     const mediaId = "6529NM-MED-0044";
     const acquisitionId = "6529NM-CA-2026-003";
@@ -812,7 +830,7 @@ describe("Wave publication receipt joins", () => {
             media_role: "historical_wave_proposal_presentation",
             publication_boundary: "historical_wave_proposal_context",
             source_locator: {
-              uri: "https://arweave.net/VE0zO2N1zVTsbEUHdUFazEgvuMbmVOi6OfaWfQOWkaM",
+              uri: "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/palmyra/magnum-75-104.jpg",
               repository_path: null,
             },
             media_type: "image/jpeg",
@@ -893,7 +911,7 @@ describe("Wave publication receipt joins", () => {
     } satisfies MuseumPublicEntityGraph;
 
     expect(() => projectMediaRelations(entities, graph, new Map())).toThrow(
-      "public_entity_graph_media_proposal_source_locator"
+      "public_entity_graph_media_token_source_locator"
     );
   });
 
