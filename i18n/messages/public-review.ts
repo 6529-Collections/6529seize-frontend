@@ -6,6 +6,7 @@ import { PUBLIC_REVIEW_DEVELOPMENT_MESSAGES } from "@/i18n/messages/public-revie
 import { PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES } from "@/i18n/messages/public-review-tokens-minting";
 import { PUBLIC_REVIEW_GOVERNANCE_MESSAGES } from "@/i18n/messages/public-review-governance";
 import { PUBLIC_REVIEW_SALES_AND_AUCTIONS_MESSAGES } from "@/i18n/messages/public-review-sales-and-auctions";
+import { PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES } from "@/i18n/messages/public-review-freezing-finality";
 
 export const PUBLIC_REVIEW_MESSAGES = {
   "navigation.nfts.theMemes": "The Memes",
@@ -175,6 +176,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.overviewGuide.startPage": "Start with {page}",
   ...PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES,
   ...PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES,
+  ...PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES,
   ...PUBLIC_REVIEW_COMMUNITY_MESSAGES,
   ...PUBLIC_REVIEW_CURATION_TDH_MESSAGES,
   ...PUBLIC_REVIEW_DEVELOPMENT_MESSAGES,

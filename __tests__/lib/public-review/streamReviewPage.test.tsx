@@ -125,6 +125,11 @@ jest.mock("@/lib/public-review/streamReviewSalesAndAuctionsPage", () => ({
     "# Fixed-price sales and auctions\n\n## The sale flow in one minute\n\nCurrent sales copy.",
 }));
 
+jest.mock("@/lib/public-review/streamReviewFreezingFinalityPage", () => ({
+  getCurrentFreezingFinalityEditorialMarkdown: () =>
+    "# Freezing, preservation, and artwork finality\n\n## The answer in one minute\n\nFinalizing supply by itself does not freeze the Core.\n\n## Recovery after finality would change the promise\n\nADR 0020 is proposed, not accepted or implemented.",
+}));
+
 jest.mock("@/lib/public-review/editorialContent", () => ({
   loadStreamEditorialContent: jest.fn(async (page: { readonly id: string }) => {
     if (page.id === "security-testing-and-known-limitations") {
@@ -213,6 +218,9 @@ Old failures copy.
 8. Does the final launch path remove ambiguity between the legacy and manager
 mint lanes?`;
     }
+    if (page.id === "freezing-preservation-and-artwork-finality") {
+      return '# Freezing, preservation, and artwork finality\n\n“Finished” can describe final supply, frozen Core configuration, a preserved set of files, or terminal artwork state.\n\n## Final supply is a supply promise\n\nOld final supply copy.\n\n## Questions for reviewers\n\n10. Should any byte-changing recovery exist after finality, and what evidence would distinguish recovery from replacement?';
+    }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
   PublicReviewEditorialContentError: class extends Error {},
@@ -249,6 +257,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "curation-and-tdh-authorization",
         sectionValues: ["old-curation-section"],
+      },
+      {
+        value: "freezing-preservation-and-artwork-finality",
+        sectionValues: ["old-freezing-section"],
       },
       {
         value: "for-artists",
@@ -1287,6 +1299,63 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
       "publicReview.pages.fixedPriceSalesAndAuctions.summary"
+    );
+  });
+
+  it("shows plain-language copy on the current Freezing and Finality page", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "freezing-preservation-and-artwork-finality",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent("The answer in one minute");
+    expect(editorialCopy).toHaveTextContent(
+      "Finalizing supply by itself does not freeze the Core."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "ADR 0020 is proposed, not accepted or implemented."
+    );
+    expect(editorialCopy).not.toHaveTextContent("Old final supply copy.");
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.freezingPreservationAndArtworkFinality.currentSummary"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "2"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("2");
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("2");
+  });
+
+  it("keeps immutable Freezing and Finality routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          version: "2026-08-01.1",
+          page: "freezing-preservation-and-artwork-finality",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent(
+      "“Finished” can describe final supply, frozen Core configuration"
+    );
+    expect(editorialCopy).toHaveTextContent("Old final supply copy.");
+    expect(editorialCopy).not.toHaveTextContent("The answer in one minute");
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.freezingPreservationAndArtworkFinality.summary"
     );
   });
 

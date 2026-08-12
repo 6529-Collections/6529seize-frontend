@@ -43,6 +43,7 @@ import { getCurrentDevelopmentEditorialMarkdown } from "@/lib/public-review/stre
 import { getCurrentTokensMintingEditorialMarkdown } from "@/lib/public-review/streamReviewTokensMintingPage";
 import { getCurrentGovernanceEditorialMarkdown } from "@/lib/public-review/streamReviewGovernancePage";
 import { getCurrentSalesAndAuctionsEditorialMarkdown } from "@/lib/public-review/streamReviewSalesAndAuctionsPage";
+import { getCurrentFreezingFinalityEditorialMarkdown } from "@/lib/public-review/streamReviewFreezingFinalityPage";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
@@ -117,6 +118,7 @@ type CurrentStreamReviewPages = {
   readonly developmentStatus: boolean;
   readonly forArtists: boolean;
   readonly governance: boolean;
+  readonly freezingFinality: boolean;
   readonly overview: boolean;
   readonly roles: boolean;
   readonly tokensAndMinting: boolean;
@@ -144,6 +146,8 @@ function getCurrentStreamReviewPages(
     forArtists: isCurrent && pageId === "for-artists",
     governance:
       isCurrent && pageId === "governance-pausing-and-successors",
+    freezingFinality:
+      isCurrent && pageId === "freezing-preservation-and-artwork-finality",
     overview: isCurrent && pageId === "overview",
     roles: isCurrent && pageId === "roles-and-trust",
     tokensAndMinting: isCurrent && pageId === "tokens-collections-and-minting",
@@ -165,6 +169,12 @@ function getDisplayedEditorialMarkdown({
 }): string {
   if (currentPages.artworkLifecycle) {
     return getCurrentArtworkLifecycleEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
+  if (currentPages.freezingFinality) {
+    return getCurrentFreezingFinalityEditorialMarkdown({
       editorialMarkdown,
       source,
     });
@@ -236,6 +246,13 @@ function getDisplayedPage(
     return {
       ...page,
       summaryKey: "publicReview.pages.fixedPriceSalesAndAuctions.currentSummary",
+    };
+  }
+  if (currentPages.freezingFinality) {
+    return {
+      ...page,
+      summaryKey:
+        "publicReview.pages.freezingPreservationAndArtworkFinality.currentSummary",
     };
   }
   return page;
