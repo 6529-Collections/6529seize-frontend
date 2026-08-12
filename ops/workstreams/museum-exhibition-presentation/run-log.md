@@ -108,3 +108,10 @@
 - Visitor status copy now follows the accession record exactly: "Selected by
   Museum Wave; accession processing in progress." It does not describe a
   second acquisition review after the Wave's selection.
+- Exact-head App CI run 31563371788 stopped at the help-index publication
+  consistency check: the canonical production help corpus carried the revised
+  accession status, while `public/help-index.json` still carried the prior
+  wording. Every parallel browser/build job was subsequently cancelled by the
+  matrix fail-fast policy. Regenerating the published help index produces one
+  expected line change and restores the source-to-publication invariant; it
+  does not alter the Museum runtime implementation or accession records.
