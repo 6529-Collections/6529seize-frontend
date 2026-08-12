@@ -779,6 +779,124 @@ describe("Wave publication receipt joins", () => {
     ]);
   });
 
+  it("keeps an Arweave token locator as evidence rather than presentation media", () => {
+    const workId = "6529NM-W-0028";
+    const mediaId = "6529NM-MED-0044";
+    const acquisitionId = "6529NM-CA-2026-003";
+    const observationId = "6529NM-WAVE-PUB-OBS-2026-08-08-001";
+    const entities: MuseumPublicEntityRecord[] = [
+      {
+        id: workId,
+        entityType: "WORK",
+        label: "Palmyra, Syria",
+        slug: "palmyra-syria",
+        canonicalRoute: `/museum/network/works/${workId}`,
+        pageExposure: "canonical_page",
+        entityStatus: "published",
+        sourcePath: `records/entities/${workId}.json`,
+        sourceRecordIds: [workId],
+        profile: {},
+      },
+      {
+        id: mediaId,
+        entityType: "MEDIA_REFERENCE",
+        label: "Palmyra token source",
+        slug: null,
+        canonicalRoute: null,
+        pageExposure: "relational_only",
+        entityStatus: "published",
+        sourcePath: `records/entities/${mediaId}.json`,
+        sourceRecordIds: [acquisitionId, PROPOSAL_ID, observationId],
+        profile: {
+          media: {
+            media_role: "historical_wave_proposal_presentation",
+            publication_boundary: "historical_wave_proposal_context",
+            source_locator: {
+              uri: "https://arweave.net/VE0zO2N1zVTsbEUHdUFazEgvuMbmVOi6OfaWfQOWkaM",
+              repository_path: null,
+            },
+            media_type: "image/jpeg",
+            visual: true,
+            width: 5964,
+            height: 4768,
+            source_byte_size: 16_871_807,
+            publication_part_number: 6,
+            accessibility_text: "A soldier seated among rubble at Palmyra.",
+            credit: "Lorenzo Meloni, Palmyra, Syria, 2016.",
+            rights: { status: "restricted", notes: "All Rights Reserved." },
+            source_observation: { status: "mutable_external" },
+            fixity: {
+              status: "verified",
+              algorithm: "sha256",
+              digest: `sha256:${"a".repeat(64)}`,
+              verified_at: "2026-08-08T10:15:02.0167151Z",
+            },
+            subject_entity_id: workId,
+            allowed_ui_affordances: ["view", "alt_text"],
+            publication_context_entity_ids: [acquisitionId],
+            wave_proposal_context: {
+              wave_id: "5f207393-5418-4a75-8738-e40edb44a94d",
+              drop_id: "002bfa4f-8416-48bf-b35e-38f354e9a9f0",
+              publication_record_id: PROPOSAL_ID,
+              observation_record_id: observationId,
+              publication_status: "historical_public_proposal_context",
+            },
+          },
+        },
+      },
+    ];
+    const relations: MuseumPublicRelationRecord[] = [
+      {
+        id: "6529NM-REL-0001",
+        relationType: "ENTITY_HAS_MEDIA",
+        sourceEntityId: workId,
+        targetEntityId: mediaId,
+        assertionStatus: "asserted",
+        qualifier: {},
+        sourceRecordIds: [workId],
+        sourcePath: "records/relations/6529NM-REL-0001.json",
+      },
+      {
+        id: "6529NM-REL-0002",
+        relationType: "CURATED_ACQUISITION_BRINGS_TOGETHER_WORK",
+        sourceEntityId: acquisitionId,
+        targetEntityId: workId,
+        assertionStatus: "asserted",
+        qualifier: { display_order: 5 },
+        sourceRecordIds: [acquisitionId],
+        sourcePath: "records/relations/6529NM-REL-0002.json",
+      },
+    ];
+    const graph = {
+      sourceCommit: "a".repeat(40),
+      entityPaths: [],
+      relationPaths: [],
+      entities,
+      relations,
+      identityInventory: {
+        sourcePath: "schemas/public-entity-identity-inventory.json",
+        inventoryVersion: "1.5.0",
+        curatedAcquisitionIds: [acquisitionId],
+        workAliases: [],
+        acquisitionAliases: [],
+        programAliases: [],
+        routeAliases: [],
+        typedReferenceRegistry: [],
+      },
+      relationIdentityInventory: {
+        sourcePath: "schemas/public-relation-identity-inventory.json",
+        schemaPath: "schemas/public-relation-identity-inventory.schema.json",
+        inventoryVersion: "1.3.0",
+        activeRelationIds: relations.map((relation) => relation.id),
+        retiredRelationIds: [],
+      },
+    } satisfies MuseumPublicEntityGraph;
+
+    expect(() => projectMediaRelations(entities, graph, new Map())).toThrow(
+      "public_entity_graph_media_proposal_source_locator"
+    );
+  });
+
   it("rejects Wave metadata and context when sourceRecordIds miss the publication record", () => {
     const workId = "6529NM-W-0024";
     const mediaId = "6529NM-MED-0003";

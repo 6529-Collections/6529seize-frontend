@@ -137,3 +137,9 @@
   decoded art. Evidence capture now enters at the works heading and proves the
   first image has decoded pixels before capture. This changes the qualification
   evidence only, not visitor runtime behavior.
+- Final review tightened the presentation-media trust boundary so an Arweave
+  token/source locator is evidence only and cannot enter the display projection;
+  only the reviewed Wave CloudFront image form can be emitted as presentation
+  media. The help corpus now describes the reviewed Keys and Gates surrogates
+  and the exact Conflict accession-processing status, removing the obsolete
+  text-only and acquisition-review statements.

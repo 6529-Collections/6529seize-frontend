@@ -7,7 +7,6 @@ import {
   buildMuseumSignedWaveStormDropUrl,
   isMuseumExternalProposalMediaUrl,
   isMuseumExternalProposalPresentationMedia,
-  isMuseumExternalProposalTokenSourceUrl,
   type MuseumAcquisitionMethod,
   type MuseumExternalProposalPresentationAffordance,
   type MuseumExternalProposalPresentationMedia,
@@ -442,8 +441,7 @@ function assertProposalContext(
 function assertProposalSourceLocator(input: MuseumMediaProjectionInput): void {
   if (
     input.uri === null ||
-    (!isMuseumExternalProposalTokenSourceUrl(input.uri) &&
-      !isMuseumExternalProposalMediaUrl(input.uri))
+    !isMuseumExternalProposalMediaUrl(input.uri)
   ) {
     throw new Error("public_entity_graph_media_proposal_source_locator");
   }
