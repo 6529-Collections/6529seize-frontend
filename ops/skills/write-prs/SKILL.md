@@ -104,12 +104,12 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `6529 run build` for build-time, generated API model, Next.js config, route, or deployment-sensitive changes.
 - Use `6529 run test:e2e` for local Playwright E2E when relevant; this repo's default Playwright config starts the app locally on port `3001`.
 - For staging or production validation, inspect the repo's current deploy and E2E configuration before running. If no target-specific E2E command exists, run the strongest available smoke checks and report the gap clearly.
-- For frontend staging or production work, hand off the exact target SHA, canonical workflow/run, deployed version, and automatic E2E result. Use `ops/docs/developer/frontend-deployment.md` for the current process.
+- For merge, staging, production, or release-lane work, include a deployment-bus handoff when relevant: release set, candidate SHA, included PRs, backend dependencies, validation owners, and held or blocked changes. Use `ops/docs/developer/simple-release-bus-v2.md` for the current process.
 
 ## Merge And Deploy Gates
 
 - Never merge, deploy staging, or deploy production unless the user explicitly asked for that mode or the repo's standing instructions require it.
-- Use `ops/skills/deploy-6529/SKILL.md` for frontend staging, production, automatic E2E validation, and deployment recovery.
+- Use `ops/skills/deploy-6529/SKILL.md` for actual merge execution, staging deployment, production deployment, backend deployment coordination, cross-agent coordination, and deployed-environment E2E validation.
 - Before merging, ensure the PR is agent-happy, bot-happy, required checks are passing or explained, and required approvals are present.
 - Order the final gates correctly: bring the branch up to date with `main` first, then seek the maintainer approval. The `main` ruleset requires approval of the most recent push, so a branch update resets the approval requirement to unmet and prior approvals no longer satisfy it. The approval must come from the `6529seize-maintainers` team and be submitted on behalf of that team, or the ruleset rejects it.
 - Before staging deploy, confirm the merge commit/ref, use the repo-approved staging deployment path, then validate the deployed target. In this repo, the documented fresh-clone staging refresh path is `./bin/6529 staging`.

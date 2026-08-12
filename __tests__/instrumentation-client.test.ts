@@ -6,16 +6,12 @@ import {
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
-const mockThirdPartyErrorFilterIntegration = jest.fn(() => ({
-  name: "third-party-errors-filter",
-}));
 const mockCaptureRouterTransitionStart = jest.fn();
 
 jest.mock("@sentry/nextjs", () => ({
   __esModule: true,
   init: mockInit,
   replayIntegration: mockReplayIntegration,
-  thirdPartyErrorFilterIntegration: mockThirdPartyErrorFilterIntegration,
   captureRouterTransitionStart: mockCaptureRouterTransitionStart,
 }));
 
@@ -1042,25 +1038,7 @@ describe("instrumentation-client", () => {
     mockInit.mockReset();
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
-    mockThirdPartyErrorFilterIntegration.mockReset();
-    mockThirdPartyErrorFilterIntegration.mockImplementation(() => ({
-      name: "third-party-errors-filter",
-    }));
     mockCaptureRouterTransitionStart.mockReset();
-  });
-
-  it("configures filtering for exclusively third-party frames", () => {
-    const config = loadSentryConfig();
-    const defaultIntegrations = [{ name: "default" }];
-
-    expect(config.integrations(defaultIntegrations)).toEqual([
-      ...defaultIntegrations,
-      { name: "third-party-errors-filter" },
-    ]);
-    expect(mockThirdPartyErrorFilterIntegration).toHaveBeenCalledWith({
-      filterKeys: ["6529-frontend"],
-      behaviour: "drop-error-if-exclusively-contains-third-party-frames",
-    });
   });
 
   it.each([

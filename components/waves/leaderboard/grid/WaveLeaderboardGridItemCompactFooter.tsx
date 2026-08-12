@@ -19,6 +19,7 @@ interface WaveLeaderboardGridItemCompactFooterProps {
   readonly drop: ExtendedDrop;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
+  readonly emphasizeCurrent?: boolean | undefined;
   readonly isVotingClosed: boolean;
   readonly canShowVotingAction: boolean;
   readonly onVoteButtonClick: () => void;
@@ -74,6 +75,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
   drop,
   winningThreshold,
   winningThresholdMinDurationMs,
+  emphasizeCurrent = false,
   isVotingClosed,
   canShowVotingAction,
   onVoteButtonClick,
@@ -140,6 +142,7 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
             winningThreshold={winningThreshold}
             winningThresholdMinDurationMs={winningThresholdMinDurationMs}
             isVotingClosed={isVotingClosed}
+            emphasizeCurrent={emphasizeCurrent}
           />
         </div>
         <div
@@ -169,21 +172,23 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
       </div>
       <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
         {hasUserVoted && (
-          <span className="tw-font-mono tw-text-[11px] tw-text-iron-500">
+          <span className="tw-text-[11px] tw-text-iron-500">
             {t(locale, "waves.leaderboard.grid.you")}:{" "}
-            <span className={voteStyle}>
+            <span className={`tw-font-mono ${voteStyle}`}>
               {isNegativeVote && "-"}
-              {formatInteger(locale, Math.abs(userVote))} {votingCreditLabel}
+              {formatInteger(locale, Math.abs(userVote))}
+            </span>{" "}
+            <span className={voteStyle}>
+              {votingCreditLabel}
             </span>
           </span>
         )}
         {canShowVotingAction && (
-          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
+          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-none tw-self-center tw-items-center tw-justify-end">
             <VotingModalButton
               drop={drop}
               onClick={onVoteButtonClick}
-              variant="subtle"
-              className="tw-box-border tw-min-h-11 tw-min-w-0 tw-max-w-full"
+              className="tw-box-border tw-min-w-0 tw-max-w-full tw-self-center"
             />
           </div>
         )}

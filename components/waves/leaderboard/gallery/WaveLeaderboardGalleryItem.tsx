@@ -311,8 +311,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 <VotingModalButton
                   drop={drop}
                   onClick={handleVoteButtonClick}
-                  variant={artFocused ? "subtle" : "default"}
-                  className="tw-box-border tw-h-8 tw-min-w-0 tw-max-w-full"
+                  className="tw-box-border tw-min-w-0 tw-max-w-full"
                 >
                   {voteButtonLabel}
                 </VotingModalButton>

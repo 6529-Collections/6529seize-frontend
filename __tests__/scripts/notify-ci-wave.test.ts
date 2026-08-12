@@ -50,7 +50,7 @@ async function runNotifier(
         CI_PIPELINES_TITLE: "Deploy complete",
         CI_PIPELINES_SERVICE: "web",
         GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
-        GITHUB_WORKFLOW: "Web Deploy - PROD",
+        GITHUB_WORKFLOW: "Release Bus - Deploy Frontend Production",
         GITHUB_RUN_ID: "123",
         GITHUB_RUN_NUMBER: "45",
         GITHUB_SHA: "a".repeat(40),

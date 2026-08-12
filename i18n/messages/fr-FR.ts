@@ -432,6 +432,81 @@ export const FR_FR_MESSAGES = {
   "waves.create.actions.next": "Suivant",
   "waves.create.actions.previous": "Précédent",
   "waves.create.actions.save": "Enregistrer",
+  "waves.create.advanced.title": "Paramètres avancés",
+  "waves.create.advanced.customized": "Personnalisé",
+  "waves.create.advanced.needsAttention": "À vérifier",
+  "waves.create.advanced.errorSummary":
+    "Vérifiez les paramètres signalés avant de continuer.",
+  "waves.create.overview.picture": "Image de la Wave",
+  "waves.create.overview.displaySettings": "Paramètres d’affichage",
+  "waves.create.groups.title": "Accès",
+  "waves.create.groups.description":
+    "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
+  "waves.create.groups.viewGroupName": "Qui peut voir",
+  "waves.create.groups.adminGroupName": "Administration",
+  "waves.create.dates.title": "Calendrier",
+  "waves.create.dates.description":
+    "Vérifiez le début de la Wave, du vote et des annonces des gagnants.",
+  "waves.create.dates.approve.noEndSummary":
+    "Débute le {start}. Aucune date de fin.",
+  "waves.create.dates.approve.endSummary":
+    "Débute le {start}. Se termine le {end}.",
+  "waves.create.dates.approve.endInfoLabel": "À propos de la fin de la Wave",
+  "waves.create.dates.rank.ongoingSummary":
+    "Les soumissions débutent le {submission}. Le vote débute le {voting}. Le classement reste ouvert.",
+  "waves.create.dates.rank.scheduledSummary":
+    "Les soumissions débutent le {submission}. Le vote débute le {voting}. Premiers gagnants : {announcement}.",
+  "waves.create.drops.maxSimultaneousSubmissions.label":
+    "Nombre maximal de soumissions simultanées",
+  "waves.create.drops.maxSimultaneousSubmissions.description":
+    "Nombre maximal de soumissions simultanées par participant. Facultatif. Illimité si ce champ est vide.",
+  "waves.proposalCard.contextLabel": "Proposition",
+  "waves.proposalCard.readFull": "Lire en entier",
+  "waves.proposalCard.readFullNamed": "Lire en entier : {title}",
+  "waves.proposalCard.untitledProposal": "Proposition sans titre",
+  "waves.proposalCard.previewAlt": "Aperçu du média pour {title}",
+  "waves.proposalCard.part.one": "{count} partie",
+  "waves.proposalCard.part.other": "{count} parties",
+  "waves.proposalCard.media.one": "{count} média",
+  "waves.proposalCard.media.other": "{count} médias",
+  "waves.proposalCard.attachment.one": "{count} pièce jointe",
+  "waves.proposalCard.attachment.other": "{count} pièces jointes",
+  "waves.proposalCard.appearanceLabel": "Apparence de la carte de proposition",
+  "waves.proposalCard.mode.standard.label": "Proposition complète",
+  "waves.proposalCard.mode.standard.description":
+    "Afficher le contenu original directement dans le fil.",
+  "waves.proposalCard.mode.custom.label": "Carte récapitulative",
+  "waves.proposalCard.mode.custom.description":
+    "Afficher un titre, un texte raccourci et une image facultative.",
+  "waves.proposalCard.excerptLabel": "Limite de l’aperçu du texte",
+  "waves.proposalCard.excerptInputAriaLabel":
+    "Nombre maximal de caractères dans l’aperçu de la proposition",
+  "waves.proposalCard.characters": "caractères",
+  "waves.proposalCard.excerptRangeError":
+    "Saisissez un nombre entier compris entre {min} et {max}.",
+  "waves.proposalCard.mediaLabel": "Image sur la carte récapitulative",
+  "waves.proposalCard.settings.editLabel":
+    "Modifier les paramètres des cartes de proposition",
+  "waves.proposalCard.settings.layoutLabel": "Présentation de la proposition",
+  "waves.proposalCard.settings.rowLabel": "Cartes de proposition",
+  "waves.proposalCard.settings.toastAuthFailed":
+    "L’authentification a échoué. Reconnectez votre portefeuille et réessayez.",
+  "waves.proposalCard.settings.toastSaveFailedTitle":
+    "Impossible d’enregistrer ces paramètres de cartes de proposition.",
+  "waves.proposalCard.settings.toastRetry": "Veuillez réessayer.",
+  "waves.proposalCard.tabLabelsLabel": "Libellés des onglets",
+  "waves.proposalCard.tabLabelsDescription":
+    "Noms affichés dans les onglets de cette Wave.",
+  "waves.proposalCard.approvalsTabLabel":
+    "Libellé de l’onglet des propositions",
+  "waves.proposalCard.approvedTabLabel":
+    "Libellé de l’onglet des propositions approuvées",
+  "waves.proposalCard.tabLabels.errorTooLong":
+    "Les libellés doivent comporter au maximum {max} caractères.",
+  "waves.proposalCard.tabLabels.errorDuplicate":
+    "Utilisez deux libellés d’onglet différents.",
+  "waves.proposalCard.tabLabels.errorReserved":
+    "Les libellés ne peuvent pas correspondre aux onglets existants.",
   ...FR_FR_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
@@ -461,7 +536,7 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.loadMore": "Charger plus de drops",
   "waves.leaderboard.loadingMoreButton": "Chargement…",
   "waves.leaderboard.grid.untitled": "Drop sans titre",
-  "waves.leaderboard.grid.readFullText": "Lire le texte intégral",
+  "waves.leaderboard.grid.readFull": "Tout lire",
   "waves.leaderboard.grid.open": "Ouvrir",
   "waves.leaderboard.grid.openNamed": "Ouvrir {title}",
   "waves.leaderboard.grid.authorProfile": "Voir le profil de {author}",

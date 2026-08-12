@@ -4,10 +4,6 @@
 
 import { publicEnv } from "@/config/env";
 import {
-  SENTRY_APPLICATION_KEY,
-  SENTRY_THIRD_PARTY_FILTER_BEHAVIOUR,
-} from "@/config/sentryThirdPartyFiltering";
-import {
   INDEXEDDB_ERROR_MESSAGE,
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
@@ -491,16 +487,8 @@ Sentry.init({
   enabled: sentryEnabled,
 
   integrations(integrations) {
-    const configuredIntegrations = [
-      ...integrations,
-      Sentry.thirdPartyErrorFilterIntegration({
-        filterKeys: [SENTRY_APPLICATION_KEY],
-        behaviour: SENTRY_THIRD_PARTY_FILTER_BEHAVIOUR,
-      }),
-    ];
-
-    if (!replayEnabled) return configuredIntegrations;
-    return [...configuredIntegrations, Sentry.replayIntegration()];
+    if (!replayEnabled) return integrations;
+    return [...integrations, Sentry.replayIntegration()];
   },
 
   tracesSampleRate: 0.1,

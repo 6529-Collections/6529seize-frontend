@@ -7,16 +7,22 @@ import {
 
 interface WaveWinnersDropHeaderTotalVotesProps {
   readonly winner: ApiWaveDecisionWinner;
+  readonly tight?: boolean | undefined;
 }
 
 export default function WaveWinnersDropHeaderTotalVotes({
   winner,
+  tight = false,
 }: WaveWinnersDropHeaderTotalVotesProps) {
   const voteStyle =
     winner.drop.rating < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
+    <div
+      className={`tw-flex tw-items-center tw-text-sm tw-leading-5 ${
+        tight ? "tw-gap-x-1.5" : "tw-gap-x-2"
+      }`}
+    >
       <span className={`tw-font-medium ${voteStyle}`}>
         {formatNumberWithCommas(winner.drop.rating)}
       </span>

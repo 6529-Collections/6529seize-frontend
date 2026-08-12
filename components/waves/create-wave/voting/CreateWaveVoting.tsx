@@ -79,7 +79,9 @@ const getApprovalThresholdTimeErrorMessage = (
   }
 
   if (
-    errors.includes(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID)
+    errors.includes(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID
+    )
   ) {
     return APPROVAL_THRESHOLD_TIME_INVALID_ERROR;
   }
@@ -96,7 +98,7 @@ function CreateWaveCreditScopeSelect({
 }) {
   return (
     <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-0 tw-pb-0 tw-pt-6">
-      <legend className="tw-mb-3 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+      <legend className="tw-mb-3 tw-mt-0 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
         Voting power scope
       </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
@@ -117,17 +119,21 @@ function CreateWaveCreditScopeSelect({
                 value={option.scope}
                 checked={selected}
                 onChange={() => onCreditScopeChange(option.scope)}
-                className="tw-mt-1 tw-form-radio tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
+                className="tw-form-radio tw-mt-1 tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
               />
               <span className="tw-min-w-0">
                 <span
                   className={`tw-block tw-text-sm tw-font-semibold ${
-                    selected ? "tw-text-primary-400" : "tw-text-iron-200"
+                    selected ? "tw-text-white" : "tw-text-iron-200"
                   }`}
                 >
                   {option.label}
                 </span>
-                <span className="tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                <span
+                  className={`tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 ${
+                    selected ? "tw-text-iron-300" : "tw-text-iron-400"
+                  }`}
+                >
                   {option.description}
                 </span>
               </span>
@@ -218,11 +224,8 @@ export default function CreateWaveVoting({
   const inferredApprovalHoldMode = getCreateWaveApprovalHoldMode({
     thresholdTimeMs: approvalThresholdTimeMs,
   });
-  const approvalHoldMode =
-    approvalHoldModeOverride ?? inferredApprovalHoldMode;
-  const onApprovalHoldModeChange = (
-    mode: CreateWaveApprovalHoldMode
-  ): void => {
+  const approvalHoldMode = approvalHoldModeOverride ?? inferredApprovalHoldMode;
+  const onApprovalHoldModeChange = (mode: CreateWaveApprovalHoldMode): void => {
     setApprovalHoldModeOverride(mode);
 
     switch (mode) {
@@ -247,9 +250,9 @@ export default function CreateWaveVoting({
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+      <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
         {TITLES[waveType]}
-      </p>
+      </h2>
       <div className={VOTING_OPTIONS_GRID_CLASSES}>
         {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
           .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
@@ -263,7 +266,7 @@ export default function CreateWaveVoting({
               onChange={onTypeChange}
             >
               <span
-                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-medium ${
                   selectedType === votingType
                     ? "tw-text-white"
                     : "tw-text-iron-300 group-hover:tw-text-white"

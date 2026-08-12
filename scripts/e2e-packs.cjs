@@ -20,9 +20,9 @@ const ROOT = process.env["E2E_MANIFEST_ROOT"]
 const SUMMARY_TAIL_LINES = 25;
 const MAX_BUFFER_BYTES = 64 * 1024 * 1024;
 const MAX_PARALLEL_PACKS = 4;
-const TRANSIENT_ROOT = ".deployment-e2e-output";
+const TRANSIENT_ROOT = ".release-bus-e2e-output";
 const RUNNER_CAPABILITIES = Object.freeze({
-  contract: "deployment-e2e-runner-capabilities.v1",
+  contract: "release-bus-e2e-runner-capabilities.v1",
   features: Object.freeze({
     readonly_pack_parallelism: Object.freeze({
       version: 1,
@@ -495,12 +495,28 @@ function outputTail(output) {
     .join("\n");
 }
 
-function sourceShaFromEnvironment() {
-  const sourceSha = process.env["DEPLOYMENT_E2E_SOURCE_SHA"] || null;
-  if (sourceSha !== null && !/^[a-f0-9]{40}$/.test(sourceSha)) {
-    throw new Error("Deployment E2E source SHA is malformed.");
+function releaseBindingFromEnvironment() {
+  const binding = {
+    manifest_id: process.env["RELEASE_BUS_E2E_MANIFEST_ID"] || null,
+    manifest_identity_sha256:
+      process.env["RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256"] || null,
+    source_sha: process.env["RELEASE_BUS_E2E_SOURCE_SHA"] || null,
+  };
+  if (
+    binding.manifest_id === null &&
+    binding.manifest_identity_sha256 === null &&
+    binding.source_sha === null
+  ) {
+    return null;
   }
-  return sourceSha;
+  if (
+    !/^[a-f0-9-]{36}$/.test(binding.manifest_id ?? "") ||
+    !/^[a-f0-9]{64}$/.test(binding.manifest_identity_sha256 ?? "") ||
+    !/^[a-f0-9]{40}$/.test(binding.source_sha ?? "")
+  ) {
+    throw new Error("Release Bus E2E binding is incomplete or malformed.");
+  }
+  return binding;
 }
 
 async function runOnePack(
@@ -594,7 +610,7 @@ async function runPacks(
   ) {
     throw new Error("retryFailedPacks must be 0 or 1.");
   }
-  const sourceSha = sourceShaFromEnvironment();
+  const releaseBinding = releaseBindingFromEnvironment();
   prepare(artifactRoot);
   const startedAt = new Date();
   const records = new Array(resolved.length);
@@ -709,7 +725,7 @@ async function runPacks(
   }
 
   const evidence = {
-    schema_version: "deployment-e2e-packs.v1",
+    schema_version: "release-bus-e2e-packs.v1",
     environment,
     trigger,
     parallelism_requested: parallel,
@@ -717,7 +733,7 @@ async function runPacks(
     serial_retry_limit: retryFailedPacks,
     started_at: startedAt.toISOString(),
     completed_at: new Date().toISOString(),
-    source_sha: sourceSha,
+    release_binding: releaseBinding,
     pack_count: records.length,
     failed_count: failedCount,
     infrastructure_failure_count: infrastructureFailureCount,

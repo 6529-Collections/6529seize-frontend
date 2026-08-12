@@ -13,7 +13,7 @@
 /playwright-report/
 /playwright/.cache/
 /.playwright-mcp/
-/.deployment-e2e-output/
+/.release-bus-e2e-output/
 /storageState.json
 /playwright/.auth/
 storageState.json

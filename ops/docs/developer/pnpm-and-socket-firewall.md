@@ -157,8 +157,9 @@ workflow has a hard guard that rejects every non-`main` ref. Before triggering
 If those checks pass, it asks for confirmation before running the production
 workflow against `main`.
 
-For exact-SHA staging, production, and automatic E2E behavior, use
-[`frontend-deployment.md`](frontend-deployment.md).
+For release-lane ownership, shared validation, backend coordination, and
+production promotion gates, use
+[`simple-release-bus-v2.md`](simple-release-bus-v2.md).
 
 ## Guardrails in this repo
 

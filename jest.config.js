@@ -39,7 +39,6 @@ const config = {
     "<rootDir>/.next/", // Next.js build folder
     "<rootDir>/tests/", // Ignore Playwright tests folder
     "<rootDir>/e2e/", // Ignore Playwright e2e folder
-    "<rootDir>/ops/archive/frontend-release-bus-integration/", // Inert historical contracts
   ],
   modulePathIgnorePatterns: ["<rootDir>/.next/"],
   // Transformation - use ts-jest

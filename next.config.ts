@@ -12,7 +12,6 @@ import { createRequire } from "node:module";
 import { NextConfig } from "next";
 import { getProductionAssetPrefix } from "@/config/assetPrefix";
 import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
-import { SENTRY_BUILD_OWNERSHIP_OPTIONS } from "@/config/sentryThirdPartyFiltering";
 import {
   loadAssetsFlagAtRuntime,
   resolveAssetsFlagFromEnv,
@@ -158,8 +157,6 @@ const nextConfigFactory = (phase: string): NextConfig => {
 };
 
 const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
-  ...SENTRY_BUILD_OWNERSHIP_OPTIONS,
-
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

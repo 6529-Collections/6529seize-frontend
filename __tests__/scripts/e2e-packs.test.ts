@@ -220,7 +220,7 @@ describe("manifest-driven E2E runner", () => {
 
   it("reports an explicit versioned parallel-runner capability without requiring an environment", () => {
     expect(runner.RUNNER_CAPABILITIES).toEqual({
-      contract: "deployment-e2e-runner-capabilities.v1",
+      contract: "release-bus-e2e-runner-capabilities.v1",
       features: {
         readonly_pack_parallelism: {
           version: 1,
@@ -755,9 +755,19 @@ describe("manifest-driven E2E runner", () => {
     }
   );
 
-  it("rejects a malformed deployment source SHA before preparing or running packs", async () => {
-    const previous = process.env["DEPLOYMENT_E2E_SOURCE_SHA"];
-    process.env["DEPLOYMENT_E2E_SOURCE_SHA"] = "not-a-sha";
+  it("rejects an incomplete release binding before preparing or running packs", async () => {
+    const bindingVariables = [
+      "RELEASE_BUS_E2E_MANIFEST_ID",
+      "RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256",
+      "RELEASE_BUS_E2E_SOURCE_SHA",
+    ] as const;
+    const previous = Object.fromEntries(
+      bindingVariables.map((name) => [name, process.env[name]])
+    );
+    process.env["RELEASE_BUS_E2E_MANIFEST_ID"] =
+      "11111111-1111-1111-1111-111111111111";
+    delete process.env["RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256"];
+    delete process.env["RELEASE_BUS_E2E_SOURCE_SHA"];
     const prepare = jest.fn();
     const spawn = jest.fn();
 
@@ -771,14 +781,17 @@ describe("manifest-driven E2E runner", () => {
           prepare,
           spawn,
         })
-      ).rejects.toThrow("Deployment E2E source SHA is malformed");
+      ).rejects.toThrow("binding is incomplete or malformed");
       expect(prepare).not.toHaveBeenCalled();
       expect(spawn).not.toHaveBeenCalled();
     } finally {
-      if (previous === undefined) {
-        delete process.env["DEPLOYMENT_E2E_SOURCE_SHA"];
-      } else {
-        process.env["DEPLOYMENT_E2E_SOURCE_SHA"] = previous;
+      for (const name of bindingVariables) {
+        const value = previous[name];
+        if (value === undefined) {
+          delete process.env[name];
+        } else {
+          process.env[name] = value;
+        }
       }
     }
   });

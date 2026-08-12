@@ -12,6 +12,7 @@ import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveGroup from "@/components/waves/specs/groups/group/WaveGroup";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import WaveOutcomesVisibility from "@/components/waves/specs/WaveOutcomesVisibility";
+import WaveProposalCardSettings from "@/components/waves/specs/WaveProposalCardSettings";
 import WaveSubmissionButtonLabel from "@/components/waves/specs/WaveSubmissionButtonLabel";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
@@ -84,6 +85,7 @@ export default function WaveSettingsSections({
           )}
         >
           <WaveSubmissionButtonLabel wave={wave} />
+          <WaveProposalCardSettings wave={wave} />
           <WaveOutcomesVisibility wave={wave} />
         </SettingsSection>
       )}

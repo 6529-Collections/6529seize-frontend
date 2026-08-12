@@ -27,4 +27,3 @@ yarn.lock
 .husky
 *.min.js
 *.min.css
-ops/archive/frontend-release-bus-integration/
