@@ -297,7 +297,12 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         page
           .locator("#acquisition-works figure img")
           .first()
-          .evaluate((image) => image.complete && image.naturalWidth > 0)
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
       )
       .toBe(true);
     await retainScreenshot(
@@ -342,7 +347,12 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         page
           .locator("#acquisition-works figure img")
           .first()
-          .evaluate((image) => image.complete && image.naturalWidth > 0)
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
       )
       .toBe(true);
     await retainScreenshot(
