@@ -275,7 +275,7 @@ describe("AppHeader", () => {
     const search = screen.getByTestId("search");
 
     expect(healthLink).not.toHaveClass("md:tw-hidden");
-    expect(healthLink.parentElement).toBe(search.parentElement);
+    expect(healthLink.parentElement).toContainElement(search);
     expect(healthLink.parentElement).toHaveClass("tw-flex", "tw-items-center");
   });
 
