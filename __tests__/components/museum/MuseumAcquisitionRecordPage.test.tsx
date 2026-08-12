@@ -394,9 +394,10 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       screen.getAllByText(lifecycle, { exact: true }).length
     ).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("heading", { name: "Curatorial reading" })
-    ).toBeInTheDocument();
+    const curatorialHeading = screen.getByRole("heading", {
+      name: "Curatorial reading",
+    });
+    expect(curatorialHeading).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Works in this acquisition" })
     ).toHaveAttribute("href", "#acquisition-works");
@@ -408,13 +409,24 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(record).not.toHaveAttribute("open");
     expectEditorialOrder(workTitle, artistName);
 
-    const bodyText = document.body.textContent ?? "";
-    expect(bodyText.indexOf("Works in this acquisition")).toBeLessThan(
-      bodyText.indexOf("Curatorial reading")
-    );
-    expect(bodyText.indexOf("Curatorial reading")).toBeLessThan(
-      bodyText.indexOf("Accession record and sources")
-    );
+    const worksSection = document.querySelector("#acquisition-works");
+    const recordSection = document.querySelector("#acquisition-record");
+    expect(
+      Boolean(
+        worksSection !== null &&
+          (worksSection.compareDocumentPosition(curatorialHeading) &
+            Node.DOCUMENT_POSITION_FOLLOWING) !==
+            0
+      )
+    ).toBe(true);
+    expect(
+      Boolean(
+        recordSection !== null &&
+          (curatorialHeading.compareDocumentPosition(recordSection) &
+            Node.DOCUMENT_POSITION_FOLLOWING) !==
+            0
+      )
+    ).toBe(true);
   });
 
   it("omits the works anchor when the acquisition has no work records", () => {

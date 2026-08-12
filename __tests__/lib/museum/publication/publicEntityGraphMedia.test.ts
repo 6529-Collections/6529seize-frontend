@@ -822,7 +822,7 @@ describe("Wave publication receipt joins", () => {
             source_byte_size: 16_871_807,
             publication_part_number: 6,
             accessibility_text: "A soldier seated among rubble at Palmyra.",
-            credit: "Lorenzo Meloni, Palmyra, Syria, 2016.",
+            credit: "Lorenzo Meloni, Palmyra, Syria, 2016. © Lorenzo Meloni/Magnum Photos 2022.",
             rights: { status: "restricted", notes: "All Rights Reserved." },
             source_observation: { status: "mutable_external" },
             fixity: {
