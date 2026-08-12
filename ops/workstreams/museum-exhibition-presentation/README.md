@@ -30,8 +30,10 @@ The interface must preserve the exact lifecycle boundary:
 5. Responsive Keys and Gates media comes from the source-safe public
    presentation manifest. Preservation locators never enter the visitor
    adapter.
-6. Conflict at Its Edges uses the five exact signed-Wave presentation images,
-   with credit, rights notice, and immutable source relation retained.
+6. Conflict at Its Edges uses the five exact display sources approved through
+   downstream accession review, with credit, rights notice, fixity, historical
+   Wave provenance, and the active accession amendment retained. The Wave
+   selects the acquisition; it does not administer media-source review.
 7. Images preserve their natural aspect ratio; the gallery does not crop works
    into uniform squares.
 

@@ -152,3 +152,29 @@
   order. Palmyra remains in the accession and retains its explicit high-resolution
   control. Focused component and browser contracts require both properties before
   the corrected release can advance.
+- The corrected frontend release reached staging at main
+  `b175c5341aaba7db7aa08da7d867cfc33d0e30c5`; deploy run `31573272295`
+  and automatic E2E run `31573922198` passed. Retained real-browser review then
+  found the first Conflict image blocked by the browser at the historical Wave
+  CDN boundary. Production was held. This is downstream accession technical
+  review after Wave selection, not a second curatorial decision or a task for
+  Wave voters.
+- Source candidate A `1702717e9ad05d9291c723b7521429199daf1cae`
+  preserves the five historical Wave locators as provenance and separately
+  designates the five fixity-verified Arweave originals as active exhibition
+  sources. A schema-validated append-only accession amendment binds the prior
+  machine records and Media payloads. Two independent Luna reviewers approved
+  the exact candidate; hosted source run `31581341454` passed all six Ubuntu,
+  Windows, publication, Stream/catalog, and Museum-validation jobs.
+- Reviewed source B is
+  `47aefd48dc94db274cad77d7b707f8d5668e815f`. Its activated catalogue is
+  `6529NM-PUBCAT-47aefd48dc94db274cad77d7b707f8d5668e815f`; source release C is
+  `7e379e6ae3ee92caeda060b7784b92a81ba4650c`. The reviewed-release manifest
+  is `sha256:b5e33e09274f92d530268d6726d0778f30b75f8140016c3c959fdcfa5c7a99b6`
+  / `0xe293001df58dca7ea8343e962e118acce9c6247824b60ab693587512164981b0`.
+- Frontend adapter commit `8f61525f445760e90d04878cc297aac79997db4d`
+  requires the historical Wave locator, exact Arweave source and fixity, and
+  active downstream accession amendment as one fail-closed projection. It
+  changes no accession, title, custody, rights, preservation, or Collection
+  claim. Focused validation passed 238 tests, changed lint/typecheck and a clean
+  production build; independent Luna review also approved the exact commit.
