@@ -243,16 +243,22 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: "Historical Wave proposal presentation",
+        name: "The work",
         exact: true,
       })
     ).toHaveCount(1);
-    await expect(
-      page.getByRole("button", { name: /historical proposal image/u })
-    ).toHaveCount(0);
+    const palmyraImageControl = page.getByRole("button", {
+      name: "View image · loads 16.9 MB",
+      exact: true,
+    });
+    await expect(palmyraImageControl).toHaveCount(1);
     await expect(
       page.locator('[aria-labelledby="canonical-work-media-title"] img')
     ).toHaveCount(0);
+    await expect(
+      page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
+    ).toHaveCount(0);
+    await palmyraImageControl.click();
     await expect(
       page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
     ).toHaveCount(1);
@@ -262,7 +268,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).toHaveCount(2);
     await expect(
       page.getByRole("link", {
-        name: "Open Wave proposal context",
+        name: "View Wave publication",
         exact: true,
       })
     ).toHaveCount(1);
@@ -283,7 +289,14 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(
       page.locator("details#acquisition-record")
     ).not.toHaveAttribute("open");
+    await page.evaluate(() => window.scrollTo(0, 0));
     await retainScreenshot(page, testInfo, "museum-acquisition-keys-and-gates");
+    await page.locator("#acquisition-works").scrollIntoViewIfNeeded();
+    await retainScreenshot(
+      page,
+      testInfo,
+      "museum-acquisition-keys-and-gates-gallery"
+    );
     await expectNoHorizontalOverflow(page);
 
     await openRoute(page, "/museum/network/acquisitions/conflict-at-its-edges");
@@ -293,17 +306,32 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         exact: true,
       })
     ).toBeVisible();
-    await expect(page.locator("#acquisition-works figure img")).toHaveCount(5);
+    await expect(page.locator("#acquisition-works figure")).toHaveCount(5);
+    await expect(page.locator("#acquisition-works figure img")).toHaveCount(4);
+    const acquisitionPalmyraImageControl = page
+      .locator("#acquisition-works")
+      .getByRole("button", {
+        name: "View image · loads 16.9 MB",
+        exact: true,
+      });
+    await expect(acquisitionPalmyraImageControl).toHaveCount(1);
     await expect(
       page.getByRole("heading", { name: "Curatorial reading", exact: true })
     ).toBeVisible();
     await expect(
       page.locator("details#acquisition-record")
     ).not.toHaveAttribute("open");
+    await page.evaluate(() => window.scrollTo(0, 0));
     await retainScreenshot(
       page,
       testInfo,
       "museum-acquisition-conflict-at-its-edges"
+    );
+    await acquisitionPalmyraImageControl.scrollIntoViewIfNeeded();
+    await retainScreenshot(
+      page,
+      testInfo,
+      "museum-acquisition-conflict-at-its-edges-gallery"
     );
     await expectNoHorizontalOverflow(page);
 

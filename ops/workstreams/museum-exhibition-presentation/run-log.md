@@ -115,3 +115,13 @@
   matrix fail-fast policy. Regenerating the published help index produces one
   expected line change and restores the source-to-publication invariant; it
   does not alter the Museum runtime implementation or accession records.
+- Exact-head App CI run 31563661368 then reached the rendered Museum contract.
+  Its retained page snapshot showed the Palmyra image correctly integrated
+  into the canonical `The work` region with the deliberate 16.9 MB view
+  control. The browser assertion still expected the former separate
+  `Historical Wave proposal presentation` heading and no view control. The
+  contract now follows the downstream accession model: it verifies the work
+  region, intentional large-image reveal, credit, rights and publication
+  source, plus five acquisition figures (four initially loaded images and one
+  intentional large-image control). Retained acquisition evidence now covers
+  both the opening composition and the works gallery.
