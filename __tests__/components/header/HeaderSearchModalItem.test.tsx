@@ -1,9 +1,11 @@
 import HeaderSearchModalItem, {
   isHeaderSearchWaveDirectMessage,
   type HeaderSearchModalItemType,
+  type HeaderSearchWave,
 } from "@/components/header/header-search/HeaderSearchModalItem";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { SidebarWave } from "@/types/waves.types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -89,7 +91,7 @@ const renderComponent = (
   searchValue: string,
   isSelected: boolean,
   options: {
-    readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
+    readonly onWaveSelect?: ((wave: HeaderSearchWave) => void) | undefined;
   } = {}
 ) => {
   const onClose = jest.fn();
@@ -174,6 +176,30 @@ describe("HeaderSearchModalItem", () => {
     expect(link.textContent).toContain("Wave 1");
     expect(link.textContent).toContain("Wave #2");
     expect(screen.getByTestId("media").textContent).toContain("pic.png");
+  });
+
+  it("renders lightweight wave search results as waves", () => {
+    useHoverDirty.mockReturnValue(false);
+    mockUsePathname.mockReturnValue("/waves");
+    const wave = {
+      id: "lightweight-wave",
+      name: "Network Museum SAFE Signers",
+      type: "CHAT",
+      picture: null,
+      isDirectMessage: false,
+      creator: {
+        handle: "museum",
+        primary_address: "0x1",
+      },
+    } as SidebarWave;
+
+    renderComponent(wave, "signers", false);
+
+    const link = screen.getByTestId("link");
+    expect(link).toHaveAttribute("href", "/waves/lightweight-wave");
+    expect(link.textContent).toContain("Network Museum SAFE Signers");
+    expect(link.textContent).toContain("by museum");
+    expect(isHeaderSearchWaveDirectMessage(wave)).toBe(false);
   });
 
   it("selects wave results through the active wave handler", () => {
