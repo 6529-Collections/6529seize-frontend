@@ -308,7 +308,14 @@ describe("NextGen metadata", () => {
   });
 
   it("falls back to a branded NextGen token card when token data is missing", async () => {
-    (commonApiFetch as jest.Mock).mockRejectedValue(new Error("missing"));
+    const headers = new Headers();
+    const notFoundError = Object.assign(new Error("missing"), {
+      name: "ApiError",
+      status: 404,
+      headers,
+      response: { status: 404, headers },
+    });
+    (commonApiFetch as jest.Mock).mockRejectedValue(notFoundError);
 
     const metadata = await generateNextGenTokenMetadata({
       params: Promise.resolve({ token: "999" }),
