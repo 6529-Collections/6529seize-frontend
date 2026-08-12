@@ -1,165 +1,83 @@
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 import { formatDate, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  STREAM_REVIEW_DEVELOPMENT_STATUS,
-  type StreamDevelopmentItem,
-} from "@/lib/public-review/streamReviewDevelopmentStatus.server";
+import { STREAM_REVIEW_DEVELOPMENT_STATUS } from "@/lib/public-review/streamReviewDevelopmentStatus.server";
 import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinition";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 
-function getRepositoryUrl(path?: string): string {
-  const { repository, commit } = STREAM_REVIEW_DEVELOPMENT_STATUS.source;
-  const root = `https://github.com/${repository}`;
-  if (!path) {
-    return `${root}/commit/${commit}`;
-  }
-  const encodedPath = path.split("/").map(encodeURIComponent).join("/");
-  return `${root}/blob/${commit}/${encodedPath}`;
-}
+const BEFORE_LAUNCH_ITEMS = [
+  "publicReview.development.beforeLaunch.audit",
+  "publicReview.development.beforeLaunch.liveTesting",
+  "publicReview.development.beforeLaunch.launchSetup",
+] as const;
 
-function DevelopmentList({
-  heading,
-  id,
-  items,
-}: {
-  readonly heading: string;
-  readonly id: string;
-  readonly items: readonly StreamDevelopmentItem[];
-}) {
-  return (
-    <section aria-labelledby={id}>
-      <h3
-        id={id}
-        className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
-      >
-        {heading}
-      </h3>
-      <ul className="tw-mb-0 tw-mt-3 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300">
-        {items.map((item) => (
-          <li key={item.id}>
-            <span>{item.text}</span>{" "}
-            <a
-              href={getRepositoryUrl(item.evidencePath)}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={t(
-                DEFAULT_LOCALE,
-                "publicReview.development.openEvidenceLabel",
-                { item: item.text }
-              )}
-              className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/45 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            >
-              {t(DEFAULT_LOCALE, "publicReview.development.openEvidence")}
-              <ArrowTopRightOnSquareIcon
-                className="tw-size-3.5 tw-flex-none"
-                aria-hidden="true"
-              />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-export function StreamReviewDevelopmentStatus({
-  reviewSourceCommit,
-  reviewVersion,
-}: {
-  readonly reviewSourceCommit: string;
-  readonly reviewVersion: string;
-}) {
+export function StreamReviewDevelopmentStatus() {
   const status = STREAM_REVIEW_DEVELOPMENT_STATUS;
-  const { complete, pending, missing } = status.evidenceSummary.requirements;
 
   return (
     <div className="tw-mt-8 tw-w-full tw-max-w-[52rem]">
       <section
-        aria-labelledby="development-update"
+        aria-labelledby="stream-launch-readiness"
         className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.1] tw-bg-iron-950/70 tw-p-5 sm:tw-p-7"
       >
-        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-5 tw-gap-y-2">
-          <h2
-            id="development-update"
-            className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl"
-          >
-            {t(DEFAULT_LOCALE, "publicReview.development.heading")}
-          </h2>
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-            <time dateTime={status.checkedAt}>
-              {t(DEFAULT_LOCALE, "publicReview.development.checkedAt", {
-                date: formatDate(DEFAULT_LOCALE, status.checkedAt),
-              })}
-            </time>
-            {" · "}
-            <a
-              href={getRepositoryUrl()}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={t(
-                DEFAULT_LOCALE,
-                "publicReview.development.sourceLabel"
-              )}
-              className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-font-medium tw-text-iron-300 tw-underline tw-decoration-white/25 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            >
-              {t(DEFAULT_LOCALE, "publicReview.development.source")}
-              <ArrowTopRightOnSquareIcon
-                className="tw-size-3.5 tw-flex-none"
-                aria-hidden="true"
-              />
-            </a>
-          </p>
-        </div>
+        <h2
+          id="stream-launch-readiness"
+          className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.development.heading")}
+        </h2>
 
         <p className="tw-mb-0 tw-mt-5 tw-text-pretty tw-text-lg tw-font-medium tw-leading-7 tw-text-iron-100">
-          {status.headline}
+          {t(DEFAULT_LOCALE, "publicReview.development.answer")}
         </p>
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {status.summary}
-        </p>
-        <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-200">
-          {t(DEFAULT_LOCALE, "publicReview.development.evidenceSummary", {
-            complete: formatInteger(DEFAULT_LOCALE, complete),
-            pending: formatInteger(DEFAULT_LOCALE, pending),
-            missing: formatInteger(DEFAULT_LOCALE, missing),
-            blockers: formatInteger(
-              DEFAULT_LOCALE,
-              status.evidenceSummary.openReleaseBlockers
-            ),
-          })}
+          {t(DEFAULT_LOCALE, "publicReview.development.summary")}
         </p>
 
-        <div className="tw-mt-6 tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-6 lg:tw-grid-cols-3">
-          <DevelopmentList
-            heading={t(
-              DEFAULT_LOCALE,
-              "publicReview.development.finishedRecently"
-            )}
-            id="stream-development-finished"
-            items={status.recentlyCompleted}
-          />
-          <DevelopmentList
-            heading={t(DEFAULT_LOCALE, "publicReview.development.workingOn")}
-            id="stream-development-working"
-            items={status.workingOn}
-          />
-          <DevelopmentList
-            heading={t(DEFAULT_LOCALE, "publicReview.development.beforeLaunch")}
-            id="stream-development-before-launch"
-            items={status.beforeLaunch}
-          />
-        </div>
+        <h3
+          id="stream-before-launch"
+          className="tw-mb-0 tw-mt-6 tw-text-sm tw-font-semibold tw-text-iron-100"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.development.beforeLaunch")}
+        </h3>
+        <ul
+          aria-labelledby="stream-before-launch"
+          className="tw-mb-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-primary-300"
+        >
+          {BEFORE_LAUNCH_ITEMS.map((messageKey) => (
+            <li key={messageKey}>{t(DEFAULT_LOCALE, messageKey)}</li>
+          ))}
+        </ul>
 
-        <p className="tw-mb-0 tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(DEFAULT_LOCALE, "publicReview.development.snapshotNote", {
-            version: reviewVersion,
-            commit: reviewSourceCommit.slice(0, 8),
-          })}
+        <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(DEFAULT_LOCALE, "publicReview.development.pagePurpose")}
         </p>
+
+        <dl className="tw-mb-0 tw-mt-6 tw-grid tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5 sm:tw-grid-cols-2">
+          <div>
+            <dt className="tw-text-xs tw-font-medium tw-text-iron-400">
+              {t(DEFAULT_LOCALE, "publicReview.development.lastChecked")}
+            </dt>
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
+              <time dateTime={status.checkedAt}>
+                {formatDate(DEFAULT_LOCALE, status.checkedAt)}
+              </time>
+            </dd>
+          </div>
+          <div>
+            <dt className="tw-text-xs tw-font-medium tw-text-iron-400">
+              {t(DEFAULT_LOCALE, "publicReview.development.openBlockers")}
+            </dt>
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
+              {formatInteger(
+                DEFAULT_LOCALE,
+                status.evidenceSummary.openReleaseBlockers
+              )}
+            </dd>
+          </div>
+        </dl>
       </section>
     </div>
   );
