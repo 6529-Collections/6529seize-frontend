@@ -148,7 +148,7 @@ export default function WaveOutcomesVisibility({
           <input
             autoFocus
             checked={draftVisible}
-            className="tw-form-checkbox tw-size-5 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+            className="tw-form-checkbox tw-size-5 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
             disabled={isSaving}
             type="checkbox"
             onChange={(event) => setDraftVisible(event.target.checked)}

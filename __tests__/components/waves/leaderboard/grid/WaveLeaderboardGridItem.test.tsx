@@ -207,14 +207,24 @@ describe("WaveLeaderboardGridItem", () => {
       "tw-text-sm",
       "tw-text-iron-100"
     );
-    expect(screen.getByText("Read full text")).toHaveClass(
+    expect(screen.getByText("Read full")).toHaveClass(
       "tw-text-xs",
       "tw-text-primary-400",
       "tw-min-h-11"
     );
     expect(screen.getByTestId("rank")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toBeInTheDocument();
-    expect(screen.getByTestId("vote-button")).toBeInTheDocument();
+    const voteButton = screen.getByTestId("vote-button");
+    expect(voteButton).toBeInTheDocument();
+    expect(voteButton).toHaveAttribute(
+      "data-class-name",
+      expect.stringContaining("tw-self-center")
+    );
+    expect(voteButton.parentElement).toHaveClass(
+      "tw-items-center",
+      "tw-self-center",
+      "tw-flex-none"
+    );
     expect(screen.getByLabelText("7 voters")).toBeInTheDocument();
     const footer = screen.getByTestId("wave-leaderboard-grid-item-footer-d1");
     expect(footer).toBeInTheDocument();
@@ -394,7 +404,12 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.getByText("You:")).toBeInTheDocument();
-    expect(screen.getByText("-4 NIC")).toHaveClass("tw-text-rose-400");
+    expect(screen.getByText("-4")).toHaveClass(
+      "tw-font-mono",
+      "tw-text-rose-400"
+    );
+    expect(screen.getByText("NIC")).toHaveClass("tw-text-rose-400");
+    expect(screen.getByText("NIC")).not.toHaveClass("tw-font-mono");
     expect(screen.getByLabelText("7 voters")).toBeInTheDocument();
   });
 
