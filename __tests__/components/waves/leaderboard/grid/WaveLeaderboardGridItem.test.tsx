@@ -607,7 +607,10 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "hello" })).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { name: "hello" });
+    expect(heading).toBeInTheDocument();
+    expect(heading.parentElement).toHaveClass("tw-py-2");
+    expect(heading.parentElement).not.toHaveClass("tw-pt-4", "tw-pb-2");
     expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
     expect(markdownProps).toBeUndefined();
   });
