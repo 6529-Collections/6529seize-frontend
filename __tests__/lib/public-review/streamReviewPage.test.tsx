@@ -221,6 +221,44 @@ mint lanes?`;
     if (page.id === "freezing-preservation-and-artwork-finality") {
       return '# Freezing, preservation, and artwork finality\n\n“Finished” can describe final supply, frozen Core configuration, a preserved set of files, or terminal artwork state.\n\n## Final supply is a supply promise\n\nOld final supply copy.\n\n## Questions for reviewers\n\n10. Should any byte-changing recovery exist after finality, and what evidence would distinguish recovery from replacement?';
     }
+    if (page.id === "revenue-splits-and-royalties") {
+      return [
+        "# Revenue, splits, and royalties",
+        "Old technical introduction.",
+        "## One wei should have one accountable path",
+        "Old accountable path.",
+        "## The current native-sale paths keep local accounting",
+        "Old native-sale path.",
+        "## Pull credits keep one recipient from blocking everyone",
+        "Old pull-credit path.",
+        "## The settlement foundation gives a sale one replay-safe identity",
+        "Old settlement path.",
+        "## Resolution separates policy from the sale mechanic",
+        "Old resolver path.",
+        "## Immutable split profiles make collaboration inspectable",
+        "Old split-profile path.",
+        "## Native ETH accounting must distinguish liabilities from surplus",
+        "Old native accounting.",
+        "## Approved ERC-20 transfers require balance checks",
+        "Old ERC-20 accounting.",
+        "## Payer-bound token sales remain a proposal",
+        "Old payer-bound proposal.",
+        "## Rounding is an allocation decision",
+        "Old rounding details.",
+        "## Curator rewards connect onchain claims to offchain allocation",
+        "Old curator details.",
+        "## ERC-2981 publishes royalty information",
+        "Old royalty details.",
+        "## Every value movement should be reconstructable",
+        "Old event details.",
+        "## Responsibilities carried by payment accounting",
+        "Old responsibility details.",
+        "## What can fail",
+        "Old failure list.",
+        "## Questions for reviewers",
+        "1. Old question.\n9. Does every public royalty statement describe marketplace payment under\nERC-2981 as voluntary?",
+      ].join("\n\n");
+    }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
   PublicReviewEditorialContentError: class extends Error {},
@@ -289,6 +327,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "community-review",
         sectionValues: ["technical-section"],
+      },
+      {
+        value: "revenue-splits-and-royalties",
+        sectionValues: ["old-revenue-section"],
       },
     ],
   })),
@@ -894,6 +936,62 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("1");
   });
 
+  it("shows plain-language copy on the current Revenue page", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "revenue-splits-and-royalties",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+
+    expect(screen.queryByText("Authorship note")).not.toBeInTheDocument();
+    expect(editorialCopy).toHaveTextContent("The short answer:");
+    expect(editorialCopy).toHaveTextContent(
+      "The reviewed source has two payment systems."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "The current fixed-price and auction paths do not call that foundation."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "ADR 0021 is accepted design, not implemented behavior"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "ADR 0019 is proposed, not accepted."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "A marketplace can choose whether to pay it."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Source and test evidence do not prove deployment, audit, or safety."
+    );
+    expect(editorialCopy).not.toHaveTextContent(
+      "Old technical introduction."
+    );
+    expect(editorialCopy).not.toHaveTextContent("Old settlement path.");
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-editorial-visible",
+      "true"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "16"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.revenueSplitsAndRoyalties.currentSummary"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
+      "16"
+    );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("16");
+  });
+
   it("puts a plain current guide before the Community Review prompts", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -1356,6 +1454,36 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
       "publicReview.pages.freezingPreservationAndArtworkFinality.summary"
+    );
+  });
+
+  it("keeps immutable Revenue routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          version: "2026-08-01.1",
+          page: "revenue-splits-and-royalties",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(editorialCopy).toHaveTextContent("Old technical introduction.");
+    expect(editorialCopy).toHaveTextContent("Old settlement path.");
+    expect(editorialCopy).not.toHaveTextContent("The short answer:");
+    expect(editorialCopy).not.toHaveTextContent(
+      "ADR 0021 is accepted design, not implemented behavior"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "16"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.revenueSplitsAndRoyalties.summary"
     );
   });
 
