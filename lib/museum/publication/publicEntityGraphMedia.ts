@@ -41,8 +41,6 @@ import {
   metadataOnlyMedia,
   proposalMetadata,
 } from "./publicEntityGraphMediaMetadata";
-import { findWavePublicationPart } from "./publicEntityGraphWaveMediaJoin";
-
 export { findWavePublicationPart } from "./publicEntityGraphWaveMediaJoin";
 
 export function mapWorkStatus(
@@ -304,24 +302,29 @@ function projectProposalMedia(
   assertProposalPresentationInput(input);
   assertProposalContext(media, subjectEntity, context, waveId, dropId);
   assertProposalSourceLocator(input);
-  const part = findWavePublicationPart({
-    sourceDocuments: context.sourceDocuments,
-    subjectEntity,
-    publicationRecordId,
-    waveId,
-    dropId,
-    input,
-  });
+  const sourceByteSize = requiredPositiveInteger(
+    media,
+    "source_byte_size",
+    "public_entity_graph_media_source_byte_size"
+  );
+  const publicationPartNumber = requiredPositiveInteger(
+    media,
+    "publication_part_number",
+    "public_entity_graph_media_publication_part_number"
+  );
+  assertAccessionMediaRecord(
+    mediaEntity,
+    media,
+    publicationRecordId
+  );
   const affordances = proposalAffordances(input);
   const candidate: MuseumExternalProposalPresentationMedia = {
     id: mediaEntity.id,
     kind: "external_proposal_presentation",
-    mediaUrl: part.mediaUrl,
+    mediaUrl: input.uri,
     mediaMimeType:
       input.mediaType as MuseumExternalProposalPresentationMedia["mediaMimeType"],
-    ...(part.mediaByteSize === null
-      ? {}
-      : { sourceByteSize: part.mediaByteSize }),
+    sourceByteSize,
     width: input.width,
     height: input.height,
     altText: input.altText,
@@ -329,11 +332,11 @@ function projectProposalMedia(
       kind: "signed_wave_storm",
       waveId,
       dropId,
-      partId: part.partId,
+      partId: publicationPartNumber,
       serial: null,
       publicationRecordId,
       contextEntityId: MUSEUM_WAVE_CURATED_ACQUISITION_ID,
-      sourcePath: part.observationPath,
+      sourcePath: mediaEntity.sourcePath,
       mediaRecordPath: mediaEntity.sourcePath,
       sourceCommit: context.sourceCommit,
     },
@@ -354,6 +357,69 @@ function projectProposalMedia(
     throw new Error("public_entity_graph_media_proposal_contract");
   }
   return { retained: null, presentation: candidate, metadata: null };
+}
+
+function requiredPositiveInteger(
+  source: Readonly<Record<string, unknown>>,
+  key: string,
+  error: string
+): number {
+  const value = source[key];
+  if (
+    typeof value !== "number" ||
+    !Number.isSafeInteger(value) ||
+    value < 1
+  ) {
+    throw new Error(error);
+  }
+  return value;
+}
+
+function assertAccessionMediaRecord(
+  mediaEntity: MuseumPublicEntityRecord,
+  media: Readonly<Record<string, unknown>>,
+  publicationRecordId: string
+): void {
+  const context = requiredObject(
+    media,
+    "wave_proposal_context",
+    "public_entity_graph_media_wave"
+  );
+  const observationRecordId = requiredString(
+    context,
+    "observation_record_id",
+    "public_entity_graph_media_observation"
+  );
+  const fixity = requiredObject(
+    media,
+    "fixity",
+    "public_entity_graph_media_fixity"
+  );
+  const rights = requiredObject(
+    media,
+    "rights",
+    "public_entity_graph_media_rights"
+  );
+  const sourceObservation = requiredObject(
+    media,
+    "source_observation",
+    "public_entity_graph_media_source_observation"
+  );
+  if (
+    context["publication_status"] !==
+      "historical_public_proposal_context" ||
+    !mediaEntity.sourceRecordIds.includes(publicationRecordId) ||
+    !mediaEntity.sourceRecordIds.includes(observationRecordId) ||
+    fixity["status"] !== "verified" ||
+    fixity["algorithm"] !== "sha256" ||
+    typeof fixity["digest"] !== "string" ||
+    !/^sha256:[a-f0-9]{64}$/u.test(fixity["digest"]) ||
+    typeof fixity["verified_at"] !== "string" ||
+    rights["status"] !== "restricted" ||
+    sourceObservation["status"] !== "mutable_external"
+  ) {
+    throw new Error("public_entity_graph_media_accession_record");
+  }
 }
 
 function assertProposalPresentationInput(

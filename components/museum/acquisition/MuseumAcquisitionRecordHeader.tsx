@@ -92,7 +92,7 @@ export function MuseumAcquisitionRecordHeader({
           >
             {t(
               DEFAULT_LOCALE,
-              "museum.network.acquisitions.accessionRecordAndSources"
+              "museum.network.acquisitions.acquisitionRecordAndSources"
             )}
           </a>
         </nav>

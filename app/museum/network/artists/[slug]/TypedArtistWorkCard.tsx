@@ -34,16 +34,21 @@ export function TypedArtistWorkCard({
       : null;
   const presentation = work.presentationMedia?.[0];
   if (media !== undefined) {
+    const altText = media.altText;
+    if (altText === null || altText.trim() === "") {
+      throw new Error("museum_artist_work_alt_text_missing");
+    }
     return (
       <MuseumPublicMediaFigure
         key={work.id}
         src={media.url}
         width={media.width}
         height={media.height}
-        alt={media.altText ?? ""}
+        alt={altText}
         href={museumWorkHref(work.id)}
         title={work.title}
         byline={relationshipLabel(work)}
+        eager={index === 0}
       />
     );
   }
@@ -61,7 +66,7 @@ export function TypedArtistWorkCard({
       >
         <Link
           href={museumWorkHref(work.id)}
-          className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {work.title}
         </Link>
@@ -88,9 +93,7 @@ export function TypedArtistWorkCard({
               alt={presentation.altText}
               width={presentation.width}
               height={presentation.height}
-              {...(presentation.sourceByteSize === undefined
-                ? {}
-                : { sourceByteSize: presentation.sourceByteSize })}
+              sourceByteSize={presentation.sourceByteSize}
               {...(sourceHref === null || !canOpenPresentation
                 ? {}
                 : {
@@ -101,13 +104,14 @@ export function TypedArtistWorkCard({
                     ),
                   })}
               className="tw-block tw-h-full tw-w-full tw-object-contain"
+              eager={index === 0}
             />
           </div>
         </div>
         <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
           <Link
             href={museumWorkHref(work.id)}
-            className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             {work.title}
           </Link>

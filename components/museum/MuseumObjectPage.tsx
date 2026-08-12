@@ -328,6 +328,21 @@ function MuseumCanonicalWorkRecordPage({
           </p>
         ) : null}
       </header>
+      <MuseumEntityContext
+        context={{
+          ...context,
+          status: displayMuseumPublicAcquisitionStatus(work.status),
+        }}
+        labels={{
+          ariaLabel: t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.entityContext"
+          ),
+          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
+          statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
+          source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
+        }}
+      />
       <MuseumCanonicalWorkMedia
         work={work}
         programMediaMatch={programMediaMatch}
@@ -374,9 +389,7 @@ function MuseumCanonicalWorkRecordPage({
                       alt={media.altText}
                       width={media.width}
                       height={media.height}
-                      {...(media.sourceByteSize === undefined
-                        ? {}
-                        : { sourceByteSize: media.sourceByteSize })}
+                      sourceByteSize={media.sourceByteSize}
                       {...(sourceHref === null || !canOpenPresentation
                         ? {}
                         : {
@@ -426,21 +439,6 @@ function MuseumCanonicalWorkRecordPage({
           </div>
         </section>
       ) : null}
-      <MuseumEntityContext
-        context={{
-          ...context,
-          status: displayMuseumPublicAcquisitionStatus(work.status),
-        }}
-        labels={{
-          ariaLabel: t(
-            DEFAULT_LOCALE,
-            "museum.network.accessibility.entityContext"
-          ),
-          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
-          statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
-          source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
-        }}
-      />
       <section
         className="tw-mt-10"
         aria-labelledby="canonical-work-record-title"

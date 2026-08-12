@@ -208,7 +208,10 @@ export default async function MuseumAcquisitionProgramPage({
               id: work.id,
               label: work.title,
               href: museumWorkHref(work.id),
-              relation: "Selected through",
+              relation: t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.relationSelectedThrough"
+              ),
               status: work.status,
               statusAsOf: work.statusAsOf,
               sourcePath: relationSourcePath,
@@ -268,6 +271,7 @@ export default async function MuseumAcquisitionProgramPage({
             DEFAULT_LOCALE,
             "museum.network.accessibility.entityContext"
           ),
+          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
           statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
@@ -281,7 +285,7 @@ export default async function MuseumAcquisitionProgramPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}
           </h2>
           <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-            {typedWorks.map((work) => {
+            {typedWorks.map((work, index) => {
               const canonicalMedia = publicWorkMedia(work);
               const reviewedProgramMedia = findReviewedProgramMediaMatch(view, [
                 work.id,
@@ -307,17 +311,22 @@ export default async function MuseumAcquisitionProgramPage({
               const mediaQualifierProps =
                 qualifier === undefined ? {} : { qualifier };
               if (canonicalMedia !== null) {
+                const altText = canonicalMedia.altText;
+                if (altText === null || altText.trim() === "") {
+                  throw new Error("museum_acquisition_program_alt_text_missing");
+                }
                 return (
                   <MuseumPublicMediaFigure
                     key={work.id}
                     src={canonicalMedia.url}
                     width={canonicalMedia.width}
                     height={canonicalMedia.height}
-                    alt={canonicalMedia.altText ?? ""}
+                    alt={altText}
                     href={museumWorkHref(work.id)}
                     title={work.title}
                     status={status}
                     {...mediaQualifierProps}
+                    eager={index === 0}
                   />
                 );
               }
@@ -339,7 +348,13 @@ export default async function MuseumAcquisitionProgramPage({
                     ? {}
                     : { statusQualifier: qualifier }),
                 };
-                return <AcquisitionWorkFigure key={work.id} work={card} />;
+                return (
+                  <AcquisitionWorkFigure
+                    key={work.id}
+                    work={card}
+                    eager={index === 0}
+                  />
+                );
               }
               return (
                 <article
@@ -378,7 +393,7 @@ export default async function MuseumAcquisitionProgramPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}
           </h2>
           <div className="tw-mt-6 tw-grid tw-gap-6 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-            {selectedWorks.map((work) => {
+            {selectedWorks.map((work, index) => {
               const href = museumWorkHrefForSourceId(
                 publication,
                 work.recordId,
@@ -391,6 +406,7 @@ export default async function MuseumAcquisitionProgramPage({
                       media={work.media}
                       sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
                       className="tw-h-full tw-w-full tw-object-contain"
+                      eager={index === 0}
                     />
                   </div>
                   <p className="tw-m-0 tw-mt-3 tw-text-base tw-font-semibold tw-text-iron-50">

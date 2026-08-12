@@ -166,15 +166,15 @@ function TypedArtistPage({
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
       />
-      <TypedArtistProfile
-        profileDocuments={profileDocuments}
-        publication={publication}
-        workHrefs={workHrefs}
-      />
       <TypedArtistWorks
         relationshipLabel={relationshipLabel}
         view={view}
         works={works}
+      />
+      <TypedArtistProfile
+        profileDocuments={profileDocuments}
+        publication={publication}
+        workHrefs={workHrefs}
       />
       <TypedArtistProjects projects={projects} />
       <MuseumRelatedEntities

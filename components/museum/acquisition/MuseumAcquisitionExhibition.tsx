@@ -63,7 +63,7 @@ export function MuseumProposalPresentationMedia({
       >
         {t(
           DEFAULT_LOCALE,
-          "museum.network.acquisitions.historicalWavePresentation"
+          "museum.network.acquisitions.worksInAcquisition"
         )}
       </h2>
       <div className="tw-mt-5 tw-grid tw-gap-6 sm:tw-grid-cols-2">
@@ -85,10 +85,7 @@ export function MuseumProposalPresentationMedia({
                 alt={presentationMedia.altText}
                 width={presentationMedia.width}
                 height={presentationMedia.height}
-                {...(exhibitionPresentation ||
-                presentationMedia.sourceByteSize === undefined
-                  ? {}
-                  : { sourceByteSize: presentationMedia.sourceByteSize })}
+                sourceByteSize={presentationMedia.sourceByteSize}
                 {...(() => {
                   const sourceHref = buildMuseumSignedWaveStormDropUrl(
                     presentationMedia.source.waveId,
@@ -178,7 +175,6 @@ export function AcquisitionWorkFigure({
       "open_upstream_presentation"
     ) === true;
   const requiresIntent =
-    !exhibitionPresentation &&
     work.presentationMedia?.sourceByteSize !== undefined &&
     work.presentationMedia.sourceByteSize >= MUSEUM_PROPOSAL_INTENT_VIEW_BYTES;
   const metadataOnly =
@@ -373,9 +369,7 @@ function AcquisitionPresentationMedia({
         alt={media.altText}
         width={media.width}
         height={media.height}
-        {...(exhibitionPresentation || media.sourceByteSize === undefined
-          ? {}
-          : { sourceByteSize: media.sourceByteSize })}
+        sourceByteSize={media.sourceByteSize}
         {...(presentationSourceHref === null || !canOpenPresentation
           ? {}
           : {

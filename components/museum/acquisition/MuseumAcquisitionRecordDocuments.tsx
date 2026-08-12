@@ -79,7 +79,7 @@ export function MuseumAcquisitionRecordDocuments({
         <summary className="tw-cursor-pointer tw-list-none tw-px-5 tw-py-5 tw-text-lg tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-px-6">
           {t(
             DEFAULT_LOCALE,
-            "museum.network.acquisitions.accessionRecordAndSources"
+            "museum.network.acquisitions.acquisitionRecordAndSources"
           )}
         </summary>
         <div className="tw-space-y-10 tw-border-t tw-border-solid tw-border-white/10 tw-px-5 tw-py-6 sm:tw-px-6">
