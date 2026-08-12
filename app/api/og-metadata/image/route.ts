@@ -8,8 +8,8 @@ import { OG_IMAGE_PROXY_MAX_BYTES } from "@/app/api/og-metadata/_lib/imageProxyP
 import { NextResponse, type NextRequest } from "next/server";
 import sharp, { type Sharp } from "sharp";
 
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const revalidate = 604800;
 
 const DEFAULT_WIDTH = 1200;
 const MAX_WIDTH = 1200;

@@ -256,6 +256,9 @@ describe("BottomNavigation", () => {
     expect(container.querySelector("nav")).toHaveClass(
       "tw-pointer-events-none"
     );
+    expect(container.querySelector("nav")).toHaveClass(
+      "tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),var(--safe-area-inset-bottom,0px),0px)]"
+    );
     expect(container.querySelector("nav")).not.toHaveClass("tw-h-[85px]");
     expect(
       container.querySelector(`[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`)
