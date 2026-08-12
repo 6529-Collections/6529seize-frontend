@@ -1,4 +1,6 @@
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   Dialog,
   DialogPanel,
@@ -21,6 +23,7 @@ import type {
   ReactNode,
   TouchEvent,
 } from "react";
+import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 
 const DISMISS_DRAG_DISTANCE_PX = 44;
 const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
@@ -54,6 +57,7 @@ type MobileWrapperDialogProps = {
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
 };
 
@@ -71,43 +75,6 @@ type MobileDialogDragOptions = {
   readonly onAfterLeave?: (() => void) | undefined;
 };
 
-function DialogCloseButton({
-  onClick,
-  className,
-}: {
-  readonly onClick: () => void;
-  readonly className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      title="Close panel"
-      aria-label="Close panel"
-      className={clsx(
-        "-tw-mr-2 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
-        className
-      )}
-      onClick={onClick}
-    >
-      <svg
-        className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-current"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M18 6L6 18M6 6L18 18"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </button>
-  );
-}
-
 function DialogHeader({
   title,
   showDesktopCloseButton,
@@ -118,6 +85,7 @@ function DialogHeader({
   showHeaderCloseButton,
   headerCloseButtonClassName,
   titleClassName,
+  closeLabel,
 }: {
   readonly title: string | undefined;
   readonly showDesktopCloseButton: boolean;
@@ -128,6 +96,7 @@ function DialogHeader({
   readonly showHeaderCloseButton?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly closeLabel: string;
 }) {
   return (
     <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
@@ -155,8 +124,9 @@ function DialogHeader({
           )}
         </div>
         {showDesktopCloseButton && (
-          <DialogCloseButton
+          <MobileWrapperDialogCloseButton
             onClick={onClose}
+            label={closeLabel}
             className={clsx(
               "tw-hidden md:tw-inline-flex",
               headerCloseButtonClassName
@@ -164,8 +134,9 @@ function DialogHeader({
           />
         )}
         {showHeaderCloseButton && (
-          <DialogCloseButton
+          <MobileWrapperDialogCloseButton
             onClick={onClose}
+            label={closeLabel}
             className={clsx("tw-inline-flex", headerCloseButtonClassName)}
           />
         )}
@@ -357,11 +328,13 @@ function FloatingCloseButton({
   tabletModal,
   onClose,
   mobileCloseButtonClassName,
+  closeLabel,
 }: {
   readonly show: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly mobileCloseButtonClassName?: string | undefined;
+  readonly closeLabel: string;
 }) {
   if (!show) {
     return null;
@@ -383,8 +356,9 @@ function FloatingCloseButton({
           tabletModal && "md:tw-hidden"
         )}
       >
-        <DialogCloseButton
+        <MobileWrapperDialogCloseButton
           onClick={onClose}
+          label={closeLabel}
           {...(mobileCloseButtonClassName
             ? { className: mobileCloseButtonClassName }
             : {})}
@@ -663,9 +637,12 @@ export default function MobileWrapperDialog({
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
+  closeLabel,
   dismissible = true,
 }: MobileWrapperDialogProps) {
+  const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const {
     canDragToClose,
     dragOffset,
@@ -757,6 +734,7 @@ export default function MobileWrapperDialog({
                       tabletModal={tabletModal}
                       onClose={handleClose}
                       mobileCloseButtonClassName={mobileCloseButtonClassName}
+                      closeLabel={resolvedCloseLabel}
                     />
                     <div className={surfaceClassNames} style={surfaceStyle}>
                       <div
@@ -772,8 +750,11 @@ export default function MobileWrapperDialog({
                           titleActions={titleActions}
                           headerActions={headerActions}
                           showHeaderCloseButton={showInlineHeaderCloseButton}
-                          headerCloseButtonClassName={headerCloseButtonClassName}
+                          headerCloseButtonClassName={
+                            headerCloseButtonClassName
+                          }
                           titleClassName={titleClassName}
+                          closeLabel={resolvedCloseLabel}
                         />
                         {children}
                       </div>
