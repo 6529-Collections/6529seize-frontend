@@ -447,7 +447,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
                       )
                     }
                     rows={4}
-                    className={`tw-form-textarea tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition placeholder:tw-text-iron-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-600 ${
+                    className={`tw-form-textarea tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-shadow-sm tw-transition-colors placeholder:tw-text-iron-600 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-0 ${
                       voteRationale.isUsingGeneratedRationale
                         ? "tw-text-iron-600"
                         : "tw-text-iron-100"

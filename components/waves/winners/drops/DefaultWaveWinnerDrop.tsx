@@ -134,7 +134,11 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     >
       <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-between tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-          <div className="tw-flex tw-flex-1 tw-gap-x-3">
+          <div
+            className={`tw-flex tw-flex-1 tw-gap-x-3 ${
+              isApprovalWave ? "tw-items-start tw-pb-3" : ""
+            }`}
+          >
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
             <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
               <WaveWinnersDropHeader
@@ -166,10 +170,26 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
               variant="full"
               cardVariant="chat"
             />
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-pt-2">
+            <div
+              className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 ${
+                isApprovalWave ? "tw-relative tw-pt-3" : "tw-pt-2"
+              }`}
+            >
+              {isApprovalWave && (
+                <span
+                  aria-hidden="true"
+                  className="tw-pointer-events-none tw-absolute tw-left-[-4.25rem] tw-right-[-1rem] tw-top-0 tw-h-px tw-bg-iron-800/60"
+                />
+              )}
               <div className="tw-flex tw-items-center tw-gap-x-4 tw-whitespace-nowrap">
-                <WaveWinnersDropHeaderTotalVotes winner={winner} />
-                <WaveWinnersDropHeaderVoters winner={winner} />
+                <WaveWinnersDropHeaderTotalVotes
+                  winner={winner}
+                  tight={isApprovalWave}
+                />
+                <WaveWinnersDropHeaderVoters
+                  winner={winner}
+                  tight={isApprovalWave}
+                />
               </div>
               <div>
                 <WaveWinnersDropOutcome
