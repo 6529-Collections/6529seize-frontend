@@ -502,7 +502,7 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
       screen.getByRole("img", { name: presentation.altText })
     ).toHaveAttribute("src", presentation.mediaUrl);
     expect(
-      screen.getByRole("link", { name: "Open the source Wave" })
+      screen.getByRole("link", { name: "View Wave publication" })
     ).toHaveAttribute("href", WAVE_CONTEXT_HREF);
     expect(
       screen.getAllByText(lifecycle, { exact: true }).length
