@@ -102,6 +102,7 @@ export function PublicReviewShell({
   displayedVersion,
   feedbackSlot,
   introNotice,
+  outroNotice,
   showAudiencePaths = true,
   showEditorialContent = true,
   source,
@@ -115,6 +116,7 @@ export function PublicReviewShell({
   readonly displayedVersion: string;
   readonly feedbackSlot: ReactNode;
   readonly introNotice?: ReactNode;
+  readonly outroNotice?: ReactNode;
   readonly showAudiencePaths?: boolean;
   readonly showEditorialContent?: boolean;
   readonly source: PublicReviewSource;
@@ -240,6 +242,8 @@ export function PublicReviewShell({
                           markdown={editorialMarkdown}
                         />
                       </article>
+
+                      {outroNotice}
 
                       <div className="tw-mt-8">
                         <PublicReviewEvidenceLegend />

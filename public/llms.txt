@@ -2,7 +2,7 @@
 
 > 6529.io is the home of The Memes by 6529 — an open-edition NFT art collection whose community tier is released under CC0 — and of the 6529 network: on-chain identity and reputation metrics (TDH, REP, NIC, Levels) plus Waves, the site's social threads. This file is the entry point for AI agents and lists the machine-readable files the site publishes.
 
-Site data such as TDH, REP, and Wave activity changes continuously. Fetch the files below for current definitions and routes instead of relying on cached copies. These files are generated from the site's curated help corpus at build time (corpus revision 2026-06-29T09:23:18.000Z).
+Site data such as TDH, REP, and Wave activity changes continuously. Fetch the files below for current definitions and routes instead of relying on cached copies. These files are generated from the site's curated help corpus at build time (corpus revision 2026-08-11T15:43:52.000Z).
 
 ## Machine-readable files
 
