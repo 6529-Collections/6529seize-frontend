@@ -91,9 +91,11 @@ const revokeProfileSessionForLogoutAll = async ({
 
 export const clearAllAuthenticatedProfiles = async (): Promise<void> => {
   const authenticatedProfiles = getAuthenticatedProfilesForLogoutAll();
-  for (const profile of authenticatedProfiles) {
-    await revokeProfileSessionForLogoutAll(profile);
-  }
+  await Promise.all(
+    authenticatedProfiles.map((profile) =>
+      revokeProfileSessionForLogoutAll(profile)
+    )
+  );
 
   await clearAllWalletAuth();
 };

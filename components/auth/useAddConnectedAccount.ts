@@ -111,8 +111,7 @@ export function useAddConnectedAccount({
           account.status !== "reconnecting"));
 
     if (hasStaleAddConnectedAccountGuard) {
-      clearAddConnectedAccountGuard();
-      setIsAddingConnectedAccount(false);
+      cancelAddConnectedAccount();
     }
 
     if (isAddingConnectedAccountRef.current) {
@@ -187,28 +186,35 @@ export function useAddConnectedAccount({
       logError("seizeAddConnectedAccount", walletError);
     };
 
-    disconnect()
-      .then(() => {
+    const disconnectBeforeAddingAccount = async (): Promise<void> => {
+      try {
+        await disconnect();
+      } catch (error: unknown) {
+        handleDisconnectFailure(error);
+        return;
+      }
+
+      if (!isCurrentAttempt()) {
+        return;
+      }
+      retryConnectTimeoutRef.current = setTimeout(() => {
         if (!isCurrentAttempt()) {
           return;
         }
-        retryConnectTimeoutRef.current = setTimeout(() => {
-          if (!isCurrentAttempt()) {
-            return;
-          }
-          retryConnectTimeoutRef.current = null;
-          if (
-            !isMountedRef.current ||
-            isSigningOutAllRef.current ||
-            hasSignOutAllGenerationChanged(signOutGeneration)
-          ) {
-            clearAddConnectedAccountGuard();
-            return;
-          }
-          openAddConnectedAccountModal();
-        }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
-      })
-      .catch(handleDisconnectFailure);
+        retryConnectTimeoutRef.current = null;
+        if (
+          !isMountedRef.current ||
+          isSigningOutAllRef.current ||
+          hasSignOutAllGenerationChanged(signOutGeneration)
+        ) {
+          clearAddConnectedAccountGuard();
+          return;
+        }
+        openAddConnectedAccountModal();
+      }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
+    };
+
+    void disconnectBeforeAddingAccount();
   }, [
     account.address,
     account.isConnected,
