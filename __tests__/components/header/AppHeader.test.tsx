@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import React from "react";
 import AppHeader from "@/components/header/AppHeader";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
 
 const mockShare = jest.fn();
 const mockNativeCanShare = jest.fn();
@@ -163,6 +164,8 @@ function setup(opts: any) {
     isAuthenticated: opts.isAuthenticated ?? false,
     isConnected: opts.isConnected ?? false,
     connectedAccounts: opts.connectedAccounts ?? [],
+    connectedAccountUnreadNotifications:
+      opts.connectedAccountUnreadNotifications ?? {},
     seizeSwitchConnectedAccount: opts.seizeSwitchConnectedAccount ?? jest.fn(),
   });
   (useAuth as jest.Mock).mockReturnValue({
@@ -250,7 +253,10 @@ describe("AppHeader", () => {
     document.title = "6529";
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
 
   it("shows menu icon on root page even with history", () => {
     setup({ address: null, asPath: "/notifications", canGoBack: true });
@@ -258,6 +264,119 @@ describe("AppHeader", () => {
     expect(
       screen.getByRole("button", { name: "Open menu" })
     ).toBeInTheDocument();
+  });
+
+  it("opens the account menu immediately when only one profile is connected", () => {
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [{ address: "0xabc", isActive: true }],
+      seizeSwitchConnectedAccount,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
+  });
+
+  it("switches when the second tap lands on the drawer over the profile button", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open menu (double-click to switch accounts)",
+    });
+    jest.spyOn(profileButton, "getBoundingClientRect").mockReturnValue({
+      bottom: 50,
+      height: 40,
+      left: 10,
+      right: 50,
+      top: 10,
+      width: 40,
+      x: 10,
+      y: 10,
+      toJSON: () => ({}),
+    });
+    fireEvent.click(profileButton);
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId("sidebar"), {
+      clientX: 30,
+      clientY: 30,
+      detail: 1,
+    });
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
+    jest.useRealTimers();
+  });
+
+  it("switches on repeated keyboard activation", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open menu (double-click to switch accounts)",
+    });
+    fireEvent.click(profileButton, { detail: 0 });
+    fireEvent.click(profileButton, { detail: 0 });
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
+    jest.useRealTimers();
+  });
+
+  it("opens the account menu immediately and retains the shared tap window", () => {
+    jest.useFakeTimers();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Open menu (double-click to switch accounts)",
+      })
+    );
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    act(() => {
+      jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
+    });
+
+    expect(PROFILE_DOUBLE_ACTIVATE_DELAY_MS).toBe(400);
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    jest.useRealTimers();
   });
 
   it("shows back button on profile page when canGoBack is true", () => {
