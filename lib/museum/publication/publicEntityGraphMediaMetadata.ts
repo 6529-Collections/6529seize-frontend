@@ -76,6 +76,7 @@ export function metadataOnlyMedia(
       sourcePath: mediaEntity.sourcePath,
     },
     sourcePath: mediaEntity.sourcePath,
+    sourceRecordIds: mediaEntity.sourceRecordIds,
   };
 }
 

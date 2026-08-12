@@ -119,7 +119,7 @@ function nullableString(value: unknown): string | null {
 }
 
 const PROGRAM_MEDIA_HOSTS = new Set(["d3lqz0a4bldqgf.cloudfront.net"]);
-const PROGRAM_MEDIA_MANIFEST_PATH = `records/programs/${KEYS_AND_GATES_PROGRAM_ID}/media-manifest.json`;
+const PROGRAM_MEDIA_MANIFEST_PATH = `records/programs/${KEYS_AND_GATES_PROGRAM_ID}/public/presentation-manifest.json`;
 
 function approvedProgramMediaUrl(value: unknown): string | null {
   if (typeof value !== "string") {
@@ -712,6 +712,67 @@ export function normalizeMuseumCorpus(
     objects: objectRecords(documents, mediaIndex),
     errorCode: corpus.errorCode,
   };
+}
+
+/**
+ * Resolve reviewed responsive program media for a public work's explicit
+ * source-record identifiers. Metadata-only public media never carries a
+ * visitor image URL, so the fallback is deliberately limited to normalized
+ * program media with at least one reviewed derivative variant.
+ */
+export function findReviewedProgramMedia(
+  view: MuseumView | null | undefined,
+  sourceRecordIds: readonly string[]
+): MuseumProgramMedia | null {
+  return findReviewedProgramMediaMatch(view, sourceRecordIds)?.media ?? null;
+}
+
+interface MuseumReviewedProgramMediaMatch {
+  readonly media: MuseumProgramMedia;
+  /** The exact source record ID that admitted the reviewed program media. */
+  readonly sourceRecordId: string;
+}
+
+export function findReviewedProgramMediaMatch(
+  view: MuseumView | null | undefined,
+  sourceRecordIds: readonly string[]
+): MuseumReviewedProgramMediaMatch | null {
+  const identifiers = new Set(
+    sourceRecordIds.map((identifier) => identifier.trim()).filter(Boolean)
+  );
+  if (identifiers.size === 0 || view === null || view === undefined) {
+    return null;
+  }
+
+  const objectMatch = view.objects.find(
+    (candidate) =>
+      identifiers.has(candidate.objectId) &&
+      candidate.media !== null &&
+      candidate.media.variants.length > 0
+  );
+  if (objectMatch?.media !== undefined && objectMatch.media !== null) {
+    return {
+      media: objectMatch.media,
+      sourceRecordId: objectMatch.objectId,
+    };
+  }
+
+  for (const program of view.programs) {
+    const selectedWork = program.selectedWorks.find(
+      (work) =>
+        identifiers.has(work.recordId) &&
+        work.media !== null &&
+        work.media.variants.length > 0
+    );
+    if (selectedWork?.media !== undefined && selectedWork.media !== null) {
+      return {
+        media: selectedWork.media,
+        sourceRecordId: selectedWork.recordId,
+      };
+    }
+  }
+
+  return null;
 }
 
 export const getMuseumView = cache(async (): Promise<MuseumView> => {

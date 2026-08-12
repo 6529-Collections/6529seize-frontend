@@ -22,7 +22,10 @@ import {
   getCaseyArtwork,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
-import { getMuseumView } from "@/lib/museum/normalize";
+import {
+  findReviewedProgramMediaMatch,
+  getMuseumView,
+} from "@/lib/museum/normalize";
 import { buildMuseumWorkContext } from "@/lib/museum/publication/ia";
 import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
 import type {
@@ -30,10 +33,7 @@ import type {
   MuseumPublication,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
-import {
-  selectMuseumStillMedia,
-  shouldWithholdKeysAndGatesMedia,
-} from "@/lib/museum/publication/mediaSelection";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import {
   displayMuseumPublicAcquisitionStatus,
   museumSlugMatches,
@@ -41,6 +41,7 @@ import {
 import { getGenerativeStudyByObjectId } from "@/lib/museum/generative-studies";
 import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
 import { MuseumProgramImage } from "./MuseumProgramImage";
+import { MuseumReviewedProgramMediaFigure } from "./MuseumReviewedProgramMediaFigure";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { museumWorkHrefIndex } from "@/lib/museum/publication/routes";
@@ -116,14 +117,12 @@ function workQualifierLabel(
 
 function MuseumCanonicalWorkMedia({
   work,
-  withholdVisualMedia,
+  programMediaMatch,
 }: {
   readonly work: MuseumPublicWork;
-  readonly withholdVisualMedia: boolean;
+  readonly programMediaMatch: ReturnType<typeof findReviewedProgramMediaMatch>;
 }) {
-  const stillMedia = withholdVisualMedia
-    ? undefined
-    : selectMuseumStillMedia(work.media);
+  const stillMedia = selectMuseumStillMedia(work.media);
   if (stillMedia !== undefined) {
     return (
       <section
@@ -158,6 +157,41 @@ function MuseumCanonicalWorkMedia({
         </div>
       </section>
     );
+  }
+  if (programMediaMatch !== null) {
+    const metadata = work.mediaMetadata?.find((candidate) =>
+      candidate.sourceRecordIds?.includes(programMediaMatch.sourceRecordId)
+    );
+    return (
+      <section
+        className="tw-mt-10"
+        aria-labelledby="canonical-work-media-title"
+      >
+        <h2 id="canonical-work-media-title" className="tw-sr-only">
+          {t(DEFAULT_LOCALE, "museum.network.works.title")}
+        </h2>
+        <MuseumReviewedProgramMediaFigure
+          media={programMediaMatch.media}
+          metadata={metadata}
+          sizes="(min-width: 1024px) 66vw, 100vw"
+          eager
+          figureClassName="tw-m-0"
+          captionClassName="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400"
+          creditLineClassName="tw-block tw-text-iron-200"
+          licenseWrapperClassName="tw-mt-1 tw-block"
+          rightsLayout="block"
+        />
+      </section>
+    );
+  }
+  // A reviewed Wave presentation is the public image for this downstream
+  // accession record. Its dedicated figure follows immediately below; do not
+  // put a metadata-only placeholder in front of it.
+  if (
+    work.presentationMedia !== undefined &&
+    work.presentationMedia.length > 0
+  ) {
+    return null;
   }
   const metadata = work.mediaMetadata?.[0];
   if (metadata !== undefined) {
@@ -238,8 +272,23 @@ function MuseumCanonicalWorkRecordPage({
   });
   const documents = selectMuseumPublicWorkDocuments(work, projectedDocuments);
   const workHrefs = museumWorkHrefIndex(publication, view);
+  const programMediaMatch = findReviewedProgramMediaMatch(view, [
+    work.id,
+    ...(work.sourceRecordIds ?? []),
+  ]);
+  const programMediaMetadata =
+    programMediaMatch === null
+      ? undefined
+      : work.mediaMetadata?.find((candidate) =>
+          candidate.sourceRecordIds?.includes(programMediaMatch.sourceRecordId)
+        );
+  const metadataCredit =
+    programMediaMatch === null
+      ? work.mediaMetadata?.[0]?.credit.creditLine
+      : programMediaMetadata?.credit.creditLine;
   const primaryCredit =
     work.media[0]?.credit.creditLine ??
+    metadataCredit ??
     work.presentationMedia?.[0]?.credit.creditLine;
   const primarySource =
     work.sourcePaths[0] === undefined
@@ -249,12 +298,6 @@ function MuseumCanonicalWorkRecordPage({
           work.sourcePaths[0]
         );
   const insideSystemHref = museumWorkInsideSystemHref(work, publication);
-  const withholdVisualMedia = shouldWithholdKeysAndGatesMedia(
-    work.status,
-    (publication.acquisitionPrograms ?? [])
-      .filter((program) => work.programIds.includes(program.id))
-      .map((program) => program.slug)
-  );
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -285,9 +328,24 @@ function MuseumCanonicalWorkRecordPage({
           </p>
         ) : null}
       </header>
+      <MuseumEntityContext
+        context={{
+          ...context,
+          status: displayMuseumPublicAcquisitionStatus(work.status),
+        }}
+        labels={{
+          ariaLabel: t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.entityContext"
+          ),
+          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
+          statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
+          source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
+        }}
+      />
       <MuseumCanonicalWorkMedia
         work={work}
-        withholdVisualMedia={withholdVisualMedia}
+        programMediaMatch={programMediaMatch}
       />
       {insideSystemHref !== null ? (
         <div className="tw-mt-8">
@@ -299,8 +357,7 @@ function MuseumCanonicalWorkRecordPage({
           </Link>
         </div>
       ) : null}
-      {!withholdVisualMedia &&
-      work.presentationMedia !== undefined &&
+      {work.presentationMedia !== undefined &&
       work.presentationMedia.length > 0 ? (
         <section
           className="tw-mt-10"
@@ -332,9 +389,7 @@ function MuseumCanonicalWorkRecordPage({
                       alt={media.altText}
                       width={media.width}
                       height={media.height}
-                      {...(media.sourceByteSize === undefined
-                        ? {}
-                        : { sourceByteSize: media.sourceByteSize })}
+                      sourceByteSize={media.sourceByteSize}
                       {...(sourceHref === null || !canOpenPresentation
                         ? {}
                         : {
@@ -384,21 +439,6 @@ function MuseumCanonicalWorkRecordPage({
           </div>
         </section>
       ) : null}
-      <MuseumEntityContext
-        context={{
-          ...context,
-          status: displayMuseumPublicAcquisitionStatus(work.status),
-        }}
-        labels={{
-          ariaLabel: t(
-            DEFAULT_LOCALE,
-            "museum.network.accessibility.entityContext"
-          ),
-          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
-          statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
-          source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
-        }}
-      />
       <section
         className="tw-mt-10"
         aria-labelledby="canonical-work-record-title"

@@ -98,6 +98,7 @@ describe("Museum publication entity contract", () => {
       mediaUrl:
         "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/d498d837-3331-4650-a30e-27ca18d53521/magnum-75-127.jpg",
       mediaMimeType: "image/jpeg",
+      sourceByteSize: 2_518_674,
       width: 1600,
       height: 1067,
       altText: "A proposed Magnum photograph.",
@@ -149,6 +150,7 @@ describe("Museum publication entity contract", () => {
         kind: "external_proposal_presentation",
         mediaUrl,
         mediaMimeType: "image/jpeg",
+        sourceByteSize: 1_000_000 + index,
         width: 1600,
         height: 1067,
         altText: `Governed proposal photograph ${index + 1}.`,
@@ -284,6 +286,7 @@ describe("Museum publication entity contract", () => {
         kind: "external_proposal_presentation",
         mediaUrl: "https://media.6529.io/museum/broken.jpg",
         mediaMimeType: "image/jpeg",
+        sourceByteSize: 1,
         width: 100,
         height: 100,
         altText: "Broken join",
