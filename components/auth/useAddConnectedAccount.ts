@@ -1,6 +1,7 @@
 /* eslint-disable max-lines-per-function, react-compiler/react-compiler -- This hook owns one cohesive asynchronous wallet handoff and its mutable coordination refs. */
 import {
   useCallback,
+  useRef,
   type Dispatch,
   type RefObject,
   type SetStateAction,
@@ -59,7 +60,10 @@ export function useAddConnectedAccount({
   seizeConnectOrThrow,
   setIsAddingConnectedAccount,
 }: UseAddConnectedAccountParams): () => void {
+  const addConnectedAccountAttemptRef = useRef(0);
+
   const cancelAddConnectedAccount = useCallback((): void => {
+    addConnectedAccountAttemptRef.current += 1;
     isAddingConnectedAccountRef.current = false;
     addFlowOriginAddressRef.current = null;
     if (retryConnectTimeoutRef.current) {
@@ -75,34 +79,6 @@ export function useAddConnectedAccount({
   ]);
 
   return useCallback((): void => {
-    const clearAddConnectedAccountGuard = cancelAddConnectedAccount;
-
-    const handleConnectFailure = (error: unknown): void => {
-      clearAddConnectedAccountGuard();
-      setIsAddingConnectedAccount(false);
-      const connectionError = createWalletError(
-        WalletConnectionError,
-        "start add-account connection flow",
-        error
-      );
-      logError("seizeAddConnectedAccount", connectionError);
-    };
-
-    const signOutGeneration = getSignOutAllGeneration();
-    const openAddConnectedAccountModal = (): void => {
-      if (
-        isSigningOutAllRef.current ||
-        hasSignOutAllGenerationChanged(signOutGeneration)
-      ) {
-        clearAddConnectedAccountGuard();
-        return;
-      }
-
-      seizeConnectOrThrow("seizeAddConnectedAccount").catch(
-        handleConnectFailure
-      );
-    };
-
     if (
       isSigningOutAllRef.current ||
       !canAddConnectedAccount ||
@@ -147,6 +123,47 @@ export function useAddConnectedAccount({
     addFlowOriginAddressRef.current = liveConnectedWallet;
     setIsAddingConnectedAccount(true);
 
+    const addConnectedAccountAttempt =
+      addConnectedAccountAttemptRef.current + 1;
+    addConnectedAccountAttemptRef.current = addConnectedAccountAttempt;
+    const isCurrentAttempt = (): boolean =>
+      addConnectedAccountAttemptRef.current === addConnectedAccountAttempt;
+    const clearAddConnectedAccountGuard = (): void => {
+      if (isCurrentAttempt()) {
+        cancelAddConnectedAccount();
+      }
+    };
+    const handleConnectFailure = (error: unknown): void => {
+      if (!isCurrentAttempt()) {
+        return;
+      }
+      clearAddConnectedAccountGuard();
+      const connectionError = createWalletError(
+        WalletConnectionError,
+        "start add-account connection flow",
+        error
+      );
+      logError("seizeAddConnectedAccount", connectionError);
+    };
+
+    const signOutGeneration = getSignOutAllGeneration();
+    const openAddConnectedAccountModal = (): void => {
+      if (!isCurrentAttempt()) {
+        return;
+      }
+      if (
+        isSigningOutAllRef.current ||
+        hasSignOutAllGenerationChanged(signOutGeneration)
+      ) {
+        clearAddConnectedAccountGuard();
+        return;
+      }
+
+      seizeConnectOrThrow("seizeAddConnectedAccount").catch(
+        handleConnectFailure
+      );
+    };
+
     if (!liveConnectedWallet || isActiveAppWalletConnector) {
       openAddConnectedAccountModal();
       return;
@@ -158,8 +175,10 @@ export function useAddConnectedAccount({
     }
 
     const handleDisconnectFailure = (error: unknown): void => {
+      if (!isCurrentAttempt()) {
+        return;
+      }
       clearAddConnectedAccountGuard();
-      setIsAddingConnectedAccount(false);
       const walletError = createWalletError(
         WalletDisconnectionError,
         "disconnect wallet before adding account",
@@ -170,7 +189,13 @@ export function useAddConnectedAccount({
 
     disconnect()
       .then(() => {
+        if (!isCurrentAttempt()) {
+          return;
+        }
         retryConnectTimeoutRef.current = setTimeout(() => {
+          if (!isCurrentAttempt()) {
+            return;
+          }
           retryConnectTimeoutRef.current = null;
           if (
             !isMountedRef.current ||

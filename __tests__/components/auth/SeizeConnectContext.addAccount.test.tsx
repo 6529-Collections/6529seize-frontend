@@ -230,6 +230,20 @@ function createPendingPromise<T>(): Promise<T> {
   });
 }
 
+function createDeferred<T>(): {
+  readonly promise: Promise<T>;
+  readonly reject: (reason?: unknown) => void;
+  readonly resolve: (value: T | PromiseLike<T>) => void;
+} {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, reject, resolve };
+}
+
 describe("SeizeConnectProvider add-account flow", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -312,7 +326,8 @@ describe("SeizeConnectProvider add-account flow", () => {
   });
 
   it("clears a stale add-flow guard before reopening connect for app-wallet connectors", async () => {
-    mockDisconnect.mockImplementation(() => createPendingPromise<void>());
+    const staleDisconnect = createDeferred<void>();
+    mockDisconnect.mockImplementation(() => staleDisconnect.promise);
 
     const { rerender } = render(
       <SeizeConnectProvider>
@@ -354,6 +369,66 @@ describe("SeizeConnectProvider add-account flow", () => {
       expect(mockOpen).toHaveBeenCalledTimes(1);
       expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
     });
+
+    await act(async () => {
+      staleDisconnect.resolve();
+      await Promise.resolve();
+    });
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores a stale disconnect failure after a newer add-account attempt starts", async () => {
+    const staleDisconnect = createDeferred<void>();
+    mockDisconnect.mockImplementation(() => staleDisconnect.promise);
+
+    const { rerender } = render(
+      <SeizeConnectProvider>
+        <AddAccountButton />
+      </SeizeConnectProvider>
+    );
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Add account" }));
+    });
+
+    mockWagmiAccount = {
+      connector: {
+        type: APP_WALLET_CONNECTOR_TYPE,
+      },
+    };
+    mockAppKitAccount = {
+      address: undefined,
+      isConnected: false,
+      status: "disconnected",
+    };
+
+    rerender(
+      <SeizeConnectProvider>
+        <AddAccountButton />
+      </SeizeConnectProvider>
+    );
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Add account" }));
+    });
+    await waitFor(() => {
+      expect(mockOpen).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      staleDisconnect.reject(new Error("stale disconnect failed"));
+      await Promise.resolve();
+    });
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Add account" }));
+    });
+
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+    expect(mockLogError).not.toHaveBeenCalled();
   });
 
   it("keeps the disconnect-then-connect flow for browser-wallet connectors", async () => {
