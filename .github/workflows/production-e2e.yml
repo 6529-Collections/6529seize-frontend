@@ -12,19 +12,27 @@ on:
       automatic_deploy_run_id:
         description: Successful Web Deploy - PROD run ID to validate again
         type: string
-        required: true
+        required: false
+      trusted_deployed_sha:
+        description: Exact live frontend SHA supplied by trusted deployment automation
+        type: string
+        required: false
+      tracking_id:
+        description: Opaque trusted-automation correlation ID
+        type: string
+        required: false
 
 permissions:
   actions: read
   contents: read
 
-run-name: Production E2E ${{ inputs.trusted_deployed_sha && 'automatic' || 'manual' }}
+run-name: Production E2E ${{ inputs.tracking_id != '' && format('[{0}]', inputs.tracking_id) || (inputs.trusted_deployed_sha && 'automatic' || 'manual') }}
 
 concurrency:
   # Automatic E2E runs while the caller owns web-deploy-prod. Manual recovery
   # runs acquire web-deploy-prod themselves so deployment cannot change the
   # environment while it is being validated.
-  group: ${{ inputs.trusted_deployed_sha != '' && 'production-e2e' || 'web-deploy-prod' }}
+  group: ${{ inputs.tracking_id == '' && inputs.trusted_deployed_sha != '' && 'production-e2e' || 'web-deploy-prod' }}
   cancel-in-progress: false
 
 jobs:
@@ -48,8 +56,15 @@ jobs:
           if [ -n "$TRUSTED_DEPLOYED_SHA" ]; then
             [[ "$TRUSTED_DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
             test -z "$AUTOMATIC_DEPLOY_RUN_ID"
+            if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+              test "$GITHUB_ACTOR" = '6529-release-bus[bot]'
+              [[ "${{ inputs.tracking_id }}" =~ ^[A-Za-z0-9._:-]{1,200}$ ]]
+            else
+              test -z "${{ inputs.tracking_id }}"
+            fi
             deployed_sha="$TRUSTED_DEPLOYED_SHA"
           else
+            test -z "${{ inputs.tracking_id }}"
             test "$GITHUB_REF" = refs/heads/main
             [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
             gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
@@ -81,7 +96,7 @@ jobs:
           echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
 
       - name: Check out trusted version verifier
-        if: inputs.trusted_deployed_sha == ''
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: main
@@ -93,7 +108,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Require the selected production deployment to still be live
-        if: inputs.trusted_deployed_sha == ''
+        if: github.event_name == 'workflow_dispatch'
         env:
           EXPECTED_SHA: ${{ steps.source.outputs.sha }}
         run: |
@@ -190,3 +205,21 @@ jobs:
           path: production-e2e-artifacts/
           retention-days: 30
           if-no-files-found: ignore
+
+      - name: Record manual production revalidation outcome
+        if: always() && inputs.trusted_deployed_sha == '' && steps.source.outputs.sha != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: ${{ job.status == 'success' && 'success' || 'failure' }}
+          CI_PIPELINES_NOTIFICATION_TYPE: release_validation
+          CI_PIPELINES_VALIDATION_MODE: manual
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: manual production revalidation"
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ steps.source.outputs.sha }}
+          CI_RELEASE_GROUP_ID: ${{ github.repository }}:${{ inputs.automatic_deploy_run_id }}
+        run: node scripts/notify-ci-wave.mjs

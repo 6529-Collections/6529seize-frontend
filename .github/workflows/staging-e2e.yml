@@ -41,19 +41,27 @@ on:
       automatic_deploy_run_id:
         description: Successful Web Deploy - STAGING run ID to validate again
         type: string
-        required: true
+        required: false
+      trusted_deployed_sha:
+        description: Exact live frontend SHA supplied by trusted deployment automation
+        type: string
+        required: false
+      tracking_id:
+        description: Opaque trusted-automation correlation ID
+        type: string
+        required: false
 
 permissions:
   actions: read
   contents: read
 
-run-name: Staging E2E [${{ inputs.trusted_deployed_sha && 'automatic' || 'manual' }}]
+run-name: Staging E2E ${{ inputs.tracking_id != '' && format('[{0}]', inputs.tracking_id) || (inputs.trusted_deployed_sha && '[automatic]' || '[manual]') }}
 
 concurrency:
   # Automatic E2E runs while the caller owns staging-deploy. Manual recovery
   # runs acquire staging-deploy themselves so deployment cannot change the
   # environment while it is being validated.
-  group: ${{ inputs.trusted_deployed_sha != '' && 'staging-e2e' || 'staging-deploy' }}
+  group: ${{ inputs.tracking_id == '' && inputs.trusted_deployed_sha != '' && 'staging-e2e' || 'staging-deploy' }}
   cancel-in-progress: false
 
 jobs:
@@ -79,8 +87,15 @@ jobs:
           if [ -n "$TRUSTED_DEPLOYED_SHA" ]; then
             [[ "$TRUSTED_DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
             test -z "$AUTOMATIC_DEPLOY_RUN_ID"
+            if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+              test "$GITHUB_ACTOR" = '6529-release-bus[bot]'
+              [[ "${{ inputs.tracking_id }}" =~ ^[A-Za-z0-9._:-]{1,200}$ ]]
+            else
+              test -z "${{ inputs.tracking_id }}"
+            fi
             deployed_sha="$TRUSTED_DEPLOYED_SHA"
           else
+            test -z "${{ inputs.tracking_id }}"
             test "$GITHUB_REF" = refs/heads/main
             [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
             gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
@@ -112,7 +127,7 @@ jobs:
           echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
 
       - name: Check out trusted version verifier
-        if: inputs.trusted_deployed_sha == ''
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: main
@@ -123,7 +138,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Require the selected staging deployment to still be live
-        if: inputs.trusted_deployed_sha == ''
+        if: github.event_name == 'workflow_dispatch'
         env:
           EXPECTED_SHA: ${{ steps.source.outputs.sha }}
           STAGING_AUTH: ${{ secrets.STAGING_AUTH }}

@@ -68,7 +68,18 @@ and starts release-note generation without waiting for automatic E2E. A second
 notifier runs after E2E and asks the backend to attach a threaded validation
 reply to those release notes. A failed validation is therefore visible as an
 explicit invalid result and tags `devs6529`; it does not erase or suppress the
-record of what was deployed.
+record of what was deployed. A later successful manual recovery run appends a
+new manual-revalidation reply to the same release-note thread, preserving both
+the original failure and the subsequent recovery. Deployments with no previous
+baseline or no newly merged pull requests still receive a minimal parent post,
+so validation always has a thread to update.
+
+The reusable staging and production E2E workflows retain one deliberately
+narrow compatibility entry point for the backend Release Bus while frontend
+Release Bus operation plumbing remains archived. Only a workflow dispatch by
+the Release Bus GitHub App may supply a trusted deployed SHA and tracking ID.
+That run verifies the SHA currently served by the environment and holds the
+same deployment concurrency lock. Manual callers cannot use this entry point.
 
 ## Concurrency and recovery
 
@@ -86,8 +97,8 @@ record of what was deployed.
 - A production target outside current `main` history or a downgrade rejection
   requires a fresh explicit production decision; do not bypass the guard.
 - A successful deploy with failed E2E is reported as deployed but unvalidated.
-  Do not silently redeploy or substitute a manual E2E run for the automatic
-  run's result.
+  A later canonical manual E2E run records a separate recovery result rather
+  than rewriting the automatic run's result.
 
 The former frontend Release Bus integration is retained for historical and
 restoration reference under

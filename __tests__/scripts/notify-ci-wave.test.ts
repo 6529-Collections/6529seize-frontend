@@ -132,6 +132,7 @@ describe("notify-ci-wave Release Train metadata", () => {
       stderr: "",
       payload: {
         notification_type: "release_validation",
+        validation_mode: "automatic",
         release_group_id: "6529-Collections/6529seize-frontend:123",
         sha: expectedSha,
         status: "success",
@@ -139,6 +140,25 @@ describe("notify-ci-wave Release Train metadata", () => {
     });
     expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
     expect(result.payload).not.toHaveProperty("deployed_at");
+  });
+
+  it("identifies manual revalidation and preserves the original release group", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_NOTIFICATION_TYPE: "release_validation",
+      CI_PIPELINES_VALIDATION_MODE: "manual",
+      CI_PIPELINES_SHA: "d".repeat(40),
+      CI_RELEASE_GROUP_ID: "6529-Collections/6529seize-frontend:999",
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        notification_type: "release_validation",
+        validation_mode: "manual",
+        release_group_id: "6529-Collections/6529seize-frontend:999",
+      },
+    });
   });
 
   it("rejects release validation without an explicit exact SHA", async () => {

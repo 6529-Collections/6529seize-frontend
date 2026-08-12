@@ -65,6 +65,14 @@ The current frontend paths are documented in
 - a manual `Web Deploy - PROD` run on `main` builds, independently verifies,
   and deploys the exact artifact, followed by automatic production E2E.
 
+The active reusable E2E workflows keep a narrow backend compatibility entry
+point: an exact dispatch from the Release Bus GitHub App may validate a trusted
+deployed SHA and tracking ID. This does not restore frontend readiness,
+authorization, manifests, authority acquisition/completion, or any other
+archived frontend Release Bus lifecycle. It only allows the still-active
+backend Release Bus to invoke the same locked, exact-SHA E2E validation during
+a staged rollout or a future theoretical restoration.
+
 ## Theoretical restoration
 
 Restoration would require a separate, reviewed change. At minimum it would:

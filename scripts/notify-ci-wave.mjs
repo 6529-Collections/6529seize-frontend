@@ -8,6 +8,7 @@ const {
   CI_PIPELINES_TARGET_ENV,
   CI_PIPELINES_STATUS,
   CI_PIPELINES_NOTIFICATION_TYPE,
+  CI_PIPELINES_VALIDATION_MODE,
   CI_PIPELINES_TITLE,
   CI_PIPELINES_DESCRIPTION,
   CI_PIPELINES_ENVIRONMENT,
@@ -126,6 +127,22 @@ if (!["pipeline", "release_validation"].includes(notificationType)) {
   console.error("CI_PIPELINES_NOTIFICATION_TYPE is invalid");
   process.exit(1);
 }
+if (
+  CI_PIPELINES_VALIDATION_MODE &&
+  !["automatic", "manual"].includes(CI_PIPELINES_VALIDATION_MODE)
+) {
+  console.error("CI_PIPELINES_VALIDATION_MODE is invalid");
+  process.exit(1);
+}
+if (
+  CI_PIPELINES_VALIDATION_MODE &&
+  notificationType !== "release_validation"
+) {
+  console.error(
+    "CI_PIPELINES_VALIDATION_MODE is allowed only for release validation"
+  );
+  process.exit(1);
+}
 const triggeredByGithubLogin = GITHUB_TRIGGERING_ACTOR || GITHUB_ACTOR || null;
 let releaseContributors = [];
 try {
@@ -196,6 +213,7 @@ const validationFields =
   notificationType === "release_validation"
     ? {
         notification_type: notificationType,
+        validation_mode: CI_PIPELINES_VALIDATION_MODE || "automatic",
         release_group_id: releaseGroupId,
       }
     : {};

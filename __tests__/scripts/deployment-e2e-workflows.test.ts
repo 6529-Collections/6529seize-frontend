@@ -106,7 +106,7 @@ describe("serialized post-deploy E2E", () => {
       expect(
         e2e.workflow.on.workflow_dispatch.inputs.automatic_deploy_run_id
           .required
-      ).toBe(true);
+      ).toBe(false);
       expect(
         e2e.workflow.on.workflow_dispatch.inputs.target_sha
       ).toBeUndefined();
@@ -145,9 +145,56 @@ describe("serialized post-deploy E2E", () => {
       );
       expect(e2e.source).toContain("DEPLOYMENT_E2E_SOURCE_SHA");
       expect(e2e.source).toContain("./bin/6529 run e2e:packs");
-      expect(e2e.source).not.toMatch(/operation_id|authority|release[-_ ]bus/i);
+      expect(e2e.source).not.toMatch(/operation_id|authority/i);
     }
   );
+
+  it.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])(
+    "keeps the %s trusted-automation compatibility contract narrow",
+    (_environment, e2e) => {
+      const dispatchInputs = e2e.workflow.on.workflow_dispatch.inputs;
+      const resolve = Object.values(e2e.workflow.jobs)[0].steps.find(
+        (step: { name?: string }) => step.name === "Resolve exact deployed SHA"
+      );
+
+      expect(dispatchInputs.trusted_deployed_sha).toEqual(
+        expect.objectContaining({ required: false, type: "string" })
+      );
+      expect(dispatchInputs.tracking_id).toEqual(
+        expect.objectContaining({ required: false, type: "string" })
+      );
+      expect(resolve.run).toContain(
+        "test \"$GITHUB_ACTOR\" = '6529-release-bus[bot]'"
+      );
+      expect(resolve.run).toContain("inputs.tracking_id");
+      expect(e2e.source).not.toMatch(
+        /release_manifest|artifact_digest|authorize|report-progress/i
+      );
+    }
+  );
+
+  it("records manual production revalidation against the original deployment", () => {
+    const job = productionE2e.workflow.jobs.readonly;
+    const notification = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Record manual production revalidation outcome"
+    );
+
+    expect(notification.if).toContain("inputs.trusted_deployed_sha == ''");
+    expect(notification.env.CI_PIPELINES_NOTIFICATION_TYPE).toBe(
+      "release_validation"
+    );
+    expect(notification.env.CI_PIPELINES_VALIDATION_MODE).toBe("manual");
+    expect(notification.env.CI_RELEASE_GROUP_ID).toBe(
+      "${{ github.repository }}:${{ inputs.automatic_deploy_run_id }}"
+    );
+    expect(notification.env.CI_PIPELINES_SHA).toBe(
+      "${{ steps.source.outputs.sha }}"
+    );
+  });
 
   it("does not expose the staging access code to source selection or checkout", () => {
     const job = stagingE2e.workflow.jobs["staging-packs"];

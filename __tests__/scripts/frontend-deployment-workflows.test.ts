@@ -124,7 +124,11 @@ describe("frontend deployment workflow contract", () => {
     const forbidden =
       /release[-_ ]bus|deployment[-_ ]bus|operation_id|authority\/|authority completion/i;
     for (const workflow of activePaths) {
-      expect(readWorkflow(workflow).source).not.toMatch(forbidden);
+      const source = readWorkflow(workflow).source.replaceAll(
+        "6529-release-bus[bot]",
+        "trusted-automation-actor"
+      );
+      expect(source).not.toMatch(forbidden);
     }
   });
 
@@ -155,7 +159,7 @@ describe("frontend deployment workflow contract", () => {
       expect(
         e2e.workflow.on.workflow_dispatch.inputs.automatic_deploy_run_id
           .required
-      ).toBe(true);
+      ).toBe(false);
       expect(
         e2e.workflow.on.workflow_dispatch.inputs.target_sha
       ).toBeUndefined();
