@@ -93,7 +93,7 @@
         "Collection means works formally accessioned by the Museum at /museum/network/collection; canonical Work records are available at /museum/network/works/[work-id].",
         "Artists, projects, organizations, acquisitions, and research connect works to curatorial writing, provenance, rights, and collection care.",
         "Acquisitions at /museum/network/acquisitions presents Casey Reas, Keys and Gates, and Magnum Photos 75 with each present stage and its related works.",
-        "Magnum Photos 75, Conflict at Its Edges, is Selected by Museum Wave; acquisition review in progress at /museum/network/acquisitions/conflict-at-its-edges.",
+        "Magnum Photos 75, Conflict at Its Edges, is Selected by Museum Wave; accession processing in progress at /museum/network/acquisitions/conflict-at-its-edges.",
         "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
         "The governed Gift into Public Trust narrative and all five Casey Reas project essays are readable onsite from the same atomic publication snapshot.",
         "Inside the System publishes project-level studies for CENTURY, Pre-Process, Phototaxis, 923 EMPTY ROOMS, and Ex Nihilo (Cosmos) at /museum/network/projects/[project-slug]/system.",

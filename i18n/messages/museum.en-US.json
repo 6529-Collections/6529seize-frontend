@@ -398,7 +398,7 @@
   "museum.network.acquisitions.keysAndGatesTitle": "Keys and Gates",
   "museum.network.acquisitions.keysAndGatesDescription": "A photographic group selected through the Keys and Gates program.",
   "museum.network.acquisitions.proposedStatus": "Proposed in the Museum Wave",
-  "museum.network.acquisitions.selectedWaveStatus": "Selected by Museum Wave; acquisition review in progress",
+  "museum.network.acquisitions.selectedWaveStatus": "Selected by Museum Wave; accession processing in progress",
   "museum.network.acquisitions.selectedStatus": "Selected through an acquisition program; acquisition pending",
   "museum.network.acquisitions.selectedWorkQualifier": "Not yet minted or accessioned.",
   "museum.network.acquisitions.completeStatus": "Acquisition complete; accession review in progress",

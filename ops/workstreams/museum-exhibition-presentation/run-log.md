@@ -88,3 +88,23 @@
   Local full-route rendering remains dependent on the shared local backend;
   the authoritative exact-catalog browser qualification is the fresh hosted
   desktop/mobile lane.
+- Corrected downstream-accession source Candidate A
+  `943ec3856ec40dada9503b848a6ab7adf82934a4` passed all six hosted source
+  checks and independent exact-head review by
+  `codex-review:independent-reviewer`. Reviewed Candidate B
+  `6cef42ab590f35f035ae4858770d880925ad3085` is its direct child; active
+  catalog Candidate C `cc8465764a55309d3eca5d3477b0f3993ef5a48c` is the
+  direct child of B. The accession records carry the five exact historical
+  Wave image byte sizes and publication parts. The visitor projection still
+  excludes the raw Wave receipt and unrelated token-source locators.
+- Frontend head `c522baeab53ba68bb0738a3216ce4d843c38ebb6` passed Knip,
+  the surface registry, changed lint/typecheck, and the Playwright smoke lane.
+  Its Museum browser lanes failed closed at publication assembly because they
+  were intentionally pinned to the pre-correction catalog/source generation,
+  which lacks the newly required accession-media fields. The fixture now
+  binds exact C `cc8465764a55309d3eca5d3477b0f3993ef5a48c` and exact B
+  `6cef42ab590f35f035ae4858770d880925ad3085`; no compatibility fallback was
+  added.
+- Visitor status copy now follows the accession record exactly: "Selected by
+  Museum Wave; accession processing in progress." It does not describe a
+  second acquisition review after the Wave's selection.

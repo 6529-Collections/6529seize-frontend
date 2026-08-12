@@ -494,10 +494,10 @@ describe("testing strategy CI plan", () => {
       "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "459cdfd41145f0ea55ec5687508222de6b673252"'
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "cc8465764a55309d3eca5d3477b0f3993ef5a48c"'
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "2da150eacf951d977f6c430b1e21c118687a0c32"'
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "6cef42ab590f35f035ae4858770d880925ad3085"'
     );
     expect(workflow).toContain('case "$selected_pack"');
     expect(workflow).toContain(

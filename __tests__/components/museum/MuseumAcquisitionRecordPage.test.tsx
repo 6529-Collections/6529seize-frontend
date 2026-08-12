@@ -442,7 +442,7 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
   it("renders Conflict at Its Edges as a visual Wave-selected acquisition", () => {
     const workTitle = "Conflict at Its Edges";
     const artistName = "M. Artist";
-    const lifecycle = "Selected by Museum Wave; acquisition review in progress";
+    const lifecycle = "Selected by Museum Wave; accession processing in progress";
     const workId = "6529NM-W-0024";
     const presentation = presentationMedia();
 

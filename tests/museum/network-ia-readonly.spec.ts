@@ -189,7 +189,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       ],
       [
         "/museum/network/works/6529NM-W-0024",
-        "Selected by Museum Wave; acquisition review in progress",
+        "Selected by Museum Wave; accession processing in progress",
       ],
     ] as const) {
       await openRoute(page, path);
@@ -235,7 +235,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).toHaveCount(0);
     await expect(
       page.getByText(
-        "Selected by Museum Wave; acquisition review in progress",
+        "Selected by Museum Wave; accession processing in progress",
         {
           exact: true,
         }
