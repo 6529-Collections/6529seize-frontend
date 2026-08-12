@@ -342,6 +342,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       "museum-acquisition-conflict-at-its-edges"
     );
     await page.locator("#acquisition-works-title").scrollIntoViewIfNeeded();
+    await expect(
+      page.locator("#acquisition-works figure").first()
+    ).toContainText(
+      "Patrolling the border between the Negev Desert and Jordan"
+    );
     await expect
       .poll(() =>
         page
