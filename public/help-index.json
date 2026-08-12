@@ -4036,7 +4036,9 @@
       "facts": [
         "Mobile layouts use bottom navigation for Discovery, Waves, Messages, Home, Network, Collections, and Notifications.",
         "The mobile bottom navigation surface is separate from the desktop and app sidebar IA.",
-        "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
+        "Tablet-sized app viewports use a wider dock while phone sizing stays unchanged.",
+        "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
+        "In the native app, the new-version refresh prompt stays centered directly above the dock and follows its expanded or compact position."
       ],
       "canonical_path": "/waves",
       "related_paths": [
