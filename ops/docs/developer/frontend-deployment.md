@@ -62,10 +62,13 @@ the `web-deploy-prod` environment lock. A later production deployment therefore
 cannot change the environment during automatic E2E. Manual production E2E
 recovery also acquires that lock and accepts only a canonical run ID whose
 production deploy job succeeded and whose exact version is still live. Manual
-recovery must run the trusted E2E workflow from `main`. The CI-wave finalizer
-runs after the builder, independent verifier, deployment, and automatic E2E;
-it sends the success and release-notes notification only when every required
-job succeeded, and otherwise sends the corresponding failure notification.
+recovery must run the trusted E2E workflow from `main`. Once the verified
+deployment succeeds, the deployment notifier publishes the production status
+and starts release-note generation without waiting for automatic E2E. A second
+notifier runs after E2E and asks the backend to attach a threaded validation
+reply to those release notes. A failed validation is therefore visible as an
+explicit invalid result and tags `devs6529`; it does not erase or suppress the
+record of what was deployed.
 
 ## Concurrency and recovery
 
@@ -76,9 +79,10 @@ job succeeded, and otherwise sends the corresponding failure notification.
 - All groups use `cancel-in-progress: false`; queued work is not evidence that
   an earlier running workflow may be cancelled.
 - A failed build or verifier run cannot reach deployment credentials.
-- CI-wave completion notifications are final workflow outcomes: upstream
-  build/verifier/deploy failures and automatic E2E failures produce failure,
-  while success is emitted only after automatic E2E succeeds.
+- CI-wave production notifications distinguish deployment from validation:
+  build/verifier/deploy failures produce a deployment failure, a successful
+  deploy publishes release notes, and automatic E2E adds a threaded validated
+  or invalid reply afterward.
 - A production target outside current `main` history or a downgrade rejection
   requires a fresh explicit production decision; do not bypass the guard.
 - A successful deploy with failed E2E is reported as deployed but unvalidated.

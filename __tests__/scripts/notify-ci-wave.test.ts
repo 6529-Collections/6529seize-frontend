@@ -120,6 +120,40 @@ describe("notify-ci-wave Release Train metadata", () => {
     ).toBe(false);
   });
 
+  it("sends post-deployment validation against the same release group", async () => {
+    const expectedSha = "c".repeat(40);
+    const result = await runNotifier({
+      CI_PIPELINES_NOTIFICATION_TYPE: "release_validation",
+      CI_PIPELINES_SHA: expectedSha,
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        notification_type: "release_validation",
+        release_group_id: "6529-Collections/6529seize-frontend:123",
+        sha: expectedSha,
+        status: "success",
+      },
+    });
+    expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
+    expect(result.payload).not.toHaveProperty("deployed_at");
+  });
+
+  it("rejects release validation without an explicit exact SHA", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_NOTIFICATION_TYPE: "release_validation",
+      CI_PIPELINES_SHA: "",
+    });
+
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain(
+      "Release validation requires production, CI_PIPELINES_SHA, and a release group ID"
+    );
+    expect(result.payload).toBeNull();
+  });
+
   it("rejects contributors without a train id", async () => {
     const result = await runNotifier({
       CI_RELEASE_CONTRIBUTORS: JSON.stringify(["GelatoGenesis"]),

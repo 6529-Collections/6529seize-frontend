@@ -312,14 +312,13 @@ jobs:
     with:
       trusted_deployed_sha: ${{ github.sha }}
 
-  notify-production-outcome:
-    name: Notify complete production pipeline outcome
+  notify-production-deployment:
+    name: Notify production deployment outcome
     if: always()
     needs:
       - build-production-artifact
       - verify-production-artifact
       - build-upload-deploy
-      - automatic-production-e2e
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -338,8 +337,7 @@ jobs:
         if: >-
           (needs.build-production-artifact.result != 'success' ||
           needs.verify-production-artifact.result != 'success' ||
-          needs.build-upload-deploy.result != 'success' ||
-          needs.automatic-production-e2e.result != 'success') &&
+          needs.build-upload-deploy.result != 'success') &&
           hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
@@ -348,7 +346,7 @@ jobs:
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: failure
-          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: deployment failed"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ github.sha }}
@@ -359,6 +357,64 @@ jobs:
           needs.build-production-artifact.result == 'success' &&
           needs.verify-production-artifact.result == 'success' &&
           needs.build-upload-deploy.result == 'success' &&
+          hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: success
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: production deployed"
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
+          CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+  notify-production-validation:
+    name: Reply with production validation outcome
+    if: always()
+    needs:
+      - build-upload-deploy
+      - automatic-production-e2e
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out CI wave notifier
+        if: needs.build-upload-deploy.result == 'success'
+        continue-on-error: true
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Notify CI wave that production validation failed
+        if: >-
+          needs.build-upload-deploy.result == 'success' &&
+          needs.automatic-production-e2e.result != 'success' &&
+          hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_NOTIFICATION_TYPE: release_validation
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: post-deployment validation failed"
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+      - name: Notify CI wave that production validation passed
+        if: >-
+          needs.build-upload-deploy.result == 'success' &&
           needs.automatic-production-e2e.result == 'success' &&
           hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
@@ -368,9 +424,9 @@ jobs:
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: success
-          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline complete"
+          CI_PIPELINES_NOTIFICATION_TYPE: release_validation
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: post-deployment validation passed"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ github.sha }}
-          CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

@@ -182,71 +182,66 @@ describe("frontend deployment workflow contract", () => {
     ).toBe(false);
   });
 
-  it.each([
-    {
-      deployJob: "deploy-staging",
-      e2eJob: "automatic-staging-e2e",
-      finalizerJob: "notify-staging-outcome",
-      requiredJobs: [
-        "build-staging-artifact",
-        "deploy-staging",
-        "automatic-staging-e2e",
-      ],
-      workflow: "deploy-staging.yml",
-    },
-    {
-      deployJob: "build-upload-deploy",
-      e2eJob: "automatic-production-e2e",
-      finalizerJob: "notify-production-outcome",
-      requiredJobs: [
-        "build-production-artifact",
-        "verify-production-artifact",
-        "build-upload-deploy",
-        "automatic-production-e2e",
-      ],
-      workflow: "build-upload-deploy-prod.yml",
-    },
-  ])(
-    "$workflow notifies only after the complete deployment and E2E lifecycle",
-    ({ deployJob, e2eJob, finalizerJob, requiredJobs, workflow }) => {
-      const parsed = readWorkflow(workflow).workflow;
-      const deploySteps = parsed.jobs[deployJob].steps as Array<{
-        name?: string;
-      }>;
-      const finalizer = parsed.jobs[finalizerJob];
-      const failure = finalizer.steps.find(
-        (step: { name?: string }) =>
-          step.name === "Notify CI wave about failure"
-      );
-      const success = finalizer.steps.find(
-        (step: { name?: string }) =>
-          step.name === "Notify CI wave about success"
-      );
-
-      expect(
-        deploySteps.some((step) => step.name?.startsWith("Notify CI wave"))
-      ).toBe(false);
-      expect(finalizer.if).toBe("always()");
-      expect(finalizer.needs).toEqual(requiredJobs);
-      expect(finalizer.needs).toContain(e2eJob);
-      for (const job of requiredJobs) {
-        expect(failure.if).toContain(`needs.${job}.result != 'success'`);
-        expect(success.if).toContain(`needs.${job}.result == 'success'`);
-      }
-      expect(failure.env.CI_PIPELINES_STATUS).toBe("failure");
-      expect(success.env.CI_PIPELINES_STATUS).toBe("success");
-    }
-  );
-
-  it("keeps production release-note generation on complete pipeline success", () => {
-    const production = readWorkflow("build-upload-deploy-prod.yml").workflow;
-    const success = production.jobs["notify-production-outcome"].steps.find(
+  it("notifies staging only after the complete deployment and E2E lifecycle", () => {
+    const staging = readWorkflow("deploy-staging.yml").workflow;
+    const finalizer = staging.jobs["notify-staging-outcome"];
+    const requiredJobs = [
+      "build-staging-artifact",
+      "deploy-staging",
+      "automatic-staging-e2e",
+    ];
+    const failure = finalizer.steps.find(
+      (step: { name?: string }) => step.name === "Notify CI wave about failure"
+    );
+    const success = finalizer.steps.find(
       (step: { name?: string }) => step.name === "Notify CI wave about success"
     );
 
-    expect(success.env.CI_RELEASE_NOTES_PROMPT_PATH).toBe(
+    expect(finalizer.if).toBe("always()");
+    expect(finalizer.needs).toEqual(requiredJobs);
+    for (const job of requiredJobs) {
+      expect(failure.if).toContain(`needs.${job}.result != 'success'`);
+      expect(success.if).toContain(`needs.${job}.result == 'success'`);
+    }
+  });
+
+  it("publishes production release notes after deploy and replies after E2E", () => {
+    const production = readWorkflow("build-upload-deploy-prod.yml").workflow;
+    const deployment = production.jobs["notify-production-deployment"];
+    const validation = production.jobs["notify-production-validation"];
+    const deploymentSuccess = deployment.steps.find(
+      (step: { name?: string }) => step.name === "Notify CI wave about success"
+    );
+    const validationFailure = validation.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Notify CI wave that production validation failed"
+    );
+    const validationSuccess = validation.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Notify CI wave that production validation passed"
+    );
+
+    expect(deployment.needs).toEqual([
+      "build-production-artifact",
+      "verify-production-artifact",
+      "build-upload-deploy",
+    ]);
+    expect(deployment.needs).not.toContain("automatic-production-e2e");
+    expect(deploymentSuccess.env.CI_RELEASE_NOTES_PROMPT_PATH).toBe(
       "ops/release-notes/release-notes.prompt.md"
     );
+    expect(validation.needs).toEqual([
+      "build-upload-deploy",
+      "automatic-production-e2e",
+    ]);
+    for (const step of [validationFailure, validationSuccess]) {
+      expect(step.env.CI_PIPELINES_NOTIFICATION_TYPE).toBe(
+        "release_validation"
+      );
+      expect(step.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
+    }
+    expect(validationFailure.env.CI_PIPELINES_STATUS).toBe("failure");
+    expect(validationSuccess.env.CI_PIPELINES_STATUS).toBe("success");
   });
 
   it("exposes the staging access code only after deployed-source authorization", () => {

@@ -7,6 +7,7 @@ const {
   CI_PIPELINES_ALERT_API_AUTH,
   CI_PIPELINES_TARGET_ENV,
   CI_PIPELINES_STATUS,
+  CI_PIPELINES_NOTIFICATION_TYPE,
   CI_PIPELINES_TITLE,
   CI_PIPELINES_DESCRIPTION,
   CI_PIPELINES_ENVIRONMENT,
@@ -120,6 +121,11 @@ const repository = requireValue("GITHUB_REPOSITORY", GITHUB_REPOSITORY);
 const runId = requireValue("GITHUB_RUN_ID", GITHUB_RUN_ID);
 const status = requireValue("CI_PIPELINES_STATUS", CI_PIPELINES_STATUS);
 const title = requireValue("CI_PIPELINES_TITLE", CI_PIPELINES_TITLE);
+const notificationType = CI_PIPELINES_NOTIFICATION_TYPE || "pipeline";
+if (!["pipeline", "release_validation"].includes(notificationType)) {
+  console.error("CI_PIPELINES_NOTIFICATION_TYPE is invalid");
+  process.exit(1);
+}
 const triggeredByGithubLogin = GITHUB_TRIGGERING_ACTOR || GITHUB_ACTOR || null;
 let releaseContributors = [];
 try {
@@ -143,7 +149,20 @@ if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/.test(CI_PIPELINES_SHA)) {
   console.error("CI_PIPELINES_SHA must be a 40-character lowercase Git SHA");
   process.exit(1);
 }
+const releaseGroupId = CI_RELEASE_GROUP_ID || `${repository}:${runId}`;
+if (
+  notificationType === "release_validation" &&
+  (targetEnvironment !== "prod" ||
+    !CI_PIPELINES_SHA ||
+    !releaseGroupId)
+) {
+  console.error(
+    "Release validation requires production, CI_PIPELINES_SHA, and a release group ID"
+  );
+  process.exit(1);
+}
 const isReleaseNotesEligible =
+  notificationType === "pipeline" &&
   status === "success" &&
   targetEnvironment === "prod" &&
   Boolean(CI_RELEASE_NOTES_PROMPT_PATH);
@@ -158,7 +177,7 @@ const releaseGroupServices = (
 const releaseNotesFields = isReleaseNotesEligible
   ? {
       release_notes_prompt_path: CI_RELEASE_NOTES_PROMPT_PATH,
-      release_group_id: CI_RELEASE_GROUP_ID || `${repository}:${runId}`,
+      release_group_id: releaseGroupId,
       release_group_services: releaseGroupServices,
       deployed_at: new Date().toISOString(),
     }
@@ -171,6 +190,13 @@ const releaseTrainFields =
     ? {
         release_train_id: CI_RELEASE_TRAIN_ID,
         contributor_github_logins: releaseContributors,
+      }
+    : {};
+const validationFields =
+  notificationType === "release_validation"
+    ? {
+        notification_type: notificationType,
+        release_group_id: releaseGroupId,
       }
     : {};
 
@@ -188,6 +214,7 @@ const payload = {
   branch: GITHUB_REF_NAME || null,
   environment: targetEnvironment || null,
   service: CI_PIPELINES_SERVICE || null,
+  ...validationFields,
   ...releaseTrainFields,
   ...releaseNotesFields,
 };
