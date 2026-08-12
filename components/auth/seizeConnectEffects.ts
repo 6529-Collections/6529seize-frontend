@@ -390,6 +390,9 @@ export function useSeizeConnectProviderEffects({
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
+      if (isSigningOutAllRef.current) {
+        return;
+      }
       syncWalletConnectionState({
         account: {
           address: account.address,
@@ -419,6 +422,7 @@ export function useSeizeConnectProviderEffects({
     account.status,
     isInitialized,
     isSigningOutAll,
+    isSigningOutAllRef,
     storedConnectedAccounts,
     walletState,
     setConnected,

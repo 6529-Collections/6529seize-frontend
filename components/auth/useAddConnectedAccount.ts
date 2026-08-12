@@ -168,26 +168,22 @@ export function useAddConnectedAccount({
       logError("seizeAddConnectedAccount", walletError);
     };
 
-    try {
-      disconnect()
-        .then(() => {
-          retryConnectTimeoutRef.current = setTimeout(() => {
-            retryConnectTimeoutRef.current = null;
-            if (
-              !isMountedRef.current ||
-              isSigningOutAllRef.current ||
-              hasSignOutAllGenerationChanged(signOutGeneration)
-            ) {
-              clearAddConnectedAccountGuard();
-              return;
-            }
-            openAddConnectedAccountModal();
-          }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
-        })
-        .catch(handleDisconnectFailure);
-    } catch (error: unknown) {
-      handleDisconnectFailure(error);
-    }
+    disconnect()
+      .then(() => {
+        retryConnectTimeoutRef.current = setTimeout(() => {
+          retryConnectTimeoutRef.current = null;
+          if (
+            !isMountedRef.current ||
+            isSigningOutAllRef.current ||
+            hasSignOutAllGenerationChanged(signOutGeneration)
+          ) {
+            clearAddConnectedAccountGuard();
+            return;
+          }
+          openAddConnectedAccountModal();
+        }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
+      })
+      .catch(handleDisconnectFailure);
   }, [
     account.address,
     account.isConnected,
