@@ -72,7 +72,7 @@
   and reviewed source Candidate B `2da150eacf951d977f6c430b1e21c118687a0c32`.
   Browser contracts now require all 16 reviewed Keys and Gates images, all five
   signed-Wave Conflict images, representative Work images, natural art-first
-  acquisition pages, curatorial reading, a collapsed accession record, and
+  acquisition pages, curatorial reading, a collapsed accession-processing record, and
   retained desktop/mobile evidence.
 - Removed the inherited rule that suppressed Keys and Gates imagery until
   accession. Reviewed display authority and accession state are separate
@@ -94,7 +94,7 @@
   `codex-review:independent-reviewer`. Reviewed Candidate B
   `6cef42ab590f35f035ae4858770d880925ad3085` is its direct child; active
   catalog Candidate C `cc8465764a55309d3eca5d3477b0f3993ef5a48c` is the
-  direct child of B. The accession records carry the five exact historical
+  direct child of B. The accession-processing records carry the five exact historical
   Wave image byte sizes and publication parts. The visitor projection still
   excludes the raw Wave receipt and unrelated token-source locators.
 - Frontend head `c522baeab53ba68bb0738a3216ce4d843c38ebb6` passed Knip,
@@ -105,7 +105,7 @@
   binds exact C `cc8465764a55309d3eca5d3477b0f3993ef5a48c` and exact B
   `6cef42ab590f35f035ae4858770d880925ad3085`; no compatibility fallback was
   added.
-- Visitor status copy now follows the accession record exactly: "Selected by
+- Visitor status copy now follows the accession-processing record exactly: "Selected by
   Museum Wave; accession processing in progress." It does not describe a
   second acquisition review after the Wave's selection.
 - Exact-head App CI run 31563371788 stopped at the help-index publication
@@ -149,7 +149,7 @@
   the opening gallery field without an immediately visible photograph. The
   downstream accession projection now leads the public exhibition sequence with
   the first reviewed, immediately viewable work and otherwise preserves canonical
-  order. Palmyra remains in the accession and retains its explicit high-resolution
+  order. Palmyra remains in the selected acquisition and retains its explicit high-resolution
   control. Focused component and browser contracts require both properties before
   the corrected release can advance.
 - The corrected frontend release reached staging at main
@@ -178,3 +178,17 @@
   changes no accession, title, custody, rights, preservation, or Collection
   claim. Focused validation passed 238 tests, changed lint/typecheck and a clean
   production build; independent Luna review also approved the exact commit.
+
+## 2026-08-12 stage-boundary review follow-up
+
+- The Museum Wave is the acquisition decision. Rights, technical, source,
+  accessibility, preservation, catalogue and exhibition review are downstream
+  accession work after selection; the Wave does not administer those tasks.
+- Public and implementation wording uses `accession-processing record` when
+  Conflict at Its Edges is discussed. A formal accession record does not yet
+  exist, and no title, custody, accession number or Collection membership is
+  implied.
+- Independent adapter review found that inline Media facts alone did not bind
+  each Arweave display source to the canonical continuity amendment. The source
+  publication now includes that amendment atomically, and the adapter verifies
+  each Work mapping before rendering.

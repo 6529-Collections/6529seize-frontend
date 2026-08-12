@@ -325,7 +325,8 @@ function projectProposalMedia(
     media,
     publicationRecordId,
     input.uri,
-    input.tokenSourceUri
+    input.tokenSourceUri,
+    context.sourceDocuments
   );
   const affordances = proposalAffordances(input);
   const candidate: MuseumExternalProposalPresentationMedia = {
@@ -463,16 +464,12 @@ function assertProposalContext(
 function assertProposalSourceLocator(input: MuseumMediaProjectionInput): void {
   if (
     input.uri === null ||
-    !isMuseumExternalProposalPresentationMediaUrl(input.uri) ||
+    !isMuseumExternalProposalMediaUrl(input.uri) ||
     input.tokenSourceUri === null ||
     !isMuseumExternalProposalTokenSourceUrl(input.tokenSourceUri)
   ) {
     throw new Error("public_entity_graph_media_proposal_source_locator");
   }
-}
-
-function isMuseumExternalProposalPresentationMediaUrl(value: string): boolean {
-  return isMuseumExternalProposalMediaUrl(value);
 }
 
 function proposalAffordances(

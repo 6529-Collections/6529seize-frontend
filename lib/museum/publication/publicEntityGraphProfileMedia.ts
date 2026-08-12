@@ -13,6 +13,7 @@ import {
 import { assertApprovedArtBlocksMediaUrl } from "./security";
 import {
   isMuseumExternalProposalMediaUrl,
+  isMuseumExternalProposalTokenSourceUrl,
 } from "./entities";
 
 const SUPPORTED_MEDIA_ROLES = new Set([
@@ -179,6 +180,14 @@ function validateWaveProposalMediaProfile(
     "public_entity_graph_media_publication"
   );
   const hasDirectVisualLocator = hasDirectVisualAffordance(affordances);
+  const tokenSource = media["token_source_locator"];
+  const tokenSourceUri = isRecord(tokenSource)
+    ? optionalString(
+        tokenSource,
+        "uri",
+        "public_entity_graph_media_token_source_uri"
+      )
+    : null;
   if (
     new Set(affordances).size !== affordances.length ||
     affordances.some((affordance) => !isAllowedProposalAffordance(affordance))
@@ -193,6 +202,13 @@ function validateWaveProposalMediaProfile(
     return;
   }
   if (uri === null || !isMuseumExternalProposalMediaUrl(uri)) {
+    throw new Error("public_entity_graph_media_proposal_contract");
+  }
+  if (
+    affordances.includes("view") &&
+    (tokenSourceUri === null ||
+      !isMuseumExternalProposalTokenSourceUrl(tokenSourceUri))
+  ) {
     throw new Error("public_entity_graph_media_proposal_contract");
   }
   if (

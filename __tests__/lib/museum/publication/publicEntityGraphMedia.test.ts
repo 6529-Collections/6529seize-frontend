@@ -17,12 +17,51 @@ import type {
 
 const OBSERVATION_PATH =
   "records/proposed-gifts/6529NM-PG-2026-001/wave-publication-observation-2026-08-08.json";
+const MEDIA_CONTINUITY_AMENDMENT_PATH =
+  "records/proposed-gifts/6529NM-PG-2026-001/public/scholarship/machine/media-source-continuity-amendment.json";
 const PROPOSAL_ID = "6529NM-PG-2026-001";
 
 type WavePart = Record<string, unknown>;
 
 function sha256(text: string): `sha256:${string}` {
   return `sha256:${createHash("sha256").update(text, "utf8").digest("hex")}`;
+}
+
+function buildMediaContinuityAmendmentDocument(input: {
+  readonly historicalWaveUri: string;
+  readonly displayUri: string;
+  readonly digest: string;
+}): MuseumSourceDocument {
+  const text = JSON.stringify(
+    {
+      amendment_id: "6529NM-MEDIA-CONT-AMD-2026-08-12-001",
+      status: "active_downstream_accession_display_source",
+      observed_at: "2026-08-12T07:37:56.984246Z",
+      works: [
+        {
+          work_entity_id: "6529NM-W-0028",
+          media_reference_entity_id: "6529NM-MED-0044",
+          historical_wave_uri: input.historicalWaveUri,
+          display_token_source_uri: input.displayUri,
+          sha256: input.digest,
+          bytes: 16_871_807,
+          width: 5964,
+          height: 4768,
+          fixity_verified_at: "2026-08-08T10:15:02.0167151Z",
+          display_policy:
+            "historical_wave_locator_preserved_token_source_used_for_accession_display",
+        },
+      ],
+    },
+    null,
+    2
+  );
+  return {
+    path: MEDIA_CONTINUITY_AMENDMENT_PATH,
+    sha256: sha256(text),
+    mediaType: "application/json",
+    text,
+  };
 }
 
 function buildFixture(): {
@@ -690,7 +729,8 @@ describe("Wave publication receipt joins", () => {
           publication_part_number: 6,
           accessibility_text:
             "A soldier seated among rubble and standing columns at Palmyra.",
-          credit: "Lorenzo Meloni, Palmyra, Syria, 2016. © Lorenzo Meloni/Magnum Photos 2022.",
+          credit:
+            "Lorenzo Meloni, Palmyra, Syria, 2016. © Lorenzo Meloni/Magnum Photos 2022.",
           rights: {
             status: "restricted",
             notes: "Source rights label: All Rights Reserved.",
@@ -781,7 +821,24 @@ describe("Wave publication receipt joins", () => {
       },
     } satisfies MuseumPublicEntityGraph;
 
-    const projected = projectMediaRelations(graph.entities, graph, new Map());
+    const historicalWaveUri =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/palmyra/magnum-75-104.jpg";
+    const displayUri =
+      "https://arweave.net/oz0t0DJj2BgFCux1WXskxisxvzV2KA0ukqaVbQ1Ckco";
+    const digest = `sha256:${"a".repeat(64)}`;
+    const amendmentDocument = buildMediaContinuityAmendmentDocument({
+      historicalWaveUri,
+      displayUri,
+      digest,
+    });
+    const sourceDocuments = new Map([
+      [MEDIA_CONTINUITY_AMENDMENT_PATH, amendmentDocument],
+    ]);
+    const projected = projectMediaRelations(
+      graph.entities,
+      graph,
+      sourceDocuments
+    );
     expect(projected.get(workId)?.presentation).toEqual([
       expect.objectContaining({
         id: mediaId,
@@ -791,10 +848,20 @@ describe("Wave publication receipt joins", () => {
           sourcePath: `records/entities/${mediaId}.json`,
           mediaRecordPath: `records/entities/${mediaId}.json`,
         }),
-        mediaUrl:
-          "https://arweave.net/oz0t0DJj2BgFCux1WXskxisxvzV2KA0ukqaVbQ1Ckco",
+        mediaUrl: displayUri,
       }),
     ]);
+    const mismatchedDocument = buildMediaContinuityAmendmentDocument({
+      historicalWaveUri,
+      displayUri: "https://arweave.net/not-the-reviewed-source",
+      digest,
+    });
+    const mismatchedDocuments = new Map([
+      [MEDIA_CONTINUITY_AMENDMENT_PATH, mismatchedDocument],
+    ]);
+    expect(() =>
+      projectMediaRelations(graph.entities, graph, mismatchedDocuments)
+    ).toThrow("public_entity_graph_media_accession_amendment");
   });
 
   it("rejects a historical Wave locator without its accession token-source binding", () => {
@@ -840,7 +907,8 @@ describe("Wave publication receipt joins", () => {
             source_byte_size: 16_871_807,
             publication_part_number: 6,
             accessibility_text: "A soldier seated among rubble at Palmyra.",
-            credit: "Lorenzo Meloni, Palmyra, Syria, 2016. © Lorenzo Meloni/Magnum Photos 2022.",
+            credit:
+              "Lorenzo Meloni, Palmyra, Syria, 2016. © Lorenzo Meloni/Magnum Photos 2022.",
             rights: { status: "restricted", notes: "All Rights Reserved." },
             source_observation: { status: "mutable_external" },
             fixity: {

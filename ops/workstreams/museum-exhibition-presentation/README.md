@@ -23,8 +23,8 @@ The interface must preserve the exact lifecycle boundary:
 
 1. Works and natural-aspect media appear first.
 2. The curatorial reading follows the image sequence.
-3. The accession record and sources are progressively disclosed after the
-   public interpretation.
+3. The accession-processing record and sources are progressively disclosed
+   after the public interpretation.
 4. Work and artist routes use only exact source-record relations to reviewed
    media. Filename resemblance and status labels are not media authority.
 5. Responsive Keys and Gates media comes from the source-safe public
