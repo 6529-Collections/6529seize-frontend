@@ -146,6 +146,26 @@ describe("DefaultWaveWinnerDrop", () => {
     );
   });
 
+  it("top-aligns approval identity and content with the author image", () => {
+    render(
+      <DefaultWaveWinnersDrop
+        winner={winner}
+        onDropClick={jest.fn()}
+        isApprovalWave={true}
+      />
+    );
+
+    const contentColumn = screen.getByTestId("header").parentElement;
+    const identityRow = contentColumn?.parentElement;
+
+    expect(contentColumn).toHaveClass("tw-gap-y-2");
+    expect(identityRow).toHaveClass(
+      "tw-items-start",
+      "tw-gap-x-3",
+      "tw-pb-3"
+    );
+  });
+
   it("keeps native tap behavior for touch long-press handlers", () => {
     useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
 

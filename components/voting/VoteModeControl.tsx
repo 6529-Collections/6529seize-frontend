@@ -18,7 +18,7 @@ export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
   const locale = useBrowserLocale();
 
   return (
-    <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-0">
+    <fieldset className="tw-m-0 tw-flex tw-w-fit tw-min-w-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-0">
       <legend className="tw-sr-only">
         {t(locale, "waves.voteMode.groupLabel")}
       </legend>

@@ -141,10 +141,10 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
 
     expect(trigger).toHaveTextContent("21voters");
     expect(trigger).toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-md",
       "tw-border",
-      "tw-border-iron-700",
-      "tw-bg-iron-900/40"
+      "tw-border-white/[0.06]",
+      "tw-bg-white/[0.05]"
     );
     expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
     expect(trigger).toHaveAttribute("aria-expanded", "false");
@@ -164,10 +164,10 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     });
 
     expect(trigger).toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-md",
       "tw-border",
-      "tw-border-iron-700",
-      "tw-bg-iron-900/40",
+      "tw-border-white/[0.06]",
+      "tw-bg-white/[0.05]",
       "tw-px-1.5",
       "tw-py-0.5"
     );

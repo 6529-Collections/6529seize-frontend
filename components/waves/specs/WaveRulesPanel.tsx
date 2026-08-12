@@ -27,7 +27,7 @@ function WaveRulesCustomSection({
   if (!hasCustomRules(custom)) {
     return (
       <section className="tw-px-4 tw-py-4">
-        <Heading className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
+        <Heading className="tw-m-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
           {waveRightPanelText("waves.sidebar.rightPanel.rules.creatorTitle")}
         </Heading>
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-light tw-italic tw-leading-5 tw-text-iron-500">
@@ -39,7 +39,7 @@ function WaveRulesCustomSection({
 
   return (
     <section className="tw-px-4 tw-py-4">
-      <Heading className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
+      <Heading className="tw-m-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
         {waveRightPanelText("waves.sidebar.rightPanel.rules.creatorTitle")}
       </Heading>
       <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-3">
@@ -98,7 +98,7 @@ export default function WaveRulesPanel({
     >
       {showTitle && (
         <div className="tw-px-4 tw-pt-6">
-          <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
+          <h2 className="tw-m-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
             {resolvedTitle}
           </h2>
         </div>
@@ -107,7 +107,7 @@ export default function WaveRulesPanel({
       <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
         {rules.automatic.map((section) => (
           <section key={section.id} className="tw-px-4 tw-py-4">
-            <SectionHeading className="tw-mb-2.5 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
+            <SectionHeading className="tw-mb-2.5 tw-mt-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
               {section.title}
             </SectionHeading>
             <dl className="tw-mb-0 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5">
