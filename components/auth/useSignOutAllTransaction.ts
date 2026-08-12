@@ -74,5 +74,9 @@ export function useSignOutAllTransaction({
     setDisconnected,
   ]);
 
-  return { isSigningOutAll, seizeDisconnectAndLogoutAll };
+  return {
+    isSigningOutAll,
+    isSigningOutAllRef,
+    seizeDisconnectAndLogoutAll,
+  };
 }

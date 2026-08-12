@@ -37,6 +37,7 @@ interface SeizeConnectProviderEffectsParams {
   readonly isConnectIntentWaitingForAppKit: boolean;
   readonly isInitialized: boolean;
   readonly isSigningOutAll: boolean;
+  readonly isSigningOutAllRef: MutableRefObject<boolean>;
   readonly isMountedRef: MutableRefObject<boolean>;
   readonly refreshStoredConnectedAccounts: () => void;
   readonly retryConnectTimeoutRef: MutableRefObject<NodeJS.Timeout | null>;
@@ -326,6 +327,7 @@ export function useSeizeConnectProviderEffects({
   isConnectIntentWaitingForAppKit,
   isInitialized,
   isSigningOutAll,
+  isSigningOutAllRef,
   isMountedRef,
   refreshStoredConnectedAccounts,
   retryConnectTimeoutRef,
@@ -357,7 +359,9 @@ export function useSeizeConnectProviderEffects({
     if (globalThis.window === undefined) return;
 
     const handleAccountsUpdated = () => {
-      refreshStoredConnectedAccounts();
+      if (!isSigningOutAllRef.current) {
+        refreshStoredConnectedAccounts();
+      }
     };
 
     globalThis.addEventListener(
@@ -370,7 +374,7 @@ export function useSeizeConnectProviderEffects({
         handleAccountsUpdated
       );
     };
-  }, [refreshStoredConnectedAccounts]);
+  }, [isSigningOutAllRef, refreshStoredConnectedAccounts]);
 
   useEffect(() => {
     if (!isInitialized || isSigningOutAll) {
