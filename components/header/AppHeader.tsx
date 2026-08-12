@@ -661,7 +661,7 @@ export default function AppHeader() {
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-0.5">
           <HeaderDropActionButton action={headerDropAction} />
-          {isHomeRoute && <NetworkHealthCTA className="md:tw-hidden" />}
+          {isHomeRoute && <NetworkHealthCTA />}
           <div className="tw-flex-shrink-0">
             <HeaderActionButtons />
           </div>

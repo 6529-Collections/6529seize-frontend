@@ -266,6 +266,19 @@ describe("AppHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps network health in the native header action row at tablet widths", () => {
+    setup({ address: null, asPath: "/" });
+
+    const healthLink = screen.getByRole("link", {
+      name: "Open network health dashboard",
+    });
+    const search = screen.getByTestId("search");
+
+    expect(healthLink).not.toHaveClass("md:tw-hidden");
+    expect(healthLink.parentElement).toBe(search.parentElement);
+    expect(healthLink.parentElement).toHaveClass("tw-flex", "tw-items-center");
+  });
+
   it("opens the account menu immediately when only one profile is connected", () => {
     const seizeSwitchConnectedAccount = jest.fn();
     setup({
