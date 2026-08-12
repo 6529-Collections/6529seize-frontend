@@ -1,7 +1,7 @@
 import type { MuseumPublicEntityRecord } from "./types";
 import { requiredObject, requiredString } from "./publicEntityGraphPrimitives";
 
-export interface MuseumAccessionMediaFacts {
+interface MuseumAccessionMediaFacts {
   readonly sourceByteSize: number;
   readonly publicationPartNumber: number;
 }
