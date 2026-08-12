@@ -83,7 +83,18 @@ const { useAuth } = require("@/components/auth/Auth");
 const createWave = () =>
   ({
     id: "1",
-    wave: { authenticated_user_eligible_for_admin: false },
+    parent_wave: null,
+    chat: { scope: { group: { is_direct_message: false } } },
+    wave: {
+      authenticated_user_eligible_for_admin: false,
+      admin_group: {
+        group: {
+          id: "parent-admin-group",
+          name: "Parent admins",
+          is_hidden: false,
+        },
+      },
+    },
   }) as any;
 
 describe("BrainMobileTabs", () => {
@@ -153,7 +164,7 @@ describe("BrainMobileTabs", () => {
     expect(screen.queryByRole("button", { name: /^chat$/i })).toBeNull();
   });
 
-  it("keeps the create curation action outside the scrollable tabs", () => {
+  it("keeps the mobile create menu outside the scrollable tabs", async () => {
     const wave = createWave();
     wave.wave.authenticated_user_eligible_for_admin = true;
 
@@ -170,14 +181,23 @@ describe("BrainMobileTabs", () => {
     );
 
     const createButton = screen.getByRole("button", {
-      name: /create curation/i,
+      name: /open create menu/i,
     });
-    const scrollableTabs = createButton.parentElement?.querySelector(
-      ".tw-overflow-x-auto"
-    );
+    const scrollableTabs = createButton
+      .closest("nav")
+      ?.querySelector(".tw-overflow-x-auto");
 
     expect(scrollableTabs).toBeInTheDocument();
     expect(scrollableTabs).not.toContainElement(createButton);
+    expect(createButton).toHaveClass("tw-size-11");
+
+    await userEvent.click(createButton);
+    expect(
+      screen.getByRole("menuitem", { name: "New curation" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("menuitem", { name: "New subwave" })
+    ).toBeInTheDocument();
   });
 
   it("shows unread indicators and handles message/notification clicks", async () => {
