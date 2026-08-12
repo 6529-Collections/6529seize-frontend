@@ -337,6 +337,39 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     expect(screen.getByText("CC BY 4.0")).toBeInTheDocument();
   });
 
+  it("omits an unrelated metadata credit for reviewed program media", async () => {
+    const selectedWork: MuseumPublicWork = {
+      ...work(
+        [],
+        [
+          metadata(
+            {
+              ...rightsCredit(null),
+              creditLine: "Unrelated metadata credit.",
+            },
+            ["unrelated-source-record"]
+          ),
+        ]
+      ),
+      status: "selected_through_acquisition_program_acquisition_pending",
+      programIds: ["6529NM-AP-ENT-0002"],
+      sourceRecordIds: ["6529NM-AP-01-OUT-001"],
+    };
+
+    render(
+      await MuseumObjectPage({
+        objectId: selectedWork.id,
+        publication: publication(selectedWork),
+        view: viewWithReviewedProgramMedia("6529NM-AP-01-OUT-001"),
+      })
+    );
+
+    expect(screen.getByRole("img")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Unrelated metadata credit.")
+    ).not.toBeInTheDocument();
+  });
+
   it("restores Keys and Gates Work media after accession", async () => {
     const accessionedWork: MuseumPublicWork = {
       ...work([retainedMedia(rightsCredit(null))]),

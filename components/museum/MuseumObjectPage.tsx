@@ -273,10 +273,13 @@ function MuseumCanonicalWorkRecordPage({
       : work.mediaMetadata?.find((candidate) =>
           candidate.sourceRecordIds?.includes(programMediaMatch.sourceRecordId)
         );
+  const metadataCredit =
+    programMediaMatch === null
+      ? work.mediaMetadata?.[0]?.credit.creditLine
+      : programMediaMetadata?.credit.creditLine;
   const primaryCredit =
     work.media[0]?.credit.creditLine ??
-    programMediaMetadata?.credit.creditLine ??
-    work.mediaMetadata?.[0]?.credit.creditLine ??
+    metadataCredit ??
     work.presentationMedia?.[0]?.credit.creditLine;
   const primarySource =
     work.sourcePaths[0] === undefined

@@ -196,7 +196,7 @@ describe("Museum surface registry", () => {
     const result = registryScript.validateRegistry(process.cwd());
     expect(result.inventory.routes).toHaveLength(57);
     expect(result.inventory.supportFiles).toHaveLength(8);
-    expect(result.inventory.components).toHaveLength(47);
+    expect(result.inventory.components).toHaveLength(48);
     expect(result.inventory.e2eSpecs).toHaveLength(6);
   });
 

@@ -562,6 +562,10 @@
       ]
     },
     {
+      "file": "components/museum/MuseumReviewedProgramMediaFigure.tsx",
+      "surface_ids": ["museum.artist", "museum.object"]
+    },
+    {
       "file": "components/museum/MuseumRightsLink.tsx",
       "surface_ids": ["museum.rights", "museum.collection", "museum.object"]
     },

@@ -24,13 +24,32 @@
   325-test source suite, the focused catalog gate, and both public-publication
   platform checks. Reviewed Candidate B is the direct child
   `2da150eacf951d977f6c430b1e21c118687a0c32`; active catalog Candidate C is
-  being constructed from that exact tree.
+  the signed direct child
+  `459cdfd41145f0ea55ec5687508222de6b673252`. The activated immutable catalog
+  has SHA-256
+  `sha256:00c7db156a67c3f7712aa6cd5b008fc1cd322a7aac4f299a8b582a99892e28bf`.
+- Thread-aware review of frontend PR #3716 identified valid accessibility,
+  localization, eager-loading, anchor, media-admission, attribution, and
+  duplicate-rendering findings. The follow-up commits added keyboard focus,
+  plural-aware counts, empty-section suppression, exact section anchors,
+  non-empty reviewed-derivative admission, shared document rendering, and a
+  shared reviewed-program-media figure whose credit must match the same exact
+  source record as the displayed image.
+- The integrated follow-up also fails closed when reviewed image media has no
+  matching metadata credit: it omits the credit instead of using an unrelated
+  metadata entry. The Museum surface registry owns the new shared component.
+- Integrated local review validation: object page 8/8, acquisition page 5/5,
+  typed artist routes 2/2, surface registry contract 8/8; registry counts 22
+  surfaces, 57 routes, 8 support files, 48 components, and 6 E2E specs.
+  Changed-file lint, changed-file typecheck across 1,535 files, and whitespace
+  checks passed.
 
 ## Release identities
 
 - Reviewed source Candidate B: `2da150eacf951d977f6c430b1e21c118687a0c32`
-- Active publication catalog Candidate C: pending
+- Active publication catalog Candidate C: `459cdfd41145f0ea55ec5687508222de6b673252`
 - Canonical Museum merge: pending
-- Frontend PR and merge: pending
+- Frontend PR: #3716; exact review follow-up head pending signed commit
+- Frontend merge: pending
 - Staging deployment and E2E: pending
 - Production deployment and E2E: pending
