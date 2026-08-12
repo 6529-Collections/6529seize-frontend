@@ -5,12 +5,11 @@ import {
   type FetchPublicUrlOptions,
 } from "@/lib/security/urlGuard";
 import { OG_IMAGE_PROXY_MAX_BYTES } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
-import { unstable_rethrow } from "next/navigation";
 import { NextResponse, type NextRequest } from "next/server";
 import sharp, { type Sharp } from "sharp";
 
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const revalidate = 604800;
 
 const DEFAULT_WIDTH = 1200;
 const MAX_WIDTH = 1200;
@@ -351,7 +350,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    unstable_rethrow(error);
     console.error("Unable to normalize OG metadata image.", error);
     return mapErrorToResponse(error);
   }
