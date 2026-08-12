@@ -7,7 +7,6 @@ import {
   buildMuseumSignedWaveStormDropUrl,
   isMuseumExternalProposalMediaUrl,
   isMuseumExternalProposalPresentationMedia,
-  isMuseumExternalProposalTokenSourceUrl,
   type MuseumAcquisitionMethod,
   type MuseumExternalProposalPresentationAffordance,
   type MuseumExternalProposalPresentationMedia,
@@ -41,8 +40,7 @@ import {
   metadataOnlyMedia,
   proposalMetadata,
 } from "./publicEntityGraphMediaMetadata";
-import { findWavePublicationPart } from "./publicEntityGraphWaveMediaJoin";
-
+import { accessionMediaFacts } from "./publicEntityGraphAccessionMedia";
 export { findWavePublicationPart } from "./publicEntityGraphWaveMediaJoin";
 
 export function mapWorkStatus(
@@ -304,24 +302,19 @@ function projectProposalMedia(
   assertProposalPresentationInput(input);
   assertProposalContext(media, subjectEntity, context, waveId, dropId);
   assertProposalSourceLocator(input);
-  const part = findWavePublicationPart({
-    sourceDocuments: context.sourceDocuments,
-    subjectEntity,
-    publicationRecordId,
-    waveId,
-    dropId,
-    input,
-  });
+  const { sourceByteSize, publicationPartNumber } = accessionMediaFacts(
+    mediaEntity,
+    media,
+    publicationRecordId
+  );
   const affordances = proposalAffordances(input);
   const candidate: MuseumExternalProposalPresentationMedia = {
     id: mediaEntity.id,
     kind: "external_proposal_presentation",
-    mediaUrl: part.mediaUrl,
+    mediaUrl: input.uri,
     mediaMimeType:
       input.mediaType as MuseumExternalProposalPresentationMedia["mediaMimeType"],
-    ...(part.mediaByteSize === null
-      ? {}
-      : { sourceByteSize: part.mediaByteSize }),
+    sourceByteSize,
     width: input.width,
     height: input.height,
     altText: input.altText,
@@ -329,11 +322,11 @@ function projectProposalMedia(
       kind: "signed_wave_storm",
       waveId,
       dropId,
-      partId: part.partId,
+      partId: publicationPartNumber,
       serial: null,
       publicationRecordId,
       contextEntityId: MUSEUM_WAVE_CURATED_ACQUISITION_ID,
-      sourcePath: part.observationPath,
+      sourcePath: mediaEntity.sourcePath,
       mediaRecordPath: mediaEntity.sourcePath,
       sourceCommit: context.sourceCommit,
     },
@@ -448,8 +441,7 @@ function assertProposalContext(
 function assertProposalSourceLocator(input: MuseumMediaProjectionInput): void {
   if (
     input.uri === null ||
-    (!isMuseumExternalProposalTokenSourceUrl(input.uri) &&
-      !isMuseumExternalProposalMediaUrl(input.uri))
+    !isMuseumExternalProposalMediaUrl(input.uri)
   ) {
     throw new Error("public_entity_graph_media_proposal_source_locator");
   }
