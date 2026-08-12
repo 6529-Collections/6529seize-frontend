@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
 import { MuseumProposalImage } from "@/components/museum/MuseumProposalImage";
 import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
-import { MuseumRightsLink } from "@/components/museum/MuseumRightsLink";
+import { MuseumReviewedProgramMediaFigure } from "@/components/museum/MuseumReviewedProgramMediaFigure";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { findReviewedProgramMedia } from "@/lib/museum/normalize";
+import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import { museumWorkHref } from "@/lib/museum/publication/routes";
@@ -26,9 +25,9 @@ export function TypedArtistWorkCard({
   work,
 }: TypedArtistWorkCardProps) {
   const media = selectMuseumStillMedia(work.media);
-  const programMedia =
+  const programMediaMatch =
     media === undefined
-      ? findReviewedProgramMedia(view, [
+      ? findReviewedProgramMediaMatch(view, [
           work.id,
           ...(work.sourceRecordIds ?? []),
         ])
@@ -48,45 +47,28 @@ export function TypedArtistWorkCard({
       />
     );
   }
-  if (programMedia !== null) {
-    const credit = work.mediaMetadata?.[0]?.credit;
+  if (programMediaMatch !== null) {
+    const metadata = work.mediaMetadata?.find((candidate) =>
+      candidate.sourceRecordIds?.includes(programMediaMatch.sourceRecordId)
+    );
     return (
-      <figure key={work.id} className="tw-m-0 tw-min-w-0">
-        <div className="tw-overflow-hidden tw-bg-black">
-          <MuseumProgramImage
-            media={programMedia}
-            sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
-            eager={index === 0}
-            className="tw-block tw-h-auto tw-w-full tw-object-contain"
-          />
-        </div>
-        <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
-          <Link
-            href={museumWorkHref(work.id)}
-            className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {work.title}
-          </Link>
-          <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
-            {relationshipLabel(work)}
-          </span>
-          {credit === undefined ? null : (
-            <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
-              {credit.creditLine}
-              {credit.licenseLabel === null ? null : (
-                <>
-                  {" · "}
-                  <MuseumRightsLink
-                    href={credit.licenseUrl ?? undefined}
-                    label={credit.licenseLabel}
-                    className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  />
-                </>
-              )}
-            </span>
-          )}
-        </figcaption>
-      </figure>
+      <MuseumReviewedProgramMediaFigure
+        key={work.id}
+        media={programMediaMatch.media}
+        metadata={metadata}
+        sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+        eager={index === 0}
+      >
+        <Link
+          href={museumWorkHref(work.id)}
+          className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {work.title}
+        </Link>
+        <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
+          {relationshipLabel(work)}
+        </span>
+      </MuseumReviewedProgramMediaFigure>
     );
   }
   if (presentation !== undefined) {

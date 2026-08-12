@@ -724,6 +724,19 @@ export function findReviewedProgramMedia(
   view: MuseumView | null | undefined,
   sourceRecordIds: readonly string[]
 ): MuseumProgramMedia | null {
+  return findReviewedProgramMediaMatch(view, sourceRecordIds)?.media ?? null;
+}
+
+export interface MuseumReviewedProgramMediaMatch {
+  readonly media: MuseumProgramMedia;
+  /** The exact source record ID that admitted the reviewed program media. */
+  readonly sourceRecordId: string;
+}
+
+export function findReviewedProgramMediaMatch(
+  view: MuseumView | null | undefined,
+  sourceRecordIds: readonly string[]
+): MuseumReviewedProgramMediaMatch | null {
   const identifiers = new Set(
     sourceRecordIds.map((identifier) => identifier.trim()).filter(Boolean)
   );
@@ -731,14 +744,17 @@ export function findReviewedProgramMedia(
     return null;
   }
 
-  const objectMedia = view.objects.find(
-    (object) =>
-      identifiers.has(object.objectId) &&
-      object.media !== null &&
-      object.media.variants.length > 0
-  )?.media;
-  if (objectMedia !== undefined && objectMedia !== null) {
-    return objectMedia;
+  const objectMatch = view.objects.find(
+    (candidate) =>
+      identifiers.has(candidate.objectId) &&
+      candidate.media !== null &&
+      candidate.media.variants.length > 0
+  );
+  if (objectMatch?.media !== undefined && objectMatch.media !== null) {
+    return {
+      media: objectMatch.media,
+      sourceRecordId: objectMatch.objectId,
+    };
   }
 
   for (const program of view.programs) {
@@ -749,7 +765,10 @@ export function findReviewedProgramMedia(
         work.media.variants.length > 0
     );
     if (selectedWork?.media !== undefined && selectedWork.media !== null) {
-      return selectedWork.media;
+      return {
+        media: selectedWork.media,
+        sourceRecordId: selectedWork.recordId,
+      };
     }
   }
 

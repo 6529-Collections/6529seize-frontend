@@ -114,7 +114,10 @@ function liveMedia(credit: MuseumRightsCredit): MuseumMedia {
   };
 }
 
-function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
+function metadata(
+  credit: MuseumRightsCredit,
+  sourceRecordIds = ["6529NM-W-0001"]
+): MuseumMediaMetadata {
   return {
     id: "6529NM-MED-0002",
     artworkId: "6529NM-W-0001",
@@ -125,6 +128,7 @@ function metadata(credit: MuseumRightsCredit): MuseumMediaMetadata {
     altText: "A governed metadata-only artwork image.",
     credit,
     sourcePath: "records/entities/6529NM-MED-0002.json",
+    sourceRecordIds,
   };
 }
 
@@ -294,7 +298,19 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
 
   it("uses reviewed responsive program media when a selected Work is metadata-only", async () => {
     const selectedWork: MuseumPublicWork = {
-      ...work([], [metadata(rightsCredit(null))]),
+      ...work(
+        [],
+        [
+          metadata(
+            {
+              ...rightsCredit(null),
+              creditLine: "Wrong metadata entry.",
+            },
+            ["unrelated-source-record"]
+          ),
+          metadata(rightsCredit(null), ["6529NM-AP-01-OUT-001"]),
+        ]
+      ),
       status: "selected_through_acquisition_program_acquisition_pending",
       programIds: ["6529NM-AP-ENT-0002"],
       sourceRecordIds: ["6529NM-AP-01-OUT-001"],
@@ -317,6 +333,7 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     expect(
       screen.getAllByText("Artist name, Work title.").length
     ).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("Wrong metadata entry.")).not.toBeInTheDocument();
     expect(screen.getByText("CC BY 4.0")).toBeInTheDocument();
   });
 
