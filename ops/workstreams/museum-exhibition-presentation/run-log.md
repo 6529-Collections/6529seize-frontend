@@ -47,6 +47,11 @@
   `MuseumReviewedProgramMediaMatch` did not need to be exported. The interface
   is now module-private. Downstream App jobs were cancelled by that shared
   preflight and did not report independent product failures.
+- Hosted follow-up run 31552007147 passed Knip and changed-source typecheck, then
+  failed the Jest typecheck ratchet on one new test fixture: a reviewed
+  derivative used `null` where `MuseumProgramMedia` requires a string SHA-256.
+  The fixture now carries a deterministic valid test digest; production code
+  was not implicated.
 
 ## Release identities
 

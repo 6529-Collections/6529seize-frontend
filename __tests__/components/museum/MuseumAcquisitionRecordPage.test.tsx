@@ -168,7 +168,8 @@ function programMedia(sourceUrl: string, altText: string): MuseumProgramMedia {
         width: 640,
         height: 427,
         mimeType: "image/webp",
-        sha256: null,
+        sha256:
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         byteSize: 120_000,
       },
     ],
