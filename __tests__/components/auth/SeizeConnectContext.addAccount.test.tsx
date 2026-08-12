@@ -11,9 +11,11 @@ import {
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
 import { AppKitBootstrapContext } from "@/components/providers/AppKitBootstrapContext";
+import { WALLET_ACCOUNTS_UPDATED_EVENT } from "@/services/auth/auth.utils";
 import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector";
 
 const ACTIVE_ADDRESS = "0x00000000000000000000000000000000000000AA";
+const SECOND_ADDRESS = "0x00000000000000000000000000000000000000BB";
 
 const mockOpen = jest.fn();
 const mockDisconnect = jest.fn();
@@ -33,6 +35,13 @@ let mockWagmiAccount: {
 };
 
 let mockAppKitState: { open: boolean };
+let mockWalletInfo:
+  | {
+      name?: string;
+      icon?: string;
+    }
+  | undefined;
+let mockIsSafeWallet: boolean;
 
 jest.mock("@reown/appkit/react", () => ({
   useAppKit: () => ({
@@ -44,7 +53,7 @@ jest.mock("@reown/appkit/react", () => ({
     disconnect: mockDisconnect,
   }),
   useWalletInfo: () => ({
-    walletInfo: undefined,
+    walletInfo: mockWalletInfo,
   }),
 }));
 
@@ -118,7 +127,7 @@ jest.mock("@/utils/security-logger", () => ({
 }));
 
 jest.mock("@/utils/wallet-detection", () => ({
-  isSafeWalletInfo: () => false,
+  isSafeWalletInfo: () => mockIsSafeWallet,
 }));
 
 jest.mock("@/components/auth/error-boundary", () => ({
@@ -149,8 +158,12 @@ function LogoutAllStateProbe() {
   const {
     connectedAccounts,
     hasValidWalletAuth,
+    address,
     isSigningOutAll,
+    isSafeWallet,
     seizeDisconnectAndLogoutAll,
+    walletIcon,
+    walletName,
   } = useSeizeConnectContext();
 
   return (
@@ -163,6 +176,42 @@ function LogoutAllStateProbe() {
       <div data-testid="connected-account-count">
         {connectedAccounts.length}
       </div>
+      <div data-testid="address">{address ?? "none"}</div>
+      <div data-testid="wallet-name">{walletName ?? "none"}</div>
+      <div data-testid="wallet-icon">{walletIcon ?? "none"}</div>
+      <div data-testid="safe-wallet">{isSafeWallet.toString()}</div>
+    </>
+  );
+}
+
+function AccountMutationButtons() {
+  const {
+    seizeAcceptConnection,
+    seizeAddConnectedAccount,
+    seizeConnect,
+    seizeConnectFresh,
+    seizeDisconnect,
+    seizeDisconnectAndLogout,
+    seizeSwitchConnectedAccount,
+  } = useSeizeConnectContext();
+
+  return (
+    <>
+      <button onClick={seizeConnect}>Connect</button>
+      <button onClick={() => void seizeConnectFresh()}>Connect fresh</button>
+      <button onClick={() => void seizeDisconnect()}>Disconnect</button>
+      <button onClick={() => void seizeDisconnectAndLogout()}>
+        Logout one
+      </button>
+      <button onClick={() => seizeAcceptConnection("invalid-address")}>
+        Accept connection
+      </button>
+      <button
+        onClick={() => seizeSwitchConnectedAccount(SECOND_ADDRESS)}
+      >
+        Switch account
+      </button>
+      <button onClick={seizeAddConnectedAccount}>Add during logout</button>
     </>
   );
 }
@@ -213,6 +262,8 @@ describe("SeizeConnectProvider add-account flow", () => {
       },
     };
     mockAppKitState = { open: false };
+    mockWalletInfo = undefined;
+    mockIsSafeWallet = false;
     mockDisconnect.mockResolvedValue(undefined);
     const sessionV2 = require("@/services/auth/session-v2.utils");
     sessionV2.getSessionClientType.mockReturnValue("native");
@@ -612,11 +663,17 @@ describe("SeizeConnectProvider add-account flow", () => {
   });
 
   it("publishes one unauthenticated signing-out state while logout all is pending", async () => {
-    const addressB = "0x00000000000000000000000000000000000000BB";
+    const addressB = SECOND_ADDRESS;
     const authUtils = require("@/services/auth/auth.utils");
     const sessionV2 = require("@/services/auth/session-v2.utils");
     const accounts = [ACTIVE_ADDRESS, addressB];
     let resolveFirstRevocation!: () => void;
+
+    mockWalletInfo = {
+      name: "Test wallet",
+      icon: "https://example.com/wallet.png",
+    };
+    mockIsSafeWallet = true;
 
     authUtils.getConnectedWalletAccounts.mockImplementation(() =>
       accounts.map((address: string) => ({
@@ -644,8 +701,15 @@ describe("SeizeConnectProvider add-account flow", () => {
     render(
       <SeizeConnectProvider>
         <LogoutAllStateProbe />
+        <AccountMutationButtons />
       </SeizeConnectProvider>
     );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("wallet-name")).toHaveTextContent(
+        "Test wallet"
+      );
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
 
@@ -656,7 +720,27 @@ describe("SeizeConnectProvider add-account flow", () => {
     expect(screen.getByTestId("connected-account-count")).toHaveTextContent(
       "0"
     );
+    expect(screen.getByTestId("address")).toHaveTextContent("none");
+    expect(screen.getByTestId("wallet-name")).toHaveTextContent("none");
+    expect(screen.getByTestId("wallet-icon")).toHaveTextContent("none");
+    expect(screen.getByTestId("safe-wallet")).toHaveTextContent("false");
     expect(authUtils.clearAllWalletAuth).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Connect" }));
+    fireEvent.click(screen.getByRole("button", { name: "Connect fresh" }));
+    fireEvent.click(screen.getByRole("button", { name: "Disconnect" }));
+    fireEvent.click(screen.getByRole("button", { name: "Logout one" }));
+    expect(() => {
+      fireEvent.click(
+        screen.getByRole("button", { name: "Accept connection" })
+      );
+    }).not.toThrow();
+    fireEvent.click(screen.getByRole("button", { name: "Switch account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add during logout" }));
+
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockOpen).not.toHaveBeenCalled();
+    expect(authUtils.setActiveWalletAccount).not.toHaveBeenCalled();
 
     await act(async () => {
       resolveFirstRevocation();
@@ -666,5 +750,56 @@ describe("SeizeConnectProvider add-account flow", () => {
       expect(screen.getByTestId("signing-out")).toHaveTextContent("false");
     });
     expect(authUtils.clearAllWalletAuth).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancels delayed add-account work and ignores wallet events during logout all", async () => {
+    const authUtils = require("@/services/auth/auth.utils");
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    let resolveRevocation!: () => void;
+
+    sessionV2.logoutSessionV2.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveRevocation = resolve;
+        })
+    );
+
+    render(
+      <SeizeConnectProvider>
+        <AddAccountButton />
+        <LogoutAllStateProbe />
+      </SeizeConnectProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Add account" }));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("signing-out")).toHaveTextContent("true");
+    });
+    expect(mockDisconnect).toHaveBeenCalledTimes(2);
+
+    const accountReadsBeforeEvent =
+      authUtils.getConnectedWalletAccounts.mock.calls.length;
+    act(() => {
+      globalThis.dispatchEvent(new Event(WALLET_ACCOUNTS_UPDATED_EVENT));
+      jest.advanceTimersByTime(100);
+    });
+
+    expect(authUtils.getConnectedWalletAccounts).toHaveBeenCalledTimes(
+      accountReadsBeforeEvent
+    );
+    expect(mockOpen).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveRevocation();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("signing-out")).toHaveTextContent("false");
+    });
   });
 });

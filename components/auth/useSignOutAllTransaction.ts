@@ -22,12 +22,23 @@ export function useSignOutAllTransaction({
 }: UseSignOutAllTransactionParams) {
   const [isSigningOutAll, setIsSigningOutAll] = useState(false);
   const isSigningOutAllRef = useRef(false);
+  const signOutAllGenerationRef = useRef(0);
+  const getSignOutAllGeneration = useCallback(
+    (): number => signOutAllGenerationRef.current,
+    []
+  );
+  const hasSignOutAllGenerationChanged = useCallback(
+    (generation: number): boolean =>
+      generation !== signOutAllGenerationRef.current,
+    []
+  );
 
   const seizeDisconnectAndLogoutAll = useCallback(async (): Promise<void> => {
     if (isSigningOutAllRef.current) {
       return;
     }
     isSigningOutAllRef.current = true;
+    signOutAllGenerationRef.current += 1;
     setIsSigningOutAll(true);
 
     try {
@@ -74,5 +85,11 @@ export function useSignOutAllTransaction({
     setDisconnected,
   ]);
 
-  return { isSigningOutAll, seizeDisconnectAndLogoutAll };
+  return {
+    getSignOutAllGeneration,
+    hasSignOutAllGenerationChanged,
+    isSigningOutAll,
+    isSigningOutAllRef,
+    seizeDisconnectAndLogoutAll,
+  };
 }

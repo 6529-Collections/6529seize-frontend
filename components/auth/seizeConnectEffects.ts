@@ -1,6 +1,6 @@
 "use client";
 
-import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useEffect } from "react";
 import { getAddress, isAddress } from "viem";
 import {
@@ -26,20 +26,21 @@ interface SeizeConnectProviderEffectsParams {
     readonly isConnected?: boolean | undefined;
     readonly status?: string | undefined;
   };
-  readonly addFlowOriginAddressRef: MutableRefObject<string | null>;
+  readonly addFlowOriginAddressRef: RefObject<string | null>;
   readonly agentLoginImpersonatedAddress: string | undefined;
   readonly clearConnectIntentHandoffTimeout: () => void;
   readonly clearConnectIntentWaitingForAppKit: () => void;
-  readonly debounceTimeoutRef: MutableRefObject<NodeJS.Timeout | null>;
+  readonly debounceTimeoutRef: RefObject<NodeJS.Timeout | null>;
   readonly impersonatedAddress: string | undefined;
   readonly isAddingConnectedAccount: boolean;
-  readonly isAddingConnectedAccountRef: MutableRefObject<boolean>;
+  readonly isAddingConnectedAccountRef: RefObject<boolean>;
   readonly isConnectIntentWaitingForAppKit: boolean;
   readonly isInitialized: boolean;
   readonly isSigningOutAll: boolean;
-  readonly isMountedRef: MutableRefObject<boolean>;
+  readonly isSigningOutAllRef: RefObject<boolean>;
+  readonly isMountedRef: RefObject<boolean>;
   readonly refreshStoredConnectedAccounts: () => void;
-  readonly retryConnectTimeoutRef: MutableRefObject<NodeJS.Timeout | null>;
+  readonly retryConnectTimeoutRef: RefObject<NodeJS.Timeout | null>;
   readonly setConnected: (address: string) => void;
   readonly setConnecting: () => void;
   readonly setDisconnected: () => void;
@@ -56,7 +57,7 @@ type AccountSnapshot = SeizeConnectProviderEffectsParams["account"];
 
 interface WalletStateSyncParams {
   readonly account: AccountSnapshot;
-  readonly addFlowOriginAddressRef: MutableRefObject<string | null>;
+  readonly addFlowOriginAddressRef: RefObject<string | null>;
   readonly agentLoginImpersonatedAddress: string | undefined;
   readonly impersonatedAddress: string | undefined;
   readonly isAddingConnectedAccount: boolean;
@@ -326,6 +327,7 @@ export function useSeizeConnectProviderEffects({
   isConnectIntentWaitingForAppKit,
   isInitialized,
   isSigningOutAll,
+  isSigningOutAllRef,
   isMountedRef,
   refreshStoredConnectedAccounts,
   retryConnectTimeoutRef,
@@ -357,7 +359,9 @@ export function useSeizeConnectProviderEffects({
     if (globalThis.window === undefined) return;
 
     const handleAccountsUpdated = () => {
-      refreshStoredConnectedAccounts();
+      if (!isSigningOutAllRef.current) {
+        refreshStoredConnectedAccounts();
+      }
     };
 
     globalThis.addEventListener(
@@ -370,7 +374,7 @@ export function useSeizeConnectProviderEffects({
         handleAccountsUpdated
       );
     };
-  }, [refreshStoredConnectedAccounts]);
+  }, [isSigningOutAllRef, refreshStoredConnectedAccounts]);
 
   useEffect(() => {
     if (!isInitialized || isSigningOutAll) {
@@ -386,6 +390,9 @@ export function useSeizeConnectProviderEffects({
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
+      if (isSigningOutAllRef.current) {
+        return;
+      }
       syncWalletConnectionState({
         account: {
           address: account.address,
@@ -415,6 +422,7 @@ export function useSeizeConnectProviderEffects({
     account.status,
     isInitialized,
     isSigningOutAll,
+    isSigningOutAllRef,
     storedConnectedAccounts,
     walletState,
     setConnected,
