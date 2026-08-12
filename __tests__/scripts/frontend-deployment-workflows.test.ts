@@ -285,9 +285,13 @@ describe("frontend deployment workflow contract", () => {
     );
     expect(production).not.toContain("refusing to announce stale production");
     expect(production).toContain("refusing to overwrite it with $COMMIT_SHA");
-    expect(productionE2e).toMatch(
+    expect(productionE2e).toContain(
+      'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
+    );
+    expect(productionE2e).not.toMatch(
       /uses: actions\/checkout@[^\n]+\n\s+with:\n\s+ref: \$\{\{ steps\.source\.outputs\.sha \}\}/u
     );
+    expect(productionE2e).toContain("path: .version-verifier");
   });
 
   it("keeps exact source-commit copies of every modified workflow", () => {

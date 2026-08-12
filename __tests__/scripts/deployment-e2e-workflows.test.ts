@@ -111,13 +111,16 @@ describe("serialized post-deploy E2E", () => {
       expect(resolve.run).toContain("/attempts/\${deploy_run_attempt}/jobs");
       expect(resolve.run).not.toContain("MANUAL_TARGET_SHA");
       expect(liveVersion.run).toContain(
-        "node ops/scripts/verify-deployment-version.cjs"
+        "ops/scripts/verify-deployment-version.cjs"
       );
       expect(e2e.workflow.concurrency.group).toContain(environmentGroup);
       expect(e2e.workflow.concurrency.group).toContain(automaticGroup);
 
       if (environment === "production") {
-        expect(sourceMaterialization.with.ref).toBe(
+        expect(sourceMaterialization.run).toContain(
+          'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
+        );
+        expect(sourceMaterialization.env.EXPECTED_SHA).toBe(
           "${{ steps.source.outputs.sha }}"
         );
       } else {
