@@ -22,8 +22,8 @@ restores it whenever that wave is opened again and the tab is still available.
 - Open a wave from waves lists, profile wave links, or a shared wave URL.
 - Open a direct message thread with a selected wave.
 - Select a tab from the wave tab strip.
-- Eligible wave admins can use the tab-row `+` menu to create a curation or,
-  on root non-direct-message waves, create a subwave.
+- Eligible wave admins can use the tab-row `+` menu on web and in the app to
+  create a curation or, on root non-direct-message waves, create a subwave.
 
 ## User Journey
 
@@ -46,6 +46,9 @@ restores it whenever that wave is opened again and the tab is still available.
    when present, and media interactions stay disabled in the row.
 8. If the active tab is no longer valid when entering a new wave, the active tab
    resets to that wave’s first available tab.
+9. Eligible admins can open the `+` menu and select `New subwave`. The new
+   subwave starts with the parent wave's admin group, which can still be changed
+   in the `Groups` step before submission.
 
 ## Common Scenarios
 
@@ -67,6 +70,9 @@ restores it whenever that wave is opened again and the tab is still available.
 - Eligible readers can use `View results` on an open unanswered poll to inspect
   counts and percentages before voting, then return to `Vote` while the poll is
   still open.
+- On mobile, the fixed `+` control stays outside the horizontally scrolling tab
+  list so both `New curation` and `New subwave` remain reachable on narrow
+  screens.
 
 ## Edge Cases
 
@@ -88,6 +94,9 @@ restores it whenever that wave is opened again and the tab is still available.
   includes video, audio, or HTML media.
 - If `preview_image` is missing or invalid, the row still shows the drop by using
   its standard media source and keeping interaction disabled.
+- `New subwave` is unavailable in direct messages, inside an existing subwave,
+  while using a profile proxy, when the parent has no reusable admin group, or
+  when the signed-in profile is not eligible to administer the parent.
 
 ## Failure and Recovery
 
@@ -105,13 +114,17 @@ restores it whenever that wave is opened again and the tab is still available.
   (title, author, and vote score) and can open the drop.
 - If metadata parsing for `preview_image` fails, `My Votes` entries continue to render
   with the row’s media source and remain navigable to the drop detail.
+- If the inherited admin group cannot be loaded for display, submission still
+  keeps its known group ID; the Groups step may temporarily label it as
+  `Selected group`.
 
 ## Limitations / Notes
 
 - Tab selection is UI state and is not encoded in wave URLs.
 - Available tabs depend on wave type, curation settings, voting state, and
   first-decision status.
-- In app-specific surfaces, tab presentation can differ from the web layout.
+- The app and web layouts present the tab row differently, but eligible root
+  wave admins receive the same curation and subwave create actions.
 
 ## Related Pages
 

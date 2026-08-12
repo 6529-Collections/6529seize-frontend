@@ -68,7 +68,9 @@ export default function CreateWaveGroup({
     isNotChatWave &&
     groupType === CreateWaveGroupConfigType.CAN_CHAT &&
     !chatEnabled;
-  const defaultLabel = CREATE_WAVE_NONE_GROUP_LABELS[groupType];
+  const defaultLabel = selectedGroupId
+    ? "Selected group"
+    : CREATE_WAVE_NONE_GROUP_LABELS[groupType];
   const groupLabel = CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType];
   const suggestedName = buildInlineGroupName({ waveName, groupLabel });
 

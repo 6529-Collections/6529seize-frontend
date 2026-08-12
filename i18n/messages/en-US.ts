@@ -982,12 +982,27 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Add identities one by one to build this access group.",
   "inlineIdentities.creatorExcludedWarning":
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
+  "error.missingWallet.title": "Add a primary wallet first.",
+  "error.missingWallet.description":
+    "A primary wallet is required to create this wave's admin group.",
+  "error.createAdmin.title": "Couldn't create the admin group.",
+  "error.createAdmin.description":
+    "Choose an existing admin group, or try again.",
+  "error.publishAdmin.title": "Couldn't make the admin group visible.",
+  "error.publishAdmin.description":
+    "Choose an existing admin group, or try again later.",
+  "error.fallbackDetails": "The group service did not complete the request.",
 } as const);
 
 const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   cancel: "Cancel",
   complete: "Complete",
+  create: "Create",
+  createMenuHeader: "Create",
   next: "Next",
+  newCuration: "New curation",
+  newSubwave: "New subwave",
+  openCreateMenu: "Open create menu",
   previous: "Previous",
   save: "Save",
 } as const);
