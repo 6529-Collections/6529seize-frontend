@@ -71,16 +71,26 @@ Every page includes:
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview contains a plain definition of Stream, five important
-parts of a Stream artwork, a seven-step artwork journey, and focused
-starting points for artists, collectors and minters, and auditors. It ends
-after those audience paths. The secondary **Review history** destination opens
-the immutable technical Overview for the active snapshot. The current **For
-Artists** page starts with a plain artist guide
-covering six questions: artwork and identity; editions and minting; artist
-approval; sales, payments, and royalties; what can still change; and files and
-artwork history. Its detailed versioned editorial remains below as the technical
-evidence. The generated technical reference lets reviewers
+The current overview opens with a broad introduction for artists, collectors,
+and the wider community, followed by five important parts of a Stream artwork,
+a seven-step artwork journey, and focused starting points for artists,
+collectors and minters, and auditors. It ends after those audience paths. The
+secondary **Review history** destination opens the immutable technical Overview
+for the active snapshot. The current **For Artists** page starts with a plain
+artist guide covering six decisions: what artwork to publish; whether it is
+unique or an edition; how collectors can get it; where the money goes; what the
+artist approves; and what can change or become permanent. A six-stage guide
+shows how the artwork moves through Stream and keeps finality separate from
+ending minting, freezing settings, and recording preservation evidence. A
+focused approval checklist separates the details covered by the artist's wallet
+signature from the wider artwork plan. A three-part sales and payments guide
+now follows that checklist before the page explains what can still change. A
+four-part roles summary explains how
+the community, signing wallet, Stream operators, guardian, and outside services
+can affect what happens. It then presents the technical detail in fifteen short
+sections. The sections use reviewed-code, accepted-design, and still-proposed
+labels so readers can tell what is safe to rely on. The generated technical
+reference lets reviewers
 inspect Solidity files, definitions, functions, events, errors, and other
 declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100
@@ -88,13 +98,18 @@ matching records at a time.
 
 ## Implementation and Evidence Status
 
-The current **Where Development Stands** page begins with a separately dated
-development update. It summarizes recent work, active work, launch requirements,
-evidence counts, and the source commit checked for that update. The current
-**Community Review** page begins with six plain-language review questions and
-the authorship disclosure. The development update and review questions appear
-only on their current, unversioned routes. Immutable version routes keep their
-exact editorial snapshot and historical authorship disclosure.
+The current **Where Development Stands** page begins with a direct launch answer:
+Stream is not ready yet. It lists the three remaining launch gates in plain
+language and shows the last checked date plus the open release-blocker count.
+The next sections explain the scope and use five plain progress labels both in
+the guide and as later section names. They keep built code separate from safety
+evidence and accepted plans separate from unaccepted designs. A plain proof
+table then explains what each kind of evidence shows and does not show. Exact
+commit and Git tree values follow under **Technical details**.
+The current **Community Review** page begins with six plain-language review
+questions and the authorship disclosure. The launch answer and review questions
+appear only on their current, unversioned routes. Immutable version routes keep
+their exact editorial snapshot and historical authorship disclosure.
 
 The plain Overview guide appears only on the unversioned Overview and replaces
 the versioned technical Overview there. Its on-page section navigation and
@@ -102,8 +117,9 @@ feedback section choices therefore omit the hidden technical headings. A link
 from the current review-wide navigation opens its immutable technical editorial.
 Immutable version routes show their exact review version and continue to
 describe their exact review snapshot.
-The plain artist guide follows the same rule: it appears only on the current,
-unversioned **For Artists** route, while immutable version routes continue to
+The plain artist guide and its short technical detail layer follow the same
+rule: they appear only on the current, unversioned **For Artists** route and
+replace the versioned editorial there. Immutable version routes continue to
 render their exact editorial snapshot without the guide.
 
 The active review centralizes snapshot implementation and evidence status on
@@ -118,10 +134,12 @@ The active review centralizes snapshot implementation and evidence status on
 Testing and audit remain a separate evidence dimension. Topical pages use
 precise verbs next to each claim and link to the canonical ledger.
 
-The daily update source is
+The development-status source is
 `config/public-reviews/6529-stream.development-status.json`. A routine update
 changes its canonical UTC timestamp, exact Stream source commit, plain-language
-items, evidence counts, and evidence links in one reviewed JSON file. Run
+items, evidence counts, and evidence links in one reviewed JSON file. The
+current page uses its checked date and open-blocker count in the plain launch
+answer. Run
 `./bin/6529 run public-review:knowledge` and
 `./bin/6529 run help-index:sync` after each update. The parser validates the
 record shape, identifiers, source identity, timestamp, counts, internal review
