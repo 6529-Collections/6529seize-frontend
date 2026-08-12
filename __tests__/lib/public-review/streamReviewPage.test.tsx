@@ -259,6 +259,9 @@ mint lanes?`;
         "1. Old question.\n9. Does every public royalty statement describe marketplace payment under\nERC-2981 as voluntary?",
       ].join("\n\n");
     }
+    if (page.id === "randomness") {
+      return "# Randomness\n\nFor generative art, randomness is part of the work's provenance. A collector\nshould be able to determine which provider produced the input, which request it\nanswered, which token and collection it belonged to, how callbacks were\nhandled, whether anyone requested new randomness, and why the final seed is\npermanent.\n\nStream therefore treats randomness as a lifecycle. Requests, delays, failures,\nprovider changes, retries, and disputed outputs all receive durable state.\n\n## Each provider has its own trust model\n\nOld provider copy.\n\n## Questions for reviewers\n\n9. Does every supported provider give artists and collectors an equally clear\nprovenance record even though its trust model differs?";
+    }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
   PublicReviewEditorialContentError: class extends Error {},
@@ -315,6 +318,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "governance-pausing-and-successors",
         sectionValues: ["old-governance-section"],
+      },
+      {
+        value: "randomness",
+        sectionValues: ["old-randomness-section"],
       },
       {
         value: "security-testing-and-known-limitations",
@@ -992,6 +999,63 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("16");
   });
 
+  it("shows plain-language copy on the current Randomness page", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "randomness",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent("Randomness in one minute");
+    expect(editorialCopy).toHaveTextContent(
+      "a retry must not become a redraw"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "What is in the reviewed code"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "What the accepted design says"
+    );
+    expect(editorialCopy).toHaveTextContent("What is still open");
+    expect(editorialCopy).toHaveTextContent(
+      "The current stale state is immediate and terminal"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Provider migration governs future requests"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "That is an open review idea. It is not implemented in the pinned contracts."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "An accepted seed can be stranded before it reaches the Core."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Those tests show local behavior. They do not prove live provider operation."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+    );
+    expect(editorialCopy).not.toHaveTextContent("Old provider copy.");
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "16"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.randomness.currentSummary"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
+      "16"
+    );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("16");
+  });
+
   it("puts a plain current guide before the Community Review prompts", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -1484,6 +1548,37 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
       "publicReview.pages.revenueSplitsAndRoyalties.summary"
+    );
+  });
+
+  it("keeps immutable Randomness routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "randomness",
+          version: "2026-08-01.1",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent(
+      "For generative art, randomness is part of the work's provenance."
+    );
+    expect(editorialCopy).toHaveTextContent("Old provider copy.");
+    expect(editorialCopy).not.toHaveTextContent("Randomness in one minute");
+    expect(editorialCopy).not.toHaveTextContent(
+      "a retry must not become a redraw"
+    );
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "2"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.randomness.summary"
     );
   });
 

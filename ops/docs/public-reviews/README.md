@@ -110,6 +110,13 @@ it explains that the pinned executor's 30-day successor class and the module
 registry's 48-hour registration path are separate code paths that still need an
 exact launch changeover catalog.
 
+The current **Randomness** page starts with a one-minute answer and a five-step
+request flow. It keeps reviewed contract behavior separate from accepted ADR
+0005 design and open recovery ideas. It then explains provider trust, request
+states, seed evidence, same-seed retries, stale requests, provider changes,
+burns, funding, risks, and reviewer questions in plain language. Its saved
+version routes keep their exact editorial snapshot.
+
 ## Implementation and Evidence Status
 
 The current **Where Development Stands** page begins with a direct launch answer:

@@ -45,6 +45,7 @@ import { getCurrentGovernanceEditorialMarkdown } from "@/lib/public-review/strea
 import { getCurrentSalesAndAuctionsEditorialMarkdown } from "@/lib/public-review/streamReviewSalesAndAuctionsPage";
 import { getCurrentFreezingFinalityEditorialMarkdown } from "@/lib/public-review/streamReviewFreezingFinalityPage";
 import { getCurrentRevenueSplitsEditorialMarkdown } from "@/lib/public-review/streamReviewRevenueSplitsPage";
+import { getCurrentRandomnessEditorialMarkdown } from "@/lib/public-review/streamReviewRandomnessPage";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
@@ -122,6 +123,7 @@ type CurrentStreamReviewPages = {
   readonly freezingFinality: boolean;
   readonly overview: boolean;
   readonly revenueSplits: boolean;
+  readonly randomness: boolean;
   readonly roles: boolean;
   readonly tokensAndMinting: boolean;
   readonly salesAndAuctions: boolean;
@@ -153,6 +155,7 @@ function getCurrentStreamReviewPages(
     overview: isCurrent && pageId === "overview",
     revenueSplits:
       isCurrent && pageId === "revenue-splits-and-royalties",
+    randomness: isCurrent && pageId === "randomness",
     roles: isCurrent && pageId === "roles-and-trust",
     tokensAndMinting: isCurrent && pageId === "tokens-collections-and-minting",
     salesAndAuctions:
@@ -225,6 +228,12 @@ function getDisplayedEditorialMarkdown({
       source,
     });
   }
+  if (currentPages.randomness) {
+    return getCurrentRandomnessEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
   return editorialMarkdown;
 }
 
@@ -269,6 +278,12 @@ function getDisplayedPage(
     return {
       ...page,
       summaryKey: "publicReview.pages.revenueSplitsAndRoyalties.currentSummary",
+    };
+  }
+  if (currentPages.randomness) {
+    return {
+      ...page,
+      summaryKey: "publicReview.pages.randomness.currentSummary",
     };
   }
   return page;
