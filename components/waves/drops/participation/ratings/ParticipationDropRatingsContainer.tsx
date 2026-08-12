@@ -12,6 +12,7 @@ interface ParticipationDropRatingsContainerProps {
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
+  readonly emphasizeCurrent?: boolean | undefined;
 }
 
 export default function ParticipationDropRatingsContainer({
@@ -20,6 +21,7 @@ export default function ParticipationDropRatingsContainer({
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
+  emphasizeCurrent = false,
 }: ParticipationDropRatingsContainerProps) {
   const isApprovalSummary =
     typeof winningThreshold === "number" &&
@@ -34,6 +36,7 @@ export default function ParticipationDropRatingsContainer({
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         variant="chat"
+        emphasizeCurrent={emphasizeCurrent}
       />
     );
   }
@@ -63,6 +66,7 @@ export default function ParticipationDropRatingsContainer({
           rank={rank}
           theme={theme}
           ratingsData={ratingsData}
+          emphasizeCurrent={emphasizeCurrent}
         />
       </div>
       <ParticipationDropRatingsUserSection

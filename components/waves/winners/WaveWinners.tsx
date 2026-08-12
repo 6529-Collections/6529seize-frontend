@@ -14,6 +14,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveWinnersApprovalError } from "./WaveWinnersApprovalError";
 import { getApprovedWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
@@ -30,6 +31,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   } = useWave(wave);
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
   const outcomesVisible = useWaveOutcomeVisibility(wave);
+  const proposalCardPresentation = useWaveProposalCardPresentation(wave.id);
 
   // Use layout context for container style
   const { winnersViewStyle } = useLayout();
@@ -54,7 +56,9 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   });
   const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
   const approvedWinners = getApprovedWaveDecisionWinners(decisionPoints);
-  const contentPresentation = isQuorumWave ? "quorumCompact" : undefined;
+  const contentPresentation = isQuorumWave
+    ? "quorumCompact"
+    : proposalCardPresentation;
   const handleApprovalWinnersRetry = () => {
     if (hasNextPage) {
       void fetchNextPage();
