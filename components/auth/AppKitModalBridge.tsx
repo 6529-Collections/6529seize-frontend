@@ -11,6 +11,7 @@ import { logError } from "@/utils/security-logger";
 import { isSafeWalletInfo } from "@/utils/wallet-detection";
 
 type OpenAppKitModal = ReturnType<typeof useAppKit>["open"];
+type CloseAppKitModal = ReturnType<typeof useAppKit>["close"];
 type AppKitWalletInfo = ReturnType<typeof useWalletInfo>["walletInfo"];
 type AppKitWalletName = NonNullable<AppKitWalletInfo>["name"];
 type AppKitWalletIcon = NonNullable<AppKitWalletInfo>["icon"];
@@ -30,9 +31,11 @@ type AppKitOpenWaiter = {
 
 type AppKitModalBridgeStore = {
   readonly dispose: () => void;
+  readonly close: () => Promise<void>;
   readonly failBootstrap: () => void;
   readonly getSnapshot: () => AppKitModalState;
   readonly setOpen: (open: OpenAppKitModal | null) => void;
+  readonly setClose: (close: CloseAppKitModal | null) => void;
   readonly setState: (state: AppKitModalState) => void;
   readonly subscribe: (listener: () => void) => () => void;
   readonly waitForOpen: () => Promise<OpenAppKitModal>;
@@ -57,6 +60,7 @@ function getEmptyAppKitModalState(): AppKitModalState {
 export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
   let snapshot = EMPTY_APPKIT_MODAL_STATE;
   let openAppKit: OpenAppKitModal | null = null;
+  let closeAppKit: CloseAppKitModal | null = null;
   let failure: Error | null = null;
   const listeners = new Set<() => void>();
   const waiters = new Set<AppKitOpenWaiter>();
@@ -77,6 +81,7 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
 
     failure = error;
     openAppKit = null;
+    closeAppKit = null;
     const stateChanged = snapshot !== EMPTY_APPKIT_MODAL_STATE;
     snapshot = EMPTY_APPKIT_MODAL_STATE;
     rejectWaiters(error);
@@ -88,6 +93,9 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
   };
 
   return {
+    close: async () => {
+      await closeAppKit?.();
+    },
     dispose: () => {
       fail(new Error("Wallet connection services became unavailable"));
       listeners.clear();
@@ -111,6 +119,11 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
       for (const waiter of pendingWaiters) {
         clearTimeout(waiter.timeoutHandle);
         waiter.resolve(nextOpenAppKit);
+      }
+    },
+    setClose: (nextCloseAppKit) => {
+      if (!failure) {
+        closeAppKit = nextCloseAppKit;
       }
     },
     setState: (nextState) => {
@@ -183,7 +196,7 @@ function useAppKitModalBridgeStore(): AppKitModalBridgeStore {
 
 const AppKitModalHooks: React.FC = () => {
   const store = useAppKitModalBridgeStore();
-  const { open } = useAppKit();
+  const { close, open } = useAppKit();
   const { walletInfo } = useWalletInfo();
   const { open: isOpen } = useAppKitState();
   const walletName = walletInfo?.name;
@@ -192,10 +205,12 @@ const AppKitModalHooks: React.FC = () => {
 
   useEffect(() => {
     store.setOpen(open);
+    store.setClose(close);
     return () => {
       store.setOpen(null);
+      store.setClose(null);
     };
-  }, [open, store]);
+  }, [close, open, store]);
 
   useEffect(() => {
     store.setState({ isOpen, walletName, walletIcon, isSafeWallet });
