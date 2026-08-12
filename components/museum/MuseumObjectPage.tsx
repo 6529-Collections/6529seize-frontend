@@ -22,7 +22,10 @@ import {
   getCaseyArtwork,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
-import { getMuseumView } from "@/lib/museum/normalize";
+import {
+  findReviewedProgramMedia,
+  getMuseumView,
+} from "@/lib/museum/normalize";
 import { buildMuseumWorkContext } from "@/lib/museum/publication/ia";
 import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
 import type {
@@ -30,10 +33,7 @@ import type {
   MuseumPublication,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
-import {
-  selectMuseumStillMedia,
-  shouldWithholdKeysAndGatesMedia,
-} from "@/lib/museum/publication/mediaSelection";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import {
   displayMuseumPublicAcquisitionStatus,
   museumSlugMatches,
@@ -116,14 +116,12 @@ function workQualifierLabel(
 
 function MuseumCanonicalWorkMedia({
   work,
-  withholdVisualMedia,
+  programMedia,
 }: {
   readonly work: MuseumPublicWork;
-  readonly withholdVisualMedia: boolean;
+  readonly programMedia: MuseumProgramMedia | null;
 }) {
-  const stillMedia = withholdVisualMedia
-    ? undefined
-    : selectMuseumStillMedia(work.media);
+  const stillMedia = selectMuseumStillMedia(work.media);
   if (stillMedia !== undefined) {
     return (
       <section
@@ -156,6 +154,45 @@ function MuseumCanonicalWorkMedia({
             </figcaption>
           </figure>
         </div>
+      </section>
+    );
+  }
+  if (programMedia !== null) {
+    const credit = work.mediaMetadata?.[0]?.credit;
+    return (
+      <section
+        className="tw-mt-10"
+        aria-labelledby="canonical-work-media-title"
+      >
+        <h2 id="canonical-work-media-title" className="tw-sr-only">
+          {t(DEFAULT_LOCALE, "museum.network.works.title")}
+        </h2>
+        <figure className="tw-m-0">
+          <div className="tw-overflow-hidden tw-bg-black">
+            <MuseumProgramImage
+              media={programMedia}
+              sizes="(min-width: 1024px) 66vw, 100vw"
+              eager
+              className="tw-block tw-h-auto tw-w-full tw-object-contain"
+            />
+          </div>
+          {credit === undefined ? null : (
+            <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              <span className="tw-block tw-text-iron-200">
+                {credit.creditLine}
+              </span>
+              {credit.licenseLabel === null ? null : (
+                <span className="tw-mt-1 tw-block">
+                  <MuseumRightsLink
+                    href={credit.licenseUrl ?? undefined}
+                    label={credit.licenseLabel}
+                    className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  />
+                </span>
+              )}
+            </figcaption>
+          )}
+        </figure>
       </section>
     );
   }
@@ -240,6 +277,7 @@ function MuseumCanonicalWorkRecordPage({
   const workHrefs = museumWorkHrefIndex(publication, view);
   const primaryCredit =
     work.media[0]?.credit.creditLine ??
+    work.mediaMetadata?.[0]?.credit.creditLine ??
     work.presentationMedia?.[0]?.credit.creditLine;
   const primarySource =
     work.sourcePaths[0] === undefined
@@ -249,12 +287,10 @@ function MuseumCanonicalWorkRecordPage({
           work.sourcePaths[0]
         );
   const insideSystemHref = museumWorkInsideSystemHref(work, publication);
-  const withholdVisualMedia = shouldWithholdKeysAndGatesMedia(
-    work.status,
-    (publication.acquisitionPrograms ?? [])
-      .filter((program) => work.programIds.includes(program.id))
-      .map((program) => program.slug)
-  );
+  const programMedia = findReviewedProgramMedia(view, [
+    work.id,
+    ...(work.sourceRecordIds ?? []),
+  ]);
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -285,10 +321,7 @@ function MuseumCanonicalWorkRecordPage({
           </p>
         ) : null}
       </header>
-      <MuseumCanonicalWorkMedia
-        work={work}
-        withholdVisualMedia={withholdVisualMedia}
-      />
+      <MuseumCanonicalWorkMedia work={work} programMedia={programMedia} />
       {insideSystemHref !== null ? (
         <div className="tw-mt-8">
           <Link
@@ -299,8 +332,7 @@ function MuseumCanonicalWorkRecordPage({
           </Link>
         </div>
       ) : null}
-      {!withholdVisualMedia &&
-      work.presentationMedia !== undefined &&
+      {work.presentationMedia !== undefined &&
       work.presentationMedia.length > 0 ? (
         <section
           className="tw-mt-10"

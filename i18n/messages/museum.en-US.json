@@ -436,6 +436,8 @@
   "museum.network.acquisitions.related": "Artists and works",
   "museum.network.acquisitions.presentation": "Presentation",
   "museum.network.acquisitions.historicalWavePresentation": "Historical Wave proposal presentation",
+  "museum.network.acquisitions.curatorialReading": "Curatorial reading",
+  "museum.network.acquisitions.accessionRecordAndSources": "Accession record and sources",
   "museum.network.acquisitions.openPresentation": "Open the source Wave",
   "museum.network.acquisitions.presentationRights": "All Rights Reserved · Presentation only.",
   "museum.network.acquisitions.presentationSource": "Source",

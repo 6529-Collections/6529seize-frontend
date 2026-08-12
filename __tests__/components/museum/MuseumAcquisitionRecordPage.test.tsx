@@ -3,13 +3,16 @@ import { MuseumAcquisitionRecordPage } from "@/components/museum/MuseumAcquisiti
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import type {
   MuseumArtist,
+  MuseumExternalProposalPresentationMedia,
   MuseumMediaMetadata,
   MuseumPublication,
+  MuseumPublicDocument,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
+import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
 
-const WAVE_CONTEXT_HREF =
-  "https://6529.io/waves/5f207393-5418-4a75-8738-e40edb44a94d?drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0";
+const WAVE_ID = "5f207393-5418-4a75-8738-e40edb44a94d";
+const WAVE_CONTEXT_HREF = `https://6529.io/waves/${WAVE_ID}?drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0`;
 
 function metadata(
   id: string,
@@ -56,7 +59,11 @@ function work(
   title: string,
   artistId: string,
   status: MuseumPublicWork["status"],
-  mediaMetadata: MuseumMediaMetadata
+  mediaMetadata: MuseumMediaMetadata,
+  options: {
+    readonly programIds?: readonly string[];
+    readonly sourceRecordIds?: readonly string[];
+  } = {}
 ): MuseumPublicWork {
   return {
     kind: "work",
@@ -69,12 +76,15 @@ function work(
     status,
     statusAsOf: "2026-08-09",
     acquisitionIds: [],
-    programIds: [],
+    programIds: options.programIds ?? [],
     media: [],
     mediaMetadata: [mediaMetadata],
     documentIds: [],
     qualifiers: [],
     sourcePaths: [],
+    ...(options.sourceRecordIds === undefined
+      ? {}
+      : { sourceRecordIds: options.sourceRecordIds }),
   };
 }
 
@@ -83,7 +93,11 @@ function acquisition(
   slug: string,
   title: string,
   status: MuseumAcquisitionViewModel["status"],
-  workId: string
+  workId: string,
+  options: {
+    readonly programId?: string | null;
+    readonly sourceDocumentIds?: readonly string[];
+  } = {}
 ): MuseumAcquisitionViewModel {
   return {
     kind: "curated_acquisition",
@@ -103,22 +117,148 @@ function acquisition(
     title,
     thesis: `A documented group of works: ${title}.`,
     acquisitionMethod: "other_authorized_method",
-    programId: null,
+    programId: options.programId ?? null,
     pathway: null,
     artistIds: [],
     organizationIds: [],
     projectIds: [],
     workIds: [workId],
     accessionLotIds: [],
-    sourceDocumentIds: [],
+    sourceDocumentIds: options.sourceDocumentIds ?? [],
     sourcePaths: [],
     presentationMedia: [],
   };
 }
 
+function publicDocument(
+  id: string,
+  kind: MuseumPublicDocument["kind"],
+  title: string,
+  markdown: string
+): MuseumPublicDocument {
+  return {
+    id,
+    kind,
+    title,
+    markdown,
+    sha256: null,
+    sourcePath: `records/documents/${id}.md`,
+    artistIds: [],
+    projectIds: [],
+    giftIds: [],
+    artworkIds: [],
+    sourceRecordIds: [],
+  };
+}
+
+function programMedia(sourceUrl: string, altText: string): MuseumProgramMedia {
+  return {
+    sourceUrl,
+    sourceMimeType: "image/webp",
+    sourceSha256: null,
+    sourceByteSize: 900_000,
+    sourceWidth: 2400,
+    sourceHeight: 1600,
+    altText,
+    altTextStatus: "governed_artwork_description",
+    variants: [],
+  };
+}
+
+function museumView(
+  selectedWorkId: string,
+  media: MuseumProgramMedia,
+  programId = "program-keys"
+): MuseumView {
+  return {
+    sourceState: {} as MuseumView["sourceState"],
+    release: null,
+    mission: null,
+    policies: [],
+    methodology: [],
+    governance: [],
+    approvedCollections: [],
+    programs: [
+      {
+        programId,
+        title: "Keys and Gates",
+        subtitle: "A photographic acquisition program",
+        status: "selection_complete",
+        statusAsOf: "2026-08-09",
+        curatorialFrame: "A program frame.",
+        rules: [],
+        nonClaims: [],
+        selectedWorks: [
+          {
+            recordId: selectedWorkId,
+            outcomePath: `records/programs/${programId}/outcomes/${selectedWorkId}.json`,
+            status: "selection_complete",
+            artist: "Anni Artist",
+            title: "A Door Opens",
+            submissionDropId: null,
+            winnerPlace: 1,
+            voteTotal: null,
+            voterCount: null,
+            media,
+          },
+        ],
+        sourcePath: `records/programs/${programId}/program.json`,
+        selectedWorksPath: `records/programs/${programId}/selected-works.json`,
+      },
+    ],
+    accessions: [],
+    objects: [],
+  };
+}
+
+function presentationMedia(): MuseumExternalProposalPresentationMedia {
+  return {
+    id: "media-wave-proposal",
+    kind: "external_proposal_presentation",
+    mediaUrl:
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/002bfa4f-8416-48bf-b35e-38f354e9a9f0/photograph.jpg",
+    mediaMimeType: "image/jpeg",
+    sourceByteSize: 16_500_000,
+    width: 2400,
+    height: 1600,
+    altText: "A governed presentation photograph.",
+    source: {
+      kind: "signed_wave_storm",
+      waveId: WAVE_ID,
+      dropId: "002bfa4f-8416-48bf-b35e-38f354e9a9f0",
+      partId: 1,
+      serial: 1,
+      publicationRecordId: "publication-wave-selection",
+      contextEntityId: "acquisition-wave-selection",
+      sourcePath: "records/proposed-gifts/wave-media-join.json",
+      mediaRecordPath: "records/entities/media-wave-proposal.json",
+      sourceCommit: "b".repeat(40),
+    },
+    credit: {
+      creditLine: "© artist / Magnum Photos.",
+      sourcePath: "records/entities/media-wave-proposal.json",
+    },
+    rights: {
+      status: "presentation_only",
+      licenseLabel: "All Rights Reserved",
+      licenseUrl: null,
+    },
+    download: "not_permitted",
+    preservation: "not_retained",
+    affordances: [
+      "view",
+      "thumbnail",
+      "hero",
+      "alt",
+      "open_upstream_presentation",
+    ],
+  };
+}
+
 function publication(
   artists: readonly MuseumArtist[],
-  works: readonly MuseumPublicWork[]
+  works: readonly MuseumPublicWork[],
+  documents: readonly MuseumPublicDocument[] = []
 ): MuseumPublication {
   return {
     identity: {
@@ -137,34 +277,32 @@ function publication(
     gifts: [],
     artworks: [],
     works,
-    documents: [],
+    documents,
     institutionalPractice: {} as MuseumPublication["institutionalPractice"],
     dataArchitecture: {} as MuseumPublication["dataArchitecture"],
     rightsHandbook: {} as MuseumPublication["rightsHandbook"],
   };
 }
 
-function expectEditorialOrder(
-  workTitle: string,
-  artistName: string,
-  lifecycle: string
-): void {
+function expectEditorialOrder(workTitle: string, artistName: string): void {
   const figure = screen.getByText(artistName).closest("figure");
   expect(figure).not.toBeNull();
   const text = figure?.textContent ?? "";
   expect(text.indexOf(workTitle)).toBeGreaterThanOrEqual(0);
   expect(text.indexOf(artistName)).toBeGreaterThan(text.indexOf(workTitle));
-  expect(text.indexOf(lifecycle)).toBeGreaterThan(text.indexOf(artistName));
 }
 
-describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
-  it("renders Keys and Gates text-only works with the selected acquisition status and qualifier", () => {
+describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
+  it("joins Keys and Gates Work IDs to selected program media and tiers the record", () => {
     const workTitle = "A Door Opens";
     const artistName = "Anni Artist";
     const lifecycle =
       "Selected through an acquisition program; acquisition pending";
-    const qualifier = "Not yet minted or accessioned.";
     const workId = "6529NM-W-0008";
+    const media = programMedia(
+      "https://museum.test/keys-and-gates/0008.webp",
+      "A photographic work from the Keys and Gates program."
+    );
 
     render(
       <MuseumAcquisitionRecordPage
@@ -173,7 +311,11 @@ describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
           "keys-and-gates",
           "Keys and Gates",
           "selected_through_acquisition_program_acquisition_pending",
-          workId
+          workId,
+          {
+            programId: "program-keys",
+            sourceDocumentIds: ["keys-essay", "keys-record"],
+          }
         )}
         publication={publication(
           [artist("artist-anni", artistName)],
@@ -188,11 +330,29 @@ describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
                 workId,
                 "© participating artists / Keys and Gates.",
                 "A photographic work from the Keys and Gates program."
-              )
+              ),
+              {
+                programIds: ["program-keys"],
+                sourceRecordIds: [`records/entities/${workId}.json`],
+              }
+            ),
+          ],
+          [
+            publicDocument(
+              "keys-essay",
+              "acquisition_essay",
+              "A photographic program",
+              "## A photographic program\n\nA curatorial reading."
+            ),
+            publicDocument(
+              "keys-record",
+              "technical_condition_review",
+              "Technical and provenance record",
+              "## Record\n\nA technical record."
             ),
           ]
         )}
-        view={null}
+        view={museumView(workId, media)}
         sourceCommit={"a".repeat(40)}
       />
     );
@@ -200,67 +360,67 @@ describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
     expect(
       screen.getByRole("heading", { name: "Keys and Gates" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: media.altText })).toHaveAttribute(
+      "src",
+      media.sourceUrl
+    );
     expect(
-      screen.getByText("No public image is available for this record.")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("A photographic work from the Keys and Gates program.")
-    ).toBeInTheDocument();
+      screen.queryByText("No public image is available for this record.")
+    ).not.toBeInTheDocument();
     expect(
       screen.getAllByText(lifecycle, { exact: true }).length
     ).toBeGreaterThan(0);
-    expect(screen.getByText(qualifier, { exact: true })).toBeInTheDocument();
-    expectEditorialOrder(workTitle, artistName, lifecycle);
-
-    expect(screen.queryByRole("img")).not.toBeInTheDocument();
-    expect(document.body.textContent).not.toContain(
-      "selected_through_acquisition_program_acquisition_pending"
-    );
-    expect(document.body.textContent).not.toContain("https://example.invalid");
     expect(
-      screen.queryByRole("link", { name: "Open Wave proposal context" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("heading", { name: "Curatorial reading" })
+    ).toBeInTheDocument();
+    const record = document.querySelector("details#acquisition-record");
+    expect(record).not.toBeNull();
+    expect(record).not.toHaveAttribute("open");
+    expectEditorialOrder(workTitle, artistName);
+
+    const bodyText = document.body.textContent ?? "";
+    expect(bodyText.indexOf("Works in this acquisition")).toBeLessThan(
+      bodyText.indexOf("Curatorial reading")
+    );
+    expect(bodyText.indexOf("Curatorial reading")).toBeLessThan(
+      bodyText.indexOf("Accession record and sources")
+    );
   });
 
-  it("renders Magnum metadata-only works with the Wave context link only when modeled", () => {
+  it("renders Conflict at Its Edges as a visual Wave-selected acquisition", () => {
     const workTitle = "Conflict at Its Edges";
     const artistName = "M. Artist";
     const lifecycle = "Selected by Museum Wave; acquisition review in progress";
     const workId = "6529NM-W-0024";
+    const presentation = presentationMedia();
 
     render(
       <MuseumAcquisitionRecordPage
         acquisition={acquisition(
           "acquisition-wave-selection",
-          "wave-selection",
-          "Wave selection",
+          "conflict-at-its-edges",
+          workTitle,
           "selected_by_museum_wave_acquisition_review_in_progress",
           workId
         )}
         publication={publication(
           [artist("artist-m", artistName)],
           [
-            work(
-              workId,
-              workTitle,
-              "artist-m",
-              "selected_by_museum_wave_acquisition_review_in_progress",
-              metadata(
-                "media-wave-proposal",
+            {
+              ...work(
                 workId,
-                "© artist / Magnum Photos.",
-                "A governed presentation photograph.",
-                {
-                  kind: "wave_proposal",
-                  waveId: "5f207393-5418-4a75-8738-e40edb44a94d",
-                  dropId: "002bfa4f-8416-48bf-b35e-38f354e9a9f0",
-                  publicationRecordId: "publication-wave-selection",
-                  acquisitionId: "acquisition-wave-selection",
-                  sourcePath: "records/entities/media-wave-proposal.json",
-                  openHref: WAVE_CONTEXT_HREF,
-                }
-              )
-            ),
+                workTitle,
+                "artist-m",
+                "selected_by_museum_wave_acquisition_review_in_progress",
+                metadata(
+                  "media-wave-proposal",
+                  workId,
+                  "© artist / Magnum Photos.",
+                  presentation.altText
+                )
+              ),
+              presentationMedia: [presentation],
+            },
           ]
         )}
         view={null}
@@ -269,31 +429,68 @@ describe("MuseumAcquisitionRecordPage metadata-only presentations", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Wave selection" })
+      screen.getByRole("heading", { name: "Conflict at Its Edges" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText("No public image is available for this record.")
-    ).toBeInTheDocument();
+      screen.getByRole("img", { name: presentation.altText })
+    ).toHaveAttribute("src", presentation.mediaUrl);
     expect(
-      screen.getByText("A governed presentation photograph.")
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: "Open the source Wave" })
+    ).toHaveAttribute("href", WAVE_CONTEXT_HREF);
     expect(
       screen.getAllByText(lifecycle, { exact: true }).length
     ).toBeGreaterThan(0);
-    expect(
-      screen.queryByText("Not yet minted or accessioned.", { exact: true })
-    ).not.toBeInTheDocument();
-    expectEditorialOrder(workTitle, artistName, lifecycle);
-
-    expect(screen.queryByRole("img")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Open Wave proposal context" })
-    ).toHaveAttribute("href", WAVE_CONTEXT_HREF);
+    expectEditorialOrder(workTitle, artistName);
     expect(document.body.textContent).not.toContain(
       "selected_by_museum_wave_acquisition_review_in_progress"
     );
-    expect(document.body.textContent).not.toContain(
-      "https://d3lqz0a4bldqgf.cloudfront.net"
+  });
+
+  it("keeps Casey's completed accession on the established record layout", () => {
+    const workId = "6529NM-W-0001";
+
+    render(
+      <MuseumAcquisitionRecordPage
+        acquisition={acquisition(
+          "acquisition-casey",
+          "the-system-in-seven-states",
+          "The System in Seven States",
+          "accessioned_into_permanent_collection",
+          workId
+        )}
+        publication={publication(
+          [artist("artist-casey", "Casey Reas")],
+          [
+            work(
+              workId,
+              "The System in Seven States",
+              "artist-casey",
+              "accessioned_into_permanent_collection",
+              metadata(
+                "media-casey",
+                workId,
+                "© Casey Reas.",
+                "A Casey Reas work."
+              )
+            ),
+          ]
+        )}
+        view={null}
+        sourceCommit={"c".repeat(40)}
+      />
     );
+
+    expect(
+      screen.getByRole("heading", { name: "The System in Seven States" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Curatorial reading" })
+    ).not.toBeInTheDocument();
+    expect(document.querySelector("details#acquisition-record")).toBeNull();
+    expect(
+      screen.getAllByText("Accessioned into the permanent Collection", {
+        exact: true,
+      }).length
+    ).toBeGreaterThan(0);
   });
 });
