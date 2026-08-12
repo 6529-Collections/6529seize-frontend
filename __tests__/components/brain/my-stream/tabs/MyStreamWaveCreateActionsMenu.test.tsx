@@ -54,10 +54,12 @@ const createWave = ({
   eligible = true,
   parentWave = null,
   adminGroupId = "parent-admin-group",
+  includeAdminGroup = true,
 }: {
   readonly eligible?: boolean;
   readonly parentWave?: object | null;
   readonly adminGroupId?: string | null;
+  readonly includeAdminGroup?: boolean;
 } = {}) =>
   ({
     id: "parent-wave",
@@ -65,11 +67,13 @@ const createWave = ({
     chat: { scope: { group: { is_direct_message: false } } },
     wave: {
       authenticated_user_eligible_for_admin: eligible,
-      admin_group: {
-        group: adminGroupId
-          ? { id: adminGroupId, name: "Parent admins", is_hidden: false }
-          : null,
-      },
+      admin_group: includeAdminGroup
+        ? {
+            group: adminGroupId
+              ? { id: adminGroupId, name: "Parent admins", is_hidden: false }
+              : null,
+          }
+        : null,
     },
   }) as any;
 
@@ -111,6 +115,11 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     ["an active proxy", { activeProfileProxy: { id: "proxy" } }, createWave()],
     ["a nested wave", {}, createWave({ parentWave: { id: "root" } })],
     ["no reusable admin group", {}, createWave({ adminGroupId: null })],
+    [
+      "no admin-group payload",
+      {},
+      createWave({ includeAdminGroup: false }),
+    ],
   ])("hides subwave creation for %s", (_label, authOverride, wave) => {
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },

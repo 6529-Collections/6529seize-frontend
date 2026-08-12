@@ -27,7 +27,10 @@ export default function MyStreamWaveCreateActionsMenu({
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const [isCreateSubwaveOpen, setIsCreateSubwaveOpen] = useState(false);
   const isDirectMessage = wave.chat?.scope?.group?.is_direct_message ?? false;
-  const parentAdminGroupId = wave.wave.admin_group.group?.id ?? null;
+  const parentAdminGroup = wave.wave.admin_group as
+    | typeof wave.wave.admin_group
+    | null;
+  const parentAdminGroupId = parentAdminGroup?.group?.id ?? null;
   const canCreateCuration =
     wave.wave?.authenticated_user_eligible_for_admin === true;
   const canCreateSubwave =

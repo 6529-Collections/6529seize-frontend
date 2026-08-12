@@ -9,6 +9,8 @@ import {
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import CreateWaveToggle from "../utils/CreateWaveToggle";
 import { buildInlineGroupName } from "./createWaveInlineGroupBuilder";
 import CreateWaveGroupInlinePanel from "./CreateWaveGroupInlinePanel";
@@ -40,6 +42,7 @@ export default function CreateWaveGroup({
   readonly groups: WaveGroupsConfig;
   readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
 }) {
+  const locale = useBrowserLocale();
   const getSelectedGroupId = () => {
     switch (groupType) {
       case CreateWaveGroupConfigType.ADMIN:
@@ -69,7 +72,7 @@ export default function CreateWaveGroup({
     groupType === CreateWaveGroupConfigType.CAN_CHAT &&
     !chatEnabled;
   const defaultLabel = selectedGroupId
-    ? "Selected group"
+    ? t(locale, "waves.create.groups.selectedGroup")
     : CREATE_WAVE_NONE_GROUP_LABELS[groupType];
   const groupLabel = CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType];
   const suggestedName = buildInlineGroupName({ waveName, groupLabel });
