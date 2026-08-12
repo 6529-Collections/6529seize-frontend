@@ -979,7 +979,7 @@ describe("artifact-portability.v1", () => {
     fixtures.push(fixture);
     fixture.refreshReportArtifact(fixture.build());
     const runHeadSha = "c".repeat(40);
-    const artifactName = "manual-staging-frontend-12345";
+    const artifactName = "staging-frontend-12345";
     const artifactMetadata = {
       artifacts: [
         {
@@ -1039,6 +1039,12 @@ describe("artifact-portability.v1", () => {
         promotion_authorized: false,
       },
     });
+    expect(
+      portability.verifyReportRun({
+        ...options,
+        artifactName: "manual-staging-frontend-12345",
+      })
+    ).toMatchObject({ role: "staging", run: { id: "12345" } });
 
     const reportPackagePath = path.join(
       fixture.reportRoot,

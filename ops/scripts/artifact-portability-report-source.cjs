@@ -343,21 +343,17 @@ function verifyReportRun(options, context) {
   );
   if (options.expectedWorkflowPath === STAGING_WORKFLOW) {
     invariant(
-      options.artifactName ===
-        `manual-staging-frontend-${options.expectedRunId}`,
-      "manual staging artifact name does not bind the source run"
+      options.artifactName === `staging-frontend-${options.expectedRunId}` ||
+        options.artifactName ===
+          `manual-staging-frontend-${options.expectedRunId}`,
+      "staging artifact name does not bind the source run"
     );
   }
   if (options.expectedWorkflowPath === PRODUCTION_BUILD_WORKFLOW) {
-    const legacyName = `production-frontend-${options.expectedSourceSha}`;
-    const operationBoundPrefix = `${legacyName}-`;
     invariant(
-      options.artifactName === legacyName ||
-        (options.artifactName.startsWith(operationBoundPrefix) &&
-          /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(
-            options.artifactName.slice(operationBoundPrefix.length)
-          )),
-      "production artifact name does not bind the source SHA"
+      options.artifactName ===
+        `production-frontend-${options.expectedSourceSha}-${options.expectedRunId}`,
+      "production artifact name does not bind the source SHA and run"
     );
   }
   const run = options.run;

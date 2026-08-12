@@ -288,7 +288,7 @@ jobs:
             --cache-control "no-store, max-age=0, must-revalidate" \
             --content-type "application/json"
           distribution_id="$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?DomainName=='${announced_host}'].Id | [0]" \
+            --query "DistributionList.Items[?DomainName=='${announced_host}' || contains(Aliases.Items || \`[]\`, '${announced_host}')].Id | [0]" \
             --output text)"
           if [ -n "$distribution_id" ] && [ "$distribution_id" != None ]; then
             aws cloudfront create-invalidation \

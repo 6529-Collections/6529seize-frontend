@@ -91,6 +91,11 @@ function walk(root, relative = "") {
   const entries = fs.readdirSync(absolute, { withFileTypes: true });
   const paths = [];
   for (const entry of entries) {
+    if (/\0|[\u0001-\u001f\u007f]/u.test(entry.name)) {
+      fail(
+        `extracted artifact contains a control character in a name: ${JSON.stringify(entry.name)}`
+      );
+    }
     const child = relative ? `${relative}/${entry.name}` : entry.name;
     const childAbsolute = path.join(root, child);
     // Directory entries come from readdirSync beneath the validated artifact root.

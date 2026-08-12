@@ -56,7 +56,7 @@ const workflowArchives = new Map([
 ]);
 
 const guidanceCopies = new Map([
-  ["AGENTS.md", "AGENTS.md"],
+  ["AGENTS.archived.md", "AGENTS.md"],
   ["README.md", "README.md"],
   [
     "artifact-portability-migration.md",
@@ -285,10 +285,7 @@ describe("frontend deployment workflow contract", () => {
     );
     expect(production).not.toContain("refusing to announce stale production");
     expect(production).toContain("refusing to overwrite it with $COMMIT_SHA");
-    expect(productionE2e).toContain(
-      'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
-    );
-    expect(productionE2e).not.toMatch(
+    expect(productionE2e).toMatch(
       /uses: actions\/checkout@[^\n]+\n\s+with:\n\s+ref: \$\{\{ steps\.source\.outputs\.sha \}\}/u
     );
   });

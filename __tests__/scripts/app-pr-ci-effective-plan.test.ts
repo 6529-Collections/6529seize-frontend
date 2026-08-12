@@ -100,6 +100,7 @@ describe("effective App PR CI plan", () => {
     "tests/packs.manifest.cjs",
     "components/museum/MuseumNetworkProposition.tsx",
     "__tests__/components/museum/MuseumNetworkProposition.test.tsx",
+    "__tests__/scripts/deployment-e2e-workflows.test.ts",
   ])("requires frontend deployment contracts for %s", (file) => {
     expect(executePlan([file]).checks.deployment_contract.required).toBe(true);
   });

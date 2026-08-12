@@ -36,7 +36,14 @@ so GitHub Actions cannot discover or execute it.
 - `guidance/pre-change/` is a deliberately small, grouped set of exact
   pre-change copies of the root agent/README guidance and only the deployment-
   relevant docs, indexes, and skills updated by the removal PR. It is not a
-  dump of unrelated repo documentation or skills.
+  dump of unrelated repo documentation or skills. The root `AGENTS.md` copy is
+  named `AGENTS.archived.md` so agent tooling cannot mistake the historical
+  snapshot for active nested instructions. Other archived guidance retains its
+  exact source bytes, so relative links reflect the files' original locations
+  and are restoration references rather than archive-local navigation.
+- Removed tests and scripts are exact historical snapshots. They intentionally
+  retain original repository-relative paths and become meaningful only if
+  restored to their former active locations.
 
 ## Removed from active use
 

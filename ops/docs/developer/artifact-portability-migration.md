@@ -23,10 +23,11 @@ file/byte totals, match counts, a digest of all matching paths, and at most twen
 sample paths per input. Raw runtime values are never written to the inventory.
 Unknown keys remain explicit fail-closed blockers.
 
-The inventory is report-only. Current `environment-bound-v3` and legacy dual-profile
-artifacts are `NOT_PORTABLE`; neither reuse nor promotion is authorized by this
-contract. A comparison may explain why staging and production differ, but it cannot
-approve moving bytes between them and it cannot mutate an environment.
+The inventory is report-only. Current `staging-deployment-v1` and
+`production-deployment-v1` artifacts, along with legacy dual-profile artifacts,
+are `NOT_PORTABLE`; neither reuse nor promotion is authorized by this contract. A
+comparison may explain why staging and production differ, but it cannot approve
+moving bytes between them and it cannot mutate an environment.
 
 The report workflow separately verifies each source run's repository, workflow
 path, event, successful conclusion, run head SHA, artifact name, source SHA,

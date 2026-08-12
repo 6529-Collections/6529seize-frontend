@@ -39,7 +39,7 @@ const DEPLOYMENT_CONTRACT_PATTERNS = [
   /^tests\/packs\.manifest\.cjs$/u,
   /^components\/museum\/MuseumNetworkProposition\.tsx$/u,
   /^__tests__\/components\/museum\/MuseumNetworkProposition\.test\.tsx$/u,
-  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deploy-staging-artifact|e2e-packs|frontend-deployment-workflows|museum-|pr-ci-policy-bundle|production-|sync-e2e-manifest)/u,
+  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deploy-staging-artifact|deployment-e2e-workflows|e2e-packs|frontend-deployment-workflows|museum-|pr-ci-policy-bundle|production-|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ];
 function check(required, reason) {

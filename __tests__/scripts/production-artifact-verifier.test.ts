@@ -205,6 +205,9 @@ describe("production artifact verifier", () => {
     expect(() =>
       verifier.validateArchiveMembers(`${members}\ntarget/.\n`)
     ).toThrow("unsafe path segment");
+    expect(() =>
+      verifier.validateArchiveMembers(`${members}\ntarget/_next/static/bad\tname.js\n`)
+    ).toThrow("control characters");
   });
 
   it("rejects missing, unexpected, and non-regular entries after extraction", () => {
@@ -228,6 +231,18 @@ describe("production artifact verifier", () => {
         "symbolic link"
       );
       fs.rmSync(path.join(root, "target", "linked"));
+      const controlCharacterPath = path.join(
+        root,
+        "target",
+        "_next",
+        "static",
+        "bad\nname.js"
+      );
+      fs.writeFileSync(controlCharacterPath, "no\n");
+      expect(() => verifier.validateExtractedArtifact(root)).toThrow(
+        "control character"
+      );
+      fs.rmSync(controlCharacterPath);
       const fifoPath = path.join(
         root,
         "target",

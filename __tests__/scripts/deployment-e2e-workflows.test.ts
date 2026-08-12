@@ -117,10 +117,7 @@ describe("serialized post-deploy E2E", () => {
       expect(e2e.workflow.concurrency.group).toContain(automaticGroup);
 
       if (environment === "production") {
-        expect(sourceMaterialization.run).toContain(
-          'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
-        );
-        expect(sourceMaterialization.env.EXPECTED_SHA).toBe(
+        expect(sourceMaterialization.with.ref).toBe(
           "${{ steps.source.outputs.sha }}"
         );
       } else {

@@ -17,8 +17,8 @@ concurrency:
 
 env:
   AWS_REGION: ${{ vars.STAGING_AWS_REGION || 'eu-west-1' }}
-  ARTIFACT_BUCKET: "seize-web"
-  ARTIFACT_BUCKET_REGION: "us-east-1"
+  ARTIFACT_BUCKET: ${{ vars.STAGING_ARTIFACT_BUCKET || 'seize-web' }}
+  ARTIFACT_BUCKET_REGION: ${{ vars.STAGING_ARTIFACT_BUCKET_REGION || 'us-east-1' }}
   STAGING_BRANCH: "1a-staging"
   STAGING_REPO_DIR: ${{ vars.STAGING_REPO_DIR || '/home/ubuntu/6529seize-frontend' }}
   STAGING_RUN_AS: ${{ vars.STAGING_RUN_AS || 'ubuntu' }}
