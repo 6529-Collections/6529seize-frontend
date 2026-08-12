@@ -1,4 +1,7 @@
-import { normalizeMuseumCorpus } from "@/lib/museum/normalize";
+import {
+  findReviewedProgramMedia,
+  normalizeMuseumCorpus,
+} from "@/lib/museum/normalize";
 import type { MuseumCorpus, MuseumDocument } from "@/lib/museum/types";
 
 function jsonDocument(path: string, value: unknown): MuseumDocument {
@@ -106,56 +109,57 @@ describe("Museum domain mapping", () => {
             record_scope: "Not an accession statement.",
           }
         ),
-        "records/programs/6529NM-AP-01/media-manifest.json": jsonDocument(
-          "records/programs/6529NM-AP-01/media-manifest.json",
-          {
-            items: [
-              {
-                record_id: "6529NM-AP-01-OUT-001",
-                source: {
-                  url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
-                  mime_type: "image/jpeg",
-                  sha256: `sha256:${"b".repeat(64)}`,
-                  byte_size: 12000000,
-                  pixel_width: 6000,
-                  pixel_height: 4000,
+        "records/programs/6529NM-AP-01/public/presentation-manifest.json":
+          jsonDocument(
+            "records/programs/6529NM-AP-01/public/presentation-manifest.json",
+            {
+              items: [
+                {
+                  record_id: "6529NM-AP-01-OUT-001",
+                  source: {
+                    url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+                    mime_type: "image/jpeg",
+                    sha256: `sha256:${"b".repeat(64)}`,
+                    byte_size: 12000000,
+                    pixel_width: 6000,
+                    pixel_height: 4000,
+                  },
+                  presentation: {
+                    alt_text:
+                      "A figure stands before a bright gate in a dark stone hall.",
+                    alt_text_status:
+                      "constructed_visual_description_pending_independent_review",
+                    derivatives: [
+                      {
+                        url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp",
+                        width: 640,
+                        height: 427,
+                        mime_type: "image/webp",
+                        sha256: `sha256:${"c".repeat(64)}`,
+                        byte_size: 32000,
+                      },
+                      {
+                        url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/1280.webp",
+                        width: 1280,
+                        height: 853,
+                        mime_type: "image/webp",
+                        sha256: `sha256:${"d".repeat(64)}`,
+                        byte_size: 110000,
+                      },
+                      {
+                        url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/2400.webp",
+                        width: 2400,
+                        height: 1600,
+                        mime_type: "image/webp",
+                        sha256: `sha256:${"e".repeat(64)}`,
+                        byte_size: 410000,
+                      },
+                    ],
+                  },
                 },
-                presentation: {
-                  alt_text:
-                    "A figure stands before a bright gate in a dark stone hall.",
-                  alt_text_status:
-                    "constructed_visual_description_pending_independent_review",
-                  derivatives: [
-                    {
-                      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp",
-                      width: 640,
-                      height: 427,
-                      mime_type: "image/webp",
-                      sha256: `sha256:${"c".repeat(64)}`,
-                      byte_size: 32000,
-                    },
-                    {
-                      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/1280.webp",
-                      width: 1280,
-                      height: 853,
-                      mime_type: "image/webp",
-                      sha256: `sha256:${"d".repeat(64)}`,
-                      byte_size: 110000,
-                    },
-                    {
-                      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/2400.webp",
-                      width: 2400,
-                      height: 1600,
-                      mime_type: "image/webp",
-                      sha256: `sha256:${"e".repeat(64)}`,
-                      byte_size: 410000,
-                    },
-                  ],
-                },
-              },
-            ],
-          }
-        ),
+              ],
+            }
+          ),
         "records/accessions/6529NM.2026.001/objects/object-001.json":
           jsonDocument(
             "records/accessions/6529NM.2026.001/objects/object-001.json",
@@ -182,6 +186,10 @@ describe("Museum domain mapping", () => {
     };
 
     const view = normalizeMuseumCorpus(corpus);
+    expect(findReviewedProgramMedia(view, ["6529NM-AP-01-OUT-001"])).toEqual(
+      view.programs[0]?.selectedWorks[0]?.media
+    );
+    expect(findReviewedProgramMedia(view, ["unrelated-record"])).toBeNull();
     expect(view.approvedCollections).toHaveLength(1);
     expect(view.accessions[0]?.accessionStatus).toBe(
       "documentation_in_progress"
@@ -244,7 +252,7 @@ describe("Museum domain mapping", () => {
     );
 
     const mediaManifestPath =
-      "records/programs/6529NM-AP-01/media-manifest.json";
+      "records/programs/6529NM-AP-01/public/presentation-manifest.json";
     const duplicateWidthManifest = JSON.parse(
       corpus.documents[mediaManifestPath]!.text
     ) as {

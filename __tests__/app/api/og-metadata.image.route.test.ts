@@ -52,7 +52,7 @@ jest.mock("next/server", () => ({
   NextResponse: MockNextResponse,
 }));
 
-import { GET } from "@/app/api/og-metadata/image/route";
+import { dynamic, GET } from "@/app/api/og-metadata/image/route";
 import { fetchPublicUrl } from "@/lib/security/urlGuard";
 import type { NextRequest } from "next/server";
 
@@ -122,6 +122,10 @@ const mockImageResponse = (
 describe("/api/og-metadata/image", () => {
   beforeEach(() => {
     mockFetchPublicUrl.mockReset();
+  });
+
+  it("is always rendered at request time", () => {
+    expect(dynamic).toBe("force-dynamic");
   });
 
   it("normalizes source images up to 50 MiB for drop OG previews", async () => {

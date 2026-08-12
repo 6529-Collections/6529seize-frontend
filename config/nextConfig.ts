@@ -12,6 +12,10 @@ const PUBLIC_REVIEW_TRACE_EXCLUDES = [
   "content/public-reviews/**/*",
   "public/review-data/**/*",
 ];
+const OG_IMAGE_SHARP_TRACE_INCLUDES = [
+  "node_modules/@img/sharp-libvips-*/**/*",
+  "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
+];
 
 function getAllowedDevOrigins(): string[] {
   return (
@@ -64,6 +68,9 @@ export function sharedConfig(
     },
     outputFileTracingExcludes: {
       "/*": PUBLIC_REVIEW_TRACE_EXCLUDES,
+    },
+    outputFileTracingIncludes: {
+      "/api/og-metadata/image": OG_IMAGE_SHARP_TRACE_INCLUDES,
     },
     async headers() {
       return [

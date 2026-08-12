@@ -51,7 +51,7 @@ describe("MuseumRelatedEntities relation context", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Selected by Museum Wave; acquisition review in progress"
+        "Selected by Museum Wave; accession processing in progress"
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Jan 1, 2026")).toBeInTheDocument();

@@ -266,6 +266,30 @@ describe("AppHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps network health in the native header action row at tablet widths", () => {
+    setup({ address: null, asPath: "/" });
+
+    const healthLink = screen.getByRole("link", {
+      name: "Open network health dashboard",
+    });
+    const search = screen.getByTestId("search");
+
+    expect(healthLink).not.toHaveClass("md:tw-hidden");
+    expect(healthLink.parentElement).toContainElement(search);
+    expect(healthLink.parentElement).toHaveClass("tw-flex", "tw-items-center");
+  });
+
+  it("keeps network health hidden at tablet widths outside Capacitor", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({ address: null, asPath: "/" });
+
+    expect(
+      screen.getByRole("link", {
+        name: "Open network health dashboard",
+      })
+    ).toHaveClass("md:tw-hidden");
+  });
+
   it("opens the account menu immediately when only one profile is connected", () => {
     const seizeSwitchConnectedAccount = jest.fn();
     setup({

@@ -121,25 +121,7 @@ export function StreamReviewOverviewGuide({
 }) {
   return (
     <div className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
-      <section aria-labelledby="stream-plain-overview-heading">
-        <h2
-          id="stream-plain-overview-heading"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.overviewGuide.whatIs.heading")}
-        </h2>
-        <p className="tw-mb-0 tw-mt-5 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-200">
-          {t(DEFAULT_LOCALE, "publicReview.overviewGuide.whatIs.description")}
-        </p>
-        <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {t(DEFAULT_LOCALE, "publicReview.overviewGuide.whatIs.reviewContext")}
-        </p>
-      </section>
-
-      <section
-        aria-labelledby="stream-artwork-parts-heading"
-        className="tw-mt-14"
-      >
+      <section aria-labelledby="stream-artwork-parts-heading">
         <h2
           id="stream-artwork-parts-heading"
           className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"

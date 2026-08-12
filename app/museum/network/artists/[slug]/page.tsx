@@ -4,12 +4,7 @@ import { notFound } from "next/navigation";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
 import { MuseumBreadcrumbs } from "@/components/museum/MuseumBreadcrumbs";
 import { MuseumEntityContext } from "@/components/museum/MuseumEntityContext";
-import {
-  MuseumJsonDisclosure,
-  MuseumMarkdown,
-} from "@/components/museum/MuseumMarkdown";
-import { MuseumProposalImage } from "@/components/museum/MuseumProposalImage";
-import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
+import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
 import { MuseumRelatedEntities } from "@/components/museum/MuseumRelatedEntities";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -19,16 +14,18 @@ import {
   CASEY_ARTIST_SLUG,
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
+import { getMuseumView } from "@/lib/museum/normalize";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { buildMuseumArtistContext } from "@/lib/museum/publication/ia";
 import {
   museumArtistHref,
-  museumWorkHref,
   museumWorkHrefForSourceId,
   museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
-import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import type { MuseumView } from "@/lib/museum/types";
+import { TypedArtistProfile } from "./TypedArtistProfile";
+import { TypedArtistProjects } from "./TypedArtistProjects";
+import { TypedArtistWorks } from "./TypedArtistWorks";
 
 interface MuseumArtistPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -56,6 +53,7 @@ export async function generateMetadata({
 function TypedArtistPage({
   artist,
   publication,
+  view,
 }: {
   readonly artist: NonNullable<
     Awaited<ReturnType<typeof getMuseumPublicationState>>["publication"]
@@ -63,6 +61,7 @@ function TypedArtistPage({
   readonly publication: NonNullable<
     Awaited<ReturnType<typeof getMuseumPublicationState>>["publication"]
   >;
+  readonly view: MuseumView | null;
 }) {
   const works =
     publication.works?.filter(
@@ -112,7 +111,7 @@ function TypedArtistPage({
   )} ${"\u00b7"} ${t(DEFAULT_LOCALE, "museum.network.artists.collectionCount", {
     count: collectionCount,
   })}`;
-  const context = buildMuseumArtistContext(publication, artist.slug, null, [
+  const context = buildMuseumArtistContext(publication, artist.slug, view, [
     { label: "6529 Network Museum", href: "/museum/network" },
     {
       label: t(DEFAULT_LOCALE, "museum.network.artists.title"),
@@ -167,165 +166,17 @@ function TypedArtistPage({
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
       />
-      {profileDocuments.length > 0 ? (
-        <section
-          className="tw-mt-10 tw-max-w-4xl"
-          aria-labelledby="typed-artist-profile-title"
-        >
-          <h2
-            id="typed-artist-profile-title"
-            className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-          >
-            {t(DEFAULT_LOCALE, "museum.network.artists.profile")}
-          </h2>
-          <div className="tw-mt-6 tw-space-y-8">
-            {profileDocuments.map((document) =>
-              document.kind === "source_record" ? (
-                <MuseumJsonDisclosure
-                  key={document.id}
-                  label={document.title}
-                  sourceJson={document.markdown}
-                />
-              ) : (
-                <MuseumMarkdown
-                  key={document.id}
-                  className="tw-max-w-3xl"
-                  embeddedDocument
-                  sourceCommit={publication.identity.commit}
-                  sourcePath={document.sourcePath}
-                  workHrefs={workHrefs}
-                >
-                  {document.markdown}
-                </MuseumMarkdown>
-              )
-            )}
-          </div>
-        </section>
-      ) : null}
-      <section className="tw-mt-12" aria-labelledby="typed-artist-works-title">
-        <h2
-          id="typed-artist-works-title"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.acquisitions.related")}
-        </h2>
-        <div className="tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-          {works.map((work) => {
-            const media = selectMuseumStillMedia(work.media);
-            const presentation = work.presentationMedia?.[0];
-            if (media !== undefined) {
-              return (
-                <MuseumPublicMediaFigure
-                  key={work.id}
-                  src={media.url}
-                  width={media.width}
-                  height={media.height}
-                  alt={media.altText ?? ""}
-                  href={museumWorkHref(work.id)}
-                  title={work.title}
-                  byline={relationshipLabel(work)}
-                />
-              );
-            }
-            if (presentation !== undefined) {
-              const sourceHref = buildMuseumSignedWaveStormDropUrl(
-                presentation.source.waveId,
-                presentation.source.dropId
-              );
-              const canOpenPresentation = presentation.affordances.includes(
-                "open_upstream_presentation"
-              );
-              return (
-                <figure key={work.id} className="tw-m-0 tw-min-w-0">
-                  <div className="tw-group tw-block">
-                    <div className="tw-aspect-square tw-overflow-hidden tw-bg-black">
-                      <MuseumProposalImage
-                        src={presentation.mediaUrl}
-                        alt={presentation.altText}
-                        width={presentation.width}
-                        height={presentation.height}
-                        {...(presentation.sourceByteSize === undefined
-                          ? {}
-                          : { sourceByteSize: presentation.sourceByteSize })}
-                        {...(sourceHref === null || !canOpenPresentation
-                          ? {}
-                          : {
-                              sourceHref,
-                              sourceLabel: t(
-                                DEFAULT_LOCALE,
-                                "museum.network.acquisitions.openPresentation"
-                              ),
-                            })}
-                        className="tw-block tw-h-full tw-w-full tw-object-contain"
-                      />
-                    </div>
-                  </div>
-                  <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
-                    <Link
-                      href={museumWorkHref(work.id)}
-                      className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                    >
-                      {work.title}
-                    </Link>
-                    <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
-                      {relationshipLabel(work)}
-                    </span>
-                    <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
-                      {presentation.credit.creditLine} ·{" "}
-                      {t(
-                        DEFAULT_LOCALE,
-                        "museum.network.acquisitions.presentationRights"
-                      )}
-                    </span>
-                  </figcaption>
-                </figure>
-              );
-            }
-            return (
-              <p
-                key={work.id}
-                className="tw-m-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4"
-              >
-                <Link
-                  href={museumWorkHref(work.id)}
-                  className="tw-text-primary-300 tw-underline tw-underline-offset-4"
-                >
-                  {work.title}
-                </Link>
-              </p>
-            );
-          })}
-        </div>
-      </section>
-      <section
-        className="tw-mt-16"
-        aria-labelledby="typed-artist-projects-title"
-      >
-        <h2
-          id="typed-artist-projects-title"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.artists.projects")}
-        </h2>
-        <ul className="tw-m-0 tw-mt-5 tw-list-none tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-0">
-          {projects.map((project) => (
-            <li
-              key={project.id}
-              className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
-            >
-              <Link
-                href={`/museum/network/projects/${encodeURIComponent(project.slug)}`}
-                className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 tw-no-underline"
-              >
-                <span>{project.title}</span>
-                <span className="tw-text-sm tw-font-normal tw-text-iron-500">
-                  {project.workIds?.length ?? project.artworkIds.length} works
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <TypedArtistWorks
+        relationshipLabel={relationshipLabel}
+        view={view}
+        works={works}
+      />
+      <TypedArtistProfile
+        profileDocuments={profileDocuments}
+        publication={publication}
+        workHrefs={workHrefs}
+      />
+      <TypedArtistProjects projects={projects} />
       <MuseumRelatedEntities
         entities={context.secondaryRelations}
         headingId="typed-artist-acquisitions-title"
@@ -349,7 +200,10 @@ export default async function MuseumArtistPage({
     notFound();
   }
   if (publication.works !== undefined) {
-    return <TypedArtistPage artist={artist} publication={publication} />;
+    const view = await getMuseumView();
+    return (
+      <TypedArtistPage artist={artist} publication={publication} view={view} />
+    );
   }
   if (slug !== CASEY_ARTIST_SLUG) {
     notFound();
