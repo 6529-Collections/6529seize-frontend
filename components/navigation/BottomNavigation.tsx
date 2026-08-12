@@ -20,6 +20,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useAuth } from "../auth/Auth";
@@ -100,6 +101,9 @@ interface BottomNavigationProps {
 
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
+const TABLET_DOCK_QUERY = "(min-width: 744px) and (min-height: 600px)";
+const TABLET_DOCK_COMPACT_WIDTH = "38.5rem";
+const TABLET_DOCK_EXPANDED_WIDTH = "44rem";
 
 const getHiddenStyle = (hidden: boolean) =>
   hidden
@@ -326,6 +330,19 @@ const getDockClassName = (compact: boolean) =>
       : "tw-h-[64px] tw-w-[min(calc(100vw-2.25rem),38rem)] tw-rounded-[2rem] sm:tw-h-[66px] sm:tw-w-[min(calc(100vw-4rem),40rem)]"
   }`;
 
+const getDockStyle = ({
+  compact,
+  isTabletViewport,
+}: {
+  readonly compact: boolean;
+  readonly isTabletViewport: boolean;
+}): React.CSSProperties | undefined =>
+  isTabletViewport
+    ? {
+        width: compact ? TABLET_DOCK_COMPACT_WIDTH : TABLET_DOCK_EXPANDED_WIDTH,
+      }
+    : undefined;
+
 const floatingNavInnerClassName = "tw-relative tw-h-full";
 
 const getFloatingNavListClassName = (compact: boolean) =>
@@ -384,18 +401,23 @@ const getFloatingActivePillLeft = ({
 
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
-}) => (
-  <nav aria-hidden="true" className={getNavClassName({ hidden })}>
-    <div
-      {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
-      className={getDockClassName(false)}
-    >
-      <div className={floatingNavInnerClassName}>
-        <ul className={getFloatingNavListClassName(false)} />
+}) => {
+  const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
+
+  return (
+    <nav aria-hidden="true" className={getNavClassName({ hidden })}>
+      <div
+        {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+        className={getDockClassName(false)}
+        style={getDockStyle({ compact: false, isTabletViewport })}
+      >
+        <div className={floatingNavInnerClassName}>
+          <ul className={getFloatingNavListClassName(false)} />
+        </div>
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
+};
 
 interface BottomNavigationResolvedContentProps extends BottomNavigationProps {
   readonly pathname: string;
@@ -412,6 +434,7 @@ const BottomNavigationResolvedContent: React.FC<
 }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
+  const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
   const { connectedProfile } = useAuth();
   const { address } = useSeizeConnectContext();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -495,6 +518,7 @@ const BottomNavigationResolvedContent: React.FC<
       <div
         {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
         className={getDockClassName(compact)}
+        style={getDockStyle({ compact, isTabletViewport })}
       >
         <div className={floatingNavInnerClassName}>
           <div
