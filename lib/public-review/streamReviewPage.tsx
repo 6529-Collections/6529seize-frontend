@@ -67,11 +67,16 @@ function getStreamReviewMetadata({
   if (!route) {
     return undefined;
   }
+  const currentPages = getCurrentStreamReviewPages(route);
+  const displayedPage = getDisplayedPage(
+    getDisplayedPageTitle(route.page, route.version !== undefined),
+    currentPages
+  );
 
   return {
     ...getAppMetadata({
       title: t(DEFAULT_LOCALE, "publicReview.metadata.title", {
-        page: t(DEFAULT_LOCALE, route.page.titleKey),
+        page: t(DEFAULT_LOCALE, displayedPage.titleKey),
       }),
       description: t(DEFAULT_LOCALE, "publicReview.metadata.description"),
     }),
@@ -194,6 +199,19 @@ function getDisplayedPage(
   return page;
 }
 
+function getDisplayedPageTitle(
+  page: PublicReviewPageDefinition,
+  isVersioned: boolean
+): PublicReviewPageDefinition {
+  if (!isVersioned && page.id === "curation-and-tdh-authorization") {
+    return {
+      ...page,
+      titleKey: "publicReview.pages.curationAndTdhAuthorization.currentTitle",
+    };
+  }
+  return page;
+}
+
 function getDisplayedSections({
   currentPages,
   editorialMarkdown,
@@ -251,7 +269,9 @@ function StreamReviewIntroNotice({
 }) {
   return (
     <>
-      {currentPages.overview ? <StreamReviewOverviewGuide pages={pages} /> : null}
+      {currentPages.overview ? (
+        <StreamReviewOverviewGuide pages={pages} />
+      ) : null}
       {currentPages.developmentStatus ? (
         <StreamReviewDevelopmentStatus />
       ) : null}
@@ -287,13 +307,22 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   }
   const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
   const currentPages = getCurrentStreamReviewPages(route);
+  const displayedReviewVersion = {
+    ...reviewVersion,
+    pages: reviewVersion.pages.map((page) =>
+      getDisplayedPageTitle(page, route.version !== undefined)
+    ),
+  };
   const displayedEditorialMarkdown = getDisplayedEditorialMarkdown({
     contentVersion,
     currentPages,
     editorialMarkdown,
     source: manifest.source,
   });
-  const displayedPage = getDisplayedPage(route.page, currentPages);
+  const displayedPage = getDisplayedPage(
+    getDisplayedPageTitle(route.page, route.version !== undefined),
+    currentPages
+  );
   const displayedSections = getDisplayedSections({
     currentPages,
     editorialMarkdown: displayedEditorialMarkdown,
@@ -309,7 +338,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       editorialMarkdown={displayedEditorialMarkdown}
       page={displayedPage}
       review={STREAM_REVIEW_DEFINITION}
-      reviewVersion={reviewVersion}
+      reviewVersion={displayedReviewVersion}
       sections={displayedSections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
@@ -317,12 +346,12 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
         <StreamReviewIntroNotice
           currentPages={currentPages}
           isVersioned={route.version !== undefined}
-          pages={reviewVersion.pages}
+          pages={displayedReviewVersion.pages}
         />
       }
       outroNotice={
         currentPages.communityReview ? (
-          <StreamReviewReviewerPrompts pages={reviewVersion.pages} />
+          <StreamReviewReviewerPrompts pages={displayedReviewVersion.pages} />
         ) : null
       }
       showAudiencePaths={!currentPages.overview}

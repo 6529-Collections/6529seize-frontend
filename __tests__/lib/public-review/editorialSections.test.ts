@@ -32,6 +32,12 @@ describe("public review editorial sections", () => {
     expect(getPublicReviewHeadingId("  ")).toBe("");
   });
 
+  it("keeps renamed review headings on their existing feedback anchors", () => {
+    expect(getPublicReviewHeadingId("What the signed details contain")).toBe(
+      "the-exact-authorization"
+    );
+  });
+
   it("suffixes repeated section titles deterministically", () => {
     expect(
       extractPublicReviewSections("## Same title\n\n## Same title\n")

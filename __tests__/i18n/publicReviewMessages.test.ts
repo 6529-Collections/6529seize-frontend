@@ -37,6 +37,7 @@ describe("split public-review messages", () => {
       "publicReview.rolesGuide.status.heading",
       "publicReview.development.heading",
       "publicReview.community.editorial.heading",
+      "publicReview.pages.curationAndTdhAuthorization.currentTitle",
       "publicReview.pages.curationAndTdhAuthorization.currentSummary",
     ] as const;
 

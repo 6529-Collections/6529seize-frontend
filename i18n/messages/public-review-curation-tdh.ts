@@ -1,28 +1,34 @@
 export const PUBLIC_REVIEW_CURATION_TDH_MESSAGES = {
+  "publicReview.pages.curationAndTdhAuthorization.currentTitle":
+    "From Artwork Decision to Signed Permission",
   "publicReview.pages.curationAndTdhAuthorization.currentSummary":
-    "How an offchain curation result becomes one exact signed mint or auction action, what the contract checks, and what still needs public proof.",
+    "How a community decision becomes permission to create an NFT or start an auction. It also explains what the contract can and cannot check.",
   "publicReview.pages.curationAndTdhAuthorization.currentEditorial": `# Community curation, TDH, and signed authorization
 
 **The answer in one minute**
 
-Community curation and TDH happen outside the contracts. A configured signer can turn the result into permission for one exact mint or auction action. Stream then checks the signature and every signed term before it mints the token or starts the auction.
+The artwork decision happens before Stream is involved. It may use community curation and TDH, but Stream does not choose the artwork or check how the decision was made.
 
-The contract does **not** choose the artist, calculate TDH, or decide whether the community process was fair. Those steps still need clear public rules and evidence.
+Stream receives signed artwork and sale details for creating an NFT or starting an auction. The signature confirms that Stream’s approved signer has authorized those exact details.
 
-**TDH means Total Days Held.** It is 6529's offchain, time-weighted measure of how long eligible assets have been held. See the [TDH guide](/network/tdh) for the calculation and categories.
+Nothing happens automatically. Someone submits the signed details to the Stream contract. For a paid mint, the signed payer must submit them and pay the exact price. For a free mint or auction, any account may submit them.
 
-**Accepted design:** [ADR 0001](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0001-drop-authorization.md) is the accepted design record for typed, one-use Drop authorization. The pinned Solidity, not ADR status, proves the current behavior.
+The contract then confirms who signed the details, whether the deadline has passed, and whether the permission was cancelled or used before. It also checks that the submitted artwork, recipient, payment, and sale type match the signed details. If every check passes, it creates the NFT or starts the auction.
 
-**Current status:** This flow exists in the pinned **StreamDrops.sol** code. The reviewed snapshot was not deployed and was still waiting for an independent audit. This page being available for review is not proof of launch, audit, or safety.
+**What proves this?**
+
+[ADR 0001](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0001-drop-authorization.md) explains the agreed design. The exact **StreamDrops.sol** code shows what the contract actually does.
+
+Need to understand TDH? See the [TDH guide](/network/tdh).
 
 ## From a community decision to a contract call
 
 The flow has six steps:
 
-1. The community process applies its published curation and TDH rules.
-2. A service turns that result into one exact mint or auction permission.
-3. The configured signer signs the EIP-712 data. The signer may be a normal wallet or an ERC-1271 contract wallet such as a Safe.
-4. Someone submits the signed permission. A paid fixed-price mint must be submitted by its signed payer. A free mint or auction registration may be submitted by any account because its payer is set to zero.
+1. The artwork is chosen outside the Stream contract.
+2. The artwork and sale details are prepared for signing.
+3. Stream’s approved signer signs those details.
+4. Someone submits the signed details to the Stream contract.
 5. Stream checks the signer, signer epoch, deadline, replay and cancellation state, token data, sale mode, and the other signed terms.
 6. If every check passes, Stream marks the permission as used and completes the mint or auction registration in the same transaction.
 
@@ -30,11 +36,11 @@ The signature is the bridge between the offchain decision and the contract. It f
 
 **Why this matters:** A reader should be able to compare the community decision, the signed permission, and the final transaction.
 
-## The exact authorization
+## What the signed details contain
 
-The current [**DropAuthorization** type](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L24-L60) uses EIP-712 typed data. Its domain includes the chain ID and the **StreamDrops** contract address, so a signature for one chain or contract should not work on another.
+Before the contract creates an NFT or starts an auction, it receives a fixed set of signed details. In the code, this set is called [**DropAuthorization**](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L24-L60). It includes the collection, recipient, sale type, price, deadline, and other safety values. The table below explains each one.
 
-The signed permission contains:
+Stream uses EIP-712, a standard way to sign structured data. The signature is tied to one blockchain and one **StreamDrops** contract. This stops the same signed details from being accepted by another contract or on another blockchain.
 
 | Field | What it fixes |
 | --- | --- |
@@ -54,7 +60,7 @@ The signed permission contains:
 | **deadline** | The last time the permission remains valid |
 | **signerEpoch** | The current signing-key era |
 
-The typed-data definition, service, wallet display, Solidity encoding, and emitted events must agree. If one layer omits or changes a field, a person may approve different terms from the ones the contract executes.
+Every part of Stream must use the same signed details. Otherwise, someone could approve one action while the contract carries out something different.
 
 ## Why each field exists
 
@@ -64,7 +70,7 @@ The [EIP-712 domain](https://github.com/{sourceRepository}/blob/{sourceCommit}/s
 
 ### Signer epoch
 
-The signer epoch makes key rotation immediate. An authorized admin can change the signer or increment the epoch. The current validation then rejects every permission from an older epoch. There is no grace period in this code.
+An epoch is the current signing period. When an admin starts a new epoch or changes the approved signer, all permissions from earlier epochs stop working immediately.
 
 ### Payer and recipient
 
@@ -72,23 +78,23 @@ The payer funds a paid fixed-price mint. The recipient receives the token. Keepi
 
 ### Collection and token data
 
-The permission names one collection. The **tokenDataHash** stops the supplied token data from being changed after signing.
+The signed permission fixes which collection receives the new NFT and the exact NFT information used when it is created. If someone changes that information after signing, the contract rejects it.
 
 ### Quantity
 
-The structure has a quantity field, but the [current validation requires **quantity == 1**](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L561-L581). One used permission therefore covers one token. An edition needs a separate permission for each token on this path.
+Each signed permission can create only one NFT in this minting flow. For example, creating 10 NFTs requires 10 separate signed permissions.
 
 ### Price and sale mode
 
-The signature fixes fixed price or auction. A paid fixed-price mint must send the signed native-ETH amount. A free mint sends no ETH. The current permission has no token-address field, so it cannot name an ERC-20 payment asset.
+The signature fixes fixed price or auction. A paid fixed-price mint must send the signed native-ETH amount. A free mint sends no ETH.
 
 ### Auction terms
 
-For an auction, the signed reserve and end time create the first auction state. The auction contract then controls bids, extensions, custody, cancellation, refunds, and settlement.
+When Stream starts an auction, the signed details set its minimum price and planned end time. After that, the auction contract holds the NFT and manages bids, extra time, cancellations, refunds, and the final sale.
 
 ### Deadline
 
-The deadline limits how long the permission can be used. A longer deadline is easier to operate but leaves more time for a leaked or outdated permission to be submitted.
+Each signed permission includes an expiry time. After that time, the contract rejects it. A later expiry gives people more time to submit it, but also leaves more time for someone to misuse it if it is stolen or no longer correct.
 
 ### Replay identity
 

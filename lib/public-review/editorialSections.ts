@@ -6,6 +6,9 @@ import {
 
 const MARKDOWN_DECORATION = new Set(["`", "*", "_", "~"]);
 const LETTER_OR_NUMBER = /[\p{Letter}\p{Number}]/u;
+const PUBLIC_REVIEW_HEADING_ID_ALIASES: Readonly<Record<string, string>> = {
+  "What the signed details contain": "the-exact-authorization",
+};
 const EVIDENCE_STATE_RULES: readonly {
   readonly state: PublicReviewEvidenceState;
   readonly pattern: RegExp;
@@ -53,6 +56,11 @@ function removeOrderedPrefix(value: string): string {
 }
 
 export function getPublicReviewHeadingId(title: string): string {
+  const aliasedId = PUBLIC_REVIEW_HEADING_ID_ALIASES[title];
+  if (aliasedId !== undefined) {
+    return aliasedId;
+  }
+
   const normalized = removeOrderedPrefix(
     Array.from(title.normalize("NFKD"))
       .filter((character) => !MARKDOWN_DECORATION.has(character))

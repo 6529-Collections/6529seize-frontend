@@ -7,7 +7,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: () => ({}),
+  getAppMetadata: ({ title }: { readonly title: string }) => ({ title }),
 }));
 
 jest.mock("@/config/env", () => ({
@@ -49,6 +49,7 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
     feedbackSlot,
     introNotice,
     page,
+    reviewVersion,
     outroNotice,
     sections,
     showEditorialContent,
@@ -56,7 +57,10 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
     readonly editorialMarkdown: string;
     readonly feedbackSlot: React.ReactNode;
     readonly introNotice?: React.ReactNode;
-    readonly page: Pick<PublicReviewPageDefinition, "summaryKey">;
+    readonly page: Pick<PublicReviewPageDefinition, "summaryKey" | "titleKey">;
+    readonly reviewVersion: {
+      readonly pages: readonly Pick<PublicReviewPageDefinition, "titleKey">[];
+    };
     readonly outroNotice?: React.ReactNode;
     readonly sections: readonly unknown[];
     readonly showEditorialContent?: boolean;
@@ -66,6 +70,10 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
       data-editorial-visible={showEditorialContent !== false}
       data-section-count={sections.length}
       data-summary-key={page.summaryKey}
+      data-title-key={page.titleKey}
+      data-navigation-title-keys={reviewVersion.pages
+        .map((reviewPage) => reviewPage.titleKey)
+        .join(",")}
     >
       {introNotice}
       <div data-testid="editorial-copy">{editorialMarkdown}</div>
@@ -130,7 +138,7 @@ jest.mock("@/lib/public-review/editorialContent", () => ({
 
 jest.mock("@/lib/public-review/streamReviewCurationTdhPage", () => ({
   getCurrentCurationTdhEditorialMarkdown: () =>
-    "# Community curation, TDH, and signed authorization\n\n**The answer in one minute**\n\nThe contract does **not** choose the artist, calculate TDH, or decide whether the community process was fair.\n\n## Questions for reviewers\n\nWhich real-service, launch-configuration, and independent-audit checks remain before this flow can be trusted?",
+    "# Community curation, TDH, and signed authorization\n\n**The answer in one minute**\n\nThe artwork decision happens before Stream is involved.\n\nStream receives signed artwork and sale details for creating an NFT or starting an auction. The signature confirms that Stream’s approved signer has authorized those exact details.\n\nNothing happens automatically. Someone submits the signed details to the Stream contract. For a paid mint, the signed payer must submit them and pay the exact price. For a free mint or auction, any account may submit them.\n\nThe contract then confirms who signed the details, whether the deadline has passed, and whether the permission was cancelled or used before. If every check passes, it creates the NFT or starts the auction.\n\n## Questions for reviewers\n\nWhich real-service, launch-configuration, and independent-audit checks remain before this flow can be trusted?",
 }));
 
 jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
@@ -196,12 +204,38 @@ import {
   PublicReviewEditorialContentError,
 } from "@/lib/public-review/editorialContent";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
-import { renderStreamReviewRoutePage } from "@/lib/public-review/streamReviewPage";
+import {
+  generateStreamReviewRouteMetadata,
+  renderStreamReviewRoutePage,
+} from "@/lib/public-review/streamReviewPage";
 
 const loadStreamEditorialContentMock = jest.mocked(loadStreamEditorialContent);
 const notFoundMock = jest.mocked(notFound);
 
 describe("renderStreamReviewRoutePage", () => {
+  it("uses the plain current title in metadata while preserving the archived title", async () => {
+    const currentMetadata = await generateStreamReviewRouteMetadata({
+      params: Promise.resolve({
+        review: "6529-stream",
+        page: "curation-and-tdh-authorization",
+      }),
+    });
+    const archivedMetadata = await generateStreamReviewRouteMetadata({
+      params: Promise.resolve({
+        review: "6529-stream",
+        version: "2026-08-01.1",
+        page: "curation-and-tdh-authorization",
+      }),
+    });
+
+    expect(currentMetadata.title).toBe(
+      "From Artwork Decision to Signed Permission | 6529 Stream Contract Review"
+    );
+    expect(archivedMetadata.title).toBe(
+      "Curation and TDH Authorization | 6529 Stream Contract Review"
+    );
+  });
+
   it("renders the not-found route when editorial content is unavailable", async () => {
     loadStreamEditorialContentMock.mockRejectedValueOnce(
       new PublicReviewEditorialContentError("Editorial content is unavailable")
@@ -753,7 +787,22 @@ describe("renderStreamReviewRoutePage", () => {
     const editorialCopy = screen.getByTestId("editorial-copy");
     expect(editorialCopy).toHaveTextContent("The answer in one minute");
     expect(editorialCopy).toHaveTextContent(
-      "The contract does **not** choose the artist, calculate TDH, or decide whether the community process was fair."
+      "The artwork decision happens before Stream is involved."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Stream receives signed artwork and sale details for creating an NFT or starting an auction."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "The signature confirms that Stream’s approved signer has authorized those exact details."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "Nothing happens automatically. Someone submits the signed details to the Stream contract."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "The contract then confirms who signed the details"
+    );
+    expect(editorialCopy).not.toHaveTextContent(
+      "This page reviews that handoff."
     );
     expect(editorialCopy).toHaveTextContent(
       "Which real-service, launch-configuration, and independent-audit checks remain before this flow can be trusted?"
@@ -765,9 +814,17 @@ describe("renderStreamReviewRoutePage", () => {
       "data-summary-key",
       "publicReview.pages.curationAndTdhAuthorization.currentSummary"
     );
-    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
-      "1"
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-title-key",
+      "publicReview.pages.curationAndTdhAuthorization.currentTitle"
     );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-navigation-title-keys",
+      expect.stringContaining(
+        "publicReview.pages.curationAndTdhAuthorization.currentTitle"
+      )
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("1");
     expect(
       screen.getByTestId("configured-feedback-section-count")
     ).toHaveTextContent("1");
@@ -973,6 +1030,16 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
       "publicReview.pages.curationAndTdhAuthorization.summary"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-title-key",
+      "publicReview.pages.curationAndTdhAuthorization.title"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-navigation-title-keys",
+      expect.stringContaining(
+        "publicReview.pages.curationAndTdhAuthorization.title"
+      )
     );
   });
 
