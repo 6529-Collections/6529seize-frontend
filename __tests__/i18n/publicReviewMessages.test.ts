@@ -6,6 +6,7 @@ import { PUBLIC_REVIEW_COMMUNITY_MESSAGES } from "@/i18n/messages/public-review-
 import { PUBLIC_REVIEW_CURATION_TDH_MESSAGES } from "@/i18n/messages/public-review-curation-tdh";
 import { PUBLIC_REVIEW_DEVELOPMENT_MESSAGES } from "@/i18n/messages/public-review-development";
 import { PUBLIC_REVIEW_GOVERNANCE_MESSAGES } from "@/i18n/messages/public-review-governance";
+import { PUBLIC_REVIEW_SALES_AND_AUCTIONS_MESSAGES } from "@/i18n/messages/public-review-sales-and-auctions";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 import { PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES } from "@/i18n/messages/public-review-tokens-minting";
 
@@ -17,6 +18,7 @@ const SPLIT_PUBLIC_REVIEW_MESSAGES = [
   PUBLIC_REVIEW_DEVELOPMENT_MESSAGES,
   PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES,
   PUBLIC_REVIEW_GOVERNANCE_MESSAGES,
+  PUBLIC_REVIEW_SALES_AND_AUCTIONS_MESSAGES,
 ] as const;
 
 describe("split public-review messages", () => {
@@ -45,6 +47,7 @@ describe("split public-review messages", () => {
       "publicReview.pages.curationAndTdhAuthorization.currentSummary",
       "publicReview.pages.tokensCollectionsAndMinting.currentSummary",
       "publicReview.pages.changesEmergenciesAndFutureContracts.currentEditorial",
+      "publicReview.pages.fixedPriceSalesAndAuctions.currentSummary",
     ] as const;
 
     for (const locale of SUPPORTED_LOCALES) {

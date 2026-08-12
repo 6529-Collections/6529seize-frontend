@@ -42,6 +42,7 @@ import { getCurrentCurationTdhEditorialMarkdown } from "@/lib/public-review/stre
 import { getCurrentDevelopmentEditorialMarkdown } from "@/lib/public-review/streamReviewDevelopmentPage";
 import { getCurrentTokensMintingEditorialMarkdown } from "@/lib/public-review/streamReviewTokensMintingPage";
 import { getCurrentGovernanceEditorialMarkdown } from "@/lib/public-review/streamReviewGovernancePage";
+import { getCurrentSalesAndAuctionsEditorialMarkdown } from "@/lib/public-review/streamReviewSalesAndAuctionsPage";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
@@ -119,6 +120,7 @@ type CurrentStreamReviewPages = {
   readonly overview: boolean;
   readonly roles: boolean;
   readonly tokensAndMinting: boolean;
+  readonly salesAndAuctions: boolean;
 };
 
 type StreamReviewSource = {
@@ -145,6 +147,8 @@ function getCurrentStreamReviewPages(
     overview: isCurrent && pageId === "overview",
     roles: isCurrent && pageId === "roles-and-trust",
     tokensAndMinting: isCurrent && pageId === "tokens-collections-and-minting",
+    salesAndAuctions:
+      isCurrent && pageId === "fixed-price-sales-and-auctions",
   };
 }
 
@@ -195,6 +199,12 @@ function getDisplayedEditorialMarkdown({
       source,
     });
   }
+  if (currentPages.salesAndAuctions) {
+    return getCurrentSalesAndAuctionsEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
   return editorialMarkdown;
 }
 
@@ -220,6 +230,12 @@ function getDisplayedPage(
       ...page,
       summaryKey:
         "publicReview.pages.tokensCollectionsAndMinting.currentSummary",
+    };
+  }
+  if (currentPages.salesAndAuctions) {
+    return {
+      ...page,
+      summaryKey: "publicReview.pages.fixedPriceSalesAndAuctions.currentSummary",
     };
   }
   return page;

@@ -120,6 +120,11 @@ jest.mock("@/components/public-review/StreamReviewRolesGuide", () => ({
   StreamReviewRolesGuide: () => <div>Roles guide</div>,
 }));
 
+jest.mock("@/lib/public-review/streamReviewSalesAndAuctionsPage", () => ({
+  getCurrentSalesAndAuctionsEditorialMarkdown: () =>
+    "# Fixed-price sales and auctions\n\n## The sale flow in one minute\n\nCurrent sales copy.",
+}));
+
 jest.mock("@/lib/public-review/editorialContent", () => ({
   loadStreamEditorialContent: jest.fn(async (page: { readonly id: string }) => {
     if (page.id === "security-testing-and-known-limitations") {
@@ -264,6 +269,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "security-testing-and-known-limitations",
         sectionValues: ["old-development-section"],
+      },
+      {
+        value: "fixed-price-sales-and-auctions",
+        sectionValues: ["old-sales-section"],
       },
       {
         value: "community-review",
@@ -847,6 +856,32 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("17");
   });
 
+  it("shows plain copy only on the current sales and auctions route", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "fixed-price-sales-and-auctions",
+        }),
+      })
+    );
+
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "The sale flow in one minute"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Current sales copy."
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.fixedPriceSalesAndAuctions.currentSummary"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("1");
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("1");
+  });
+
   it("puts a plain current guide before the Community Review prompts", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -1228,6 +1263,30 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-summary-key",
       "publicReview.pages.tokensCollectionsAndMinting.summary"
+    );
+  });
+
+  it("keeps immutable sales and auctions routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          version: "2026-08-01.1",
+          page: "fixed-price-sales-and-auctions",
+        }),
+      })
+    );
+
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Technical section"
+    );
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent("Body.");
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "The sale flow in one minute"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.fixedPriceSalesAndAuctions.summary"
     );
   });
 
