@@ -117,6 +117,14 @@ states, seed evidence, same-seed retries, stale requests, provider changes,
 burns, funding, risks, and reviewer questions in plain language. Its saved
 version routes keep their exact editorial snapshot.
 
+The current **Metadata, Scripts, and Dependencies** page begins with a one-minute
+answer. It separates behavior in the pinned Solidity from the accepted metadata
+ADR, the unbuilt satellite refresh helpers, and external compatibility evidence.
+It then keeps the detailed material on storage, encoding, scripts, dependency
+versions, collection records, snapshots, shared contract metadata, refresh
+events, size limits, browser assumptions, failure cases, and reviewer questions.
+Its immutable version route keeps the exact historical editorial.
+
 ## Implementation and Evidence Status
 
 The current **Where Development Stands** page begins with a direct launch answer:

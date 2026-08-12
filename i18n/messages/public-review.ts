@@ -9,6 +9,7 @@ import { PUBLIC_REVIEW_SALES_AND_AUCTIONS_MESSAGES } from "@/i18n/messages/publi
 import { PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES } from "@/i18n/messages/public-review-freezing-finality";
 import { PUBLIC_REVIEW_REVENUE_SPLITS_MESSAGES } from "@/i18n/messages/public-review-revenue-splits";
 import { PUBLIC_REVIEW_RANDOMNESS_MESSAGES } from "@/i18n/messages/public-review-randomness";
+import { PUBLIC_REVIEW_METADATA_MESSAGES } from "@/i18n/messages/public-review-metadata";
 
 export const PUBLIC_REVIEW_MESSAGES = {
   "navigation.nfts.theMemes": "The Memes",
@@ -187,6 +188,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   ...PUBLIC_REVIEW_SALES_AND_AUCTIONS_MESSAGES,
   ...PUBLIC_REVIEW_REVENUE_SPLITS_MESSAGES,
   ...PUBLIC_REVIEW_RANDOMNESS_MESSAGES,
+  ...PUBLIC_REVIEW_METADATA_MESSAGES,
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",

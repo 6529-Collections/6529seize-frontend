@@ -262,6 +262,45 @@ mint lanes?`;
     if (page.id === "randomness") {
       return "# Randomness\n\nFor generative art, randomness is part of the work's provenance. A collector\nshould be able to determine which provider produced the input, which request it\nanswered, which token and collection it belonged to, how callbacks were\nhandled, whether anyone requested new randomness, and why the final seed is\npermanent.\n\nStream therefore treats randomness as a lifecycle. Requests, delays, failures,\nprovider changes, retries, and disputed outputs all receive durable state.\n\n## Each provider has its own trust model\n\nOld provider copy.\n\n## Questions for reviewers\n\n9. Does every supported provider give artists and collectors an equally clear\nprovenance record even though its trust model differs?";
     }
+    if (page.id === "metadata-scripts-and-dependencies") {
+      return [
+        "# Metadata, scripts, and dependencies",
+        "",
+        "Old metadata snapshot copy.",
+        "",
+        "## The first question is: where are the bytes?",
+        "",
+        "## Metadata modes express different preservation promises",
+        "",
+        "## String construction is a security boundary",
+        "",
+        "## Scripts are ordered, byte-exact artwork inputs",
+        "",
+        "## Versioned dependencies prevent silent library replacement",
+        "",
+        "## Collection metadata separates claims by purpose and authority",
+        "",
+        "## Snapshots preserve an authorized view",
+        "",
+        "## Shared contract metadata serves the ERC-721 surface",
+        "",
+        "## Refresh events tell consumers that state changed",
+        "",
+        "## Size limits protect delivery and execution",
+        "",
+        "## The browser is part of the artwork's environment",
+        "",
+        "## Every collection needs a dependency bill of materials",
+        "",
+        "## Responsibilities carried by metadata records",
+        "",
+        "## What can fail",
+        "",
+        "## Questions for reviewers",
+        "",
+        "9. What must be preserved outside Ethereum for each supported artwork mode to remain reproducible?",
+      ].join("\n");
+    }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
   PublicReviewEditorialContentError: class extends Error {},
@@ -322,6 +361,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "randomness",
         sectionValues: ["old-randomness-section"],
+      },
+      {
+        value: "metadata-scripts-and-dependencies",
+        sectionValues: ["old-metadata-section"],
       },
       {
         value: "security-testing-and-known-limitations",
@@ -1248,6 +1291,54 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("2");
   });
 
+  it("replaces the current metadata editorial with a plain evidence-first page", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "metadata-scripts-and-dependencies",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    const editorialText = editorialCopy.textContent ?? "";
+
+    expect(screen.queryByText("Authorship note")).not.toBeInTheDocument();
+    expect(editorialCopy).toHaveTextContent("One-minute explanation");
+    expect(editorialCopy).toHaveTextContent("What the pinned code does");
+    expect(editorialCopy).toHaveTextContent("What the accepted design says");
+    expect(editorialCopy).toHaveTextContent("What is still open");
+    expect(editorialCopy).toHaveTextContent(
+      "This public review is not proof of launch, deployment, audit, or safety."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "A snapshot does not freeze the underlying records."
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "no matching public or external helper exists in the pinned Solidity"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+    );
+    expect(editorialCopy).not.toHaveTextContent(
+      "Old metadata snapshot copy."
+    );
+    expect(editorialText.indexOf("One-minute explanation")).toBeLessThan(
+      editorialText.indexOf("The first question is: where are the bytes?")
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "16"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
+      "16"
+    );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("16");
+  });
+
   it("keeps immutable Overview routes unchanged", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -1646,6 +1737,30 @@ describe("renderStreamReviewRoutePage", () => {
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
       "1"
+    );
+  });
+
+  it("keeps immutable metadata routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "metadata-scripts-and-dependencies",
+          version: "2026-08-01.1",
+        }),
+      })
+    );
+
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Old metadata snapshot copy."
+    );
+    expect(screen.getByTestId("editorial-copy")).not.toHaveTextContent(
+      "One-minute explanation"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "15"
     );
   });
 

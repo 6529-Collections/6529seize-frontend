@@ -46,6 +46,7 @@ import { getCurrentSalesAndAuctionsEditorialMarkdown } from "@/lib/public-review
 import { getCurrentFreezingFinalityEditorialMarkdown } from "@/lib/public-review/streamReviewFreezingFinalityPage";
 import { getCurrentRevenueSplitsEditorialMarkdown } from "@/lib/public-review/streamReviewRevenueSplitsPage";
 import { getCurrentRandomnessEditorialMarkdown } from "@/lib/public-review/streamReviewRandomnessPage";
+import { getCurrentMetadataEditorialMarkdown } from "@/lib/public-review/streamReviewMetadataPage";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
@@ -121,6 +122,7 @@ type CurrentStreamReviewPages = {
   readonly forArtists: boolean;
   readonly governance: boolean;
   readonly freezingFinality: boolean;
+  readonly metadata: boolean;
   readonly overview: boolean;
   readonly revenueSplits: boolean;
   readonly randomness: boolean;
@@ -152,6 +154,7 @@ function getCurrentStreamReviewPages(
       isCurrent && pageId === "governance-pausing-and-successors",
     freezingFinality:
       isCurrent && pageId === "freezing-preservation-and-artwork-finality",
+    metadata: isCurrent && pageId === "metadata-scripts-and-dependencies",
     overview: isCurrent && pageId === "overview",
     revenueSplits:
       isCurrent && pageId === "revenue-splits-and-royalties",
@@ -230,6 +233,12 @@ function getDisplayedEditorialMarkdown({
   }
   if (currentPages.randomness) {
     return getCurrentRandomnessEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
+  if (currentPages.metadata) {
+    return getCurrentMetadataEditorialMarkdown({
       editorialMarkdown,
       source,
     });
