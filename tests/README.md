@@ -164,15 +164,10 @@ App PR CI:
   The desktop/mobile route sweep adds browser evidence for Museum-impacting PRs
   and exact staging changes. Unrelated changes exclude it; explicit manual
   Museum selection remains available.
-- Uploaded PR CI artifacts are short-term debugging evidence. Durable
-  deployment-train evidence still belongs on approved 6529-controlled artifact
-  storage, not Git LFS.
-- Deployment workflows use `deployment-bus upload-validation-artifact` to
-  redact, hash, upload, and record GET `/api/version` evidence as
-  `deployment:http-version` when the approved artifact store is writable. A
-  failed upload warns and records no durable pointer. This is durable
-  deployment evidence, but it does not replace the required Playwright pack
-  artifacts for release readiness.
+- Uploaded PR CI artifacts are short-term debugging evidence. Deployment
+  workflows separately upload exact-version and readiness evidence, then keep
+  the environment lock through the automatic Playwright pack continuation;
+  those artifacts do not replace the E2E result.
 
 WCAG and i18n route evidence:
 
@@ -480,13 +475,11 @@ Large-pack ownership:
   coverage for drop reaction writes. The pack may use local synthetic auth and
   a mock API, but it must never allow broad `/api/drops/**` writes beyond the
   exact sandbox reaction endpoint and body.
-- `test:e2e:production:readonly` is owned by the release captain or validation
-  agent after a production deploy. It is a production-safe aggregate of the
-  individual public read-only packs on desktop Chromium and is the command
-  behind the optional deployment-bus pack `playwright:production-readonly`. Do
-  not make it a staging requirement unless a real staging aggregate command and
-  evidence path exist; use targeted staging/local commands for mobile-web
-  follow-up evidence.
+- `test:e2e:production:readonly` is a production-safe aggregate of the
+  individual public read-only packs on desktop Chromium. The canonical
+  production E2E workflow resolves all production `post-deploy` packs from the
+  pack manifest after an exact successful deploy; do not substitute a manual
+  run for that automatic result.
 - `test:e2e:browser-diversity` is a train/nightly compatibility pack. A PR
   owner should run it when changing browser-sensitive rendering, media,
   focus/keyboard behavior, or CSS layout primitives.

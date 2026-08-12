@@ -1,136 +1,77 @@
 ---
 name: deploy-6529
-description: Route and execute 6529 frontend, backend, or coupled staging and production releases through an effective Release Bus lane by exact PR head SHA, or use the serialized manual fallback while that target lane reports OFF. Use for staging, deploy, promotion, release merge, turning a lane on or off, recovery, or rollout coordination.
+description: Operate the frontend's exact-SHA staging and production deployment workflows. Use for frontend staging, production, post-deploy E2E, deployment recovery, or deployment status questions.
 ---
 
-# Deploy 6529
+# Deploy 6529 frontend
 
-## Live routing gate
+This repository owns two direct frontend deployment paths. It does not register
+frontend candidates with Release Bus.
 
-1. Run `./bin/6529 exec node ops/scripts/release-bus-status.mjs` at the start
-   and again before any readiness or environment mutation. The helper uses an
-   authenticated `gh` session to read the controls endpoint, verifies hidden
-   safety fences, and returns only the two effective automation lanes.
-2. Fail closed on an unavailable/malformed API, authentication failure, unknown
-   or inconsistent lane state. Never infer ownership from files, raw mode,
-   hidden controls, or old output.
-3. Route the target environment by the fresh lane result:
+## Safety rules
 
-| Target lane       | Route                                                                                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `STAGING: ON`     | Register the exact candidate with Release Bus                                                                                                          |
-| `STAGING: OFF`    | If `changeable: true`, serialized manual staging after the staging drain gate                                                                          |
-| `PRODUCTION: ON`  | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for Release Bus production                                                                |
-| `PRODUCTION: OFF` | If `changeable: true`, serialized manual production after the production drain gate and explicit owner authorization; staging evidence is not required |
+- Resolve every requested branch or pull request to an exact 40-character SHA.
+- Fetch immediately before a staging push or production dispatch and stop if
+  the selected ref moved.
+- Never force-push a deployment branch or cancel another actor's deployment.
+- Preserve workflow concurrency and wait for the existing lane when a run is
+  queued.
+- Treat a successful deploy and its automatic E2E as separate results.
+- Do not expose credentials, signed URLs, or raw production data.
 
-Raw mode and `ALL` are internal emergency fences. They are verified by the
-helper but are not normal routing or UI controls. Do not bypass an internal
-fence. Both lanes `OFF` means full manual fallback after both drain gates.
+## Staging
 
-There is no inferred control-plane or self-upgrade exception. When a target
-lane is `ON`, every deployment for that environment—including API,
-`releaseBus`, cleaner/reconciler, and other control-plane changes—must be an
-authenticated Release Bus operation. Do not manually dispatch a target
-environment workflow while its lane is `ON`. Manual fallback exists only when
-the helper authoritatively reports the affected lane `OFF` and its drain gate
-passes. The helper must also report `changeable: true` and verify that no hidden
-emergency fence blocks fallback. If Release Bus cannot safely self-deploy while
-`ON`, stop for explicit owner direction; never infer an exception from the
-component or GitHub actor.
+The canonical entry point is a push to `1a-staging`. That push automatically
+runs `Web Deploy - STAGING` (`.github/workflows/deploy-staging.yml`), which:
 
-## V2 readiness
+1. checks out and verifies the pushed SHA;
+2. builds and packages those exact bytes;
+3. uploads and verifies the immutable artifact;
+4. deploys that version to staging; and
+5. calls reusable `Staging E2E` for that exact SHA before the canonical workflow
+   releases the staging environment lock, then reports the complete pipeline
+   outcome to the CI wave.
 
-1. Require an open PR whose exact head and green merge-tree checks are current.
-2. Open `/deploy/ui/bus` or call the versioned API. Submit repository, PR,
-   branch, exact 40-character head SHA, backend deploy units/DAG edges, and
-   candidate dependencies.
-3. For coupled work, register backend first and declare it as the frontend
-   prerequisite. Declare only real ordering edges; independent backend DAG
-   frontier units run concurrently.
-4. Report candidate ID, immutable SHA, and status. Do not launch a parallel
-   manual deploy after v2 accepts the candidate.
-5. Wait for `STAGING_VALIDATED`. `STAGING_DEPLOYED` means manifest-bound E2E is
-   still pending and is not production evidence.
-6. Production is a separate explicit action. Re-resolve the branch and mark
-   ready only when it still equals the exact staging-validated SHA. Staging
-   validation never schedules production automatically. A pre-mutation
-   production replan may create a new audited replacement from all currently
-   eligible explicit selections, including a compatible selection recorded
-   after the source train was claimed. Verify every source selection/train
-   mapping and omission reason; it must never infer candidates from staging.
-   Once any `main` advance succeeds, a production deploy is dispatched, or
-   production E2E exists, the original exact set is frozen and may only resume
-   or recover unchanged.
-   If `PRODUCTION_REPLAN_INTENT_SCAN_FAILED_CLOSED` reaches its bounded cap,
-   stop claiming; after ownership drains, revoke/cancel only owner-authorized
-   stale intents or deploy a separately reviewed pagination/cap change. Never
-   edit the ledger or silently drop intent.
+Do not manually dispatch the staging workflow after pushing. A manual dispatch
+is a recovery/rerun entry point only and still rejects any ref other than
+`1a-staging`.
 
-V2 reuses exact green PR merge-tree source and test evidence, then freshly
-builds one immutable environment-bound artifact from the train's exact
-composition. Staging builds only the staging profile. Production freshly
-composes the exact dependency-closed selection on current production `main`
-and builds only the production profile; staging artifact bytes are never
-reused for ordinary production. Repository-wide lint, typecheck, test
-inventory, and full Jest matrices stay in exact-head/merge-tree PR CI rather
-than normal train preflight. Shared staging is owned only for deploy plus
-manifest-bound E2E. V2 never publishes release notes.
+## Production
 
-## Manual fallback while the target lane is OFF and changeable
+The canonical entry point is the manual `Web Deploy - PROD` workflow on
+`main` (`.github/workflows/build-upload-deploy-prod.yml`). Production never
+deploys because a commit is pushed or a pull request is merged.
 
-1. Require the helper to report the target lane `OFF` with `changeable: true`
-   and no hidden emergency fence blocking fallback. The legacy frontend
-   staging and production workflows independently call the authenticated
-   readiness gate as their first job and reject before checkout, build, ref,
-   credential, or deployment mutation unless the exact run and drain state
-   are authorized. Then prove the target environment lock is free, no target
-   mutation/E2E workflow is active, and every already-dispatched exact operation
-   is terminal. Fetch the exact remote target head. Wait; never cancel another
-   actor.
-2. Re-fetch immediately before pushing. If a shared ref moved, recompute from
-   the new head. Never force-push.
-3. Deploy required backend units in DAG order before merging/deploying dependent
-   frontend work to `1a-staging`. Dispatch exactly one backend service workflow
-   (`Deploy a service`) at a time and wait for exact success before starting the
-   next; shared workflow concurrency can cancel sibling runs, even for
-   independent DAG-frontier units.
-4. Record exact deployed frontend/backend SHAs before E2E and freeze staging
-   until E2E is terminal.
-5. With the production lane `OFF`, production requires explicit owner
-   authorization but not prior staging deployment or validation. Re-fetch
-   `main` and preserve dependency
-   order. For backend services, pass the same merged PR number and full
-   canonical service set to every sequential production run, setting
-   `release_note_publish=true` only on the final service. Never author or post
-   the note—the autonomous bot owns it.
+Before dispatching, require explicit production authorization, fetch current
+`main`, and freeze its exact SHA. The workflow:
 
-## Monitoring and recovery
+1. calls `Build Production Artifact` for that exact main-history SHA;
+2. independently verifies the run, artifact ID, API digest, manifest,
+   checksums, package bytes, portability record, and current-main ancestry;
+3. permits `main` to advance only while the selected SHA remains in its history;
+4. refuses to deploy if the currently deployed production version is not an
+   ancestor of the target SHA;
+5. deploys the verified artifact; and
+6. calls reusable `Production E2E` for that exact SHA before the canonical
+   workflow releases the production environment lock, then reports the
+   complete pipeline outcome to the CI wave.
 
-- Use train details, operations, workflow links, manifest identity, failure
-  class, and recovery message in `/deploy/ui/bus`.
-- Infrastructure and retryable exact deployment failures retry the same
-  idempotent operation. They do not isolate candidates.
-- A merge conflict marks only the direct candidate `NEEDS_REBASE` and holds
-  transitive dependants. Fix the branch and register its new SHA.
-- A control-plane defect leaves candidates unblamed. If the supported,
-  authorized recovery procedure turns the affected automation lane off, keep
-  exact state and wait for its drain gate before using manual fallback; turn
-  the lane on explicitly after repair. If the lane remains `ON`, do not infer a
-  self-upgrade exception—stop for explicit owner direction.
-- Use the backend fast-off helper only for an emergency hard stop of both
-  lanes. Its raw mode and `ALL` changes are intentionally absent from normal UI
-  and routing.
-- Failed E2E never creates staging validation. Do not mutate staging while the
-  manifest owner still holds the environment lock.
-- If either production `main` base moves before irreversible mutation, v2 must
-  preserve every explicit intent and replan a fresh audited, dependency-closed
-  replacement. After irreversible mutation, freeze the original exact set and
-  require exact recovery. Never force a recorded composition over a newer ref
-  or broaden an active train in place.
+Never substitute a branch name for the frozen target SHA or bypass the
+independent verifier. A manual E2E recovery run must identify a canonical run
+whose deployment job succeeded and whose exact version is still live; it cannot
+select an arbitrary source SHA or a non-`main` workflow ref.
 
-## Closeout
+## Recovery and closeout
 
-Report exact candidate SHAs/dependencies, train and operation states, deployed
-versions, manifest/E2E evidence, failures or holds, and both effective lane
-states. Do
-not expose credentials, signed URLs, raw production data, or hidden prompts.
+- A failed build or verifier run has no deployment authority. Fix the source or
+  retry the exact canonical workflow as explicitly authorized.
+- If staging or production deploy succeeds but E2E fails, report the exact
+  deploy SHA and the E2E failure separately; the final CI-wave notification is
+  failure, and operators must not silently redeploy.
+- If production rejects a target that left current `main` history or a
+  downgrade, resolve current `main` and the deployed production SHA before
+  asking for a new explicit dispatch.
+- Report the exact SHA, workflow/run links, deployed version, automatic E2E
+  result, and any durable blocker.
+
+See `ops/docs/developer/frontend-deployment.md` for the workflow contract.

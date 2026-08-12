@@ -95,9 +95,7 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("tests/museum/inside-system-readonly.spec.ts");
     expect(appPrCi).toContain("tests/museum/rights-readonly.spec.ts");
     expect(appPrCi).not.toContain("./bin/6529 run test:e2e:museum-");
-    expect(appPrCi).toContain(
-      "startsWith(matrix.lane, 'playwright-museum-')"
-    );
+    expect(appPrCi).toContain("matrix.lane == 'playwright-museum'");
     expect(appPrCi).toContain("Restore Playwright browser");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
       expect(appPrCi).toContain(
