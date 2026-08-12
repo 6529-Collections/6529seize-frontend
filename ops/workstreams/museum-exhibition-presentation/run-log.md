@@ -131,3 +131,9 @@
   read `Conflict at Its Edges`. The contract now selects the page title at
   heading level 1. The page snapshot showed the intended art-first acquisition
   route; no runtime, copy, catalogue, or visual code changed for this fix.
+- Visual inspection of the retained mobile gallery evidence found that centering
+  the full, tall works section placed the viewport between lazy-loaded cards.
+  The DOM contained all 16 governed images, but the screenshot did not show
+  decoded art. Evidence capture now enters at the works heading and proves the
+  first image has decoded pixels before capture. This changes the qualification
+  evidence only, not visitor runtime behavior.

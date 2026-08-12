@@ -291,7 +291,15 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).not.toHaveAttribute("open");
     await page.evaluate(() => window.scrollTo(0, 0));
     await retainScreenshot(page, testInfo, "museum-acquisition-keys-and-gates");
-    await page.locator("#acquisition-works").scrollIntoViewIfNeeded();
+    await page.locator("#acquisition-works-title").scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        page
+          .locator("#acquisition-works figure img")
+          .first()
+          .evaluate((image) => image.complete && image.naturalWidth > 0)
+      )
+      .toBe(true);
     await retainScreenshot(
       page,
       testInfo,
@@ -328,7 +336,15 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       testInfo,
       "museum-acquisition-conflict-at-its-edges"
     );
-    await acquisitionPalmyraImageControl.scrollIntoViewIfNeeded();
+    await page.locator("#acquisition-works-title").scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        page
+          .locator("#acquisition-works figure img")
+          .first()
+          .evaluate((image) => image.complete && image.naturalWidth > 0)
+      )
+      .toBe(true);
     await retainScreenshot(
       page,
       testInfo,
