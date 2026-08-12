@@ -26,7 +26,7 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
     isOpen ? (
       <div role="dialog" aria-label={title}>
         <button type="button" onClick={onClose}>
-          Close panel
+          Close
         </button>
         {children}
       </div>
@@ -452,7 +452,7 @@ describe("WaveApprovalStatusBar", () => {
     expect(controlledContent).toBeInTheDocument();
     expect(dialog).toContainElement(controlledContent);
 
-    fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
 
     expect(
       screen.queryByRole("dialog", { name: "Approval rules" })
