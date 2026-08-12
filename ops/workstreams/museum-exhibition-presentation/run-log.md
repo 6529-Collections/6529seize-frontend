@@ -125,3 +125,9 @@
   source, plus five acquisition figures (four initially loaded images and one
   intentional large-image control). Retained acquisition evidence now covers
   both the opening composition and the works gallery.
+- Exact-head App CI run 31564282063 reached the corrected exhibition contract.
+  The mobile lane found one ambiguous accessibility-role selector, not a
+  rendered-product defect: the acquisition H1 and the governed essay H3 both
+  read `Conflict at Its Edges`. The contract now selects the page title at
+  heading level 1. The page snapshot showed the intended art-first acquisition
+  route; no runtime, copy, catalogue, or visual code changed for this fix.

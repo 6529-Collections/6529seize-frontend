@@ -304,6 +304,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       page.getByRole("heading", {
         name: "Conflict at Its Edges",
         exact: true,
+        level: 1,
       })
     ).toBeVisible();
     await expect(page.locator("#acquisition-works figure")).toHaveCount(5);
