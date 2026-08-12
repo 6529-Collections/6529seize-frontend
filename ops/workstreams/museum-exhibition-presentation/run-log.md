@@ -63,3 +63,4 @@
 - Frontend merge: pending
 - Staging deployment and E2E: pending
 - Production deployment and E2E: pending
+- Final exact-tree inspection caught a still-present featured-work class-token defect despite the earlier resolved review thread: `tw-min-w-0` and the featured centering/width utilities were concatenated. The follow-up restores the separator and adds an exact component assertion for the four featured-layout classes. The focused acquisition suite passes 5/5, changed lint passes, and whitespace passes. A fresh exact-head CI run is required.

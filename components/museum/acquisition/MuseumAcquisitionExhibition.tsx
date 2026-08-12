@@ -193,7 +193,7 @@ export function AcquisitionWorkFigure({
   );
   return (
     <figure
-      className={`tw-m-0 tw-min-w-0${featured ? "tw-mx-auto tw-w-full tw-max-w-5xl" : ""}`}
+      className={`tw-m-0 tw-min-w-0${featured ? " tw-mx-auto tw-w-full tw-max-w-5xl" : ""}`}
     >
       {requiresIntent || metadataOnly ? (
         <div className="tw-group tw-block">{media}</div>

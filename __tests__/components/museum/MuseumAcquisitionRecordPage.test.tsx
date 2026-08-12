@@ -386,6 +386,9 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
       media.sourceUrl
     );
     expect(
+      screen.getByRole("link", { name: workTitle }).closest("figure")
+    ).toHaveClass("tw-min-w-0", "tw-mx-auto", "tw-w-full", "tw-max-w-5xl");
+    expect(
       screen.queryByText("No public image is available for this record.")
     ).not.toBeInTheDocument();
     expect(
