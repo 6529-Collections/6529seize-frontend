@@ -76,10 +76,10 @@ export default function MyStreamWaveCreateActionsMenu({
     <>
       <span
         className="tw-inline-flex tw-flex-shrink-0 tw-self-center"
-        data-tooltip-id={isMobile ? undefined : createActionsTooltipId}
-        data-tooltip-content={
-          isMobile ? undefined : t(locale, "waves.create.actions.create")
-        }
+        {...(!isMobile && {
+          "data-tooltip-id": createActionsTooltipId,
+          "data-tooltip-content": t(locale, "waves.create.actions.create"),
+        })}
       >
         <CompactMenu
           className="tailwind-scope tw-flex tw-flex-shrink-0"
