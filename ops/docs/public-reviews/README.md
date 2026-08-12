@@ -96,6 +96,12 @@ declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100
 matching records at a time.
 
+The current **Tokens, Collections, and Minting** page starts with a one-minute
+explanation. It then separates permanent Core identity from replaceable minting
+rules, explains the two source mint paths, and labels the proposed ADR 0018
+replay change as unimplemented. It keeps the snapshot's section anchors for
+feedback. Immutable version routes retain the original technical editorial.
+
 ## Implementation and Evidence Status
 
 The current **Where Development Stands** page begins with a direct launch answer:

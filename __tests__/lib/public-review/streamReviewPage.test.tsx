@@ -131,6 +131,83 @@ jest.mock("@/lib/public-review/editorialContent", () => ({
     if (page.id === "curation-and-tdh-authorization") {
       return "# Community curation, TDH, and signed authorization\n\nArchived curation introduction.\n\n## Questions for reviewers\n\nArchived curation question.";
     }
+    if (page.id === "tokens-collections-and-minting") {
+      return `# Tokens, collections, and minting
+
+A Stream token carries a larger set of facts: its collection, its serial within
+that collection, the collection's maximum supply, the distribution policy that
+admitted the mint, the limits consumed, and the history preserved through a
+burn or module replacement.
+
+Minting therefore spans identity, supply, replay protection, eligibility, and
+accounting. The review follows each guarantee through the contracts and the
+external systems that support them.
+
+## One permanent identity surface for many collections
+
+Old identity copy.
+
+## Supply combines several counters
+
+Old supply copy.
+
+## Why mint policy lives outside the Core
+
+Old policy copy.
+
+## The two source mint lanes
+
+Old lanes copy.
+
+## Phases make distribution policy inspectable
+
+Old phases copy.
+
+## Gates carry security inputs
+
+Old gates copy.
+
+## Durable counters cover activity across transactions
+
+Old counters copy.
+
+## Editions and signed Drop quantity
+
+Old editions copy.
+
+## Prepared execution keeps cross-module state atomic
+
+Old atomic copy.
+
+## Replay protection needs one durable owner
+
+Old replay copy.
+
+## Every minted token receives durable identity
+
+Old result copy.
+
+## Burning preserves history
+
+Old burn copy.
+
+## Mint closure must close every lane
+
+Old closure copy.
+
+## Responsibilities carried by the minting system
+
+Old responsibilities copy.
+
+## What can fail
+
+Old failures copy.
+
+## Questions for reviewers
+
+8. Does the final launch path remove ambiguity between the legacy and manager
+mint lanes?`;
+    }
     return "# Editorial title\n\n## Technical section\n\nBody.";
   }),
   PublicReviewEditorialContentError: class extends Error {},
@@ -168,6 +245,10 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
       {
         value: "roles-and-trust",
         sectionValues: ["old-roles-section"],
+      },
+      {
+        value: "tokens-collections-and-minting",
+        sectionValues: ["old-tokens-section"],
       },
       {
         value: "security-testing-and-known-limitations",
@@ -715,6 +796,46 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("21");
   });
 
+  it("uses plain current copy on Tokens, Collections, and Minting", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "tokens-collections-and-minting",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent("Minting in one minute");
+    expect(editorialCopy).toHaveTextContent(
+      "they are not one combined launch path"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "That ADR is not accepted or implemented in the pinned source"
+    );
+    expect(editorialCopy).toHaveTextContent(
+      "`setFinalSupply` alone is not a one-way zero-mint closure"
+    );
+    expect(editorialCopy).not.toHaveTextContent("Old identity copy.");
+    expect(editorialCopy).not.toHaveTextContent("Old replay copy.");
+    expect(screen.queryByText("Authorship note")).not.toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "17"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.tokensCollectionsAndMinting.currentSummary"
+    );
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent(
+      "17"
+    );
+    expect(
+      screen.getByTestId("configured-feedback-section-count")
+    ).toHaveTextContent("17");
+  });
+
   it("puts a plain current guide before the Community Review prompts", async () => {
     render(
       await renderStreamReviewRoutePage({
@@ -1040,6 +1161,38 @@ describe("renderStreamReviewRoutePage", () => {
       expect.stringContaining(
         "publicReview.pages.curationAndTdhAuthorization.title"
       )
+    );
+  });
+
+  it("keeps immutable Tokens, Collections, and Minting routes unchanged", async () => {
+    render(
+      await renderStreamReviewRoutePage({
+        params: Promise.resolve({
+          review: "6529-stream",
+          version: "2026-08-01.1",
+          page: "tokens-collections-and-minting",
+        }),
+      })
+    );
+
+    const editorialCopy = screen.getByTestId("editorial-copy");
+    expect(editorialCopy).toHaveTextContent(
+      "A Stream token carries a larger set of facts"
+    );
+    expect(editorialCopy).toHaveTextContent("Old identity copy.");
+    expect(editorialCopy).toHaveTextContent("Old replay copy.");
+    expect(editorialCopy).not.toHaveTextContent("Minting in one minute");
+    expect(editorialCopy).not.toHaveTextContent(
+      "they are not one combined launch path"
+    );
+    expect(screen.getByText("Authorship note")).toBeInTheDocument();
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-section-count",
+      "16"
+    );
+    expect(screen.getByTestId("review-shell")).toHaveAttribute(
+      "data-summary-key",
+      "publicReview.pages.tokensCollectionsAndMinting.summary"
     );
   });
 

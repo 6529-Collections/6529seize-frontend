@@ -40,6 +40,7 @@ import { getCurrentArtworkLifecycleEditorialMarkdown } from "@/lib/public-review
 import { getCurrentCommunityReviewEditorialMarkdown } from "@/lib/public-review/streamReviewCommunityPage";
 import { getCurrentCurationTdhEditorialMarkdown } from "@/lib/public-review/streamReviewCurationTdhPage";
 import { getCurrentDevelopmentEditorialMarkdown } from "@/lib/public-review/streamReviewDevelopmentPage";
+import { getCurrentTokensMintingEditorialMarkdown } from "@/lib/public-review/streamReviewTokensMintingPage";
 import {
   createStreamEditorialFeedbackPageContext,
   createStreamReviewFeedbackConfig,
@@ -115,6 +116,7 @@ type CurrentStreamReviewPages = {
   readonly forArtists: boolean;
   readonly overview: boolean;
   readonly roles: boolean;
+  readonly tokensAndMinting: boolean;
 };
 
 type StreamReviewSource = {
@@ -138,6 +140,8 @@ function getCurrentStreamReviewPages(
     forArtists: isCurrent && pageId === "for-artists",
     overview: isCurrent && pageId === "overview",
     roles: isCurrent && pageId === "roles-and-trust",
+    tokensAndMinting:
+      isCurrent && pageId === "tokens-collections-and-minting",
   };
 }
 
@@ -176,6 +180,12 @@ function getDisplayedEditorialMarkdown({
       source,
     });
   }
+  if (currentPages.tokensAndMinting) {
+    return getCurrentTokensMintingEditorialMarkdown({
+      editorialMarkdown,
+      source,
+    });
+  }
   return editorialMarkdown;
 }
 
@@ -194,6 +204,13 @@ function getDisplayedPage(
       ...page,
       summaryKey:
         "publicReview.pages.curationAndTdhAuthorization.currentSummary",
+    };
+  }
+  if (currentPages.tokensAndMinting) {
+    return {
+      ...page,
+      summaryKey:
+        "publicReview.pages.tokensCollectionsAndMinting.currentSummary",
     };
   }
   return page;

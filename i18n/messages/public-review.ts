@@ -3,6 +3,7 @@ import { PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES } from "@/i18n/messages/public
 import { PUBLIC_REVIEW_COMMUNITY_MESSAGES } from "@/i18n/messages/public-review-community";
 import { PUBLIC_REVIEW_CURATION_TDH_MESSAGES } from "@/i18n/messages/public-review-curation-tdh";
 import { PUBLIC_REVIEW_DEVELOPMENT_MESSAGES } from "@/i18n/messages/public-review-development";
+import { PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES } from "@/i18n/messages/public-review-tokens-minting";
 
 export const PUBLIC_REVIEW_MESSAGES = {
   "navigation.nfts.theMemes": "The Memes",
@@ -175,6 +176,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   ...PUBLIC_REVIEW_COMMUNITY_MESSAGES,
   ...PUBLIC_REVIEW_CURATION_TDH_MESSAGES,
   ...PUBLIC_REVIEW_DEVELOPMENT_MESSAGES,
+  ...PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES,
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",
