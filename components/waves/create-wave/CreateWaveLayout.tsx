@@ -68,10 +68,11 @@ export default function CreateWaveLayout({
               // oversized gap the full inset + 1rem produced. Mirrors the app's
               // BottomNavigation approach (trim the inset rather than add to
               // it), but a touch more conservative — subtract 0.5rem with a
-              // 0.5rem floor so home-indicator devices tighten up (~env-8px)
-              // while home-button/Android-button devices still keep breathing
-              // room. Scales per device via env(); never goes flush.
-              className={`tw-sticky tw-bottom-0 tw-z-10 tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-bg-iron-950/10 tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)_-_0.5rem),0.5rem)] tw-pt-4 tw-shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] tw-backdrop-blur-md tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none lg:tw-px-8 lg:tw-pb-5 lg:tw-pt-5 ${
+              // 0.5rem floor on phones. Medium modal layouts use a 1rem floor
+              // so the action row stays balanced, while still honoring a
+              // larger device safe area. Scales per device via env(); never
+              // goes flush.
+              className={`tw-sticky tw-bottom-0 tw-z-10 tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-bg-iron-950/10 tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)_-_0.5rem),0.5rem)] tw-pt-4 tw-shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] tw-backdrop-blur-md tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none md:tw-pb-[max(env(safe-area-inset-bottom,0px),1rem)] lg:tw-px-8 lg:tw-pb-5 lg:tw-pt-5 ${
                 canScrollDown ? "tw-border-white/25" : "tw-border-white/[0.08]"
               }`}
             >

@@ -24,7 +24,7 @@ describe('CreateDropFullMobileWrapper', () => {
     );
 
     expect(screen.getByRole('heading', { name: /create a post/i })).toBeInTheDocument();
-    fireEvent.click(screen.getByLabelText('Close panel'));
+    fireEvent.click(screen.getByLabelText('Close'));
     expect(onClose).toHaveBeenCalled();
   });
 
