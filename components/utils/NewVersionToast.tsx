@@ -94,7 +94,7 @@ const NewVersionToast = (): JSX.Element | null => {
 
   const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
   const positionClassName = usesNativeDockPosition
-    ? "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-1/2 tw-right-auto tw-w-[min(calc(100vw-2rem),23.25rem)] -tw-translate-x-1/2"
+    ? "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-1/2 tw-right-auto tw-w-[min(calc(100vw-2rem),23.25rem)] -tw-translate-x-1/2 sm:tw-scale-100"
     : "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-w-auto sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100";
 
   return (

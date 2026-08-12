@@ -329,7 +329,7 @@ describe("useNativeKeyboard", () => {
       expect(result.current.isVisible).toBe(false);
       expect(result.current.keyboardHeight).toBe(0);
       expect(result.current.phase).toBe("hidden");
-      expect(document.documentElement.dataset.nativeKeyboardVisible).toBe(
+      expect(document.documentElement.dataset["nativeKeyboardVisible"]).toBe(
         undefined
       );
     } finally {
@@ -358,7 +358,7 @@ describe("useNativeKeyboard", () => {
     const originalRequestAnimationFrame = window.requestAnimationFrame;
     const originalCancelAnimationFrame = window.cancelAnimationFrame;
     let visualViewportHeight = 900;
-    const visualViewportWidth = 420;
+    let visualViewportWidth = 420;
     const visualViewport = new EventTarget();
     Object.defineProperties(visualViewport, {
       height: { get: () => visualViewportHeight },
@@ -389,6 +389,7 @@ describe("useNativeKeyboard", () => {
     try {
       const { result } = await renderNativeKeyboardHook();
       visualViewportHeight = 620;
+      visualViewportWidth = 450;
 
       act(() => {
         visualViewport.dispatchEvent(new Event("resize"));
@@ -397,7 +398,7 @@ describe("useNativeKeyboard", () => {
       expect(result.current.isVisible).toBe(true);
       expect(result.current.keyboardHeight).toBe(280);
       expect(result.current.phase).toBe("showing");
-      expect(document.documentElement.dataset.nativeKeyboardVisible).toBe(
+      expect(document.documentElement.dataset["nativeKeyboardVisible"]).toBe(
         "true"
       );
     } finally {

@@ -357,6 +357,11 @@ describe("NewVersionToast", () => {
     const { container } = render(<NewVersionToast />);
     const toastLayer = container.firstChild as HTMLElement;
 
+    expect(toastLayer).toHaveClass(
+      "tw-left-1/2",
+      "tw-right-auto",
+      "-tw-translate-x-1/2"
+    );
     expect(
       toastLayer.style.getPropertyValue(
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
@@ -407,11 +412,8 @@ describe("NewVersionToast", () => {
       "-tw-translate-x-1/2",
       "tw-w-[min(calc(100vw-2rem),23.25rem)]"
     );
-    expect(toastLayer).not.toHaveClass(
-      "sm:tw-bottom-7",
-      "sm:tw-right-7",
-      "sm:tw-scale-100"
-    );
+    expect(toastLayer).not.toHaveClass("sm:tw-bottom-7", "sm:tw-right-7");
+    expect(toastLayer).toHaveClass("sm:tw-scale-100");
     await waitFor(() =>
       expect(
         toastLayer.style.getPropertyValue(

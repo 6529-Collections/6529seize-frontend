@@ -46,6 +46,7 @@ const KEYBOARD_EVENT_LAYOUT_TRANSITION_MS = 250;
 const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
 const VIEWPORT_KEYBOARD_HEIGHT_TOLERANCE_PX = 8;
 const VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX = 24;
+const VIEWPORT_ORIENTATION_WIDTH_THRESHOLD_PX = 96;
 const FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS = 180;
 const NATIVE_KEYBOARD_HIDE_FALLBACK_MS = 500;
 
@@ -384,7 +385,7 @@ function syncKeyboardVisibilityFromViewport(): void {
       keyboardClosedViewportWidth > 0 &&
       viewportWidth > 0 &&
       Math.abs(viewportWidth - keyboardClosedViewportWidth) >
-        VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX;
+        VIEWPORT_ORIENTATION_WIDTH_THRESHOLD_PX;
     const hasKeyboardEvidence =
       nativeKeyboardLifecycleActive || hasEditableFocus();
 

@@ -232,6 +232,7 @@ describe("BottomNavigation", () => {
   });
 
   it("renders a stable nav fallback when search params suspend", () => {
+    (useMediaQuery as jest.Mock).mockReturnValue(true);
     const pendingSearchParams = new Promise<URLSearchParams>(() => {
       // Keep the promise pending so Suspense stays on the fallback.
     });
@@ -249,6 +250,14 @@ describe("BottomNavigation", () => {
     expect(
       container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
     ).toBeInTheDocument();
+    const fallbackDock = container.querySelector<HTMLElement>(
+      `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`
+    );
+    expect(fallbackDock?.style.width).toBe("calc(100vw - 2rem)");
+    expect(fallbackDock?.style.maxWidth).toBe("44rem");
+    expect(useMediaQuery).toHaveBeenCalledWith(
+      "(min-width: 744px) and (min-height: 600px)"
+    );
     expect(NavItem).not.toHaveBeenCalled();
   });
 
@@ -287,14 +296,27 @@ describe("BottomNavigation", () => {
       `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`
     );
 
-    expect(dock?.style.width).toBe("44rem");
+    expect(dock?.style.width).toBe("calc(100vw - 2rem)");
+    expect(dock?.style.maxWidth).toBe("44rem");
 
     act(() => {
       globalThis.scrollY = 24;
-      fireEvent.scroll(globalThis);
+      fireEvent.scroll(window);
     });
 
-    await waitFor(() => expect(dock?.style.width).toBe("38.5rem"));
+    await waitFor(() => expect(dock?.style.maxWidth).toBe("38.5rem"));
+  });
+
+  it("keeps the phone dock on class-based sizing", () => {
+    (useMediaQuery as jest.Mock).mockReturnValue(false);
+
+    const { container } = render(<BottomNavigation />);
+    const dock = container.querySelector<HTMLElement>(
+      `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`
+    );
+
+    expect(dock?.style.width).toBe("");
+    expect(dock?.style.maxWidth).toBe("");
   });
 
   it("keeps one active pill mounted while moving it between active items", () => {

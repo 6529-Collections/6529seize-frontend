@@ -102,8 +102,9 @@ interface BottomNavigationProps {
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
 const TABLET_DOCK_QUERY = "(min-width: 744px) and (min-height: 600px)";
-const TABLET_DOCK_COMPACT_WIDTH = "38.5rem";
-const TABLET_DOCK_EXPANDED_WIDTH = "44rem";
+const TABLET_DOCK_VIEWPORT_WIDTH = "calc(100vw - 2rem)";
+const TABLET_DOCK_COMPACT_MAX_WIDTH = "38.5rem";
+const TABLET_DOCK_EXPANDED_MAX_WIDTH = "44rem";
 
 const getHiddenStyle = (hidden: boolean) =>
   hidden
@@ -339,7 +340,10 @@ const getDockStyle = ({
 }): React.CSSProperties | undefined =>
   isTabletViewport
     ? {
-        width: compact ? TABLET_DOCK_COMPACT_WIDTH : TABLET_DOCK_EXPANDED_WIDTH,
+        width: TABLET_DOCK_VIEWPORT_WIDTH,
+        maxWidth: compact
+          ? TABLET_DOCK_COMPACT_MAX_WIDTH
+          : TABLET_DOCK_EXPANDED_MAX_WIDTH,
       }
     : undefined;
 
