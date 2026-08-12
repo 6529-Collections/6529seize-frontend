@@ -494,10 +494,10 @@ describe("testing strategy CI plan", () => {
       "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "343f98fcfe1c231755518a513b5af9fc89ac4bed"'
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "cc8465764a55309d3eca5d3477b0f3993ef5a48c"'
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "81c3353b06725582d7d7d7cc297d06ea19ee61bf"'
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "6cef42ab590f35f035ae4858770d880925ad3085"'
     );
     expect(workflow).toContain('case "$selected_pack"');
     expect(workflow).toContain(
@@ -673,9 +673,7 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).toContain(
       "Museum $MUSEUM_PROJECT remaining coverage failed with exit ${museum_remaining_exit}."
     );
-    expect(museumBrowserRun).toContain(
-      'tail -n 120 "$museum_remaining_log"'
-    );
+    expect(museumBrowserRun).toContain('tail -n 120 "$museum_remaining_log"');
     expect(museumBrowserRun).toContain("--workers=1");
     expect(museumBrowserRun).not.toContain("--workers=2");
     expect(museumBrowserRun).not.toContain("wait -n");

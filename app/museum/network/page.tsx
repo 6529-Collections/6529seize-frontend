@@ -408,9 +408,7 @@ function MuseumAcquisitionProposalFigure({
             alt={presentation.altText}
             width={presentation.width}
             height={presentation.height}
-            {...(presentation.sourceByteSize === undefined
-              ? {}
-              : { sourceByteSize: presentation.sourceByteSize })}
+            sourceByteSize={presentation.sourceByteSize}
             {...(sourceHref === null || !canOpenPresentation
               ? {}
               : {

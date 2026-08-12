@@ -200,9 +200,7 @@ function AcquisitionProposalPreview({
             alt={proposal.altText}
             width={proposal.width}
             height={proposal.height}
-            {...(proposal.sourceByteSize === undefined
-              ? {}
-              : { sourceByteSize: proposal.sourceByteSize })}
+            sourceByteSize={proposal.sourceByteSize}
             {...(sourceHref === null || !canOpenPresentation
               ? {}
               : {
