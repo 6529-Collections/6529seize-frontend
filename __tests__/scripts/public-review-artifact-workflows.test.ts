@@ -30,6 +30,15 @@ const sourceCleanGuard =
   "git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews";
 
 describe("public-review artifact workflow contract", () => {
+  it("bakes mainnet NextGen contracts into every staging artifact", () => {
+    expect(stagingWorkflow).toContain('NEXTGEN_CHAIN_ID: "1"');
+    expect(stagingWorkflow).not.toContain("STAGING_NEXTGEN_CHAIN_ID");
+    expect(
+      releaseBusPreflight.match(/export NEXTGEN_CHAIN_ID=1/g)
+    ).toHaveLength(2);
+    expect(releaseBusPreflight).not.toContain("STAGING_NEXTGEN_CHAIN_ID");
+  });
+
   it("bakes the environment-specific mobile app scheme", () => {
     expect(stagingWorkflow).toContain(
       "MOBILE_APP_SCHEME: mobileStaging6529"
