@@ -20,6 +20,11 @@ import MaxVotesPerIdentityInput from "./MaxVotesPerIdentityInput";
 import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
 import type { TimeWeightedVotingConfig } from "./types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
+import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.TdhPlusXtdh]: 0,
@@ -36,6 +41,15 @@ const APPROVAL_THRESHOLD_TIME_INVALID_ERROR =
 const APPROVAL_THRESHOLD_TIME_DURATION_ERROR =
   "This time is longer than the wave duration. Choose a shorter time, extend the wave end date, or clear the end date.";
 const DEFAULT_APPROVAL_THRESHOLD_TIME_MS = 60 * 1000;
+
+const ADVANCED_VOTING_ERRORS = new Set<CREATE_WAVE_VALIDATION_ERROR>([
+  CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID,
+  CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL,
+  CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE,
+  CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION,
+  CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID,
+  CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION,
+]);
 
 const VOTING_SETTINGS_GRID_CLASSES =
   "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
@@ -130,7 +144,7 @@ function CreateWaveCreditScopeSelect({
                   {option.label}
                 </span>
                 <span
-                  className={`tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 ${
+                  className={`tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-4 ${
                     selected ? "tw-text-iron-300" : "tw-text-iron-400"
                   }`}
                 >
@@ -198,11 +212,7 @@ export default function CreateWaveVoting({
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
-  const TITLES: Record<ApiWaveType, string> = {
-    [ApiWaveType.Chat]: "How Drops are Rated",
-    [ApiWaveType.Rank]: "How Drops are Voted",
-    [ApiWaveType.Approve]: "How Drops are Voted",
-  };
+  const locale = useBrowserLocale();
   const [approvalHoldModeOverride, setApprovalHoldModeOverride] =
     useState<CreateWaveApprovalHoldMode | null>(null);
 
@@ -221,6 +231,14 @@ export default function CreateWaveVoting({
   const approvalThresholdTimeErrorMessage =
     getApprovalThresholdTimeErrorMessage(errors);
   const showVotingSettings = waveType !== ApiWaveType.Chat;
+  const hasAdvancedError = errors.some((error) =>
+    ADVANCED_VOTING_ERRORS.has(error)
+  );
+  const isAdvancedCustomized =
+    maxVotesPerIdentityPerDrop !== null ||
+    !allowNegativeVotes ||
+    timeWeighted.enabled ||
+    approvalThresholdTimeMs !== null;
   const inferredApprovalHoldMode = getCreateWaveApprovalHoldMode({
     thresholdTimeMs: approvalThresholdTimeMs,
   });
@@ -250,9 +268,13 @@ export default function CreateWaveVoting({
 
   return (
     <div>
-      <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
-        {TITLES[waveType]}
-      </h2>
+      <CreateWaveStepHeader
+        title={t(locale, "waves.create.voting.title")}
+        description={t(locale, "waves.create.voting.description")}
+      />
+      <h3 className={`tw-mt-6 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}>
+        {t(locale, "waves.create.voting.powerTitle")}
+      </h3>
       <div className={VOTING_OPTIONS_GRID_CLASSES}>
         {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
           .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
@@ -266,7 +288,7 @@ export default function CreateWaveVoting({
               onChange={onTypeChange}
             >
               <span
-                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-medium ${
+                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
                   selectedType === votingType
                     ? "tw-text-white"
                     : "tw-text-iron-300 group-hover:tw-text-white"
@@ -304,69 +326,85 @@ export default function CreateWaveVoting({
         onCreditScopeChange={onCreditScopeChange}
       />
 
-      {showVotingSettings && (
+      {waveType === ApiWaveType.Approve && (
         <div
           data-testid="create-wave-voting-settings-grid"
           className={VOTING_SETTINGS_GRID_CLASSES}
         >
-          <MaxVotesPerIdentityInput
-            value={maxVotesPerIdentityPerDrop}
-            errors={errors}
-            onChange={setMaxVotesPerIdentityPerDrop}
+          <CreateWaveVotingThreshold
+            threshold={approvalThreshold}
+            error={approvalThresholdError}
+            setThreshold={setApprovalThreshold}
           />
-
-          {waveType === ApiWaveType.Approve && (
-            <CreateWaveVotingThreshold
-              threshold={approvalThreshold}
-              error={approvalThresholdError}
-              setThreshold={setApprovalThreshold}
-            />
-          )}
         </div>
       )}
 
-      {waveType === ApiWaveType.Approve && (
-        <>
-          <TimeWeightedVoting
-            config={timeWeighted}
-            errorMessage={timeWeightedErrorMessage}
-            onChange={onTimeWeightedChange}
-          />
-
-          <CreateWaveApprovalHold
-            selectedMode={approvalHoldMode}
-            onModeChange={onApprovalHoldModeChange}
-          />
-
-          {approvalHoldMode === CreateWaveApprovalHoldMode.HOLD && (
-            <div className="tw-mt-3" data-testid="approval-hold-detail">
-              <CreateWaveVotingThresholdTime
-                thresholdTimeMs={approvalThresholdTimeMs}
-                errorMessage={approvalThresholdTimeErrorMessage}
-                usesTimeWeightedScore={timeWeighted.enabled}
-                setThresholdTimeMs={onApprovalThresholdTimeChange}
+      {showVotingSettings && (
+        <div className="tw-mt-6">
+          <CreateWaveAdvancedSection
+            title={t(
+              locale,
+              waveType === ApiWaveType.Approve
+                ? "waves.create.voting.approveAdvancedSummary"
+                : "waves.create.voting.rankAdvancedSummary"
+            )}
+            isCustomized={isAdvancedCustomized}
+            hasError={hasAdvancedError}
+          >
+            <div className="tw-space-y-3">
+              <MaxVotesPerIdentityInput
+                value={maxVotesPerIdentityPerDrop}
+                errors={errors}
+                onChange={setMaxVotesPerIdentityPerDrop}
               />
+
+              {waveType === ApiWaveType.Approve ? (
+                <>
+                  <TimeWeightedVoting
+                    config={timeWeighted}
+                    errorMessage={timeWeightedErrorMessage}
+                    onChange={onTimeWeightedChange}
+                  />
+
+                  <CreateWaveApprovalHold
+                    selectedMode={approvalHoldMode}
+                    onModeChange={onApprovalHoldModeChange}
+                  />
+
+                  {approvalHoldMode === CreateWaveApprovalHoldMode.HOLD && (
+                    <div data-testid="approval-hold-detail">
+                      <CreateWaveVotingThresholdTime
+                        thresholdTimeMs={approvalThresholdTimeMs}
+                        errorMessage={approvalThresholdTimeErrorMessage}
+                        usesTimeWeightedScore={timeWeighted.enabled}
+                        setThresholdTimeMs={onApprovalThresholdTimeChange}
+                      />
+                    </div>
+                  )}
+
+                  <NegativeVotingToggle
+                    allowNegativeVotes={allowNegativeVotes}
+                    onChange={onAllowNegativeVotesChange}
+                    isDisabled={false}
+                  />
+                </>
+              ) : (
+                <>
+                  <NegativeVotingToggle
+                    allowNegativeVotes={allowNegativeVotes}
+                    onChange={onAllowNegativeVotesChange}
+                    isDisabled={false}
+                  />
+                  <TimeWeightedVoting
+                    config={timeWeighted}
+                    errorMessage={timeWeightedErrorMessage}
+                    onChange={onTimeWeightedChange}
+                  />
+                </>
+              )}
             </div>
-          )}
-        </>
-      )}
-
-      {/* Negative Voting Toggle - show for Rank and Approve waves */}
-      {waveType !== ApiWaveType.Chat && (
-        <NegativeVotingToggle
-          allowNegativeVotes={allowNegativeVotes}
-          onChange={onAllowNegativeVotesChange}
-          isDisabled={false}
-        />
-      )}
-
-      {/* Show Time-Weighted Voting for Rank waves */}
-      {waveType === ApiWaveType.Rank && (
-        <TimeWeightedVoting
-          config={timeWeighted}
-          errorMessage={timeWeightedErrorMessage}
-          onChange={onTimeWeightedChange}
-        />
+          </CreateWaveAdvancedSection>
+        </div>
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 export function getVotingSettingInputClasses({
   hasError,
@@ -14,7 +15,7 @@ export function getVotingSettingInputClasses({
     ? "tw-text-primary-400 focus:tw-text-white"
     : "tw-text-white";
 
-  return `${stateClasses} ${valueClasses} tw-form-input tw-block tw-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-base tw-font-semibold tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-black/20 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`;
+  return `${stateClasses} ${valueClasses} tw-form-input tw-block tw-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-black/20 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`;
 }
 
 export default function VotingSettingBox({
@@ -47,7 +48,7 @@ export default function VotingSettingBox({
     >
       <label
         htmlFor={inputId}
-        className={`tw-mb-2 tw-block tw-text-sm tw-font-semibold ${
+        className={`tw-mb-2 tw-block ${CREATE_WAVE_FORM_STYLES.fieldLabel} ${
           hasError ? "tw-text-error" : "tw-text-iron-100"
         }`}
       >
@@ -81,7 +82,7 @@ export default function VotingSettingBox({
       )}
       <p
         id={helpId}
-        className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+        className={`tw-mt-3 ${CREATE_WAVE_FORM_STYLES.supportingText}`}
       >
         {helpText}
       </p>

@@ -63,6 +63,12 @@ describe("CreateWaveDates", () => {
 
     expect(screen.getByTestId("approve-dates")).toBeInTheDocument();
     expect(screen.queryByTestId("rank-dates")).toBeNull();
+    expect(
+      screen.getByText(
+        "Review when this wave starts and, optionally, when it ends."
+      )
+    ).toBeVisible();
+    expect(screen.queryByText(/winners are announced/i)).toBeNull();
   });
 
   it("renders rank dates flow for rank waves", () => {
@@ -77,6 +83,24 @@ describe("CreateWaveDates", () => {
 
     expect(screen.getByTestId("rank-dates")).toBeInTheDocument();
     expect(screen.queryByTestId("approve-dates")).toBeNull();
+  });
+
+  it("describes perpetual ranking without promising winner announcements", () => {
+    render(
+      <CreateWaveDates
+        waveType={ApiWaveType.Rank}
+        dates={{ ...baseDates, ongoingRanking: true }}
+        errors={[]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "Review when submissions open and voting begins for this ongoing ranking."
+      )
+    ).toBeVisible();
+    expect(screen.queryByText(/winners are announced/i)).toBeNull();
   });
 
   it("passes validation errors to the rank dates flow", () => {

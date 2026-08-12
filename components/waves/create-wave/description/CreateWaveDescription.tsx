@@ -11,6 +11,9 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateDropType } from "@/components/drops/create/types";
 import { CreateDropScreenType } from "@/components/drops/create/utils/CreateDropWrapper";
 import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 export interface CreateWaveDescriptionHandles {
   requestDrop: () => CreateDropConfig | null;
   getDropSnapshot: () => CreateDropConfig | null;
@@ -46,6 +49,7 @@ const CreateWaveDescription = forwardRef<
     },
     ref
   ) => {
+    const locale = useBrowserLocale();
     const dropEditorRef = useRef<DropEditorHandles | null>(null);
     const profileMin = profileAndConsolidationsToProfileMin({ profile });
 
@@ -65,27 +69,20 @@ const CreateWaveDescription = forwardRef<
       // Complete button.
       return (
         <div>
-          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-            Description
-          </p>
-          <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-text-iron-300">
-            A profile handle is required to create a wave. Set up your profile,
-            then come back to finish this step.
-          </p>
+          <CreateWaveStepHeader
+            title={t(locale, "waves.create.description.title")}
+            description={t(locale, "waves.create.description.missingProfile")}
+          />
         </div>
       );
     }
 
     return (
       <div>
-        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-          Description
-        </p>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-text-iron-300">
-          Give a good description of your wave so participants know what you
-          expect in this wave. More information, including any content
-          moderation parameters, is better than less.
-        </p>
+        <CreateWaveStepHeader
+          title={t(locale, "waves.create.description.title")}
+          description={t(locale, "waves.create.description.description")}
+        />
         <div className="tw-mt-6">
           <CreateDropEmojiPickerLayerProvider
             desktopZIndex={10000}

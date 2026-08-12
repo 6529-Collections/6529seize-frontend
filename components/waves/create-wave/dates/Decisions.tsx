@@ -8,6 +8,11 @@ import SubsequentDecisions from "./SubsequentDecisions";
 import { calculateDecisionTimes } from "../services/waveDecisionService";
 import CommonSwitch from "@/components/utils/switch/CommonSwitch";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import type { ReactNode } from "react";
 
 interface DecisionsProps {
   readonly dates: CreateWaveDatesConfig;
@@ -16,6 +21,8 @@ interface DecisionsProps {
   readonly onRollingEnabled: () => void;
   readonly isExpanded: boolean;
   readonly setIsExpanded: (expanded: boolean) => void;
+  readonly advancedContent?: ReactNode;
+  readonly hasAdvancedError?: boolean;
 }
 
 interface DecisionsCollapsedContentProps {
@@ -58,7 +65,10 @@ export default function Decisions({
   onRollingEnabled,
   isExpanded,
   setIsExpanded,
+  advancedContent,
+  hasAdvancedError = false,
 }: DecisionsProps) {
+  const locale = useBrowserLocale();
   const isRollingMode = dates.isRolling;
   const hasRankFutureDateError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
@@ -126,111 +136,115 @@ export default function Decisions({
   };
 
   return (
-    <CollapsibleCard
-      title="Winners Announcements"
-      isExpanded={shouldShowExpandedContent}
-      onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
-      collapsedContent={
-        <DecisionsCollapsedContent
-          totalDecisionPoints={totalDecisionPoints}
-          isRollingMode={isRollingMode}
-        />
-      }
-    >
-      <div className="tw-px-5 tw-pb-1 tw-pt-2">
-        {hasRankFutureDateError && (
-          <div
-            role="alert"
-            className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
-          >
-            <FontAwesomeIcon
-              icon={faTriangleExclamation}
-              className="tw-size-4 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
-            <span>
-              First winners announcement and wave end must be in the future.
-            </span>
-          </div>
-        )}
-        {hasEndDateBeforeVotingStartError && (
-          <div
-            role="alert"
-            className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
-          >
-            <FontAwesomeIcon
-              icon={faTriangleExclamation}
-              className="tw-size-4 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
-            <span>
-              Last winners announcement cannot be before voting begins. Move
-              voting start earlier or move winner announcements later.
-            </span>
-          </div>
-        )}
-        {hasFirstDecisionBeforeVotingStartError && (
-          <div
-            role="alert"
-            className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
-          >
-            <FontAwesomeIcon
-              icon={faTriangleExclamation}
-              className="tw-size-4 tw-flex-shrink-0"
-              aria-hidden="true"
-            />
-            <span>
-              First winners announcement cannot be before voting begins. Move
-              voting start earlier or move first winners announcement later.
-            </span>
-          </div>
-        )}
-        <div className="tw-mb-3 tw-border-b tw-border-iron-700/50 tw-pb-3">
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-            <strong>Winner announcements</strong> for showcasing selected
-            creators. Set your first date, then add more if needed.
-            {dates.subsequentDecisions.length === 0 && (
-              <span className="tw-text-primary-300">
-                {" "}
-                With a fixed schedule, the last announcement marks your
-                wave&apos;s end date.
+    <div className="tw-space-y-4">
+      <CollapsibleCard
+        title={<span className="tw-text-iron-100">Winners Announcements</span>}
+        isExpanded={shouldShowExpandedContent}
+        onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
+        collapsedContent={
+          <DecisionsCollapsedContent
+            totalDecisionPoints={totalDecisionPoints}
+            isRollingMode={isRollingMode}
+          />
+        }
+      >
+        <div className="tw-px-5 tw-pb-1 tw-pt-2">
+          {hasRankFutureDateError && (
+            <div
+              role="alert"
+              className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+            >
+              <FontAwesomeIcon
+                icon={faTriangleExclamation}
+                className="tw-size-4 tw-flex-shrink-0"
+                aria-hidden="true"
+              />
+              <span>
+                First winners announcement and wave end must be in the future.
               </span>
-            )}
-          </p>
-          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-italic tw-text-iron-400">
-            Examples: Weekly, monthly, or quarterly announcements.
-          </p>
+            </div>
+          )}
+          {hasEndDateBeforeVotingStartError && (
+            <div
+              role="alert"
+              className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+            >
+              <FontAwesomeIcon
+                icon={faTriangleExclamation}
+                className="tw-size-4 tw-flex-shrink-0"
+                aria-hidden="true"
+              />
+              <span>
+                Last winners announcement cannot be before voting begins. Move
+                voting start earlier or move winner announcements later.
+              </span>
+            </div>
+          )}
+          {hasFirstDecisionBeforeVotingStartError && (
+            <div
+              role="alert"
+              className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+            >
+              <FontAwesomeIcon
+                icon={faTriangleExclamation}
+                className="tw-size-4 tw-flex-shrink-0"
+                aria-hidden="true"
+              />
+              <span>
+                First winners announcement cannot be before voting begins. Move
+                voting start earlier or move first winners announcement later.
+              </span>
+            </div>
+          )}
+          <div className="tw-mb-3 tw-border-b tw-border-iron-700/50 tw-pb-3">
+            <p className={CREATE_WAVE_FORM_STYLES.supportingText}>
+              <strong>Winner announcements</strong> for showcasing selected
+              creators. Set your first date, then add more if needed.
+              {dates.subsequentDecisions.length === 0 && (
+                <span className="tw-text-primary-300">
+                  {" "}
+                  With a fixed schedule, the last announcement marks your
+                  wave&apos;s end date.
+                </span>
+              )}
+            </p>
+            <p
+              className={`tw-mt-1 tw-italic ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+            >
+              Examples: Weekly, monthly, or quarterly announcements.
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-6 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-px-5 tw-pb-5 md:tw-grid-cols-2">
-        {/* First Decision Date and Time */}
-        <DecisionsFirst
-          firstDecisionTime={dates.firstDecisionTime}
-          setFirstDecisionTime={(time) =>
-            setDates({ ...dates, firstDecisionTime: time })
-          }
-          minTimestamp={dates.votingStartDate} // First decision can't be before voting starts
-        />
+        <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-6 tw-px-5 tw-pb-5 md:tw-grid-cols-2">
+          <DecisionsFirst
+            firstDecisionTime={dates.firstDecisionTime}
+            setFirstDecisionTime={(time) =>
+              setDates({ ...dates, firstDecisionTime: time })
+            }
+            minTimestamp={dates.votingStartDate}
+          />
+        </div>
+      </CollapsibleCard>
 
-        {/* Subsequent Decisions */}
-        <div className="tw-col-span-2">
+      <CreateWaveAdvancedSection
+        title={t(locale, "waves.create.dates.rank.advancedSummary")}
+        isCustomized={dates.subsequentDecisions.length > 0}
+        hasError={hasAdvancedError}
+      >
+        <div className="tw-space-y-6">
           <SubsequentDecisions
             firstDecisionTime={dates.firstDecisionTime}
             subsequentDecisions={dates.subsequentDecisions}
             setSubsequentDecisions={handleUpdateSubsequentDecisions}
           />
-        </div>
-
-        {/* Recurring Mode Toggle - Only show when at least one subsequent decision exists */}
-        {dates.subsequentDecisions.length > 0 && (
-          <div className="tw-col-span-2">
-            <div className="tw-mb-2 tw-mt-5 tw-rounded-lg tw-border tw-border-iron-700/50 tw-shadow-md">
+          {dates.subsequentDecisions.length > 0 && (
+            <div className="tw-rounded-lg tw-border tw-border-iron-700/50 tw-shadow-md">
               <div className="tw-flex tw-items-center tw-justify-between">
                 <div className="tw-flex-1">
-                  <h3 className="tw-mb-1 tw-text-base tw-font-semibold tw-text-iron-50">
+                  <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
                     Repeating Announcement Cycles
                   </h3>
-                  <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+                  <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
                     Repeat this pattern until an optional end date
                   </p>
                 </div>
@@ -253,9 +267,11 @@ export default function Decisions({
                 </div>
               )}
             </div>
-          </div>
-        )}
-      </div>
-    </CollapsibleCard>
+          )}
+
+          {advancedContent}
+        </div>
+      </CreateWaveAdvancedSection>
+    </div>
   );
 }

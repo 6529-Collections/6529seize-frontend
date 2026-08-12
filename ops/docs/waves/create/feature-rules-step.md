@@ -7,8 +7,8 @@ optionally add creator-specific rules.
 
 The step separates rules into two layers:
 
-- automatic rules generated from the current wave configuration
-- optional custom creator rules
+- visible automatic rules generated from the current wave configuration
+- optional custom creator rules in an expandable creator-rules section
 
 Creators should not retype rules that are already shown in the automatic rules
 preview.
@@ -70,10 +70,14 @@ submission step.
 1. Complete `Groups` for `Chat`, or `Drops` for `Rank` and `Approve`.
 2. Open `Rules`.
 3. Review the automatic rules preview.
-4. Optionally enter display-only creator rules.
-5. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
+4. Open `Optional creator rules` for Chat, or `Optional creator rules and
+   acceptance` for Rank and Approve, only when creator-written rules are needed.
+5. Optionally enter display-only creator rules.
+6. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
    rules participants must accept before submitting.
-6. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
+7. Collapse the section if desired; entered rules remain in the draft
+   and the disclosure shows `Customized`.
+8. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
    `Rank` and `Approve`.
 
 ## Participant Visibility
@@ -99,6 +103,8 @@ use the existing submit acceptance flow.
   chat-status enable/disable row because chat waves require chat to stay
   enabled.
 - `Chat` custom rules are display-only.
+- Chat's optional-section label mentions only creator rules because Chat does not
+  support acceptance-required rules.
 - Leaving custom-rule fields blank is valid.
 - Display-only creator rules are capped at `2,000` characters.
 - For `Rank` and `Approve`, turning off `Require acceptance` clears the

@@ -62,6 +62,9 @@ describe("CreateWaveDrops", () => {
         setDrops={setDrops}
       />
     );
+    await user.click(
+      screen.getByRole("button", { name: "Submission requirements" })
+    );
     await user.type(
       screen.getByLabelText(/Max simultaneous submissions/i),
       "3"

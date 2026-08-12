@@ -1,3 +1,5 @@
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+
 interface NegativeVotingToggleProps {
   readonly allowNegativeVotes: boolean;
   readonly onChange: (allowNegativeVotes: boolean) => void;
@@ -20,7 +22,7 @@ export default function NegativeVotingToggle({
       <div className="tw-flex tw-items-center tw-gap-3">
         <h3
           id="negative-votes-label"
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+          className={CREATE_WAVE_FORM_STYLES.sectionTitle}
         >
           Allow Negative Votes
         </h3>
@@ -64,7 +66,7 @@ export default function NegativeVotingToggle({
       </div>
       <p
         id="negative-votes-description"
-        className={`tw-m-0 tw-mt-1 tw-text-pretty tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 ${
+        className={`tw-mt-1 tw-text-pretty ${CREATE_WAVE_FORM_STYLES.supportingText} ${
           isDisabled ? "tw-opacity-70" : ""
         }`}
       >

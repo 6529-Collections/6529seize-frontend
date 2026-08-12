@@ -14,6 +14,7 @@ import {
   clampApproveWaveEndDate,
   getEarliestApproveWaveEndTimestamp,
 } from "./approveWaveDates.helpers";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface CreateWaveDatesApproveEndProps {
   readonly dates: CreateWaveDatesConfig;
@@ -116,22 +117,17 @@ export default function CreateWaveDatesApproveEnd({
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-5 tw-text-iron-300">
-              Wave End
-            </h3>
+            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>Wave End</h3>
             <TooltipIconButton
               icon={faInfoCircle}
               tooltipText={END_DATE_TOOLTIP_TEXT}
               tooltipPosition="bottom"
               tooltipWidth="tw-w-80"
-              aria-label={t(
-                locale,
-                "waves.create.dates.approve.endInfoLabel"
-              )}
+              aria-label={t(locale, "waves.create.dates.approve.endInfoLabel")}
               className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-leading-none"
             />
           </div>
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
             Optional. Leave blank for no end date.
           </p>
         </div>
@@ -189,7 +185,7 @@ export default function CreateWaveDatesApproveEnd({
         )}
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
           <div className="tw-w-full">
-            <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+            <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
               Select End Date:
             </p>
             <CommonCalendar
@@ -203,7 +199,7 @@ export default function CreateWaveDatesApproveEnd({
           </div>
 
           <div className="tw-w-full">
-            <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+            <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
               Select End Time:
             </p>
             <TimePicker
@@ -214,7 +210,9 @@ export default function CreateWaveDatesApproveEnd({
               disabled={!hasSelectedEndDate}
             />
             {!hasSelectedEndDate && (
-              <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
+              <p
+                className={`tw-mt-2 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+              >
                 Pick an end date first. The earliest allowed end time is{" "}
                 {formatDateTime(earliestValidEndTimestamp)}.
               </p>

@@ -70,7 +70,7 @@ function SubmissionOptionRow<T extends string>({
     : "tw-text-iron-300 group-hover:tw-text-white";
   const descriptionClasses = isSelected
     ? "tw-text-iron-300"
-    : "tw-text-iron-500";
+    : "tw-text-iron-400";
   const hasDescription = description !== undefined;
 
   return (
@@ -112,7 +112,7 @@ function SubmissionOptionRow<T extends string>({
         {description && (
           <span
             id={descriptionId}
-            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-medium tw-leading-4`}
+            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-normal tw-leading-4`}
           >
             {description}
           </span>
@@ -221,7 +221,7 @@ export default function CreateWaveDropsSubmissionMode({
         <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           Submission type
         </h3>
-        <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
+        <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
           Choose whether participants submit drops or nominate identities.
         </p>
       </div>

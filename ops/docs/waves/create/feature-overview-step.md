@@ -35,7 +35,6 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - `Ranking mode` for `Rank` waves:
   - `Announce Winners`
   - `Perpetual Ranking`
-- `Show outcomes` for `Rank` and `Approve` waves.
 - `Display settings` inside `Advanced settings` for `Rank` and `Approve` waves:
   - submission-button label
   - proposal-card appearance
@@ -77,8 +76,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
 - Changing wave type resets all non-overview settings to that type's defaults
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
-- `Show outcomes` defaults to on. Turning it off hides outcome displays after
-  the wave is created.
+- Outcome visibility is configured on the `Outcomes` step for scheduled `Rank`
+  and `Approve` waves.
 - `Proposal card appearance` is inside `Advanced settings` and defaults to
   `Summary card` for newly created Waves. The default stores a versioned
   Wave-level display recipe when the Wave is created. Existing Waves and older

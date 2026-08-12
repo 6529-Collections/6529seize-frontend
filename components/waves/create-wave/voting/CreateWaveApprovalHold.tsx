@@ -73,7 +73,7 @@ export default function CreateWaveApprovalHold({
                   {option.label}
                 </span>
                 <span
-                  className={`tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 ${
+                  className={`tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-4 ${
                     selected ? "tw-text-iron-300" : "tw-text-iron-400"
                   }`}
                 >

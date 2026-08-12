@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { CREATE_WAVE_FORM_STYLES } from "../../utils/createWaveFormStyles";
 
 interface TimeWeightedToggleProps {
   /** Whether time-weighted voting is enabled */
@@ -17,7 +18,7 @@ const TimeWeightedToggle = memo(
       <div className="tw-flex tw-items-center tw-gap-3">
         <h3
           id="time-weighted-title"
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+          className={CREATE_WAVE_FORM_STYLES.sectionTitle}
         >
           Time-Weighted Voting
         </h3>
@@ -58,7 +59,7 @@ const TimeWeightedToggle = memo(
 
       <p
         id="time-weighted-description"
-        className="tw-m-0 tw-mt-1 tw-text-pretty tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+        className={`tw-mt-1 tw-text-pretty ${CREATE_WAVE_FORM_STYLES.supportingText}`}
       >
         Protects against last-minute vote manipulation by using a time-averaged
         vote count instead of the final tally. When enabled, votes are weighted

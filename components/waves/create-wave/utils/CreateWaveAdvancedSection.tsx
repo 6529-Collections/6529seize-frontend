@@ -6,11 +6,13 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function CreateWaveAdvancedSection({
+  title,
   summary,
   isCustomized,
   hasError,
   children,
 }: {
+  readonly title?: string;
   readonly summary?: string;
   readonly isCustomized: boolean;
   readonly hasError: boolean;
@@ -32,6 +34,7 @@ export default function CreateWaveAdvancedSection({
   }
 
   const isExpanded = isOpen || hasError;
+  const sectionTitle = title ?? t(locale, "waves.create.advanced.title");
   const detail = hasError
     ? t(locale, "waves.create.advanced.errorSummary")
     : summary;
@@ -54,8 +57,8 @@ export default function CreateWaveAdvancedSection({
       >
         <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0">
           <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-4">
-            <span className="tw-text-sm tw-font-semibold tw-leading-4 tw-text-iron-200">
-              {t(locale, "waves.create.advanced.title")}
+            <span className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+              {sectionTitle}
             </span>
             {status ? (
               <span

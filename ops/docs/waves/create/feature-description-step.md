@@ -15,8 +15,10 @@ You write the first wave drop here, then click `Complete`.
 ## Step Paths
 
 - `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+- Scheduled `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
+- `Perpetual Ranking`: `Overview` -> `Groups` -> `Dates` -> `Drops` ->
+  `Rules` -> `Voting` -> `Description`
 - `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
 
@@ -68,6 +70,8 @@ You write the first wave drop here, then click `Complete`.
 ## Limitations / Notes
 
 - No separate review step exists after `Description`.
+- `Description` is always a core editor and has no optional-settings
+  disclosure.
 - `Description` has no standalone step-validation rules in create-step
   validation.
 - `Complete` submits prior step config and the description drop in one

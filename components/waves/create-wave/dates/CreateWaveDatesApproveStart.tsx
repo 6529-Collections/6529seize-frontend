@@ -9,6 +9,7 @@ import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { Time } from "@/helpers/time";
 import { getEarliestApproveWaveEndTimestamp } from "./approveWaveDates.helpers";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface CreateWaveDatesApproveStartProps {
   readonly dates: CreateWaveDatesConfig;
@@ -58,9 +59,7 @@ export default function CreateWaveDatesApproveStart({
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-5 tw-text-iron-300">
-              Wave Start
-            </h3>
+            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>Wave Start</h3>
             <TooltipIconButton
               icon={faInfoCircle}
               tooltipText="Choose when the approve wave opens. Approvals and submissions start at the same moment."
@@ -70,7 +69,7 @@ export default function CreateWaveDatesApproveStart({
               className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-leading-none"
             />
           </div>
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
             This is when the approve wave opens for submissions and approvals.
           </p>
         </div>

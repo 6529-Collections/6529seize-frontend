@@ -42,7 +42,7 @@ export default function CreateWaveModal({
       zIndexClassName="tw-z-[9999]"
       showHeaderCloseButton
       headerClassName="tw-flex-shrink-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-2 md:!tw-px-8 lg:tw-py-4"
-      titleClassName="tw-mb-0 tw-text-[17px] tw-font-bold tw-tracking-wide tw-text-white"
+      titleClassName="tw-m-0 !tw-text-base !tw-font-semibold tw-leading-6 tw-tracking-wide tw-text-white"
       surfaceClassName="tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:!tw-rounded-3xl"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">

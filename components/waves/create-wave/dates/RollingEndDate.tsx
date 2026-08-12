@@ -17,6 +17,7 @@ import {
 } from "../services/waveDecisionService";
 import { calculateLastDecisionTime } from "@/helpers/waves/create-wave.helpers";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface RollingEndDateProps {
   readonly dates: CreateWaveDatesConfig;
@@ -125,7 +126,7 @@ export default function RollingEndDate({
   return (
     <div className="tw-relative">
       <CollapsibleCard
-        title="Optional Wave End Date"
+        title={<span className="tw-text-iron-100">Optional Wave End Date</span>}
         isExpanded={shouldShowExpandedContent}
         onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
         collapsedContent={collapsedContent}
@@ -135,10 +136,12 @@ export default function RollingEndDate({
           <div className="tw-col-span-2">
             <div className="tw-mb-3 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
               <div>
-                <p className="tw-mb-1 tw-text-base tw-font-medium tw-text-iron-50">
+                <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
                   Set Optional End Date
-                </p>
-                <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+                </h3>
+                <p
+                  className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+                >
                   Leave blank for no end date.
                 </p>
               </div>
@@ -195,7 +198,7 @@ export default function RollingEndDate({
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
               {/* Date selection */}
               <div className="tw-w-full">
-                <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+                <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
                   Select Official End Date:
                 </p>
                 <CommonCalendar
@@ -210,7 +213,7 @@ export default function RollingEndDate({
 
               {/* Time selection */}
               <div className="tw-w-full">
-                <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+                <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
                   Select Time:
                 </p>
                 <TimePicker
@@ -220,7 +223,9 @@ export default function RollingEndDate({
                   disabled={!hasSelectedEndDate}
                 />
                 {!hasSelectedEndDate && (
-                  <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
+                  <p
+                    className={`tw-mt-2 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+                  >
                     Pick an end date first. Recurring announcements currently
                     have no end date.
                   </p>

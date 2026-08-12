@@ -1,5 +1,6 @@
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
 import CreateWaveAdvancedSection from "@/components/waves/create-wave/utils/CreateWaveAdvancedSection";
+import { CREATE_WAVE_FORM_STYLES } from "@/components/waves/create-wave/utils/createWaveFormStyles";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import {
   DEFAULT_PROPOSAL_CARD_RECIPE,
@@ -236,9 +237,9 @@ export default function CreateWaveDisplaySettings({
       hasError={hasDisplaySettingsError}
     >
       <div className="tw-space-y-4">
-        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+        <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
           {t(locale, "waves.create.overview.displaySettings")}
-        </p>
+        </h3>
         <div className="tw-space-y-2">
           <div className="tw-group tw-relative tw-w-full">
             <input
@@ -297,7 +298,7 @@ export default function CreateWaveDisplaySettings({
           </CommonAnimationHeight>
         </div>
         <fieldset className="tw-m-0 tw-border-0 tw-p-0">
-          <legend className="tw-text-sm tw-font-semibold tw-text-iron-200">
+          <legend className={CREATE_WAVE_FORM_STYLES.fieldLabel}>
             {t(locale, "waves.proposalCard.appearanceLabel")}
           </legend>
           <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
@@ -362,7 +363,7 @@ export default function CreateWaveDisplaySettings({
                       </span>
                       <p
                         className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-normal tw-leading-4 ${
-                          isSelected ? "tw-text-iron-300" : "tw-text-iron-500"
+                          isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
                         }`}
                       >
                         {description}
@@ -410,7 +411,7 @@ export default function CreateWaveDisplaySettings({
                             hasValue: false,
                           })} !tw-h-9 !tw-w-20 !tw-bg-iron-950 !tw-px-3 !tw-py-1 focus:!tw-bg-iron-950`}
                         />
-                        <span className="tw-text-xs tw-leading-5 tw-text-iron-500">
+                        <span className="tw-text-xs tw-leading-4 tw-text-iron-400">
                           {t(locale, "waves.proposalCard.characters")}
                         </span>
                       </div>
@@ -421,14 +422,10 @@ export default function CreateWaveDisplaySettings({
                           id={proposalCardExcerptErrorId}
                           className="tw-mb-0 tw-mt-1 tw-text-xs tw-font-medium tw-leading-5 tw-text-error"
                         >
-                          {t(
-                            locale,
-                            "waves.proposalCard.excerptRangeError",
-                            {
-                              min: PROPOSAL_CARD_EXCERPT_MIN_LENGTH,
-                              max: PROPOSAL_CARD_EXCERPT_MAX_LENGTH,
-                            }
-                          )}
+                          {t(locale, "waves.proposalCard.excerptRangeError", {
+                            min: PROPOSAL_CARD_EXCERPT_MIN_LENGTH,
+                            max: PROPOSAL_CARD_EXCERPT_MAX_LENGTH,
+                          })}
                         </p>
                       ) : null}
                     </CommonAnimationHeight>
@@ -460,11 +457,13 @@ export default function CreateWaveDisplaySettings({
           >
             <h4
               id="create-wave-tab-labels-heading"
-              className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200"
+              className={CREATE_WAVE_FORM_STYLES.fieldLabel}
             >
               {t(locale, "waves.proposalCard.tabLabelsLabel")}
             </h4>
-            <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-500">
+            <p
+              className={`tw-mt-1 tw-text-pretty ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+            >
               {t(locale, "waves.proposalCard.tabLabelsDescription")}
             </p>
             <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">

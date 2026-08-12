@@ -12,6 +12,8 @@ import type {
 } from "@/types/waves.types";
 import CreateWaveWarning from "../utils/CreateWaveWarning";
 import CreateWaveGroup from "./CreateWaveGroup";
+import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 export default function CreateWaveGroups({
   waveName,
@@ -46,14 +48,14 @@ export default function CreateWaveGroups({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
-      <div className="tw-flex tw-flex-col tw-gap-y-2">
-        <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
-          {t(locale, "waves.create.groups.title")}
-        </h2>
-        <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
-          {t(locale, "waves.create.groups.description")}
-        </p>
-        <p className="tw-m-0 tw-text-pretty tw-text-xs tw-leading-relaxed tw-text-iron-500">
+      <div className="tw-space-y-2">
+        <CreateWaveStepHeader
+          title={t(locale, "waves.create.groups.title")}
+          description={t(locale, "waves.create.groups.description")}
+        />
+        <p
+          className={`${CREATE_WAVE_FORM_STYLES.compactSupportingText} tw-text-pretty`}
+        >
           {t(locale, "waves.create.groups.accessHelper", {
             viewGroupName: t(locale, "waves.create.groups.viewGroupName"),
           })}

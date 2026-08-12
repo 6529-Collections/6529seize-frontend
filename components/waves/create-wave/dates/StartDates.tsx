@@ -8,6 +8,7 @@ import { CREATE_WAVE_START_DATE_LABELS } from "@/helpers/waves/waves.constants";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 import CollapsibleCard from "@/components/common/CollapsibleCard";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface StartDatesProps {
   readonly waveType: ApiWaveType;
@@ -61,7 +62,7 @@ export default function StartDates({
 
   return (
     <CollapsibleCard
-      title="Wave Timeline"
+      title={<span className="tw-text-iron-100">Wave Timeline</span>}
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={
@@ -102,10 +103,12 @@ export default function StartDates({
       {/* Calendar Selection */}
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 tw-px-5 tw-pb-5 tw-pt-2 md:tw-grid-cols-2">
         <div className="tw-col-span-1">
-          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+          <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
             {CREATE_WAVE_START_DATE_LABELS[waveType]}
-          </p>
-          <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
+          </h3>
+          <p
+            className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+          >
             Creators begin submitting work to your wave
           </p>
           <div className="tw-mt-4">
@@ -122,10 +125,12 @@ export default function StartDates({
 
         {isRankWave && (
           <div className="tw-col-span-1">
-            <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
               Drops Voting Begins
-            </p>
-            <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
+            </h3>
+            <p
+              className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+            >
               Community voting on wave submissions begins
             </p>
             <div className="tw-mt-4">

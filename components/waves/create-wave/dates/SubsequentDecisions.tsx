@@ -13,6 +13,7 @@ import {
   formatDate,
 } from "../services/waveDecisionService";
 import Button from "@/components/utils/button/Button";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface SubsequentDecisionsProps {
   readonly firstDecisionTime: number;
@@ -85,7 +86,7 @@ export default function SubsequentDecisions({
   return (
     <div className="tw-mt-5 tw-bg-iron-900">
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h3 className="tw-mb-2 tw-text-lg tw-font-semibold tw-text-iron-50">
+        <h3 className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}>
           Additional Announcements
         </h3>
       </div>
@@ -126,7 +127,10 @@ export default function SubsequentDecisions({
 
         {/* Subsequent Decisions */}
         {subsequentDecisions.map((interval, index) => (
-          <div key={index} className="tw-relative tw-mb-6">
+          <div
+            key={`decision-${decisionDates[index + 1]!}`}
+            className="tw-relative tw-mb-6"
+          >
             {/* Timeline dot */}
             <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/80 tw-text-xs tw-font-semibold tw-text-black tw-ring-4 tw-ring-iron-800">
               {index + 2}

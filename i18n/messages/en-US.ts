@@ -1043,13 +1043,19 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
   title: "Schedule",
   description:
     "Review when this wave opens, voting begins, and winners are announced.",
+  approveDescription:
+    "Review when this wave starts and, optionally, when it ends.",
+  perpetualDescription:
+    "Review when submissions open and voting begins for this ongoing ranking.",
   "approve.noEndSummary": "Starts {start}. No end date.",
   "approve.endSummary": "Starts {start}. Ends {end}.",
+  "approve.advancedSummary": "Optional wave end",
   "approve.endInfoLabel": "About wave end",
   "rank.ongoingSummary":
     "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
   "rank.scheduledSummary":
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
+  "rank.advancedSummary": "Additional announcements and recurring schedule",
 } as const);
 
 const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
@@ -1078,6 +1084,8 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
 } as const);
 
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  title: "Overview",
+  name: "Wave name",
   picture: "Wave Profile Picture",
   displaySettings: "Display settings",
 } as const);
@@ -1098,6 +1106,7 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
 const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
   title: "Drops",
   description: "Choose what participants can submit to this wave.",
+  requirementsTitle: "Submission requirements",
   "advanced.defaultSummary": "No additional submission requirements.",
   "advanced.customSummary": "Submission requirements customized.",
   "maxSimultaneousSubmissions.label": "Max simultaneous submissions",
@@ -1109,6 +1118,10 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
 
 const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   title: "Outcomes",
+  description: "Choose what winners receive when their submissions succeed.",
+  rankAdvancedSummary: "Outcome visibility",
+  approveAdvancedSummary: "Winner limits and outcome visibility",
+  chooseType: "Choose outcome type",
   showOutcomes: "Show outcomes",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
@@ -1116,6 +1129,22 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   "empty.title": "No outcomes yet — add at least one to continue",
   "empty.description":
     "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
+} as const);
+
+const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
+  title: "Rules",
+  description:
+    "Review the automatic rules and add creator rules only when they are needed.",
+  advancedSummary: "Optional creator rules and acceptance",
+  chatAdvancedSummary: "Optional creator rules",
+} as const);
+
+const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
+  title: "Voting",
+  description: "Choose how voting power works and how submissions succeed.",
+  powerTitle: "Voting power",
+  rankAdvancedSummary: "Vote limits and vote behavior",
+  approveAdvancedSummary: "Vote limits, behavior, and timing",
 } as const);
 
 const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
@@ -1126,6 +1155,11 @@ const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
 const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
   "waves.create.description",
   {
+    title: "Description",
+    description:
+      "Explain the wave so participants understand its purpose and what you expect.",
+    missingProfile:
+      "A profile handle is required to create a wave. Set up your profile, then come back to finish this step.",
     placeholder: "Describe your wave",
   } as const
 );
@@ -2785,6 +2819,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_CREATE_RULES_MESSAGES,
+  ...WAVE_CREATE_VOTING_MESSAGES,
   ...WAVE_CREATE_PROGRESS_MESSAGES,
   ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,

@@ -5,6 +5,9 @@
 Use `Outcomes` to define winner rewards in `Rank` and `Approve` wave creation.
 You must save at least one outcome before `Next` can move to `Description`.
 
+Outcome type and reward configuration stay visible. Optional outcome
+visibility and the Approve winner limit are in a named expandable section.
+
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
@@ -14,8 +17,11 @@ You must save at least one outcome before `Next` can move to `Description`.
 
 ## Step Path
 
-- `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- Scheduled `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
 - `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+
+`Perpetual Ranking` skips this step because its live leaderboard is the outcome
+and it never announces winners.
 
 ## Outcome Types
 
@@ -45,13 +51,19 @@ You must save at least one outcome before `Next` can move to `Description`.
 3. Fill the selected form.
 4. Click `Save` to add a row, or `Cancel` to discard draft edits.
 5. Repeat to add more outcomes.
-6. Click `Next` to continue to `Description`.
+6. Open `Outcome visibility` for Rank, or `Winner limits and outcome
+   visibility` for Approve, only when optional behavior needs changing.
+7. For `Approve`, optionally set `Max Winners`; blank means unlimited.
+8. Choose whether to `Show outcomes` after creation.
+9. Click `Next` to continue to `Description`.
 
 ## Common Scenarios
 
 - Mix outcome types in one wave (for example manual + rep).
 - Add multiple winner rows for `Rep` or `NIC`.
 - Return from `Description` to `Outcomes` and adjust rewards before submit.
+- Open-ended approval: when both wave end and max winners are blank, the visible
+  warning explains that the wave will run indefinitely.
 
 ## Edge Cases
 
@@ -65,6 +77,8 @@ You must save at least one outcome before `Next` can move to `Description`.
 - Changing selected type while editing drops unsaved form values.
 - Saved `Manual` and `Rep` rows can be removed.
 - Saved `NIC` rows show a remove icon, but it currently does not remove the row.
+- `Show outcomes` defaults on. `Max Winners` defaults blank.
+- Non-default optional values show `Customized` on the collapsed disclosure.
 
 ## Failure and Recovery
 
@@ -77,6 +91,7 @@ You must save at least one outcome before `Next` can move to `Description`.
 
 - Percentage distribution mode is not exposed in the current outcomes UI.
 - `Approve` outcomes use approve-specific forms and payload mapping.
+- `Perpetual Ranking` has no Outcomes step or optional-settings disclosure.
 
 ## Related Pages
 

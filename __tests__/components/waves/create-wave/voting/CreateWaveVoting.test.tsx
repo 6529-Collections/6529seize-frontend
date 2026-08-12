@@ -99,21 +99,22 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/create-wave/voting/TimeWeightedVoting",
-  () => (props: {
-    config: {
-      enabled: boolean;
-      averagingInterval: number;
-      averagingIntervalUnit: "minutes" | "hours";
-    };
-    errorMessage?: string;
-    showToggle?: boolean;
-    onChange: (config: {
-      enabled: boolean;
-      averagingInterval: number;
-      averagingIntervalUnit: "minutes" | "hours";
-    }) => void;
-  }) =>
-    mockTimeWeightedVoting(props)
+  () =>
+    (props: {
+      config: {
+        enabled: boolean;
+        averagingInterval: number;
+        averagingIntervalUnit: "minutes" | "hours";
+      };
+      errorMessage?: string;
+      showToggle?: boolean;
+      onChange: (config: {
+        enabled: boolean;
+        averagingInterval: number;
+        averagingIntervalUnit: "minutes" | "hours";
+      }) => void;
+    }) =>
+      mockTimeWeightedVoting(props)
 );
 
 describe("CreateWaveVoting", () => {
@@ -153,6 +154,14 @@ describe("CreateWaveVoting", () => {
     jest.clearAllMocks();
   });
 
+  const openAdvancedSettings = () => {
+    const advancedButton = screen.getByRole("button", {
+      name: /Vote limits/,
+    });
+    fireEvent.click(advancedButton);
+    return advancedButton;
+  };
+
   it("returns null when no selected type", () => {
     const { container } = render(
       <CreateWaveVoting {...baseProps} selectedType={null} />
@@ -161,19 +170,32 @@ describe("CreateWaveVoting", () => {
     expect(screen.queryByText("Voting power scope")).toBeNull();
   });
 
-  it("renders only vote cap settings for rank waves", () => {
+  it("keeps rank tuning controls in collapsed advanced settings", () => {
     render(<CreateWaveVoting {...baseProps} />);
-    const settingsGrid = screen.getByTestId("create-wave-voting-settings-grid");
 
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Voting" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Voting power" })
+    ).toBeVisible();
     expect(screen.getByTestId("rep")).toBeInTheDocument();
     expect(screen.getByText("Voting power scope")).toBeInTheDocument();
-    expect(screen.getByTestId("negative")).toBeInTheDocument();
-    expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
-    expect(screen.getByLabelText("Vote cap per identity")).toBeInTheDocument();
     expect(screen.queryByLabelText("Approval threshold")).toBeNull();
     expect(screen.queryByLabelText("Minimum time above threshold")).toBeNull();
-    expect(settingsGrid).toHaveClass("tw-grid-cols-1");
-    expect(settingsGrid).not.toHaveClass("sm:tw-grid-cols-2");
+    expect(
+      screen.getByRole("button", { name: /Vote limits and vote behavior/ })
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByTestId("negative")).not.toBeVisible();
+    expect(screen.getByTestId("time-weighted")).not.toBeVisible();
+    expect(screen.getByLabelText("Vote cap per identity")).not.toBeVisible();
+
+    const advancedButton = openAdvancedSettings();
+
+    expect(advancedButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByTestId("negative")).toBeVisible();
+    expect(screen.getByTestId("time-weighted")).toBeVisible();
+    expect(screen.getByLabelText("Vote cap per identity")).toBeVisible();
     expect(
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
     ).toHaveClass("tw-rounded-xl", "tw-border-white/5", "tw-bg-iron-900");
@@ -183,12 +205,8 @@ describe("CreateWaveVoting", () => {
   it("renders voting power scope from props", () => {
     render(<CreateWaveVoting {...baseProps} />);
 
-    expect(
-      screen.getByRole("radio", { name: /^Whole wave/ })
-    ).toBeChecked();
-    expect(
-      screen.getByRole("radio", { name: /^Each drop/ })
-    ).not.toBeChecked();
+    expect(screen.getByRole("radio", { name: /^Whole wave/ })).toBeChecked();
+    expect(screen.getByRole("radio", { name: /^Each drop/ })).not.toBeChecked();
   });
 
   it("updates voting power scope", async () => {
@@ -218,6 +236,8 @@ describe("CreateWaveVoting", () => {
         onAllowNegativeVotesChange={onAllowNegativeVotesChange}
       />
     );
+
+    openAdvancedSettings();
 
     const negativeVotingProps = mockNegativeVotingToggle.mock.calls[0]?.[0];
 
@@ -312,8 +332,14 @@ describe("CreateWaveVoting", () => {
 
     expect(settingsGrid).toHaveClass("tw-grid-cols-1");
     expect(settingsGrid).not.toHaveClass("sm:tw-grid-cols-2");
-    expect(settingsGrid).toContainElement(voteCapInput);
     expect(settingsGrid).toContainElement(thresholdInput);
+    expect(settingsGrid).not.toContainElement(voteCapInput);
+    expect(thresholdInput).toBeVisible();
+    expect(voteCapInput).not.toBeVisible();
+
+    openAdvancedSettings();
+
+    expect(voteCapInput).toBeVisible();
     expect(screen.getByTestId("time-weighted")).toHaveAttribute(
       "data-enabled",
       "false"
@@ -323,9 +349,7 @@ describe("CreateWaveVoting", () => {
     expect(
       screen.getByRole("radio", { name: /^Require hold time/ })
     ).not.toBeChecked();
-    expect(
-      screen.queryByLabelText("Minimum time above threshold")
-    ).toBeNull();
+    expect(screen.queryByLabelText("Minimum time above threshold")).toBeNull();
     expect(screen.queryByTestId("approval-hold-detail")).toBeNull();
     expect(
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
@@ -344,7 +368,7 @@ describe("CreateWaveVoting", () => {
       "tw-ring-inset"
     );
     expect(
-      voteCapInput.compareDocumentPosition(thresholdInput) &
+      thresholdInput.compareDocumentPosition(voteCapInput) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
@@ -358,15 +382,15 @@ describe("CreateWaveVoting", () => {
       />
     );
 
+    openAdvancedSettings();
+
     expect(
       screen.getByRole("radio", { name: /^Require hold time/ })
     ).toBeChecked();
     expect(
       screen.getByLabelText("Minimum time above threshold")
     ).toBeInTheDocument();
-    expect(screen.getByTestId("approval-hold-detail")).toHaveClass(
-      "tw-mt-3"
-    );
+    expect(screen.getByTestId("approval-hold-detail")).toBeVisible();
     expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
   });
 
@@ -378,6 +402,8 @@ describe("CreateWaveVoting", () => {
         approvalThresholdTimeMs={0}
       />
     );
+
+    openAdvancedSettings();
 
     expect(
       screen.getByRole("radio", { name: /^Require hold time/ })
@@ -400,14 +426,14 @@ describe("CreateWaveVoting", () => {
       />
     );
 
+    openAdvancedSettings();
+
     expect(screen.getByTestId("time-weighted")).toHaveAttribute(
       "data-enabled",
       "true"
     );
     expect(screen.getByRole("radio", { name: /^No hold/ })).toBeChecked();
-    expect(
-      screen.queryByLabelText("Minimum time above threshold")
-    ).toBeNull();
+    expect(screen.queryByLabelText("Minimum time above threshold")).toBeNull();
   });
 
   it("selecting hold preserves approve time weighted voting", () => {
@@ -428,9 +454,9 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    fireEvent.click(
-      screen.getByRole("radio", { name: /^Require hold time/ })
-    );
+    openAdvancedSettings();
+
+    fireEvent.click(screen.getByRole("radio", { name: /^Require hold time/ }));
 
     expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(60_000);
     expect(onTimeWeightedChange).not.toHaveBeenCalled();
@@ -449,6 +475,8 @@ describe("CreateWaveVoting", () => {
         onTimeWeightedChange={onTimeWeightedChange}
       />
     );
+
+    openAdvancedSettings();
 
     fireEvent.click(screen.getByTestId("time-weighted"));
 
@@ -479,6 +507,8 @@ describe("CreateWaveVoting", () => {
       />
     );
 
+    openAdvancedSettings();
+
     fireEvent.click(screen.getByRole("radio", { name: /^No hold/ }));
 
     expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(null);
@@ -501,6 +531,8 @@ describe("CreateWaveVoting", () => {
       />
     );
 
+    openAdvancedSettings();
+
     expect(screen.getByTestId("time-weighted")).toHaveTextContent(
       "This interval is longer than the wave duration. Choose a shorter interval, extend the wave end date, or clear the end date."
     );
@@ -516,6 +548,8 @@ describe("CreateWaveVoting", () => {
         setMaxVotesPerIdentityPerDrop={setMaxVotesPerIdentityPerDrop}
       />
     );
+
+    openAdvancedSettings();
 
     await user.type(screen.getByLabelText("Vote cap per identity"), "1");
 
@@ -552,6 +586,8 @@ describe("CreateWaveVoting", () => {
       />
     );
 
+    openAdvancedSettings();
+
     fireEvent.change(
       screen.getByLabelText("Minimum time above threshold unit"),
       {
@@ -569,8 +605,9 @@ describe("CreateWaveVoting", () => {
     const thresholdTimeChanges = jest.fn();
 
     function StatefulVoting() {
-      const [approvalThresholdTimeMs, setApprovalThresholdTimeMs] =
-        useState<number | null>(120_000);
+      const [approvalThresholdTimeMs, setApprovalThresholdTimeMs] = useState<
+        number | null
+      >(120_000);
       const [timeWeighted, setTimeWeighted] = useState(baseProps.timeWeighted);
 
       return (
@@ -589,6 +626,8 @@ describe("CreateWaveVoting", () => {
     }
 
     render(<StatefulVoting />);
+
+    openAdvancedSettings();
 
     fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
       target: { value: "" },
@@ -621,11 +660,13 @@ describe("CreateWaveVoting", () => {
         {...baseProps}
         waveType={ApiWaveType.Approve}
         approvalThresholdTimeMs={60_000}
-        errors={[
-          CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID,
-        ]}
+        errors={[CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID]}
       />
     );
+
+    expect(
+      screen.getByRole("button", { name: /Needs attention/ })
+    ).toHaveAttribute("aria-expanded", "true");
 
     expect(
       screen.getByText(
@@ -650,6 +691,8 @@ describe("CreateWaveVoting", () => {
         }}
       />
     );
+
+    openAdvancedSettings();
 
     expect(
       screen.getByText(/This hold checks the time-weighted score./)

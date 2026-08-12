@@ -10,17 +10,34 @@ interface WaveRulesPanelProps {
   readonly title?: string | undefined;
   readonly useRing?: boolean | undefined;
   readonly showTitle?: boolean | undefined;
+  readonly variant?: "default" | "form" | undefined;
 }
 
 const hasCustomRules = (custom: WaveCustomRules): boolean =>
   Boolean(custom.display) || Boolean(custom.binding);
+
+function getSectionHeadingLevel({
+  showTitle,
+  variant,
+}: {
+  readonly showTitle: boolean;
+  readonly variant: "default" | "form";
+}): "h2" | "h3" | "h4" {
+  if (!showTitle) {
+    return "h2";
+  }
+  if (variant === "form") {
+    return "h4";
+  }
+  return "h3";
+}
 
 function WaveRulesCustomSection({
   custom,
   headingLevel,
 }: {
   readonly custom: WaveCustomRules;
-  readonly headingLevel: "h2" | "h3";
+  readonly headingLevel: "h2" | "h3" | "h4";
 }) {
   const Heading = headingLevel;
 
@@ -83,24 +100,32 @@ export default function WaveRulesPanel({
   title,
   useRing = true,
   showTitle = true,
+  variant = "default",
 }: WaveRulesPanelProps) {
   const ringClasses = useRing
     ? "tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
     : "";
 
-  const SectionHeading = showTitle ? "h3" : "h2";
+  const TitleHeading = variant === "form" ? "h3" : "h2";
+  const SectionHeading = getSectionHeadingLevel({ showTitle, variant });
   const resolvedTitle =
     title ?? waveRightPanelText("waves.sidebar.rightPanel.rules.title");
+  const titleClasses =
+    variant === "form"
+      ? "!tw-text-base !tw-font-semibold !tw-leading-6 !tw-text-iron-100"
+      : "!tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]";
+  const backgroundClasses =
+    variant === "form" ? "tw-bg-iron-900/60" : "tw-bg-iron-950";
 
   return (
     <div
-      className={`tw-relative tw-overflow-hidden tw-bg-iron-950 ${ringClasses}`}
+      className={`tw-relative tw-overflow-hidden ${backgroundClasses} ${ringClasses}`}
     >
       {showTitle && (
         <div className="tw-px-4 tw-pt-6">
-          <h2 className="tw-m-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
+          <TitleHeading className={`tw-m-0 ${titleClasses}`}>
             {resolvedTitle}
-          </h2>
+          </TitleHeading>
         </div>
       )}
 
@@ -135,7 +160,7 @@ export default function WaveRulesPanel({
         {showCustomRules && (
           <WaveRulesCustomSection
             custom={rules.custom}
-            headingLevel={showTitle ? "h3" : "h2"}
+            headingLevel={SectionHeading}
           />
         )}
       </div>
