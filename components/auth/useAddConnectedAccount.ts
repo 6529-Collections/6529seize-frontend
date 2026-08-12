@@ -186,36 +186,35 @@ export function useAddConnectedAccount({
       logError("seizeAddConnectedAccount", walletError);
     };
 
-    let disconnectPromise: Promise<unknown>;
-    try {
-      disconnectPromise = disconnect();
-    } catch (error: unknown) {
-      handleDisconnectFailure(error);
-      return;
-    }
+    const disconnectBeforeAddingAccount = async (): Promise<void> => {
+      try {
+        await disconnect();
+      } catch (error: unknown) {
+        handleDisconnectFailure(error);
+        return;
+      }
 
-    disconnectPromise
-      .then(() => {
+      if (!isCurrentAttempt()) {
+        return;
+      }
+      retryConnectTimeoutRef.current = setTimeout(() => {
         if (!isCurrentAttempt()) {
           return;
         }
-        retryConnectTimeoutRef.current = setTimeout(() => {
-          if (!isCurrentAttempt()) {
-            return;
-          }
-          retryConnectTimeoutRef.current = null;
-          if (
-            !isMountedRef.current ||
-            isSigningOutAllRef.current ||
-            hasSignOutAllGenerationChanged(signOutGeneration)
-          ) {
-            clearAddConnectedAccountGuard();
-            return;
-          }
-          openAddConnectedAccountModal();
-        }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
-      })
-      .catch(handleDisconnectFailure);
+        retryConnectTimeoutRef.current = null;
+        if (
+          !isMountedRef.current ||
+          isSigningOutAllRef.current ||
+          hasSignOutAllGenerationChanged(signOutGeneration)
+        ) {
+          clearAddConnectedAccountGuard();
+          return;
+        }
+        openAddConnectedAccountModal();
+      }, CONNECT_AFTER_DISCONNECT_DELAY_MS);
+    };
+
+    void disconnectBeforeAddingAccount();
   }, [
     account.address,
     account.isConnected,

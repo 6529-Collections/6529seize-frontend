@@ -226,12 +226,6 @@ function LogoutButton() {
   );
 }
 
-function createPendingPromise<T>(): Promise<T> {
-  return new Promise<T>(() => {
-    // Intentionally pending for stale add-flow guard coverage.
-  });
-}
-
 function createDeferred<T>(): {
   readonly promise: Promise<T>;
   readonly reject: (reason?: unknown) => void;
@@ -351,7 +345,6 @@ describe("SeizeConnectProvider add-account flow", () => {
       },
     };
     mockAppKitAccount = {
-      address: undefined,
       isConnected: false,
       status: "disconnected",
     };
