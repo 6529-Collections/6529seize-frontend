@@ -22,7 +22,7 @@ describe("ProposalCardReadFullButton", () => {
               },
             ],
             nft_links: [],
-          } satisfies Partial<ExtendedDrop>) as ExtendedDrop
+          } satisfies Partial<ExtendedDrop>) as unknown as ExtendedDrop
         }
         onReadFull={jest.fn()}
       />

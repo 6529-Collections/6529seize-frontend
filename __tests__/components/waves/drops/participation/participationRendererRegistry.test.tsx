@@ -55,23 +55,46 @@ const mockUseWaveProposalCardPresentation =
     typeof useWaveProposalCardPresentation
   >;
 
+const createSeizeSettingsContext = (
+  overrides: Partial<ReturnType<typeof useSeizeSettings>> = {}
+): ReturnType<typeof useSeizeSettings> => ({
+  seizeSettings: {
+    rememes_submission_tdh_threshold: 0,
+    memes_wave_id: null,
+    curation_wave_id: null,
+    quorum_wave_id: null,
+    announcements_wave_id: null,
+    distribution_admin_wallets: [],
+    claims_admin_wallets: [],
+    auth: {
+      structured_signatures_required: false,
+      session_v2_migration_deadline: null,
+    },
+  },
+  isMemesWave: () => false,
+  isCurationWave: () => false,
+  isQuorumWave: () => false,
+  isAnnouncementsWave: () => false,
+  isMemesSubmission: () => false,
+  isLoaded: true,
+  loadError: null,
+  loadSeizeSettings: jest.fn().mockResolvedValue(undefined),
+  ...overrides,
+});
+
 describe("useWaveParticipationRendererSet", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSeizeSettings.mockReturnValue({
-      isMemesWave: () => false,
-      isCurationWave: () => false,
-      isQuorumWave: () => false,
-    });
+    mockUseSeizeSettings.mockReturnValue(createSeizeSettingsContext());
     mockUseWaveProposalCardPresentation.mockReturnValue("default");
   });
 
   it("returns the explicit curation variant with default renderers", () => {
-    mockUseSeizeSettings.mockReturnValue({
-      isMemesWave: () => false,
-      isCurationWave: (waveId: string) => waveId === "curation-wave",
-      isQuorumWave: () => false,
-    });
+    mockUseSeizeSettings.mockReturnValue(
+      createSeizeSettingsContext({
+        isCurationWave: (waveId) => waveId === "curation-wave",
+      })
+    );
 
     const { result } = renderHook(() =>
       useWaveParticipationRendererSet("curation-wave")
