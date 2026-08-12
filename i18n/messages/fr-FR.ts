@@ -427,6 +427,8 @@ export const FR_FR_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Vous pouvez televerser un fichier GIF a la place.",
   "common.close": "Fermer",
+  "waves.create.dialog.subwaveTitle": "Créer une sous-wave",
+  "waves.create.dialog.waveTitle": "Créer une wave",
   "waves.create.actions.cancel": "Annuler",
   "waves.create.actions.complete": "Terminer",
   "waves.create.actions.next": "Suivant",
