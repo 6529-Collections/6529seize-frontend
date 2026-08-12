@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveSmallLeaderboardItemContent } from "@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
@@ -123,8 +123,9 @@ describe("WaveSmallLeaderboardItemContent", () => {
     expect(screen.queryByTestId("medias")).not.toBeInTheDocument();
   });
 
-  it("opens a proposal card from the keyboard", () => {
+  it("opens a proposal card from the keyboard", async () => {
     const onDropClick = jest.fn();
+    const user = userEvent.setup();
     render(
       <WaveSmallLeaderboardItemContent
         drop={{ ...baseDrop, id: "proposal-1" }}
@@ -133,7 +134,9 @@ describe("WaveSmallLeaderboardItemContent", () => {
       />
     );
 
-    fireEvent.keyDown(screen.getByRole("button"), { key: " " });
+    await user.tab();
+    expect(screen.getByRole("button")).toHaveFocus();
+    await user.keyboard(" ");
 
     expect(onDropClick).toHaveBeenCalledTimes(1);
   });
