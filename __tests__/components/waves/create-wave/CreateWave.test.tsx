@@ -55,6 +55,13 @@ jest.mock("@/components/waves/create-wave/hooks/useWaveConfig", () => ({
   useWaveConfig: jest.fn(),
 }));
 
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue({
+    id: "parent-admin-group",
+    name: "Parent admins",
+  }),
+}));
+
 jest.mock("@/components/waves/create-wave/services/waveApiService", () => ({
   useAddWaveMutation: jest.fn(),
 }));
@@ -69,6 +76,9 @@ jest.mock("@/components/waves/create-wave/services/waveMediaService", () => ({
 }));
 
 jest.mock("@/components/waves/create-wave/services/waveGroupService", () => ({
+  ...jest.requireActual(
+    "@/components/waves/create-wave/services/waveGroupService"
+  ),
   getAdminGroupId: jest.fn(),
 }));
 
@@ -143,7 +153,10 @@ jest.mock(
 import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { useAddWaveMutation } from "@/components/waves/create-wave/services/waveApiService";
-import { getAdminGroupId } from "@/components/waves/create-wave/services/waveGroupService";
+import {
+  getAdminGroupId,
+  WaveAdminGroupError,
+} from "@/components/waves/create-wave/services/waveGroupService";
 import { generateDropPart } from "@/components/waves/create-wave/services/waveMediaService";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
@@ -331,10 +344,12 @@ describe("CreateWave", () => {
 
   type RenderCreateWaveOptions = {
     readonly parentWaveId?: string | null | undefined;
+    readonly parentAdminGroupId?: string | null | undefined;
   };
 
   const createWaveElement = ({
     parentWaveId,
+    parentAdminGroupId,
   }: RenderCreateWaveOptions = {}) => (
     <AuthContext.Provider value={mockAuthContext}>
       <ReactQueryWrapperContext.Provider value={mockQueryContext}>
@@ -342,6 +357,7 @@ describe("CreateWave", () => {
           profile={mockProfile}
           onBack={onBack}
           parentWaveId={parentWaveId}
+          parentAdminGroupId={parentAdminGroupId}
         />
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
@@ -360,11 +376,15 @@ describe("CreateWave", () => {
   });
 
   it("uses subwave title when creating under a parent wave", () => {
-    renderCreateWave({ parentWaveId: "parent-wave" });
+    renderCreateWave({
+      parentWaveId: "parent-wave",
+      parentAdminGroupId: "parent-admin-group",
+    });
 
     expect(screen.getByTestId("create-wave-flow-title")).toHaveTextContent(
       'Create subwave "Test Wave"'
     );
+    expect(mockedUseWaveConfig).toHaveBeenCalledWith();
   });
 
   it("calls onBack when back button is clicked", () => {
@@ -499,16 +519,71 @@ describe("CreateWave", () => {
       };
       mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
 
-      renderCreateWave({ parentWaveId: "parent-wave" });
+      renderCreateWave({
+        parentWaveId: "parent-wave",
+        parentAdminGroupId: "parent-admin-group",
+      });
 
       fireEvent.click(screen.getByRole("button", { name: /complete/i }));
 
       await waitFor(() => {
+        expect(mockedGetAdminGroupId).toHaveBeenCalledWith(
+          expect.objectContaining({ adminGroupId: "admin-group-id" })
+        );
         expect(mockedGetCreateNewWaveBody).toHaveBeenCalledWith(
           expect.objectContaining({
             parentWaveId: "parent-wave",
           })
         );
+      });
+    });
+
+    it("uses the parent admin group when a subwave draft has no selection", async () => {
+      mockedUseWaveConfig.mockReturnValue({
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+        config: {
+          ...mockWaveConfig.config,
+          groups: {
+            ...mockWaveConfig.config.groups,
+            admin: null,
+          },
+        },
+      });
+
+      renderCreateWave({
+        parentWaveId: "parent-wave",
+        parentAdminGroupId: "parent-admin-group",
+      });
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedGetAdminGroupId).toHaveBeenCalledWith(
+          expect.objectContaining({ adminGroupId: "parent-admin-group" })
+        );
+      });
+    });
+
+    it("ignores a second submit while authentication is pending", async () => {
+      let resolveAuth: ((value: { success: boolean }) => void) | undefined;
+      mockAuthContext.requestAuth.mockReturnValue(
+        new Promise((resolve) => {
+          resolveAuth = resolve;
+        })
+      );
+      mockedUseWaveConfig.mockReturnValue({
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      });
+      renderCreateWave();
+
+      const completeButton = screen.getByRole("button", { name: /complete/i });
+      fireEvent.click(completeButton);
+      fireEvent.click(completeButton);
+
+      expect(mockAuthContext.requestAuth).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        resolveAuth?.({ success: false });
       });
     });
 
@@ -676,7 +751,15 @@ describe("CreateWave", () => {
     });
 
     it("shows error when admin group retrieval fails", async () => {
-      mockedGetAdminGroupId.mockResolvedValue(null);
+      mockedGetAdminGroupId.mockImplementation(async ({ onError }) => {
+        onError(
+          new WaveAdminGroupError({
+            reason: "publish-personal-group",
+            cause: "Something went wrong...",
+          })
+        );
+        return null;
+      });
 
       const configOnDescriptionStep = {
         ...mockWaveConfig,
@@ -692,6 +775,12 @@ describe("CreateWave", () => {
       await waitFor(() => {
         expect(mockedGetAdminGroupId).toHaveBeenCalled();
         expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          type: "error",
+          title: "Couldn't make the admin group visible.",
+          description: "Choose an existing admin group, or try again later.",
+          details: "The group service did not complete the request.",
+        });
       });
     });
 

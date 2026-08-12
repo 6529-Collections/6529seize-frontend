@@ -12,6 +12,7 @@ interface CreateWaveModalProps {
   readonly onClose: () => void;
   readonly profile: ApiIdentity;
   readonly parentWaveId?: string | null | undefined;
+  readonly parentAdminGroupId?: string | null | undefined;
 }
 
 const subscribeToClientMount = () => () => {};
@@ -23,6 +24,7 @@ export default function CreateWaveModal({
   onClose,
   profile,
   parentWaveId,
+  parentAdminGroupId,
 }: CreateWaveModalProps) {
   const mounted = useSyncExternalStore(
     subscribeToClientMount,
@@ -76,6 +78,7 @@ export default function CreateWaveModal({
                 onBack={onClose}
                 onSuccess={onClose}
                 parentWaveId={parentWaveId}
+                parentAdminGroupId={parentAdminGroupId}
               />
             </div>
           </motion.div>
