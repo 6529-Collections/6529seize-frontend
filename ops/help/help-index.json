@@ -2093,6 +2093,47 @@
       "tags": ["waves", "drop", "glossary", "concept"]
     },
     {
+      "id": "waves.proposal-cards",
+      "kind": "ui_affordance",
+      "title": "Summary proposal cards",
+      "aliases": [
+        "proposal card",
+        "proposal cards",
+        "compact proposal",
+        "open full proposal",
+        "network museum proposals"
+      ],
+      "keywords": [
+        "waves",
+        "proposal",
+        "compact",
+        "card",
+        "preview",
+        "approved",
+        "winner",
+        "museum",
+        "create"
+      ],
+      "facts": [
+        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so it uses a compatibility fallback: Summary card with 360 characters and the first ready still image enabled. A Wave admin can replace that fallback from Settings, and the saved choice takes precedence.",
+        "Other existing standard Waves keep their current presentation unless the Wave is explicitly configured to use custom proposal cards.",
+        "A compact card uses the proposal's stored title or first authored non-empty line, an excerpt from the original authored text, real multipart/media/attachment counts, and at most one ready static image preview.",
+        "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
+        "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
+        "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
+        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Overview step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
+        "Wave admins can change the same presentation later from the right sidebar under Settings, Display, Proposal cards. This control is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
+        "Summary card lets the admin set a proposal-text limit from 120 to 1000 characters and choose whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits cannot be saved. Full proposal media is unchanged."
+      ],
+      "canonical_path": "/waves/5f207393-5418-4a75-8738-e40edb44a94d",
+      "related_paths": ["/waves", "/waves?create=wave", "/waves/create"],
+      "tags": ["waves", "proposal", "cards", "museum", "ui"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-proposal-cards.md",
+        "ops/docs/waves/create/feature-overview-step.md"
+      ]
+    },
+    {
       "id": "waves.subwaves.unread-count",
       "kind": "ui_affordance",
       "title": "Parent wave unread subwave count",
@@ -2203,9 +2244,13 @@
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
-        "In the Groups step, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "Overview shows the wave name, picture, type, Rank ranking mode, and relevant proposal display settings without an Advanced settings section.",
+        "On steps that use Advanced settings, the disclosure shows Customized for non-default values and opens automatically when a hidden field needs attention.",
+        "The Groups step shows all access and moderation rows immediately, organized from Who can view through Admin without an Advanced settings disclosure.",
+        "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "Dates starts with a compact Schedule summary using the draft's current values; expand Advanced settings to change starts, winner announcements, recurring cycles, or an optional end date.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "In Description, individual @ mention suggestions follow the draft wave's Who can view group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."

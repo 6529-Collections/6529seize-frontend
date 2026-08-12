@@ -119,8 +119,34 @@ export interface CreateWaveApproveDisplayConfig {
   readonly approvedTabLabel: string;
 }
 
+export type CreateWaveProposalCardMode = "standard" | "custom";
+
+export interface CreateWaveProposalCardConfig {
+  readonly mode: CreateWaveProposalCardMode;
+  readonly excerptMaxCharacters: number;
+  readonly showMediaThumbnail: boolean;
+}
+
+export interface WaveProposalCardRecipe {
+  readonly version: 1;
+  readonly layout: "summary";
+  readonly excerptMaxCharacters: number;
+  readonly showMediaThumbnail: boolean;
+}
+
+export type WaveProposalCardPresentation =
+  | {
+      readonly version: 1;
+      readonly layout: "full";
+    }
+  | WaveProposalCardRecipe;
+
 export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
+  /** Omitted in older saved drafts; absence preserves the standard display. */
+  readonly proposalCards?: CreateWaveProposalCardConfig;
+  /** Legacy saved-draft field. New waves persist `proposalCards` as a recipe. */
+  readonly compactProposalCards?: boolean;
   readonly customRules: string | null;
   readonly outcomesVisible: boolean;
   readonly submissionButtonLabel: string | null;

@@ -216,17 +216,17 @@ export default function CreateWaveDropsSubmissionMode({
   ];
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-6">
-      <div>
-        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+    <div className="tw-flex tw-flex-col">
+      <div className="tw-space-y-1">
+        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           Submission type
-        </p>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-text-iron-400">
+        </h3>
+        <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
           Choose whether participants submit drops or nominate identities.
         </p>
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
         {submissionModeOptions.map((option) => (
           <SubmissionOptionRow
             key={option.type}
@@ -240,7 +240,9 @@ export default function CreateWaveDropsSubmissionMode({
         ))}
       </div>
 
-      <CommonAnimationHeight>
+      <CommonAnimationHeight
+        className={submissionStrategy ? "tw-mt-6" : undefined}
+      >
         {submissionStrategy && (
           <div className="tw-flex tw-flex-col tw-gap-y-6">
             <div>
@@ -321,7 +323,9 @@ export default function CreateWaveDropsSubmissionMode({
         )}
       </CommonAnimationHeight>
 
-      <CommonAnimationHeight>
+      <CommonAnimationHeight
+        className={showSubmissionStrategyError ? "tw-mt-4" : undefined}
+      >
         {showSubmissionStrategyError && (
           <div className="tw-text-sm tw-font-medium tw-text-error">
             Complete the identity nomination settings before continuing.
@@ -329,7 +333,9 @@ export default function CreateWaveDropsSubmissionMode({
         )}
       </CommonAnimationHeight>
 
-      <CommonAnimationHeight>
+      <CommonAnimationHeight
+        className={showDuplicatesRequireWinnersError ? "tw-mt-4" : undefined}
+      >
         {showDuplicatesRequireWinnersError && (
           <div className="tw-text-sm tw-font-medium tw-text-error">
             {t(

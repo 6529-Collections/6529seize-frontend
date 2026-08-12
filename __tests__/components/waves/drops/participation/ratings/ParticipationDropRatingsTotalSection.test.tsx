@@ -79,7 +79,7 @@ describe("ParticipationDropRatingsTotalSection", () => {
     expect(progress).toHaveAttribute("data-projected", "80");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Votes given now"
+      "Votes now"
     );
   });
 

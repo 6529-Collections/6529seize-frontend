@@ -8,6 +8,8 @@ import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import TimePicker from "@/components/common/TimePicker";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   clampApproveWaveEndDate,
   getEarliestApproveWaveEndTimestamp,
@@ -38,6 +40,7 @@ export default function CreateWaveDatesApproveEnd({
   errors,
   setDates,
 }: CreateWaveDatesApproveEndProps) {
+  const locale = useBrowserLocale();
   const endDate = dates.endDate;
   const selectedEndDate =
     endDate !== null && Number.isFinite(endDate) ? endDate : null;
@@ -111,9 +114,9 @@ export default function CreateWaveDatesApproveEnd({
   return (
     <section className="tw-rounded-xl tw-bg-iron-900 tw-px-5 tw-pb-5 tw-pt-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
-        <div>
+        <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-300">
+            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-5 tw-text-iron-300">
               Wave End
             </h3>
             <TooltipIconButton
@@ -121,9 +124,14 @@ export default function CreateWaveDatesApproveEnd({
               tooltipText={END_DATE_TOOLTIP_TEXT}
               tooltipPosition="bottom"
               tooltipWidth="tw-w-80"
+              aria-label={t(
+                locale,
+                "waves.create.dates.approve.endInfoLabel"
+              )}
+              className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-leading-none"
             />
           </div>
-          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             Optional. Leave blank for no end date.
           </p>
         </div>
