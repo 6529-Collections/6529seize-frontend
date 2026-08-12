@@ -10,6 +10,10 @@ import {
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
 import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
+import {
+  AcquisitionWorkFigure,
+  type AcquisitionWorkCard,
+} from "@/components/museum/acquisition/MuseumAcquisitionExhibition";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -34,10 +38,8 @@ import {
   displayMuseumPublicAcquisitionProgramStatus,
   museumPublicAcquisitionProgramStatusAsOf,
 } from "@/lib/museum/publication/programStatus";
-import {
-  selectMuseumStillMedia,
-  shouldWithholdKeysAndGatesMedia,
-} from "@/lib/museum/publication/mediaSelection";
+import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 interface MuseumAcquisitionProgramPageProps {
   readonly params: Promise<{ slug: string }>;
@@ -206,7 +208,10 @@ export default async function MuseumAcquisitionProgramPage({
               id: work.id,
               label: work.title,
               href: museumWorkHref(work.id),
-              relation: "Selected through",
+              relation: t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.relationSelectedThrough"
+              ),
               status: work.status,
               statusAsOf: work.statusAsOf,
               sourcePath: relationSourcePath,
@@ -266,6 +271,7 @@ export default async function MuseumAcquisitionProgramPage({
             DEFAULT_LOCALE,
             "museum.network.accessibility.entityContext"
           ),
+          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
           statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
@@ -279,12 +285,20 @@ export default async function MuseumAcquisitionProgramPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}
           </h2>
           <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-            {typedWorks.map((work) => {
-              const media = shouldWithholdKeysAndGatesMedia(work.status, [
-                typed?.slug ?? slug,
-              ])
-                ? null
-                : publicWorkMedia(work);
+            {typedWorks.map((work, index) => {
+              const canonicalMedia = publicWorkMedia(work);
+              const reviewedProgramMedia = findReviewedProgramMediaMatch(view, [
+                work.id,
+                ...(work.sourceRecordIds ?? []),
+              ]);
+              const programMediaMetadata =
+                reviewedProgramMedia === null
+                  ? undefined
+                  : work.mediaMetadata?.find((candidate) =>
+                      candidate.sourceRecordIds?.includes(
+                        reviewedProgramMedia.sourceRecordId
+                      )
+                    );
               const status = displayMuseumPublicAcquisitionStatus(work.status);
               const qualifier =
                 work.status ===
@@ -296,19 +310,53 @@ export default async function MuseumAcquisitionProgramPage({
                   : undefined;
               const mediaQualifierProps =
                 qualifier === undefined ? {} : { qualifier };
-              return media ? (
-                <MuseumPublicMediaFigure
-                  key={work.id}
-                  src={media.url}
-                  width={media.width}
-                  height={media.height}
-                  alt={media.altText ?? ""}
-                  href={museumWorkHref(work.id)}
-                  title={work.title}
-                  status={status}
-                  {...mediaQualifierProps}
-                />
-              ) : (
+              if (canonicalMedia !== null) {
+                const altText = canonicalMedia.altText;
+                if (altText === null || altText.trim() === "") {
+                  throw new Error("museum_acquisition_program_alt_text_missing");
+                }
+                return (
+                  <MuseumPublicMediaFigure
+                    key={work.id}
+                    src={canonicalMedia.url}
+                    width={canonicalMedia.width}
+                    height={canonicalMedia.height}
+                    alt={altText}
+                    href={museumWorkHref(work.id)}
+                    title={work.title}
+                    status={status}
+                    {...mediaQualifierProps}
+                    eager={index === 0}
+                  />
+                );
+              }
+              if (reviewedProgramMedia !== null) {
+                const artist = publication.artists.find(
+                  (candidate) => candidate.id === work.artistId
+                );
+                const card: AcquisitionWorkCard = {
+                  id: work.id,
+                  href: museumWorkHref(work.id),
+                  title: work.title,
+                  artist: artist?.preferredName ?? work.artistId,
+                  media: reviewedProgramMedia.media,
+                  ...(programMediaMetadata === undefined
+                    ? {}
+                    : { mediaMetadata: programMediaMetadata }),
+                  status,
+                  ...(qualifier === undefined
+                    ? {}
+                    : { statusQualifier: qualifier }),
+                };
+                return (
+                  <AcquisitionWorkFigure
+                    key={work.id}
+                    work={card}
+                    eager={index === 0}
+                  />
+                );
+              }
+              return (
                 <article
                   key={work.id}
                   className="tw-min-w-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4"
@@ -345,7 +393,7 @@ export default async function MuseumAcquisitionProgramPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.works")}
           </h2>
           <div className="tw-mt-6 tw-grid tw-gap-6 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-            {selectedWorks.map((work) => {
+            {selectedWorks.map((work, index) => {
               const href = museumWorkHrefForSourceId(
                 publication,
                 work.recordId,
@@ -358,6 +406,7 @@ export default async function MuseumAcquisitionProgramPage({
                       media={work.media}
                       sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
                       className="tw-h-full tw-w-full tw-object-contain"
+                      eager={index === 0}
                     />
                   </div>
                   <p className="tw-m-0 tw-mt-3 tw-text-base tw-font-semibold tw-text-iron-50">

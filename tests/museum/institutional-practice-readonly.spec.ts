@@ -23,7 +23,8 @@ const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
 const CASEY_WORK_HREFS = Array.from(
   { length: 7 },
-  (_, index) => `/museum/network/works/6529NM-W-${String(index + 1).padStart(4, "0")}`
+  (_, index) =>
+    `/museum/network/works/6529NM-W-${String(index + 1).padStart(4, "0")}`
 );
 const LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
@@ -424,7 +425,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.locator('main a[href^="/museum/network/works/"]')
     ).toHaveCount(16);
-    await expect(page.locator("main figure img")).toHaveCount(0);
+    await expect(page.locator("main figure img")).toHaveCount(16);
   });
 
   test("publishes each Keys and Gates selection as a complete work page", async ({
@@ -435,7 +436,12 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       KEYS_AND_GATES_OBJECT_ROUTE,
       REQUIRED_SOURCE_COMMIT
     );
-    await expect(page.locator("main figure img")).toHaveCount(0);
+    await expect(page.locator("main figure img")).toHaveCount(1);
+    await expect(
+      page.getByRole("img", {
+        name: "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+      })
+    ).toBeVisible();
     await expect(
       page.getByText(
         "Selected through an acquisition program; acquisition pending",
@@ -448,7 +454,9 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       page.getByText("Not yet minted or accessioned.", { exact: true })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Open submitted high-resolution image" })
+      page.getByText("No public image is available for this record.", {
+        exact: true,
+      })
     ).toHaveCount(0);
   });
 });
