@@ -2153,6 +2153,31 @@
       ]
     },
     {
+      "id": "waves.subwaves.create",
+      "kind": "workflow",
+      "title": "Create a subwave",
+      "aliases": [
+        "create subwave",
+        "new subwave",
+        "make a subwave",
+        "subwave plus button",
+        "mobile subwave"
+      ],
+      "keywords": ["waves", "subwaves", "create", "admin", "mobile", "plus"],
+      "facts": [
+        "Eligible admins can open the + menu in a root wave's tab row and select New subwave on web or in the app.",
+        "New subwave is hidden in direct messages, inside an existing subwave, while using a profile proxy, when the parent has no reusable admin group, or when the profile cannot administer the parent.",
+        "A new subwave starts with the parent wave's admin group, and the creator can choose a different existing admin group in the Groups step before submitting."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "subwaves", "create", "admin", "mobile"],
+      "source_refs": [
+        "ops/docs/waves/chat/feature-content-tabs.md",
+        "ops/docs/waves/create/feature-groups-step.md"
+      ]
+    },
+    {
       "id": "waves.create.entrypoint.sidebar",
       "kind": "ui_affordance",
       "title": "Create a wave from the Waves panel",

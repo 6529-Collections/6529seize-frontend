@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BrainView } from "./brainMobileViews";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboard";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { useWave } from "@/hooks/useWave";
-import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAuth } from "@/components/auth/Auth";
 import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
-import MyStreamWaveCurationCreateDialog from "../my-stream/tabs/MyStreamWaveCurationCreateDialog";
+import MyStreamWaveCreateActionsMenu from "../my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -110,7 +110,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const { connectedProfile, isAuthenticated } = useAuth();
   const hasValidNotificationAuth = isAuthenticated === true;
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
-  const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const shouldShowCurationTabs = Boolean(isApp && waveActive && wave?.id);
   const activeCurationId = shouldShowCurationTabs
     ? searchParams.get("curation")
@@ -305,16 +304,13 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
         </span>
       </button>
     ) : null;
-  const createCurationButton =
-    isApp && canManageCurations ? (
-      <button
-        type="button"
-        onClick={() => setIsCreateCurationOpen(true)}
-        className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-self-center tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
-        aria-label="Create curation"
-      >
-        <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
-      </button>
+  const createActionsMenu =
+    isApp && wave && canManageCurations ? (
+      <MyStreamWaveCreateActionsMenu
+        wave={wave}
+        variant="mobile"
+        onCreated={onCurationClick}
+      />
     ) : null;
 
   return (
@@ -349,7 +345,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               </span>
             ))}
           </output>
-          {createCurationButton}
+          {createActionsMenu}
         </div>
       ) : (
         <div className="tw-flex tw-min-h-12 tw-w-full tw-min-w-0 tw-items-stretch tw-gap-1.5 tw-px-0.5">
@@ -561,19 +557,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               </button>
             )}
           </div>
-          {createCurationButton}
+          {createActionsMenu}
         </div>
-      )}
-      {wave && isCreateCurationOpen && (
-        <MyStreamWaveCurationCreateDialog
-          wave={wave}
-          isOpen={isCreateCurationOpen}
-          onClose={() => setIsCreateCurationOpen(false)}
-          onSaved={(curation) => {
-            onCurationClick(curation.id);
-            setIsCreateCurationOpen(false);
-          }}
-        />
       )}
     </nav>
   );
