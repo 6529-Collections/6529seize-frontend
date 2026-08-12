@@ -189,7 +189,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       ],
       [
         "/museum/network/works/6529NM-W-0024",
-        "Selected by Museum Wave; acquisition review in progress",
+        "Selected by Museum Wave; accession processing in progress",
       ],
     ] as const) {
       await openRoute(page, path);
@@ -212,10 +212,15 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       page.getByText("Selected through", { exact: true })
     ).toBeVisible();
     await expect(
+      page.getByRole("img", {
+        name: "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+      })
+    ).toBeVisible();
+    await expect(
       page.getByText("No public image is available for this record.", {
         exact: true,
       })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: /historical proposal image/u })
     ).toHaveCount(0);
@@ -227,10 +232,10 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       page.getByText("No public image is available for this record.", {
         exact: true,
       })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByText(
-        "Selected by Museum Wave; acquisition review in progress",
+        "Selected by Museum Wave; accession processing in progress",
         {
           exact: true,
         }
@@ -238,33 +243,128 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: "Historical Wave proposal presentation",
+        name: "The work",
         exact: true,
       })
-    ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: /historical proposal image/u })
-    ).toHaveCount(0);
+    ).toHaveCount(1);
+    const palmyraImageControl = page.getByRole("button", {
+      name: "View image · loads 16.9 MB",
+      exact: true,
+    });
+    await expect(palmyraImageControl).toHaveCount(1);
     await expect(
       page.locator('[aria-labelledby="canonical-work-media-title"] img')
     ).toHaveCount(0);
     await expect(
       page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
     ).toHaveCount(0);
+    await palmyraImageControl.click();
+    await expect(
+      page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
+    ).toHaveCount(1);
     await expect(page.locator("[download]")).toHaveCount(0);
     await expect(
       page.locator(`a[href="${MAGNUM_WAVE_CONTEXT_HREF}"]`)
     ).toHaveCount(2);
     await expect(
       page.getByRole("link", {
-        name: "Open Wave proposal context",
+        name: "View Wave publication",
         exact: true,
       })
     ).toHaveCount(1);
     await expect(
       page.getByRole("link", { name: "Wave proposal, part 6", exact: true })
     ).toHaveCount(1);
-    await retainScreenshot(page, testInfo, "museum-work-magnum-metadata-only");
+    await retainScreenshot(page, testInfo, "museum-work-conflict-at-its-edges");
+    await expectNoHorizontalOverflow(page);
+
+    await openRoute(page, "/museum/network/acquisitions/keys-and-gates");
+    await expect(
+      page.getByRole("heading", { name: "Keys and Gates", exact: true })
+    ).toBeVisible();
+    await expect(page.locator("#acquisition-works figure img")).toHaveCount(16);
+    await expect(
+      page.getByRole("heading", { name: "Curatorial reading", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.locator("details#acquisition-record")
+    ).not.toHaveAttribute("open");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await retainScreenshot(page, testInfo, "museum-acquisition-keys-and-gates");
+    await page.locator("#acquisition-works-title").scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        page
+          .locator("#acquisition-works figure img")
+          .first()
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
+      )
+      .toBe(true);
+    await retainScreenshot(
+      page,
+      testInfo,
+      "museum-acquisition-keys-and-gates-gallery"
+    );
+    await expectNoHorizontalOverflow(page);
+
+    await openRoute(page, "/museum/network/acquisitions/conflict-at-its-edges");
+    await expect(
+      page.getByRole("heading", {
+        name: "Conflict at Its Edges",
+        exact: true,
+        level: 1,
+      })
+    ).toBeVisible();
+    await expect(page.locator("#acquisition-works figure")).toHaveCount(5);
+    await expect(page.locator("#acquisition-works figure img")).toHaveCount(4);
+    const acquisitionPalmyraImageControl = page
+      .locator("#acquisition-works")
+      .getByRole("button", {
+        name: "View image · loads 16.9 MB",
+        exact: true,
+      });
+    await expect(acquisitionPalmyraImageControl).toHaveCount(1);
+    await expect(
+      page.getByRole("heading", { name: "Curatorial reading", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.locator("details#acquisition-record")
+    ).not.toHaveAttribute("open");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await retainScreenshot(
+      page,
+      testInfo,
+      "museum-acquisition-conflict-at-its-edges"
+    );
+    await page.locator("#acquisition-works-title").scrollIntoViewIfNeeded();
+    await expect(
+      page.locator("#acquisition-works figure").first()
+    ).toContainText(
+      "Patrolling the border between the Negev Desert and Jordan"
+    );
+    await expect
+      .poll(() =>
+        page
+          .locator("#acquisition-works figure img")
+          .first()
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
+      )
+      .toBe(true);
+    await retainScreenshot(
+      page,
+      testInfo,
+      "museum-acquisition-conflict-at-its-edges-gallery"
+    );
     await expectNoHorizontalOverflow(page);
 
     await openRoute(page, "/museum/network/works/6529NM-W-0027");
