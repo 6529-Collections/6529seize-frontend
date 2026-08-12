@@ -110,7 +110,7 @@ type DialogProps = {
   onClose: () => void;
   title?: string;
   closeLabel?: string;
-  children: any;
+  children: React.ReactNode;
 };
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
