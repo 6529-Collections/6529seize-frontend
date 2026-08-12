@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MuseumAcquisitionRecordPage } from "@/components/museum/MuseumAcquisitionRecordPage";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import type {
@@ -495,6 +495,9 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       screen.getByRole("heading", { name: "Conflict at Its Edges" })
     ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "View image · loads 16.5 MB" })
+    );
     expect(
       screen.getByRole("img", { name: presentation.altText })
     ).toHaveAttribute("src", presentation.mediaUrl);
