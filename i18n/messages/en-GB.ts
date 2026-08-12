@@ -408,6 +408,8 @@ export const EN_GB_MESSAGES = {
   "waves.poll.status.voted": "Voted",
   "waves.poll.status.updated": "Updated",
   "common.close": "Close",
+  "waves.create.dialog.subwaveTitle": "Create subwave",
+  "waves.create.dialog.waveTitle": "Create Wave",
   "waves.create.actions.cancel": "Cancel",
   "waves.create.actions.complete": "Complete",
   "waves.create.actions.next": "Next",

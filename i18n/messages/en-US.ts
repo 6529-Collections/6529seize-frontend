@@ -1008,6 +1008,11 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   save: "Save",
 } as const);
 
+const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
+  subwaveTitle: "Create subwave",
+  waveTitle: "Create Wave",
+} as const);
+
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
   "waves.create.rank.mode",
   {
@@ -2696,6 +2701,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_ACTIONS_MESSAGES,
+  ...WAVE_CREATE_DIALOG_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,

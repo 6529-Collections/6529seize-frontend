@@ -54,6 +54,7 @@ type MobileWrapperDialogProps = {
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
 };
 
@@ -74,15 +75,17 @@ type MobileDialogDragOptions = {
 function DialogCloseButton({
   onClick,
   className,
+  label,
 }: {
   readonly onClick: () => void;
   readonly className?: string;
+  readonly label: string;
 }) {
   return (
     <button
       type="button"
-      title="Close panel"
-      aria-label="Close panel"
+      title={label}
+      aria-label={label}
       className={clsx(
         "-tw-mr-2 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
         className
@@ -118,6 +121,7 @@ function DialogHeader({
   showHeaderCloseButton,
   headerCloseButtonClassName,
   titleClassName,
+  closeLabel,
 }: {
   readonly title: string | undefined;
   readonly showDesktopCloseButton: boolean;
@@ -128,6 +132,7 @@ function DialogHeader({
   readonly showHeaderCloseButton?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly closeLabel: string;
 }) {
   return (
     <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
@@ -157,6 +162,7 @@ function DialogHeader({
         {showDesktopCloseButton && (
           <DialogCloseButton
             onClick={onClose}
+            label={closeLabel}
             className={clsx(
               "tw-hidden md:tw-inline-flex",
               headerCloseButtonClassName
@@ -166,6 +172,7 @@ function DialogHeader({
         {showHeaderCloseButton && (
           <DialogCloseButton
             onClick={onClose}
+            label={closeLabel}
             className={clsx("tw-inline-flex", headerCloseButtonClassName)}
           />
         )}
@@ -357,11 +364,13 @@ function FloatingCloseButton({
   tabletModal,
   onClose,
   mobileCloseButtonClassName,
+  closeLabel,
 }: {
   readonly show: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly mobileCloseButtonClassName?: string | undefined;
+  readonly closeLabel: string;
 }) {
   if (!show) {
     return null;
@@ -385,6 +394,7 @@ function FloatingCloseButton({
       >
         <DialogCloseButton
           onClick={onClose}
+          label={closeLabel}
           {...(mobileCloseButtonClassName
             ? { className: mobileCloseButtonClassName }
             : {})}
@@ -663,6 +673,7 @@ export default function MobileWrapperDialog({
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
+  closeLabel = "Close panel",
   dismissible = true,
 }: MobileWrapperDialogProps) {
   const { isCapacitor, isIos } = useCapacitor();
@@ -757,6 +768,7 @@ export default function MobileWrapperDialog({
                       tabletModal={tabletModal}
                       onClose={handleClose}
                       mobileCloseButtonClassName={mobileCloseButtonClassName}
+                      closeLabel={closeLabel}
                     />
                     <div className={surfaceClassNames} style={surfaceStyle}>
                       <div
@@ -772,8 +784,11 @@ export default function MobileWrapperDialog({
                           titleActions={titleActions}
                           headerActions={headerActions}
                           showHeaderCloseButton={showInlineHeaderCloseButton}
-                          headerCloseButtonClassName={headerCloseButtonClassName}
+                          headerCloseButtonClassName={
+                            headerCloseButtonClassName
+                          }
                           titleClassName={titleClassName}
+                          closeLabel={closeLabel}
                         />
                         {children}
                       </div>
