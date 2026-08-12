@@ -55,26 +55,34 @@ const createWave = ({
   parentWave = null,
   adminGroupId = "parent-admin-group",
   includeAdminGroup = true,
+  includeWaveConfig = true,
 }: {
   readonly eligible?: boolean;
   readonly parentWave?: object | null;
   readonly adminGroupId?: string | null;
   readonly includeAdminGroup?: boolean;
+  readonly includeWaveConfig?: boolean;
 } = {}) =>
   ({
     id: "parent-wave",
     parent_wave: parentWave,
     chat: { scope: { group: { is_direct_message: false } } },
-    wave: {
-      authenticated_user_eligible_for_admin: eligible,
-      admin_group: includeAdminGroup
-        ? {
-            group: adminGroupId
-              ? { id: adminGroupId, name: "Parent admins", is_hidden: false }
-              : null,
-          }
-        : null,
-    },
+    wave: includeWaveConfig
+      ? {
+          authenticated_user_eligible_for_admin: eligible,
+          admin_group: includeAdminGroup
+            ? {
+                group: adminGroupId
+                  ? {
+                      id: adminGroupId,
+                      name: "Parent admins",
+                      is_hidden: false,
+                    }
+                  : null,
+              }
+            : null,
+        }
+      : undefined,
   }) as any;
 
 describe("MyStreamWaveCreateActionsMenu", () => {
@@ -139,6 +147,17 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     const { container } = render(
       <MyStreamWaveCreateActionsMenu
         wave={createWave({ eligible: false })}
+        onCreated={jest.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders no create control without a wave config payload", () => {
+    const { container } = render(
+      <MyStreamWaveCreateActionsMenu
+        wave={createWave({ includeWaveConfig: false })}
         onCreated={jest.fn()}
       />
     );

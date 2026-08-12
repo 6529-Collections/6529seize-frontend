@@ -27,19 +27,21 @@ export default function MyStreamWaveCreateActionsMenu({
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const [isCreateSubwaveOpen, setIsCreateSubwaveOpen] = useState(false);
   const isDirectMessage = wave.chat?.scope?.group?.is_direct_message ?? false;
-  const parentAdminGroup = wave.wave.admin_group as
+  const waveConfig = wave.wave as typeof wave.wave | null | undefined;
+  const parentAdminGroup = waveConfig?.admin_group as
     | typeof wave.wave.admin_group
-    | null;
+    | null
+    | undefined;
   const parentAdminGroupId = parentAdminGroup?.group?.id ?? null;
   const canCreateCuration =
-    wave.wave?.authenticated_user_eligible_for_admin === true;
+    waveConfig?.authenticated_user_eligible_for_admin === true;
   const canCreateSubwave =
     Boolean(connectedProfile) &&
     !activeProfileProxy &&
     !isDirectMessage &&
     !wave.parent_wave &&
     Boolean(parentAdminGroupId) &&
-    wave.wave?.authenticated_user_eligible_for_admin === true;
+    waveConfig?.authenticated_user_eligible_for_admin === true;
 
   const menuItems = useMemo<CompactMenuItem[]>(
     () => [
