@@ -119,6 +119,7 @@ describe("NextGen page component", () => {
       expect(mockedFetch).toHaveBeenCalledWith({
         endpoint: "nextgen/featured",
         headers: { "x-mock": "1" },
+        errorMode: "structured",
       })
     );
 

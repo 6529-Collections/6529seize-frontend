@@ -5,10 +5,10 @@ import {
 } from "@/components/providers/metadata";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { isEmptyObject } from "@/helpers/Helpers";
-import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { getNextgenTitle } from "../../title-utils";
+import { fetchNextGenApiOrNull } from "../../nextgen-api";
 
 const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
 
@@ -17,10 +17,10 @@ export async function fetchCollection(
   headers: Record<string, string>
 ): Promise<NextGenCollection | null> {
   const parsedId = encodeURIComponent(id.replaceAll(/-/g, " "));
-  const collection = await commonApiFetch<NextGenCollection>({
+  const collection = await fetchNextGenApiOrNull<NextGenCollection>({
     endpoint: `nextgen/collections/${parsedId}`,
-    headers: headers,
-  }).catch(() => null);
+    headers,
+  });
   return collection === null || isEmptyObject(collection) ? null : collection;
 }
 
