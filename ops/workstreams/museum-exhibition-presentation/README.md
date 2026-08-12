@@ -31,9 +31,11 @@ The interface must preserve the exact lifecycle boundary:
    presentation manifest. Preservation locators never enter the visitor
    adapter.
 6. Conflict at Its Edges uses the five exact display sources approved through
-   downstream accession review, with credit, rights notice, fixity, historical
-   Wave provenance, and the active accession amendment retained. The Wave
-   selects the acquisition; it does not administer media-source review.
+   downstream accession review. Each projection must match its Work and Media
+   identities, historical Wave locator, Arweave display source, SHA-256 fixity,
+   byte size, dimensions, display policy, and active accession amendment as one
+   atomic gate. Credit and rights notices remain attached. The Wave selects the
+   acquisition; it does not administer media-source review.
 7. Images preserve their natural aspect ratio; the gallery does not crop works
    into uniform squares.
 

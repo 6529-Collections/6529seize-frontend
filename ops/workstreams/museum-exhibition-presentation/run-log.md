@@ -143,6 +143,10 @@
   media. The help corpus now describes the reviewed Keys and Gates surrogates
   and the exact Conflict accession-processing status, removing the obsolete
   text-only and acquisition-review statements.
+- The CloudFront-only display rule above was superseded by the downstream
+  accession media-continuity review recorded below. The historical Wave
+  CloudFront locator remains provenance; the fixity-verified Arweave original
+  is the active exhibition media URL.
 - Staging qualification of frontend main `9354f35f8ed1e5932a1a32bad0ae6f564b2c5b3e`
   passed, but retained mobile accession evidence showed that the canonical first
   Conflict work is the 16.9 MB Palmyra master. Its intentional load control left
@@ -173,7 +177,8 @@
   is `sha256:b5e33e09274f92d530268d6726d0778f30b75f8140016c3c959fdcfa5c7a99b6`
   / `0xe293001df58dca7ea8343e962e118acce9c6247824b60ab693587512164981b0`.
 - Frontend adapter commit `8f61525f445760e90d04878cc297aac79997db4d`
-  requires the historical Wave locator, exact Arweave source and fixity, and
+  requires Work and Media identity, historical Wave locator, exact Arweave
+  display source, SHA-256 fixity, byte size, dimensions, display policy, and
   active downstream accession amendment as one fail-closed projection. It
   changes no accession, title, custody, rights, preservation, or Collection
   claim. Focused validation passed 238 tests, changed lint/typecheck and a clean

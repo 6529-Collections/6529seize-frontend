@@ -94,6 +94,7 @@ export function accessionMediaFacts(
   assertActiveDisplaySourceAmendment({
     mediaEntity,
     media,
+    publicationRecordId,
     historicalWaveUri,
     displayUri,
     sourceByteSize,
@@ -110,6 +111,7 @@ export function accessionMediaFacts(
 function assertActiveDisplaySourceAmendment(input: {
   readonly mediaEntity: MuseumPublicEntityRecord;
   readonly media: Readonly<Record<string, unknown>>;
+  readonly publicationRecordId: string;
   readonly historicalWaveUri: string;
   readonly displayUri: string;
   readonly sourceByteSize: number;
@@ -127,6 +129,9 @@ function assertActiveDisplaySourceAmendment(input: {
     ) ||
     typeof amendmentPath !== "string" ||
     !isMuseumSafeGovernedSourcePath(amendmentPath) ||
+    !amendmentPath.startsWith(
+      `records/proposed-gifts/${input.publicationRecordId}/`
+    ) ||
     !/^records\/proposed-gifts\/[^/]+\/public\/scholarship\/machine\/media-source-continuity-amendment\.json$/u.test(
       amendmentPath
     ) ||

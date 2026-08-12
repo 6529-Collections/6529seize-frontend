@@ -862,6 +862,32 @@ describe("Wave publication receipt joins", () => {
     expect(() =>
       projectMediaRelations(graph.entities, graph, mismatchedDocuments)
     ).toThrow("public_entity_graph_media_accession_amendment");
+
+    const unrelatedAmendmentPath =
+      "records/proposed-gifts/6529NM-PG-2026-999/public/scholarship/machine/media-source-continuity-amendment.json";
+    const unrelatedMedia = JSON.parse(
+      JSON.stringify(media).replace(
+        MEDIA_CONTINUITY_AMENDMENT_PATH,
+        unrelatedAmendmentPath
+      )
+    ) as MuseumPublicEntityRecord;
+    const unrelatedGraph = {
+      ...graph,
+      entities: [work, unrelatedMedia],
+    } satisfies MuseumPublicEntityGraph;
+    const unrelatedDocuments = new Map([
+      [
+        unrelatedAmendmentPath,
+        { ...amendmentDocument, path: unrelatedAmendmentPath },
+      ],
+    ]);
+    expect(() =>
+      projectMediaRelations(
+        unrelatedGraph.entities,
+        unrelatedGraph,
+        unrelatedDocuments
+      )
+    ).toThrow("public_entity_graph_media_accession_record");
   });
 
   it("rejects a historical Wave locator without its accession token-source binding", () => {
