@@ -81,9 +81,9 @@ describe("WaveApprovalStatusBar", () => {
     expect(container.firstElementChild).not.toHaveClass("tw-overflow-hidden");
     expect(statusGroup).toHaveClass("tw-flex-1");
     expect(statusGroup.firstElementChild).toHaveClass(
-      "tw-grid",
-      "tw-grid-cols-2",
-      "md:tw-flex"
+      "tw-flex",
+      "tw-flex-col",
+      "md:tw-flex-row"
     );
     expect(statusGroup.firstElementChild?.firstElementChild).toHaveClass(
       "tw-items-baseline",
@@ -258,9 +258,16 @@ describe("WaveApprovalStatusBar", () => {
     });
     const statusItems = statusGroup.firstElementChild;
     expect(statusItems).toHaveClass(
-      "tw-grid-cols-2",
-      "tw-items-baseline",
-      "tw-gap-y-2"
+      "tw-flex",
+      "tw-flex-col",
+      "tw-gap-y-1",
+      "md:tw-flex-row"
+    );
+    expect(statusItems?.firstElementChild).toHaveClass(
+      "tw-w-full",
+      "tw-justify-between",
+      "md:tw-w-auto",
+      "md:tw-justify-start"
     );
     const labels = Array.from(statusItems?.children ?? [])
       .map((item) => item.firstElementChild?.textContent)

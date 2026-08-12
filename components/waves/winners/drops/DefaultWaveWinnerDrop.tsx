@@ -134,7 +134,11 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     >
       <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-between tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-          <div className="tw-flex tw-flex-1 tw-gap-x-3">
+          <div
+            className={`tw-flex tw-flex-1 tw-gap-x-3 ${
+              isApprovalWave ? "tw-items-start tw-pb-3" : ""
+            }`}
+          >
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
             <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
               <WaveWinnersDropHeader

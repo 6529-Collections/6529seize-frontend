@@ -254,9 +254,9 @@ export default function ApprovalDropVoteSummary({
             </span>
             <span
               aria-hidden="true"
-              className={`tw-font-mono tw-font-medium ${
-                emphasizeCurrent ? "tw-text-iron-400" : "tw-text-iron-50"
-              }`}
+              className={`tw-font-mono ${
+                emphasizeCurrent ? "tw-font-semibold" : "tw-font-medium"
+              } ${emphasizeCurrent ? "tw-text-iron-400" : "tw-text-iron-50"}`}
             >
               {formatLargeNumber(winningThreshold)}
             </span>

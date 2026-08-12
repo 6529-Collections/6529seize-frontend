@@ -118,11 +118,13 @@ describe("ParticipationDropFooter", () => {
 
     const actionRow = screen.getByTestId("vote-action").parentElement;
     const footerRow = actionRow?.parentElement;
+    const footerSurface = footerRow?.parentElement;
 
     expect(actionRow).toHaveClass("tw-ml-auto", "tw-w-auto", "tw-border-0");
     expect(actionRow).not.toHaveClass("tw-w-full", "tw-border-t");
     expect(footerRow).toHaveClass("tw-items-center", "tw-justify-between");
     expect(footerRow).not.toHaveClass("tw-flex-col");
+    expect(footerSurface).toHaveClass("tw-bg-iron-800/20");
   });
 
   it("keeps approval reactions above the approval footer controls", () => {

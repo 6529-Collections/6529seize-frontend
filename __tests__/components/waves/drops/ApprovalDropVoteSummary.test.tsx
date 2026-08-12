@@ -125,7 +125,11 @@ describe("ApprovalDropVoteSummary", () => {
       screen.getByTitle("70,022,534 / 42,000,000 TDH")
     ).toBeInTheDocument();
     expect(screen.getByText("70M")).toHaveClass("tw-font-mono");
-    expect(screen.getByText("42M")).toHaveClass("tw-font-mono");
+    expect(screen.getByText("42M")).toHaveClass(
+      "tw-font-mono",
+      "tw-font-medium",
+      "tw-text-iron-50"
+    );
     expect(
       screen
         .getAllByText("TDH")
@@ -238,6 +242,27 @@ describe("ApprovalDropVoteSummary", () => {
     expect(screen.getByTestId("progress")).toHaveAttribute(
       "data-projected-label",
       "77.7M"
+    );
+  });
+
+  it("gives the muted threshold equal visual weight in emphasized summaries", () => {
+    render(
+      <ApprovalDropVoteSummary
+        drop={createDrop({
+          rating: 0,
+          realtime_rating: 0,
+          wave: { voting_credit_type: ApiWaveCreditType.Tdh },
+        })}
+        winningThreshold={69_000_000}
+        variant="leaderboard"
+        emphasizeCurrent
+      />
+    );
+
+    expect(screen.getByText("69M")).toHaveClass(
+      "tw-font-mono",
+      "tw-font-semibold",
+      "tw-text-iron-400"
     );
   });
 

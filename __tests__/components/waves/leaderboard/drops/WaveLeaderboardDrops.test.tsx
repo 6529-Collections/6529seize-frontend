@@ -150,7 +150,6 @@ const renderComp = (
     isError: false,
     isFetching: false,
     isFetchingNextPage: false,
-    isFetchingPreviousPage: false,
     refetch: jest.fn(),
     manualFetch: jest.fn(),
     ...hookReturn,
