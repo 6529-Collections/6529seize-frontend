@@ -192,3 +192,31 @@
   each Arweave display source to the canonical continuity amendment. The source
   publication now includes that amendment atomically, and the adapter verifies
   each Work mapping before rendering.
+
+## 2026-08-12 canonical downstream accession source
+
+- Museum PR #56 merged as canonical main
+  `970ac8b6a3f1c51b21090cee71365bf9aa4bcd42`.
+- Constructed source Candidate A is
+  `c326825445ce1c2ea70623cb75d721164be36619`; its governed manifest is
+  `sha256:0b4f8a83095ce3496524f6bd9196fde813aa6754c6d18714633c7b217c34c01b`
+  / `0xac73dfbdff1e299ebcb5c6d1bb6e190d5900b4d58d10019562f3092743773eda`.
+- Independently reviewed source B is
+  `dfb7024075efd0cedf63eebd4f4e87b7ce84808f`; its governed manifest is
+  `sha256:a6a374b2ca651ff96aefda43c006f871554eaca28aa242f72cf7bacc4cd68ef0`
+  / `0x7d528d03251cbd804b07e6f96ca003f2b3cec5692f06263b95eb4f7dd457a354`.
+- Immutable catalog C is
+  `859c99b2a586c2e7d9d3f329b150da12a95eab46`; its catalog file SHA-256 is
+  `sha256:7920ef017ad74b21feeb3df92836c2356fc251219aa230897f49075bd7dd8c9d`
+  and its envelope content hash is
+  `0xb77ab37c3b95ede86b021c4c9b8e5271a4985e9ab67896ee97ef8014f527d299`.
+- Exact Catalog C passed the required Museum validation, focused
+  Stream/catalog, both public-publication jobs, and deterministic Ubuntu before
+  merge. The slower deterministic Windows portability lane had no failure and
+  was not the required merge check.
+- The current catalog tool repeatedly spawns Git processes per accepted blob
+  during construction and validation. On this Windows host, activating the
+  340-record corpus took about 41 minutes. A later control-plane optimization
+  should validate the committed manifest commitments first and use one
+  `git cat-file --batch` stream for optional full-blob verification. This is a
+  performance defect, not a reason to weaken the hash or exact-tree boundary.
