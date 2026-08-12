@@ -315,6 +315,7 @@
   "museum.network.artists.back": "Back to artists",
   "museum.network.artists.artist": "Artist",
   "museum.network.artists.worksInCollection": "Works in the collection",
+  "museum.network.artists.worksByArtist": "Works by this artist",
   "museum.network.artists.projects": "Projects represented",
   "museum.network.artists.acquisitions": "Acquisitions connected to this artist",
   "museum.network.artists.profile": "Artist and practice profile",

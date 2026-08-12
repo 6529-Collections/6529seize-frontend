@@ -15,13 +15,17 @@ export function TypedArtistWorks({
   view,
   works,
 }: TypedArtistWorksProps) {
+  if (works.length === 0) {
+    return null;
+  }
+
   return (
     <section className="tw-mt-12" aria-labelledby="typed-artist-works-title">
       <h2
         id="typed-artist-works-title"
         className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
       >
-        {t(DEFAULT_LOCALE, "museum.network.acquisitions.related")}
+        {t(DEFAULT_LOCALE, "museum.network.artists.worksByArtist")}
       </h2>
       <div className="tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
         {works.map((work, index) => (

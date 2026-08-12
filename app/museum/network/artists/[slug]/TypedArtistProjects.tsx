@@ -24,11 +24,19 @@ export function TypedArtistProjects({ projects }: TypedArtistProjectsProps) {
           >
             <Link
               href={`/museum/network/projects/${encodeURIComponent(project.slug)}`}
-              className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 tw-no-underline"
+              className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
               <span>{project.title}</span>
               <span className="tw-text-sm tw-font-normal tw-text-iron-500">
-                {project.workIds?.length ?? project.artworkIds.length} works
+                {t(
+                  DEFAULT_LOCALE,
+                  (project.workIds?.length ?? project.artworkIds.length) === 1
+                    ? "museum.network.projects.workCount.one"
+                    : "museum.network.projects.workCount.other",
+                  {
+                    count: project.workIds?.length ?? project.artworkIds.length,
+                  }
+                )}
               </span>
             </Link>
           </li>
