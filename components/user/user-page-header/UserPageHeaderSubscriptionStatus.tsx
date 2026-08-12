@@ -3,6 +3,7 @@
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { getProfileSubscriptionsHref } from "@/components/user/subscriptions/subscriptionNavigation";
 import {
   formatSubscriptionCoverageDate,
@@ -62,10 +63,14 @@ const STATUS_ICON_CLASSES: Record<SubscriptionCoverageTone, string> = {
   neutral: "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700",
 };
 
+const SUBSCRIPTIONS_TITLE_KEY = "subscriptions.coverage.header.title";
+
 export default function UserPageHeaderSubscriptionStatus({
   profile,
+  compact = false,
 }: Readonly<{
   profile: ApiIdentity;
+  compact?: boolean;
 }>) {
   const locale = useBrowserLocale();
   const { country } = useCookieConsent();
@@ -77,12 +82,26 @@ export default function UserPageHeaderSubscriptionStatus({
   const profileKey = profile.consolidation_key.trim();
   const profileHref = getProfileSubscriptionsHref(profile);
   const coverageQuery = useSubscriptionCoverage({
-    enabled: !hideSubscriptions,
+    enabled: !hideSubscriptions && !compact,
     profileKey,
   });
 
   if (hideSubscriptions || !profileKey || !profileHref) {
     return null;
+  }
+
+  if (compact) {
+    return (
+      <ButtonLink
+        href={profileHref}
+        variant="tertiary"
+        size="sm"
+        aria-label={t(locale, SUBSCRIPTIONS_TITLE_KEY)}
+      >
+        <span>{t(locale, SUBSCRIPTIONS_TITLE_KEY)}</span>
+        <ArrowRightIcon className="tw-size-3.5" aria-hidden="true" />
+      </ButtonLink>
+    );
   }
 
   if (coverageQuery.isLoading) {
@@ -106,7 +125,7 @@ export default function UserPageHeaderSubscriptionStatus({
       >
         <span className="tw-min-w-0">
           <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-100">
-            {t(locale, "subscriptions.coverage.header.title")}
+            {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
           </span>
           <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-text-iron-400">
             {t(locale, "subscriptions.coverage.status.unknown")}
@@ -167,7 +186,7 @@ export default function UserPageHeaderSubscriptionStatus({
       </span>
       <span className="tw-min-w-0 tw-flex-1">
         <span className="tw-block tw-truncate tw-text-[13px] tw-font-medium tw-text-iron-100">
-          {t(locale, "subscriptions.coverage.header.title")}
+          {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
         </span>
         <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-leading-4 tw-text-iron-400">
           {secondaryLine}

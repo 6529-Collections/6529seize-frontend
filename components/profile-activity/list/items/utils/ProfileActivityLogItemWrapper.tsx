@@ -41,9 +41,9 @@ export default function ProfileActivityLogItemWrapper({
   const pfp = profile?.pfp ?? null;
 
   return (
-    <div className="tw-group tw-p-4 tw-bg-[#0A0A0C]/50 hover:tw-bg-[#0A0A0C] tw-border tw-border-solid tw-border-white/[0.12] hover:tw-border-white/[0.16] tw-rounded-lg tw-transition-all tw-duration-200">
+    <div className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/60 tw-p-4 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.1] hover:tw-bg-iron-900">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-x-3">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-3">
           {!isArchived &&
             (pfp ? (
               <img

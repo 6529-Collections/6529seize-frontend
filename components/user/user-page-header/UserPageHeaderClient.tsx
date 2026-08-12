@@ -156,6 +156,12 @@ export default function UserPageHeaderClient({
       ? profile.handle
       : null;
   const showSubscriptionStatus = isMyProfile && !activeProfileProxy;
+  let subscriptionStatusVisibilityClass = "";
+  if (canEdit) {
+    subscriptionStatusVisibilityClass = hasTouchScreen
+      ? "tw-hidden"
+      : "tw-hidden sm:tw-block";
+  }
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -224,10 +230,14 @@ export default function UserPageHeaderClient({
 
               {canEdit ? (
                 <div
-                  className={`tw-absolute tw-right-4 tw-top-0 sm:tw-right-6 md:tw-right-8 md:tw-pointer-events-auto ${
+                  className={`tw-absolute tw-right-4 -tw-top-[5.5rem] tw-flex tw-items-center tw-gap-2 sm:tw-right-6 sm:-tw-top-[6.625rem] md:tw-right-8 md:-tw-top-12 md:tw-pointer-events-auto ${
                     hasTouchScreen ? "" : "sm:tw-hidden"
                   }`}
                 >
+                  <UserPageHeaderSubscriptionStatus
+                    profile={profile}
+                    compact
+                  />
                   <UserPageHeaderEditProfile
                     profile={profile}
                     statement={aboutStatement}
@@ -267,7 +277,8 @@ export default function UserPageHeaderClient({
                         : "tw-hidden lg:tw-flex"
                     }`}
                   >
-                    {showSubscriptionStatus ? (
+                    {showSubscriptionStatus &&
+                    !(canEdit && hasTouchScreen) ? (
                       <div className="tw-hidden lg:tw-block">
                         <UserPageHeaderSubscriptionStatus profile={profile} />
                       </div>
@@ -315,11 +326,9 @@ export default function UserPageHeaderClient({
 
             {showSubscriptionStatus ? (
               <div
-                className={
-                  hasVisibleAbout
-                    ? "tw-mt-4 md:tw-pointer-events-auto lg:tw-hidden"
-                    : "md:tw-pointer-events-auto lg:tw-hidden"
-                }
+                className={`md:tw-pointer-events-auto lg:tw-hidden ${
+                  hasVisibleAbout ? "tw-mt-4" : ""
+                } ${subscriptionStatusVisibilityClass}`}
               >
                 <UserPageHeaderSubscriptionStatus profile={profile} />
               </div>
