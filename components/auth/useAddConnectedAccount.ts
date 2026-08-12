@@ -111,8 +111,7 @@ export function useAddConnectedAccount({
           account.status !== "reconnecting"));
 
     if (hasStaleAddConnectedAccountGuard) {
-      clearAddConnectedAccountGuard();
-      setIsAddingConnectedAccount(false);
+      cancelAddConnectedAccount();
     }
 
     if (isAddingConnectedAccountRef.current) {
