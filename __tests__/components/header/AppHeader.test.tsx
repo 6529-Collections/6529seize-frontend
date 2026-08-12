@@ -279,6 +279,17 @@ describe("AppHeader", () => {
     expect(healthLink.parentElement).toHaveClass("tw-flex", "tw-items-center");
   });
 
+  it("keeps network health hidden at tablet widths outside Capacitor", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({ address: null, asPath: "/" });
+
+    expect(
+      screen.getByRole("link", {
+        name: "Open network health dashboard",
+      })
+    ).toHaveClass("md:tw-hidden");
+  });
+
   it("opens the account menu immediately when only one profile is connected", () => {
     const seizeSwitchConnectedAccount = jest.fn();
     setup({
