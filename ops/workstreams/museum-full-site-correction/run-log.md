@@ -137,3 +137,21 @@ comes first; acquisition and accession follow.` before the next hosted lane
   668 returned successful Museum-bound responses with no visible soft-404 or
   publication-unavailable state. This preliminary result will be repeated
   against the corrected staging and production releases.
+- PR #3733 merged as frontend main
+  `d438a57eb58d3abaf4d7fc549441c9a5af253190`. Staging deploy run
+  `31681902527` and automatic staging E2E `31682667244` passed. The repeated
+  authenticated crawl passed all 668 routes; a separate decoded-media audit
+  confirmed all 12 permanent Collection works, all five Magnum works, and all
+  16 Keys and Gates selections painted nonzero images.
+- Independent post-staging editorial, IA, media, and visual audits found
+  release-blocking document association and presentation defects: sibling
+  object and artist manuscripts could be inherited through shared parent IDs;
+  document IDs containing slashes or colons produced broken Research routes;
+  the Collection hero left the first desktop viewport blank; portrait project
+  media clipped; wide tables were unusable on mobile; and complete technical
+  manuscripts produced 100,000–300,000-pixel continuous pages.
+- PR #3735 exact head `17e6fb8e2fdfbc30318fa6b16656775d3627b917`
+  corrects those defects and adds plain museum-language accession channels.
+  Local qualification passed 78 focused/regression tests, changed lint,
+  changed typecheck, formatting, and the Windows-safe diff check. Hosted
+  exact-head review and CI are in progress.

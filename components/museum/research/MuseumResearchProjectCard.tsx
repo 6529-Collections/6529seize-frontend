@@ -20,11 +20,34 @@ export interface MuseumResearchProjectCardData {
   readonly presentationMedia?: MuseumExternalProposalPresentationMedia;
 }
 
+function portraitAspectRatio(
+  width: number | null,
+  height: number | null
+): number | undefined {
+  if (width === null || height === null || height <= width) return undefined;
+  return width / height;
+}
+
 export function MuseumResearchProjectCard({
   project,
 }: {
   readonly project: MuseumResearchProjectCardData;
 }) {
+  const mediaAspectRatio = project.media
+    ? portraitAspectRatio(project.media.width, project.media.height)
+    : undefined;
+  const presentationAspectRatio = project.presentationMedia
+    ? portraitAspectRatio(
+        project.presentationMedia.width,
+        project.presentationMedia.height
+      )
+    : undefined;
+  const mediaAspectRatioProps =
+    mediaAspectRatio === undefined ? {} : { aspectRatio: mediaAspectRatio };
+  const presentationStyleProps =
+    presentationAspectRatio === undefined
+      ? {}
+      : { style: { aspectRatio: presentationAspectRatio } };
   return (
     <article className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4 sm:tw-p-5">
       {project.media === undefined ? null : (
@@ -36,11 +59,15 @@ export function MuseumResearchProjectCard({
           href={project.href}
           title={project.title}
           sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+          {...mediaAspectRatioProps}
         />
       )}
       {project.media !== undefined ||
       project.presentationMedia === undefined ? null : (
-        <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
+        <div
+          className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black"
+          {...presentationStyleProps}
+        >
           <MuseumProposalImage
             src={project.presentationMedia.mediaUrl}
             width={project.presentationMedia.width}

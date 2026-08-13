@@ -2,9 +2,14 @@ import {
   buildMuseumResearchDetailEntry,
   buildMuseumResearchRelations,
 } from "@/app/museum/network/research/[slug]/page";
-import type { MuseumResearchIndexEntry } from "@/app/museum/network/research/page";
+import {
+  buildMuseumResearchIndex,
+  findMuseumResearchIndexEntry,
+  type MuseumResearchIndexEntry,
+} from "@/app/museum/network/research/page";
 import type {
   MuseumMedia,
+  MuseumPublicDocument,
   MuseumPublication,
 } from "@/lib/museum/publication/types";
 
@@ -149,6 +154,51 @@ function publication(): MuseumPublication {
 }
 
 describe("Museum research detail enrichment", () => {
+  it("generates unique URL-safe document slugs and resolves each detail entry", () => {
+    const generatedDocuments: readonly MuseumPublicDocument[] = [
+      {
+        ...DOCUMENT,
+        id: "typed-source:records/research/a-study.md",
+        sourcePath: "records/research/a-study.md",
+      },
+      {
+        ...DOCUMENT,
+        id: "typed-source:records/research/a:study.md",
+        sourcePath: "records/research/a:study.md",
+      },
+      {
+        ...DOCUMENT,
+        id: "typed-source:records/research/a/study.md",
+        sourcePath: "records/research/a/study.md",
+      },
+    ];
+    const current = publication();
+    const withUnrepresentedDocuments = {
+      ...current,
+      documents: [...current.documents, ...generatedDocuments],
+    };
+
+    const entries = buildMuseumResearchIndex(withUnrepresentedDocuments);
+    const generatedEntries = entries.filter((entry) =>
+      generatedDocuments.some((document) => document.id === entry.id)
+    );
+
+    expect(entries.find((entry) => entry.id === RESEARCH_ID)?.slug).toBe(
+      ENTRY.slug
+    );
+    expect(new Set(entries.map((entry) => entry.slug)).size).toBe(
+      entries.length
+    );
+    expect(generatedEntries).toHaveLength(generatedDocuments.length);
+    expect(generatedEntries[0]?.slug).toMatch(/^a-study-of-a-work-/u);
+    for (const entry of generatedEntries) {
+      expect(entry.slug).not.toMatch(/[:%/\\]/u);
+      expect(
+        findMuseumResearchIndexEntry(withUnrepresentedDocuments, entry.slug)
+      ).toEqual(expect.objectContaining({ id: entry.id, slug: entry.slug }));
+    }
+  });
+
   it("prefers typed subject media and carries typed subjects and authors", () => {
     const detail = buildMuseumResearchDetailEntry(publication(), ENTRY);
 
