@@ -92,7 +92,6 @@ export default function CreateWaveInlineGroupIdentities({
               variant="secondary"
               size="md"
               onClick={onCancel}
-              className="!tw-h-12 sm:!tw-h-11"
             >
               {t(locale, "waves.create.actions.cancel")}
             </Button>

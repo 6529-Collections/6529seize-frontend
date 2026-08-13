@@ -476,7 +476,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                   canAddTokens={canAddTokens && !maxSelectionReached}
                   allowAll={allowAll}
                   selectedContract={!!selectedContract}
-                  variant={variant}
                   selectAllLabel={
                     contractTotalSupply
                       ? `Select All(${new Intl.NumberFormat("en-US").format(contractTotalSupply)})`

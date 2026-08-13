@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import type { ParseError, TokenRange } from "../types";
 import { formatBigIntWithSeparators, formatCanonical } from "../utils";
+import Button from "@/components/utils/button/Button";
 
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
@@ -153,9 +154,10 @@ export function NftEditRanges({
             </span>
             {showCopyButton && (
               <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-                <button
-                  type="button"
-                  className="tw-inline-flex tw-h-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/50 tw-bg-transparent tw-px-3 tw-text-xs tw-font-semibold tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  className="tw-border-primary-500/50 tw-bg-transparent tw-text-primary-300 desktop-hover:hover:tw-border-primary-500 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
                   onClick={handleCopy}
                   aria-label="Copy token selection"
                 >
@@ -170,7 +172,7 @@ export function NftEditRanges({
                       <span>Copy</span>
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -186,22 +188,24 @@ export function NftEditRanges({
         {showActionButtons && (
           <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row">
             {showToggleButton && (
-              <button
-                type="button"
-                className="tw-inline-flex tw-h-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+              <Button
+                variant="secondary"
+                size="sm"
+                className="tw-bg-transparent desktop-hover:hover:tw-border-primary-500 desktop-hover:hover:tw-bg-transparent"
                 onClick={onToggle}
               >
                 {isEditing ? "Hide text editor" : "Edit as text"}
-              </button>
+              </Button>
             )}
             {showClearButton && (
-              <button
-                type="button"
-                className="tw-inline-flex tw-h-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+              <Button
+                variant="secondary"
+                size="sm"
+                className="tw-bg-transparent desktop-hover:hover:tw-border-primary-500 desktop-hover:hover:tw-bg-transparent"
                 onClick={onClear}
               >
                 Clear All
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -225,20 +229,12 @@ export function NftEditRanges({
             </ul>
           )}
           <div className="tw-flex tw-justify-end tw-gap-2">
-            <button
-              type="button"
-              className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-1 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
-              onClick={onCancel}
-            >
+            <Button variant="secondary" size="sm" onClick={onCancel}>
               Cancel
-            </button>
-            <button
-              type="button"
-              className="tw-rounded tw-bg-primary-500 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-black hover:tw-bg-primary-400"
-              onClick={onApply}
-            >
+            </Button>
+            <Button variant="action" size="sm" onClick={onApply}>
               Apply
-            </button>
+            </Button>
           </div>
         </div>
       )}

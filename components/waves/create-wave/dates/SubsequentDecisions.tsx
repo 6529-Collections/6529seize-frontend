@@ -290,7 +290,7 @@ export default function SubsequentDecisions({
           <div className="tw-flex-shrink-0">
             <Button
               variant="primary"
-              size="lg"
+              size="md"
               onClick={handleAddTimeframe}
               disabled={!additionalTime}
             >
