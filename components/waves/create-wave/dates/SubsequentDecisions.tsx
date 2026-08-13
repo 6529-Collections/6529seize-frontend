@@ -74,13 +74,29 @@ export default function SubsequentDecisions({
   };
 
   const formatInterval = (interval: number) => {
-    if (interval >= periodToMs(1, Period.WEEKS)) {
-      return `${Math.round(interval / periodToMs(1, Period.WEEKS))}w`;
+    const week = periodToMs(1, Period.WEEKS);
+    const day = periodToMs(1, Period.DAYS);
+    const hour = periodToMs(1, Period.HOURS);
+    const minute = periodToMs(1, Period.MINUTES);
+
+    if (interval % week === 0) {
+      return t(locale, "waves.create.dates.rank.additional.intervalWeeks", {
+        count: interval / week,
+      });
     }
-    if (interval >= periodToMs(1, Period.DAYS)) {
-      return `${Math.round(interval / periodToMs(1, Period.DAYS))}d`;
+    if (interval % day === 0) {
+      return t(locale, "waves.create.dates.rank.additional.intervalDays", {
+        count: interval / day,
+      });
     }
-    return `${Math.round(interval / periodToMs(1, Period.HOURS))}h`;
+    if (interval % hour === 0) {
+      return t(locale, "waves.create.dates.rank.additional.intervalHours", {
+        count: interval / hour,
+      });
+    }
+    return t(locale, "waves.create.dates.rank.additional.intervalMinutes", {
+      count: interval / minute,
+    });
   };
 
   const handleDeleteDecision = (index: number, e: React.MouseEvent) => {
@@ -146,10 +162,10 @@ export default function SubsequentDecisions({
               {t(locale, "waves.create.dates.rank.additional.firstTitle")}
             </div>
             <p className="tw-mb-0 tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-iron-50">
-              {formatDate(firstDecisionTime)}
+              {formatDate(firstDecisionTime, locale)}
               <span className="tw-ml-1 tw-text-xs tw-text-iron-400">
                 (
-                {new Date(firstDecisionTime).toLocaleDateString(undefined, {
+                {new Date(firstDecisionTime).toLocaleDateString(locale, {
                   weekday: "long",
                 })}
                 )
@@ -192,7 +208,7 @@ export default function SubsequentDecisions({
                       )}
                     </div>
                     <p className="tw-mb-0 tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-iron-50">
-                      {formatDate(decisionDate)}
+                      {formatDate(decisionDate, locale)}
                       <span className="tw-ml-1 tw-text-xs tw-text-iron-400">
                         (
                         {new Date(decisionDate).toLocaleDateString(locale, {
@@ -212,7 +228,7 @@ export default function SubsequentDecisions({
                     )}
                     // Hover-revealed on pointer devices; always visible where
                     // there is no hover to reveal it (touch phones).
-                    className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/30 tw-transition-all tw-duration-300 hover:tw-bg-iron-700/60 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red touch-only:tw-opacity-100"
+                    className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/30 tw-transition-all tw-duration-300 hover:tw-bg-iron-700/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red desktop-hover:focus-visible:tw-opacity-100 touch-only:tw-opacity-100"
                   >
                     <FontAwesomeIcon
                       icon={faTrashCan}
@@ -298,7 +314,7 @@ export default function SubsequentDecisions({
                       key="additional-announcement-preview-date"
                       className="tw-font-medium tw-text-iron-300"
                     >
-                      {formatDate(previewDate)}
+                      {formatDate(previewDate, locale)}
                     </span>
                   ),
                 })}

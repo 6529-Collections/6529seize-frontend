@@ -90,7 +90,8 @@ describe("waveDecisionService", () => {
 
   it("formats date", () => {
     const ts = Date.UTC(2020, 0, 1, 12, 0, 0);
-    expect(formatDate(ts)).toMatch(/Jan/);
+    expect(formatDate(ts, "en-US")).toMatch(/Jan/);
+    expect(formatDate(ts, "en-GB")).not.toBe(formatDate(ts, "en-US"));
   });
 
   it("counts total decisions in rolling mode", () => {

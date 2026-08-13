@@ -51,7 +51,7 @@ function RollingEndDateCollapsedContent({
         <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-50">
           {endDate === null
             ? t(locale, "waves.create.dates.rank.end.noEndDate")
-            : formatDate(endDate)}
+            : formatDate(endDate, locale)}
         </span>
       </span>
     </span>
@@ -164,7 +164,7 @@ export default function RollingEndDate({
                   <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
                     {selectedEndDate === null
                       ? t(locale, "waves.create.dates.rank.end.noEndDate")
-                      : formatDate(selectedEndDate)}
+                      : formatDate(selectedEndDate, locale)}
                   </p>
                   {hasSelectedEndDate && (
                     <button
@@ -270,7 +270,8 @@ export default function RollingEndDate({
                           dates.firstDecisionTime,
                           dates.subsequentDecisions,
                           selectedEndDate
-                        )
+                        ),
+                        locale
                       )}
                     </p>
                   </div>
