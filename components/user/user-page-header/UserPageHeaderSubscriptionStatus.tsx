@@ -31,9 +31,7 @@ import type { ComponentType, SVGProps } from "react";
 
 type StatusIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
-function SubscriptionEthIcon({
-  className,
-}: Readonly<SVGProps<SVGSVGElement>>) {
+function SubscriptionEthIcon({ className }: Readonly<SVGProps<SVGSVGElement>>) {
   return (
     <span className={clsx("tw-inline-flex tw-flex-none", className)}>
       <EthereumIcon />
@@ -48,16 +46,16 @@ const STATUS_ICONS: Record<SubscriptionCoverageTone, StatusIcon> = {
   neutral: SubscriptionEthIcon,
 };
 
-const STATUS_CONTAINER_RING_CLASSES: Record<SubscriptionCoverageTone, string> = {
-  positive: "tw-ring-emerald-400/25",
-  caution: "tw-ring-amber-300/30",
-  danger: "tw-ring-red-300/35",
-  neutral: "tw-ring-white/10",
-};
+const STATUS_CONTAINER_RING_CLASSES: Record<SubscriptionCoverageTone, string> =
+  {
+    positive: "tw-ring-emerald-400/25",
+    caution: "tw-ring-amber-300/30",
+    danger: "tw-ring-red-300/35",
+    neutral: "tw-ring-white/10",
+  };
 
 const STATUS_ICON_CLASSES: Record<SubscriptionCoverageTone, string> = {
-  positive:
-    "tw-bg-emerald-400/10 tw-text-emerald-300 tw-ring-emerald-400/25",
+  positive: "tw-bg-emerald-400/10 tw-text-emerald-300 tw-ring-emerald-400/25",
   caution: "tw-bg-amber-300/10 tw-text-amber-200 tw-ring-amber-300/25",
   danger: "tw-bg-red-300/10 tw-text-red-200 tw-ring-red-300/30",
   neutral: "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700",

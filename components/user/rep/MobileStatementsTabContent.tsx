@@ -12,17 +12,18 @@ export default function MobileStatementsTabContent({
   return (
     <>
       <h3 className="tw-sr-only">ID Statements</h3>
-      {canEditStatements && (
-        <div className="tw-mt-5 tw-flex tw-justify-end">
-          <UserPageIdentityStatementsAddButton profile={profile} />
-        </div>
-      )}
-      <div
-        className={`tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0f1014] ${
-          canEditStatements ? "tw-mt-3" : "tw-mt-5"
-        }`}
-      >
-        <UserPageIdentityStatements profile={profile} />
+      <div className="tw-mt-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0f1014]">
+        <UserPageIdentityStatements
+          profile={profile}
+          headerAction={
+            canEditStatements ? (
+              <UserPageIdentityStatementsAddButton
+                profile={profile}
+                size="sm"
+              />
+            ) : undefined
+          }
+        />
       </div>
     </>
   );
