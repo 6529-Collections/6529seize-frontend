@@ -89,15 +89,11 @@ describe("getCurrentRevenueSplitsEditorialMarkdown", () => {
     expect(result).toContain(
       "Current fixed-price ETH sales and English auctions keep their own split rules"
     );
-    expect(result).toContain(
-      "the current sale paths do not use it."
-    );
+    expect(result).toContain("the current sale paths do not use it.");
     expect(result).toContain("ADR 0021 is accepted design, not implemented");
     expect(result).toContain("ADR 0019");
     expect(result).toContain("is proposed, not accepted");
-    expect(result).toContain(
-      "A marketplace can choose whether to pay it."
-    );
+    expect(result).toContain("A marketplace can choose whether to pay it.");
     expect(result).toContain(
       `https://github.com/${SOURCE.repository}/blob/${SOURCE.commit}/smart-contracts/StreamDrops.sol#L540-L559`
     );

@@ -22,11 +22,11 @@ offchain token metadata. It validates and limits stored inputs, protects the JSO
 and HTML wrapper, hashes ordered script chunks, creates versioned dependency
 records, records who may write each kind of collection claim, and emits metadata
 refresh events for changes made in Core, the shared token contract. See the exact
-[`StreamMetadataRenderer` code](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L51-L383).
+[\`StreamMetadataRenderer\` code](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L51-L383).
 
 ### What the accepted design says
 
-[`ADR 0006`](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0006-metadata-freeze.md#L96-L145)
+[\`ADR 0006\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0006-metadata-freeze.md#L96-L145)
 is the accepted metadata and freeze design. It says pending and final metadata
 must be distinct, dependency versions must not be silently replaced, frozen
 collections must commit to their rendering inputs, and metadata changes must be
@@ -44,8 +44,7 @@ file-retrieval evidence is also still incomplete.
 
 A valid hash proves that available bytes match a commitment. It does not keep
 those bytes online, make old software run, or prove that common apps can process
-the result. This public review is not proof of launch, deployment, audit, or
-safety.
+the result. This public review is not proof of launch, deployment, audit, or safety.
 
 ## The first question is: where are the bytes?
 
@@ -58,16 +57,16 @@ Reviewers need to distinguish four broad setups:
 - a hybrid keeps commitments onchain while some required bytes live elsewhere.
 
 The main rendering code is
-[`StreamMetadataRenderer.sol`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol).
+[\`StreamMetadataRenderer.sol\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol).
 Collection records are handled by
-[`StreamCollectionMetadata.sol`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol),
+[\`StreamCollectionMetadata.sol\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol),
 shared contract presentation by
-[`StreamContractMetadata.sol`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamContractMetadata.sol),
+[\`StreamContractMetadata.sol\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamContractMetadata.sol),
 and shared code libraries by
-[`DependencyRegistry.sol`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/DependencyRegistry.sol).
+[\`DependencyRegistry.sol\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/DependencyRegistry.sol).
 
 "Onchain metadata" is not precise enough by itself. It may mean only that
-`tokenURI()` returns JSON from the contract. The JSON may still point to an
+\`tokenURI()\` returns JSON from the contract. The JSON may still point to an
 outside image, HTML file, script, font, library, or service.
 
 For every layer, reviewers should ask:
@@ -85,14 +84,14 @@ dependencies, is inside the stated boundary.
 
 The pinned code supports two main token-metadata paths.
 
-- **Offchain mode:** `tokenURI()` builds a location from the collection base URI
+- **Offchain mode:** \`tokenURI()\` builds a location from the collection base URI
   and the token's metadata state or token ID.
-- **Onchain mode:** `tokenURI()` returns base64-encoded JSON. Final metadata can
+- **Onchain mode:** \`tokenURI()\` returns base64-encoded JSON. Final metadata can
   also include generated HTML and JavaScript.
 
 Pending, stale, failed, and final metadata are separate states. The onchain path
 adds the generated animation only after the token has final randomness. See the
-[`onchain and offchain builders`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L138-L383).
+[\`onchain and offchain builders\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L138-L383).
 
 An admin with permission for the exact update function can change collection
 metadata and switch its mode while the collection remains mutable. Core rejects
@@ -130,7 +129,7 @@ The current renderer includes:
   the final token URI.
 
 See the exact
-[`validation and encoding code`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L453-L925).
+[\`validation and encoding code\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L453-L925).
 
 These checks protect the wrapper. They do not make artist scripts or dependency
 code safe to execute. Reviewers should still test quotes, slashes, control
@@ -149,7 +148,7 @@ exact bytes, encoding, chunk order, and dependency order all matter.
 The current renderer hashes every collection-script chunk with its index, byte
 length, and content hash. It then hashes the ordered sequence. Reordering,
 removing, or changing a chunk therefore changes the final script hash. See
-[`collectionScriptHash`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L276-L288).
+[\`collectionScriptHash\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMetadataRenderer.sol#L276-L288).
 
 An authorized admin can update collection data before freeze. Core blocks these
 updates after collection freeze. The artist's approval record can show support
@@ -170,7 +169,7 @@ access, and runtime preservation remain operating duties.
 ## Versioned dependencies prevent silent library replacement
 
 Generative art often uses a shared library. In the pinned
-[`DependencyRegistry`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/DependencyRegistry.sol#L75-L125),
+[\`DependencyRegistry\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/DependencyRegistry.sol#L75-L125),
 an admin with permission for the exact function creates a new numbered version.
 Even the function that changes one chunk copies the prior chunks and creates
 another version; it does not edit the old version's script bytes.
@@ -186,13 +185,13 @@ Each version records:
 - size and chunk-count limits.
 
 See the exact
-[`version and hash code`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/DependencyRegistry.sol#L239-L400).
+[\`version and hash code\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/DependencyRegistry.sol#L239-L400).
 
 Deprecation is a warning for future use. It does not delete or replace the old
 version's bytes. Core also pins a collection to a dependency key, version,
 content hash, and registry address when the collection is created or fully
 updated. Freeze includes that pinned state in the collection commitment. See
-[`dependency pinning`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L949-L973).
+[\`dependency pinning\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L949-L973).
 
 Reviewers should still confirm who controls the relevant admin function, which
 versions are packaged outside the contract, and whether every chunk remains easy
@@ -227,7 +226,7 @@ a limited set of allowed writer classes:
 
 Artist, owner, independent, and institution families reject admin grants. An
 exact record type can be admitted only once and keeps its family mapping. See the
-[`family and writer rules`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamRecordFamilyRegistry.sol#L85-L228).
+[\`family and writer rules\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamRecordFamilyRegistry.sol#L85-L228).
 
 The registry proves who was allowed to write. It does not prove that a rights
 claim, archive location, credential, IIIF service, or automated statement is
@@ -249,13 +248,13 @@ Publishing one requires:
 
 The contract checks every covered family and emits the authorization class used
 for each one. See
-[`publishCollectionSnapshot`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol#L124-L180)
+[\`publishCollectionSnapshot\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol#L124-L180)
 and
-[`_requireSnapshotFamilyIntersection`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol#L504-L524).
+[\`_requireSnapshotFamilyIntersection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol#L504-L524).
 
 A snapshot does not freeze the underlying records. Those records can keep
 changing until their own lock or Core freeze stops them. A later snapshot can
-become `latest` without changing an older snapshot.
+become \`latest\` without changing an older snapshot.
 
 The pinned code still allows an authorized writer to publish a snapshot after
 Core collection freeze if the snapshot path remains unlocked. It also allows
@@ -270,7 +269,7 @@ shared surface.
 
 In the pinned code, a global admin or an admin permitted for the exact function
 can call
-[`updateContractURI`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamContractMetadata.sol#L109-L145)
+[\`updateContractURI\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamContractMetadata.sol#L109-L145)
 when metadata mutation is not paused. This separate adapter is outside an
 individual collection's Core freeze.
 
@@ -287,17 +286,17 @@ adapter. Marketplace and wallet support still needs real integration evidence.
 The pinned Core emits standard ERC-4906 signals on current Core mutation paths:
 
 - token-data changes and image or attribute changes emit
-  `MetadataUpdate(tokenId)`;
-- randomness fulfillment for a live token emits `MetadataUpdate(tokenId)`;
+  \`MetadataUpdate(tokenId)\`;
+- randomness fulfillment for a live token emits \`MetadataUpdate(tokenId)\`;
 - collection-info or metadata-mode changes emit
-  `BatchMetadataUpdate(1, lastAllocatedTokenId)` when the collection has minted
+  \`BatchMetadataUpdate(1, lastAllocatedTokenId)\` when the collection has minted
   tokens.
 
 See the
-[`token-level emissions`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L786-L823),
-[`randomness emission`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L844-L883),
+[\`token-level emissions\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L786-L823),
+[\`randomness emission\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L844-L883),
 and
-[`collection helper`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1035-L1044).
+[\`collection helper\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1035-L1044).
 
 The collection range is deliberately broad. Stream token IDs are global, so
 tokens from different collections can appear inside the same range. Consumers
@@ -306,7 +305,7 @@ must treat the event as a refresh hint and decide what to fetch again.
 The accepted launch target also calls for restricted Core helpers that approved
 support contracts can use. Those helpers would emit the standard event plus
 Stream-specific context and would limit callers and ranges. They are
-[`required by the accepted target`](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/launch-v1-target-architecture.md#L320-L333),
+[\`required by the accepted target\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/launch-v1-target-architecture.md#L320-L333),
 but no matching public or external helper exists in the pinned Solidity. Caller
 checks, lifecycle checks, range limits, abuse analysis, implementation, and tests
 remain open work.

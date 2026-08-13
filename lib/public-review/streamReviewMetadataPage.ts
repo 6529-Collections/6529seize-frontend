@@ -25,23 +25,19 @@ const EXPECTED_METADATA_HEADINGS = [
 const EXPECTED_METADATA_END =
   /9\. What must be preserved outside Ethereum for each supported artwork mode to\s+remain reproducible\?\s*$/;
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 function assertExpectedMetadataStructure(editorialMarkdown: string): void {
   let remainingMarkdown = editorialMarkdown;
   for (const heading of EXPECTED_METADATA_HEADINGS) {
-    const match = getRequiredEditorialMatch(
-      remainingMarkdown,
-      new RegExp(`^## ${escapeRegExp(heading)}$`, "m"),
-      `metadata section: ${heading}`
-    );
-    const matchIndex = match.index;
-    if (matchIndex === undefined) {
-      throw new Error("The metadata section match has no index.");
+    const headingLine = `## ${heading}`;
+    const lines = remainingMarkdown.split("\n");
+    const matchIndex = lines.findIndex((line) => line === headingLine);
+    if (matchIndex < 0) {
+      throw new Error(
+        "The current Stream review editorial transformation is out of date: " +
+          `metadata section: ${heading}.`
+      );
     }
-    remainingMarkdown = remainingMarkdown.slice(matchIndex + match[0].length);
+    remainingMarkdown = lines.slice(matchIndex + 1).join("\n");
   }
   getRequiredEditorialMatch(
     editorialMarkdown,

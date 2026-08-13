@@ -219,7 +219,7 @@ Old failures copy.
 mint lanes?`;
     }
     if (page.id === "freezing-preservation-and-artwork-finality") {
-      return '# Freezing, preservation, and artwork finality\n\n“Finished” can describe final supply, frozen Core configuration, a preserved set of files, or terminal artwork state.\n\n## Final supply is a supply promise\n\nOld final supply copy.\n\n## Questions for reviewers\n\n10. Should any byte-changing recovery exist after finality, and what evidence would distinguish recovery from replacement?';
+      return "# Freezing, preservation, and artwork finality\n\n“Finished” can describe final supply, frozen Core configuration, a preserved set of files, or terminal artwork state.\n\n## Final supply is a supply promise\n\nOld final supply copy.\n\n## Questions for reviewers\n\n10. Should any byte-changing recovery exist after finality, and what evidence would distinguish recovery from replacement?";
     }
     if (page.id === "revenue-splits-and-royalties") {
       return [
@@ -1018,9 +1018,7 @@ describe("renderStreamReviewRoutePage", () => {
     expect(editorialCopy).toHaveTextContent(
       "Source and test evidence do not prove deployment, audit, or safety."
     );
-    expect(editorialCopy).not.toHaveTextContent(
-      "Old technical introduction."
-    );
+    expect(editorialCopy).not.toHaveTextContent("Old technical introduction.");
     expect(editorialCopy).not.toHaveTextContent("Old settlement path.");
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-editorial-visible",
@@ -1054,15 +1052,9 @@ describe("renderStreamReviewRoutePage", () => {
 
     const editorialCopy = screen.getByTestId("editorial-copy");
     expect(editorialCopy).toHaveTextContent("Randomness in one minute");
-    expect(editorialCopy).toHaveTextContent(
-      "a retry must not become a redraw"
-    );
-    expect(editorialCopy).toHaveTextContent(
-      "What is in the reviewed code"
-    );
-    expect(editorialCopy).toHaveTextContent(
-      "What the accepted design says"
-    );
+    expect(editorialCopy).toHaveTextContent("a retry must not become a redraw");
+    expect(editorialCopy).toHaveTextContent("What is in the reviewed code");
+    expect(editorialCopy).toHaveTextContent("What the accepted design says");
     expect(editorialCopy).toHaveTextContent("What is still open");
     expect(editorialCopy).toHaveTextContent(
       "The current stale state is immediate and terminal"
@@ -1321,9 +1313,7 @@ describe("renderStreamReviewRoutePage", () => {
     expect(editorialCopy).toHaveTextContent(
       "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
     );
-    expect(editorialCopy).not.toHaveTextContent(
-      "Old metadata snapshot copy."
-    );
+    expect(editorialCopy).not.toHaveTextContent("Old metadata snapshot copy.");
     expect(editorialText.indexOf("One-minute explanation")).toBeLessThan(
       editorialText.indexOf("The first question is: where are the bytes?")
     );

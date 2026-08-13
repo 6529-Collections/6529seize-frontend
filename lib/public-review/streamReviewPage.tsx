@@ -150,19 +150,16 @@ function getCurrentStreamReviewPages(
     developmentStatus:
       isCurrent && pageId === "security-testing-and-known-limitations",
     forArtists: isCurrent && pageId === "for-artists",
-    governance:
-      isCurrent && pageId === "governance-pausing-and-successors",
+    governance: isCurrent && pageId === "governance-pausing-and-successors",
     freezingFinality:
       isCurrent && pageId === "freezing-preservation-and-artwork-finality",
     metadata: isCurrent && pageId === "metadata-scripts-and-dependencies",
     overview: isCurrent && pageId === "overview",
-    revenueSplits:
-      isCurrent && pageId === "revenue-splits-and-royalties",
+    revenueSplits: isCurrent && pageId === "revenue-splits-and-royalties",
     randomness: isCurrent && pageId === "randomness",
     roles: isCurrent && pageId === "roles-and-trust",
     tokensAndMinting: isCurrent && pageId === "tokens-collections-and-minting",
-    salesAndAuctions:
-      isCurrent && pageId === "fixed-price-sales-and-auctions",
+    salesAndAuctions: isCurrent && pageId === "fixed-price-sales-and-auctions",
   };
 }
 
@@ -273,7 +270,8 @@ function getDisplayedPage(
   if (currentPages.salesAndAuctions) {
     return {
       ...page,
-      summaryKey: "publicReview.pages.fixedPriceSalesAndAuctions.currentSummary",
+      summaryKey:
+        "publicReview.pages.fixedPriceSalesAndAuctions.currentSummary",
     };
   }
   if (currentPages.freezingFinality) {

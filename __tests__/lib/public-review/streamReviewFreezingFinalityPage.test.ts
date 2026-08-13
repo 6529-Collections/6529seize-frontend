@@ -16,8 +16,7 @@ async function loadFreezingFinalityEditorial() {
     throw new Error("The active Stream review version is unavailable.");
   }
   const page = reviewVersion.pages.find(
-    (candidate) =>
-      candidate.id === "freezing-preservation-and-artwork-finality"
+    (candidate) => candidate.id === "freezing-preservation-and-artwork-finality"
   );
   if (page === undefined) {
     throw new Error("The freezing and finality test page is unavailable.");

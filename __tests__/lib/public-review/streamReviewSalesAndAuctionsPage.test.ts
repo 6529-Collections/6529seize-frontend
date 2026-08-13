@@ -58,10 +58,7 @@ describe("getCurrentSalesAndAuctionsEditorialMarkdown", () => {
         "A sale contract turns approved terms into custody, payment, allocation"
       );
       expect(
-        Array.from(
-          currentMarkdown.matchAll(/^## (.+)$/gm),
-          (match) => match[1]
-        )
+        Array.from(currentMarkdown.matchAll(/^## (.+)$/gm), (match) => match[1])
       ).toEqual([
         "The sale flow in one minute",
         "Signed terms are the bridge from decision to execution",

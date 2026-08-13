@@ -30,7 +30,7 @@ These are safety rules. If the same wei is counted twice, or money owed to someo
 
 ### What the current code does
 
-Signed fixed-price ETH sales run through `StreamDrops`. English-auction ETH sales run through `AuctionContract`.
+Signed fixed-price ETH sales run through \`StreamDrops\`. English-auction ETH sales run through \`AuctionContract\`.
 
 Each contract chooses its local split in this order:
 
@@ -52,9 +52,9 @@ Before launch, the design needs one clear answer: keep and fully define the loca
 
 ### Technical details
 
-- [`StreamDrops.proceedsSplitFor`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L540-L559) applies token, collection, then contract precedence.
-- [`StreamDrops._creditFixedPriceProceeds`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L635-L681) records the fixed-price balances.
-- [`AuctionContract._creditAuctionProceeds`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L471-L509) records auction proceeds after a winning settlement.
+- [\`StreamDrops.proceedsSplitFor\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L540-L559) applies token, collection, then contract precedence.
+- [\`StreamDrops._creditFixedPriceProceeds\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L635-L681) records the fixed-price balances.
+- [\`AuctionContract._creditAuctionProceeds\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L471-L509) records auction proceeds after a winning settlement.
 
 ## Pull credits keep one recipient from blocking everyone
 
@@ -70,7 +70,7 @@ The credit owner can withdraw to their own account. The current Drop and Auction
 
 ### Current limit
 
-There is no single ledger for the whole system. Fixed-price credits stay in `StreamDrops`. Auction proceeds and bidder refunds stay in `AuctionContract`. Split-wallet balances stay in each wallet after it is funded.
+There is no single ledger for the whole system. Fixed-price credits stay in \`StreamDrops\`. Auction proceeds and bidder refunds stay in \`AuctionContract\`. Split-wallet balances stay in each wallet after it is funded.
 
 Reviewers therefore need both local solvency checks and a cross-contract view of all money owed.
 
@@ -84,7 +84,7 @@ Reviewers therefore need both local solvency checks and a cross-contract view of
 
 ### What the source implements
 
-The separate `StreamPrimarySaleSettlement` contract can record a primary sale and route its value to a resolved split wallet. Only a caller approved by the settlement contract owner may start this action.
+The separate \`StreamPrimarySaleSettlement\` contract can record a primary sale and route its value to a resolved split wallet. Only a caller approved by the settlement contract owner may start this action.
 
 The contract creates one settlement key from the sale ID, revenue class, collection, token, payer, other participants, and amount. It rejects a second use of the same key.
 
@@ -94,7 +94,7 @@ The sale also carries an expected policy hash. In strict mode, settlement fails 
 
 ### Known ERC-20 gap
 
-For ERC-20 settlement, the caller supplies the token contract in a separate argument. That asset is not part of the `PrimarySale` record or the settlement key.
+For ERC-20 settlement, the caller supplies the token contract in a separate argument. That asset is not part of the \`PrimarySale\` record or the settlement key.
 
 This means the first successful call with any active asset can consume the shared key. A future sale integration must bind the exact asset in both the signed sale terms and the replay identity.
 
@@ -114,11 +114,11 @@ The sale mechanism decides how a sale happens. The revenue resolver decides whic
 
 ### What the current source does
 
-The reviewed `StreamRevenueResolver` stores primary-sale assignments. Its owner can set a fixed profile or a template, clear an assignment while it is still changeable, and freeze an assignment.
+The reviewed \`StreamRevenueResolver\` stores primary-sale assignments. Its owner can set a fixed profile or a template, clear an assignment while it is still changeable, and freeze an assignment.
 
 When asked for an assignment, it checks token scope first, then collection scope, then the default.
 
-The current `StreamDrops` and `AuctionContract` sale paths do not call this resolver.
+The current \`StreamDrops\` and \`AuctionContract\` sale paths do not call this resolver.
 
 ### What accepted ADRs intend
 
@@ -143,7 +143,7 @@ A split profile names the recipients and each recipient's share.
 
 ### What the source implements
 
-`StreamSplitFactory` sorts and checks the entries, gives the profile a deterministic ID, and can deploy its `StreamSplitWallet` at a predictable address.
+\`StreamSplitFactory\` sorts and checks the entries, gives the profile a deterministic ID, and can deploy its \`StreamSplitWallet\` at a predictable address.
 
 The profile does not change after creation. If recipients or shares change, the system creates a new profile and changes the resolver assignment while that assignment is still allowed to change.
 
@@ -183,8 +183,8 @@ Direct or forced ETH must not create a new user credit. It may increase surplus,
 
 ### Technical details
 
-- [`StreamDrops.totalOwed`, `surplus`, and `emergencyWithdrawable`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L440-L472)
-- [`AuctionContract` local solvency views](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L647-L677)
+- [\`StreamDrops.totalOwed\`, \`surplus\`, and \`emergencyWithdrawable\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L440-L472)
+- [\`AuctionContract\` local solvency views](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L647-L677)
 
 ## Approved ERC-20 transfers require balance checks
 
@@ -197,8 +197,8 @@ The asset-policy registry owner marks each ERC-20 asset with a status, evidence 
 The settlement contract then checks:
 
 - the token contract has code;
-- `balanceOf` returns one valid value;
-- `transferFrom` and `transfer` return exactly `true`; and
+- \`balanceOf\` returns one valid value;
+- \`transferFrom\` and \`transfer\` return exactly \`true\`; and
 - the payer, settlement contract, and wallet balances change by the exact amount.
 
 These checks reject missing or false return values, fee-on-transfer behavior, no-op transfers, failed balance reads, and unexpected balance changes.
@@ -219,9 +219,9 @@ Reviewers must inspect the real onchain asset-policy registry. A frontend list s
 
 ### Current foundation behavior
 
-An approved settlement caller can ask `StreamPrimarySaleSettlement` to pull an active ERC-20 token from the payer. The payer must already have given enough allowance.
+An approved settlement caller can ask \`StreamPrimarySaleSettlement\` to pull an active ERC-20 token from the payer. The payer must already have given enough allowance.
 
-The settlement contract does not verify a payer-signed `PaymentIntent`. It also does not own signer-specific nonce use or revocation.
+The settlement contract does not verify a payer-signed \`PaymentIntent\`. It also does not own signer-specific nonce use or revocation.
 
 ### Proposed ADR 0019
 
@@ -245,7 +245,7 @@ That rule makes the three credits add back to the exact payment, even for a one-
 
 ### Split-wallet rule
 
-The separate split wallets use 1,000,000 parts per million. They calculate each account's cumulative share and expose any amount that is currently left as `roundingDust`.
+The separate split wallets use 1,000,000 parts per million. They calculate each account's cumulative share and expose any amount that is currently left as \`roundingDust\`.
 
 Reviewers should check who can ever receive that dust, whether later deposits change it, and whether many small payments create a meaningful bias.
 
@@ -256,7 +256,7 @@ Reviewers should check who can ever receive that dust, whether later deposits ch
 
 ## Curator rewards connect onchain claims to offchain allocation
 
-The current Drop and Auction contracts record a curator reserve or curator credit. An authorized action can release that money to the configured `StreamCuratorsPool`.
+The current Drop and Auction contracts record a curator reserve or curator credit. An authorized action can release that money to the configured \`StreamCuratorsPool\`.
 
 An authorized account sets a Merkle root for a collection. A **Merkle root** is a short onchain commitment to a longer list of recipients and amounts.
 
@@ -281,11 +281,11 @@ It does not prove that the offchain inputs or allocation policy were fair. Revie
 
 ### What the current Core reports
 
-For every token ID, `StreamCore.royaltyInfo` returns:
+For every token ID, \`StreamCore.royaltyInfo\` returns:
 
-- receiver `0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377`;
+- receiver \`0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377\`;
 - 690 basis points, which is 6.9%; and
-- royalty amount `salePrice * 690 / 10,000`.
+- royalty amount \`salePrice * 690 / 10,000\`.
 
 There is no runtime setter or token-specific override. The current revenue resolver is not part of this read.
 
@@ -301,7 +301,7 @@ Accepted ADR 0008 requires the Core to use resolver-backed ERC-2981 with split w
 
 ### Technical details
 
-- [Current `StreamCore.royaltyInfo`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1013-L1027)
+- [Current \`StreamCore.royaltyInfo\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1013-L1027)
 - [Accepted resolver-backed ERC-2981 target](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L1267-L1319)
 
 ## Every value movement should be reconstructable
