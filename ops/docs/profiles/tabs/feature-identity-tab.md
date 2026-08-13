@@ -29,7 +29,8 @@ Mobile (`< lg`):
   received-only `Grant Rep`, and REP activity log
 - `NIC` subview: NIC explanation, status, top-rater avatars, `Rate NIC`, and NIC
   activity log
-- `ID Statements` subview: identity statements and the statement add action
+- `ID Statements` subview: a possessive profile heading, short public-data
+  description, statement card, and the statement add action beside the heading
   when editing is allowed
 
 ## Entry Points
@@ -130,6 +131,7 @@ Mobile (`< lg`):
 - `Rate` is enabled only when the value changed and is valid.
 
 Statement ownership in this tab:
+
 - [Profile Identity Statements](feature-identity-statements.md)
 
 ## Activity Log Behavior
@@ -184,8 +186,8 @@ Statement ownership in this tab:
 - If loading a later categories page fails, already visible categories stay on
   screen; use `Load more` again or refresh the route to retry.
 - Selecting `Cancel` closes NIC rating without applying changes.
-- Statement or rating fetch failures can leave empty/partial sections; refresh
-  to retry.
+- Statement fetch failures show an error panel with `Retry`; consolidated
+  addresses remain available while statement groups are unavailable.
 - Replace old `/{user}/rep` bookmarks with `/{user}`.
 
 ## Limitations / Notes

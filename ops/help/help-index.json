@@ -4535,9 +4535,12 @@
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
+        "On mobile, select the ID Statements score card to open a possessive profile heading, public-data description, consolidated wallets, and statement groups without changing the profile URL.",
         "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
-        "The add modal supports documented statement types and visibility rules.",
-        "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state."
+        "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
+        "Consolidated wallet rows expand to show the full address, ENS name when available, copy controls, and labeled mobile links to Etherscan and OpenSea.",
+        "Statement rows can expose touch-sized Open, Copy, Delete, and Set primary actions depending on statement type, ownership, and wallet state.",
+        "If statements fail to load, the page keeps consolidated addresses visible and shows a Retry action; profiles with no statements show one empty-state message."
       ],
       "canonical_path": "/{user}",
       "related_paths": ["/{user}/identity", "/delegation/wallet-checker"],

@@ -1,16 +1,20 @@
 import UserPageIdentityDeleteStatementButton from "@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+let modalProps: any;
 jest.mock(
   "@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal",
   () => ({
     __esModule: true,
-    default: (props: any) => (
-      <div data-testid="modal">
+    default: (props: any) => {
+      modalProps = props;
+      return (
+      <div data-testid="modal" data-open={String(props.isOpen)}>
         <button onClick={props.onClose}>close</button>
       </div>
-    ),
+      );
+    },
   })
 );
 
@@ -25,20 +29,12 @@ jest.mock("react-tooltip", () => ({
 const statement = { id: "1" } as any;
 const profile = { id: "p" } as any;
 
-function setMatchMedia(matches: boolean) {
-  Object.defineProperty(window, "matchMedia", {
-    writable: true,
-    value: jest.fn().mockReturnValue({
-      matches,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    }),
-  });
-}
+let isTouchDevice = false;
+jest.mock("@/hooks/useIsTouchDevice", () => () => isTouchDevice);
 
 describe("UserPageIdentityDeleteStatementButton", () => {
   beforeEach(() => {
-    setMatchMedia(false);
+    isTouchDevice = false;
   });
 
   it("opens and closes modal when button clicked", async () => {
@@ -48,24 +44,25 @@ describe("UserPageIdentityDeleteStatementButton", () => {
         profile={profile}
       />
     );
-    expect(screen.queryByTestId("modal")).toBeNull();
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
     await userEvent.click(
-      screen.getByRole("button", { name: /delete statement/i })
+      screen.getByRole("button", { name: "Delete" })
     );
-    expect(screen.getByTestId("modal")).toBeInTheDocument();
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
     await userEvent.click(screen.getByText("close"));
-    await waitFor(() => expect(screen.queryByTestId("modal")).toBeNull());
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
+    expect(modalProps.statement).toBe(statement);
   });
 
   it("shows button when touchscreen", () => {
-    setMatchMedia(true);
+    isTouchDevice = true;
     render(
       <UserPageIdentityDeleteStatementButton
         statement={statement}
         profile={profile}
       />
     );
-    const button = screen.getByRole("button", { name: /delete statement/i });
+    const button = screen.getByRole("button", { name: "Delete" });
     expect(button.className).toContain("tw-opacity-100");
   });
 });

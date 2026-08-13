@@ -15,14 +15,13 @@ describe('UserPageIdentityAddStatementsTypeButton', () => {
       <UserPageIdentityAddStatementsTypeButton
         statementType={STATEMENT_TYPE.X}
         isActive={false}
-        isFirst={true}
-        isLast={false}
         onClick={onClick}
       />
     );
     const button = getByRole('button');
-    expect(button.className).toContain('tw-bg-transparent');
-    expect(button.className).toContain('tw-rounded-l-md');
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+    expect(button.className).toContain('tw-bg-white/[0.035]');
+    expect(button.className).toContain('tw-min-h-12');
     await userEvent.click(button);
     expect(onClick).toHaveBeenCalled();
 
@@ -30,12 +29,10 @@ describe('UserPageIdentityAddStatementsTypeButton', () => {
       <UserPageIdentityAddStatementsTypeButton
         statementType={STATEMENT_TYPE.X}
         isActive={true}
-        isFirst={false}
-        isLast={true}
         onClick={onClick}
       />
     );
-    expect(button.className).toContain('tw-bg-iron-800');
-    expect(button.className).toContain('tw-rounded-r-md');
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button.className).toContain('tw-bg-primary-500/10');
   });
 });

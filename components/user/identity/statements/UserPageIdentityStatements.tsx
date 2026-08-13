@@ -8,8 +8,11 @@ import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
@@ -18,23 +21,20 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 export default function UserPageIdentityStatements({
   profile,
-  headerAction,
 }: {
   readonly profile: ApiIdentity;
-  readonly headerAction?: ReactNode;
 }) {
+  const locale = useBrowserLocale();
   const params = useParams();
   const user = (params?.["user"] as string)?.toLowerCase();
-  const [socialMediaAccounts, setSocialMediaAccounts] = useState<
-    CicStatement[]
-  >([]);
 
-  const [contacts, setContacts] = useState<CicStatement[]>([]);
-  const [nftAccounts, setNftAccounts] = useState<CicStatement[]>([]);
-  const [socialMediaVerificationPosts, setSocialMediaVerificationPosts] =
-    useState<CicStatement[]>([]);
-
-  const { isLoading, data: statements } = useQuery<CicStatement[]>({
+  const {
+    isLoading,
+    isFetching,
+    isError,
+    data: statements,
+    refetch,
+  } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user],
     queryFn: async () => {
       if (!user) {
@@ -50,40 +50,26 @@ export default function UserPageIdentityStatements({
     enabled: !!user,
   });
 
-  useEffect(() => {
-    if (!statements) {
-      setNftAccounts([]);
-      setSocialMediaAccounts([]);
-      setContacts([]);
-      setSocialMediaVerificationPosts([]);
-      return;
-    }
-    const sortedStatements = [...statements].sort((a, d) => {
+  const groupedStatements = useMemo(() => {
+    const sortedStatements = [...(statements ?? [])].sort((a, d) => {
       return new Date(d.crated_at).getTime() - new Date(a.crated_at).getTime();
     });
-    setSocialMediaAccounts(
-      sortedStatements.filter(
+
+    return {
+      socialMediaAccounts: sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT
-      )
-    );
-    setContacts(
-      sortedStatements.filter(
+      ),
+      contacts: sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.CONTACT
-      )
-    );
-
-    setNftAccounts(
-      sortedStatements.filter(
+      ),
+      nftAccounts: sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS
-      )
-    );
-
-    setSocialMediaVerificationPosts(
-      sortedStatements.filter(
+      ),
+      socialMediaVerificationPosts: sortedStatements.filter(
         (s) =>
           s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_VERIFICATION_POST
-      )
-    );
+      ),
+    };
   }, [statements]);
 
   const shouldShowStatementGroup = (group: CicStatement[]) =>
@@ -100,41 +86,77 @@ export default function UserPageIdentityStatements({
                 <div>
                   <UserPageIdentityStatementsConsolidatedAddresses
                     profile={profile}
-                    headerAction={headerAction}
                   />
                 </div>
-                {shouldShowStatementGroup(socialMediaAccounts) && (
+                {isError && (
+                  <div
+                    role="alert"
+                    className="tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/10 tw-p-4"
+                  >
+                    <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+                      {t(
+                        locale,
+                        "user.profile.identity.statements.loadError"
+                      )}
+                    </p>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      loading={isFetching}
+                      className="tw-mt-3"
+                      onClick={() => void refetch()}
+                    >
+                      {t(locale, "user.profile.identity.statements.retry")}
+                    </Button>
+                  </div>
+                )}
+                {!isLoading && !isError && (statements?.length ?? 0) === 0 && (
+                  <p className="tw-m-0 tw-rounded-lg tw-border tw-border-dashed tw-border-white/10 tw-p-4 tw-text-sm tw-text-iron-400">
+                    {t(locale, "user.profile.identity.statements.empty")}
+                  </p>
+                )}
+                {!isError &&
+                  shouldShowStatementGroup(
+                    groupedStatements.socialMediaAccounts
+                  ) && (
                   <div>
                     <UserPageIdentityStatementsSocialMediaAccounts
-                      statements={socialMediaAccounts}
+                      statements={groupedStatements.socialMediaAccounts}
                       profile={profile}
                       loading={isLoading}
                     />
                   </div>
                 )}
-                {shouldShowStatementGroup(nftAccounts) && (
+                {!isError &&
+                  shouldShowStatementGroup(groupedStatements.nftAccounts) && (
                   <div>
                     <UserPageIdentityStatementsNFTAccounts
-                      statements={nftAccounts}
+                      statements={groupedStatements.nftAccounts}
                       profile={profile}
                       loading={isLoading}
                     />
                   </div>
                 )}
 
-                {shouldShowStatementGroup(contacts) && (
+                {!isError &&
+                  shouldShowStatementGroup(groupedStatements.contacts) && (
                   <div>
                     <UserPageIdentityStatementsContacts
-                      statements={contacts}
+                      statements={groupedStatements.contacts}
                       profile={profile}
                       loading={isLoading}
                     />
                   </div>
                 )}
-                {shouldShowStatementGroup(socialMediaVerificationPosts) && (
+                {!isError &&
+                  shouldShowStatementGroup(
+                    groupedStatements.socialMediaVerificationPosts
+                  ) && (
                   <div>
                     <UserPageIdentityStatementsSocialMediaVerificationPosts
-                      statements={socialMediaVerificationPosts}
+                      statements={
+                        groupedStatements.socialMediaVerificationPosts
+                      }
                       profile={profile}
                       loading={isLoading}
                     />
@@ -153,12 +175,19 @@ export default function UserPageIdentityStatements({
           style={TOOLTIP_STYLES}
         >
           <ul className="tw-m-0 tw-list-disc tw-space-y-1 tw-py-2 tw-pl-4 tw-font-normal tw-text-iron-300">
-            <li>All statements are optional.</li>
-            <li>All statements are fully and permanently public.</li>
+            <li>{t(locale, "user.profile.identity.statements.optional")}</li>
             <li>
-              Seize does not connect to social media accounts or verify posts.
+              {t(
+                locale,
+                "user.profile.identity.statements.permanentlyPublic"
+              )}
             </li>
-            <li>The community will rate the accuracy of statements.</li>
+            <li>
+              {t(locale, "user.profile.identity.statements.noVerification")}
+            </li>
+            <li>
+              {t(locale, "user.profile.identity.statements.communityRates")}
+            </li>
           </ul>
         </Tooltip>
       </div>

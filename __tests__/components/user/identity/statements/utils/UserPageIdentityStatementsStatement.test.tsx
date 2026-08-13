@@ -76,7 +76,7 @@ describe("UserPageIdentityStatementsStatement", () => {
     expect(mockCopyToClipboard).toHaveBeenCalledWith("test-value");
 
     // Check that the text changed to "Copied!"
-    expect(screen.getByText("Copied!")).toBeInTheDocument();
+    expect(screen.getAllByText("Copied!")).toHaveLength(2);
 
     // Fast-forward time to check that the text reverts
     await act(async () => {

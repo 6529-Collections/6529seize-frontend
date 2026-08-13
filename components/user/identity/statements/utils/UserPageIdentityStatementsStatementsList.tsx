@@ -2,12 +2,14 @@
 
 import type { CicStatement } from "@/entities/IProfile";
 import UserPageIdentityStatementsStatement from "./UserPageIdentityStatementsStatement";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { amIUser } from "@/helpers/Helpers";
 import CommonSkeletonLoader from "@/components/utils/animation/CommonSkeletonLoader";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 export default function UserPageIdentityStatementsStatementsList({
   statements,
   profile,
@@ -19,22 +21,18 @@ export default function UserPageIdentityStatementsStatementsList({
   readonly noItemsMessage: string;
   readonly loading: boolean;
 }) {
+  const locale = useBrowserLocale();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
-  const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
-
-  useEffect(
-    () => setIsMyProfile(amIUser({ profile, address })),
-    [profile, address]
-  );
-
-  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
-  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
-  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
+  const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
 
   if (loading) {
     return (
-      <div className="tw-pt-2">
+      <div
+        role="status"
+        aria-label={t(locale, "user.profile.identity.statements.loading")}
+        className="tw-pt-2"
+      >
         <CommonSkeletonLoader />
       </div>
     );
@@ -52,9 +50,9 @@ export default function UserPageIdentityStatementsStatementsList({
       ))}
 
       {!statements.length && (
-        <span className="tw-text-xs tw-font-normal tw-text-iron-500">
+        <li className="tw-text-xs tw-font-normal tw-text-iron-500">
           {noItemsMessage}
-        </span>
+        </li>
       )}
     </ul>
   );

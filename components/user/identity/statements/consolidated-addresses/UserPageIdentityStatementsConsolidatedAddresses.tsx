@@ -1,7 +1,7 @@
 "use client";
 
 import type { WalletConsolidationState } from "@/entities/IProfile";
-import { useContext, useEffect, useState, type ReactNode } from "react";
+import { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -15,74 +15,52 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
-export default function UserPageIdentityStatementsConsolidatedAddresses({
-  profile,
-  headerAction,
-}: {
-  readonly profile: ApiIdentity;
-  readonly headerAction?: ReactNode;
-}) {
-  const { address } = useSeizeConnectContext();
-  const { activeProfileProxy } = useContext(AuthContext);
-  const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
-  useEffect(
-    () => setIsMyProfile(amIUser({ profile, address })),
-    [profile, address]
-  );
+function getPrimaryAddress(profile: ApiIdentity): string | null {
+  if (profile.primary_wallet) {
+    return profile.primary_wallet.toLowerCase();
+  }
 
-  const getCanEdit = (): boolean => isMyProfile && !activeProfileProxy;
-  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
-  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
+  const highestTdhWallet = profile.wallets?.reduce((highest, wallet) => {
+    return wallet.tdh > highest.tdh ? wallet : highest;
+  });
 
-  const getPrimaryAddress = (p: ApiIdentity) => {
-    if (p.primary_wallet) {
-      return p.primary_wallet.toLowerCase();
+  return highestTdhWallet?.wallet.toLowerCase() ?? null;
+}
+
+function sortByPrimary(
+  wallets: ApiWallet[],
+  primaryAddress: string | null
+): ApiWallet[] {
+  return [...wallets].sort((a, b) => {
+    if (a.wallet.toLowerCase() === primaryAddress) {
+      return -1;
     }
 
-    const highestTdhWallet = p.wallets?.reduce((highest, wallet) => {
-      if (wallet.tdh > highest.tdh) {
-        return wallet;
-      }
+    if (b.wallet.toLowerCase() === primaryAddress) {
+      return 1;
+    }
 
-      return highest;
-    });
+    return b.tdh - a.tdh;
+  });
+}
 
-    return highestTdhWallet?.wallet.toLowerCase() ?? null;
-  };
-
-  const [primaryAddress, setPrimaryAddress] = useState<string | null>(
-    getPrimaryAddress(profile)
+export default function UserPageIdentityStatementsConsolidatedAddresses({
+  profile,
+}: {
+  readonly profile: ApiIdentity;
+}) {
+  const locale = useBrowserLocale();
+  const { address } = useSeizeConnectContext();
+  const { activeProfileProxy } = useContext(AuthContext);
+  const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
+  const primaryAddress = getPrimaryAddress(profile);
+  const sortedByPrimary = useMemo(
+    () => sortByPrimary(profile.wallets ?? [], primaryAddress),
+    [primaryAddress, profile.wallets]
   );
-
-  useEffect(() => {
-    setPrimaryAddress(getPrimaryAddress(profile));
-  }, [profile]);
-
-  const sortByPrimary = (wallets: ApiWallet[]) => {
-    const sorted = [...wallets];
-    sorted.sort((a, b) => {
-      if (a.wallet.toLowerCase() === primaryAddress) {
-        return -1;
-      }
-
-      if (b.wallet.toLowerCase() === primaryAddress) {
-        return 1;
-      }
-
-      return b.tdh - a.tdh;
-    });
-
-    return sorted;
-  };
-
-  const [sortedByPrimary, setSortedByPrimary] = useState<ApiWallet[]>(
-    sortByPrimary(profile.wallets ?? [])
-  );
-
-  useEffect(() => {
-    setSortedByPrimary(sortByPrimary(profile.wallets ?? []));
-  }, [profile, primaryAddress]);
 
   const [expandedWallet, setExpandedWallet] = useState<string | null>(null);
 
@@ -103,35 +81,30 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
     })),
   });
 
-  const [showDelegationCenter, setShowDelegationCenter] = useState(false);
-
-  useEffect(() => {
-    if (walletConsolidations.length === 0 || !address) {
-      setShowDelegationCenter(false);
-      return;
-    }
-
-    const haveAffectedWallets = walletConsolidations.some((w) =>
-      w.data?.data.some(
+  const showDelegationCenter =
+    !!address &&
+    walletConsolidations.some((walletConsolidation) =>
+      walletConsolidation.data?.data.some(
         (c) =>
-          c.wallet1.toLowerCase() === address?.toLowerCase() ||
-          c.wallet2.toLowerCase() === address?.toLowerCase()
+          c.wallet1.toLowerCase() === address.toLowerCase() ||
+          c.wallet2.toLowerCase() === address.toLowerCase()
       )
     );
-    setShowDelegationCenter(haveAffectedWallets);
-  }, [walletConsolidations, address]);
 
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-1">
           <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-            Consolidated Addresses
+            {t(
+              locale,
+              "user.profile.identity.statements.consolidatedAddresses"
+            )}
           </span>
           <button
             type="button"
-            aria-label="Statements help"
-            className="tw-inline-flex tw-h-8 tw-w-8 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+            aria-label={t(locale, "user.profile.identity.statements.help")}
+            className="tw-inline-flex tw-h-11 tw-w-11 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-8 lg:tw-w-8"
             data-tooltip-id="statements-help"
           >
             <svg
@@ -151,9 +124,8 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             </svg>
           </button>
         </div>
-        {headerAction}
       </div>
-      <ul className="tw-mb-0 tw-mt-4 tw-list-none tw-space-y-3 tw-pl-0">
+      <ul className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-2 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet}
@@ -170,22 +142,29 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           />
         ))}
       </ul>
-      <div className="tw-space-x-3 tw-pt-5 xl:tw-pt-4">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-2 tw-pt-5 min-[360px]:tw-grid-cols-2 lg:tw-flex xl:tw-pt-4">
         <ButtonLink
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
           variant="secondary"
-          size="xs"
+          size="lg"
+          fullWidth
+          className="lg:tw-h-8 lg:tw-w-auto lg:tw-px-2.5 lg:tw-py-0 lg:tw-text-xs"
         >
-          Wallet Checker
+          {t(locale, "user.profile.identity.statements.walletChecker")}
         </ButtonLink>
         <AnimatePresence mode="wait" initial={false}>
           {showDelegationCenter && (
             <ButtonLink
               href="/delegation/delegation-center"
               variant="secondary"
-              size="xs"
+              size="lg"
+              fullWidth
+              className="lg:tw-h-8 lg:tw-w-auto lg:tw-px-2.5 lg:tw-py-0 lg:tw-text-xs"
             >
-              Delegation Center
+              {t(
+                locale,
+                "user.profile.identity.statements.delegationCenter"
+              )}
             </ButtonLink>
           )}
         </AnimatePresence>

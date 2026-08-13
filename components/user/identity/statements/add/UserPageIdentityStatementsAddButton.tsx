@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Button from "@/components/utils/button/Button";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,
@@ -13,24 +15,21 @@ export default function UserPageIdentityStatementsAddButton({
   readonly profile: ApiIdentity;
   readonly size?: ButtonSize;
 }) {
+  const locale = useBrowserLocale();
   const [isAddStatementsOpen, setIsAddStatementsOpen] =
     useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   return (
     <div>
       <Button
         size={size}
-        onClick={() => setIsAddStatementsOpen(!isAddStatementsOpen)}
+        onClick={() => setIsAddStatementsOpen(true)}
       >
         <svg
           className="-tw-ml-1 tw-h-5 tw-w-5"
           viewBox="0 0 24 24"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -41,15 +40,14 @@ export default function UserPageIdentityStatementsAddButton({
             strokeLinejoin="round"
           />
         </svg>
-        <span>Add</span>
+        <span>{t(locale, "user.profile.identity.statements.add")}</span>
       </Button>
 
-      {isMounted && isAddStatementsOpen && (
-        <UserPageIdentityAddStatements
-          profile={profile}
-          onClose={() => setIsAddStatementsOpen(false)}
-        />
-      )}
+      <UserPageIdentityAddStatements
+        profile={profile}
+        isOpen={isAddStatementsOpen}
+        onClose={() => setIsAddStatementsOpen(false)}
+      />
     </div>
   );
 }

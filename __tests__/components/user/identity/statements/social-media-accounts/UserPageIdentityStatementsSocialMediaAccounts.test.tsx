@@ -12,7 +12,7 @@ describe('UserPageIdentityStatementsSocialMediaAccounts', () => {
     render(<UserPageIdentityStatementsSocialMediaAccounts statements={statements} profile={profile} loading={false} />);
     expect(listProps.statements).toBe(statements);
     expect(listProps.profile).toBe(profile);
-    expect(listProps.noItemsMessage).toBe('No Social Media Account added yet');
+    expect(listProps.noItemsMessage).toBe('No social media accounts added yet.');
     expect(listProps.loading).toBe(false);
   });
 });

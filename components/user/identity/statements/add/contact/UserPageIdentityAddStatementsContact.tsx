@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import UserPageIdentityAddStatementsContactItems from "./UserPageIdentityAddStatementsContactItems";
-import UserPageIdentityAddStatementsContactHeader from "./UserPageIdentityAddStatementsContactHeader";
 import type {
   CONTACT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
@@ -27,7 +26,6 @@ export default function UserPageIdentityAddStatementsContact({
 
   return (
     <>
-      <UserPageIdentityAddStatementsContactHeader onClose={onClose} />
       <UserPageIdentityAddStatementsContactItems
         activeType={contactType}
         setContactType={setContactType}

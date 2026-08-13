@@ -16,12 +16,17 @@ import { getTransactionLink } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";
+
+const PRIMARY_ERROR_TITLE_KEY =
+  "user.profile.identity.statements.primaryErrorTitle" as const;
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
@@ -36,6 +41,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   readonly isOpen: boolean;
   readonly onToggleOpen: () => void;
 }) {
+  const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const ensName = (() => {
     const value = address.display.trim();
@@ -47,18 +53,6 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     }
     return value.endsWith(".eth") ? value : null;
   })();
-
-  const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.stopPropagation();
-    window.open(`https://opensea.io/${address.wallet}`, "_blank");
-  };
-
-  const goToEtherscan = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.stopPropagation();
-    window.open(`https://etherscan.io/address/${address.wallet}`, "_blank");
-  };
 
   const isPrimary =
     address.wallet.toLowerCase() === primaryAddress?.toLowerCase();
@@ -112,80 +106,158 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   }, []);
 
   const isTouchScreen = useIsTouchDevice();
-
-  const [assigningPrimary, setAssigningPrimary] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<any>();
-
   const writeDelegation = useWriteContract();
-
   const waitWriteDelegation = useWaitForTransactionReceipt({
     confirmations: 1,
     hash: writeDelegation.data,
   });
+  const lastToastKeyRef = useRef<string | null>(null);
 
   function getError(e: unknown) {
     const record = e as { message?: unknown } | null;
     const message =
       typeof record?.message === "string" ? record.message : "";
-    return message.split("Request Arguments")[0];
+    return message.split("Request Arguments")[0] ?? "";
   }
 
   useEffect(() => {
-    if (writeDelegation.isPending) {
-      setStatusMessage("Confirm in your wallet...");
-    } else if (writeDelegation.data) {
-      const trxLink = (
-        <>
-          {writeDelegation.data && (
-            <a
-              href={getTransactionLink(
-                DELEGATION_CONTRACT.chain_id,
-                writeDelegation.data
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tw-text-primary-400 tw-underline"
-            >
-              View Transaction
-            </a>
-          )}
-        </>
-      );
-      if (waitWriteDelegation.isLoading) {
-        setStatusMessage(<>Waiting for confirmation... {trxLink}</>);
-      } else if (waitWriteDelegation.data) {
-        setStatusMessage(
-          <>
-            Confirmed! Check back in a few minutes to see the change. {trxLink}
-          </>
-        );
-        setToast({
-          type: "success",
-          message: "Primary address set.",
-        });
-      } else if (waitWriteDelegation.error) {
-        setStatusMessage(
-          <>
-            Error: {getError(waitWriteDelegation.error)} {trxLink}
-          </>
-        );
-        setToast({
-          type: "error",
-          title: "Couldn't set the primary address.",
-          description: "Please try again.",
-          details: getToastErrorDetails(
-            waitWriteDelegation.error,
-            getError(waitWriteDelegation.error)
-          ),
-        });
-      }
-    } else {
-      setStatusMessage(undefined);
+    if (writeDelegation.isPending || waitWriteDelegation.isLoading) {
+      lastToastKeyRef.current = null;
+      return;
     }
-  }, [writeDelegation.status, waitWriteDelegation.status]);
+
+    if (writeDelegation.error) {
+      const errorMessage = getError(writeDelegation.error);
+      const toastKey = `write-error:${errorMessage}`;
+      if (lastToastKeyRef.current === toastKey) {
+        return;
+      }
+      lastToastKeyRef.current = toastKey;
+      setToast({
+        type: "error",
+        title: t(locale, PRIMARY_ERROR_TITLE_KEY),
+        description: t(
+          locale,
+          "user.profile.identity.statements.primaryErrorDescription"
+        ),
+        details: getToastErrorDetails(writeDelegation.error, errorMessage),
+      });
+      return;
+    }
+
+    if (writeDelegation.data && waitWriteDelegation.data) {
+      const toastKey = `success:${writeDelegation.data}`;
+      if (lastToastKeyRef.current === toastKey) {
+        return;
+      }
+      lastToastKeyRef.current = toastKey;
+      setToast({
+        type: "success",
+        message: t(
+          locale,
+          "user.profile.identity.statements.primarySuccess"
+        ),
+      });
+      return;
+    }
+
+    if (waitWriteDelegation.error) {
+      const errorMessage = getError(waitWriteDelegation.error);
+      const toastKey = `receipt-error:${errorMessage}`;
+      if (lastToastKeyRef.current === toastKey) {
+        return;
+      }
+      lastToastKeyRef.current = toastKey;
+      setToast({
+        type: "error",
+        title: t(locale, PRIMARY_ERROR_TITLE_KEY),
+        description: t(
+          locale,
+          "user.profile.identity.statements.primaryErrorDescription"
+        ),
+        details: getToastErrorDetails(
+          waitWriteDelegation.error,
+          errorMessage
+        ),
+      });
+    }
+  }, [
+    locale,
+    setToast,
+    waitWriteDelegation.data,
+    waitWriteDelegation.error,
+    waitWriteDelegation.isLoading,
+    writeDelegation.data,
+    writeDelegation.error,
+    writeDelegation.isPending,
+  ]);
+
+  const transactionLink = writeDelegation.data ? (
+    <a
+      href={getTransactionLink(
+        DELEGATION_CONTRACT.chain_id,
+        writeDelegation.data
+      )}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="tw-text-primary-400 tw-underline"
+    >
+      {t(locale, "user.profile.identity.statements.viewTransaction")}
+    </a>
+  ) : null;
+
+  let statusMessage: ReactNode = null;
+  if (writeDelegation.isPending) {
+    statusMessage = t(
+      locale,
+      "user.profile.identity.statements.confirmWallet"
+    );
+  } else if (writeDelegation.error) {
+    statusMessage = (
+      <>
+        {t(locale, PRIMARY_ERROR_TITLE_KEY)} {getError(writeDelegation.error)}
+      </>
+    );
+  } else if (writeDelegation.data && waitWriteDelegation.isLoading) {
+    statusMessage = (
+      <>
+        {t(
+          locale,
+          "user.profile.identity.statements.waitingConfirmation"
+        )}{" "}
+        {transactionLink}
+      </>
+    );
+  } else if (writeDelegation.data && waitWriteDelegation.data) {
+    statusMessage = (
+      <>
+        {t(locale, "user.profile.identity.statements.primaryConfirmed")}{" "}
+        {transactionLink}
+      </>
+    );
+  } else if (waitWriteDelegation.error) {
+    statusMessage = (
+      <>
+        {t(locale, PRIMARY_ERROR_TITLE_KEY)} {getError(waitWriteDelegation.error)}{" "}
+        {transactionLink}
+      </>
+    );
+  }
+
+  let copiedAnnouncement = "";
+  if (copiedItem === "full-address") {
+    copiedAnnouncement = t(
+      locale,
+      "user.profile.identity.statements.addressCopied"
+    );
+  } else if (copiedItem === "ens") {
+    copiedAnnouncement = t(
+      locale,
+      "user.profile.identity.statements.ensCopied"
+    );
+  }
 
   const assignPrimary = async () => {
-    setAssigningPrimary(true);
     writeDelegation.writeContract({
       address: DELEGATION_CONTRACT.contract,
       abi: DELEGATION_ABI,
@@ -204,55 +276,76 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   return (
     <li>
-      <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/40">
-        <div
-          className={`tw-flex tw-justify-between tw-gap-2 tw-px-3 tw-py-2 ${
-            ensName ? "tw-items-start" : "tw-items-center"
-          }`}
-        >
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-flex tw-items-center tw-gap-1">
-              <button
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={`consolidated-address-panel-${address.wallet}`}
-                onClick={onToggleOpen}
-                className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-mono tw-text-xs tw-font-normal tw-leading-none tw-text-iron-100 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
-              >
-                {address.wallet.slice(0, 6)}
-              </button>
-              <UserPageIdentityStatementsConsolidatedAddressesItemPrimary
-                isPrimary={isPrimary}
-                canEdit={canEdit}
-                assignPrimary={assignPrimary}
-                isAssigningPrimary={assigningPrimary}
-              />
-            </div>
-            {ensName && (
-              <button
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={`consolidated-address-panel-${address.wallet}`}
-                onClick={onToggleOpen}
-                className="tw-mt-1 tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-mono tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
-              >
-                {ensName}
-              </button>
+      <div className="tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/30">
+        <div className="tw-flex tw-items-center tw-gap-1 tw-px-1.5 tw-py-1 lg:tw-gap-2 lg:tw-px-3 lg:tw-py-2">
+          <button
+            type="button"
+            aria-label={t(
+              locale,
+              isOpen
+                ? "user.profile.identity.statements.collapseAddress"
+                : "user.profile.identity.statements.expandAddress"
             )}
-          </div>
-          <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5">
-            <button
-              type="button"
-              onClick={goToEtherscan}
-              aria-label="Go to Etherscan"
-              className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200"
+            aria-expanded={isOpen}
+            aria-controls={`consolidated-address-panel-${address.wallet}`}
+            onClick={onToggleOpen}
+            className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-0.5 tw-text-left tw-text-iron-100 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-px-0"
+          >
+            <span className="tw-min-w-0 tw-flex-1">
+              {ensName && (
+                <span className="tw-block tw-truncate tw-font-mono tw-text-sm tw-font-semibold tw-leading-4">
+                  {ensName}
+                </span>
+              )}
+              <span
+                className={`tw-block tw-font-mono tw-text-xs tw-font-medium tw-text-iron-400 ${
+                  ensName ? "tw-mt-0.5" : ""
+                }`}
+              >
+                {address.wallet.slice(0, 6)}…{address.wallet.slice(-4)}
+              </span>
+            </span>
+            <ChevronDownIcon
+              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none lg:tw-hidden ${
+                isOpen ? "tw-rotate-180" : ""
+              }`}
+              aria-hidden="true"
+            />
+          </button>
+
+          <UserPageIdentityStatementsConsolidatedAddressesItemPrimary
+            isPrimary={isPrimary}
+            canEdit={canEdit}
+            assignPrimary={assignPrimary}
+            isAssigningPrimary={
+              writeDelegation.isPending || waitWriteDelegation.isLoading
+            }
+          />
+
+          <div className="tw-ml-auto tw-hidden tw-flex-shrink-0 tw-items-center tw-gap-1.5 lg:tw-flex">
+            <a
+              href={`https://etherscan.io/address/${address.wallet}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t(
+                locale,
+                "user.profile.identity.statements.openEtherscan"
+              )}
+              className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-500 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               data-tooltip-id={`etherscan-tooltip-${address.wallet}`}
-              data-tooltip-content={isTouchScreen ? null : "Etherscan"}
+              data-tooltip-content={
+                isTouchScreen
+                  ? null
+                  : t(
+                      locale,
+                      "user.profile.identity.statements.openEtherscan"
+                    )
+              }
             >
               <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
                 <EtherscanIcon />
               </div>
-            </button>
+            </a>
             {!isTouchScreen && (
               <Tooltip
                 id={`etherscan-tooltip-${address.wallet}`}
@@ -263,18 +356,29 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 style={TOOLTIP_STYLES}
               />
             )}
-            <button
-              type="button"
-              onClick={goToOpensea}
-              aria-label="Go to Opensea"
-              className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200"
+            <a
+              href={`https://opensea.io/${address.wallet}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t(
+                locale,
+                "user.profile.identity.statements.openOpenSea"
+              )}
+              className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-500 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               data-tooltip-id={`opensea-tooltip-${address.wallet}`}
-              data-tooltip-content={isTouchScreen ? null : "Opensea"}
+              data-tooltip-content={
+                isTouchScreen
+                  ? null
+                  : t(
+                      locale,
+                      "user.profile.identity.statements.openOpenSea"
+                    )
+              }
             >
               <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
                 <OpenseaIcon />
               </div>
-            </button>
+            </a>
             {!isTouchScreen && (
               <Tooltip
                 id={`opensea-tooltip-${address.wallet}`}
@@ -287,18 +391,19 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             )}
             <button
               type="button"
-              aria-label={
+              aria-label={t(
+                locale,
                 isOpen
-                  ? "Collapse consolidated address details"
-                  : "Expand consolidated address details"
-              }
+                  ? "user.profile.identity.statements.collapseAddress"
+                  : "user.profile.identity.statements.expandAddress"
+              )}
               aria-expanded={isOpen}
               aria-controls={`consolidated-address-panel-${address.wallet}`}
               onClick={onToggleOpen}
-              className="tw-border-0 tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400"
+              className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
               <ChevronDownIcon
-                className={`tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-ease-out ${
+                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
                   isOpen ? "tw-rotate-180" : ""
                 }`}
                 aria-hidden="true"
@@ -315,17 +420,20 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             <div className="tw-space-y-2.5">
               <div>
                 <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                  Full Address
+                  {t(locale, "user.profile.identity.statements.fullAddress")}
                 </div>
-                <div className="tw-mt-1 tw-flex tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1.5">
-                  <span className="tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+                <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-pl-3 tw-pr-1">
+                  <span className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
                     {address.wallet}
                   </span>
                   <button
                     type="button"
-                    aria-label="Copy full address"
+                    aria-label={t(
+                      locale,
+                      "user.profile.identity.statements.copyFullAddress"
+                    )}
                     onClick={handleCopyAddress}
-                    className={`tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400 ${
+                    className={`tw-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-transition hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
                       copiedItem === "full-address"
                         ? "tw-text-primary-400"
                         : "tw-text-iron-400 hover:tw-text-iron-200"
@@ -341,17 +449,20 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               {ensName && (
                 <div>
                   <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                    ENS Name
+                    {t(locale, "user.profile.identity.statements.ensName")}
                   </div>
-                  <div className="tw-mt-1 tw-flex tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1.5">
-                    <span className="tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+                  <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-pl-3 tw-pr-1">
+                    <span className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
                       {ensName}
                     </span>
                     <button
                       type="button"
-                      aria-label="Copy ens name"
+                      aria-label={t(
+                        locale,
+                        "user.profile.identity.statements.copyEnsName"
+                      )}
                       onClick={handleCopyEns}
-                      className={`tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border-0 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-emerald-400 ${
+                      className={`tw-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-transition hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
                         copiedItem === "ens"
                           ? "tw-text-primary-400"
                           : "tw-text-iron-400 hover:tw-text-iron-200"
@@ -364,12 +475,49 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                   </div>
                 </div>
               )}
+
+              <div className="tw-grid tw-grid-cols-2 tw-gap-2 lg:tw-hidden">
+                <a
+                  href={`https://etherscan.io/address/${address.wallet}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                >
+                  <span className="tw-h-4 tw-w-4" aria-hidden="true">
+                    <EtherscanIcon />
+                  </span>
+                  {t(
+                    locale,
+                    "user.profile.identity.statements.openEtherscan"
+                  )}
+                </a>
+                <a
+                  href={`https://opensea.io/${address.wallet}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                >
+                  <span className="tw-h-4 tw-w-4" aria-hidden="true">
+                    <OpenseaIcon />
+                  </span>
+                  {t(
+                    locale,
+                    "user.profile.identity.statements.openOpenSea"
+                  )}
+                </a>
+              </div>
             </div>
+            <span className="tw-sr-only" aria-live="polite">
+              {copiedAnnouncement}
+            </span>
           </div>
         )}
       </div>
       {statusMessage && (
-        <div className="tw-pt-2 tw-text-xs tw-font-medium tw-text-iron-200">
+        <div
+          aria-live="polite"
+          className="tw-pt-2 tw-text-xs tw-font-medium tw-text-iron-200"
+        >
           {statusMessage}
         </div>
       )}

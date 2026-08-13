@@ -20,7 +20,7 @@ describe('UserPageIdentityStatementsSocialMediaVerificationPosts', () => {
     expect(capturedProps.statements).toBe(statements);
     expect(capturedProps.profile).toBe(profile);
     expect(capturedProps.loading).toBe(true);
-    expect(capturedProps.noItemsMessage).toMatch('No Social Media Verification Post added yet');
+    expect(capturedProps.noItemsMessage).toBe('No verification posts added yet.');
     expect(screen.getByTestId('list')).toBeInTheDocument();
   });
 });

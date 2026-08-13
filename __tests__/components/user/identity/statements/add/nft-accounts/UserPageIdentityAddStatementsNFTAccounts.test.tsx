@@ -4,17 +4,8 @@ import { act } from "@testing-library/react";
 import UserPageIdentityAddStatementsNFTAccounts from "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
 import { STATEMENT_TYPE, STATEMENT_GROUP } from "@/helpers/Types";
 
-let headerProps: any;
 let itemsProps: any;
 let formProps: any;
-
-jest.mock(
-  "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountHeader",
-  () => (props: any) => {
-    headerProps = props;
-    return <div data-testid="header" />;
-  }
-);
 
 jest.mock(
   "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems",
@@ -37,7 +28,6 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
   const onClose = jest.fn();
 
   beforeEach(() => {
-    headerProps = undefined;
     itemsProps = undefined;
     formProps = undefined;
   });
@@ -47,7 +37,6 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
       <UserPageIdentityAddStatementsNFTAccounts onClose={onClose} profile={profile} />
     );
 
-    expect(headerProps.onClose).toBe(onClose);
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.SUPER_RARE);
     expect(typeof itemsProps.setType).toBe("function");
 
@@ -70,4 +59,3 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
     expect(formProps.activeType).toBe(STATEMENT_TYPE.FOUNDATION);
   });
 });
-

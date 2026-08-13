@@ -4,14 +4,8 @@ import React from 'react';
 import UserPageIdentityAddStatementsSocialMediaAccount from '@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount';
 import { STATEMENT_TYPE, STATEMENT_GROUP } from '@/helpers/Types';
 
-let headerProps: any;
 let itemsProps: any;
 let formProps: any;
-
-jest.mock('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountHeader', () => (props: any) => {
-  headerProps = props;
-  return <div data-testid="header" />;
-});
 
 jest.mock('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems', () => (props: any) => {
   itemsProps = props;
@@ -28,7 +22,6 @@ describe('UserPageIdentityAddStatementsSocialMediaAccount', () => {
   const onClose = jest.fn();
 
   beforeEach(() => {
-    headerProps = undefined;
     itemsProps = undefined;
     formProps = undefined;
   });
@@ -36,13 +29,13 @@ describe('UserPageIdentityAddStatementsSocialMediaAccount', () => {
   it('passes props and updates type', () => {
     render(<UserPageIdentityAddStatementsSocialMediaAccount profile={profile} onClose={onClose} />);
 
-    expect(headerProps.onClose).toBe(onClose);
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.X);
     expect(typeof itemsProps.setSocialType).toBe('function');
 
     expect(formProps.group).toBe(STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT);
     expect(formProps.activeType).toBe(STATEMENT_TYPE.X);
     expect(formProps.profile).toBe(profile);
+    expect(formProps.onClose).toBe(onClose);
 
     act(() => {
       itemsProps.setSocialType(STATEMENT_TYPE.REDDIT);

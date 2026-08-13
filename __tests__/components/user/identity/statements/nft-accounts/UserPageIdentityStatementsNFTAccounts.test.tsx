@@ -22,7 +22,7 @@ describe('UserPageIdentityStatementsNFTAccounts', () => {
     );
     expect(listProps.statements).toBe(statements);
     expect(listProps.profile).toBe(profile);
-    expect(listProps.noItemsMessage).toBe('No NFT Account added yet');
+    expect(listProps.noItemsMessage).toBe('No NFT accounts added yet.');
     expect(listProps.loading).toBe(false);
   });
 });

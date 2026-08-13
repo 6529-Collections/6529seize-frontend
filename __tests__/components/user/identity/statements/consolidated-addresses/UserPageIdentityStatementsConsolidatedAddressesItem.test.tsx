@@ -61,7 +61,6 @@ function renderComponent(props: any = {}) {
 describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (window as any).open = jest.fn();
     (window as any).matchMedia = jest.fn().mockReturnValue({
       matches: true,
       addListener: jest.fn(),
@@ -69,35 +68,32 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
     });
   });
 
-  it("opens external links", () => {
+  it("uses semantic external links", () => {
     renderComponent();
-    fireEvent.click(screen.getByRole("button", { name: "Go to Opensea" }));
-    expect(window.open).toHaveBeenCalledWith(
-      "https://opensea.io/0x1234567890abcdef",
-      "_blank"
+    expect(screen.getByRole("link", { name: "Open on OpenSea" })).toHaveAttribute(
+      "href",
+      "https://opensea.io/0x1234567890abcdef"
     );
-    fireEvent.click(screen.getByRole("button", { name: "Go to Etherscan" }));
-    expect(window.open).toHaveBeenCalledWith(
-      "https://etherscan.io/address/0x1234567890abcdef",
-      "_blank"
+    expect(screen.getByRole("link", { name: "Open on Etherscan" })).toHaveAttribute(
+      "href",
+      "https://etherscan.io/address/0x1234567890abcdef"
     );
   });
 
   it("is collapsed by default", () => {
     renderComponent();
-    expect(screen.queryByText("Full Address")).not.toBeInTheDocument();
+    expect(screen.queryByText(/full address/i)).not.toBeInTheDocument();
   });
 
   it("calls toggle callback from header and chevron", () => {
     const onToggleOpen = jest.fn();
     renderComponent({ onToggleOpen });
 
-    fireEvent.click(screen.getByRole("button", { name: "0x1234" }));
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Expand consolidated address details",
-      })
-    );
+    const expandButtons = screen.getAllByRole("button", {
+      name: "Show wallet details",
+    });
+    fireEvent.click(expandButtons[0]!);
+    fireEvent.click(expandButtons[1]!);
 
     expect(onToggleOpen).toHaveBeenCalledTimes(2);
   });
@@ -120,7 +116,7 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
       address: { wallet: "0x1234567890abcdef", display: "", tdh: 0 },
     });
 
-    expect(screen.queryByText("ENS Name")).not.toBeInTheDocument();
+    expect(screen.queryByText(/ens name/i)).not.toBeInTheDocument();
   });
 
   it("assigns primary address when clicked", () => {

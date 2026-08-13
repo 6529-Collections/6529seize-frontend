@@ -4,23 +4,16 @@ import UserPageIdentityAddStatementsSelect from '@/components/user/identity/stat
 import { STATEMENT_ADD_VIEW } from '@/components/user/identity/statements/add/UserPageIdentityAddStatements';
 
 describe('UserPageIdentityAddStatementsSelect', () => {
-  it('calls onClose when close button clicked', () => {
-    const onClose = jest.fn();
-    render(<UserPageIdentityAddStatementsSelect onClose={onClose} onViewChange={jest.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: /close/i }));
-    expect(onClose).toHaveBeenCalled();
-  });
-
   it('triggers view changes', () => {
     const onViewChange = jest.fn();
-    render(<UserPageIdentityAddStatementsSelect onClose={jest.fn()} onViewChange={onViewChange} />);
-    fireEvent.click(screen.getByText('Social Media Accounts'));
+    render(<UserPageIdentityAddStatementsSelect onViewChange={onViewChange} />);
+    fireEvent.click(screen.getByRole('button', { name: /social media account/i }));
     expect(onViewChange).toHaveBeenCalledWith(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT);
-    fireEvent.click(screen.getByText('NFT Accounts'));
+    fireEvent.click(screen.getByRole('button', { name: /nft account/i }));
     expect(onViewChange).toHaveBeenCalledWith(STATEMENT_ADD_VIEW.NFT_ACCOUNT);
-    fireEvent.click(screen.getByText('Contact'));
+    fireEvent.click(screen.getByRole('button', { name: /contact/i }));
     expect(onViewChange).toHaveBeenCalledWith(STATEMENT_ADD_VIEW.CONTACT);
-    fireEvent.click(screen.getByText('Social Media Verification Posts'));
+    fireEvent.click(screen.getByRole('button', { name: /verification post/i }));
     expect(onViewChange).toHaveBeenCalledWith(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST);
   });
 });

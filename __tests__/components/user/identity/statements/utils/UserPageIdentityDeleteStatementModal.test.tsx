@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useMutation } from '@tanstack/react-query';
 import UserPageIdentityDeleteStatementModal from '@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal';
@@ -7,21 +7,24 @@ import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/React
 import type { CicStatement } from '@/entities/IProfile';
 import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
-// Mock dependencies
 jest.mock('@tanstack/react-query');
-jest.mock('react-use', () => ({
-  useClickAway: jest.fn(),
-  useKeyPressEvent: jest.fn((key, fn) => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === key) fn();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }),
+
+let dialogProps: any;
+jest.mock('@/components/mobile-wrapper-dialog/MobileWrapperDialog', () => ({
+  __esModule: true,
+  default: (props: any) => {
+    dialogProps = props;
+    return props.isOpen ? (
+      <div role="dialog" aria-label={props.title}>
+        <button onClick={props.onClose}>Close</button>
+        {props.children}
+      </div>
+    ) : null;
+  },
 }));
 
 const mockMutation = {
-  mutateAsync: jest.fn(),
+  mutate: jest.fn(),
   isPending: false,
   error: null,
 };
@@ -82,6 +85,7 @@ const renderWithProviders = (onClose = jest.fn()) => {
         <UserPageIdentityDeleteStatementModal
           statement={mockStatement}
           profile={mockProfile}
+          isOpen
           onClose={onClose}
         />
       </ReactQueryWrapperContext.Provider>
@@ -99,8 +103,8 @@ describe('UserPageIdentityDeleteStatementModal', () => {
   it('renders modal with delete confirmation', () => {
     renderWithProviders();
     
-    expect(screen.getByText('Delete Statement')).toBeInTheDocument();
-    expect(screen.getByText('Are you sure you want to delete this statement?')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Delete statement?' })).toBeInTheDocument();
+    expect(screen.getByText(/you can’t undo this action/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
   });
@@ -121,15 +125,6 @@ describe('UserPageIdentityDeleteStatementModal', () => {
     
     const closeButton = screen.getByRole('button', { name: /close/i });
     await userEvent.click(closeButton);
-    
-    expect(mockOnClose).toHaveBeenCalled();
-  });
-
-  it('calls onClose when Escape key is pressed', async () => {
-    const mockOnClose = jest.fn();
-    renderWithProviders(mockOnClose);
-    
-    fireEvent.keyDown(document, { key: 'Escape' });
     
     expect(mockOnClose).toHaveBeenCalled();
   });
@@ -158,7 +153,6 @@ describe('UserPageIdentityDeleteStatementModal', () => {
   });
 
   it('handles successful deletion', async () => {
-    mockMutation.mutateAsync.mockResolvedValueOnce({});
     renderWithProviders();
     
     const deleteButton = screen.getByRole('button', { name: /delete/i });
@@ -169,7 +163,7 @@ describe('UserPageIdentityDeleteStatementModal', () => {
     });
     
     await waitFor(() => {
-      expect(mockMutation.mutateAsync).toHaveBeenCalled();
+      expect(mockMutation.mutate).toHaveBeenCalled();
     });
   });
 
@@ -184,12 +178,10 @@ describe('UserPageIdentityDeleteStatementModal', () => {
       expect(mockAuthContext.requestAuth).toHaveBeenCalled();
     });
     
-    expect(mockMutation.mutateAsync).not.toHaveBeenCalled();
+    expect(mockMutation.mutate).not.toHaveBeenCalled();
   });
 
   it('calls mutation with correct parameters', async () => {
-    mockMutation.mutateAsync.mockResolvedValueOnce({});
-    
     renderWithProviders();
     
     const deleteButton = screen.getByRole('button', { name: /delete/i });
@@ -200,10 +192,20 @@ describe('UserPageIdentityDeleteStatementModal', () => {
     });
     
     await waitFor(() => {
-      expect(mockMutation.mutateAsync).toHaveBeenCalled();
+      expect(mockMutation.mutate).toHaveBeenCalled();
     });
     
     // Verify that the component correctly sets up the mutation
-    expect(mockMutation.mutateAsync).toHaveBeenCalledTimes(1);
+    expect(mockMutation.mutate).toHaveBeenCalledTimes(1);
+  });
+
+  it('prevents dialog dismissal while deletion is pending', () => {
+    (useMutation as jest.Mock).mockReturnValue({
+      ...mockMutation,
+      isPending: true,
+    });
+    renderWithProviders();
+    expect(dialogProps.dismissible).toBe(false);
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeDisabled();
   });
 });

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import UserPageIdentityAddStatementsSocialMediaAccountHeader from "./UserPageIdentityAddStatementsSocialMediaAccountHeader";
 import type {
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE} from "@/helpers/Types";
 import {
@@ -26,10 +25,6 @@ export default function UserPageIdentityAddStatementsSocialMediaAccount({
 
   return (
     <>
-      <UserPageIdentityAddStatementsSocialMediaAccountHeader
-        onClose={onClose}
-      />
-
       <UserPageIdentityAddStatementsSocialMediaAccountItems
         activeType={socialMediaType}
         setSocialType={setSocialMediaType}

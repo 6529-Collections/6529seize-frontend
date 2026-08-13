@@ -3,12 +3,14 @@ import userEvent from '@testing-library/user-event';
 import UserPageIdentityAddStatements, { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
 import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 
-let clickAway: () => void;
-let escapeCb: () => void;
+let dialogProps: any;
 
-jest.mock('react-use', () => ({
-  useClickAway: (_ref: any, cb: () => void) => { clickAway = cb; },
-  useKeyPressEvent: (key: string, cb: () => void) => { if (key === 'Escape') escapeCb = cb; }
+jest.mock('@/components/mobile-wrapper-dialog/MobileWrapperDialog', () => ({
+  __esModule: true,
+  default: (props: any) => {
+    dialogProps = props;
+    return props.isOpen ? <div data-testid="dialog">{props.children}</div> : null;
+  },
 }));
 
 jest.mock('@/components/user/identity/statements/add/UserPageIdentityAddStatementsViews', () => ({
@@ -20,20 +22,19 @@ jest.mock('@/components/user/identity/statements/add/UserPageIdentityAddStatemen
 
 const profile = { id: '1' } as ApiIdentity;
 
-test('calls onClose on escape and click away', () => {
+test('passes open state and close callback to the shared dialog', () => {
   const onClose = jest.fn();
-  render(<UserPageIdentityAddStatements profile={profile} onClose={onClose} />);
-  escapeCb();
-  expect(onClose).toHaveBeenCalled();
-  onClose.mockClear();
-  clickAway();
+  render(<UserPageIdentityAddStatements profile={profile} isOpen onClose={onClose} />);
+  expect(dialogProps.isOpen).toBe(true);
+  dialogProps.onClose();
   expect(onClose).toHaveBeenCalled();
 });
 
 test('changes active view when child triggers', async () => {
-  render(<UserPageIdentityAddStatements profile={profile} onClose={() => {}} />);
+  render(<UserPageIdentityAddStatements profile={profile} isOpen onClose={() => {}} />);
   const div = screen.getByTestId('views');
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
   await userEvent.click(div);
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.CONTACT);
+  expect(dialogProps.title).toBe('Add contact');
 });

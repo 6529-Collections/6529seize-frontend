@@ -8,8 +8,8 @@ import { useMutation } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query', () => ({ useMutation: jest.fn() }));
 
-const mutateAsync = jest.fn();
-(useMutation as jest.Mock).mockReturnValue({ mutateAsync });
+const mutate = jest.fn();
+(useMutation as jest.Mock).mockReturnValue({ mutate, isPending: false });
 
 const auth = { requestAuth: jest.fn().mockResolvedValue({ success: true }), setToast: jest.fn() } as any;
 const wrapper = ({ children }: any) => (
@@ -34,6 +34,6 @@ describe('UserPageIdentityAddStatementsForm', () => {
     const form = input.closest('form') as HTMLFormElement;
     fireEvent.submit(form);
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
-    expect(mutateAsync).toHaveBeenCalledWith('abc');
+    expect(mutate).toHaveBeenCalledWith('abc', expect.objectContaining({ onSuccess: expect.any(Function) }));
   });
 });

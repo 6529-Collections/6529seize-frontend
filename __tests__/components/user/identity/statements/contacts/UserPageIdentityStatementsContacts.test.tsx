@@ -12,7 +12,7 @@ describe('UserPageIdentityStatementsContacts', () => {
     render(<UserPageIdentityStatementsContacts statements={statements} profile={profile} loading={false} />);
     expect(listProps.statements).toBe(statements);
     expect(listProps.profile).toBe(profile);
-    expect(listProps.noItemsMessage).toBe('No Contact added yet');
+    expect(listProps.noItemsMessage).toBe('No contact details added yet.');
     expect(listProps.loading).toBe(false);
   });
 });

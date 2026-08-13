@@ -19,7 +19,7 @@ jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({
 
 jest.mock('@/components/user/identity/statements/add/UserPageIdentityAddStatements', () => (props: any) => {
   modalProps = props;
-  return <div data-testid="modal-content" />;
+  return <div data-testid="modal-content" data-open={String(props.isOpen)} />;
 });
 
 jest.mock('@/components/utils/button/PrimaryButton', () => (props: any) => (
@@ -31,15 +31,15 @@ const profile = { id: '1' } as any;
 describe('UserPageIdentityStatementsAddButton', () => {
   it('opens and closes the add statements modal', async () => {
     render(<UserPageIdentityStatementsAddButton profile={profile} />);
-    expect(screen.queryByTestId('modal-content')).toBeNull();
+    expect(screen.getByTestId('modal-content')).toHaveAttribute('data-open', 'false');
 
     await userEvent.click(screen.getByRole('button', { name: /add/i }));
-    expect(screen.getByTestId('modal-content')).toBeInTheDocument();
+    expect(screen.getByTestId('modal-content')).toHaveAttribute('data-open', 'true');
     expect(modalProps.profile).toBe(profile);
 
     await act(async () => {
       modalProps.onClose();
     });
-    expect(screen.queryByTestId('modal-content')).toBeNull();
+    expect(screen.getByTestId('modal-content')).toHaveAttribute('data-open', 'false');
   });
 });

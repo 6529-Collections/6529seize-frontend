@@ -48,6 +48,9 @@ export default function UserPageIdentityAddStatementsContactInput({
           type="text"
           required
           autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           value={value}
           onChange={handleInputChange}
           placeholder={STATEMENT_META[activeType].inputPlaceholder}
