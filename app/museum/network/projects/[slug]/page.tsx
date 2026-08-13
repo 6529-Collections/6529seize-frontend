@@ -284,6 +284,7 @@ function ProjectWorkCard({
               width={presentation.width}
               height={presentation.height}
               sourceByteSize={presentation.sourceByteSize}
+              variants={presentation.variants}
               {...(sourceHref === null || !canOpenPresentation
                 ? {}
                 : {

@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { MuseumManagedImage } from "./MuseumManagedImage";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { MuseumExternalProposalPresentationVariant } from "@/lib/museum/publication/types";
 
 export const MUSEUM_PROPOSAL_INTENT_VIEW_BYTES = 16_000_000;
 
@@ -17,6 +18,8 @@ export function MuseumProposalImage({
   width,
   height,
   sourceByteSize,
+  variants = [],
+  sizes = "(min-width: 1280px) 42vw, (min-width: 640px) 70vw, 100vw",
   sourceHref,
   sourceLabel,
   eager = false,
@@ -28,13 +31,31 @@ export function MuseumProposalImage({
   readonly width: number;
   readonly height: number;
   readonly sourceByteSize?: number;
+  readonly variants?:
+    | readonly MuseumExternalProposalPresentationVariant[]
+    | undefined;
+  readonly sizes?: string;
   readonly sourceHref?: string;
   readonly sourceLabel?: string;
   readonly eager?: boolean;
   readonly requireIntentForLargeSource?: boolean;
   readonly className?: string;
 }) {
+  const responsiveVariants = [...variants].sort(
+    (left, right) => left.width - right.width
+  );
+  const smallest = responsiveVariants.at(0);
+  const renderedSrc = smallest?.url ?? src;
+  const renderedWidth = smallest?.width ?? width;
+  const renderedHeight = smallest?.height ?? height;
+  const srcSet =
+    responsiveVariants.length === 0
+      ? undefined
+      : responsiveVariants
+          .map((variant) => `${variant.url} ${variant.width}w`)
+          .join(", ");
   const requiresIntent =
+    responsiveVariants.length === 0 &&
     requireIntentForLargeSource &&
     sourceByteSize !== undefined &&
     sourceByteSize >= MUSEUM_PROPOSAL_INTENT_VIEW_BYTES;
@@ -100,10 +121,11 @@ export function MuseumProposalImage({
         {statusMessage}
       </span>
       <MuseumManagedImage
-        src={src}
+        src={renderedSrc}
+        {...(srcSet === undefined ? {} : { srcSet, sizes })}
         alt={alt}
-        width={width}
-        height={height}
+        width={renderedWidth}
+        height={renderedHeight}
         loading={eager ? "eager" : "lazy"}
         fetchPriority={eager ? "high" : "low"}
         style={{ aspectRatio: `${width} / ${height}` }}

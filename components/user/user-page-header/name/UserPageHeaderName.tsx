@@ -83,7 +83,10 @@ export default function UserPageHeaderName({
           </UserPageClassificationWrapper>
           {profileEnabledLabel && (
             <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-              <span className="tw-text-iron-700">&bull;</span>
+              <span
+                aria-hidden="true"
+                className="tw-size-1 tw-flex-none tw-rounded-full tw-bg-iron-500"
+              />
               <p
                 className="tw-m-0 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-4 tw-text-white/50"
                 suppressHydrationWarning

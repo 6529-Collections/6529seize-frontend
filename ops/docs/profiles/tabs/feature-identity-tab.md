@@ -7,7 +7,8 @@ It combines `Rep` and `NIC` on one route.
 
 - Desktop shows both surfaces at the same time.
 - Rep supports direction toggles: `Received` and `Given`.
-- Mobile switches between `Rep` and `Identity` subviews inside the same URL.
+- Mobile switches between `Total Rep`, `NIC`, and `ID Statements` subviews
+  inside the same URL.
 
 ## Location in the Site
 
@@ -22,10 +23,14 @@ Desktop (`>= lg`):
 - Right: NIC summary, ID statements, and `Rate NIC` entry point
 
 Mobile (`< lg`):
-- Top cards: direction-aware `Total Rep` and `NIC`
-- `Rep` subview: rep direction toggle, categories, received-only `Grant Rep`,
-  REP activity log
-- `Identity` subview: `Rate NIC`, ID statements, NIC activity log
+- Top segmented control: direction-aware `Total Rep`, `NIC`, and
+  `ID Statements`
+- `Total Rep` subview: contributor summary, rep direction toggle, categories,
+  received-only `Grant Rep`, and REP activity log
+- `NIC` subview: NIC explanation, status, top-rater avatars, `Rate NIC`, and NIC
+  activity log
+- `ID Statements` subview: identity statements and the statement add action
+  when editing is allowed
 
 ## Entry Points
 
@@ -44,7 +49,8 @@ Mobile (`< lg`):
 5. If actions are available, open `Grant Rep` (received only) or `Rate NIC`.
 6. `Rate NIC` opens a modal; submit to save or select `Cancel` to close.
 7. Review activity logs and apply filters.
-8. On mobile, switch between `Rep` and `NIC` cards as needed.
+8. On mobile, switch between `Total Rep`, `NIC`, and `ID Statements` as
+   needed.
 
 ## Rep Behavior
 
@@ -119,8 +125,7 @@ Mobile (`< lg`):
 - NIC panel shows NIC value, NIC status, top-contributor avatars, and rater
   count.
 - Desktop shows a `Rate NIC` CTA in the NIC section when rating is allowed.
-- Mobile shows `Rate NIC` only in the `Identity` subview when rating is
-  allowed.
+- Mobile shows `Rate NIC` only in the `NIC` subview when rating is allowed.
 - Desktop and mobile rating flows open a modal with `Save` and `Cancel`.
 - `Rate` is enabled only when the value changed and is valid.
 
@@ -134,8 +139,8 @@ Statement ownership in this tab:
   - direction tabs: `All`, `Incoming`, `Outgoing`
   - NIC-only log-type filter when matter is `NIC`
 - Mobile:
-  - `Rep` subview uses REP log with direction tabs
-  - `Identity` subview uses NIC log with direction tabs and NIC log-type filter
+  - `Total Rep` subview uses REP log with direction tabs
+  - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
 - Empty results show `No Activity Log`.
 
 ## Permissions and Visibility Rules
@@ -146,13 +151,13 @@ Statement ownership in this tab:
   - Rep actions require `AllocateRep`
   - NIC actions require `AllocateCic`
   - proxy grantor profile cannot be the target
-- Mobile `Rep`/`Identity` switching does not change URL state.
+- Mobile `Total Rep`/`NIC`/`ID Statements` switching does not change URL state.
 
 ## Common Scenarios
 
 - Desktop viewers compare `Rep` and `NIC` side by side on the same route.
-- Mobile viewers switch between `Rep` and `Identity` cards without leaving
-  `/{user}`.
+- Mobile viewers switch between `Total Rep`, `NIC`, and `ID Statements`
+  without leaving `/{user}`.
 - Profiles with many rep categories use `+N more`, then `Load more`, to reveal
   additional categories incrementally.
 - Eligible viewers open `Grant Rep` from the received-rep surface or `Rate NIC`
@@ -190,7 +195,7 @@ Statement ownership in this tab:
 - Action availability still depends on wallet, profile-handle, and proxy
   permission context at runtime.
 - Mobile subview switching is local UI state and does not create a distinct URL
-  for `Rep` versus `Identity`.
+  for `Total Rep`, `NIC`, or `ID Statements`.
 
 ## Related Pages
 

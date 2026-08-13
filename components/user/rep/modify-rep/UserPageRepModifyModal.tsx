@@ -254,14 +254,13 @@ export default function UserPageRepModifyModal({
             </div>
 
             <div className="tw-mt-8">
-              <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
+              <div className="tw-flex tw-flex-col tw-gap-3">
                 <Button
                   type="submit"
                   disabled={isSaveDisabled}
                   loading={mutating}
                   size="lg"
                   fullWidth
-                  className="sm:tw-w-auto"
                 >
                   Save
                 </Button>
@@ -271,7 +270,6 @@ export default function UserPageRepModifyModal({
                   variant="secondary"
                   size="lg"
                   fullWidth
-                  className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
                 >
                   Cancel
                 </Button>

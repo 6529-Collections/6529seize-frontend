@@ -16,6 +16,7 @@ export type {
   MuseumEntityRelation,
   MuseumExhibition,
   MuseumExternalProposalPresentationMedia,
+  MuseumExternalProposalPresentationVariant,
   MuseumOrganization,
 } from "./entities";
 

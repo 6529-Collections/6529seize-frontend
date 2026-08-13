@@ -740,6 +740,15 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   "badges.beta": "Beta",
 } as const);
 
+const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
+  "user.profile.identity.mobileTabs",
+  {
+    totalRep: "Total REP",
+    nic: "NIC",
+    idStatements: "ID Statements",
+  } as const
+);
+
 const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
   "waves.composer.mentionShortcuts",
   {
@@ -833,20 +842,20 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.saveFailed":
     "Couldn't save this about statement. Please try again.",
   "aboutEdit.errors.close": "Dismiss About statement error",
-  "aboutEdit.errors.unknown.title": "Unknown Error",
-  "aboutEdit.errors.hateSpeech.title": "Error: Hate Speech",
+  "aboutEdit.errors.unknown.title": "Couldn't save About",
+  "aboutEdit.errors.hateSpeech.title": "Hate speech warning",
   "aboutEdit.errors.hateSpeech.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially containing hate speech. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
-  "aboutEdit.errors.personalInsults.title": "Error: Personal Insults",
+    "Your About statement was flagged for possible hate speech. Revise it and try again.",
+  "aboutEdit.errors.personalInsults.title": "Personal insult warning",
   "aboutEdit.errors.personalInsults.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially containing a personal insult. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
+    "Your About statement was flagged for a possible personal insult. Revise it and try again.",
   "aboutEdit.errors.inappropriateLanguage.title":
-    "Error: Inappropriate Language",
+    "Language warning",
   "aboutEdit.errors.inappropriateLanguage.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially containing inappropriate language that may make others uncomfortable. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
-  "aboutEdit.errors.doxxing.title": "Error: Doxxing of Another Person",
+    "Your About statement was flagged for language that may be inappropriate. Revise it and try again.",
+  "aboutEdit.errors.doxxing.title": "Privacy warning",
   "aboutEdit.errors.doxxing.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system. We have a strong cultural value around respecting pseudonymity, so we'd appreciate it if you adjusted your text.",
+    "Your About statement may reveal another person's private information. Remove it and try again.",
   "edit.open": "Edit profile",
   "edit.title": "Edit profile",
   "edit.banner": "Profile cover",
@@ -1539,6 +1548,7 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 ] as const);
 
 const COMMON_MESSAGES = objectMessages("common", {
+  back: "Back",
   close: "Close",
 } as const);
 
@@ -2019,6 +2029,7 @@ export const EN_US_MESSAGES = {
   "headerUserMenu.profiles": "Profiles",
   "headerUserMenu.addProfile": "Add profile",
   "appSidebar.openingAccountConnection": "Opening account connection",
+  "appSidebar.openProfile": "Open {name} profile",
   "appSidebar.accountSwitchFailed":
     "Failed to switch connected account. Please try again.",
   "appSidebar.accountConnectionFailed":
@@ -2756,6 +2767,7 @@ export const EN_US_MESSAGES = {
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES,
   ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
   ...GROUP_MENTION_COMPOSER_MESSAGES,
   ...MENTION_SHORTCUT_SETTINGS_MESSAGES,

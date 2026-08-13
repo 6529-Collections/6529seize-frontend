@@ -35,7 +35,13 @@ jest.mock(
 );
 jest.mock(
   "@/components/user/user-page-header/UserPageHeaderSubscriptionStatus",
-  () => () => <div data-testid="subscription-status" />
+  () =>
+    ({ compact = false }: { readonly compact?: boolean }) => (
+      <div
+        data-testid="subscription-status"
+        data-compact={compact ? "true" : "false"}
+      />
+    )
 );
 jest.mock("@/components/user/utils/UserFollowBtn", () => ({
   __esModule: true,
@@ -130,7 +136,13 @@ describe("UserPageHeader", () => {
     );
 
     expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
-    expect(screen.getAllByTestId("subscription-status")).toHaveLength(2);
+    const subscriptionStatuses = screen.getAllByTestId("subscription-status");
+    expect(subscriptionStatuses).toHaveLength(3);
+    expect(
+      subscriptionStatuses.filter(
+        (subscriptionStatus) => subscriptionStatus.dataset["compact"] === "true"
+      )
+    ).toHaveLength(1);
   });
 
   it("renders profile website link when a primary CMS site exists", () => {
