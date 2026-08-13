@@ -1,11 +1,19 @@
-import type { AnchorHTMLAttributes, ReactNode } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  type AnchorHTMLAttributes,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { CASEY_ACCESSION_ID, getCaseyDossierAnchor } from "@/lib/museum/casey";
+import { getCaseyDossierAnchor } from "@/lib/museum/casey";
 import { MUSEUM_DATA_ARCHITECTURE_STANDARD_SLUGS } from "@/lib/museum/publication/dataArchitectureContract";
+import { MUSEUM_CASEY_ACQUISITION_SLUG } from "@/lib/museum/publication/routes";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 
 interface MuseumMarkdownProps {
@@ -177,6 +185,8 @@ function publicMuseumRoute(
   workHrefs: Readonly<Record<string, string>>
 ): string | null {
   const withoutFragment = url.split("#", 1)[0] ?? "";
+  const exactWorkHref = workHrefs[withoutFragment];
+  if (exactWorkHref !== undefined) return exactWorkHref;
   const rightsRoute = RIGHTS_ROUTE_BY_PATH.get(withoutFragment);
   if (rightsRoute !== undefined) {
     return rightsRoute;
@@ -199,10 +209,10 @@ function publicMuseumRoute(
     return "/museum/network/artists/casey-reas";
   }
   if (fileName === "casey-reas-collection-essay.md") {
-    return `/museum/network/gifts/${CASEY_ACCESSION_ID}#casey-reas-collection-essay`;
+    return `/museum/network/acquisitions/${MUSEUM_CASEY_ACQUISITION_SLUG}#casey-reas-collection-essay`;
   }
   if (fileName === "gift-into-public-trust.md") {
-    return `/museum/network/gifts/${CASEY_ACCESSION_ID}#gift-narrative-title`;
+    return `/museum/network/acquisitions/${MUSEUM_CASEY_ACQUISITION_SLUG}#gift-narrative-title`;
   }
   if (fileName === "source-and-chronology-matrix.md") {
     return "/museum/network/research/sources-and-chronology";
@@ -213,7 +223,7 @@ function publicMuseumRoute(
   }
   const dossierAnchor = getCaseyDossierAnchor(fileName);
   return dossierAnchor !== null
-    ? `/museum/network/gifts/${CASEY_ACCESSION_ID}#${dossierAnchor}`
+    ? `/museum/network/acquisitions/${MUSEUM_CASEY_ACQUISITION_SLUG}#${dossierAnchor}`
     : null;
 }
 
@@ -375,12 +385,149 @@ function MuseumMarkdownLink({
   );
 }
 
+const LONG_MARKDOWN_CHARACTER_THRESHOLD = 32_000;
+
+interface MuseumMarkdownTableElementProps {
+  readonly children?: ReactNode;
+}
+
+interface MuseumMarkdownTableCellProps extends MuseumMarkdownTableElementProps {
+  readonly mobileLabel?: string;
+}
+
+function MuseumMarkdownTableHead({
+  children,
+}: MuseumMarkdownTableElementProps) {
+  return (
+    <thead className="tw-hidden tw-border-b tw-border-solid tw-border-iron-700 tw-text-iron-100 sm:tw-table-header-group">
+      {children}
+    </thead>
+  );
+}
+
+function MuseumMarkdownTableBody({
+  children,
+}: MuseumMarkdownTableElementProps) {
+  return (
+    <tbody className="tw-block tw-divide-y tw-divide-iron-800 sm:tw-table-row-group">
+      {children}
+    </tbody>
+  );
+}
+
+function MuseumMarkdownTableRow({ children }: MuseumMarkdownTableElementProps) {
+  return (
+    <tr className="tw-block tw-border-b tw-border-iron-800 last:tw-border-b-0 sm:tw-table-row">
+      {children}
+    </tr>
+  );
+}
+
+function MuseumMarkdownTableHeader({
+  children,
+}: MuseumMarkdownTableElementProps) {
+  return (
+    <th scope="col" className="tw-px-3 tw-py-3 tw-align-top tw-font-semibold">
+      {children}
+    </th>
+  );
+}
+
+function MuseumMarkdownTableCell({
+  children,
+  mobileLabel,
+}: MuseumMarkdownTableCellProps) {
+  return (
+    <td className="tw-block tw-whitespace-normal tw-break-words tw-px-3 tw-py-2 tw-align-top sm:tw-table-cell sm:tw-py-3">
+      {mobileLabel ? (
+        <span className="tw-mb-1 tw-block tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500 sm:tw-hidden">
+          {mobileLabel}
+        </span>
+      ) : null}
+      {children}
+    </td>
+  );
+}
+
+function tableElementWithChildren(
+  element: ReactNode
+): ReactElement<MuseumMarkdownTableElementProps> | null {
+  return isValidElement(element)
+    ? (element as ReactElement<MuseumMarkdownTableElementProps>)
+    : null;
+}
+
+function markdownTextContent(node: ReactNode): string {
+  return Children.toArray(node)
+    .map((child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        return String(child);
+      }
+      const element = tableElementWithChildren(child);
+      if (!element) return "";
+      return markdownTextContent(element.props.children);
+    })
+    .join("")
+    .trim();
+}
+
+function tableHeaderLabels(children: ReactNode): string[] {
+  const header = Children.toArray(children)
+    .map(tableElementWithChildren)
+    .find((element) => element?.type === MuseumMarkdownTableHead);
+  if (!header) return [];
+
+  const row = Children.toArray(header.props.children)
+    .map(tableElementWithChildren)
+    .find((element) => element?.type === MuseumMarkdownTableRow);
+  if (!row) return [];
+
+  return Children.toArray(row.props.children).map((cell) => {
+    const element = tableElementWithChildren(cell);
+    return element?.type === MuseumMarkdownTableHeader
+      ? markdownTextContent(element.props.children)
+      : "";
+  });
+}
+
+function addMobileTableLabels(
+  children: ReactNode,
+  labels: readonly string[]
+): ReactNode {
+  return Children.toArray(children).map((section) => {
+    const sectionElement = tableElementWithChildren(section);
+    if (sectionElement?.type !== MuseumMarkdownTableBody) return section;
+
+    const rows = Children.toArray(sectionElement.props.children).map((row) => {
+      const rowElement = tableElementWithChildren(row);
+      if (rowElement?.type !== MuseumMarkdownTableRow) return row;
+
+      const cells = Children.toArray(rowElement.props.children).map(
+        (cell, index) => {
+          const cellElement = tableElementWithChildren(cell);
+          if (cellElement?.type !== MuseumMarkdownTableCell) return cell;
+          const mobileLabel = labels[index] ?? "";
+          const mobileLabelProps =
+            mobileLabel.length > 0 ? { mobileLabel } : {};
+          return cloneElement(
+            cellElement as ReactElement<MuseumMarkdownTableCellProps>,
+            mobileLabelProps
+          );
+        }
+      );
+      return cloneElement(rowElement, { children: cells });
+    });
+
+    return cloneElement(sectionElement, { children: rows });
+  });
+}
+
 function MuseumMarkdownTable({ children }: { readonly children?: ReactNode }) {
+  const labels = tableHeaderLabels(children);
+  const labelledChildren = addMobileTableLabels(children, labels);
+
   return (
     <div>
-      <p className="tw-m-0 tw-mb-2 tw-text-xs tw-leading-5 tw-text-iron-500 sm:tw-hidden">
-        {t(DEFAULT_LOCALE, "museum.network.markdown.scrollTableHint")}
-      </p>
       <div
         aria-label={t(
           DEFAULT_LOCALE,
@@ -390,8 +537,8 @@ function MuseumMarkdownTable({ children }: { readonly children?: ReactNode }) {
         role="region"
         tabIndex={0}
       >
-        <table className="tw-w-full tw-min-w-[44rem] tw-border-collapse tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200">
-          {children}
+        <table className="tw-block tw-w-full tw-table-fixed tw-border-collapse tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200 sm:tw-table sm:tw-table-auto">
+          {labelledChildren}
         </table>
       </div>
     </div>
@@ -447,22 +594,11 @@ const baseComponents: Components = {
     </pre>
   ),
   table: MuseumMarkdownTable,
-  thead: ({ children }) => (
-    <thead className="tw-border-b tw-border-solid tw-border-iron-700 tw-text-iron-100">
-      {children}
-    </thead>
-  ),
-  tbody: ({ children }) => (
-    <tbody className="tw-divide-y tw-divide-iron-800">{children}</tbody>
-  ),
-  th: ({ children }) => (
-    <th scope="col" className="tw-px-3 tw-py-3 tw-align-top tw-font-semibold">
-      {children}
-    </th>
-  ),
-  td: ({ children }) => (
-    <td className="tw-px-3 tw-py-3 tw-align-top">{children}</td>
-  ),
+  thead: MuseumMarkdownTableHead,
+  tbody: MuseumMarkdownTableBody,
+  tr: MuseumMarkdownTableRow,
+  th: MuseumMarkdownTableHeader,
+  td: MuseumMarkdownTableCell,
   // Markdown is a source-record surface. Typed publication routes render
   // governed media separately; arbitrary Markdown image URLs stay inert.
   img: ({ alt }) => (
@@ -503,20 +639,36 @@ export function MuseumMarkdown({
   sourcePath,
   workHrefs = EMPTY_WORK_HREFS,
 }: MuseumMarkdownProps) {
+  const markdown = embeddedDocument
+    ? withoutEmbeddedDocumentTitle(children)
+    : children;
+  const renderedMarkdown = (
+    <ReactMarkdown
+      components={documentHeadings ? documentHeadingComponents : baseComponents}
+      rehypePlugins={[rehypeSanitize]}
+      remarkPlugins={[remarkGfm]}
+      urlTransform={(url) =>
+        safeUrlTransform(url, sourcePath, sourceCommit, workHrefs)
+      }
+    >
+      {markdown}
+    </ReactMarkdown>
+  );
+
   return (
     <div className={`tw-space-y-4 tw-text-base ${className}`}>
-      <ReactMarkdown
-        components={
-          documentHeadings ? documentHeadingComponents : baseComponents
-        }
-        rehypePlugins={[rehypeSanitize]}
-        remarkPlugins={[remarkGfm]}
-        urlTransform={(url) =>
-          safeUrlTransform(url, sourcePath, sourceCommit, workHrefs)
-        }
-      >
-        {embeddedDocument ? withoutEmbeddedDocumentTitle(children) : children}
-      </ReactMarkdown>
+      {markdown.length >= LONG_MARKDOWN_CHARACTER_THRESHOLD ? (
+        <details className="tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-950/40">
+          <summary className="tw-flex tw-min-h-12 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 [&::-webkit-details-marker]:tw-hidden">
+            {t(DEFAULT_LOCALE, "museum.network.research.completeSource")}
+          </summary>
+          <div className="tw-border-t tw-border-solid tw-border-white/10 tw-p-4 sm:tw-p-6">
+            {renderedMarkdown}
+          </div>
+        </details>
+      ) : (
+        renderedMarkdown
+      )}
     </div>
   );
 }

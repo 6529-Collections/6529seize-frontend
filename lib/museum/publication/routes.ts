@@ -193,12 +193,23 @@ export function museumWorkHrefIndex(
     ...publication.artworks.map((artwork) => artwork.id),
     ...(view?.objects.map((object) => object.objectId) ?? []),
   ]);
-  return Object.fromEntries(
+  const index = Object.fromEntries(
     [...sourceIds].flatMap((sourceId) => {
       const href = museumWorkHrefForSourceId(publication, sourceId, view);
       return href === null ? [] : [[sourceId, href]];
     })
   );
+  for (const work of publication.works ?? []) {
+    const href = museumWorkHrefForSourceId(publication, work.id, view);
+    if (href === null) continue;
+    for (const documentId of work.documentIds) {
+      const sourcePath = publication.documents.find(
+        (document) => document.id === documentId
+      )?.sourcePath;
+      if (sourcePath !== undefined) index[sourcePath] = href;
+    }
+  }
+  return index;
 }
 
 /**

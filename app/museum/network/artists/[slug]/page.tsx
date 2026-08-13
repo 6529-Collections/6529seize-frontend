@@ -128,7 +128,15 @@ function TypedArtistPage({
     const document = publication.documents.find(
       (candidate) => candidate.id === documentId
     );
-    return document === undefined ? [] : [document];
+    if (
+      document === undefined ||
+      (document.kind !== "artist_practice" &&
+        document.kind !== "source_record") ||
+      (document.artistIds.length > 0 && !document.artistIds.includes(artist.id))
+    ) {
+      return [];
+    }
+    return [document];
   });
   const workHrefs = museumWorkHrefIndex(publication, view);
   return (
