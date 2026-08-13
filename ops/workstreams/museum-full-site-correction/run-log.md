@@ -137,3 +137,31 @@ comes first; acquisition and accession follow.` before the next hosted lane
   668 returned successful Museum-bound responses with no visible soft-404 or
   publication-unavailable state. This preliminary result will be repeated
   against the corrected staging and production releases.
+- Final correction PR #3731 passed all exact-head checks at
+  `dc02cb29898fd6a39c9be916aa014b5f3a86eb10` and merged as frontend main
+  `aa9a33f2e90efcb50e9a6fc2e704788406d83802`.
+- Final staging composition `a4b5d26f140096adade71627e715aa9c5e1b37d9`
+  deployed successfully in run `31672717558`. The authenticated final staging
+  crawl passed all 668 Museum routes. Automatic staging E2E run `31673246237`
+  passed every Museum pack but failed one unrelated mobile Memes mint test on
+  a transient Server Components error; isolated read-only media rerun
+  `31674047260` passed `[web-mobile-chromium]
+  tests/media/media-mint-detail-readonly.spec.ts:113:7`, `renders The Memes mint
+  page read-only`, without a source change. The 668-route result is an
+  authenticated HTTP/visible-soft-404 crawl; browser E2E separately covered
+  the selected Museum desktop and 390px mobile route matrix.
+- Production deploy run `31674231646` completed successfully on exact main
+  `aa9a33f2e90efcb50e9a6fc2e704788406d83802`. Eight consecutive live version
+  reads returned that exact version and announced version with `stale:false`.
+- Automatic Production E2E run `31675378896` passed, including isolated
+  evidence verification. The final production HTTP/visible-soft-404 crawl
+  passed all 668 Museum routes. Run `31675378896` separately passed the
+  selected Museum desktop and 390px mobile browser matrix; retained production
+  pixels confirm Magnum's status as accessioned into the permanent Collection
+  and Keys and Gates as selected, unminted, and pending acquisition. No claim
+  is made that all 668 routes received individual desktop and mobile pixel
+  captures.
+- Final canonical Museum source remains
+  `a5b64f7eb586a5a07024b56a0604d8b8ae0ea574`, with active catalog
+  `975f041aed7e2f402ab26d4fb2bb266e07db4974` and reviewed publication source
+  `9aea66c07d59f890e366dde6552a304580ba789a`.
