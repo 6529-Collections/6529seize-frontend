@@ -377,6 +377,7 @@ export default async function MuseumAcquisitionProgramPage({
                         height={presentation.height}
                         alt={presentation.altText.trim() || work.title}
                         sourceByteSize={presentation.sourceByteSize}
+                        variants={presentation.variants}
                         requireIntentForLargeSource={false}
                         eager={index === 0}
                         className="tw-h-full tw-w-full tw-object-contain"

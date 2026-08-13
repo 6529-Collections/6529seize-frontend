@@ -405,6 +405,7 @@ function MuseumCanonicalWorkRecordPage({
                       width={media.width}
                       height={media.height}
                       sourceByteSize={media.sourceByteSize}
+                      variants={media.variants}
                       requireIntentForLargeSource={false}
                       {...(sourceHref === null || !canOpenPresentation
                         ? {}

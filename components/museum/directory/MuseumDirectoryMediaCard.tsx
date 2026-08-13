@@ -71,6 +71,7 @@ function MuseumDirectoryMediaStage({
           width={presentation.width}
           height={presentation.height}
           sourceByteSize={presentation.sourceByteSize}
+          variants={presentation.variants}
           eager={eager}
           {...(sourceHref === null || !canOpenPresentation
             ? {}

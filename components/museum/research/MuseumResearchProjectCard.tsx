@@ -74,6 +74,7 @@ export function MuseumResearchProjectCard({
             height={project.presentationMedia.height}
             alt={project.presentationMedia.altText.trim() || project.title}
             sourceByteSize={project.presentationMedia.sourceByteSize}
+            variants={project.presentationMedia.variants}
             requireIntentForLargeSource={false}
             className="tw-h-full tw-w-full tw-object-contain"
           />
