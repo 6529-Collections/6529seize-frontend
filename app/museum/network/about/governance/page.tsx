@@ -13,8 +13,11 @@ import { getMuseumView } from "@/lib/museum/normalize";
 import {
   isAdoptedGovernanceEffect,
   museumSlug,
-  statusTone,
 } from "@/lib/museum/presentation";
+import {
+  displayGovernanceDecisionClass,
+  displayGovernanceEffect,
+} from "./presentation";
 
 export const metadata: Metadata = {
   ...getAppMetadata({
@@ -49,7 +52,7 @@ export default async function MuseumAboutGovernancePage() {
                 href={`/museum/network/about/governance/${museumSlug(decision.decisionId)}`}
                 eyebrow={decision.decisionId}
                 title={decision.title}
-                description={decision.governanceEffect}
+                description={displayGovernanceEffect(decision.governanceEffect)}
                 meta={
                   decision.createdAt
                     ? formatDate(DEFAULT_LOCALE, decision.createdAt)
@@ -69,8 +72,9 @@ export default async function MuseumAboutGovernancePage() {
                     tone={adopted ? "success" : "warning"}
                   />
                   <MuseumStatusBadge
-                    label={decision.decisionClass}
-                    tone={statusTone(decision.observedWaveStatus)}
+                    label={displayGovernanceDecisionClass(
+                      decision.decisionClass
+                    )}
                   />
                 </div>
               </MuseumRecordCard>

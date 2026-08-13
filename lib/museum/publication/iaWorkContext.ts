@@ -6,6 +6,7 @@ import type {
 import type { MuseumArtwork, MuseumPublication } from "./types";
 import type { MuseumView } from "@/lib/museum/types";
 import { museumWorkHref, museumWorkHrefForSourceId } from "./routes";
+import { museumPublicWorkStatus } from "./collectionSemantics";
 import {
   acquisitionRef,
   artistRef,
@@ -53,12 +54,12 @@ export function buildMuseumWorkRelations(
 ): MuseumEntityRelations {
   const publicWork = publication.works?.find((work) => work.id === artworkId);
   if (publicWork !== undefined) {
+    const status = museumPublicWorkStatus(publicWork);
     const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter(
       (item) => publicWork.acquisitionIds.includes(item.acquisitionId)
     );
     const programRefs =
-      publicWork.status ===
-      "selected_through_acquisition_program_acquisition_pending"
+      status === "selected_through_acquisition_program_acquisition_pending"
         ? publicWork.programIds.map((id) => typedProgramRef(publication, id))
         : [];
     return {
@@ -72,7 +73,7 @@ export function buildMuseumWorkRelations(
         ...acquisitions.map((item) =>
           acquisitionRef(
             item,
-            publicWork.status === "accessioned_into_permanent_collection"
+            status === "accessioned_into_permanent_collection"
               ? "Acquired through"
               : "Part of"
           )
@@ -121,6 +122,7 @@ export function buildMuseumWorkContext(
 ): MuseumEntityContextModel | null {
   const publicWork = publication.works?.find((work) => work.id === artworkId);
   if (publicWork !== undefined) {
+    const status = museumPublicWorkStatus(publicWork);
     const relations = buildMuseumWorkRelations(publication, artworkId, view);
     return {
       kind: "work",
@@ -128,8 +130,8 @@ export function buildMuseumWorkContext(
       label: publicWork.title,
       canonicalHref: museumWorkHref(publicWork.id),
       breadcrumbs,
-      status: publicWork.status,
-      statusTone: statusTone(publicWork.status),
+      status,
+      statusTone: statusTone(status),
       statusAsOf: publicWork.statusAsOf,
       primaryRelations: relations.primaryRelations,
       secondaryRelations: relations.secondaryRelations,

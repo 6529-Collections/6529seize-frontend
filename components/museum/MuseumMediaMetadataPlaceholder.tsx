@@ -15,7 +15,7 @@ export function MuseumMediaMetadataPlaceholder({
     <div
       role="group"
       aria-labelledby={headingId}
-      className="tw-flex tw-min-h-48 tw-flex-col tw-justify-center tw-border-y tw-border-solid tw-border-iron-800 tw-bg-black tw-p-6"
+      className="tw-flex tw-h-full tw-min-h-48 tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-overflow-y-auto tw-border-y tw-border-solid tw-border-iron-800 tw-bg-black tw-p-6 tw-text-center"
     >
       <p
         id={headingId}

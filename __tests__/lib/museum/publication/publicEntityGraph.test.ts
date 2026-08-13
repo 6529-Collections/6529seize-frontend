@@ -636,7 +636,7 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     } as unknown as MuseumPublication;
     expect(buildMuseumAcquisitionIndex(publication, null)).toHaveLength(1);
     expect(buildMuseumAcquisitionIndex(publication, null)[0]?.status).toBe(
-      "selected_by_museum_wave_acquisition_review_in_progress"
+      "accessioned_into_permanent_collection"
     );
     const invalid = {
       ...publication,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getMuseumObjectMetadata } from "@/components/museum/MuseumObjectPage";
+import { applyMuseumCollectionSemantics } from "@/lib/museum/publication/collectionSemantics";
 import { museumCollectionWorkHrefForSourceId } from "@/lib/museum/publication/routes";
 import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 
@@ -21,11 +22,10 @@ export default async function MuseumCollectionObjectRoute({
   const { objectId } = await params;
   const { publicationState, view } = await getMuseumPublicationBundle();
   if (publicationState.publication === null) notFound();
-  const href = museumCollectionWorkHrefForSourceId(
-    publicationState.publication,
-    objectId,
-    view
+  const publication = applyMuseumCollectionSemantics(
+    publicationState.publication
   );
+  const href = museumCollectionWorkHrefForSourceId(publication, objectId, view);
   if (href === null) notFound();
   permanentRedirect(href);
 }
