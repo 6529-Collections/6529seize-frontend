@@ -45,14 +45,14 @@ describe("getCurrentSalesAndAuctionsEditorialMarkdown", () => {
         "The reviewed code has two signed sale paths. Both use native ETH."
       );
       expect(currentMarkdown).toContain(
-        "## Signed terms are the bridge from decision to execution"
+        "## How sale details are approved and checked"
       );
       expect(currentMarkdown).toContain(
-        "## Current signed sales use the legacy mint lane"
+        "## Current sales use the older minting path"
       );
       expect(currentMarkdown).toContain("ADR 0019");
       expect(currentMarkdown).toContain(
-        "Its end-to-end path is not accepted or implemented at this pinned commit."
+        "It is not accepted or implemented as a complete current sale path"
       );
       expect(currentMarkdown).not.toContain(
         "A sale contract turns approved terms into custody, payment, allocation"
@@ -61,22 +61,22 @@ describe("getCurrentSalesAndAuctionsEditorialMarkdown", () => {
         Array.from(currentMarkdown.matchAll(/^## (.+)$/gm), (match) => match[1])
       ).toEqual([
         "The sale flow in one minute",
-        "Signed terms are the bridge from decision to execution",
-        "Fixed-price execution protects both paid and free mints",
-        "Payer and recipient are intentionally different concepts",
-        "Auction registration commits the item to one state machine",
-        "Bids create liabilities as well as a leader",
-        "The minimum next bid is exact",
-        "Anti-sniping needs a reproducible clock rule",
-        "Winner settlement uses fixed results",
-        "Zero-bid settlement resolves the auctioned token",
-        "Cancellation must respect custody and bidder rights",
-        "Current signed sales use the legacy mint lane",
-        "Recoverable surplus excludes liabilities",
-        "Hostile recipients remain part of the design",
-        "Additional sale mechanics belong behind reviewed adapters",
-        "Responsibilities carried by the sale contracts",
-        "What can fail",
+        "How sale details are approved and checked",
+        "How paid sales and free claims work",
+        "The payer and NFT recipient can be different",
+        "How an auction starts",
+        "How bids and refunds work",
+        "How the next minimum bid is calculated",
+        "A late bid can extend the auction",
+        "How an auction with a winner ends",
+        "What happens if nobody bids",
+        "When an auction can be cancelled",
+        "Current sales use the older minting path",
+        "Money owed to people is not spare money",
+        "Some wallets and contracts may reject transfers",
+        "Other sale types are not available yet",
+        "What the contracts must make easy to check",
+        "What reviewers should check for",
         "Questions for reviewers",
       ]);
     }
