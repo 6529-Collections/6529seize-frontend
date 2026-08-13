@@ -19,6 +19,22 @@ const PHASE_ORDER = [
   ApiWalletDistributionAllocationPhaseEnum.Public,
 ] as const;
 
+const PHASE_MESSAGE_KEY = {
+  [ApiWalletDistributionAllocationPhaseEnum.Phase0]:
+    "home.mintAllowlist.phase.phase0",
+  [ApiWalletDistributionAllocationPhaseEnum.Phase1]:
+    "home.mintAllowlist.phase.phase1",
+  [ApiWalletDistributionAllocationPhaseEnum.Phase2]:
+    "home.mintAllowlist.phase.phase2",
+  [ApiWalletDistributionAllocationPhaseEnum.Public]:
+    "home.mintAllowlist.phase.public",
+} as const;
+
+function getPhaseRank(phase: ApiWalletDistributionAllocationPhaseEnum): number {
+  const rank = PHASE_ORDER.indexOf(phase);
+  return rank === -1 ? PHASE_ORDER.length : rank;
+}
+
 function normalizeAddress(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -33,7 +49,7 @@ function formatAllocation(
       ? 0
       : Math.max(0, allocation.spots_allowlist);
   const params = {
-    phase: allocation.phase,
+    phase: t(locale, PHASE_MESSAGE_KEY[allocation.phase]),
     airdrop: formatNumber(locale, airdrop, { maximumFractionDigits: 0 }),
     allowlist: formatNumber(locale, allowlist, { maximumFractionDigits: 0 }),
   };
@@ -57,6 +73,8 @@ export default function LatestDropAllowlistStatus({
   const locale = useBrowserLocale();
   const normalizedAddress = address ? normalizeAddress(address) : "";
   const hasTokenId = Number.isInteger(tokenId) && tokenId > 0;
+  const walletIsTransitioning =
+    connectionState === "initializing" || connectionState === "connecting";
 
   const { data, isError, isPending } =
     useQuery<ApiWalletDistributionAllocations>({
@@ -77,30 +95,32 @@ export default function LatestDropAllowlistStatus({
   }
 
   const labels = [...(data?.allocations ?? [])]
-    .sort(
-      (left, right) =>
-        PHASE_ORDER.indexOf(left.phase) - PHASE_ORDER.indexOf(right.phase)
-    )
-    .map((allocation) => ({
-      phase: allocation.phase,
-      label: formatAllocation(locale, allocation),
-    }))
-    .filter(
-      (allocation): allocation is { phase: string; label: string } =>
-        allocation.label !== null
-    );
+    .sort((left, right) => getPhaseRank(left.phase) - getPhaseRank(right.phase))
+    .flatMap((allocation) => {
+      const label = formatAllocation(locale, allocation);
+      return label === null ? [] : [{ phase: allocation.phase, label }];
+    });
+  const hasDistribution = data?.has_distribution;
 
   let status = t(locale, "home.mintAllowlist.checking");
   if (connectionState === "error" || isError) {
     status = t(locale, "home.mintAllowlist.unavailable");
-  } else if (!isPending && data.has_distribution === false) {
+  } else if (
+    !walletIsTransitioning &&
+    !isPending &&
+    hasDistribution === false
+  ) {
     status = t(locale, "home.mintAllowlist.notPublished");
-  } else if (!isPending && labels.length === 0) {
+  } else if (!walletIsTransitioning && !isPending && labels.length === 0) {
     status = t(locale, "home.mintAllowlist.notFound");
   }
 
   const showAllocations =
-    connectionState !== "error" && !isPending && !isError && labels.length > 0;
+    connectionState !== "error" &&
+    !walletIsTransitioning &&
+    !isPending &&
+    !isError &&
+    labels.length > 0;
 
   return (
     <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-px-4 tw-py-3">

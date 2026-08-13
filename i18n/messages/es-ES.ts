@@ -633,6 +633,10 @@ export const ES_ES_MESSAGES = {
   "home.mintAllowlist.notFound": "No se encontró asignación para esta wallet.",
   "home.mintAllowlist.unavailable":
     "La información de asignación no está disponible temporalmente.",
+  "home.mintAllowlist.phase.phase0": "Fase 0",
+  "home.mintAllowlist.phase.phase1": "Fase 1",
+  "home.mintAllowlist.phase.phase2": "Fase 2",
+  "home.mintAllowlist.phase.public": "Pública",
   "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
   "home.mintAllowlist.pill.mixed":

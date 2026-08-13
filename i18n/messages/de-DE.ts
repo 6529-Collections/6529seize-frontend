@@ -629,6 +629,10 @@ export const DE_DE_MESSAGES = {
   "home.mintAllowlist.notFound": "Keine Zuteilung für diese Wallet gefunden.",
   "home.mintAllowlist.unavailable":
     "Zuteilungsinformationen sind vorübergehend nicht verfügbar.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Öffentlich",
   "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
   "home.mintAllowlist.pill.mixed":

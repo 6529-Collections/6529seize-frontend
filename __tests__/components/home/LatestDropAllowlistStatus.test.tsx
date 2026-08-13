@@ -130,6 +130,11 @@ describe("LatestDropAllowlistStatus", () => {
       "No allocation found for this wallet.",
     ],
     [
+      "settled query without data",
+      { data: undefined, isError: false, isPending: false },
+      "No allocation found for this wallet.",
+    ],
+    [
       "unavailable",
       { data: undefined, isError: true, isPending: false },
       "Allocation information is temporarily unavailable.",
@@ -138,6 +143,36 @@ describe("LatestDropAllowlistStatus", () => {
     useQueryMock.mockReturnValue(queryResult);
     render(<LatestDropAllowlistStatus tokenId={532} />);
     expect(screen.getByRole("status")).toHaveTextContent(expected);
+  });
+
+  it.each(["initializing", "connecting"])(
+    "keeps the checking state while the wallet is %s",
+    (connectionState) => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        address: TEST_ADDRESS,
+        connectionState,
+      });
+
+      render(<LatestDropAllowlistStatus tokenId={532} />);
+
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Checking your allocation…"
+      );
+      expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    }
+  );
+
+  it("shows unavailable when the wallet connection fails", () => {
+    mockUseSeizeConnectContext.mockReturnValue({
+      address: TEST_ADDRESS,
+      connectionState: "error",
+    });
+
+    render(<LatestDropAllowlistStatus tokenId={532} />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Allocation information is temporarily unavailable."
+    );
   });
 
   it("uses one public wallet-allocation request and forwards cancellation", async () => {

@@ -2111,6 +2111,10 @@ export const EN_US_MESSAGES = {
   "home.mintAllowlist.notFound": "No allocation found for this wallet.",
   "home.mintAllowlist.unavailable":
     "Allocation information is temporarily unavailable.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Public",
   "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
   "home.mintAllowlist.pill.mixed":
