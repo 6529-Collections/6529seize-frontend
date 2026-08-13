@@ -270,6 +270,31 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     );
   });
 
+  it("gives a single Work image the full frame and avoids repeating its license", async () => {
+    const credit: MuseumRightsCredit = {
+      ...rightsCredit("https://creativecommons.org/licenses/by-nc/4.0/"),
+      creditLine:
+        "Casey Reas, Work One; 6529 Network Museum. Licensed CC BY-NC 4.0.",
+      licenseLabel: "CC BY-NC 4.0",
+    };
+    render(
+      await MuseumObjectPage({
+        objectId: "6529NM-W-0001",
+        publication: publication(work([retainedMedia(credit)])),
+        view: null,
+      })
+    );
+
+    const figure = screen.getByRole("img").closest("figure");
+    expect(figure).not.toBeNull();
+    expect(figure).toHaveClass("tw-w-full");
+    expect(figure).toHaveTextContent(
+      "Casey Reas, Work One; 6529 Network Museum."
+    );
+    expect(figure).not.toHaveTextContent("Licensed CC BY-NC 4.0.");
+    expect(screen.getAllByText("CC BY-NC 4.0")).toHaveLength(1);
+  });
+
   it("shows Magnum's typed institutional-display statement and fails closed for a selected work", async () => {
     const magnumCredit: MuseumRightsCredit = {
       ...rightsCredit(null),
