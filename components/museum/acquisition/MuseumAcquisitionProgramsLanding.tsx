@@ -239,9 +239,9 @@ export function MuseumAcquisitionProgramsLandingPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title")}
           </h1>
           <p className="tw-m-0 tw-mt-6 tw-max-w-lg tw-text-lg tw-leading-8 tw-text-iron-300">
-            Curated routes for forming groups of works. A program sets the
-            premise; the acquisition that follows gives the works a title and a
-            place in Museum history.
+            The Museum acquires works through gifts, purchases, commissions,
+            primary mints, bequests, exchanges, and transfers. Programs define
+            what the Museum is seeking within those methods.
           </p>
           <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <Link
@@ -260,21 +260,73 @@ export function MuseumAcquisitionProgramsLandingPage({
         </div>
       </header>
 
+      <section aria-labelledby="accession-channels-title">
+        <div className="tw-max-w-3xl">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+            Collecting methods
+          </p>
+          <h2
+            id="accession-channels-title"
+            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
+          >
+            How works enter the Collection
+          </h2>
+          <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
+            The acquisition method records how the Museum obtains a work. The
+            accession records the Museum&apos;s formal decision to add that work
+            to the permanent Collection.
+          </p>
+        </div>
+        <dl className="tw-m-0 tw-mt-8 tw-grid tw-gap-px tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 sm:tw-grid-cols-2">
+          {[
+            [
+              "Gift",
+              "A donor gives the Museum a specified work or group of works.",
+            ],
+            [
+              "Purchase",
+              "The Museum buys a specified work, directly or through an approved acquisition program.",
+            ],
+            [
+              "Commission or primary mint",
+              "The Museum commissions a new work or acquires it when it is first minted.",
+            ],
+            [
+              "Bequest, exchange, or transfer",
+              "The Museum may also receive a work through an estate, an exchange, or a transfer from another holder.",
+            ],
+          ].map(([term, description]) => (
+            <div key={term} className="tw-bg-iron-950 tw-p-6 sm:tw-p-8">
+              <dt className="tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
+                {term}
+              </dt>
+              <dd className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-text-base sm:tw-leading-7">
+                {description}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="tw-m-0 tw-mt-6 tw-max-w-3xl tw-border-l-2 tw-border-solid tw-border-primary-400 tw-py-1 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
+          Whatever the method, a work enters the permanent Collection only after
+          formal accession. An offer, selection, mint, or wallet transfer is not
+          an accession.
+        </p>
+      </section>
+
       <section aria-labelledby="program-pathways-title">
         <div className="tw-max-w-3xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            Two routes, distinct histories
+            Current programs
           </p>
           <h2
             id="program-pathways-title"
             className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
           >
-            Curatorial pathways
+            Programs now in use
           </h2>
           <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            The Museum currently uses two pathways: a standing route for
-            considered gifts and Keys and Gates, a focused photographic
-            acquisition program.
+            The Museum currently has a standing program for gifts and Keys and
+            Gates, a focused photographic acquisition program.
           </p>
         </div>
         <ul className="tw-m-0 tw-mt-8 tw-list-none tw-p-0">
@@ -293,19 +345,19 @@ export function MuseumAcquisitionProgramsLandingPage({
         <div className="tw-grid tw-gap-8 md:tw-grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:tw-gap-14">
           <div>
             <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-              A simple distinction
+              Terms
             </p>
             <h2
               id="program-language-title"
               className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
             >
-              A program sets the route; an acquisition names the group
+              Program, acquisition, and accession
             </h2>
           </div>
           <p className="tw-m-0 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            The program defines the collecting frame; the acquisition names the
-            works gathered within it. Accessioned works enter the permanent
-            Collection; selected works remain visibly in process.
+            A program sets a collecting scope. An acquisition is a specific work
+            or group of works obtained through that program. Accession is the
+            final act that adds each accepted work to the permanent Collection.
           </p>
         </div>
       </section>
