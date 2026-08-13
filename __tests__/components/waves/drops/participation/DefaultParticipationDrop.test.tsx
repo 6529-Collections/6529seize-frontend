@@ -79,4 +79,18 @@ describe("DefaultParticipationDrop", () => {
       true
     );
   });
+
+  it("forwards the selected content presentation to the existing proposal shell", () => {
+    (useDropInteractionRules as jest.Mock).mockReturnValue({
+      isVotingEnded: false,
+    });
+
+    render(
+      <ParticipationDrop {...baseProps} contentPresentation="proposalCard" />
+    );
+
+    expect(mockOngoingParticipationDrop).toHaveBeenCalledWith(
+      expect.objectContaining({ contentPresentation: "proposalCard" })
+    );
+  });
 });

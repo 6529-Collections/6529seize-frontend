@@ -34,7 +34,12 @@ export function getMuseumGiftMetadata(accessionId: string): Metadata {
       accessionId === CASEY_ACCESSION_ID
         ? t(DEFAULT_LOCALE, "museum.network.gift.caseyTitle")
         : t(DEFAULT_LOCALE, "museum.network.gift.title"),
-    description: t(DEFAULT_LOCALE, "museum.network.gift.caseyDescription"),
+    description: t(
+      DEFAULT_LOCALE,
+      accessionId === CASEY_ACCESSION_ID
+        ? "museum.network.gift.caseyDescription"
+        : "museum.network.gift.description"
+    ),
   });
 }
 

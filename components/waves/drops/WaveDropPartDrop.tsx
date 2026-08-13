@@ -8,6 +8,7 @@ import WaveDropPartTitle from "./WaveDropPartTitle";
 import WaveDropPartContent from "./WaveDropPartContent";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { DropContentPresentation } from "./dropContentPresentation";
+import ProposalCardContent from "./proposal/ProposalCardContent";
 
 interface WaveDropPartDropProps {
   drop: ApiDrop;
@@ -69,43 +70,50 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   embedDepth,
   maxEmbedDepth,
 }) => {
-  const showStandaloneTitle = contentPresentation !== "quorumCompact";
+  const showStandaloneTitle = contentPresentation === "default";
+  const showProposalCard = contentPresentation === "proposalCard" && !isEditing;
 
   return (
     <div className="tw-relative tw-flex tw-h-full tw-gap-x-3">
       <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-self-center sm:tw-self-start">
         <div>
-          {showStandaloneTitle && <WaveDropPartTitle title={drop.title} />}
-          <WaveDropPartContent
-            mentionedUsers={drop.mentioned_users}
-            mentionedGroups={drop.mentioned_groups}
-            mentionedWaves={drop.mentioned_waves}
-            referencedNfts={drop.referenced_nfts}
-            wave={drop.wave}
-            activePart={activePart}
-            havePreviousPart={havePreviousPart}
-            haveNextPart={haveNextPart}
-            isStorm={isStorm}
-            activePartIndex={activePartIndex}
-            setActivePartIndex={setActivePartIndex}
-            onQuoteClick={onQuoteClick}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={onSave}
-            onCancel={onCancel}
-            drop={drop}
-            isCompetitionDrop={isCompetitionDrop}
-            mediaImageScale={mediaImageScale}
-            mediaContainerHeightClassName={mediaContainerHeightClassName}
-            fullWidthMedia={fullWidthMedia}
-            fullWidthLinkPreviews={fullWidthLinkPreviews}
-            onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
-            contentPresentation={contentPresentation}
-            embedPath={embedPath}
-            quotePath={quotePath}
-            embedDepth={embedDepth}
-            maxEmbedDepth={maxEmbedDepth}
-          />
+          {showProposalCard ? (
+            <ProposalCardContent drop={drop} />
+          ) : (
+            <>
+              {showStandaloneTitle && <WaveDropPartTitle title={drop.title} />}
+              <WaveDropPartContent
+                mentionedUsers={drop.mentioned_users}
+                mentionedGroups={drop.mentioned_groups}
+                mentionedWaves={drop.mentioned_waves}
+                referencedNfts={drop.referenced_nfts}
+                wave={drop.wave}
+                activePart={activePart}
+                havePreviousPart={havePreviousPart}
+                haveNextPart={haveNextPart}
+                isStorm={isStorm}
+                activePartIndex={activePartIndex}
+                setActivePartIndex={setActivePartIndex}
+                onQuoteClick={onQuoteClick}
+                isEditing={isEditing}
+                isSaving={isSaving}
+                onSave={onSave}
+                onCancel={onCancel}
+                drop={drop}
+                isCompetitionDrop={isCompetitionDrop}
+                mediaImageScale={mediaImageScale}
+                mediaContainerHeightClassName={mediaContainerHeightClassName}
+                fullWidthMedia={fullWidthMedia}
+                fullWidthLinkPreviews={fullWidthLinkPreviews}
+                onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+                contentPresentation={contentPresentation}
+                embedPath={embedPath}
+                quotePath={quotePath}
+                embedDepth={embedDepth}
+                maxEmbedDepth={maxEmbedDepth}
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -23,9 +23,24 @@ function typedPublication(): MuseumPublication {
   return {
     identity: { commit: "a".repeat(40) },
     works: [
-      { id: "6529NM-W-0001", collectionMembership: true },
-      { id: "6529NM-W-0008", collectionMembership: false },
-      { id: "6529NM-W-0024", collectionMembership: false },
+      {
+        id: "6529NM-W-0001",
+        collectionMembership: true,
+        acquisitionIds: ["6529NM-CA-2026-001"],
+        programIds: [],
+      },
+      {
+        id: "6529NM-W-0008",
+        collectionMembership: false,
+        acquisitionIds: ["6529NM-CA-2026-002"],
+        programIds: ["6529NM-AP-ENT-0002"],
+      },
+      {
+        id: "6529NM-W-0024",
+        collectionMembership: false,
+        acquisitionIds: ["6529NM-CA-2026-003"],
+        programIds: [],
+      },
     ],
     workAliases: [
       {
@@ -303,6 +318,6 @@ describe("Museum IA route boundaries", () => {
         publication,
         "6529NM-PG-2026-001.OBJ-001"
       )
-    ).toBeNull();
+    ).toBe("/museum/network/works/6529NM-W-0024");
   });
 });

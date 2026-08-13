@@ -85,7 +85,7 @@
       ],
       "facts": [
         "The 6529 Network Museum presents itself at /museum/network as the public art museum of the 6529 Network: a permanent digital-art collection held by the Network on Ethereum, governed through TDH, and open worldwide.",
-        "The homepage establishes one institutional proposition and introduces the Casey Reas, Keys and Gates, and Magnum Photos 75 acquisition stories through artwork-led presentations. The Collection page contains the seven accessioned Casey Reas works.",
+        "The homepage establishes one institutional proposition and introduces the Casey Reas, Keys and Gates, and Magnum Photos 75 acquisition stories through artwork-led presentations. The Collection page contains twelve accessioned works: seven by Casey Reas and five from Magnum Photos 75.",
         "The complete institutional proposition is at /museum/network/about. It explains what Network holding means, the absence of fractional or economic claims for members, the Museum's present delegated operating boundaries, the on-chain direction, and the permanence objective.",
         "Keys and Gates is published at /museum/network/acquisition-programs/keys-and-gates with sixteen selected photographs and its program record.",
         "The sixteen Keys and Gates works carry the status Selected through the Keys and Gates program; minting and acquisition will follow, and the permanent Collection begins at formal accession.",
@@ -93,7 +93,7 @@
         "Collection means works formally accessioned by the Museum at /museum/network/collection; canonical Work records are available at /museum/network/works/[work-id].",
         "Artists, projects, organizations, acquisitions, and research connect works to curatorial writing, provenance, rights, and collection care.",
         "Acquisitions at /museum/network/acquisitions presents Casey Reas, Keys and Gates, and Magnum Photos 75 with each present stage and its related works.",
-        "Magnum Photos 75, Conflict at Its Edges, is Selected by Museum Wave; accession processing in progress at /museum/network/acquisitions/conflict-at-its-edges.",
+        "Magnum Photos 75, Conflict at Its Edges, is an accessioned gift of five photographs in the permanent Collection at /museum/network/acquisitions/conflict-at-its-edges.",
         "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
         "The governed Gift into Public Trust narrative and all five Casey Reas project essays are readable onsite from the same atomic publication snapshot.",
         "Inside the System publishes project-level studies for CENTURY, Pre-Process, Phototaxis, 923 EMPTY ROOMS, and Ex Nihilo (Cosmos) at /museum/network/projects/[project-slug]/system.",
@@ -105,7 +105,7 @@
         "Generative studies belong to projects rather than gifts, so later accessions from the same project can be added to the same analysis.",
         "Research is published at /museum/network/research, with sources and chronology, art and artists, Museum practice, and sources and methods available as distinct reading paths.",
         "A field of practice is published at /museum/network/stories/a-field-of-practice with a comparative essay, twenty-seven institutional profiles, an adjacent-practice study, the public scholarship and editorial standard, and a primary-source register admitted from one exact Museum source release.",
-        "Casey Reas: seven works is formally accessioned into the Collection. Keys and Gates works carry the selected-program status. Conflict at Its Edges was selected by the Museum Wave and is undergoing accession processing.",
+        "The System in Seven States and Conflict at Its Edges are formally accessioned gifts in the permanent Collection. Keys and Gates carries the selected-program status; its works remain unminted and outside the Collection.",
         "Official Art Blocks still and live URLs remain labeled upstream presentation sources for Casey Reas. Keys and Gates uses reviewed Museum-hosted display surrogates; Conflict at Its Edges uses reviewed signed-Wave display sources.",
         "The public release supplies current status. Accession, rights, ownership, and preservation records each carry their own evidence.",
         "The Museum repository is the transitional public working record: visitors can inspect exact source commits, fork the repository, and propose reviewed changes through pull requests.",
@@ -2093,6 +2093,47 @@
       "tags": ["waves", "drop", "glossary", "concept"]
     },
     {
+      "id": "waves.proposal-cards",
+      "kind": "ui_affordance",
+      "title": "Summary proposal cards",
+      "aliases": [
+        "proposal card",
+        "proposal cards",
+        "compact proposal",
+        "open full proposal",
+        "network museum proposals"
+      ],
+      "keywords": [
+        "waves",
+        "proposal",
+        "compact",
+        "card",
+        "preview",
+        "approved",
+        "winner",
+        "museum",
+        "create"
+      ],
+      "facts": [
+        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so it uses a compatibility fallback: Summary card with 360 characters and the first ready still image enabled. A Wave admin can replace that fallback from Settings, and the saved choice takes precedence.",
+        "Other existing standard Waves keep their current presentation unless the Wave is explicitly configured to use custom proposal cards.",
+        "A compact card uses the proposal's stored title or first authored non-empty line, an excerpt from the original authored text, real multipart/media/attachment counts, and at most one ready static image preview.",
+        "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
+        "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
+        "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
+        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Overview step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
+        "Wave admins can change the same presentation later from the right sidebar under Settings, Display, Proposal cards. This control is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
+        "Summary card lets the admin set a proposal-text limit from 120 to 1000 characters and choose whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits cannot be saved. Full proposal media is unchanged."
+      ],
+      "canonical_path": "/waves/5f207393-5418-4a75-8738-e40edb44a94d",
+      "related_paths": ["/waves", "/waves?create=wave", "/waves/create"],
+      "tags": ["waves", "proposal", "cards", "museum", "ui"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-proposal-cards.md",
+        "ops/docs/waves/create/feature-overview-step.md"
+      ]
+    },
+    {
       "id": "waves.subwaves.unread-count",
       "kind": "ui_affordance",
       "title": "Parent wave unread subwave count",
@@ -2169,6 +2210,7 @@
       ],
       "facts": [
         "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
+        "On web, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
         "The app full-page create route remains /waves/create where app mode uses it.",
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],
@@ -2202,9 +2244,13 @@
       ],
       "facts": [
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
-        "In the Groups step, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "Overview shows the wave name, picture, type, Rank ranking mode, and relevant proposal display settings without an Advanced settings section.",
+        "On steps that use Advanced settings, the disclosure shows Customized for non-default values and opens automatically when a hidden field needs attention.",
+        "The Groups step shows all access and moderation rows immediately, organized from Who can view through Admin without an Advanced settings disclosure.",
+        "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
+        "Dates starts with a compact Schedule summary using the draft's current values; expand Advanced settings to change starts, winner announcements, recurring cycles, or an optional end date.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
         "In Description, individual @ mention suggestions follow the draft wave's Who can view group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
@@ -3994,7 +4040,9 @@
       "facts": [
         "Mobile layouts use bottom navigation for Discovery, Waves, Messages, Home, Network, Collections, and Notifications.",
         "The mobile bottom navigation surface is separate from the desktop and app sidebar IA.",
-        "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
+        "Tablet-sized app viewports use a wider dock while phone sizing stays unchanged.",
+        "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
+        "In the native app, the new-version refresh prompt stays centered directly above the dock and follows its expanded or compact position."
       ],
       "canonical_path": "/waves",
       "related_paths": [

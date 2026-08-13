@@ -777,7 +777,7 @@
     "__tests__/components/waves/WaveLeaderboardGallery.test.tsx": 1,
     "__tests__/components/waves/WavePicture.test.tsx": 1,
     "__tests__/components/waves/WaveServerFeedSeed.test.tsx": 2,
-    "__tests__/components/waves/WinnerDrop.test.tsx": 3,
+    "__tests__/components/waves/WinnerDrop.test.tsx": 2,
     "__tests__/components/waves/winners/drops/DefaultWaveWinnerDrop.test.tsx": 2,
     "__tests__/components/waves/winners/drops/header/WaveWinnersDropHeader.test.tsx": 1,
     "__tests__/components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorHandle.test.tsx": 1,

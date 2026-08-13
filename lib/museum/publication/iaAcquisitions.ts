@@ -15,6 +15,10 @@ import type {
   MuseumPublicWork,
   MuseumPublication,
 } from "./types";
+import {
+  museumPublicAcquisitionStatus,
+  museumPublicWorkStatus,
+} from "./collectionSemantics";
 import { selectMuseumStillMedia } from "./mediaSelection";
 import type { MuseumSelectedWork, MuseumView } from "@/lib/museum/types";
 import {
@@ -77,6 +81,15 @@ const PUBLIC_ACQUISITION_STATUSES: ReadonlySet<string> = new Set([
   "closed_without_selection",
   "withdrawn",
 ]);
+
+const PROGRAM_SELECTION_RELATION = "Selected through";
+const PROGRAM_SELECTION_STATUS =
+  "selected_through_acquisition_program_acquisition_pending";
+const GIFT_PATHWAY_RELATION = "Gift pathway";
+
+function isGiftAcquisitionMethod(method: string): boolean {
+  return method === "gift" || method === "donation";
+}
 
 function isPublicAcquisitionStatus(
   status: string
@@ -239,7 +252,7 @@ function workRef(
     label: work.title.trim() || work.id,
     href: museumWorkHref(work.id),
     relation,
-    status: work.status,
+    status: museumPublicWorkStatus(work),
     statusAsOf: work.statusAsOf,
     sourcePath: firstPath(work.sourcePaths),
     sourceCommit,
@@ -325,7 +338,9 @@ export function programRef(
   programId: string,
   label: string,
   statusAsOf: string | null,
-  sourcePath: string | null
+  sourcePath: string | null,
+  relation = PROGRAM_SELECTION_RELATION,
+  status: string | null = PROGRAM_SELECTION_STATUS
 ): MuseumEntityRef | null {
   const slug = resolveMuseumAcquisitionProgramSlug(publication, programId);
   return ref({
@@ -333,8 +348,8 @@ export function programRef(
     id: programId,
     label,
     href: slug === null ? null : museumAcquisitionProgramHref(slug),
-    relation: "Selected through",
-    status: "selected_through_acquisition_program_acquisition_pending",
+    relation,
+    ...(status === null ? {} : { status }),
     statusAsOf,
     sourcePath,
     sourceCommit: publication.identity.commit,
@@ -343,7 +358,8 @@ export function programRef(
 
 export function typedProgramRef(
   publication: MuseumPublication,
-  programId: string
+  programId: string,
+  relation = PROGRAM_SELECTION_RELATION
 ): MuseumEntityRef | null {
   const program = publication.acquisitionPrograms?.find(
     (item) => item.id === programId
@@ -354,7 +370,7 @@ export function typedProgramRef(
     id: program.id,
     label: program.title,
     href: museumAcquisitionProgramHref(program.slug),
-    relation: "Selected through",
+    relation,
     status: program.status,
     sourcePath: firstPath(program.sourcePaths),
     sourceCommit: publication.identity.commit,
@@ -400,11 +416,16 @@ function acquisitionRelations(
           id: organization.id,
           label: organization.preferredName,
           href: museumOrganizationHref(organization.slug),
-          relation: "Published by project",
+          relation: "Associated organization",
           sourcePath: firstPath(organization.sourcePaths),
           sourceCommit: publication.identity.commit,
         });
   });
+  const giftPathway = isGiftAcquisitionMethod(acquisition.acquisitionMethod);
+  const programRelation = giftPathway
+    ? GIFT_PATHWAY_RELATION
+    : PROGRAM_SELECTION_RELATION;
+  const programStatus = giftPathway ? null : PROGRAM_SELECTION_STATUS;
   const program =
     acquisition.programId === null
       ? null
@@ -413,7 +434,9 @@ function acquisitionRelations(
           acquisition.programId,
           acquisition.pathway ?? acquisition.programId,
           acquisition.statusAsOf,
-          acquisition.sourcePath
+          acquisition.sourcePath,
+          programRelation,
+          programStatus
         );
   return {
     primaryRelations: dedupe([...typedWorks, ...legacyWorks, ...artistRefs]),
@@ -449,15 +472,18 @@ function typedAcquisitionRelations(
           id: organization.id,
           label: organization.preferredName,
           href: museumOrganizationHref(organization.slug),
-          relation: "Published by project",
+          relation: "Project originator",
           sourcePath: firstPath(organization.sourcePaths),
           sourceCommit: publication.identity.commit,
         });
   });
+  const programRelation = isGiftAcquisitionMethod(acquisition.acquisitionMethod)
+    ? GIFT_PATHWAY_RELATION
+    : PROGRAM_SELECTION_RELATION;
   const programRefs =
     acquisition.programId === null
       ? []
-      : [typedProgramRef(publication, acquisition.programId)];
+      : [typedProgramRef(publication, acquisition.programId, programRelation)];
   const projectRefs = acquisition.projectIds.map((id) =>
     projectRef(id, publication)
   );
@@ -485,8 +511,8 @@ function modelFromTypedAcquisition(
     acquisition.sourcePaths.length === 0
   )
     return null;
-  const status = acquisition.status;
-  if (!isPublicAcquisitionStatus(status)) return null;
+  if (!isPublicAcquisitionStatus(acquisition.status)) return null;
+  const status = museumPublicAcquisitionStatus(acquisition);
   const relations = typedAcquisitionRelations(acquisition, publication);
   const modelContext = context({
     kind: "curated_acquisition",

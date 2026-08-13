@@ -79,12 +79,14 @@ describe("WaveWinnersDropHeader", () => {
   });
 
   it("uses approval badge for approval waves", () => {
-    const { getByTestId, queryByTestId } = render(
+    const { container, getByTestId, queryByTestId } = render(
       <WaveWinnersDropHeader winner={winner} isApprovalWave={true} />
     );
 
     expect(getByTestId("approval-badge")).toBeInTheDocument();
     expect(queryByTestId("badge")).toBeNull();
     expect(getByTestId("voters")).not.toHaveAttribute("data-is-approval-wave");
+    expect(container.firstElementChild).toHaveClass("tw-items-start");
+    expect(container.firstElementChild).not.toHaveClass("tw-min-h-10");
   });
 });

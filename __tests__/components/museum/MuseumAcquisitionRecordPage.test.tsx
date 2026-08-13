@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MuseumAcquisitionRecordPage } from "@/components/museum/MuseumAcquisitionRecordPage";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import type {
@@ -317,8 +317,7 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
   it("joins Keys and Gates Work IDs to selected program media and tiers the record", () => {
     const workTitle = "A Door Opens";
     const artistName = "Anni Artist";
-    const lifecycle =
-      "Selected through an acquisition program; acquisition pending";
+    const lifecycle = "Selected through an acquisition program; unminted";
     const workId = "6529NM-W-0008";
     const media = programMedia(
       "https://museum.test/keys-and-gates/0008.webp",
@@ -496,9 +495,9 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       screen.getByRole("heading", { name: "Conflict at Its Edges" })
     ).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: "View image · loads 16.5 MB" })
-    );
+    expect(
+      screen.queryByRole("button", { name: "View image · loads 16.5 MB" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("img", { name: presentation.altText })
     ).toHaveAttribute("src", presentation.mediaUrl);
@@ -589,8 +588,12 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
       screen.getByRole("img", { name: immediatelyViewable.altText })
     ).toHaveAttribute("src", immediatelyViewable.mediaUrl);
     expect(
-      screen.getByRole("button", { name: "View image · loads 16.5 MB" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "View image · loads 16.5 MB" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: gated.altText })).toHaveAttribute(
+      "src",
+      gated.mediaUrl
+    );
   });
 
   it("fails closed when selected program media has no reviewed derivatives", () => {
@@ -681,7 +684,9 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       screen.queryByRole("heading", { name: "Curatorial reading" })
     ).not.toBeInTheDocument();
-    expect(document.querySelector("details#acquisition-record")).toBeNull();
+    const record = document.querySelector("details#acquisition-record");
+    expect(record).not.toBeNull();
+    expect(record).not.toHaveAttribute("open");
     expect(
       screen.getAllByText("Accessioned into the permanent Collection", {
         exact: true,

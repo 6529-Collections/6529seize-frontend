@@ -408,19 +408,18 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "Works selected through this program",
+        name: "Works acquired or selected through this program",
       })
     ).toBeVisible();
     await expect(
-      page.getByText(
-        "Selected through an acquisition program; acquisition pending",
-        {
-          exact: true,
-        }
-      )
+      page.getByText("Selected through an acquisition program; unminted", {
+        exact: true,
+      })
     ).toHaveCount(16);
     await expect(
-      page.getByText("Not yet minted or accessioned.", { exact: true })
+      page.getByText("Minting comes first; acquisition and accession follow.", {
+        exact: true,
+      })
     ).toHaveCount(16);
     await expect(
       page.locator('main a[href^="/museum/network/works/"]')
@@ -443,15 +442,14 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       })
     ).toBeVisible();
     await expect(
-      page.getByText(
-        "Selected through an acquisition program; acquisition pending",
-        {
-          exact: true,
-        }
-      )
+      page.getByText("Selected through an acquisition program; unminted", {
+        exact: true,
+      })
     ).toBeVisible();
     await expect(
-      page.getByText("Not yet minted or accessioned.", { exact: true })
+      page.getByText("Minting comes first; acquisition and accession follow.", {
+        exact: true,
+      })
     ).toBeVisible();
     await expect(
       page.getByText("No public image is available for this record.", {
