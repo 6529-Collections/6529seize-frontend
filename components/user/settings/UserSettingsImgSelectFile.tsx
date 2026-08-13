@@ -27,7 +27,7 @@ export default function UserSettingsImgSelectFile({
           ? "tw-border-primary-400/60 tw-bg-primary-500/10"
           : "tw-border-white/10 tw-bg-iron-900"
       } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-border-2 tw-border-dashed tw-transition tw-duration-200 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-white/20 hover:tw-bg-iron-800 ${
-        shake ? "tw-animate-shake" : ""
+        shake ? "tw-animate-shake motion-reduce:tw-animate-none" : ""
       }`}
     >
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pb-6 tw-pt-5">
@@ -73,7 +73,11 @@ export default function UserSettingsImgSelectFile({
           </>
         )}
         {error && (
-          <p className="tw-absolute tw-bottom-2 tw-left-0 tw-w-full tw-text-center tw-text-xs tw-font-medium tw-text-red">
+          <p
+            id="pfp-upload-error"
+            role="alert"
+            className="tw-absolute tw-bottom-2 tw-left-0 tw-w-full tw-text-center tw-text-xs tw-font-medium tw-text-error"
+          >
             {error}
           </p>
         )}
@@ -82,6 +86,7 @@ export default function UserSettingsImgSelectFile({
         id="pfp-upload-input"
         type="file"
         aria-label="Upload profile picture"
+        aria-describedby={error ? "pfp-upload-error" : undefined}
         className="tw-sr-only"
         accept={ACCEPTED_FORMATS_DISPLAY}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

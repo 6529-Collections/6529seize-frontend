@@ -1,7 +1,57 @@
 import { render, screen } from "@testing-library/react";
 import { MuseumResearchProjectCard } from "@/components/museum/research/MuseumResearchProjectCard";
+import type { MuseumMedia } from "@/lib/museum/publication/types";
+
+const PORTRAIT_MEDIA: MuseumMedia = {
+  id: "magnum-portrait",
+  artworkId: "work-portrait",
+  kind: "still",
+  role: "source",
+  mediaType: "image/jpeg",
+  width: 1000,
+  height: 1500,
+  altText: "A portrait photograph.",
+  credit: {
+    creditLine: "Museum record",
+    licenseLabel: "All Rights Reserved",
+    licenseUrl: null,
+    rightsExpressionId: null,
+    sourcePath: "records/media/portrait.json",
+  },
+  sourcePath: "records/media/portrait.json",
+  custody: "retained",
+  url: "https://example.com/portrait.jpg",
+  preservationStatus: "retained_verified",
+  sha256: `sha256:${"c".repeat(64)}`,
+  upstreamProvider: null,
+};
 
 describe("MuseumResearchProjectCard", () => {
+  it("matches portrait media frames to the source ratio", () => {
+    render(
+      <MuseumResearchProjectCard
+        project={{
+          id: "portrait-project",
+          href: "/museum/network/projects/portrait-project",
+          title: "Portrait Project",
+          artistNames: ["An Artist"],
+          workCount: 1,
+          media: PORTRAIT_MEDIA,
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole("img", { name: PORTRAIT_MEDIA.altText! })
+    ).toHaveAttribute("src", PORTRAIT_MEDIA.url);
+    expect(
+      screen.getAllByRole("link", { name: "Portrait Project" })
+    ).toHaveLength(1);
+    expect(screen.getByRole("img").parentElement?.style.aspectRatio).toBe(
+      "0.6666666666666666"
+    );
+  });
+
   it("shows accession-reviewed presentation media without bogus empty metadata", () => {
     render(
       <MuseumResearchProjectCard

@@ -53,6 +53,8 @@ The profile header appears on profile routes under `/{user}` and shows:
 7. Actions depend on viewer context:
    - own profile with handle and no active proxy: edit banner, profile picture,
      name, classification, and About
+   - on editable touch layouts, a compact `Subscriptions` action sits beside
+     `Edit Profile` and opens the profile Subscriptions tab
    - other profile, signed-in viewer with handle, and target profile with
      handle: follow/unfollow button
    - if that target also has a primary wallet: direct-message button appears
@@ -70,6 +72,8 @@ The profile header appears on profile routes under `/{user}` and shows:
   `See less`; desktop stays expanded.
 - Mobile profile banners show the artwork at full strength. Desktop banners use
   dark gradients where profile content overlaps the artwork.
+- On non-touch layouts, the full subscription status can link directly to the
+  relevant settings, upcoming-drops, or top-up section.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity
   counts.

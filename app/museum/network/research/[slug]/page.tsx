@@ -32,7 +32,7 @@ import type {
   MuseumResearchPublication,
 } from "@/lib/museum/publication/types";
 import {
-  buildMuseumResearchIndex,
+  findMuseumResearchIndexEntry,
   museumResearchGroupCopy,
   type MuseumResearchIndexEntry,
 } from "../page";
@@ -537,9 +537,7 @@ async function findEntry(slug: string): Promise<{
 } | null> {
   const publication = (await getMuseumPublicationState()).publication;
   if (publication === null) return null;
-  const entry = buildMuseumResearchIndex(publication).find(
-    (candidate) => candidate.slug === slug
-  );
+  const entry = findMuseumResearchIndexEntry(publication, slug);
   return entry === undefined
     ? null
     : {
