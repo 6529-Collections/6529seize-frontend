@@ -32,7 +32,7 @@ describe("CreateWaveOutcomeWarning", () => {
       />
     );
     expect(screen.getByTestId("warning")).toHaveTextContent(
-      "Warning: Wave Will Run Indefinitely"
+      "Warning: Challenge Will Run Indefinitely"
     );
   });
 

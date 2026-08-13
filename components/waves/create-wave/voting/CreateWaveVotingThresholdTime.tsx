@@ -6,8 +6,17 @@ import { parsePositiveWholeNumberInput } from "../utils/positiveWholeNumberInput
 import VotingSettingBox, {
   getVotingSettingInputClasses,
 } from "./VotingSettingBox";
+import CreateWaveDropdown from "../utils/CreateWaveDropdown";
 
 type ThresholdTimeUnit = "minutes" | "hours";
+
+const THRESHOLD_TIME_UNIT_OPTIONS = [
+  { value: "minutes", label: "Minutes" },
+  { value: "hours", label: "Hours" },
+] as const satisfies ReadonlyArray<{
+  readonly value: ThresholdTimeUnit;
+  readonly label: string;
+}>;
 
 const MINUTE_IN_MS = 60 * 1000;
 const HOUR_IN_MS = 60 * MINUTE_IN_MS;
@@ -115,9 +124,7 @@ export default function CreateWaveVotingThresholdTime({
     updateThresholdTimeMs(nextValue, unit);
   };
 
-  const onUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const nextUnit = e.target.value as ThresholdTimeUnit;
-
+  const onUnitChange = (nextUnit: ThresholdTimeUnit) => {
     setUnit(nextUnit);
     updateThresholdTimeMs(inputValue, nextUnit);
   };
@@ -139,6 +146,7 @@ export default function CreateWaveVotingThresholdTime({
       }
       inputId={inputId}
       label="Minimum time above threshold"
+      surface="nested"
     >
       <div className="tw-grid tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_9rem]">
         <input
@@ -156,18 +164,14 @@ export default function CreateWaveVotingThresholdTime({
           aria-invalid={hasError}
           aria-describedby={hasError ? `${errorId} ${helpId}` : helpId}
         />
-        <select
+        <CreateWaveDropdown
           value={unit}
+          options={THRESHOLD_TIME_UNIT_OPTIONS}
           onChange={onUnitChange}
-          aria-label="Minimum time above threshold unit"
-          className={getVotingSettingInputClasses({
-            hasError,
-            hasValue: hasThresholdTime,
-          })}
-        >
-          <option value="minutes">Minutes</option>
-          <option value="hours">Hours</option>
-        </select>
+          ariaLabel="Minimum time above threshold unit"
+          hasError={hasError}
+          accentValue={hasThresholdTime}
+        />
       </div>
     </VotingSettingBox>
   );

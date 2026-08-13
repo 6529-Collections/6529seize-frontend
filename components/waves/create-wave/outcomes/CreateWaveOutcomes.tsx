@@ -32,33 +32,17 @@ function ShowOutcomesToggle({
   readonly onChange: (display: CreateWaveDisplayConfig) => void;
 }) {
   const locale = useBrowserLocale();
-  const labelId = "create-wave-show-outcomes-label";
-  const descriptionId = "create-wave-show-outcomes-description";
-
   return (
     <label
-      className={`tw-flex tw-items-start tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-4 tw-py-3 ${
+      className={`tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-4 tw-py-3 ${
         disabled ? "tw-opacity-60" : ""
       }`}
     >
-      <span className="tw-min-w-0">
-        <span
-          id={labelId}
-          className={`tw-block ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}
-        >
-          {t(locale, "waves.create.outcomes.showOutcomes")}
-        </span>
-        <span
-          id={descriptionId}
-          className={`tw-mt-1 tw-block ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
-        >
-          {t(locale, "waves.create.outcomes.showOutcomesDescription")}
-        </span>
+      <span className={CREATE_WAVE_FORM_STYLES.fieldLabel}>
+        {t(locale, "waves.create.outcomes.showOutcomes")}
       </span>
       <input
         type="checkbox"
-        aria-labelledby={labelId}
-        aria-describedby={descriptionId}
         checked={display.outcomesVisible}
         disabled={disabled}
         onChange={(event) =>
@@ -67,7 +51,7 @@ function ShowOutcomesToggle({
             outcomesVisible: event.target.checked,
           })
         }
-        className="tw-form-checkbox tw-mt-0.5 tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed"
+        className="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed"
       />
     </label>
   );
@@ -102,8 +86,7 @@ export default function WavesOutcome({
   const isApproveWave = waveType === ApiWaveType.Approve;
   const isPerpetualRanking =
     waveType === ApiWaveType.Rank && (dates.ongoingRanking ?? false);
-  const isAdvancedCustomized =
-    !display.outcomesVisible || (isApproveWave && maxWinners !== null);
+  const isAdvancedCustomized = isApproveWave && maxWinners !== null;
 
   const onOutcome = (outcome: CreateWaveOutcomeConfig) => {
     setOutcomes([...outcomes, outcome]);
@@ -143,7 +126,6 @@ export default function WavesOutcome({
       <div className="tw-mx-auto tw-w-full">
         <CreateWaveStepHeader
           title={t(locale, "waves.create.outcomes.title")}
-          description={t(locale, "waves.create.outcomes.description")}
         />
         <div className="tw-mt-3 tw-space-y-4">
           <div className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/10 tw-p-4 tw-shadow-inner">
@@ -165,18 +147,20 @@ export default function WavesOutcome({
     <div className="tw-mx-auto tw-w-full">
       <CreateWaveStepHeader
         title={t(locale, "waves.create.outcomes.title")}
-        description={t(locale, "waves.create.outcomes.description")}
       />
       <div className="tw-mt-6 tw-space-y-6">
-        <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
-          <legend className={`tw-mb-3 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}>
+        <section aria-labelledby="create-wave-outcome-type-heading">
+          <h3
+            id="create-wave-outcome-type-heading"
+            className={`tw-mb-3 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}
+          >
             {t(locale, "waves.create.outcomes.chooseType")}
-          </legend>
+          </h3>
           <CreateWaveOutcomeTypes
             outcomeType={outcomeType}
             setOutcomeType={setOutcomeType}
           />
-        </fieldset>
+        </section>
         <div>
           {/* <h3 className="tw-mb-2 tw-text-base tw-font-semibold tw-text-white">Title for created outcome cards</h3> */}
           <CommonAnimationHeight>
@@ -199,30 +183,25 @@ export default function WavesOutcome({
             maxWinners={maxWinners}
           />
         )}
-        <CreateWaveAdvancedSection
-          title={t(
-            locale,
-            isApproveWave
-              ? "waves.create.outcomes.approveAdvancedSummary"
-              : "waves.create.outcomes.rankAdvancedSummary"
-          )}
-          isCustomized={isAdvancedCustomized}
-          hasError={false}
-        >
-          <div className="tw-space-y-4">
-            {isApproveWave && (
+        <ShowOutcomesToggle
+          display={display}
+          disabled={false}
+          onChange={setDisplay}
+        />
+        {isApproveWave && (
+          <CreateWaveAdvancedSection
+            title={t(locale, "waves.create.outcomes.approveAdvancedSummary")}
+            isCustomized={isAdvancedCustomized}
+            hasError={false}
+          >
+            <div>
               <CreateWaveApprovalMaxWinners
                 maxWinners={maxWinners}
                 setMaxWinners={setMaxWinners}
               />
-            )}
-            <ShowOutcomesToggle
-              display={display}
-              disabled={false}
-              onChange={setDisplay}
-            />
-          </div>
-        </CreateWaveAdvancedSection>
+            </div>
+          </CreateWaveAdvancedSection>
+        )}
       </div>
     </div>
   );

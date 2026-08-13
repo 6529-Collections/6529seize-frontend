@@ -171,8 +171,8 @@ describe("CreateWaveOutcomesCICApprove", () => {
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
     const nicInput = screen.getByLabelText("NIC");
-    expect(nicInput).toHaveClass("tw-ring-iron-650");
-    expect(nicInput).toHaveClass("focus:tw-border-blue-500");
+    expect(nicInput).toHaveClass("tw-ring-white/5");
+    expect(nicInput).toHaveClass("focus:tw-border-primary-500/50");
     expect(nicInput).toHaveClass("focus:tw-ring-primary-400");
     expect(nicInput).toHaveClass("tw-caret-primary-400");
   });

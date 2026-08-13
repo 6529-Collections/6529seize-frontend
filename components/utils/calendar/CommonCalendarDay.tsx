@@ -1,6 +1,8 @@
 import type { CalendarDay } from "@/helpers/calendar/calendar.helpers";
 import { Time } from "@/helpers/time";
 
+export type CommonCalendarVariant = "default" | "flat";
+
 enum CalendarDaySate {
   NOT_ACTIVE_MONTH = "NOT_ACTIVE_MONTH",
   MANUALLY_DISABLED = "MANUALLY_DISABLED",
@@ -14,20 +16,29 @@ export default function CommonCalendarDay({
   minTimestamp,
   maxTimestamp,
   setSelectedTimestamp,
+  variant = "default",
 }: {
   readonly day: CalendarDay;
   readonly selectedTimestamp: number | null;
   readonly minTimestamp: number | null;
   readonly maxTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
+  readonly variant?: CommonCalendarVariant;
 }) {
+  const activeClasses =
+    variant === "flat"
+      ? "tw-bg-primary-500 tw-text-white tw-font-semibold"
+      : "tw-bg-primary-500 tw-text-white tw-font-semibold tw-shadow-lg tw-shadow-primary-500/20 tw-ring-2 tw-ring-primary-400/50";
+  const disabledClasses =
+    variant === "flat"
+      ? "tw-bg-iron-900/80 tw-text-iron-600"
+      : "tw-bg-iron-600 tw-text-iron-400";
   const BUTTON_CLASSES: Record<CalendarDaySate, string> = {
     [CalendarDaySate.NOT_ACTIVE_MONTH]: "tw-bg-transparent tw-text-iron-400",
-    [CalendarDaySate.MANUALLY_DISABLED]: "tw-bg-iron-600 tw-text-iron-400",
+    [CalendarDaySate.MANUALLY_DISABLED]: disabledClasses,
     [CalendarDaySate.AVAILABLE]:
       "tw-font-normal tw-bg-iron-700 tw-text-white hover:tw-bg-iron-700 hover:tw-border-primary-400 hover:tw-shadow-md",
-    [CalendarDaySate.ACTIVE]:
-      "tw-bg-primary-500 tw-text-white tw-font-semibold tw-shadow-lg tw-shadow-primary-500/20 tw-ring-2 tw-ring-primary-400/50"
+    [CalendarDaySate.ACTIVE]: activeClasses,
   };
 
   const getDayState = (): CalendarDaySate => {

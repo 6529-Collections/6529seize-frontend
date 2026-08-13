@@ -65,10 +65,9 @@ describe("CreateWaveDates", () => {
     expect(screen.queryByTestId("rank-dates")).toBeNull();
     expect(
       screen.getByText(
-        "Review when this wave starts and, optionally, when it ends."
+        "Review when this wave opens, voting begins, and winners are announced."
       )
     ).toBeVisible();
-    expect(screen.queryByText(/winners are announced/i)).toBeNull();
   });
 
   it("renders rank dates flow for rank waves", () => {
@@ -85,7 +84,7 @@ describe("CreateWaveDates", () => {
     expect(screen.queryByTestId("approve-dates")).toBeNull();
   });
 
-  it("describes perpetual ranking without promising winner announcements", () => {
+  it("keeps the existing schedule description for perpetual ranking", () => {
     render(
       <CreateWaveDates
         waveType={ApiWaveType.Rank}
@@ -97,10 +96,9 @@ describe("CreateWaveDates", () => {
 
     expect(
       screen.getByText(
-        "Review when submissions open and voting begins for this ongoing ranking."
+        "Review when this wave opens, voting begins, and winners are announced."
       )
     ).toBeVisible();
-    expect(screen.queryByText(/winners are announced/i)).toBeNull();
   });
 
   it("passes validation errors to the rank dates flow", () => {

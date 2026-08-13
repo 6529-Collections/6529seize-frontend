@@ -8,9 +8,9 @@ export default function CreateWaveDropsMetadataRowType({
   readonly onTypeChange: (type: ApiWaveMetadataType) => void;
 }) {
   const activeClasses =
-    "tw-ring-primary-400 tw-bg-[#202B45] tw-text-primary-400 tw-z-10";
+    "tw-ring-primary-400 tw-bg-primary-500/10 tw-text-primary-400 tw-z-10";
   const inactiveClasses =
-    "tw-ring-iron-650 tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-300";
+    "tw-ring-white/10 tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-300";
 
   const STRING_CLASSES =
     activeType === ApiWaveMetadataType.String ? activeClasses : inactiveClasses;

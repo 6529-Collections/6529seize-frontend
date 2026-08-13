@@ -264,15 +264,16 @@ export default function Decisions({
         title={t(locale, "waves.create.dates.rank.advancedSummary")}
         isCustomized={dates.subsequentDecisions.length > 0}
         hasError={hasAdvancedError}
+        variant="filled"
       >
-        <div className="tw-space-y-6">
+        <div className="tw-space-y-6 tw-p-5">
           <SubsequentDecisions
             firstDecisionTime={dates.firstDecisionTime}
             subsequentDecisions={dates.subsequentDecisions}
             setSubsequentDecisions={handleUpdateSubsequentDecisions}
           />
           {dates.subsequentDecisions.length > 0 && (
-            <div className="tw-rounded-lg tw-border tw-border-iron-700/50 tw-shadow-md">
+            <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40 tw-p-4">
               <div className="tw-flex tw-items-center tw-justify-between">
                 <div className="tw-flex-1">
                   <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>

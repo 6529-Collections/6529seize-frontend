@@ -54,7 +54,7 @@ export default function CreateWaveGroups({
           description={t(locale, "waves.create.groups.description")}
         />
         <p
-          className={`${CREATE_WAVE_FORM_STYLES.compactSupportingText} tw-text-pretty`}
+          className={`${CREATE_WAVE_FORM_STYLES.compactSupportingText} tw-max-w-2xl tw-text-pretty !tw-text-iron-500`}
         >
           {t(locale, "waves.create.groups.accessHelper", {
             viewGroupName: t(locale, "waves.create.groups.viewGroupName"),

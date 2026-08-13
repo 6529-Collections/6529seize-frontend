@@ -111,7 +111,7 @@ describe("CreateWaveRules", () => {
       screen.getByRole("heading", { level: 3, name: "Automatic rules" })
     ).toBeVisible();
     const advancedButton = screen.getByRole("button", {
-      name: "Optional creator rules",
+      name: "Creator rules",
     });
     expect(advancedButton).toHaveAttribute("aria-expanded", "false");
     expect(
@@ -139,7 +139,7 @@ describe("CreateWaveRules", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Optional creator rules and acceptance",
+        name: "Creator rules and acceptance",
       })
     );
     fireEvent.click(
@@ -166,7 +166,7 @@ describe("CreateWaveRules", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Optional creator rules and acceptance Customized/,
+        name: /Creator rules and acceptance Customized/,
       })
     ).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByDisplayValue("Restored rule")).not.toBeVisible();

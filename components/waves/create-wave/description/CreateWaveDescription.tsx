@@ -34,6 +34,9 @@ interface CreateWaveDescriptionProps {
   readonly onHaveDropToSubmitChange: (canSubmit: boolean) => void;
 }
 
+const CREATE_WAVE_DESCRIPTION_EDITOR_CLASSES =
+  "[&_.create-drop-composer-surface]:!tw-border-white/5 [&_.create-drop-composer-surface]:!tw-bg-iron-900 [&_.editor-input-one-liner]:!tw-bg-iron-950 [&_.editor-input-one-liner]:!tw-ring-white/10 desktop-hover:[&_.editor-input-one-liner:hover:not(:focus)]:!tw-ring-white/15 [&_.editor-input-one-liner:focus]:!tw-ring-primary-400 [&_.editor-input-multi-liner]:!tw-bg-iron-950 [&_.editor-input-multi-liner]:!tw-ring-white/10 desktop-hover:[&_.editor-input-multi-liner:hover:not(:focus)]:!tw-ring-white/15 [&_.editor-input-multi-liner:focus]:!tw-ring-primary-400 [&_input:not([type=file])]:!tw-h-11 [&_input:not([type=file])]:!tw-bg-iron-950 [&_input:not([type=file])]:!tw-text-base [&_input:not([type=file])]:!tw-ring-white/10 desktop-hover:[&_input:not([type=file]):hover:not(:focus)]:!tw-ring-white/15 [&_input:not([type=file]):focus]:!tw-ring-primary-400 sm:[&_input:not([type=file])]:!tw-text-sm";
+
 const CreateWaveDescription = forwardRef<
   CreateWaveDescriptionHandles,
   CreateWaveDescriptionProps
@@ -91,6 +94,7 @@ const CreateWaveDescription = forwardRef<
             <MentionSearchScopeProvider visibilityGroupId={visibilityGroupId}>
               <DropEditor
                 ref={dropEditorRef}
+                className={CREATE_WAVE_DESCRIPTION_EDITOR_CLASSES}
                 waveId={null}
                 profile={profileMin}
                 quotedDrop={null}

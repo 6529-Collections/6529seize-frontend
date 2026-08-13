@@ -13,8 +13,9 @@ describe('CreateWaveOutcomeTypesItem', () => {
         setOutcomeType={jest.fn()}
       />
     );
-    const btn = screen.getByRole('button');
-    expect(btn.className).toContain('tw-ring-primary-400');
+    const radio = screen.getByRole('radio', { name: 'Manual' });
+    expect(radio).toBeChecked();
+    expect(radio.parentElement).toHaveClass('tw-border-primary-500/60');
   });
 
   it('calls setOutcomeType on click', async () => {
@@ -28,7 +29,7 @@ describe('CreateWaveOutcomeTypesItem', () => {
         setOutcomeType={setOutcomeType}
       />
     );
-    await user.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('radio', { name: 'Rep' }));
     expect(setOutcomeType).toHaveBeenCalledWith(CreateWaveOutcomeType.REP);
   });
 });

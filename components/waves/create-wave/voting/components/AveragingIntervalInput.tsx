@@ -5,6 +5,7 @@ import type { KeyboardEvent } from "react";
 import type { TimeUnit } from "../types";
 import { MAX_HOURS, MIN_MINUTES } from "../types";
 import { parseWholeNumberInput } from "../utils";
+import CreateWaveDropdown from "../../utils/CreateWaveDropdown";
 import VotingSettingBox, {
   getVotingSettingInputClasses,
 } from "../VotingSettingBox";
@@ -21,6 +22,14 @@ interface AveragingIntervalInputProps {
   /** Validation error message, if any */
   readonly validationError?: string | undefined;
 }
+
+const TIME_UNIT_OPTIONS = [
+  { value: "minutes", label: "Minutes" },
+  { value: "hours", label: "Hours" },
+] as const satisfies ReadonlyArray<{
+  readonly value: TimeUnit;
+  readonly label: string;
+}>;
 
 /**
  * AveragingIntervalInput Component
@@ -83,6 +92,7 @@ const AveragingIntervalInput = memo(
         }
         inputId={inputId}
         label="Averaging Interval"
+        surface="plain"
       >
         <div className="tw-grid tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_9rem]">
           <input
@@ -100,17 +110,15 @@ const AveragingIntervalInput = memo(
             aria-describedby={hasError ? `${errorId} ${helpId}` : helpId}
             data-testid="averaging-interval-input"
           />
-          <select
-            id={`${inputId}-unit`}
-            aria-label="Averaging interval time unit"
+          <CreateWaveDropdown
             value={unit}
-            onChange={(e) => onUnitChange(e.target.value as TimeUnit)}
-            className={getVotingSettingInputClasses({ hasError, hasValue })}
-            data-testid="time-unit-selector"
-          >
-            <option value="minutes">Minutes</option>
-            <option value="hours">Hours</option>
-          </select>
+            options={TIME_UNIT_OPTIONS}
+            ariaLabel="Averaging interval time unit"
+            dataTestId="time-unit-selector"
+            hasError={hasError}
+            accentValue={hasValue}
+            onChange={onUnitChange}
+          />
         </div>
       </VotingSettingBox>
     );

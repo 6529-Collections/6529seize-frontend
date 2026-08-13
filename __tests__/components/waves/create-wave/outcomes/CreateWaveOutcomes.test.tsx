@@ -51,7 +51,7 @@ jest.mock("@/components/utils/animation/CommonAnimationHeight", () => ({
 describe("CreateWaveOutcomes", () => {
   const openAdvancedSettings = () => {
     const advancedButton = screen.getByRole("button", {
-      name: /Winner limits and outcome visibility/,
+      name: /Winner limits/,
     });
     fireEvent.click(advancedButton);
     return advancedButton;
@@ -84,10 +84,7 @@ describe("CreateWaveOutcomes", () => {
   it("shows rows list when no outcome type selected", () => {
     render(<CreateWaveOutcomes {...baseProps} />);
     expect(
-      screen.getByRole("heading", { level: 2, name: "Outcomes" })
-    ).toBeVisible();
-    expect(
-      screen.getByRole("group", { name: "Choose outcome type" })
+      screen.getByRole("heading", { level: 3, name: "Choose outcome type" })
     ).toBeVisible();
     expect(screen.getByTestId("rows")).toBeInTheDocument();
   });
@@ -129,7 +126,7 @@ describe("CreateWaveOutcomes", () => {
     expect(input).toBeInTheDocument();
     expect(helpText).toBeInTheDocument();
     expect(input.parentElement).toContainElement(label);
-    expect(input.parentElement).not.toContainElement(helpText);
+    expect(input.parentElement).toContainElement(helpText);
   });
 
   it("rejects decimal max winners instead of truncating", () => {
@@ -156,20 +153,10 @@ describe("CreateWaveOutcomes", () => {
     const setDisplay = jest.fn();
     render(<CreateWaveOutcomes {...baseProps} setDisplay={setDisplay} />);
 
-    const advancedButton = screen.getByRole("button", {
-      name: /Winner limits and outcome visibility/,
-    });
-    expect(advancedButton).toHaveAttribute("aria-expanded", "false");
-
-    openAdvancedSettings();
-
     const toggle = screen.getByRole("checkbox");
     expect(toggle).toBeEnabled();
     expect(toggle).toBeChecked();
     expect(toggle).toHaveAccessibleName("Show outcomes");
-    expect(toggle).toHaveAccessibleDescription(
-      "Turn on to show outcome details in the wave’s Outcome tab and winner views. Turn off to keep them hidden from participants."
-    );
 
     fireEvent.click(toggle);
 
@@ -190,11 +177,21 @@ describe("CreateWaveOutcomes", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Winner limits and outcome visibility Customized/,
+        name: /Winner limits Customized/,
       })
     ).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByLabelText(/Max Winners/)).not.toBeVisible();
-    expect(screen.getByRole("checkbox", { hidden: true })).not.toBeVisible();
+    expect(screen.getByRole("checkbox")).toBeVisible();
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
+  });
+
+  it("does not render an empty advanced section for rank waves", () => {
+    render(<CreateWaveOutcomes {...baseProps} waveType={ApiWaveType.Rank} />);
+
+    expect(screen.getByRole("checkbox", { name: "Show outcomes" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: /Outcome visibility/ })
+    ).not.toBeInTheDocument();
   });
 
   it("replaces outcome configuration with an explainer for perpetual rank waves", () => {

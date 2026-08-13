@@ -11,7 +11,7 @@ describe('DecisionPointDropdown', () => {
     );
     fireEvent.click(getByRole('button'));
     expect(queryByText('Hours')).not.toBeNull(); // Hours option should be visible in open dropdown
-    fireEvent.click(getByRole('button', { name: 'Hours' }));
+    fireEvent.click(getByRole('option', { name: 'Hours' }));
     expect(onChange).toHaveBeenCalledWith(Period.HOURS);
     expect(queryByText('Hours')).toBeNull(); // Hours option should no longer be visible after dropdown closes
   });

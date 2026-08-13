@@ -5,6 +5,7 @@ interface NftPickerActionsProps {
     canAddTokens: boolean;
     allowAll: boolean;
     selectedContract: boolean;
+    variant: "card" | "flat";
     selectAllLabel: string;
     onSelectAll: () => void;
     onAdd: () => void;
@@ -14,6 +15,7 @@ export function NftPickerActions({
     canAddTokens,
     allowAll,
     selectedContract,
+    variant,
     selectAllLabel,
     onSelectAll,
     onAdd,
@@ -24,6 +26,7 @@ export function NftPickerActions({
                 onClicked={onAdd}
                 loading={false}
                 disabled={!canAddTokens}
+                size={variant === "flat" ? "lg" : "default"}
             >
                 Add
             </PrimaryButton>

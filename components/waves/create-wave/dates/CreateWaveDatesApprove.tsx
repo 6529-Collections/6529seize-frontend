@@ -32,6 +32,7 @@ export default function CreateWaveDatesApprove({
         title={t(locale, "waves.create.dates.approve.advancedSummary")}
         isCustomized={dates.endDate !== null}
         hasError={hasEndDateError}
+        variant="filled"
       >
         <CreateWaveDatesApproveEnd
           dates={dates}

@@ -1043,13 +1043,9 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
   title: "Schedule",
   description:
     "Review when this wave opens, voting begins, and winners are announced.",
-  approveDescription:
-    "Review when this wave starts and, optionally, when it ends.",
-  perpetualDescription:
-    "Review when submissions open and voting begins for this ongoing ranking.",
   "approve.noEndSummary": "Starts {start}. No end date.",
   "approve.endSummary": "Starts {start}. Ends {end}.",
-  "approve.advancedSummary": "Optional wave end",
+  "approve.advancedSummary": "Wave end",
   "approve.endInfoLabel": "About wave end",
   "approve.start.title": "Wave Start",
   "approve.start.tooltip":
@@ -1074,7 +1070,7 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
     "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
   "rank.scheduledSummary":
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
-  "rank.advancedSummary": "Additional announcements and recurring schedule",
+  "rank.advancedSummary": "Winner schedule",
   "rank.timeline.title": "Wave Timeline",
   "rank.timeline.submissionLabel": "Drops Submission Opens",
   "rank.timeline.votingLabel": "Drops Voting Begins",
@@ -1172,9 +1168,10 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
 } as const);
 
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
-  title: "Overview",
-  name: "Wave name",
+  title: "Create Wave",
+  name: "Wave Name",
   picture: "Wave Profile Picture",
+  advancedTitle: "Appearance and labels",
   displaySettings: "Display settings",
 } as const);
 
@@ -1206,13 +1203,10 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
 
 const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   title: "Outcomes",
-  description: "Choose what winners receive when their submissions succeed.",
   rankAdvancedSummary: "Outcome visibility",
-  approveAdvancedSummary: "Winner limits and outcome visibility",
+  approveAdvancedSummary: "Winner limits",
   chooseType: "Choose outcome type",
   showOutcomes: "Show outcomes",
-  showOutcomesDescription:
-    "Turn on to show outcome details in the wave’s Outcome tab and winner views. Turn off to keep them hidden from participants.",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
@@ -1221,18 +1215,18 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
     "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
   "warning.unlimited.title": "Warning: Unlimited Awards",
   "warning.unlimited.description":
-    "You have not set a maximum number of winners for this wave. Everyone who meets the threshold will be awarded.",
-  "warning.indefinite.title": "Warning: Wave Will Run Indefinitely",
+    "You have not set a maximum number of winners for this challenge. Everyone who meets the threshold will be awarded.",
+  "warning.indefinite.title": "Warning: Challenge Will Run Indefinitely",
   "warning.indefinite.description":
-    "You have not set an end date or a maximum number of winners for this wave. It will run indefinitely, and everyone who meets the threshold will be awarded.",
+    "You have not set an end date or a maximum number of winners for this challenge. It will run indefinitely, and everyone who meets the threshold will be awarded.",
 } as const);
 
 const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   title: "Rules",
   description:
-    "Review the automatic rules and add creator rules only when they are needed.",
-  advancedSummary: "Optional creator rules and acceptance",
-  chatAdvancedSummary: "Optional creator rules",
+    "Automatic rules are generated from the wave setup. Add creator rules only for wave-specific requirements that are not already covered.",
+  advancedSummary: "Creator rules and acceptance",
+  chatAdvancedSummary: "Creator rules",
   automaticTitle: "Automatic rules",
   displayOnlyTitle: "Display-only creator rules",
   displayOnlyDescription:
@@ -1250,10 +1244,9 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
 } as const);
 
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
-  title: "Voting",
-  description: "Choose how voting power works and how submissions succeed.",
-  powerTitle: "Voting power",
-  rankAdvancedSummary: "Vote limits and vote behavior",
+  title: "How Drops are Voted",
+  ratingTitle: "How Drops are Rated",
+  rankAdvancedSummary: "Vote limits and behavior",
   approveAdvancedSummary: "Vote limits, behavior, and timing",
   "negative.title": "Allow Negative Votes",
   "negative.enabledDescription":
@@ -1286,7 +1279,7 @@ const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
   {
     title: "Description",
     description:
-      "Explain the wave so participants understand its purpose and what you expect.",
+      "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less.",
     missingProfile:
       "A profile handle is required to create a wave. Set up your profile, then come back to finish this step.",
     placeholder: "Describe your wave",

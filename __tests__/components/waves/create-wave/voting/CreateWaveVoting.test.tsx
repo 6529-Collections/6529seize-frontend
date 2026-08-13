@@ -55,12 +55,16 @@ const mockNegativeVotingToggle = jest.fn(
 jest.mock(
   "@/components/utils/radio/CommonBorderedRadioButton",
   () => (props: any) => (
-    <button
-      data-testid={`radio-${props.type}`}
-      onClick={() => props.onChange(props.type)}
-    >
+    <label data-testid={`radio-${props.type}`}>
+      <input
+        type="radio"
+        name={props.name}
+        aria-label={props.ariaLabel}
+        checked={props.selected === props.type}
+        onChange={() => props.onChange(props.type)}
+      />
       {props.children}
-    </button>
+    </label>
   )
 );
 
@@ -174,17 +178,14 @@ describe("CreateWaveVoting", () => {
     render(<CreateWaveVoting {...baseProps} />);
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Voting" })
-    ).toBeVisible();
-    expect(
-      screen.getByRole("heading", { level: 3, name: "Voting power" })
+      screen.getByRole("heading", { level: 2, name: "How Drops are Voted" })
     ).toBeVisible();
     expect(screen.getByTestId("rep")).toBeInTheDocument();
     expect(screen.getByText("Voting power scope")).toBeInTheDocument();
     expect(screen.queryByLabelText("Approval threshold")).toBeNull();
     expect(screen.queryByLabelText("Minimum time above threshold")).toBeNull();
     expect(
-      screen.getByRole("button", { name: /Vote limits and vote behavior/ })
+      screen.getByRole("button", { name: /Vote limits and behavior/ })
     ).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByTestId("negative")).not.toBeVisible();
     expect(screen.getByTestId("time-weighted")).not.toBeVisible();
@@ -198,7 +199,10 @@ describe("CreateWaveVoting", () => {
     expect(screen.getByLabelText("Vote cap per identity")).toBeVisible();
     expect(
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
-    ).toHaveClass("tw-rounded-xl", "tw-border-white/5", "tw-bg-iron-900");
+    ).toHaveAttribute("data-surface", "plain");
+    expect(
+      screen.getByTestId("max-votes-per-identity-per-drop-setting")
+    ).not.toHaveClass("tw-rounded-xl", "tw-border", "tw-bg-iron-900");
     expect(screen.queryByTestId("approval-threshold-setting")).toBeNull();
   });
 
@@ -353,19 +357,15 @@ describe("CreateWaveVoting", () => {
     expect(screen.queryByTestId("approval-hold-detail")).toBeNull();
     expect(
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
-    ).toHaveClass(
-      "tw-rounded-xl",
-      "tw-border-white/5",
-      "tw-bg-iron-900",
-      "tw-shadow-inner",
-      "tw-ring-inset"
-    );
+    ).toHaveAttribute("data-surface", "plain");
+    expect(
+      screen.getByTestId("max-votes-per-identity-per-drop-setting")
+    ).not.toHaveClass("tw-rounded-xl", "tw-border", "tw-shadow-inner");
     expect(screen.getByTestId("approval-threshold-setting")).toHaveClass(
       "tw-rounded-xl",
       "tw-border-white/5",
-      "tw-bg-iron-900",
-      "tw-shadow-inner",
-      "tw-ring-inset"
+      "tw-bg-iron-900/60",
+      "tw-shadow-inner"
     );
     expect(
       thresholdInput.compareDocumentPosition(voteCapInput) &
@@ -588,12 +588,8 @@ describe("CreateWaveVoting", () => {
 
     openAdvancedSettings();
 
-    fireEvent.change(
-      screen.getByLabelText("Minimum time above threshold unit"),
-      {
-        target: { value: "hours" },
-      }
-    );
+    fireEvent.click(screen.getByLabelText("Minimum time above threshold unit"));
+    fireEvent.click(screen.getByRole("option", { name: "Hours" }));
     fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
       target: { value: "2" },
     });

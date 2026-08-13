@@ -110,7 +110,7 @@ export default function CreateWaveDatesApproveEnd({
   };
 
   return (
-    <section className="tw-rounded-xl tw-bg-iron-900 tw-px-5 tw-pb-5 tw-pt-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+    <section className="tw-bg-transparent tw-p-5">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -132,12 +132,12 @@ export default function CreateWaveDatesApproveEnd({
         </div>
 
         <div className="tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md">
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
+          <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">
             {t(locale, "waves.create.dates.approve.end.summaryLabel")}
           </p>
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <p
-              className={`tw-mb-0 tw-text-sm tw-font-medium ${
+              className={`tw-m-0 tw-text-sm tw-font-medium ${
                 hasEndBeforeStartError ? "tw-text-error" : "tw-text-iron-50"
               }`}
             >
@@ -199,6 +199,7 @@ export default function CreateWaveDatesApproveEnd({
               minTimestamp={earliestValidEndTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleDateSelection}
+              variant="flat"
             />
           </div>
 
@@ -212,6 +213,7 @@ export default function CreateWaveDatesApproveEnd({
               onTimeChange={handleTimeChange}
               minTime={isSameDayAsEarliestValidEnd ? minTime : null}
               disabled={!hasSelectedEndDate}
+              variant="flat"
             />
             {!hasSelectedEndDate && (
               <p

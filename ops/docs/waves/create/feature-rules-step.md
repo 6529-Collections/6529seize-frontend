@@ -70,8 +70,8 @@ submission step.
 1. Complete `Groups` for `Chat`, or `Drops` for `Rank` and `Approve`.
 2. Open `Rules`.
 3. Review the automatic rules preview.
-4. Open `Optional creator rules` for Chat, or `Optional creator rules and
-   acceptance` for Rank and Approve, only when creator-written rules are needed.
+4. Open `Creator rules` for Chat, or `Creator rules and acceptance` for Rank
+   and Approve, only when creator-written rules are needed.
 5. Optionally enter display-only creator rules.
 6. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
    rules participants must accept before submitting.

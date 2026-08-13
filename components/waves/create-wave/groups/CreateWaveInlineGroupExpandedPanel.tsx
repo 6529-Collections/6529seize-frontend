@@ -7,7 +7,7 @@ export default function CreateWaveInlineGroupExpandedPanel({
   onCancel,
   cancelClassName = "",
   cancelLabel = "Cancel",
-  cancelSize = "xs",
+  cancelSize = "md",
   showCancel = true,
 }: {
   readonly children: ReactNode;

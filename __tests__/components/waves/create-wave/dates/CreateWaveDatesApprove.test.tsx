@@ -56,7 +56,7 @@ describe("CreateWaveDatesApprove", () => {
     expect(screen.getByTestId("start")).toBeVisible();
     expect(screen.getByTestId("end")).not.toBeVisible();
     const advancedButton = screen.getByRole("button", {
-      name: "Optional wave end",
+      name: "Wave end",
     });
     expect(advancedButton).toHaveAttribute("aria-expanded", "false");
 
@@ -95,7 +95,7 @@ describe("CreateWaveDatesApprove", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Optional wave end Needs attention/,
+        name: /Wave end Needs attention/,
       })
     ).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByTestId("end")).toBeVisible();

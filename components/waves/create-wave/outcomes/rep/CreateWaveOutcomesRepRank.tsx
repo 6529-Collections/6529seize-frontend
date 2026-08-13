@@ -128,7 +128,7 @@ export default function CreateWaveOutcomesRepRank({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-5">
+    <div className="tw-flex tw-flex-col tw-gap-y-6">
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-5 tw-pt-[0.5px] sm:tw-flex-row">
         <CreateWaveOutcomesRepCategoryField
           category={outcome.category}

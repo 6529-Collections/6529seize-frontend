@@ -44,7 +44,7 @@ export default function CreateWaveOutcomesRows({
           <p
             className={`${
               showNoOutcomesError ? "tw-text-error" : "tw-text-iron-200"
-            } tw-mb-0 tw-text-sm tw-font-semibold`}
+            } tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold`}
           >
             {t(DEFAULT_LOCALE, "waves.create.outcomes.empty.title")}
           </p>

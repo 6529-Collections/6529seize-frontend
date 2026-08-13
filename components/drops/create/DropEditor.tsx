@@ -37,6 +37,7 @@ interface DropEditorWaveProps {
 }
 
 interface DropEditorProps {
+  readonly className?: string | undefined;
   readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: {
     readonly dropId: string;
@@ -63,6 +64,7 @@ interface DropEditorProps {
 const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
   (
     {
+      className,
       profile,
       quotedDrop,
       isClient = false,
@@ -152,7 +154,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
     }
 
     return (
-      <div>
+      <div className={className}>
         <CreateDropWrapper
           ref={createDropWrapperRef}
           quotedDrop={quotedDrop}

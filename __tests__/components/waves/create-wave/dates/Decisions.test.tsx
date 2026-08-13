@@ -48,7 +48,7 @@ describe("Decisions", () => {
   const openAdvancedSettings = () =>
     fireEvent.click(
       screen.getByRole("button", {
-        name: /Additional announcements and recurring schedule/,
+        name: /Winner schedule/,
       })
     );
 
@@ -178,7 +178,7 @@ describe("Decisions", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Additional announcements and recurring schedule Needs attention/,
+        name: /Winner schedule Needs attention/,
       })
     ).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Invalid optional end date")).toBeVisible();

@@ -251,7 +251,7 @@ describe("CreateWaveOutcomesRepRank", () => {
     const { container } = renderComponent();
 
     const mainContainer = container.firstChild;
-    expect(mainContainer).toHaveClass("tw-flex", "tw-flex-col", "tw-gap-y-5");
+    expect(mainContainer).toHaveClass("tw-flex", "tw-flex-col", "tw-gap-y-6");
 
     const buttonContainer = container.querySelector(
       ".tw-flex.tw-justify-end.tw-gap-x-3"

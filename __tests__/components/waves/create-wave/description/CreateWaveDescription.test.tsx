@@ -125,7 +125,7 @@ describe("CreateWaveDescription", () => {
     ).toBeVisible();
     expect(
       screen.getByText(
-        "Explain the wave so participants understand its purpose and what you expect."
+        "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less."
       )
     ).toBeVisible();
   });
@@ -274,7 +274,7 @@ describe("CreateWaveDescription", () => {
     );
 
     const subtitle = screen.getByText(
-      "Explain the wave so participants understand its purpose and what you expect."
+      "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less."
     );
     expect(subtitle).toHaveClass(
       "tw-m-0",

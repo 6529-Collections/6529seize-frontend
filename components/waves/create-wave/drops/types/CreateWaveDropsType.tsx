@@ -19,8 +19,8 @@ export default function CreateWaveDropsType({
   };
 
   const buttonClasses = isChecked
-    ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
-    : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10";
+    ? "tw-border-primary-500/60 tw-bg-iron-900/80"
+    : "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10";
 
   const labelClasses = isChecked
     ? "tw-text-white"
@@ -28,7 +28,7 @@ export default function CreateWaveDropsType({
 
   return (
     <label
-      className={`${buttonClasses} tw-group tw-relative tw-flex tw-min-h-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+      className={`${buttonClasses} tw-group tw-relative tw-flex tw-min-h-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-transition tw-duration-300 tw-ease-out`}
     >
       <input
         checked={isChecked}

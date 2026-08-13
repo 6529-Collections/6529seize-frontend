@@ -128,6 +128,7 @@ export default function StartDates({
               minTimestamp={minStartTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleSubmissionDateChange}
+              variant="flat"
             />
           </div>
         </div>
@@ -150,6 +151,7 @@ export default function StartDates({
                 minTimestamp={minVotingTimestamp}
                 maxTimestamp={null}
                 setSelectedTimestamp={handleVotingDateChange}
+                variant="flat"
               />
             </div>
           </div>

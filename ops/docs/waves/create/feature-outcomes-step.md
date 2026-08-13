@@ -5,8 +5,8 @@
 Use `Outcomes` to define winner rewards in `Rank` and `Approve` wave creation.
 You must save at least one outcome before `Next` can move to `Description`.
 
-Outcome type and reward configuration stay visible. Optional outcome
-visibility and the Approve winner limit are in a named expandable section.
+Outcome type, reward configuration, and outcome visibility stay visible.
+The optional Approve winner limit is in the named `Winner limits` expandable.
 
 ## Location in the Site
 
@@ -51,11 +51,10 @@ and it never announces winners.
 3. Fill the selected form.
 4. Click `Save` to add a row, or `Cancel` to discard draft edits.
 5. Repeat to add more outcomes.
-6. Open `Outcome visibility` for Rank, or `Winner limits and outcome
-   visibility` for Approve, only when optional behavior needs changing.
-7. For `Approve`, optionally set `Max Winners`; blank means unlimited.
-8. Choose whether to `Show outcomes` after creation.
-9. Click `Next` to continue to `Description`.
+6. Choose whether to `Show outcomes` after creation.
+7. For `Approve`, open `Winner limits` and optionally set `Max Winners`; blank
+   means unlimited.
+8. Click `Next` to continue to `Description`.
 
 ## Common Scenarios
 
@@ -78,7 +77,8 @@ and it never announces winners.
 - Saved `Manual` and `Rep` rows can be removed.
 - Saved `NIC` rows show a remove icon, but it currently does not remove the row.
 - `Show outcomes` defaults on. `Max Winners` defaults blank.
-- Non-default optional values show `Customized` on the collapsed disclosure.
+- A non-default `Max Winners` value shows `Customized` on the collapsed
+  `Winner limits` disclosure.
 
 ## Failure and Recovery
 

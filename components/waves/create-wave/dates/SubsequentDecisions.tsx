@@ -115,7 +115,7 @@ export default function SubsequentDecisions({
     periodToMs(additionalTime, timeframeUnit);
 
   return (
-    <div className="tw-mt-5 tw-bg-iron-900">
+    <div>
       <div className="tw-flex tw-items-center tw-justify-between">
         <h3 className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}>
           {t(locale, "waves.create.dates.rank.additional.title")}
@@ -123,7 +123,7 @@ export default function SubsequentDecisions({
       </div>
 
       {/* Explanation about sequence */}
-      <div className="tw-mb-2 tw-border-b tw-border-iron-700/30 tw-pb-3">
+      <div className="tw-mb-2 tw-border-b tw-border-white/5 tw-pb-3">
         <p className="tw-mb-0 tw-text-xs tw-text-iron-300">
           <span className="tw-font-medium tw-text-primary-400">
             {t(locale, "waves.create.dates.rank.additional.timelineLabel")}
@@ -136,13 +136,13 @@ export default function SubsequentDecisions({
         {/* First Decision Point */}
         <div className="tw-relative tw-mb-6">
           {/* Timeline dot */}
-          <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-text-xs tw-font-semibold tw-text-black tw-ring-4 tw-ring-iron-800">
+          <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-text-xs tw-font-semibold tw-text-black tw-ring-4 tw-ring-iron-900">
             1
           </div>
 
           {/* Content */}
-          <div className="tw-rounded-lg tw-border-l-4 tw-border-primary-500 tw-bg-iron-700/40 tw-px-4 tw-py-3 tw-shadow-md">
-            <div className="tw-mb-0.5 tw-text-xs tw-font-medium tw-text-primary-300">
+          <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40 tw-px-4 tw-py-3">
+            <div className="tw-flex tw-min-h-6 tw-items-center tw-text-xs tw-font-medium tw-text-primary-300">
               {t(locale, "waves.create.dates.rank.additional.firstTitle")}
             </div>
             <p className="tw-mb-0 tw-flex tw-items-center tw-text-sm tw-font-medium tw-text-iron-50">
@@ -169,22 +169,22 @@ export default function SubsequentDecisions({
           }) => (
             <div key={`decision-${key}`} className="tw-relative tw-mb-6">
               {/* Timeline dot */}
-              <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/80 tw-text-xs tw-font-semibold tw-text-black tw-ring-4 tw-ring-iron-800">
+              <div className="tw-absolute tw-left-[-14px] tw-top-3 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/80 tw-text-xs tw-font-semibold tw-text-black tw-ring-4 tw-ring-iron-900">
                 {announcementNumber}
               </div>
 
               {/* Interval indicator on the timeline */}
               <div className="tw-absolute tw-left-[-22px] tw-top-[-8px] tw-flex tw-items-center tw-justify-center">
-                <span className="tw-whitespace-nowrap tw-rounded tw-border tw-border-iron-700/70 tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-primary-300">
+                <span className="tw-whitespace-nowrap tw-rounded tw-border tw-border-white/10 tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium tw-text-primary-300">
                   +{formatInterval(interval)}
                 </span>
               </div>
 
               {/* Content */}
-              <div className="tw-group tw-rounded-lg tw-border-l-4 tw-border-primary-400/70 tw-bg-[#24242B] tw-px-4 tw-py-3 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-shadow-md">
+              <div className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40 tw-px-4 tw-py-3 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/10">
                 <div className="tw-flex tw-items-start tw-justify-between">
                   <div>
-                    <div className="tw-mb-0.5 tw-text-xs tw-font-medium tw-text-primary-300/90">
+                    <div className="tw-flex tw-min-h-6 tw-items-center tw-text-xs tw-font-medium tw-text-primary-300/90">
                       {t(
                         locale,
                         "waves.create.dates.rank.additional.announcementTitle",
@@ -227,30 +227,28 @@ export default function SubsequentDecisions({
       </div>
 
       {/* Add New Decision Point */}
-      <div className="tw-mt-6 tw-rounded-lg tw-bg-iron-800/60 tw-p-4">
-        <div className="tw-mb-3 tw-flex tw-items-center">
-          <div className="tw-mr-3 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/20 tw-text-xs tw-font-medium tw-text-primary-400">
+      <div className="tw-mt-6 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40 tw-p-4">
+        <div className="tw-mb-3 tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-1">
+          <div className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/20 tw-text-xs tw-font-medium tw-text-primary-400">
             <FontAwesomeIcon
               icon={faCalendarPlus}
               className="tw-size-4 tw-flex-shrink-0"
             />
           </div>
-          <div>
-            <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-              {t(locale, "waves.create.dates.rank.additional.scheduleTitle")}
-            </p>
-            <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-              {t(
-                locale,
-                "waves.create.dates.rank.additional.scheduleDescription"
-              )}
-            </p>
-          </div>
+          <p className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-50">
+            {t(locale, "waves.create.dates.rank.additional.scheduleTitle")}
+          </p>
+          <p className="tw-col-start-2 tw-m-0 tw-text-xs tw-text-iron-400">
+            {t(
+              locale,
+              "waves.create.dates.rank.additional.scheduleDescription"
+            )}
+          </p>
         </div>
 
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-basis-56 tw-items-stretch tw-rounded-lg">
-            <div className="tw-w-24 tw-rounded-l-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-primary-400">
+            <div className="tw-h-11 tw-w-24 tw-rounded-l-lg tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus-within:tw-ring-primary-400">
               <input
                 type="number"
                 min="1"
@@ -260,7 +258,7 @@ export default function SubsequentDecisions({
                     e.target.value === "" ? 0 : parseInt(e.target.value, 10)
                   )
                 }
-                className="tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-4 tw-font-medium tw-text-primary-400 tw-caret-primary-300 [appearance:textfield] focus:tw-outline-none [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+                className="tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-text-base tw-font-medium tw-text-primary-400 tw-caret-primary-300 [appearance:textfield] focus:tw-outline-none sm:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
                 aria-label={t(
                   locale,
                   "waves.create.dates.rank.additional.timeValueAriaLabel"
@@ -276,7 +274,7 @@ export default function SubsequentDecisions({
           <div className="tw-flex-shrink-0">
             <Button
               variant="primary"
-              size="md"
+              size="lg"
               onClick={handleAddTimeframe}
               disabled={!additionalTime}
             >

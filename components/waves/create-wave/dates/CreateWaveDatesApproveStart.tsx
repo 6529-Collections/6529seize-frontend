@@ -59,7 +59,7 @@ export default function CreateWaveDatesApproveStart({
   };
 
   return (
-    <section className="tw-rounded-xl tw-bg-iron-900 tw-p-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-5 tw-shadow-sm">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -102,15 +102,18 @@ export default function CreateWaveDatesApproveStart({
         </div>
       </div>
 
-      <div className="tw-mt-4 tw-w-full tw-max-w-md">
-        <CommonCalendar
-          initialMonth={new Date().getMonth()}
-          initialYear={new Date().getFullYear()}
-          selectedTimestamp={dates.submissionStartDate}
-          minTimestamp={minStartTimestamp}
-          maxTimestamp={null}
-          setSelectedTimestamp={handleStartDateChange}
-        />
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-x-10 md:tw-grid-cols-2">
+        <div className="tw-w-full">
+          <CommonCalendar
+            initialMonth={new Date().getMonth()}
+            initialYear={new Date().getFullYear()}
+            selectedTimestamp={dates.submissionStartDate}
+            minTimestamp={minStartTimestamp}
+            maxTimestamp={null}
+            setSelectedTimestamp={handleStartDateChange}
+            variant="flat"
+          />
+        </div>
       </div>
     </section>
   );

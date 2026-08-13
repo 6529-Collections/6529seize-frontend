@@ -17,6 +17,7 @@ export default function CreateWaveOutcomesRepCategoryField({
         error={errorMessage !== null}
         hideDefaultError
         category={category}
+        inputClassName="tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-500/50 focus:tw-bg-iron-900 focus:tw-ring-primary-400"
         setCategory={setCategory}
       />
       {errorMessage !== null && (

@@ -31,7 +31,7 @@ export default function NegativeVotingToggle({
   }
 
   return (
-    <section className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
+    <section className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
       <div className="tw-flex tw-items-center tw-gap-3">
         <h3
           id="negative-votes-label"

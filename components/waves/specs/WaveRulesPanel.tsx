@@ -102,9 +102,13 @@ export default function WaveRulesPanel({
   showTitle = true,
   variant = "default",
 }: WaveRulesPanelProps) {
-  const ringClasses = useRing
-    ? "tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
-    : "";
+  let boundaryClasses = "";
+  if (useRing) {
+    boundaryClasses =
+      variant === "form"
+        ? "tw-rounded-xl tw-border tw-border-solid tw-border-white/5"
+        : "tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  }
 
   const TitleHeading = variant === "form" ? "h3" : "h2";
   const SectionHeading = getSectionHeadingLevel({ showTitle, variant });
@@ -119,7 +123,7 @@ export default function WaveRulesPanel({
 
   return (
     <div
-      className={`tw-relative tw-overflow-hidden ${backgroundClasses} ${ringClasses}`}
+      className={`tw-relative tw-overflow-hidden ${backgroundClasses} ${boundaryClasses}`}
     >
       {showTitle && (
         <div className="tw-px-4 tw-pt-6">

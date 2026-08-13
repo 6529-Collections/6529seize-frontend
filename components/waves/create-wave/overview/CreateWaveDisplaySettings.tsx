@@ -219,13 +219,13 @@ export default function CreateWaveDisplaySettings({
     `${
       hasError
         ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-        : "tw-border-white/5 tw-caret-primary-400 tw-ring-white/5 desktop-hover:hover:tw-ring-white/10 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400"
+        : "tw-border-white/10 tw-caret-primary-400 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400"
     } ${
       hasValue ? "tw-text-primary-400 focus:tw-text-white" : "tw-text-white"
-    } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
+    } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none sm:tw-text-sm`;
 
   const floatingLabelClasses = (hasError = false) =>
-    `tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-whitespace-nowrap tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
+    `tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-whitespace-nowrap tw-bg-iron-950 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
       hasError
         ? "tw-text-error peer-focus:tw-text-error"
         : "tw-text-iron-500 peer-focus:tw-text-primary-400"
@@ -233,10 +233,12 @@ export default function CreateWaveDisplaySettings({
 
   return (
     <CreateWaveAdvancedSection
+      title={t(locale, "waves.create.overview.advancedTitle")}
       isCustomized={isDisplaySettingsCustomized}
       hasError={hasDisplaySettingsError}
+      variant="filled"
     >
-      <div className="tw-space-y-4">
+      <div className="tw-space-y-4 tw-p-5">
         <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
           {t(locale, "waves.create.overview.displaySettings")}
         </h3>
@@ -323,8 +325,8 @@ export default function CreateWaveDisplaySettings({
                   key={mode}
                   className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-transition tw-duration-300 tw-ease-out ${
                     isSelected
-                      ? "tw-border-primary-400 tw-bg-iron-900 tw-shadow-inner"
-                      : "tw-border-white/10 tw-bg-iron-900/60 hover:tw-border-white/20 hover:tw-bg-iron-900"
+                      ? "tw-border-primary-500/60 tw-bg-primary-500/5"
+                      : "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10"
                   }`}
                 >
                   <ProposalCardAppearancePreview mode={mode} />
@@ -377,8 +379,8 @@ export default function CreateWaveDisplaySettings({
           <CommonAnimationHeight>
             {proposalCards.mode === "custom" ? (
               <div className="tw-pt-3">
-                <div className="tw-grid tw-grid-cols-1 tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-3 sm:tw-grid-cols-2 sm:tw-gap-0">
-                  <div className="tw-min-w-0 sm:tw-pr-4">
+                <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
+                  <div className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4">
                     <div className="tw-flex tw-min-h-10 tw-items-center tw-justify-between tw-gap-3">
                       <label
                         htmlFor="create-wave-proposal-card-excerpt-length"
@@ -432,7 +434,7 @@ export default function CreateWaveDisplaySettings({
                   </div>
                   <label
                     htmlFor="create-wave-proposal-card-media-thumbnail"
-                    className="tw-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3 sm:tw-border-l sm:tw-border-t-0 sm:tw-pl-4 sm:tw-pt-0"
+                    className="tw-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4"
                   >
                     <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
                       {t(locale, "waves.proposalCard.mediaLabel")}

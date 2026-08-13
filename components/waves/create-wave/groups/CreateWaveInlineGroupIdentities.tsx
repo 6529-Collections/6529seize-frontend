@@ -82,13 +82,13 @@ export default function CreateWaveInlineGroupIdentities({
               onIdentitySelect={onIdentitySelect}
               placeholder="Search identities..."
               hideLabel={true}
-              inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 desktop-hover:hover:tw-ring-white/10 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
+              inputClassName="tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
               iconClassName="tw-text-iron-500"
               resultsLayout={resultsLayout}
             />
           </div>
           {onCancel && (
-            <Button variant="secondary" size="xs" onClick={onCancel}>
+            <Button variant="secondary" size="md" onClick={onCancel}>
               {t(locale, "waves.create.actions.cancel")}
             </Button>
           )}

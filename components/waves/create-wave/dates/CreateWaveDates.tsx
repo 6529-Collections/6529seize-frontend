@@ -24,18 +24,12 @@ export default function CreateWaveDates({
 }: CreateWaveDatesProps) {
   const locale = useBrowserLocale();
   const isApprove = waveType === ApiWaveType.Approve;
-  let description = t(locale, "waves.create.dates.description");
-  if (isApprove) {
-    description = t(locale, "waves.create.dates.approveDescription");
-  } else if (dates.ongoingRanking) {
-    description = t(locale, "waves.create.dates.perpetualDescription");
-  }
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4">
       <CreateWaveStepHeader
         title={t(locale, "waves.create.dates.title")}
-        description={description}
+        description={t(locale, "waves.create.dates.description")}
       />
       {isApprove ? (
         <CreateWaveDatesApprove

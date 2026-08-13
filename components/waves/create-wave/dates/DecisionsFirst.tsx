@@ -112,6 +112,7 @@ export default function DecisionsFirst({
             minTimestamp={minTimestamp}
             maxTimestamp={null}
             setSelectedTimestamp={handleDateSelection}
+            variant="flat"
           />
         </div>
 
@@ -125,6 +126,7 @@ export default function DecisionsFirst({
             hours={selectedDate.getHours()}
             minutes={selectedDate.getMinutes()}
             onTimeChange={onTimeChange}
+            variant="flat"
             minTime={
               // Only apply min time constraint if the selected date is the same as min timestamp date
               minTimestamp &&

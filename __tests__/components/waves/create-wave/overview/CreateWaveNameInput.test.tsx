@@ -18,15 +18,15 @@ describe("CreateWaveNameInput", () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     render(<CreateWaveNameInput name="" errors={[]} onChange={onChange} />);
-    await user.type(screen.getByLabelText("Wave name *"), "Wave");
+    await user.type(screen.getByLabelText("Wave Name *"), "Wave");
     expect(onChange).toHaveBeenCalled();
   });
 
   it("keeps the wave name label inside the input until it floats", () => {
     render(<CreateWaveNameInput name="" errors={[]} onChange={jest.fn()} />);
 
-    const input = screen.getByLabelText("Wave name *");
-    const label = screen.getByText(/Wave name/, { selector: "label" });
+    const input = screen.getByLabelText("Wave Name *");
+    const label = screen.getByText(/Wave Name/, { selector: "label" });
 
     expect(input).toHaveAttribute("placeholder", " ");
     expect(label).toHaveClass("peer-placeholder-shown:tw-top-1/2");

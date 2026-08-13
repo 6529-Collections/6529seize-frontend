@@ -86,8 +86,9 @@ export default function CreateWaveRules({
         )}
         isCustomized={hasCustomRules || hasBindingRules}
         hasError={false}
+        variant="filled"
       >
-        <div className="tw-space-y-6">
+        <div className="tw-space-y-6 tw-p-5">
           <section>
             <div className="tw-space-y-3">
               <div>
@@ -111,7 +112,7 @@ export default function CreateWaveRules({
                 maxLength={WAVE_CUSTOM_RULES_MAX_LENGTH}
                 rows={5}
                 onChange={(event) => setDisplayRules(event.target.value)}
-                className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-4 tw-text-base tw-font-medium tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm"
+                className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-4 tw-text-base tw-font-medium tw-text-white tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm"
                 placeholder={t(
                   locale,
                   "waves.create.rules.displayOnlyPlaceholder"
@@ -133,7 +134,7 @@ export default function CreateWaveRules({
           </section>
 
           {supportsAcceptanceRules && (
-            <section className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
+            <section className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
               <CreateWaveTermsOfService
                 terms={config.drops.terms}
                 setTerms={setBindingRules}

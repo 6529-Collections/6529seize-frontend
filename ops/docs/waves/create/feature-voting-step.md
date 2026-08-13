@@ -48,7 +48,7 @@ behavior tuning are in an expandable section named for those controls.
    - `Profile` (identity search)
 3. Choose whether voting power applies to the `Whole wave` or `Each drop`.
 4. For `Approve` waves, set the visible `Approval threshold`.
-5. Open `Vote limits and vote behavior` for Rank, or `Vote limits, behavior,
+5. Open `Vote limits and behavior` for Rank, or `Vote limits, behavior,
    and timing` for Approve, only when tuning is needed.
 6. Optionally set `Vote cap per identity`.
 7. Set `Allow Negative Votes`.

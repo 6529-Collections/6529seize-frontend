@@ -55,10 +55,10 @@ export default function CreateWaveApprovalHold({
           return (
             <label
               key={option.mode}
-              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition tw-duration-300 tw-ease-out ${
                 selected
-                  ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
-                  : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10"
+                  ? "tw-border-primary-500/60 tw-bg-primary-500/5 tw-shadow-inner"
+                  : "tw-border-white/5 tw-bg-iron-950/40 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-950/60"
               }`}
             >
               <input

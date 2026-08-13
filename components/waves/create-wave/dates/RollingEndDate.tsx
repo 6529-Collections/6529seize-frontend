@@ -226,6 +226,7 @@ export default function RollingEndDate({
                   minTimestamp={minEndDate}
                   maxTimestamp={null}
                   setSelectedTimestamp={handleDateSelection}
+                  variant="flat"
                 />
               </div>
 
@@ -239,6 +240,7 @@ export default function RollingEndDate({
                   minutes={displayedMinutes}
                   onTimeChange={handleTimeChange}
                   disabled={!hasSelectedEndDate}
+                  variant="flat"
                 />
                 {!hasSelectedEndDate && (
                   <p

@@ -24,7 +24,6 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
-import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.TdhPlusXtdh]: 0,
@@ -52,7 +51,7 @@ const ADVANCED_VOTING_ERRORS = new Set<CREATE_WAVE_VALIDATION_ERROR>([
 ]);
 
 const VOTING_SETTINGS_GRID_CLASSES =
-  "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
+  "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6";
 const VOTING_OPTIONS_GRID_CLASSES =
   "tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4 [&>div]:tw-gap-x-2 [&>div]:tw-px-3 [&>div]:tw-py-3";
 
@@ -111,47 +110,42 @@ function CreateWaveCreditScopeSelect({
   readonly onCreditScopeChange: (scope: ApiWaveCreditScope) => void;
 }) {
   return (
-    <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-0 tw-pb-0 tw-pt-6">
-      <legend className="tw-mb-3 tw-mt-0 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+    <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-0 tw-pb-0 tw-pt-6">
+      <legend className="tw-mb-3 tw-mt-0 tw-block tw-pr-4 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
         Voting power scope
       </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
         {CREDIT_SCOPE_OPTIONS.map((option) => {
-          const selected = creditScope === option.scope;
+          const isSelected = creditScope === option.scope;
           return (
-            <label
+            <CommonBorderedRadioButton
               key={option.scope}
-              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
-                selected
-                  ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
-                  : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10"
-              }`}
+              type={option.scope}
+              selected={creditScope}
+              variant="subtle"
+              name="create-wave-credit-scope"
+              ariaLabel={option.label}
+              onChange={onCreditScopeChange}
             >
-              <input
-                type="radio"
-                name="create-wave-credit-scope"
-                value={option.scope}
-                checked={selected}
-                onChange={() => onCreditScopeChange(option.scope)}
-                className="tw-form-radio tw-mt-1 tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
-              />
-              <span className="tw-min-w-0">
+              <span className="tw-min-w-0 tw-whitespace-normal">
                 <span
-                  className={`tw-block tw-text-sm tw-font-semibold ${
-                    selected ? "tw-text-white" : "tw-text-iron-200"
+                  className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                    isSelected
+                      ? "tw-text-white"
+                      : "tw-text-iron-300 group-hover:tw-text-white"
                   }`}
                 >
                   {option.label}
                 </span>
                 <span
                   className={`tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-4 ${
-                    selected ? "tw-text-iron-300" : "tw-text-iron-400"
+                    isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
                   }`}
                 >
                   {option.description}
                 </span>
               </span>
-            </label>
+            </CommonBorderedRadioButton>
           );
         })}
       </div>
@@ -269,12 +263,13 @@ export default function CreateWaveVoting({
   return (
     <div>
       <CreateWaveStepHeader
-        title={t(locale, "waves.create.voting.title")}
-        description={t(locale, "waves.create.voting.description")}
+        title={t(
+          locale,
+          waveType === ApiWaveType.Chat
+            ? "waves.create.voting.ratingTitle"
+            : "waves.create.voting.title"
+        )}
       />
-      <h3 className={`tw-mt-6 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}>
-        {t(locale, "waves.create.voting.powerTitle")}
-      </h3>
       <div className={VOTING_OPTIONS_GRID_CLASSES}>
         {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
           .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
@@ -285,6 +280,8 @@ export default function CreateWaveVoting({
               selected={selectedType}
               disabled={false}
               variant="subtle"
+              name="create-wave-credit-type"
+              ariaLabel={getCreateWaveVotingLabel(votingType)}
               onChange={onTypeChange}
             >
               <span
@@ -299,7 +296,7 @@ export default function CreateWaveVoting({
             </CommonBorderedRadioButton>
           ))}
         {selectedType === ApiWaveCreditType.Rep && (
-          <div className="tw-col-span-full">
+          <div className="tw-col-span-full !tw-px-0 !tw-py-0">
             <CreateWaveVotingRep
               category={category}
               profileId={profileId}
@@ -350,8 +347,9 @@ export default function CreateWaveVoting({
             )}
             isCustomized={isAdvancedCustomized}
             hasError={hasAdvancedError}
+            variant="filled"
           >
-            <div className="tw-space-y-3">
+            <div className="tw-space-y-3 tw-p-5">
               <MaxVotesPerIdentityInput
                 value={maxVotesPerIdentityPerDrop}
                 errors={errors}

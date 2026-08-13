@@ -33,8 +33,7 @@ For scheduled `Rank` waves:
 2. Set `Drops Voting Begins` (must be at or after submission start).
 3. Set `First Winners Announcement` date and time (must be at or after voting
    start).
-4. To extend the schedule, open `Additional announcements and recurring
-   schedule` and add optional
+4. To extend the schedule, open `Winner schedule` and add optional
    `Additional Announcements` as intervals (`Hours`, `Days`, or `Weeks`).
 5. In that section, optionally enable `Repeating Announcement Cycles`
    after at least one additional interval exists.
@@ -54,7 +53,7 @@ For `Perpetual Ranking` waves:
 For `Approve` waves:
 
 1. Set `Wave Start` in the visible calendar.
-2. To limit the duration, open `Optional wave end` and optionally set
+2. To limit the duration, open `Wave end` and optionally set
    `Wave End`.
 3. Continue to `Drops`.
 
@@ -85,7 +84,7 @@ For `Approve` waves:
 
 ## Failure and Recovery
 
-- An error in an optional wave end automatically opens `Optional wave end`,
+- An error in an optional wave end automatically opens `Wave end`,
   marks it `Needs attention`, and exposes the invalid date control.
 - Errors in visible schedule controls remain visible in their schedule card.
 - If `Next` does not advance, verify:

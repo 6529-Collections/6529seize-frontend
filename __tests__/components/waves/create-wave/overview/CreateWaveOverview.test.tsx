@@ -90,7 +90,7 @@ describe("CreateWaveOverview", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Overview" })
+      screen.getByRole("heading", { level: 2, name: "Create Wave" })
     ).toBeVisible();
     expect(
       screen.queryByText("Name your wave and choose how it works.")
