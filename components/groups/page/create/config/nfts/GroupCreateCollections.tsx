@@ -37,10 +37,10 @@ export default function GroupCreateCollections({
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-shadow-inner sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           Collection Access
         </p>
-        <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-500">
+        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-500">
           Identity must own any token from these collections.
         </p>
       </div>

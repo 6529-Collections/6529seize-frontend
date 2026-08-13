@@ -73,7 +73,7 @@ describe("ApprovalDropVoteSummary", () => {
     expect(progress).toHaveAttribute("data-current", "5");
     expect(progress).toHaveAttribute("data-projected", "9");
     expect(progress).toHaveAttribute("data-projected-label", "9");
-    expect(progress).toHaveAttribute("data-tooltip-label", "Votes given now");
+    expect(progress).toHaveAttribute("data-tooltip-label", "Votes now");
     expect(progress).toHaveAttribute("data-compact", "true");
   });
 
@@ -124,10 +124,18 @@ describe("ApprovalDropVoteSummary", () => {
     expect(
       screen.getByTitle("70,022,534 / 42,000,000 TDH")
     ).toBeInTheDocument();
-    expect(screen.getByText("70M")).toBeInTheDocument();
-    expect(screen.getByText("42M")).toBeInTheDocument();
-    expect(screen.getByText("TDH")).toBeInTheDocument();
-    expect(screen.getByText("+100 TDH")).toBeInTheDocument();
+    expect(screen.getByText("70M")).toHaveClass("tw-font-mono");
+    expect(screen.getByText("42M")).toHaveClass(
+      "tw-font-mono",
+      "tw-font-medium",
+      "tw-text-iron-50"
+    );
+    expect(
+      screen
+        .getAllByText("TDH")
+        .some((label) => !label.classList.contains("tw-font-mono"))
+    ).toBe(true);
+    expect(screen.getByText("+100")).toHaveClass("tw-font-mono");
     expect(
       screen.getByRole("button", {
         name: "View voters and vote log for 22 voters",
@@ -138,7 +146,7 @@ describe("ApprovalDropVoteSummary", () => {
     expect(progress).toHaveAttribute("data-current", "70022534");
     expect(progress).toHaveAttribute("data-projected", "77694101");
     expect(progress).toHaveAttribute("data-projected-label", "77.7M");
-    expect(progress).toHaveAttribute("data-tooltip-label", "Votes given now");
+    expect(progress).toHaveAttribute("data-tooltip-label", "Votes now");
     expect(progress).toHaveAttribute("data-compact", "true");
   });
 
@@ -205,7 +213,10 @@ describe("ApprovalDropVoteSummary", () => {
     );
 
     expect(screen.getByText("Your votes:")).toBeInTheDocument();
-    expect(screen.getByText("-4 Rep")).toBeInTheDocument();
+    expect(screen.getByText("-4")).toHaveClass("tw-font-mono");
+    screen
+      .getAllByText("Rep")
+      .forEach((label) => expect(label).not.toHaveClass("tw-font-mono"));
   });
 
   it("uses compact approval labels for leaderboard summaries", () => {
@@ -234,6 +245,27 @@ describe("ApprovalDropVoteSummary", () => {
     );
   });
 
+  it("gives the muted threshold equal visual weight in emphasized summaries", () => {
+    render(
+      <ApprovalDropVoteSummary
+        drop={createDrop({
+          rating: 0,
+          realtime_rating: 0,
+          wave: { voting_credit_type: ApiWaveCreditType.Tdh },
+        })}
+        winningThreshold={69_000_000}
+        variant="leaderboard"
+        emphasizeCurrent
+      />
+    );
+
+    expect(screen.getByText("69M")).toHaveClass(
+      "tw-font-mono",
+      "tw-font-semibold",
+      "tw-text-iron-400"
+    );
+  });
+
   it("keeps final summaries on full comma formatting", () => {
     render(
       <ApprovalDropVoteSummary
@@ -250,7 +282,8 @@ describe("ApprovalDropVoteSummary", () => {
 
     expect(screen.getByText("70,022,534")).toBeInTheDocument();
     expect(screen.getByText("42,000,000")).toBeInTheDocument();
-    expect(screen.getByText("+1,234 TDH")).toBeInTheDocument();
+    expect(screen.getByText("+1,234")).toHaveClass("tw-font-mono");
+    expect(screen.getByText("TDH")).not.toHaveClass("tw-font-mono");
     expect(screen.queryByText("70M")).not.toBeInTheDocument();
   });
 });

@@ -512,7 +512,7 @@ jobs:
           STAGING_API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
           STAGING_WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
           STAGING_ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
-          STAGING_NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
+          STAGING_NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
           TRAIN_ID: ${{ inputs.release_train_id }}
         run: |
           set -euo pipefail

@@ -129,11 +129,15 @@ function CollisionChamber({
   return (
     <svg
       viewBox="0 0 280 300"
-      aria-label={t(locale, "museum.network.insideSystem.collisionChamberLabel", {
-        row: cell.row,
-        group: cell.group,
-        value: cell.value,
-      })}
+      aria-label={t(
+        locale,
+        "museum.network.insideSystem.collisionChamberLabel",
+        {
+          row: cell.row,
+          group: cell.group,
+          value: cell.value,
+        }
+      )}
       className="tw-w-full"
     >
       <defs>

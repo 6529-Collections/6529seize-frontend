@@ -1,8 +1,7 @@
-import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import {
+  clearAllWalletAuth,
   getConnectedWalletAccounts,
   getWalletAddress,
-  removeAuthJwt,
 } from "@/services/auth/auth.utils";
 import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { logError } from "@/utils/security-logger";
@@ -59,15 +58,27 @@ export const createWalletError = (
 const getLogoutSessionError = (error: unknown, message: string): Error =>
   error instanceof Error ? error : new Error(message);
 
-const revokeActiveSessionForLogoutAll = async (): Promise<void> => {
-  const activeAddress = getWalletAddress();
-  if (!activeAddress) {
-    return;
-  }
+interface AuthenticatedProfileSnapshot {
+  readonly address: string;
+}
 
+const getAuthenticatedProfilesForLogoutAll =
+  (): readonly AuthenticatedProfileSnapshot[] => {
+    const connectedProfiles = getConnectedWalletAccounts();
+    if (connectedProfiles.length > 0) {
+      return connectedProfiles.map(({ address }) => ({ address }));
+    }
+
+    const activeAddress = getWalletAddress();
+    return activeAddress ? [{ address: activeAddress }] : [];
+  };
+
+const revokeProfileSessionForLogoutAll = async ({
+  address,
+}: AuthenticatedProfileSnapshot): Promise<void> => {
   try {
     await logoutSessionV2({
-      address: activeAddress,
+      address,
       allSessions: true,
     });
   } catch (error: unknown) {
@@ -79,36 +90,12 @@ const revokeActiveSessionForLogoutAll = async (): Promise<void> => {
 };
 
 export const clearAllAuthenticatedProfiles = async (): Promise<void> => {
-  let remainingProfiles = getConnectedWalletAccounts().length;
-  let activeWalletAddress = getWalletAddress();
-  const maxIterations = Math.max(
-    MAX_CONNECTED_PROFILES * 2,
-    remainingProfiles + 2
+  const authenticatedProfiles = getAuthenticatedProfilesForLogoutAll();
+  await Promise.all(
+    authenticatedProfiles.map((profile) =>
+      revokeProfileSessionForLogoutAll(profile)
+    )
   );
-  let iterations = 0;
 
-  while (remainingProfiles > 0 || activeWalletAddress) {
-    iterations += 1;
-    if (iterations > maxIterations) {
-      const iterationError = new AuthenticationError(
-        `Failed to clear all authenticated profiles: exceeded ${maxIterations} iterations during logout cleanup.`
-      );
-      logError("seizeDisconnectAndLogoutAll", iterationError);
-      throw iterationError;
-    }
-
-    await revokeActiveSessionForLogoutAll();
-    await removeAuthJwt();
-
-    const nextRemainingProfiles = getConnectedWalletAccounts().length;
-    const nextActiveWalletAddress = getWalletAddress();
-    if (
-      nextRemainingProfiles >= remainingProfiles &&
-      nextActiveWalletAddress === activeWalletAddress
-    ) {
-      throw new Error("Failed to clear all authenticated profiles.");
-    }
-    remainingProfiles = nextRemainingProfiles;
-    activeWalletAddress = nextActiveWalletAddress;
-  }
+  await clearAllWalletAuth();
 };

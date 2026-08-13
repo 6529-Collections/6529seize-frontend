@@ -20,6 +20,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useAuth } from "../auth/Auth";
@@ -100,6 +101,10 @@ interface BottomNavigationProps {
 
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
+const TABLET_DOCK_QUERY = "(min-width: 744px) and (min-height: 600px)";
+const TABLET_DOCK_VIEWPORT_WIDTH = "calc(100vw - 2rem)";
+const TABLET_DOCK_COMPACT_MAX_WIDTH = "38.5rem";
+const TABLET_DOCK_EXPANDED_MAX_WIDTH = "44rem";
 
 const getHiddenStyle = (hidden: boolean) =>
   hidden
@@ -317,7 +322,7 @@ const useCompactDock = ({
 };
 
 const getNavClassName = ({ hidden }: { readonly hidden: boolean }) =>
-  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),0px)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
+  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),var(--safe-area-inset-bottom,0px),0px)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
 
 const getDockClassName = (compact: boolean) =>
   `tw-pointer-events-auto tw-relative tw-overflow-hidden tw-border tw-border-white/[0.13] tw-bg-black/[0.76] tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
@@ -325,6 +330,22 @@ const getDockClassName = (compact: boolean) =>
       ? "tw-h-[54px] tw-w-[min(calc(100vw-5.5rem),25rem)] tw-rounded-[1.65rem] sm:tw-h-[58px] sm:tw-w-[min(calc(100vw-6.75rem),31rem)] md:tw-w-[min(calc(100vw-10rem),35rem)]"
       : "tw-h-[64px] tw-w-[min(calc(100vw-2.25rem),38rem)] tw-rounded-[2rem] sm:tw-h-[66px] sm:tw-w-[min(calc(100vw-4rem),40rem)]"
   }`;
+
+const getDockStyle = ({
+  compact,
+  isTabletViewport,
+}: {
+  readonly compact: boolean;
+  readonly isTabletViewport: boolean;
+}): React.CSSProperties | undefined =>
+  isTabletViewport
+    ? {
+        width: TABLET_DOCK_VIEWPORT_WIDTH,
+        maxWidth: compact
+          ? TABLET_DOCK_COMPACT_MAX_WIDTH
+          : TABLET_DOCK_EXPANDED_MAX_WIDTH,
+      }
+    : undefined;
 
 const floatingNavInnerClassName = "tw-relative tw-h-full";
 
@@ -384,18 +405,23 @@ const getFloatingActivePillLeft = ({
 
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
-}) => (
-  <nav aria-hidden="true" className={getNavClassName({ hidden })}>
-    <div
-      {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
-      className={getDockClassName(false)}
-    >
-      <div className={floatingNavInnerClassName}>
-        <ul className={getFloatingNavListClassName(false)} />
+}) => {
+  const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
+
+  return (
+    <nav aria-hidden="true" className={getNavClassName({ hidden })}>
+      <div
+        {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
+        className={getDockClassName(false)}
+        style={getDockStyle({ compact: false, isTabletViewport })}
+      >
+        <div className={floatingNavInnerClassName}>
+          <ul className={getFloatingNavListClassName(false)} />
+        </div>
       </div>
-    </div>
-  </nav>
-);
+    </nav>
+  );
+};
 
 interface BottomNavigationResolvedContentProps extends BottomNavigationProps {
   readonly pathname: string;
@@ -412,6 +438,7 @@ const BottomNavigationResolvedContent: React.FC<
 }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
+  const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
   const { connectedProfile } = useAuth();
   const { address } = useSeizeConnectContext();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -495,6 +522,7 @@ const BottomNavigationResolvedContent: React.FC<
       <div
         {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
         className={getDockClassName(compact)}
+        style={getDockStyle({ compact, isTabletViewport })}
       >
         <div className={floatingNavInnerClassName}>
           <div

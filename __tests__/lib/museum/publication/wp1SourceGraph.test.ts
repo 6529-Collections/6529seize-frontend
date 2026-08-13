@@ -13,6 +13,7 @@ import {
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import {
   createMuseumLocalFixtureFetch,
+  readMuseumLocalFixtureMediaAssetPaths,
   readMuseumLocalFixtureVisitorPaths,
 } from "@/lib/museum/publication/localFixture";
 import { museumWorkHrefForSourceId } from "@/lib/museum/publication/routes";
@@ -27,34 +28,31 @@ import type {
 // fixture. Production resolves the canonical C pointer/catalog and consumes
 // only this immutable reviewed B corpus.
 const SOURCE_COMMIT = [
-  "81c3353b",
-  "06725582",
-  "d7d7d7cc",
-  "297d06ea",
-  "19ee61bf",
+  "9aea66c0",
+  "7d59f890",
+  "e366dde6",
+  "552a3045",
+  "80ba789a",
 ].join("");
-const CATALOG_COMMIT = "343f98fcfe1c231755518a513b5af9fc89ac4bed";
+const CATALOG_COMMIT = "975f041aed7e2f402ab26d4fb2bb266e07db4974";
 const CATALOG_ID = `6529NM-PUBCAT-${SOURCE_COMMIT}`;
-const GOVERNED_MEDIA_ASSET_PATH =
-  "records/proposed-gifts/6529NM-PG-2026-001/public/media/conflict-at-its-edges-cover.png";
-const CATALOG_PATH =
-  `release-artifacts/catalog/${CATALOG_ID}.json` as const;
+const CATALOG_PATH = `release-artifacts/catalog/${CATALOG_ID}.json` as const;
 const POINTER_PATH =
   "release-artifacts/latest/publication-catalog-pointer.json" as const;
 const POINTER_SHA256 =
-  "sha256:fecb7acb94bdfd2994f605648b5092a5a0dd17a288263255b56f6a1ef0420294";
+  "sha256:935aa76ed1159e7ef22ec9a75d8afea112c5f41f2038cd43db6086739fb85b8e";
 const CATALOG_SHA256 =
-  "sha256:32deef4217a1777fe14a39681a996ea13c7972ca8c02674cc70fdab6d95f19d7";
+  "sha256:bd488ac43ee423b1390a50bf02addb71716daddf45f7897d7afa86787e9df49f";
 const CATALOG_ENVELOPE =
-  "0x568fb9af2314e8585702e77d4962d617152c66dda1750b31da9ddd5dd4ee6095";
+  "0xf782673a74d437ab6fb5a0017e54024f62c84a2d311f5bb5fddad81e407a26a2";
 const INVENTORY_SELF_SHA256 =
-  "sha256:2b9f83b9fe7d821f057ab21addffe85fdbc14fe7819577ba8fc5e2ef4a3f1cd8";
+  "sha256:8700dffecad31591901dfb9d93df07542603701899ef5efb46bda048f301a925";
 const INVENTORY_SELF_KECCAK =
-  "0xea6f9514169845e47da4021899b8138ed55da202439ff4b830014ec69ef7a694";
+  "0x919fe993d2db227927937b2888512e6d7098cf0ad68d61bcd66d50a71b9ce271";
 const COMPLETE_INVENTORY_SHA256 =
-  "sha256:3979ec064052cc644ef77f8e2c39f793925b970a0b99a691223db40e2640b441";
+  "sha256:facd7ba6d8d83dc34e77e6f246e792cd834d08b56962f3ff07cc49a8f33cb999";
 const COMPLETE_INVENTORY_KECCAK =
-  "0xb22e086ed77ffc67087b9094df0a7e613badcd14991cf52ba5eccd3a8d2c356e";
+  "0x1a9e98306367a283e958e70a007fd49cda5e12447b553e0c651905a8b8aad5a2";
 const SOURCE_ROOT = process.env["MUSEUM_WP1_SOURCE_ROOT"];
 const LOCAL_FIXTURE_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"] ??
@@ -157,15 +155,14 @@ function readSourceFixture(): SourceFixture | null {
   const manifest = JSON.parse(
     readFileSync(manifestPath, "utf8")
   ) as SourceManifest;
-  const sourceCommit =
-    process.env["MUSEUM_WP1_SOURCE_COMMIT"] ?? SOURCE_COMMIT;
+  const sourceCommit = process.env["MUSEUM_WP1_SOURCE_COMMIT"] ?? SOURCE_COMMIT;
   if (sourceCommit === SOURCE_COMMIT) {
     if (
-      manifest.entries.length !== 793 ||
+      manifest.entries.length !== 888 ||
       manifest.manifest_sha256 !==
-        "sha256:a3c8a6efb26a501b7f31f9f2ccf402e62c0cb4797e4d30478219b1480bd49c7b" ||
+        "sha256:546e183b31de7ec725db9700989b0026dce3bcbc2dd7f4fdc771161d4bb038c8" ||
       manifest.manifest_commitment?.digest !==
-        "0x37b13ace933e7d73afd6e8a080e8f0d027415fed03ea19bb1220570cc491251f"
+        "0x8d02eb26ed0c9420eb1b7b735aaa33235f3bf1b3be0dd3935065e926f32a271e"
     ) {
       throw new Error("wp1_source_manifest_commitment_mismatch");
     }
@@ -180,7 +177,7 @@ function readSourceFixture(): SourceFixture | null {
   const bundle = JSON.parse(
     readFileSync(
       join(
-        SOURCE_ROOT,
+        SOURCE_ROOT!,
         "records",
         "publication",
         "visitor-corpus-bundle-v1.json"
@@ -370,7 +367,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       declaredGraphPaths.length
     );
     expect(graph.relationIdentityInventory).toMatchObject({
-      inventoryVersion: "1.4.0",
+      inventoryVersion: "1.5.0",
       sourcePath: "schemas/public-relation-identity-inventory.json",
       schemaPath: "schemas/public-relation-identity-inventory.schema.json",
     });
@@ -390,7 +387,10 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       emptyPublication(fixture),
       graph,
       fixture.documents,
-      [GOVERNED_MEDIA_ASSET_PATH]
+      readMuseumLocalFixtureMediaAssetPaths(
+        SOURCE_ROOT!,
+        LOCAL_FIXTURE_SOURCE_COMMIT
+      )
     );
     expect(publication.works).toHaveLength(28);
     expect(publication.artists).toHaveLength(21);
@@ -402,13 +402,13 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       publication.works?.filter(
         (work) => work.status === "accessioned_into_permanent_collection"
       )
-    ).toHaveLength(7);
+    ).toHaveLength(12);
     expect(
       publication.curatedAcquisitions?.map((acquisition) => acquisition.status)
     ).toEqual([
       "accessioned_into_permanent_collection",
       "selected_through_acquisition_program_acquisition_pending",
-      "selected_by_museum_wave_acquisition_review_in_progress",
+      "accessioned_into_permanent_collection",
     ]);
     expect(
       publication.curatedAcquisitions?.every(
@@ -442,13 +442,13 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     expect(casey?.documentIds.some((id) => id.includes("typed-source:"))).toBe(
       true
     );
-    const selectedMagnum = publication.curatedAcquisitions?.find(
+    const accessionedMagnum = publication.curatedAcquisitions?.find(
       (acquisition) => acquisition.id === "6529NM-CA-2026-003"
     );
-    expect(selectedMagnum?.status).toBe(
-      "selected_by_museum_wave_acquisition_review_in_progress"
+    expect(accessionedMagnum?.status).toBe(
+      "accessioned_into_permanent_collection"
     );
-    expect(selectedMagnum?.organizationIds).toContain("6529NM-ORG-0002");
+    expect(accessionedMagnum?.organizationIds).toContain("6529NM-ORG-0002");
     expect(
       publication.projects.find((project) => project.id === "6529NM-PRJ-0006")
         ?.organizationIds
@@ -466,18 +466,18 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
         }),
       ])
     );
-    expect(selectedMagnum?.presentationMedia ?? []).toHaveLength(0);
+    expect(accessionedMagnum?.presentationMedia ?? []).toHaveLength(5);
     const magnumWorks = publication.works?.filter((work) =>
-      selectedMagnum?.workIds.includes(work.id)
+      accessionedMagnum?.workIds.includes(work.id)
     );
     expect(magnumWorks).toHaveLength(5);
     expect(
-      magnumWorks?.every((work) => (work.presentationMedia ?? []).length === 0)
+      magnumWorks?.every((work) => (work.presentationMedia ?? []).length === 1)
     ).toBe(true);
     expect(
       new Set(
         magnumWorks?.flatMap(
-          (work) => work.mediaMetadata?.map((media) => media.id) ?? []
+          (work) => work.presentationMedia?.map((media) => media.id) ?? []
         )
       )
     ).toEqual(
@@ -491,13 +491,10 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     );
     expect(
       magnumWorks?.every((work) =>
-        work.mediaMetadata?.every(
+        work.presentationMedia?.every(
           (media) =>
-            media.context?.kind === "wave_proposal" &&
-            media.credit.licenseLabel === "All Rights Reserved" &&
-            media.context.openHref?.includes(
-              "drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0"
-            )
+            media.rights.licenseLabel === "All Rights Reserved" &&
+            media.source.dropId === "002bfa4f-8416-48bf-b35e-38f354e9a9f0"
         )
       )
     ).toBe(true);
@@ -516,14 +513,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
           (work) => work.mediaMetadata?.map((media) => media.id) ?? []
         )
       )
-    ).toEqual(
-      new Set(
-        Array.from(
-          { length: 16 },
-          (_, index) => `6529NM-MED-${String(index + 20).padStart(4, "0")}`
-        )
-      )
-    );
+    ).toEqual(new Set());
     expect(
       publication.workAliases?.every((alias) =>
         museumWorkHrefForSourceId(
@@ -591,14 +581,14 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     [
       "an unknown inventory version",
       (inventory: Record<string, unknown>) => {
-        inventory["inventory_version"] = "1.5.1";
+        inventory["inventory_version"] = "1.6.1";
       },
       "public_entity_graph_inventory_version",
     ],
     [
       "a prior inventory version",
       (inventory: Record<string, unknown>) => {
-        inventory["inventory_version"] = "1.4.0";
+        inventory["inventory_version"] = "1.5.0";
       },
       "public_entity_graph_inventory_version",
     ],
@@ -695,7 +685,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     [
       "the closed relation inventory version",
       (inventory: Record<string, unknown>) => {
-        inventory["inventory_version"] = "1.4.1";
+        inventory["inventory_version"] = "1.5.1";
       },
       "public_entity_graph_relation_inventory_version",
     ],
@@ -717,18 +707,21 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
   it.each([
     "schemas/public-relation-identity-inventory.json",
     "schemas/public-relation-identity-inventory.schema.json",
-  ])("rejects the reviewed source when %s is absent from the closed graph", (path) => {
-    if (fixture === null) throw new Error("wp1_source_fixture_required");
-    const documents = new Map(fixture.documents);
-    documents.delete(path);
-    expect(() =>
-      parseMuseumPublicEntityGraph(
-        documents,
-        fixture.declaredPaths.filter((candidate) => candidate !== path),
-        fixture.sourceCommit
-      )
-    ).toThrow("public_entity_graph_inventory_incomplete");
-  });
+  ])(
+    "rejects the reviewed source when %s is absent from the closed graph",
+    (path) => {
+      if (fixture === null) throw new Error("wp1_source_fixture_required");
+      const documents = new Map(fixture.documents);
+      documents.delete(path);
+      expect(() =>
+        parseMuseumPublicEntityGraph(
+          documents,
+          fixture.declaredPaths.filter((candidate) => candidate !== path),
+          fixture.sourceCommit
+        )
+      ).toThrow("public_entity_graph_inventory_incomplete");
+    }
+  );
 
   it("assembles the exact reviewed source fixture through the source adapter", async () => {
     if (SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0) {
@@ -744,7 +737,10 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       allowUncataloguedTestFixture: true,
       localFixtureAcceptedPaths:
         readMuseumLocalFixtureVisitorPaths(SOURCE_ROOT),
-      localFixtureMediaAssetPaths: [GOVERNED_MEDIA_ASSET_PATH],
+      localFixtureMediaAssetPaths: readMuseumLocalFixtureMediaAssetPaths(
+        SOURCE_ROOT,
+        LOCAL_FIXTURE_SOURCE_COMMIT
+      ),
     });
     const result = await source.load();
     if (result.status !== "current") {
@@ -854,7 +850,9 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     const result = await source.load();
 
     if (result.status !== "current") {
-      throw new Error(`canonical_catalog_source:${result.errorCode ?? "unknown"}`);
+      throw new Error(
+        `canonical_catalog_source:${result.errorCode ?? "unknown"}`
+      );
     }
     expect(result.publication.identity).toMatchObject({
       commit: SOURCE_COMMIT,

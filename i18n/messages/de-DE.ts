@@ -419,11 +419,84 @@ export const DE_DE_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Du kannst stattdessen eine GIF-Datei hochladen.",
   "common.close": "Schliessen",
+  "waves.create.dialog.subwaveTitle": "Subwave erstellen",
+  "waves.create.dialog.waveTitle": "Wave erstellen",
   "waves.create.actions.cancel": "Abbrechen",
   "waves.create.actions.complete": "Abschließen",
   "waves.create.actions.next": "Weiter",
   "waves.create.actions.previous": "Zurück",
   "waves.create.actions.save": "Speichern",
+  "waves.create.advanced.title": "Erweiterte Einstellungen",
+  "waves.create.advanced.customized": "Angepasst",
+  "waves.create.advanced.needsAttention": "Prüfen",
+  "waves.create.advanced.errorSummary":
+    "Prüfe die markierten Einstellungen, bevor du fortfährst.",
+  "waves.create.overview.picture": "Wave-Bild",
+  "waves.create.overview.displaySettings": "Anzeigeeinstellungen",
+  "waves.create.groups.title": "Zugriff",
+  "waves.create.groups.description":
+    "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
+  "waves.create.groups.viewGroupName": "Wer darf ansehen",
+  "waves.create.groups.adminGroupName": "Admin",
+  "waves.create.dates.title": "Zeitplan",
+  "waves.create.dates.description":
+    "Prüfe, wann diese Wave startet, die Abstimmung beginnt und Gewinner bekannt gegeben werden.",
+  "waves.create.dates.approve.noEndSummary": "Startet {start}. Kein Enddatum.",
+  "waves.create.dates.approve.endSummary": "Startet {start}. Endet {end}.",
+  "waves.create.dates.approve.endInfoLabel": "Informationen zum Wave-Ende",
+  "waves.create.dates.rank.ongoingSummary":
+    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Das Ranking bleibt offen.",
+  "waves.create.dates.rank.scheduledSummary":
+    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Erste Gewinner: {announcement}.",
+  "waves.create.drops.maxSimultaneousSubmissions.label":
+    "Maximale gleichzeitige Einreichungen",
+  "waves.create.drops.maxSimultaneousSubmissions.description":
+    "Maximale Anzahl gleichzeitiger Einreichungen pro Teilnehmer. Optional. Leer lassen für unbegrenzt.",
+  "waves.proposalCard.contextLabel": "Vorschlag",
+  "waves.proposalCard.readFull": "Vollständig lesen",
+  "waves.proposalCard.readFullNamed": "Vollständig lesen: {title}",
+  "waves.proposalCard.untitledProposal": "Unbenannter Vorschlag",
+  "waves.proposalCard.previewAlt": "Medienvorschau für {title}",
+  "waves.proposalCard.part.one": "{count} Teil",
+  "waves.proposalCard.part.other": "{count} Teile",
+  "waves.proposalCard.media.one": "{count} Medienelement",
+  "waves.proposalCard.media.other": "{count} Medienelemente",
+  "waves.proposalCard.attachment.one": "{count} Anhang",
+  "waves.proposalCard.attachment.other": "{count} Anhänge",
+  "waves.proposalCard.appearanceLabel": "Darstellung der Vorschlagskarte",
+  "waves.proposalCard.mode.standard.label": "Vollständiger Vorschlag",
+  "waves.proposalCard.mode.standard.description":
+    "Originalinhalt direkt im Feed anzeigen.",
+  "waves.proposalCard.mode.custom.label": "Zusammenfassungskarte",
+  "waves.proposalCard.mode.custom.description":
+    "Titel, gekürzten Text und optional ein Bild anzeigen.",
+  "waves.proposalCard.excerptLabel": "Limit der Textvorschau",
+  "waves.proposalCard.excerptInputAriaLabel":
+    "Maximale Zeichenanzahl der Vorschau",
+  "waves.proposalCard.characters": "Zeichen",
+  "waves.proposalCard.excerptRangeError":
+    "Gib eine ganze Zahl von {min} bis {max} ein.",
+  "waves.proposalCard.mediaLabel": "Bild auf der Zusammenfassungskarte",
+  "waves.proposalCard.settings.editLabel":
+    "Einstellungen der Vorschlagskarte bearbeiten",
+  "waves.proposalCard.settings.layoutLabel": "Vorschlagslayout",
+  "waves.proposalCard.settings.rowLabel": "Vorschlagskarten",
+  "waves.proposalCard.settings.toastAuthFailed":
+    "Authentifizierung fehlgeschlagen. Verbinde deine Wallet erneut und versuche es noch einmal.",
+  "waves.proposalCard.settings.toastSaveFailedTitle":
+    "Diese Einstellungen der Vorschlagskarte konnten nicht gespeichert werden.",
+  "waves.proposalCard.settings.toastRetry": "Bitte versuche es erneut.",
+  "waves.proposalCard.tabLabelsLabel": "Tab-Bezeichnungen",
+  "waves.proposalCard.tabLabelsDescription":
+    "Namen, die in den Tabs dieser Wave angezeigt werden.",
+  "waves.proposalCard.approvalsTabLabel": "Bezeichnung des Vorschlags-Tabs",
+  "waves.proposalCard.approvedTabLabel": "Bezeichnung des Genehmigt-Tabs",
+  "waves.proposalCard.tabLabels.errorTooLong":
+    "Bezeichnungen dürfen höchstens {max} Zeichen lang sein.",
+  "waves.proposalCard.tabLabels.errorDuplicate":
+    "Verwende zwei unterschiedliche Tab-Bezeichnungen.",
+  "waves.proposalCard.tabLabels.errorReserved":
+    "Bezeichnungen dürfen nicht mit vorhandenen Tabs übereinstimmen.",
   ...DE_DE_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
@@ -452,7 +525,7 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.loadMore": "Weitere Drops laden",
   "waves.leaderboard.loadingMoreButton": "Wird geladen…",
   "waves.leaderboard.grid.untitled": "Unbenannter Drop",
-  "waves.leaderboard.grid.readFullText": "Vollständigen Text lesen",
+  "waves.leaderboard.grid.readFull": "Vollständig lesen",
   "waves.leaderboard.grid.open": "Öffnen",
   "waves.leaderboard.grid.openNamed": "{title} öffnen",
   "waves.leaderboard.grid.authorProfile": "Profil von {author} ansehen",

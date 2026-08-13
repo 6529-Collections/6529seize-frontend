@@ -352,11 +352,16 @@ describe("NewVersionToast", () => {
       isAppleMobile: true,
       isMobileDevice: true,
     });
-    setMobileDockViewport(true);
+    setMobileDockViewport(false);
 
     const { container } = render(<NewVersionToast />);
     const toastLayer = container.firstChild as HTMLElement;
 
+    expect(toastLayer).toHaveClass(
+      "tw-left-1/2",
+      "tw-right-auto",
+      "-tw-translate-x-1/2"
+    );
     expect(
       toastLayer.style.getPropertyValue(
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
@@ -380,6 +385,42 @@ describe("NewVersionToast", () => {
     expect(
       toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
     ).toBe("1");
+  });
+
+  it("centers the wide native-app toast above the measured dock", async () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: true,
+      isAppleMobile: true,
+      isMobileDevice: false,
+    });
+    setMobileDockViewport(false);
+    const dockRoot = createDockRoot();
+    createMeasuredDock({
+      height: 64,
+      parentElement: dockRoot,
+      top: 816,
+    });
+
+    const { container } = render(<NewVersionToast />);
+    const toastLayer = container.firstChild as HTMLElement;
+
+    expect(toastLayer).toHaveClass(
+      "tw-left-1/2",
+      "tw-right-auto",
+      "-tw-translate-x-1/2",
+      "tw-w-[min(calc(100vw-2rem),23.25rem)]"
+    );
+    expect(toastLayer).not.toHaveClass("sm:tw-bottom-7", "sm:tw-right-7");
+    expect(toastLayer).toHaveClass("sm:tw-scale-100");
+    await waitFor(() =>
+      expect(
+        toastLayer.style.getPropertyValue(
+          NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
+        )
+      ).toBe("88px")
+    );
   });
 
   it("does not watch body mutations when mobile web has no dock root", async () => {

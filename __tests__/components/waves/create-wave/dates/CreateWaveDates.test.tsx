@@ -29,6 +29,28 @@ const baseDates: CreateWaveDatesConfig = {
 };
 
 describe("CreateWaveDates", () => {
+  it("shows the schedule controls as the primary step content", () => {
+    const now = Date.now();
+    render(
+      <CreateWaveDates
+        waveType={ApiWaveType.Rank}
+        dates={{
+          ...baseDates,
+          submissionStartDate: now,
+          votingStartDate: now,
+        }}
+        errors={[]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "Schedule" })).toBeVisible();
+    expect(screen.getByTestId("rank-dates")).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: /Advanced settings/ })
+    ).not.toBeInTheDocument();
+  });
+
   it("renders approve dates flow for approve waves", () => {
     render(
       <CreateWaveDates
@@ -73,6 +95,7 @@ describe("CreateWaveDates", () => {
       "data-error-count",
       "1"
     );
+    expect(screen.getByTestId("rank-dates")).toBeVisible();
   });
 
   it("keeps non-approve waves on the rank flow", () => {

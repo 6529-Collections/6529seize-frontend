@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MuseumObjectPage } from "@/components/museum/MuseumObjectPage";
 import type {
+  MuseumExternalProposalPresentationMedia,
   MuseumMedia,
   MuseumMediaMetadata,
   MuseumPublication,
@@ -8,6 +9,7 @@ import type {
   MuseumRightsCredit,
 } from "@/lib/museum/publication/types";
 import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
+import { MUSEUM_MAGNUM_ACQUISITION_ID } from "@/lib/museum/publication/collectionSemantics";
 
 const SOURCE_COMMIT = "a".repeat(40);
 
@@ -114,6 +116,44 @@ function liveMedia(credit: MuseumRightsCredit): MuseumMedia {
   };
 }
 
+function magnumPresentationMedia(): MuseumExternalProposalPresentationMedia {
+  return {
+    id: "6529NM-MED-0044",
+    kind: "external_proposal_presentation",
+    mediaUrl:
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/002bfa4f-8416-48bf-b35e-38f354e9a9f0/photograph.jpg",
+    mediaMimeType: "image/jpeg",
+    sourceByteSize: 16_871_807,
+    width: 2400,
+    height: 1600,
+    altText: "A governed Magnum accession photograph.",
+    source: {
+      kind: "signed_wave_storm",
+      waveId: "5f207393-5418-4a75-8738-e40edb44a94d",
+      dropId: "002bfa4f-8416-48bf-b35e-38f354e9a9f0",
+      partId: 6,
+      serial: 1,
+      publicationRecordId: "6529NM-WAVE-PUB-OBS-2026-08-08-001",
+      contextEntityId: MUSEUM_MAGNUM_ACQUISITION_ID,
+      sourcePath: "records/acquisitions/magnum-75/wave-publication.json",
+      mediaRecordPath: "records/entities/6529NM-MED-0044.json",
+      sourceCommit: "b".repeat(40),
+    },
+    credit: {
+      creditLine: "© Artist / Magnum Photos.",
+      sourcePath: "records/entities/6529NM-MED-0044.json",
+    },
+    rights: {
+      status: "presentation_only",
+      licenseLabel: "All Rights Reserved",
+      licenseUrl: null,
+    },
+    download: "not_permitted",
+    preservation: "not_retained",
+    affordances: ["view", "alt", "open_upstream_presentation"],
+  };
+}
+
 function metadata(
   credit: MuseumRightsCredit,
   sourceRecordIds = ["6529NM-W-0001"]
@@ -203,6 +243,13 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
 
     expect(screen.getByRole("img")).toHaveAttribute("src", still.url);
     expect(screen.getAllByRole("img")).toHaveLength(1);
+    expect(screen.getByText("Aug 9, 2026")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open source record" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Institutional record" })
+    ).not.toBeInTheDocument();
   });
 
   it("links a visual Work license through MuseumRightsLink", async () => {
@@ -221,6 +268,77 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       "href",
       licenseUrl
     );
+  });
+
+  it("shows Magnum's typed institutional-display statement and fails closed for a selected work", async () => {
+    const magnumCredit: MuseumRightsCredit = {
+      ...rightsCredit(null),
+      licenseLabel: "All Rights Reserved",
+      sourcePath: "records/acquisitions/magnum-75/media/med-001.json",
+    };
+    const magnumWork = {
+      ...work([retainedMedia(magnumCredit)]),
+      acquisitionIds: [MUSEUM_MAGNUM_ACQUISITION_ID],
+      collectionMembership: true,
+    };
+
+    const renderedMagnum = render(
+      await MuseumObjectPage({
+        objectId: magnumWork.id,
+        publication: publication(magnumWork),
+        view: null,
+      })
+    );
+    expect(
+      screen.getByText(/ordinary, credited institutional display/u)
+    ).toBeInTheDocument();
+
+    renderedMagnum.unmount();
+    const selectedWork = {
+      ...magnumWork,
+      status:
+        "selected_through_acquisition_program_acquisition_pending" as const,
+      acquisitionIds: [],
+      programIds: ["6529NM-AP-ENT-0002"],
+    };
+    render(
+      await MuseumObjectPage({
+        objectId: selectedWork.id,
+        publication: publication(selectedWork),
+        view: null,
+      })
+    );
+    expect(
+      screen.queryByText(/ordinary, credited institutional display/u)
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows a large governed Magnum presentation immediately on its canonical Work page", async () => {
+    const magnumWork: MuseumPublicWork = {
+      ...work([]),
+      acquisitionIds: [MUSEUM_MAGNUM_ACQUISITION_ID],
+      collectionMembership: true,
+      presentationMedia: [magnumPresentationMedia()],
+    };
+
+    render(
+      await MuseumObjectPage({
+        objectId: magnumWork.id,
+        publication: publication(magnumWork),
+        view: null,
+      })
+    );
+
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      magnumPresentationMedia().mediaUrl
+    );
+    expect(
+      screen.queryByRole("button", { name: /historical proposal image/u })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /download/u })
+    ).not.toBeInTheDocument();
   });
 
   it("links a metadata-only Work license through MuseumRightsLink", async () => {
@@ -313,6 +431,13 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       ),
       status: "selected_through_acquisition_program_acquisition_pending",
       programIds: ["6529NM-AP-ENT-0002"],
+      qualifiers: [
+        {
+          kind: "mint",
+          status: "pending",
+          sourcePath: "records/entities/6529NM-W-0001.json",
+        },
+      ],
       sourceRecordIds: ["6529NM-AP-01-OUT-001"],
     };
 
@@ -330,6 +455,12 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp"
     );
     expect(image).toHaveAttribute("srcset");
+    expect(
+      screen.getByText("Selected through an acquisition program; unminted")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Minting comes first; acquisition and accession follow.")
+    ).toBeInTheDocument();
     expect(
       screen.getAllByText("Artist name, Work title.").length
     ).toBeGreaterThanOrEqual(1);

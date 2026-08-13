@@ -1,10 +1,30 @@
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
-import {
-  createGroup,
-  publishGroup,
-} from "@/services/groups/groupMutations";
+import { createGroup, publishGroup } from "@/services/groups/groupMutations";
+
+type WaveAdminGroupErrorReason =
+  | "missing-primary-wallet"
+  | "create-personal-group"
+  | "publish-personal-group";
+
+export class WaveAdminGroupError extends Error {
+  readonly reason: WaveAdminGroupErrorReason;
+  override readonly cause: unknown;
+
+  constructor({
+    reason,
+    cause,
+  }: {
+    readonly reason: WaveAdminGroupErrorReason;
+    readonly cause?: unknown;
+  }) {
+    super(reason);
+    this.name = "WaveAdminGroupError";
+    this.reason = reason;
+    this.cause = cause;
+  }
+}
 
 /**
  * Creates a group that only includes the specified wallet
@@ -21,49 +41,65 @@ const createOnlyMeGroup = async ({
   readonly handle: string | undefined;
   readonly onError: (error: unknown) => void;
 }): Promise<string | null> => {
-  try {
-    const groupConfig: ApiCreateGroup = {
-      name: `Only ${handle ?? "Me"}`,
-      group: {
-        tdh: {
-          min: null,
-          max: null,
-          inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
-        },
-        rep: {
-          min: null,
-          max: null,
-          direction: ApiGroupFilterDirection.Received,
-          user_identity: null,
-          category: null,
-        },
-        cic: {
-          min: null,
-          max: null,
-          direction: ApiGroupFilterDirection.Received,
-          user_identity: null,
-        },
-        level: { min: null, max: null },
-        owns_nfts: [],
-        identity_addresses: [primaryWallet],
-        excluded_identity_addresses: null,
+  const groupConfig: ApiCreateGroup = {
+    name: `Only ${handle ?? "Me"}`,
+    group: {
+      tdh: {
+        min: null,
+        max: null,
+        inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
       },
-    };
+      rep: {
+        min: null,
+        max: null,
+        direction: ApiGroupFilterDirection.Received,
+        user_identity: null,
+        category: null,
+      },
+      cic: {
+        min: null,
+        max: null,
+        direction: ApiGroupFilterDirection.Received,
+        user_identity: null,
+      },
+      level: { min: null, max: null },
+      owns_nfts: [],
+      identity_addresses: [primaryWallet],
+      excluded_identity_addresses: null,
+    },
+  };
 
-    const group = await createGroup({
+  let group: Awaited<ReturnType<typeof createGroup>>;
+  try {
+    group = await createGroup({
       payload: groupConfig,
     });
+  } catch (error) {
+    onError(
+      new WaveAdminGroupError({
+        reason: "create-personal-group",
+        cause: error,
+      })
+    );
+    return null;
+  }
 
+  try {
     await publishGroup({
       id: group.id,
       oldVersionId: null,
     });
-
-    return group.id;
   } catch (error) {
-    onError(error);
+    onError(
+      new WaveAdminGroupError({
+        reason: "publish-personal-group",
+        cause: error,
+      })
+    );
     return null;
   }
+
+  return group.id;
 };
 
 /**
@@ -90,7 +126,7 @@ export const getAdminGroupId = async ({
   }
 
   if (!primaryWallet) {
-    onError("You need to have a primary wallet to create a wave");
+    onError(new WaveAdminGroupError({ reason: "missing-primary-wallet" }));
     return null;
   }
 

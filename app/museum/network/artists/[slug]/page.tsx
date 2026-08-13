@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
+import { buildMuseumDirectoryModel } from "@/components/museum/directory/MuseumDirectoryData";
 import { MuseumBreadcrumbs } from "@/components/museum/MuseumBreadcrumbs";
 import { MuseumEntityContext } from "@/components/museum/MuseumEntityContext";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
@@ -14,9 +15,14 @@ import {
   CASEY_ARTIST_SLUG,
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
-import { getMuseumView } from "@/lib/museum/normalize";
-import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import {
+  applyMuseumCollectionSemantics,
+  isMuseumPermanentCollectionWork,
+  museumDirectoryPublication,
+  museumPublicWorkStatus,
+} from "@/lib/museum/publication/collectionSemantics";
 import { buildMuseumArtistContext } from "@/lib/museum/publication/ia";
+import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import {
   museumArtistHref,
   museumWorkHrefForSourceId,
@@ -35,7 +41,7 @@ export async function generateMetadata({
   params,
 }: MuseumArtistPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const publicationState = await getMuseumPublicationState();
+  const { publicationState } = await getMuseumPublicationBundle();
   const artist = publicationState.publication?.artists.find(
     (item) => item.slug === slug
   );
@@ -56,10 +62,14 @@ function TypedArtistPage({
   view,
 }: {
   readonly artist: NonNullable<
-    Awaited<ReturnType<typeof getMuseumPublicationState>>["publication"]
+    Awaited<
+      ReturnType<typeof getMuseumPublicationBundle>
+    >["publicationState"]["publication"]
   >["artists"][number];
   readonly publication: NonNullable<
-    Awaited<ReturnType<typeof getMuseumPublicationState>>["publication"]
+    Awaited<
+      ReturnType<typeof getMuseumPublicationBundle>
+    >["publicationState"]["publication"]
   >;
   readonly view: MuseumView | null;
 }) {
@@ -72,16 +82,14 @@ function TypedArtistPage({
   const projects = publication.projects.filter(
     (project) =>
       project.artistId === artist.id ||
-      project.artistIds?.includes(artist.id) === true
+      project.artistIds?.includes(artist.id) === true ||
+      works.some((work) => work.projectId === project.id)
   );
-  const collectionCount = works.filter(
-    (work) => work.collectionMembership === true
-  ).length;
   const relationshipLabel = (work: (typeof works)[number]): string => {
-    if (work.collectionMembership === true) {
+    if (isMuseumPermanentCollectionWork(work)) {
       return t(DEFAULT_LOCALE, "museum.network.works.collectionStatus");
     }
-    const status = work.status;
+    const status = museumPublicWorkStatus(work);
     switch (status) {
       case "accessioned_into_permanent_collection":
         return t(DEFAULT_LOCALE, "museum.network.works.connectedStatus");
@@ -102,15 +110,11 @@ function TypedArtistPage({
         return t(DEFAULT_LOCALE, "museum.network.acquisitions.withdrawnStatus");
     }
   };
-  const relationshipSummary = `${t(
-    DEFAULT_LOCALE,
-    works.length === 1
-      ? "museum.network.artists.connectedWorks.one"
-      : "museum.network.artists.connectedWorks.other",
-    { count: works.length }
-  )} ${"\u00b7"} ${t(DEFAULT_LOCALE, "museum.network.artists.collectionCount", {
-    count: collectionCount,
-  })}`;
+  const relationshipSummary =
+    buildMuseumDirectoryModel(
+      museumDirectoryPublication(publication)
+    )?.artists.find((record) => record.artist.id === artist.id)?.relationship ??
+    t(DEFAULT_LOCALE, "museum.network.artists.profileUnavailable");
   const context = buildMuseumArtistContext(publication, artist.slug, view, [
     { label: "6529 Network Museum", href: "/museum/network" },
     {
@@ -124,9 +128,17 @@ function TypedArtistPage({
     const document = publication.documents.find(
       (candidate) => candidate.id === documentId
     );
-    return document === undefined ? [] : [document];
+    if (
+      document === undefined ||
+      (document.kind !== "artist_practice" &&
+        document.kind !== "source_record") ||
+      (document.artistIds.length > 0 && !document.artistIds.includes(artist.id))
+    ) {
+      return [];
+    }
+    return [document];
   });
-  const workHrefs = museumWorkHrefIndex(publication);
+  const workHrefs = museumWorkHrefIndex(publication, view);
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -190,17 +202,18 @@ export default async function MuseumArtistPage({
   params,
 }: MuseumArtistPageProps) {
   const { slug } = await params;
-  const publicationState = await getMuseumPublicationState();
+  const { publicationState, view } = await getMuseumPublicationBundle();
   if (publicationState.publication === null) {
     return <MuseumPublicationUnavailable />;
   }
-  const publication = publicationState.publication;
+  const publication = applyMuseumCollectionSemantics(
+    publicationState.publication
+  );
   const artist = publication.artists.find((item) => item.slug === slug);
   if (artist === undefined) {
     notFound();
   }
   if (publication.works !== undefined) {
-    const view = await getMuseumView();
     return (
       <TypedArtistPage artist={artist} publication={publication} view={view} />
     );
@@ -220,7 +233,7 @@ export default async function MuseumArtistPage({
   const projects = publication.projects.filter(
     (project) => project.artistId === artist.id
   );
-  const workHrefs = museumWorkHrefIndex(publication);
+  const workHrefs = museumWorkHrefIndex(publication, view);
 
   return (
     <article>

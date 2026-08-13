@@ -35,6 +35,7 @@ let listenerSetupToken = 0;
 let browserFallbackTeardown: (() => void) | null = null;
 let hiddenFallbackTimeout: ReturnType<typeof setTimeout> | null = null;
 let keyboardClosedViewportHeight = 0;
+let keyboardClosedViewportWidth = 0;
 let keyboardClosedLayoutViewportHeight = 0;
 let nativeKeyboardLifecycleActive = false;
 
@@ -45,6 +46,7 @@ const KEYBOARD_EVENT_LAYOUT_TRANSITION_MS = 250;
 const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
 const VIEWPORT_KEYBOARD_HEIGHT_TOLERANCE_PX = 8;
 const VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX = 24;
+const VIEWPORT_ORIENTATION_WIDTH_THRESHOLD_PX = 96;
 const FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS = 180;
 const NATIVE_KEYBOARD_HIDE_FALLBACK_MS = 500;
 
@@ -217,6 +219,30 @@ function getLayoutViewportHeight(): number {
     : 0;
 }
 
+function getViewportWidth(): number {
+  const visualViewportWidth = globalThis.visualViewport?.width;
+  if (
+    typeof visualViewportWidth === "number" &&
+    Number.isFinite(visualViewportWidth) &&
+    visualViewportWidth > 0
+  ) {
+    return visualViewportWidth;
+  }
+
+  const windowWidth = typeof window !== "undefined" ? window.innerWidth : 0;
+  if (
+    typeof windowWidth === "number" &&
+    Number.isFinite(windowWidth) &&
+    windowWidth > 0
+  ) {
+    return windowWidth;
+  }
+
+  return typeof document !== "undefined"
+    ? document.documentElement.clientWidth
+    : 0;
+}
+
 function getLayoutViewportShrinkHeight(): number {
   const layoutViewportHeight = getLayoutViewportHeight();
   if (keyboardClosedLayoutViewportHeight <= 0 || layoutViewportHeight <= 0) {
@@ -245,6 +271,11 @@ function rememberKeyboardClosedViewportHeight(): number {
   const viewportHeight = getViewportHeight();
   if (viewportHeight > 0) {
     keyboardClosedViewportHeight = viewportHeight;
+  }
+
+  const viewportWidth = getViewportWidth();
+  if (viewportWidth > 0) {
+    keyboardClosedViewportWidth = viewportWidth;
   }
 
   const layoutViewportHeight = getLayoutViewportHeight();
@@ -349,6 +380,24 @@ function syncKeyboardVisibilityFromViewport(): void {
 
   const viewportKeyboardHeight = getViewportKeyboardHeight();
   if (viewportKeyboardHeight > VIEWPORT_KEYBOARD_HEIGHT_TOLERANCE_PX) {
+    const viewportWidth = getViewportWidth();
+    const viewportWidthChanged =
+      keyboardClosedViewportWidth > 0 &&
+      viewportWidth > 0 &&
+      Math.abs(viewportWidth - keyboardClosedViewportWidth) >
+        VIEWPORT_ORIENTATION_WIDTH_THRESHOLD_PX;
+    const hasKeyboardEvidence =
+      nativeKeyboardLifecycleActive || hasEditableFocus();
+
+    // Rotation changes both viewport axes and can otherwise look exactly like
+    // a keyboard opening when the portrait height is used as the baseline.
+    // Viewport-only fallback detection also needs editable focus; native
+    // lifecycle events remain authoritative when focus is in transition.
+    if (viewportWidthChanged || !hasKeyboardEvidence) {
+      markKeyboardHiddenFromFallback();
+      return;
+    }
+
     clearHiddenFallbackTimeout();
     setKeyboardState({
       isVisible: true,
@@ -674,6 +723,7 @@ export function __resetNativeKeyboardForTests(): void {
   listenerSetupPromise = null;
   listenerSetupToken = 0;
   keyboardClosedViewportHeight = 0;
+  keyboardClosedViewportWidth = 0;
   keyboardClosedLayoutViewportHeight = 0;
   nativeKeyboardLifecycleActive = false;
   resetKeyboardLayoutVariables();

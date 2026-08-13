@@ -2,8 +2,9 @@
 
 ## Overview
 
-Use `Groups` to set who can view, drop, vote, chat, and administer a wave.
-This step is user-reachable for `Chat`, `Rank`, and `Approve`.
+Use `Groups` to review or customize wave access and permissions, including
+viewing, dropping, voting, chatting, and administration where supported. This
+step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Location in the Site
 
@@ -28,6 +29,9 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## What You Configure
 
+- All access and moderation rows are visible when the step opens. Each row
+  groups its permission name, current scope, and related actions so the page can
+  be scanned from `Who can view` through `Admin` without opening a disclosure.
 - Helper copy clarifies that `Who can view` controls who can access the wave,
   and that followers who can view the wave may get a notification when it is
   created.
@@ -40,7 +44,8 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
   - `Allow admins to delete posts` toggle sets admin delete permission
 - Defaults:
   - `Anyone` for view/drop/vote/chat
-  - `Only me` for admin
+  - `Only me` for admin when creating a top-level wave
+  - the parent wave's admin group when creating a subwave
   - `Allow admins to delete posts` is enabled by default
 
 ## Group Picker Behavior
@@ -77,13 +82,17 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 - If search shows no matches, clear or change search text and retry.
 - No group selection is required to leave `Groups` and continue.
 - If no explicit admin group is selected, submit tries to create and publish a
-  personal admin group (`Only {handle}` / `Only Me`).
-- If admin-group creation fails (for example missing primary wallet), submit
-  stops on create-wave; fix prerequisites and retry.
+  personal admin group (`Only {handle}` / `Only Me`) for a top-level wave.
+- A subwave reuses its parent wave's admin group instead of creating another
+  personal group when no different group is selected.
+- If a top-level personal admin group cannot be created or made visible, submit
+  stops and identifies the failed stage. Add a primary wallet when requested,
+  choose an existing admin group, or retry later.
 
 ## Limitations / Notes
 
-- `Groups` only selects existing groups; it does not create or edit groups.
+- The inline group builder can select an existing group or create an identity,
+  NFT, or combined group without leaving wave creation.
 - `Approve` uses the same group rows as `Rank`.
 
 ## Related Pages

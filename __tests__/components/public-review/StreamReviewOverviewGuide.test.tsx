@@ -13,13 +13,11 @@ describe("StreamReviewOverviewGuide", () => {
     render(<StreamReviewOverviewGuide pages={ACTIVE_REVIEW_VERSION.pages} />);
 
     expect(
-      screen.getByRole("heading", { name: "What is Stream?" })
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: "What is Stream?" })
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Stream is a proposed system for publishing and selling digital art. It keeps the artwork, its history, and its important rules connected over time—from launch and sales to long-term preservation."
-      )
-    ).toBeInTheDocument();
+      screen.queryByText(/Stream is a proposed system/)
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: "A Stream artwork is more than the media you see",

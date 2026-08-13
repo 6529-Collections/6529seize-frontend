@@ -73,11 +73,13 @@ const NewVersionToast = (): JSX.Element | null => {
   const shouldTrackMobileDock = useMediaQuery(
     NEW_VERSION_TOAST_MOBILE_DOCK_QUERY
   );
+  const usesNativeDockPosition = isApp;
   const fallbackBottom = isApp
     ? NEW_VERSION_TOAST_APP_FALLBACK_BOTTOM
     : NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM;
   const toastLayerRef = useMeasuredMobileBottomNavDockBottom({
-    enabled: isVersionStale && shouldTrackMobileDock,
+    enabled:
+      isVersionStale && (usesNativeDockPosition || shouldTrackMobileDock),
     fallbackBottom,
     measurementWindowMs: MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS,
     resetOnDisabled: false,
@@ -91,12 +93,15 @@ const NewVersionToast = (): JSX.Element | null => {
   }
 
   const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
+  const positionClassName = usesNativeDockPosition
+    ? "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-1/2 tw-right-auto tw-w-[min(calc(100vw-2rem),23.25rem)] -tw-translate-x-1/2 sm:tw-scale-100"
+    : "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-w-auto sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100";
 
   return (
     <div
       ref={toastLayerRef}
       style={getNewVersionToastStyle(fallbackBottom)}
-      className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-z-[1000] tw-w-auto tw-origin-bottom tw-scale-[var(--new-version-toast-mobile-scale,1)] tw-transform-gpu tw-will-change-[bottom,transform] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100"
+      className={`tailwind-scope tw-pointer-events-none tw-fixed tw-z-[1000] tw-origin-bottom tw-scale-[var(--new-version-toast-mobile-scale,1)] tw-transform-gpu tw-will-change-[bottom,transform] ${positionClassName}`}
     >
       <button
         type="button"

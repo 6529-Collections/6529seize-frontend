@@ -109,13 +109,17 @@ type DialogProps = {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  children: any;
+  closeLabel?: string;
+  children: React.ReactNode;
 };
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () => (props: DialogProps) => (
     <div data-testid="dialog" role="dialog" aria-label={props.title}>
-      <button aria-label="Close panel" onClick={props.onClose}></button>
+      <button
+        aria-label={props.closeLabel ?? "Close"}
+        onClick={props.onClose}
+      ></button>
       {props.children}
     </div>
   )
@@ -199,7 +203,7 @@ describe("CreateDropGifPicker", () => {
       "GIF search is temporarily unavailable."
     );
 
-    const closeButton = screen.getByRole("button", { name: "Close" });
+    const closeButton = screen.getByText("Close");
     expect(closeButton).toHaveFocus();
 
     fireEvent.click(closeButton);
@@ -223,7 +227,7 @@ describe("CreateDropGifPicker", () => {
       "GIF search is temporarily unavailable."
     );
 
-    const closeButton = screen.getByRole("button", { name: "Close" });
+    const closeButton = screen.getByText("Close");
     expect(closeButton).toHaveFocus();
 
     fireEvent.click(closeButton);
@@ -254,7 +258,7 @@ describe("CreateDropGifPicker", () => {
     const setShow = jest.fn();
     render(<CreateDropGifPicker {...defaultProps} setShow={setShow} />);
 
-    fireEvent.click(screen.getByLabelText("Close panel"));
+    fireEvent.click(screen.getByLabelText("Close"));
 
     expect(setShow).toHaveBeenCalledWith(false);
   });

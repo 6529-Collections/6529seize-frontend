@@ -15,7 +15,7 @@ import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers"
 import { useCreateWaveDrafts } from "./hooks/useCreateWaveDrafts";
 import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
-import { useWaveConfig } from "./hooks/useWaveConfig";
+import { useSubwaveWaveConfig } from "./hooks/useSubwaveWaveConfig";
 import CreateWaveDraftsSection from "./overview/CreateWaveDraftsSection";
 
 export default function CreateWave({
@@ -23,13 +23,17 @@ export default function CreateWave({
   onBack,
   onSuccess,
   parentWaveId,
+  parentAdminGroupId,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
   readonly parentWaveId?: string | null | undefined;
+  readonly parentAdminGroupId?: string | null | undefined;
 }) {
-  const waveConfig = useWaveConfig();
+  const waveConfig = useSubwaveWaveConfig({
+    parentAdminGroupId,
+  });
   const {
     config,
     step,
@@ -122,6 +126,7 @@ export default function CreateWave({
       onSuccess?.();
     },
     parentWaveId,
+    parentAdminGroupId,
   });
 
   const setStep = (

@@ -267,6 +267,11 @@ export function MuseumAcquisitionRecordPage({
   );
   const workHrefs = museumWorkHrefIndex(publication, view);
   const workCards = acquisitionWorkCards(publication, acquisition, view);
+  if (workCards.length !== acquisition.workIds.length) {
+    throw new Error(
+      `museum_acquisition_work_join_incomplete:${acquisition.acquisitionId}`
+    );
+  }
   const displayedWorkCards = exhibitionWorkCards(workCards);
   const coveredPresentationIds = new Set(
     workCards.flatMap((work) =>
@@ -276,8 +281,7 @@ export function MuseumAcquisitionRecordPage({
   const additionalPresentationMedia = acquisition.presentationMedia.filter(
     (media) => !coveredPresentationIds.has(media.id)
   );
-  const artFirst =
-    acquisition.status !== "accessioned_into_permanent_collection";
+  const artFirst = workCards.length > 0;
   const curatorialDocuments = acquisitionDocuments.filter(isCuratorialDocument);
   const recordDocuments = acquisitionDocuments.filter(
     (document) => !isCuratorialDocument(document)
@@ -328,7 +332,7 @@ export function MuseumAcquisitionRecordPage({
           ...acquisition.secondaryRelations,
         ]}
         headingId="acquisition-related-entities-title"
-        title={t(DEFAULT_LOCALE, "museum.network.acquisitions.related")}
+        title={t(DEFAULT_LOCALE, "museum.network.acquisitions.context")}
       />
     </article>
   );

@@ -96,7 +96,7 @@ describe("Museum publication entity contract", () => {
         sourceCommit: "92429032013b9dfdb626ff6860e272191a89dfc4",
       },
       mediaUrl:
-        "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/d498d837-3331-4650-a30e-27ca18d53521/magnum-75-127.jpg",
+        "https://arweave.net/VE0zO2N1zVTsbEUHdUFazEgvuMbmVOi6OfaWfQOWkaM",
       mediaMimeType: "image/jpeg",
       sourceByteSize: 2_518_674,
       width: 1600,
@@ -134,17 +134,15 @@ describe("Museum publication entity contract", () => {
   });
 
   it("accepts each exact Arweave transaction media join", () => {
-    const transactionIds = ["A", "B", "C", "_", "-"] as const;
-    const joins = transactionIds.map((_, index) => {
+    const mediaUrls = [
+      "https://arweave.net/VE0zO2N1zVTsbEUHdUFazEgvuMbmVOi6OfaWfQOWkaM",
+      "https://arweave.net/r0bUW6Mtxq897pgig0V01Ad43S_Ldwv3tARjwmjrqpE",
+      "https://arweave.net/vRmOcFJRTK84ILXp2Tkjz5KoS4iXXbMqki7rxhTYlr4",
+      "https://arweave.net/zLifpzu3AQWqjg59nuy9jeRqHPA5o5-LpwwBqNRcD5o",
+      "https://arweave.net/oz0t0DJj2BgFCux1WXskxisxvzV2KA0ukqaVbQ1Ckco",
+    ] as const;
+    const joins = mediaUrls.map((mediaUrl, index) => {
       const sourcePath = `records/entities/6529NM-MED-${String(index + 3).padStart(4, "0")}.json`;
-      const mediaUrl = [
-        "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/d498d837-3331-4650-a30e-27ca18d53521/magnum-75-127.jpg",
-        "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/3e2fbdea-cf3c-4949-b3d2-f081cb12de00/magnum-75-145.jpg",
-        "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/2146f5f7-9352-47e6-bf60-cba46e52c07f/magnum-75-97.jpg",
-        "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/5d6d9bf0-7ff3-4afd-ac69-c6b34079fbf9/magnum-75-44.jpg",
-        "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/4526b19e-76df-493b-86ac-105782c061ea/magnum-75-104.jpg",
-      ][index];
-      if (mediaUrl === undefined) throw new Error("test_media_url");
       const media = {
         id: `conflict-at-its-edges-${index + 1}`,
         kind: "external_proposal_presentation",
