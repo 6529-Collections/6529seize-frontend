@@ -392,6 +392,14 @@
   ],
   "components": [
     {
+      "file": "components/museum/MuseumNetworkIndexLoading.tsx",
+      "surface_ids": ["museum.shell"]
+    },
+    {
+      "file": "components/museum/acquisition/MuseumAcquisitionCopy.ts",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
       "file": "components/museum/acquisition/MuseumAcquisitionLanding.tsx",
       "surface_ids": ["museum.acquisition"]
     },
