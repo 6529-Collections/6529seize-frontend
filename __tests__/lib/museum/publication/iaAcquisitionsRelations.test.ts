@@ -249,7 +249,7 @@ describe("typed acquisition/work relation presentation", () => {
         }),
         expect.objectContaining({
           id: "6529NM-ORG-0002",
-          relation: "Originated by",
+          relation: "Project originator",
         }),
       ])
     );
