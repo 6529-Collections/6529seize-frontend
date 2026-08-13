@@ -80,7 +80,10 @@ describe('UserPageHeaderEditName', () => {
 
   it('renders username edit form', () => {
     renderComponent();
-    
+
+    expect(
+      screen.getByRole('dialog', { name: 'Profile name' })
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue('testuser')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
   });

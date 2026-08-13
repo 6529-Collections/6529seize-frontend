@@ -1,4 +1,4 @@
-import { render, act, fireEvent } from "@testing-library/react";
+import { render, act, fireEvent, screen } from "@testing-library/react";
 import UserPageHeaderEditClassification from "@/components/user/user-page-header/name/classification/UserPageHeaderEditClassification";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -41,11 +41,6 @@ jest.mock(
   }
 );
 
-jest.mock("react-dom", () => ({
-  ...jest.requireActual("react-dom"),
-  createPortal: (node: any) => node,
-}));
-
 jest.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ mutateAsync: jest.fn() }),
 }));
@@ -56,6 +51,28 @@ const profile: ApiIdentity = {
 } as any;
 
 describe("UserPageHeaderEditClassification", () => {
+  it("renders in the shared responsive classification dialog", () => {
+    render(
+      <AuthContext.Provider
+        value={{ setToast: jest.fn(), requestAuth: jest.fn() } as any}
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ onProfileEdit: jest.fn() } as any}
+        >
+          <UserPageHeaderEditClassification
+            profile={profile}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.getByRole("dialog", { name: "Classification" })
+    ).toBeInTheDocument();
+    expect(capturedClassificationProps.inlineOptions).toBe(true);
+  });
+
   it("enables save button when classification changes", () => {
     render(
       <AuthContext.Provider

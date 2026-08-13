@@ -1,7 +1,5 @@
 "use client";
 
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import React, { useState } from "react";
@@ -46,20 +44,12 @@ export default function UserPageHeaderNameWrapper({
           </div>
         </div>
       </button>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditNameOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            onClicked={(e) => e.stopPropagation()}
-          >
-            <UserPageHeaderEditName
-              profile={profile}
-              onClose={() => setIsEditNameOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isEditNameOpen && (
+        <UserPageHeaderEditName
+          profile={profile}
+          onClose={() => setIsEditNameOpen(false)}
+        />
+      )}
     </div>
   );
 }

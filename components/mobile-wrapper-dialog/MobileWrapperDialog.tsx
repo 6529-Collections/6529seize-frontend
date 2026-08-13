@@ -4,7 +4,6 @@ import { t } from "@/i18n/messages";
 import {
   Dialog,
   DialogPanel,
-  DialogTitle,
   Transition,
   TransitionChild,
 } from "@headlessui/react";
@@ -24,6 +23,7 @@ import type {
   TouchEvent,
 } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
+import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 
 const DISMISS_DRAG_DISTANCE_PX = 44;
 const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
@@ -31,11 +31,21 @@ const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
 const DISMISS_DRAG_SETTLE_MS = 180;
 const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
+const MOBILE_DIALOG_KEYBOARD_INSET =
+  "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
+  "var(--native-keyboard-layout-transition-duration, 0ms)";
+const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
+  bottom: 0,
+  transform: `translate3d(0, calc(0px - ${MOBILE_DIALOG_KEYBOARD_INSET}), 0)`,
+  transition: `transform ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+};
 
 type MobileWrapperDialogProps = {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
+  readonly onBack?: (() => void) | undefined;
   readonly onBeforeLeave?: (() => void) | undefined;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: ReactNode;
@@ -57,6 +67,7 @@ type MobileWrapperDialogProps = {
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
 };
@@ -74,76 +85,6 @@ type MobileDialogDragOptions = {
   readonly onClose: () => void;
   readonly onAfterLeave?: (() => void) | undefined;
 };
-
-function DialogHeader({
-  title,
-  showDesktopCloseButton,
-  onClose,
-  className,
-  titleActions,
-  headerActions,
-  showHeaderCloseButton,
-  headerCloseButtonClassName,
-  titleClassName,
-  closeLabel,
-}: {
-  readonly title: string | undefined;
-  readonly showDesktopCloseButton: boolean;
-  readonly onClose: () => void;
-  readonly className?: string | undefined;
-  readonly titleActions?: ReactNode;
-  readonly headerActions?: ReactNode;
-  readonly showHeaderCloseButton?: boolean | undefined;
-  readonly headerCloseButtonClassName?: string | undefined;
-  readonly titleClassName?: string | undefined;
-  readonly closeLabel: string;
-}) {
-  return (
-    <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2">
-          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-            {title && (
-              <DialogTitle
-                className={clsx(
-                  "tw-text-base tw-font-semibold tw-text-iron-50",
-                  titleClassName
-                )}
-              >
-                {title}
-              </DialogTitle>
-            )}
-            {titleActions !== undefined && titleActions !== null && (
-              <div className="tw-flex tw-shrink-0 tw-items-center">
-                {titleActions}
-              </div>
-            )}
-          </div>
-          {headerActions !== undefined && headerActions !== null && (
-            <div className="tw-flex tw-items-center">{headerActions}</div>
-          )}
-        </div>
-        {showDesktopCloseButton && (
-          <MobileWrapperDialogCloseButton
-            onClick={onClose}
-            label={closeLabel}
-            className={clsx(
-              "tw-hidden md:tw-inline-flex",
-              headerCloseButtonClassName
-            )}
-          />
-        )}
-        {showHeaderCloseButton && (
-          <MobileWrapperDialogCloseButton
-            onClick={onClose}
-            label={closeLabel}
-            className={clsx("tw-inline-flex", headerCloseButtonClassName)}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
 
 function getSlideTransition(tabletModal?: boolean) {
   return {
@@ -191,12 +132,15 @@ function getDialogHeight({
   readonly isCapacitor: boolean;
 }): string {
   const viewportHeight = "min(100vh, 100svh)";
+  const restingHeight =
+    tall && !isCapacitor
+      ? `calc(${viewportHeight} - 4rem)`
+      : `calc(${viewportHeight} - 10rem)`;
+  const keyboardAvailableHeight =
+    `max(0px, calc(${viewportHeight} - 4rem - ` +
+    `${MOBILE_DIALOG_KEYBOARD_INSET}))`;
 
-  if (tall && !isCapacitor) {
-    return `calc(${viewportHeight} - 4rem)`;
-  }
-
-  return `calc(${viewportHeight} - 10rem)`;
+  return `min(${restingHeight}, ${keyboardAvailableHeight})`;
 }
 
 function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
@@ -250,8 +194,9 @@ function getDragPanelClassNames(canDragToClose: boolean) {
 
 function getContainerClassNames(tabletModal?: boolean | undefined) {
   return clsx(
-    "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10",
-    tabletModal && "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0"
+    "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10 [--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]",
+    tabletModal &&
+      "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0 md:[--mobile-wrapper-dialog-keyboard-inset:0px]"
   );
 }
 
@@ -267,7 +212,9 @@ function getSurfaceClassNames({
   return clsx(
     "tw-flex tw-flex-col tw-rounded-t-xl",
     surfaceClassName ?? "tw-bg-iron-950",
-    allowOverflow ? "tw-overflow-visible" : "tw-overflow-hidden",
+    allowOverflow
+      ? "mobile-wrapper-dialog-overflow-surface tw-overflow-visible"
+      : "tw-overflow-hidden",
     tabletModal && "md:tw-rounded-xl"
   );
 }
@@ -283,7 +230,9 @@ function getContentClassNames({
 }) {
   return clsx(
     "tw-flex tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-flex-col",
-    allowOverflow ? "tw-overflow-visible" : "tw-overflow-y-auto",
+    allowOverflow
+      ? "mobile-wrapper-dialog-overflow-content tw-overflow-visible"
+      : "tw-overflow-y-auto",
     noPadding ? "tw-py-0" : "tw-py-6",
     showScrollbar &&
       !allowOverflow &&
@@ -320,7 +269,15 @@ function getSurfaceStyle({
   readonly dialogHeight: string;
   readonly fixedHeight?: boolean | undefined;
 }): CSSProperties {
-  return fixedHeight ? { height: dialogHeight } : { maxHeight: dialogHeight };
+  const dimension = fixedHeight ? "height" : "max-height";
+  const size = fixedHeight
+    ? { height: dialogHeight }
+    : { maxHeight: dialogHeight };
+
+  return {
+    ...size,
+    transition: `${dimension} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+  };
 }
 
 function FloatingCloseButton({
@@ -616,6 +573,7 @@ export default function MobileWrapperDialog({
   title,
   isOpen,
   onClose,
+  onBack,
   onBeforeLeave,
   onAfterLeave,
   children,
@@ -637,11 +595,13 @@ export default function MobileWrapperDialog({
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
+  backLabel,
   closeLabel,
   dismissible = true,
 }: MobileWrapperDialogProps) {
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const {
     canDragToClose,
@@ -720,7 +680,10 @@ export default function MobileWrapperDialog({
             className="tw-absolute tw-inset-0 tw-overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className={containerClassNames}>
+            <div
+              className={containerClassNames}
+              style={MOBILE_DIALOG_CONTAINER_STYLE}
+            >
               <TransitionChild as={Fragment} {...slideTransition}>
                 <div className={panelClassNames}>
                   <DialogPanel
@@ -742,10 +705,11 @@ export default function MobileWrapperDialog({
                         style={{ paddingBottom: bottomPadding }}
                       >
                         <DragHandle show={showDragHandle} />
-                        <DialogHeader
+                        <MobileWrapperDialogHeader
                           title={title}
                           showDesktopCloseButton={showDesktopHeaderCloseButton}
                           onClose={handleClose}
+                          onBack={dismissible ? onBack : undefined}
                           className={headerClassName}
                           titleActions={titleActions}
                           headerActions={headerActions}
@@ -754,6 +718,7 @@ export default function MobileWrapperDialog({
                             headerCloseButtonClassName
                           }
                           titleClassName={titleClassName}
+                          backLabel={resolvedBackLabel}
                           closeLabel={resolvedCloseLabel}
                         />
                         {children}
