@@ -202,6 +202,7 @@ export * from '../models/ApiDropWithoutWavesPageWithoutCount';
 export * from '../models/ApiDropsLeaderboardPage';
 export * from '../models/ApiDropsLeaderboardPageV2';
 export * from '../models/ApiDropsPage';
+export * from '../models/ApiErrorResponse';
 export * from '../models/ApiFeedItem';
 export * from '../models/ApiFeedItemType';
 export * from '../models/ApiGlobalRepCategoryGiver';
@@ -836,6 +837,7 @@ import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWav
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
 import { ApiDropsPage } from '../models/ApiDropsPage';
+import { ApiErrorResponse } from '../models/ApiErrorResponse';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
 import { ApiFeedItemType } from '../models/ApiFeedItemType';
 import { ApiGlobalRepCategoryGiver } from '../models/ApiGlobalRepCategoryGiver';
@@ -1666,6 +1668,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropsLeaderboardPage": ApiDropsLeaderboardPage,
     "ApiDropsLeaderboardPageV2": ApiDropsLeaderboardPageV2,
     "ApiDropsPage": ApiDropsPage,
+    "ApiErrorResponse": ApiErrorResponse,
     "ApiFeedItem": ApiFeedItem,
     "ApiGlobalRepCategoryGiver": ApiGlobalRepCategoryGiver,
     "ApiGlobalRepCategoryGiversPage": ApiGlobalRepCategoryGiversPage,
