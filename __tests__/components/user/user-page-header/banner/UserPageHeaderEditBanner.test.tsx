@@ -23,11 +23,6 @@ jest.mock('@/components/user/settings/UserSettingsSave', () => (props: any) => {
   );
 });
 
-jest.mock('react-use', () => ({
-  useClickAway: jest.fn(),
-  useKeyPressEvent: jest.fn(),
-}));
-
 const mutateAsync = jest.fn();
 
 jest.mock('@tanstack/react-query', () => ({
@@ -54,6 +49,15 @@ function renderComponent() {
 }
 
 describe('UserPageHeaderEditBanner', () => {
+  it('renders in the shared responsive profile cover dialog', () => {
+    renderComponent();
+
+    expect(
+      screen.getByRole('dialog', { name: 'Profile cover' })
+    ).toBeInTheDocument();
+    expect(capturedSaveProps.responsiveWidthClassName).toBe('md:tw-w-auto');
+  });
+
   it('enables save when background changes and submits update', async () => {
     const user = userEvent.setup();
     renderComponent();

@@ -2,6 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useIpfsService } from "@/components/ipfs/IPFSContext";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -21,20 +22,21 @@ import {
 import { getUploadErrorMessage } from "@/services/api/upload-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FormEvent } from "react";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
+import { useContext, useEffect, useState } from "react";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 export default function UserPageHeaderEditPfp({
   profile,
+  isOpen = true,
+  onAfterLeave,
+  onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
 }) {
-  const modalRef = useRef<HTMLDivElement>(null);
-  useClickAway(modalRef, onClose);
-  useKeyPressEvent("Escape", onClose);
-
   const ipfsService = useIpfsService();
 
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -187,76 +189,69 @@ export default function UserPageHeaderEditPfp({
     await updatePfp.mutateAsync(formData);
   };
 
-  if (typeof document === "undefined") {
-    return null;
-  }
+  return (
+    <MobileWrapperDialog
+      title={getUserProfileHeaderMessage("user.profileHeader.edit.pfp")}
+      isOpen={isOpen}
+      onClose={onClose}
+      onBack={onBack}
+      onAfterLeave={onAfterLeave}
+      tabletModal
+      showHeaderCloseButton
+      showScrollbar
+      maxWidthClass="md:tw-max-w-2xl"
+      headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
+    >
+      <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
+        <UserSettingsImgSelectMeme
+          memes={memes ?? []}
+          onMeme={setSelectedMemeAndRemoveFile}
+        />
 
-  return createPortal(
-    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default">
-      <button
-        type="button"
-        aria-label="Close edit profile picture modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0"
-        onClick={onClose}
-      />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
-        <div
-          ref={modalRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Edit profile picture"
-          className="tw-w-full tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl sm:tw-max-w-2xl lg:tw-p-8"
-        >
-          <form onSubmit={onSubmit}>
-            <UserSettingsImgSelectMeme
-              memes={memes ?? []}
-              onMeme={setSelectedMemeAndRemoveFile}
-            />
-
-            <div className="tw-my-5 tw-flex tw-w-full tw-items-center tw-gap-3">
-              <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
-              <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
-                or
-              </span>
-              <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
-            </div>
-
-            <UserSettingsImgSelectFile
-              imageToShow={imageToShow}
-              setFile={setFileAndRemoveMeme}
-            />
-            {error && (
-              <p className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-sm tw-text-error">
-                {error}
-              </p>
-            )}
-            <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 sm:tw-flex-row-reverse sm:tw-justify-start">
-              <Button
-                type="submit"
-                variant="action"
-                size="lg"
-                loading={saving}
-                disabled={!file && !selectedMeme}
-                fullWidth
-                className="sm:tw-w-auto"
-              >
-                Save PFP
-              </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                disabled={saving}
-                onClick={onClose}
-                fullWidth
-                className="sm:tw-w-auto"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
+        <div className="tw-my-5 tw-flex tw-w-full tw-items-center tw-gap-3">
+          <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
+          <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
+            or
+          </span>
+          <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
         </div>
-      </div>
-    </div>,
-    document.body
+
+        <UserSettingsImgSelectFile
+          imageToShow={imageToShow}
+          setFile={setFileAndRemoveMeme}
+        />
+        {error && (
+          <p
+            role="alert"
+            className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-sm tw-text-error"
+          >
+            {error}
+          </p>
+        )}
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
+          <Button
+            type="submit"
+            variant="action"
+            size="lg"
+            loading={saving}
+            disabled={!file && !selectedMeme}
+            fullWidth
+            className="md:tw-w-auto"
+          >
+            Save PFP
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            disabled={saving}
+            onClick={onClose}
+            fullWidth
+            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </MobileWrapperDialog>
   );
 }

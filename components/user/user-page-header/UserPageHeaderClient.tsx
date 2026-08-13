@@ -208,6 +208,20 @@ export default function UserPageHeaderClient({
             canEdit={canInlineEdit}
             profileLabel={profileLabel}
           />
+          {canEdit ? (
+            <div
+              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${
+                hasTouchScreen ? "" : "sm:tw-hidden"
+              }`}
+            >
+              <UserPageHeaderEditProfile
+                profile={profile}
+                statement={aboutStatement}
+                defaultBanner1={banner1Color}
+                defaultBanner2={banner2Color}
+              />
+            </div>
+          ) : null}
         </div>
 
         <div className="tw-relative tw-z-20 tw-bg-black md:tw-pointer-events-none md:-tw-mt-[164px] md:tw-bg-transparent">
@@ -230,17 +244,11 @@ export default function UserPageHeaderClient({
 
               {canEdit ? (
                 <div
-                  className={`tw-absolute tw-right-4 tw-top-0 tw-flex tw-items-center tw-gap-2 sm:tw-right-6 md:tw-pointer-events-auto md:tw-right-8 ${
+                  className={`tw-absolute tw-right-4 tw-top-0 sm:tw-right-6 md:tw-pointer-events-auto md:tw-right-8 ${
                     hasTouchScreen ? "" : "sm:tw-hidden"
                   }`}
                 >
                   <UserPageHeaderSubscriptionStatus profile={profile} compact />
-                  <UserPageHeaderEditProfile
-                    profile={profile}
-                    statement={aboutStatement}
-                    defaultBanner1={banner1Color}
-                    defaultBanner2={banner2Color}
-                  />
                 </div>
               ) : null}
 
@@ -254,7 +262,7 @@ export default function UserPageHeaderClient({
                     profileEnabledAt={profileEnabledAt}
                     variant="title"
                   />
-                  <div className="tw-mt-1.5">
+                  <div className="tw-mt-2 sm:tw-mt-1.5">
                     <UserPageHeaderName
                       profile={profile}
                       canEdit={canInlineEdit}

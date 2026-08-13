@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import UserSettingsImgSelectFile from '@/components/user/settings/UserSettingsImgSelectFile';
@@ -30,6 +30,10 @@ describe('UserSettingsImgSelectFile', () => {
     Object.defineProperty(bigFile, 'size', { value: 3000000 });
     await userEvent.upload(input, bigFile);
     expect(await findByText('File size must be less than 2MB')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'File size must be less than 2MB'
+    );
+    expect(input).toHaveAttribute('aria-describedby', 'pfp-upload-error');
     expect(setFile).not.toHaveBeenCalled();
   });
 
