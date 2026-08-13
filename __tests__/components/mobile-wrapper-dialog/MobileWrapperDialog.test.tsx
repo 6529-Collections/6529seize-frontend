@@ -106,6 +106,68 @@ describe("MobileWrapperDialog", () => {
       ).toBeInTheDocument();
     });
 
+    it("keeps mobile sheets above the native keyboard inset", () => {
+      render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
+
+      const container = document.querySelector<HTMLElement>(
+        ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
+      );
+      const surface = document.querySelector<HTMLElement>(".tw-rounded-t-xl");
+
+      expect(container).toHaveClass(
+        "[--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]"
+      );
+      expect(container?.style.bottom).toBe(
+        "var(--mobile-wrapper-dialog-keyboard-inset, 0px)"
+      );
+      expect(container?.style.transition).toBe(
+        "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+      );
+      expect(surface?.style.maxHeight).toBe(
+        "min(calc(min(100vh, 100svh) - 10rem), max(0px, calc(min(100vh, 100svh) - 4rem - var(--mobile-wrapper-dialog-keyboard-inset, 0px))))"
+      );
+      expect(surface?.style.transition).toBe(
+        "max-height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+      );
+    });
+
+    it("animates keyboard resizing for fixed-height sheets", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          fixedHeight={true}
+        />
+      );
+
+      const surface = document.querySelector<HTMLElement>(".tw-rounded-t-xl");
+
+      expect(surface?.style.height).toContain(
+        "var(--mobile-wrapper-dialog-keyboard-inset, 0px)"
+      );
+      expect(surface?.style.transition).toBe(
+        "height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+      );
+    });
+
+    it("keeps the centered tablet modal independent of the keyboard inset", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          tabletModal={true}
+        />
+      );
+
+      const container = document.querySelector<HTMLElement>(
+        ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
+      );
+
+      expect(container).toHaveClass(
+        "md:[--mobile-wrapper-dialog-keyboard-inset:0px]"
+      );
+    });
+
     it.each([
       {
         name: "enables dragging without rendering a handle",

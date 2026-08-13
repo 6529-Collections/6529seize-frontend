@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsBackground from "@/components/user/settings/UserSettingsBackground";
 import UserSettingsBannerImageInput from "@/components/user/settings/UserSettingsBannerImageInput";
@@ -19,9 +20,8 @@ import {
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 type BannerEditMode = "gradient" | "image";
 const bannerTabs: CommonSelectItem<BannerEditMode>[] = [
@@ -40,7 +40,6 @@ export default function UserPageHeaderEditBanner({
   readonly defaultBanner2: string;
   readonly onClose: () => void;
 }) {
-  const modalRef = useRef<HTMLDivElement>(null);
   const isSavingRef = useRef(false);
 
   const handleClose = () => {
@@ -48,9 +47,6 @@ export default function UserPageHeaderEditBanner({
       onClose();
     }
   };
-
-  useClickAway(modalRef, handleClose);
-  useKeyPressEvent("Escape", handleClose);
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
@@ -199,83 +195,62 @@ export default function UserPageHeaderEditBanner({
     await updateUser.mutateAsync(body);
   };
 
-  if (typeof document === "undefined") {
-    return null;
-  }
-
-  const dialogTitleId = "user-page-header-edit-banner-title";
-
-  return createPortal(
-    <dialog
-      open
-      aria-modal="true"
-      aria-labelledby={dialogTitleId}
-      className="tailwind-scope tw-m-0 tw-h-[100dvh] tw-w-screen tw-cursor-default tw-border-0 tw-bg-transparent tw-p-0"
-      style={{ inset: 0, position: "fixed", zIndex: 1100 }}
+  return (
+    <MobileWrapperDialog
+      title={getUserProfileHeaderMessage("user.profileHeader.edit.banner")}
+      isOpen
+      onClose={handleClose}
+      tabletModal
+      showHeaderCloseButton
+      showScrollbar
+      maxWidthClass="md:tw-max-w-2xl"
+      headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
+      dismissible={!isSaving}
     >
-      <button
-        type="button"
-        aria-label="Close edit banner modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0"
-        onClick={handleClose}
-      />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
-        <div
-          ref={modalRef}
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl md:tw-max-w-2xl lg:tw-p-8"
-        >
-          <h2 id={dialogTitleId} className="tw-sr-only">
-            Edit Banner
-          </h2>
-          <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-5">
-            <div>
-              <p className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-                Edit profile cover
-              </p>
-              <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
-                Choose a gradient or upload an image for your profile cover.
-              </p>
-            </div>
+      <form
+        onSubmit={onSubmit}
+        className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+      >
+        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+          Choose a gradient or upload an image for your profile cover.
+        </p>
 
-            <CommonTabs<BannerEditMode>
-              items={bannerTabs}
-              activeItem={editMode}
-              setSelected={setEditMode}
-              filterLabel="Banner editor mode"
-              fill={false}
-            />
+        <CommonTabs<BannerEditMode>
+          items={bannerTabs}
+          activeItem={editMode}
+          setSelected={setEditMode}
+          filterLabel="Banner editor mode"
+          fill={false}
+        />
 
-            {editMode === "gradient" ? (
-              <UserSettingsBackground
-                bgColor1={bgColor1}
-                bgColor2={bgColor2}
-                setBgColor1={setBgColor1}
-                setBgColor2={setBgColor2}
-              />
-            ) : (
-              <UserSettingsBannerImageInput
-                imageToShow={bannerPreviewUrl}
-                setFile={setBannerFile}
-              />
-            )}
+        {editMode === "gradient" ? (
+          <UserSettingsBackground
+            bgColor1={bgColor1}
+            bgColor2={bgColor2}
+            setBgColor1={setBgColor1}
+            setBgColor2={setBgColor2}
+          />
+        ) : (
+          <UserSettingsBannerImageInput
+            imageToShow={bannerPreviewUrl}
+            setFile={setBannerFile}
+          />
+        )}
 
-            <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
-              <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
-              <Button
-                variant="secondary"
-                size="lg"
-                disabled={isSaving}
-                onClick={handleClose}
-                fullWidth
-                className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
+        <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
+          <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
+          <Button
+            variant="secondary"
+            size="lg"
+            disabled={isSaving}
+            onClick={handleClose}
+            fullWidth
+            className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
+          >
+            Cancel
+          </Button>
         </div>
-      </div>
-    </dialog>,
-    document.body
+      </form>
+    </MobileWrapperDialog>
   );
 }

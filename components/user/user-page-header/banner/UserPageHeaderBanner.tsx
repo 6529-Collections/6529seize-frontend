@@ -3,8 +3,6 @@
 import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   getBannerColorValue,
@@ -77,23 +75,14 @@ export default function UserPageHeaderBanner({
           </div>
         </button>
       )}
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
-            <UserPageHeaderEditBanner
-              profile={profile}
-              defaultBanner1={defaultBanner1}
-              defaultBanner2={defaultBanner2}
-              onClose={() => setIsEditOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isEditOpen && (
+        <UserPageHeaderEditBanner
+          profile={profile}
+          defaultBanner1={defaultBanner1}
+          defaultBanner2={defaultBanner2}
+          onClose={() => setIsEditOpen(false)}
+        />
+      )}
     </div>
   );
 }

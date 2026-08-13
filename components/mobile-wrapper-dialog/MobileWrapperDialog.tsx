@@ -31,6 +31,10 @@ const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
 const DISMISS_DRAG_SETTLE_MS = 180;
 const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
+const MOBILE_DIALOG_KEYBOARD_INSET =
+  "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
+  "var(--native-keyboard-layout-transition-duration, 0ms)";
 
 type MobileWrapperDialogProps = {
   readonly title?: string | undefined;
@@ -191,12 +195,15 @@ function getDialogHeight({
   readonly isCapacitor: boolean;
 }): string {
   const viewportHeight = "min(100vh, 100svh)";
+  const restingHeight =
+    tall && !isCapacitor
+      ? `calc(${viewportHeight} - 4rem)`
+      : `calc(${viewportHeight} - 10rem)`;
+  const keyboardAvailableHeight =
+    `max(0px, calc(${viewportHeight} - 4rem - ` +
+    `${MOBILE_DIALOG_KEYBOARD_INSET}))`;
 
-  if (tall && !isCapacitor) {
-    return `calc(${viewportHeight} - 4rem)`;
-  }
-
-  return `calc(${viewportHeight} - 10rem)`;
+  return `min(${restingHeight}, ${keyboardAvailableHeight})`;
 }
 
 function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
@@ -250,9 +257,17 @@ function getDragPanelClassNames(canDragToClose: boolean) {
 
 function getContainerClassNames(tabletModal?: boolean | undefined) {
   return clsx(
-    "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10",
-    tabletModal && "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0"
+    "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10 [--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]",
+    tabletModal &&
+      "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0 md:[--mobile-wrapper-dialog-keyboard-inset:0px]"
   );
+}
+
+function getContainerStyle(): CSSProperties {
+  return {
+    bottom: MOBILE_DIALOG_KEYBOARD_INSET,
+    transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+  };
 }
 
 function getSurfaceClassNames({
@@ -320,7 +335,15 @@ function getSurfaceStyle({
   readonly dialogHeight: string;
   readonly fixedHeight?: boolean | undefined;
 }): CSSProperties {
-  return fixedHeight ? { height: dialogHeight } : { maxHeight: dialogHeight };
+  const dimension = fixedHeight ? "height" : "max-height";
+  const size = fixedHeight
+    ? { height: dialogHeight }
+    : { maxHeight: dialogHeight };
+
+  return {
+    ...size,
+    transition: `${dimension} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+  };
 }
 
 function FloatingCloseButton({
@@ -672,6 +695,7 @@ export default function MobileWrapperDialog({
   });
   const dragPanelClassNames = getDragPanelClassNames(canDragToClose);
   const containerClassNames = getContainerClassNames(tabletModal);
+  const containerStyle = getContainerStyle();
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
     canDragToClose,
@@ -720,7 +744,7 @@ export default function MobileWrapperDialog({
             className="tw-absolute tw-inset-0 tw-overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className={containerClassNames}>
+            <div className={containerClassNames} style={containerStyle}>
               <TransitionChild as={Fragment} {...slideTransition}>
                 <div className={panelClassNames}>
                   <DialogPanel

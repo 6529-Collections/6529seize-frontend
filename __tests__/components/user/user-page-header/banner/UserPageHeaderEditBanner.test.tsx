@@ -54,6 +54,14 @@ function renderComponent() {
 }
 
 describe('UserPageHeaderEditBanner', () => {
+  it('renders in the shared responsive profile cover dialog', () => {
+    renderComponent();
+
+    expect(
+      screen.getByRole('dialog', { name: 'Profile cover' })
+    ).toBeInTheDocument();
+  });
+
   it('enables save when background changes and submits update', async () => {
     const user = userEvent.setup();
     renderComponent();

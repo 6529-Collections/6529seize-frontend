@@ -55,6 +55,20 @@ const profile = {
 } as any;
 
 describe("UserPageHeaderEditPfp", () => {
+  it("renders in the shared responsive profile picture dialog", () => {
+    render(
+      <AuthContext.Provider value={authCtx}>
+        <ReactQueryWrapperContext.Provider value={queryCtx}>
+          <UserPageHeaderEditPfp profile={profile} onClose={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.getByRole("dialog", { name: "Profile picture" })
+    ).toBeInTheDocument();
+  });
+
   it("shows error when file too big", async () => {
     render(
       <AuthContext.Provider value={authCtx}>

@@ -12,6 +12,7 @@ describe("UserSettingsClassification", () => {
       <UserSettingsClassification
         selected={ApiProfileClassification.Ai}
         onSelect={onSelect}
+        inlineOptions
       />
     );
     const toggle = screen.getByRole("button");
@@ -23,6 +24,10 @@ describe("UserSettingsClassification", () => {
     const optionsId = toggle.getAttribute("aria-controls");
     expect(optionsId).not.toBeNull();
     expect(document.getElementById(optionsId!)).toBeInTheDocument();
+    expect(document.getElementById(optionsId!)?.parentElement?.parentElement)
+      .toHaveClass("tw-relative");
+    expect(document.getElementById(optionsId!)?.parentElement?.parentElement)
+      .not.toHaveClass("tw-absolute");
     const option = await screen.findByRole("button", {
       name: CLASSIFICATIONS[ApiProfileClassification.Pseudonym].title,
     });
