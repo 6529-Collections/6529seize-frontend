@@ -56,7 +56,7 @@ function programDescription(program: MuseumAcquisitionProgram): string {
   if (program.id === "AP-GIFT-01") {
     return "A standing route for considered gifts, with each gift recorded as its own curated acquisition.";
   }
-  if (program.id === "6529NM-AP-01") {
+  if (program.slug === "keys-and-gates") {
     return "A focused photographic acquisition program. Its selected works remain unminted while the acquisition proceeds.";
   }
   return t(
