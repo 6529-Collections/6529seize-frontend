@@ -99,14 +99,14 @@ Use this page for visibility rules, state switches, and route targets.
   alongside its wave, submission time, and rating details.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
-- Latest Drop and mapped Next Drop cards show a separate `Your allowlist` row.
-  It checks the connected wallet only and lists every Phase 0, Phase 1, or Phase
-  2 entry with a positive manual-allowlist allocation. Subscription airdrops do
-  not count as manual allowlist access.
-- The allowlist row asks disconnected users to connect a wallet, keeps a stable
-  checking state while wallet/API data loads, and distinguishes no matching
-  phase from an unavailable lookup. It reports allowlist membership, not whether
-  an allocation is still unused or mintable now.
+- Latest Drop and mapped Next Drop cards show `Your allocation` only while a
+  wallet is connected. Compact wrapping pills list each nonzero Phase 0, Phase
+  1, Phase 2, or Public allocation, spelling out Airdrop and Allowlist counts;
+  Public can contain Airdrop only.
+- The allocation row distinguishes loading, an unpublished distribution, a
+  published distribution with no matching allocation, and an unavailable
+  lookup. It reports planned allocation, not whether it is still unused or
+  mintable now.
 - Latest Drop subscription awareness is read-only and links to subscription
   info/profile subscriptions without querying the upcoming-meme status endpoint
   for the current or already-dropped card.
