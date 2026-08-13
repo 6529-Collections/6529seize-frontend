@@ -7,29 +7,6 @@ import { updateMentionAlias } from "@/services/api/mention-aliases-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
-  __esModule: true,
-  default: ({
-    children,
-    isOpen,
-    title,
-    titleActions,
-    headerActions,
-  }: {
-    children: React.ReactNode;
-    isOpen: boolean;
-    title: string;
-    titleActions?: React.ReactNode;
-    headerActions?: React.ReactNode;
-  }) =>
-    isOpen ? (
-      <div role="dialog" aria-label={title}>
-        {titleActions}
-        {headerActions}
-        {children}
-      </div>
-    ) : null,
-}));
 jest.mock("@/hooks/useMentionAliases", () => ({
   useMentionAliases: jest.fn(),
 }));
@@ -160,7 +137,7 @@ describe("UserPageMentionShortcuts", () => {
     } as ReturnType<typeof useMentionAliases>);
   });
 
-  it("renders owner-only Quick Tags as a compact single-row Brain section", () => {
+  it("renders owner-only Quick Tags as a compact Brain section", () => {
     renderQuickTags();
 
     const section = screen.getByTestId("quick-tags-section");
@@ -170,24 +147,23 @@ describe("UserPageMentionShortcuts", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText("Mention several profiles with one shortcut.")
-    ).toHaveClass("tw-whitespace-nowrap");
+    ).not.toHaveClass("tw-whitespace-nowrap");
     expect(screen.getByRole("button", { name: "Manage" })).toBeInTheDocument();
     expect(screen.getByText("@frens")).toBeInTheDocument();
     expect(screen.getByText("6 members")).toBeInTheDocument();
     expect(screen.getByText("B")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "+1 more" })).toBeInTheDocument();
     expect(screen.queryByText("@writers")).not.toBeInTheDocument();
-    expect(section.querySelector(".tw-flex-nowrap")).toBeInTheDocument();
+    expect(section.querySelector(".tw-flex-wrap")).toBeInTheDocument();
   });
 
-  it("opens the complete manager from Manage", () => {
+  it("opens the complete inline manager from Manage", () => {
     renderQuickTags();
 
     fireEvent.click(screen.getByRole("button", { name: "Manage" }));
 
-    expect(
-      screen.getByRole("dialog", { name: "Quick Tags" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("quick-tags-manager")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "New Quick Tag" })
     ).toBeInTheDocument();
@@ -321,9 +297,7 @@ describe("UserPageMentionShortcuts", () => {
     expect(
       screen.queryByRole("button", { name: /@alice/i })
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /@alex/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /@alex/i })).toBeInTheDocument();
   });
 
   it("does not render on another profile or while acting as a proxy", () => {
