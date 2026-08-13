@@ -125,6 +125,7 @@ describe("notify-ci-wave Release Train metadata", () => {
     const result = await runNotifier({
       CI_PIPELINES_NOTIFICATION_TYPE: "release_validation",
       CI_PIPELINES_SHA: expectedSha,
+      CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN: "prxt6529",
     });
 
     expect(result).toMatchObject({
@@ -136,6 +137,7 @@ describe("notify-ci-wave Release Train metadata", () => {
         release_group_id: "6529-Collections/6529seize-frontend:123",
         sha: expectedSha,
         status: "success",
+        triggered_by_github_login: "prxt6529",
       },
     });
     expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
@@ -148,6 +150,7 @@ describe("notify-ci-wave Release Train metadata", () => {
       CI_PIPELINES_VALIDATION_MODE: "manual",
       CI_PIPELINES_SHA: "d".repeat(40),
       CI_RELEASE_GROUP_ID: "6529-Collections/6529seize-frontend:999",
+      CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN: "GelatoGenesis",
     });
 
     expect(result).toMatchObject({
@@ -157,8 +160,21 @@ describe("notify-ci-wave Release Train metadata", () => {
         notification_type: "release_validation",
         validation_mode: "manual",
         release_group_id: "6529-Collections/6529seize-frontend:999",
+        triggered_by_github_login: "GelatoGenesis",
       },
     });
+  });
+
+  it("rejects an invalid explicit workflow initiator", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN: "not a login",
+    });
+
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain(
+      "CI pipeline initiator is not a valid GitHub login"
+    );
+    expect(result.payload).toBeNull();
   });
 
   it("rejects release validation without an explicit exact SHA", async () => {

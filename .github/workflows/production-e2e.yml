@@ -217,6 +217,7 @@ jobs:
           CI_PIPELINES_STATUS: ${{ job.status == 'success' && 'success' || 'failure' }}
           CI_PIPELINES_NOTIFICATION_TYPE: release_validation
           CI_PIPELINES_VALIDATION_MODE: manual
+          CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN: ${{ github.triggering_actor }}
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: manual production revalidation"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web

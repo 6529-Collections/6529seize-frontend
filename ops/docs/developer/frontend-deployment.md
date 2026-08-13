@@ -68,7 +68,11 @@ and starts release-note generation without waiting for automatic E2E. A second
 notifier runs after E2E and asks the backend to attach a threaded validation
 reply to those release notes. A failed validation is therefore visible as an
 explicit invalid result and tags `devs6529`; it does not erase or suppress the
-record of what was deployed. A later successful manual recovery run appends a
+record of what was deployed. Failed automatic validation identifies the user
+who initiated the deployment; failed manual revalidation identifies the user
+who initiated that recovery run. The notifier passes this explicit GitHub
+initiator instead of attributing reusable-workflow execution to
+`github-actions`. A later successful manual recovery run appends a
 new manual-revalidation reply to the same release-note thread, preserving both
 the original failure and the subsequent recovery. Deployments with no previous
 baseline or no newly merged pull requests still receive a minimal parent post,

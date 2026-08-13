@@ -407,6 +407,7 @@ jobs:
           CI_PIPELINES_STATUS: failure
           CI_PIPELINES_NOTIFICATION_TYPE: release_validation
           CI_PIPELINES_VALIDATION_MODE: automatic
+          CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN: ${{ github.triggering_actor }}
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: post-deployment validation failed"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
@@ -427,6 +428,7 @@ jobs:
           CI_PIPELINES_STATUS: success
           CI_PIPELINES_NOTIFICATION_TYPE: release_validation
           CI_PIPELINES_VALIDATION_MODE: automatic
+          CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN: ${{ github.triggering_actor }}
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: post-deployment validation passed"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web

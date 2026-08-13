@@ -9,6 +9,7 @@ const {
   CI_PIPELINES_STATUS,
   CI_PIPELINES_NOTIFICATION_TYPE,
   CI_PIPELINES_VALIDATION_MODE,
+  CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN,
   CI_PIPELINES_TITLE,
   CI_PIPELINES_DESCRIPTION,
   CI_PIPELINES_ENVIRONMENT,
@@ -143,7 +144,18 @@ if (
   );
   process.exit(1);
 }
-const triggeredByGithubLogin = GITHUB_TRIGGERING_ACTOR || GITHUB_ACTOR || null;
+const triggeredByGithubLogin =
+  CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN ||
+  GITHUB_TRIGGERING_ACTOR ||
+  GITHUB_ACTOR ||
+  null;
+if (
+  triggeredByGithubLogin &&
+  !isContributorGithubLogin(triggeredByGithubLogin)
+) {
+  console.error("CI pipeline initiator is not a valid GitHub login");
+  process.exit(1);
+}
 let releaseContributors = [];
 try {
   releaseContributors = parseReleaseContributors(CI_RELEASE_CONTRIBUTORS);

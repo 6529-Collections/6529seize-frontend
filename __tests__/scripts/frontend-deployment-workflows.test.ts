@@ -242,6 +242,9 @@ describe("frontend deployment workflow contract", () => {
       expect(step.env.CI_PIPELINES_NOTIFICATION_TYPE).toBe(
         "release_validation"
       );
+      expect(step.env.CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN).toBe(
+        "${{ github.triggering_actor }}"
+      );
       expect(step.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
     }
     expect(validationFailure.env.CI_PIPELINES_STATUS).toBe("failure");

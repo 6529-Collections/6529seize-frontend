@@ -188,6 +188,9 @@ describe("serialized post-deploy E2E", () => {
       "release_validation"
     );
     expect(notification.env.CI_PIPELINES_VALIDATION_MODE).toBe("manual");
+    expect(notification.env.CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN).toBe(
+      "${{ github.triggering_actor }}"
+    );
     expect(notification.env.CI_RELEASE_GROUP_ID).toBe(
       "${{ github.repository }}:${{ inputs.automatic_deploy_run_id }}"
     );
