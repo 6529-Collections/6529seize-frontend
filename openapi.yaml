@@ -2124,7 +2124,7 @@ paths:
           description: NFT contract address
           required: true
           schema:
-            type: string
+            $ref: "#/components/schemas/ApiEthereumAddress"
         - name: card_id
           in: path
           description: Card ID
@@ -2138,7 +2138,7 @@ paths:
           description: Wallet address whose allocations should be returned
           required: true
           schema:
-            type: string
+            $ref: "#/components/schemas/ApiEthereumAddress"
       responses:
         "200":
           description: successful operation
