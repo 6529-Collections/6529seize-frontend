@@ -1,3 +1,4 @@
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import Button from "@/components/utils/button/Button";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
@@ -5,11 +6,76 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { RateMatter } from "@/types/enums";
-import type { RepDirection } from "./UserPageRep.helpers";
+import { ChevronRightIcon } from "@heroicons/react/24/solid";
+import { useMemo } from "react";
+import { buildRepAvatarItems } from "./buildRepAvatarItems";
+import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
 import RepCategoryPill from "./RepCategoryPill";
 import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
+
+function RepContributorControl({
+  overview,
+  repDirection,
+  onOpenOverviewContributors,
+}: {
+  readonly overview: ApiRepOverview | null;
+  readonly repDirection: RepDirection;
+  readonly onOpenOverviewContributors: () => void;
+}) {
+  const repAvatarItems = useMemo(
+    () =>
+      buildRepAvatarItems(overview?.contributors.data ?? [], 3, {
+        omitHref: true,
+      }),
+    [overview?.contributors.data]
+  );
+
+  if (!overview) {
+    return null;
+  }
+
+  const contributorLabel = getContributorLabel(
+    repDirection,
+    overview.contributor_count
+  );
+  const contributorContent = (
+    <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+      {repAvatarItems.length > 0 && (
+        <span className="tw-flex-shrink-0">
+          <OverlappingAvatars items={repAvatarItems} size="sm" maxCount={3} />
+        </span>
+      )}
+      <span className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-300">
+        {formatNumberWithCommas(overview.contributor_count)} {contributorLabel}
+      </span>
+    </span>
+  );
+
+  if (overview.contributor_count <= 0) {
+    return (
+      <span className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-items-center tw-px-1">
+        {contributorContent}
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={`View ${formatNumberWithCommas(overview.contributor_count)} ${contributorLabel}`}
+      onClick={onOpenOverviewContributors}
+      className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.04] tw-px-2.5 tw-py-1 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.14] desktop-hover:hover:tw-bg-white/[0.07] motion-reduce:tw-transition-none"
+    >
+      {contributorContent}
+      <ChevronRightIcon
+        aria-hidden="true"
+        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
+      />
+    </button>
+  );
+}
 
 function RepEmptyState({
   loading,
@@ -46,6 +112,7 @@ export default function MobileRepTabContent({
   hasNextPage,
   isFetchingNextPage,
   onGrantRep,
+  onOpenOverviewContributors,
   onEditCategory,
   onOpenGlobalCategory,
   onOpenCategoryContributors,
@@ -63,6 +130,7 @@ export default function MobileRepTabContent({
   readonly hasNextPage: boolean;
   readonly isFetchingNextPage: boolean;
   readonly onGrantRep: () => void;
+  readonly onOpenOverviewContributors: () => void;
   readonly onEditCategory: (category: string) => void;
   readonly onOpenGlobalCategory: (category: string) => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
@@ -83,55 +151,6 @@ export default function MobileRepTabContent({
 
   return (
     <>
-      {canEditRep && repDirection === "received" && (
-        <div className="tw-mt-4">
-          <UserPageRateWrapper
-            profile={profile}
-            type={RateMatter.REP}
-            hideOwnProfileMessage
-          >
-            <button
-              type="button"
-              onClick={onGrantRep}
-              className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/30 tw-bg-blue-400/5 tw-px-4 tw-py-2.5 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-400/10"
-            >
-              {overview !== null &&
-              overview.authenticated_user_contribution !== null &&
-              overview.authenticated_user_contribution !== 0 ? (
-                <span className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
-                  You Assigned:{" "}
-                  <span className="tw-font-semibold tw-text-iron-300">
-                    {overview.authenticated_user_contribution > 0 && "+"}
-                    {formatNumberWithCommas(
-                      overview.authenticated_user_contribution
-                    )}
-                  </span>
-                </span>
-              ) : (
-                <span className="tw-text-xs tw-font-medium tw-text-blue-300/70">
-                  Add rep to this identity
-                </span>
-              )}
-              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white">
-                <svg
-                  className="-tw-ml-1 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Grant Rep
-              </span>
-            </button>
-          </UserPageRateWrapper>
-        </div>
-      )}
-
       {repDirection === "given" &&
         overview !== null &&
         overview.authenticated_user_contribution !== null &&
@@ -148,11 +167,64 @@ export default function MobileRepTabContent({
         )}
 
       <div className="tw-mt-4">
-        <div className="tw-mb-4">
-          <div className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-            Rep Categories
+        <div className="tw-mb-4 sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-center sm:tw-gap-x-6">
+          <div className="tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-3 sm:tw-justify-start sm:tw-gap-6">
+            <div className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              Rep Categories
+            </div>
+            <RepContributorControl
+              overview={overview}
+              repDirection={repDirection}
+              onOpenOverviewContributors={onOpenOverviewContributors}
+            />
           </div>
-          <div className="tw-mt-3 tw-w-full sm:tw-w-fit">
+          {canEditRep && repDirection === "received" && (
+            <div className="tw-mt-3 tw-w-full sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-mt-0 sm:tw-w-auto">
+              <UserPageRateWrapper
+                profile={profile}
+                type={RateMatter.REP}
+                hideOwnProfileMessage
+              >
+                <div className="tw-flex tw-w-full tw-flex-col tw-items-stretch tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center sm:tw-gap-3">
+                  {overview !== null &&
+                  overview.authenticated_user_contribution !== null &&
+                  overview.authenticated_user_contribution !== 0 ? (
+                    <span className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
+                      You Assigned:{" "}
+                      <span className="tw-font-semibold tw-text-iron-300">
+                        {overview.authenticated_user_contribution > 0 && "+"}
+                        {formatNumberWithCommas(
+                          overview.authenticated_user_contribution
+                        )}
+                      </span>
+                    </span>
+                  ) : null}
+                  <Button
+                    variant="action"
+                    size="sm"
+                    fullWidth
+                    onClick={onGrantRep}
+                    className="sm:tw-w-auto"
+                  >
+                    <svg
+                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0 sm:tw-h-5 sm:tw-w-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Grant Rep
+                  </Button>
+                </div>
+              </UserPageRateWrapper>
+            </div>
+          )}
+          <div className="tw-mt-3 tw-w-full sm:tw-col-start-1 sm:tw-row-start-2 sm:tw-w-fit">
             <RepDirectionToggle
               repDirection={repDirection}
               onRepDirectionChange={onRepDirectionChange}

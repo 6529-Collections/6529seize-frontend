@@ -4,7 +4,7 @@ export default function ProfileActivityLogItemAction({
   readonly action: string;
 }) {
   return (
-    <span className="tw-whitespace-nowrap tw-text-sm lg:tw-text-base tw-text-iron-500 tw-font-normal empty:tw-hidden">
+    <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500 empty:tw-hidden sm:tw-text-base">
       {action}
     </span>
   );

@@ -94,9 +94,9 @@ export default function UserPageRepHeader({
     <>
       <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-gradient-to-br tw-from-[#0f1014] tw-via-[#0A0A0C] tw-to-[#08090b] tw-shadow-2xl">
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-blue-500/[0.05] tw-via-transparent tw-to-transparent tw-opacity-100" />
-        <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-[1px] tw-bg-gradient-to-r tw-from-transparent tw-via-blue-400/40 tw-to-transparent" />
-        <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-[1px] tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
-        <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-[1px] tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
+        <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
+        <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/10 tw-to-transparent" />
+        <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/10 tw-to-transparent" />
 
         <div className="tw-relative tw-p-6">
           <div className="tw-flex tw-items-end tw-justify-between tw-gap-6">
@@ -190,10 +190,7 @@ export default function UserPageRepHeader({
               </div>
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
                 {canEditRep && repDirection === "received" && (
-                  <Button
-                    size="md"
-                    onClick={() => setIsGrantRepOpen(true)}
-                  >
+                  <Button size="md" onClick={() => setIsGrantRepOpen(true)}>
                     <PlusIcon
                       aria-hidden="true"
                       className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
