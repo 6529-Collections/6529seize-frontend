@@ -51,15 +51,23 @@ function buildProjectCards(
         .filter((artwork) => project.artworkIds.includes(artwork.id))
         .map((artwork) => selectMuseumStillMedia(artwork.media))
         .find((candidate) => candidate !== undefined);
+    const presentationMedia = works
+      .flatMap((work) => work.presentationMedia ?? [])
+      .at(0);
     return {
       id: project.id,
       href: museumProjectHref(project.slug),
       title: project.title,
       artistNames: projectArtists(publication, project),
-      platform: project.platform,
-      releaseYear: project.releaseYear,
+      ...(project.platform.trim().length === 0
+        ? {}
+        : { platform: project.platform }),
+      ...(project.releaseYear > 0 ? { releaseYear: project.releaseYear } : {}),
       workCount: Math.max(works.length, declaredWorkCount),
       ...(media === undefined ? {} : { media }),
+      ...(media === undefined && presentationMedia !== undefined
+        ? { presentationMedia }
+        : {}),
     };
   });
 }

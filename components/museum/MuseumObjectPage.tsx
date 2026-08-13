@@ -124,10 +124,15 @@ function hasMagnumInstitutionalDisplayRights(work: MuseumPublicWork): boolean {
     return false;
   }
 
-  return [...work.media, ...(work.mediaMetadata ?? [])].some(
-    (media) =>
-      media.credit.licenseLabel === "All Rights Reserved" &&
-      media.credit.sourcePath.trim().length > 0
+  return (
+    [...work.media, ...(work.mediaMetadata ?? [])].some(
+      (media) =>
+        media.credit.licenseLabel === "All Rights Reserved" &&
+        media.credit.sourcePath.trim().length > 0
+    ) ||
+    (work.presentationMedia ?? []).some(
+      (media) => media.credit.sourcePath.trim().length > 0
+    )
   );
 }
 
@@ -154,6 +159,7 @@ function MuseumCanonicalWorkMedia({
               <MuseumProgramImage
                 media={publicWorkMedia(stillMedia)}
                 sizes="(min-width: 640px) 50vw, 100vw"
+                className="tw-block tw-h-auto tw-w-full tw-object-contain"
               />
             </div>
             <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">

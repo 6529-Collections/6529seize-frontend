@@ -27,6 +27,7 @@ export type MuseumLandingMedia =
       readonly sourceHref?: string;
       readonly sourceLabel?: string;
       readonly creditLine?: string;
+      readonly requireIntentForLargeSource?: boolean;
     }
   | {
       readonly kind: "program";
@@ -63,6 +64,7 @@ function MediaFrame({
         width={media.width}
         height={media.height}
         sourceByteSize={media.sourceByteSize}
+        requireIntentForLargeSource={media.requireIntentForLargeSource ?? true}
         {...(media.sourceHref === undefined || media.sourceLabel === undefined
           ? {}
           : {
