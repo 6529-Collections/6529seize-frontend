@@ -495,8 +495,7 @@ export const ES_ES_MESSAGES = {
     "Nombres que se muestran en las pestañas de esta Wave.",
   "waves.proposalCard.approvalsTabLabel":
     "Etiqueta de la pestaña de propuestas",
-  "waves.proposalCard.approvedTabLabel":
-    "Etiqueta de la pestaña de aprobadas",
+  "waves.proposalCard.approvedTabLabel": "Etiqueta de la pestaña de aprobadas",
   "waves.proposalCard.tabLabels.errorTooLong":
     "Las etiquetas deben tener {max} caracteres o menos.",
   "waves.proposalCard.tabLabels.errorDuplicate":
@@ -625,5 +624,22 @@ export const ES_ES_MESSAGES = {
   "theMemes.volume.7Days": "7 días",
   "theMemes.volume.30Days": "30 días",
   "theMemes.volume.allTime": "Todo el tiempo",
+  "home.mintAllowlist.label": "Tu asignación",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Asignaciones de mint de la wallet conectada",
+  "home.mintAllowlist.checking": "Comprobando tu asignación…",
+  "home.mintAllowlist.notPublished":
+    "La asignación estará disponible cuando se publique la distribución.",
+  "home.mintAllowlist.notFound": "No se encontró asignación para esta wallet.",
+  "home.mintAllowlist.unavailable":
+    "La información de asignación no está disponible temporalmente.",
+  "home.mintAllowlist.phase.phase0": "Fase 0",
+  "home.mintAllowlist.phase.phase1": "Fase 1",
+  "home.mintAllowlist.phase.phase2": "Fase 2",
+  "home.mintAllowlist.phase.public": "Pública",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
   ...ES_ES_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;
