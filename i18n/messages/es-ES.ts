@@ -433,7 +433,9 @@ export const ES_ES_MESSAGES = {
   "waves.create.advanced.needsAttention": "Requiere atención",
   "waves.create.advanced.errorSummary":
     "Revisa los ajustes señalados antes de continuar.",
+  "waves.create.overview.title": "Crear Wave",
   "waves.create.overview.picture": "Imagen de la Wave",
+  "waves.create.overview.advancedTitle": "Apariencia y etiquetas",
   "waves.create.overview.displaySettings": "Ajustes de visualización",
   "waves.create.groups.title": "Acceso",
   "waves.create.groups.description":
@@ -448,10 +450,21 @@ export const ES_ES_MESSAGES = {
   "waves.create.dates.approve.endSummary":
     "Empieza el {start}. Termina el {end}.",
   "waves.create.dates.approve.endInfoLabel": "Acerca del final de la Wave",
+  "waves.create.dates.approve.advancedSummary": "Final de la Wave",
   "waves.create.dates.rank.ongoingSummary":
     "Los envíos empiezan el {submission}. La votación empieza el {voting}. La clasificación permanece abierta.",
   "waves.create.dates.rank.scheduledSummary":
     "Los envíos empiezan el {submission}. La votación empieza el {voting}. Primeros ganadores: {announcement}.",
+  "waves.create.dates.rank.advancedSummary": "Calendario de ganadores",
+  "waves.create.drops.requirementsTitle": "Requisitos de envío",
+  "waves.create.rules.advancedSummary": "Reglas del creador y aceptación",
+  "waves.create.rules.chatAdvancedSummary": "Reglas del creador",
+  "waves.create.voting.rankAdvancedSummary":
+    "Límites y comportamiento del voto",
+  "waves.create.voting.approveAdvancedSummary":
+    "Límites, comportamiento y tiempos del voto",
+  "waves.create.outcomes.rankAdvancedSummary": "Visibilidad de los resultados",
+  "waves.create.outcomes.approveAdvancedSummary": "Límites de ganadores",
   "waves.create.drops.maxSimultaneousSubmissions.label":
     "Máximo de envíos simultáneos",
   "waves.create.drops.maxSimultaneousSubmissions.description":

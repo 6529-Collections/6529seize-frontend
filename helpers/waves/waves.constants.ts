@@ -179,9 +179,3 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
   [CreateWaveGroupConfigType.CAN_CHAT]: "Anyone",
   [CreateWaveGroupConfigType.ADMIN]: "Only me",
 };
-
-export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {
-  [ApiWaveType.Chat]: "Drops Submission Opens",
-  [ApiWaveType.Rank]: "Drops Submission Opens",
-  [ApiWaveType.Approve]: "Drops Submission Opens",
-};

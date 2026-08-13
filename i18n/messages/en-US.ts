@@ -849,8 +849,7 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.personalInsults.title": "Personal insult warning",
   "aboutEdit.errors.personalInsults.value":
     "Your About statement was flagged for a possible personal insult. Revise it and try again.",
-  "aboutEdit.errors.inappropriateLanguage.title":
-    "Language warning",
+  "aboutEdit.errors.inappropriateLanguage.title": "Language warning",
   "aboutEdit.errors.inappropriateLanguage.value":
     "Your About statement was flagged for language that may be inappropriate. Revise it and try again.",
   "aboutEdit.errors.doxxing.title": "Privacy warning",
@@ -1054,11 +1053,105 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
     "Review when this wave opens, voting begins, and winners are announced.",
   "approve.noEndSummary": "Starts {start}. No end date.",
   "approve.endSummary": "Starts {start}. Ends {end}.",
+  "approve.advancedSummary": "Wave end",
   "approve.endInfoLabel": "About wave end",
+  "approve.start.title": "Wave Start",
+  "approve.start.tooltip":
+    "Choose when the approve wave opens. Approvals and submissions start at the same moment.",
+  "approve.start.infoLabel": "About wave start",
+  "approve.start.description":
+    "This is when the approve wave opens for submissions and approvals.",
+  "approve.start.summaryLabel": "Wave Starts",
+  "approve.end.title": "Wave End",
+  "approve.end.tooltip":
+    "Choose when the approve wave closes. Leave it blank to keep the wave open until max winners is reached, or indefinitely if max winners is blank.",
+  "approve.end.description": "Optional. Leave blank for no end date.",
+  "approve.end.summaryLabel": "Wave Ends",
+  "approve.end.noEndDate": "No end date",
+  "approve.end.clearAriaLabel": "Clear end date",
+  "approve.end.error": "Wave end must be after wave start.",
+  "approve.end.dateLabel": "Select End Date:",
+  "approve.end.timeLabel": "Select End Time:",
+  "approve.end.disabledTimeGuidance":
+    "Pick an end date first. The earliest allowed end time is {earliest}.",
   "rank.ongoingSummary":
     "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
   "rank.scheduledSummary":
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
+  "rank.advancedSummary": "Winner schedule",
+  "rank.timeline.title": "Wave Timeline",
+  "rank.timeline.submissionLabel": "Drops Submission Opens",
+  "rank.timeline.votingLabel": "Drops Voting Begins",
+  "rank.timeline.submissionDescription":
+    "Creators begin submitting work to your wave",
+  "rank.timeline.votingDescription":
+    "Community voting on wave submissions begins",
+  "rank.announcements.title": "Winners Announcements",
+  "rank.announcements.summaryLabel": "Winners",
+  "rank.announcements.summarySingular": "{count} announcement",
+  "rank.announcements.summaryPlural": "{count} announcements",
+  "rank.announcements.recurringBadge": "Recurring",
+  "rank.announcements.futureError":
+    "First winners announcement and wave end must be in the future.",
+  "rank.announcements.endBeforeVotingError":
+    "Last winners announcement cannot be before voting begins. Move voting start earlier or move winner announcements later.",
+  "rank.announcements.firstBeforeVotingError":
+    "First winners announcement cannot be before voting begins. Move voting start earlier or move first winners announcement later.",
+  "rank.announcements.description":
+    "{emphasis} for showcasing selected creators. Set your first date, then add more if needed.",
+  "rank.announcements.descriptionEmphasis": "Winner announcements",
+  "rank.announcements.fixedEndNote":
+    "With a fixed schedule, the last announcement marks your wave's end date.",
+  "rank.announcements.examples":
+    "Examples: Weekly, monthly, or quarterly announcements.",
+  "rank.recurring.title": "Repeating Announcement Cycles",
+  "rank.recurring.description":
+    "Repeat this pattern until an optional end date",
+  "rank.recurring.switchLabel": "Enable recurring cycles",
+  "rank.recurring.enabledTitle": "Recurring cycles enabled.",
+  "rank.recurring.enabledDescription":
+    "Announcements will repeat until an optional end date, or keep going with no end date.",
+  "rank.additional.title": "Additional Announcements",
+  "rank.additional.timelineLabel": "Timeline:",
+  "rank.additional.timelineDescription":
+    "Define when winners will be selected throughout your wave.",
+  "rank.additional.firstTitle": "First Winners Announcement",
+  "rank.additional.announcementTitle": "Winners Announcement #{number}",
+  "rank.additional.removeAriaLabel": "Remove announcement #{number}",
+  "rank.additional.scheduleTitle": "Schedule Next Winners Announcement",
+  "rank.additional.scheduleDescription": "Set time between announcements",
+  "rank.additional.timeValueAriaLabel": "Time value",
+  "rank.additional.addButton": "Add to Timeline",
+  "rank.additional.previewLabel": "Preview:",
+  "rank.additional.previewNext": "Next announcement #{number} on {date}",
+  "rank.additional.previewFirst": "First additional announcement on {date}",
+  "rank.additional.intervalWeeks": "{count}w",
+  "rank.additional.intervalDays": "{count}d",
+  "rank.additional.intervalHours": "{count}h",
+  "rank.additional.intervalMinutes": "{count}m",
+  "rank.end.collapsedLabel": "Wave End Date",
+  "rank.end.noEndDate": "No end date",
+  "rank.end.optionalTitle": "Optional Wave End Date",
+  "rank.end.setTitle": "Set Optional End Date",
+  "rank.end.description": "Leave blank for no end date.",
+  "rank.end.summaryLabel": "Wave Ends",
+  "rank.end.clearAriaLabel": "Clear end date",
+  "rank.end.futureError": "Wave end date must be in the future.",
+  "rank.end.beforeVotingError": "Wave end date cannot be before voting begins.",
+  "rank.end.dateLabel": "Select Official End Date:",
+  "rank.end.timeLabel": "Select Time:",
+  "rank.end.disabledTimeGuidance":
+    "Pick an end date first. Recurring announcements currently have no end date.",
+  "rank.end.lastAnnouncementLabel": "Last winner announcement will be at:",
+  "rank.end.aboutRecurringTitle": "About Recurring Winners",
+  "rank.end.aboutFixedTitle": "About Wave End Date",
+  "rank.end.recurringDescription":
+    "In recurring mode, your wave continues announcing winners in regular intervals until an optional end date.",
+  "rank.end.recurringOpenEndedDescription":
+    "Leave the end date blank to keep recurring announcements open-ended.",
+  "rank.end.fixedDescription":
+    "Your wave will end immediately after the final winner announcement.",
+  "rank.end.totalAnnouncementsLabel": "Total winner announcements:",
 } as const);
 
 const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
@@ -1087,7 +1180,10 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
 } as const);
 
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  title: "Create Wave",
+  name: "Wave Name",
   picture: "Wave Profile Picture",
+  advancedTitle: "Appearance and labels",
   displaySettings: "Display settings",
 } as const);
 
@@ -1107,6 +1203,7 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
 const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
   title: "Drops",
   description: "Choose what participants can submit to this wave.",
+  requirementsTitle: "Submission requirements",
   "advanced.defaultSummary": "No additional submission requirements.",
   "advanced.customSummary": "Submission requirements customized.",
   "maxSimultaneousSubmissions.label": "Max simultaneous submissions",
@@ -1118,13 +1215,88 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
 
 const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   title: "Outcomes",
+  rankAdvancedSummary: "Outcome visibility",
+  approveAdvancedSummary: "Winner limits",
+  chooseType: "Choose outcome type",
   showOutcomes: "Show outcomes",
+  nicPositiveError: "NIC must be a positive number",
+  repPositiveError: "Rep must be a positive number",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
   "empty.title": "No outcomes yet — add at least one to continue",
   "empty.description":
     "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
+  "warning.unlimited.title": "Warning: Unlimited Awards",
+  "warning.unlimited.description":
+    "You have not set a maximum number of winners for this challenge. Everyone who meets the threshold will be awarded.",
+  "warning.indefinite.title": "Warning: Challenge Will Run Indefinitely",
+  "warning.indefinite.description":
+    "You have not set an end date or a maximum number of winners for this challenge. It will run indefinitely, and everyone who meets the threshold will be awarded.",
+} as const);
+
+const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
+  title: "Rules",
+  description:
+    "Automatic rules are generated from the wave setup. Add creator rules only for wave-specific requirements that are not already covered.",
+  advancedSummary: "Creator rules and acceptance",
+  chatAdvancedSummary: "Creator rules",
+  automaticTitle: "Automatic rules",
+  displayOnlyTitle: "Display-only creator rules",
+  displayOnlyDescription:
+    "These rules are shown in the wave rules panel. They do not require a signature.",
+  displayOnlyPlaceholder: "Add optional display-only creator rules...",
+  displayOnlyEmptyHint:
+    "Leave blank when automatic rules already cover the wave.",
+  acceptanceTitle: "Rules that require acceptance",
+  acceptanceToggle: "Require acceptance",
+  acceptanceDescription:
+    "Use this only for custom creator rules that participants must accept and sign before submitting.",
+  acceptancePlaceholder:
+    "Enter rules participants must accept before submitting...",
+  acceptanceHelper: "Participants will sign these rules with their wallet",
+} as const);
+
+const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
+  title: "How Drops are Voted",
+  ratingTitle: "How Drops are Rated",
+  rankAdvancedSummary: "Vote limits and behavior",
+  approveAdvancedSummary: "Vote limits, behavior, and timing",
+  "timeUnit.minutes": "Minutes",
+  "timeUnit.hours": "Hours",
+  "averaging.label": "Averaging Interval",
+  "averaging.description":
+    "The time period over which votes are averaged. Must be between {minMinutes} minutes and {maxHours} hours. Longer intervals are more resistant to manipulation.",
+  "averaging.unitAriaLabel": "Averaging interval time unit",
+  "scope.legend": "Voting power scope",
+  "scope.wave.label": "Whole wave",
+  "scope.wave.description":
+    "Each identity has one voting budget across the wave.",
+  "scope.drop.label": "Each drop",
+  "scope.drop.description": "Voting power applies separately to every drop.",
+  "negative.title": "Allow Negative Votes",
+  "negative.enabledDescription":
+    "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results.",
+  "negative.disabledDescription":
+    "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics.",
+  "negative.enabledLockedDescription":
+    "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results. This setting cannot be changed.",
+  "negative.disabledLockedDescription":
+    "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics. This setting cannot be changed.",
+  "timeWeighted.title": "Time-Weighted Voting",
+  "timeWeighted.description":
+    "Protects against last-minute vote manipulation by using a time-averaged vote count instead of the final tally. When enabled, votes are weighted based on when they were cast, making it harder to manipulate results at the end of voting.",
+  "approvalHold.legend": "Approval hold",
+  "approvalHold.none.label": "No hold",
+  "approvalHold.none.description":
+    "Approve as soon as the score reaches the threshold.",
+  "approvalHold.required.label": "Require hold time",
+  "approvalHold.required.description":
+    "Require the score to stay at or above the threshold.",
+} as const);
+
+const WAVE_CREATE_DROPDOWN_MESSAGES = objectMessages("waves.create.dropdown", {
+  currentValue: "Current value: {value}",
 } as const);
 
 const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
@@ -1135,6 +1307,11 @@ const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
 const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
   "waves.create.description",
   {
+    title: "Description",
+    description:
+      "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less.",
+    missingProfile:
+      "A profile handle is required to create a wave. Set up your profile, then come back to finish this step.",
     placeholder: "Describe your wave",
   } as const
 );
@@ -2803,6 +2980,9 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_CREATE_RULES_MESSAGES,
+  ...WAVE_CREATE_VOTING_MESSAGES,
+  ...WAVE_CREATE_DROPDOWN_MESSAGES,
   ...WAVE_CREATE_PROGRESS_MESSAGES,
   ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,

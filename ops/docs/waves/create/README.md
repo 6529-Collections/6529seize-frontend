@@ -49,8 +49,15 @@ Use this area to create:
   8. [Wave Creation Description Step](feature-description-step.md)
 - Step path by wave type:
   - `Chat`: `Overview -> Groups -> Rules -> Description`
-  - `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - Scheduled `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - `Perpetual Ranking`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Description`
   - `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+
+The default path keeps the decisions most creators need visible. Less common
+customization is available from expandable sections named for their contents,
+such as `Submission requirements` or `Vote limits and behavior`. A section
+shows `Customized` when saved or restored values differ from the defaults and
+opens as `Needs attention` when a hidden field fails validation.
 
 ### Direct-Message Journey
 

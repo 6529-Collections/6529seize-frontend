@@ -24,7 +24,11 @@ export default function GroupCreateIdentitySelectedItems({
   const isInline = variant === "inline";
 
   return (
-    <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 empty:tw-hidden">
+    <div
+      className={`${
+        isInline ? "" : "tw-mt-3"
+      } tw-flex tw-flex-wrap tw-gap-2 empty:tw-hidden`}
+    >
       {selectedIdentities.map((identity) => (
         <div
           key={identity.wallet}

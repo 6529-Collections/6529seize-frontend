@@ -50,7 +50,8 @@ export default function CreateWaveInlineGroupIdentities({
     identities.length === 0
       ? t(locale, "waves.create.groups.inlineIdentities.emptyHelper")
       : null;
-  const showHelperRow = !!identitiesHelperText || !!currentUserIdentity;
+  const showIdentityControlsRow =
+    identities.length > 0 || !!identitiesHelperText || !!currentUserIdentity;
   const showCurrentUserExcludedWarning =
     identities.length > 0 && !!currentUserIdentity && !isCurrentUserSelected;
 
@@ -81,24 +82,37 @@ export default function CreateWaveInlineGroupIdentities({
               onIdentitySelect={onIdentitySelect}
               placeholder="Search identities..."
               hideLabel={true}
-              inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
-              iconClassName="tw-top-3.5 tw-text-iron-500"
+              inputClassName="tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
+              iconClassName="tw-text-iron-500"
               resultsLayout={resultsLayout}
             />
           </div>
           {onCancel && (
-            <Button variant="secondary" size="xs" onClick={onCancel}>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={onCancel}
+            >
               {t(locale, "waves.create.actions.cancel")}
             </Button>
           )}
         </div>
-        {showHelperRow && (
+        {showIdentityControlsRow && (
           <div
             className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 ${
-              identitiesHelperText ? "tw-justify-between" : "tw-justify-end"
+              identities.length > 0 || identitiesHelperText
+                ? "tw-justify-between"
+                : "tw-justify-end"
             }`}
           >
-            {identitiesHelperText && (
+            {identities.length > 0 && (
+              <GroupCreateIdentitySelectedItems
+                selectedIdentities={[...identities]}
+                onRemove={onRemove}
+                variant="inline"
+              />
+            )}
+            {identities.length === 0 && identitiesHelperText && (
               <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
                 {identitiesHelperText}
               </p>
@@ -146,13 +160,6 @@ export default function CreateWaveInlineGroupIdentities({
           </div>
         )}
       </div>
-      {identities.length > 0 && (
-        <GroupCreateIdentitySelectedItems
-          selectedIdentities={[...identities]}
-          onRemove={onRemove}
-          variant="inline"
-        />
-      )}
       {showCurrentUserExcludedWarning && (
         <p
           role="status"

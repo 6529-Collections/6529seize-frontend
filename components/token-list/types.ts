@@ -9,6 +9,7 @@ export type TokenListAction = {
   label: string;
   onClick: (tokenId: bigint, metadata?: TokenMetadata) => void;
   getAriaLabel?: ((tokenLabel: string) => string) | undefined;
+  className?: string | undefined;
 };
 
 export type TokenWindowEntry = {

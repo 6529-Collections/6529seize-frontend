@@ -8,9 +8,9 @@ export default function CreateWaveDropsMetadataRowType({
   readonly onTypeChange: (type: ApiWaveMetadataType) => void;
 }) {
   const activeClasses =
-    "tw-ring-primary-400 tw-bg-[#202B45] tw-text-primary-400 tw-z-10";
+    "tw-ring-primary-400 tw-bg-primary-500/10 tw-text-primary-400 tw-z-10";
   const inactiveClasses =
-    "tw-ring-iron-650 tw-bg-iron-900 hover:tw-bg-iron-800 tw-text-iron-300";
+    "tw-ring-white/10 tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-300";
 
   const STRING_CLASSES =
     activeType === ApiWaveMetadataType.String ? activeClasses : inactiveClasses;
@@ -21,7 +21,7 @@ export default function CreateWaveDropsMetadataRowType({
       <button
         onClick={() => onTypeChange(ApiWaveMetadataType.String)}
         title="Text"
-        className={`${STRING_CLASSES} tw-flex-shrink-0 tw-ring-1 tw-ring-inset focus:tw-z-10 tw-rounded-l-lg tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
+        className={`${STRING_CLASSES} tw-w-12 tw-flex-1 tw-flex-shrink-0 tw-whitespace-nowrap tw-rounded-l-lg tw-border-0 tw-py-2.5 tw-text-sm tw-font-semibold tw-leading-5 tw-ring-1 tw-ring-inset tw-transition-all tw-duration-300 tw-ease-out focus:tw-z-10 sm:tw-flex-none`}
         type="button"
       >
         <svg
@@ -43,7 +43,7 @@ export default function CreateWaveDropsMetadataRowType({
       <button
         onClick={() => onTypeChange(ApiWaveMetadataType.Number)}
         title="Number"
-        className={`${NUMBER_CLASSES} tw-flex-shrink-0 -tw-ml-px focus:tw-z-10 tw-ring-1 tw-ring-inset tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
+        className={`${NUMBER_CLASSES} -tw-ml-px tw-w-12 tw-flex-1 tw-flex-shrink-0 tw-whitespace-nowrap tw-border-0 tw-py-2.5 tw-text-sm tw-font-semibold tw-leading-5 tw-ring-1 tw-ring-inset tw-transition-all tw-duration-300 tw-ease-out focus:tw-z-10 sm:tw-flex-none`}
         type="button"
       >
         <svg

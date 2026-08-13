@@ -6,11 +6,9 @@ The `Dates` step sets timing for `Rank` and `Approve` waves.
 `Rank` waves set submission, voting, and winner announcement timing.
 `Approve` waves set when the wave opens and an optional end date.
 
-The default view is a compact `Schedule` summary built from the current draft
-values. Expand `Advanced settings` only when the default timing needs to change.
-
-If recurring announcements are enabled, this step can also set an optional
-`Wave End Date`.
+The default view keeps the schedule decisions needed for the selected wave type
+visible. Less common schedule expansion and optional end controls are grouped
+in expandable sections named for those controls.
 
 ## Location in the Site
 
@@ -29,28 +27,34 @@ If recurring announcements are enabled, this step can also set an optional
 
 ## User Journey
 
-For either wave type, first review the schedule summary. If it is correct,
-continue without opening the detailed calendars. If it needs adjustment, expand
-`Advanced settings`; collapsing it later preserves every entered date, interval,
-and recurring-cycle choice.
-
-For `Rank` waves:
+For scheduled `Rank` waves:
 
 1. Set `Drops Submission Opens`.
 2. Set `Drops Voting Begins` (must be at or after submission start).
 3. Set `First Winners Announcement` date and time (must be at or after voting
    start).
-4. Add optional `Additional Announcements` as intervals (`Hours`, `Days`, or
-   `Weeks`).
-5. Optional: enable `Repeating Announcement Cycles` after at least one
-   additional interval exists.
-6. If recurring is enabled, optionally set `Wave End Date`.
-7. Continue to `Drops`.
+4. To extend the schedule, open `Winner schedule` and add optional
+   `Additional Announcements` as intervals (`Hours`, `Days`, or `Weeks`).
+5. In that section, optionally enable `Repeating Announcement Cycles`
+   after at least one additional interval exists.
+6. If recurring is enabled, optionally set `Wave End Date` in the same
+   disclosure.
+7. Collapse the section if desired; all entered values remain in the
+   draft.
+8. Continue to `Drops`.
+
+For `Perpetual Ranking` waves:
+
+1. Set `Drops Submission Opens`.
+2. Set `Drops Voting Begins`.
+3. Continue to `Drops`. There are no winner announcements or end date. No
+   optional-settings section is shown, including an empty one.
 
 For `Approve` waves:
 
-1. Set `Wave Starts`.
-2. Optionally set `Wave End`.
+1. Set `Wave Start` in the visible calendar.
+2. To limit the duration, open `Wave end` and optionally set
+   `Wave End`.
 3. Continue to `Drops`.
 
 ## Common Scenarios
@@ -62,13 +66,13 @@ For `Approve` waves:
   set an optional end date and time.
 - Mid-flow adjustment: return from later steps and revise dates before final
   submit.
+- Open-ended approval: leave `Wave End` blank. The Outcomes step explains when
+  the wave will otherwise run indefinitely.
 
 ## Edge Cases
 
 - `Drops Submission Opens` cannot be set in the past; past picks are pushed to
   current time.
-- On first interaction with `Winners Announcements`, `Wave Timeline` can
-  auto-collapse once.
 - If voting start moves forward, first winners announcement can auto-shift so
   it stays at or after voting start.
 - `Wave End Date` appears only when recurring is on and at least one additional
@@ -80,8 +84,9 @@ For `Approve` waves:
 
 ## Failure and Recovery
 
-- A hidden date validation error automatically opens `Advanced settings` and
-  marks it `Needs attention`.
+- An error in an optional wave end automatically opens `Wave end`,
+  marks it `Needs attention`, and exposes the invalid date control.
+- Errors in visible schedule controls remain visible in their schedule card.
 - If `Next` does not advance, verify:
   - submission start <= voting start
   - first announcement is not before voting start
@@ -96,6 +101,7 @@ For `Approve` waves:
 ## Limitations / Notes
 
 - `Chat` waves skip `Dates`.
+- `Perpetual Ranking` has no winner announcements, outcomes, or end date.
 - Additional announcements are interval-based; there is no standalone timestamp
   list.
 - Saved create-wave drafts preserve date values for later recovery on the same

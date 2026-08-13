@@ -1,3 +1,6 @@
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
+
 export enum CreateWaveApprovalHoldMode {
   NONE = "NONE",
   HOLD = "HOLD",
@@ -5,18 +8,18 @@ export enum CreateWaveApprovalHoldMode {
 
 const APPROVAL_HOLD_OPTIONS: readonly {
   readonly mode: CreateWaveApprovalHoldMode;
-  readonly label: string;
-  readonly description: string;
+  readonly labelKey: MessageKey;
+  readonly descriptionKey: MessageKey;
 }[] = [
   {
     mode: CreateWaveApprovalHoldMode.NONE,
-    label: "No hold",
-    description: "Approve as soon as the score reaches the threshold.",
+    labelKey: "waves.create.voting.approvalHold.none.label",
+    descriptionKey: "waves.create.voting.approvalHold.none.description",
   },
   {
     mode: CreateWaveApprovalHoldMode.HOLD,
-    label: "Require hold time",
-    description: "Require the score to stay at or above the threshold.",
+    labelKey: "waves.create.voting.approvalHold.required.label",
+    descriptionKey: "waves.create.voting.approvalHold.required.description",
   },
 ];
 
@@ -39,10 +42,12 @@ export default function CreateWaveApprovalHold({
   readonly selectedMode: CreateWaveApprovalHoldMode;
   readonly onModeChange: (mode: CreateWaveApprovalHoldMode) => void;
 }) {
+  const locale = useBrowserLocale();
+
   return (
     <fieldset className="tw-mt-6 tw-border-0 tw-p-0">
       <legend className="tw-mb-3 tw-mt-0 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
-        Approval hold
+        {t(locale, "waves.create.voting.approvalHold.legend")}
       </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
         {APPROVAL_HOLD_OPTIONS.map((option) => {
@@ -50,10 +55,10 @@ export default function CreateWaveApprovalHold({
           return (
             <label
               key={option.mode}
-              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition tw-duration-300 tw-ease-out ${
                 selected
-                  ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
-                  : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10"
+                  ? "tw-border-primary-500/60 tw-bg-primary-500/5 tw-shadow-inner"
+                  : "tw-border-white/5 tw-bg-iron-950/40 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-950/60"
               }`}
             >
               <input
@@ -70,14 +75,14 @@ export default function CreateWaveApprovalHold({
                     selected ? "tw-text-white" : "tw-text-iron-200"
                   }`}
                 >
-                  {option.label}
+                  {t(locale, option.labelKey)}
                 </span>
                 <span
-                  className={`tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 ${
+                  className={`tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-4 ${
                     selected ? "tw-text-iron-300" : "tw-text-iron-400"
                   }`}
                 >
-                  {option.description}
+                  {t(locale, option.descriptionKey)}
                 </span>
               </span>
             </label>

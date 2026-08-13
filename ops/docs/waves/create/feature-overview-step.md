@@ -12,6 +12,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
   messages routes
   - route ownership: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - Step label: `Overview`
+- Content heading: `Create Wave`
 - Create form renders only when a connected profile is available.
 
 ## Step Paths
@@ -35,13 +36,13 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - `Ranking mode` for `Rank` waves:
   - `Announce Winners`
   - `Perpetual Ranking`
-- `Show outcomes` for `Rank` and `Approve` waves.
-- `Display settings` inside `Advanced settings` for `Rank` and `Approve` waves:
+- `Display settings` inside `Appearance and labels` for `Rank` and `Approve`
+  waves:
   - submission-button label
   - proposal-card appearance
   - Approve tab labels for `Approve` waves
 - `Proposal card appearance` for `Rank` and `Approve` waves:
-  - open `Advanced settings` to change the proposal-card presentation
+  - open `Appearance and labels` to change the proposal-card presentation
   - `Summary card` is the default for new waves and applies a reusable compact
     presentation in chat and list views
   - `Full proposal` keeps the previous full-content presentation
@@ -50,7 +51,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - `Image on summary card` controls whether the first ready still image
     appears beside the summary
 - Approve tab labels:
-  - appear in their own `Tab labels` group under `Advanced settings`
+  - appear in their own `Tab labels` group under `Appearance and labels`
   - proposals tab defaults to `Proposals`
   - approved tab defaults to `Approved`
 - Uploaded image shows a preview; `Delete` removes it.
@@ -77,9 +78,9 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
 - Changing wave type resets all non-overview settings to that type's defaults
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
-- `Show outcomes` defaults to on. Turning it off hides outcome displays after
-  the wave is created.
-- `Proposal card appearance` is inside `Advanced settings` and defaults to
+- Outcome visibility is configured on the `Outcomes` step for scheduled `Rank`
+  and `Approve` waves.
+- `Proposal card appearance` is inside `Appearance and labels` and defaults to
   `Summary card` for newly created Waves. The default stores a versioned
   Wave-level display recipe when the Wave is created. Existing Waves and older
   drafts without this setting keep the `Full proposal` presentation. The 6529
