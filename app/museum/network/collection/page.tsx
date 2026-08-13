@@ -92,6 +92,9 @@ function publicWorkItem(
         height: presentationMedia.height,
         alt: presentationMedia.altText.trim() || work.title,
         sourceByteSize: presentationMedia.sourceByteSize,
+        ...(presentationMedia.variants === undefined
+          ? {}
+          : { variants: presentationMedia.variants }),
         creditLine: presentationMedia.credit.creditLine,
         requireIntentForLargeSource: false,
         ...(sourceHref === null ||

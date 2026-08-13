@@ -44,6 +44,9 @@ describe("MuseumResearchProjectCard", () => {
     expect(
       screen.getByRole("img", { name: PORTRAIT_MEDIA.altText! })
     ).toHaveAttribute("src", PORTRAIT_MEDIA.url);
+    expect(
+      screen.getAllByRole("link", { name: "Portrait Project" })
+    ).toHaveLength(1);
     expect(screen.getByRole("img").parentElement?.style.aspectRatio).toBe(
       "0.6666666666666666"
     );
