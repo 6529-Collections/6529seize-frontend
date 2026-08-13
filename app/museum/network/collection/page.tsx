@@ -185,7 +185,7 @@ function CollectionHero({ hero }: { readonly hero: CollectionItem }) {
         {...(hero.metadata === undefined ? {} : { metadata: hero.metadata })}
         {...(hero.href === null ? {} : { href: hero.href })}
         title={hero.title}
-        {...(hero.subtitle === undefined ? {} : { subtitle: hero.subtitle })}
+        subtitle={hero.subtitle}
         eager
         featured
       />

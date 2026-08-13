@@ -460,12 +460,12 @@ function tableElementWithChildren(
 function markdownTextContent(node: ReactNode): string {
   return Children.toArray(node)
     .map((child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        return String(child);
+      }
       const element = tableElementWithChildren(child);
-      return element
-        ? markdownTextContent(element.props.children)
-        : typeof child === "string" || typeof child === "number"
-          ? String(child)
-          : "";
+      if (!element) return "";
+      return markdownTextContent(element.props.children);
     })
     .join("")
     .trim();
@@ -507,9 +507,12 @@ function addMobileTableLabels(
           const cellElement = tableElementWithChildren(cell);
           if (cellElement?.type !== MuseumMarkdownTableCell) return cell;
           const mobileLabel = labels[index] ?? "";
-          return cloneElement(cellElement, {
-            mobileLabel: mobileLabel.length > 0 ? mobileLabel : undefined,
-          });
+          const mobileLabelProps =
+            mobileLabel.length > 0 ? { mobileLabel } : {};
+          return cloneElement(
+            cellElement as ReactElement<MuseumMarkdownTableCellProps>,
+            mobileLabelProps
+          );
         }
       );
       return cloneElement(rowElement, { children: cells });
