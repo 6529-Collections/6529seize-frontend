@@ -156,7 +156,14 @@ describe("serialized post-deploy E2E", () => {
     "keeps the %s trusted-automation compatibility contract narrow",
     (_environment, e2e) => {
       const dispatchInputs = e2e.workflow.on.workflow_dispatch.inputs;
-      const resolve = Object.values(e2e.workflow.jobs)[0].steps.find(
+      const job = Object.values(e2e.workflow.jobs)[0] as {
+        steps: Array<{
+          name?: string;
+          run?: string;
+          env?: Record<string, string>;
+        }>;
+      };
+      const resolve = job.steps.find(
         (step: { name?: string }) => step.name === "Resolve exact deployed SHA"
       );
 
@@ -166,12 +173,12 @@ describe("serialized post-deploy E2E", () => {
       expect(dispatchInputs.tracking_id).toEqual(
         expect.objectContaining({ required: false, type: "string" })
       );
-      expect(resolve.run).toContain(
+      expect(resolve?.run).toContain(
         "test \"$GITHUB_ACTOR\" = '6529-release-bus[bot]'"
       );
-      expect(resolve.env.TRACKING_ID).toBe("${{ inputs.tracking_id }}");
-      expect(resolve.run).toContain("$TRACKING_ID");
-      expect(resolve.run).not.toContain("inputs.tracking_id");
+      expect(resolve?.env?.TRACKING_ID).toBe("${{ inputs.tracking_id }}");
+      expect(resolve?.run).toContain("$TRACKING_ID");
+      expect(resolve?.run).not.toContain("inputs.tracking_id");
       expect(e2e.source).not.toMatch(
         /release_manifest|artifact_digest|authorize|report-progress/i
       );
