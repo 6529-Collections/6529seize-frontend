@@ -8,6 +8,16 @@ const MARKDOWN_DECORATION = new Set(["`", "*", "_", "~"]);
 const LETTER_OR_NUMBER = /[\p{Letter}\p{Number}]/u;
 const PUBLIC_REVIEW_HEADING_ID_ALIASES: Readonly<Record<string, string>> = {
   "What the signed details contain": "the-exact-authorization",
+  "Who can approve mints and auctions": "eoa-and-contract-wallet-signers",
+  "How a fixed-price mint works": "fixed-price-execution",
+  "How an auction starts": "auction-registration",
+  "How unused permissions can be stopped":
+    "cancellation-consumption-and-rotation",
+  "Can someone copy the transaction?": "transaction-ordering-and-mev",
+  "What the contract cannot verify":
+    "offchain-evidence-completes-the-authorization",
+  "A public proof page is still needed": "the-authorization-receipt",
+  "How to test that Stream fails safely": "failure-modes-reviewers-should-test",
 };
 const EVIDENCE_STATE_RULES: readonly {
   readonly state: PublicReviewEvidenceState;

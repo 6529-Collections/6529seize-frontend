@@ -109,6 +109,107 @@ describe("getCurrentCurationTdhEditorialMarkdown", () => {
       expect(currentMarkdown).toContain(
         "Each signed permission includes an expiry time. After that time, the contract rejects it. A later expiry gives people more time to submit it, but also leaves more time for someone to misuse it if it is stolen or no longer correct."
       );
+      expect(currentMarkdown).toContain(
+        "Each signed permission has a unique ID called **dropId**. The ID is created from the approved signer, the current signing period (**epoch**), and two extra values called **nonce** and **salt** that make the permission unique."
+      );
+      expect(currentMarkdown).toContain(
+        "After the permission succeeds or is cancelled, the contract will not accept it again. If the transaction fails, the permission stays unused and can be tried again."
+      );
+      expect(currentMarkdown).toContain(
+        "## Who can approve mints and auctions"
+      );
+      expect(currentMarkdown).toContain("Stream [accepts signatures]");
+      expect(currentMarkdown).toContain(
+        "from either a normal wallet or a shared contract wallet, such as a Safe. A Safe can require approval from several people before it signs."
+      );
+      expect(currentMarkdown).toContain(
+        "Because this signer can approve mints and auctions, the public should know which wallet is used, how it is controlled, and how it can be replaced in an emergency. Private keys and recovery secrets must always stay private."
+      );
+      expect(currentMarkdown).toContain("## How a fixed-price mint works");
+      expect(currentMarkdown).toContain(
+        "Before creating the NFT, the contract checks that [minting is not paused]"
+      );
+      expect(currentMarkdown).toContain(
+        "For a paid mint, only the wallet named as the payer can submit it, and it must send the exact ETH price. A free mint sends no ETH. Both need a wallet that will receive the NFT."
+      );
+      expect(currentMarkdown).toContain(
+        "If every check passes, the contract uses the permission and creates the NFT in one transaction. If any step fails, everything is undone and the permission can be tried again."
+      );
+      expect(currentMarkdown).toContain("## How an auction starts");
+      expect(currentMarkdown).toContain(
+        "The signed permission includes the auction's minimum price and planned end time."
+      );
+      expect(currentMarkdown).toContain(
+        "Someone must submit this permission to Stream to start the auction. Any wallet can submit it. The wallet sends no ETH, and submitting the permission does not make it the buyer. Buyers place bids later."
+      );
+      expect(currentMarkdown).toContain(
+        "Stream then creates the NFT and places it in a separate [auction contract]"
+      );
+      expect(currentMarkdown).toContain(
+        "This contract holds the NFT, records bids, and completes the sale."
+      );
+      expect(currentMarkdown).toContain(
+        "The same auction contract can manage many auctions. It keeps a separate record for each one."
+      );
+      expect(currentMarkdown).toContain(
+        "Once the auction starts, the signed permission has been used. Later changes to the signer or unused permissions do not change the active auction."
+      );
+      expect(currentMarkdown).toContain(
+        "## How unused permissions can be stopped"
+      );
+      expect(currentMarkdown).toContain(
+        "An authorized admin can cancel a specific signed permission before anyone uses it."
+      );
+      expect(currentMarkdown).not.toContain(
+        "The admin cancels the permission, not the person or wallet trying to submit it."
+      );
+      expect(currentMarkdown).toContain(
+        "If a mistake is found before the mint, an admin can cancel the permission using its unique ID, called **dropId**. Stream then rejects it."
+      );
+      expect(currentMarkdown).toContain(
+        "An admin can stop all older permissions by starting a new signing period, called an **epoch**. Changing the signer does this automatically."
+      );
+      expect(currentMarkdown).toContain(
+        "The contract [records these changes on the blockchain]"
+      );
+      expect(currentMarkdown).toContain(
+        "These controls only work before the permission succeeds. Once it creates an NFT or starts an auction, it can no longer be cancelled. If the transaction fails, it stays unused and can be tried again."
+      );
+      expect(currentMarkdown).not.toContain(
+        "These protections only work well if admins watch the system and act quickly. The public should know who the admins are, what they can do, and how they will handle emergencies."
+      );
+      expect(currentMarkdown).toContain("## Can someone copy the transaction?");
+      expect(currentMarkdown).toContain(
+        "For a free mint or auction, another wallet may copy the transaction and submit it first. It cannot change the signed details or take the NFT."
+      );
+      expect(currentMarkdown).toContain(
+        "If the copied transaction succeeds first, the original transaction fails because the permission has already been used."
+      );
+      expect(currentMarkdown).not.toContain(
+        "## Which transaction happens first"
+      );
+      expect(currentMarkdown).not.toContain(
+        "Ethereum decides which waiting transaction is processed first."
+      );
+      expect(currentMarkdown).not.toContain("## Transaction ordering and MEV");
+      expect(currentMarkdown).not.toContain("public-mempool ordering");
+      expect(currentMarkdown).not.toContain("**Review goal:**");
+      expect(currentMarkdown).toContain("## What the contract cannot verify");
+      expect(currentMarkdown).toContain(
+        "The contract can verify that Stream's approved signer accepted the exact NFT and sale details."
+      );
+      expect(currentMarkdown).toContain(
+        "It cannot verify how the artwork was chosen, whether TDH was calculated correctly, whether the signer and services followed the rules, or whether the artist received accurate information."
+      );
+      expect(currentMarkdown).toContain(
+        "Those steps happen outside the blockchain. They need clear public records so others can check them."
+      );
+      expect(currentMarkdown).not.toContain(
+        "## Offchain evidence completes the authorization"
+      );
+      expect(currentMarkdown).not.toContain(
+        "These claims need public rules, reproducible calculations, retained records, monitoring, and accountable operators."
+      );
       expect(currentMarkdown).toContain("ADR 0001");
       expect(currentMarkdown).toContain(
         "The exact **StreamDrops.sol** code shows what the contract actually does."
@@ -155,15 +256,84 @@ describe("getCurrentCurationTdhEditorialMarkdown", () => {
         "The deadline limits how long the permission can be used."
       );
       expect(currentMarkdown).not.toContain(
+        "The **dropId** is derived from the signer, epoch, nonce, and salt."
+      );
+      expect(currentMarkdown).not.toContain(
+        "## EOA and contract-wallet signers"
+      );
+      expect(currentMarkdown).not.toContain(
+        "supports a normal ECDSA wallet and an ERC-1271 contract wallet"
+      );
+      expect(currentMarkdown).not.toContain(
+        "**Still needed outside the contract:**"
+      );
+      expect(currentMarkdown).not.toContain("## Fixed-price execution");
+      expect(currentMarkdown).not.toContain(
+        "The current path first checks the [**DROP_EXECUTION** pause in **mintDrop**]"
+      );
+      expect(currentMarkdown).not.toContain("## Auction registration");
+      expect(currentMarkdown).not.toContain(
+        "For an auction permission, recipient, payer, fixed price, and submitted ETH must all be zero."
+      );
+      expect(currentMarkdown).not.toContain(
+        "Stream creates the NFT, places it in the [auction contract]"
+      );
+      expect(currentMarkdown).not.toContain(
+        "## Cancellation, consumption, and rotation"
+      );
+      expect(currentMarkdown).not.toContain(
+        "The current code gives configured function admins or a global admin three controls:"
+      );
+      expect(currentMarkdown).not.toContain("**Operational risk:**");
+      expect(currentMarkdown).not.toContain(
         "Stream checks the signature and the signed details."
       );
       expect(currentMarkdown).not.toContain("This page reviews that handoff.");
       expect(currentMarkdown).not.toContain("**Current status**");
       expect(currentMarkdown).toContain(
-        "The current path first checks the [**DROP_EXECUTION** pause in **mintDrop**]"
+        "## A public proof page is still needed"
       );
       expect(currentMarkdown).toContain(
+        "After an NFT is approved and created, people need an easy way to check that nothing changed."
+      );
+      expect(currentMarkdown).toContain("- What was approved?");
+      expect(currentMarkdown).toContain("- Who approved it?");
+      expect(currentMarkdown).toContain("- What did Stream create?");
+      expect(currentMarkdown).toContain(
+        "- Did the final result match the approval?"
+      );
+      expect(currentMarkdown).toContain(
+        "This page is not created automatically. Stream and its operators still need to build and publish it."
+      );
+      expect(currentMarkdown).not.toContain("## The authorization receipt");
+      expect(currentMarkdown).not.toContain(
         "**Still open as a product and operations requirement:**"
+      );
+      expect(currentMarkdown).toContain(
+        "## How to test that Stream fails safely"
+      );
+      expect(currentMarkdown).toContain("### Contract tests");
+      expect(currentMarkdown).toContain(
+        "Change a signed detail, such as the recipient or price. The contract should reject it."
+      );
+      expect(currentMarkdown).toContain(
+        "Make a mint or auction fail after the checks begin. The whole transaction should be undone, and the permission should remain unused."
+      );
+      expect(currentMarkdown).toContain(
+        "Copy a free-mint or auction transaction. The copy must not change the signed details or take the NFT."
+      );
+      expect(currentMarkdown).toContain("### Public record and process checks");
+      expect(currentMarkdown).toContain(
+        "Start with a known TDH and curation decision. Compare it with the prepared data, readable display, signed permission, and final transaction."
+      );
+      expect(currentMarkdown).toContain(
+        "Confirm the public proof page shows the decision, signed details, final transaction, and current status."
+      );
+      expect(currentMarkdown).not.toContain(
+        "## Failure modes reviewers should test"
+      );
+      expect(currentMarkdown).not.toContain(
+        "EIP-712 field order, encoding, chain, or contract differs between layers."
       );
       expect(currentMarkdown).not.toContain(
         "Stream converts a social curation decision into a cryptographically bound action."

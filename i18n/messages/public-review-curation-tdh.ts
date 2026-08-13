@@ -98,81 +98,72 @@ Each signed permission includes an expiry time. After that time, the contract re
 
 ### Replay identity
 
-The **dropId** is derived from the signer, epoch, nonce, and salt. The contract rejects a **dropId** that was already used or cancelled. A failed transaction rolls back the used marker with the rest of the transaction.
+Each signed permission has a unique ID called **dropId**. The ID is created from the approved signer, the current signing period (**epoch**), and two extra values called **nonce** and **salt** that make the permission unique. After the permission succeeds or is cancelled, the contract will not accept it again. If the transaction fails, the permission stays unused and can be tried again.
 
-## EOA and contract-wallet signers
+## Who can approve mints and auctions
 
-The [current signer check](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L736-L785) supports a normal ECDSA wallet and an ERC-1271 contract wallet.
+Stream [accepts signatures](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L736-L785) from either a normal wallet or a shared contract wallet, such as a Safe. A Safe can require approval from several people before it signs.
 
-A contract wallet can support shared control, for example through a Safe. It also moves trust into that wallet's owners, threshold, modules, and signature rules. Those settings can change outside **StreamDrops**.
+Because this signer can approve mints and auctions, the public should know which wallet is used, how it is controlled, and how it can be replaced in an emergency. Private keys and recovery secrets must always stay private.
 
-**Still needed outside the contract:** Publish the signer address, wallet type, Safe policy where relevant, current epoch, rotation and emergency steps, monitoring, and the software version that created the signed data. Never publish private keys, seed phrases, or recovery secrets.
+## How a fixed-price mint works
 
-## Fixed-price execution
+Before creating the NFT, the contract checks that [minting is not paused](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L186-L198) and that [the signed permission is still valid](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L561-L601).
 
-The current path first checks the [**DROP_EXECUTION** pause in **mintDrop**](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L186-L198). The [authorization validation](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L561-L601) then checks the signer, epoch, deadline, **dropId**, replay state, cancellation state, poster, quantity, token-data hash, recipient, auction fields, price, and payer rules.
+For a paid mint, only the wallet named as the payer can submit it, and it must send the exact ETH price. A free mint sends no ETH. Both need a wallet that will receive the NFT.
 
-For a paid mint, the caller must be the signed payer and must send the exact signed ETH amount. For a free mint, the signed payer and submitted value must both be zero. Both forms require a nonzero recipient.
+If every check passes, the contract uses the permission and creates the NFT in one transaction. If any step fails, everything is undone and the permission can be tried again.
 
-The contract marks the permission as used before calling the mint path. All of this happens in one transaction. If a later step fails, the whole transaction reverts, including the used marker and token changes.
+## How an auction starts
 
-## Auction registration
+The signed permission includes the auction's minimum price and planned end time.
 
-For an auction permission, recipient, payer, fixed price, and submitted ETH must all be zero. The contract mints the token into the auction path and registers the signed reserve and end time.
+Someone must submit this permission to Stream to start the auction. Any wallet can submit it. The wallet sends no ETH, and submitting the permission does not make it the buyer. Buyers place bids later.
 
-See [the auction execution call](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L693-L716).
+Stream then creates the NFT and places it in a separate [auction contract](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L693-L716). This contract holds the NFT, records bids, and completes the sale.
 
-After registration, the permission is already used. Signer rotation or cancellation of unused permissions does not rewrite the auction. The auction contract's own rules now control the token and bids.
+The same auction contract can manage many auctions. It keeps a separate record for each one.
 
-## Cancellation, consumption, and rotation
+Once the auction starts, the signed permission has been used. Later changes to the signer or unused permissions do not change the active auction.
 
-The current code gives configured function admins or a global admin three controls:
+## How unused permissions can be stopped
 
-- cancel one unused **dropId**;
-- increment the signer epoch, which invalidates every permission from the old epoch; or
-- replace the signer, which also increments the epoch.
+An authorized admin can cancel a specific signed permission before anyone uses it.
 
-The [admin functions emit cancellation, epoch, and signer-change events](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L219-L243). A used permission cannot be cancelled. A failed mint does not stay consumed because the transaction reverts.
+If a mistake is found before the mint, an admin can cancel the permission using its unique ID, called **dropId**. Stream then rejects it.
 
-**Operational risk:** These controls are only as reliable as the configured admin policy, monitoring, and response speed. Reviewers still need the exact launch roles and incident process.
+An admin can stop all older permissions by starting a new signing period, called an **epoch**. Changing the signer does this automatically.
 
-## Transaction ordering and MEV
+The contract [records these changes on the blockchain](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L219-L243).
 
-Binding the payer, recipient, collection, price, quantity, mode, deadline, and token data limits what someone can change after copying a transaction.
+These controls only work before the permission succeeds. Once it creates an NFT or starts an auction, it can no longer be cancelled. If the transaction fails, it stays unused and can be tried again.
 
-It does not remove public-mempool ordering. Another transaction may land first, a deadline may pass, an auction bid may arrive first, or a different block timestamp may apply.
+## Can someone copy the transaction?
 
-**Review goal:** Product wording must promise only the ordering guarantees that Ethereum and the auction code actually provide.
+For a free mint or auction, another wallet may copy the transaction and submit it first. It cannot change the signed details or take the NFT.
 
-## Offchain evidence completes the authorization
+If the copied transaction succeeds first, the original transaction fails because the permission has already been used.
 
-The contract can prove that the configured signer approved the exact data. It cannot prove:
+## What the contract cannot verify
 
-- that TDH was calculated correctly;
-- that the curation rule was fair or applied correctly;
-- that the service copied the community result accurately;
-- that the signer acted freely and kept its keys safe;
-- that the artist saw an accurate explanation; or
-- that supporting evidence was kept.
+The contract can verify that Stream's approved signer accepted the exact NFT and sale details.
 
-These claims need public rules, reproducible calculations, retained records, monitoring, and accountable operators.
+It cannot verify how the artwork was chosen, whether TDH was calculated correctly, whether the signer and services followed the rules, or whether the artist received accurate information.
 
-## The authorization receipt
+Those steps happen outside the blockchain. They need clear public records so others can check them.
 
-**Still open as a product and operations requirement:** Each permission should have a public, human-readable receipt showing:
+## A public proof page is still needed
 
-- curation rule and version;
-- offchain decision ID;
-- collection and artist identity;
-- readable and machine-readable signed data;
-- signer address, wallet type, and epoch;
-- chain and contract address;
-- payer, recipient, price, asset, quantity, deadline, and sale mode;
-- token-data hash and **dropId**;
-- execution transaction and events; and
-- cancellation, expiry, or exception status.
+After an NFT is approved and created, people need an easy way to check that nothing changed.
 
-The receipt should let an artist, collector, auditor, or community member compare the decision, signature, and contract result.
+The public page should answer:
+
+- What was approved?
+- Who approved it?
+- What did Stream create?
+- Did the final result match the approval?
+
+This page is not created automatically. Stream and its operators still need to build and publish it.
 
 ## What the public record should show
 
@@ -185,20 +176,27 @@ The public record should keep four things together:
 
 This record is not created automatically by the signature alone. The product and operators must publish it and keep it available.
 
-## Failure modes reviewers should test
+## How to test that Stream fails safely
 
-- TDH or curation input is wrong.
-- The authorization service changes a term from the approved decision.
-- The readable display hides or misstates a signed field.
-- The signer wallet or Safe is compromised.
-- Rotation does not invalidate an old permission as expected.
-- EIP-712 field order, encoding, chain, or contract differs between layers.
-- A used or cancelled permission can be replayed.
-- A failed call leaves a permission used or a token partly created.
-- A copied transaction can change a sensitive result.
-- Users expect signer cancellation to undo an auction that is already registered.
-- A long deadline leaves an outdated permission usable.
-- The public receipt cannot reproduce the decision-to-transaction path.
+These checks deliberately use bad, old, or changed permissions. Stream should reject them without creating the wrong NFT or leaving a permission marked as used.
+
+### Contract tests
+
+- Change a signed detail, such as the recipient or price. The contract should reject it.
+- Submit an expired or cancelled permission. The contract should reject it.
+- Submit the same permission twice. The second attempt should fail.
+- Change the approved signer. Permissions from the old signer should stop working.
+- Use a signature made for another blockchain or **StreamDrops** contract. It should fail.
+- Make a mint or auction fail after the checks begin. The whole transaction should be undone, and the permission should remain unused.
+- Copy a free-mint or auction transaction. The copy must not change the signed details or take the NFT.
+- Start an auction, then change the signer or cancel an unused permission. The active auction should not change.
+
+### Public record and process checks
+
+- Start with a known TDH and curation decision. Compare it with the prepared data, readable display, signed permission, and final transaction.
+- Change one value at each step. The mismatch should be blocked or clearly shown.
+- Replace the signer in an emergency test. Permissions from the old signer should stop working.
+- Confirm the public proof page shows the decision, signed details, final transaction, and current status.
 
 ## Questions for reviewers
 
