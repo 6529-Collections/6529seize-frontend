@@ -1,364 +1,310 @@
 export const PUBLIC_REVIEW_REVENUE_SPLITS_MESSAGES = {
   "publicReview.pages.revenueSplitsAndRoyalties.currentSummary":
-    "How current ETH sales record what each person is owed, how the separate payment foundation is meant to work, and why ERC-2981 royalties are only a signal.",
+    "How ETH sales record money today, how the separate payment system differs, and why marketplace royalties are optional.",
   "publicReview.pages.revenueSplitsAndRoyalties.currentEditorial": `**The short answer:** The reviewed source has two payment systems.
 
 - Current fixed-price ETH sales and English auctions keep their own split rules and payment records.
-- A separate resolver, split-wallet, and settlement foundation exists in the source, but the current sale paths do not use it.
-- The Core, Stream's shared NFT contract, reports one fixed ERC-2981 royalty. A marketplace can choose whether to pay it.
+- A separate resolver, settlement contract, and split-wallet system exists, but the current sale paths do not use it.
+- Stream's Core contract reports one fixed ERC-2981 royalty. A marketplace can choose whether to pay it.
 
-This page explains what the current code does, what accepted ADRs intend, and what is still only proposed. Source and test evidence do not prove deployment, audit, or safety.
+The separate system has three main parts:
+
+- A **resolver** chooses which split rule applies.
+- **Settlement** records one sale as paid and moves its money.
+- A **split wallet** holds money for one fixed list of recipients and shares.
+
+This page uses three clear states. **Current code** means behavior in the pinned source. **Accepted design** means an approved launch target that is not yet current behavior. **Proposed** means the design is still open.
 
 ## One wei should have one accountable path
 
-A **wei** is the smallest unit of ETH. Every wei from a sale should be counted once.
+A **wei** is the smallest unit of ETH. Every wei should be counted once.
 
-For each sale, a reviewer should be able to answer:
+For each sale, the public record should show:
 
-- Which sale created the money?
-- Which asset and amount were received?
-- Which split rule won?
-- Who is owed money?
-- Who gets any rounding remainder?
-- Where is the money held before withdrawal?
-- How much can an emergency action safely remove?
-- Which reads and events show every later movement?
+- which sale received the money;
+- which payment token and amount arrived;
+- which split rule was used;
+- who can withdraw each share;
+- where the money is held; and
+- what happened to any rounding remainder.
 
-These are safety rules. If the same wei is counted twice, or money owed to someone is treated as spare money, the contract can pay the wrong people even when the code runs without an error.
+If one wei is counted twice, someone may be paid too much. If money owed to a user is treated as spare money, an emergency withdrawal may take it.
 
 ## The current native-sale paths keep local accounting
 
-### What the current code does
+### Current sale code
 
 Signed fixed-price ETH sales run through \`StreamDrops\`. English-auction ETH sales run through \`AuctionContract\`.
 
-Each contract chooses its local split in this order:
+Each contract keeps its own ledger. A **ledger** is a record of money received and money owed.
+
+Each contract chooses its split in this order:
 
 1. a rule for the token;
-2. a rule for the collection; then
-3. the contract default.
+2. a rule for the collection;
+3. the contract's default rule.
 
-The fixed-price path records balances for the poster, protocol, and curator reserve. The auction path records balances for the poster, protocol, and curator. It also records refunds owed to outbid bidders.
+The fixed-price contract records shares for the poster, protocol, and curator pool. The auction contract records the same shares and refunds for outbid bidders. The **poster** is the account named in the signed sale approval.
 
-The **poster** is the account named in the signed sale approval.
+The contracts record these amounts first. Posters and protocol recipients withdraw later. An authorized action moves curator money to the curator pool.
 
-Recipients withdraw later. A sale does not try to send every payment while the mint or auction settlement is running.
+### Accepted design for launch
 
-### What is not connected
+The rehearsal also deploys the separate resolver, settlement contract, split factory, and split wallets. It does not connect them to the current fixed-price or auction paths.
 
-The reviewed source also contains a revenue resolver, split factory, split wallets, and a primary-sale settlement contract. The current fixed-price and auction paths do not call that foundation.
+[Accepted ADR 0008](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L187-L228) says launch sales should use resolver-backed pull accounting. That is the accepted target, not the current pinned behavior.
 
-Before launch, the design needs one clear answer: keep and fully define the local sale ledgers, or connect every supported sale to the shared resolver and settlement path.
-
-### Technical details
+### Evidence
 
 - [\`StreamDrops.proceedsSplitFor\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L540-L559) applies token, collection, then contract precedence.
-- [\`StreamDrops._creditFixedPriceProceeds\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L635-L681) records the fixed-price balances.
-- [\`AuctionContract._creditAuctionProceeds\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L471-L509) records auction proceeds after a winning settlement.
+- [\`StreamDrops._creditFixedPriceProceeds\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L635-L681) records fixed-price balances.
+- [\`AuctionContract._creditAuctionProceeds\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L471-L509) records auction balances.
+- [The rehearsal wiring](https://github.com/{sourceRepository}/blob/{sourceCommit}/script/RehearseDeployment.s.sol#L192-L271) deploys the separate system without adding it to the current sale path.
 
 ## Pull credits keep one recipient from blocking everyone
 
-A **credit** is a balance the contract records as owed. That owed balance is also called a **liability**.
+A **credit** is money the contract records as owed. A credit that has not been paid is a **liability**.
 
-The recipient pulls the money out in a later withdrawal. This has three useful effects:
+Here is a small example. A sale receives 101 wei. Its chosen split is 50% to the poster, 25% to curators, and 25% to the protocol. The code records 50 wei for the poster, 25 wei for curators, and 26 wei for the protocol. The extra one wei goes to the protocol because the other two shares round down.
 
-- a recipient that rejects ETH cannot block the sale;
-- a failed withdrawal does not erase the credit because the whole withdrawal reverts; and
-- the contract can show how much it still owes before anyone withdraws.
+These amounts are credits. They are not sent during the sale. Their owners withdraw them later.
 
-The credit owner can withdraw to their own account. The current Drop and Auction contracts also let that owner choose another nonzero recipient address.
+This keeps the sale safe if one recipient rejects ETH. A failed withdrawal reverts, so it does not erase the credit. The contract can also show how much it still owes.
 
-### Current limit
+The ledgers remain separate. Fixed-price credits stay in \`StreamDrops\`. Auction proceeds and bidder refunds stay in \`AuctionContract\`. Split-wallet money stays in each wallet until recipients claim it.
 
-There is no single ledger for the whole system. Fixed-price credits stay in \`StreamDrops\`. Auction proceeds and bidder refunds stay in \`AuctionContract\`. Split-wallet balances stay in each wallet after it is funded.
+### Evidence
 
-Reviewers therefore need both local solvency checks and a cross-contract view of all money owed.
-
-### Technical details
-
-- [Fixed-price withdrawals](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L389-L438) clear local credits and then send ETH.
-- [Auction withdrawals](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L315-L369) keep bidder refunds and sale proceeds in separate local balances.
+- [Fixed-price withdrawals](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L389-L438) clear a credit and then send ETH. A failed send reverts the whole withdrawal.
+- [Auction withdrawals](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L315-L369) keep bidder refunds and sale proceeds separate.
 - [Accepted ADR 0003](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0003-payment-accounting.md#L87-L111) requires pull payments and protects money owed from emergency withdrawal.
 
 ## The settlement foundation gives a sale one replay-safe identity
 
-### What the source implements
+### What the separate contract does
 
-The separate \`StreamPrimarySaleSettlement\` contract can record a primary sale and route its value to a resolved split wallet. Only a caller approved by the settlement contract owner may start this action.
+\`StreamPrimarySaleSettlement\` can send primary-sale money to a split wallet. Only a caller approved by the contract owner can start this action.
 
-The contract creates one settlement key from the sale ID, revenue class, collection, token, payer, other participants, and amount. It rejects a second use of the same key.
+It makes one key from the chain, settlement contract, sale details, people, and amount. It marks the key as used.
 
-This is replay protection: the same recorded sale cannot be settled twice through that key.
+**Replay** means trying to use the same sale payment again. The used key blocks that second payment. If settlement fails, the whole transaction rolls back, including the used mark.
 
-The sale also carries an expected policy hash. In strict mode, settlement fails if the resolved split policy has changed. In allow-current mode, settlement uses the current policy and records whether it drifted from the expected one.
+The contract can also require the current split rule to match the rule expected by the sale. Another mode allows the current rule but records that it changed.
 
-### Known ERC-20 gap
+### Missing payment-token link
 
-For ERC-20 settlement, the caller supplies the token contract in a separate argument. That asset is not part of the \`PrimarySale\` record or the settlement key.
+For an ERC-20 payment, the caller supplies the token contract separately. That token address is not part of the sale record or the settlement key.
 
-This means the first successful call with any active asset can consume the shared key. A future sale integration must bind the exact asset in both the signed sale terms and the replay identity.
+The first successful call with any active token can therefore use the shared key. A complete sale path must bind the exact payment token to both the signed sale and its replay protection.
 
-### Current limit
-
-This contract exists in the reviewed source. That does not mean it is deployed or used by current signed sales. The current fixed-price and auction paths still use their local accounting.
-
-### Technical details
+### Evidence
 
 - [Native and ERC-20 settlement entry points](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPrimarySaleSettlement.sol#L87-L145)
 - [The current settlement-key fields](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPrimarySaleSettlement.sol#L357-L376)
-- [Policy matching and drift records](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPrimarySaleSettlement.sol#L209-L335)
+- [Split-rule matching records](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPrimarySaleSettlement.sol#L209-L335)
 
 ## Resolution separates policy from the sale mechanic
 
-The sale mechanism decides how a sale happens. The revenue resolver decides which approved economic rule applies.
+The sale contract decides how a sale happens. The resolver decides which payment rule applies.
 
-### What the current source does
+### Current resolver code
 
-The reviewed \`StreamRevenueResolver\` stores primary-sale assignments. Its owner can set a fixed profile or a template, clear an assignment while it is still changeable, and freeze an assignment.
+The current resolver stores primary-sale rules. Its owner can set a fixed split or a template. The owner can clear a rule while it is changeable, or freeze it so it cannot change.
 
-When asked for an assignment, it checks token scope first, then collection scope, then the default.
+The resolver checks for a rule in this order: token, collection, then default.
 
-The current \`StreamDrops\` and \`AuctionContract\` sale paths do not call this resolver.
+### Accepted design
 
-### What accepted ADRs intend
+[Accepted ADR 0008](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L138-L185) gives the launch resolver a wider job. It should provide rules for both primary revenue and Core royalty information.
 
-[Accepted ADR 0008](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L124-L145) chooses one resolver-backed design for primary revenue and Core royalty information.
+[Accepted ADR 0021](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0021-immutable-revenue-resolver-validation-adapter.md#L2-L18) adds a small adapter that checks data for the resolver. The resolver would still own the rules and all authority.
 
-[Accepted ADR 0021](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0021-immutable-revenue-resolver-validation-adapter.md#L2-L18) adds an immutable, stateless validation adapter. The resolver would remain the only registered module, authority boundary, state owner, and Core royalty target.
+ADR 0021 is accepted design, not implemented behavior at this source commit. Implementation review and deployment proof are still separate steps.
 
-ADR 0021 is accepted design, not implemented behavior at this source commit. Its own status says implementation and deployment evidence are separate gates.
+### Evidence
 
-### Why this matters
-
-Artists and collectors need to see which rule wins, whether a higher-priority override exists, whether the rule can still change, and when it becomes frozen.
-
-### Technical details
-
-- [Primary assignment writes and freezes](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamRevenueResolver.sol#L170-L257)
-- [Token, collection, then default resolution](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamRevenueResolver.sol#L259-L280)
+- [Setting and freezing primary-sale rules](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamRevenueResolver.sol#L170-L257)
+- [Token, collection, then default lookup](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamRevenueResolver.sol#L259-L280)
 
 ## Immutable split profiles make collaboration inspectable
 
-A split profile names the recipients and each recipient's share.
+A **split profile** is a fixed list of recipients and shares. Its split wallet holds money for that list.
 
-### What the source implements
+### Current split-wallet code
 
-\`StreamSplitFactory\` sorts and checks the entries, gives the profile a deterministic ID, and can deploy its \`StreamSplitWallet\` at a predictable address.
+\`StreamSplitFactory\` sorts and checks the list. It gives each valid profile one ID and one predictable wallet address.
 
-The profile does not change after creation. If recipients or shares change, the system creates a new profile and changes the resolver assignment while that assignment is still allowed to change.
+The factory rejects a zero address, a zero share, a total other than 1,000,000 parts, or a repeated account-and-label pair. The same account may use different labels. Its shares are added together for payment.
 
-After a wallet receives ETH or an approved ERC-20 token, each recipient can pull their calculated share.
+Once created, the profile cannot change. A new split needs a new profile. Future payments may use the new profile, but money already in the old wallet stays there for the old recipients.
 
-### What reviewers should check
+Recipients claim their shares after the wallet receives ETH or an approved ERC-20 token.
 
-- every address is nonzero;
-- every share is positive and all shares add to the exact denominator;
-- duplicate entries are rejected or combined by one clear rule;
-- sorting always creates the same profile ID;
-- the deployed wallet has the expected code and stored profile; and
-- artists can inspect the exact profile before approving a sale.
+### Evidence
 
-### Why this matters
-
-The onchain profile shows exactly which split a sale used. A later change does not rewrite the old profile.
-
-### Technical details
-
-- [Profile creation and deterministic wallet deployment](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitFactory.sol#L76-L128)
-- [Immutable wallet setup and share checks](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitWallet.sol#L55-L125)
-- [Pull-based release](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitWallet.sol#L172-L231)
+- [Profile checks and predictable wallet deployment](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitFactory.sol#L71-L141)
+- [Exact entry rules](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitFactory.sol#L328-L390)
+- [Wallet setup and share checks](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitWallet.sol#L61-L125)
+- [Pull-based release](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitWallet.sol#L159-L248)
 
 ## Native ETH accounting must distinguish liabilities from surplus
 
-The ETH held by a contract is not automatically spare money.
+A **liability** is money the contract still owes or must keep reserved. **Surplus** is money left after every liability is protected.
 
-- **Liabilities** are amounts owed or reserved for someone.
-- **Surplus** is the remaining balance after all liabilities are protected.
+The current Drop and Auction contracts report their local owed totals. They calculate emergency-withdrawable money as contract balance minus money owed.
 
-The current Drop and Auction contracts expose local owed and reserved totals. Their emergency-withdrawable amount is limited to local surplus.
+This is safe only if every credit, refund, and reserve is counted. ETH sent directly or forced into a contract may increase surplus, but it must not change what users are owed.
 
-Reviewers still need to prove that every local credit and reserve is included. A missing liability could let an emergency action remove money that belongs to a seller, bidder, curator, or protocol account.
+### Evidence
 
-Direct or forced ETH must not create a new user credit. It may increase surplus, but it must not change the amounts already owed.
-
-### Technical details
-
-- [\`StreamDrops.totalOwed\`, \`surplus\`, and \`emergencyWithdrawable\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L440-L472)
-- [\`AuctionContract\` local solvency views](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L647-L677)
+- [\`StreamDrops.totalOwed\`, \`surplus\`, and \`emergencyWithdrawable\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L438-L475)
+- [\`AuctionContract\` local solvency views](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/AuctionContract.sol#L648-L679)
 
 ## Approved ERC-20 transfers require balance checks
 
-An **ERC-20** is a payment token rather than native ETH. This section applies to the separate settlement and split-wallet foundation. Current fixed-price and auction sales use native ETH.
+An **ERC-20** is a payment token, such as a fungible token used instead of ETH. This section applies only to the separate settlement and split-wallet system.
 
-### What the current foundation checks
+### Current checks
 
-The asset-policy registry owner marks each ERC-20 asset with a status, evidence hash, and effective time. New settlement accepts only an asset with the active status.
+The payment-token registry gives each ERC-20 token a status. Settlement accepts only a token marked active.
 
-The settlement contract then checks:
+The settlement contract also checks that the token address has code, its transfer calls return \`true\`, and every balance changes by the exact amount.
 
-- the token contract has code;
-- \`balanceOf\` returns one valid value;
-- \`transferFrom\` and \`transfer\` return exactly \`true\`; and
-- the payer, settlement contract, and wallet balances change by the exact amount.
+These checks reject many unsafe token behaviors. For example, they reject a token that takes a transfer fee or reports success without moving the full amount.
 
-These checks reject missing or false return values, fee-on-transfer behavior, no-op transfers, failed balance reads, and unexpected balance changes.
+### Missing deployment proof
 
-### What evidence is still needed
+The source shows the checks. It does not prove which tokens will be active in a real deployment. Reviewers must inspect the deployed registry. A frontend list should copy that blockchain state, not replace it.
 
-Source and tests show how the candidate handles standard tokens and known bad cases. They do not prove which assets will be active in a deployment.
+### Evidence
 
-Reviewers must inspect the real onchain asset-policy registry. A frontend list should mirror that registry, not replace it.
-
-### Technical details
-
-- [Active-asset check and exact transfer accounting](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPrimarySaleSettlement.sol#L340-L567)
-- [Asset-policy records](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamAssetPolicyRegistry.sol#L17-L81)
-- [Pinned settlement rejection tests](https://github.com/{sourceRepository}/blob/{sourceCommit}/test/StreamPrimarySaleSettlement.t.sol#L778-L1043)
+- [Active-token and exact-balance checks](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPrimarySaleSettlement.sol#L340-L567)
+- [Payment-token status records](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamAssetPolicyRegistry.sol#L7-L82)
+- [Pinned rejection tests](https://github.com/{sourceRepository}/blob/{sourceCommit}/test/StreamPrimarySaleSettlement.t.sol#L778-L1043)
 
 ## Payer-bound token sales remain a proposal
 
-### Current foundation behavior
+### Current code
 
-An approved settlement caller can ask \`StreamPrimarySaleSettlement\` to pull an active ERC-20 token from the payer. The payer must already have given enough allowance.
+An approved settlement caller can pull an active ERC-20 token from the payer. The payer must first give the settlement contract an **allowance**, which is permission to spend that token.
 
-The settlement contract does not verify a payer-signed \`PaymentIntent\`. It also does not own signer-specific nonce use or revocation.
+The current contract does not check a payer-signed \`PaymentIntent\`. It also does not track payer-specific use or cancellation of that intent.
 
 ### Proposed ADR 0019
 
 ADR 0019 is proposed, not accepted. [Read the pinned ADR](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0019-payment-intent-orchestration.md#L1-L89).
 
-Its target gives a separate payment adapter the job of verifying the payer's signed intent and making the only allowed payer pull. The settlement contract would resolve the split, consume the settlement key, route the value, and record the result without using the payer's allowance itself.
+The proposal adds a separate payment adapter. It would check the payer's signed instructions and would be the only protocol contract allowed to pull the payer's token. The settlement contract would keep the accounting job.
 
-The final signed fields, replay rules, revocation, callback flow, escrow cases, and top-level sale integration still require accepted and implemented evidence.
-
-**Why this matters:** A token allowance should not let an approved caller choose a different sale, asset, or amount than the payer approved.
+The final signed fields, replay rules, cancellation rules, and sale connection are still open.
 
 ## Rounding is an allocation decision
 
-Whole-number division can leave a small remainder.
+Whole-number division can leave a remainder.
 
-### Current native-sale rule
+### Current sales
 
-The current Drop and Auction splits use 10,000 basis points. Poster and curator shares round down. The protocol receives the remainder.
+In current Drop and Auction splits, poster and curator shares round down. The protocol receives what remains. The 101-wei example above therefore records 50, 25, and 26 wei. Nothing is lost.
 
-That rule makes the three credits add back to the exact payment, even for a one-wei payment.
+### Split wallets
 
-### Split-wallet rule
+Split wallets calculate each account's share from all money ever received. An amount that cannot yet be divided is shown as \`roundingDust\` and stays in the wallet.
 
-The separate split wallets use 1,000,000 parts per million. They calculate each account's cumulative share and expose any amount that is currently left as \`roundingDust\`.
+More money can make earlier dust claimable. The current wallet has no normal dust-sweep function.
 
-Reviewers should check who can ever receive that dust, whether later deposits change it, and whether many small payments create a meaningful bias.
+### Evidence
 
-### Technical details
-
-- [Current native-sale rounding](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L673-L681)
-- [Split-wallet releasable amount and rounding dust](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitWallet.sol#L143-L170)
+- [Current native-sale rounding](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L671-L680)
+- [Split-wallet release and rounding dust](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamSplitWallet.sol#L159-L191)
+- [Accepted cumulative rounding rule](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L470-L545)
 
 ## Curator rewards connect onchain claims to offchain allocation
 
-The current Drop and Auction contracts record a curator reserve or curator credit. An authorized action can release that money to the configured \`StreamCuratorsPool\`.
+The current sale contracts record money for the curator pool. An authorized action moves that money into \`StreamCuratorsPool\`.
 
-An authorized account sets a Merkle root for a collection. A **Merkle root** is a short onchain commitment to a longer list of recipients and amounts.
+An authorized account stores a Merkle root for a collection. A **Merkle root** is a short fingerprint of a longer reward list stored outside the blockchain.
 
-A curator submits a proof for their entry. A valid claim records a pull credit. The recipient withdraws later.
+A curator proves that their reward is in that list. A valid claim creates a credit, which the curator withdraws later.
 
 ### What the contract proves
 
-The contract can prove that a claim belongs to the current committed list and that the reward address has not already claimed for that collection.
+It proves that the claim is in the current list and that the reward address has not already claimed for that collection.
 
-### What the contract does not prove
+### What it cannot prove
 
-It does not prove that the offchain inputs or allocation policy were fair. Reviewers still need to know who built the list, which data and policy it used, how a root may change, and how anyone can reproduce or challenge it.
+It cannot prove that the list is fair or that its input data is correct. The public process must show who made the list, which rules they used, and how others can check it.
 
-**Main risk:** A valid Merkle root can still commit to the wrong allocation.
-
-### Technical details
+### Evidence
 
 - [Root updates and curator claims](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCuratorsPool.sol#L73-L132)
-- [Curator credit withdrawals](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCuratorsPool.sol#L134-L151)
+- [Curator credit withdrawals](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCuratorsPool.sol#L134-L149)
 
 ## ERC-2981 publishes royalty information
 
-### What the current Core reports
+### Current code
 
-For every token ID, \`StreamCore.royaltyInfo\` returns:
+\`StreamCore.royaltyInfo\` reports the same result for every token:
 
 - receiver \`0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377\`;
-- 690 basis points, which is 6.9%; and
-- royalty amount \`salePrice * 690 / 10,000\`.
+- 690 basis points, which is 6.9%;
+- amount \`salePrice * 690 / 10,000\`.
 
-There is no runtime setter or token-specific override. The current revenue resolver is not part of this read.
+The current resolver is not used for this answer.
 
 ### What ERC-2981 means
 
-ERC-2981 reports a royalty receiver and amount. It does not force a marketplace to pay.
+ERC-2981 tells a marketplace which royalty receiver and amount the contract reports. It does not force the marketplace to pay.
 
 The accurate words are **royalty information** or **royalty signal**, not guaranteed royalty payment.
 
-### Accepted target, not current code
+### Accepted design
 
-Accepted ADR 0008 requires the Core to use resolver-backed ERC-2981 with split wallets before genesis. The reviewed Core still uses the fixed result above.
+[Accepted ADR 0008](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L1365-L1445) requires Core to use resolver-backed ERC-2981 with split wallets before launch. The pinned Core still returns the fixed result above.
 
-### Technical details
+### Evidence
 
 - [Current \`StreamCore.royaltyInfo\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1013-L1027)
-- [Accepted resolver-backed ERC-2981 target](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L1267-L1319)
+- [Current and accepted royalty behavior](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0008-revenue-splits-and-royalty-resolver.md#L187-L228)
 
 ## Every value movement should be reconstructable
 
-Public reads and events should let an independent reviewer rebuild:
+Public reads and events should show:
 
-- the sale ID and gross amount;
-- the split rule and why it won;
-- the profile and every allocation;
-- every credit and withdrawal;
-- auction refunds and active bid escrow;
-- curator reserves, roots, and claims;
-- the royalty rule;
+- the sale and total amount;
+- the split rule and recipients;
+- each credit, refund, and withdrawal;
+- curator funding and claims;
 - rounding remainders; and
 - emergency or surplus movements.
 
-The current design has several local ledgers. Reviewers must show how their events and reads fit together. If a complete answer needs a private database, the public accounting record is incomplete.
+The current system has several separate ledgers. If a full answer needs a private database, the public record is incomplete.
 
 ## Responsibilities carried by payment accounting
 
-The payment system must:
+The system must use the approved split, keep enough money for everyone it owes, and keep refunds and reserves separate.
 
-- apply the split that was approved;
-- keep enough money for every person owed;
-- let sales finish when one recipient rejects a transfer;
-- keep refunds, credits, and reserves separate;
-- preserve old profiles and payment history;
-- prevent a replacement contract from duplicating or abandoning money owed; and
-- describe voluntary marketplace royalties honestly.
-
-Each duty needs one clear owner in the code and enough public evidence for artists, collaborators, collectors, curators, and auditors to verify the result.
+It must also preserve old payment records when contracts or split rules change. Public royalty statements must say that marketplace payment is voluntary.
 
 ## What can fail
 
-- The local sale ledgers and separate settlement foundation remain two unclear paths.
-- The wrong token, collection, or default rule wins.
-- A sale or settlement key is used twice.
-- An ERC-20 asset is not bound to the signed sale and replay identity.
-- Shares or rounding pay the wrong amount.
-- A contract owes more than it holds.
-- An emergency action removes money that is still owed.
-- A nonstandard ERC-20 creates a false accounting record.
-- A split wallet's code or stored profile does not match its expected identity.
-- A curator root is valid but its inputs are wrong.
-- A successor duplicates or loses credits.
-- A marketplace ignores the ERC-2981 royalty signal.
+- Current sales remain outside the accepted resolver-backed launch path.
+- The wrong split rule wins.
+- The same sale is paid twice.
+- The ERC-20 token is missing from the signed sale or replay key.
+- A caller pulls tokens without the payer's signed instructions.
+- The contract records more money owed than it holds.
+- An emergency withdrawal takes money still owed.
+- A split wallet or curator list contains the wrong data.
+- A marketplace ignores the royalty signal.
 
 ## Questions for reviewers
 
-1. Should genesis keep the local native-sale ledgers, or connect every sale to the resolver and settlement foundation?
-2. Can artists and collectors see which split rule wins before a sale is approved?
-3. When should a split or royalty assignment become permanent?
-4. How will the exact ERC-20 asset be bound to the signed sale and replay key?
-5. Which ERC-20 assets should be active at launch, and what evidence supports each one?
-6. Who receives each kind of rounding remainder?
-7. Can total liabilities be proven across every contract that holds value?
-8. Is the curator-root process reproducible and open to challenge?
-9. What proof is required before a successor receives accounting duties?
-10. Does every royalty statement say clearly that marketplace payment is voluntary?`,
+1. Does the launch candidate connect every supported sale to the accepted resolver-backed system?
+2. Can artists and collectors see the winning split before a sale?
+3. When does each split or royalty rule become permanent?
+4. Is the exact ERC-20 token bound to the payer's signed sale and replay key?
+5. Which ERC-20 tokens will be active at launch?
+6. Can the system prove all money owed across every contract?
+7. Can anyone check and challenge the curator reward list?
+8. Does every royalty statement say that marketplace payment is voluntary?`,
 } as const;
