@@ -377,15 +377,23 @@ function MuseumMarkdownLink({
 
 function MuseumMarkdownTable({ children }: { readonly children?: ReactNode }) {
   return (
-    <div
-      aria-label={t(DEFAULT_LOCALE, "museum.network.markdown.scrollableTable")}
-      className="tw-max-w-full tw-overflow-x-auto focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-      role="region"
-      tabIndex={0}
-    >
-      <table className="tw-w-full tw-min-w-[44rem] tw-border-collapse tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200">
-        {children}
-      </table>
+    <div>
+      <p className="tw-m-0 tw-mb-2 tw-text-xs tw-leading-5 tw-text-iron-500 sm:tw-hidden">
+        {t(DEFAULT_LOCALE, "museum.network.markdown.scrollTableHint")}
+      </p>
+      <div
+        aria-label={t(
+          DEFAULT_LOCALE,
+          "museum.network.markdown.scrollableTable"
+        )}
+        className="tw-max-w-full tw-overflow-x-auto focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        role="region"
+        tabIndex={0}
+      >
+        <table className="tw-w-full tw-min-w-[44rem] tw-border-collapse tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200">
+          {children}
+        </table>
+      </div>
     </div>
   );
 }
@@ -496,7 +504,7 @@ export function MuseumMarkdown({
   workHrefs = EMPTY_WORK_HREFS,
 }: MuseumMarkdownProps) {
   return (
-    <div className={`tw-space-y-4 ${className}`}>
+    <div className={`tw-space-y-4 tw-text-base ${className}`}>
       <ReactMarkdown
         components={
           documentHeadings ? documentHeadingComponents : baseComponents

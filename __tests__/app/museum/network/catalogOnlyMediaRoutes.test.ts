@@ -35,6 +35,16 @@ describe("typed Museum routes keep media catalog-only", () => {
     expect(typedBranch).toContain("publicWorkItem(work, publication)");
   });
 
+  it("presents governed accession media on permanent Collection cards", () => {
+    const source = routeSource("app/museum/network/collection/page.tsx");
+    const workProjection = bracedBlock(source, "function publicWorkItem(");
+
+    expect(workProjection).toContain("work.presentationMedia?.[0]");
+    expect(workProjection).toContain('kind: "proposal"');
+    expect(workProjection).toContain("requireIntentForLargeSource: false");
+    expect(workProjection).toContain("presentationMedia.credit.creditLine");
+  });
+
   it("derives the Collection history from active holdings and acquisitions", () => {
     const source = routeSource("app/museum/network/collection/page.tsx");
 
