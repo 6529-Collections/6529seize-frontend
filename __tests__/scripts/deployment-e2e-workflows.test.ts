@@ -243,11 +243,12 @@ describe("serialized post-deploy E2E", () => {
       PLAYWRIGHT_STAGING_ACCESS_CODE:
         "${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}",
     });
-    expect(stagingE2e.workflow.on.workflow_call.secrets).toEqual({
-      STAGING_AUTH: expect.objectContaining({ required: false }),
-      PLAYWRIGHT_STAGING_ACCESS_CODE: expect.objectContaining({
-        required: true,
-      }),
-    });
+    const declaredSecrets = stagingE2e.workflow.on.workflow_call.secrets;
+    expect(declaredSecrets.STAGING_AUTH).toEqual(
+      expect.objectContaining({ required: false })
+    );
+    expect(declaredSecrets.PLAYWRIGHT_STAGING_ACCESS_CODE).toEqual(
+      expect.objectContaining({ required: true })
+    );
   });
 });
