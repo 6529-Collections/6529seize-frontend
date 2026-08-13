@@ -66,6 +66,7 @@ describe("Museum acquisition program status projection", () => {
           statusAsOf: "2026-01-01T00:00:00Z",
           programIds: ["6529NM-AP-ENT-0002"],
           acquisitionIds: [],
+          documentIds: [],
           sourcePaths: ["records/entities/6529NM-W-0020.json"],
           media: [
             {
@@ -100,6 +101,7 @@ describe("Museum acquisition program status projection", () => {
           statusAsOf: "2026-08-12T00:00:00Z",
           programIds: ["6529NM-AP-ENT-0002"],
           acquisitionIds: [],
+          documentIds: [],
           sourcePaths: ["records/entities/6529NM-W-0024.json"],
           media: [],
         },
