@@ -265,8 +265,9 @@ function getContainerClassNames(tabletModal?: boolean | undefined) {
 
 function getContainerStyle(): CSSProperties {
   return {
-    bottom: MOBILE_DIALOG_KEYBOARD_INSET,
-    transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+    bottom: 0,
+    transform: `translate3d(0, calc(0px - ${MOBILE_DIALOG_KEYBOARD_INSET}), 0)`,
+    transition: `transform ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
   };
 }
 
