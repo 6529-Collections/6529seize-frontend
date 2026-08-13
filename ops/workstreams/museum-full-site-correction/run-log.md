@@ -125,3 +125,15 @@ comes first; acquisition and accession follow.` before the next hosted lane
   editorial defects with targeted regressions; focused validation passed five
   suites / 19 tests, help-index sync, Museum surface registry, changed lint,
   changed typecheck, and the Windows-safe diff check.
+- Follow-up exact-head run `31670163257` passed build, quality/contracts,
+  shell, smoke, and all external checks. Its desktop Museum lane then found
+  one stale browser assertion for the corrected acquisition-program heading:
+  runtime and component tests correctly rendered `Works acquired or selected
+  through this program`, while the institutional-practice E2E still expected
+  `Works selected through this program`. Updated that assertion only; no
+  runtime, source, rights, relation, layout, or public-copy behavior changed.
+- The authenticated whole-site crawler expanded all 57 accepted route patterns
+  into 668 concrete Museum URLs. Against the first staging composition, all
+  668 returned successful Museum-bound responses with no visible soft-404 or
+  publication-unavailable state. This preliminary result will be repeated
+  against the corrected staging and production releases.
