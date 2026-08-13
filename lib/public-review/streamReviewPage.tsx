@@ -140,8 +140,7 @@ function getCurrentStreamReviewPages(
     forArtists: isCurrent && pageId === "for-artists",
     overview: isCurrent && pageId === "overview",
     roles: isCurrent && pageId === "roles-and-trust",
-    tokensAndMinting:
-      isCurrent && pageId === "tokens-collections-and-minting",
+    tokensAndMinting: isCurrent && pageId === "tokens-collections-and-minting",
   };
 }
 

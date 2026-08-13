@@ -158,10 +158,7 @@ export function getCurrentTokensMintingEditorialMarkdown({
   const withCurrentIntro = replaceRequiredEditorialMarkdown(
     editorialMarkdown,
     TOKENS_MINTING_OLD_INTRO,
-    t(
-      locale,
-      "publicReview.pages.tokensCollectionsAndMinting.currentIntro"
-    ),
+    t(locale, "publicReview.pages.tokensCollectionsAndMinting.currentIntro"),
     "tokens and minting introduction"
   );
   return CURRENT_SECTIONS.reduce(
