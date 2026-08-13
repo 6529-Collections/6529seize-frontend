@@ -4,9 +4,9 @@ import {
   type AcquisitionWorkCard,
 } from "./MuseumAcquisitionExhibition";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
+import { museumAcquisitionWorkCountLabel } from "./MuseumAcquisitionCopy";
 
 export function MuseumAcquisitionRecordWorkSection({
   workCards,
@@ -33,7 +33,7 @@ export function MuseumAcquisitionRecordWorkSection({
               {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
             </h2>
             <p className="tw-m-0 tw-text-sm tw-text-iron-500">
-              {formatInteger(DEFAULT_LOCALE, workCards.length)}
+              {museumAcquisitionWorkCountLabel(workCards.length)}
             </p>
           </div>
           {artFirst ? (

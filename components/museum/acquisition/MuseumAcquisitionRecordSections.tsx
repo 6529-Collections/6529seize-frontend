@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import {
@@ -11,6 +10,7 @@ import type { MuseumPublication } from "@/lib/museum/publication/types";
 import type { MuseumView } from "@/lib/museum/types";
 import { museumDocumentKindLabelKey } from "@/lib/museum/publication/documentLabels";
 import { MuseumJsonDisclosure, MuseumMarkdown } from "../MuseumMarkdown";
+import { museumAcquisitionWorkCountLabel } from "./MuseumAcquisitionCopy";
 
 function acquisitionMethodLabel(
   method: string,
@@ -206,7 +206,7 @@ export function AcquisitionRecordSummary({
           {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
         </p>
         <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {formatInteger(DEFAULT_LOCALE, acquisition.workIds.length)}
+          {museumAcquisitionWorkCountLabel(acquisition.workIds.length)}
         </p>
       </div>
     </section>

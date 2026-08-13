@@ -12,6 +12,7 @@ import { MuseumProposalImage } from "./MuseumProposalImage";
 import { MuseumRelatedEntities } from "./MuseumRelatedEntities";
 import { MuseumInTheSystem } from "./MuseumInsideSystem";
 import { MuseumRightsLink } from "./MuseumRightsLink";
+import { displayCreditWithoutRepeatedLicense } from "@/lib/museum/credit";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -153,30 +154,31 @@ function MuseumCanonicalWorkMedia({
         <h2 id="canonical-work-media-title" className="tw-sr-only">
           {t(DEFAULT_LOCALE, "museum.network.works.title")}
         </h2>
-        <div className="tw-grid tw-gap-6 sm:tw-grid-cols-2">
-          <figure key={stillMedia.id} className="tw-m-0">
-            <div className="tw-overflow-hidden tw-bg-black">
-              <MuseumProgramImage
-                media={publicWorkMedia(stillMedia)}
-                sizes="(min-width: 640px) 50vw, 100vw"
-                className="tw-block tw-h-auto tw-w-full tw-object-contain"
-              />
-            </div>
-            <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-              {stillMedia.credit.creditLine}
-              {stillMedia.credit.licenseLabel === null ? null : (
-                <>
-                  {" "}
-                  <MuseumRightsLink
-                    href={stillMedia.credit.licenseUrl ?? undefined}
-                    label={stillMedia.credit.licenseLabel}
-                    className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  />
-                </>
-              )}
-            </figcaption>
-          </figure>
-        </div>
+        <figure key={stillMedia.id} className="tw-m-0 tw-w-full">
+          <div className="tw-overflow-hidden tw-bg-black">
+            <MuseumProgramImage
+              media={publicWorkMedia(stillMedia)}
+              sizes="(min-width: 640px) 50vw, 100vw"
+              className="tw-block tw-h-auto tw-w-full tw-object-contain"
+            />
+          </div>
+          <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+            {displayCreditWithoutRepeatedLicense(
+              stillMedia.credit.creditLine,
+              stillMedia.credit.licenseLabel
+            )}
+            {stillMedia.credit.licenseLabel === null ? null : (
+              <>
+                {" "}
+                <MuseumRightsLink
+                  href={stillMedia.credit.licenseUrl ?? undefined}
+                  label={stillMedia.credit.licenseLabel}
+                  className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                />
+              </>
+            )}
+          </figcaption>
+        </figure>
       </section>
     );
   }
@@ -306,12 +308,27 @@ function MuseumCanonicalWorkRecordPage({
         );
   const metadataCredit =
     programMediaMatch === null
-      ? work.mediaMetadata?.[0]?.credit.creditLine
-      : programMediaMetadata?.credit.creditLine;
+      ? work.mediaMetadata?.[0]?.credit
+      : programMediaMetadata?.credit;
   const primaryCredit =
-    work.media[0]?.credit.creditLine ??
-    metadataCredit ??
-    work.presentationMedia?.[0]?.credit.creditLine;
+    (work.media[0] === undefined
+      ? undefined
+      : displayCreditWithoutRepeatedLicense(
+          work.media[0].credit.creditLine,
+          work.media[0].credit.licenseLabel
+        )) ??
+    (metadataCredit === undefined
+      ? undefined
+      : displayCreditWithoutRepeatedLicense(
+          metadataCredit.creditLine,
+          metadataCredit.licenseLabel
+        )) ??
+    (work.presentationMedia?.[0] === undefined
+      ? undefined
+      : displayCreditWithoutRepeatedLicense(
+          work.presentationMedia[0].credit.creditLine,
+          work.presentationMedia[0].rights.licenseLabel
+        ));
   const insideSystemHref = museumWorkInsideSystemHref(work, publication);
   return (
     <article className="tw-min-w-0">
@@ -384,7 +401,11 @@ function MuseumCanonicalWorkRecordPage({
               "museum.network.acquisitions.historicalWavePresentation"
             )}
           </h2>
-          <div className="tw-grid tw-gap-6 sm:tw-grid-cols-2">
+          <div
+            className={`tw-grid tw-gap-6 ${
+              work.presentationMedia.length > 1 ? "lg:tw-grid-cols-2" : ""
+            }`}
+          >
             {work.presentationMedia.map((media, index) => {
               const sourceHref = buildMuseumSignedWaveStormDropUrl(
                 media.source.waveId,
