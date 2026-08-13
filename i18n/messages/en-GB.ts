@@ -475,8 +475,7 @@ export const EN_GB_MESSAGES = {
     "Couldn't save these proposal card settings.",
   "waves.proposalCard.settings.toastRetry": "Please try again.",
   "waves.proposalCard.tabLabelsLabel": "Tab labels",
-  "waves.proposalCard.tabLabelsDescription":
-    "Names shown on this wave's tabs.",
+  "waves.proposalCard.tabLabelsDescription": "Names shown on this wave's tabs.",
   "waves.proposalCard.approvalsTabLabel": "Approvals tab label",
   "waves.proposalCard.approvedTabLabel": "Approved tab label",
   "waves.proposalCard.tabLabels.errorTooLong":
@@ -531,5 +530,22 @@ export const EN_GB_MESSAGES = {
   "theMemes.filters.season.label": "Season",
   "theMemes.filters.season.all": "All Seasons",
   "theMemes.filters.season.allForYear": "All Year {year}",
+  "home.mintAllowlist.label": "Your allocation",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint allocations for the connected wallet",
+  "home.mintAllowlist.checking": "Checking your allocation…",
+  "home.mintAllowlist.notPublished":
+    "Allocation will be available once distribution is published.",
+  "home.mintAllowlist.notFound": "No allocation found for this wallet.",
+  "home.mintAllowlist.unavailable":
+    "Allocation information is temporarily unavailable.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Public",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
   ...TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;
