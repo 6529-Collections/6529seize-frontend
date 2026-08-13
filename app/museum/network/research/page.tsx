@@ -1,28 +1,32 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
-import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
+import { MuseumResearchLanding } from "@/components/museum/research/MuseumResearchLanding";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import type {
-  MuseumPublication,
-  MuseumPublicDocument,
-} from "@/lib/museum/publication/types";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { museumResearchHref } from "@/lib/museum/publication/routes";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
-import { museumDocumentKindLabelKey } from "@/lib/museum/publication/documentLabels";
+import type {
+  MuseumMedia,
+  MuseumPublication,
+  MuseumPublicDocument,
+} from "@/lib/museum/publication/types";
 
 export const metadata: Metadata = {
   ...getAppMetadata({
-    title: t(DEFAULT_LOCALE, "museum.network.research.title"),
-    description: t(DEFAULT_LOCALE, "museum.network.research.description"),
+    title: t(DEFAULT_LOCALE, "museum.network.research.indexTitle"),
+    description: t(DEFAULT_LOCALE, "museum.network.research.indexDescription"),
   }),
   alternates: { canonical: "/museum/network/research" },
 };
 
-export type MuseumResearchGroup = "art" | "practice" | "methods";
+export type MuseumResearchGroup =
+  | "art"
+  | "collection"
+  | "stewardship"
+  | "practice";
 
 export interface MuseumResearchIndexEntry {
   readonly id: string;
@@ -33,49 +37,94 @@ export interface MuseumResearchIndexEntry {
   readonly typed: boolean;
   readonly document?: MuseumPublicDocument;
   readonly publicationUri?: string;
+  readonly media?: MuseumMedia;
 }
 
 function researchGroup(value: string): MuseumResearchGroup {
   const normalized = value.toLocaleLowerCase();
-  if (/(?:artist|project|work|acquisition|close|reading)/u.test(normalized)) {
+  if (/(?:artist|project|work|close|reading)/u.test(normalized)) {
     return "art";
   }
   if (
-    /(?:institution|accession|rights|preservation|data|practice)/u.test(
-      normalized
-    )
+    /(?:collection|acquisition|gift|accession|program|object)/u.test(normalized)
   ) {
+    return "collection";
+  }
+  if (/(?:institution|scholarship|editorial|practice)/u.test(normalized)) {
     return "practice";
   }
-  return "methods";
+  return "stewardship";
 }
 
 function documentGroup(document: MuseumPublicDocument): MuseumResearchGroup {
   if (
-    document.kind === "collection_essay" ||
-    document.kind === "gift_narrative" ||
     document.kind === "artist_practice" ||
-    document.kind === "project_essay" ||
-    document.kind === "object_entry" ||
-    document.kind === "acquisition_essay" ||
-    document.kind === "program_essay"
+    document.kind === "project_essay"
   ) {
     return "art";
+  }
+  if (
+    document.kind === "collection_essay" ||
+    document.kind === "gift_narrative" ||
+    document.kind === "object_entry" ||
+    document.kind === "acquisition_essay" ||
+    document.kind === "program_essay" ||
+    document.kind === "curatorial_accession_review" ||
+    document.kind === "accession_certificate" ||
+    document.kind === "gift_acceptance_authorization" ||
+    document.kind === "technical_condition_review" ||
+    document.kind === "title_rights_accession_review" ||
+    document.kind === "custody_title_compliance_diligence"
+  ) {
+    return "collection";
   }
   if (
     document.kind === "institutional_practice_study" ||
     document.kind === "institutional_practice_adjacent" ||
     document.kind === "institution_profile" ||
-    document.kind === "data_architecture_overview" ||
-    document.kind === "data_architecture_standard" ||
-    document.kind === "data_architecture_case_study" ||
-    document.kind === "rights_handbook" ||
-    document.kind === "rights_artist_guide" ||
-    document.kind === "rights_collector_guide"
+    document.kind === "scholarship_editorial_standard" ||
+    document.kind === "institutional_practice_source_register"
   ) {
     return "practice";
   }
-  return "methods";
+  return "stewardship";
+}
+
+function researchMedia(
+  publication: MuseumPublication,
+  document: MuseumPublicDocument
+): MuseumMedia | undefined {
+  const sourceIds = new Set([
+    ...(document.workIds ?? []),
+    ...document.artworkIds,
+    ...document.projectIds.flatMap((projectId) => {
+      const project = publication.projects.find(
+        (candidate) => candidate.id === projectId
+      );
+      return [...(project?.workIds ?? []), ...(project?.artworkIds ?? [])];
+    }),
+    ...document.artistIds.flatMap((artistId) => {
+      const artist = publication.artists.find(
+        (candidate) => candidate.id === artistId
+      );
+      return [...(artist?.workIds ?? []), ...(artist?.artworkIds ?? [])];
+    }),
+  ]);
+  const workIds = new Set([
+    ...sourceIds,
+    ...(publication.workAliases ?? [])
+      .filter((alias) => sourceIds.has(alias.sourceObjectId))
+      .map((alias) => alias.workId),
+  ]);
+  const typedMedia = (publication.works ?? [])
+    .filter((work) => workIds.has(work.id))
+    .map((work) => selectMuseumStillMedia(work.media))
+    .find((media): media is MuseumMedia => media !== undefined);
+  if (typedMedia !== undefined) return typedMedia;
+  return publication.artworks
+    .filter((artwork) => workIds.has(artwork.id))
+    .map((artwork) => selectMuseumStillMedia(artwork.media))
+    .find((media): media is MuseumMedia => media !== undefined);
 }
 
 export function buildMuseumResearchIndex(
@@ -105,6 +154,7 @@ export function buildMuseumResearchIndex(
     ) {
       return [];
     }
+    const media = researchMedia(publication, document);
     return [
       {
         id: record.id,
@@ -115,6 +165,7 @@ export function buildMuseumResearchIndex(
         typed: true,
         publicationUri: immutablePublicationUri,
         document,
+        ...(media === undefined ? {} : { media }),
       },
     ];
   });
@@ -128,95 +179,164 @@ export function buildMuseumResearchIndex(
         document.kind !== "open_museum_statement"
     )
     .filter((document) => !representedDocumentIds.has(document.id))
-    .map((document) => ({
-      id: document.id,
-      slug: document.id,
-      title: document.title,
-      group: documentGroup(document),
-      sourcePath: document.sourcePath,
-      typed: false,
-      document,
-    }));
+    .map((document) => {
+      const media = researchMedia(publication, document);
+      return {
+        id: document.id,
+        slug: document.id,
+        title: document.title,
+        group: documentGroup(document),
+        sourcePath: document.sourcePath,
+        typed: false,
+        document,
+        ...(media === undefined ? {} : { media }),
+      };
+    });
   return [...typedEntries, ...documentEntries];
 }
 
-const GROUPS: readonly [MuseumResearchGroup, MessageKey, MessageKey][] = [
+export const MUSEUM_RESEARCH_GROUPS: readonly [
+  MuseumResearchGroup,
+  MessageKey,
+  MessageKey,
+][] = [
   [
     "art",
     "museum.network.research.artAndArtists",
     "museum.network.research.artAndArtistsDescription",
   ],
   [
+    "collection",
+    "museum.network.research.collectionAndAcquisitions",
+    "museum.network.research.collectionAndAcquisitionsDescription",
+  ],
+  [
+    "stewardship",
+    "museum.network.research.digitalArtStewardship",
+    "museum.network.research.digitalArtStewardshipDescription",
+  ],
+  [
     "practice",
     "museum.network.research.museumPractice",
     "museum.network.research.museumPracticeDescription",
   ],
+];
+
+const MUSEUM_RESEARCH_TIERS: readonly [
+  string,
+  MessageKey,
+  MessageKey,
+  MessageKey,
+  readonly MuseumResearchGroup[],
+][] = [
   [
-    "methods",
-    "museum.network.research.sourcesMethods",
-    "museum.network.research.sourcesMethodsDescription",
+    "scholarship",
+    "museum.network.research.scholarshipTierEyebrow",
+    "museum.network.research.scholarshipTierTitle",
+    "museum.network.research.scholarshipTierDescription",
+    ["art", "collection"],
+  ],
+  [
+    "institution",
+    "museum.network.research.institutionTierEyebrow",
+    "museum.network.research.institutionTierTitle",
+    "museum.network.research.institutionTierDescription",
+    ["stewardship", "practice"],
   ],
 ];
+
+export function museumResearchGroupCopy(group: MuseumResearchGroup): {
+  readonly label: string;
+  readonly description: string;
+} {
+  const definition = MUSEUM_RESEARCH_GROUPS.find(
+    ([candidate]) => candidate === group
+  );
+  if (definition === undefined) {
+    throw new Error(`unknown_museum_research_group:${group}`);
+  }
+  return {
+    label: t(DEFAULT_LOCALE, definition[1]),
+    description: t(DEFAULT_LOCALE, definition[2]),
+  };
+}
+
+function researchGroupEntries(
+  entries: readonly MuseumResearchIndexEntry[],
+  group: MuseumResearchGroup
+) {
+  return entries.filter((entry) => entry.group === group);
+}
+
+function researchGroupView(
+  entries: readonly MuseumResearchIndexEntry[],
+  group: MuseumResearchGroup
+) {
+  const copy = museumResearchGroupCopy(group);
+  return {
+    id: group,
+    title: copy.label,
+    description: copy.description,
+    // Keep the complete group here. The landing component orders illustrated
+    // entries before applying its three-card editorial limit.
+    entries: researchGroupEntries(entries, group),
+  };
+}
 
 export default async function MuseumResearchPage() {
   const publication = (await getMuseumPublicationState()).publication;
   if (publication === null) return <MuseumPublicationUnavailable />;
   const entries = buildMuseumResearchIndex(publication);
+  const featuredEntry =
+    entries.find(
+      (entry) => entry.group === "art" && entry.media !== undefined
+    ) ??
+    entries.find((entry) => entry.group === "art") ??
+    entries.find(
+      (entry) => entry.group === "collection" && entry.media !== undefined
+    ) ??
+    entries.find((entry) => entry.media !== undefined) ??
+    entries[0];
+  if (featuredEntry === undefined) return <MuseumPublicationUnavailable />;
 
   return (
-    <section>
-      <MuseumSectionHeading
-        eyebrow={t(DEFAULT_LOCALE, "museum.network.research.indexEyebrow")}
-        title={t(DEFAULT_LOCALE, "museum.network.research.indexTitle")}
-        description={t(
+    <MuseumResearchLanding
+      eyebrow={t(DEFAULT_LOCALE, "museum.network.research.indexEyebrow")}
+      title={t(DEFAULT_LOCALE, "museum.network.research.indexTitle")}
+      description={t(
+        DEFAULT_LOCALE,
+        "museum.network.research.indexDescription"
+      )}
+      featured={{
+        href: museumResearchHref(featuredEntry.slug),
+        eyebrow: t(DEFAULT_LOCALE, "museum.network.research.featuredLabel"),
+        title: featuredEntry.title,
+        description: t(
           DEFAULT_LOCALE,
-          "museum.network.research.indexDescription"
-        )}
-      />
-      <div className="tw-space-y-12">
-        {GROUPS.map(([group, titleKey, descriptionKey]) => {
-          const groupEntries = entries.filter((entry) => entry.group === group);
-          if (groupEntries.length === 0) return null;
-          return (
-            <section key={group} aria-labelledby={`research-${group}-title`}>
-              <h2
-                id={`research-${group}-title`}
-                className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-              >
-                {t(DEFAULT_LOCALE, titleKey)}
-              </h2>
-              <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
-                {t(DEFAULT_LOCALE, descriptionKey)}
-              </p>
-              <ul className="tw-m-0 tw-mt-5 tw-list-none tw-border-y tw-border-solid tw-border-iron-800 tw-p-0">
-                {groupEntries.map((entry) => (
-                  <li
-                    key={entry.id}
-                    className="tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0"
-                  >
-                    <Link
-                      href={museumResearchHref(entry.slug)}
-                      className="tw-flex tw-min-h-20 tw-flex-col tw-justify-center tw-gap-1 tw-py-5 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                    >
-                      <span className="hover:tw-text-primary-200 tw-text-lg tw-font-semibold tw-text-iron-50">
-                        {entry.title}
-                      </span>
-                      <span className="tw-text-sm tw-text-iron-500">
-                        {t(
-                          DEFAULT_LOCALE,
-                          museumDocumentKindLabelKey(
-                            entry.document?.kind ?? "source_record"
-                          )
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
-      </div>
-    </section>
+          "museum.network.research.featuredDescription"
+        ),
+        media: featuredEntry.media,
+        actionLabel: t(DEFAULT_LOCALE, "museum.network.research.readStudy"),
+      }}
+      tiers={MUSEUM_RESEARCH_TIERS.map(
+        ([id, eyebrowKey, titleKey, descriptionKey, groupIds]) => ({
+          id,
+          eyebrow: t(DEFAULT_LOCALE, eyebrowKey),
+          title: t(DEFAULT_LOCALE, titleKey),
+          description: t(DEFAULT_LOCALE, descriptionKey),
+          groups: groupIds
+            .map((group) => researchGroupView(entries, group))
+            .filter((group) => group.entries.length > 0),
+        })
+      ).filter((tier) => tier.groups.length > 0)}
+      browseGroups={MUSEUM_RESEARCH_GROUPS.map(([group]) =>
+        researchGroupView(entries, group)
+      ).filter((group) => group.entries.length > 0)}
+      browseTitle={t(DEFAULT_LOCALE, "museum.network.research.browseTitle")}
+      browseDescription={t(
+        DEFAULT_LOCALE,
+        "museum.network.research.browseDescription"
+      )}
+    />
   );
 }

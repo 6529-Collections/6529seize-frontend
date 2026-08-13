@@ -58,6 +58,19 @@ export function isCuratorialDocument(
   return CURATORIAL_DOCUMENT_KINDS.has(document.kind);
 }
 
+function isHistoricalAcquisitionStatusDocument(
+  document: MuseumPublication["documents"][number]
+): boolean {
+  if (document.kind !== "source_record") return false;
+  const path = document.sourcePath.replaceAll("\\", "/");
+  return (
+    path.includes("/status-amendments/") ||
+    path.includes("/wave-publication-observation-") ||
+    path.endsWith("/wave-storm.json") ||
+    path.endsWith("/proposal.json")
+  );
+}
+
 export function AcquisitionDocumentSection({
   document,
   sourceCommit,
@@ -71,6 +84,8 @@ export function AcquisitionDocumentSection({
   readonly headingLevel?: "h2" | "h3";
   readonly sectionClassName?: string;
 }) {
+  const historical = isHistoricalAcquisitionStatusDocument(document);
+
   return (
     <section
       className={sectionClassName}
@@ -79,6 +94,19 @@ export function AcquisitionDocumentSection({
       <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
         {t(DEFAULT_LOCALE, museumDocumentKindLabelKey(document.kind))}
       </p>
+      {historical ? (
+        <div className="tw-mt-4 tw-border-l-2 tw-border-iron-700 tw-pl-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-font-semibold tw-text-iron-200">
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.historicalRecord")}
+          </p>
+          <p className="tw-m-0 tw-mt-1">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitions.historicalRecordDescription"
+            )}
+          </p>
+        </div>
+      ) : null}
       {headingLevel === "h2" ? (
         <h2
           id={`acquisition-document-${document.id}`}

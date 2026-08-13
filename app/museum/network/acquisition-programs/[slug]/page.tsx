@@ -185,9 +185,7 @@ export default async function MuseumAcquisitionProgramPage({
     kind: "acquisition_program",
     id: typed?.id ?? legacy?.programId ?? slug,
     label: title,
-    canonicalHref: museumAcquisitionProgramHref(
-      typed?.slug ?? "keys-and-gates"
-    ),
+    canonicalHref: museumAcquisitionProgramHref(typed?.slug ?? slug),
     breadcrumbs: [
       { label: "6529 Network Museum", href: "/museum/network" },
       {
@@ -313,7 +311,9 @@ export default async function MuseumAcquisitionProgramPage({
               if (canonicalMedia !== null) {
                 const altText = canonicalMedia.altText;
                 if (altText === null || altText.trim() === "") {
-                  throw new Error("museum_acquisition_program_alt_text_missing");
+                  throw new Error(
+                    "museum_acquisition_program_alt_text_missing"
+                  );
                 }
                 return (
                   <MuseumPublicMediaFigure

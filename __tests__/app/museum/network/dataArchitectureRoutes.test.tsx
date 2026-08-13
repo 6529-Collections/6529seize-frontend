@@ -84,11 +84,11 @@ describe("Museum data architecture routes", () => {
       screen.getByText("A public introduction to the Museum data architecture.")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Read the machine application profile")
+      screen.getByText("Read the publication profile")
     ).toBeInTheDocument();
     expect(
       screen
-        .getByText("Read the machine application profile")
+        .getByText("Read the publication profile")
         .closest("details")
         ?.querySelector("pre")?.textContent
     ).toBe(publication.dataArchitecture.profileJson);

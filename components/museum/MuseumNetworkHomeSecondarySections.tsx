@@ -31,7 +31,7 @@ const COLLECTION_PATHS = [
   {
     titleKey: "museum.network.home.collection.projects",
     descriptionKey: "museum.network.home.collection.projectsDescription",
-    href: "/museum/network/projects/century",
+    href: "/museum/network/projects",
   },
 ] as const;
 

@@ -455,6 +455,8 @@ const baseComponents: Components = {
   td: ({ children }) => (
     <td className="tw-px-3 tw-py-3 tw-align-top">{children}</td>
   ),
+  // Markdown is a source-record surface. Typed publication routes render
+  // governed media separately; arbitrary Markdown image URLs stay inert.
   img: ({ alt }) => (
     <span className="tw-inline-flex tw-rounded-md tw-border tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-300">
       {t(DEFAULT_LOCALE, "museum.network.markdown.mediaOmitted", {
