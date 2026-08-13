@@ -1,335 +1,424 @@
 export const PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES = {
   "publicReview.pages.tokensCollectionsAndMinting.currentSummary":
-    "How one shared NFT contract creates Stream collections and tokens, controls minting, keeps limits, and records open risks.",
+    "How Stream uses one contract for all its NFT collections, controls how tokens are created, and handles limits and risks.",
   "publicReview.pages.tokensCollectionsAndMinting.currentIntro": `## Minting in one minute
 
 All Stream collections and tokens live in one shared ERC-721 NFT contract called the Core.
 
-First, a collection gets an ID. When a mint succeeds, the token gets a global Stream token ID and a serial number inside its collection. Minting tools check the sale or eligibility rules. The Core then enforces the collection supply and records the token's permanent identity.
+First, a collection gets an ID. When a mint succeeds, the token gets a global Stream token ID and a serial number inside its collection. Before an NFT is created, the system checks the sale rules and makes sure the collection still has room. The Core then creates the NFT and records its permanent ID.
 
-The reviewed code has two separate minting paths. Signed Drops and auctions use the older \`StreamMinter\` path. A newer \`StreamMintManager\` and \`StreamMintLedger\` path supports phases, gates, and detailed counters. The two paths are both present, but they are not one combined launch path.
+The reviewed code has two separate minting paths. Signed Drops and auctions use the older \`StreamMinter\` path. A newer path uses \`StreamMintManager\` and \`StreamMintLedger\` to control when minting is open, check who is allowed to mint, and track how much of each limit has been used. The two paths are both present, but they are not one combined launch path.
 
-**Main point:** token identity belongs in the Core. Minting rules can live in replaceable modules. Every path must still obey the same supply and identity rules.
+**Main point:** token identity belongs in the Core. Minting rules live outside the Core. New gate contracts can be added, and the Core can move to a new mint manager. Any replacement must preserve the limits already used. Every path must still obey the same supply and identity rules.
 
 This is code under public review. Its availability here does not prove deployment, audit, or safety.`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentIdentitySection": `## One permanent identity surface for many collections
+  "publicReview.pages.tokensCollectionsAndMinting.currentIdentitySection": `## One shared contract records every Stream NFT
 
 ### What happens
 
-All Stream collections share the same Core contract. A function admin creates each collection record. The Core records every token under that collection.
+All Stream NFT collections use one main contract called the Core.
 
-Each token has:
+When an approved admin adds a collection, the Core gives it a collection ID.
 
-- one global Stream token ID; and
-- one serial number inside its collection.
+When an NFT is created, the Core records which collection it belongs to. The NFT gets two numbers:
 
-### Accepted design
+- A token ID that is unique across all Stream NFTs.
+- A serial number showing its place inside the collection.
 
-[ADR 0016](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0016-core-native-only-erc721.md#L27-L50) accepts one Core-native ERC-721 for the launch line. It rejects hidden per-collection NFT contracts inside this Core.
+For example, an NFT could be token \`1,250\` in Stream and number \`20\` in its collection.
 
-[ADR 0015 decisions W1 and W2](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0015-collection-identity-and-facade-readiness.md#L21-L66) still apply. Collection reads and token JSON identify the collection. Required marketplace or indexer commitments remain an outside release gate.
+### Accepted decisions
 
-### Why this matters
+[ADR 0016](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0016-core-native-only-erc721.md#L23-L49) says the launch will use one Core contract. Every NFT in it must follow the same ERC-721 rules for ownership, approvals, transfers, minting, and burning. The launch Core does not include a separate NFT contract for each collection.
 
-One Core gives every collection the same ownership rules, but a Core defect can affect them all. Address-only marketplaces may also group all Stream collections together.
-
-### Technical details
-
-[\`StreamCore.createCollection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L336-L375) creates the collection record. [\`tokenCollectionIdentity\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L576-L590) returns the stored collection ID, collection serial, and burn status for a token.`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentSupplySection": `## Supply combines several counters
-
-Stream uses several supply numbers because they answer different questions:
-
-- **Maximum supply:** the current collection cap.
-- **Minted-ever supply:** every token identity allocated to the collection, including burned tokens.
-- **Live supply:** minted-ever supply minus burned tokens.
-- **Phase or authorization capacity:** how much one minting rule still allows.
-- **Final supply:** the intended cap after minting closes.
-
-### What the current Core does
-
-The Core increases minted-ever supply when it allocates a collection serial. Burning lowers live supply. It does not lower minted-ever supply or free the old token ID.
-
-The manager and ledger path can also consume separate counters for a payer, recipient, executor, authorizer, or shared context.
+[ADR 0015 decisions W1 and W2](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0015-collection-identity-and-facade-readiness.md#L41-L71) remain accepted. Core reads and token data must show which collection an NFT belongs to. Before the first public sale, at least two major marketplaces or indexers must give recorded written commitments to use this information.
 
 ### Why this matters
 
-Mixing these numbers could let a burn or second path break a supply promise.
+Using one Core keeps ownership rules the same for every collection. It also means a bug in the Core could affect every collection.
 
-### Technical details
+Some marketplaces group NFTs only by contract address. They may show all Stream NFTs as one collection unless they also read Stream's collection data.
 
-[\`_allocateTokenIdentity\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1356-L1389) assigns the next global ID and collection serial. [\`totalSupplyOfCollection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1652-L1660) returns minted-ever minus burns.`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentPolicySection": `## Why mint policy lives outside the Core
+### Code links
 
-### The split of duties
+[\`StreamCore.createCollection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L312-L352) creates a collection record. [\`tokenCollectionIdentity\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L544-L559) returns a token's collection ID, serial number, and burn status.`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentSupplySection": `## How Stream counts NFT supply
 
-The Core owns the rules every minting path must obey:
+Stream keeps several numbers because each one answers a different question:
 
-- permanent token and collection identity;
-- the collection supply cap;
-- collection freeze; and
-- access to the Core mint entries.
-
-The newer manager path puts changeable distribution rules outside the Core:
-
-- the manager owner configures phases and approved executors;
-- an approved executor asks to mint;
-- an optional gate checks extra eligibility rules;
-- the ledger records limits and used authorizations; and
-- the Core creates the token identity.
-
-### Why this matters
-
-Sales, claims, allowlists, and airdrops can change without replacing the Core. No outside module may bypass its supply, identity, or freeze rules, or lose limits already used.
-
-### Technical details
-
-[\`StreamMintManager\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L13-L56) names the manager's dependencies and limits. [\`StreamMintLedger\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintLedger.sol#L7-L40) stores its authorized writers and durable accounting.`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentLanesSection": `## The two source mint lanes
-
-The pinned code has two separate paths.
-
-### 1. Signed Drops and auctions
-
-\`StreamDrops\` checks a signed authorization. It then calls the older \`StreamMinter\`. That minter checks its own time window and supply rules before asking the Core to mint.
-
-### 2. Manager and ledger
-
-\`StreamMintManager\` checks a configured phase, executor, optional gate, and counters. It consumes ledger state and uses the Core's prepared-mint functions.
-
-### Current status
-
-The rehearsal deploys and wires both paths. Signed Drops and the current auction still use \`StreamMinter\`. They do not use the manager's phases or ledger counters.
-
-The code does not yet show one clear launch path for all minting. This must be resolved before launch. Review code is not proof of deployment or audit.
-
-### Technical details
-
-See [the signed Drop call](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L609-L632), [the legacy minter](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMinter.sol#L130-L175), [the manager mint](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L241-L302), and [the rehearsal wiring](https://github.com/{sourceRepository}/blob/{sourceCommit}/script/RehearseDeployment.s.sol#L218-L269).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentPhasesSection": `## Phases make distribution policy inspectable
-
-### What a phase records
-
-The manager owner can configure a phase once. The current phase data includes:
-
-- the collection and phase IDs;
-- start and end times;
-- the largest allowed batch;
-- configuration and metadata hashes;
-- a paused state;
-- approved executors;
-- an optional gate; and
-- one or more counters.
-
-The manager hashes these rules. A mint request must provide the current hash. Pausing the phase or changing executors updates it.
-
-The current phase struct does not have a separate \`maxPhaseSupply\` field. A phase-wide cap must be expressed through a configured ledger counter.
-
-### Why this matters
-
-Collectors should see the exact rules before acting. Reviewers need the list of phase types the first release will support and test.
-
-### Technical details
-
-See [the phase types](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/IStreamMintManager.sol#L21-L50) and [phase configuration](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L143-L239).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentGatesSection": `## Gates carry security inputs
-
-A gate is an optional read-only contract that checks extra eligibility rules for a manager phase.
-
-### Who acts
-
-The module-registry owner registers a gate and pins its interface, version, code, metadata, and gas limit. The manager owner connects it to a phase. An approved executor submits the request.
-
-### What the current code accepts
-
-A gate can return an authorization ID, an authorizer, a maximum quantity, a gate hash, and nullifiers. A nullifier is meant to be a one-use replay key.
-
-The current manager and ledger reject nonempty nullifier arrays. Nullifier-backed gates still need implementation.
-
-### Why this matters
-
-The registry identifies the gate code. It cannot prove that an outside allowlist was correct. Onchain gate data is public; a \`bytes32\` value is not private.
-
-### Technical details
-
-See [\`StreamMintModuleRegistry\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintModuleRegistry.sol#L21-L100), [\`IStreamMintGate\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/IStreamMintGate.sol#L6-L29), and [manager gate validation](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L551-L609).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentCountersSection": `## Durable counters cover activity across transactions
-
-The ledger stores how much of a limit has been used. A counter key includes the manager, collection, phase, counter, and subject.
-
-The subject can be a payer, recipient, executor, authorizer, constant group, or shared context. A sponsored mint can therefore count payer and recipient limits separately.
+- **Collection limit:** how many NFT identities the collection is currently allowed to create in total.
+- **Minted count:** how many NFT identities the collection has created, including NFTs later burned.
+- **Live count:** how many of those NFTs still exist and have not been burned.
+- **Minting-rule limit:** how many NFTs one sale, claim, wallet, or other rule still allows.
+- **Final supply:** the collection limit after minting is closed.
 
 ### What the current code does
 
-The manager consumes counters before asking the Core to mint. If the transaction fails, the EVM reverts those changes too. Burns do not reduce consumed ledger counters.
+The Core increases the minted count when it gives an NFT its serial number. Burning an NFT lowers the live count. It does not lower the minted count or free the old token ID.
 
-The current ledger supports static increments and static caps. It also stores used authorization IDs in the calling manager's scope.
-
-### Successor risk
-
-Old values remain stored after manager replacement. But the manager address is part of each key, so a new manager does not automatically inherit them. A successor plan must preserve earlier limits.
-
-### Technical details
-
-See [ledger storage and consumption](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintLedger.sol#L7-L108) and [counter-key derivation](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintLedger.sol#L155-L164).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentEditionsSection": `## Editions and signed Drop quantity
-
-The Core can hold a one-of-one work or an edition with many distinct ERC-721 tokens in one collection.
-
-That collection ability is different from the current signed Drop format.
-
-### Current signed Drop path
-
-The signed authorization has a \`quantity\` field, but the contract requires it to equal one. The fixed-price call builds one-item arrays and mints one token. An edition therefore needs one signed Drop authorization per token on this path.
-
-### Manager path
-
-The manager can mint a batch. A phase sets the limit, up to a hard maximum of ten tokens.
+The newer manager path also tracks separate limits. It can count activity for the payer, recipient, executor, authorizer, or a shared group.
 
 ### Why this matters
 
-Interfaces must name the path. “Supports editions” can hide the signed Drop path's one-token rule.
+These numbers must not be mixed up. For example, burning an NFT must not create a new mint allowance if the original rule was a lifetime limit.
 
-### Technical details
+Both minting paths must also obey the same collection limit.
 
-See [the signed authorization fields](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L44-L61), [the quantity check](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L561-L581), and [the manager batch cap](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L38-L45).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentAtomicSection": `## Prepared execution keeps cross-module state atomic
+### Code links
 
-The manager path changes policy, counters, and Core token state in one transaction.
+[\`_allocateTokenIdentity\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1270-L1303) gives each NFT its token ID and collection serial. [\`totalSupplyOfCollection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1545-L1552) returns the live count: minted NFTs minus burned NFTs.`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentPolicySection": `## The Core and minting rules have different jobs
+
+### The Core keeps the permanent rules
+
+The Core controls:
+
+- token and collection identity;
+- the collection supply limit;
+- collection freeze; and
+- which contracts may call its minting functions.
+
+### The manager handles changeable minting rules
+
+In the newer path:
+
+- the manager owner sets up each phase, which is the rule set for one minting period;
+- an approved executor starts the mint;
+- an optional gate answers an extra question, such as whether a wallet may mint;
+- the ledger, a separate record-keeping contract, stores how much of each limit has been used; and
+- the Core creates the NFT and its permanent identity.
+
+An executor is an approved contract or account that sends the mint request.
+
+### Why this matters
+
+Sale, claim, allowlist, and airdrop rules can change without replacing the Core.
+
+No outside contract may bypass the Core's supply, identity, or freeze rules. A replacement must also keep the limits that were already used.
+
+### Code links
+
+[\`StreamMintManager\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L13-L56) connects the Core, ledger, and gate registry. [\`StreamMintLedger\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintLedger.sol#L7-L40) stores minting limits and used authorization IDs.`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentLanesSection": `## The code has two separate ways to mint
+
+### 1. Signed Drops and auctions
+
+\`StreamDrops\` checks a signed permission for a fixed-price Drop. It then calls the older \`StreamMinter\`.
+
+The older minter checks its own time window and supply rules before asking the Core to create the NFT. The current auction also uses this older minter.
+
+### 2. Manager and ledger
+
+\`StreamMintManager\` checks the saved rules for the minting period, who sent the request, any extra eligibility check, and the limits.
+
+It updates the used limits in \`StreamMintLedger\`, then asks the Core to create the NFT.
+
+### Current status
+
+The rehearsal deployment sets up both paths. Signed Drops and the current auction do not use the manager's phases or ledger limits.
+
+The pinned code does not combine both paths under one set of minting rules. Before launch, the team needs to state which path or paths will be used and prove that they enforce the same Core limits.
+
+Review code is not proof that either path has been deployed or audited.
+
+### Code links
+
+See [the signed Drop call](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L560-L584), [the older minter](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMinter.sol#L122-L167), [the manager mint](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L222-L318), and [the rehearsal setup](https://github.com/{sourceRepository}/blob/{sourceCommit}/script/RehearseDeployment.s.sol#L201-L250).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentPhasesSection": `## A phase sets the rules for one minting period
+
+A phase is a saved set of rules for one minting period. For example, one public sale or allowlist claim can have its own phase.
+
+The manager owner—the account allowed to configure the manager—can create each phase only once. The phase stores:
+
+- the collection and phase IDs;
+- when minting starts and ends;
+- the largest number of NFTs allowed in one request;
+- whether the phase is paused;
+- which executors may start a mint;
+- an optional gate;
+- counters that track used limits; and
+- fingerprints for the phase rules and metadata.
+
+A fingerprint is a short code made from the current rules. Each mint request names the fingerprint it expects. The request works only if it matches the current one.
+
+Pausing the phase or changing its approved executors changes the fingerprint. A request prepared for the old rules then fails instead of running under different rules.
+
+### One important detail
+
+The current phase data has no separate field for the total number of NFTs the phase may mint. To enforce that total, the phase must use a ledger counter shared by the whole phase.
+
+### Why this matters
+
+Collectors should be able to see the exact rules that apply before they mint. Reviewers also need to know which types of phases the first release will support.
+
+### Code links
+
+See [the phase data](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/IStreamMintManager.sol#L19-L46) and [phase setup](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L131-L220).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentGatesSection": `## A gate can add an extra eligibility check
+
+A gate is an optional contract that gives an extra yes-or-no answer before a mint. For example: “Is this wallet on the allowlist?”
+
+A nullifier is a one-use receipt for a proof. Once it is recorded, the same proof should not work again.
+
+**Practical result:** the pinned code rejects any gate result that contains a nullifier. A gate that needs this kind of one-use receipt cannot be used yet.
+
+### How a gate is chosen
+
+First, the account that controls the gate registry approves the exact gate contract. The registry saves technical facts about it: its interface, version, code fingerprint, metadata, and gas limit.
+
+Next, the account that controls the mint manager connects that gate to a phase. An approved executor then sends the mint request and any data the gate needs.
+
+### What the current code supports
+
+A gate result can include:
+
+- an authorization ID, used to stop the same permission from working twice;
+- the address that approved the mint;
+- the largest quantity allowed;
+- a fingerprint of the gate result; and
+- nullifiers, although the current code does not accept them.
+
+Only a gate result with no nullifiers can pass this part of the current checks. Both the manager and the ledger reject a non-empty list.
+
+### Why this matters
+
+The registry proves which gate code was approved. It cannot prove that an outside allowlist or other data source was correct.
+
+Gate data written onchain is public. Putting data in a \`bytes32\` value does not make it private.
+
+### Code links
+
+See [\`StreamMintModuleRegistry\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintModuleRegistry.sol#L18-L100), [\`IStreamMintGate\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/IStreamMintGate.sol#L5-L28), and [the manager's gate checks](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L512-L600).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentCountersSection": `## How the system remembers used limits
+
+A counter is a running total. The ledger is the contract that stores these totals.
+
+Each total is saved under a counter key. Think of the key as a unique label made from:
+
+- the mint manager;
+- the collection;
+- the phase;
+- the type of limit; and
+- the person or group being counted.
+
+The person or group can be the payer, recipient, executor, authorizer, a fixed group, or a shared context such as one campaign.
+
+For example, one person may pay while another receives the NFT. Separate keys let the system track their limits separately.
+
+### What the current code does
+
+The manager updates the counters before it asks the Core to mint. If any later step fails, the whole blockchain transaction is undone, including those updates.
+
+Burning an NFT does not reduce these used limits.
+
+The pinned ledger can add a fixed amount to a counter and enforce a fixed maximum. It also remembers which authorization IDs each manager has already used.
+
+### Replacing the manager is not safe by itself
+
+**Cause:** the manager's contract address is part of every counter key.
+
+**Effect:** a replacement manager has a new address, so it creates different keys. The old totals remain in the ledger, but the new manager does not use them automatically.
+
+Without a safe move of the old totals, a limit that was already used could appear unused to the replacement manager.
+
+Accepted [ADR 0010 decision D5.8](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0010-world-class-spec-pass.md#L198-L200) requires an approved process that moves the old totals into a new ledger. A Merkle-proved snapshot must prove the old values.
+
+The pinned ledger has no function that performs this move. A safe replacement process is still missing from this code.
+
+### Code links
+
+See [ledger storage and limit use](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintLedger.sol#L5-L150) and [how a counter key is created](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintLedger.sol#L142-L150).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentEditionsSection": `## Editions work differently in the two paths
+
+A Stream collection may contain one unique NFT or many NFTs in an edition. Each NFT in an edition is still its own ERC-721 token.
+
+### Signed Drop path
+
+The signed Drop permission includes a \`quantity\` field, but the current contract requires that value to be one.
+
+The fixed-price Drop therefore creates one NFT at a time. An edition needs a separate signed Drop permission for each NFT on this path.
+
+### Manager path
+
+The manager can create several NFTs in one request. A phase sets the request limit, but the code never allows more than ten NFTs in one batch.
+
+### Why this matters
+
+Saying “editions are supported” is not enough. The interface must also say which minting path it uses and how many NFTs that path can create at once.
+
+### Code links
+
+See [the signed permission fields](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L41-L57), [the one-token check](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamDrops.sol#L515-L554), and [the manager's batch limit](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L37-L38).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentAtomicSection": `## A manager mint should fully succeed or fully fail
+
+The manager path does all of its work in one blockchain transaction.
 
 ### What happens
 
 1. An approved executor sends a mint request.
-2. The manager checks the phase, policy hash, gate, and batch.
-3. The ledger consumes the required counters and authorization ID.
-4. The manager derives a batch root and a separate operation ID for each token.
-5. The Core prepares and completes each token.
-6. The manager emits batch and token events.
+2. The manager checks the current rules, any extra eligibility check, and the number of NFTs requested.
+3. The ledger updates the used limits and records the authorization ID.
+4. The manager creates one operation root for the whole batch and one operation ID for each token.
+5. The Core prepares and creates each NFT.
+6. The contracts write public events for the batch and tokens.
 
-If any step reverts, the EVM restores counters, nonces, token identities, and mint state.
+An operation root is the fingerprint for the whole batch. An operation ID identifies one token operation inside that batch.
 
-The Core also has an abort function for the latest prepared token. The current \`mintPrepared\` path does not call it; it relies on transaction rollback.
+If any step fails, the whole transaction is undone. The used limits, the manager's next operation number, token identities, and ownership return to their earlier values.
 
-### Why this matters
-
-A collector must not receive half a mint while a limit remains consumed. Reviewers must prove rollback across every call and token.
-
-### Technical details
-
-See [\`mintPrepared\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L241-L302) and [the Core prepare, complete, and abort functions](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L492-L569).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentReplaySection": `## Replay protection needs one durable owner
-
-Replay protection stops the same permission or operation from being used twice.
-
-### What the current code stores
-
-- Signed Drops store used drop IDs in \`StreamDrops\`.
-- The ledger stores used authorization IDs inside each manager's scope.
-- The Core stores every used prepared-token operation ID for the life of the contract.
-- The manager derives and emits a batch operation root, but the ledger does not store that root.
-
-The batch root, ledger counters, and Core operation IDs lack one durable joined record.
-
-### Still proposed
-
-[ADR 0018](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0018-batch-operation-root-and-token-identity.md#L3-L33) proposes making the ledger the permanent owner of batch replay, then removing the Core's lifetime operation-ID mapping after a proven cutover.
-
-That ADR is not accepted or implemented in the pinned source. The current code still uses the older ownership split.
+The Core also has a function that can cancel the latest prepared token. The current manager path does not call it. Normal manager mints rely on full transaction rollback instead.
 
 ### Why this matters
 
-One replay rule should have one owner. Otherwise a replacement can lose the link between consumed limits and created tokens. The current Core mapping also grows with every prepared token, so its long-term storage cost needs review.`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentIdentityResultSection": `## Every minted token receives durable identity
+A collector must not receive only part of a batch while the system still counts the full limit as used.
 
-When a mint succeeds, the Core records:
+Reviewers need to test failure at every step and on every token in a batch.
 
-- the global token ID;
-- the collection ID;
-- the collection serial;
-- the owner; and
-- the token data and randomness state used by that collection.
+### Code links
 
-The Core emits \`TokenCollectionRegistered\` when it allocates identity. The normal ERC-721 mint also emits \`Transfer\` from the zero address. A manager mint adds manager batch and token events.
+See [\`mintPrepared\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L222-L318) and [the Core prepare, complete, and cancel functions](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L464-L539).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentReplaySection": `## The same mint permission must not work twice
 
-### Why this matters
+Each mint permission and prepared token operation has an ID. The contracts remember used IDs so the same action cannot run twice. This is called replay protection.
 
-A third party should be able to rebuild identity and ownership history from public state and events. The two mint paths need separate tests because they emit different extra evidence.
+### What the current code remembers
 
-### Technical details
+- Signed Drops remember used Drop IDs inside \`StreamDrops\`.
+- The ledger remembers used authorization IDs separately for each manager.
+- The Core remembers every prepared-token operation ID for the life of the contract.
+- The manager creates an operation root for the whole batch, but the ledger does not store it.
 
-See [identity allocation](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1356-L1389) and [the manager's token event](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L304-L343).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentBurnSection": `## Burning preserves history
+The result is split across contracts. No single lasting record links the batch, its used limits, and all NFTs created by it.
 
-Before a collection is frozen, a token owner or approved account can burn the token.
+### A proposed change
 
-Burning removes the current owner and lowers live supply. It does not erase the token's collection ID, collection serial, token ID, token data, or burn audit record. It also does not lower minted-ever supply.
+[ADR 0018](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0018-batch-operation-root-and-token-identity.md#L3-L33) proposes making the ledger remember each used operation root. After a proven move to that design, the Core would no longer keep every token operation ID forever.
 
-After collection freeze, the Core rejects burning because the collection is no longer mutable.
+This ADR is only a proposal. It is not accepted or implemented in the pinned code.
 
 ### Why this matters
 
-The chain can distinguish “never minted” from “burned.” Other modules must define what a burn means for randomness, sales, preservation, royalties, and indexes.
+One contract should own the lasting batch record. Otherwise a replacement may lose the link between used limits and created NFTs.
 
-### Technical details
+The current Core record also grows every time the manager prepares a token. Its long-term storage cost still needs review.`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentIdentityResultSection": `## Each minted NFT gets a lasting identity
 
-See [\`StreamCore.burn\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L628-L663) and [the retained identity read](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L576-L590).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentClosureSection": `## Mint closure must close every lane
+After a successful mint, the Core stores:
+
+- the NFT's global token ID;
+- its collection ID;
+- its serial number inside that collection;
+- its current owner; and
+- its token data and randomness state.
+
+The IDs stay with the NFT. The owner may change later when the NFT is transferred.
+
+The Core also writes public log events. \`TokenCollectionRegistered\` records the collection and serial. The normal ERC-721 \`Transfer\` event records the first owner. A manager mint adds its own batch and token events.
+
+### Why this matters
+
+Another service should be able to rebuild an NFT's identity and ownership history from public contract state and events.
+
+The two minting paths need separate tests because they write different extra events.
+
+### Code links
+
+See [identity creation](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1270-L1303) and [the manager's token event](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamMintManager.sol#L281-L318).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentBurnSection": `## Burning removes the NFT but keeps its history
+
+Before a collection is frozen, the NFT owner or an approved account can burn the NFT.
+
+Burning:
+
+- removes the current owner;
+- lowers the number of live NFTs;
+- keeps the token ID, collection ID, and collection serial;
+- keeps the token data and burn audit record;
+- does not lower the number ever minted; and
+- does not restore a used limit in the mint ledger.
+
+After the collection is frozen, the Core no longer allows burning.
+
+### Why this matters
+
+The public record can tell the difference between an NFT that never existed and one that existed but was burned.
+
+Sales, preservation tools, royalty tools, and indexes still need clear rules for how they treat burned NFTs.
+
+### Code links
+
+See [\`StreamCore.burn\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L591-L626) and [the identity kept after a burn](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L544-L559).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentClosureSection": `## Closing minting must stop every path
 
 ### What the current Core does
 
-After the wait, a function admin can call \`setFinalSupply\`. The Core sets the cap to minted-ever supply. Both mint paths need the Core's next collection serial, so this cap blocks both.
+After the older minter's end time and a waiting period, an approved function admin can call \`setFinalSupply\`.
 
-### Current zero-mint gap
+The Core then sets the collection limit to the number of NFTs ever minted. Both minting paths need the Core to allocate the next collection serial, so this limit blocks both paths.
 
-With no mints, \`setFinalSupply\` sets the cap to zero. Zero also lets \`setCollectionData\` initialize supply, so a function admin can set a new cap while the collection remains unfrozen.
+### The zero-mint problem
 
-\`freezeCollection\` closes supply and freezes in one transaction, which blocks reopening. But \`setFinalSupply\` alone is not a one-way zero-mint closure.
+If no NFT has been minted, \`setFinalSupply\` sets the collection limit to zero.
 
-The current \`setFinalSupply\` function also emits no dedicated supply-closed event.
+The Core also uses zero to mean that the supply has not been set yet. While the collection is still unfrozen, an approved function admin can call \`setCollectionData\` and set a new limit.
+
+This means \`setFinalSupply\` alone does not close an empty collection forever.
+
+\`freezeCollection\` sets the final supply and freezes the collection in one transaction. That prevents the zero limit from being reopened.
+
+\`setFinalSupply\` also writes no dedicated event saying that supply was closed.
 
 ### What still needs a clear launch rule
 
-Closure should be one-way at zero, close every phase and executor, define pending authorizations, preserve the rule through successors, and emit an exact final value.
+The launch rule should:
 
-### Technical details
+- close minting permanently even when no NFT exists;
+- close or pause every phase and executor;
+- say what happens to unused permissions;
+- stay closed after a manager or ledger replacement; and
+- write the exact final supply in an event.
 
-See [\`setFinalSupply\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L888-L908), [\`setCollectionData\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L379-L408), and [\`freezeCollection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L826-L842).`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentResponsibilitiesSection": `## Responsibilities carried by the minting system
+### Code links
 
-The current source spreads minting duties across several contracts:
+See [\`setFinalSupply\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L838-L858), [\`setCollectionData\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L353-L385), and [\`freezeCollection\`](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L779-L795).`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentResponsibilitiesSection": `## Which contract is responsible for what
 
-- **Core:** permanent identity, collection supply, freeze, ownership, transfer, and burn.
-- **StreamDrops and StreamMinter:** signed Drop and auction minting rules.
-- **StreamMintManager:** phase policy, approved executors, gates, batch preparation, and operation identities.
-- **StreamMintLedger:** manager-scoped counters and used authorization IDs.
-- **Gate modules:** extra eligibility decisions for manager phases.
-- **Outside systems:** marketplace collection display and any offchain allowlist or curation process.
+The current code splits minting work across several contracts:
+
+- **Core:** stores permanent identity, the collection supply, freeze state, ownership, transfers, and burns.
+- **StreamDrops and StreamMinter:** handle signed Drops and the current auction minting path.
+- **StreamMintManager:** handles phases, approved executors, gates, batch setup, and operation IDs.
+- **StreamMintLedger:** stores limits and used authorization IDs separately for each manager.
+- **Gate contracts:** make extra eligibility checks for manager phases.
+- **Outside systems:** decide how marketplaces show collections and provide any offchain allowlist or curation data.
 
 ### Why this matters
 
-Each promise needs one owner. The launch design must explain how those owners work together and preserve history when a contract changes.`,
-  "publicReview.pages.tokensCollectionsAndMinting.currentFailuresSection": `## What can fail
+Each promise needs one clear owner.
 
-- The legacy and manager paths enforce different limits.
-- Two phases exceed an intended allocation even while the Core cap holds.
-- Payer and recipient limits are mixed up during a sponsored mint.
-- A gate uses wrong outside data, fails its pinned code check, runs out of gas, or returns unclear results.
-- A batch fails after one module changes state and rollback is not proven.
-- An authorization or operation ID can be used again.
-- A burn wrongly restores mint capacity.
-- A replacement manager starts with empty counter history.
-- Supply is called final while another path can still mint or reopen it.
-- Marketplaces show every Stream collection as one collection under the shared Core address.
+Before launch, the design must show how these contracts work together and how used limits and history survive when a contract is replaced.`,
+  "publicReview.pages.tokensCollectionsAndMinting.currentFailuresSection": `## What reviewers should try to break
 
-These are review targets. Listing them does not mean the code is safe or that every failure has been tested.`,
+- The older and newer minting paths apply different limits.
+- Two phases together mint more NFTs than their intended shared allowance.
+- A sponsored mint counts the payer when it should count the recipient, or the other way around.
+- A gate uses wrong outside data, different code, too much gas, or unclear results.
+- Part of a batch remains changed after a later step fails.
+- The same authorization or operation ID works twice.
+- Burning an NFT wrongly creates a new mint allowance.
+- A new manager starts with empty limit history.
+- Supply is called final but an admin or another path can reopen minting.
+- A marketplace shows all Stream NFTs as one collection because they share one Core address.
+
+These are things to test. This list does not say that every problem exists or that the code is safe.`,
   "publicReview.pages.tokensCollectionsAndMinting.currentQuestionsSection": `## Questions for reviewers
 
-1. Which identity and supply rules must stay in the permanent Core?
-2. Can marketplaces and indexers reliably show separate collections under one Core address?
-3. Which minting path will the first release actually use?
-4. Which phase, gate, and counter types are required for that release?
-5. Do payer, recipient, transfer, burn, and successor cases keep the right limits?
-6. Does every failure restore counters, operation state, and token state for the whole batch?
-7. Which contract should own the permanent batch replay record?
-8. Can supply close once, including when no token has been minted, and stay closed across every path?`,
+1. Which minting path or paths will the first release use?
+2. Which identity and supply rules must always stay in the Core?
+3. Can major marketplaces and indexers show each Stream collection separately?
+4. Which phases, gates, and limit types does the first release need?
+5. Do payer, recipient, transfer, burn, and contract-replacement cases keep the right limits?
+6. Does every failed batch undo all limit, operation, and token changes?
+7. Which contract should keep the permanent record that stops batch replay?
+8. Can minting close once and stay closed, even when no NFT has been minted?`,
 } as const;
