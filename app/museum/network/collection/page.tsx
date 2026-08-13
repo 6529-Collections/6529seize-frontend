@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import { MuseumLandingHero } from "@/components/museum/landing/MuseumLandingHero";
 import {
   MuseumLandingMediaCard,
   type MuseumLandingMedia,
@@ -152,47 +153,6 @@ function collectionItems(
   return legacy.length === 0 ? null : legacy;
 }
 
-function CollectionHero({ hero }: { readonly hero: CollectionItem }) {
-  return (
-    <header className="tw-grid tw-gap-10 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-12 md:tw-grid-cols-[minmax(0,0.8fr)_minmax(22rem,1.2fr)] md:tw-items-start md:tw-gap-14 md:tw-pb-16">
-      <div className="tw-max-w-2xl">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-primary-300">
-          {t(DEFAULT_LOCALE, "museum.network.collection.eyebrow")}
-        </p>
-        <h1 className="tw-m-0 tw-mt-4 tw-text-4xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.03em] tw-text-iron-50 sm:tw-text-6xl">
-          {t(DEFAULT_LOCALE, "museum.network.collection.title")}
-        </h1>
-        <p className="tw-m-0 tw-mt-6 tw-max-w-xl tw-text-lg tw-leading-8 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "museum.network.collection.heroDescription")}
-        </p>
-        <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
-          <Link
-            href="/museum/network/acquisitions"
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-bg-primary-500 tw-px-5 tw-text-sm tw-font-semibold tw-text-black tw-no-underline hover:tw-bg-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
-          >
-            {t(DEFAULT_LOCALE, "museum.network.collection.browseAcquisitions")}
-          </Link>
-          <Link
-            href="/museum/network/artists"
-            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {t(DEFAULT_LOCALE, "museum.network.collection.meetArtists")}
-          </Link>
-        </div>
-      </div>
-      <MuseumLandingMediaCard
-        {...(hero.media === undefined ? {} : { media: hero.media })}
-        {...(hero.metadata === undefined ? {} : { metadata: hero.metadata })}
-        {...(hero.href === null ? {} : { href: hero.href })}
-        title={hero.title}
-        subtitle={hero.subtitle}
-        eager
-        featured
-      />
-    </header>
-  );
-}
-
 export default async function MuseumCollectionPage() {
   const { publicationState, view } = await getMuseumPublicationBundle();
   if (publicationState.publication === null) {
@@ -240,7 +200,40 @@ export default async function MuseumCollectionPage() {
 
   return (
     <div>
-      <CollectionHero hero={hero} />
+      <MuseumLandingHero
+        eyebrow={t(DEFAULT_LOCALE, "museum.network.collection.eyebrow")}
+        title={t(DEFAULT_LOCALE, "museum.network.collection.title")}
+        description={t(
+          DEFAULT_LOCALE,
+          "museum.network.collection.heroDescription"
+        )}
+        {...(hero.media === undefined ? {} : { media: hero.media })}
+        {...(hero.metadata === undefined
+          ? {}
+          : { mediaMetadata: hero.metadata })}
+        mediaTitle={hero.title}
+        mediaSubtitle={hero.subtitle}
+        {...(hero.href === null ? {} : { mediaHref: hero.href })}
+        actions={
+          <>
+            <Link
+              href="/museum/network/acquisitions"
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-bg-primary-500 tw-px-5 tw-text-sm tw-font-semibold tw-text-black tw-no-underline hover:tw-bg-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+            >
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.collection.browseAcquisitions"
+              )}
+            </Link>
+            <Link
+              href="/museum/network/artists"
+              className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.collection.meetArtists")}
+            </Link>
+          </>
+        }
+      />
 
       <section
         className="tw-mt-14 sm:tw-mt-16"

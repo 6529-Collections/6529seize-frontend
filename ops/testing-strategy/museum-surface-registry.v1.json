@@ -400,6 +400,10 @@
       "surface_ids": ["museum.artist", "museum.work"]
     },
     {
+      "file": "components/museum/landing/MuseumLandingHero.tsx",
+      "surface_ids": ["museum.collection"]
+    },
+    {
       "file": "components/museum/landing/MuseumLandingMediaCard.tsx",
       "surface_ids": ["museum.collection"]
     },
