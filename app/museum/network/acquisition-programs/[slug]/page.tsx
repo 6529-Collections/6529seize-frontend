@@ -206,10 +206,16 @@ export default async function MuseumAcquisitionProgramPage({
               id: work.id,
               label: work.title,
               href: museumWorkHref(work.id),
-              relation: t(
-                DEFAULT_LOCALE,
-                "museum.network.acquisitions.relationSelectedThrough"
-              ),
+              relation:
+                work.status === "accessioned_into_permanent_collection"
+                  ? t(
+                      DEFAULT_LOCALE,
+                      "museum.network.acquisitions.relationAccessionedThrough"
+                    )
+                  : t(
+                      DEFAULT_LOCALE,
+                      "museum.network.acquisitions.relationSelectedThrough"
+                    ),
               status: work.status,
               statusAsOf: work.statusAsOf,
               sourcePath: relationSourcePath,
