@@ -1,83 +1,56 @@
-import { useMemo, type ComponentProps } from "react";
-import { ChevronRightIcon } from "@heroicons/react/24/solid";
-import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
-import UserCICStatus from "../utils/user-cic-status/UserCICStatus";
-import UserCICTypeIcon from "../utils/user-cic-type/UserCICTypeIcon";
-import OverlappingAvatars from "@/components/common/OverlappingAvatars";
-import { buildRepAvatarItems } from "./buildRepAvatarItems";
-import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
+import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
-type MobileTab = "rep" | "identity";
-type AvatarItems = ComponentProps<typeof OverlappingAvatars>["items"];
+export type MobileTab = "rep" | "nic" | "statements";
 
-function RepContributorRow({
-  overview,
-  contributorLabel,
-  repAvatarItems,
-  isRepActive,
-  onOpenOverviewContributors,
+const SELECTED_BUTTON_CLASSES: Record<MobileTab, string> = {
+  rep: "tw-border-primary-500/30 tw-bg-primary-500/10",
+  nic: "tw-border-emerald-500/30 tw-bg-emerald-500/10",
+  statements: "tw-border-white/15 tw-bg-white/[0.06]",
+};
+
+function MobileTabButton({
+  tab,
+  label,
+  value,
+  activeTab,
+  onTabChange,
 }: {
-  readonly overview: ApiRepOverview | null;
-  readonly contributorLabel: string;
-  readonly repAvatarItems: AvatarItems;
-  readonly isRepActive: boolean;
-  readonly onOpenOverviewContributors: () => void;
+  readonly tab: MobileTab;
+  readonly label: string;
+  readonly value: string;
+  readonly activeTab: MobileTab;
+  readonly onTabChange: (tab: MobileTab) => void;
 }) {
-  if (!overview) {
-    return null;
+  const isSelected = activeTab === tab;
+  const horizontalPaddingClasses =
+    tab === "statements" ? "tw-px-0" : "tw-px-0 min-[360px]:tw-px-1";
+  const buttonStateClasses = isSelected
+    ? SELECTED_BUTTON_CLASSES[tab]
+    : "tw-border-transparent tw-bg-transparent desktop-hover:hover:tw-bg-white/[0.035]";
+  let valueColorClasses = isSelected ? "tw-text-white" : "tw-text-iron-400";
+  if (tab === "rep" && isSelected) {
+    valueColorClasses = "tw-text-primary-400";
   }
-
-  if (overview.contributor_count <= 0) {
-    return (
-      <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-black/10 tw-px-3 tw-py-2.5">
-        <span className="tw-text-xs tw-font-medium tw-text-iron-500">
-          {formatNumberWithCommas(overview.contributor_count)}{" "}
-          {contributorLabel}
-        </span>
-      </div>
-    );
-  }
-
-  const contributorRowContent = (
-    <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-      {repAvatarItems.length > 0 && (
-        <span className="tw-pointer-events-none tw-flex-shrink-0">
-          <OverlappingAvatars items={repAvatarItems} size="sm" maxCount={3} />
-        </span>
-      )}
-      <span className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-300">
-        {formatNumberWithCommas(overview.contributor_count)} {contributorLabel}
-      </span>
-    </span>
-  );
-
-  if (!isRepActive) {
-    return (
-      <div className="tw-mt-3 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/15 tw-px-3 tw-py-2.5 tw-text-left">
-        {contributorRowContent}
-        <ChevronRightIcon
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
-          aria-hidden="true"
-        />
-      </div>
-    );
-  }
-
   return (
     <button
       type="button"
-      onClick={onOpenOverviewContributors}
-      aria-label={`View all ${formatNumberWithCommas(overview.contributor_count)} ${contributorLabel}`}
-      className="tw-mt-3 tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/15 tw-px-3 tw-py-2.5 tw-text-left tw-transition-colors hover:tw-border-white/[0.14] hover:tw-bg-white/[0.04]"
+      aria-pressed={isSelected}
+      onClick={() => onTabChange(tab)}
+      className={`tw-flex tw-min-h-16 tw-min-w-0 tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-py-2.5 tw-text-center tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 active:tw-bg-white/[0.08] motion-reduce:tw-transition-none ${horizontalPaddingClasses} ${buttonStateClasses}`}
     >
-      {contributorRowContent}
-      <ChevronRightIcon
-        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
-        aria-hidden="true"
-      />
+      <span className="tw-flex tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-normal tw-text-iron-500 min-[360px]:tw-text-[0.6875rem] min-[360px]:tw-tracking-wider">
+        <span className="tw-min-w-0 tw-whitespace-nowrap">{label}</span>
+      </span>
+      <span
+        className={`tw-max-w-full tw-truncate tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${valueColorClasses}`}
+      >
+        {value}
+      </span>
     </button>
   );
 }
@@ -88,176 +61,45 @@ export default function MobileTabCards({
   overview,
   cicOverview,
   profile,
-  repDirection,
-  cicAvatarItems,
-  onOpenOverviewContributors,
+  identityStatementCount,
 }: {
   readonly activeTab: MobileTab;
   readonly onTabChange: (tab: MobileTab) => void;
   readonly overview: ApiRepOverview | null;
   readonly cicOverview: ApiCicOverview | null;
   readonly profile: ApiIdentity;
-  readonly repDirection: RepDirection;
-  readonly cicAvatarItems: ComponentProps<typeof OverlappingAvatars>["items"];
-  readonly onOpenOverviewContributors: () => void;
+  readonly identityStatementCount: number | null;
 }) {
-  const repAvatarItems = useMemo(
-    () =>
-      buildRepAvatarItems(overview?.contributors.data ?? [], 3, {
-        omitHref: true,
-      }),
-    [overview?.contributors.data]
-  );
-  const isRepActive = activeTab === "rep";
-  const fallbackContributorLabel =
-    repDirection === "given" ? "receivers" : "raters";
-  const contributorLabel = overview
-    ? getContributorLabel(repDirection, overview.contributor_count)
-    : fallbackContributorLabel;
-
-  const repCardClasses = `tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-p-4 tw-text-left tw-transition-all tw-duration-300 tw-ease-out ${
-    isRepActive ? "tw-bg-[#0f1014]" : "tw-bg-white/[0.02]"
-  }`;
-
-  const repCardContent = (
-    <>
-      <div
-        aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-3 tw-z-10"
-      >
-        <span
-          className={`tw-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-all tw-duration-300 ${
-            isRepActive
-              ? "tw-border-primary-300/90 tw-bg-transparent tw-ring-2 tw-ring-primary-500/25"
-              : "tw-border-iron-400/45 tw-bg-black/10 tw-ring-1 tw-ring-black/20"
-          }`}
-        >
-          {isRepActive && (
-            <span className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-primary-300 tw-transition-all tw-duration-300" />
-          )}
-        </span>
-      </div>
-      {isRepActive && (
-        <>
-          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-blue-500/[0.05] tw-via-transparent tw-to-transparent" />
-          <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-iron-300/25 tw-to-transparent" />
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-blue-400/40 tw-to-transparent" />
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/20 tw-to-transparent" />
-        </>
-      )}
-      <div
-        className={`tw-relative tw-transition-opacity tw-duration-300 ${
-          isRepActive ? "" : "tw-opacity-40"
-        }`}
-      >
-        <div className="tw-mb-1.5 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
-          Total Rep
-        </div>
-        <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-          {overview ? formatNumberWithCommas(overview.total_rep) : "\u2014"}
-        </div>
-        <RepContributorRow
-          overview={overview}
-          contributorLabel={contributorLabel}
-          repAvatarItems={repAvatarItems}
-          isRepActive={isRepActive}
-          onOpenOverviewContributors={onOpenOverviewContributors}
-        />
-      </div>
-    </>
-  );
+  const locale = useBrowserLocale();
+  const identityStatementValue =
+    identityStatementCount === null
+      ? "\u2014"
+      : formatInteger(locale, identityStatementCount);
+  const nicValue = cicOverview?.total_cic ?? profile.cic;
 
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-      {isRepActive ? (
-        <div className={repCardClasses}>{repCardContent}</div>
-      ) : (
-        <button
-          type="button"
-          aria-pressed={false}
-          onClick={() => onTabChange("rep")}
-          className={`${repCardClasses} tw-cursor-pointer`}
-        >
-          {repCardContent}
-        </button>
-      )}
-
-      <button
-        type="button"
-        aria-pressed={activeTab === "identity"}
-        onClick={() => onTabChange("identity")}
-        className={`tw-relative tw-cursor-pointer tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-p-4 tw-text-left tw-transition-all tw-duration-300 tw-ease-out ${
-          activeTab === "identity" ? "tw-bg-[#0f1014]" : "tw-bg-white/[0.02]"
-        }`}
-      >
-        <div
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-3 tw-z-10"
-        >
-          <span
-            className={`tw-flex tw-h-4 tw-w-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-all tw-duration-300 ${
-              activeTab === "identity"
-                ? "tw-border-emerald-300/90 tw-bg-transparent tw-ring-2 tw-ring-emerald-500/25"
-                : "tw-border-iron-400/45 tw-bg-black/10 tw-ring-1 tw-ring-black/20"
-            }`}
-          >
-            {activeTab === "identity" && (
-              <span className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-emerald-300 tw-transition-all tw-duration-300" />
-            )}
-          </span>
-        </div>
-        {activeTab === "identity" && (
-          <>
-            <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-emerald-500/[0.05] tw-via-transparent tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-iron-300/25 tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/40 tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
-            <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
-          </>
-        )}
-        <div
-          className={`tw-relative tw-transition-opacity tw-duration-300 ${
-            activeTab === "identity" ? "" : "tw-opacity-40"
-          }`}
-        >
-          <div className="tw-mb-1.5 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
-            NIC
-          </div>
-          <div className="tw-text-2xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white">
-            {formatNumberWithCommas(cicOverview?.total_cic ?? profile.cic)}
-          </div>
-          <div className="tw-mt-2.5 tw-flex tw-items-center tw-gap-1.5">
-            <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
-              <UserCICTypeIcon cic={cicOverview?.total_cic ?? profile.cic} />
-            </span>
-            <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-emerald-400">
-              <UserCICStatus cic={cicOverview?.total_cic ?? profile.cic} />
-            </span>
-          </div>
-          <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
-            {cicAvatarItems.length > 0 && (
-              <div
-                className={
-                  activeTab === "identity"
-                    ? "tw-pointer-events-none desktop-hover:tw-pointer-events-auto"
-                    : "tw-pointer-events-none"
-                }
-              >
-                <OverlappingAvatars
-                  items={cicAvatarItems}
-                  size="sm"
-                  maxCount={3}
-                />
-              </div>
-            )}
-            <span className="tw-text-xs tw-font-normal tw-text-iron-400">
-              {formatNumberWithCommas(cicOverview?.contributor_count ?? 0)}{" "}
-              {(cicOverview?.contributor_count ?? 0) === 1 ? "rater" : "raters"}
-            </span>
-          </div>
-        </div>
-      </button>
+    <div className="tw-grid tw-grid-cols-[0.95fr_0.65fr_1.4fr] tw-gap-1 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-p-1.5 min-[360px]:tw-grid-cols-[1fr_0.8fr_1.2fr] sm:tw-grid-cols-3">
+      <MobileTabButton
+        tab="rep"
+        label={t(locale, "user.profile.identity.mobileTabs.totalRep")}
+        value={overview ? formatInteger(locale, overview.total_rep) : "\u2014"}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+      />
+      <MobileTabButton
+        tab="nic"
+        label={t(locale, "user.profile.identity.mobileTabs.nic")}
+        value={formatInteger(locale, nicValue)}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+      />
+      <MobileTabButton
+        tab="statements"
+        label={t(locale, "user.profile.identity.mobileTabs.idStatements")}
+        value={identityStatementValue}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+      />
     </div>
   );
 }
