@@ -39,6 +39,26 @@ jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
 }));
 
 describe("OverlappingAvatars", () => {
+  it("portals tooltips outside paint-contained avatar rows", () => {
+    const { container } = render(
+      <OverlappingAvatars
+        items={[
+          {
+            key: "gpebbles",
+            pfpUrl: "https://cdn.warpcast.com/avatars/gpebbles.png",
+            ariaLabel: "View @gpebbles",
+            fallback: "GP",
+            title: "gpebbles",
+          },
+        ]}
+      />
+    );
+
+    const tooltip = screen.getByText("gpebbles");
+    expect(tooltip.closest("body")).toBe(document.body);
+    expect(container.contains(tooltip)).toBe(false);
+  });
+
   it("retries an optimized avatar load with unoptimized mode before showing fallback", () => {
     render(
       <OverlappingAvatars
