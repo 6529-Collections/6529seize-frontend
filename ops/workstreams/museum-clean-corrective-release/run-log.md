@@ -26,3 +26,7 @@
   `sha256:01c8598b0cd2019ea59e1c65595d8e57bc929bc1d2c585b2fb0e16d70af01f5e`,
   and envelope commitment
   `0xdd880b410acdcf8fd7bcdf2f2087be373fdaf1d380e88b976e1f81c1bd51564f`.
+- The strict frontend compatibility probe accepted exact canonical source main
+  `9caa28e2eaa3d32c790850e46dea04753e71aa2a` and resolved the reviewed
+  publication commit, catalogue ID, and envelope commitment above without a
+  fallback or stale state.
