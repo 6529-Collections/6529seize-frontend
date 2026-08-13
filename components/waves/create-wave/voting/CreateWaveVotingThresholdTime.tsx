@@ -172,6 +172,8 @@ export default function CreateWaveVotingThresholdTime({
           options={THRESHOLD_TIME_UNIT_OPTIONS}
           onChange={onUnitChange}
           ariaLabel="Minimum time above threshold unit"
+          ariaDescribedBy={hasError ? `${errorId} ${helpId}` : helpId}
+          ariaInvalid={hasError}
           hasError={hasError}
           accentValue={hasThresholdTime}
         />

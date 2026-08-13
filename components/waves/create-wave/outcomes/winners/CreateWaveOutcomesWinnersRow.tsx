@@ -69,7 +69,7 @@ export default function CreateWaveOutcomesWinnersRow({
             className={`${getCreateWaveOutcomeInputStateClasses({
               hasError: isError,
               hasValue: winner.value > 0,
-            })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES}`}
+            })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES} tw-pr-16`}
             placeholder=" "
           />
           <label

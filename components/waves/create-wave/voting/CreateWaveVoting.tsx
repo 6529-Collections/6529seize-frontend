@@ -55,23 +55,6 @@ const VOTING_SETTINGS_GRID_CLASSES =
 const VOTING_OPTIONS_GRID_CLASSES =
   "tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4 [&>div]:tw-gap-x-2 [&>div]:tw-px-3 [&>div]:tw-py-3";
 
-const CREDIT_SCOPE_OPTIONS: readonly {
-  readonly scope: ApiWaveCreditScope;
-  readonly label: string;
-  readonly description: string;
-}[] = [
-  {
-    scope: ApiWaveCreditScope.Wave,
-    label: "Whole wave",
-    description: "Each identity has one voting budget across the wave.",
-  },
-  {
-    scope: ApiWaveCreditScope.Drop,
-    label: "Each drop",
-    description: "Voting power applies separately to every drop.",
-  },
-];
-
 const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
   if (votingType === ApiWaveCreditType.CardSetTdh) {
     return "Memes TDH";
@@ -109,13 +92,27 @@ function CreateWaveCreditScopeSelect({
   readonly creditScope: ApiWaveCreditScope;
   readonly onCreditScopeChange: (scope: ApiWaveCreditScope) => void;
 }) {
+  const locale = useBrowserLocale();
+  const creditScopeOptions = [
+    {
+      scope: ApiWaveCreditScope.Wave,
+      label: t(locale, "waves.create.voting.scope.wave.label"),
+      description: t(locale, "waves.create.voting.scope.wave.description"),
+    },
+    {
+      scope: ApiWaveCreditScope.Drop,
+      label: t(locale, "waves.create.voting.scope.drop.label"),
+      description: t(locale, "waves.create.voting.scope.drop.description"),
+    },
+  ] as const;
+
   return (
     <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-0 tw-pb-0 tw-pt-6">
       <legend className="tw-mb-3 tw-mt-0 tw-block tw-pr-4 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
-        Voting power scope
+        {t(locale, "waves.create.voting.scope.legend")}
       </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
-        {CREDIT_SCOPE_OPTIONS.map((option) => {
+        {creditScopeOptions.map((option) => {
           const isSelected = creditScope === option.scope;
           return (
             <CommonBorderedRadioButton

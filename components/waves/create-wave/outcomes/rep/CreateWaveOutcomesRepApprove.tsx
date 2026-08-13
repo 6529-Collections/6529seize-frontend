@@ -58,14 +58,17 @@ export default function CreateWaveOutcomesRepApprove({
 
   const setCredit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newCredit = parseFloat(e.target.value);
-    const isValid = !isNaN(newCredit) && newCredit >= 0;
+    const isValid = Number.isFinite(newCredit) && newCredit >= 0;
     setOutcome({ ...outcome, credit: isValid ? newCredit : null });
     setCreditError(false);
   };
 
   const onSubmit = () => {
     const dontHaveCategorySet = !outcome.category;
-    const dontHaveCreditSet = !outcome.credit;
+    const dontHaveCreditSet =
+      outcome.credit === null ||
+      !Number.isFinite(outcome.credit) ||
+      outcome.credit <= 0;
     setShowCategoryRequired(dontHaveCategorySet);
     setCreditError(dontHaveCreditSet);
 
@@ -139,7 +142,7 @@ export default function CreateWaveOutcomesRepApprove({
                   />
                 </svg>
                 <div className="tw-text-xs tw-font-medium tw-text-error">
-                  Rep must be a positive number
+                  {t(locale, "waves.create.outcomes.repPositiveError")}
                 </div>
               </div>
             )}

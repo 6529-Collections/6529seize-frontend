@@ -1219,6 +1219,8 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   approveAdvancedSummary: "Winner limits",
   chooseType: "Choose outcome type",
   showOutcomes: "Show outcomes",
+  nicPositiveError: "NIC must be a positive number",
+  repPositiveError: "Rep must be a positive number",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
@@ -1260,6 +1262,18 @@ const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
   ratingTitle: "How Drops are Rated",
   rankAdvancedSummary: "Vote limits and behavior",
   approveAdvancedSummary: "Vote limits, behavior, and timing",
+  "timeUnit.minutes": "Minutes",
+  "timeUnit.hours": "Hours",
+  "averaging.label": "Averaging Interval",
+  "averaging.description":
+    "The time period over which votes are averaged. Must be between {minMinutes} minutes and {maxHours} hours. Longer intervals are more resistant to manipulation.",
+  "averaging.unitAriaLabel": "Averaging interval time unit",
+  "scope.legend": "Voting power scope",
+  "scope.wave.label": "Whole wave",
+  "scope.wave.description":
+    "Each identity has one voting budget across the wave.",
+  "scope.drop.label": "Each drop",
+  "scope.drop.description": "Voting power applies separately to every drop.",
   "negative.title": "Allow Negative Votes",
   "negative.enabledDescription":
     "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results.",
@@ -1279,6 +1293,10 @@ const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
   "approvalHold.required.label": "Require hold time",
   "approvalHold.required.description":
     "Require the score to stay at or above the threshold.",
+} as const);
+
+const WAVE_CREATE_DROPDOWN_MESSAGES = objectMessages("waves.create.dropdown", {
+  currentValue: "Current value: {value}",
 } as const);
 
 const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
@@ -2958,6 +2976,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
   ...WAVE_CREATE_RULES_MESSAGES,
   ...WAVE_CREATE_VOTING_MESSAGES,
+  ...WAVE_CREATE_DROPDOWN_MESSAGES,
   ...WAVE_CREATE_PROGRESS_MESSAGES,
   ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,

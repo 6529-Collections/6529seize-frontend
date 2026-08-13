@@ -1,5 +1,7 @@
 import { CreateWaveOutcomeType } from "@/types/waves.types";
 import CreateWaveOutcomeTypesItem from "./CreateWaveOutcomeTypesItem";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveOutcomeTypes({
   outcomeType,
@@ -8,6 +10,7 @@ export default function CreateWaveOutcomeTypes({
   readonly outcomeType: CreateWaveOutcomeType | null;
   readonly setOutcomeType: (value: CreateWaveOutcomeType | null) => void;
 }) {
+  const locale = useBrowserLocale();
   const LABELS: Record<CreateWaveOutcomeType, string> = {
     [CreateWaveOutcomeType.MANUAL]: "Manual",
     [CreateWaveOutcomeType.REP]: "Rep",
@@ -15,7 +18,9 @@ export default function CreateWaveOutcomeTypes({
   };
   return (
     <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
-      <legend className="tw-sr-only">Choose outcome type</legend>
+      <legend className="tw-sr-only">
+        {t(locale, "waves.create.outcomes.chooseType")}
+      </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3 [&>div]:tw-rounded-xl [&>div]:tw-px-3 [&>div]:tw-py-3 [&>div]:tw-shadow-none [&_input]:tw-h-4 [&_input]:tw-w-4">
         {Object.values(CreateWaveOutcomeType).map((type) => (
           <CreateWaveOutcomeTypesItem

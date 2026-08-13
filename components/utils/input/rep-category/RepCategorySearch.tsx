@@ -79,13 +79,9 @@ export default function RepCategorySearch({
     setIsOpen(false);
   };
 
-  const onFocusChange = (newV: boolean) => {
-    if (newV) {
-      setDraftCriteria((current) =>
-        current === undefined ? category : current
-      );
-      setIsOpen(true);
-    }
+  const onFocus = () => {
+    setDraftCriteria((current) => (current === undefined ? category : current));
+    setIsOpen(true);
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
@@ -125,14 +121,25 @@ export default function RepCategorySearch({
   }, [data, debouncedValue, disableInputCategoryAsValue]);
 
   return (
-    <div className="tw-relative tw-w-full" ref={wrapperRef}>
+    <div
+      className="tw-relative tw-w-full"
+      ref={wrapperRef}
+      onBlur={(event) => {
+        if (
+          event.relatedTarget instanceof Node &&
+          event.currentTarget.contains(event.relatedTarget)
+        ) {
+          return;
+        }
+        setIsOpen(false);
+      }}
+    >
       <div className="tw-group tw-relative tw-w-full">
         <input
           type="text"
           value={searchCriteria ?? ""}
           onChange={(e) => onSearchCriteriaChange(e.target.value)}
-          onFocus={() => onFocusChange(true)}
-          onBlur={() => onFocusChange(false)}
+          onFocus={onFocus}
           id={randomId}
           aria-invalid={error || undefined}
           className={`${INPUT_CLASSES[size]} ${

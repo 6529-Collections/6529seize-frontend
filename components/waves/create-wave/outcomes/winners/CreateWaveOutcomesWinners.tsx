@@ -83,6 +83,7 @@ export default function CreateWaveOutcomesWinners({
   const isWinnersRowsError = isPercentageCredit
     ? percentageError
     : totalValueError;
+  const totalAmountErrorId = "outcome-total-amount-error";
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
@@ -93,7 +94,11 @@ export default function CreateWaveOutcomesWinners({
         />
       </div> */}
       {totalValueError && (
-        <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div
+          id={totalAmountErrorId}
+          role="alert"
+          className="tw-flex tw-items-center tw-gap-x-2"
+        >
           <svg
             className="tw-size-5 tw-flex-shrink-0 tw-text-error"
             viewBox="0 0 24 24"
@@ -149,10 +154,13 @@ export default function CreateWaveOutcomesWinners({
                 onChange={onTotalAmountChange}
                 autoComplete="off"
                 aria-invalid={totalValueError}
+                aria-describedby={
+                  totalValueError ? totalAmountErrorId : undefined
+                }
                 className={`${getCreateWaveOutcomeInputStateClasses({
                   hasError: totalValueError,
                   hasValue: winnersConfig.totalAmount > 0,
-                })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES}`}
+                })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES} tw-pr-16`}
                 placeholder=" "
               />
               <label

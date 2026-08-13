@@ -10,6 +10,8 @@ import {
   getCreateWaveOutcomeInputStateClasses,
   getCreateWaveOutcomeLabelStateClasses,
 } from "../createWaveOutcomeStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveOutcomesCICApprove({
   onOutcome,
@@ -19,6 +21,7 @@ export default function CreateWaveOutcomesCICApprove({
   readonly onCancel: () => void;
 }) {
   const outcomeType = CreateWaveOutcomeType.NIC;
+  const locale = useBrowserLocale();
   const [outcome, setOutcome] = useState<CreateWaveOutcomeConfig>({
     type: outcomeType,
     title: null,
@@ -32,16 +35,19 @@ export default function CreateWaveOutcomesCICApprove({
 
   const setCredit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newCredit = parseFloat(e.target.value);
-    const isValid = !isNaN(newCredit) && newCredit >= 0;
+    const isValid = Number.isFinite(newCredit) && newCredit >= 0;
     setOutcome({ ...outcome, credit: isValid ? newCredit : null });
     setCreditError(false);
   };
 
   const onSubmit = () => {
-    const dontHaveCreditSet = !outcome.credit;
-    setCreditError(dontHaveCreditSet);
+    const isMissingOutcomeAmount =
+      outcome.credit === null ||
+      !Number.isFinite(outcome.credit) ||
+      outcome.credit <= 0;
+    setCreditError(isMissingOutcomeAmount);
 
-    if (dontHaveCreditSet) {
+    if (isMissingOutcomeAmount) {
       return;
     }
     onOutcome(outcome);
@@ -98,7 +104,7 @@ export default function CreateWaveOutcomesCICApprove({
                 />
               </svg>
               <div className="tw-text-xs tw-font-medium tw-text-error">
-                NIC must be a positive number
+                {t(locale, "waves.create.outcomes.nicPositiveError")}
               </div>
             </div>
           )}

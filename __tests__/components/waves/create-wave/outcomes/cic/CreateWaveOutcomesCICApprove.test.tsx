@@ -85,6 +85,21 @@ describe("CreateWaveOutcomesCICApprove", () => {
     expect(defaultProps.onOutcome).not.toHaveBeenCalled();
   });
 
+  it("rejects non-finite NIC amounts", async () => {
+    const user = userEvent.setup();
+    render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText("NIC"), {
+      target: { value: "Infinity" },
+    });
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(
+      screen.getByText("NIC must be a positive number")
+    ).toBeInTheDocument();
+    expect(defaultProps.onOutcome).not.toHaveBeenCalled();
+  });
+
   it("clears error when valid input is entered", async () => {
     const user = userEvent.setup();
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);

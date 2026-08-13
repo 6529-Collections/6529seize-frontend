@@ -4,7 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
-import { useClickAway, useKeyPressEvent } from "react-use";
+import { useClickAway } from "react-use";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface CreateWaveDropdownOption<TValue extends string> {
   readonly value: TValue;
@@ -15,6 +17,8 @@ export default function CreateWaveDropdown<TValue extends string>({
   value,
   options,
   ariaLabel,
+  ariaDescribedBy,
+  ariaInvalid = false,
   dataTestId,
   hasError = false,
   accentValue = false,
@@ -24,12 +28,15 @@ export default function CreateWaveDropdown<TValue extends string>({
   readonly value: TValue;
   readonly options: readonly CreateWaveDropdownOption<TValue>[];
   readonly ariaLabel: string;
+  readonly ariaDescribedBy?: string | undefined;
+  readonly ariaInvalid?: boolean | undefined;
   readonly dataTestId?: string | undefined;
   readonly hasError?: boolean | undefined;
   readonly accentValue?: boolean | undefined;
   readonly rounding?: "all" | "right" | undefined;
   readonly onChange: (value: TValue) => void;
 }) {
+  const locale = useBrowserLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [menuPlacement, setMenuPlacement] = useState<"top" | "bottom">(
     "bottom"
@@ -99,14 +106,10 @@ export default function CreateWaveDropdown<TValue extends string>({
       if (option) {
         selectOption(option);
       }
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      closeMenu(true);
     }
   };
 
   useClickAway(dropdownRef, () => closeMenu());
-  useKeyPressEvent("Escape", () => closeMenu());
 
   useLayoutEffect(() => {
     if (!isOpen) return;
@@ -168,6 +171,13 @@ export default function CreateWaveDropdown<TValue extends string>({
     <div
       className="tw-relative tw-w-full"
       ref={dropdownRef}
+      onKeyDown={(event) => {
+        if (isOpen && event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          closeMenu(true);
+        }
+      }}
       onBlur={(event) => {
         if (
           event.relatedTarget instanceof Node &&
@@ -181,8 +191,14 @@ export default function CreateWaveDropdown<TValue extends string>({
       <button
         ref={buttonRef}
         type="button"
+        role="combobox"
         aria-label={ariaLabel}
-        aria-describedby={valueDescriptionId}
+        aria-describedby={
+          ariaDescribedBy
+            ? `${valueDescriptionId} ${ariaDescribedBy}`
+            : valueDescriptionId
+        }
+        aria-invalid={ariaInvalid || undefined}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? menuId : undefined}
@@ -200,7 +216,9 @@ export default function CreateWaveDropdown<TValue extends string>({
         />
       </button>
       <span id={valueDescriptionId} className="tw-sr-only">
-        Current value: {selectedOption?.label}
+        {t(locale, "waves.create.dropdown.currentValue", {
+          value: selectedOption?.label ?? "",
+        })}
       </span>
 
       {isOpen && (
