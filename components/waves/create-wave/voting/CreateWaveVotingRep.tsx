@@ -28,8 +28,7 @@ export default function CreateWaveVotingRep({
         ? ""
         : "!tw-ring-white/5 desktop-hover:hover:!tw-ring-white/10 desktop-hover:hover:focus:!tw-ring-primary-400 focus:!tw-border-primary-500/50 focus:!tw-ring-primary-400"
     }`;
-  const labelClassName =
-    "!tw-bg-iron-900 peer-focus:!tw-bg-iron-900";
+  const labelClassName = "!tw-bg-iron-900 peer-focus:!tw-bg-iron-900";
 
   return (
     <div className="tw-grid tw-gap-4 md:tw-grid-cols-2">

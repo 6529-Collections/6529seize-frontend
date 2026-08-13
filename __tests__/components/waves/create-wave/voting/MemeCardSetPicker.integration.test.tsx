@@ -32,7 +32,9 @@ jest.mock("@/components/token-list/VirtualizedTokenList", () => ({
   }) => (
     <div data-testid="token-list">
       {ranges.map(({ start, end }) =>
-        start === end ? start.toString() : `${start.toString()}-${end.toString()}`
+        start === end
+          ? start.toString()
+          : `${start.toString()}-${end.toString()}`
       )}
     </div>
   ),

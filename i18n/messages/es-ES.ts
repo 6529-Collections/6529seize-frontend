@@ -457,15 +457,13 @@ export const ES_ES_MESSAGES = {
     "Los envíos empiezan el {submission}. La votación empieza el {voting}. Primeros ganadores: {announcement}.",
   "waves.create.dates.rank.advancedSummary": "Calendario de ganadores",
   "waves.create.drops.requirementsTitle": "Requisitos de envío",
-  "waves.create.rules.advancedSummary":
-    "Reglas del creador y aceptación",
+  "waves.create.rules.advancedSummary": "Reglas del creador y aceptación",
   "waves.create.rules.chatAdvancedSummary": "Reglas del creador",
   "waves.create.voting.rankAdvancedSummary":
     "Límites y comportamiento del voto",
   "waves.create.voting.approveAdvancedSummary":
     "Límites, comportamiento y tiempos del voto",
-  "waves.create.outcomes.rankAdvancedSummary":
-    "Visibilidad de los resultados",
+  "waves.create.outcomes.rankAdvancedSummary": "Visibilidad de los resultados",
   "waves.create.outcomes.approveAdvancedSummary": "Límites de ganadores",
   "waves.create.drops.maxSimultaneousSubmissions.label":
     "Máximo de envíos simultáneos",
@@ -510,8 +508,7 @@ export const ES_ES_MESSAGES = {
     "Nombres que se muestran en las pestañas de esta Wave.",
   "waves.proposalCard.approvalsTabLabel":
     "Etiqueta de la pestaña de propuestas",
-  "waves.proposalCard.approvedTabLabel":
-    "Etiqueta de la pestaña de aprobadas",
+  "waves.proposalCard.approvedTabLabel": "Etiqueta de la pestaña de aprobadas",
   "waves.proposalCard.tabLabels.errorTooLong":
     "Las etiquetas deben tener {max} caracteres o menos.",
   "waves.proposalCard.tabLabels.errorDuplicate":

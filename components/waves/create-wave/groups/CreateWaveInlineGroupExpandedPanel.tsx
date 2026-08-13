@@ -26,7 +26,7 @@ export default function CreateWaveInlineGroupExpandedPanel({
             variant="secondary"
             size={cancelSize}
             onClick={onCancel}
-            className={cancelClassName}
+            className={`!tw-h-12 sm:!tw-h-11 ${cancelClassName}`}
           >
             {cancelLabel}
           </Button>

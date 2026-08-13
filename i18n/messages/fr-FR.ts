@@ -463,15 +463,12 @@ export const FR_FR_MESSAGES = {
     "Les soumissions débutent le {submission}. Le vote débute le {voting}. Premiers gagnants : {announcement}.",
   "waves.create.dates.rank.advancedSummary": "Calendrier des gagnants",
   "waves.create.drops.requirementsTitle": "Exigences de soumission",
-  "waves.create.rules.advancedSummary":
-    "Règles du créateur et acceptation",
+  "waves.create.rules.advancedSummary": "Règles du créateur et acceptation",
   "waves.create.rules.chatAdvancedSummary": "Règles du créateur",
-  "waves.create.voting.rankAdvancedSummary":
-    "Limites et comportement du vote",
+  "waves.create.voting.rankAdvancedSummary": "Limites et comportement du vote",
   "waves.create.voting.approveAdvancedSummary":
     "Limites, comportement et calendrier du vote",
-  "waves.create.outcomes.rankAdvancedSummary":
-    "Visibilité des résultats",
+  "waves.create.outcomes.rankAdvancedSummary": "Visibilité des résultats",
   "waves.create.outcomes.approveAdvancedSummary": "Limites des gagnants",
   "waves.create.drops.maxSimultaneousSubmissions.label":
     "Nombre maximal de soumissions simultanées",

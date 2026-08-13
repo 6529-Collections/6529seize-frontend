@@ -104,9 +104,7 @@ export default function TimePicker({
         isFlat
           ? "tw-bg-transparent"
           : "tw-rounded-lg tw-bg-iron-800/60 tw-py-4 tw-shadow-md tw-ring-1 tw-ring-iron-700/50"
-      } ${
-        disabled ? "tw-opacity-60" : ""
-      }`}
+      } ${disabled ? "tw-opacity-60" : ""}`}
     >
       <div className={isFlat ? "tw-px-0" : "tw-px-5"}>
         <div className="tw-mb-5 tw-flex tw-items-center">

@@ -188,7 +188,9 @@ describe("CreateWaveOutcomes", () => {
   it("does not render an empty advanced section for rank waves", () => {
     render(<CreateWaveOutcomes {...baseProps} waveType={ApiWaveType.Rank} />);
 
-    expect(screen.getByRole("checkbox", { name: "Show outcomes" })).toBeVisible();
+    expect(
+      screen.getByRole("checkbox", { name: "Show outcomes" })
+    ).toBeVisible();
     expect(
       screen.queryByRole("button", { name: /Outcome visibility/ })
     ).not.toBeInTheDocument();

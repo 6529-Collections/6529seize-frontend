@@ -1,9 +1,4 @@
-import {
-  AnimatePresence,
-  LazyMotion,
-  domAnimation,
-  m,
-} from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import RepCategorySearchItem from "./RepCategorySearchItem";
 
 const NO_DISABLED_CATEGORIES: string[] = [];
@@ -37,7 +32,7 @@ export default function RepCategorySearchDropdown({
             transition={{ duration: 0.2 }}
           >
             <div className="tw-absolute tw-z-50 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-              <div className="tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto tw-py-1">
+              <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
                 <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-px-2">
                   {categories.length ? (
                     categories.map((category) => (

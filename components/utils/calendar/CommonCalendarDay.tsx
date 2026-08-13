@@ -7,7 +7,7 @@ enum CalendarDaySate {
   NOT_ACTIVE_MONTH = "NOT_ACTIVE_MONTH",
   MANUALLY_DISABLED = "MANUALLY_DISABLED",
   AVAILABLE = "AVAILABLE",
-  ACTIVE = "ACTIVE"
+  ACTIVE = "ACTIVE",
 }
 
 export default function CommonCalendarDay({
@@ -45,15 +45,21 @@ export default function CommonCalendarDay({
     if (!day.isActiveMonth) {
       return CalendarDaySate.NOT_ACTIVE_MONTH;
     }
-    if (minTimestamp && day.startTimestamp < minTimestamp && 
-        !(day.startTimestamp <= minTimestamp && day.startTimestamp + Time.days(1).toMillis() > minTimestamp)) {
+    if (
+      minTimestamp !== null &&
+      day.startTimestamp < minTimestamp &&
+      !(
+        day.startTimestamp <= minTimestamp &&
+        day.startTimestamp + Time.days(1).toMillis() > minTimestamp
+      )
+    ) {
       return CalendarDaySate.MANUALLY_DISABLED;
     }
-    if (maxTimestamp && day.startTimestamp > maxTimestamp) {
+    if (maxTimestamp !== null && day.startTimestamp > maxTimestamp) {
       return CalendarDaySate.MANUALLY_DISABLED;
     }
     if (
-      selectedTimestamp &&
+      selectedTimestamp !== null &&
       day.startTimestamp <= selectedTimestamp &&
       day.startTimestamp + Time.days(1).toMillis() > selectedTimestamp
     ) {
@@ -67,7 +73,11 @@ export default function CommonCalendarDay({
   const canSelect = dayState === CalendarDaySate.AVAILABLE;
 
   const handleClick = () => {
-    if (minTimestamp && day.startTimestamp <= minTimestamp && day.startTimestamp + Time.days(1).toMillis() > minTimestamp) {
+    if (
+      minTimestamp !== null &&
+      day.startTimestamp <= minTimestamp &&
+      day.startTimestamp + Time.days(1).toMillis() > minTimestamp
+    ) {
       setSelectedTimestamp(minTimestamp);
     } else {
       setSelectedTimestamp(day.startTimestamp);
@@ -79,9 +89,9 @@ export default function CommonCalendarDay({
       type="button"
       onClick={handleClick}
       disabled={!canSelect}
-      className={`${BUTTON_CLASSES[dayState]} tw-mx-auto tw-relative tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 sm:tw-h-8 sm:tw-w-8 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10`}
+      className={`${BUTTON_CLASSES[dayState]} tw-relative tw-mx-auto tw-h-9 tw-w-9 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 sm:tw-h-8 sm:tw-w-8`}
     >
-      <span className="tw-text-sm tw-mx-auto tw-flex tw-items-center tw-justify-center tw-rounded-full">
+      <span className="tw-mx-auto tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-sm">
         {day.date}
       </span>
     </button>

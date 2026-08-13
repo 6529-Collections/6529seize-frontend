@@ -160,11 +160,7 @@ describe("CreateWaveOutcomesCICApprove", () => {
 
     expect(primaryButton).not.toHaveAttribute("aria-busy");
     expect(primaryButton).not.toBeDisabled();
-    expect(primaryButton).toHaveClass(
-      "tw-min-h-11",
-      "tw-px-5",
-      "tw-py-2.5"
-    );
+    expect(primaryButton).toHaveClass("tw-min-h-11", "tw-px-5", "tw-py-2.5");
   });
 
   it("applies normal styling when no error is present", () => {

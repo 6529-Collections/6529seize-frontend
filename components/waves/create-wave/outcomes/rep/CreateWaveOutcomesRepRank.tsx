@@ -147,18 +147,10 @@ export default function CreateWaveOutcomesRepRank({
         />
       )}
       <div className="tw-flex tw-justify-end tw-gap-x-3">
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={onCancel}
-        >
+        <Button variant="secondary" size="lg" onClick={onCancel}>
           {t(locale, "waves.create.actions.cancel")}
         </Button>
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={onSubmit}
-        >
+        <Button variant="primary" size="lg" onClick={onSubmit}>
           {t(locale, "waves.create.actions.save")}
         </Button>
       </div>

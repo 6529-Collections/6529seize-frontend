@@ -103,7 +103,10 @@ export default function CreateWaveVotingThresholdTime({
     setInputValue(getDisplayValue({ thresholdTimeMs, unit }));
   }, [thresholdTimeMs, unit]);
 
-  const updateThresholdTimeMs = (value: string, nextUnit: ThresholdTimeUnit) => {
+  const updateThresholdTimeMs = (
+    value: string,
+    nextUnit: ThresholdTimeUnit
+  ) => {
     const parsedValue = parsePositiveWholeNumberInput(value);
     const nextThresholdTimeMs =
       value.trim() === ""

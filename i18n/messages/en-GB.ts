@@ -487,8 +487,7 @@ export const EN_GB_MESSAGES = {
     "Couldn't save these proposal card settings.",
   "waves.proposalCard.settings.toastRetry": "Please try again.",
   "waves.proposalCard.tabLabelsLabel": "Tab labels",
-  "waves.proposalCard.tabLabelsDescription":
-    "Names shown on this wave's tabs.",
+  "waves.proposalCard.tabLabelsDescription": "Names shown on this wave's tabs.",
   "waves.proposalCard.approvalsTabLabel": "Approvals tab label",
   "waves.proposalCard.approvedTabLabel": "Approved tab label",
   "waves.proposalCard.tabLabels.errorTooLong":

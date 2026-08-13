@@ -849,8 +849,7 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.personalInsults.title": "Personal insult warning",
   "aboutEdit.errors.personalInsults.value":
     "Your About statement was flagged for a possible personal insult. Revise it and try again.",
-  "aboutEdit.errors.inappropriateLanguage.title":
-    "Language warning",
+  "aboutEdit.errors.inappropriateLanguage.title": "Language warning",
   "aboutEdit.errors.inappropriateLanguage.value":
     "Your About statement was flagged for language that may be inappropriate. Revise it and try again.",
   "aboutEdit.errors.doxxing.title": "Privacy warning",

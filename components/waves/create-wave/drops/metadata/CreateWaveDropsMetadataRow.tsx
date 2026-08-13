@@ -54,7 +54,7 @@ export default function CreateWaveDropsMetadataRow({
             className={`${
               hasError
                 ? "tw-border-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-                : "tw-border-white/10 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400"
+                : "tw-border-white/10 tw-ring-white/10 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400"
             } tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-r-lg tw-border-0 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base sm:tw-text-sm ${
               item.key
                 ? "tw-text-primary-400 focus:tw-text-white"

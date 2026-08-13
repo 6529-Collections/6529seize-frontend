@@ -17,9 +17,7 @@ export default function CreateWaveOutcomesRowCICRank({
   return (
     <div className={CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES}>
       <div className={CREATE_WAVE_OUTCOME_ROW_HEADER_GRID_CLASSES}>
-        <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>
-          NIC
-        </h3>
+        <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>NIC</h3>
         <div className="tw-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-justify-end">
           <button
             onClick={removeOutcome}

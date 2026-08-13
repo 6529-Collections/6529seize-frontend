@@ -23,9 +23,7 @@ export default function CreateWaveOutcomesRowRepApprove({
     <>
       <div className={CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES}>
         <div className={CREATE_WAVE_OUTCOME_ROW_GRID_WITH_VALUE_CLASSES}>
-          <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>
-            Rep
-          </h3>
+          <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>Rep</h3>
           <div className="tw-flex tw-min-h-8 tw-min-w-0 tw-items-center">
             <p
               className={`${CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES} tw-truncate`}
@@ -35,7 +33,9 @@ export default function CreateWaveOutcomesRowRepApprove({
             </p>
           </div>
           <div className="tw-flex tw-min-h-8 tw-shrink-0 tw-items-center">
-            <p className={`${CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES} tw-text-nowrap`}>
+            <p
+              className={`${CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES} tw-text-nowrap`}
+            >
               {formatLargeNumber(outcome.credit ?? 0)} Rep
             </p>
           </div>

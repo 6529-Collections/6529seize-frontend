@@ -22,9 +22,7 @@ export default function CreateWaveOutcomesRowManualApprove({
     <>
       <div className={CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES}>
         <div className={CREATE_WAVE_OUTCOME_ROW_GRID_CLASSES}>
-          <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>
-            Manual
-          </h3>
+          <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>Manual</h3>
           <p
             className={`${CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES} tw-truncate`}
             data-tooltip-id={tooltipId}

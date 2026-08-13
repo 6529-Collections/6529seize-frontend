@@ -20,9 +20,9 @@ describe("CreateWaveVotingThresholdTime", () => {
       />
     );
 
-    expect(
-      screen.getByLabelText("Minimum time above threshold")
-    ).toHaveValue("2");
+    expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
+      "2"
+    );
     expect(
       screen.getByLabelText("Minimum time above threshold unit")
     ).toHaveTextContent("Hours");

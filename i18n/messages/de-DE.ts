@@ -453,15 +453,12 @@ export const DE_DE_MESSAGES = {
     "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Erste Gewinner: {announcement}.",
   "waves.create.dates.rank.advancedSummary": "Gewinnerzeitplan",
   "waves.create.drops.requirementsTitle": "Einreichungsanforderungen",
-  "waves.create.rules.advancedSummary":
-    "Creator-Regeln und Zustimmung",
+  "waves.create.rules.advancedSummary": "Creator-Regeln und Zustimmung",
   "waves.create.rules.chatAdvancedSummary": "Creator-Regeln",
-  "waves.create.voting.rankAdvancedSummary":
-    "Abstimmungslimits und -verhalten",
+  "waves.create.voting.rankAdvancedSummary": "Abstimmungslimits und -verhalten",
   "waves.create.voting.approveAdvancedSummary":
     "Abstimmungslimits, -verhalten und -zeitplan",
-  "waves.create.outcomes.rankAdvancedSummary":
-    "Sichtbarkeit der Ergebnisse",
+  "waves.create.outcomes.rankAdvancedSummary": "Sichtbarkeit der Ergebnisse",
   "waves.create.outcomes.approveAdvancedSummary": "Gewinnerlimits",
   "waves.create.drops.maxSimultaneousSubmissions.label":
     "Maximale gleichzeitige Einreichungen",

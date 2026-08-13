@@ -158,10 +158,7 @@ export default function TimeWeightedVoting({
     : undefined;
 
   return (
-    <section
-      className={sectionClassName}
-      data-testid="time-weighted-voting"
-    >
+    <section className={sectionClassName} data-testid="time-weighted-voting">
       {showToggle && (
         <TimeWeightedToggle enabled={config.enabled} onToggle={handleToggle} />
       )}

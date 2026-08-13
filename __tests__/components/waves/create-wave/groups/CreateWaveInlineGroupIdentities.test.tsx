@@ -192,7 +192,9 @@ describe("CreateWaveInlineGroupIdentities", () => {
       .getByRole("switch", { name: "Include me" })
       .closest("label");
 
-    expect(selectedIdentities.parentElement).toBe(includeMeLabel?.parentElement);
+    expect(selectedIdentities.parentElement).toBe(
+      includeMeLabel?.parentElement
+    );
   });
 
   it("removes the connected profile when Include me is switched off", async () => {

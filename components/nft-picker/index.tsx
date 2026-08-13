@@ -462,6 +462,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                   }
                   tokenInputDisabled={maxSelectionReached}
                   helperMessageId={helperMessageId}
+                  variant={variant}
                   onTokenInputChange={handleTokenInputChange}
                   onTokenInputKeyDown={(e) => {
                     if (e.key === "Enter") {

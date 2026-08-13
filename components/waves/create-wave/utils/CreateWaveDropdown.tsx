@@ -2,16 +2,11 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import {
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
-export interface CreateWaveDropdownOption<TValue extends string> {
+interface CreateWaveDropdownOption<TValue extends string> {
   readonly value: TValue;
   readonly label: string;
 }

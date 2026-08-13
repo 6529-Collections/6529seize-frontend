@@ -18,11 +18,11 @@ export default function CreateWaveOutcomesRowCICApprove({
   return (
     <div className={CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES}>
       <div className={CREATE_WAVE_OUTCOME_ROW_GRID_CLASSES}>
-        <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>
-          NIC
-        </h3>
+        <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>NIC</h3>
         <div className="tw-flex tw-min-h-8 tw-min-w-0 tw-items-center">
-          <p className={`${CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES} tw-text-nowrap`}>
+          <p
+            className={`${CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES} tw-text-nowrap`}
+          >
             {formatLargeNumber(outcome.credit ?? 0)} NIC
           </p>
         </div>

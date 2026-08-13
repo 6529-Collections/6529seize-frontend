@@ -145,9 +145,7 @@ export default function WavesOutcome({
 
   return (
     <div className="tw-mx-auto tw-w-full">
-      <CreateWaveStepHeader
-        title={t(locale, "waves.create.outcomes.title")}
-      />
+      <CreateWaveStepHeader title={t(locale, "waves.create.outcomes.title")} />
       <div className="tw-mt-6 tw-space-y-6">
         <section aria-labelledby="create-wave-outcome-type-heading">
           <h3

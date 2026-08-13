@@ -38,7 +38,7 @@ export default function VotingSettingBox({
   readonly inputId: string;
   readonly label: string;
   readonly surface?: "primary" | "nested" | "plain";
-  }) {
+}) {
   const isPlain = surface === "plain";
   let stateClasses = "";
   let surfaceClasses = "";

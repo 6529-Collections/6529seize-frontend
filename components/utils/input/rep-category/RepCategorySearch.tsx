@@ -51,11 +51,10 @@ export default function RepCategorySearch({
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  const [draftCriteria, setDraftCriteria] = useState<
-    string | null | undefined
-  >(undefined);
-  const searchCriteria =
-    draftCriteria === undefined ? category : draftCriteria;
+  const [draftCriteria, setDraftCriteria] = useState<string | null | undefined>(
+    undefined
+  );
+  const searchCriteria = draftCriteria === undefined ? category : draftCriteria;
 
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
@@ -109,9 +108,7 @@ export default function RepCategorySearch({
     }
 
     if (disableInputCategoryAsValue) {
-      return (data ?? []).filter(
-        (item) => !isHelpBotCreditRepCategory(item)
-      );
+      return (data ?? []).filter((item) => !isHelpBotCreditRepCategory(item));
     }
     if (isHelpBotCreditRepCategory(debouncedValue)) {
       return [];
