@@ -23,7 +23,7 @@ describe("CreateWaveOutcomesRepCategoryField", () => {
       />
     );
 
-    expect(repCategoryProps?.inputClassName).toContain("tw-ring-white/5");
+    expect(repCategoryProps?.["inputClassName"]).toContain("tw-ring-white/5");
 
     rerender(
       <CreateWaveOutcomesRepCategoryField
@@ -33,7 +33,7 @@ describe("CreateWaveOutcomesRepCategoryField", () => {
       />
     );
 
-    expect(repCategoryProps?.error).toBe(true);
-    expect(repCategoryProps?.inputClassName).toBeUndefined();
+    expect(repCategoryProps?.["error"]).toBe(true);
+    expect(repCategoryProps?.["inputClassName"]).toBeUndefined();
   });
 });
