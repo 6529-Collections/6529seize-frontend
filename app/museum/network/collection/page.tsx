@@ -27,6 +27,7 @@ import type {
   MuseumPublication,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
+import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication/types";
 import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 
 export const metadata: Metadata = {
@@ -76,6 +77,35 @@ function publicWorkItem(
         alt: media.altText ?? work.title,
         creditLine: media.credit.creditLine,
       },
+    };
+  } else if (work.presentationMedia?.[0] !== undefined) {
+    const presentationMedia = work.presentationMedia[0];
+    const sourceHref = buildMuseumSignedWaveStormDropUrl(
+      presentationMedia.source.waveId,
+      presentationMedia.source.dropId
+    );
+    presentation = {
+      media: {
+        kind: "proposal" as const,
+        src: presentationMedia.mediaUrl,
+        width: presentationMedia.width,
+        height: presentationMedia.height,
+        alt: presentationMedia.altText,
+        sourceByteSize: presentationMedia.sourceByteSize,
+        creditLine: presentationMedia.credit.creditLine,
+        requireIntentForLargeSource: false,
+        ...(sourceHref === null ||
+        !presentationMedia.affordances.includes("open_upstream_presentation")
+          ? {}
+          : {
+              sourceHref,
+              sourceLabel: t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.openPresentation"
+              ),
+            }),
+      },
+      ...(mediaMetadata === undefined ? {} : { metadata: mediaMetadata }),
     };
   } else if (mediaMetadata !== undefined) {
     presentation = { metadata: mediaMetadata };
