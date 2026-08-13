@@ -5,6 +5,7 @@ import {
   getMuseumObjectMetadata,
 } from "@/components/museum/MuseumObjectPage";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import { applyMuseumCollectionSemantics } from "@/lib/museum/publication/collectionSemantics";
 import {
   isMuseumCanonicalWorkId,
   museumWorkHref,
@@ -57,8 +58,12 @@ export default async function MuseumWorkRoute({
 }: MuseumWorkRouteProps) {
   const { workId } = await params;
   const { publicationState, view } = await getMuseumPublicationBundle();
-  const publication = publicationState.publication;
-  if (publication === null) return <MuseumPublicationUnavailable />;
+  if (publicationState.publication === null) {
+    return <MuseumPublicationUnavailable />;
+  }
+  const publication = applyMuseumCollectionSemantics(
+    publicationState.publication
+  );
   const canonicalId = resolveCanonicalWorkId(publication, workId);
   if (canonicalId === null) notFound();
   if (canonicalId !== workId) {

@@ -217,7 +217,7 @@ function buildRetainedMediaGraph(input: {
     relations: [relation],
     identityInventory: {
       sourcePath: "schemas/public-entity-identity-inventory.json",
-      inventoryVersion: "1.5.0",
+      inventoryVersion: "1.6.0",
       curatedAcquisitionIds: [],
       workAliases: [],
       acquisitionAliases: [],
@@ -646,7 +646,7 @@ describe("Wave publication receipt joins", () => {
       relations,
       identityInventory: {
         sourcePath: "schemas/public-entity-identity-inventory.json",
-        inventoryVersion: "1.5.0",
+        inventoryVersion: "1.6.0",
         curatedAcquisitionIds: ["6529NM-CA-2026-003"],
         workAliases: [],
         acquisitionAliases: [],
@@ -804,7 +804,7 @@ describe("Wave publication receipt joins", () => {
       relations,
       identityInventory: {
         sourcePath: "schemas/public-entity-identity-inventory.json",
-        inventoryVersion: "1.5.0",
+        inventoryVersion: "1.6.0",
         curatedAcquisitionIds: [acquisitionId],
         workAliases: [],
         acquisitionAliases: [],
@@ -1014,7 +1014,7 @@ describe("Wave publication receipt joins", () => {
       relations,
       identityInventory: {
         sourcePath: "schemas/public-entity-identity-inventory.json",
-        inventoryVersion: "1.5.0",
+        inventoryVersion: "1.6.0",
         curatedAcquisitionIds: [acquisitionId],
         workAliases: [],
         acquisitionAliases: [],
@@ -1114,7 +1114,7 @@ describe("Wave publication receipt joins", () => {
       ],
       identityInventory: {
         sourcePath: "schemas/public-entity-identity-inventory.json",
-        inventoryVersion: "1.5.0",
+        inventoryVersion: "1.6.0",
         curatedAcquisitionIds: [acquisitionId],
         workAliases: [],
         acquisitionAliases: [],

@@ -540,7 +540,9 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setJanky(event.target.checked)}
                 className="tw-size-5"
               />
-              <span>{t(locale, "museum.network.insideSystem.jankyControl")}</span>
+              <span>
+                {t(locale, "museum.network.insideSystem.jankyControl")}
+              </span>
             </label>
             <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-self-end tw-text-sm tw-text-iron-200">
               <input
@@ -549,7 +551,9 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setAlpha(event.target.checked)}
                 className="tw-size-5"
               />
-              <span>{t(locale, "museum.network.insideSystem.alphaControl")}</span>
+              <span>
+                {t(locale, "museum.network.insideSystem.alphaControl")}
+              </span>
             </label>
             <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-self-end tw-text-sm tw-text-iron-200">
               <input
@@ -558,7 +562,9 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setOculi(event.target.checked)}
                 className="tw-size-5"
               />
-              <span>{t(locale, "museum.network.insideSystem.oculiControl")}</span>
+              <span>
+                {t(locale, "museum.network.insideSystem.oculiControl")}
+              </span>
             </label>
             <label className="tw-text-sm tw-text-iron-300">
               {t(locale, "museum.network.insideSystem.initialOrderControl")}

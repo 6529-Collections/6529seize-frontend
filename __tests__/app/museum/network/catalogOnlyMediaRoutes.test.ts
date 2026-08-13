@@ -5,58 +5,80 @@ function routeSource(path: string): string {
   return readFileSync(resolve(process.cwd(), path), "utf8");
 }
 
-function functionBody(source: string, start: string, end: string): string {
-  const startIndex = source.indexOf(start);
-  const endIndex = source.indexOf(end, startIndex + start.length);
-  expect(startIndex).toBeGreaterThanOrEqual(0);
-  expect(endIndex).toBeGreaterThan(startIndex);
-  return source.slice(startIndex, endIndex);
+function bracedBlock(source: string, marker: string): string {
+  const markerIndex = source.indexOf(marker);
+  expect(markerIndex).toBeGreaterThanOrEqual(0);
+  const openBrace = source.indexOf("{", markerIndex + marker.length);
+  expect(openBrace).toBeGreaterThan(markerIndex);
+
+  let depth = 0;
+  for (let index = openBrace; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") depth -= 1;
+    if (depth === 0) return source.slice(markerIndex, index + 1);
+  }
+
+  throw new Error(`Unclosed source block: ${marker}`);
 }
 
 describe("typed Museum routes keep media catalog-only", () => {
   it("does not read legacy artwork media inside the typed Collection branch", () => {
     const source = routeSource("app/museum/network/collection/page.tsx");
-    const typedBranch = functionBody(
+    const typedBranch = bracedBlock(
       source,
-      "if (typedHoldings !== undefined)",
-      "const artworks = tryCaseyArtworksFromPublication"
+      "if (publication.works !== undefined)"
     );
 
     expect(typedBranch).not.toContain("publication.artworks");
     expect(typedBranch).not.toContain("legacyMedia");
-    expect(typedBranch).toContain("MuseumPublicWorkTextFigure");
+    expect(typedBranch).toContain("isMuseumPermanentCollectionWork");
+    expect(typedBranch).toContain("publicWorkItem(work, publication)");
   });
 
-  it.each([
-    [
-      "acquisitions",
-      "app/museum/network/acquisitions/page.tsx",
-      "function AcquisitionPreview",
-      "function AcquisitionEditorialRow",
-      "return legacyAcquisitionPreview",
-    ],
-    [
-      "home",
-      "app/museum/network/page.tsx",
-      "function MuseumAcquisitionStoryMedia",
-      "function MuseumAcquisitionStories",
-      "return legacyAcquisitionStoryMedia",
-    ],
-  ])(
-    "closes the typed %s preview before its pre-ontology adapter",
-    (_, path, start, end, legacyMarker) => {
-      const body = functionBody(routeSource(path), start, end);
-      const typedBoundary = body.indexOf(
-        "if (publication.works !== undefined)"
-      );
-      const legacyBoundary = body.indexOf(legacyMarker);
+  it("derives the Collection history from active holdings and acquisitions", () => {
+    const source = routeSource("app/museum/network/collection/page.tsx");
 
-      expect(typedBoundary).toBeGreaterThanOrEqual(0);
-      expect(legacyBoundary).toBeGreaterThan(typedBoundary);
-      expect(body.slice(0, typedBoundary)).toContain("presentationMedia[0]");
-      expect(body.slice(typedBoundary, legacyBoundary)).toContain(
-        "MuseumPublicWorkTextFigure"
-      );
-    }
-  );
+    expect(source).toContain("holdings.length");
+    expect(source).toContain("accessionedAcquisitions.length");
+    expect(source).toContain("acquisitionHistoryDescription");
+    expect(source).not.toContain("twelve works");
+    expect(source).not.toContain("two completed gifts");
+    expect(source).not.toContain("readonly creditLine?: string");
+  });
+
+  it("requires the typed acquisition catalog before building acquisition media", () => {
+    const route = routeSource("app/museum/network/acquisitions/page.tsx");
+    const landing = routeSource(
+      "components/museum/acquisition/MuseumAcquisitionLanding.tsx"
+    );
+    const guard = route.indexOf("publication.works === undefined");
+    const indexBuild = route.indexOf("buildMuseumAcquisitionIndex(");
+
+    expect(guard).toBeGreaterThanOrEqual(0);
+    expect(indexBuild).toBeGreaterThan(guard);
+    expect(route).not.toContain("tryCaseyArtworksFromPublication");
+    expect(landing).toContain(
+      "if (publication.works === undefined) return [];"
+    );
+    expect(landing).toContain("selectMuseumStillMedia(work.media)");
+    expect(landing).not.toContain("tryCaseyArtworksFromPublication");
+    expect(landing).not.toContain("publication.artworks");
+  });
+
+  it("selects the typed home branch before the legacy adapter", () => {
+    const source = routeSource("app/museum/network/page.tsx");
+    const typedBranch = bracedBlock(
+      source,
+      "if (publicationState.publication.works !== undefined)"
+    );
+    const legacyAdapter = source.indexOf(
+      "const artworks = tryCaseyArtworksFromPublication"
+    );
+
+    expect(typedBranch).toContain("MuseumTypedNetworkHome");
+    expect(typedBranch).not.toContain("tryCaseyArtworksFromPublication");
+    expect(legacyAdapter).toBeGreaterThan(
+      source.indexOf("if (publicationState.publication.works !== undefined)")
+    );
+  });
 });
