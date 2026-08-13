@@ -393,6 +393,7 @@ function MuseumAcquisitionMediaFrame({
       width={media.width}
       height={media.height}
       sourceByteSize={media.sourceByteSize}
+      requireIntentForLargeSource={false}
       eager={eager}
       className={imageClassName}
     />

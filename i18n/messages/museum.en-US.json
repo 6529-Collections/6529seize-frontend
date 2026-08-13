@@ -235,6 +235,7 @@
   "museum.network.programs.selectedWorksCount": "{count} selected works",
   "museum.network.markdown.mediaOmitted": "Media omitted from the record view{suffix}.",
   "museum.network.markdown.scrollableTable": "Scrollable research table",
+  "museum.network.markdown.scrollTableHint": "Scroll horizontally to read the complete table.",
   "museum.network.objects.title": "Museum object record",
   "museum.network.objects.description": "Artwork, interpretation, collection status, rights, and technical documentation.",
   "museum.network.objects.back": "Back to programs",

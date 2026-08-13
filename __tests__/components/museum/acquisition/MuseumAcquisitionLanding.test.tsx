@@ -296,13 +296,14 @@ describe("Museum acquisitions landing", () => {
 
     render(<MuseumAcquisitionLandingPage records={records} />);
 
-    const disclosures = screen.getAllByRole("button", {
-      name: "View image · loads 16.9 MB",
-    });
-    expect(disclosures).toHaveLength(2);
-    for (const disclosure of disclosures) {
-      expect(disclosure.closest("a")).toBeNull();
-    }
+    expect(
+      screen.queryByRole("button", {
+        name: /View image/,
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("img", { name: "Palmyra by Lorenzo Meloni" })
+    ).toHaveLength(2);
     for (const link of screen.getAllByRole("link", {
       name: "Conflict at Its Edges",
     })) {
