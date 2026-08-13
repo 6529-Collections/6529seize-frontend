@@ -169,6 +169,7 @@ export default async function MuseumCollectionPage() {
     holdings.find(
       (item) => item.media !== undefined || item.metadata !== undefined
     ) ?? holdings[0];
+  if (hero === undefined) return <MuseumPublicationUnavailable />;
   const holdingIds = new Set(holdings.map((item) => item.id));
   const accessionedAcquisitions = buildMuseumAcquisitionIndex(
     publication,
@@ -206,19 +207,13 @@ export default async function MuseumCollectionPage() {
           DEFAULT_LOCALE,
           "museum.network.collection.heroDescription"
         )}
-        {...(hero?.media === undefined ? {} : { media: hero.media })}
-        {...(hero?.metadata === undefined
+        {...(hero.media === undefined ? {} : { media: hero.media })}
+        {...(hero.metadata === undefined
           ? {}
           : { mediaMetadata: hero.metadata })}
-        mediaTitle={
-          hero?.title ?? t(DEFAULT_LOCALE, "museum.network.collection.title")
-        }
-        {...(hero?.subtitle === undefined
-          ? {}
-          : { mediaSubtitle: hero.subtitle })}
-        {...(hero?.href === null || hero?.href === undefined
-          ? {}
-          : { mediaHref: hero.href })}
+        mediaTitle={hero.title}
+        mediaSubtitle={hero.subtitle}
+        {...(hero.href === null ? {} : { mediaHref: hero.href })}
         actions={
           <>
             <Link
