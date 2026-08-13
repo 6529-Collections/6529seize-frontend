@@ -211,7 +211,7 @@ function DialogNewGroupActions({
   );
 }
 
-function renderSearchPanel({
+function SearchPanel({
   allowGroupClear,
   defaultLabel,
   disabled,
@@ -310,15 +310,15 @@ export default function GroupAssignmentPanel({
 
         {isSearchPanel ? (
           <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/40 tw-p-3">
-            {renderSearchPanel({
-              allowGroupClear,
-              defaultLabel,
-              disabled,
-              hasUnsavedGroup,
-              onExistingGroupSelect,
-              resultsLayout: "inline",
-              selectedGroup,
-            })}
+            <SearchPanel
+              allowGroupClear={allowGroupClear}
+              defaultLabel={defaultLabel}
+              disabled={disabled}
+              hasUnsavedGroup={hasUnsavedGroup}
+              onExistingGroupSelect={onExistingGroupSelect}
+              resultsLayout="inline"
+              selectedGroup={selectedGroup}
+            />
           </div>
         ) : (
           <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/40 tw-p-3">
@@ -466,16 +466,16 @@ export default function GroupAssignmentPanel({
         {displayedBuilder.panel === "search" ? (
           <CreateWaveInlineGroupExpandedPanel
             onCancel={onCancelPanel}
-            cancelClassName="tw-mt-3"
+            cancelSize="md"
           >
-            {renderSearchPanel({
-              allowGroupClear,
-              defaultLabel,
-              disabled,
-              hasUnsavedGroup,
-              onExistingGroupSelect,
-              selectedGroup,
-            })}
+            <SearchPanel
+              allowGroupClear={allowGroupClear}
+              defaultLabel={defaultLabel}
+              disabled={disabled}
+              hasUnsavedGroup={hasUnsavedGroup}
+              onExistingGroupSelect={onExistingGroupSelect}
+              selectedGroup={selectedGroup}
+            />
           </CreateWaveInlineGroupExpandedPanel>
         ) : null}
 

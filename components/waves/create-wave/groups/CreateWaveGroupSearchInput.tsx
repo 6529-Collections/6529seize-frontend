@@ -65,7 +65,7 @@ export default function CreateWaveGroupSearchInput({
         autoComplete="off"
       />
       <svg
-        className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-500"
+        className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-500"
         viewBox="0 0 20 20"
         fill="currentColor"
         aria-hidden="true"
@@ -105,7 +105,7 @@ export default function CreateWaveGroupSearchInput({
 
       <label
         htmlFor={inputId}
-        className={`tw-absolute tw-cursor-text tw-rounded-lg tw-text-base tw-font-medium ${
+        className={`tw-absolute tw-cursor-text tw-rounded-lg tw-text-base tw-font-medium sm:tw-text-sm ${
           disabled ? "tw-text-iron-400" : "tw-text-iron-500"
         } tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-bg-iron-950 tw-px-2 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-950 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
       >
