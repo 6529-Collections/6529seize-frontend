@@ -82,7 +82,8 @@ function TypedArtistPage({
   const projects = publication.projects.filter(
     (project) =>
       project.artistId === artist.id ||
-      project.artistIds?.includes(artist.id) === true
+      project.artistIds?.includes(artist.id) === true ||
+      works.some((work) => work.projectId === project.id)
   );
   const relationshipLabel = (work: (typeof works)[number]): string => {
     if (isMuseumPermanentCollectionWork(work)) {

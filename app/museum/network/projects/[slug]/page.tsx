@@ -357,10 +357,12 @@ function TypedProjectPage({
   readonly view: MuseumView | null;
 }) {
   const works = museumProjectWorks(publication, project);
+  const workArtistIds = new Set(works.map((work) => work.artistId));
   const artists = publication.artists.filter(
     (artist) =>
       project.artistIds?.includes(artist.id) === true ||
-      artist.id === project.artistId
+      artist.id === project.artistId ||
+      workArtistIds.has(artist.id)
   );
   const organizations =
     publication.organizations?.filter(

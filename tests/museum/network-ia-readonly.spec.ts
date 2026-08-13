@@ -165,6 +165,68 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
           /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href)
       )
     ).toBe(true);
+    for (const title of [
+      "Patrolling the border between the Negev Desert and Jordan",
+      "Government soldiers in a church, Suchitoto, El Salvador",
+      "Demonstration, Western Wall, Jerusalem",
+      "Tripoli, Libya",
+      "Palmyra, Syria",
+    ]) {
+      const card = page
+        .locator('[data-testid="museum-landing-media-card"]')
+        .filter({ has: page.getByRole("link", { name: title, exact: true }) });
+      await expect(card.locator("img")).toHaveCount(1);
+      await expect(
+        card.getByText(/does not currently include an image/iu)
+      ).toHaveCount(0);
+    }
+    const firstMagnumCollectionCard = page
+      .locator('[data-testid="museum-landing-media-card"]')
+      .filter({
+        has: page.getByRole("link", {
+          name: "Patrolling the border between the Negev Desert and Jordan",
+          exact: true,
+        }),
+      });
+    await firstMagnumCollectionCard.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        firstMagnumCollectionCard
+          .locator("img")
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
+      )
+      .toBe(true);
+    await retainScreenshot(page, testInfo, "museum-network-collection");
+    await expectNoHorizontalOverflow(page);
+
+    await openRoute(page, "/museum/network/projects");
+    const magnumProjectCard = page.locator("article").filter({
+      has: page.getByRole("link", { name: "Magnum Photos 75", exact: true }),
+    });
+    await expect(magnumProjectCard.locator("img")).toHaveCount(1);
+    await expect(magnumProjectCard.getByText("0", { exact: true })).toHaveCount(
+      0
+    );
+    await magnumProjectCard.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        magnumProjectCard
+          .locator("img")
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
+      )
+      .toBe(true);
+    await retainScreenshot(page, testInfo, "museum-network-projects");
+    await expectNoHorizontalOverflow(page);
 
     await openRoute(page, "/museum/network/artists");
     const artistHrefs = await page
