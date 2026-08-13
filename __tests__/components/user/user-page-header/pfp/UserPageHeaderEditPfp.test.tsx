@@ -8,11 +8,6 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 global.URL.createObjectURL = jest.fn(() => "mocked-object-url");
 global.URL.revokeObjectURL = jest.fn();
 
-jest.mock("react-use", () => ({
-  useClickAway: jest.fn(),
-  useKeyPressEvent: jest.fn(),
-}));
-
 jest.mock("@/components/user/settings/UserSettingsImgSelectMeme", () => ({
   __esModule: true,
   default: ({ onMeme }: any) => (

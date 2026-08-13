@@ -35,6 +35,11 @@ const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
+const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
+  bottom: 0,
+  transform: `translate3d(0, calc(0px - ${MOBILE_DIALOG_KEYBOARD_INSET}), 0)`,
+  transition: `transform ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+};
 
 type MobileWrapperDialogProps = {
   readonly title?: string | undefined;
@@ -261,14 +266,6 @@ function getContainerClassNames(tabletModal?: boolean | undefined) {
     tabletModal &&
       "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0 md:[--mobile-wrapper-dialog-keyboard-inset:0px]"
   );
-}
-
-function getContainerStyle(): CSSProperties {
-  return {
-    bottom: 0,
-    transform: `translate3d(0, calc(0px - ${MOBILE_DIALOG_KEYBOARD_INSET}), 0)`,
-    transition: `transform ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
-  };
 }
 
 function getSurfaceClassNames({
@@ -696,7 +693,6 @@ export default function MobileWrapperDialog({
   });
   const dragPanelClassNames = getDragPanelClassNames(canDragToClose);
   const containerClassNames = getContainerClassNames(tabletModal);
-  const containerStyle = getContainerStyle();
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
     canDragToClose,
@@ -745,7 +741,10 @@ export default function MobileWrapperDialog({
             className="tw-absolute tw-inset-0 tw-overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className={containerClassNames} style={containerStyle}>
+            <div
+              className={containerClassNames}
+              style={MOBILE_DIALOG_CONTAINER_STYLE}
+            >
               <TransitionChild as={Fragment} {...slideTransition}>
                 <div className={panelClassNames}>
                   <DialogPanel

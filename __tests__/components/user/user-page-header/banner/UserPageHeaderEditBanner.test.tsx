@@ -23,11 +23,6 @@ jest.mock('@/components/user/settings/UserSettingsSave', () => (props: any) => {
   );
 });
 
-jest.mock('react-use', () => ({
-  useClickAway: jest.fn(),
-  useKeyPressEvent: jest.fn(),
-}));
-
 const mutateAsync = jest.fn();
 
 jest.mock('@tanstack/react-query', () => ({
