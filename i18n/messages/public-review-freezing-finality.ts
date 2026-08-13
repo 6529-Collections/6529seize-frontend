@@ -1,6 +1,6 @@
 export const PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES = {
   "publicReview.pages.freezingPreservationAndArtworkFinality.currentSummary":
-    "How Stream separately closes minting, freezes Core state, records preservation evidence, and handles delayed artwork finality.",
+    "How Stream stops minting, freezes specific Core data, records proof about artwork files, and schedules a final artwork lock.",
   "publicReview.pages.freezingPreservationAndArtworkFinality.currentEditorial": `# Freezing, preservation, and artwork finality
 
 ## The answer in one minute
@@ -8,11 +8,11 @@ export const PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES = {
 Stream does not have one button that makes an artwork "finished." It has four separate promises:
 
 1. **Final supply:** minting should stop.
-2. **Core freeze:** a defined set of permanent token and collection data stops changing.
-3. **Preservation records:** approved writers can keep adding evidence about artwork files and how to find them.
-4. **Artwork finality:** a delayed action can make a defined artwork record final.
+2. **Core freeze:** An account with freeze permission can permanently lock a specific group of collection and token data stored in the Core contract. This also finalizes supply.
+3. **Preservation records:** Approved artists, archives, or preservation services can add permanent records showing where artwork files are stored and how to check them.
+4. **Artwork finality:** An authorised finality admin can schedule the final artwork lock. A safety delay lets a guardian stop a mistake.
 
-These promises are not interchangeable. Final supply does not freeze metadata. Core freeze does not keep files online. A preservation hash proves that retrieved bytes match; it does not make those bytes available. The finality registry contains scheduling and execution code, but this review does not yet prove that every artwork-changing path is covered.
+Each step protects something different. Stopping minting only stops new tokens. Core freeze locks only specific data in the Core contract. It does not lock outside files, every metadata record, or helper contracts. A file fingerprint is a short code made from a file. It can show that a downloaded file matches the earlier record, but it cannot make a missing file available. Stream has code for the final lock, but reviewers still need proof that no other path can change the displayed artwork.
 
 This page describes the code at [the pinned source commit](https://github.com/{sourceRepository}/tree/{sourceCommit}). Public review is not proof of launch, deployment, audit, or safety.
 
@@ -20,274 +20,292 @@ This page describes the code at [the pinned source commit](https://github.com/{s
 
 ### 1. Final supply
 
-Final supply closes the collection's supply cap at its minted-ever count: the token identities allocated for the collection. Burned tokens still count. It is only a promise about minting.
+**Final supply is meant to end minting.** Stream sets the collection’s maximum supply to the number of tokens already created. Burned tokens still count, so burning one does not make room for a replacement. This step only controls token supply. It does not lock the artwork or its files.
 
 ### 2. Core freeze
 
-Core freeze permanently locks a defined group of fields in the shared token contract. It also finalizes supply as part of the freeze transaction. Finalizing supply by itself does not freeze the Core.
+**Core freeze locks specific Core data.** It finalizes supply and permanently freezes a defined group of collection and token data in the Core contract. It does not freeze the whole artwork, outside files, every metadata record, or every helper contract.
 
 ### 3. Preservation records
 
-Preservation records keep an append-only history of file hashes, locations, formats, and other evidence. New records do not erase old records.
+**Preservation records are a permanent logbook for the artwork.** Each record can show where a file is stored and how to check it. New records can be added, but old records are never deleted.
 
 ### 4. Artwork finality
 
-Artwork finality is a separate delayed process. It is meant to bind a precise collection or token scope, the expected record, and the components used to display the work.
+**Artwork finality is the last planned lock.** It targets a scope—the exact collection, token, release, season, or view being locked. It checks the expected record and the parts needed to display the work. A safety delay lets a guardian stop a mistake.
 
-**Main open point:** the contracts contain these mechanisms, but the release candidate still needs proof that the exact finality payload is bound and every effective writer is covered.
+**Still to prove:** Reviewers must confirm that the final lock covers the correct artwork data and blocks every other way the displayed artwork could change.
 
 Technical sources: [StreamCore.sol](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol), [StreamPreservationRecords.sol](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPreservationRecords.sol), and [StreamArtworkFinalityRegistry.sol](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamArtworkFinalityRegistry.sol).
 
-## Final supply is a supply promise
+## How to read the technical sections
 
-### What happens
+This page keeps three kinds of evidence separate:
 
-After minting ends and the required wait has passed, an account with permission for setFinalSupply can close supply. The Core changes the collection cap to the number of token identities allocated for that collection. Burning a token does not lower this minted-ever count or make room for a replacement mint.
+- **Current code** means behavior found in the pinned contracts.
+- **Accepted design** means a rule the project has agreed to in an ADR. It may still need implementation and launch proof.
+- **Proposed design** means an idea that has not been accepted.
 
-This does not freeze scripts, metadata, artwork files, or other modules.
+The main accepted design records are [ADR 0004 for admin powers](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0004-admin-governance.md), [ADR 0006 for metadata and freezing](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0006-metadata-freeze.md), [ADR 0009 for finality scopes](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0009-protocol-v1-open-question-resolutions.md), and [ADR 0011 for preservation and finality evidence](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0011-world-class-pass-round-2.md).
 
-### Current code and known defect
+## 1. Final supply stops new minting
 
-For a collection with at least one mint, later mints fail at the new cap.
+### What the current code does
 
-The zero-mint case is different. The current code writes zero as the final supply. The same zero also means "supply not initialized" to setCollectionData. Until Core freeze, a function admin can set a new nonzero cap and reopen minting.
+After minting ends and the required extra wait has passed, an account with permission for setFinalSupply can close the supply.
 
-Core freeze closes that route, but it is a separate operation.
+The Core sets the collection's maximum supply to the number of token identities already created. Burning a token does not lower this minted-ever count or make room for a replacement mint.
+
+This step controls minting only. It does not lock metadata, scripts, artwork files, or other contracts.
+
+### The zero-token problem
+
+If no token has been minted, the code writes zero as the final supply. But setCollectionData also treats zero as "supply has not been set."
+
+Before Core freeze, an account with permission for setCollectionData can set a new nonzero supply and reopen minting. Core freeze closes this route. Finalizing supply by itself does not freeze the Core.
 
 See [setFinalSupply](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L888-L907), [_finalizeCollectionSupply](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1497-L1501), and [setCollectionData](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L377-L408).
 
-### What must be proven before launch
+### What reviewers still need to prove
 
-- Zero supply has a clear one-way final state.
-- Every mint lane and executor respects closure.
-- Existing signed Drops, auctions, and reservations have defined behavior.
-- An event records the final value.
-- No successor path can bypass the final state.
+- Zero can mean "closed forever" without also meaning "not set yet."
+- Every current and future mint route respects the final supply.
+- Signed Drops, auctions, reservations, and unfinished mint actions have clear rules.
+- The final value has a clear event or receipt.
+- A replacement contract cannot bypass the closed supply.
 
-**Why this matters:** "No works will ever be minted" must not mean the same stored value as "supply has not been set yet."
+**Why this matters:** "No tokens will ever be minted" must be a clear final state.
 
-## Core freeze fixes a defined boundary
+## 2. Core freeze locks a specific group of data
 
-### What happens
+### What the current code does
 
-An account with permission for freezeCollection can permanently freeze a collection in the Core. The function first finalizes supply, then stores a freeze-manifest hash and marks the collection frozen.
+An account with permission for freezeCollection can freeze a collection in the Core. This action cannot be undone.
 
-At the pinned commit, freeze blocks:
+The function first finalizes supply. It then saves a fingerprint of the frozen Core state and marks the collection as frozen.
 
-- old and manager mint entries;
+At the pinned commit, Core freeze blocks:
+
+- every Core mint entry;
 - burning live tokens;
-- changes to the collection randomizer;
-- changes to artist approval;
-- covered token data, images, and attributes;
-- new or revised collection-metadata records; and
-- changes to reserved collection-metadata locks.
+- changing the collection's randomizer;
+- changing the artist approval;
+- changing covered token data, images, and attributes;
+- adding or changing collection-metadata records; and
+- changing reserved collection-metadata locks.
 
 See [freezeCollection](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L826-L841), [mint entries](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L445-L503), [burn](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L628-L640), and [artist approval](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L734-L761).
 
-### What can still happen
+### What Core freeze does not stop
 
-Core freeze does not stop everything. The pinned code still allows:
+The pinned code still allows:
 
 - normal token transfers and approvals;
-- new append-only preservation records;
-- post-burn randomness evidence for a token already burned;
-- some metadata snapshot and record-lock actions;
-- shared contract-level metadata changes;
-- reads and history exports; and
-- module, successor, or governance actions unless another terminal rule blocks them.
+- new preservation records;
+- late randomness evidence for a token that was already burned;
+- some metadata snapshots and nonreserved record locks;
+- changes to shared contract-level metadata; and
+- module, successor, or governance actions unless another final rule blocks them.
 
-See the [transfer behavior](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1008-L1011) and [metadata mutation checks](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol#L363-L397).
+See the [transfer behavior](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCore.sol#L1008-L1011) and [metadata checks](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamCollectionMetadata.sol#L363-L397).
 
-**Why this matters:** "Core frozen" must not be shown as "the whole artwork is final."
+**Why this matters:** "Core frozen" does not mean "the whole artwork is final."
 
-## A freeze manifest gives the boundary one identity
+### What the freeze fingerprint proves
 
-The Core stores a hash of the frozen state. A hash is a short digital fingerprint. It lets someone compare a separately rebuilt package with the state that was frozen.
+The Core saves a hash of its frozen state. A hash is a short digital fingerprint. Someone can rebuild the same package and check whether its fingerprint matches.
 
-For that comparison to work, reviewers need a clear recipe for:
+Reviewers still need a clear recipe that says:
 
 - which fields and versions are included;
-- how each value is encoded;
+- how each value is written before hashing;
 - how live, burned, and unminted tokens are handled;
-- which randomness and dependency facts are included; and
-- which mutable parts remain outside the hash.
+- which randomness and software dependencies are included; and
+- which changeable parts remain outside the fingerprint.
 
-**Why this matters:** artists and collectors need to know what the fingerprint covers, not only that a fingerprint exists.
+**Why this matters:** a fingerprint is useful only when people know exactly what it covers.
 
-## Preservation records keep history append-only
+## 3. Preservation records keep a permanent history
 
-### What current code does
+### Who can add a record
 
-An approved record writer can add a preservation record for a known collection. The record includes its type, subject, content hash, location, schema, time, writer, and authorization class.
+The record-family rules decide who can write each type of record. Depending on the record type, an approved writer may be an artist, owner, curator, institution, independent checker, preservation service, or admin.
 
-The contract accepts several hash and reference formats, including Keccak-256, SHA-256, BLAKE3, multihash, IPFS CID, and Arweave transaction references.
+A general contract admin does not automatically become an approved preservation writer.
 
-Every record remains readable. A newer record only updates a separate latest pointer for the same collection, record type, and subject. "Latest" means most recently written onchain; it does not mean the record with the newest effective date.
+### What a record contains
 
-See [StreamPreservationRecords](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPreservationRecords.sol) and its [record interface](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/IStreamPreservationRecords.sol#L106-L126).
+A record can identify:
 
-### What readers must keep separate
+- what kind of evidence it is;
+- which collection or subject it belongs to;
+- a fingerprint of the file or evidence;
+- where the material can be found;
+- which data format it uses;
+- when it applies;
+- who wrote it; and
+- which permission allowed the writer to add it.
 
-- the package tied to finality;
-- later preservation evidence;
-- the current latest pointer;
-- who wrote the record and under which authority; and
-- a stored signature hash versus a signature another system actually verified.
+The code supports common fingerprint and storage references such as Keccak-256, SHA-256, BLAKE3, multihash, IPFS CID, and Arweave transaction IDs.
 
-**Why this matters:** future conservators can add new evidence without rewriting the original record.
+See [StreamPreservationRecords](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamPreservationRecords.sol), its [record interface](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/IStreamPreservationRecords.sol#L106-L126), and the [writer rules](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamRecordFamilyRegistry.sol#L264-L285).
 
-## Integrity and availability require separate evidence
+### Old records are not erased
 
-A valid hash answers one question: **Do these retrieved bytes match the earlier commitment?**
+Every record stays readable. Adding a new record changes only the "latest" pointer for the same collection, record type, and subject.
 
-It does not keep those bytes online. Long-term access may also require:
+"Latest" means the last record written to the blockchain. It does not mean the record with the newest date inside it.
+
+Readers should check:
+
+- which record was included in the final artwork lock;
+- which records were added later;
+- who wrote each record and with what permission; and
+- whether a signature was actually checked or only its fingerprint was stored.
+
+**Why this matters:** future conservators can add better evidence without rewriting history.
+
+### A correct fingerprint does not keep a file online
+
+A matching fingerprint proves one thing: **the downloaded file matches the earlier record.**
+
+It does not store the file or keep it available. Long-term access may also need:
 
 - independent copies of the files;
 - paid and working storage;
-- a usable gateway, domain, and RPC service;
-- the right browser, font, codec, GPU, or JavaScript runtime; and
-- public recovery and replay instructions.
+- working gateways, domains, and blockchain access;
+- the correct browser, font, codec, graphics support, or JavaScript runtime; and
+- public instructions for recovering and replaying the artwork.
 
-**Why this matters:** proof that a file is correct is different from proof that people can still get and run it.
+**Why this matters:** proving that a file is correct is different from making sure people can still get and run it.
 
-## One-of-one materials need token-specific commitments
+### One-of-one works may need their own records
 
-A one-of-one work may have source files, media, or authenticity evidence that belongs only to that token. The finality design supports token-specific manifests so those commitments can stay bound to the right token ID.
+A one-of-one artwork may have files or evidence that belong only to that token. The accepted finality design supports a token scope, so this material can be tied to the correct token ID.
 
-Reviewers still need to verify:
+Reviewers still need to confirm that:
 
-- every token that needs its own manifest is covered;
-- encoding and hashing are unambiguous;
-- shared edition files are not needlessly copied;
+- every token that needs its own package has one;
+- the hashing rules are clear;
+- shared files are not copied without need;
 - burned and unminted cases are defined; and
-- the permanence package includes the renderer, dependencies, archives, replay steps, output hashes, browser proof, and storage assumptions.
+- the package includes the renderer, software dependencies, archive copies, replay steps, output fingerprints, browser proof, and storage assumptions.
 
-These records do not prove ownership, marketplace support, or royalty enforcement.
+These records do not prove ownership, marketplace support, or royalty payment.
 
-## Terminal finality is delayed for a reason
+## 4. Artwork finality is the last planned lock
 
-### What current code does
+### How the current process starts
 
-An authorized finality admin can schedule a terminal freeze for a precise scope and expected record hash. The schedule must include a waiting period and an execution window.
+An authorized finality admin schedules a lock for one exact scope and one expected final-record fingerprint.
 
-Before the waiting period ends, the current veto guardian can stop it. A finality admin can cancel it before execution or expiry. Anyone can record that an overdue proposal expired.
+The code requires at least a 72-hour waiting period. After that wait, there must be an execution window of at least seven days.
 
-Only an authorized finality admin can execute the scheduled action. Execution checks the scheduled record, scope, manifest, Core facts, required components, and live component responses. The code then stores a collection or scoped finality record.
+During the waiting period:
+
+- the current veto guardian can stop the action;
+- a finality admin can cancel it; and
+- anyone can later mark an overdue action as expired.
+
+### What happens when the lock is executed
+
+Only an authorized finality admin can execute the scheduled action.
+
+The code checks:
+
+- the exact scheduled scope and expected fingerprint;
+- the finality manifest—a structured record that says what the lock covers;
+- the frozen Core facts;
+- the required artwork components;
+- the live state reported by those components;
+- the required artist approval or platform declaration; and
+- the discovery route used to find the components.
+
+If the checks pass, the registry stores the final record for that collection or smaller scope.
 
 See the [registry limits and roles](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamArtworkFinalityRegistry.sol#L39-L81) and [schedule and execution code](https://github.com/{sourceRepository}/blob/{sourceCommit}/smart-contracts/StreamArtworkFinalityRegistry.sol#L297-L589).
 
-### What remains unproven
+### Who does what
 
-The review still needs complete evidence that:
+- **Finality admin:** schedules, cancels, or executes the action.
+- **Artist:** should approve the exact artwork facts that are being made final.
+- **Veto guardian:** can stop the action during the waiting period. The guardian cannot replace the artwork data.
+- **Independent reviewer:** checks the files, fingerprints, permissions, and final result.
 
-- execution uses the exact payload reviewed during the delay;
-- every required component and writer is covered; and
-- no indirect route can change the promised final state.
+The artist should be able to read the collection or token, manifest, artwork parts, deadline, and final action before signing.
 
-**Why this matters:** a delay only helps when reviewers see the exact irreversible action that will later execute.
+The Core also stores an artist approval for its own collection-freeze state. Reviewers still need clear evidence showing how that approval and the finality approval fit together. If contract wallets are supported, their signature path must also be clear. Losing an artist key must not silently make a platform admin the artist.
 
-## Artist approval must be approval of readable facts
+### What reviewers still need to prove
 
-An artist should be able to read the package before signing it. A complete approval should clearly bind the chain, contract, collection or token scope, manifests, component commitments, nonce, deadline, and finality action.
+The contract checks that execution matches the expected fingerprint. Reviewers still must show that the fingerprint covers the right and complete artwork information.
 
-The current Core artist approval binds a defined collection-state hash. How that approval should connect to Core freeze, preservation, and terminal finality remains an important design decision.
+Reviewers must prove that:
 
-Contract-wallet artists also need a clear ERC-1271 signing path if supported. Key-loss recovery must not silently turn a platform administrator into the artist.
+- people review the same data that later executes;
+- every required artwork component and writer is included; and
+- no direct, indirect, governance, or successor path can change the displayed artwork after finality.
 
-## A guardian can stop finality
+Here, a **writer** means any account, function, or contract that can change the artwork result. This includes metadata, scripts, dependencies, images, animation, renderer inputs, randomness, preservation helpers, refresh helpers, and successor modules.
 
-The current registry gives the veto guardian one narrow job: stop a scheduled finality action before the waiting period ends.
+At launch, Stream must publish who has each writing permission, which records they may write, and how those permissions can change or end.
 
-The intended separation is:
+**Why this matters:** blocking one change function is not enough if another contract can make the same change.
 
-- the proposer supplies the payload;
-- the artist approves the artistic commitment;
-- the guardian may veto;
-- execution applies the already-bound payload; and
-- expiry closes an abandoned proposal.
+## Recovery after finality is only a proposal
 
-A replacement manifest or changed payload needs a new identity and fresh approval where required. An old signature must not be reused for a different action.
+ADR 0020 proposes a separate recovery record for a broken renderer, software dependency, or file-serving route. **It is proposed, not accepted or implemented in the pinned candidate.**
 
-## Terminal means every effective writer is accounted for
+Under the proposal:
 
-Finality is only terminal if every artwork-changing route is blocked or clearly excluded from the promise.
+- the original finality record would never change;
+- Governance V2 would schedule and execute a separate recovery action; and
+- the new record would identify the old route, replacement route, reason, manifest, and previous recovery.
 
-The proof must cover effects, not just function names. It should include:
+The proposal treats a route replacement as a change to the served artwork bytes unless a future accepted checker proves the bytes are equivalent. Recovery might keep the artwork available while changing what a viewer receives.
 
-- token and collection metadata;
-- scripts, dependencies, images, animations, and attributes;
-- renderer inputs;
-- randomness providers and final seeds;
-- preservation and refresh helpers;
-- successor modules; and
-- any global or indirect path that can make the same change.
-
-The source contains record-family authorization. The exact launch setup still needs evidence for admitted record types, provider addresses, grants, code hashes, rotation, revocation, and independent review.
-
-**Why this matters:** blocking one function is not enough when another contract can create the same change.
-
-## Recovery after finality would change the promise
-
-ADR 0020 proposes a separate recovery companion for a failed renderer, dependency, or serving route. **It is proposed, not accepted or implemented in the pinned candidate.**
-
-Under the proposal, the original finality record would stay unchanged. Governance V2 would schedule and execute a separate recovery record. That record would identify the old route, replacement, manifest, reason, and prior recovery.
-
-The proposal treats a route change as a change to the served artwork bytes unless a later accepted verifier proves equivalence. It could preserve access while changing what a viewer receives.
-
-Reviewers should decide whether any byte-changing recovery should exist and what artist consent, owner notice, veto, waiting period, and competing-recovery rules it would need.
+Reviewers still need to decide whether any byte-changing recovery should exist. They must also decide what artist consent, owner notice, veto period, waiting time, and conflict rules it would require.
 
 See [ADR 0020 status and blockers](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0020-executor-only-finality-recovery.md#L3-L24) and its [proposed decision](https://github.com/{sourceRepository}/blob/{sourceCommit}/docs/adr/0020-executor-only-finality-recovery.md#L75-L138).
 
-## Irreversible actions deserve separate ceremonies
+## A safer order for making artwork final
 
-A safer flow keeps each irreversible promise visible:
+Each permanent step should be separate and visible:
 
-1. Confirm maximum supply.
-2. Close every mint path and make supply final.
-3. Inspect and freeze the Core boundary.
-4. Retrieve and verify preservation materials independently.
-5. Inspect collection-wide and token-specific manifests.
-6. Compare readable facts with the exact signed payload.
-7. Wait through the review and veto period.
-8. Execute terminal finality.
-9. Check the resulting state with an independent reader.
+1. Confirm the maximum number of tokens.
+2. Close every mint route.
+3. Inspect and freeze the Core data.
+4. Download and check the preservation files.
+5. Inspect the collection-wide and token-specific manifests.
+6. Show the artist the exact facts and collect the correct approval.
+7. Wait through the public review and guardian-veto period.
+8. Execute the final artwork lock.
+9. Use an independent reader to check the result.
 
-Each step should produce a machine-readable receipt. Before production, an independent person should be able to recover and replay the package from published instructions and commitments.
+Each step should create a machine-readable receipt. Before launch, an independent person should be able to recover and replay the artwork by following published instructions.
 
-## What the finality process must establish
+## Main ways this can fail
 
-Artists, collectors, and independent reviewers should be able to prove:
+- One mint route stays open.
+- A broad "frozen" label hides data or modules that can still change.
+- A manifest points to the wrong collection, token, data, or hashing rule.
+- A fingerprint is correct, but the file is missing or cannot run.
+- The executed action differs from the action that people reviewed.
+- An old artist approval is reused for a different action.
+- A guardian can edit the action instead of only stopping it.
+- An indirect metadata, governance, preservation, refresh, or successor route bypasses the lock.
+- A later recovery changes the served artwork but is described as the same work.
 
-- every mint path is closed;
-- every mutable artwork field is known;
-- each hash uses a clear, repeatable encoding;
-- token-specific files are included;
-- required bytes can be retrieved and run;
-- the artist approved the exact final state; and
-- every administrative change path has ended or is outside the promise.
+## Final reviewer checklist
 
-## What can fail
-
-- Final supply leaves another mint lane open.
-- A broad freeze label hides fields or modules that can still change.
-- A manifest binds the wrong data, token, or encoding.
-- The hash is valid but the files are missing or unusable.
-- Finality executes different data from the scheduled proposal.
-- An old artist approval is reused for a new action.
-- A guardian can change the payload instead of only stopping it.
-- An indirect metadata, governance, preservation, refresh, or successor route bypasses finality.
-- A later recovery changes served bytes but is described as the same artwork.
-
-## Questions for reviewers
-
-1. Are final supply, Core freeze, preservation, and finality each narrow enough to verify?
-2. Does mint closure cover every current and successor lane, including the zero-mint case?
-3. Which exact Core and module fields enter each manifest?
-4. Is the finality delay long enough for independent retrieval and replay?
-5. What exact facts must the artist approve?
-6. Can the guardian only veto?
-7. Does the writer inventory cover every indirect change route?
-8. Which independent storage locations and runtime files are required?
-9. Which receipt lets an artist or collector verify the final state?
-10. Should any byte-changing recovery exist after finality?`,
+1. Are final supply, Core freeze, preservation, and artwork finality clearly separate?
+2. Is every current and future mint route closed, including the zero-token case?
+3. Which exact Core fields, modules, and files are included in each manifest?
+4. Can an independent person download and run every required file?
+5. Are all hashing and encoding rules clear and repeatable?
+6. Does the artist approve the exact final artwork facts?
+7. Is the waiting period long enough, and can the guardian only stop the action?
+8. Does the writer list cover every direct and indirect change route?
+9. Which receipt lets an artist or collector check the final state?
+10. Should any recovery that changes served artwork bytes be allowed after finality?`,
 } as const;
