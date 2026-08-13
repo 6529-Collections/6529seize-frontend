@@ -15,9 +15,15 @@ import { useContext, useState } from "react";
 import { getUserProfileHeaderMessage } from "../../user-page-header.messages";
 export default function UserPageHeaderEditClassification({
   profile,
+  isOpen = true,
+  onAfterLeave,
+  onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -101,8 +107,10 @@ export default function UserPageHeaderEditClassification({
       title={getUserProfileHeaderMessage(
         "user.profileHeader.edit.classification"
       )}
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
+      onBack={onBack}
+      onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
       maxWidthClass="md:tw-max-w-xl"
@@ -118,7 +126,7 @@ export default function UserPageHeaderEditClassification({
           inlineOptions
         />
 
-        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row-reverse sm:tw-justify-start">
+        <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row-reverse md:tw-justify-start">
           <Button
             type="submit"
             variant="action"
@@ -126,7 +134,7 @@ export default function UserPageHeaderEditClassification({
             loading={mutating}
             disabled={!haveChanges}
             fullWidth
-            className="sm:tw-w-auto"
+            className="md:tw-w-auto"
           >
             Save
           </Button>
@@ -136,7 +144,7 @@ export default function UserPageHeaderEditClassification({
             disabled={mutating}
             onClick={onClose}
             fullWidth
-            className="sm:tw-w-auto"
+            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
           >
             Cancel
           </Button>

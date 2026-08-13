@@ -77,6 +77,9 @@ describe("UserPageHeaderEditPfp", () => {
     expect(
       screen.getByText("File size must be less than 2MB")
     ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "File size must be less than 2MB"
+    );
   });
 
   it("submits selected meme", async () => {

@@ -15,9 +15,15 @@ import { useContext, useState } from "react";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 export default function UserPageHeaderEditName({
   profile,
+  isOpen = true,
+  onAfterLeave,
+  onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -108,11 +114,13 @@ export default function UserPageHeaderEditName({
   return (
     <MobileWrapperDialog
       title={getUserProfileHeaderMessage("user.profileHeader.edit.name")}
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
+      onBack={onBack}
+      onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
-      headerClassName="-tw-mt-2 md:tw-mt-0"
+      headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
       maxWidthClass="md:tw-max-w-xl"
     >
       <form
@@ -127,7 +135,7 @@ export default function UserPageHeaderEditName({
           setIsLoading={setCheckingUsername}
         />
 
-        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row-reverse sm:tw-justify-start">
+        <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row-reverse md:tw-justify-start">
           <Button
             type="submit"
             variant="action"
@@ -135,7 +143,7 @@ export default function UserPageHeaderEditName({
             loading={mutating}
             disabled={!haveChanges || !available || checkingUsername}
             fullWidth
-            className="sm:tw-w-auto"
+            className="md:tw-w-auto"
           >
             Save
           </Button>
@@ -145,7 +153,7 @@ export default function UserPageHeaderEditName({
             disabled={mutating}
             onClick={onClose}
             fullWidth
-            className="sm:tw-w-auto"
+            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
           >
             Cancel
           </Button>

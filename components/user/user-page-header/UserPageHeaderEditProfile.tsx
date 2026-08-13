@@ -4,10 +4,9 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import Button from "@/components/utils/button/Button";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import useCapacitor from "@/hooks/useCapacitor";
 import {
   ChevronRightIcon,
-  PencilSquareIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import {
   DocumentTextIcon,
@@ -37,11 +36,12 @@ export default function UserPageHeaderEditProfile({
   defaultBanner1: string;
   defaultBanner2: string;
 }>) {
-  const { isCapacitor } = useCapacitor();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pendingTarget, setPendingTarget] = useState<EditTarget | null>(null);
   const [activeTarget, setActiveTarget] = useState<EditTarget | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [returnToMenu, setReturnToMenu] = useState(false);
 
   const options = [
     {
@@ -88,11 +88,27 @@ export default function UserPageHeaderEditProfile({
       return;
     }
     setActiveTarget(pendingTarget);
+    setIsEditorOpen(true);
     setPendingTarget(null);
   };
 
   const closeEditor = () => {
+    setReturnToMenu(false);
+    setIsEditorOpen(false);
+  };
+
+  const backToMenu = () => {
+    setReturnToMenu(true);
+    setIsEditorOpen(false);
+  };
+
+  const finishEditorLeave = () => {
     setActiveTarget(null);
+    if (returnToMenu) {
+      setReturnToMenu(false);
+      setIsMenuOpen(true);
+      return;
+    }
     globalThis.requestAnimationFrame(() => triggerRef.current?.focus());
   };
 
@@ -101,12 +117,16 @@ export default function UserPageHeaderEditProfile({
       <Button
         ref={triggerRef}
         variant="tertiary"
-        size="sm"
+        size={null}
         onClick={() => setIsMenuOpen(true)}
+        aria-label={getUserProfileHeaderMessage(
+          "user.profileHeader.edit.open"
+        )}
+        title={getUserProfileHeaderMessage("user.profileHeader.edit.open")}
+        className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent active:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5"
       >
-        <PencilSquareIcon className="tw-size-5" aria-hidden="true" />
-        <span className="max-[359px]:tw-sr-only">
-          {getUserProfileHeaderMessage("user.profileHeader.edit.open")}
+        <span className="tw-box-border tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/75 tw-text-iron-100 tw-shadow-[0_8px_24px_rgba(0,0,0,0.32)] tw-transition-[background-color,border-color,color,transform] tw-duration-200 tw-ease-out group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black desktop-hover:group-hover:tw-border-white/25 desktop-hover:group-hover:tw-bg-black/90 desktop-hover:group-hover:tw-text-white group-active:tw-scale-95 group-active:tw-bg-black motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
+          <PencilIcon className="tw-size-[1.125rem]" aria-hidden="true" />
         </span>
       </Button>
 
@@ -115,31 +135,29 @@ export default function UserPageHeaderEditProfile({
         isOpen={isMenuOpen}
         onClose={closeMenu}
         onAfterLeave={openPendingEditor}
+        tabletModal
         showHeaderCloseButton
-        showDragHandle={isCapacitor}
-        enableDragToClose={isCapacitor}
-        surfaceClassName="tw-bg-iron-950 tw-shadow-[0_-24px_60px_rgba(0,0,0,0.55)] md:tw-shadow-2xl"
-        headerClassName={
-          isCapacitor ? "tw-pb-4" : "-tw-mt-2 tw-pb-4 md:tw-mt-0"
-        }
+        maxWidthClass="md:tw-max-w-md"
+        surfaceClassName="tw-bg-iron-950 md:tw-shadow-2xl"
+        headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
       >
         <div className="tw-px-4 sm:tw-px-6">
-          <ul className="tw-m-0 tw-list-none tw-space-y-0.5 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_12px_32px_rgba(0,0,0,0.18)]">
+          <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
             {options.map(({ target, label, Icon }) => (
               <li key={target}>
                 <button
                   type="button"
                   onClick={() => selectTarget(target)}
-                  className="tw-group/option tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-[background-color,border-color,color,transform] tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-[0.99] active:tw-bg-white/[0.08] desktop-hover:hover:tw-border-white/[0.06] desktop-hover:hover:tw-bg-white/[0.055] desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                  className="tw-group/option tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-[background-color,color,transform] tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-[0.99] active:tw-bg-white/[0.07] desktop-hover:hover:tw-bg-white/[0.045] desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 >
-                  <span className="tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/15 tw-bg-primary-500/10 tw-text-primary-300 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_4px_12px_rgba(0,0,0,0.18)] tw-transition-colors tw-duration-200 desktop-hover:group-hover/option:tw-border-primary-400/30 desktop-hover:group-hover/option:tw-bg-primary-500/15 desktop-hover:group-hover/option:tw-text-primary-200">
+                  <span className="tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.035] tw-text-iron-400 tw-transition-colors tw-duration-200 group-active/option:tw-border-primary-400/20 group-active/option:tw-bg-primary-500/10 group-active/option:tw-text-primary-300 group-focus-visible/option:tw-border-primary-400/20 group-focus-visible/option:tw-bg-primary-500/10 group-focus-visible/option:tw-text-primary-300 desktop-hover:group-hover/option:tw-border-primary-400/20 desktop-hover:group-hover/option:tw-bg-primary-500/10 desktop-hover:group-hover/option:tw-text-primary-300 motion-reduce:tw-transition-none">
                     <Icon className="tw-size-5" aria-hidden="true" />
                   </span>
                   <span className="tw-min-w-0 tw-flex-1 tw-leading-5">
                     {label}
                   </span>
                   <ChevronRightIcon
-                    className="tw-mr-1 tw-size-4 tw-flex-none tw-text-iron-600 tw-transition-[color,transform] tw-duration-200 desktop-hover:group-hover/option:tw-translate-x-0.5 desktop-hover:group-hover/option:tw-text-iron-300 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                    className="tw-mr-1 tw-size-4 tw-flex-none tw-text-iron-700 tw-transition-[color,transform] tw-duration-200 group-active/option:tw-text-iron-300 group-focus-visible/option:tw-text-iron-300 desktop-hover:group-hover/option:tw-translate-x-0.5 desktop-hover:group-hover/option:tw-text-iron-300 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                     aria-hidden="true"
                   />
                 </button>
@@ -154,18 +172,36 @@ export default function UserPageHeaderEditProfile({
           profile={profile}
           defaultBanner1={defaultBanner1}
           defaultBanner2={defaultBanner2}
+          isOpen={isEditorOpen}
+          onAfterLeave={finishEditorLeave}
+          onBack={backToMenu}
           onClose={closeEditor}
         />
       )}
       {activeTarget === "pfp" && (
-        <UserPageHeaderEditPfp profile={profile} onClose={closeEditor} />
+        <UserPageHeaderEditPfp
+          profile={profile}
+          isOpen={isEditorOpen}
+          onAfterLeave={finishEditorLeave}
+          onBack={backToMenu}
+          onClose={closeEditor}
+        />
       )}
       {activeTarget === "name" && (
-        <UserPageHeaderEditName profile={profile} onClose={closeEditor} />
+        <UserPageHeaderEditName
+          profile={profile}
+          isOpen={isEditorOpen}
+          onAfterLeave={finishEditorLeave}
+          onBack={backToMenu}
+          onClose={closeEditor}
+        />
       )}
       {activeTarget === "classification" && (
         <UserPageHeaderEditClassification
           profile={profile}
+          isOpen={isEditorOpen}
+          onAfterLeave={finishEditorLeave}
+          onBack={backToMenu}
           onClose={closeEditor}
         />
       )}
@@ -173,11 +209,13 @@ export default function UserPageHeaderEditProfile({
         title={getUserProfileHeaderMessage(
           "user.profileHeader.edit.aboutTitle"
         )}
-        isOpen={activeTarget === "about"}
+        isOpen={activeTarget === "about" && isEditorOpen}
         onClose={closeEditor}
+        onBack={backToMenu}
+        onAfterLeave={finishEditorLeave}
         tabletModal
         showHeaderCloseButton
-        headerClassName="-tw-mt-2 md:tw-mt-0"
+        headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
       >
         <div className="tw-px-4 sm:tw-px-6">
           <UserPageHeaderAboutEdit

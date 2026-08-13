@@ -33,11 +33,17 @@ export default function UserPageHeaderEditBanner({
   profile,
   defaultBanner1,
   defaultBanner2,
+  isOpen = true,
+  onAfterLeave,
+  onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
 }) {
   const isSavingRef = useRef(false);
@@ -198,23 +204,26 @@ export default function UserPageHeaderEditBanner({
   return (
     <MobileWrapperDialog
       title={getUserProfileHeaderMessage("user.profileHeader.edit.banner")}
-      isOpen
+      isOpen={isOpen}
       onClose={handleClose}
+      onBack={onBack}
+      onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"
       headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
+      headerActions={
+        <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
+          Choose a gradient or upload an image for your profile cover.
+        </p>
+      }
       dismissible={!isSaving}
     >
       <form
         onSubmit={onSubmit}
         className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
       >
-        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
-          Choose a gradient or upload an image for your profile cover.
-        </p>
-
         <CommonTabs<BannerEditMode>
           items={bannerTabs}
           activeItem={editMode}
@@ -237,7 +246,7 @@ export default function UserPageHeaderEditBanner({
           />
         )}
 
-        <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
+        <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
           <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
           <Button
             variant="secondary"
@@ -245,7 +254,7 @@ export default function UserPageHeaderEditBanner({
             disabled={isSaving}
             onClick={handleClose}
             fullWidth
-            className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
+            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
           >
             Cancel
           </Button>

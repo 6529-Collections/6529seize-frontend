@@ -29,8 +29,8 @@ export default function UserSettingsBannerImageInput({
           dragging
             ? "tw-border-iron-600 tw-bg-iron-800"
             : "tw-border-iron-700 tw-bg-iron-900"
-        } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-600 hover:tw-bg-iron-800 ${
-          shake ? "tw-animate-shake" : ""
+        } tw-relative tw-flex tw-h-64 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-primary-400/60 hover:tw-border-iron-600 hover:tw-bg-iron-800 ${
+          shake ? "tw-animate-shake motion-reduce:tw-animate-none" : ""
         } `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4">
@@ -40,6 +40,7 @@ export default function UserSettingsBannerImageInput({
                 src={imageToShow}
                 alt="Banner preview"
                 fill
+                sizes="10rem"
                 className="tw-rounded-sm tw-object-contain"
               />
             </div>
@@ -77,13 +78,21 @@ export default function UserSettingsBannerImageInput({
             </>
           )}
           {error && (
-            <p className="tw-text-xs tw-font-medium tw-text-red">{error}</p>
+            <p
+              id="banner-upload-error"
+              role="alert"
+              className="tw-text-xs tw-font-medium tw-text-error"
+            >
+              {error}
+            </p>
           )}
         </div>
         <input
           id="banner-upload-input"
           type="file"
-          className="tw-hidden"
+          aria-label="Upload profile cover"
+          className="tw-sr-only"
+          aria-describedby={error ? "banner-upload-error" : undefined}
           accept={ACCEPTED_FORMATS_DISPLAY}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const f = e.target.files?.[0];

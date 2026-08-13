@@ -16,12 +16,19 @@ jest.mock("framer-motion", () => ({
 }));
 jest.mock(
   "@/components/user/user-page-header/about/UserPageHeaderAboutEditError",
-  () => (props: any) => <div>{props.msg}</div>
+  () => (props: any) => <div id="profile-about-error">{props.msg}</div>
 );
+
+let mutationError: Error | null = null;
 
 (useMutation as jest.Mock).mockImplementation((opts) => {
   return {
     mutateAsync: async (val: string) => {
+      if (mutationError) {
+        opts.onError?.(mutationError);
+        opts.onSettled?.();
+        return;
+      }
       await opts.mutationFn(val);
       opts.onSuccess?.();
       opts.onSettled?.();
@@ -35,6 +42,10 @@ describe("UserPageHeaderAboutEdit", () => {
     setToast: jest.fn(),
   } as any;
   const ctx = { onProfileStatementAdd: jest.fn() } as any;
+
+  beforeEach(() => {
+    mutationError = null;
+  });
 
   it("enables save when value changes and submits", async () => {
     render(
@@ -61,5 +72,32 @@ describe("UserPageHeaderAboutEdit", () => {
       message: "About statement added.",
       type: "success",
     });
+  });
+
+  it("associates the inline save error with the textarea", async () => {
+    mutationError = new Error("backend unavailable");
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={ctx}>
+          <UserPageHeaderAboutEdit
+            profile={{ query: "alice" } as any}
+            statement={{ statement_value: "old" } as any}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const input = screen.getByRole("textbox", { name: "About statement" });
+    await userEvent.clear(input);
+    await userEvent.type(input, "new");
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("backend unavailable.")).toBeInTheDocument();
+    expect(input).toHaveAttribute(
+      "aria-describedby",
+      "profile-about-character-count profile-about-error"
+    );
   });
 });

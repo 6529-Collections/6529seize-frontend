@@ -143,7 +143,11 @@ export default function UserPageHeaderAboutEdit({
             aria-label={getUserProfileHeaderMessage(
               "user.profileHeader.aboutEdit.textareaLabel"
             )}
-            aria-describedby="profile-about-character-count"
+            aria-describedby={
+              errorMsg
+                ? "profile-about-character-count profile-about-error"
+                : "profile-about-character-count"
+            }
             placeholder={getUserProfileHeaderMessage(
               "user.profileHeader.aboutEdit.placeholder"
             )}
@@ -160,13 +164,13 @@ export default function UserPageHeaderAboutEdit({
             {characterCount}
           </div>
         </div>
-        <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 sm:tw-ml-auto sm:tw-w-auto sm:tw-flex-row">
+        <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 md:tw-ml-auto md:tw-w-auto md:tw-flex-row">
           <Button
             variant="secondary"
             size="lg"
             disabled={loading}
             onClick={onClose}
-            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+            className="tw-hidden tw-min-h-11 md:tw-inline-flex md:tw-flex-none"
           >
             {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.cancel")}
           </Button>
@@ -179,7 +183,7 @@ export default function UserPageHeaderAboutEdit({
             aria-label={getUserProfileHeaderMessage(
               "user.profileHeader.aboutEdit.save"
             )}
-            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+            className="tw-min-h-11 tw-flex-1 md:tw-flex-none"
           >
             {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.save")}
           </Button>

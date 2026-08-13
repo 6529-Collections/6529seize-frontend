@@ -23,6 +23,7 @@ import type {
   ReactNode,
   TouchEvent,
 } from "react";
+import MobileWrapperDialogBackButton from "./MobileWrapperDialogBackButton";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 
 const DISMISS_DRAG_DISTANCE_PX = 44;
@@ -45,6 +46,7 @@ type MobileWrapperDialogProps = {
   readonly title?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
+  readonly onBack?: (() => void) | undefined;
   readonly onBeforeLeave?: (() => void) | undefined;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: ReactNode;
@@ -66,6 +68,7 @@ type MobileWrapperDialogProps = {
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
 };
@@ -88,34 +91,56 @@ function DialogHeader({
   title,
   showDesktopCloseButton,
   onClose,
+  onBack,
   className,
   titleActions,
   headerActions,
   showHeaderCloseButton,
   headerCloseButtonClassName,
   titleClassName,
+  backLabel,
   closeLabel,
 }: {
   readonly title: string | undefined;
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
+  readonly onBack?: (() => void) | undefined;
   readonly className?: string | undefined;
   readonly titleActions?: ReactNode;
   readonly headerActions?: ReactNode;
   readonly showHeaderCloseButton?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly backLabel: string;
   readonly closeLabel: string;
 }) {
   return (
-    <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2">
-          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+    <div
+      className={clsx(
+        "tw-px-4 sm:tw-px-6",
+        onBack && "tw-pb-4",
+        className
+      )}
+    >
+      <div
+        className={clsx(
+          "tw-flex tw-items-center tw-justify-between tw-gap-3",
+          onBack &&
+            "-tw-mx-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-pb-4 sm:-tw-mx-6 sm:tw-px-6"
+        )}
+      >
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
+          {onBack && (
+            <MobileWrapperDialogBackButton
+              onClick={onBack}
+              label={backLabel}
+            />
+          )}
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
             {title && (
               <DialogTitle
                 className={clsx(
-                  "tw-text-base tw-font-semibold tw-text-iron-50",
+                  "tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50",
                   titleClassName
                 )}
               >
@@ -128,9 +153,6 @@ function DialogHeader({
               </div>
             )}
           </div>
-          {headerActions !== undefined && headerActions !== null && (
-            <div className="tw-flex tw-items-center">{headerActions}</div>
-          )}
         </div>
         {showDesktopCloseButton && (
           <MobileWrapperDialogCloseButton
@@ -150,6 +172,16 @@ function DialogHeader({
           />
         )}
       </div>
+      {headerActions !== undefined && headerActions !== null && (
+        <div
+          className={clsx(
+            "tw-flex tw-items-center",
+            onBack ? "tw-pt-4" : "tw-mt-2"
+          )}
+        >
+          {headerActions}
+        </div>
+      )}
     </div>
   );
 }
@@ -280,7 +312,9 @@ function getSurfaceClassNames({
   return clsx(
     "tw-flex tw-flex-col tw-rounded-t-xl",
     surfaceClassName ?? "tw-bg-iron-950",
-    allowOverflow ? "tw-overflow-visible" : "tw-overflow-hidden",
+    allowOverflow
+      ? "mobile-wrapper-dialog-overflow-surface tw-overflow-visible"
+      : "tw-overflow-hidden",
     tabletModal && "md:tw-rounded-xl"
   );
 }
@@ -296,7 +330,9 @@ function getContentClassNames({
 }) {
   return clsx(
     "tw-flex tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-flex-col",
-    allowOverflow ? "tw-overflow-visible" : "tw-overflow-y-auto",
+    allowOverflow
+      ? "mobile-wrapper-dialog-overflow-content tw-overflow-visible"
+      : "tw-overflow-y-auto",
     noPadding ? "tw-py-0" : "tw-py-6",
     showScrollbar &&
       !allowOverflow &&
@@ -637,6 +673,7 @@ export default function MobileWrapperDialog({
   title,
   isOpen,
   onClose,
+  onBack,
   onBeforeLeave,
   onAfterLeave,
   children,
@@ -658,11 +695,13 @@ export default function MobileWrapperDialog({
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
+  backLabel,
   closeLabel,
   dismissible = true,
 }: MobileWrapperDialogProps) {
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const {
     canDragToClose,
@@ -770,6 +809,7 @@ export default function MobileWrapperDialog({
                           title={title}
                           showDesktopCloseButton={showDesktopHeaderCloseButton}
                           onClose={handleClose}
+                          onBack={dismissible ? onBack : undefined}
                           className={headerClassName}
                           titleActions={titleActions}
                           headerActions={headerActions}
@@ -778,6 +818,7 @@ export default function MobileWrapperDialog({
                             headerCloseButtonClassName
                           }
                           titleClassName={titleClassName}
+                          backLabel={resolvedBackLabel}
                           closeLabel={resolvedCloseLabel}
                         />
                         {children}

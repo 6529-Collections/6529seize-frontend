@@ -26,9 +26,15 @@ import { useContext, useEffect, useState } from "react";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 export default function UserPageHeaderEditPfp({
   profile,
+  isOpen = true,
+  onAfterLeave,
+  onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
 }) {
   const ipfsService = useIpfsService();
@@ -186,8 +192,10 @@ export default function UserPageHeaderEditPfp({
   return (
     <MobileWrapperDialog
       title={getUserProfileHeaderMessage("user.profileHeader.edit.pfp")}
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
+      onBack={onBack}
+      onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
       showScrollbar
@@ -213,11 +221,14 @@ export default function UserPageHeaderEditPfp({
           setFile={setFileAndRemoveMeme}
         />
         {error && (
-          <p className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-sm tw-text-error">
+          <p
+            role="alert"
+            className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-sm tw-text-error"
+          >
             {error}
           </p>
         )}
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 sm:tw-flex-row-reverse sm:tw-justify-start">
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
           <Button
             type="submit"
             variant="action"
@@ -225,7 +236,7 @@ export default function UserPageHeaderEditPfp({
             loading={saving}
             disabled={!file && !selectedMeme}
             fullWidth
-            className="sm:tw-w-auto"
+            className="md:tw-w-auto"
           >
             Save PFP
           </Button>
@@ -235,7 +246,7 @@ export default function UserPageHeaderEditPfp({
             disabled={saving}
             onClick={onClose}
             fullWidth
-            className="sm:tw-w-auto"
+            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
           >
             Cancel
           </Button>

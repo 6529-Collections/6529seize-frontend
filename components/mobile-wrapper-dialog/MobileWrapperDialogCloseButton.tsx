@@ -15,13 +15,13 @@ export default function MobileWrapperDialogCloseButton({
       title={label}
       aria-label={label}
       className={clsx(
-        "-tw-mr-2 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
+        "tw-inline-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white/[0.04] tw-p-0 tw-text-iron-300 tw-transition-[background-color,color,transform] tw-duration-150 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-white active:tw-scale-95 active:tw-bg-white/10 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
         className
       )}
       onClick={onClick}
     >
       <svg
-        className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-current"
+        className="tw-size-5 tw-flex-shrink-0 tw-text-current"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

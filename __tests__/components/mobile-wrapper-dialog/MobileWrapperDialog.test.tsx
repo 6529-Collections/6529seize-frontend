@@ -99,10 +99,14 @@ describe("MobileWrapperDialog", () => {
       );
 
       expect(
-        document.querySelector(".tw-rounded-t-xl.tw-overflow-visible")
+        document.querySelector(
+          ".tw-rounded-t-xl.mobile-wrapper-dialog-overflow-surface.tw-overflow-visible"
+        )
       ).toBeInTheDocument();
       expect(
-        document.querySelector(".tw-flex-1.tw-overflow-visible")
+        document.querySelector(
+          ".tw-flex-1.mobile-wrapper-dialog-overflow-content.tw-overflow-visible"
+        )
       ).toBeInTheDocument();
     });
 
