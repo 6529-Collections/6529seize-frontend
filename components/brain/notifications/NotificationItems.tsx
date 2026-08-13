@@ -13,6 +13,9 @@ import NotificationItem from "./NotificationItem";
 const NOTIFICATION_ITEM_RENDERING_STYLE = {
   containIntrinsicSize: "auto 400px",
   contentVisibility: "auto",
+  // Keep paint containment for scroll performance while allowing the existing
+  // avatar and reaction hover scale to extend beyond the row boundary.
+  overflowClipMargin: "4px",
 } satisfies CSSProperties;
 
 interface NotificationItemsProps {
