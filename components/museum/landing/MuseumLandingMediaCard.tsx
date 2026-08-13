@@ -1,5 +1,8 @@
 import Link from "next/link";
-import type { MuseumMediaMetadata } from "@/lib/museum/publication/types";
+import type {
+  MuseumExternalProposalPresentationVariant,
+  MuseumMediaMetadata,
+} from "@/lib/museum/publication/types";
 import type { MuseumProgramMedia } from "@/lib/museum/types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -24,6 +27,7 @@ export type MuseumLandingMedia =
       readonly height: number;
       readonly alt: string;
       readonly sourceByteSize: number;
+      readonly variants?: readonly MuseumExternalProposalPresentationVariant[];
       readonly sourceHref?: string;
       readonly sourceLabel?: string;
       readonly creditLine?: string;
@@ -64,6 +68,7 @@ function MediaFrame({
         width={media.width}
         height={media.height}
         sourceByteSize={media.sourceByteSize}
+        variants={media.variants}
         requireIntentForLargeSource={media.requireIntentForLargeSource ?? true}
         {...(media.sourceHref === undefined || media.sourceLabel === undefined
           ? {}

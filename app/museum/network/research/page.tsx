@@ -166,19 +166,26 @@ function researchMedia(
     .find((media): media is MuseumMedia => media !== undefined);
 }
 
+function typedResearchDocument(
+  publication: MuseumPublication,
+  record: NonNullable<MuseumPublication["researchPublications"]>[number]
+): MuseumPublicDocument | undefined {
+  const matches = publication.documents.filter(
+    (document) =>
+      buildImmutableMuseumBlobUrl(
+        publication.identity.commit,
+        document.sourcePath
+      ) === record.publicationUri
+  );
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
 export function buildMuseumResearchIndex(
   publication: MuseumPublication
 ): readonly MuseumResearchIndexEntry[] {
   const typed = publication.researchPublications ?? [];
   const typedEntries = typed.flatMap((record) => {
-    const document = publication.documents.find(
-      (candidate) =>
-        candidate.id === record.id ||
-        buildImmutableMuseumBlobUrl(
-          publication.identity.commit,
-          candidate.sourcePath
-        ) === record.publicationUri
-    );
+    const document = typedResearchDocument(publication, record);
     const immutablePublicationUri =
       document === undefined
         ? null

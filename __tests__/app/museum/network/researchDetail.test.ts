@@ -199,6 +199,63 @@ describe("Museum research detail enrichment", () => {
     }
   });
 
+  it("joins a typed publication to its exact current manuscript before record IDs", () => {
+    const manuscript = {
+      ...DOCUMENT,
+      id: `typed-source:${DOCUMENT.sourcePath}`,
+      markdown:
+        "# A study of a work\n\nThe governed manuscript is the visitor-facing publication.",
+    };
+    const machineRecord: MuseumPublicDocument = {
+      ...DOCUMENT,
+      id: RESEARCH_ID,
+      kind: "source_record",
+      title: "Research publication record",
+      markdown: '{"recordType":"RESEARCH_PUBLICATION"}',
+      sourcePath: "records/entities/6529NM-RP-0001.json",
+    };
+    const current = {
+      ...publication(),
+      documents: [machineRecord, manuscript],
+    };
+
+    const entry = findMuseumResearchIndexEntry(current, ENTRY.slug);
+
+    expect(entry).toEqual(
+      expect.objectContaining({
+        id: RESEARCH_ID,
+        typed: true,
+        publicationUri: ENTRY.publicationUri,
+        document: expect.objectContaining({
+          id: manuscript.id,
+          sourcePath: manuscript.sourcePath,
+          markdown: manuscript.markdown,
+        }),
+      })
+    );
+  });
+
+  it("fails closed when a typed publication has no exact manuscript source", () => {
+    const current = {
+      ...publication(),
+      researchPublications: [
+        {
+          ...publication().researchPublications![0]!,
+          publicationUri: ENTRY.publicationUri!.replace(
+            DOCUMENT.sourcePath,
+            "records/research/not-the-manuscript.md"
+          ),
+        },
+      ],
+    };
+
+    expect(
+      buildMuseumResearchIndex(current).some(
+        (entry) => entry.id === RESEARCH_ID && entry.typed
+      )
+    ).toBe(false);
+  });
+
   it("prefers typed subject media and carries typed subjects and authors", () => {
     const detail = buildMuseumResearchDetailEntry(publication(), ENTRY);
 
