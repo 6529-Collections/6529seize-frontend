@@ -90,7 +90,7 @@ function publicWorkItem(
         src: presentationMedia.mediaUrl,
         width: presentationMedia.width,
         height: presentationMedia.height,
-        alt: presentationMedia.altText,
+        alt: presentationMedia.altText.trim() || work.title,
         sourceByteSize: presentationMedia.sourceByteSize,
         creditLine: presentationMedia.credit.creditLine,
         requireIntentForLargeSource: false,
