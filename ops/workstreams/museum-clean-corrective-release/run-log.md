@@ -16,3 +16,13 @@
   detail pages, loading states, and the Lorenzo Meloni media omission.
 - Passed 62 focused tests, changed lint, changed typecheck, and whitespace checks
   before source catalogue activation.
+- Merged the responsive source package as
+  `32637be32992a1e17981ba2919b53aac19c218a4`, its independently reviewed child
+  as `8414fcea5c846ab7112fa3fa9fe936c09cdc60b2`, and the append-only catalogue
+  activation as `9caa28e2eaa3d32c790850e46dea04753e71aa2a` after all exact-head Museum,
+  deterministic Ubuntu/Windows, public-publication, and bot checks passed.
+- Bound the frontend candidate to active catalogue
+  `6529NM-PUBCAT-8414fcea5c846ab7112fa3fa9fe936c09cdc60b2`, file SHA-256
+  `sha256:01c8598b0cd2019ea59e1c65595d8e57bc929bc1d2c585b2fb0e16d70af01f5e`,
+  and envelope commitment
+  `0xdd880b410acdcf8fd7bcdf2f2087be373fdaf1d380e88b976e1f81c1bd51564f`.
