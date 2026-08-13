@@ -164,6 +164,12 @@ function candidatePaths(
   if (entity.entityType === "WORK") {
     return workCandidatePaths(entity, sourceDocuments);
   }
+  if (entity.entityType === "ARTIST") {
+    return artistCandidatePaths(entity, sourceDocuments);
+  }
+  if (entity.entityType === "PROJECT_OR_SERIES") {
+    return projectCandidatePaths(entity, sourceDocuments);
+  }
   const paths = new Set<string>();
   collectRepositoryPaths(entity.profile, paths);
   const sourceIds = entitySourceRecordIds(entity, graph);
@@ -178,6 +184,51 @@ function candidatePaths(
   return [...paths]
     .filter((path) => sourceDocuments.has(path))
     .sort((left, right) => left.localeCompare(right));
+}
+
+function entityScopedCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>,
+  publicPathMatches: (path: string, slug: string) => boolean
+): readonly string[] {
+  const paths = new Set<string>();
+  if (sourceDocuments.has(entity.sourcePath)) paths.add(entity.sourcePath);
+  collectRepositoryPaths(entity.profile, paths);
+  const slug = entitySlug(entity);
+  for (const path of sourceDocuments.keys()) {
+    if (slug !== null && publicPathMatches(path.toLocaleLowerCase(), slug)) {
+      paths.add(path);
+    }
+  }
+  return [...paths]
+    .filter((path) => sourceDocuments.has(path))
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function artistCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
+): readonly string[] {
+  return entityScopedCandidatePaths(
+    entity,
+    sourceDocuments,
+    (path, slug) =>
+      path.endsWith(`/public/artists/${slug}.md`) ||
+      path.endsWith(`/public/scholarship/artists/${slug}.md`)
+  );
+}
+
+function projectCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
+): readonly string[] {
+  return entityScopedCandidatePaths(
+    entity,
+    sourceDocuments,
+    (path, slug) =>
+      path.endsWith(`/projects/${slug}.md`) ||
+      path.endsWith(`/public/scholarship/entities/${slug}.md`)
+  );
 }
 
 function documentStem(value: string): string {
@@ -222,18 +273,32 @@ function isWorkManuscriptPath(
   if (!normalizedPath.endsWith(".md")) return false;
   if (/\/public\/scholarship\/works\/\d{2}-[^/]+\.md$/u.test(normalizedPath)) {
     const number = workNumber(sourceRecordIds);
+    const sharesProposalContext = [...sourceRecordIds].some(
+      (sourceRecordId) =>
+        sourceRecordId.startsWith("6529NM-PG-") &&
+        normalizedPath.includes(sourceRecordId.toLocaleLowerCase())
+    );
     return (
+      sharesProposalContext &&
       number !== null &&
       normalizedPath.split("/").at(-1)?.startsWith(`${number}-`) === true
     );
   }
   if (/\/public\/works\/[^/]+\.md$/u.test(normalizedPath)) {
     const expectedStem = documentStem(title);
-    return normalizedPath.split("/").at(-1) === `${expectedStem}.md`;
+    const fileStem = normalizedPath.split("/").at(-1)?.slice(0, -3);
+    return (
+      fileStem !== undefined &&
+      (fileStem === expectedStem || expectedStem.endsWith(`-${fileStem}`))
+    );
   }
   if (/\/public\/\d{4}nm\.\d{4}\.\d{3}\.\d{2}\.md$/u.test(normalizedPath)) {
-    return [...sourceRecordIds].some((sourceRecordId) =>
-      normalizedPath.includes(sourceRecordId.toLocaleLowerCase())
+    const sourceRecordId = normalizedPath.split("/").at(-1)?.slice(0, -3);
+    return (
+      sourceRecordId !== undefined &&
+      [...sourceRecordIds].some(
+        (candidate) => candidate.toLocaleLowerCase() === sourceRecordId
+      )
     );
   }
   return false;
@@ -257,7 +322,27 @@ function workCandidatePaths(
     if (isWorkManuscriptPath(path, title, sourceRecordIds)) paths.add(path);
   }
   for (const path of sourceDocuments.keys()) {
-    if (isWorkPublicDocumentPath(path, title, sourceRecordIds)) paths.add(path);
+    if (isWorkPublicDocumentPath(path, title, sourceRecordIds)) {
+      paths.add(path);
+      continue;
+    }
+    const source = sourceDocuments.get(path);
+    const outcomeIds = [...sourceRecordIds].filter((id) =>
+      /-(?:OUT|OBJ)-\d{3}$/u.test(id)
+    );
+    if (
+      path.includes("/public/works/") &&
+      source !== undefined &&
+      outcomeIds.some((id) => {
+        const outcomeSuffix = /((?:OUT|OBJ)-\d{3})$/u.exec(id)?.[1];
+        return (
+          source.text.includes(id) ||
+          (outcomeSuffix !== undefined && source.text.includes(outcomeSuffix))
+        );
+      })
+    ) {
+      paths.add(path);
+    }
   }
   return [...paths].sort((left, right) => left.localeCompare(right));
 }
@@ -318,7 +403,10 @@ function documentKind(
   ) {
     return "object_entry";
   }
-  if (path.includes("/public/scholarship/artists/")) {
+  if (
+    path.includes("/public/scholarship/artists/") ||
+    path.includes("/public/artists/")
+  ) {
     return "artist_practice";
   }
   if (path.includes("/public/scholarship/essays/")) {
@@ -377,7 +465,37 @@ function mergeDocument(
   const existing = [...documents.values()].find(
     (document) => document.sourcePath === path
   );
-  if (existing !== undefined) return existing.id;
+  if (existing !== undefined) {
+    const addEntity = (
+      values: readonly string[],
+      entityType: MuseumPublicEntityType
+    ): readonly string[] =>
+      entity.entityType === entityType
+        ? [...new Set([...values, entity.id])]
+        : values;
+    documents.set(existing.id, {
+      ...existing,
+      artistIds: addEntity(existing.artistIds, "ARTIST"),
+      projectIds: addEntity(existing.projectIds, "PROJECT_OR_SERIES"),
+      workIds: addEntity(existing.workIds ?? [], "WORK"),
+      acquisitionIds: addEntity(
+        existing.acquisitionIds ?? [],
+        "CURATED_ACQUISITION"
+      ),
+      programIds: addEntity(existing.programIds ?? [], "ACQUISITION_PROGRAM"),
+      organizationIds: addEntity(
+        existing.organizationIds ?? [],
+        "ORGANIZATION"
+      ),
+      sourceRecordIds: [
+        ...new Set([
+          ...(existing.sourceRecordIds ?? []),
+          ...entity.sourceRecordIds,
+        ]),
+      ],
+    });
+    return existing.id;
+  }
   const document = generatedDocument(path, source, entity);
   documents.set(document.id, document);
   return document.id;
@@ -434,6 +552,8 @@ export function selectMuseumPublicWorkDocuments(
   return documents.filter(
     (document) =>
       documentIds.has(document.id) &&
+      ((document.workIds?.length ?? 0) === 0 ||
+        document.workIds?.includes(work.id) === true) &&
       isWorkPublicDocumentPath(document.sourcePath, work.title, sourceRecordIds)
   );
 }
