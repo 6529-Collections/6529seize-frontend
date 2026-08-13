@@ -353,6 +353,10 @@
       "surface_ids": ["museum.artist"]
     },
     {
+      "file": "app/museum/network/artists/[slug]/MuseumArtistRecordSummary.tsx",
+      "surface_ids": ["museum.artist"]
+    },
+    {
       "file": "app/museum/network/artists/[slug]/TypedArtistProjects.tsx",
       "surface_ids": ["museum.artist"]
     },
@@ -372,6 +376,14 @@
     {
       "file": "app/museum/network/loading.tsx",
       "surface_ids": ["museum.shell"]
+    },
+    {
+      "file": "app/museum/network/acquisitions/loading.tsx",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "app/museum/network/artists/loading.tsx",
+      "surface_ids": ["museum.artist"]
     },
     {
       "file": "app/museum/network/not-found.tsx",
