@@ -78,6 +78,13 @@ export default function CreateWaveDropdown<TValue extends string>({
   };
 
   const onTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (isOpen && event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu(true);
+      return;
+    }
+
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       openFromKeyboard(selectedIndex);
@@ -88,7 +95,11 @@ export default function CreateWaveDropdown<TValue extends string>({
     event: KeyboardEvent<HTMLButtonElement>,
     index: number
   ) => {
-    if (event.key === "ArrowDown") {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu(true);
+    } else if (event.key === "ArrowDown") {
       event.preventDefault();
       focusOption(index + 1);
     } else if (event.key === "ArrowUp") {
@@ -171,13 +182,6 @@ export default function CreateWaveDropdown<TValue extends string>({
     <div
       className="tw-relative tw-w-full"
       ref={dropdownRef}
-      onKeyDown={(event) => {
-        if (isOpen && event.key === "Escape") {
-          event.preventDefault();
-          event.stopPropagation();
-          closeMenu(true);
-        }
-      }}
       onBlur={(event) => {
         if (
           event.relatedTarget instanceof Node &&
