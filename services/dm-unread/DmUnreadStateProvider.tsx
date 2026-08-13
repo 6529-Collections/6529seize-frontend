@@ -139,6 +139,7 @@ export function DmUnreadStateProvider({
         if (
           latestSnapshotRequestByProfileRef.current.get(expectedProfileId) !==
             requestId ||
+          activeProfileIdRef.current !== expectedProfileId ||
           !isDmUnreadSnapshot(response) ||
           response.profile_id !== expectedProfileId
         ) {
@@ -202,7 +203,10 @@ export function DmUnreadStateProvider({
 
   const handleUnreadStateChanged = useCallback(
     (value: unknown) => {
-      if (!isDmUnreadConversationState(value)) {
+      if (
+        !isDmUnreadConversationState(value) ||
+        activeProfileIdRef.current !== value.profile_id
+      ) {
         return;
       }
       if (store.applyServerState(value)) {

@@ -211,6 +211,7 @@ describe("DmUnreadStateProvider", () => {
 
   it("does not let a stale profile snapshot bleed into the switched profile", async () => {
     let resolveProfileOne!: (value: unknown) => void;
+    let resolveReturnedProfileOne!: (value: unknown) => void;
     commonApiFetchMock
       .mockImplementationOnce(
         () =>
@@ -222,6 +223,12 @@ describe("DmUnreadStateProvider", () => {
         snapshot("profile-2", [
           state({ profileId: "profile-2", unreadCount: 4, version: 1 }),
         ])
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveReturnedProfileOne = resolve;
+          })
       );
     const { rerender } = render(
       <DmUnreadStateProvider>
@@ -251,6 +258,67 @@ describe("DmUnreadStateProvider", () => {
     expect(screen.getByTestId("messages")).toHaveTextContent("4");
     expect(screen.getByTestId("wave")).toHaveTextContent("4");
     expect(screen.getByTestId("ready")).toHaveTextContent("true");
+
+    connectedProfileId = "profile-1";
+    jwt = "jwt-profile-1";
+    rerender(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    expect(screen.getByTestId("messages")).toHaveTextContent("0");
+    expect(screen.getByTestId("ready")).toHaveTextContent("false");
+    await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(3));
+
+    await act(async () => {
+      resolveReturnedProfileOne(snapshot("profile-1"));
+    });
+  });
+
+  it("ignores websocket state for an inactive profile", async () => {
+    const { rerender } = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("messages")).toHaveTextContent("1")
+    );
+
+    commonApiFetchMock
+      .mockResolvedValueOnce(
+        snapshot("profile-2", [
+          state({ profileId: "profile-2", unreadCount: 4, version: 1 }),
+        ])
+      )
+      .mockImplementationOnce(() => new Promise(() => undefined));
+    connectedProfileId = "profile-2";
+    jwt = "jwt-profile-2";
+    rerender(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("messages")).toHaveTextContent("4")
+    );
+
+    act(() => {
+      websocketHandler?.(
+        state({ profileId: "profile-1", unreadCount: 99, version: 99 })
+      );
+    });
+
+    connectedProfileId = "profile-1";
+    jwt = "jwt-profile-1";
+    rerender(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    expect(screen.getByTestId("messages")).toHaveTextContent("1");
   });
 
   it("takes one snapshot when the native app returns to the foreground", async () => {
