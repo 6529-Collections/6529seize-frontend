@@ -182,6 +182,19 @@ describe("CreateWaveInlineGroupIdentities", () => {
     expect(screen.getByRole("switch", { name: "Include me" })).toBeChecked();
   });
 
+  it("places selected identities beside the Include me control", () => {
+    renderWithProfile({
+      identities: [selectedCurrentUserIdentity],
+    });
+
+    const selectedIdentities = screen.getByTestId("selected-identities");
+    const includeMeLabel = screen
+      .getByRole("switch", { name: "Include me" })
+      .closest("label");
+
+    expect(selectedIdentities.parentElement).toBe(includeMeLabel?.parentElement);
+  });
+
   it("removes the connected profile when Include me is switched off", async () => {
     const user = userEvent.setup();
     const { onRemove } = renderWithProfile({

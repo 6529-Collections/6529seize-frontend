@@ -50,7 +50,8 @@ export default function CreateWaveInlineGroupIdentities({
     identities.length === 0
       ? t(locale, "waves.create.groups.inlineIdentities.emptyHelper")
       : null;
-  const showHelperRow = !!identitiesHelperText || !!currentUserIdentity;
+  const showIdentityControlsRow =
+    identities.length > 0 || !!identitiesHelperText || !!currentUserIdentity;
   const showCurrentUserExcludedWarning =
     identities.length > 0 && !!currentUserIdentity && !isCurrentUserSelected;
 
@@ -92,13 +93,22 @@ export default function CreateWaveInlineGroupIdentities({
             </Button>
           )}
         </div>
-        {showHelperRow && (
+        {showIdentityControlsRow && (
           <div
             className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 ${
-              identitiesHelperText ? "tw-justify-between" : "tw-justify-end"
+              identities.length > 0 || identitiesHelperText
+                ? "tw-justify-between"
+                : "tw-justify-end"
             }`}
           >
-            {identitiesHelperText && (
+            {identities.length > 0 && (
+              <GroupCreateIdentitySelectedItems
+                selectedIdentities={[...identities]}
+                onRemove={onRemove}
+                variant="inline"
+              />
+            )}
+            {identities.length === 0 && identitiesHelperText && (
               <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
                 {identitiesHelperText}
               </p>
@@ -146,13 +156,6 @@ export default function CreateWaveInlineGroupIdentities({
           </div>
         )}
       </div>
-      {identities.length > 0 && (
-        <GroupCreateIdentitySelectedItems
-          selectedIdentities={[...identities]}
-          onRemove={onRemove}
-          variant="inline"
-        />
-      )}
       {showCurrentUserExcludedWarning && (
         <p
           role="status"
