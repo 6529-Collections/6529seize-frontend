@@ -58,10 +58,14 @@ export default function CollapsibleCard({
           aria-controls={contentId}
           aria-labelledby={titleId}
           className={`tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-transparent tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-            compactHeader ? "tw-h-12 tw-px-4" : "tw-h-16 tw-px-5"
+            compactHeader ? "tw-h-12 tw-px-3" : "tw-h-16 tw-px-5"
           }`}
         >
-          <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
+          <span
+            className={`tw-flex tw-min-w-0 tw-items-center ${
+              compactHeader ? "tw-gap-x-2" : "tw-gap-x-3"
+            }`}
+          >
             <m.span
               // Match the app-wide chevron convention: points down when
               // collapsed, rotates up when expanded (as in

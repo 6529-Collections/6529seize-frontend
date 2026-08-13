@@ -165,6 +165,22 @@ describe("CreateWaveGroupSearchField", () => {
     jest.clearAllMocks();
   });
 
+  it("uses the modal search sizing and vertically centered search icon", () => {
+    renderSearchField();
+
+    const input = screen.getByRole("combobox", { name: "Search groups..." });
+    const searchIcon = input.parentElement?.querySelector("svg");
+    const label = screen.getByText("Search groups...", { selector: "label" });
+
+    expect(input).toHaveClass("tw-text-base", "sm:tw-text-sm");
+    expect(label).toHaveClass("tw-text-base", "sm:tw-text-sm");
+    expect(searchIcon).toHaveClass(
+      "tw-top-1/2",
+      "-tw-translate-y-1/2",
+      "tw-size-5"
+    );
+  });
+
   it("opens on focus, renders results, and selects with keyboard", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderSearchField();

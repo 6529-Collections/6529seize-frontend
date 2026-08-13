@@ -10,6 +10,7 @@ import {
 } from "@/helpers/waves/wave-submission-strategy.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { CREATE_WAVE_FORM_STYLES } from "../../utils/createWaveFormStyles";
 
 enum CreateWaveSubmissionMode {
   STANDARD = "STANDARD",
@@ -63,19 +64,19 @@ function SubmissionOptionRow<T extends string>({
 }: SubmissionOptionRowProps<T>) {
   const isSelected = selected === type;
   const wrapperClasses = isSelected
-    ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
-    : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10";
+    ? "tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner"
+    : "tw-border-white/5 tw-bg-iron-900/60 tw-shadow-none hover:tw-border-white/10 hover:tw-bg-iron-900";
   const labelClasses = isSelected
     ? "tw-text-white"
     : "tw-text-iron-300 group-hover:tw-text-white";
   const descriptionClasses = isSelected
     ? "tw-text-iron-300"
-    : "tw-text-iron-500";
+    : "tw-text-iron-400";
   const hasDescription = description !== undefined;
 
   return (
     <label
-      className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+      className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-transition tw-duration-300 tw-ease-out ${
         hasDescription ? "tw-items-start" : "tw-items-center"
       }`}
     >
@@ -112,7 +113,7 @@ function SubmissionOptionRow<T extends string>({
         {description && (
           <span
             id={descriptionId}
-            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-medium tw-leading-4`}
+            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-normal tw-leading-4`}
           >
             {description}
           </span>
@@ -221,7 +222,7 @@ export default function CreateWaveDropsSubmissionMode({
         <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           Submission type
         </h3>
-        <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
+        <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
           Choose whether participants submit drops or nominate identities.
         </p>
       </div>
