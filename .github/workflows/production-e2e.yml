@@ -57,7 +57,7 @@ jobs:
           if [ -n "$TRUSTED_DEPLOYED_SHA" ]; then
             [[ "$TRUSTED_DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
             test -z "$AUTOMATIC_DEPLOY_RUN_ID"
-            if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            if [ -n "$TRACKING_ID" ]; then
               test "$GITHUB_ACTOR" = '6529-release-bus[bot]'
               [[ "$TRACKING_ID" =~ ^[A-Za-z0-9._:-]{1,200}$ ]]
             else
@@ -97,7 +97,7 @@ jobs:
           echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
 
       - name: Check out trusted version verifier
-        if: github.event_name == 'workflow_dispatch'
+        if: inputs.tracking_id != '' || inputs.trusted_deployed_sha == ''
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: main
@@ -109,7 +109,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Require the selected production deployment to still be live
-        if: github.event_name == 'workflow_dispatch'
+        if: inputs.tracking_id != '' || inputs.trusted_deployed_sha == ''
         env:
           EXPECTED_SHA: ${{ steps.source.outputs.sha }}
         run: |
@@ -207,6 +207,16 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
+      - name: Check out trusted notification script
+        if: always() && inputs.trusted_deployed_sha == '' && steps.source.outputs.sha != ''
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .workflow-control
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
       - name: Record manual production revalidation outcome
         if: always() && inputs.trusted_deployed_sha == '' && steps.source.outputs.sha != ''
         continue-on-error: true
@@ -224,4 +234,4 @@ jobs:
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ steps.source.outputs.sha }}
           CI_RELEASE_GROUP_ID: ${{ github.repository }}:${{ inputs.automatic_deploy_run_id }}
-        run: node scripts/notify-ci-wave.mjs
+        run: node .workflow-control/scripts/notify-ci-wave.mjs

@@ -563,7 +563,9 @@ jobs:
     with:
       trusted_deployed_sha: ${{ github.sha }}
       pack: all
-    secrets: inherit
+    secrets:
+      STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
+      PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
 
   notify-staging-outcome:
     name: Notify complete staging pipeline outcome

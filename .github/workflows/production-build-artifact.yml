@@ -321,7 +321,7 @@ jobs:
         id: upload
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: production-frontend-${{ inputs.target_sha }}-${{ github.run_id }}
+          name: ${{ steps.validate-inputs.outputs.artifact_name }}
           path: production-artifact
           include-hidden-files: true
           if-no-files-found: error

@@ -125,6 +125,9 @@ describe("serialized post-deploy E2E", () => {
       expect(liveVersion.run).toContain(
         "ops/scripts/verify-deployment-version.cjs"
       );
+      expect(liveVersion.if).toBe(
+        "inputs.tracking_id != '' || inputs.trusted_deployed_sha == ''"
+      );
       expect(e2e.workflow.concurrency.group).toContain(environmentGroup);
       expect(e2e.workflow.concurrency.group).toContain(automaticGroup);
 
@@ -179,6 +182,7 @@ describe("serialized post-deploy E2E", () => {
       expect(resolve?.env?.["TRACKING_ID"]).toBe("${{ inputs.tracking_id }}");
       expect(resolve?.run).toContain("$TRACKING_ID");
       expect(resolve?.run).not.toContain("inputs.tracking_id");
+      expect(resolve?.run).not.toContain("GITHUB_EVENT_NAME");
       expect(e2e.source).not.toMatch(
         /release_manifest|artifact_digest|authorize|report-progress/i
       );
@@ -187,6 +191,10 @@ describe("serialized post-deploy E2E", () => {
 
   it("records manual production revalidation against the original deployment", () => {
     const job = productionE2e.workflow.jobs.readonly;
+    const notifierCheckout = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Check out trusted notification script"
+    );
     const notification = job.steps.find(
       (step: { name?: string }) =>
         step.name === "Record manual production revalidation outcome"
@@ -206,6 +214,13 @@ describe("serialized post-deploy E2E", () => {
     expect(notification.env.CI_PIPELINES_SHA).toBe(
       "${{ steps.source.outputs.sha }}"
     );
+    expect(notifierCheckout.with.ref).toBe("${{ github.workflow_sha }}");
+    expect(notifierCheckout.with["sparse-checkout"]).toBe(
+      "scripts/notify-ci-wave.mjs"
+    );
+    expect(notification.run).toBe(
+      "node .workflow-control/scripts/notify-ci-wave.mjs"
+    );
   });
 
   it("does not expose the staging access code to source selection or checkout", () => {
@@ -218,5 +233,21 @@ describe("serialized post-deploy E2E", () => {
     expect(runPacks.env.PLAYWRIGHT_STAGING_ACCESS_CODE).toBe(
       "${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}"
     );
+  });
+
+  it("passes only the staging E2E secrets across the reusable boundary", () => {
+    const call = stagingDeploy.workflow.jobs["automatic-staging-e2e"];
+
+    expect(call.secrets).toEqual({
+      STAGING_AUTH: "${{ secrets.STAGING_AUTH }}",
+      PLAYWRIGHT_STAGING_ACCESS_CODE:
+        "${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}",
+    });
+    expect(stagingE2e.workflow.on.workflow_call.secrets).toEqual({
+      STAGING_AUTH: expect.objectContaining({ required: false }),
+      PLAYWRIGHT_STAGING_ACCESS_CODE: expect.objectContaining({
+        required: true,
+      }),
+    });
   });
 });

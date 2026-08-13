@@ -42,8 +42,17 @@ describe("production exact-artifact deployment contract", () => {
       'artifact_contract:"production-deployment-v1"'
     );
     expect(buildSource).toContain(
+      '{schema_version:1,artifact_contract:"production-deployment-v1"'
+    );
+    expect(buildSource).toContain(
       "production-frontend-${TARGET_SHA}-${PRODUCER_RUN_ID}"
     );
+    expect(
+      build.jobs["build-production-artifact"].steps.find(
+        (step: { name?: string }) =>
+          step.name === "Upload exact production artifact"
+      ).with.name
+    ).toBe("${{ steps.validate-inputs.outputs.artifact_name }}");
     expect(buildSource).toContain("artifact-portability.cjs inventory");
     expect(buildSource).toContain("sha256sum > SHA256SUMS");
     expect(JSON.stringify(build.jobs)).not.toContain("AWS_ACCESS_KEY_ID");
@@ -74,6 +83,7 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).toContain(
       '.artifact_contract == "production-deployment-v1"'
     );
+    expect(deploySource).toContain(".schema_version == 1");
     expect(deploySource).toContain("aws s3 sync production-artifact/target");
     expect(deploySource).toContain("Refuse stale main or production downgrade");
     expect(deploySource).toContain(

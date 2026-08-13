@@ -127,6 +127,7 @@ describe("production artifact verifier", () => {
     expect(source).toContain('test "$(sha256sum "$root/artifact.zip"');
     expect(source).toContain("sha256sum -c SHA256SUMS");
     expect(source).toContain('artifact_contract == "production-deployment-v1"');
+    expect(source).toContain("schema_version == 1");
     expect(source).toContain("compare/${TARGET_SHA}...${current_main_sha}");
     expect(source).not.toMatch(/release[-_ ]bus|operation_id|authority/i);
   });

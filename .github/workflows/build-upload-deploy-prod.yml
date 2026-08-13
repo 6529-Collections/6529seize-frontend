@@ -28,7 +28,15 @@ jobs:
     uses: ./.github/workflows/production-build-artifact.yml
     with:
       target_sha: ${{ github.sha }}
-    secrets: inherit
+    secrets:
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+      AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+      AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+      GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+      NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
   verify-production-artifact:
     name: Verify exact production artifact

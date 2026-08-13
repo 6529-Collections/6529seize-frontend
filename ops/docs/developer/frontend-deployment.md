@@ -5,6 +5,10 @@ artifact construction and verification separate from the environment mutation,
 serialize each environment with GitHub Actions concurrency, and automatically
 run read-only E2E after a successful deployment.
 
+Deploy backend PR [#1923](https://github.com/6529-Collections/6529seize-backend/pull/1923)
+before using either path. It supplies the production release-note and threaded
+validation contract consumed by these frontend workflows.
+
 ## Staging path
 
 `Web Deploy - STAGING` (`.github/workflows/deploy-staging.yml`) is triggered by
