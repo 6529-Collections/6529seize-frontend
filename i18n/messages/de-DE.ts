@@ -620,5 +620,18 @@ export const DE_DE_MESSAGES = {
   "theMemes.volume.7Days": "7 Tage",
   "theMemes.volume.30Days": "30 Tage",
   "theMemes.volume.allTime": "Gesamt",
+  "home.mintAllowlist.label": "Deine Zuteilung",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint-Zuteilungen für die verbundene Wallet",
+  "home.mintAllowlist.checking": "Deine Zuteilung wird geprüft…",
+  "home.mintAllowlist.notPublished":
+    "Die Zuteilung ist verfügbar, sobald die Verteilung veröffentlicht wurde.",
+  "home.mintAllowlist.notFound": "Keine Zuteilung für diese Wallet gefunden.",
+  "home.mintAllowlist.unavailable":
+    "Zuteilungsinformationen sind vorübergehend nicht verfügbar.",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
   ...DE_DE_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

@@ -2101,6 +2101,53 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DistributionNormalizedPage"
+  /distributions/{contract}/{card_id}/wallet-allocations:
+    get:
+      tags:
+        - Distributions
+      summary: Get a wallet's phase allocations for a card
+      description: >-
+        Returns whether the card distribution is published and the wallet's
+        Phase 0, Phase 1, Phase 2, and Public allocations. Public allocations
+        can contain airdrops but never allowlist spots.
+      operationId: getWalletDistributionAllocations
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/distributions/get-wallet-distribution-allocations.handler"
+          name: handleGetWalletDistributionAllocations
+      parameters:
+        - name: contract
+          in: path
+          description: NFT contract address
+          required: true
+          schema:
+            type: string
+        - name: card_id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: wallet
+          in: query
+          description: Wallet address whose allocations should be returned
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWalletDistributionAllocations"
+        "400":
+          description: Invalid contract, card ID, or wallet address
   /distributions/{contract}/{id}/overview:
     get:
       tags:
@@ -8009,7 +8056,9 @@ paths:
         "400":
           description: Invalid request payload
         "409":
-          description: Deploy-only completion, workflow identity, terminal state, or immutable evidence conflict
+          description: >-
+            Deploy-only completion, workflow identity, terminal state, or
+            immutable evidence conflict
           content:
             application/json:
               schema:
@@ -8042,7 +8091,9 @@ paths:
         "400":
           description: Invalid request payload
         "409":
-          description: Persisted denial, workflow identity, terminal state, or immutable evidence conflict
+          description: >-
+            Persisted denial, workflow identity, terminal state, or immutable
+            evidence conflict
           content:
             application/json:
               schema:
@@ -22579,6 +22630,41 @@ components:
         tdh:
           type: integer
           format: int64
+    ApiWalletDistributionAllocation:
+      type: object
+      required:
+        - phase
+        - spots_airdrop
+        - spots_allowlist
+      properties:
+        phase:
+          type: string
+          enum:
+            - Phase 0
+            - Phase 1
+            - Phase 2
+            - Public
+        spots_airdrop:
+          type: integer
+          format: int64
+          minimum: 0
+        spots_allowlist:
+          type: integer
+          format: int64
+          minimum: 0
+    ApiWalletDistributionAllocations:
+      type: object
+      required:
+        - has_distribution
+        - allocations
+      properties:
+        has_distribution:
+          type: boolean
+          description: Whether normalized distribution data exists for the card
+        allocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWalletDistributionAllocation"
     ApiWave:
       type: object
       required:
