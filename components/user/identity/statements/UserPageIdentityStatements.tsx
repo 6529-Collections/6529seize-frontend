@@ -8,7 +8,7 @@ import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
@@ -18,8 +18,10 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 export default function UserPageIdentityStatements({
   profile,
+  headerAction,
 }: {
   readonly profile: ApiIdentity;
+  readonly headerAction?: ReactNode;
 }) {
   const params = useParams();
   const user = (params?.["user"] as string)?.toLowerCase();
@@ -98,6 +100,7 @@ export default function UserPageIdentityStatements({
                 <div>
                   <UserPageIdentityStatementsConsolidatedAddresses
                     profile={profile}
+                    headerAction={headerAction}
                   />
                 </div>
                 {shouldShowStatementGroup(socialMediaAccounts) && (

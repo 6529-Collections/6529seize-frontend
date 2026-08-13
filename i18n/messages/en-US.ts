@@ -740,6 +740,15 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   "badges.beta": "Beta",
 } as const);
 
+const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
+  "user.profile.identity.mobileTabs",
+  {
+    totalRep: "Total REP",
+    nic: "NIC",
+    idStatements: "ID Statements",
+  } as const
+);
+
 const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
   "waves.composer.mentionShortcuts",
   {
@@ -2758,6 +2767,7 @@ export const EN_US_MESSAGES = {
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES,
   ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
   ...GROUP_MENTION_COMPOSER_MESSAGES,
   ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
