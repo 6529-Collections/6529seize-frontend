@@ -113,7 +113,7 @@ export default function SubsequentDecisions({
   );
   const subsequentDecisionRows = subsequentDecisions.map((interval, index) => ({
     interval,
-    decisionDate: decisionDates[index + 1]!,
+    decisionDate: decisionDates.at(index + 1) ?? firstDecisionTime,
     key: subsequentDecisions.slice(0, index + 1).join("-"),
     announcementNumber: index + 2,
     removeIndex: index,
@@ -124,7 +124,7 @@ export default function SubsequentDecisions({
       : "waves.create.dates.rank.additional.previewFirst";
   const previewBaseTime =
     subsequentDecisions.length > 0
-      ? decisionDates[decisionDates.length - 1]!
+      ? (decisionDates.at(-1) ?? firstDecisionTime)
       : firstDecisionTime;
   const previewDate =
     new Date(previewBaseTime).getTime() +
