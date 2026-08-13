@@ -2,8 +2,12 @@
 
 ## Current state
 
-- Frontend branch: `codex/museum-full-site-correction` from exact frontend main
-  `95ffe58506f7df9884786b42a9faa4c72ee2e346`.
+- Frontend PR #3733 merged at exact main
+  `d438a57eb58d3abaf4d7fc549441c9a5af253190`; staging deploy `31681902527`
+  and automatic staging E2E `31682667244` passed, including the complete
+  668-route crawl and decoded Casey, Magnum, and Keys and Gates media checks.
+- Follow-up PR #3735 is open at signed exact head
+  `17e6fb8e2fdfbc30318fa6b16656775d3627b917`.
 - Canonical Museum source is merged at
   `a5b64f7eb586a5a07024b56a0604d8b8ae0ea574`; post-merge run
   `31657649972` passed all six Museum, portable, catalog, and public-publication
@@ -17,8 +21,10 @@
   works in accession `6529NM.2026.002`.
 - Keys and Gates is selected, unminted, and in process. It is outside the
   permanent Collection until mint, custody, and accession are complete.
-- Frontend PR #3730 is open and in exact-head independent and hosted
-  qualification.
+- The follow-up corrects the independently audited publication join defects,
+  broken Research URLs, Collection hero composition, portrait media framing,
+  mobile tables, long-manuscript tiering, and the plain-language explanation
+  of accession channels.
 
 ## Rights interpretation
 
@@ -45,7 +51,7 @@ AI-training permission.
 
 ## Next work
 
-1. Resolve every valid PR review or CI finding.
+1. Resolve every valid PR #3735 review or CI finding.
 2. Merge the exact approved head.
 3. Compose and qualify staging, then deploy and qualify production.
 4. Audit every public Museum route live at desktop and 390px mobile widths.
