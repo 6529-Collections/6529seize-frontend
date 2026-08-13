@@ -472,7 +472,7 @@ function typedAcquisitionRelations(
           id: organization.id,
           label: organization.preferredName,
           href: museumOrganizationHref(organization.slug),
-          relation: "Published by project",
+          relation: "Originated by",
           sourcePath: firstPath(organization.sourcePaths),
           sourceCommit: publication.identity.commit,
         });

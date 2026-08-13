@@ -303,9 +303,9 @@ export function MuseumAcquisitionProgramsLandingPage({
             </h2>
           </div>
           <p className="tw-m-0 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            Start with the program for its frame, then move to the acquisition
-            for the works themselves. Accessioned works continue into the
-            permanent Collection; selected works remain visibly in process.
+            The program defines the collecting frame; the acquisition names the
+            works gathered within it. Accessioned works enter the permanent
+            Collection; selected works remain visibly in process.
           </p>
         </div>
       </section>
