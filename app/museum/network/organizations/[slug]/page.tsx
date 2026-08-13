@@ -75,7 +75,7 @@ export default async function MuseumOrganizationPage({
       id: project.id,
       label: project.title,
       href: museumProjectHref(project.slug),
-      relation: "Publishes",
+      relation: "Originates",
       ...(project.sourcePaths[0] ? { sourcePath: project.sourcePaths[0] } : {}),
       sourceCommit: publication.identity.commit,
     })),

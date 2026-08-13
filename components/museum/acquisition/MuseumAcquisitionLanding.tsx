@@ -628,9 +628,9 @@ export function MuseumAcquisitionLandingPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitions.title")}
           </h1>
           <p className="tw-m-0 tw-mt-6 tw-max-w-lg tw-text-lg tw-leading-8 tw-text-iron-300">
-            Curated units of art, each gathered under a title and a thesis.
-            Follow the image first, then the story of how the group belongs in
-            the Museum&apos;s public record.
+            Curated units of art, each gathered under a title and a thesis. Each
+            brings the works, their shared context, and their place in the
+            Museum&apos;s public record into a single view.
           </p>
           <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <Link

@@ -64,7 +64,7 @@ function relationPublication(): MuseumPublication {
     acquisitionMethod: method,
     programId,
     artistIds: [artistId],
-    organizationIds: [],
+    organizationIds: slug === "magnum-acquisition" ? ["6529NM-ORG-0002"] : [],
     projectIds: [],
     workIds: [workId],
     accessionLotIds: [],
@@ -88,6 +88,19 @@ function relationPublication(): MuseumPublication {
       artist("6529NM-AGT-0001", "casey-reas", "6529NM-W-0001"),
       artist("6529NM-AGT-0002", "keys-artist", "6529NM-W-0008"),
       artist("6529NM-AGT-0003", "magnum-artist", "6529NM-W-0024"),
+    ],
+    organizations: [
+      {
+        kind: "organization",
+        id: "6529NM-ORG-0002",
+        slug: "magnum-photos",
+        preferredName: "Magnum Photos",
+        projectIds: [],
+        artworkIds: [],
+        acquisitionIds: ["6529NM-CA-2026-003"],
+        documentIds: [],
+        sourcePaths: [source("6529NM-ORG-0002")],
+      },
     ],
     projects: [],
     gifts: [],
@@ -233,6 +246,10 @@ describe("typed acquisition/work relation presentation", () => {
         expect.objectContaining({
           id: "6529NM-AP-ENT-0001",
           relation: "Gift pathway",
+        }),
+        expect.objectContaining({
+          id: "6529NM-ORG-0002",
+          relation: "Project originator",
         }),
       ])
     );

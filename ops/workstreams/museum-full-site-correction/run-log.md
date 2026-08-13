@@ -108,3 +108,32 @@
 accessioned.` Updated both to the already-approved public sentence `Minting
 comes first; acquisition and accession follow.` before the next hosted lane
   reached them; no runtime copy changed.
+- PR #3730 passed all exact-head review, security, desktop/mobile Museum,
+  production-build, shell, smoke, and quality gates and merged as frontend main
+  `89fd86d3dae0fce64435ff03d9ae3e53260d86be`.
+- First staging composition `0334d0c93b544dfd9ff5e0076da66ecc38e3d14e`
+  deployed successfully in run `31667595266`; automatic staging E2E run
+  `31668157351` also passed.
+- Three independent post-deploy audits inventoried 668 accepted Museum request
+  paths and found four narrow corrections before production: stale public help
+  facts, a program-to-Work lifecycle label that treated accessioned gifts as
+  selections, Magnum Photos described as publisher rather than originator, and
+  two process-sounding landing sentences. A claimed mobile image-width issue
+  was rejected because the rendered image already carries `tw-w-full` and
+  `tw-h-auto` under the site's responsive image contract.
+- Opened a follow-up branch from exact merged main. Corrected those factual and
+  editorial defects with targeted regressions; focused validation passed five
+  suites / 19 tests, help-index sync, Museum surface registry, changed lint,
+  changed typecheck, and the Windows-safe diff check.
+- Follow-up exact-head run `31670163257` passed build, quality/contracts,
+  shell, smoke, and all external checks. Its desktop Museum lane then found
+  one stale browser assertion for the corrected acquisition-program heading:
+  runtime and component tests correctly rendered `Works acquired or selected
+  through this program`, while the institutional-practice E2E still expected
+  `Works selected through this program`. Updated that assertion only; no
+  runtime, source, rights, relation, layout, or public-copy behavior changed.
+- The authenticated whole-site crawler expanded all 57 accepted route patterns
+  into 668 concrete Museum URLs. Against the first staging composition, all
+  668 returned successful Museum-bound responses with no visible soft-404 or
+  publication-unavailable state. This preliminary result will be repeated
+  against the corrected staging and production releases.

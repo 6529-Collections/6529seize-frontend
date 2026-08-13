@@ -408,7 +408,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "Works selected through this program",
+        name: "Works acquired or selected through this program",
       })
     ).toBeVisible();
     await expect(
