@@ -167,8 +167,12 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/Page-level source: unassigned/u)
+      screen.getByText(
+        "Published from the Museum's public record at aaaaaaaaaaaa.",
+        { exact: true }
+      )
     ).toBeInTheDocument();
+    expect(screen.queryByText(/unassigned/u)).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Read the source" })
     ).not.toBeInTheDocument();

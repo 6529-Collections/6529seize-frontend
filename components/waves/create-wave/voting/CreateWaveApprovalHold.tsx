@@ -41,7 +41,7 @@ export default function CreateWaveApprovalHold({
 }) {
   return (
     <fieldset className="tw-mt-6 tw-border-0 tw-p-0">
-      <legend className="tw-mb-3 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+      <legend className="tw-mb-3 tw-mt-0 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
         Approval hold
       </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
@@ -62,17 +62,21 @@ export default function CreateWaveApprovalHold({
                 value={option.mode}
                 checked={selected}
                 onChange={() => onModeChange(option.mode)}
-                className="tw-mt-1 tw-form-radio tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
+                className="tw-form-radio tw-mt-1 tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
               />
               <span className="tw-min-w-0">
                 <span
                   className={`tw-block tw-text-sm tw-font-semibold ${
-                    selected ? "tw-text-primary-400" : "tw-text-iron-200"
+                    selected ? "tw-text-white" : "tw-text-iron-200"
                   }`}
                 >
                   {option.label}
                 </span>
-                <span className="tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                <span
+                  className={`tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 ${
+                    selected ? "tw-text-iron-300" : "tw-text-iron-400"
+                  }`}
+                >
                   {option.description}
                 </span>
               </span>

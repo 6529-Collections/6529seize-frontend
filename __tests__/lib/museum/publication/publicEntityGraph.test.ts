@@ -228,6 +228,56 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     });
   });
 
+  it("rejects a direct historical-proposal image without an approved token source", () => {
+    const path = "records/entities/6529NM-MED-0003.json";
+    const document = documentFor(path, "PUBLIC_ENTITY", {
+      ...commonPayload("6529NM-MED-0003"),
+      entity_id: "6529NM-MED-0003",
+      entity_type: "MEDIA_REFERENCE",
+      preferred_label: "Historical Wave proposal image",
+      public_slug: null,
+      canonical_route: null,
+      page_exposure: "relational_only",
+      entity_status: "published",
+      profile: {
+        profile_type: "MEDIA_REFERENCE",
+        media: {
+          media_role: "historical_wave_proposal_presentation",
+          source_locator: {
+            uri: "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_7ee51a67-07b7-4c91-87ed-464c56446c43/image.jpg",
+          },
+          token_source_locator: null,
+          media_type: "image/jpeg",
+          visual: true,
+          width: 1200,
+          height: 900,
+          accessibility_text: "A documentary photograph.",
+          accessibility_status: "provided",
+          subject_entity_id: "6529NM-W-0024",
+          credit: "© artist / Magnum Photos. All Rights Reserved.",
+          rights: { status: "restricted" },
+          source_observation: { status: "mutable_external" },
+          allowed_ui_affordances: [
+            "view",
+            "thumbnail",
+            "hero",
+            "alt_text",
+            "open_wave_proposal_context",
+          ],
+          wave_proposal_context: {
+            wave_id: "5f207393-5418-4a75-8738-e40edb44a94d",
+            drop_id: "002bfa4f-8416-48bf-b35e-38f354e9a9f0",
+            publication_record_id: "6529NM-PG-2026-001",
+          },
+        },
+      },
+    });
+
+    expect(() => parseMuseumEntityRecord(document, SOURCE_COMMIT)).toThrow(
+      "public_entity_graph_media_proposal_contract"
+    );
+  });
+
   it("accepts the released rights-limited Magnum and Keys media inventory without image locators", () => {
     const magnumIds = ["0003", "0041", "0042", "0043", "0044"];
     const keysAndGatesIds = Array.from({ length: 16 }, (_, index) =>
@@ -586,7 +636,7 @@ describe("PUBLIC_ENTITY/PUBLIC_RELATION graph boundary", () => {
     } as unknown as MuseumPublication;
     expect(buildMuseumAcquisitionIndex(publication, null)).toHaveLength(1);
     expect(buildMuseumAcquisitionIndex(publication, null)[0]?.status).toBe(
-      "selected_by_museum_wave_acquisition_review_in_progress"
+      "accessioned_into_permanent_collection"
     );
     const invalid = {
       ...publication,

@@ -902,10 +902,11 @@ jobs:
         id: museum_publication
         if: startsWith(matrix.lane, 'playwright-museum-')
         env:
+          GH_TOKEN: ${{ github.token }}
           # Exact canonical-C qualification. The runtime resolves the pointer
           # and catalog at C, then assembles only the immutable reviewed B corpus.
-          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "cc8465764a55309d3eca5d3477b0f3993ef5a48c"
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "6cef42ab590f35f035ae4858770d880925ad3085"
+          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "975f041aed7e2f402ab26d4fb2bb266e07db4974"
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "9aea66c07d59f890e366dde6552a304580ba789a"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(
@@ -922,6 +923,12 @@ jobs:
           source_commit="$MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT"
           [[ "$catalog_commit" =~ ^[a-f0-9]{40}$ ]]
           [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
+          gh api \
+            "repos/6529-Collections/6529networkmuseum/git/commits/$catalog_commit" \
+            --jq '.sha' | grep -Fx "$catalog_commit"
+          gh api \
+            "repos/6529-Collections/6529networkmuseum/git/commits/$source_commit" \
+            --jq '.sha' | grep -Fx "$source_commit"
           echo "catalog_commit=$catalog_commit" >> "$GITHUB_OUTPUT"
           echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
           echo "Museum moving source main: $museum_commit"

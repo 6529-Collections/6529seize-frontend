@@ -146,6 +146,15 @@ describe("MuseumMarkdown public links", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps arbitrary Markdown images inert", () => {
+    renderMarkdown("![Unapproved source](https://example.com/source.jpg)");
+
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Media omitted from the record view: Unapproved source.")
+    ).toBeInTheDocument();
+  });
+
   it("routes the closed institutional-practice package onsite", () => {
     renderMarkdown(
       [

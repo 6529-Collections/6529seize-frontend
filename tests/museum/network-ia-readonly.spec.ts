@@ -137,8 +137,8 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(
       page.getByText("Seven works by Casey Reas", { exact: true })
     ).toBeVisible();
-    const acquisitionStories = page.getByLabel(
-      "Three ways a work enters the Museum's public record"
+    const acquisitionStories = page.locator(
+      '[aria-labelledby="museum-acquisition-stories-title"]'
     );
     for (const title of [
       "The System in Seven States",
@@ -157,7 +157,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
-    expect(collectionWorkHrefs).toHaveLength(7);
+    expect(collectionWorkHrefs).toHaveLength(12);
     expect(
       collectionWorkHrefs.every(
         (href): href is string =>
@@ -185,11 +185,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       ],
       [
         "/museum/network/works/6529NM-W-0008",
-        "Selected through an acquisition program; acquisition pending",
+        "Selected through an acquisition program; unminted",
       ],
       [
         "/museum/network/works/6529NM-W-0024",
-        "Selected by Museum Wave; accession processing in progress",
+        "Accessioned into the permanent Collection",
       ],
     ] as const) {
       await openRoute(page, path);
@@ -234,12 +234,9 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       })
     ).toHaveCount(0);
     await expect(
-      page.getByText(
-        "Selected by Museum Wave; accession processing in progress",
-        {
-          exact: true,
-        }
-      )
+      page.getByText("Accessioned into the permanent Collection", {
+        exact: true,
+      })
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
@@ -247,18 +244,6 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         exact: true,
       })
     ).toHaveCount(1);
-    const palmyraImageControl = page.getByRole("button", {
-      name: "View image · loads 16.9 MB",
-      exact: true,
-    });
-    await expect(palmyraImageControl).toHaveCount(1);
-    await expect(
-      page.locator('[aria-labelledby="canonical-work-media-title"] img')
-    ).toHaveCount(0);
-    await expect(
-      page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
-    ).toHaveCount(0);
-    await palmyraImageControl.click();
     await expect(
       page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
     ).toHaveCount(1);
@@ -321,14 +306,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       })
     ).toBeVisible();
     await expect(page.locator("#acquisition-works figure")).toHaveCount(5);
-    await expect(page.locator("#acquisition-works figure img")).toHaveCount(4);
-    const acquisitionPalmyraImageControl = page
-      .locator("#acquisition-works")
-      .getByRole("button", {
-        name: "View image · loads 16.9 MB",
-        exact: true,
-      });
-    await expect(acquisitionPalmyraImageControl).toHaveCount(1);
+    await expect(page.locator("#acquisition-works figure img")).toHaveCount(5);
     await expect(
       page.getByRole("heading", { name: "Curatorial reading", exact: true })
     ).toBeVisible();

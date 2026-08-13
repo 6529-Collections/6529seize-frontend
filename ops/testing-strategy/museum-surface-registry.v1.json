@@ -345,6 +345,10 @@
   ],
   "support_files": [
     {
+      "file": "app/museum/network/about/governance/presentation.ts",
+      "surface_ids": ["museum.governance"]
+    },
+    {
       "file": "app/museum/network/artists/[slug]/TypedArtistProfile.tsx",
       "surface_ids": ["museum.artist"]
     },
@@ -375,6 +379,62 @@
     }
   ],
   "components": [
+    {
+      "file": "components/museum/acquisition/MuseumAcquisitionLanding.tsx",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "components/museum/acquisition/MuseumAcquisitionProgramsLanding.tsx",
+      "surface_ids": ["museum.acquisition", "museum.acquisition.program"]
+    },
+    {
+      "file": "components/museum/directory/MuseumDirectoryData.ts",
+      "surface_ids": ["museum.artist", "museum.work"]
+    },
+    {
+      "file": "components/museum/directory/MuseumDirectoryMediaCard.tsx",
+      "surface_ids": ["museum.artist", "museum.work"]
+    },
+    {
+      "file": "components/museum/directory/MuseumDirectoryPages.tsx",
+      "surface_ids": ["museum.artist", "museum.work"]
+    },
+    {
+      "file": "components/museum/landing/MuseumLandingHero.tsx",
+      "surface_ids": ["museum.collection"]
+    },
+    {
+      "file": "components/museum/landing/MuseumLandingMediaCard.tsx",
+      "surface_ids": ["museum.collection"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchBrowse.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchDetail.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchDocumentCard.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchLanding.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchProjectCard.tsx",
+      "surface_ids": ["museum.project", "museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchProjectsLanding.tsx",
+      "surface_ids": ["museum.project", "museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchStoryCard.tsx",
+      "surface_ids": ["museum.project", "museum.research"]
+    },
     {
       "file": "components/museum/DataArchitectureReadingRoom.tsx",
       "surface_ids": ["museum.methodology"]

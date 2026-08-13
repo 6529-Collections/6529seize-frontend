@@ -20,6 +20,7 @@ export function MuseumProposalImage({
   sourceHref,
   sourceLabel,
   eager = false,
+  requireIntentForLargeSource = true,
   className,
 }: {
   readonly src: string;
@@ -30,9 +31,11 @@ export function MuseumProposalImage({
   readonly sourceHref?: string;
   readonly sourceLabel?: string;
   readonly eager?: boolean;
+  readonly requireIntentForLargeSource?: boolean;
   readonly className?: string;
 }) {
   const requiresIntent =
+    requireIntentForLargeSource &&
     sourceByteSize !== undefined &&
     sourceByteSize >= MUSEUM_PROPOSAL_INTENT_VIEW_BYTES;
   const [revealed, setRevealed] = useState(!requiresIntent);
@@ -65,7 +68,7 @@ export function MuseumProposalImage({
             setMediaStatus("loading");
             setRevealed(true);
           }}
-          className="hover:tw-text-primary-200 tw-flex tw-min-h-12 tw-w-full tw-items-center tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-bg-black tw-p-5 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="hover:tw-text-primary-200 tw-flex tw-h-full tw-min-h-12 tw-w-full tw-items-center tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-bg-black tw-p-5 tw-text-center tw-text-sm tw-leading-6 tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {t(
             DEFAULT_LOCALE,

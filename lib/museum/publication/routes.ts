@@ -1,5 +1,6 @@
 import type { MuseumPublication } from "./types";
 import type { MuseumView } from "@/lib/museum/types";
+import { isMuseumPermanentCollectionWork } from "./collectionSemantics";
 
 /**
  * Canonical Museum route grammar. Entity identity is resolved from the
@@ -214,7 +215,9 @@ export function museumCollectionWorkHrefForSourceId(
   if (workId === null) return null;
   const typedWork = publication.works?.find((work) => work.id === workId);
   if (typedWork !== undefined) {
-    return typedWork.collectionMembership ? museumWorkHref(workId) : null;
+    return isMuseumPermanentCollectionWork(typedWork)
+      ? museumWorkHref(workId)
+      : null;
   }
   const legacyArtwork = publication.artworks.find(
     (artwork) => artwork.id === sourceObjectId

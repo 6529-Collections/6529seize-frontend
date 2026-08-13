@@ -20,6 +20,8 @@ export default function CreateWaveTermsOfService({
   readonly helperText?: string | undefined;
 }) {
   const [enabled, setEnabled] = useState(!!terms);
+  const titleId = "terms-of-service-title";
+  const descriptionId = "terms-of-service-description";
   const helperId = "terms-of-service-helper";
 
   const onEnabledChange = (enabled: boolean) => {
@@ -32,60 +34,69 @@ export default function CreateWaveTermsOfService({
   return (
     <div className="tw-space-y-4">
       <div>
-        <div className="tw-flex tw-items-center tw-justify-between">
-          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
+          <h3
+            id={titleId}
+            className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+          >
             {title}
           </h3>
-          <label htmlFor="tos-toggle" className="tw-flex tw-cursor-pointer">
-            <div className="tw-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
-              <div
-                className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${
-                  enabled ? "tw-from-primary-300" : "tw-from-iron-600"
-                }`}>
-                <input
-                  id="tos-toggle"
-                  type="checkbox"
-                  checked={enabled}
-                  onChange={() => onEnabledChange(!enabled)}
-                  className="tw-sr-only"
-                />
+          <label
+            htmlFor="tos-toggle"
+            className="tw-flex tw-min-h-6 tw-cursor-pointer tw-items-center tw-gap-2"
+          >
+            <input
+              id="tos-toggle"
+              type="checkbox"
+              aria-describedby={descriptionId}
+              checked={enabled}
+              onChange={(event) => onEnabledChange(event.target.checked)}
+              className="tw-peer tw-sr-only"
+            />
+            <span
+              aria-hidden="true"
+              className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+                enabled ? "tw-from-primary-300" : "tw-from-iron-600"
+              }`}
+            >
+              <span
+                className={`tw-relative tw-flex tw-h-5 tw-w-9 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border-2 tw-border-transparent tw-p-0 tw-transition-colors tw-duration-200 tw-ease-in-out motion-reduce:tw-transition-none ${
+                  enabled ? "tw-bg-primary-500" : "tw-bg-iron-700"
+                }`}
+              >
                 <span
-                  className={`tw-p-0 tw-relative tw-flex tw-items-center tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none ${
-                    enabled
-                      ? "tw-bg-primary-500 focus-focus:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2"
-                      : "tw-bg-iron-700"
+                  className={`tw-pointer-events-none tw-inline-block tw-size-4 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out motion-reduce:tw-transition-none ${
+                    enabled ? "tw-translate-x-[18px]" : "tw-translate-x-0"
                   }`}
-                  role="switch"
-                  aria-checked={enabled}>
-                  <span
-                    aria-hidden="true"
-                    className={`tw-pointer-events-none tw-inline-block tw-h-5 tw-w-5 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out ${
-                      enabled ? "tw-translate-x-5" : "tw-translate-x-0"
-                    }`}></span>
-                </span>
-              </div>
-              <span className="tw-mb-0 tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-50 tw-whitespace-nowrap">
-                {toggleLabel}
+                />
               </span>
-            </div>
+            </span>
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
+              {toggleLabel}
+            </span>
           </label>
         </div>
-        <p className="tw-text-sm tw-text-iron-300 tw-mt-1">
+        <p
+          id={descriptionId}
+          className="tw-m-0 tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+        >
           {description}
         </p>
       </div>
 
       {enabled && (
-        <div className="tw-mt-4">
-          <div className="tw-group tw-w-full tw-relative">
+        <div>
+          <div className="tw-group tw-relative tw-w-full">
             <textarea
               value={terms ?? ""}
-              aria-describedby={helperId}
+              aria-labelledby={titleId}
+              aria-describedby={`${descriptionId} ${helperId}`}
               onChange={(e) => setTerms(e.target.value)}
               id="terms-of-service-text"
               rows={6}
-              className="tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400 tw-caret-primary-400 tw-form-textarea tw-block tw-px-4 tw-py-4 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-600 tw-peer tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
-              placeholder={placeholder}></textarea>
+              className="tw-peer tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-4 tw-text-base tw-font-medium tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-border-blue-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+              placeholder={placeholder}
+            />
           </div>
           <div
             id={helperId}
