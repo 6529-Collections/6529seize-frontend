@@ -72,6 +72,7 @@ function MuseumDirectoryMediaStage({
           height={presentation.height}
           sourceByteSize={presentation.sourceByteSize}
           variants={presentation.variants}
+          requireIntentForLargeSource={false}
           eager={eager}
           {...(sourceHref === null || !canOpenPresentation
             ? {}
