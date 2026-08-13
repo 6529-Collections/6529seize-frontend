@@ -85,7 +85,7 @@
       ],
       "facts": [
         "The 6529 Network Museum presents itself at /museum/network as the public art museum of the 6529 Network: a permanent digital-art collection held by the Network on Ethereum, governed through TDH, and open worldwide.",
-        "The homepage establishes one institutional proposition and introduces the Casey Reas, Keys and Gates, and Magnum Photos 75 acquisition stories through artwork-led presentations. The Collection page contains the seven accessioned Casey Reas works.",
+        "The homepage establishes one institutional proposition and introduces the Casey Reas, Keys and Gates, and Magnum Photos 75 acquisition stories through artwork-led presentations. The Collection page contains twelve accessioned works: seven by Casey Reas and five from Magnum Photos 75.",
         "The complete institutional proposition is at /museum/network/about. It explains what Network holding means, the absence of fractional or economic claims for members, the Museum's present delegated operating boundaries, the on-chain direction, and the permanence objective.",
         "Keys and Gates is published at /museum/network/acquisition-programs/keys-and-gates with sixteen selected photographs and its program record.",
         "The sixteen Keys and Gates works carry the status Selected through the Keys and Gates program; minting and acquisition will follow, and the permanent Collection begins at formal accession.",
@@ -93,7 +93,7 @@
         "Collection means works formally accessioned by the Museum at /museum/network/collection; canonical Work records are available at /museum/network/works/[work-id].",
         "Artists, projects, organizations, acquisitions, and research connect works to curatorial writing, provenance, rights, and collection care.",
         "Acquisitions at /museum/network/acquisitions presents Casey Reas, Keys and Gates, and Magnum Photos 75 with each present stage and its related works.",
-        "Magnum Photos 75, Conflict at Its Edges, is Selected by Museum Wave; accession processing in progress at /museum/network/acquisitions/conflict-at-its-edges.",
+        "Magnum Photos 75, Conflict at Its Edges, is an accessioned gift of five photographs in the permanent Collection at /museum/network/acquisitions/conflict-at-its-edges.",
         "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
         "The governed Gift into Public Trust narrative and all five Casey Reas project essays are readable onsite from the same atomic publication snapshot.",
         "Inside the System publishes project-level studies for CENTURY, Pre-Process, Phototaxis, 923 EMPTY ROOMS, and Ex Nihilo (Cosmos) at /museum/network/projects/[project-slug]/system.",
@@ -105,7 +105,7 @@
         "Generative studies belong to projects rather than gifts, so later accessions from the same project can be added to the same analysis.",
         "Research is published at /museum/network/research, with sources and chronology, art and artists, Museum practice, and sources and methods available as distinct reading paths.",
         "A field of practice is published at /museum/network/stories/a-field-of-practice with a comparative essay, twenty-seven institutional profiles, an adjacent-practice study, the public scholarship and editorial standard, and a primary-source register admitted from one exact Museum source release.",
-        "Casey Reas: seven works is formally accessioned into the Collection. Keys and Gates works carry the selected-program status. Conflict at Its Edges was selected by the Museum Wave and is undergoing accession processing.",
+        "The System in Seven States and Conflict at Its Edges are formally accessioned gifts in the permanent Collection. Keys and Gates carries the selected-program status; its works remain unminted and outside the Collection.",
         "Official Art Blocks still and live URLs remain labeled upstream presentation sources for Casey Reas. Keys and Gates uses reviewed Museum-hosted display surrogates; Conflict at Its Edges uses reviewed signed-Wave display sources.",
         "The public release supplies current status. Accession, rights, ownership, and preservation records each carry their own evidence.",
         "The Museum repository is the transitional public working record: visitors can inspect exact source commits, fork the repository, and propose reviewed changes through pull requests.",
@@ -2210,6 +2210,7 @@
       ],
       "facts": [
         "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
+        "On web, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
         "The app full-page create route remains /waves/create where app mode uses it.",
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],
@@ -4039,7 +4040,9 @@
       "facts": [
         "Mobile layouts use bottom navigation for Discovery, Waves, Messages, Home, Network, Collections, and Notifications.",
         "The mobile bottom navigation surface is separate from the desktop and app sidebar IA.",
-        "Mobile keyboard and viewport behavior can affect how navigation and composer controls fit on screen."
+        "Tablet-sized app viewports use a wider dock while phone sizing stays unchanged.",
+        "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
+        "In the native app, the new-version refresh prompt stays centered directly above the dock and follows its expanded or compact position."
       ],
       "canonical_path": "/waves",
       "related_paths": [

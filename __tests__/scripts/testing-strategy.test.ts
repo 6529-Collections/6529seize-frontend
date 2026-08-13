@@ -487,6 +487,7 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain(
       "Resolve exact Museum publication for Playwright"
     );
+    expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
     expect(workflow).toContain(
       "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}"
     );
@@ -494,10 +495,10 @@ describe("testing strategy CI plan", () => {
       "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "cc8465764a55309d3eca5d3477b0f3993ef5a48c"'
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "975f041aed7e2f402ab26d4fb2bb266e07db4974"'
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "6cef42ab590f35f035ae4858770d880925ad3085"'
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "9aea66c07d59f890e366dde6552a304580ba789a"'
     );
     expect(workflow).toContain('case "$selected_pack"');
     expect(workflow).toContain(

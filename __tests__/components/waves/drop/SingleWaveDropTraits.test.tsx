@@ -47,7 +47,7 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => {
             ReactActual.createElement(
               "button",
               { type: "button", onClick: onClose },
-              "Close panel"
+              "Close"
             ),
             children
           )
@@ -168,7 +168,7 @@ describe("SingleWaveDropTraits", () => {
       );
 
       fireEvent.click(
-        within(dialog).getByRole("button", { name: "Close panel" })
+        within(dialog).getByRole("button", { name: "Close" })
       );
 
       expect(

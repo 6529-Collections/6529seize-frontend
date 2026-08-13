@@ -1,14 +1,15 @@
-# Wave Create Modal Entry Points
+# Wave Create Dialog Entry Points
 
 ## Overview
 
-Desktop wave creation uses URL mode `?create=wave`.
-When that mode is active, the `Create Wave` modal opens above the current page
-context.
+Web wave creation uses URL mode `?create=wave`.
+When that mode is active, the `Create Wave` flow opens above the current page
+context. It uses a centered modal on desktop and the standard bottom sheet on
+mobile viewports.
 
 ## Route Coverage
 
-- Desktop routes where `?create=wave` opens the wave-create modal:
+- Web routes where `?create=wave` opens the wave-create dialog:
   - `/waves`
   - `/waves/{waveId}`
   - `/messages`
@@ -21,18 +22,18 @@ context.
   section.
 - `/waves`: click `Create Wave` in the empty-content placeholder.
 - `/messages`: open by URL only (`?create=wave`).
-- Open a supported desktop route URL with `?create=wave`.
+- Open a supported web route URL with `?create=wave`.
 
 ## URL and Modal Behavior
 
-1. Open a desktop waves or messages route with an authenticated profile.
+1. Open a web waves or messages route with an authenticated profile.
 2. Start create-wave from an available control, or from a URL that already has
    `create=wave`.
 3. The current URL keeps the same path/context and sets `create=wave`.
-4. The `Create Wave` modal opens above the current page context while the
-   underlying list/content view remains visible.
-5. Close from the header close button, backdrop click, or `Escape` (when focus
-   is not in an input, textarea, or select).
+4. The `Create Wave` dialog opens above the current page context while the
+   underlying list/content view remains visible. At widths below `768px`, it
+   uses the mobile bottom sheet; wider viewports retain the centered modal.
+5. Close from the close button, backdrop click, or `Escape`.
 6. Closing removes the `create` query value while keeping the rest of the URL
    context.
 7. Successful submit navigates to the new wave route.
@@ -65,17 +66,19 @@ context.
   clears the create state and returns to the underlying page context.
 - If the modal is dismissed before submission, users can reopen create-wave
   from either entry point and continue from the start of the flow.
-- If the close icon is not convenient on a narrow viewport, clicking the modal
-  backdrop also closes the modal.
+- On mobile, the sheet keeps its header and close control visible while the
+  multi-step form scrolls within the available viewport.
+- The close control, backdrop, and `Escape` dismiss the responsive dialog.
 
 ## Scope Notes
 
-- This page documents desktop waves/messages shell behavior only.
-- App create actions route to `/waves/create` instead of this desktop modal.
+- This page documents responsive web waves/messages shell behavior.
+- App create actions route to `/waves/create` instead of this responsive web
+  dialog.
 - Create-wave visibility depends on the URL create mode and connected-profile
   availability.
-- Desktop wave/message layouts are expected to render one create-wave overlay
-  at a time.
+- Web wave/message layouts are expected to render one create-wave overlay at a
+  time.
 
 ## Related Pages
 

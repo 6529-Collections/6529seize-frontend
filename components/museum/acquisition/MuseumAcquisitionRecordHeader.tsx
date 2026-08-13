@@ -64,7 +64,10 @@ export function MuseumAcquisitionRecordHeader({
 
       {artFirst ? (
         <nav
-          aria-label={t(DEFAULT_LOCALE, "museum.network.acquisitions.title")}
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "museum.network.acquisitions.onThisPage"
+          )}
           className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-border-y tw-border-solid tw-border-iron-800 tw-py-3 tw-text-sm"
         >
           {workCount === 0 ? null : (

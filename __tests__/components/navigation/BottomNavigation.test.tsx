@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import {
@@ -29,6 +30,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+jest.mock("@/hooks/useMediaQuery", () => ({ useMediaQuery: jest.fn() }));
 jest.mock("@/hooks/useWaveData", () => ({ useWaveData: jest.fn() }));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("next/navigation", () => ({
@@ -41,6 +43,7 @@ const registerRef = jest.fn();
 (useAuth as jest.Mock).mockReturnValue({ connectedProfile: null });
 (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: undefined });
 (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
+(useMediaQuery as jest.Mock).mockReturnValue(false);
 (useWaveData as jest.Mock).mockReturnValue({ data: null });
 (useWave as jest.Mock).mockReturnValue({ isDm: false });
 
@@ -144,6 +147,7 @@ beforeEach(() => {
     address: undefined,
   });
   (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
+  (useMediaQuery as jest.Mock).mockReturnValue(false);
   (useWaveData as jest.Mock).mockReturnValue({ data: null });
   (useWave as jest.Mock).mockReturnValue({ isDm: false });
   (usePathname as jest.Mock).mockReturnValue("/");
@@ -228,6 +232,7 @@ describe("BottomNavigation", () => {
   });
 
   it("renders a stable nav fallback when search params suspend", () => {
+    (useMediaQuery as jest.Mock).mockReturnValue(true);
     const pendingSearchParams = new Promise<URLSearchParams>(() => {
       // Keep the promise pending so Suspense stays on the fallback.
     });
@@ -245,6 +250,14 @@ describe("BottomNavigation", () => {
     expect(
       container.querySelector(`[${MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE}="true"]`)
     ).toBeInTheDocument();
+    const fallbackDock = container.querySelector<HTMLElement>(
+      `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`
+    );
+    expect(fallbackDock?.style.width).toBe("calc(100vw - 2rem)");
+    expect(fallbackDock?.style.maxWidth).toBe("44rem");
+    expect(useMediaQuery).toHaveBeenCalledWith(
+      "(min-width: 744px) and (min-height: 600px)"
+    );
     expect(NavItem).not.toHaveBeenCalled();
   });
 
@@ -268,6 +281,42 @@ describe("BottomNavigation", () => {
         return props.variant === "floating" && props.compact === false;
       })
     ).toBe(true);
+  });
+
+  it("widens the expanded and compact dock by ten percent on tablets", async () => {
+    (useMediaQuery as jest.Mock).mockReturnValue(true);
+    Object.defineProperty(globalThis, "scrollY", {
+      configurable: true,
+      value: 0,
+      writable: true,
+    });
+
+    const { container } = render(<BottomNavigation />);
+    const dock = container.querySelector<HTMLElement>(
+      `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`
+    );
+
+    expect(dock?.style.width).toBe("calc(100vw - 2rem)");
+    expect(dock?.style.maxWidth).toBe("44rem");
+
+    act(() => {
+      globalThis.scrollY = 24;
+      fireEvent.scroll(window);
+    });
+
+    await waitFor(() => expect(dock?.style.maxWidth).toBe("38.5rem"));
+  });
+
+  it("keeps the phone dock on class-based sizing", () => {
+    (useMediaQuery as jest.Mock).mockReturnValue(false);
+
+    const { container } = render(<BottomNavigation />);
+    const dock = container.querySelector<HTMLElement>(
+      `[${MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE}="true"]`
+    );
+
+    expect(dock?.style.width).toBe("");
+    expect(dock?.style.maxWidth).toBe("");
   });
 
   it("keeps one active pill mounted while moving it between active items", () => {

@@ -10,6 +10,7 @@ import {
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFigure";
 import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
+import { MuseumProposalImage } from "@/components/museum/MuseumProposalImage";
 import {
   AcquisitionWorkFigure,
   type AcquisitionWorkCard,
@@ -185,9 +186,7 @@ export default async function MuseumAcquisitionProgramPage({
     kind: "acquisition_program",
     id: typed?.id ?? legacy?.programId ?? slug,
     label: title,
-    canonicalHref: museumAcquisitionProgramHref(
-      typed?.slug ?? "keys-and-gates"
-    ),
+    canonicalHref: museumAcquisitionProgramHref(typed?.slug ?? slug),
     breadcrumbs: [
       { label: "6529 Network Museum", href: "/museum/network" },
       {
@@ -208,10 +207,16 @@ export default async function MuseumAcquisitionProgramPage({
               id: work.id,
               label: work.title,
               href: museumWorkHref(work.id),
-              relation: t(
-                DEFAULT_LOCALE,
-                "museum.network.acquisitions.relationSelectedThrough"
-              ),
+              relation:
+                work.status === "accessioned_into_permanent_collection"
+                  ? t(
+                      DEFAULT_LOCALE,
+                      "museum.network.acquisitions.relationAccessionedThrough"
+                    )
+                  : t(
+                      DEFAULT_LOCALE,
+                      "museum.network.acquisitions.relationSelectedThrough"
+                    ),
               status: work.status,
               statusAsOf: work.statusAsOf,
               sourcePath: relationSourcePath,
@@ -313,7 +318,9 @@ export default async function MuseumAcquisitionProgramPage({
               if (canonicalMedia !== null) {
                 const altText = canonicalMedia.altText;
                 if (altText === null || altText.trim() === "") {
-                  throw new Error("museum_acquisition_program_alt_text_missing");
+                  throw new Error(
+                    "museum_acquisition_program_alt_text_missing"
+                  );
                 }
                 return (
                   <MuseumPublicMediaFigure
@@ -354,6 +361,48 @@ export default async function MuseumAcquisitionProgramPage({
                     work={card}
                     eager={index === 0}
                   />
+                );
+              }
+              const presentation = work.presentationMedia?.[0];
+              if (presentation !== undefined) {
+                const artist = publication.artists.find(
+                  (candidate) => candidate.id === work.artistId
+                );
+                return (
+                  <figure key={work.id} className="tw-m-0 tw-min-w-0">
+                    <div className="tw-aspect-square tw-overflow-hidden tw-bg-black">
+                      <MuseumProposalImage
+                        src={presentation.mediaUrl}
+                        width={presentation.width}
+                        height={presentation.height}
+                        alt={presentation.altText.trim() || work.title}
+                        sourceByteSize={presentation.sourceByteSize}
+                        requireIntentForLargeSource={false}
+                        eager={index === 0}
+                        className="tw-h-full tw-w-full tw-object-contain"
+                      />
+                    </div>
+                    <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
+                      <Link
+                        href={museumWorkHref(work.id)}
+                        className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                      >
+                        {work.title}
+                      </Link>
+                      {artist === undefined ? null : (
+                        <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
+                          {artist.preferredName}
+                        </span>
+                      )}
+                      <span className="tw-mt-2 tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
+                        {status}
+                      </span>
+                      <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
+                        {presentation.credit.creditLine} ·{" "}
+                        {presentation.rights.licenseLabel}
+                      </span>
+                    </figcaption>
+                  </figure>
                 );
               }
               return (
