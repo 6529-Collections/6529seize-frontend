@@ -155,3 +155,20 @@ comes first; acquisition and accession follow.` before the next hosted lane
   Local qualification passed 78 focused/regression tests, changed lint,
   changed typecheck, formatting, and the Windows-safe diff check. Hosted
   exact-head review and CI are in progress.
+- PR #3735 passed its final exact-head review and CI gates and merged as
+  frontend main `3bf97fb98a330e9fd42bcef40b0ffaec1d415aaf`.
+- Staging composition `025db98989f8b2150323d860a9c9f22e98005900`
+  deployed successfully in run `31689338698`. Independent qualification
+  passed all 651 current Museum routes, all 12 permanent Collection images,
+  all five Magnum images, all 16 Keys and Gates images, and 12 retained
+  desktop/mobile overflow and visual checks.
+- Automatic staging E2E run `31690074532` passed 16 of 17 packs. The sole
+  failing pack exposed four stale assertions: two expected long manuscripts
+  to remain permanently expanded and two counted every contextual Work link
+  as a unique artwork card. The runtime, route crawl, media paint, layout, and
+  public copy all passed.
+- Updated the institutional-practice browser contract to open semantic
+  disclosure ancestors before checking tiered manuscript content and to count
+  artwork figures rather than unrelated contextual links. The exact failing
+  pack now passes 70/70 against staging across desktop and mobile. Changed
+  lint, changed typecheck, formatting, and the Windows-safe diff check pass.
