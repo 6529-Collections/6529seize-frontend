@@ -16,7 +16,7 @@ const ACQUISITION_SKELETONS = [
   "acquisition-3",
 ] as const;
 
-export type MuseumNetworkIndexLoadingKind = "artists" | "acquisitions";
+type MuseumNetworkIndexLoadingKind = "artists" | "acquisitions";
 
 function LoadingBlock({ className }: { readonly className: string }) {
   return (
