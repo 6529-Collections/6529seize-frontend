@@ -10,9 +10,9 @@ export default function UserPageRepModifyModalHeader({
   return (
     <div className="tw-flex tw-items-start tw-justify-between">
       <div className="tw-flex tw-items-center tw-gap-3">
-        <span className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-h-10 tw-w-10 tw-bg-white/[0.05] tw-border tw-border-solid tw-border-white/10">
+        <span className="tw-inline-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05]">
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50"
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-50"
             clipRule="evenodd"
             fillRule="evenodd"
             strokeLinejoin="round"
@@ -34,7 +34,7 @@ export default function UserPageRepModifyModalHeader({
             ></path>
           </svg>
         </span>
-        <p className="tw-pr-8 tw-text-wrap tw-truncate md:tw-max-w-sm tw-text-lg tw-text-iron-50 tw-font-semibold tw-mb-0">
+        <p className="tw-m-0 tw-truncate tw-text-wrap tw-pr-8 tw-text-lg tw-font-semibold tw-text-iron-50 md:tw-max-w-sm">
           Add Rep to {handleOrWallet}
         </p>
       </div>
