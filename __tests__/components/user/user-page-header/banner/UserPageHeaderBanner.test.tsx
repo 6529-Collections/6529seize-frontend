@@ -99,12 +99,9 @@ describe("UserPageHeaderBanner", () => {
     const imageLayer = container.querySelector<HTMLElement>(
       'div[style*="background-image"]'
     );
-    expect(imageLayer).toHaveClass(
-      "md:tw-mix-blend-lighten",
-      "md:tw-opacity-60"
-    );
+    expect(imageLayer).toHaveClass("md:tw-opacity-80");
     expect(imageLayer).not.toHaveClass("tw-mix-blend-lighten");
-    expect(imageLayer).not.toHaveClass("tw-opacity-60");
+    expect(imageLayer).not.toHaveClass("tw-opacity-80");
 
     expect(
       container.querySelector<HTMLElement>('div[class~="tw-ring-white/5"]')

@@ -1,7 +1,5 @@
 "use client";
 
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
@@ -46,20 +44,12 @@ export default function UserPageClassificationWrapper({
           <PencilIcon size={PencilIconSize.SMALL} />
         </span>
       </button>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            onClicked={(e) => e.stopPropagation()}
-          >
-            <UserPageHeaderEditClassification
-              profile={profile}
-              onClose={() => setIsEditOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isEditOpen && (
+        <UserPageHeaderEditClassification
+          profile={profile}
+          onClose={() => setIsEditOpen(false)}
+        />
+      )}
     </div>
   );
 }
