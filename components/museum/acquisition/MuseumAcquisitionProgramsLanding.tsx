@@ -239,9 +239,7 @@ export function MuseumAcquisitionProgramsLandingPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title")}
           </h1>
           <p className="tw-m-0 tw-mt-6 tw-max-w-lg tw-text-lg tw-leading-8 tw-text-iron-300">
-            The Museum acquires works through gifts, purchases, commissions,
-            primary mints, bequests, exchanges, and transfers. Programs define
-            what the Museum is seeking within those methods.
+            {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.lead")}
           </p>
           <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <Link
@@ -263,70 +261,88 @@ export function MuseumAcquisitionProgramsLandingPage({
       <section aria-labelledby="accession-channels-title">
         <div className="tw-max-w-3xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            Collecting methods
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.methods.eyebrow"
+            )}
           </p>
           <h2
             id="accession-channels-title"
             className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
           >
-            How works enter the Collection
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.methods.title"
+            )}
           </h2>
           <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            The acquisition method records how the Museum obtains a work. The
-            accession records the Museum&apos;s formal decision to add that work
-            to the permanent Collection.
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.methods.description"
+            )}
           </p>
         </div>
         <dl className="tw-m-0 tw-mt-8 tw-grid tw-gap-px tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 sm:tw-grid-cols-2">
-          {[
+          {(
             [
-              "Gift",
-              "A donor gives the Museum a specified work or group of works.",
-            ],
-            [
-              "Purchase",
-              "The Museum buys a specified work, directly or through an approved acquisition program.",
-            ],
-            [
-              "Commission or primary mint",
-              "The Museum commissions a new work or acquires it when it is first minted.",
-            ],
-            [
-              "Bequest, exchange, or transfer",
-              "The Museum may also receive a work through an estate, an exchange, or a transfer from another holder.",
-            ],
-          ].map(([term, description]) => (
-            <div key={term} className="tw-bg-iron-950 tw-p-6 sm:tw-p-8">
+              [
+                "museum.network.acquisitionPrograms.methods.gift.label",
+                "museum.network.acquisitionPrograms.methods.gift.description",
+              ],
+              [
+                "museum.network.acquisitionPrograms.methods.purchase.label",
+                "museum.network.acquisitionPrograms.methods.purchase.description",
+              ],
+              [
+                "museum.network.acquisitionPrograms.methods.commission.label",
+                "museum.network.acquisitionPrograms.methods.commission.description",
+              ],
+              [
+                "museum.network.acquisitionPrograms.methods.other.label",
+                "museum.network.acquisitionPrograms.methods.other.description",
+              ],
+            ] as const
+          ).map(([termKey, descriptionKey]) => (
+            <div key={termKey} className="tw-bg-iron-950 tw-p-6 sm:tw-p-8">
               <dt className="tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
-                {term}
+                {t(DEFAULT_LOCALE, termKey)}
               </dt>
               <dd className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-text-base sm:tw-leading-7">
-                {description}
+                {t(DEFAULT_LOCALE, descriptionKey)}
               </dd>
             </div>
           ))}
         </dl>
         <p className="tw-m-0 tw-mt-6 tw-max-w-3xl tw-border-l-2 tw-border-solid tw-border-primary-400 tw-py-1 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
-          Whatever the method, a work enters the permanent Collection only after
-          formal accession. An offer, selection, mint, or wallet transfer is not
-          an accession.
+          {t(
+            DEFAULT_LOCALE,
+            "museum.network.acquisitionPrograms.methods.accessionNotice"
+          )}
         </p>
       </section>
 
       <section aria-labelledby="program-pathways-title">
         <div className="tw-max-w-3xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            Current programs
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.current.eyebrow"
+            )}
           </p>
           <h2
             id="program-pathways-title"
             className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
           >
-            Programs now in use
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.current.title"
+            )}
           </h2>
           <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            The Museum currently has a standing program for gifts and Keys and
-            Gates, a focused photographic acquisition program.
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.current.description"
+            )}
           </p>
         </div>
         <ul className="tw-m-0 tw-mt-8 tw-list-none tw-p-0">
@@ -345,19 +361,26 @@ export function MuseumAcquisitionProgramsLandingPage({
         <div className="tw-grid tw-gap-8 md:tw-grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:tw-gap-14">
           <div>
             <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-              Terms
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitionPrograms.terms.eyebrow"
+              )}
             </p>
             <h2
               id="program-language-title"
               className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
             >
-              Program, acquisition, and accession
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitionPrograms.terms.title"
+              )}
             </h2>
           </div>
           <p className="tw-m-0 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            A program sets a collecting scope. An acquisition is a specific work
-            or group of works obtained through that program. Accession is the
-            final act that adds each accepted work to the permanent Collection.
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.terms.description"
+            )}
           </p>
         </div>
       </section>

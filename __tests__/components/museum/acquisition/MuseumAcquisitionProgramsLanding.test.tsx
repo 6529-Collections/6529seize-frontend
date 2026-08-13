@@ -221,7 +221,13 @@ describe("Museum acquisition programs landing", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Gift", { selector: "dt" })).toBeInTheDocument();
     expect(
+      screen.getByText("Purchase", { selector: "dt" })
+    ).toBeInTheDocument();
+    expect(
       screen.getByText("Commission or primary mint", { selector: "dt" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Bequest, exchange, or transfer", { selector: "dt" })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -229,6 +235,9 @@ describe("Museum acquisition programs landing", () => {
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Current programs")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Programs now in use" })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: "Program, acquisition, and accession",
