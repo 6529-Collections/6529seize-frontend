@@ -526,7 +526,7 @@ Reviewers should test what happens when:
   "publicReview.pages.changesEmergenciesAndFutureContracts.title":
     "Changes, Emergencies, and Future Contracts",
   "publicReview.pages.changesEmergenciesAndFutureContracts.summary":
-    "How Stream announces changes, stops problems, replaces service contracts, and ends powers permanently.",
+    "How Stream announces updates, pauses part of the system in an emergency, switches to newer helper contracts, and permanently removes old admin powers.",
   "publicReview.pages.securityTestingAndKnownLimitations.title":
     "Security, Testing, and Known Limitations",
   "publicReview.pages.securityTestingAndKnownLimitations.summary":

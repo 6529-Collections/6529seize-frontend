@@ -43,31 +43,31 @@ describe("getCurrentGovernanceEditorialMarkdown", () => {
 
       expect(currentMarkdown).toContain("## The short answer");
       expect(currentMarkdown).toContain(
-        "This review page does not prove that a launch setup uses them correctly."
+        "These controls exist in the pinned code. This page does not prove that the contracts are deployed, independently audited, or safe."
       );
       expect(currentMarkdown).toContain(
-        "A deployment process first creates the contracts. Temporary setup permissions then connect them"
+        "A deployment process creates the contracts. A temporary setup account then connects them"
       );
       expect(currentMarkdown).not.toContain(
         "A new system needs temporary setup power."
       );
       expect(currentMarkdown).toContain(
-        "An accepted ADR records the chosen design. It does not by itself prove"
+        "This accepted ADR sets the design."
       );
       expect(currentMarkdown).toContain(
-        "open risk `RISK-GOV-004` still asks for end-to-end proof"
+        "Open high risk RISK-GOV-004 says the planned production settings still need deployment evidence"
       );
       expect(currentMarkdown).toContain(
-        "The source risk register still marks `RISK-GOV-003` as an open High risk."
+        "Open high risk RISK-GOV-003 says this power may still be too broad for launch."
       );
       expect(currentMarkdown).toContain(
-        "A terminal-freeze guardian may veto only a terminal-freeze action"
+        "A permanent-removal guardian can block only an update that removes a power forever."
       );
       expect(currentMarkdown).toContain(
-        "the current module-registration function requires the `DELAYED_LOOSENING` class"
+        "adding a helper contract to the registry uses a different update type with a 48-hour minimum wait."
       );
       expect(currentMarkdown).toContain(
-        "Registration alone is not proof of a complete 30-day successor changeover."
+        "The current code does not show one complete 30-day changeover. Registering a helper does not prove that Stream has switched to it."
       );
       expect(currentMarkdown).not.toContain(
         "Stream keeps the permanent Core at its original address."
@@ -111,6 +111,12 @@ describe("getCurrentGovernanceEditorialMarkdown", () => {
     );
     expect(currentMarkdown).toContain(
       `https://github.com/${repository}/blob/${commit}/docs/adr/0017-raise-only-parameter-governance.md#L48-L71`
+    );
+    expect(currentMarkdown).toContain(
+      `https://github.com/${repository}/blob/${commit}/docs/adr/0007-upgrade-redeployment.md#L85-L118`
+    );
+    expect(currentMarkdown).toContain(
+      `https://github.com/${repository}/blob/${commit}/docs/adr/0009-protocol-v1-open-question-resolutions.md#L59-L78`
     );
     expect(currentMarkdown).not.toContain(
       "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
