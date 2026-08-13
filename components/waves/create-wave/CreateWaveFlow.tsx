@@ -102,7 +102,7 @@ export default function CreateWaveFlow({
 
   return (
     <div
-      className="tailwind-scope tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-iron-950"
+      className="tailwind-scope tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-iron-950 [&_input]:tw-text-base sm:[&_input]:tw-text-sm [&_select]:tw-text-base sm:[&_select]:tw-text-sm [&_textarea]:tw-text-base sm:[&_textarea]:tw-text-sm"
       data-flow-title={title}
     >
       {/* Single scroll owner for the create-wave flow. It is always an

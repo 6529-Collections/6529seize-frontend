@@ -219,13 +219,13 @@ export default function CreateWaveDisplaySettings({
     `${
       hasError
         ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-        : "tw-border-white/5 tw-caret-primary-400 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-500/50 focus:tw-ring-primary-400"
+        : "tw-border-white/5 tw-caret-primary-400 tw-ring-white/5 desktop-hover:hover:tw-ring-white/10 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400"
     } ${
       hasValue ? "tw-text-primary-400 focus:tw-text-white" : "tw-text-white"
-    } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
+    } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none sm:tw-text-sm`;
 
   const floatingLabelClasses = (hasError = false) =>
-    `tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-whitespace-nowrap tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
+    `tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-whitespace-nowrap tw-bg-iron-950 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
       hasError
         ? "tw-text-error peer-focus:tw-text-error"
         : "tw-text-iron-500 peer-focus:tw-text-primary-400"

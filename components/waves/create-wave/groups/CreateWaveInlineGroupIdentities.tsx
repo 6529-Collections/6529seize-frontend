@@ -81,8 +81,8 @@ export default function CreateWaveInlineGroupIdentities({
               onIdentitySelect={onIdentitySelect}
               placeholder="Search identities..."
               hideLabel={true}
-              inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
-              iconClassName="tw-top-3.5 tw-text-iron-500"
+              inputClassName="tw-border-white/5 tw-bg-iron-950 tw-ring-white/5 desktop-hover:hover:tw-ring-white/10 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
+              iconClassName="tw-text-iron-500"
               resultsLayout={resultsLayout}
             />
           </div>
