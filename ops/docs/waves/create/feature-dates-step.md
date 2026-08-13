@@ -48,8 +48,8 @@ For `Perpetual Ranking` waves:
 
 1. Set `Drops Submission Opens`.
 2. Set `Drops Voting Begins`.
-3. Continue to `Drops`. There are no winner announcements, end date, or empty
-   optional-settings section.
+3. Continue to `Drops`. There are no winner announcements or end date. No
+   optional-settings section is shown, including an empty one.
 
 For `Approve` waves:
 

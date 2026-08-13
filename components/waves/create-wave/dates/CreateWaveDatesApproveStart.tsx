@@ -8,6 +8,9 @@ import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { Time } from "@/helpers/time";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getEarliestApproveWaveEndTimestamp } from "./approveWaveDates.helpers";
 import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
@@ -16,8 +19,8 @@ interface CreateWaveDatesApproveStartProps {
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
 }
 
-const formatShortDate = (timestamp: number) =>
-  new Date(timestamp).toLocaleString("en-US", {
+const formatShortDate = (timestamp: number, locale: SupportedLocale) =>
+  new Date(timestamp).toLocaleString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -27,10 +30,11 @@ export default function CreateWaveDatesApproveStart({
   dates,
   setDates,
 }: CreateWaveDatesApproveStartProps) {
+  const locale = useBrowserLocale();
   const minStartTimestamp = Time.currentMillis();
   const startDateFormatted = useMemo(
-    () => formatShortDate(dates.submissionStartDate),
-    [dates.submissionStartDate]
+    () => formatShortDate(dates.submissionStartDate, locale),
+    [dates.submissionStartDate, locale]
   );
 
   const handleStartDateChange = (timestamp: number) => {
@@ -59,18 +63,26 @@ export default function CreateWaveDatesApproveStart({
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>Wave Start</h3>
+            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+              {t(locale, "waves.create.dates.approve.start.title")}
+            </h3>
             <TooltipIconButton
               icon={faInfoCircle}
-              tooltipText="Choose when the approve wave opens. Approvals and submissions start at the same moment."
+              tooltipText={t(
+                locale,
+                "waves.create.dates.approve.start.tooltip"
+              )}
               tooltipPosition="bottom"
               tooltipWidth="tw-w-80"
-              aria-label="About wave start"
+              aria-label={t(
+                locale,
+                "waves.create.dates.approve.start.infoLabel"
+              )}
               className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-leading-none"
             />
           </div>
           <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
-            This is when the approve wave opens for submissions and approvals.
+            {t(locale, "waves.create.dates.approve.start.description")}
           </p>
         </div>
 
@@ -80,7 +92,9 @@ export default function CreateWaveDatesApproveStart({
             className="tw-mr-2 tw-size-4 tw-text-primary-400"
           />
           <div>
-            <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">Wave Starts</p>
+            <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">
+              {t(locale, "waves.create.dates.approve.start.summaryLabel")}
+            </p>
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-50">
               {startDateFormatted}
             </p>

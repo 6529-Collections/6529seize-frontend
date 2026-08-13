@@ -22,6 +22,17 @@ describe("CreateWaveNameInput", () => {
     expect(onChange).toHaveBeenCalled();
   });
 
+  it("keeps the wave name label inside the input until it floats", () => {
+    render(<CreateWaveNameInput name="" errors={[]} onChange={jest.fn()} />);
+
+    const input = screen.getByLabelText("Wave name *");
+    const label = screen.getByText(/Wave name/, { selector: "label" });
+
+    expect(input).toHaveAttribute("placeholder", " ");
+    expect(label).toHaveClass("peer-placeholder-shown:tw-top-1/2");
+    expect(label).toHaveClass("peer-focus:tw-scale-75");
+  });
+
   it("shows error message when name required", () => {
     render(
       <CreateWaveNameInput

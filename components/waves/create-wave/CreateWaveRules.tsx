@@ -73,7 +73,7 @@ export default function CreateWaveRules({
       <WaveRulesPanel
         rules={rules}
         showCustomRules={false}
-        title="Automatic rules"
+        title={t(locale, "waves.create.rules.automaticTitle")}
         variant="form"
       />
 
@@ -95,14 +95,13 @@ export default function CreateWaveRules({
                   htmlFor="create-wave-custom-rules"
                   className={`tw-block ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}
                 >
-                  Display-only creator rules
+                  {t(locale, "waves.create.rules.displayOnlyTitle")}
                 </label>
                 <p
                   id={customRulesHelpId}
                   className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.supportingText}`}
                 >
-                  These rules are shown in the wave rules panel. They do not
-                  require a signature.
+                  {t(locale, "waves.create.rules.displayOnlyDescription")}
                 </p>
               </div>
               <textarea
@@ -113,7 +112,10 @@ export default function CreateWaveRules({
                 rows={5}
                 onChange={(event) => setDisplayRules(event.target.value)}
                 className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-4 tw-text-base tw-font-medium tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm"
-                placeholder="Add optional display-only creator rules..."
+                placeholder={t(
+                  locale,
+                  "waves.create.rules.displayOnlyPlaceholder"
+                )}
               />
               <div
                 id={customRulesCounterId}
@@ -121,7 +123,7 @@ export default function CreateWaveRules({
                 className={`tw-flex tw-justify-between tw-gap-3 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
               >
                 <span>
-                  Leave blank when automatic rules already cover the wave.
+                  {t(locale, "waves.create.rules.displayOnlyEmptyHint")}
                 </span>
                 <span>
                   {customRules.length}/{WAVE_CUSTOM_RULES_MAX_LENGTH}
@@ -135,13 +137,17 @@ export default function CreateWaveRules({
               <CreateWaveTermsOfService
                 terms={config.drops.terms}
                 setTerms={setBindingRules}
-                title="Rules that require acceptance"
-                toggleLabel="Require acceptance"
-                description={
-                  "Use this only for custom creator rules that participants must accept and sign before submitting."
-                }
-                placeholder="Enter rules participants must accept before submitting..."
-                helperText="Participants will sign these rules with their wallet"
+                title={t(locale, "waves.create.rules.acceptanceTitle")}
+                toggleLabel={t(locale, "waves.create.rules.acceptanceToggle")}
+                description={t(
+                  locale,
+                  "waves.create.rules.acceptanceDescription"
+                )}
+                placeholder={t(
+                  locale,
+                  "waves.create.rules.acceptancePlaceholder"
+                )}
+                helperText={t(locale, "waves.create.rules.acceptanceHelper")}
               />
             </section>
           )}

@@ -87,7 +87,7 @@ describe("CreateWaveOutcomes", () => {
       screen.getByRole("heading", { level: 2, name: "Outcomes" })
     ).toBeVisible();
     expect(
-      screen.getByRole("heading", { level: 3, name: "Choose outcome type" })
+      screen.getByRole("group", { name: "Choose outcome type" })
     ).toBeVisible();
     expect(screen.getByTestId("rows")).toBeInTheDocument();
   });
@@ -166,6 +166,10 @@ describe("CreateWaveOutcomes", () => {
     const toggle = screen.getByRole("checkbox");
     expect(toggle).toBeEnabled();
     expect(toggle).toBeChecked();
+    expect(toggle).toHaveAccessibleName("Show outcomes");
+    expect(toggle).toHaveAccessibleDescription(
+      "Turn on to show outcome details in the wave’s Outcome tab and winner views. Turn off to keep them hidden from participants."
+    );
 
     fireEvent.click(toggle);
 

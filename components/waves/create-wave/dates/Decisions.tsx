@@ -11,7 +11,7 @@ import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.valida
 import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import type { ReactNode } from "react";
 
 interface DecisionsProps {
@@ -34,6 +34,8 @@ function DecisionsCollapsedContent({
   totalDecisionPoints,
   isRollingMode,
 }: DecisionsCollapsedContentProps) {
+  const locale = useBrowserLocale();
+
   return (
     <span className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
       <FontAwesomeIcon
@@ -41,15 +43,25 @@ function DecisionsCollapsedContent({
         className="tw-mr-2 tw-size-4 tw-text-primary-400"
       />
       <span className="tw-flex tw-flex-col">
-        <span className="tw-block tw-text-xs tw-text-iron-300/70">Winners</span>
+        <span className="tw-block tw-text-xs tw-text-iron-300/70">
+          {t(locale, "waves.create.dates.rank.announcements.summaryLabel")}
+        </span>
         <span className="tw-flex tw-items-center">
           <span className="tw-text-sm tw-font-medium tw-text-iron-50">
-            {totalDecisionPoints} announcement
-            {totalDecisionPoints !== 1 ? "s" : ""}
+            {t(
+              locale,
+              totalDecisionPoints === 1
+                ? "waves.create.dates.rank.announcements.summarySingular"
+                : "waves.create.dates.rank.announcements.summaryPlural",
+              { count: totalDecisionPoints }
+            )}
           </span>
           {isRollingMode && (
             <span className="tw-ml-2 tw-rounded tw-bg-blue-500/20 tw-px-1.5 tw-text-xs tw-text-blue-400">
-              Recurring
+              {t(
+                locale,
+                "waves.create.dates.rank.announcements.recurringBadge"
+              )}
             </span>
           )}
         </span>
@@ -138,7 +150,11 @@ export default function Decisions({
   return (
     <div className="tw-space-y-4">
       <CollapsibleCard
-        title={<span className="tw-text-iron-100">Winners Announcements</span>}
+        title={
+          <span className="tw-text-iron-100">
+            {t(locale, "waves.create.dates.rank.announcements.title")}
+          </span>
+        }
         isExpanded={shouldShowExpandedContent}
         onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
         collapsedContent={
@@ -160,7 +176,7 @@ export default function Decisions({
                 aria-hidden="true"
               />
               <span>
-                First winners announcement and wave end must be in the future.
+                {t(locale, "waves.create.dates.rank.announcements.futureError")}
               </span>
             </div>
           )}
@@ -175,8 +191,10 @@ export default function Decisions({
                 aria-hidden="true"
               />
               <span>
-                Last winners announcement cannot be before voting begins. Move
-                voting start earlier or move winner announcements later.
+                {t(
+                  locale,
+                  "waves.create.dates.rank.announcements.endBeforeVotingError"
+                )}
               </span>
             </div>
           )}
@@ -191,27 +209,43 @@ export default function Decisions({
                 aria-hidden="true"
               />
               <span>
-                First winners announcement cannot be before voting begins. Move
-                voting start earlier or move first winners announcement later.
+                {t(
+                  locale,
+                  "waves.create.dates.rank.announcements.firstBeforeVotingError"
+                )}
               </span>
             </div>
           )}
           <div className="tw-mb-3 tw-border-b tw-border-iron-700/50 tw-pb-3">
             <p className={CREATE_WAVE_FORM_STYLES.supportingText}>
-              <strong>Winner announcements</strong> for showcasing selected
-              creators. Set your first date, then add more if needed.
+              {tRich(
+                locale,
+                "waves.create.dates.rank.announcements.description",
+                {
+                  emphasis: (
+                    <strong key="winner-announcements-emphasis">
+                      {t(
+                        locale,
+                        "waves.create.dates.rank.announcements.descriptionEmphasis"
+                      )}
+                    </strong>
+                  ),
+                }
+              )}
               {dates.subsequentDecisions.length === 0 && (
                 <span className="tw-text-primary-300">
                   {" "}
-                  With a fixed schedule, the last announcement marks your
-                  wave&apos;s end date.
+                  {t(
+                    locale,
+                    "waves.create.dates.rank.announcements.fixedEndNote"
+                  )}
                 </span>
               )}
             </p>
             <p
               className={`tw-mt-1 tw-italic ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
             >
-              Examples: Weekly, monthly, or quarterly announcements.
+              {t(locale, "waves.create.dates.rank.announcements.examples")}
             </p>
           </div>
         </div>
@@ -242,15 +276,18 @@ export default function Decisions({
               <div className="tw-flex tw-items-center tw-justify-between">
                 <div className="tw-flex-1">
                   <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
-                    Repeating Announcement Cycles
+                    {t(locale, "waves.create.dates.rank.recurring.title")}
                   </h3>
                   <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
-                    Repeat this pattern until an optional end date
+                    {t(locale, "waves.create.dates.rank.recurring.description")}
                   </p>
                 </div>
                 <div>
                   <CommonSwitch
-                    label="Enable recurring cycles"
+                    label={t(
+                      locale,
+                      "waves.create.dates.rank.recurring.switchLabel"
+                    )}
                     isOn={isRollingMode}
                     setIsOn={handleToggleSwitch}
                   />
@@ -260,9 +297,16 @@ export default function Decisions({
               {isRollingMode && (
                 <div className="tw-mt-3 tw-rounded-lg tw-border tw-border-primary-500/30 tw-bg-primary-500/20 tw-p-3 tw-shadow-inner">
                   <p className="tw-text-primary-100 tw-mb-0 tw-text-xs">
-                    <strong>Recurring cycles enabled.</strong> Announcements
-                    will repeat until an optional end date, or keep going with
-                    no end date.
+                    <strong>
+                      {t(
+                        locale,
+                        "waves.create.dates.rank.recurring.enabledTitle"
+                      )}
+                    </strong>{" "}
+                    {t(
+                      locale,
+                      "waves.create.dates.rank.recurring.enabledDescription"
+                    )}
                   </p>
                 </div>
               )}

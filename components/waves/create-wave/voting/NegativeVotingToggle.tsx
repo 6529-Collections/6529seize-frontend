@@ -1,4 +1,6 @@
 import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
 
 interface NegativeVotingToggleProps {
   readonly allowNegativeVotes: boolean;
@@ -11,11 +13,22 @@ export default function NegativeVotingToggle({
   onChange,
   isDisabled = true,
 }: NegativeVotingToggleProps) {
+  const locale = useBrowserLocale();
   const handleToggle = () => {
     if (!isDisabled) {
       onChange(!allowNegativeVotes);
     }
   };
+  let descriptionKey: MessageKey;
+  if (allowNegativeVotes) {
+    descriptionKey = isDisabled
+      ? "waves.create.voting.negative.enabledLockedDescription"
+      : "waves.create.voting.negative.enabledDescription";
+  } else {
+    descriptionKey = isDisabled
+      ? "waves.create.voting.negative.disabledLockedDescription"
+      : "waves.create.voting.negative.disabledDescription";
+  }
 
   return (
     <section className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
@@ -24,7 +37,7 @@ export default function NegativeVotingToggle({
           id="negative-votes-label"
           className={CREATE_WAVE_FORM_STYLES.sectionTitle}
         >
-          Allow Negative Votes
+          {t(locale, "waves.create.voting.negative.title")}
         </h3>
         <label
           htmlFor="toggle-negative-votes"
@@ -70,10 +83,7 @@ export default function NegativeVotingToggle({
           isDisabled ? "tw-opacity-70" : ""
         }`}
       >
-        {allowNegativeVotes
-          ? "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results."
-          : "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics."}
-        {isDisabled && " This setting cannot be changed."}
+        {t(locale, descriptionKey)}
       </p>
     </section>
   );

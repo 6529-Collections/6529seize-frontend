@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import CreateWaveRules from "@/components/waves/create-wave/CreateWaveRules";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { CreateWaveConfig } from "@/types/waves.types";
 
 jest.mock("@/helpers/waves/wave-rules.helpers", () => ({
   buildWaveRules: jest.fn(() => []),
@@ -23,12 +25,73 @@ jest.mock(
   })
 );
 
-const getConfig = (type: ApiWaveType, customRules: string | null = null) =>
-  ({
-    overview: { type },
-    display: { customRules },
-    drops: { terms: null, signatureRequired: false },
-  }) as any;
+const getConfig = (
+  type: ApiWaveType,
+  customRules: string | null = null
+): CreateWaveConfig => ({
+  overview: {
+    type,
+    typeSelected: true,
+    name: "Rules test wave",
+    image: null,
+  },
+  groups: {
+    canView: null,
+    canDrop: null,
+    canVote: null,
+    canChat: null,
+    admin: null,
+  },
+  dates: {
+    submissionStartDate: 0,
+    votingStartDate: 0,
+    endDate: null,
+    firstDecisionTime: 0,
+    subsequentDecisions: [],
+    isRolling: false,
+  },
+  drops: {
+    noOfApplicationsAllowedPerParticipant: null,
+    requiredTypes: [],
+    requiredMetadata: [],
+    submissionStrategy: null,
+    terms: null,
+    signatureRequired: false,
+    adminCanDeleteDrops: true,
+  },
+  chat: { enabled: true },
+  voting: {
+    type: null,
+    creditScope: ApiWaveCreditScope.Wave,
+    category: null,
+    profileId: null,
+    creditNfts: [],
+    creditNftMemeCount: null,
+    allowNegativeVotes: false,
+    maxVotesPerIdentityPerDrop: null,
+    winningThreshold: null,
+    timeWeighted: {
+      enabled: false,
+      averagingInterval: 24,
+      averagingIntervalUnit: "hours",
+    },
+  },
+  outcomes: [],
+  approval: {
+    threshold: null,
+    thresholdTimeMs: null,
+    maxWinners: null,
+  },
+  display: {
+    customRules,
+    outcomesVisible: true,
+    submissionButtonLabel: null,
+    approve: {
+      approvalsTabLabel: "",
+      approvedTabLabel: "",
+    },
+  },
+});
 
 describe("CreateWaveRules", () => {
   it("keeps automatic rules visible and Chat creator rules in Advanced", () => {
@@ -83,10 +146,12 @@ describe("CreateWaveRules", () => {
       screen.getByRole("button", { name: "Rules that require acceptance" })
     );
 
-    expect(setDrops).toHaveBeenCalledWith({
-      terms: "Binding rule",
-      signatureRequired: true,
-    });
+    expect(setDrops).toHaveBeenCalledWith(
+      expect.objectContaining({
+        terms: "Binding rule",
+        signatureRequired: true,
+      })
+    );
   });
 
   it("marks restored creator rules as Customized while collapsed", () => {

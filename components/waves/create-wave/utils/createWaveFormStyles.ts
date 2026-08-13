@@ -11,3 +11,6 @@ export const CREATE_WAVE_FORM_STYLES = {
   compactSupportingText:
     "tw-m-0 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400",
 } as const;
+
+export const CREATE_WAVE_FORM_CONTROL_SCOPE_STYLES =
+  "[&_input]:tw-text-base sm:[&_input]:tw-text-sm [&_select]:tw-text-base sm:[&_select]:tw-text-sm [&_textarea]:tw-text-base sm:[&_textarea]:tw-text-sm [&_input:not([type=checkbox]):not([type=radio]):focus]:!tw-border-primary-400 [&_input:not([type=checkbox]):not([type=radio]):focus]:!tw-ring-primary-400 [&_select:focus]:!tw-border-primary-400 [&_select:focus]:!tw-ring-primary-400 [&_textarea:focus]:!tw-border-primary-400 [&_textarea:focus]:!tw-ring-primary-400 desktop-hover:[&_input:not([type=checkbox]):not([type=radio]):hover:not(:focus)]:!tw-ring-white/10 desktop-hover:[&_select:hover:not(:focus)]:!tw-ring-white/10 desktop-hover:[&_textarea:hover:not(:focus)]:!tw-ring-white/10";

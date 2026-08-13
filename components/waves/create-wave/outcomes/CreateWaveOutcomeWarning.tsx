@@ -2,6 +2,8 @@
 
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import CreateWaveWarning from "../utils/CreateWaveWarning";
 
 export default function CreateWaveOutcomeWarning({
@@ -13,6 +15,7 @@ export default function CreateWaveOutcomeWarning({
   readonly dates: CreateWaveDatesConfig;
   readonly maxWinners: number | null;
 }) {
+  const locale = useBrowserLocale();
   const isApproveWave = waveType === ApiWaveType.Approve;
   const hasMaxWinners = Boolean(maxWinners);
   const hasEndDate = Boolean(dates.endDate);
@@ -24,14 +27,18 @@ export default function CreateWaveOutcomeWarning({
   if (isApproveWave && !hasMaxWinners) {
     warning = hasEndDate
       ? {
-          title: "Warning: Unlimited Awards",
-          description:
-            "You have not set a maximum number of winners for this wave. Everyone who meets the threshold will be awarded.",
+          title: t(locale, "waves.create.outcomes.warning.unlimited.title"),
+          description: t(
+            locale,
+            "waves.create.outcomes.warning.unlimited.description"
+          ),
         }
       : {
-          title: "Warning: Wave Will Run Indefinitely",
-          description:
-            "You have not set an end date or a maximum number of winners for this wave. It will run indefinitely, and everyone who meets the threshold will be awarded.",
+          title: t(locale, "waves.create.outcomes.warning.indefinite.title"),
+          description: t(
+            locale,
+            "waves.create.outcomes.warning.indefinite.description"
+          ),
         };
   }
 
