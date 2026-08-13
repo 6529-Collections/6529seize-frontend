@@ -18,6 +18,37 @@ import { MuseumRightsLink } from "../MuseumRightsLink";
 const MUSEUM_OPEN_PRESENTATION_MESSAGE =
   "museum.network.acquisitions.openPresentation";
 
+type MuseumPresentationContext =
+  | "magnum_accession"
+  | "keys_and_gates_selection";
+
+const MUSEUM_MAGNUM_ACQUISITION_ID = "6529NM-CA-2026-003";
+const MUSEUM_KEYS_AND_GATES_ACQUISITION_ID = "6529NM-CA-2026-002";
+
+function museumPresentationContext(
+  media: MuseumExternalProposalPresentationMedia
+): MuseumPresentationContext | null {
+  if (media.source.contextEntityId === MUSEUM_MAGNUM_ACQUISITION_ID) {
+    return "magnum_accession";
+  }
+  if (media.source.contextEntityId === MUSEUM_KEYS_AND_GATES_ACQUISITION_ID) {
+    return "keys_and_gates_selection";
+  }
+  return null;
+}
+
+function presentationRightsCaption(
+  context: MuseumPresentationContext | null
+): string {
+  if (context === "magnum_accession") {
+    return "Copyright remains with the photographer and Magnum Photos. The Museum presents this image in the context of the accession under its recorded institutional-display interpretation. No general reproduction, commercial, derivative, licensing, download, or AI-training rights are granted.";
+  }
+  if (context === "keys_and_gates_selection") {
+    return "This image represents a selected, unminted work from Keys and Gates. It is shown in the acquisition-program context and does not represent accession into the Museum's permanent Collection.";
+  }
+  return "The governed record does not establish a public display context for this image.";
+}
+
 export interface AcquisitionWorkCard {
   readonly id: string;
   readonly href: string;
@@ -50,9 +81,11 @@ function mediaAspectRatio(
 export function MuseumProposalPresentationMedia({
   media,
   exhibitionPresentation = false,
+  presentationContext,
 }: {
   readonly media: readonly MuseumExternalProposalPresentationMedia[];
   readonly exhibitionPresentation?: boolean;
+  readonly presentationContext?: MuseumPresentationContext;
 }) {
   if (media.length === 0) return null;
   return (
@@ -61,10 +94,7 @@ export function MuseumProposalPresentationMedia({
         id="proposal-presentation-title"
         className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
       >
-        {t(
-          DEFAULT_LOCALE,
-          "museum.network.acquisitions.worksInAcquisition"
-        )}
+        {t(DEFAULT_LOCALE, "museum.network.acquisitions.worksInAcquisition")}
       </h2>
       <div className="tw-mt-5 tw-grid tw-gap-6 sm:tw-grid-cols-2">
         {media.map((presentationMedia, index) => (
@@ -105,6 +135,7 @@ export function MuseumProposalPresentationMedia({
                       };
                 })()}
                 eager={index === 0}
+                requireIntentForLargeSource={!exhibitionPresentation}
               />
             </div>
             <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -112,9 +143,9 @@ export function MuseumProposalPresentationMedia({
                 {presentationMedia.credit.creditLine}
               </span>
               <span className="tw-mt-1 tw-block">
-                {t(
-                  DEFAULT_LOCALE,
-                  "museum.network.acquisitions.presentationRights"
+                {presentationRightsCaption(
+                  presentationContext ??
+                    museumPresentationContext(presentationMedia)
                 )}
               </span>
               {(() => {
@@ -157,11 +188,13 @@ export function AcquisitionWorkFigure({
   eager = false,
   exhibitionPresentation = false,
   featured = false,
+  presentationContext,
 }: {
   readonly work: AcquisitionWorkCard;
   readonly eager?: boolean;
   readonly exhibitionPresentation?: boolean;
   readonly featured?: boolean;
+  readonly presentationContext?: MuseumPresentationContext;
 }) {
   const presentationSourceHref =
     work.presentationMedia === undefined
@@ -175,6 +208,7 @@ export function AcquisitionWorkFigure({
       "open_upstream_presentation"
     ) === true;
   const requiresIntent =
+    !exhibitionPresentation &&
     work.presentationMedia?.sourceByteSize !== undefined &&
     work.presentationMedia.sourceByteSize >= MUSEUM_PROPOSAL_INTENT_VIEW_BYTES;
   const metadataOnly =
@@ -217,12 +251,12 @@ export function AcquisitionWorkFigure({
         <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
           {work.artist}
         </span>
-        {!exhibitionPresentation && work.status ? (
+        {work.status ? (
           <span className="tw-mt-2 tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
             {work.status}
           </span>
         ) : null}
-        {!exhibitionPresentation && work.statusQualifier ? (
+        {work.statusQualifier ? (
           <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
             {work.statusQualifier}
           </span>
@@ -231,6 +265,9 @@ export function AcquisitionWorkFigure({
           work={work}
           presentationSourceHref={presentationSourceHref}
           canOpenPresentation={canOpenPresentation}
+          {...(presentationContext === undefined
+            ? {}
+            : { presentationContext })}
         />
         {!exhibitionPresentation && work.meta ? (
           <span className="tw-mt-1 tw-block tw-text-xs tw-text-iron-500">
@@ -246,19 +283,23 @@ function AcquisitionWorkCredit({
   work,
   presentationSourceHref,
   canOpenPresentation,
+  presentationContext,
 }: {
   readonly work: AcquisitionWorkCard;
   readonly presentationSourceHref: string | null;
   readonly canOpenPresentation: boolean;
+  readonly presentationContext?: MuseumPresentationContext;
 }) {
   if (work.presentationMedia !== undefined) {
+    const context =
+      presentationContext ?? museumPresentationContext(work.presentationMedia);
     return (
       <div className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
         <span className="tw-block tw-text-iron-300">
           {work.presentationMedia.credit.creditLine}
         </span>
         <span className="tw-mt-1 tw-block">
-          {t(DEFAULT_LOCALE, "museum.network.acquisitions.presentationRights")}
+          {presentationRightsCaption(context)}
         </span>
         {presentationSourceHref === null || !canOpenPresentation ? null : (
           <span className="tw-mt-1 tw-block">
@@ -377,6 +418,7 @@ function AcquisitionPresentationMedia({
               sourceLabel: t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE),
             })}
         eager={eager}
+        requireIntentForLargeSource={!exhibitionPresentation}
         className={
           exhibitionPresentation
             ? "tw-block tw-h-auto tw-w-full tw-object-contain"

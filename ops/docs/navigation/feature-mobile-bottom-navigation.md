@@ -69,8 +69,15 @@ Profile access stays in the app drawer/account surfaces.
   has unread items.
 - On non-stream routes (for example `/network`, `/the-memes`),
   layout reserves bottom space so content is not hidden behind the bar.
+- Tablet-sized app viewports use wider expanded and compact dock widths so the
+  seven destinations remain balanced against the available canvas. Phone
+  sizing is unchanged.
+- Rotating a phone or tablet between portrait and landscape keeps the dock
+  available when no other hide condition is active.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
   view and is non-interactive.
+- The new-version refresh prompt is centered directly above the dock in the
+  native app and follows the dock as it expands or compacts.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,
   the bar is not rendered.
 
@@ -82,6 +89,8 @@ Profile access stays in the app drawer/account surfaces.
 - If `Waves` or `Messages` keeps reopening a stale thread, tap that tab from an
   active thread once to reset to section root, then retry.
 - If the bar is hidden, dismiss keyboard and close drop/edit overlays first.
+- Rotation by itself should not hide the bar; if it remains hidden after
+  rotating, return to portrait once and rotate again.
 - If content appears clipped under the bar, return to a section root route once
   to reapply bottom reserve spacing.
 - If unread dots look stale, reopen the section after unread state refresh.

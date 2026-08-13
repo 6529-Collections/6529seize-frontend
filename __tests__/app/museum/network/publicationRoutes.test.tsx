@@ -14,6 +14,7 @@ import {
   type MuseumPublication,
 } from "@/lib/museum/publication";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
 import { MUSEUM_SAFE_ETHERSCAN_URL } from "@/lib/museum/types";
 import { createCaseyFixture } from "../../../lib/museum/publication/fixture";
 
@@ -21,7 +22,12 @@ jest.mock("@/lib/museum/publication/runtime", () => ({
   getMuseumPublicationState: jest.fn(),
 }));
 
+jest.mock("@/lib/museum/publication/runtimeBundle", () => ({
+  getMuseumPublicationBundle: jest.fn(),
+}));
+
 const mockedPublicationState = jest.mocked(getMuseumPublicationState);
+const mockedBundle = jest.mocked(getMuseumPublicationBundle);
 
 jest.mock("@/components/museum/MuseumArtworkFigure", () => ({
   MuseumArtworkFigure: ({
@@ -77,13 +83,15 @@ describe("Museum finished publication routes", () => {
   });
 
   beforeEach(() => {
-    mockedPublicationState.mockResolvedValue({
+    const publicationState = {
       status: "current",
       publication,
       errorCode: null,
       failedAt: null,
       lastValidAcceptedAt: null,
-    });
+    } as const;
+    mockedPublicationState.mockResolvedValue(publicationState);
+    mockedBundle.mockResolvedValue({ publicationState, view: null });
   });
 
   afterEach(() => {

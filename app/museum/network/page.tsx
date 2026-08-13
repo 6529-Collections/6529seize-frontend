@@ -118,12 +118,17 @@ function MuseumTypedWorkFigure({
     .join(" · ");
   const media = selectMuseumStillMedia(work.media);
   if (media !== undefined) {
+    const mediaAltText = media.altText?.trim();
     return (
       <MuseumPublicMediaFigure
         src={media.url}
         width={media.width}
         height={media.height}
-        alt={media.altText ?? ""}
+        alt={
+          mediaAltText === undefined || mediaAltText.length === 0
+            ? work.title
+            : mediaAltText
+        }
         href={href}
         title={work.title}
         byline={byline}

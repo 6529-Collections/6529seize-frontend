@@ -7,6 +7,7 @@ import {
   buildMuseumSignedWaveStormDropUrl,
   isMuseumExternalProposalMediaUrl,
   isMuseumExternalProposalPresentationMedia,
+  isMuseumExternalProposalTokenSourceUrl,
   type MuseumAcquisitionMethod,
   type MuseumExternalProposalPresentationAffordance,
   type MuseumExternalProposalPresentationMedia,
@@ -108,6 +109,7 @@ export interface MuseumProjectedMedia {
 
 interface MuseumMediaProjectionInput {
   readonly uri: string | null;
+  readonly tokenSourceUri: string | null;
   readonly repositoryPath: string | null;
   readonly visual: boolean;
   readonly mediaType: string;
@@ -207,6 +209,14 @@ function mediaFromEntity(
     "repository_path",
     "public_entity_graph_media_path"
   );
+  const tokenSourceValue = media["token_source_locator"];
+  const tokenSourceUri = isRecord(tokenSourceValue)
+    ? optionalString(
+        tokenSourceValue,
+        "uri",
+        "public_entity_graph_media_token_source_uri"
+      )
+    : null;
   const mediaType = requiredString(
     media,
     "media_type",
@@ -236,6 +246,7 @@ function mediaFromEntity(
   }
   const input: MuseumMediaProjectionInput = {
     uri,
+    tokenSourceUri,
     repositoryPath,
     visual,
     mediaType,
@@ -277,9 +288,16 @@ function projectProposalMedia(
   if (!mediaEntity.sourceRecordIds.includes(publicationRecordId)) {
     throw new Error("public_entity_graph_media_wave_source_join");
   }
+  if (
+    input.visual &&
+    input.allowedUiAffordances.includes("view") &&
+    input.tokenSourceUri === null
+  ) {
+    throw new Error("public_entity_graph_media_token_source_locator");
+  }
   const metadataOnly =
     !input.visual ||
-    (input.uri === null && input.repositoryPath === null) ||
+    (input.tokenSourceUri === null && input.repositoryPath === null) ||
     !input.allowedUiAffordances.includes("view");
   if (metadataOnly) {
     assertProposalContext(media, subjectEntity, context, waveId, dropId);
@@ -305,13 +323,16 @@ function projectProposalMedia(
   const { sourceByteSize, publicationPartNumber } = accessionMediaFacts(
     mediaEntity,
     media,
-    publicationRecordId
+    publicationRecordId,
+    input.uri,
+    input.tokenSourceUri,
+    context.sourceDocuments
   );
   const affordances = proposalAffordances(input);
   const candidate: MuseumExternalProposalPresentationMedia = {
     id: mediaEntity.id,
     kind: "external_proposal_presentation",
-    mediaUrl: input.uri,
+    mediaUrl: input.tokenSourceUri,
     mediaMimeType:
       input.mediaType as MuseumExternalProposalPresentationMedia["mediaMimeType"],
     sourceByteSize,
@@ -353,12 +374,14 @@ function assertProposalPresentationInput(
   input: MuseumMediaProjectionInput
 ): asserts input is MuseumMediaProjectionInput & {
   readonly uri: string;
+  readonly tokenSourceUri: string;
   readonly width: number;
   readonly height: number;
   readonly altText: string;
 } {
   if (
     input.uri === null ||
+    input.tokenSourceUri === null ||
     !input.visual ||
     typeof input.width !== "number" ||
     typeof input.height !== "number" ||
@@ -441,7 +464,9 @@ function assertProposalContext(
 function assertProposalSourceLocator(input: MuseumMediaProjectionInput): void {
   if (
     input.uri === null ||
-    !isMuseumExternalProposalMediaUrl(input.uri)
+    !isMuseumExternalProposalMediaUrl(input.uri) ||
+    input.tokenSourceUri === null ||
+    !isMuseumExternalProposalTokenSourceUrl(input.tokenSourceUri)
   ) {
     throw new Error("public_entity_graph_media_proposal_source_locator");
   }

@@ -272,6 +272,154 @@ describe("useNativeKeyboard", () => {
     }
   });
 
+  it("does not mistake portrait-to-landscape rotation for a keyboard", async () => {
+    const originalInnerHeight = globalThis.innerHeight;
+    const originalInnerWidth = globalThis.innerWidth;
+    const originalVisualViewport = globalThis.visualViewport;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    let visualViewportHeight = 900;
+    let visualViewportWidth = 420;
+    const visualViewport = new EventTarget();
+    Object.defineProperties(visualViewport, {
+      height: { get: () => visualViewportHeight },
+      offsetTop: { value: 0 },
+      width: { get: () => visualViewportWidth },
+    });
+    Object.defineProperty(globalThis, "innerHeight", {
+      configurable: true,
+      value: 900,
+    });
+    Object.defineProperty(globalThis, "innerWidth", {
+      configurable: true,
+      value: 420,
+    });
+    Object.defineProperty(globalThis, "visualViewport", {
+      configurable: true,
+      value: visualViewport,
+    });
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    };
+    window.cancelAnimationFrame = jest.fn();
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    try {
+      const { result } = await renderNativeKeyboardHook();
+
+      visualViewportHeight = 420;
+      visualViewportWidth = 900;
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: 420,
+      });
+      Object.defineProperty(globalThis, "innerWidth", {
+        configurable: true,
+        value: 900,
+      });
+
+      act(() => {
+        globalThis.dispatchEvent(new Event("orientationchange"));
+        visualViewport.dispatchEvent(new Event("resize"));
+      });
+
+      expect(result.current.isVisible).toBe(false);
+      expect(result.current.keyboardHeight).toBe(0);
+      expect(result.current.phase).toBe("hidden");
+      expect(document.documentElement.dataset["nativeKeyboardVisible"]).toBe(
+        undefined
+      );
+    } finally {
+      input.remove();
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      Object.defineProperty(globalThis, "innerWidth", {
+        configurable: true,
+        value: originalInnerWidth,
+      });
+      Object.defineProperty(globalThis, "visualViewport", {
+        configurable: true,
+        value: originalVisualViewport,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+    }
+  });
+
+  it("keeps viewport keyboard fallback for a focused field", async () => {
+    const originalInnerHeight = globalThis.innerHeight;
+    const originalInnerWidth = globalThis.innerWidth;
+    const originalVisualViewport = globalThis.visualViewport;
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    let visualViewportHeight = 900;
+    let visualViewportWidth = 420;
+    const visualViewport = new EventTarget();
+    Object.defineProperties(visualViewport, {
+      height: { get: () => visualViewportHeight },
+      offsetTop: { value: 0 },
+      width: { get: () => visualViewportWidth },
+    });
+    Object.defineProperty(globalThis, "innerHeight", {
+      configurable: true,
+      value: 900,
+    });
+    Object.defineProperty(globalThis, "innerWidth", {
+      configurable: true,
+      value: 420,
+    });
+    Object.defineProperty(globalThis, "visualViewport", {
+      configurable: true,
+      value: visualViewport,
+    });
+    window.requestAnimationFrame = (callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    };
+    window.cancelAnimationFrame = jest.fn();
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    try {
+      const { result } = await renderNativeKeyboardHook();
+      visualViewportHeight = 620;
+      visualViewportWidth = 450;
+
+      act(() => {
+        visualViewport.dispatchEvent(new Event("resize"));
+      });
+
+      expect(result.current.isVisible).toBe(true);
+      expect(result.current.keyboardHeight).toBe(280);
+      expect(result.current.phase).toBe("showing");
+      expect(document.documentElement.dataset["nativeKeyboardVisible"]).toBe(
+        "true"
+      );
+    } finally {
+      input.remove();
+      Object.defineProperty(globalThis, "innerHeight", {
+        configurable: true,
+        value: originalInnerHeight,
+      });
+      Object.defineProperty(globalThis, "innerWidth", {
+        configurable: true,
+        value: originalInnerWidth,
+      });
+      Object.defineProperty(globalThis, "visualViewport", {
+        configurable: true,
+        value: originalVisualViewport,
+      });
+      window.requestAnimationFrame = originalRequestAnimationFrame;
+      window.cancelAnimationFrame = originalCancelAnimationFrame;
+    }
+  });
+
   it("publishes the complete closed layout on will-hide", async () => {
     const { result } = await renderNativeKeyboardHook();
 

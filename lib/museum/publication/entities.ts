@@ -278,7 +278,7 @@ export function isMuseumExternalProposalMediaUrl(value: string): boolean {
   }
 }
 
-/** The token/source locator is evidence, never the presentation URL. */
+/** Exact Arweave transaction source admitted by downstream accession review. */
 export function isMuseumExternalProposalTokenSourceUrl(value: string): boolean {
   try {
     const parsed = new URL(value);
@@ -310,7 +310,7 @@ export function isMuseumExternalProposalPresentationMedia(
     candidate["kind"] === "external_proposal_presentation" &&
     typeof candidate["id"] === "string" &&
     typeof candidate["mediaUrl"] === "string" &&
-    isMuseumExternalProposalMediaUrl(candidate["mediaUrl"]) &&
+    isMuseumExternalProposalTokenSourceUrl(candidate["mediaUrl"]) &&
     (candidate["mediaMimeType"] === "image/jpeg" ||
       candidate["mediaMimeType"] === "image/png" ||
       candidate["mediaMimeType"] === "image/webp") &&

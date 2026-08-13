@@ -15,7 +15,7 @@ export const MUSEUM_PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA_PATH =
   "schemas/public-relation-identity-inventory.schema.json" as const;
 export const PUBLIC_RELATION_IDENTITY_INVENTORY_SCHEMA =
   "https://6529networkmuseum.org/schemas/public-relation-identity-inventory-v1.json" as const;
-export const PUBLIC_RELATION_IDENTITY_INVENTORY_VERSION = "1.4.0" as const;
+export const PUBLIC_RELATION_IDENTITY_INVENTORY_VERSION = "1.5.0" as const;
 
 export const ENTITY_ID_PATTERNS: Readonly<
   Record<MuseumPublicEntityType, RegExp | null>
