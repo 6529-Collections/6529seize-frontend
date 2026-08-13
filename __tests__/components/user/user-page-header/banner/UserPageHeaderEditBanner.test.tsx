@@ -55,6 +55,7 @@ describe('UserPageHeaderEditBanner', () => {
     expect(
       screen.getByRole('dialog', { name: 'Profile cover' })
     ).toBeInTheDocument();
+    expect(capturedSaveProps.responsiveWidthClassName).toBe('md:tw-w-auto');
   });
 
   it('enables save when background changes and submits update', async () => {

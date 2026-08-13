@@ -247,7 +247,11 @@ export default function UserPageHeaderEditBanner({
         )}
 
         <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
-          <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
+          <UserSettingsSave
+            loading={isSaving}
+            disabled={!haveChanges}
+            responsiveWidthClassName="md:tw-w-auto"
+          />
           <Button
             variant="secondary"
             size="lg"

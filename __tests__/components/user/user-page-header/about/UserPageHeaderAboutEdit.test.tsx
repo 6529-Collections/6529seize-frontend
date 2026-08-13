@@ -4,6 +4,7 @@ import UserPageHeaderAboutEdit from "@/components/user/user-page-header/about/Us
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 jest.mock("react-use", () => ({ useKeyPressEvent: jest.fn() }));
 
@@ -27,7 +28,7 @@ let mutationError: Error | null = null;
       if (mutationError) {
         opts.onError?.(mutationError);
         opts.onSettled?.();
-        return;
+        throw mutationError;
       }
       await opts.mutationFn(val);
       opts.onSuccess?.();
@@ -35,6 +36,23 @@ let mutationError: Error | null = null;
     },
   };
 });
+
+function AboutEditHarness({ onClose = jest.fn() }: { onClose?: () => void }) {
+  const [value, setValue] = useState("old");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  return (
+    <UserPageHeaderAboutEdit
+      profile={{ query: "alice" } as any}
+      statement={{ statement_value: "old" } as any}
+      onClose={onClose}
+      value={value}
+      onValueChange={setValue}
+      errorMsg={errorMsg}
+      onErrorMsgChange={setErrorMsg}
+    />
+  );
+}
 
 describe("UserPageHeaderAboutEdit", () => {
   const auth = {
@@ -51,11 +69,7 @@ describe("UserPageHeaderAboutEdit", () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={ctx}>
-          <UserPageHeaderAboutEdit
-            profile={{ query: "alice" } as any}
-            statement={{ statement_value: "old" } as any}
-            onClose={jest.fn()}
-          />
+          <AboutEditHarness />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
@@ -80,11 +94,7 @@ describe("UserPageHeaderAboutEdit", () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={ctx}>
-          <UserPageHeaderAboutEdit
-            profile={{ query: "alice" } as any}
-            statement={{ statement_value: "old" } as any}
-            onClose={jest.fn()}
-          />
+          <AboutEditHarness />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );

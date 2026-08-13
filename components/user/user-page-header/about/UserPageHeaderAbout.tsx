@@ -29,12 +29,22 @@ function UserPageHeaderAboutContent({
   const [view, setView] = useState<AboutStatementView>(
     AboutStatementView.STATEMENT
   );
+  const [draftValue, setDraftValue] = useState(
+    statement?.statement_value ?? ""
+  );
+  const [editorErrorMsg, setEditorErrorMsg] = useState<string | null>(null);
   const isDesktopAboutEditor = useMediaQuery("(min-width: 768px)");
 
-  const closeEditor = () => setView(AboutStatementView.STATEMENT);
+  const closeEditor = () => {
+    setView(AboutStatementView.STATEMENT);
+    setDraftValue(statement?.statement_value ?? "");
+    setEditorErrorMsg(null);
+  };
 
   const onEditClick = () => {
     if (view === AboutStatementView.STATEMENT) {
+      setDraftValue(statement?.statement_value ?? "");
+      setEditorErrorMsg(null);
       setView(AboutStatementView.EDIT);
     }
   };
@@ -89,6 +99,10 @@ function UserPageHeaderAboutContent({
           profile={profile}
           statement={statement}
           onClose={closeEditor}
+          value={draftValue}
+          onValueChange={setDraftValue}
+          errorMsg={editorErrorMsg}
+          onErrorMsgChange={setEditorErrorMsg}
         />
       )}
 
@@ -114,6 +128,10 @@ function UserPageHeaderAboutContent({
                 profile={profile}
                 statement={statement}
                 onClose={closeEditor}
+                value={draftValue}
+                onValueChange={setDraftValue}
+                errorMsg={editorErrorMsg}
+                onErrorMsgChange={setEditorErrorMsg}
               />
             </div>
           </MobileWrapperDialog>

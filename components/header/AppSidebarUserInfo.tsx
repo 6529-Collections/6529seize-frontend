@@ -82,7 +82,7 @@ export default function AppSidebarUserInfo({
   const profileHref = profileRouteHandleOrWallet
     ? `/${encodeURIComponent(profileRouteHandleOrWallet)}`
     : "/profile";
-  const profileLinkLabel = label ?? "user";
+  const profileLinkLabel = label?.trim() || "user";
   const profileLinkClickProps = onNavigate ? { onClick: onNavigate } : {};
 
   const level = source?.level ?? 0;
