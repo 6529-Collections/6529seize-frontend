@@ -47,9 +47,28 @@ describe("MuseumProposalImage", () => {
     const viewButton = screen.getByRole("button", {
       name: "View image · loads 16.9 MB",
     });
+    expect(viewButton).toHaveClass(
+      "tw-h-full",
+      "tw-items-center",
+      "tw-justify-center"
+    );
     fireEvent.click(viewButton);
     const image = screen.getByRole("img");
     expect(image).toHaveAttribute("src", media.src);
     expect(image.parentElement).toHaveFocus();
+  });
+
+  it("renders a large governed source immediately in an art-first exhibition", () => {
+    render(
+      <MuseumProposalImage
+        {...media}
+        sourceByteSize={16_871_807}
+        alt="Lorenzo Meloni exhibition photograph"
+        requireIntentForLargeSource={false}
+      />
+    );
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getByRole("img")).toHaveAttribute("src", media.src);
   });
 });

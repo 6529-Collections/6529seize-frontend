@@ -7,6 +7,7 @@ import { t } from "@/i18n/messages";
 import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import { MUSEUM_MAGNUM_ACQUISITION_ID } from "@/lib/museum/publication/collectionSemantics";
 import { museumWorkHref } from "@/lib/museum/publication/routes";
 import type { MuseumPublicWork } from "@/lib/museum/publication/types";
 import type { MuseumView } from "@/lib/museum/types";
@@ -122,7 +123,10 @@ export function TypedArtistWorkCard({
             {presentation.credit.creditLine} ·{" "}
             {t(
               DEFAULT_LOCALE,
-              "museum.network.acquisitions.presentationRights"
+              presentation.source.contextEntityId ===
+                MUSEUM_MAGNUM_ACQUISITION_ID
+                ? "museum.network.rights.magnumInstitutionalDisplayCaption"
+                : "museum.network.acquisitions.presentationRights"
             )}
           </span>
         </figcaption>

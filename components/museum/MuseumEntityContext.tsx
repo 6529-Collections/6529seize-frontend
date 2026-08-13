@@ -1,6 +1,16 @@
 import { MuseumStatusBadge } from "./MuseumShell";
-import type { MuseumEntityContextModel } from "@/lib/museum/publication/ia";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { formatDate } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+import type {
+  MuseumEntityContextModel,
+  MuseumPublicAcquisitionStatus,
+} from "@/lib/museum/publication/ia";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
+import {
+  displayMuseumPublicAcquisitionStatus,
+  displayMuseumStatus,
+} from "@/lib/museum/presentation";
 
 interface MuseumEntityContextLabels {
   readonly ariaLabel: string;
@@ -12,6 +22,28 @@ interface MuseumEntityContextLabels {
 interface MuseumEntityContextProps {
   readonly context: MuseumEntityContextModel;
   readonly labels: MuseumEntityContextLabels;
+}
+
+const PUBLIC_ACQUISITION_STATUSES: ReadonlySet<string> = new Set([
+  "proposed_in_museum_wave",
+  "selected_by_museum_wave_acquisition_review_in_progress",
+  "selected_through_acquisition_program_acquisition_pending",
+  "acquisition_complete_accession_review_in_progress",
+  "accessioned_into_permanent_collection",
+  "closed_without_selection",
+  "withdrawn",
+]);
+
+function displayEntityStatus(value: string): string {
+  if (PUBLIC_ACQUISITION_STATUSES.has(value)) {
+    return displayMuseumPublicAcquisitionStatus(
+      value as MuseumPublicAcquisitionStatus
+    );
+  }
+
+  return value.includes("_") || value === value.toLocaleUpperCase()
+    ? displayMuseumStatus(value.toLocaleLowerCase())
+    : value;
 }
 
 function MuseumEntityStatus({
@@ -34,7 +66,7 @@ function MuseumEntityStatus({
             </span>
           )}
           <MuseumStatusBadge
-            label={status}
+            label={displayEntityStatus(status)}
             tone={context.statusTone ?? "neutral"}
           />
         </div>
@@ -45,7 +77,9 @@ function MuseumEntityStatus({
             {labels.statusAsOf}
           </span>
           <span className="tw-text-sm tw-leading-6 tw-text-iron-300">
-            {statusAsOf}
+            <time dateTime={statusAsOf}>
+              {formatDate(DEFAULT_LOCALE, statusAsOf)}
+            </time>
           </span>
         </div>
       )}
@@ -55,10 +89,8 @@ function MuseumEntityStatus({
 
 function MuseumEntitySource({
   context,
-  label,
 }: {
   readonly context: MuseumEntityContextModel;
-  readonly label: string;
 }) {
   const sourcePath = context.sourcePath;
   if (sourcePath === null) return null;
@@ -69,16 +101,13 @@ function MuseumEntitySource({
   if (sourceHref === null) return null;
   return (
     <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 tw-text-sm">
-      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
-        {label}
-      </span>
       <a
         href={sourceHref}
         target="_blank"
         rel="noopener noreferrer"
         className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-break-words tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
-        {label}
+        {t(DEFAULT_LOCALE, "museum.network.detail.openSourceRecord")}
       </a>
     </div>
   );
@@ -98,7 +127,7 @@ export function MuseumEntityContext({
     buildImmutableMuseumBlobUrl(context.sourceCommit, context.sourcePath) ===
       null
       ? null
-      : { context, label: labels.source };
+      : { context };
   if (!hasStatus && !hasStatusAsOf && source === null) return null;
 
   return (
