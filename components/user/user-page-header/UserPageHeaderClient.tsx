@@ -156,6 +156,12 @@ export default function UserPageHeaderClient({
       ? profile.handle
       : null;
   const showSubscriptionStatus = isMyProfile && !activeProfileProxy;
+  let subscriptionStatusVisibilityClass = "";
+  if (canEdit) {
+    subscriptionStatusVisibilityClass = hasTouchScreen
+      ? "tw-hidden"
+      : "tw-hidden sm:tw-block";
+  }
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -204,10 +210,10 @@ export default function UserPageHeaderClient({
           />
         </div>
 
-        <div className="tw-relative tw-z-20 tw-bg-black md:-tw-mt-[164px] md:tw-pointer-events-none md:tw-bg-transparent">
+        <div className="tw-relative tw-z-20 tw-bg-black md:tw-pointer-events-none md:-tw-mt-[164px] md:tw-bg-transparent">
           <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8">
             <div className="tw-mb-4 tw-flex tw-flex-col tw-items-start tw-gap-5 md:tw-flex-row md:tw-items-end lg:tw-mb-8">
-              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:-tw-mt-[58px] md:tw-mt-0 md:tw-pointer-events-auto">
+              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:-tw-mt-[58px] md:tw-pointer-events-auto md:tw-mt-0">
                 <UserPageHeaderPfpWrapper
                   profile={profile}
                   canEdit={canInlineEdit}
@@ -224,10 +230,11 @@ export default function UserPageHeaderClient({
 
               {canEdit ? (
                 <div
-                  className={`tw-absolute tw-right-4 tw-top-0 sm:tw-right-6 md:tw-right-8 md:tw-pointer-events-auto ${
+                  className={`tw-absolute tw-right-4 tw-top-0 tw-flex tw-items-center tw-gap-2 sm:tw-right-6 md:tw-pointer-events-auto md:tw-right-8 ${
                     hasTouchScreen ? "" : "sm:tw-hidden"
                   }`}
                 >
+                  <UserPageHeaderSubscriptionStatus profile={profile} compact />
                   <UserPageHeaderEditProfile
                     profile={profile}
                     statement={aboutStatement}
@@ -267,7 +274,7 @@ export default function UserPageHeaderClient({
                         : "tw-hidden lg:tw-flex"
                     }`}
                   >
-                    {showSubscriptionStatus ? (
+                    {showSubscriptionStatus && !(canEdit && hasTouchScreen) ? (
                       <div className="tw-hidden lg:tw-block">
                         <UserPageHeaderSubscriptionStatus profile={profile} />
                       </div>
@@ -315,17 +322,15 @@ export default function UserPageHeaderClient({
 
             {showSubscriptionStatus ? (
               <div
-                className={
-                  hasVisibleAbout
-                    ? "tw-mt-4 md:tw-pointer-events-auto lg:tw-hidden"
-                    : "md:tw-pointer-events-auto lg:tw-hidden"
-                }
+                className={`md:tw-pointer-events-auto lg:tw-hidden ${
+                  hasVisibleAbout ? "tw-mt-4" : ""
+                } ${subscriptionStatusVisibilityClass}`}
               >
                 <UserPageHeaderSubscriptionStatus profile={profile} />
               </div>
             ) : null}
 
-            <div className="tw-mt-4 tw-flex tw-items-center md:tw-mt-6 md:tw-pointer-events-auto">
+            <div className="tw-mt-4 tw-flex tw-items-center md:tw-pointer-events-auto md:tw-mt-6">
               <UserPageHeaderStats
                 profile={profile}
                 handleOrWallet={normalizedHandleOrWallet}
