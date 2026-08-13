@@ -145,15 +145,22 @@ comes first; acquisition and accession follow.` before the next hosted lane
   crawl passed all 668 Museum routes. Automatic staging E2E run `31673246237`
   passed every Museum pack but failed one unrelated mobile Memes mint test on
   a transient Server Components error; isolated read-only media rerun
-  `31674047260` passed without a source change.
+  `31674047260` passed `[web-mobile-chromium]
+  tests/media/media-mint-detail-readonly.spec.ts:113:7`, `renders The Memes mint
+  page read-only`, without a source change. The 668-route result is an
+  authenticated HTTP/visible-soft-404 crawl; browser E2E separately covered
+  the selected Museum desktop and 390px mobile route matrix.
 - Production deploy run `31674231646` completed successfully on exact main
   `aa9a33f2e90efcb50e9a6fc2e704788406d83802`. Eight consecutive live version
   reads returned that exact version and announced version with `stale:false`.
 - Automatic Production E2E run `31675378896` passed, including isolated
-  evidence verification. The final production crawl passed all 668 Museum
-  routes. Retained production desktop/mobile pixels confirm Magnum's status as
-  accessioned into the permanent Collection and Keys and Gates as selected,
-  unminted, and pending acquisition.
+  evidence verification. The final production HTTP/visible-soft-404 crawl
+  passed all 668 Museum routes. Run `31675378896` separately passed the
+  selected Museum desktop and 390px mobile browser matrix; retained production
+  pixels confirm Magnum's status as accessioned into the permanent Collection
+  and Keys and Gates as selected, unminted, and pending acquisition. No claim
+  is made that all 668 routes received individual desktop and mobile pixel
+  captures.
 - Final canonical Museum source remains
   `a5b64f7eb586a5a07024b56a0604d8b8ae0ea574`, with active catalog
   `975f041aed7e2f402ab26d4fb2bb266e07db4974` and reviewed publication source
