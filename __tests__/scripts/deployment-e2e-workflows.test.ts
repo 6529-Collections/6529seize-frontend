@@ -169,7 +169,9 @@ describe("serialized post-deploy E2E", () => {
       expect(resolve.run).toContain(
         "test \"$GITHUB_ACTOR\" = '6529-release-bus[bot]'"
       );
-      expect(resolve.run).toContain("inputs.tracking_id");
+      expect(resolve.env.TRACKING_ID).toBe("${{ inputs.tracking_id }}");
+      expect(resolve.run).toContain("$TRACKING_ID");
+      expect(resolve.run).not.toContain("inputs.tracking_id");
       expect(e2e.source).not.toMatch(
         /release_manifest|artifact_digest|authorize|report-progress/i
       );
