@@ -190,3 +190,7 @@
   the current heading, collection-purpose section identifier, and compact source
   wording. Updated the same stale source wording in the institutional-practice
   browser contract and retained the 20-second route-readiness budget.
+- Exact-head related Jest then exposed one stale Keys and Gates sentence. The
+  page correctly states `Selected and unminted. Acquisition and accession remain
+pending.`; its unit test still expected the discarded mint-first phrasing.
+  Updated the assertion to the shipped lifecycle language.
