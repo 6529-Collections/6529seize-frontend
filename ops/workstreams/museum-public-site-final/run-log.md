@@ -73,3 +73,6 @@
 - Exact-head quality then reached the registry contract and caught its stale
   component-count literal. Updated the contract expectation from 64 to the
   registry's verified 65 components.
+- The optimized build proved the former exported acquisition media-card helper
+  was wholly unused, not merely module-local. Deleted the dead component rather
+  than suppressing the lint finding.
