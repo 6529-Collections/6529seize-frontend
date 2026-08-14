@@ -187,6 +187,8 @@ deployment-sensitive code:
 - Agent and automation instructions: [AGENTS.md](AGENTS.md)
 - Package-manager and deployment-wrapper guidance:
   [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md)
+- CI wave deploy and WEB E2E notification contract:
+  [ops/docs/developer/ci-wave-deploy-validation-notifications.md](ops/docs/developer/ci-wave-deploy-validation-notifications.md)
 - Standalone Memes mint page notes:
   [standalone/standalone-memes-mint/README.md](standalone/standalone-memes-mint/README.md)
 
@@ -206,6 +208,9 @@ Repository and deployment helper details, including `ghruns`, `ghdeploy`,
 The staging and production release process for coordinating shared validation,
 backend dependencies, and production promotion is documented in
 [ops/docs/developer/simple-release-bus-v2.md](ops/docs/developer/simple-release-bus-v2.md).
+CI wave message formats, deploy-to-E2E reply correlation, manual reruns, and
+rollout order are documented in
+[ops/docs/developer/ci-wave-deploy-validation-notifications.md](ops/docs/developer/ci-wave-deploy-validation-notifications.md).
 
 ## Contributing
 
