@@ -214,6 +214,14 @@ then the trusted decision client makes one authenticated lookup:
 - unavailable, stale, moved, expired, malformed, ambiguous or
   identity-mismatched evidence fails closed and cannot validate or adopt.
 
+The terminal WEB E2E notification carries that deploy run ID, or the Release
+Bus train ID, back to the CI alert receiver. The receiver correlates it to the
+original deploy drop and posts the result as a reply; workflows do not handle
+drop IDs. Reruns preserve the parent identity and expose attempts greater than
+one in the linked run label. See
+[CI wave deploy and WEB E2E notifications](ci-wave-deploy-validation-notifications.md)
+for standalone fallback, message, activation, and rollout behavior.
+
 The manual production fallback follows the same build-once principle. An
 authorized production operation explicitly invokes `production-build-artifact.yml`
 with a 40-character `target_sha` and operation-bound `operation_id`; merges to
