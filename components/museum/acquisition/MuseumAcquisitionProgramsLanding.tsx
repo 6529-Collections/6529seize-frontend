@@ -54,7 +54,13 @@ const FRAMEWORKS: readonly {
 function frameworkForProgram(
   program: MuseumAcquisitionProgram
 ): AcquisitionFramework | null {
-  if (program.id === "AP-GIFT-01") return "gifts";
+  if (
+    program.id === "6529NM-AP-ENT-0001" ||
+    program.id === "AP-GIFT-01" ||
+    program.slug === "gift-acquisitions"
+  ) {
+    return "gifts";
+  }
   if (program.slug === "keys-and-gates") return "meme-card";
   return null;
 }
@@ -114,7 +120,7 @@ function acquisitionCountLabel(count: number): string {
 }
 
 function programDescription(program: MuseumAcquisitionProgram): string {
-  if (program.id === "AP-GIFT-01") {
+  if (frameworkForProgram(program) === "gifts") {
     return t(
       DEFAULT_LOCALE,
       "museum.network.acquisitionPrograms.frameworks.gifts.recordDescription"

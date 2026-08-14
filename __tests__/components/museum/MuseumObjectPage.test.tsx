@@ -371,6 +371,50 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("uses an aliased reviewed derivative before a large Magnum original", async () => {
+    const magnumWork: MuseumPublicWork = {
+      ...work([]),
+      acquisitionIds: [MUSEUM_MAGNUM_ACQUISITION_ID],
+      collectionMembership: true,
+      presentationMedia: [magnumPresentationMedia()],
+    };
+    const magnumPublication: MuseumPublication = {
+      ...publication(magnumWork),
+      workAliases: [
+        {
+          kind: "work_source_alias",
+          sourceObjectId: "6529NM-PG-2026-001.OBJ-005",
+          workId: magnumWork.id,
+          sourcePath: "records/entities/6529NM-W-0001.json",
+        },
+      ],
+    };
+
+    render(
+      await MuseumObjectPage({
+        objectId: magnumWork.id,
+        publication: magnumPublication,
+        view: viewWithReviewedProgramMedia("6529NM-PG-2026-001.OBJ-005"),
+      })
+    );
+
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute(
+      "src",
+      "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp"
+    );
+    expect(image).toHaveAttribute("srcset");
+    expect(
+      screen.queryByRole("button", { name: /loads 16\.9 MB/u })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View Wave publication" })
+    ).toHaveAttribute(
+      "href",
+      "https://6529.io/waves/5f207393-5418-4a75-8738-e40edb44a94d?drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0"
+    );
+  });
+
   it("links a metadata-only Work license through MuseumRightsLink", async () => {
     const licenseUrl = "https://creativecommons.org/licenses/by/4.0/";
     render(

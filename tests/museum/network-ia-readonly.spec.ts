@@ -332,8 +332,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       })
     ).toHaveCount(1);
     await expect(
-      page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
+      page.locator('[aria-labelledby="canonical-work-media-title"] img')
     ).toHaveCount(1);
+    await expect(
+      page.getByRole("button", { name: /loads 16\.9 MB/u })
+    ).toHaveCount(0);
     await expect(page.locator("[download]")).toHaveCount(0);
     await expect(
       page.locator(`a[href="${MAGNUM_WAVE_CONTEXT_HREF}"]`)

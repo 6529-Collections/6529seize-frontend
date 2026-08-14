@@ -177,6 +177,30 @@ describe("Museum acquisition programs landing", () => {
     ).toThrow("museum_acquisition_program_framework:6529NM-AP-UNKNOWN");
   });
 
+  it("classifies the canonical Gift Acquisitions entity", () => {
+    const canonicalGiftProgram = program(
+      "6529NM-AP-ENT-0001",
+      "gift-acquisitions",
+      "Gift Acquisitions",
+      "6529NM-CA-2026-001",
+      "donation"
+    );
+    expect(() =>
+      render(
+        <MuseumAcquisitionProgramsLandingPage
+          records={[
+            {
+              program: canonicalGiftProgram,
+              acquisitions: [],
+              acquisitionArtistNames: {},
+            },
+          ]}
+        />
+      )
+    ).not.toThrow();
+    expect(screen.getByText("Gifts", { exact: true })).toBeInTheDocument();
+  });
+
   it("presents pathways separately from the acquisitions they produce", () => {
     const casey = acquisition(
       "casey-acquisition",

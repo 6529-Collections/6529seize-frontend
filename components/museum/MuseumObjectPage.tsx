@@ -140,9 +140,11 @@ function hasMagnumInstitutionalDisplayRights(work: MuseumPublicWork): boolean {
 function MuseumCanonicalWorkMedia({
   work,
   programMediaMatch,
+  presentationSourceHref,
 }: {
   readonly work: MuseumPublicWork;
   readonly programMediaMatch: ReturnType<typeof findReviewedProgramMediaMatch>;
+  readonly presentationSourceHref: string | null;
 }) {
   const stillMedia = selectMuseumStillMedia(work.media);
   if (stillMedia !== undefined) {
@@ -204,7 +206,27 @@ function MuseumCanonicalWorkMedia({
           creditLineClassName="tw-block tw-text-iron-200"
           licenseWrapperClassName="tw-mt-1 tw-block"
           rightsLayout="block"
-        />
+        >
+          {presentationSourceHref === null ? null : (
+            <span className="tw-mt-1 tw-block tw-text-iron-400">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.presentationSource"
+              )}{" "}
+              <a
+                href={presentationSourceHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.acquisitions.openPresentation"
+                )}
+              </a>
+            </span>
+          )}
+        </MuseumReviewedProgramMediaFigure>
       </section>
     );
   }
@@ -296,10 +318,25 @@ function MuseumCanonicalWorkRecordPage({
   });
   const documents = selectMuseumPublicWorkDocuments(work, projectedDocuments);
   const workHrefs = museumWorkHrefIndex(publication, view);
+  const workAliasIds = (publication.workAliases ?? [])
+    .filter((alias) => alias.workId === work.id)
+    .map((alias) => alias.sourceObjectId);
   const programMediaMatch = findReviewedProgramMediaMatch(view, [
     work.id,
     ...(work.sourceRecordIds ?? []),
+    ...workAliasIds,
   ]);
+  const presentationSourceHref = (() => {
+    const presentation = work.presentationMedia?.find((media) =>
+      media.affordances.includes("open_upstream_presentation")
+    );
+    return presentation === undefined
+      ? null
+      : buildMuseumSignedWaveStormDropUrl(
+          presentation.source.waveId,
+          presentation.source.dropId
+        );
+  })();
   const programMediaMetadata =
     programMediaMatch === null
       ? undefined
@@ -382,6 +419,7 @@ function MuseumCanonicalWorkRecordPage({
       <MuseumCanonicalWorkMedia
         work={work}
         programMediaMatch={programMediaMatch}
+        presentationSourceHref={presentationSourceHref}
       />
       {insideSystemHref !== null ? (
         <div className="tw-mt-8">
@@ -393,7 +431,8 @@ function MuseumCanonicalWorkRecordPage({
           </Link>
         </div>
       ) : null}
-      {work.presentationMedia !== undefined &&
+      {programMediaMatch === null &&
+      work.presentationMedia !== undefined &&
       work.presentationMedia.length > 0 ? (
         <section
           className="tw-mt-10"

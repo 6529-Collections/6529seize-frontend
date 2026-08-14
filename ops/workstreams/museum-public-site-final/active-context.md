@@ -1,6 +1,6 @@
 # Active context
 
-Updated: 2026-08-14T13:05:00Z
+Updated: 2026-08-14T13:35:00Z
 
 ## Objective
 
@@ -49,7 +49,11 @@ production, production E2E, and live visual readback.
 
 ## Current phase
 
-Implementation and local acceptance are complete. The exact local state passes
-14 focused suites with 72 assertions, changed-file lint and typecheck, diff
-hygiene, and the deterministic Collection, Acquisitions, and Research browser
-acceptance. The next mutation is the signed release commit and ready PR.
+Ready PR `#3751` is open. Exact-head CI run `31804454944` found one real mobile
+media defect and canceled its sibling lanes. The corrected local state resolves
+Magnum Work media through typed aliases so a reviewed derivative renders before
+the large original, and recognizes the canonical Gift Acquisitions entity in the
+fail-closed framework classifier. Focused component tests, changed lint,
+changed typecheck, diff hygiene, and the complete Network IA replay in desktop
+and 390 px mobile Chromium pass. The next mutation is a signed corrective commit
+to PR `#3751`, followed by fresh exact-head CI.

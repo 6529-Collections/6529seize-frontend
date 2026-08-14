@@ -81,3 +81,24 @@
   to the permanent-holdings section and added an independent assertion for the
   16 selected, in-progress Keys and Gates works. The sections remain visually
   unchanged and are now machine-distinguishable.
+
+## 2026-08-14T13:35:00Z
+
+- Exact-head App PR CI run `31804454944` reached the mobile Network IA gate and
+  exposed a real media-path defect on the Lorenzo Meloni Work page: the page
+  offered the 16.9 MB historical original instead of resolving the reviewed
+  responsive derivative through the Work's explicit proposal alias. Fail-fast
+  canceled the sibling jobs after this first failure.
+- Expanded reviewed-media resolution with the publication's typed Work aliases.
+  Magnum Work pages now render the derivative first, retain the Wave publication
+  link and rights credit, and suppress the duplicate large-original panel. The
+  bounded original-only fallback remains available when no reviewed derivative
+  exists.
+- The exact local optimized build independently found that the canonical Gift
+  Acquisitions entity `6529NM-AP-ENT-0001` was omitted from the newly fail-closed
+  framework classifier. Added the canonical entity ID and slug while retaining
+  the legacy alias.
+- Focused component tests pass, 15 assertions. Changed-file lint and typecheck
+  pass. The full Network IA replay passes in both desktop and 390 px mobile
+  Chromium, including derivative-first Magnum media and the permanent versus
+  in-progress Collection boundary.
