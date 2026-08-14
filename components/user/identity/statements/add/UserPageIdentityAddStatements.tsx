@@ -1,10 +1,11 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
 
 export enum STATEMENT_ADD_VIEW {
@@ -39,6 +40,13 @@ const VIEW_WIDTH_CLASSES: Record<STATEMENT_ADD_VIEW, string> = {
     DETAIL_DIALOG_WIDTH_CLASS,
 };
 
+function KeyboardAwareContent({ children }: { readonly children: ReactNode }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  useKeyboardFocusScroll(contentRef);
+
+  return <div ref={contentRef}>{children}</div>;
+}
+
 export default function UserPageIdentityAddStatements({
   profile,
   isOpen,
@@ -65,14 +73,18 @@ export default function UserPageIdentityAddStatements({
       showHeaderCloseButton
       maxWidthClass={VIEW_WIDTH_CLASSES[activeView]}
       headerClassName="-tw-mt-2 md:tw-mt-0"
+      zIndexClassName="tw-z-[1100]"
+      surfaceClassName="tw-bg-iron-950 tw-shadow-xl"
     >
-      <UserPageIdentityAddStatementsViews
-        profile={profile}
-        activeView={activeView}
-        setActiveView={setActiveView}
-        onBack={() => setActiveView(STATEMENT_ADD_VIEW.SELECT)}
-        onClose={onClose}
-      />
+      <KeyboardAwareContent>
+        <UserPageIdentityAddStatementsViews
+          profile={profile}
+          activeView={activeView}
+          setActiveView={setActiveView}
+          onBack={() => setActiveView(STATEMENT_ADD_VIEW.SELECT)}
+          onClose={onClose}
+        />
+      </KeyboardAwareContent>
     </MobileWrapperDialog>
   );
 }
