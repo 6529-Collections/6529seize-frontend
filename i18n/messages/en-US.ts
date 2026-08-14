@@ -2290,17 +2290,23 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
-  "home.mintAllowlist.label": "Your allowlist",
-  "home.mintAllowlist.connectedWallet": "Connected wallet",
-  "home.mintAllowlist.phase": "Phase {number}",
-  "home.mintAllowlist.phasesAriaLabel":
-    "Allowlist phases for the connected wallet",
-  "home.mintAllowlist.checking": "Checking your connected wallet…",
-  "home.mintAllowlist.connectWallet":
-    "Connect a wallet to check your allowlist phase.",
-  "home.mintAllowlist.notFound": "No allowlist phase found for this wallet.",
-  "home.mintAllowlist.unavailable":
-    "Allowlist status is temporarily unavailable.",
+  "home.mintAllowlist.label": "Your allowance",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint allocations for the connected wallet",
+  "home.mintAllowlist.connectWallet": "Connect your wallet to view details.",
+  "home.mintAllowlist.checking": "Checking…",
+  "home.mintAllowlist.notPublished":
+    "Available once distribution is published.",
+  "home.mintAllowlist.notFound": "None found for this wallet.",
+  "home.mintAllowlist.unavailable": "Temporarily unavailable.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Public",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
