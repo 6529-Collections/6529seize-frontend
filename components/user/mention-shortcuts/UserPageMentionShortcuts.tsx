@@ -39,7 +39,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode, RefObject } from "react";
-import { useContext, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -139,7 +139,9 @@ function AliasEditor({
     ownerProfileId
   );
   const searchIsReady =
-    search.length >= MIN_SEARCH_LENGTH && debouncedSearch === search;
+    members.length < MAX_MEMBERS &&
+    search.length >= MIN_SEARCH_LENGTH &&
+    debouncedSearch === search;
   let searchStatus = t(locale, "user.mentionShortcuts.searchPrompt");
   if (searchIsReady && profileSearchQuery.isFetching) {
     searchStatus = t(locale, LOADING_MESSAGE_KEY);
@@ -416,24 +418,32 @@ export default function UserPageMentionShortcuts({
     useState<Exclude<QuickTagsView, "editor">>("manage");
   const [aliasToDelete, setAliasToDelete] = useState<MentionAlias | null>(null);
   const viewHeadingRef = useRef<HTMLHeadingElement>(null);
+  const shouldFocusViewHeadingRef = useRef(false);
 
-  const focusViewHeading = () => {
-    globalThis.setTimeout(() => viewHeadingRef.current?.focus(), 0);
+  useEffect(() => {
+    if (!shouldFocusViewHeadingRef.current) return;
+    shouldFocusViewHeadingRef.current = false;
+    viewHeadingRef.current?.focus();
+  }, [aliasToDelete, view]);
+
+  const requestViewHeadingFocus = () => {
+    shouldFocusViewHeadingRef.current = true;
   };
 
   const changeView = (nextView: QuickTagsView) => {
+    requestViewHeadingFocus();
+    setAliasToDelete(null);
     setView(nextView);
-    focusViewHeading();
   };
 
   const cancelDeletion = () => {
+    requestViewHeadingFocus();
     setAliasToDelete(null);
-    focusViewHeading();
   };
 
   const startDeleting = (alias: MentionAlias) => {
+    requestViewHeadingFocus();
     setAliasToDelete(alias);
-    focusViewHeading();
   };
 
   const deleteMutation = useMutation({
@@ -446,9 +456,9 @@ export default function UserPageMentionShortcuts({
         type: "success",
         message: t(locale, "user.mentionShortcuts.deleted"),
       });
+      requestViewHeadingFocus();
       setAliasToDelete(null);
       setEditorAlias(null);
-      focusViewHeading();
     },
     onError: (error) =>
       setToast({
@@ -493,7 +503,7 @@ export default function UserPageMentionShortcuts({
   }
 
   let labelledBy = "quick-tags-heading";
-  if (aliasToDelete) {
+  if (view === "manage" && aliasToDelete) {
     labelledBy = "delete-mention-shortcut-title";
   } else if (view === "manage") {
     labelledBy = "quick-tags-manager-title";
@@ -502,7 +512,7 @@ export default function UserPageMentionShortcuts({
   }
 
   let content: ReactNode;
-  if (aliasToDelete) {
+  if (view === "manage" && aliasToDelete) {
     content = (
       <QuickTagsDeleteConfirmation
         alias={aliasToDelete}
@@ -611,7 +621,7 @@ export default function UserPageMentionShortcuts({
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <button
               type="button"
-              aria-label={t(locale, "user.mentionShortcuts.backToSummary")}
+              aria-label={t(locale, "user.mentionShortcuts.back")}
               onClick={showSummary}
               className="tw-flex tw-size-11 tw-flex-none -tw-translate-x-1 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100 sm:tw-size-10"
             >
@@ -719,12 +729,7 @@ export default function UserPageMentionShortcuts({
     content = (
       <AliasEditor
         key={editorAlias?.id ?? "new"}
-        backLabel={t(
-          locale,
-          editorReturnView === "summary"
-            ? "user.mentionShortcuts.backToSummary"
-            : "user.mentionShortcuts.backToList"
-        )}
+        backLabel={t(locale, "user.mentionShortcuts.back")}
         headingRef={viewHeadingRef}
         initialAlias={editorAlias}
         onCancel={() => {

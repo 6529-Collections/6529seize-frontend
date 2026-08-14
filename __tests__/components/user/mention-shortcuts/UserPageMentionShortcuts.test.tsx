@@ -28,6 +28,7 @@ const mockedUpdateMentionAlias = updateMentionAlias as jest.MockedFunction<
 const mockedCommonApiFetch = commonApiFetch as jest.MockedFunction<
   typeof commonApiFetch
 >;
+const mockedRefetch = jest.fn();
 
 const profile = {
   id: "profile-1",
@@ -75,6 +76,7 @@ function renderQuickTags({
 
 describe("UserPageMentionShortcuts", () => {
   beforeEach(() => {
+    mockedRefetch.mockReset();
     mockedCommonApiFetch.mockResolvedValue([]);
     mockedUseMentionAliases.mockReturnValue({
       aliases: [
@@ -134,6 +136,7 @@ describe("UserPageMentionShortcuts", () => {
       ],
       isPending: false,
       isError: false,
+      refetch: mockedRefetch,
     } as ReturnType<typeof useMentionAliases>);
   });
 
@@ -190,6 +193,70 @@ describe("UserPageMentionShortcuts", () => {
     expect(
       screen.getByRole("button", { name: "Save Quick Tag" })
     ).toBeInTheDocument();
+  });
+
+  it("retries after Quick Tags fail to load", () => {
+    mockedUseMentionAliases.mockReturnValue({
+      aliases: [],
+      isPending: false,
+      isError: true,
+      refetch: mockedRefetch,
+    } as ReturnType<typeof useMentionAliases>);
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    expect(mockedRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("moves focus through inline views and returns with the shared back action", async () => {
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+    const managerHeading = screen.getByRole("heading", { name: "Quick Tags" });
+    await waitFor(() => expect(managerHeading).toHaveFocus());
+
+    fireEvent.click(screen.getByRole("button", { name: "New Quick Tag" }));
+    const editorHeading = screen.getByRole("heading", {
+      name: "Create Quick Tag",
+    });
+    await waitFor(() => expect(editorHeading).toHaveFocus());
+
+    fireEvent.click(screen.getByRole("button", { name: "Back to Quick Tags" }));
+    await waitFor(() =>
+      expect(screen.getByTestId("quick-tags-manager")).toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Quick Tags" })).toHaveFocus()
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Back to Quick Tags" }));
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Quick Tags" })).toHaveFocus()
+    );
+    expect(screen.getByRole("button", { name: "Manage" })).toBeInTheDocument();
+  });
+
+  it("keeps delete confirmation inline and returns focus to Manage", async () => {
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Delete" })[0]!);
+
+    const deleteHeading = screen.getByRole("heading", {
+      name: "Delete @frens?",
+    });
+    await waitFor(() => expect(deleteHeading).toHaveFocus());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Back to Quick Tags" }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("quick-tags-manager")).toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Quick Tags" })).toHaveFocus()
+    );
   });
 
   it("uses the shared selected-profile chips in the editor", () => {

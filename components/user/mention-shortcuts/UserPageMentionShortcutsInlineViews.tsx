@@ -25,8 +25,9 @@ export function QuickTagsDeleteConfirmation({
       <div className="tw-flex tw-items-center tw-gap-2">
         <button
           type="button"
-          aria-label={t(locale, "user.mentionShortcuts.backToList")}
+          aria-label={t(locale, "user.mentionShortcuts.back")}
           onClick={onCancel}
+          disabled={isPending}
           className="tw-flex tw-size-11 tw-flex-none -tw-translate-x-1 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100 sm:tw-size-10"
         >
           <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
@@ -50,7 +51,12 @@ export function QuickTagsDeleteConfirmation({
         {isPending ? t(locale, "user.mentionShortcuts.deleting") : ""}
       </p>
       <div className="tw-mt-5 tw-flex tw-flex-col-reverse tw-gap-2 sm:tw-flex-row sm:tw-justify-end">
-        <Button variant="secondary" size="sm" onClick={onCancel}>
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={isPending}
+          onClick={onCancel}
+        >
           {t(locale, "user.mentionShortcuts.cancel")}
         </Button>
         <Button
