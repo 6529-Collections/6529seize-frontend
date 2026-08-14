@@ -2272,8 +2272,10 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.action.setUp": "Set up",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
-  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
-  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
+  "home.mintSubscriptions.subscriptionsCount.none": "No subscriptions",
+  "home.mintSubscriptions.subscriptionsCount.value":
+    "x{count} subscription{pluralSuffix}",
+  "home.mintSubscriptions.subscriptionsLoading": "Loading subscription count",
   "home.mintSubscriptions.tooltip.connect":
     "Connect to set up subscription minting.",
   "home.mintSubscriptions.tooltip.dropped":
