@@ -178,3 +178,8 @@
   passed the corrected Collection acceptance gate. The first attempt timed out
   on one upstream Arweave image request; Playwright's automatic retry completed
   the same acceptance flow successfully.
+- Exact-head mobile CI exposed a separate five-second media-settle timeout in
+  the broader hub sweep. The card and image were present, but the derivative had
+  not decoded before the default poll expired. Aligned this gate with the
+  existing 20-second Museum media-settle budget used by the deterministic
+  Collection acceptance test.

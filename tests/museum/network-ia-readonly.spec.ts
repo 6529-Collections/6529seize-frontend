@@ -215,15 +215,17 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       });
     await firstMagnumCollectionCard.scrollIntoViewIfNeeded();
     await expect
-      .poll(() =>
-        firstMagnumCollectionCard
-          .locator("img")
-          .evaluate(
-            (image) =>
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-          )
+      .poll(
+        () =>
+          firstMagnumCollectionCard
+            .locator("img")
+            .evaluate(
+              (image) =>
+                image instanceof HTMLImageElement &&
+                image.complete &&
+                image.naturalWidth > 0
+            ),
+        { timeout: 20_000 }
       )
       .toBe(true);
     await retainScreenshot(page, testInfo, "museum-network-collection");
