@@ -138,6 +138,21 @@ function programDescription(program: MuseumAcquisitionProgram): string {
   );
 }
 
+function programEyebrowKey(
+  framework: AcquisitionFramework | null
+):
+  | "museum.network.acquisitionPrograms.frameworks.gifts.recordEyebrow"
+  | "museum.network.acquisitionPrograms.frameworks.memeCard.recordEyebrow"
+  | "museum.network.acquisitionPrograms.current.eyebrow" {
+  if (framework === "gifts") {
+    return "museum.network.acquisitionPrograms.frameworks.gifts.recordEyebrow";
+  }
+  if (framework === "meme-card") {
+    return "museum.network.acquisitionPrograms.frameworks.memeCard.recordEyebrow";
+  }
+  return "museum.network.acquisitionPrograms.current.eyebrow";
+}
+
 export function buildMuseumAcquisitionProgramLandingRecords(
   publication: MuseumPublication,
   programs: readonly MuseumAcquisitionProgram[],
@@ -312,7 +327,7 @@ function ProgramFeature({
   index,
 }: {
   readonly record: MuseumAcquisitionProgramLandingRecord;
-  readonly framework: AcquisitionFramework;
+  readonly framework: AcquisitionFramework | null;
   readonly index: number;
 }) {
   const { program } = record;
@@ -359,12 +374,7 @@ function ProgramFeature({
         }
       >
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          {t(
-            DEFAULT_LOCALE,
-            framework === "gifts"
-              ? "museum.network.acquisitionPrograms.frameworks.gifts.recordEyebrow"
-              : "museum.network.acquisitionPrograms.frameworks.memeCard.recordEyebrow"
-          )}
+          {t(DEFAULT_LOCALE, programEyebrowKey(framework))}
         </p>
         <h3 className="tw-m-0 tw-mt-4 tw-max-w-xl tw-text-3xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.025em] tw-text-iron-50 sm:tw-text-4xl">
           {titleKey === null ? (
@@ -393,7 +403,7 @@ function ProgramFeature({
                 "museum.network.acquisitionPrograms.acquisitions"
               )}
             </p>
-            <ul className="tw-m-3 tw-list-none tw-space-y-3 tw-p-0">
+            <ul className="tw-mt-3 tw-list-none tw-space-y-3 tw-p-0">
               {record.acquisitions.map((acquisitionRecord) => {
                 const acquisition = acquisitionRecord.acquisition;
                 const artists =
@@ -454,14 +464,6 @@ export function MuseumAcquisitionProgramsLandingPage({
   const unclassifiedPrograms = records.filter(
     (record) => frameworkForProgram(record.program) === null
   );
-  if (unclassifiedPrograms.length > 0) {
-    throw new Error(
-      `museum_acquisition_program_framework:${unclassifiedPrograms
-        .map((record) => record.program.id)
-        .join(",")}`
-    );
-  }
-
   return (
     <div className="tw-min-w-0 tw-space-y-20 sm:tw-space-y-28">
       <header
@@ -548,6 +550,39 @@ export function MuseumAcquisitionProgramsLandingPage({
               </ul>
             </section>
           ))}
+          {unclassifiedPrograms.length === 0 ? null : (
+            <section aria-labelledby="other-published-programs-title">
+              <div className="tw-max-w-3xl">
+                <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+                  {t(
+                    DEFAULT_LOCALE,
+                    "museum.network.acquisitionPrograms.current.eyebrow"
+                  )}
+                </p>
+                <h2
+                  id="other-published-programs-title"
+                  className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
+                >
+                  Other published programs
+                </h2>
+                <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
+                  These published programs have not been assigned to one of the
+                  Museum&apos;s standing collecting frameworks.
+                </p>
+              </div>
+              <ul className="tw-m-0 tw-mt-8 tw-list-none tw-p-0">
+                {unclassifiedPrograms.map((record, index) => (
+                  <li key={record.program.id}>
+                    <ProgramFeature
+                      record={record}
+                      framework={null}
+                      index={index}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       </section>
 
@@ -577,7 +612,7 @@ export function MuseumAcquisitionProgramsLandingPage({
                 "museum.network.acquisitionPrograms.methods.description"
               )}
             </p>
-            <dl className="tw-m-6 tw-mr-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
+            <dl className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
               {(
                 [
                   [

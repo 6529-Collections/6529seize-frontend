@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { ENTITY_ID_PATTERNS } from "@/lib/museum/publication/publicEntityGraphSchema";
 import {
   buildMuseumAcquisitionProgramLandingRecords,
   MuseumAcquisitionProgramsLandingPage,
@@ -153,28 +154,40 @@ function program(
 }
 
 describe("Museum acquisition programs landing", () => {
-  it("fails closed when a program has no published framework", () => {
+  it("renders a valid but unclassified program in a neutral fallback section", () => {
+    const unknownProgramId = "6529NM-AP-ENT-0099";
     const unknown = program(
-      "6529NM-AP-UNKNOWN",
+      unknownProgramId,
       "unknown-program",
       "Unknown program",
       "unknown-acquisition",
       "purchase"
     );
 
-    expect(() =>
-      render(
-        <MuseumAcquisitionProgramsLandingPage
-          records={[
-            {
-              program: unknown,
-              acquisitions: [],
-              acquisitionArtistNames: {},
-            },
-          ]}
-        />
+    expect(ENTITY_ID_PATTERNS.ACQUISITION_PROGRAM?.test(unknown.id)).toBe(true);
+    render(
+      <MuseumAcquisitionProgramsLandingPage
+        records={[
+          {
+            program: unknown,
+            acquisitions: [],
+            acquisitionArtistNames: {},
+          },
+        ]}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Other published programs" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Unknown program", { exact: true })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "These published programs have not been assigned to one of the Museum's standing collecting frameworks."
       )
-    ).toThrow("museum_acquisition_program_framework:6529NM-AP-UNKNOWN");
+    ).toBeInTheDocument();
   });
 
   it("classifies the canonical Gift Acquisitions entity", () => {
