@@ -137,7 +137,7 @@ describe("UserPageMentionShortcuts", () => {
       isPending: false,
       isError: false,
       refetch: mockedRefetch,
-    } as ReturnType<typeof useMentionAliases>);
+    } as unknown as ReturnType<typeof useMentionAliases>);
   });
 
   it("renders owner-only Quick Tags as a compact Brain section", () => {
@@ -201,7 +201,7 @@ describe("UserPageMentionShortcuts", () => {
       isPending: false,
       isError: true,
       refetch: mockedRefetch,
-    } as ReturnType<typeof useMentionAliases>);
+    } as unknown as ReturnType<typeof useMentionAliases>);
     renderQuickTags();
 
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
@@ -297,7 +297,7 @@ describe("UserPageMentionShortcuts", () => {
       ],
       isPending: false,
       isError: false,
-    } as ReturnType<typeof useMentionAliases>);
+    } as unknown as ReturnType<typeof useMentionAliases>);
     mockedUpdateMentionAlias.mockResolvedValue({
       id: "tag-1",
       alias: "frens",
@@ -318,7 +318,15 @@ describe("UserPageMentionShortcuts", () => {
   });
 
   it("keeps editor navigation disabled while a save is pending", async () => {
-    mockedUpdateMentionAlias.mockReturnValue(new Promise(() => {}));
+    let resolveUpdate!: (
+      value: Awaited<ReturnType<typeof updateMentionAlias>>
+    ) => void;
+    const pendingUpdate = new Promise<
+      Awaited<ReturnType<typeof updateMentionAlias>>
+    >((resolve) => {
+      resolveUpdate = resolve;
+    });
+    mockedUpdateMentionAlias.mockReturnValue(pendingUpdate);
     renderQuickTags();
 
     fireEvent.click(screen.getByRole("button", { name: /@frens/i }));
@@ -329,6 +337,11 @@ describe("UserPageMentionShortcuts", () => {
       screen.getByRole("button", { name: "Back to Quick Tags" })
     ).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+
+    resolveUpdate({ id: "tag-1", alias: "frens", members: [] });
+    await waitFor(() =>
+      expect(screen.getByTestId("quick-tags-manager")).toBeInTheDocument()
+    );
   });
 
   it("excludes the connected profile from search results", async () => {
@@ -384,7 +397,7 @@ describe("UserPageMentionShortcuts", () => {
   it("announces only the search results rendered in the list", async () => {
     const searchResults: CommunityMemberMinimal[] = Array.from(
       { length: 7 },
-      (_, index) => ({
+      (_, index): CommunityMemberMinimal => ({
         profile_id: `profile-${index + 20}`,
         handle: `alex${index}`,
         normalised_handle: `alex${index}`,
