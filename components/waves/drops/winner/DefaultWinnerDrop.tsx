@@ -224,7 +224,11 @@ const DefaultWinnerDropInner = ({
   return (
     <div
       className={`tw-w-full ${
-        location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
+        location === DropLocation.WAVE
+          ? "tw-px-4 tw-py-1"
+          : location === DropLocation.PROFILE
+            ? "tw-mb-3"
+            : ""
       }`}
     >
       <div className="tw-group tw-relative tw-w-full">

@@ -10,7 +10,7 @@ export type MobileTab = "rep" | "nic" | "statements";
 const SELECTED_BUTTON_CLASSES: Record<MobileTab, string> = {
   rep: "tw-border-primary-500/30 tw-bg-primary-500/10",
   nic: "tw-border-emerald-500/30 tw-bg-emerald-500/10",
-  statements: "tw-border-white/15 tw-bg-white/[0.06]",
+  statements: "tw-border-emerald-500/30 tw-bg-emerald-500/10",
 };
 
 function MobileTabButton({

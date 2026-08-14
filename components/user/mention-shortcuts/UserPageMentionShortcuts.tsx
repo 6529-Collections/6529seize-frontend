@@ -439,7 +439,9 @@ export default function UserPageMentionShortcuts({
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
   const isOwner =
-    !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
+    !!profile.id &&
+    connectedProfile?.id === profile.id &&
+    !activeProfileProxy;
   const queryClient = useQueryClient();
   const { aliases, isPending, isError, refetch } = useMentionAliases({
     enabled: isOwner,
@@ -480,7 +482,10 @@ export default function UserPageMentionShortcuts({
 
   const deleteMutation = useMutation({
     mutationFn: deleteMentionAlias,
-    onSuccess: async () => {
+    onSuccess: async (_data, deletedAliasId) => {
+      const deletedLastAlias = !aliases.some(
+        (alias) => alias.id !== deletedAliasId
+      );
       await queryClient.invalidateQueries({
         queryKey: [QueryKey.MENTION_ALIASES],
       });
@@ -489,6 +494,9 @@ export default function UserPageMentionShortcuts({
         message: t(locale, "user.mentionShortcuts.deleted"),
       });
       requestViewHeadingFocus();
+      if (deletedLastAlias) {
+        setView("summary");
+      }
       setAliasToDelete(null);
       setEditorAlias(null);
     },
@@ -571,13 +579,15 @@ export default function UserPageMentionShortcuts({
               {t(locale, "user.mentionShortcuts.summaryDescription")}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => changeView("manage")}
-            className="tw-min-h-11 tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-400 sm:tw-min-h-6 sm:tw-py-0"
-          >
-            {t(locale, "user.mentionShortcuts.manage")}
-          </button>
+          {sortedAliases.length > 0 && (
+            <button
+              type="button"
+              onClick={() => changeView("manage")}
+              className="tw-min-h-11 tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-400 sm:tw-min-h-6 sm:tw-py-0"
+            >
+              {t(locale, "user.mentionShortcuts.manage")}
+            </button>
+          )}
         </div>
 
         <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-gap-2">
@@ -591,14 +601,18 @@ export default function UserPageMentionShortcuts({
           )}
           {isError && <QuickTagsLoadError onRetry={() => void refetch()} />}
           {!isPending && !isError && sortedAliases.length === 0 && (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => startEditing(null, "summary")}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/5 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10 sm:tw-min-h-9 sm:tw-py-2"
+              className="tw-min-h-11 sm:tw-min-h-9"
             >
-              <PlusIcon aria-hidden="true" className="tw-size-4" />
+              <PlusIcon
+                aria-hidden="true"
+                className="-tw-ml-0.5 tw-size-4"
+              />
               {t(locale, "user.mentionShortcuts.new")}
-            </button>
+            </Button>
           )}
           {!isPending &&
             !isError &&
