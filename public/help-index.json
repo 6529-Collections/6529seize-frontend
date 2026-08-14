@@ -4551,6 +4551,7 @@
         "Identity statements are managed from profile identity surfaces on /{user}.",
         "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
         "The add modal supports documented statement types and visibility rules.",
+        "On mobile web and Capacitor, the add-statements sheet stays above the software keyboard and keeps its fields and Save/Cancel actions reachable by scrolling.",
         "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state."
       ],
       "canonical_path": "/{user}",
