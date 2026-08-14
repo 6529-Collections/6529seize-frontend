@@ -30,7 +30,7 @@ function assertExpectedMetadataStructure(editorialMarkdown: string): void {
   for (const heading of EXPECTED_METADATA_HEADINGS) {
     const headingLine = `## ${heading}`;
     const lines = remainingMarkdown.split("\n");
-    const matchIndex = lines.findIndex((line) => line === headingLine);
+    const matchIndex = lines.indexOf(headingLine);
     if (matchIndex < 0) {
       throw new Error(
         "The current Stream review editorial transformation is out of date: " +
