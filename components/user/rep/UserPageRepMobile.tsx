@@ -4,13 +4,18 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { CicStatement } from "@/entities/IProfile";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { buildRepAvatarItems } from "./buildRepAvatarItems";
+import { STATEMENT_GROUP } from "@/helpers/Types";
+import { commonApiFetch } from "@/services/api/common-api";
 import { RateMatter } from "@/types/enums";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
+import { useParams } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 import IdentityGettingStartedCard from "../identity/getting-started/IdentityGettingStartedCard";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
@@ -19,11 +24,17 @@ import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditRep, getCanEditNic } from "./UserPageRep.helpers";
-import MobileTabCards from "./MobileTabCards";
+import MobileTabCards, { type MobileTab } from "./MobileTabCards";
 import MobileRepTabContent from "./MobileRepTabContent";
-import MobileIdentityTabContent from "./MobileIdentityTabContent";
+import MobileNicTabContent from "./MobileNicTabContent";
+import MobileStatementsTabContent from "./MobileStatementsTabContent";
 
-type MobileTab = "rep" | "identity";
+const IDENTITY_STATEMENT_GROUPS = new Set<STATEMENT_GROUP>([
+  STATEMENT_GROUP.CONTACT,
+  STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT,
+  STATEMENT_GROUP.NFT_ACCOUNTS,
+  STATEMENT_GROUP.SOCIAL_MEDIA_VERIFICATION_POST,
+]);
 
 export default function UserPageRepMobile({
   profile,
@@ -58,6 +69,8 @@ export default function UserPageRepMobile({
   readonly onOpenGlobalCategory: (category: string) => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
+  const params = useParams();
+  const user = params["user"]?.toString().toLowerCase() ?? null;
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
 
@@ -94,13 +107,28 @@ export default function UserPageRepMobile({
       (w) => w.wallet.toLowerCase() === address?.toLowerCase()
     );
 
-  const cicAvatarItems = useMemo(
-    () =>
-      buildRepAvatarItems(cicOverview?.contributors.data ?? [], 3, {
-        omitHref: true,
-      }),
-    [cicOverview?.contributors.data]
-  );
+  const { data: statements } = useQuery<CicStatement[]>({
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user],
+    queryFn: async () => {
+      if (!user) {
+        return [];
+      }
+      return await commonApiFetch<CicStatement[]>({
+        endpoint: `profiles/${user}/cic/statements`,
+      });
+    },
+    enabled: !!user,
+  });
+
+  const identityStatementCount = useMemo(() => {
+    if (!statements) {
+      return null;
+    }
+    const visibleStatementCount = statements.filter((statement) =>
+      IDENTITY_STATEMENT_GROUPS.has(statement.statement_group)
+    ).length;
+    return (profile.wallets?.length ?? 0) + visibleStatementCount;
+  }, [profile.wallets, statements]);
 
   return (
     <div>
@@ -112,13 +140,11 @@ export default function UserPageRepMobile({
         overview={overview}
         cicOverview={cicOverview}
         profile={profile}
-        repDirection={repDirection}
-        cicAvatarItems={cicAvatarItems}
-        onOpenOverviewContributors={onOpenOverviewContributors}
+        identityStatementCount={identityStatementCount}
       />
 
       <AnimatePresence mode="wait">
-        {activeTab === "rep" ? (
+        {activeTab === "rep" && (
           <motion.div
             key="rep"
             initial={{ opacity: 0 }}
@@ -140,26 +166,43 @@ export default function UserPageRepMobile({
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
               onGrantRep={() => setIsGrantRepOpen(true)}
+              onOpenOverviewContributors={onOpenOverviewContributors}
               onEditCategory={setEditCategory}
               onOpenGlobalCategory={onOpenGlobalCategory}
               onOpenCategoryContributors={onOpenCategoryContributors}
             />
           </motion.div>
-        ) : (
+        )}
+
+        {activeTab === "nic" && (
           <motion.div
-            key="identity"
+            key="nic"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15, ease: "easeInOut" }}
           >
-            <MobileIdentityTabContent
+            <MobileNicTabContent
               profile={profile}
               cicOverview={cicOverview}
               initialActivityLogParams={initialActivityLogParams}
               canEditNic={canEditNic}
-              canEditStatements={canEditStatements}
               onRateNic={() => setIsNicRateOpen(true)}
+            />
+          </motion.div>
+        )}
+
+        {activeTab === "statements" && (
+          <motion.div
+            key="statements"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeInOut" }}
+          >
+            <MobileStatementsTabContent
+              profile={profile}
+              canEditStatements={canEditStatements}
             />
           </motion.div>
         )}
@@ -176,10 +219,12 @@ export default function UserPageRepMobile({
         title="Rate NIC"
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
+        noPadding
         tabletModal
         maxWidthClass="md:tw-max-w-md"
+        headerClassName="tw-pb-6 tw-pt-4"
       >
-        <div className="tw-px-4 sm:tw-px-6">
+        <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
             <UserPageIdentityHeaderCICRate
               profile={profile}

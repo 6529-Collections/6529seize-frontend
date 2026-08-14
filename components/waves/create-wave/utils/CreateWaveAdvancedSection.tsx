@@ -6,14 +6,18 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function CreateWaveAdvancedSection({
+  title,
   summary,
   isCustomized,
   hasError,
+  variant = "default",
   children,
 }: {
+  readonly title?: string;
   readonly summary?: string;
   readonly isCustomized: boolean;
   readonly hasError: boolean;
+  readonly variant?: "default" | "filled";
   readonly children: ReactNode;
 }) {
   const locale = useBrowserLocale();
@@ -32,6 +36,8 @@ export default function CreateWaveAdvancedSection({
   }
 
   const isExpanded = isOpen || hasError;
+  const isFilled = variant === "filled";
+  const sectionTitle = title ?? t(locale, "waves.create.advanced.title");
   const detail = hasError
     ? t(locale, "waves.create.advanced.errorSummary")
     : summary;
@@ -43,19 +49,29 @@ export default function CreateWaveAdvancedSection({
     status = t(locale, "waves.create.advanced.customized");
   }
 
+  const sectionClasses = isFilled
+    ? "tw-border-white/5 tw-bg-iron-900/60 desktop-hover:hover:tw-border-white/10"
+    : "tw-border-white/10 tw-bg-transparent desktop-hover:hover:tw-border-white/20";
+  const buttonClasses = isFilled
+    ? "tw-bg-transparent desktop-hover:hover:tw-bg-white/[0.02]"
+    : "tw-bg-iron-900/60 desktop-hover:hover:tw-bg-iron-900";
+  const contentClasses = isFilled ? "tw-p-0" : "tw-p-4";
+
   return (
-    <section className="tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-transition-colors desktop-hover:hover:tw-border-white/20">
+    <section
+      className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-300 tw-ease-out motion-reduce:tw-transition-none ${sectionClasses}`}
+    >
       <button
         type="button"
         aria-expanded={isExpanded}
         aria-controls={contentId}
         onClick={() => setIsOpen((current) => (hasError ? true : !current))}
-        className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-left tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none"
+        className={`tw-group tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${buttonClasses}`}
       >
         <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0">
           <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-leading-4">
-            <span className="tw-text-sm tw-font-semibold tw-leading-4 tw-text-iron-200">
-              {t(locale, "waves.create.advanced.title")}
+            <span className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+              {sectionTitle}
             </span>
             {status ? (
               <span
@@ -77,7 +93,7 @@ export default function CreateWaveAdvancedSection({
         </span>
         <ChevronDownIcon
           aria-hidden="true"
-          className={`tw-size-5 tw-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
+          className={`tw-size-5 tw-shrink-0 tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-out group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300 motion-reduce:tw-transition-none ${
             isExpanded ? "tw-rotate-180" : ""
           }`}
         />
@@ -85,7 +101,7 @@ export default function CreateWaveAdvancedSection({
       <div
         id={contentId}
         hidden={!isExpanded}
-        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-transparent tw-p-4"
+        className={`tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-transparent ${contentClasses}`}
       >
         {children}
       </div>

@@ -12,34 +12,32 @@ export default function CreateWaveToggle({
   displayLabel = false,
 }: CreateWaveToggleProps) {
   return (
-    <div className="tw-pl-4">
-      <label className="tw-flex tw-cursor-pointer tw-items-center">
+    <div>
+      <label className="tw-flex tw-min-h-6 tw-cursor-pointer tw-items-center tw-gap-2">
+        <input
+          type="checkbox"
+          role="switch"
+          className="tw-peer tw-sr-only"
+          checked={enabled}
+          onChange={(event) => onChange(event.target.checked)}
+        />
         {displayLabel && (
-          <span className="tw-mr-2 tw-text-xs tw-font-medium tw-text-iron-500">
+          <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
             {label}
           </span>
         )}
         <span className="tw-sr-only">{!displayLabel ? label : ""}</span>
-        <div className="tw-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
-          <div
-            className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${
+        <span className="tw-flex tw-items-center">
+          <span
+            aria-hidden="true"
+            className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
               enabled ? "tw-from-primary-300" : "tw-from-iron-600"
             }`}
           >
-            <input
-              type="checkbox"
-              className="tw-sr-only"
-              checked={enabled}
-              onChange={(e) => onChange(e.target.checked)}
-            />
             <span
               className={`tw-relative tw-flex tw-h-5 tw-w-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-rounded-full tw-border-2 tw-border-transparent tw-p-0 tw-transition-colors tw-duration-200 tw-ease-in-out ${
-                enabled
-                  ? "tw-bg-primary-500 focus:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2"
-                  : "tw-bg-iron-700 focus:tw-outline-none"
+                enabled ? "tw-bg-primary-500" : "tw-bg-iron-700"
               }`}
-              role="switch"
-              aria-checked={enabled ? "true" : "false"}
             >
               <span
                 aria-hidden="true"
@@ -48,8 +46,8 @@ export default function CreateWaveToggle({
                 }`}
               ></span>
             </span>
-          </div>
-        </div>
+          </span>
+        </span>
       </label>
     </div>
   );

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { AcquisitionDocumentSection } from "@/components/museum/acquisition/MuseumAcquisitionRecordSections";
+import { museumAcquisitionWorkCountLabel } from "@/components/museum/acquisition/MuseumAcquisitionCopy";
 import type { MuseumPublicDocument } from "@/lib/museum/publication/types";
 
 function documentFor(
@@ -21,6 +22,12 @@ function documentFor(
 }
 
 describe("Museum acquisition record document history", () => {
+  it("uses museum language for singular and plural work counts", () => {
+    expect(museumAcquisitionWorkCountLabel(1)).toBe("1 work");
+    expect(museumAcquisitionWorkCountLabel(7)).toBe("7 works");
+    expect(museumAcquisitionWorkCountLabel(16)).toBe("16 works");
+  });
+
   it("recognizes status observations and amendments as historical records", () => {
     const props = { sourceCommit: "a".repeat(40), workHrefs: {} } as const;
     const { rerender } = render(

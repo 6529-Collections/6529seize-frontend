@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import CreateWaveWarning from "../utils/CreateWaveWarning";
 
 export default function CreateWaveOutcomeWarning({
@@ -14,36 +15,32 @@ export default function CreateWaveOutcomeWarning({
   readonly dates: CreateWaveDatesConfig;
   readonly maxWinners: number | null;
 }) {
+  const locale = useBrowserLocale();
   const isApproveWave = waveType === ApiWaveType.Approve;
-
-  const [warning, setWarning] = useState<{
+  const hasMaxWinners = Boolean(maxWinners);
+  const hasEndDate = Boolean(dates.endDate);
+  let warning: {
     readonly title: string;
     readonly description: string;
-  } | null>(null);
+  } | null = null;
 
-  useEffect(() => {
-    if (!isApproveWave) {
-      setWarning(null);
-      return;
-    }
-    if (maxWinners) {
-      setWarning(null);
-      return;
-    }
-    if (!dates.endDate) {
-      setWarning({
-        title: "Warning: Challenge Will Run Indefinitely",
-        description:
-          "You have not set an end date or a maximum number of winners for this challenge. It will run indefinitely, and everyone who meets the threshold will be awarded.",
-      });
-      return;
-    }
-    setWarning({
-      title: "Warning: Unlimited Awards",
-      description:
-        "You have not set a maximum number of winners for this challenge. Everyone who meets the threshold will be awarded.",
-    });
-  }, [dates.endDate, maxWinners, isApproveWave]);
+  if (isApproveWave && !hasMaxWinners) {
+    warning = hasEndDate
+      ? {
+          title: t(locale, "waves.create.outcomes.warning.unlimited.title"),
+          description: t(
+            locale,
+            "waves.create.outcomes.warning.unlimited.description"
+          ),
+        }
+      : {
+          title: t(locale, "waves.create.outcomes.warning.indefinite.title"),
+          description: t(
+            locale,
+            "waves.create.outcomes.warning.indefinite.description"
+          ),
+        };
+  }
 
   if (!warning) {
     return null;

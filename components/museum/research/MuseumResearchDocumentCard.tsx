@@ -17,19 +17,6 @@ export interface MuseumResearchDocumentCardEntry {
   readonly media?: MuseumMedia;
 }
 
-function excerpt(markdown: string | undefined): string | undefined {
-  if (markdown === undefined) return undefined;
-  const value = markdown
-    .replace(/^#{1,6}\s+/gmu, "")
-    .replace(/!\[[^\]]*\]\([^)]*\)/gu, "")
-    .replace(/\[([^\]]+)\]\([^)]*\)/gu, "$1")
-    .replace(/[*_>`]/gu, "")
-    .replace(/\s+/gu, " ")
-    .trim();
-  if (value.length === 0) return undefined;
-  return value.length > 190 ? `${value.slice(0, 187).trimEnd()}…` : value;
-}
-
 export function MuseumResearchDocumentCard({
   entry,
   kindLabel,
@@ -48,7 +35,6 @@ export function MuseumResearchDocumentCard({
           DEFAULT_LOCALE,
           museumDocumentKindLabelKey(entry.document.kind) as MessageKey
         ));
-  const summary = excerpt(entry.document?.markdown);
   const Heading = headingLevel === 4 ? "h4" : "h3";
 
   return (
@@ -82,11 +68,6 @@ export function MuseumResearchDocumentCard({
             {entry.title}
           </Link>
         </Heading>
-        {summary === undefined ? null : (
-          <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {summary}
-          </p>
-        )}
       </div>
     </article>
   );

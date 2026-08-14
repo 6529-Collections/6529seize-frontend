@@ -90,6 +90,45 @@ function documentGroup(document: MuseumPublicDocument): MuseumResearchGroup {
   return "stewardship";
 }
 
+function museumResearchSlugPart(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/\p{Mark}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, "-")
+    .replace(/^-+|-+$/gu, "");
+}
+
+function museumResearchSlugHash(value: string): string {
+  let hash = 2166136261;
+  for (const character of value) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function uniqueMuseumResearchDocumentSlug(
+  document: MuseumPublicDocument,
+  usedSlugs: Set<string>
+): string {
+  const base =
+    museumResearchSlugPart(document.title) ||
+    `research-document-${museumResearchSlugHash(document.id)}`;
+  if (!usedSlugs.has(base)) return base;
+
+  const disambiguated = `${base}-${museumResearchSlugHash(document.id)}`;
+  if (!usedSlugs.has(disambiguated)) return disambiguated;
+
+  let suffix = 2;
+  let candidate = `${disambiguated}-${suffix}`;
+  while (usedSlugs.has(candidate)) {
+    suffix += 1;
+    candidate = `${disambiguated}-${suffix}`;
+  }
+  return candidate;
+}
+
 function researchMedia(
   publication: MuseumPublication,
   document: MuseumPublicDocument
@@ -127,19 +166,26 @@ function researchMedia(
     .find((media): media is MuseumMedia => media !== undefined);
 }
 
+function typedResearchDocument(
+  publication: MuseumPublication,
+  record: NonNullable<MuseumPublication["researchPublications"]>[number]
+): MuseumPublicDocument | undefined {
+  const matches = publication.documents.filter(
+    (document) =>
+      buildImmutableMuseumBlobUrl(
+        publication.identity.commit,
+        document.sourcePath
+      ) === record.publicationUri
+  );
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
 export function buildMuseumResearchIndex(
   publication: MuseumPublication
 ): readonly MuseumResearchIndexEntry[] {
   const typed = publication.researchPublications ?? [];
   const typedEntries = typed.flatMap((record) => {
-    const document = publication.documents.find(
-      (candidate) =>
-        candidate.id === record.id ||
-        buildImmutableMuseumBlobUrl(
-          publication.identity.commit,
-          candidate.sourcePath
-        ) === record.publicationUri
-    );
+    const document = typedResearchDocument(publication, record);
     const immutablePublicationUri =
       document === undefined
         ? null
@@ -172,6 +218,7 @@ export function buildMuseumResearchIndex(
   const representedDocumentIds = new Set(
     typedEntries.map((entry) => entry.document.id)
   );
+  const usedSlugs = new Set(typedEntries.map((entry) => entry.slug));
   const documentEntries = publication.documents
     .filter(
       (document) =>
@@ -181,9 +228,11 @@ export function buildMuseumResearchIndex(
     .filter((document) => !representedDocumentIds.has(document.id))
     .map((document) => {
       const media = researchMedia(publication, document);
+      const slug = uniqueMuseumResearchDocumentSlug(document, usedSlugs);
+      usedSlugs.add(slug);
       return {
         id: document.id,
-        slug: document.id,
+        slug,
         title: document.title,
         group: documentGroup(document),
         sourcePath: document.sourcePath,
@@ -193,6 +242,15 @@ export function buildMuseumResearchIndex(
       };
     });
   return [...typedEntries, ...documentEntries];
+}
+
+export function findMuseumResearchIndexEntry(
+  publication: MuseumPublication,
+  slug: string
+): MuseumResearchIndexEntry | undefined {
+  return buildMuseumResearchIndex(publication).find(
+    (entry) => entry.slug === slug
+  );
 }
 
 export const MUSEUM_RESEARCH_GROUPS: readonly [

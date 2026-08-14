@@ -84,6 +84,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     overscan = DEFAULT_OVERSCAN,
     placeholder = "Search by collection name or paste contract address…",
     className,
+    hideSelectionSummaryWhenEmpty = false,
     renderTokenExtra,
     variant = "card",
   } = props;
@@ -494,27 +495,33 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                 helperMessageId={helperMessageId}
               />
 
-              <NftEditRanges
-                ranges={ranges}
-                isEditing={isEditingText}
-                textValue={textValue}
-                parseErrors={parseErrors}
-                allowAll={allowAll}
-                onToggle={() => setIsEditingText((prev) => !prev)}
-                onTextChange={(val) => {
-                  if (parseErrors.length) setParseErrors([]);
-                  if (addTokenInputError !== null) setAddTokenInputError(null);
-                  setTextValue(val);
-                }}
-                onApply={handleApplyText}
-                onCancel={() => {
-                  setTextValue(formatCanonical(ranges));
-                  setParseErrors([]);
-                  setAddTokenInputError(null);
-                  setIsEditingText(false);
-                }}
-                onClear={handleClearTokens}
-              />
+              {(!hideSelectionSummaryWhenEmpty ||
+                ranges.length > 0 ||
+                isEditingText) && (
+                <NftEditRanges
+                  ranges={ranges}
+                  isEditing={isEditingText}
+                  textValue={textValue}
+                  parseErrors={parseErrors}
+                  allowAll={allowAll}
+                  variant={variant}
+                  onToggle={() => setIsEditingText((prev) => !prev)}
+                  onTextChange={(val) => {
+                    if (parseErrors.length) setParseErrors([]);
+                    if (addTokenInputError !== null)
+                      setAddTokenInputError(null);
+                    setTextValue(val);
+                  }}
+                  onApply={handleApplyText}
+                  onCancel={() => {
+                    setTextValue(formatCanonical(ranges));
+                    setParseErrors([]);
+                    setAddTokenInputError(null);
+                    setIsEditingText(false);
+                  }}
+                  onClear={handleClearTokens}
+                />
+              )}
 
               {ranges.length > 0 ? (
                 <NftTokenList
@@ -522,6 +529,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                   chain={chain}
                   ranges={ranges}
                   overscan={overscan}
+                  variant={variant}
                   renderTokenExtra={renderTokenExtra}
                   onRemove={handleRemoveToken}
                 />

@@ -57,7 +57,7 @@ export default function CreateWaveDraftsSection({
           {drafts.map((draft) => (
             <li
               key={draft.id}
-              className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-800/60 tw-py-2 tw-pl-4 tw-pr-2 tw-ring-1 tw-ring-inset tw-ring-iron-700"
+              className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-py-2 tw-pl-4 tw-pr-2"
             >
               <button
                 type="button"

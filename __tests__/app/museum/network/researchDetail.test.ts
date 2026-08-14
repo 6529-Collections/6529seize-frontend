@@ -2,9 +2,14 @@ import {
   buildMuseumResearchDetailEntry,
   buildMuseumResearchRelations,
 } from "@/app/museum/network/research/[slug]/page";
-import type { MuseumResearchIndexEntry } from "@/app/museum/network/research/page";
+import {
+  buildMuseumResearchIndex,
+  findMuseumResearchIndexEntry,
+  type MuseumResearchIndexEntry,
+} from "@/app/museum/network/research/page";
 import type {
   MuseumMedia,
+  MuseumPublicDocument,
   MuseumPublication,
 } from "@/lib/museum/publication/types";
 
@@ -149,6 +154,108 @@ function publication(): MuseumPublication {
 }
 
 describe("Museum research detail enrichment", () => {
+  it("generates unique URL-safe document slugs and resolves each detail entry", () => {
+    const generatedDocuments: readonly MuseumPublicDocument[] = [
+      {
+        ...DOCUMENT,
+        id: "typed-source:records/research/a-study.md",
+        sourcePath: "records/research/a-study.md",
+      },
+      {
+        ...DOCUMENT,
+        id: "typed-source:records/research/a:study.md",
+        sourcePath: "records/research/a:study.md",
+      },
+      {
+        ...DOCUMENT,
+        id: "typed-source:records/research/a/study.md",
+        sourcePath: "records/research/a/study.md",
+      },
+    ];
+    const current = publication();
+    const withUnrepresentedDocuments = {
+      ...current,
+      documents: [...current.documents, ...generatedDocuments],
+    };
+
+    const entries = buildMuseumResearchIndex(withUnrepresentedDocuments);
+    const generatedEntries = entries.filter((entry) =>
+      generatedDocuments.some((document) => document.id === entry.id)
+    );
+
+    expect(entries.find((entry) => entry.id === RESEARCH_ID)?.slug).toBe(
+      ENTRY.slug
+    );
+    expect(new Set(entries.map((entry) => entry.slug)).size).toBe(
+      entries.length
+    );
+    expect(generatedEntries).toHaveLength(generatedDocuments.length);
+    expect(generatedEntries[0]?.slug).toMatch(/^a-study-of-a-work-/u);
+    for (const entry of generatedEntries) {
+      expect(entry.slug).not.toMatch(/[:%/\\]/u);
+      expect(
+        findMuseumResearchIndexEntry(withUnrepresentedDocuments, entry.slug)
+      ).toEqual(expect.objectContaining({ id: entry.id, slug: entry.slug }));
+    }
+  });
+
+  it("joins a typed publication to its exact current manuscript before record IDs", () => {
+    const manuscript = {
+      ...DOCUMENT,
+      id: `typed-source:${DOCUMENT.sourcePath}`,
+      markdown:
+        "# A study of a work\n\nThe governed manuscript is the visitor-facing publication.",
+    };
+    const machineRecord: MuseumPublicDocument = {
+      ...DOCUMENT,
+      id: RESEARCH_ID,
+      kind: "source_record",
+      title: "Research publication record",
+      markdown: '{"recordType":"RESEARCH_PUBLICATION"}',
+      sourcePath: "records/entities/6529NM-RP-0001.json",
+    };
+    const current = {
+      ...publication(),
+      documents: [machineRecord, manuscript],
+    };
+
+    const entry = findMuseumResearchIndexEntry(current, ENTRY.slug);
+
+    expect(entry).toEqual(
+      expect.objectContaining({
+        id: RESEARCH_ID,
+        typed: true,
+        publicationUri: ENTRY.publicationUri,
+        document: expect.objectContaining({
+          id: manuscript.id,
+          sourcePath: manuscript.sourcePath,
+          markdown: manuscript.markdown,
+        }),
+      })
+    );
+  });
+
+  it("fails closed when a typed publication has no exact manuscript source", () => {
+    const current = {
+      ...publication(),
+      researchPublications: [
+        {
+          ...publication().researchPublications![0]!,
+          publicationUri: ENTRY.publicationUri!.replace(
+            DOCUMENT.sourcePath,
+            "records/research/not-the-manuscript.md"
+          ),
+        },
+      ],
+    };
+
+    expect(
+      buildMuseumResearchIndex(current).some(
+        (entry) => entry.id === RESEARCH_ID && entry.typed
+      )
+    ).toBe(false);
+  });
+
   it("prefers typed subject media and carries typed subjects and authors", () => {
     const detail = buildMuseumResearchDetailEntry(publication(), ENTRY);
 

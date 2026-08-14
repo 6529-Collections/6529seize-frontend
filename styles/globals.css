@@ -94,6 +94,14 @@
     ) {
     --native-keyboard-composer-bottom-padding: 0px;
   }
+  :root[data-native-keyboard-visible="true"]
+    .mobile-wrapper-dialog-overflow-surface {
+    overflow: hidden;
+  }
+  :root[data-native-keyboard-visible="true"]
+    .mobile-wrapper-dialog-overflow-content {
+    overflow-y: auto;
+  }
   [data-pull-to-refresh-transform-root="true"]
     [data-pull-to-refresh-fixed-overlay="true"] {
     translate: 0 calc(var(--pull-to-refresh-fixed-overlay-offset, 0px) * -1);

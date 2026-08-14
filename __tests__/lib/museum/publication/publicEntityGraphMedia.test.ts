@@ -19,6 +19,8 @@ const OBSERVATION_PATH =
   "records/proposed-gifts/6529NM-PG-2026-001/wave-publication-observation-2026-08-08.json";
 const MEDIA_CONTINUITY_AMENDMENT_PATH =
   "records/proposed-gifts/6529NM-PG-2026-001/public/scholarship/machine/media-source-continuity-amendment.json";
+const ACCESSION_PRESENTATION_PATH =
+  "records/accessions/6529NM.2026.002/public/presentation-manifest.json";
 const PROPOSAL_ID = "6529NM-PG-2026-001";
 
 type WavePart = Record<string, unknown>;
@@ -61,6 +63,70 @@ function buildMediaContinuityAmendmentDocument(input: {
     sha256: sha256(text),
     mediaType: "application/json",
     text,
+  };
+}
+
+function buildAccessionPresentationDocument(input: {
+  readonly workId: string;
+  readonly mediaId: string;
+  readonly sourceUrl: string;
+  readonly sourceDigest: string;
+  readonly sourceByteSize: number;
+  readonly sourceWidth: number;
+  readonly sourceHeight: number;
+  readonly altText: string;
+}): { readonly document: MuseumSourceDocument; readonly paths: string[] } {
+  const digest = input.sourceDigest.replace("sha256:", "");
+  const dimensions = [
+    [640, 512],
+    [1280, 1023],
+    [2400, 1919],
+  ] as const;
+  const derivatives = dimensions.map(([width, height]) => {
+    const repositoryPath = `media/accessions/6529NM.2026.002/${input.workId}/${digest}/webp-v2-q82-m6-fixed-icc/${width}.webp`;
+    return {
+      width,
+      height,
+      mime_type: "image/webp",
+      sha256: `sha256:${String(width).padStart(64, "0")}`,
+      byte_size: width * 100,
+      repository_path: repositoryPath,
+      url: `https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/${input.workId}/${digest}/webp-v2-q82-m6-fixed-icc/${width}.webp`,
+      cache_control: "public, max-age=31536000, immutable",
+    };
+  });
+  const text = JSON.stringify({
+    record_type: "ACCESSION_MEDIA_PRESENTATION",
+    schema_profile: "6529NM_ACCESSION_MEDIA_PRESENTATION_V1",
+    accession_lot_id: "6529NM.2026.002",
+    delivery: {
+      status: "approved_for_contextual_museum_display",
+      cdn_base_url: "https://d3lqz0a4bldqgf.cloudfront.net",
+      cache_control: "public, max-age=31536000, immutable",
+    },
+    items: [
+      {
+        work_entity_id: input.workId,
+        media_reference_entity_id: input.mediaId,
+        source: {
+          url: input.sourceUrl,
+          sha256: input.sourceDigest,
+          byte_size: input.sourceByteSize,
+          pixel_width: input.sourceWidth,
+          pixel_height: input.sourceHeight,
+        },
+        presentation: { alt_text: input.altText, derivatives },
+      },
+    ],
+  });
+  return {
+    document: {
+      path: ACCESSION_PRESENTATION_PATH,
+      sha256: sha256(text),
+      mediaType: "application/json",
+      text,
+    },
+    paths: derivatives.map((derivative) => derivative.repository_path),
   };
 }
 
@@ -834,10 +900,23 @@ describe("Wave publication receipt joins", () => {
     const sourceDocuments = new Map([
       [MEDIA_CONTINUITY_AMENDMENT_PATH, amendmentDocument],
     ]);
+    const presentation = buildAccessionPresentationDocument({
+      workId,
+      mediaId,
+      sourceUrl: displayUri,
+      sourceDigest: digest,
+      sourceByteSize: 16_871_807,
+      sourceWidth: 5964,
+      sourceHeight: 4768,
+      altText:
+        "A soldier seated among rubble and standing columns at Palmyra.",
+    });
+    sourceDocuments.set(ACCESSION_PRESENTATION_PATH, presentation.document);
     const projected = projectMediaRelations(
       graph.entities,
       graph,
-      sourceDocuments
+      sourceDocuments,
+      presentation.paths
     );
     expect(projected.get(workId)?.presentation).toEqual([
       expect.objectContaining({
@@ -849,6 +928,11 @@ describe("Wave publication receipt joins", () => {
           mediaRecordPath: `records/entities/${mediaId}.json`,
         }),
         mediaUrl: displayUri,
+        variants: [
+          expect.objectContaining({ width: 640 }),
+          expect.objectContaining({ width: 1280 }),
+          expect.objectContaining({ width: 2400 }),
+        ],
       }),
     ]);
     const mismatchedDocument = buildMediaContinuityAmendmentDocument({

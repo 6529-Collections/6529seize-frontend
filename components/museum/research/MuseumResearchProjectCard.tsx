@@ -20,11 +20,34 @@ export interface MuseumResearchProjectCardData {
   readonly presentationMedia?: MuseumExternalProposalPresentationMedia;
 }
 
+function portraitAspectRatio(
+  width: number | null,
+  height: number | null
+): number | undefined {
+  if (width === null || height === null || height <= width) return undefined;
+  return width / height;
+}
+
 export function MuseumResearchProjectCard({
   project,
 }: {
   readonly project: MuseumResearchProjectCardData;
 }) {
+  const mediaAspectRatio = project.media
+    ? portraitAspectRatio(project.media.width, project.media.height)
+    : undefined;
+  const presentationAspectRatio = project.presentationMedia
+    ? portraitAspectRatio(
+        project.presentationMedia.width,
+        project.presentationMedia.height
+      )
+    : undefined;
+  const mediaAspectRatioProps =
+    mediaAspectRatio === undefined ? {} : { aspectRatio: mediaAspectRatio };
+  const presentationStyleProps =
+    presentationAspectRatio === undefined
+      ? {}
+      : { style: { aspectRatio: presentationAspectRatio } };
   return (
     <article className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4 sm:tw-p-5">
       {project.media === undefined ? null : (
@@ -36,17 +59,22 @@ export function MuseumResearchProjectCard({
           href={project.href}
           title={project.title}
           sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
+          {...mediaAspectRatioProps}
         />
       )}
       {project.media !== undefined ||
       project.presentationMedia === undefined ? null : (
-        <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
+        <div
+          className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black"
+          {...presentationStyleProps}
+        >
           <MuseumProposalImage
             src={project.presentationMedia.mediaUrl}
             width={project.presentationMedia.width}
             height={project.presentationMedia.height}
             alt={project.presentationMedia.altText.trim() || project.title}
             sourceByteSize={project.presentationMedia.sourceByteSize}
+            variants={project.presentationMedia.variants}
             requireIntentForLargeSource={false}
             className="tw-h-full tw-w-full tw-object-contain"
           />
@@ -62,14 +90,16 @@ export function MuseumResearchProjectCard({
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.projects.project")}
         </p>
-        <h3 className="tw-m-0 tw-mt-2 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-50">
-          <Link
-            href={project.href}
-            className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {project.title}
-          </Link>
-        </h3>
+        {project.media === undefined ? (
+          <h3 className="tw-m-0 tw-mt-2 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-50">
+            <Link
+              href={project.href}
+              className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {project.title}
+            </Link>
+          </h3>
+        ) : null}
         {project.artistNames.length === 0 ? null : (
           <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-300">
             {project.artistNames.join(", ")}

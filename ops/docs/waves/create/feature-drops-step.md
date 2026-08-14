@@ -9,6 +9,9 @@ requirements:
 - optional required metadata keys
 - optional simultaneous-submission limit
 
+The submission type stays visible. Optional media requirements, metadata, and
+simultaneous-submission limits are under `Submission requirements`.
+
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
@@ -34,12 +37,15 @@ requirements:
    - `Image`
    - `Audio`
    - `Video`
-2. Optionally add required metadata rows:
+2. Open `Submission requirements` only when extra requirements are needed.
+3. Optionally add required metadata rows:
    - set row type (`Text` or `Number`)
    - set metadata name
    - remove rows you do not need
-3. Optionally set `Maximum number of simultaneous submissions per participant`.
-4. Click `Next` to continue to `Rules`.
+4. Optionally set `Maximum number of simultaneous submissions per participant`.
+5. Collapse `Submission requirements` if desired; the configured values remain in the
+   draft and the disclosure shows `Customized`.
+6. Click `Next` to continue to `Rules`.
 
 ## Common Scenarios
 
@@ -66,6 +72,8 @@ requirements:
 ## Failure and Recovery
 
 - If `Next` does not advance, resolve duplicate metadata names, then retry.
+- Validation inside collapsed `Submission requirements` reopens the section and
+  exposes the invalid field.
 - If submission-limit input keeps clearing, enter a positive whole number or
   leave it blank.
 

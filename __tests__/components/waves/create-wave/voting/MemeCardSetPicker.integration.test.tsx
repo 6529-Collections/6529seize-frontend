@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -23,10 +23,21 @@ jest.mock("@/hooks/useAlchemyNftQueries", () => ({
 
 jest.mock("@/components/token-list/VirtualizedTokenList", () => ({
   VirtualizedTokenList: ({
-    footerContent,
+    ranges,
   }: {
-    readonly footerContent?: ReactNode | undefined;
-  }) => <div data-testid="token-list">{footerContent}</div>,
+    readonly ranges: readonly {
+      readonly start: bigint;
+      readonly end: bigint;
+    }[];
+  }) => (
+    <div data-testid="token-list">
+      {ranges.map(({ start, end }) =>
+        start === end
+          ? start.toString()
+          : `${start.toString()}-${end.toString()}`
+      )}
+    </div>
+  ),
 }));
 
 function ControlledMemeCardSetPicker() {

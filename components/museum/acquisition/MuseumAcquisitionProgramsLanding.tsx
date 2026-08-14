@@ -239,9 +239,7 @@ export function MuseumAcquisitionProgramsLandingPage({
             {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.title")}
           </h1>
           <p className="tw-m-0 tw-mt-6 tw-max-w-lg tw-text-lg tw-leading-8 tw-text-iron-300">
-            Curated routes for forming groups of works. A program sets the
-            premise; the acquisition that follows gives the works a title and a
-            place in Museum history.
+            {t(DEFAULT_LOCALE, "museum.network.acquisitionPrograms.lead")}
           </p>
           <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <Link
@@ -260,21 +258,91 @@ export function MuseumAcquisitionProgramsLandingPage({
         </div>
       </header>
 
+      <section aria-labelledby="accession-channels-title">
+        <div className="tw-max-w-3xl">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.methods.eyebrow"
+            )}
+          </p>
+          <h2
+            id="accession-channels-title"
+            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
+          >
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.methods.title"
+            )}
+          </h2>
+          <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.methods.description"
+            )}
+          </p>
+        </div>
+        <dl className="tw-m-0 tw-mt-8 tw-grid tw-gap-px tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 sm:tw-grid-cols-2">
+          {(
+            [
+              [
+                "museum.network.acquisitionPrograms.methods.gift.label",
+                "museum.network.acquisitionPrograms.methods.gift.description",
+              ],
+              [
+                "museum.network.acquisitionPrograms.methods.purchase.label",
+                "museum.network.acquisitionPrograms.methods.purchase.description",
+              ],
+              [
+                "museum.network.acquisitionPrograms.methods.commission.label",
+                "museum.network.acquisitionPrograms.methods.commission.description",
+              ],
+              [
+                "museum.network.acquisitionPrograms.methods.other.label",
+                "museum.network.acquisitionPrograms.methods.other.description",
+              ],
+            ] as const
+          ).map(([termKey, descriptionKey]) => (
+            <div key={termKey} className="tw-bg-iron-950 tw-p-6 sm:tw-p-8">
+              <dt className="tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
+                {t(DEFAULT_LOCALE, termKey)}
+              </dt>
+              <dd className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-text-base sm:tw-leading-7">
+                {t(DEFAULT_LOCALE, descriptionKey)}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <p className="tw-m-0 tw-mt-6 tw-max-w-3xl tw-border-l-2 tw-border-solid tw-border-primary-400 tw-py-1 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-200">
+          {t(
+            DEFAULT_LOCALE,
+            "museum.network.acquisitionPrograms.methods.accessionNotice"
+          )}
+        </p>
+      </section>
+
       <section aria-labelledby="program-pathways-title">
         <div className="tw-max-w-3xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            Two routes, distinct histories
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.current.eyebrow"
+            )}
           </p>
           <h2
             id="program-pathways-title"
             className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
           >
-            Curatorial pathways
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.current.title"
+            )}
           </h2>
           <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            The Museum currently uses two pathways: a standing route for
-            considered gifts and Keys and Gates, a focused photographic
-            acquisition program.
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.current.description"
+            )}
           </p>
         </div>
         <ul className="tw-m-0 tw-mt-8 tw-list-none tw-p-0">
@@ -293,19 +361,26 @@ export function MuseumAcquisitionProgramsLandingPage({
         <div className="tw-grid tw-gap-8 md:tw-grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:tw-gap-14">
           <div>
             <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-              A simple distinction
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitionPrograms.terms.eyebrow"
+              )}
             </p>
             <h2
               id="program-language-title"
               className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
             >
-              A program sets the route; an acquisition names the group
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitionPrograms.terms.title"
+              )}
             </h2>
           </div>
           <p className="tw-m-0 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            The program defines the collecting frame; the acquisition names the
-            works gathered within it. Accessioned works enter the permanent
-            Collection; selected works remain visibly in process.
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitionPrograms.terms.description"
+            )}
           </p>
         </div>
       </section>
