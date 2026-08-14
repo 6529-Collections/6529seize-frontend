@@ -206,3 +206,19 @@ pending.`; its unit test still expected the discarded mint-first phrasing.
   to the public lifecycle language: `Selected and unminted. Acquisition and
 accession remain pending.` No runtime code, copy, media, layout, or rendered
   pixels changed.
+
+## 2026-08-14T23:03:00Z
+
+- Rebased the release branch onto frontend main `1cd65c1d9` and preserved the
+  armed squash auto-merge. The focused mobile Keys and Gates route replay passed.
+- Resolved the fourteen remaining CodeRabbit threads in four parallel, disjoint
+  lanes: reviewed research media and localized fallbacks; safe rendering of
+  unclassified acquisition programs; optimized home delivery and unique Work
+  media identifiers; and stricter browser acceptance contracts.
+- Applied four additional verified review refinements: explicit Casey feature
+  selection, removal of a contradictory border utility, restoration of the
+  native Related Sources disclosure marker, and a live status region for the
+  optimized proposal-image path.
+- The combined focused regression set passes: 11 suites, 62 tests. Changed lint,
+  changed typecheck across 1,717 files, Prettier, and the Windows-safe diff check
+  pass on the integrated tree.

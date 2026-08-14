@@ -188,7 +188,7 @@ export function MuseumSourceContribution({
           </div>
           {relatedSources.length > 0 ? (
             <details className="tw-min-w-0 tw-text-xs tw-text-iron-500 lg:tw-text-right">
-              <summary className="tw-inline-flex tw-min-h-9 tw-cursor-pointer tw-items-center tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+              <summary className="tw-min-h-9 tw-cursor-pointer tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
                 {t(
                   DEFAULT_LOCALE,
                   "museum.network.openMuseum.strip.relatedTitle"

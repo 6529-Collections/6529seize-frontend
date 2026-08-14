@@ -128,22 +128,36 @@ export function MuseumProposalImage({
         />
       );
     }
+    const statusMessage =
+      mediaStatus === "loading"
+        ? t(DEFAULT_LOCALE, "museum.network.media.loading")
+        : t(DEFAULT_LOCALE, "museum.network.media.revealed");
     return (
-      <Image
-        key={`${src}:${optimizedAttempt}`}
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        sizes={sizes}
-        quality={75}
-        loading={eager ? "eager" : "lazy"}
-        fetchPriority={eager ? "high" : "low"}
-        style={{ aspectRatio: `${width} / ${height}` }}
-        className={className ?? "tw-block tw-h-auto tw-w-full"}
-        onLoad={() => setMediaStatus("revealed")}
-        onError={() => setMediaStatus("error")}
-      />
+      <div
+        ref={focusRevealedMedia}
+        tabIndex={-1}
+        aria-label={statusMessage}
+        className="tw-outline-none"
+      >
+        <span className="tw-sr-only" aria-live="polite">
+          {statusMessage}
+        </span>
+        <Image
+          key={`${src}:${optimizedAttempt}`}
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          sizes={sizes}
+          quality={75}
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : "low"}
+          style={{ aspectRatio: `${width} / ${height}` }}
+          className={className ?? "tw-block tw-h-auto tw-w-full"}
+          onLoad={() => setMediaStatus("revealed")}
+          onError={() => setMediaStatus("error")}
+        />
+      </div>
     );
   }
   let statusMessage: string;

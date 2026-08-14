@@ -90,7 +90,9 @@ function selectAboutWorks(publication: MuseumPublication) {
     (artist) => artist.slug === "casey-reas"
   )?.id;
 
-  add(collectionWorks.find((work) => work.artistId === caseyArtistId));
+  if (caseyArtistId !== undefined) {
+    add(collectionWorks.find((work) => work.artistId === caseyArtistId));
+  }
   add(
     collectionWorks.find((work) =>
       work.acquisitionIds.includes(MUSEUM_MAGNUM_ACQUISITION_ID)
