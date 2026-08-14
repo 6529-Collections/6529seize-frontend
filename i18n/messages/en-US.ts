@@ -2113,15 +2113,17 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
-  "home.mintAllowlist.label": "Your allocation",
+  "home.mintAllowlist.label": "Your allowance",
   "home.mintAllowlist.allocationsAriaLabel":
     "Mint allocations for the connected wallet",
-  "home.mintAllowlist.checking": "Checking your allocation…",
+  "home.mintAllowlist.connectWallet":
+    "Connect your wallet to view your allowance.",
+  "home.mintAllowlist.checking": "Checking your allowance…",
   "home.mintAllowlist.notPublished":
-    "Allocation will be available once distribution is published.",
-  "home.mintAllowlist.notFound": "No allocation found for this wallet.",
+    "Your allowance will be available once distribution is published.",
+  "home.mintAllowlist.notFound": "No allowance found for this wallet.",
   "home.mintAllowlist.unavailable":
-    "Allocation information is temporarily unavailable.",
+    "Allowance information is temporarily unavailable.",
   "home.mintAllowlist.phase.phase0": "Phase 0",
   "home.mintAllowlist.phase.phase1": "Phase 1",
   "home.mintAllowlist.phase.phase2": "Phase 2",

@@ -90,7 +90,7 @@ export default function LatestDropAllowlistStatus({
       retry: false,
     });
 
-  if (!hasTokenId || !address) {
+  if (!hasTokenId) {
     return null;
   }
 
@@ -102,20 +102,29 @@ export default function LatestDropAllowlistStatus({
     });
   const hasDistribution = data?.has_distribution;
 
-  let status = t(locale, "home.mintAllowlist.checking");
-  if (connectionState === "error" || isError) {
+  let status = t(locale, "home.mintAllowlist.connectWallet");
+  if (walletIsTransitioning) {
+    status = t(locale, "home.mintAllowlist.checking");
+  } else if (address && (connectionState === "error" || isError)) {
     status = t(locale, "home.mintAllowlist.unavailable");
   } else if (
+    address &&
     !walletIsTransitioning &&
     !isPending &&
     hasDistribution === false
   ) {
     status = t(locale, "home.mintAllowlist.notPublished");
-  } else if (!walletIsTransitioning && !isPending && labels.length === 0) {
+  } else if (
+    address &&
+    !walletIsTransitioning &&
+    !isPending &&
+    labels.length === 0
+  ) {
     status = t(locale, "home.mintAllowlist.notFound");
   }
 
   const showAllocations =
+    !!address &&
     connectionState !== "error" &&
     !walletIsTransitioning &&
     !isPending &&

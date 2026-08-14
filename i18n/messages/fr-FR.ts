@@ -635,6 +635,8 @@ export const FR_FR_MESSAGES = {
   "home.mintAllowlist.label": "Votre allocation",
   "home.mintAllowlist.allocationsAriaLabel":
     "Allocations de mint pour le wallet connecté",
+  "home.mintAllowlist.connectWallet":
+    "Connectez votre wallet pour voir votre allocation.",
   "home.mintAllowlist.checking": "Vérification de votre allocation…",
   "home.mintAllowlist.notPublished":
     "L’allocation sera disponible après la publication de la distribution.",
