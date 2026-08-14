@@ -317,6 +317,20 @@ describe("UserPageMentionShortcuts", () => {
     );
   });
 
+  it("keeps editor navigation disabled while a save is pending", async () => {
+    mockedUpdateMentionAlias.mockReturnValue(new Promise(() => {}));
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: /@frens/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Save Quick Tag" }));
+
+    await waitFor(() => expect(mockedUpdateMentionAlias).toHaveBeenCalled());
+    expect(
+      screen.getByRole("button", { name: "Back to Quick Tags" })
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+  });
+
   it("excludes the connected profile from search results", async () => {
     const searchResults: CommunityMemberMinimal[] = [
       {
@@ -365,6 +379,38 @@ describe("UserPageMentionShortcuts", () => {
       screen.queryByRole("button", { name: /@alice/i })
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /@alex/i })).toBeInTheDocument();
+  });
+
+  it("announces only the search results rendered in the list", async () => {
+    const searchResults: CommunityMemberMinimal[] = Array.from(
+      { length: 7 },
+      (_, index) => ({
+        profile_id: `profile-${index + 20}`,
+        handle: `alex${index}`,
+        normalised_handle: `alex${index}`,
+        primary_wallet: `0xalex${index}`,
+        display: `Alex ${index}`,
+        tdh: 0,
+        level: 0,
+        cic_rating: 0,
+        wallet: `0xalex${index}`,
+        pfp: null,
+      })
+    );
+    mockedCommonApiFetch.mockResolvedValue(searchResults);
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+    fireEvent.click(screen.getByRole("button", { name: "New Quick Tag" }));
+    fireEvent.change(screen.getByLabelText("Search profiles by handle"), {
+      target: { value: "ale" },
+    });
+
+    await waitFor(() =>
+      expect(screen.getAllByRole("button", { name: /@alex/i })).toHaveLength(5)
+    );
+    expect(screen.getByText("5 profiles available.")).toBeInTheDocument();
+    expect(screen.queryByText("7 profiles available.")).not.toBeInTheDocument();
   });
 
   it("does not render on another profile or while acting as a proxy", () => {

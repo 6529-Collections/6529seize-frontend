@@ -24,6 +24,7 @@ export default function GroupCreateIdentitySelectedItems({
   const isInline = variant === "inline";
   const isQuickTag = variant === "quickTag";
   const isRounded = isInline || isQuickTag;
+  const roundedClass = isRounded ? "tw-rounded-full" : "tw-rounded-lg";
   let selectedItemClass =
     "tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-950 tw-px-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700";
   if (isInline) {
@@ -55,19 +56,13 @@ export default function GroupCreateIdentitySelectedItems({
             }
           >
             <div
-              className={`tw-relative tw-h-7 tw-w-7 tw-flex-shrink-0 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 ${
-                isRounded ? "tw-rounded-full" : "tw-rounded-lg"
-              }`}
+              className={`tw-relative tw-h-7 tw-w-7 tw-flex-shrink-0 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 ${roundedClass}`}
             >
               <div
-                className={`tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-bg-iron-900 ${
-                  isRounded ? "tw-rounded-full" : "tw-rounded-lg"
-                }`}
+                className={`tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-bg-iron-900 ${roundedClass}`}
               >
                 <div
-                  className={`tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-text-center ${
-                    isRounded ? "tw-rounded-full" : "tw-rounded-lg"
-                  }`}
+                  className={`tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-text-center ${roundedClass}`}
                 >
                   {identity.pfp ? (
                     // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.

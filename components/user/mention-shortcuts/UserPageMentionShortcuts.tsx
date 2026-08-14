@@ -6,6 +6,7 @@ import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/co
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
 import {
+  QuickTagsBackButton,
   QuickTagsDeleteConfirmation,
   QuickTagsLoadError,
 } from "@/components/user/mention-shortcuts/UserPageMentionShortcutsInlineViews";
@@ -32,7 +33,6 @@ import {
 import { commonApiFetch } from "@/services/api/common-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeftIcon,
   MagnifyingGlassIcon,
   PencilSquareIcon,
   PlusIcon,
@@ -44,6 +44,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const MAX_MEMBERS = 25;
+const MAX_SEARCH_RESULTS = 5;
 const MIN_SEARCH_LENGTH = 3;
 const VISIBLE_QUICK_TAGS = 3;
 const LOADING_MESSAGE_KEY = "user.mentionShortcuts.loading";
@@ -138,6 +139,7 @@ function AliasEditor({
     members,
     ownerProfileId
   );
+  const visibleIdentities = availableIdentities.slice(0, MAX_SEARCH_RESULTS);
   const searchIsReady =
     members.length < MAX_MEMBERS &&
     search.length >= MIN_SEARCH_LENGTH &&
@@ -147,10 +149,10 @@ function AliasEditor({
     searchStatus = t(locale, LOADING_MESSAGE_KEY);
   } else if (searchIsReady) {
     searchStatus =
-      availableIdentities.length === 1
+      visibleIdentities.length === 1
         ? t(locale, "user.mentionShortcuts.searchResult")
         : t(locale, "user.mentionShortcuts.searchResults", {
-            count: availableIdentities.length,
+            count: visibleIdentities.length,
           });
   }
 
@@ -206,10 +208,10 @@ function AliasEditor({
         {t(locale, LOADING_MESSAGE_KEY)}
       </p>
     );
-  } else if (availableIdentities.length > 0) {
+  } else if (visibleIdentities.length > 0) {
     searchResultsContent = (
       <ul className="tw-m-0 tw-list-none tw-p-0">
-        {availableIdentities.slice(0, 5).map((identity) => (
+        {visibleIdentities.map((identity) => (
           <li key={identity.profile_id}>
             <button
               type="button"
@@ -238,14 +240,11 @@ function AliasEditor({
   return (
     <div aria-labelledby="quick-tag-editor-title">
       <div className="tw-flex tw-items-center tw-gap-2">
-        <button
-          type="button"
-          aria-label={backLabel}
+        <QuickTagsBackButton
+          label={backLabel}
           onClick={onCancel}
-          className="tw-flex tw-size-11 tw-flex-none -tw-translate-x-1 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100 sm:tw-size-10"
-        >
-          <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
-        </button>
+          disabled={mutation.isPending}
+        />
         <h3
           ref={headingRef}
           id="quick-tag-editor-title"
@@ -379,7 +378,12 @@ function AliasEditor({
       </div>
 
       <div className="tw-mt-5 tw-flex tw-flex-col-reverse tw-gap-2 sm:tw-flex-row sm:tw-justify-end">
-        <Button variant="secondary" size="sm" onClick={onCancel}>
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={mutation.isPending}
+          onClick={onCancel}
+        >
           {t(locale, "user.mentionShortcuts.cancel")}
         </Button>
         <Button
@@ -619,14 +623,10 @@ export default function UserPageMentionShortcuts({
       <div data-testid="quick-tags-manager">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-            <button
-              type="button"
-              aria-label={t(locale, "user.mentionShortcuts.back")}
+            <QuickTagsBackButton
+              label={t(locale, "user.mentionShortcuts.back")}
               onClick={showSummary}
-              className="tw-flex tw-size-11 tw-flex-none -tw-translate-x-1 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100 sm:tw-size-10"
-            >
-              <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
-            </button>
+            />
             <h3
               ref={viewHeadingRef}
               id="quick-tags-manager-title"
