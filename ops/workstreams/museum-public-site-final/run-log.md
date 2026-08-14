@@ -229,3 +229,11 @@ accession remain pending.` No runtime code, copy, media, layout, or rendered
   exported Research landing type. Made the interface module-private. Full Knip,
   changed lint, changed typecheck across 1,717 files, and the Windows-safe diff
   check pass on the corrected tree.
+
+## 2026-08-14T23:28:54Z
+
+- Exact-head mobile CI exposed one stale rendered contract on the permanent
+  Magnum work route. The work correctly presents the governed Wave figure under
+  the presentation heading; the test still queried the generic media heading.
+  Updated the selector to the rendered presentation region. The exact focused
+  390px Chromium route replay passes, 1 test in 42.9 seconds.
