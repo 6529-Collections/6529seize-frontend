@@ -12,6 +12,9 @@ describe("CreateWaveDropsTypes", () => {
         onRequiredTypeChange={onChange}
       />
     );
+    expect(
+      screen.getByRole("group", { name: "Required Types" })
+    ).toBeInTheDocument();
     await userEvent.click(screen.getByRole("radio", { name: "Image" }));
     expect(onChange).toHaveBeenCalledWith([
       ApiWaveParticipationRequirement.Image,

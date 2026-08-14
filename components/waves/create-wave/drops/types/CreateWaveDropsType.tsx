@@ -6,13 +6,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ExtendedWaveParticipationRequirement } from "./CreateWaveDropsTypes.constants";
 
-const LABELS: Record<ExtendedWaveParticipationRequirement, string> = {
-  [ExtendedWaveParticipationRequirement.NONE]: "None",
-  [ExtendedWaveParticipationRequirement.IMAGE]: "Image",
-  [ExtendedWaveParticipationRequirement.AUDIO]: "Audio",
-  [ExtendedWaveParticipationRequirement.VIDEO]: "Video",
-};
-
 const ICONS = {
   [ExtendedWaveParticipationRequirement.NONE]: null,
   [ExtendedWaveParticipationRequirement.IMAGE]: faImage,
@@ -23,10 +16,12 @@ const ICONS = {
 export default function CreateWaveDropsType({
   isChecked,
   type,
+  label,
   onRequiredTypeChange,
 }: {
   readonly isChecked: boolean;
   readonly type: ExtendedWaveParticipationRequirement;
+  readonly label: string;
   readonly onRequiredTypeChange: (
     type: ExtendedWaveParticipationRequirement
   ) => void;
@@ -79,7 +74,7 @@ export default function CreateWaveDropsType({
       <span
         className={`${labelClasses} tw-min-w-0 tw-text-sm tw-font-semibold`}
       >
-        {LABELS[type]}
+        {label}
       </span>
     </label>
   );
