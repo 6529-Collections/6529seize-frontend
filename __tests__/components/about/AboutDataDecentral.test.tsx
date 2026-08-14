@@ -9,13 +9,17 @@ describe('AboutDataDecentral', () => {
 
   it('contains arweave link for team addresses', () => {
     render(<AboutDataDecentral />);
-    const link = screen.getAllByRole('link', { name: 'here' })[0];
+    const link = screen.getByRole('link', {
+      name: 'Arweave record of 6529 Team addresses (opens in a new tab)',
+    });
     expect(link).toHaveAttribute('href', expect.stringContaining('media.6529.io/arweave'));
   });
 
   it('links to open data page', () => {
     render(<AboutDataDecentral />);
-    const link = screen.getAllByRole('link', { name: 'here' })[1];
+    const link = screen.getByRole('link', {
+      name: 'Compiled 6529.io data on the Open Data page (opens in a new tab)',
+    });
     expect(link).toHaveAttribute('href', '/open-data');
   });
 
