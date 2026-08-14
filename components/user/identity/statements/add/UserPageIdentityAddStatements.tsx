@@ -15,11 +15,11 @@ export enum STATEMENT_ADD_VIEW {
 }
 
 const VIEW_W_CLASS: Record<STATEMENT_ADD_VIEW, string> = {
-  [STATEMENT_ADD_VIEW.SELECT]: "md:tw-max-w-[74rem]",
-  [STATEMENT_ADD_VIEW.CONTACT]: "md:tw-max-w-[26.25rem]",
-  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT]: "md:tw-max-w-[26.25rem]",
-  [STATEMENT_ADD_VIEW.NFT_ACCOUNT]: "md:tw-max-w-[26.25rem]",
-  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]: "md:tw-max-w-lg",
+  [STATEMENT_ADD_VIEW.SELECT]: "sm:tw-max-w-[74rem]",
+  [STATEMENT_ADD_VIEW.CONTACT]: "sm:tw-max-w-[26.25rem]",
+  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
+  [STATEMENT_ADD_VIEW.NFT_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
+  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]: "sm:tw-max-w-lg",
 };
 
 export default function UserPageIdentityAddStatements({
