@@ -108,14 +108,14 @@ export default function CreateWaveOutcomesCICRank({
         <div className="tw-flex tw-justify-end tw-gap-x-3">
           <Button
             variant="secondary"
-            size="lg"
+            size="md"
             onClick={onCancel}
           >
             Cancel
           </Button>
           <Button
             variant="primary"
-            size="lg"
+            size="md"
             onClick={onSubmit}
           >
             Save

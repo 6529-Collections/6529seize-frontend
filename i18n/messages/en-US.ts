@@ -1727,6 +1727,7 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 const COMMON_MESSAGES = objectMessages("common", {
   back: "Back",
   close: "Close",
+  expandEditor: "Expand editor",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {

@@ -37,4 +37,29 @@ describe('CommonCalendarDay', () => {
     fireEvent.click(getByRole('button'));
     expect(setSelected).toHaveBeenCalledWith(min);
   });
+
+  it('keeps the selected day focusable and exposes its selected state', () => {
+    const selected = new Date(2026, 7, 14).getTime();
+    const day: CalendarDay = {
+      date: 14,
+      isActiveMonth: true,
+      startTimestamp: selected,
+    };
+    const setSelected = jest.fn();
+    const { getByRole } = render(
+      <CommonCalendarDay
+        day={day}
+        selectedTimestamp={selected}
+        minTimestamp={null}
+        maxTimestamp={null}
+        setSelectedTimestamp={setSelected}
+      />
+    );
+
+    const button = getByRole('button', { name: /august 14, 2026/i });
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(button);
+    expect(setSelected).toHaveBeenCalledWith(selected);
+  });
 });

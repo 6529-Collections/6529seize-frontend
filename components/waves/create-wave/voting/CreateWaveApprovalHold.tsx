@@ -55,7 +55,7 @@ export default function CreateWaveApprovalHold({
           return (
             <label
               key={option.mode}
-              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition tw-duration-300 tw-ease-out ${
+              className={`tw-group tw-flex tw-cursor-pointer tw-items-start tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition tw-duration-300 tw-ease-out ${
                 selected
                   ? "tw-border-primary-500/60 tw-bg-primary-500/5 tw-shadow-inner"
                   : "tw-border-white/5 tw-bg-iron-950/40 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-950/60"
@@ -67,8 +67,22 @@ export default function CreateWaveApprovalHold({
                 value={option.mode}
                 checked={selected}
                 onChange={() => onModeChange(option.mode)}
-                className="tw-form-radio tw-mt-1 tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
+                className="tw-peer tw-sr-only"
               />
+              <span
+                aria-hidden="true"
+                className={`tw-mt-0.5 tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+                  selected
+                    ? "tw-border-primary-400 tw-bg-primary-500/10"
+                    : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
+                }`}
+              >
+                <span
+                  className={`tw-h-2 tw-w-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
+                    selected ? "tw-scale-100" : "tw-scale-0"
+                  }`}
+                />
+              </span>
               <span className="tw-min-w-0">
                 <span
                   className={`tw-block tw-text-sm tw-font-semibold ${

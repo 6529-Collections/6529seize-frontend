@@ -1,4 +1,24 @@
+import {
+  faHeadphones,
+  faImage,
+  faVideo,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ExtendedWaveParticipationRequirement } from "./CreateWaveDropsTypes.constants";
+
+const LABELS: Record<ExtendedWaveParticipationRequirement, string> = {
+  [ExtendedWaveParticipationRequirement.NONE]: "None",
+  [ExtendedWaveParticipationRequirement.IMAGE]: "Image",
+  [ExtendedWaveParticipationRequirement.AUDIO]: "Audio",
+  [ExtendedWaveParticipationRequirement.VIDEO]: "Video",
+};
+
+const ICONS = {
+  [ExtendedWaveParticipationRequirement.NONE]: null,
+  [ExtendedWaveParticipationRequirement.IMAGE]: faImage,
+  [ExtendedWaveParticipationRequirement.AUDIO]: faHeadphones,
+  [ExtendedWaveParticipationRequirement.VIDEO]: faVideo,
+} as const;
 
 export default function CreateWaveDropsType({
   isChecked,
@@ -11,13 +31,7 @@ export default function CreateWaveDropsType({
     type: ExtendedWaveParticipationRequirement
   ) => void;
 }) {
-  const LABELS: Record<ExtendedWaveParticipationRequirement, string> = {
-    [ExtendedWaveParticipationRequirement.NONE]: "None",
-    [ExtendedWaveParticipationRequirement.IMAGE]: "Image",
-    [ExtendedWaveParticipationRequirement.AUDIO]: "Audio",
-    [ExtendedWaveParticipationRequirement.VIDEO]: "Video",
-  };
-
+  const icon = ICONS[type];
   const buttonClasses = isChecked
     ? "tw-border-primary-500/60 tw-bg-iron-900/80"
     : "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10";
@@ -28,7 +42,7 @@ export default function CreateWaveDropsType({
 
   return (
     <label
-      className={`${buttonClasses} tw-group tw-relative tw-flex tw-min-h-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-transition tw-duration-300 tw-ease-out`}
+      className={`${buttonClasses} tw-group tw-relative tw-flex tw-min-h-12 tw-cursor-pointer tw-items-center tw-gap-x-2.5 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-transition tw-duration-300 tw-ease-out`}
     >
       <input
         checked={isChecked}
@@ -51,11 +65,22 @@ export default function CreateWaveDropsType({
           }`}
         />
       </span>
-      <div className="tw-flex tw-min-w-0 tw-flex-col">
-        <span className={`${labelClasses} tw-text-sm tw-font-semibold`}>
-          {LABELS[type]}
-        </span>
-      </div>
+      {icon && (
+        <FontAwesomeIcon
+          aria-hidden="true"
+          icon={icon}
+          className={`tw-size-4 tw-flex-shrink-0 tw-transition-colors tw-duration-300 ${
+            isChecked
+              ? "tw-text-primary-400"
+              : "tw-text-iron-500 group-hover:tw-text-iron-300"
+          }`}
+        />
+      )}
+      <span
+        className={`${labelClasses} tw-min-w-0 tw-text-sm tw-font-semibold`}
+      >
+        {LABELS[type]}
+      </span>
     </label>
   );
 }

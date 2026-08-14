@@ -63,7 +63,7 @@ export default function CreateWaveDropsTypes({
       <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
         Required Types
       </h3>
-      <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+      <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4 sm:tw-gap-3">
         {Object.values(ExtendedWaveParticipationRequirement).map((type) => (
           <CreateWaveDropsType
             key={type}

@@ -228,7 +228,7 @@ export default function SubsequentDecisions({
                     )}
                     // Hover-revealed on pointer devices; always visible where
                     // there is no hover to reveal it (touch phones).
-                    className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/30 tw-transition-all tw-duration-300 hover:tw-bg-iron-700/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red desktop-hover:focus-visible:tw-opacity-100 touch-only:tw-opacity-100"
+                    className="tw-relative tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/30 tw-transition-all tw-duration-300 after:tw-absolute after:-tw-inset-2 after:tw-content-[''] hover:tw-bg-iron-700/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red desktop-hover:focus-visible:tw-opacity-100 touch-only:tw-opacity-100"
                   >
                     <FontAwesomeIcon
                       icon={faTrashCan}
@@ -243,7 +243,7 @@ export default function SubsequentDecisions({
       </div>
 
       {/* Add New Decision Point */}
-      <div className="tw-mt-6 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40 tw-p-4">
+      <div className="tw-mt-6">
         <div className="tw-mb-3 tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-1">
           <div className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/20 tw-text-xs tw-font-medium tw-text-primary-400">
             <FontAwesomeIcon

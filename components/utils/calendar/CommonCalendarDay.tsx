@@ -1,5 +1,6 @@
 import type { CalendarDay } from "@/helpers/calendar/calendar.helpers";
 import { Time } from "@/helpers/time";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 
 export type CommonCalendarVariant = "default" | "flat";
 
@@ -70,9 +71,22 @@ export default function CommonCalendarDay({
 
   const dayState = getDayState();
 
-  const canSelect = dayState === CalendarDaySate.AVAILABLE;
+  const isSelected = dayState === CalendarDaySate.ACTIVE;
+  const canSelect =
+    dayState === CalendarDaySate.AVAILABLE ||
+    dayState === CalendarDaySate.ACTIVE;
+  const accessibleDate = new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(day.startTimestamp);
 
   const handleClick = () => {
+    if (isSelected && selectedTimestamp !== null) {
+      setSelectedTimestamp(selectedTimestamp);
+      return;
+    }
     if (
       minTimestamp !== null &&
       day.startTimestamp <= minTimestamp &&
@@ -89,7 +103,9 @@ export default function CommonCalendarDay({
       type="button"
       onClick={handleClick}
       disabled={!canSelect}
-      className={`${BUTTON_CLASSES[dayState]} tw-relative tw-mx-auto tw-h-9 tw-w-9 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 sm:tw-h-8 sm:tw-w-8`}
+      aria-label={accessibleDate}
+      aria-pressed={isSelected}
+      className={`${BUTTON_CLASSES[dayState]} tw-relative tw-mx-auto tw-h-9 tw-w-9 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-800 sm:tw-h-8 sm:tw-w-8`}
     >
       <span className="tw-mx-auto tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-sm">
         {day.date}
