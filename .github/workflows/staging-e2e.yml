@@ -902,7 +902,7 @@ jobs:
           CI_PIPELINES_STATUS: ${{ needs.staging-packs.result == 'success' && 'success' || 'failure' }}
           CI_PIPELINES_TITLE: ${{ needs.staging-packs.result == 'success' && 'WEB E2E passed' || 'WEB E2E failed' }}
           CI_PIPELINES_SERVICE: web
-          CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
+          CI_PIPELINES_SHA: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha }}
           CI_PIPELINES_PARENT_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           CI_PIPELINES_PARENT_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
           CI_PIPELINES_VALIDATION_PACK: ${{ inputs.pack || 'all' }}

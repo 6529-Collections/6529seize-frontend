@@ -340,6 +340,15 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
   });
 
+  it("ignores blank related Jest test entries before resolving paths", () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+
+    expect(workflow).toContain('if [ -z "$related_test" ]; then');
+  });
+
   it.each([
     "config/public-reviews/6529-stream.reference.json",
     "public/review-data/6529-stream/index.json",

@@ -48,6 +48,7 @@ describe("WEB E2E CI wave notifications", () => {
       environment: "staging",
       needs: ["baseline-adoption-decision", "staging-packs"],
       pack: "${{ inputs.pack || 'all' }}",
+      sha: "${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha }}",
       resultExpression: "needs.staging-packs.result",
     },
     {
@@ -55,11 +56,12 @@ describe("WEB E2E CI wave notifications", () => {
       environment: "production",
       needs: ["readonly", "verify-evidence"],
       pack: "all",
+      sha: "${{ needs.readonly.outputs.expected-sha }}",
       resultExpression: "needs.verify-evidence.result",
     },
   ])(
     "posts the terminal $environment validation outcome without changing it",
-    ({ environment, file, needs, pack, resultExpression }) => {
+    ({ environment, file, needs, pack, sha, resultExpression }) => {
       const { job, step } = notification(file);
 
       expect(job.needs).toEqual(needs);
@@ -72,6 +74,7 @@ describe("WEB E2E CI wave notifications", () => {
           CI_PIPELINES_ALERT_TYPE: "web_e2e",
           CI_PIPELINES_TARGET_ENV: environment,
           CI_PIPELINES_SERVICE: "web",
+          CI_PIPELINES_SHA: sha,
           CI_PIPELINES_PARENT_DEPLOY_RUN_ID:
             "${{ inputs.automatic_deploy_run_id }}",
           CI_PIPELINES_PARENT_RELEASE_TRAIN_ID:
