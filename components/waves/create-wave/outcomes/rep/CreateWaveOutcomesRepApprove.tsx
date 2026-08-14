@@ -151,10 +151,10 @@ export default function CreateWaveOutcomesRepApprove({
 
         <div className="tw-flex tw-justify-end tw-gap-x-3">
           <Button variant="secondary" size="md" onClick={onCancel}>
-            Cancel
+            {t(locale, "waves.create.actions.cancel")}
           </Button>
           <Button variant="primary" size="md" onClick={onSubmit}>
-            Save
+            {t(locale, "waves.create.actions.save")}
           </Button>
         </div>
       </div>

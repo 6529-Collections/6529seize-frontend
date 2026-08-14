@@ -8,6 +8,8 @@ import {
 } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES,
   CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES,
@@ -24,6 +26,7 @@ export default function CreateWaveOutcomesManual({
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
 }) {
+  const locale = useBrowserLocale();
   const [value, setValue] = useState<string>("");
   const [positions, setPositions] = useState<string>("");
   const [positionsError, setPositionsError] = useState<string>("");
@@ -246,10 +249,10 @@ export default function CreateWaveOutcomesManual({
         </div>
         <div className="tw-relative tw-z-50 tw-flex tw-justify-end tw-gap-x-3">
           <Button variant="secondary" size="md" onClick={onCancel}>
-            Cancel
+            {t(locale, "waves.create.actions.cancel")}
           </Button>
           <Button variant="primary" size="md" onClick={onSubmit}>
-            Save
+            {t(locale, "waves.create.actions.save")}
           </Button>
         </div>
       </div>
