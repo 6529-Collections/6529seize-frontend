@@ -483,9 +483,8 @@ export default function UserPageMentionShortcuts({
   const deleteMutation = useMutation({
     mutationFn: deleteMentionAlias,
     onSuccess: async (_data, deletedAliasId) => {
-      const deletedLastAlias = !aliases.some(
-        (alias) => alias.id !== deletedAliasId
-      );
+      const deletedLastAlias =
+        aliases.length === 1 && aliases[0]?.id === deletedAliasId;
       await queryClient.invalidateQueries({
         queryKey: [QueryKey.MENTION_ALIASES],
       });
