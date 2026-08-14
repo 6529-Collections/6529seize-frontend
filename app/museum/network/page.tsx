@@ -163,6 +163,7 @@ function MuseumTypedWorkFigure({
             sourceByteSize={presentation.sourceByteSize}
             variants={presentation.variants}
             requireIntentForLargeSource={false}
+            optimizeSource
             eager={eager}
             {...(sourceHref === null || !canOpenPresentation
               ? {}

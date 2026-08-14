@@ -29,15 +29,18 @@ jest.mock("@/components/museum/MuseumProposalImage", () => ({
     alt,
     src,
     variants,
+    optimizeSource,
   }: {
     readonly alt: string;
     readonly src: string;
     readonly variants?: readonly unknown[];
+    readonly optimizeSource?: boolean;
   }) => (
     <img
       alt={alt}
       src={src}
       data-variant-count={String(variants?.length ?? 0)}
+      data-optimize-source={String(optimizeSource ?? false)}
     />
   ),
 }));
@@ -230,6 +233,7 @@ describe("Museum homepage media", () => {
       "https://example.com/palmyra-original.jpg"
     );
     expect(image).toHaveAttribute("data-variant-count", "1");
+    expect(image).toHaveAttribute("data-optimize-source", "true");
     expect(screen.getAllByText("Untitled work")).toHaveLength(1);
     expect(screen.queryByText("6529NM-W-0001")).not.toBeInTheDocument();
   });

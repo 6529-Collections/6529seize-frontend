@@ -191,7 +191,8 @@ function MuseumCanonicalWorkMedia({
               {t(
                 DEFAULT_LOCALE,
                 "museum.network.acquisitions.presentationSource"
-              )}{" "}
+              )}
+              {": "}
               <a
                 href={presentationSourceHref}
                 target="_blank"
@@ -413,9 +414,9 @@ function MuseumCanonicalWorkRecordPage({
       work.presentationMedia.length > 0 ? (
         <section
           className="tw-mt-10"
-          aria-labelledby="canonical-work-media-title"
+          aria-labelledby="canonical-work-presentation-title"
         >
-          <h2 id="canonical-work-media-title" className="tw-sr-only">
+          <h2 id="canonical-work-presentation-title" className="tw-sr-only">
             {t(
               DEFAULT_LOCALE,
               "museum.network.acquisitions.historicalWavePresentation"

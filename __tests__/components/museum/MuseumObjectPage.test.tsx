@@ -360,10 +360,10 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     });
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     fireEvent.click(loadButton);
-    expect(screen.getByRole("img")).toHaveAttribute(
-      "src",
-      magnumPresentationMedia().mediaUrl
-    );
+    const image = await screen.findByRole("img", {
+      name: "A governed Magnum accession photograph.",
+    });
+    expect(image).toHaveAttribute("src", magnumPresentationMedia().mediaUrl);
     expect(
       screen.queryByRole("button", { name: /historical proposal image/u })
     ).not.toBeInTheDocument();
