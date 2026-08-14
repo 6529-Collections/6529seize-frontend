@@ -70,3 +70,6 @@
 - A stale-head hosted quality job identified two module-local symbols exported
   unnecessarily. Removed both exports; full Knip now passes with no dead-code
   findings introduced by the release.
+- Exact-head quality then reached the registry contract and caught its stale
+  component-count literal. Updated the contract expectation from 64 to the
+  registry's verified 65 components.
