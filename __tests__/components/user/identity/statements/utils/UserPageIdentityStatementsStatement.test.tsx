@@ -42,10 +42,6 @@ describe("UserPageIdentityStatementsStatement", () => {
     setMatchMedia(false);
     mockCopyToClipboard.mockClear();
     mockClipboardWriteText.mockReset().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText: mockClipboardWriteText },
-    });
   });
 
   afterEach(() => {
@@ -55,6 +51,10 @@ describe("UserPageIdentityStatementsStatement", () => {
 
   it("copies text when copy button clicked", async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: mockClipboardWriteText },
+    });
     const statement = {
       statement_value: "test-value",
       statement_type: STATEMENT_TYPE.X,
