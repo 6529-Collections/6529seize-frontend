@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -18,6 +20,20 @@ export const MUSEUM_RELEASE_ACCEPTANCE_ROUTES = {
   acquisitions: "/museum/network/acquisitions",
   research: "/museum/network/research",
 } as const;
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+const unresolvedMediaPatternSource = [
+  t(DEFAULT_LOCALE, "museum.network.media.loading"),
+  t(DEFAULT_LOCALE, "museum.network.media.unavailable"),
+  t(DEFAULT_LOCALE, "museum.network.media.error"),
+  t(DEFAULT_LOCALE, "museum.network.media.metadataOnly"),
+  "The public record does not currently include an image for this work.",
+]
+  .map(escapeRegExp)
+  .join("|");
 
 type MuseumAcceptanceRoute =
   (typeof MUSEUM_RELEASE_ACCEPTANCE_ROUTES)[keyof typeof MUSEUM_RELEASE_ACCEPTANCE_ROUTES];
@@ -64,44 +80,42 @@ async function settleImages(page: Page, selector: string) {
 
 export async function expectNoUnresolvedMuseumMedia(
   page: Page,
-  selector = "main img"
+  root = "main",
+  imageSelector = "img"
 ) {
-  await settleImages(page, selector);
-  const rootSelector = selector.startsWith("section[")
-    ? selector.replace(/\s+img$/u, "")
-    : selector === "main article img"
-      ? "main article"
-      : "main";
-  const problems = await page.locator(rootSelector).evaluateAll((roots) => {
-    const unresolvedMediaPattern =
-      /Loading image\.|This image is temporarily unavailable\.|Image unavailable\.|No public image is available for this record\.|public record does not currently include an image for this work/iu;
-    const isVisible = (element: Element) => {
-      const style = getComputedStyle(element);
-      const rect = element.getBoundingClientRect();
-      return (
-        style.display !== "none" &&
-        style.visibility !== "hidden" &&
-        rect.width > 0 &&
-        rect.height > 0
-      );
-    };
-    const failures: string[] = [];
-    for (const root of roots) {
-      for (const element of root.querySelectorAll("img")) {
-        if (!isVisible(element)) continue;
-        if (!(element instanceof HTMLImageElement)) continue;
-        if (!element.complete || element.naturalWidth === 0) {
-          failures.push(`unresolved image: ${element.alt || element.src}`);
+  await settleImages(page, `${root} ${imageSelector}`);
+  const problems = await page.locator(root).evaluateAll(
+    (roots, options) => {
+      const unresolvedMediaPattern = new RegExp(options.patternSource, "iu");
+      const isVisible = (element: Element) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return (
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          rect.width > 0 &&
+          rect.height > 0
+        );
+      };
+      const failures: string[] = [];
+      for (const root of roots) {
+        for (const element of root.querySelectorAll(options.imageSelector)) {
+          if (!isVisible(element)) continue;
+          if (!(element instanceof HTMLImageElement)) continue;
+          if (!element.complete || element.naturalWidth === 0) {
+            failures.push(`unresolved image: ${element.alt || element.src}`);
+          }
+        }
+        for (const element of root.querySelectorAll("[role=alert], p, span")) {
+          if (!isVisible(element)) continue;
+          const text = element.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+          if (unresolvedMediaPattern.test(text)) failures.push(text);
         }
       }
-      for (const element of root.querySelectorAll("[role=alert], p, span")) {
-        if (!isVisible(element)) continue;
-        const text = element.textContent?.replace(/\s+/gu, " ").trim() ?? "";
-        if (unresolvedMediaPattern.test(text)) failures.push(text);
-      }
-    }
-    return [...new Set(failures)];
-  });
+      return [...new Set(failures)];
+    },
+    { imageSelector, patternSource: unresolvedMediaPatternSource }
+  );
   expect(problems, problems.join("\n")).toEqual([]);
 }
 
@@ -115,7 +129,8 @@ export async function expectCollectionAcceptance(page: Page) {
   await expect(holdingCards).toHaveCount(12);
   await expectNoUnresolvedMuseumMedia(
     page,
-    'section[aria-labelledby="collection-holdings-title"] img'
+    'section[aria-labelledby="collection-holdings-title"]',
+    "img"
   );
 
   const magnumTitles = [
@@ -255,11 +270,11 @@ export async function expectAcquisitionsAcceptance(page: Page) {
       )
     );
   expect(new Set(articleSources).size).toBe(3);
-  await expectNoUnresolvedMuseumMedia(page, "main article img");
+  await expectNoUnresolvedMuseumMedia(page, "main article", "img");
 }
 
 export async function expectResearchAcceptance(page: Page) {
-  await expectNoUnresolvedMuseumMedia(page, "main img");
+  await expectNoUnresolvedMuseumMedia(page, "main", "img");
   const editorialCards = page.locator("main article");
   const cardSummaries = await editorialCards.evaluateAll((cards) =>
     cards.map((card) => {
@@ -274,11 +289,11 @@ export async function expectResearchAcceptance(page: Page) {
       return { title, links, images, text: card.textContent ?? "" };
     })
   );
-  const firstEight = cardSummaries.slice(0, 8);
   expect(
-    firstEight.length,
+    cardSummaries.length,
     "Research needs eight editorial entry points"
   ).toBeGreaterThanOrEqual(8);
+  const firstEight = cardSummaries.slice(0, 8);
   const firstEightText = firstEight.map((card) => card.text).join(" ");
   expect(firstEightText).toMatch(/Casey Reas|System in Seven States/iu);
   expect(firstEightText).toMatch(/Magnum|Conflict at Its Edges/iu);
@@ -397,7 +412,12 @@ export async function expectMuseumGeometryAcceptance(page: Page) {
       if (!visible(element)) continue;
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
-      if (Number.parseFloat(style.borderLeftWidth) > 0 && rect.height > 120) {
+      const leftOnlyBorder =
+        Number.parseFloat(style.borderLeftWidth) > 0 &&
+        Number.parseFloat(style.borderTopWidth) === 0 &&
+        Number.parseFloat(style.borderRightWidth) === 0 &&
+        Number.parseFloat(style.borderBottomWidth) === 0;
+      if (leftOnlyBorder && rect.height > 120) {
         allIssues.push("decorative left rail exceeds 120px");
       }
       if (

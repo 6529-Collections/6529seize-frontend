@@ -40,11 +40,18 @@ describe("MuseumLandingMediaCard", () => {
       />
     );
 
+    const hasBorderClass = (element: Element | null) =>
+      element !== null &&
+      Array.from(element.classList).some(
+        (className) =>
+          className === "tw-border" || className.startsWith("tw-border-")
+      );
+
     const card = screen.getByTestId("museum-landing-media-card");
     expect(card).toHaveTextContent(
       "Selected through an acquisition program; unminted"
     );
-    expect(card).not.toHaveClass("tw-border");
-    expect(card.querySelector("figcaption")).not.toHaveClass("tw-border-t");
+    expect(hasBorderClass(card)).toBe(false);
+    expect(hasBorderClass(card.querySelector("figcaption"))).toBe(false);
   });
 });

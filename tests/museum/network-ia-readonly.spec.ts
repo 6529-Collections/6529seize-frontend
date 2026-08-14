@@ -175,12 +175,12 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
           /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href)
       )
     ).toBe(true);
-    const inProgressWorkHrefs = await page
+    const inProgressWorkHrefValues = await page
       .getByTestId("museum-in-progress-works")
       .locator('a[href^="/museum/network/works/"]')
-      .evaluateAll((links) => [
-        ...new Set(links.map((link) => link.getAttribute("href"))),
-      ]);
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+    const inProgressWorkHrefs = [...new Set(inProgressWorkHrefValues)];
+    expect(inProgressWorkHrefValues).toHaveLength(16);
     expect(inProgressWorkHrefs).toHaveLength(16);
     expect(
       inProgressWorkHrefs.every(
