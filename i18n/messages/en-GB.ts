@@ -542,5 +542,22 @@ export const EN_GB_MESSAGES = {
   "theMemes.filters.season.label": "Season",
   "theMemes.filters.season.all": "All Seasons",
   "theMemes.filters.season.allForYear": "All Year {year}",
+  "home.mintAllowlist.label": "Your allowance",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint allocations for the connected wallet",
+  "home.mintAllowlist.connectWallet": "Connect your wallet to view details.",
+  "home.mintAllowlist.checking": "Checking…",
+  "home.mintAllowlist.notPublished":
+    "Available once distribution is published.",
+  "home.mintAllowlist.notFound": "None found for this wallet.",
+  "home.mintAllowlist.unavailable": "Temporarily unavailable.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Public",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
   ...TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

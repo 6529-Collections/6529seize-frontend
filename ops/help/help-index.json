@@ -3820,7 +3820,7 @@
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
         "Home uses explicit Main Stage mappings for its submission and Meme-card links and omits those links when a mapping is unavailable.",
         "When an unresolved /the-memes/{id} route is the explicitly mapped next Meme and home is in Next Drop mode, it shows the same winning artwork panel with Mint Date and subscription awareness above the calendar; other upcoming Meme routes keep the standalone subscription and calendar view.",
-        "Home Latest Drop and mapped Next Drop cards show a separate Your allowlist row for the connected wallet. It lists manual Phase 0, Phase 1, and Phase 2 allowlist access, does not treat subscription airdrops as manual allowlist access, and does not promise that an allocation is still mintable.",
+        "Home Latest Drop and mapped Next Drop cards always show Your allowance. Before a wallet is connected, the row prompts the user to connect to view it. Once connected, wrapping pills list each nonzero Airdrop or Allowlist count for Phase 0, Phase 1, and Phase 2, plus a Public Airdrop count; Public never shows Allowlist. The row distinguishes unavailable distribution data, an unpublished distribution, and a published distribution with no matching allocation; unavailable data does not mean the allocation is zero, and none of these states promises that an allocation is still mintable.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
