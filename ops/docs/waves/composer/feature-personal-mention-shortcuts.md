@@ -14,13 +14,14 @@ Quick Tags let a profile save a private tag for several profiles. For example,
 
 - Open your own profile and select `Brain`.
 - Select `Manage`, a visible Quick Tag, or the `+N more` chip in the compact
-  `Quick Tags` section.
+  `Quick Tags` section. The section changes in place instead of opening a
+  separate dialog.
 
 ## User Journey
 
 1. Open the `Brain` tab on your own profile.
 2. Find the compact `Quick Tags` section beneath `Activity`.
-3. Select `Manage`, then select `New Quick Tag`.
+3. Select `Manage`, then select `New Quick Tag` in the inline manager.
 4. Create a tag with a 3–15 character name containing letters, numbers, or
    underscores.
 5. Add between 1 and 25 profiles and save.
@@ -51,15 +52,17 @@ case-insensitive.
 ## Edge Cases
 
 - Quick Tags are private to the profile that created them.
-- The compact section shows up to three tags in one row and adds a `+N more`
-  chip when more tags exist.
+- The compact section shows up to three tags and adds a `+N more` chip when
+  more tags exist. Tags wrap at narrow widths so the controls remain visible.
+- Creating, editing, and deleting a Quick Tag stays inside the same Brain-tab
+  card. Back controls return to the preceding Quick Tags view.
 - The section is hidden on other profiles and while acting through a proxy.
 - Quick Tags do not have a dedicated profile tab or route.
 
 ## Failure and Recovery
 
-- If Quick Tags cannot be loaded, the compact Brain section and manager show an
-  error; refresh to retry.
+- If Quick Tags cannot be loaded, the compact Brain section and inline manager
+  show an error with a retry action.
 - If saving or deleting fails, the app shows an error notification and keeps
   the existing Quick Tag state available for another attempt.
 - If a selected profile is no longer eligible, remove it and choose another
