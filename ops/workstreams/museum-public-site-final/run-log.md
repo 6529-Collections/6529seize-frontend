@@ -222,3 +222,10 @@ accession remain pending.` No runtime code, copy, media, layout, or rendered
 - The combined focused regression set passes: 11 suites, 62 tests. Changed lint,
   changed typecheck across 1,717 files, Prettier, and the Windows-safe diff check
   pass on the integrated tree.
+
+## 2026-08-14T23:16:16Z
+
+- Diagnosed the preceding combined-head App CI failure as one unnecessary
+  exported Research landing type. Made the interface module-private. Full Knip,
+  changed lint, changed typecheck across 1,717 files, and the Windows-safe diff
+  check pass on the corrected tree.
