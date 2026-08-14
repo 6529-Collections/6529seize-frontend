@@ -248,6 +248,7 @@ const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
 
 const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
   AboutSection.TECH,
+  AboutSection.DATA_DECENTR,
   AboutSection.SUBSCRIPTIONS,
   AboutSection.MEME_LAB,
   AboutSection.GRADIENTS,

@@ -28,7 +28,7 @@ export default function DistributionPlanToolConnect() {
   }, [address]);
 
   return (
-    <div className="xl:tw-max-w-2xl xl:tw-mx-auto lg:tw-px-8 xl:tw-px-0">
+    <div className="tw-w-full lg:tw-mx-auto lg:tw-max-w-2xl">
       <div>
         {(() => {
           switch (authStatus) {

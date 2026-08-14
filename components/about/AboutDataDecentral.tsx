@@ -1,59 +1,101 @@
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
-  faBoxArchive,
   faCalculator,
-  faDatabase,
-  faFileCsv,
+  faCube,
+  faFileExport,
   faLink,
-  faStore,
+  faServer,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import clsx from "clsx";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import OpenSeaIcon from "@/components/user/utils/icons/OpenseaIcon";
+
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 
-const DATA_SOURCE_CARD_CLASS =
-  "tw-h-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-4 sm:tw-p-6";
+const DATA_SOURCE_SECTION_CLASS =
+  "tw-relative tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-[minmax(12rem,0.36fr)_minmax(0,1fr)] md:tw-gap-16";
+
+const STANDARD_DATA_SOURCE_SECTION_CLASS =
+  "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-10";
+
+const FEATURED_DATA_SOURCE_SECTION_CLASS =
+  "tw-group tw-mt-8 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/[0.05] tw-p-5 tw-shadow-[0_15px_40px_rgba(0,240,255,0.05)] sm:tw-mt-10 sm:tw-p-6";
 
 const DATA_SOURCE_LIST_CLASS =
-  "tw-m-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600";
+  "tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 md:tw-pt-1";
 
 const DATA_SOURCE_LINK_CLASS =
-  "tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+  "tw-rounded-sm tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
-function DataSourceCard({
+const FEATURED_DATA_SOURCE_LINK_CLASS =
+  "tw-rounded-sm tw-font-semibold tw-text-[#00f0ff] tw-underline tw-decoration-[#00f0ff]/30 tw-underline-offset-4 tw-transition-colors hover:tw-text-iron-50 hover:tw-decoration-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]";
+
+function DataSourceSection({
   children,
+  featured = false,
+  glowClassName,
   headingId,
   icon,
-  iconClassName,
+  iconIsUnframed = false,
   iconWrapperClassName,
   title,
+  titleClassName,
 }: {
   readonly children: ReactNode;
+  readonly featured?: boolean;
+  readonly glowClassName?: string;
   readonly headingId: string;
-  readonly icon: IconDefinition;
-  readonly iconClassName: string;
-  readonly iconWrapperClassName: string;
+  readonly icon: ReactNode;
+  readonly iconIsUnframed?: boolean;
+  readonly iconWrapperClassName?: string;
   readonly title: string;
+  readonly titleClassName?: string;
 }) {
   return (
-    <section aria-labelledby={headingId} className={DATA_SOURCE_CARD_CLASS}>
-      <div className="tw-flex tw-items-center tw-gap-3">
+    <section
+      aria-labelledby={headingId}
+      className={clsx(
+        DATA_SOURCE_SECTION_CLASS,
+        featured
+          ? FEATURED_DATA_SOURCE_SECTION_CLASS
+          : STANDARD_DATA_SOURCE_SECTION_CLASS
+      )}
+    >
+      {glowClassName && (
         <span
           aria-hidden="true"
-          className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full ${iconWrapperClassName}`}
+          className={clsx(
+            "tw-pointer-events-none tw-absolute -tw-right-16 -tw-top-20 tw-size-64 tw-rounded-full tw-blur-3xl",
+            glowClassName
+          )}
+        />
+      )}
+      <div className="tw-relative tw-z-10 tw-flex tw-min-w-0 tw-items-center tw-gap-4 tw-self-start">
+        <span
+          aria-hidden="true"
+          className={clsx(
+            "tw-flex tw-shrink-0 tw-items-center tw-justify-center",
+            iconIsUnframed
+              ? "tw-size-6"
+              : "tw-size-10 tw-rounded-full tw-border tw-border-solid sm:tw-size-11",
+            iconWrapperClassName
+          )}
         >
-          <FontAwesomeIcon className={iconClassName} icon={icon} />
+          {icon}
         </span>
         <h2
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
+          className={clsx(
+            "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl",
+            titleClassName
+          )}
           id={headingId}
         >
           {title}
         </h2>
       </div>
-      {children}
+      <div className="tw-relative tw-z-10 tw-min-w-0">{children}</div>
     </section>
   );
 }
@@ -63,37 +105,41 @@ export default function AboutDataDecentral() {
     <article
       className={`tw-w-full tw-pb-12 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
-      <header className="tw-max-w-4xl tw-px-1 tw-pb-8 tw-pt-4 sm:tw-px-2 sm:tw-pb-10 sm:tw-pt-8">
+      <header className="tw-max-w-4xl tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
         <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           Data Decentralization
         </h1>
         <div className="tw-mt-6 tw-space-y-4 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
-          <p className="tw-m-0">
+          <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-7 sm:tw-text-xl sm:tw-leading-8">
             One of our goals is to demonstrate how applications can be built in
             a decentralized manner.
           </p>
-          <p className="tw-m-0">
+          <p className="tw-m-0 tw-text-iron-400">
             Effectively all information on 6529.io comes from on-chain or public
             sources or is derived in transparent ways from on-chain or public
             sources. This means anyone can replicate the data available on this
             site for a website or application of their own, without seeking
             permission from us and without any dependency on us.
           </p>
-          <p className="tw-m-0">
+          <p className="tw-m-0 tw-text-iron-400">
             This page shares the source of all data displayed on 6529.io.
           </p>
         </div>
       </header>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-px-1 sm:tw-gap-6 sm:tw-px-2 md:tw-grid-cols-2">
-        <DataSourceCard
+      <div className="tw-flex tw-w-full tw-flex-col tw-px-1 sm:tw-px-2">
+        <DataSourceSection
           headingId="on-chain-data-heading"
-          icon={faLink}
-          iconClassName="tw-text-[#00f0ff]"
-          iconWrapperClassName="tw-bg-[#00f0ff]/10"
+          icon={
+            <FontAwesomeIcon
+              className="tw-text-xl tw-text-[#00f0ff]"
+              icon={faLink}
+            />
+          }
+          iconWrapperClassName="tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10"
           title="On-Chain (Ethereum)"
         >
-          <ul className={DATA_SOURCE_LIST_CLASS}>
+          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-[#00f0ff]`}>
             <li>The token #</li>
             <li>
               The location (URI/URL) of the JSON with the token&apos;s metadata
@@ -105,41 +151,54 @@ export default function AboutDataDecentral() {
             </li>
             <li>ENS addresses of collectors</li>
           </ul>
-        </DataSourceCard>
+        </DataSourceSection>
 
-        <DataSourceCard
+        <DataSourceSection
           headingId="arweave-data-heading"
-          icon={faBoxArchive}
-          iconClassName="tw-text-[#8f5cff]"
-          iconWrapperClassName="tw-bg-[#7000ff]/20"
+          icon={
+            <FontAwesomeIcon
+              className="tw-text-base tw-text-emerald-400"
+              icon={faCube}
+            />
+          }
+          iconWrapperClassName="tw-border-emerald-500/20 tw-bg-emerald-500/10"
           title="Arweave (Decentralized storage)"
         >
-          <ul className={DATA_SOURCE_LIST_CLASS}>
+          <ul
+            className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-emerald-400`}
+          >
             <li>The image of the art associated with each NFT</li>
             <li>The metadata for the NFT</li>
           </ul>
-        </DataSourceCard>
+        </DataSourceSection>
 
-        <DataSourceCard
+        <DataSourceSection
           headingId="opensea-data-heading"
-          icon={faStore}
-          iconClassName="tw-text-iron-300"
-          iconWrapperClassName="tw-bg-iron-800"
+          icon={
+            <span className="tw-size-6">
+              <OpenSeaIcon />
+            </span>
+          }
+          iconWrapperClassName="tw-border-[#2081E2]/30 tw-bg-[#2081E2]/10"
           title="OpenSea API"
         >
-          <ul className={DATA_SOURCE_LIST_CLASS}>
+          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-[#2081E2]`}>
             <li>NFT listing prices on OpenSea</li>
           </ul>
-        </DataSourceCard>
+        </DataSourceSection>
 
-        <DataSourceCard
+        <DataSourceSection
           headingId="internal-data-heading"
-          icon={faDatabase}
-          iconClassName="tw-text-orange-400"
-          iconWrapperClassName="tw-bg-orange-500/10"
+          icon={
+            <FontAwesomeIcon
+              className="tw-text-base tw-text-orange-400"
+              icon={faServer}
+            />
+          }
+          iconWrapperClassName="tw-border-orange-500/20 tw-bg-orange-500/10"
           title="Internal Database"
         >
-          <ul className={DATA_SOURCE_LIST_CLASS}>
+          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-orange-400`}>
             <li>
               6529 Team addresses. A record of these can be found on Arweave{" "}
               <Link
@@ -154,16 +213,20 @@ export default function AboutDataDecentral() {
               . We will move this list 100% on-chain in the coming weeks.
             </li>
           </ul>
-        </DataSourceCard>
+        </DataSourceSection>
 
-        <DataSourceCard
+        <DataSourceSection
           headingId="computed-data-heading"
-          icon={faCalculator}
-          iconClassName="tw-text-primary-300"
-          iconWrapperClassName="tw-bg-primary-400/10"
+          icon={
+            <FontAwesomeIcon
+              className="tw-text-base tw-text-iron-200"
+              icon={faCalculator}
+            />
+          }
+          iconWrapperClassName="tw-border-white/10 tw-bg-white/[0.05]"
           title="Internally Calculated / Computed"
         >
-          <ul className={DATA_SOURCE_LIST_CLASS}>
+          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-iron-400`}>
             <li>
               Thumbnail images to match the site design (transformed from the
               original image from Arweave)
@@ -173,16 +236,25 @@ export default function AboutDataDecentral() {
               will release sample code for this calculation soon)
             </li>
           </ul>
-        </DataSourceCard>
+        </DataSourceSection>
 
-        <DataSourceCard
+        <DataSourceSection
+          featured
+          glowClassName="tw-bg-[#00f0ff]/10 tw-opacity-30 tw-transition-opacity tw-duration-500 group-hover:tw-opacity-70 motion-reduce:tw-transition-none"
           headingId="compiled-data-heading"
-          icon={faFileCsv}
-          iconClassName="tw-text-success"
-          iconWrapperClassName="tw-bg-success/10"
+          icon={
+            <FontAwesomeIcon
+              className="tw-text-xl tw-text-[#00f0ff]"
+              icon={faFileExport}
+            />
+          }
+          iconIsUnframed
           title="Compiled 6529.io Data"
+          titleClassName="!tw-text-[#00f0ff]"
         >
-          <ul className={DATA_SOURCE_LIST_CLASS}>
+          <ul
+            className={`${DATA_SOURCE_LIST_CLASS} !tw-text-iron-200 marker:tw-text-[#00f0ff]`}
+          >
             <li>
               Even though everyone can compile and calculate the same data as
               us, we also export daily all our compiled and calculated data for
@@ -194,7 +266,7 @@ export default function AboutDataDecentral() {
               can be found{" "}
               <Link
                 aria-label="Compiled 6529.io data on the Open Data page (opens in a new tab)"
-                className={DATA_SOURCE_LINK_CLASS}
+                className={FEATURED_DATA_SOURCE_LINK_CLASS}
                 href="/open-data"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -204,7 +276,7 @@ export default function AboutDataDecentral() {
               .
             </li>
           </ul>
-        </DataSourceCard>
+        </DataSourceSection>
       </div>
     </article>
   );

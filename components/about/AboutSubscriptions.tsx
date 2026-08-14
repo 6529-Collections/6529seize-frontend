@@ -21,7 +21,6 @@ import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
 import {
   SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
-  SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
 
@@ -41,19 +40,19 @@ const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
   {
     icon: faGasPump,
     iconClassName: "tw-text-[#00f0ff]",
-    iconWrapperClassName: "tw-bg-[#00f0ff]/10",
+    iconWrapperClassName: "tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10",
     messageKey: "about.subscriptions.overview.gasSavings",
   },
   {
     icon: faEarthAmericas,
     iconClassName: "tw-text-[#8f5cff]",
-    iconWrapperClassName: "tw-bg-[#7000ff]/20",
+    iconWrapperClassName: "tw-border-[#8f5cff]/25 tw-bg-[#7000ff]/20",
     messageKey: "about.subscriptions.overview.awayFromComputer",
   },
   {
     icon: faSliders,
     iconClassName: "tw-text-iron-300",
-    iconWrapperClassName: "tw-bg-iron-900",
+    iconWrapperClassName: "tw-border-white/10 tw-bg-white/[0.05]",
     messageKey: "about.subscriptions.overview.setAndForget",
   },
 ] as const;
@@ -90,7 +89,7 @@ function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
             <AboutSubscriptionsProfileButton variant="white" />
           </div>
         </div>
-        <div className="tw-mt-3">
+        <div className="tw-mt-5">
           <Link
             className="tw-group/report -tw-ml-1 tw-inline-flex tw-max-w-full tw-items-start tw-gap-2 tw-rounded-md tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-items-center"
             href="/tools/subscriptions-report"
@@ -144,7 +143,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
               key={benefit.messageKey}
             >
               <span
-                className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full md:tw-size-12 ${benefit.iconWrapperClassName}`}
+                className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid sm:tw-size-11 ${benefit.iconWrapperClassName}`}
               >
                 <FontAwesomeIcon
                   aria-hidden="true"
@@ -160,11 +159,11 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         })}
       </ul>
 
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-mt-6 lg:tw-grid-cols-2 lg:tw-gap-6">
+      <div className="tw-mt-8 tw-flex tw-max-w-4xl tw-flex-col tw-gap-10 sm:tw-mt-10 sm:tw-gap-12">
         <OverviewRule
           title={m(locale, "about.subscriptions.overview.notMintpass.title")}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-[#00f0ff]">
             <li>
               {m(locale, "about.subscriptions.overview.notMintpass.choice")}
             </li>
@@ -186,7 +185,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         <OverviewRule
           title={m(locale, "about.subscriptions.overview.regularMinting.title")}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-[#8f5cff]">
             <li>
               {m(locale, "about.subscriptions.overview.regularMinting.normal")}
             </li>
@@ -210,12 +209,25 @@ function OverviewRule({
   readonly children: ReactNode;
   readonly title: string;
 }) {
+  const emphasizedWord = "not";
+  const emphasizedWordIndex = title.indexOf(emphasizedWord);
+
   return (
-    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-6`}>
-      <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
-        {title}
+    <section>
+      <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-xl">
+        {emphasizedWordIndex >= 0 ? (
+          <>
+            {title.slice(0, emphasizedWordIndex)}
+            <span className="tw-underline tw-decoration-red tw-decoration-[3px] tw-underline-offset-[8px]">
+              {emphasizedWord}
+            </span>
+            {title.slice(emphasizedWordIndex + emphasizedWord.length)}
+          </>
+        ) : (
+          title
+        )}
       </h3>
-      <div className="tw-mt-3">{children}</div>
-    </div>
+      <div className="tw-mt-4">{children}</div>
+    </section>
   );
 }
