@@ -72,6 +72,23 @@ describe("MuseumProposalImage", () => {
     expect(screen.getByRole("img")).toHaveAttribute("src", media.src);
   });
 
+  it("delivers a large governed source through a responsive runtime derivative", () => {
+    render(
+      <MuseumProposalImage
+        {...media}
+        sourceByteSize={16_871_807}
+        alt="Lorenzo Meloni accession photograph"
+        optimizeSource
+      />
+    );
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute("sizes");
+    expect(image.getAttribute("src")).toContain("/_next/image?url=");
+    expect(image.getAttribute("src")).toContain(encodeURIComponent(media.src));
+  });
+
   it("uses the smallest approved delivery copy as src and publishes responsive candidates", () => {
     const variants = [
       {
@@ -112,10 +129,7 @@ describe("MuseumProposalImage", () => {
       "srcset",
       `${variants[0].url} 640w, ${variants[1].url} 1280w, ${variants[2].url} 2400w`
     );
-    expect(image).toHaveAttribute(
-      "sizes",
-      "(min-width: 1280px) 30vw, 100vw"
-    );
+    expect(image).toHaveAttribute("sizes", "(min-width: 1280px) 30vw, 100vw");
     expect(image).not.toHaveAttribute("src", media.src);
   });
 });

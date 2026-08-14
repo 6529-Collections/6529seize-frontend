@@ -150,7 +150,10 @@ export async function expectCollectionAcceptance(page: Page) {
         .split(",")
         .map((candidate) => candidate.trim().split(/\s+/u))
         .filter((candidate) => candidate.length === 2)
-        .map(([url, width]) => ({ url, width: Number.parseInt(width, 10) }))
+        .map(([url, width]) => ({
+          url,
+          width: Number.parseInt(width ?? "", 10),
+        }))
         .filter((candidate) => Number.isFinite(candidate.width))
         .sort((left, right) => left.width - right.width);
       return {
@@ -216,7 +219,7 @@ export async function expectAcquisitionsAcceptance(page: Page) {
 
   const identifiers = await museumMain(page).evaluate((main) => {
     const internalIdentifierPattern = /\b6529NM-(?:AP|CA)-[A-Z0-9.-]+\b/gu;
-    const text = main.innerText;
+    const text = main.textContent ?? "";
     const counts = new Map<string, number>();
     for (const identifier of text.match(internalIdentifierPattern) ?? []) {
       counts.set(identifier, (counts.get(identifier) ?? 0) + 1);

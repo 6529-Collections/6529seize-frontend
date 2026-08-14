@@ -230,9 +230,7 @@ function MuseumCanonicalWorkMedia({
       </section>
     );
   }
-  // A reviewed Wave presentation is the public image for this downstream
-  // accession record. Its dedicated figure follows immediately below; do not
-  // put a metadata-only placeholder in front of it.
+  // The dedicated Wave figure follows below; do not precede it with metadata.
   if (
     work.presentationMedia !== undefined &&
     work.presentationMedia.length > 0
@@ -436,9 +434,9 @@ function MuseumCanonicalWorkRecordPage({
       work.presentationMedia.length > 0 ? (
         <section
           className="tw-mt-10"
-          aria-labelledby="canonical-work-presentation-title"
+          aria-labelledby="canonical-work-media-title"
         >
-          <h2 id="canonical-work-presentation-title" className="tw-sr-only">
+          <h2 id="canonical-work-media-title" className="tw-sr-only">
             {t(
               DEFAULT_LOCALE,
               "museum.network.acquisitions.historicalWavePresentation"
@@ -470,6 +468,7 @@ function MuseumCanonicalWorkRecordPage({
                       height={media.height}
                       sourceByteSize={media.sourceByteSize}
                       variants={media.variants}
+                      optimizeSource={hasMagnumInstitutionalDisplayRights(work)}
                       {...(sourceHref === null || !canOpenPresentation
                         ? {}
                         : {

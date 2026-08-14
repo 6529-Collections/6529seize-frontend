@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
-import { MuseumManagedImage } from "./MuseumManagedImage";
+import { MuseumManagedImage, MuseumMediaFailure } from "./MuseumManagedImage";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MuseumExternalProposalPresentationVariant } from "@/lib/museum/publication/types";
@@ -24,6 +25,7 @@ export function MuseumProposalImage({
   sourceLabel,
   eager = false,
   requireIntentForLargeSource = true,
+  optimizeSource = false,
   className,
 }: {
   readonly src: string;
@@ -39,6 +41,12 @@ export function MuseumProposalImage({
   readonly sourceLabel?: string;
   readonly eager?: boolean;
   readonly requireIntentForLargeSource?: boolean;
+  /**
+   * Deliver a runtime web derivative through Next's image optimizer. The
+   * governed upstream locator remains the source of record; this affects only
+   * browser delivery and avoids transferring a multi-megabyte original.
+   */
+  readonly optimizeSource?: boolean;
   readonly className?: string;
 }) {
   const responsiveVariants = [...variants].sort(
@@ -56,10 +64,12 @@ export function MuseumProposalImage({
           .join(", ");
   const requiresIntent =
     responsiveVariants.length === 0 &&
+    !optimizeSource &&
     requireIntentForLargeSource &&
     sourceByteSize !== undefined &&
     sourceByteSize >= MUSEUM_PROPOSAL_INTENT_VIEW_BYTES;
   const [revealed, setRevealed] = useState(!requiresIntent);
+  const [optimizedAttempt, setOptimizedAttempt] = useState(0);
   const [mediaStatus, setMediaStatus] = useState<
     "idle" | "loading" | "revealed" | "error"
   >(requiresIntent ? "idle" : "loading");
@@ -100,6 +110,40 @@ export function MuseumProposalImage({
           )}
         </button>
       </>
+    );
+  }
+  if (optimizeSource && responsiveVariants.length === 0) {
+    if (mediaStatus === "error") {
+      return (
+        <MuseumMediaFailure
+          message={t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
+          retryLabel={t(DEFAULT_LOCALE, "museum.network.media.retry")}
+          {...(sourceHref === undefined || sourceLabel === undefined
+            ? {}
+            : { sourceHref, sourceLabel })}
+          onRetry={() => {
+            setOptimizedAttempt((value) => value + 1);
+            setMediaStatus("loading");
+          }}
+        />
+      );
+    }
+    return (
+      <Image
+        key={`${src}:${optimizedAttempt}`}
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        sizes={sizes}
+        quality={75}
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : "low"}
+        style={{ aspectRatio: `${width} / ${height}` }}
+        className={className ?? "tw-block tw-h-auto tw-w-full"}
+        onLoad={() => setMediaStatus("revealed")}
+        onError={() => setMediaStatus("error")}
+      />
     );
   }
   let statusMessage: string;

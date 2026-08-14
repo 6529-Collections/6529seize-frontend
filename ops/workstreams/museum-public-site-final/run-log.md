@@ -118,3 +118,34 @@
   or alt fallbacks.
 - Exact local follow-up gates pass: four focused suites / 23 assertions,
   changed lint, changed typecheck across 1,715 files, and diff hygiene.
+
+## 2026-08-14T13:55:00Z
+
+- Exact-head App PR CI run `31806044674` used the immutable Museum catalog/source
+  fixture pair `975f041a` / `9aea66c0` and exposed one remaining Work-page media
+  defect. The accessioned Lorenzo Meloni page still rendered the 16.9 MB source
+  behind an intent button because this historical fixture contains no preserved
+  responsive derivative.
+- Reproduced the hosted failure locally against those exact commits. Added a
+  bounded runtime web-derivative path using Next's image optimizer only when the
+  Work is accessioned into the permanent Collection through the Magnum
+  acquisition and carries the recorded institutional-display rights basis.
+  The governed source URL remains the optimizer input and source of record.
+- The Work page now presents one responsive image in the canonical Work region;
+  source credit, rights language, and the Wave publication link remain intact.
+  Large non-accessioned proposal originals retain their explicit-load gate.
+- Focused `MuseumProposalImage` and `MuseumObjectPage` suites pass, 17 assertions.
+  Changed typecheck passes across 1,715 files. The optimized production build
+  completes successfully, including sitemap generation.
+- Exact fixed-fixture Network IA replay passes in desktop and 390 px mobile
+  Chromium, including one responsive image in the canonical Work region and no
+  16.9 MB intent button for the accessioned Magnum Work.
+
+## 2026-08-14T14:18:00Z
+
+- Exact-head App PR CI run `31808053149` found two TypeScript errors confined to
+  the new Playwright acceptance helper: a destructured `srcset` width needed an
+  explicit undefined guard, and the evaluated Museum root has an HTML/SVG union
+  type that requires `textContent` rather than `innerText`.
+- Corrected both without changing runtime behavior or rendered pixels. The full
+  Jest typecheck ratchet and exact Playwright TypeScript check pass locally.

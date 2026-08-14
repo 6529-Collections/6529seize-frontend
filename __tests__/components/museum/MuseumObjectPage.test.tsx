@@ -338,18 +338,19 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("gates a large Magnum original until the visitor asks to load it", async () => {
-    const magnumWork: MuseumPublicWork = {
+  it("gates a large proposal original until the visitor asks to load it", async () => {
+    const proposedWork: MuseumPublicWork = {
       ...work([]),
-      acquisitionIds: [MUSEUM_MAGNUM_ACQUISITION_ID],
-      collectionMembership: true,
+      status: "proposed_in_museum_wave",
+      acquisitionIds: [],
+      collectionMembership: false,
       presentationMedia: [magnumPresentationMedia()],
     };
 
     render(
       await MuseumObjectPage({
-        objectId: magnumWork.id,
-        publication: publication(magnumWork),
+        objectId: proposedWork.id,
+        publication: publication(proposedWork),
         view: null,
       })
     );

@@ -1,6 +1,6 @@
 # Active context
 
-Updated: 2026-08-14T13:42:32Z
+Updated: 2026-08-14T13:55:00Z
 
 ## Objective
 
@@ -49,13 +49,16 @@ production, production E2E, and live visual readback.
 
 ## Current phase
 
-Ready PR `#3751` is open. The current local follow-up resolves the final valid
-review findings on top of exact PR head `9463659f195596f61f0105feb415165e0c036345`:
-in-progress works are de-duplicated across acquisitions; Research excerpts are
-Unicode- and word-boundary-safe; result-count announcements are debounced; all
-remaining Research interface copy comes from the Museum message catalog; About
-selects Casey by stable slug; and internal work IDs no longer leak into About
-figure titles or alt fallbacks. Four focused suites pass with 23 assertions,
-along with changed lint, changed typecheck across 1,715 files, and diff hygiene.
-The next mutation is one signed follow-up commit, then exact-head hosted CI and
-merge.
+Ready PR `#3751` is open at exact pushed head
+`436f641ecbd81e51142746953504dde5c8b36dc4`. Hosted mobile qualification exposed
+one further product defect under the immutable release fixture: the accessioned
+Lorenzo Meloni Work page still offered the 16.9 MB source because that source
+snapshot has no preserved responsive derivative. The local correction delivers
+the governed source through Next's responsive runtime image optimizer only for
+an accessioned Magnum Work with the recorded institutional-display basis. The
+source locator, credit, rights statement, and Wave publication link remain
+unchanged; non-accessioned large proposal media still requires explicit visitor
+intent. Focused unit tests, changed lint and typecheck across 1,715 files, and
+the clean optimized build pass. Exact fixed-fixture Playwright replay passes in
+desktop and 390 px mobile Chromium. The next mutation is one signed follow-up
+commit, then exact-head hosted CI and merge.
