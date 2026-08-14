@@ -183,3 +183,10 @@
   not decoded before the default poll expired. Aligned this gate with the
   existing 20-second Museum media-settle budget used by the deterministic
   Collection acceptance test.
+- The responsive-media hub sweep then passed on hosted mobile CI. The remaining
+  mobile pack exposed a stale About locator: the rewritten page correctly uses
+  `The 6529 Network Museum`, while the browser test still expected the discarded
+  `A public museum for a network state` line. Updated the rendered contract to
+  the current heading, collection-purpose section identifier, and compact source
+  wording. Updated the same stale source wording in the institutional-practice
+  browser contract and retained the 20-second route-readiness budget.

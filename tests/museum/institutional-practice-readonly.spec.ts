@@ -211,7 +211,7 @@ async function expectFreshExactSource(
   );
   await expect(sourcePanel).toBeVisible();
   await expect(sourcePanel).toContainText(
-    /Published from the Museum's public record at commit [a-f0-9]{12}\./u
+    /Public record at commit [a-f0-9]{12}\./u
   );
   await expect(sourcePanel).not.toContainText(
     /latest verified release|temporarily unavailable|Page-level source: unassigned/iu
