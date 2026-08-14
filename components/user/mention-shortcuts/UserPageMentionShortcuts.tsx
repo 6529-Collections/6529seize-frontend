@@ -41,6 +41,7 @@ import {
 import type { ReactNode, RefObject } from "react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 const MAX_MEMBERS = 25;
@@ -50,6 +51,39 @@ const VISIBLE_QUICK_TAGS = 3;
 const LOADING_MESSAGE_KEY = "user.mentionShortcuts.loading";
 
 type QuickTagsView = "summary" | "manage" | "editor";
+
+function getAliasErrorDescription(
+  reserved: boolean,
+  aliasIsValid: boolean,
+  hasAlias: boolean
+): string | undefined {
+  if (reserved) return "mention-shortcut-reserved-error";
+  if (!aliasIsValid && hasAlias) return "mention-shortcut-name-error";
+  return undefined;
+}
+
+function getSearchStatus({
+  isFetching,
+  locale,
+  searchIsReady,
+  visibleResultCount,
+}: {
+  readonly isFetching: boolean;
+  readonly locale: SupportedLocale;
+  readonly searchIsReady: boolean;
+  readonly visibleResultCount: number;
+}): string {
+  if (!searchIsReady) {
+    return t(locale, "user.mentionShortcuts.searchPrompt");
+  }
+  if (isFetching) return t(locale, LOADING_MESSAGE_KEY);
+  if (visibleResultCount === 1) {
+    return t(locale, "user.mentionShortcuts.searchResult");
+  }
+  return t(locale, "user.mentionShortcuts.searchResults", {
+    count: visibleResultCount,
+  });
+}
 
 function AliasEditor({
   backLabel,
@@ -97,12 +131,11 @@ function AliasEditor({
   const aliasIsValid = /^\w{3,15}$/.test(normalizedAlias);
   const reserved = isReservedMentionAlias(normalizedAlias);
   const aliasHasError = alias.length > 0 && (!aliasIsValid || reserved);
-  let aliasErrorDescription: string | undefined;
-  if (reserved) {
-    aliasErrorDescription = "mention-shortcut-reserved-error";
-  } else if (!aliasIsValid && alias.length > 0) {
-    aliasErrorDescription = "mention-shortcut-name-error";
-  }
+  const aliasErrorDescription = getAliasErrorDescription(
+    reserved,
+    aliasIsValid,
+    alias.length > 0
+  );
   const canSave = aliasIsValid && !reserved && members.length > 0;
 
   const mutation = useMutation({
@@ -144,17 +177,12 @@ function AliasEditor({
     members.length < MAX_MEMBERS &&
     search.length >= MIN_SEARCH_LENGTH &&
     debouncedSearch === search;
-  let searchStatus = t(locale, "user.mentionShortcuts.searchPrompt");
-  if (searchIsReady && profileSearchQuery.isFetching) {
-    searchStatus = t(locale, LOADING_MESSAGE_KEY);
-  } else if (searchIsReady) {
-    searchStatus =
-      visibleIdentities.length === 1
-        ? t(locale, "user.mentionShortcuts.searchResult")
-        : t(locale, "user.mentionShortcuts.searchResults", {
-            count: visibleIdentities.length,
-          });
-  }
+  const searchStatus = getSearchStatus({
+    isFetching: profileSearchQuery.isFetching,
+    locale,
+    searchIsReady,
+    visibleResultCount: visibleIdentities.length,
+  });
 
   const addMember = (identity: CommunityMemberMinimal) => {
     const { profile_id: profileId, handle } = identity;
