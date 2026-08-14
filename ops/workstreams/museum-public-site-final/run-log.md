@@ -237,3 +237,17 @@ accession remain pending.` No runtime code, copy, media, layout, or rendered
   the presentation heading; the test still queried the generic media heading.
   Updated the selector to the rendered presentation region. The exact focused
   390px Chromium route replay passes, 1 test in 42.9 seconds.
+
+## 2026-08-14T23:51:00Z
+
+- Exact-head desktop CI found that the Research launch sequence contained only
+  two distinct visual sources. The Magnum study was inheriting Casey media from
+  the broad Gift Acquisitions program before considering the study's directly
+  associated Magnum work.
+- Reordered Research media selection so a publication's direct Work or Artwork
+  association takes precedence over acquisition and program context. Broad
+  relations remain available as fallbacks.
+- Added a regression proving direct subject media wins over a program-level
+  fallback. The focused Jest suite passes, 6 tests; the exact desktop Research
+  browser acceptance passes; changed lint, changed typecheck, Playwright
+  typecheck, and the Windows-safe diff check pass.

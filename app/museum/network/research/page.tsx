@@ -206,10 +206,10 @@ function researchMedia(
     );
   });
   const sourceIds = [
-    ...acquisitionWorkIds,
-    ...programWorkIds,
     ...(document.workIds ?? []),
     ...document.artworkIds,
+    ...acquisitionWorkIds,
+    ...programWorkIds,
     ...document.projectIds.flatMap((projectId) => {
       const project = publication.projects.find(
         (candidate) => candidate.id === projectId
