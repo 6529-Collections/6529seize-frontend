@@ -1,4 +1,5 @@
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
+import type { SupportedLocale } from "@/i18n/locales";
 
 /**
  * Calculates all decision times based on firstDecisionTime and subsequentDecisions
@@ -124,7 +125,9 @@ export const adjustDatesAfterSubmissionChange = (
  * for creators who accepted the defaults (the last announcement is the wave's
  * end date), so the seed deliberately lands a week later.
  */
-export const getDefaultFirstDecisionTime = (votingStartDate: number): number => {
+export const getDefaultFirstDecisionTime = (
+  votingStartDate: number
+): number => {
   const date = new Date(votingStartDate);
   date.setDate(date.getDate() + 7);
   date.setHours(23, 59, 0, 0);
@@ -153,8 +156,11 @@ export const ensureSafeFirstDecisionTime = (
 /**
  * Formats a date for display
  */
-export const formatDate = (timestamp: number): string => {
-  return new Date(timestamp).toLocaleString("en-US", {
+export const formatDate = (
+  timestamp: number,
+  locale: SupportedLocale
+): string => {
+  return new Date(timestamp).toLocaleString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",

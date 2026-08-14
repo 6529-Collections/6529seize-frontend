@@ -154,26 +154,25 @@ export default function TimeWeightedVoting({
   const intervalErrorMessage =
     errorMessage ?? getIntervalValidationError(config);
   const sectionClassName = showToggle
-    ? "tw-mt-6 tw-border-t tw-border-iron-700 tw-pt-6"
+    ? "tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6"
     : undefined;
 
   return (
-    <section
-      className={sectionClassName}
-      data-testid="time-weighted-voting"
-    >
+    <section className={sectionClassName} data-testid="time-weighted-voting">
       {showToggle && (
         <TimeWeightedToggle enabled={config.enabled} onToggle={handleToggle} />
       )}
 
       {(config.enabled || !showToggle) && (
-        <AveragingIntervalInput
-          value={inputValue}
-          unit={config.averagingIntervalUnit}
-          onIntervalChange={handleIntervalChange}
-          onUnitChange={handleUnitChange}
-          validationError={intervalErrorMessage}
-        />
+        <div className={showToggle ? "tw-mt-5" : undefined}>
+          <AveragingIntervalInput
+            value={inputValue}
+            unit={config.averagingIntervalUnit}
+            onIntervalChange={handleIntervalChange}
+            onUnitChange={handleUnitChange}
+            validationError={intervalErrorMessage}
+          />
+        </div>
       )}
     </section>
   );

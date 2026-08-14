@@ -26,7 +26,7 @@ export default function CreateWavesMainStep({
   const isDone = stepStatus === CreateWaveStepStatus.DONE;
 
   const LABEL_CLASSES: Record<CreateWaveStepStatus, string> = {
-    [CreateWaveStepStatus.DONE]: "tw-text-iron-600 tw-font-semibold tw-delay-0",
+    [CreateWaveStepStatus.DONE]: "tw-text-iron-300 tw-font-semibold tw-delay-0",
     [CreateWaveStepStatus.ACTIVE]:
       "tw-text-primary-400 tw-font-bold tw-delay-500",
     [CreateWaveStepStatus.PENDING]:
@@ -34,7 +34,7 @@ export default function CreateWavesMainStep({
   };
 
   return (
-    <div className="tw-relative tw-mb-10">
+    <div className="tw-relative tw-mb-10 tw-w-full">
       {!isLast && <CreateWavesMainStepConnectionLine done={isDone} />}
       <button
         type="button"
@@ -42,15 +42,15 @@ export default function CreateWavesMainStep({
         onClick={() => onStep(step)}
         className="tw-group tw-relative tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
       >
-        <span className="tw-mr-5 tw-flex tw-min-w-0 tw-flex-col">
+        <span className="tw-flex tw-h-8 tw-items-center">
+          <CreateWavesMainStepIcon stepStatus={stepStatus} />
+        </span>
+        <span className="tw-ml-4 tw-flex tw-min-w-0 tw-flex-col">
           <span
             className={`${LABEL_CLASSES[stepStatus]} tw-transform tw-text-base tw-transition tw-duration-300 tw-ease-out`}
           >
             {label}
           </span>
-        </span>
-        <span className="tw-flex tw-h-8 tw-items-center">
-          <CreateWavesMainStepIcon stepStatus={stepStatus} />
         </span>
       </button>
     </div>

@@ -9,6 +9,7 @@ import {
   CreateWaveScrollHintProvider,
   useCanScrollDown,
 } from "./hooks/useCreateWaveScrollHint";
+import { CREATE_WAVE_FORM_CONTROL_SCOPE_STYLES } from "./utils/createWaveFormStyles";
 
 export default function CreateWaveFlow({
   title,
@@ -102,7 +103,7 @@ export default function CreateWaveFlow({
 
   return (
     <div
-      className="tailwind-scope tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-iron-950"
+      className={`tailwind-scope tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-iron-950 ${CREATE_WAVE_FORM_CONTROL_SCOPE_STYLES}`}
       data-flow-title={title}
     >
       {/* Single scroll owner for the create-wave flow. It is always an

@@ -20,6 +20,10 @@ import MaxVotesPerIdentityInput from "./MaxVotesPerIdentityInput";
 import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
 import type { TimeWeightedVotingConfig } from "./types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
+import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 
 const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.TdhPlusXtdh]: 0,
@@ -37,27 +41,19 @@ const APPROVAL_THRESHOLD_TIME_DURATION_ERROR =
   "This time is longer than the wave duration. Choose a shorter time, extend the wave end date, or clear the end date.";
 const DEFAULT_APPROVAL_THRESHOLD_TIME_MS = 60 * 1000;
 
+const ADVANCED_VOTING_ERRORS = new Set<CREATE_WAVE_VALIDATION_ERROR>([
+  CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID,
+  CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL,
+  CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE,
+  CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION,
+  CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID,
+  CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION,
+]);
+
 const VOTING_SETTINGS_GRID_CLASSES =
-  "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
+  "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6";
 const VOTING_OPTIONS_GRID_CLASSES =
   "tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4 [&>div]:tw-gap-x-2 [&>div]:tw-px-3 [&>div]:tw-py-3";
-
-const CREDIT_SCOPE_OPTIONS: readonly {
-  readonly scope: ApiWaveCreditScope;
-  readonly label: string;
-  readonly description: string;
-}[] = [
-  {
-    scope: ApiWaveCreditScope.Wave,
-    label: "Whole wave",
-    description: "Each identity has one voting budget across the wave.",
-  },
-  {
-    scope: ApiWaveCreditScope.Drop,
-    label: "Each drop",
-    description: "Voting power applies separately to every drop.",
-  },
-];
 
 const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
   if (votingType === ApiWaveCreditType.CardSetTdh) {
@@ -96,48 +92,57 @@ function CreateWaveCreditScopeSelect({
   readonly creditScope: ApiWaveCreditScope;
   readonly onCreditScopeChange: (scope: ApiWaveCreditScope) => void;
 }) {
+  const locale = useBrowserLocale();
+  const creditScopeOptions = [
+    {
+      scope: ApiWaveCreditScope.Wave,
+      label: t(locale, "waves.create.voting.scope.wave.label"),
+      description: t(locale, "waves.create.voting.scope.wave.description"),
+    },
+    {
+      scope: ApiWaveCreditScope.Drop,
+      label: t(locale, "waves.create.voting.scope.drop.label"),
+      description: t(locale, "waves.create.voting.scope.drop.description"),
+    },
+  ] as const;
+
   return (
-    <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-0 tw-pb-0 tw-pt-6">
-      <legend className="tw-mb-3 tw-mt-0 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
-        Voting power scope
+    <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-0 tw-pb-0 tw-pt-6">
+      <legend className="tw-mb-3 tw-mt-0 tw-block tw-pr-4 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+        {t(locale, "waves.create.voting.scope.legend")}
       </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
-        {CREDIT_SCOPE_OPTIONS.map((option) => {
-          const selected = creditScope === option.scope;
+        {creditScopeOptions.map((option) => {
+          const isSelected = creditScope === option.scope;
           return (
-            <label
+            <CommonBorderedRadioButton
               key={option.scope}
-              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
-                selected
-                  ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
-                  : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10"
-              }`}
+              type={option.scope}
+              selected={creditScope}
+              variant="subtle"
+              name="create-wave-credit-scope"
+              ariaLabel={option.label}
+              onChange={onCreditScopeChange}
             >
-              <input
-                type="radio"
-                name="create-wave-credit-scope"
-                value={option.scope}
-                checked={selected}
-                onChange={() => onCreditScopeChange(option.scope)}
-                className="tw-form-radio tw-mt-1 tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
-              />
-              <span className="tw-min-w-0">
+              <span className="tw-min-w-0 tw-whitespace-normal">
                 <span
-                  className={`tw-block tw-text-sm tw-font-semibold ${
-                    selected ? "tw-text-white" : "tw-text-iron-200"
+                  className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                    isSelected
+                      ? "tw-text-white"
+                      : "tw-text-iron-300 group-hover:tw-text-white"
                   }`}
                 >
                   {option.label}
                 </span>
                 <span
-                  className={`tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 ${
-                    selected ? "tw-text-iron-300" : "tw-text-iron-400"
+                  className={`tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-4 ${
+                    isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
                   }`}
                 >
                   {option.description}
                 </span>
               </span>
-            </label>
+            </CommonBorderedRadioButton>
           );
         })}
       </div>
@@ -198,11 +203,7 @@ export default function CreateWaveVoting({
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
-  const TITLES: Record<ApiWaveType, string> = {
-    [ApiWaveType.Chat]: "How Drops are Rated",
-    [ApiWaveType.Rank]: "How Drops are Voted",
-    [ApiWaveType.Approve]: "How Drops are Voted",
-  };
+  const locale = useBrowserLocale();
   const [approvalHoldModeOverride, setApprovalHoldModeOverride] =
     useState<CreateWaveApprovalHoldMode | null>(null);
 
@@ -221,6 +222,14 @@ export default function CreateWaveVoting({
   const approvalThresholdTimeErrorMessage =
     getApprovalThresholdTimeErrorMessage(errors);
   const showVotingSettings = waveType !== ApiWaveType.Chat;
+  const hasAdvancedError = errors.some((error) =>
+    ADVANCED_VOTING_ERRORS.has(error)
+  );
+  const isAdvancedCustomized =
+    maxVotesPerIdentityPerDrop !== null ||
+    !allowNegativeVotes ||
+    timeWeighted.enabled ||
+    approvalThresholdTimeMs !== null;
   const inferredApprovalHoldMode = getCreateWaveApprovalHoldMode({
     thresholdTimeMs: approvalThresholdTimeMs,
   });
@@ -250,9 +259,14 @@ export default function CreateWaveVoting({
 
   return (
     <div>
-      <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
-        {TITLES[waveType]}
-      </h2>
+      <CreateWaveStepHeader
+        title={t(
+          locale,
+          waveType === ApiWaveType.Chat
+            ? "waves.create.voting.ratingTitle"
+            : "waves.create.voting.title"
+        )}
+      />
       <div className={VOTING_OPTIONS_GRID_CLASSES}>
         {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
           .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
@@ -263,10 +277,12 @@ export default function CreateWaveVoting({
               selected={selectedType}
               disabled={false}
               variant="subtle"
+              name="create-wave-credit-type"
+              ariaLabel={getCreateWaveVotingLabel(votingType)}
               onChange={onTypeChange}
             >
               <span
-                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-medium ${
+                className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
                   selectedType === votingType
                     ? "tw-text-white"
                     : "tw-text-iron-300 group-hover:tw-text-white"
@@ -277,7 +293,7 @@ export default function CreateWaveVoting({
             </CommonBorderedRadioButton>
           ))}
         {selectedType === ApiWaveCreditType.Rep && (
-          <div className="tw-col-span-full">
+          <div className="tw-col-span-full !tw-px-0 !tw-py-0">
             <CreateWaveVotingRep
               category={category}
               profileId={profileId}
@@ -304,69 +320,86 @@ export default function CreateWaveVoting({
         onCreditScopeChange={onCreditScopeChange}
       />
 
-      {showVotingSettings && (
+      {waveType === ApiWaveType.Approve && (
         <div
           data-testid="create-wave-voting-settings-grid"
           className={VOTING_SETTINGS_GRID_CLASSES}
         >
-          <MaxVotesPerIdentityInput
-            value={maxVotesPerIdentityPerDrop}
-            errors={errors}
-            onChange={setMaxVotesPerIdentityPerDrop}
+          <CreateWaveVotingThreshold
+            threshold={approvalThreshold}
+            error={approvalThresholdError}
+            setThreshold={setApprovalThreshold}
           />
-
-          {waveType === ApiWaveType.Approve && (
-            <CreateWaveVotingThreshold
-              threshold={approvalThreshold}
-              error={approvalThresholdError}
-              setThreshold={setApprovalThreshold}
-            />
-          )}
         </div>
       )}
 
-      {waveType === ApiWaveType.Approve && (
-        <>
-          <TimeWeightedVoting
-            config={timeWeighted}
-            errorMessage={timeWeightedErrorMessage}
-            onChange={onTimeWeightedChange}
-          />
-
-          <CreateWaveApprovalHold
-            selectedMode={approvalHoldMode}
-            onModeChange={onApprovalHoldModeChange}
-          />
-
-          {approvalHoldMode === CreateWaveApprovalHoldMode.HOLD && (
-            <div className="tw-mt-3" data-testid="approval-hold-detail">
-              <CreateWaveVotingThresholdTime
-                thresholdTimeMs={approvalThresholdTimeMs}
-                errorMessage={approvalThresholdTimeErrorMessage}
-                usesTimeWeightedScore={timeWeighted.enabled}
-                setThresholdTimeMs={onApprovalThresholdTimeChange}
+      {showVotingSettings && (
+        <div className="tw-mt-6">
+          <CreateWaveAdvancedSection
+            title={t(
+              locale,
+              waveType === ApiWaveType.Approve
+                ? "waves.create.voting.approveAdvancedSummary"
+                : "waves.create.voting.rankAdvancedSummary"
+            )}
+            isCustomized={isAdvancedCustomized}
+            hasError={hasAdvancedError}
+            variant="filled"
+          >
+            <div className="tw-space-y-3 tw-p-5">
+              <MaxVotesPerIdentityInput
+                value={maxVotesPerIdentityPerDrop}
+                errors={errors}
+                onChange={setMaxVotesPerIdentityPerDrop}
               />
+
+              {waveType === ApiWaveType.Approve ? (
+                <>
+                  <TimeWeightedVoting
+                    config={timeWeighted}
+                    errorMessage={timeWeightedErrorMessage}
+                    onChange={onTimeWeightedChange}
+                  />
+
+                  <CreateWaveApprovalHold
+                    selectedMode={approvalHoldMode}
+                    onModeChange={onApprovalHoldModeChange}
+                  />
+
+                  {approvalHoldMode === CreateWaveApprovalHoldMode.HOLD && (
+                    <div data-testid="approval-hold-detail">
+                      <CreateWaveVotingThresholdTime
+                        thresholdTimeMs={approvalThresholdTimeMs}
+                        errorMessage={approvalThresholdTimeErrorMessage}
+                        usesTimeWeightedScore={timeWeighted.enabled}
+                        setThresholdTimeMs={onApprovalThresholdTimeChange}
+                      />
+                    </div>
+                  )}
+
+                  <NegativeVotingToggle
+                    allowNegativeVotes={allowNegativeVotes}
+                    onChange={onAllowNegativeVotesChange}
+                    isDisabled={false}
+                  />
+                </>
+              ) : (
+                <>
+                  <NegativeVotingToggle
+                    allowNegativeVotes={allowNegativeVotes}
+                    onChange={onAllowNegativeVotesChange}
+                    isDisabled={false}
+                  />
+                  <TimeWeightedVoting
+                    config={timeWeighted}
+                    errorMessage={timeWeightedErrorMessage}
+                    onChange={onTimeWeightedChange}
+                  />
+                </>
+              )}
             </div>
-          )}
-        </>
-      )}
-
-      {/* Negative Voting Toggle - show for Rank and Approve waves */}
-      {waveType !== ApiWaveType.Chat && (
-        <NegativeVotingToggle
-          allowNegativeVotes={allowNegativeVotes}
-          onChange={onAllowNegativeVotesChange}
-          isDisabled={false}
-        />
-      )}
-
-      {/* Show Time-Weighted Voting for Rank waves */}
-      {waveType === ApiWaveType.Rank && (
-        <TimeWeightedVoting
-          config={timeWeighted}
-          errorMessage={timeWeightedErrorMessage}
-          onChange={onTimeWeightedChange}
-        />
+          </CreateWaveAdvancedSection>
+        </div>
       )}
     </div>
   );

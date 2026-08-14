@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { commonApiFetch } from "@/services/api/common-api";
 import RepCategorySearchDropdown from "./RepCategorySearchDropdown";
@@ -21,12 +21,16 @@ export default function RepCategorySearch({
   disableInputCategoryAsValue = false,
   error = false,
   hideDefaultError = false,
+  inputClassName,
+  labelClassName,
   setCategory,
 }: {
   readonly category: string | null;
   readonly size?: RepCategorySearchSize | undefined;
   readonly disableInputCategoryAsValue?: boolean | undefined;
   readonly error?: boolean | undefined;
+  readonly inputClassName?: string | undefined;
+  readonly labelClassName?: string | undefined;
   /**
    * Keep the error styling (ring/caret) but suppress the built-in message,
    * for callers that render their own — e.g. the create-wave outcome field
@@ -46,16 +50,11 @@ export default function RepCategorySearch({
     [RepCategorySearchSize.MD]: "tw-text-md",
   };
 
-  const ICON_CLASSES: Record<RepCategorySearchSize, string> = {
-    [RepCategorySearchSize.SM]: "tw-top-3",
-    [RepCategorySearchSize.MD]: "tw-top-3.5",
-  };
-
-  const [searchCriteria, setSearchCriteria] = useState<string | null>(category);
-
-  useEffect(() => {
-    setSearchCriteria(category);
-  }, [category]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [draftCriteria, setDraftCriteria] = useState<string | null | undefined>(
+    undefined
+  );
+  const searchCriteria = draftCriteria === undefined ? category : draftCriteria;
 
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
@@ -74,21 +73,19 @@ export default function RepCategorySearch({
     enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
 
-  const [isOpen, setIsOpen] = useState(false);
   const onValueChange = (newValue: string | null) => {
     setCategory(newValue);
-    setSearchCriteria(newValue);
+    setDraftCriteria(undefined);
     setIsOpen(false);
   };
 
-  const onFocusChange = (newV: boolean) => {
-    if (newV) {
-      setIsOpen(true);
-    }
+  const onFocus = () => {
+    setDraftCriteria((current) => (current === undefined ? category : current));
+    setIsOpen(true);
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
-    setSearchCriteria(newV);
+    setDraftCriteria(newV);
     if (!newV) {
       setCategory(null);
     }
@@ -98,50 +95,53 @@ export default function RepCategorySearch({
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const [categories, setCategories] = useState<string[]>([]);
-
-  useEffect(() => {
+  const categories = useMemo(() => {
     if (!debouncedValue) {
-      setCategories([]);
-      return;
+      return [];
     }
     if (debouncedValue.length < MIN_SEARCH_LENGTH) {
-      setCategories([]);
-      return;
+      return [];
     }
 
     if (disableInputCategoryAsValue) {
-      setCategories(
-        (data ?? []).filter((item) => !isHelpBotCreditRepCategory(item))
-      );
-      return;
+      return (data ?? []).filter((item) => !isHelpBotCreditRepCategory(item));
     }
     if (isHelpBotCreditRepCategory(debouncedValue)) {
-      setCategories([]);
-      return;
+      return [];
     }
     if (!data?.length) {
-      setCategories([debouncedValue]);
-      return;
+      return [debouncedValue];
     }
-    setCategories([
+    return [
       debouncedValue,
       ...data.filter(
         (i) => i !== debouncedValue && !isHelpBotCreditRepCategory(i)
       ),
-    ]);
+    ];
   }, [data, debouncedValue, disableInputCategoryAsValue]);
 
   return (
-    <div className="tw-relative tw-w-full" ref={wrapperRef}>
+    <div
+      className="tw-relative tw-w-full"
+      ref={wrapperRef}
+      onBlur={(event) => {
+        if (
+          event.relatedTarget instanceof Node &&
+          event.currentTarget.contains(event.relatedTarget)
+        ) {
+          return;
+        }
+        setIsOpen(false);
+      }}
+    >
       <div className="tw-group tw-relative tw-w-full">
         <input
           type="text"
           value={searchCriteria ?? ""}
           onChange={(e) => onSearchCriteriaChange(e.target.value)}
-          onFocus={() => onFocusChange(true)}
-          onBlur={() => onFocusChange(false)}
+          onFocus={onFocus}
           id={randomId}
+          aria-invalid={error || undefined}
           className={`${INPUT_CLASSES[size]} ${
             error
               ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
@@ -150,11 +150,11 @@ export default function RepCategorySearch({
             searchCriteria
               ? "tw-text-primary-400 focus:tw-text-white"
               : "tw-text-white"
-          } tw-peer tw-border-iron-700 tw-bg-iron-900 tw-py-3 tw-pl-10 tw-pr-4 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset`}
+          } tw-peer tw-border-iron-700 tw-bg-iron-900 tw-py-3 tw-pl-10 tw-pr-4 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset ${inputClassName ?? ""}`}
           placeholder=" "
         />
         <svg
-          className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
+          className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-1/2 tw-h-5 tw-w-5 -tw-translate-y-1/2 tw-text-iron-300"
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -166,22 +166,28 @@ export default function RepCategorySearch({
           ></path>
         </svg>
         {!!category?.length && (
-          <svg
+          <button
+            type="button"
             onClick={() => onValueChange(null)}
             aria-label="Clear category"
-            className={`${ICON_CLASSES[size]} tw-absolute tw-right-3 tw-top-3.5 tw-h-5 tw-w-5 tw-cursor-pointer tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error`}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+            className="tw-absolute tw-right-3 tw-top-1/2 tw-flex tw-h-5 tw-w-5 -tw-translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
-            <path
-              d="M17 7L7 17M7 7L17 17"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            <svg
+              className="tw-h-5 tw-w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M17 7L7 17M7 7L17 17"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         )}
         <label
           htmlFor={randomId}
@@ -189,7 +195,7 @@ export default function RepCategorySearch({
             error
               ? "peer-focus:tw-text-error"
               : "peer-focus:tw-text-primary-400"
-          } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+          } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4 ${labelClassName ?? ""}`}
         >
           Rep Category
         </label>
