@@ -1285,7 +1285,7 @@ describe("CreateWave", () => {
     expect(descriptionComponent).toBeInTheDocument();
   });
 
-  it("renders a sticky glass action footer instead of the legacy iOS bottom margin", () => {
+  it("renders a sticky solid action footer instead of the legacy iOS bottom margin", () => {
     const useCapacitor = require("@/hooks/useCapacitor").default;
     useCapacitor.mockReturnValue({ isIos: true });
     (useNativeKeyboard as jest.Mock).mockReturnValue({ isVisible: false });
@@ -1293,12 +1293,13 @@ describe("CreateWave", () => {
     renderCreateWave();
 
     // The old iOS-only tw-mb-10 dock spacer is gone (it read as a chunky
-    // footer); Prev/Next now live in a sticky, translucent-blur footer.
+    // footer); Prev/Next now live in a sticky, opaque footer.
     const mainColumn = document.querySelector(".tw-flex-1.tw-bg-iron-950");
     expect(mainColumn).not.toHaveClass("tw-mb-10");
 
     const footer = screen.getByTestId("create-wave-actions").parentElement;
     expect(footer?.className).toContain("tw-sticky");
-    expect(footer?.className).toContain("tw-backdrop-blur-md");
+    expect(footer?.className).toContain("tw-bg-iron-950");
+    expect(footer?.className).not.toContain("tw-backdrop-blur-md");
   });
 });

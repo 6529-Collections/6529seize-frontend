@@ -1206,6 +1206,11 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
   title: "Drops",
   description: "Choose what participants can submit to this wave.",
   requirementsTitle: "Submission requirements",
+  requiredTypesLegend: "Required Types",
+  "requiredType.none": "None",
+  "requiredType.image": "Image",
+  "requiredType.audio": "Audio",
+  "requiredType.video": "Video",
   "advanced.defaultSummary": "No additional submission requirements.",
   "advanced.customSummary": "Submission requirements customized.",
   "maxSimultaneousSubmissions.label": "Max simultaneous submissions",
@@ -1729,6 +1734,7 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 const COMMON_MESSAGES = objectMessages("common", {
   back: "Back",
   close: "Close",
+  expandEditor: "Expand editor",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
