@@ -81,7 +81,7 @@ describe("LatestDropAllowlistStatus", () => {
     render(<LatestDropAllowlistStatus tokenId={532} />);
 
     expect(
-      screen.getByRole("heading", { name: "Your allocation" })
+      screen.getByRole("heading", { name: "Your allowance" })
     ).toBeInTheDocument();
     expect(screen.queryByText("Connected wallet")).not.toBeInTheDocument();
     expect(
@@ -96,14 +96,20 @@ describe("LatestDropAllowlistStatus", () => {
     );
   });
 
-  it("hides the entire allocation section while disconnected", () => {
+  it("prompts disconnected users without starting an allocation request", () => {
     mockUseSeizeConnectContext.mockReturnValue({
       address: undefined,
       connectionState: "disconnected",
     });
-    const { container } = render(<LatestDropAllowlistStatus tokenId={532} />);
+    render(<LatestDropAllowlistStatus tokenId={532} />);
 
-    expect(container).toBeEmptyDOMElement();
+    expect(
+      screen.getByRole("heading", { name: "Your allowance" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Connect your wallet to view your allowance."
+    );
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({ enabled: false })
     );
@@ -113,7 +119,7 @@ describe("LatestDropAllowlistStatus", () => {
     [
       "loading",
       { data: undefined, isError: false, isPending: true },
-      "Checking your allocation…",
+      "Checking your allowance…",
     ],
     [
       "unpublished",
@@ -122,22 +128,22 @@ describe("LatestDropAllowlistStatus", () => {
         isError: false,
         isPending: false,
       },
-      "Allocation will be available once distribution is published.",
+      "Your allowance will be available once distribution is published.",
     ],
     [
       "published empty",
       { data: result(), isError: false, isPending: false },
-      "No allocation found for this wallet.",
+      "No allowance found for this wallet.",
     ],
     [
       "settled query without data",
       { data: undefined, isError: false, isPending: false },
-      "No allocation found for this wallet.",
+      "No allowance found for this wallet.",
     ],
     [
       "unavailable",
       { data: undefined, isError: true, isPending: false },
-      "Allocation information is temporarily unavailable.",
+      "Allowance information is temporarily unavailable.",
     ],
   ])("shows the %s state", (_name, queryResult, expected) => {
     useQueryMock.mockReturnValue(queryResult);
@@ -156,7 +162,7 @@ describe("LatestDropAllowlistStatus", () => {
       render(<LatestDropAllowlistStatus tokenId={532} />);
 
       expect(screen.getByRole("status")).toHaveTextContent(
-        "Checking your allocation…"
+        "Checking your allowance…"
       );
       expect(screen.queryByRole("list")).not.toBeInTheDocument();
     }
@@ -171,7 +177,7 @@ describe("LatestDropAllowlistStatus", () => {
     render(<LatestDropAllowlistStatus tokenId={532} />);
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Allocation information is temporarily unavailable."
+      "Allowance information is temporarily unavailable."
     );
   });
 

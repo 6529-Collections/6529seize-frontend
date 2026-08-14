@@ -635,6 +635,8 @@ export const DE_DE_MESSAGES = {
   "home.mintAllowlist.label": "Deine Zuteilung",
   "home.mintAllowlist.allocationsAriaLabel":
     "Mint-Zuteilungen für die verbundene Wallet",
+  "home.mintAllowlist.connectWallet":
+    "Verbinde deine Wallet, um deine Zuteilung anzuzeigen.",
   "home.mintAllowlist.checking": "Deine Zuteilung wird geprüft…",
   "home.mintAllowlist.notPublished":
     "Die Zuteilung ist verfügbar, sobald die Verteilung veröffentlicht wurde.",
