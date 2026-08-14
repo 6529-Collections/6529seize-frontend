@@ -41,7 +41,8 @@ export function MuseumResearchDocumentCard({
           museumDocumentKindLabelKey(entry.document.kind) as MessageKey
         ));
   const Heading = headingLevel === 4 ? "h4" : "h3";
-  const subject = entry.subjectLabels?.join(" / ");
+  const joinedSubject = entry.subjectLabels?.join(" / ");
+  const subject = joinedSubject === "" ? undefined : joinedSubject;
   const byline = [label, subject].filter(Boolean).join(" / ");
   const mediaStatus: { status?: string } = {};
   if (entry.description !== undefined) {
@@ -58,6 +59,8 @@ export function MuseumResearchDocumentCard({
     }
   }
 
+  const altText = entry.media?.altText?.trim();
+
   return (
     <article className="tw-min-w-0">
       {entry.media === undefined ? null : (
@@ -65,13 +68,16 @@ export function MuseumResearchDocumentCard({
           src={entry.media.url}
           width={entry.media.width}
           height={entry.media.height}
-          alt={entry.media.altText ?? entry.title}
+          alt={
+            altText === undefined || altText.length === 0
+              ? entry.title
+              : altText
+          }
           href={href}
           title={entry.title}
           byline={byline}
           {...mediaStatus}
           {...mediaAspectRatioProps}
-          sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
         />
       )}
       {entry.media === undefined ? (

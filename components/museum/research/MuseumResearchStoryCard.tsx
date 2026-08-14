@@ -33,6 +33,7 @@ export function MuseumResearchStoryCard({
     media === undefined
       ? undefined
       : museumResearchMediaAspectRatio(media.width, media.height);
+  const altText = media?.altText?.trim();
 
   return (
     <article className="tw-grid tw-min-w-0 tw-items-start tw-gap-8 lg:tw-grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] lg:tw-gap-12">
@@ -54,10 +55,13 @@ export function MuseumResearchStoryCard({
               <MuseumManagedImage
                 src={media.url}
                 {...imageDimensions}
-                alt={media.altText ?? title}
+                alt={
+                  altText === undefined || altText.length === 0
+                    ? title
+                    : altText
+                }
                 loading="eager"
                 fetchPriority="high"
-                sizes="(min-width: 1024px) 58vw, 100vw"
                 failureMessage={t(
                   DEFAULT_LOCALE,
                   "museum.network.media.unavailable"

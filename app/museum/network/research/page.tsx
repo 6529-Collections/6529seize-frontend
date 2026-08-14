@@ -137,18 +137,19 @@ function uniqueMuseumResearchDocumentSlug(
 function proposalPresentationMedia(
   workId: string,
   media: MuseumExternalProposalPresentationMedia
-): MuseumMedia {
+): MuseumMedia | undefined {
   const delivery =
     media.variants?.find((variant) => variant.width >= 1280) ??
     media.variants?.at(-1);
+  if (delivery === undefined) return undefined;
   return {
     id: media.id,
     artworkId: workId,
     kind: "still",
     role: "source",
     mediaType: media.mediaMimeType,
-    width: delivery?.width ?? media.width,
-    height: delivery?.height ?? media.height,
+    width: delivery.width,
+    height: delivery.height,
     altText: media.altText,
     credit: {
       creditLine: media.credit.creditLine,
@@ -159,7 +160,7 @@ function proposalPresentationMedia(
     },
     sourcePath: media.source.mediaRecordPath,
     custody: "upstream",
-    url: delivery?.url ?? media.mediaUrl,
+    url: delivery.url,
     preservationStatus: "not_retained",
     sha256: null,
     upstreamProvider: "museum_public_derivative",
@@ -239,7 +240,11 @@ function researchMedia(
     if (typedMedia !== undefined) return typedMedia;
     const proposalMedia = work?.presentationMedia?.[0];
     if (proposalMedia !== undefined) {
-      return proposalPresentationMedia(id, proposalMedia);
+      const reviewedProposalMedia = proposalPresentationMedia(
+        id,
+        proposalMedia
+      );
+      if (reviewedProposalMedia !== undefined) return reviewedProposalMedia;
     }
     const artwork = publication.artworks.find(
       (candidate) => candidate.id === id
@@ -302,7 +307,10 @@ function museumResearchEditorialTitle(
   if (!/^(?:6529NM|OUT-|RP-|RESEARCH-|[0-9a-f]{24,})/iu.test(title)) {
     return title;
   }
-  return subjectLabels[0] ?? "Research record";
+  return (
+    subjectLabels[0] ??
+    t(DEFAULT_LOCALE, "museum.network.research.fallbackTitle")
+  );
 }
 
 function museumResearchDescription(
@@ -338,9 +346,15 @@ function museumResearchDescription(
     return `${wordSafeExcerpt}...`;
   }
   if (subjectLabels.length > 0) {
-    return `${kindLabel} concerning ${subjectLabels.join(", ")}.`;
+    return t(
+      DEFAULT_LOCALE,
+      "museum.network.research.fallbackDescriptionWithSubjects",
+      { kind: kindLabel, subjects: subjectLabels.join(", ") }
+    );
   }
-  return `${kindLabel} from the Museum's published research record.`;
+  return t(DEFAULT_LOCALE, "museum.network.research.fallbackDescription", {
+    kind: kindLabel,
+  });
 }
 
 function researchEntryFields(

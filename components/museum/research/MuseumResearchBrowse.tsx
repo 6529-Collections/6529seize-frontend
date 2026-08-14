@@ -3,13 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { museumResearchHref } from "@/lib/museum/publication/routes";
-import type { MuseumPublicDocument } from "@/lib/museum/publication/types";
 
 export interface MuseumResearchBrowseEntry {
   readonly id: string;
   readonly slug: string;
   readonly title: string;
-  readonly document?: MuseumPublicDocument;
   readonly kindLabel?: string;
   readonly subjectLabels?: readonly string[];
   readonly description?: string;
@@ -157,7 +155,10 @@ export function MuseumResearchBrowse({
           </select>
         </div>
       </div>
-      <p className="tw-m-0 tw-mt-4 tw-text-sm tw-text-iron-400">
+      <p
+        aria-hidden="true"
+        className="tw-m-0 tw-mt-4 tw-text-sm tw-text-iron-400"
+      >
         {resultCountText(labels, resultCount)}
       </p>
       <span className="tw-sr-only" aria-live="polite" aria-atomic="true">
