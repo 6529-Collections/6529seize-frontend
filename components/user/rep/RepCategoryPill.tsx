@@ -101,10 +101,10 @@ export default function RepCategoryPill({
   );
 
   const surfaceClasses = compact
-    ? "tw-border tw-border-solid tw-border-white/[0.14] tw-bg-iron-900/60"
+    ? "tw-border tw-border-solid tw-border-white/[0.1] tw-bg-iron-900/60"
     : "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-white/[0.06]";
   const surfaceHoverClasses = compact
-    ? "desktop-hover:hover:tw-border-white/[0.2] desktop-hover:hover:tw-bg-iron-900"
+    ? "desktop-hover:hover:tw-border-white/[0.16] desktop-hover:hover:tw-bg-iron-900"
     : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-ring-white/10";
   const baseClasses = `group ${layoutClass} tw-rounded-lg ${surfaceClasses} tw-transition-colors tw-duration-200 tw-ease-out ${paddingClass}`;
 
