@@ -1,11 +1,13 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import RepCategorySearchItem from "./RepCategorySearchItem";
+
+const NO_DISABLED_CATEGORIES: string[] = [];
 
 export default function RepCategorySearchDropdown({
   open,
   categories,
   selected,
-  disabledCategories = [],
+  disabledCategories = NO_DISABLED_CATEGORIES,
   onSelect,
 }: {
   readonly open: boolean;
@@ -19,38 +21,40 @@ export default function RepCategorySearchDropdown({
       ? "Type at least 3 characters"
       : "No results";
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      {open && (
-        <motion.div
-          className="tw-absolute tw-z-10 tw-mt-1.5 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="tw-absolute tw-z-10 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-            <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
-              <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                {categories.length ? (
-                  categories.map((category) => (
-                    <RepCategorySearchItem
-                      key={category}
-                      category={category}
-                      selected={selected}
-                      disabledCategories={disabledCategories}
-                      onSelect={onSelect}
-                    />
-                  ))
-                ) : (
-                  <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
-                    {noResultsText}
-                  </li>
-                )}
-              </ul>
+    <LazyMotion features={domAnimation}>
+      <AnimatePresence mode="wait" initial={false}>
+        {open && (
+          <m.div
+            className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="tw-absolute tw-z-50 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+              <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
+                <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-px-2">
+                  {categories.length ? (
+                    categories.map((category) => (
+                      <RepCategorySearchItem
+                        key={category}
+                        category={category}
+                        selected={selected}
+                        disabledCategories={disabledCategories}
+                        onSelect={onSelect}
+                      />
+                    ))
+                  ) : (
+                    <li className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-text-white">
+                      {noResultsText}
+                    </li>
+                  )}
+                </ul>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </m.div>
+        )}
+      </AnimatePresence>
+    </LazyMotion>
   );
 }

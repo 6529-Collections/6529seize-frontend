@@ -431,7 +431,9 @@ export const DE_DE_MESSAGES = {
   "waves.create.advanced.needsAttention": "Prüfen",
   "waves.create.advanced.errorSummary":
     "Prüfe die markierten Einstellungen, bevor du fortfährst.",
+  "waves.create.overview.title": "Wave erstellen",
   "waves.create.overview.picture": "Wave-Bild",
+  "waves.create.overview.advancedTitle": "Darstellung und Bezeichnungen",
   "waves.create.overview.displaySettings": "Anzeigeeinstellungen",
   "waves.create.groups.title": "Zugriff",
   "waves.create.groups.description":
@@ -444,10 +446,20 @@ export const DE_DE_MESSAGES = {
   "waves.create.dates.approve.noEndSummary": "Startet {start}. Kein Enddatum.",
   "waves.create.dates.approve.endSummary": "Startet {start}. Endet {end}.",
   "waves.create.dates.approve.endInfoLabel": "Informationen zum Wave-Ende",
+  "waves.create.dates.approve.advancedSummary": "Wave-Ende",
   "waves.create.dates.rank.ongoingSummary":
     "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Das Ranking bleibt offen.",
   "waves.create.dates.rank.scheduledSummary":
     "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Erste Gewinner: {announcement}.",
+  "waves.create.dates.rank.advancedSummary": "Gewinnerzeitplan",
+  "waves.create.drops.requirementsTitle": "Einreichungsanforderungen",
+  "waves.create.rules.advancedSummary": "Creator-Regeln und Zustimmung",
+  "waves.create.rules.chatAdvancedSummary": "Creator-Regeln",
+  "waves.create.voting.rankAdvancedSummary": "Abstimmungslimits und -verhalten",
+  "waves.create.voting.approveAdvancedSummary":
+    "Abstimmungslimits, -verhalten und -zeitplan",
+  "waves.create.outcomes.rankAdvancedSummary": "Sichtbarkeit der Ergebnisse",
+  "waves.create.outcomes.approveAdvancedSummary": "Gewinnerlimits",
   "waves.create.drops.maxSimultaneousSubmissions.label":
     "Maximale gleichzeitige Einreichungen",
   "waves.create.drops.maxSimultaneousSubmissions.description":
@@ -620,5 +632,23 @@ export const DE_DE_MESSAGES = {
   "theMemes.volume.7Days": "7 Tage",
   "theMemes.volume.30Days": "30 Tage",
   "theMemes.volume.allTime": "Gesamt",
+  "home.mintAllowlist.label": "Deine Zuteilung",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint-Zuteilungen für die verbundene Wallet",
+  "home.mintAllowlist.connectWallet":
+    "Verbinde deine Wallet, um Details anzuzeigen.",
+  "home.mintAllowlist.checking": "Wird geprüft…",
+  "home.mintAllowlist.notPublished":
+    "Verfügbar, sobald die Verteilung veröffentlicht wurde.",
+  "home.mintAllowlist.notFound": "Keine für diese Wallet.",
+  "home.mintAllowlist.unavailable": "Vorübergehend nicht verfügbar.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Öffentlich",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
   ...DE_DE_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

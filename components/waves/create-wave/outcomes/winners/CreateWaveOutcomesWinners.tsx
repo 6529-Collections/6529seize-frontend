@@ -11,6 +11,12 @@ import {
 } from "@/types/waves.types";
 import CreateWaveOutcomesWinnersAddWinner from "./CreateWaveOutcomesWinnersAddWinner";
 import CreateWaveOutcomesWinnersRows from "./CreateWaveOutcomesWinnersRows";
+import {
+  CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES,
+  CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES,
+  getCreateWaveOutcomeInputStateClasses,
+  getCreateWaveOutcomeLabelStateClasses,
+} from "../createWaveOutcomeStyles";
 
 export default function CreateWaveOutcomesWinners({
   winnersConfig,
@@ -77,6 +83,7 @@ export default function CreateWaveOutcomesWinners({
   const isWinnersRowsError = isPercentageCredit
     ? percentageError
     : totalValueError;
+  const totalAmountErrorId = "outcome-total-amount-error";
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
@@ -87,7 +94,11 @@ export default function CreateWaveOutcomesWinners({
         />
       </div> */}
       {totalValueError && (
-        <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div
+          id={totalAmountErrorId}
+          role="alert"
+          className="tw-flex tw-items-center tw-gap-x-2"
+        >
           <svg
             className="tw-size-5 tw-flex-shrink-0 tw-text-error"
             viewBox="0 0 24 24"
@@ -135,25 +146,28 @@ export default function CreateWaveOutcomesWinners({
           <div>
             <div className="tw-relative">
               <input
+                id="outcome-total-amount"
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 value={winnersConfig.totalAmount}
                 onChange={onTotalAmountChange}
                 autoComplete="off"
-                className={`${
-                  totalValueError
-                    ? "tw-text-error tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-                    : "tw-text-white tw-caret-primary-400 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
-                } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`}
+                aria-invalid={totalValueError}
+                aria-describedby={
+                  totalValueError ? totalAmountErrorId : undefined
+                }
+                className={`${getCreateWaveOutcomeInputStateClasses({
+                  hasError: totalValueError,
+                  hasValue: winnersConfig.totalAmount > 0,
+                })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES} tw-pr-16`}
                 placeholder=" "
               />
               <label
-                className={`${
+                htmlFor="outcome-total-amount"
+                className={`${getCreateWaveOutcomeLabelStateClasses(
                   totalValueError
-                    ? "tw-text-error peer-focus:tw-text-error"
-                    : "tw-text-iron-500 peer-focus:tw-text-primary-400"
-                } tw-absolute tw-start-1 tw-top-2 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+                )} ${CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES}`}
               >
                 Total Amount
               </label>

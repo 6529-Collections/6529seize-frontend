@@ -1,7 +1,15 @@
 import { PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES } from "@/i18n/messages/public-review-artists-and-roles";
 import { PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES } from "@/i18n/messages/public-review-artwork-lifecycle";
 import { PUBLIC_REVIEW_COMMUNITY_MESSAGES } from "@/i18n/messages/public-review-community";
+import { PUBLIC_REVIEW_CURATION_TDH_MESSAGES } from "@/i18n/messages/public-review-curation-tdh";
 import { PUBLIC_REVIEW_DEVELOPMENT_MESSAGES } from "@/i18n/messages/public-review-development";
+import { PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES } from "@/i18n/messages/public-review-tokens-minting";
+import { PUBLIC_REVIEW_GOVERNANCE_MESSAGES } from "@/i18n/messages/public-review-governance";
+import { PUBLIC_REVIEW_SALES_AND_AUCTIONS_MESSAGES } from "@/i18n/messages/public-review-sales-and-auctions";
+import { PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES } from "@/i18n/messages/public-review-freezing-finality";
+import { PUBLIC_REVIEW_REVENUE_SPLITS_MESSAGES } from "@/i18n/messages/public-review-revenue-splits";
+import { PUBLIC_REVIEW_RANDOMNESS_MESSAGES } from "@/i18n/messages/public-review-randomness";
+import { PUBLIC_REVIEW_METADATA_MESSAGES } from "@/i18n/messages/public-review-metadata";
 
 export const PUBLIC_REVIEW_MESSAGES = {
   "navigation.nfts.theMemes": "The Memes",
@@ -171,8 +179,16 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.overviewGuide.startPage": "Start with {page}",
   ...PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES,
   ...PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES,
+  ...PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES,
   ...PUBLIC_REVIEW_COMMUNITY_MESSAGES,
+  ...PUBLIC_REVIEW_CURATION_TDH_MESSAGES,
   ...PUBLIC_REVIEW_DEVELOPMENT_MESSAGES,
+  ...PUBLIC_REVIEW_TOKENS_MINTING_MESSAGES,
+  ...PUBLIC_REVIEW_GOVERNANCE_MESSAGES,
+  ...PUBLIC_REVIEW_SALES_AND_AUCTIONS_MESSAGES,
+  ...PUBLIC_REVIEW_REVENUE_SPLITS_MESSAGES,
+  ...PUBLIC_REVIEW_RANDOMNESS_MESSAGES,
+  ...PUBLIC_REVIEW_METADATA_MESSAGES,
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",

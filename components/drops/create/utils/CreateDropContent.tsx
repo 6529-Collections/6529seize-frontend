@@ -321,7 +321,13 @@ const CreateDropContent = forwardRef<
                   </div>
                 }
                 placeholder={
-                  <span className="editor-placeholder">
+                  <span
+                    className={`editor-placeholder ${
+                      viewType === CreateDropViewType.COMPACT
+                        ? "tw-top-1/2 -tw-translate-y-1/2 tw-leading-6"
+                        : ""
+                    }`}
+                  >
                     {getPlaceHolderText()}
                   </span>
                 }

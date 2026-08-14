@@ -21,7 +21,7 @@ function getWrapperClasses({
   readonly isSubtle: boolean;
 }) {
   if (isSelected && isSubtle) {
-    return "tw-rounded-xl tw-border-primary-400 tw-bg-iron-900 tw-shadow-inner";
+    return "tw-rounded-xl tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner";
   }
 
   if (isSelected) {
@@ -31,8 +31,8 @@ function getWrapperClasses({
   if (isSubtle) {
     const hoverClasses = disabled
       ? ""
-      : "hover:tw-border-white/20 hover:tw-bg-iron-900";
-    return `tw-rounded-xl tw-border-white/10 tw-bg-iron-900/60 tw-shadow-none ${hoverClasses}`;
+      : "hover:tw-border-white/10 hover:tw-bg-iron-900";
+    return `tw-rounded-xl tw-border-white/5 tw-bg-iron-900/60 tw-shadow-none ${hoverClasses}`;
   }
 
   const hoverClasses = disabled ? "" : "hover:tw-ring-iron-650";
@@ -119,7 +119,7 @@ export default function CommonBorderedRadioButton<T extends string>({
       {isSubtle && (
         <span
           aria-hidden="true"
-          className={`tw-mt-1 tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+          className={`tw-mt-0.5 tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
             isSelected
               ? "tw-border-primary-400 tw-bg-primary-500/10"
               : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"

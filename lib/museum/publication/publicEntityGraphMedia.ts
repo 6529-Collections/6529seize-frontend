@@ -42,6 +42,7 @@ import {
   proposalMetadata,
 } from "./publicEntityGraphMediaMetadata";
 import { accessionMediaFacts } from "./publicEntityGraphAccessionMedia";
+import { accessionPresentationVariants } from "./publicEntityGraphAccessionPresentation";
 export { findWavePublicationPart } from "./publicEntityGraphWaveMediaJoin";
 
 export function mapWorkStatus(
@@ -329,6 +330,23 @@ function projectProposalMedia(
     context.sourceDocuments
   );
   const affordances = proposalAffordances(input);
+  const sourceSha256 = requiredString(
+    requiredObject(media, "fixity", "public_entity_graph_media_fixity"),
+    "digest",
+    "public_entity_graph_media_fixity"
+  );
+  const variants = accessionPresentationVariants({
+    workId: subjectEntity.id,
+    mediaId: mediaEntity.id,
+    sourceUrl: input.tokenSourceUri,
+    sourceSha256,
+    sourceByteSize,
+    sourceWidth: input.width,
+    sourceHeight: input.height,
+    sourceAltText: input.altText,
+    sourceDocuments: context.sourceDocuments,
+    catalogMediaAssetPaths: context.catalogMediaAssetPaths,
+  });
   const candidate: MuseumExternalProposalPresentationMedia = {
     id: mediaEntity.id,
     kind: "external_proposal_presentation",
@@ -336,6 +354,7 @@ function projectProposalMedia(
     mediaMimeType:
       input.mediaType as MuseumExternalProposalPresentationMedia["mediaMimeType"],
     sourceByteSize,
+    ...(variants.length === 0 ? {} : { variants }),
     width: input.width,
     height: input.height,
     altText: input.altText,

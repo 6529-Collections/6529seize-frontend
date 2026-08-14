@@ -96,6 +96,35 @@ declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100
 matching records at a time.
 
+The current **Tokens, Collections, and Minting** page starts with a one-minute
+explanation. It then separates permanent Core identity from replaceable minting
+rules, explains the two source mint paths, and labels the proposed ADR 0018
+replay change as unimplemented. It keeps the snapshot's section anchors for
+feedback. Immutable version routes retain the original technical editorial.
+
+The current **Changes, Emergencies, and Future Contracts** page starts with a
+short explanation of setup sealing, delayed governance, incident pauses,
+permanent powers, and replacement contracts. It keeps current Solidity,
+accepted ADR design, open risks, and launch evidence separate. In particular,
+it explains that the pinned executor's 30-day successor class and the module
+registry's 48-hour registration path are separate code paths that still need an
+exact launch changeover catalog.
+
+The current **Randomness** page starts with a one-minute answer and a five-step
+request flow. It keeps reviewed contract behavior separate from accepted ADR
+0005 design and open recovery ideas. It then explains provider trust, request
+states, seed evidence, same-seed retries, stale requests, provider changes,
+burns, funding, risks, and reviewer questions in plain language. Its saved
+version routes keep their exact editorial snapshot.
+
+The current **Metadata, Scripts, and Dependencies** page begins with a one-minute
+answer. It separates behavior in the pinned Solidity from the accepted metadata
+ADR, the unbuilt satellite refresh helpers, and external compatibility evidence.
+It then keeps the detailed material on storage, encoding, scripts, dependency
+versions, collection records, snapshots, shared contract metadata, refresh
+events, size limits, browser assumptions, failure cases, and reviewer questions.
+Its immutable version route keeps the exact historical editorial.
+
 ## Implementation and Evidence Status
 
 The current **Where Development Stands** page begins with a direct launch answer:
@@ -121,6 +150,16 @@ The plain artist guide and its short technical detail layer follow the same
 rule: they appear only on the current, unversioned **For Artists** route and
 replace the versioned editorial there. Immutable version routes continue to
 render their exact editorial snapshot without the guide.
+The plain governance explanation follows the same current-route rule. Immutable
+**Changes, Emergencies, and Future Contracts** routes keep their exact saved
+editorial instead of receiving later wording.
+
+The current, unversioned **Curation and TDH Authorization** page follows the
+same snapshot boundary. It replaces the active snapshot's editorial with a
+plain, status-first explanation while keeping the existing section anchors.
+It separates ADR 0001's accepted design from behavior proven by the pinned
+Solidity, and separates both from launch, audit, and offchain evidence. Saved
+version routes keep their exact historical editorial.
 
 The active review centralizes snapshot implementation and evidence status on
 **Where Development Stands**. It separates five implementation states:

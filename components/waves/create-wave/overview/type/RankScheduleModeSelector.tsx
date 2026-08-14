@@ -67,7 +67,7 @@ export default function RankScheduleModeSelector({
           const titleColorClass = isSelected
             ? "tw-text-white"
             : "tw-text-iron-300 group-hover:tw-text-white";
-          const descriptionColorClass = "tw-text-iron-500";
+          const descriptionColorClass = "tw-text-iron-400";
 
           return (
             <CommonBorderedRadioButton

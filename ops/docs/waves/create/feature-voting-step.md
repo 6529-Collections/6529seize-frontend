@@ -7,6 +7,10 @@ counted.
 Pick the vote mode, optional `Rep` scope, optional time-weighted averaging, and
 approve-wave threshold behavior.
 
+The voting-power model, voting-power scope, required `Rep` or `Memes TDH`
+details, and the `Approve` threshold remain visible. Optional vote limits and
+behavior tuning are in an expandable section named for those controls.
+
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
@@ -20,7 +24,8 @@ approve-wave threshold behavior.
 
 ## Step Path
 
-- `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- Scheduled `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- `Perpetual Ranking`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Description`
 - `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 ## Navigation Behavior
@@ -41,14 +46,19 @@ approve-wave threshold behavior.
 2. If `Rep` is selected, set at least one scope field:
    - `Rep Category`, or
    - `Profile` (identity search)
-3. Set `Allow Negative Votes`.
-4. Optional: enable `Time-Weighted Voting`.
-5. If enabled, set `Averaging Interval` in `Minutes` or `Hours`.
-6. For `Approve` waves, set `Approval threshold`.
-7. For `Approve` waves, choose `No hold` or `Require hold time`.
-8. If hold time is required, set `Minimum time above threshold` in `Minutes` or
+3. Choose whether voting power applies to the `Whole wave` or `Each drop`.
+4. For `Approve` waves, set the visible `Approval threshold`.
+5. Open `Vote limits and behavior` for Rank, or `Vote limits, behavior,
+   and timing` for Approve, only when tuning is needed.
+6. Optionally set `Vote cap per identity`.
+7. Set `Allow Negative Votes`.
+8. Optional: enable `Time-Weighted Voting` and set `Averaging Interval` in
+   `Minutes` or `Hours`.
+9. For `Approve` waves, choose `No hold` or `Require hold time`.
+10. If hold time is required, set `Minimum time above threshold` in `Minutes` or
    `Hours`.
-9. Click `Next` to continue to `Outcomes`.
+11. Click `Next` to continue to `Outcomes`, or to `Description` for
+    `Perpetual Ranking`.
 
 ## Validation and State Rules
 
@@ -72,6 +82,9 @@ approve-wave threshold behavior.
   hold checks the time-weighted score.
 - `Allow Negative Votes` defaults on, so existing behavior still allows
   negative votes.
+- `Vote cap per identity` is optional and blank by default.
+- Non-default optional values show `Customized` when the section is
+  collapsed.
 - Wave create payload sends the inverse backend flag:
   `forbid_negative_votes: false` when allowed, and `true` when blocked.
 
@@ -83,6 +96,9 @@ approve-wave threshold behavior.
 - If hold-time validation appears, set a whole positive minute/hour value,
   choose `No hold`, or extend the approve-wave end date.
 - If submit fails later in `Description`, keep voting settings and retry submit.
+- A validation error inside the collapsed optional section reopens it as
+  disclosure as `Needs attention`, focuses the invalid control, and exposes its
+  error message.
 
 ## Limitations / Notes
 

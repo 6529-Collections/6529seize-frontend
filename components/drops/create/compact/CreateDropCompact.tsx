@@ -116,7 +116,9 @@ const CreateDropCompact = forwardRef<
     }));
 
     return (
-      <div className={`${getWrapperClasses()} tw-bg-iron-900`}>
+      <div
+        className={`create-drop-composer-surface ${getWrapperClasses()} tw-bg-iron-900`}
+      >
         {children}
         <div className="tw-inline-flex tw-w-full tw-items-start tw-gap-x-2 sm:tw-gap-x-3">
           <div className="tw-flex tw-w-full tw-gap-x-2 sm:tw-gap-x-3">
@@ -170,9 +172,9 @@ const CreateDropCompact = forwardRef<
           <div key={`drop-compact-file-${i}`} className="tw-mt-3">
             <div className="tw-w-full">
               <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-650 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600">
-                <div className="tw-flex tw-items-center tw-gap-x-3 tw-truncate">
+                <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
                   <CreateDropSelectedFileIcon file={file} />
-                  <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-50">
+                  <p className="tw-m-0 tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
                     {file.name}
                   </p>
                 </div>
@@ -185,7 +187,7 @@ const CreateDropCompact = forwardRef<
                   type="button"
                   aria-label="Remove file"
                   disabled={loading}
-                  className="-tw-mb-0.5 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent hover:tw-bg-iron-800"
+                  className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent hover:tw-bg-iron-800"
                 >
                   <svg
                     className="tw-size-5 tw-flex-shrink-0 tw-text-red"
