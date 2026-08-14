@@ -420,7 +420,9 @@ export const EN_GB_MESSAGES = {
   "waves.create.advanced.needsAttention": "Needs attention",
   "waves.create.advanced.errorSummary":
     "Review the highlighted settings before continuing.",
+  "waves.create.overview.title": "Create Wave",
   "waves.create.overview.picture": "Wave profile picture",
+  "waves.create.overview.advancedTitle": "Appearance and labels",
   "waves.create.overview.displaySettings": "Display settings",
   "waves.create.groups.title": "Access",
   "waves.create.groups.description":
@@ -433,10 +435,20 @@ export const EN_GB_MESSAGES = {
   "waves.create.dates.approve.noEndSummary": "Starts {start}. No end date.",
   "waves.create.dates.approve.endSummary": "Starts {start}. Ends {end}.",
   "waves.create.dates.approve.endInfoLabel": "About wave end",
+  "waves.create.dates.approve.advancedSummary": "Wave end",
   "waves.create.dates.rank.ongoingSummary":
     "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
   "waves.create.dates.rank.scheduledSummary":
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
+  "waves.create.dates.rank.advancedSummary": "Winner schedule",
+  "waves.create.drops.requirementsTitle": "Submission requirements",
+  "waves.create.rules.advancedSummary": "Creator rules and acceptance",
+  "waves.create.rules.chatAdvancedSummary": "Creator rules",
+  "waves.create.voting.rankAdvancedSummary": "Vote limits and behaviour",
+  "waves.create.voting.approveAdvancedSummary":
+    "Vote limits, behaviour, and timing",
+  "waves.create.outcomes.rankAdvancedSummary": "Outcome visibility",
+  "waves.create.outcomes.approveAdvancedSummary": "Winner limits",
   "waves.create.drops.maxSimultaneousSubmissions.label":
     "Max simultaneous submissions",
   "waves.create.drops.maxSimultaneousSubmissions.description":
@@ -475,8 +487,7 @@ export const EN_GB_MESSAGES = {
     "Couldn't save these proposal card settings.",
   "waves.proposalCard.settings.toastRetry": "Please try again.",
   "waves.proposalCard.tabLabelsLabel": "Tab labels",
-  "waves.proposalCard.tabLabelsDescription":
-    "Names shown on this wave's tabs.",
+  "waves.proposalCard.tabLabelsDescription": "Names shown on this wave's tabs.",
   "waves.proposalCard.approvalsTabLabel": "Approvals tab label",
   "waves.proposalCard.approvedTabLabel": "Approved tab label",
   "waves.proposalCard.tabLabels.errorTooLong":

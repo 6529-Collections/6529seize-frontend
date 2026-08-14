@@ -29,7 +29,7 @@ export default function CreateWaveLayout({
 
   return (
     <div className="tw-h-full tw-w-full lg:tw-flex">
-      <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-border-y-0 lg:tw-border-l-0 lg:tw-border-r lg:tw-border-solid lg:tw-border-white/[0.06] lg:tw-bg-[#09090B] lg:tw-py-8 lg:tw-pl-3 lg:tw-pr-5">
+      <div className="tw-hidden lg:tw-flex lg:tw-w-52 lg:tw-shrink-0 lg:tw-border-y-0 lg:tw-border-l-0 lg:tw-border-r lg:tw-border-solid lg:tw-border-white/[0.06] lg:tw-bg-[#09090B] lg:tw-py-8 lg:tw-pl-8 lg:tw-pr-5">
         <CreateWavesMainSteps
           activeStep={step}
           waveType={config.overview.type}

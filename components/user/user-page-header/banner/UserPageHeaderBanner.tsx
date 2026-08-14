@@ -3,8 +3,6 @@
 import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   getBannerColorValue,
@@ -38,7 +36,7 @@ export default function UserPageHeaderBanner({
     <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40 md:tw-h-[300px]">
       {scaledBannerUrl ? (
         <div
-          className="tw-absolute tw-inset-0 md:tw-opacity-60 md:tw-mix-blend-lighten"
+          className="tw-absolute tw-inset-0 md:tw-opacity-80"
           style={{
             backgroundImage: `url(${scaledBannerUrl})`,
             backgroundSize: "cover",
@@ -54,8 +52,8 @@ export default function UserPageHeaderBanner({
         />
       )}
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5 md:tw-hidden" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-transparent" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-hidden tw-h-32 tw-bg-gradient-to-b tw-from-black/40 tw-to-transparent md:tw-block" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-transparent md:tw-via-black/40" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-hidden tw-h-32 tw-bg-gradient-to-b tw-from-black/20 tw-to-transparent md:tw-block" />
 
       {canEdit && (
         <button
@@ -70,30 +68,21 @@ export default function UserPageHeaderBanner({
           <div className="tw-absolute tw-inset-0 tw-bg-black/30 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out hover:tw-opacity-100">
             <div
               aria-hidden="true"
-              className="tw-absolute tw-bottom-4 tw-right-4 md:tw-bottom-auto md:tw-top-4"
+              className="tw-absolute tw-right-4 tw-top-4"
             >
               <PencilIcon />
             </div>
           </div>
         </button>
       )}
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
-            <UserPageHeaderEditBanner
-              profile={profile}
-              defaultBanner1={defaultBanner1}
-              defaultBanner2={defaultBanner2}
-              onClose={() => setIsEditOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isEditOpen && (
+        <UserPageHeaderEditBanner
+          profile={profile}
+          defaultBanner1={defaultBanner1}
+          defaultBanner2={defaultBanner2}
+          onClose={() => setIsEditOpen(false)}
+        />
+      )}
     </div>
   );
 }

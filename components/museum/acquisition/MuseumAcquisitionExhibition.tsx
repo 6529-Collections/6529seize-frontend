@@ -116,6 +116,7 @@ export function MuseumProposalPresentationMedia({
                 width={presentationMedia.width}
                 height={presentationMedia.height}
                 sourceByteSize={presentationMedia.sourceByteSize}
+                variants={presentationMedia.variants}
                 {...(() => {
                   const sourceHref = buildMuseumSignedWaveStormDropUrl(
                     presentationMedia.source.waveId,
@@ -411,6 +412,7 @@ function AcquisitionPresentationMedia({
         width={media.width}
         height={media.height}
         sourceByteSize={media.sourceByteSize}
+        variants={media.variants}
         {...(presentationSourceHref === null || !canOpenPresentation
           ? {}
           : {

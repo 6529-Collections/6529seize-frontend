@@ -89,6 +89,12 @@ describe("CreateWaveOverview", () => {
       />
     );
 
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Create Wave" })
+    ).toBeVisible();
+    expect(
+      screen.queryByText("Name your wave and choose how it works.")
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("wave-name-input")).toBeInTheDocument();
     expect(screen.getByTestId("wave-image-input")).toBeInTheDocument();
     expect(screen.getByTestId("wave-type-input")).toBeInTheDocument();
@@ -132,7 +138,7 @@ describe("CreateWaveOverview", () => {
     expect(onOngoingRankingChange).toHaveBeenCalledWith(true);
   });
 
-  it("displays Wave Profile Picture header", () => {
+  it("displays Wave Profile Picture as a subsection heading", () => {
     render(
       <CreateWaveOverview
         overview={mockOverview}
@@ -141,7 +147,12 @@ describe("CreateWaveOverview", () => {
       />
     );
 
-    expect(screen.getByText("Wave Profile Picture")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 3,
+        name: "Wave Profile Picture",
+      })
+    ).toBeVisible();
   });
 
   it("passes current overview values to child components", () => {

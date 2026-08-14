@@ -131,6 +131,14 @@ export interface MuseumExternalProposalPresentationRights {
   readonly licenseUrl: string | null;
 }
 
+export interface MuseumExternalProposalPresentationVariant {
+  readonly url: string;
+  readonly width: number;
+  readonly height: number;
+  readonly byteSize: number;
+  readonly sha256: `sha256:${string}`;
+}
+
 /**
  * Accession-reviewed media used to present a selected acquisition while title,
  * custody, formal accession, and Collection membership remain in progress.
@@ -145,6 +153,8 @@ export interface MuseumExternalProposalPresentationMedia {
   readonly mediaMimeType: "image/jpeg" | "image/png" | "image/webp";
   /** Reviewed observed byte size used for the intentional-view safety gate. */
   readonly sourceByteSize: number;
+  /** Reviewed, content-addressed browser delivery copies, smallest first. */
+  readonly variants?: readonly MuseumExternalProposalPresentationVariant[];
   readonly width: number;
   readonly height: number;
   readonly altText: string;
@@ -306,6 +316,7 @@ export function isMuseumExternalProposalPresentationMedia(
   const credit = candidate["credit"];
   const affordances = candidate["affordances"];
   const sourceByteSize = candidate["sourceByteSize"];
+  const variants = candidate["variants"];
   return (
     candidate["kind"] === "external_proposal_presentation" &&
     typeof candidate["id"] === "string" &&
@@ -317,6 +328,7 @@ export function isMuseumExternalProposalPresentationMedia(
     typeof sourceByteSize === "number" &&
     Number.isSafeInteger(sourceByteSize) &&
     sourceByteSize > 0 &&
+    (variants === undefined || isMuseumExternalProposalVariants(variants)) &&
     typeof candidate["width"] === "number" &&
     Number.isSafeInteger(candidate["width"]) &&
     candidate["width"] > 0 &&
@@ -337,6 +349,54 @@ export function isMuseumExternalProposalPresentationMedia(
     candidate["preservation"] === "not_retained" &&
     isMuseumExternalProposalPresentationAffordances(affordances)
   );
+}
+
+function isMuseumExternalProposalVariants(value: unknown): boolean {
+  if (!Array.isArray(value) || value.length !== 3) return false;
+  return value.every((candidate, index) => {
+    if (!isRecord(candidate)) return false;
+    const width = candidate["width"];
+    const height = candidate["height"];
+    const byteSize = candidate["byteSize"];
+    const sha256 = candidate["sha256"];
+    return (
+      width === [640, 1280, 2400][index] &&
+      typeof height === "number" &&
+      Number.isSafeInteger(height) &&
+      height > 0 &&
+      typeof byteSize === "number" &&
+      Number.isSafeInteger(byteSize) &&
+      byteSize > 0 &&
+      typeof sha256 === "string" &&
+      /^sha256:[0-9a-f]{64}$/u.test(sha256) &&
+      typeof candidate["url"] === "string" &&
+      isMuseumAccessionPresentationUrl(candidate["url"], width as number)
+    );
+  });
+}
+
+function isMuseumAccessionPresentationUrl(
+  value: string,
+  width: number
+): boolean {
+  try {
+    const parsed = new URL(value);
+    return (
+      parsed.protocol === "https:" &&
+      parsed.hostname === WAVE_PRESENTATION_HOST &&
+      parsed.username.length === 0 &&
+      parsed.password.length === 0 &&
+      parsed.port.length === 0 &&
+      parsed.search.length === 0 &&
+      parsed.hash.length === 0 &&
+      /^\/museum\/accessions\/6529NM\.2026\.002\/6529NM-W-00(?:24|25|26|27|28)\/[0-9a-f]{64}\/webp-v2-q82-m6-fixed-icc\/(?:640|1280|2400)\.webp$/u.test(
+        parsed.pathname
+      ) &&
+      parsed.pathname.endsWith(`/${width}.webp`)
+    );
+  } catch {
+    return false;
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

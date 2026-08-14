@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import CreateWaveVotingThresholdTime from "@/components/waves/create-wave/voting/CreateWaveVotingThresholdTime";
 
 describe("CreateWaveVotingThresholdTime", () => {
@@ -19,15 +20,16 @@ describe("CreateWaveVotingThresholdTime", () => {
       />
     );
 
-    expect(
-      screen.getByLabelText("Minimum time above threshold")
-    ).toHaveValue("2");
+    expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
+      "2"
+    );
     expect(
       screen.getByLabelText("Minimum time above threshold unit")
-    ).toHaveValue("hours");
+    ).toHaveTextContent("Hours");
   });
 
-  it("stores hours as milliseconds", () => {
+  it("stores hours as milliseconds", async () => {
+    const user = userEvent.setup();
     const setThresholdTimeMs = jest.fn();
 
     render(
@@ -37,12 +39,10 @@ describe("CreateWaveVotingThresholdTime", () => {
       />
     );
 
-    fireEvent.change(
-      screen.getByLabelText("Minimum time above threshold unit"),
-      {
-        target: { value: "hours" },
-      }
+    await user.click(
+      screen.getByLabelText("Minimum time above threshold unit")
     );
+    await user.click(screen.getByRole("option", { name: "Hours" }));
     fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
       target: { value: "2" },
     });

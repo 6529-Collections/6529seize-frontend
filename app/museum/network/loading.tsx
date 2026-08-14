@@ -3,7 +3,7 @@ import { t } from "@/i18n/messages";
 
 export default function MuseumNetworkLoading() {
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-10">
+    <main className="tailwind-scope tw-min-h-screen tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-10">
       <div
         className="tw-mx-auto tw-w-full tw-max-w-6xl tw-animate-pulse motion-reduce:tw-animate-none"
         role="status"

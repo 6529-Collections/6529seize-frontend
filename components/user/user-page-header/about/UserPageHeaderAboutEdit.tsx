@@ -23,10 +23,20 @@ export default function UserPageHeaderAboutEdit({
   profile,
   statement,
   onClose,
+  value: controlledValue,
+  onValueChange: controlledOnValueChange,
+  errorMsg: controlledErrorMsg,
+  onErrorMsgChange: controlledOnErrorMsgChange,
 }: {
   readonly profile: ApiIdentity;
   readonly statement: CicStatement | null;
   readonly onClose: () => void;
+  readonly value?: string | undefined;
+  readonly onValueChange?: ((value: string) => void) | undefined;
+  readonly errorMsg?: string | null | undefined;
+  readonly onErrorMsgChange?:
+    | ((errorMsg: string | null) => void)
+    | undefined;
 }) {
   const MAX_STATEMENT_LENGTH = 500;
 
@@ -35,7 +45,18 @@ export default function UserPageHeaderAboutEdit({
   useKeyPressEvent("Escape", onClose);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [internalValue, setInternalValue] = useState(
+    statement?.statement_value ?? ""
+  );
+  const [internalErrorMsg, setInternalErrorMsg] = useState<string | null>(null);
+  const value = controlledValue ?? internalValue;
+  const errorMsg =
+    controlledErrorMsg === undefined
+      ? internalErrorMsg
+      : controlledErrorMsg;
+  const onValueChange = controlledOnValueChange ?? setInternalValue;
+  const onErrorMsgChange =
+    controlledOnErrorMsgChange ?? setInternalErrorMsg;
   const profileStatementTarget =
     [profile.query, profile.handle, profile.primary_wallet]
       .map((value) => value?.trim() ?? "")
@@ -49,16 +70,14 @@ export default function UserPageHeaderAboutEdit({
     }
   }, []);
 
-  const [value, setValue] = useState<string>(statement?.statement_value ?? "");
-
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setErrorMsg(null);
+    onErrorMsgChange(null);
     const newValue = event.target.value;
     if (newValue.length > MAX_STATEMENT_LENGTH) {
-      setValue(newValue.substring(0, MAX_STATEMENT_LENGTH));
+      onValueChange(newValue.substring(0, MAX_STATEMENT_LENGTH));
       return;
     }
-    setValue(newValue);
+    onValueChange(newValue);
   };
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -71,7 +90,7 @@ export default function UserPageHeaderAboutEdit({
   const addStatementMutation = useMutation({
     mutationFn: async (statementValue: string) => {
       setLoading(true);
-      setErrorMsg(null);
+      onErrorMsgChange(null);
       return await commonApiPost<
         ApiCreateOrUpdateProfileCicStatement,
         CicStatement
@@ -86,7 +105,7 @@ export default function UserPageHeaderAboutEdit({
       });
     },
     onSuccess: () => {
-      setErrorMsg(null);
+      onErrorMsgChange(null);
       setToast({
         message: getUserProfileHeaderMessage(
           "user.profileHeader.aboutEdit.success"
@@ -99,7 +118,7 @@ export default function UserPageHeaderAboutEdit({
       onClose();
     },
     onError: (error) => {
-      setErrorMsg(
+      onErrorMsgChange(
         getToastErrorDetails(error) ??
           getUserProfileHeaderMessage(
             "user.profileHeader.aboutEdit.errors.saveFailed"
@@ -117,7 +136,11 @@ export default function UserPageHeaderAboutEdit({
     }
     const { success } = await requestAuth();
     if (!success) return;
-    await addStatementMutation.mutateAsync(value);
+    try {
+      await addStatementMutation.mutateAsync(value);
+    } catch {
+      // The mutation's onError callback owns the inline error presentation.
+    }
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -143,7 +166,11 @@ export default function UserPageHeaderAboutEdit({
             aria-label={getUserProfileHeaderMessage(
               "user.profileHeader.aboutEdit.textareaLabel"
             )}
-            aria-describedby="profile-about-character-count"
+            aria-describedby={
+              errorMsg
+                ? "profile-about-character-count profile-about-error"
+                : "profile-about-character-count"
+            }
             placeholder={getUserProfileHeaderMessage(
               "user.profileHeader.aboutEdit.placeholder"
             )}
@@ -160,13 +187,13 @@ export default function UserPageHeaderAboutEdit({
             {characterCount}
           </div>
         </div>
-        <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 sm:tw-ml-auto sm:tw-w-auto sm:tw-flex-row">
+        <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col-reverse tw-gap-2 md:tw-ml-auto md:tw-w-auto md:tw-flex-row">
           <Button
             variant="secondary"
             size="lg"
             disabled={loading}
             onClick={onClose}
-            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+            className="tw-hidden tw-min-h-11 md:tw-inline-flex md:tw-flex-none"
           >
             {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.cancel")}
           </Button>
@@ -179,7 +206,7 @@ export default function UserPageHeaderAboutEdit({
             aria-label={getUserProfileHeaderMessage(
               "user.profileHeader.aboutEdit.save"
             )}
-            className="tw-min-h-11 tw-flex-1 sm:tw-flex-none"
+            className="tw-min-h-11 tw-flex-1 md:tw-flex-none"
           >
             {getUserProfileHeaderMessage("user.profileHeader.aboutEdit.save")}
           </Button>
@@ -189,7 +216,7 @@ export default function UserPageHeaderAboutEdit({
         {errorMsg && (
           <UserPageHeaderAboutEditError
             msg={errorMsg}
-            closeError={() => setErrorMsg(null)}
+            closeError={() => onErrorMsgChange(null)}
           />
         )}
       </AnimatePresence>

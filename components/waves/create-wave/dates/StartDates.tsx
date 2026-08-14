@@ -4,10 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
-import { CREATE_WAVE_START_DATE_LABELS } from "@/helpers/waves/waves.constants";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 import CollapsibleCard from "@/components/common/CollapsibleCard";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface StartDatesProps {
   readonly waveType: ApiWaveType;
@@ -24,6 +26,7 @@ export default function StartDates({
   isExpanded,
   setIsExpanded,
 }: StartDatesProps) {
+  const locale = useBrowserLocale();
   const isRankWave = waveType === ApiWaveType.Rank;
   const minStartTimestamp = Time.currentMillis();
   const minVotingTimestamp = isRankWave
@@ -49,7 +52,7 @@ export default function StartDates({
   };
 
   const formatShortDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString("en-US", {
+    return new Date(timestamp).toLocaleString(locale, {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -61,7 +64,11 @@ export default function StartDates({
 
   return (
     <CollapsibleCard
-      title="Wave Timeline"
+      title={
+        <span className="tw-text-iron-100">
+          {t(locale, "waves.create.dates.rank.timeline.title")}
+        </span>
+      }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={
@@ -73,7 +80,7 @@ export default function StartDates({
             />
             <span className="tw-block">
               <span className="tw-block tw-text-xs tw-text-iron-300/70">
-                Drops Submission Opens
+                {t(locale, "waves.create.dates.rank.timeline.submissionLabel")}
               </span>
               <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-50">
                 {submissionDateFormatted}
@@ -88,7 +95,7 @@ export default function StartDates({
               />
               <span className="tw-block">
                 <span className="tw-block tw-text-xs tw-text-iron-300/70">
-                  Drops Voting Begins
+                  {t(locale, "waves.create.dates.rank.timeline.votingLabel")}
                 </span>
                 <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-50">
                   {votingDateFormatted}
@@ -102,11 +109,16 @@ export default function StartDates({
       {/* Calendar Selection */}
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 tw-px-5 tw-pb-5 tw-pt-2 md:tw-grid-cols-2">
         <div className="tw-col-span-1">
-          <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-            {CREATE_WAVE_START_DATE_LABELS[waveType]}
-          </p>
-          <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
-            Creators begin submitting work to your wave
+          <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+            {t(locale, "waves.create.dates.rank.timeline.submissionLabel")}
+          </h3>
+          <p
+            className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+          >
+            {t(
+              locale,
+              "waves.create.dates.rank.timeline.submissionDescription"
+            )}
           </p>
           <div className="tw-mt-4">
             <CommonCalendar
@@ -116,17 +128,20 @@ export default function StartDates({
               minTimestamp={minStartTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleSubmissionDateChange}
+              variant="flat"
             />
           </div>
         </div>
 
         {isRankWave && (
           <div className="tw-col-span-1">
-            <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-              Drops Voting Begins
-            </p>
-            <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
-              Community voting on wave submissions begins
+            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+              {t(locale, "waves.create.dates.rank.timeline.votingLabel")}
+            </h3>
+            <p
+              className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+            >
+              {t(locale, "waves.create.dates.rank.timeline.votingDescription")}
             </p>
             <div className="tw-mt-4">
               <CommonCalendar
@@ -136,6 +151,7 @@ export default function StartDates({
                 minTimestamp={minVotingTimestamp}
                 maxTimestamp={null}
                 setSelectedTimestamp={handleVotingDateChange}
+                variant="flat"
               />
             </div>
           </div>
