@@ -63,3 +63,7 @@
   `MuseumReviewedProgramMediaMatch`; no runtime change was required there.
 - Follow-up validation passed: focused Programs and Research suites, four
   assertions; changed-file lint; and changed-file typecheck across 1,715 files.
+- Browser replay caught and corrected a lazy-image race in the first concurrent
+  implementation. Release acceptance now triggers lazy media in document order,
+  then waits for all decoded images concurrently. Exact desktop acceptance for
+  Collection, Acquisitions, and Research passes in 33.7 seconds.

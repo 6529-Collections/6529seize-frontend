@@ -42,10 +42,12 @@ export async function openMuseumAcceptanceRoute(
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
   const imageCount = await images.count();
+  for (let index = 0; index < imageCount; index += 1) {
+    await images.nth(index).scrollIntoViewIfNeeded();
+  }
   await Promise.all(
     Array.from({ length: imageCount }, async (_, index) => {
       const image = images.nth(index);
-      await image.scrollIntoViewIfNeeded();
       await expect
         .poll(
           () =>
