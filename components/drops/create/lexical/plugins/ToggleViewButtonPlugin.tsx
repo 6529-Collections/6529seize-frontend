@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function ToggleViewButtonPlugin({
@@ -8,6 +8,8 @@ export default function ToggleViewButtonPlugin({
   readonly disabled?: boolean | undefined;
   readonly onViewClick: () => void;
 }) {
+  const locale = useBrowserLocale();
+
   return (
     <button
       onClick={() => {
@@ -20,7 +22,7 @@ export default function ToggleViewButtonPlugin({
       className="tw-relative tw-ml-auto tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out after:tw-absolute after:-tw-inset-1.5 after:tw-content-[''] hover:tw-bg-iron-900 hover:tw-text-iron-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
       <span className="tw-sr-only tw-text-sm">
-        {t(DEFAULT_LOCALE, "common.expandEditor")}
+        {t(locale, "common.expandEditor")}
       </span>
       <svg
         className="tw-h-6 tw-w-6"

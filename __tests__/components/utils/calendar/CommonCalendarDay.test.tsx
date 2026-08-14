@@ -19,6 +19,7 @@ describe("CommonCalendarDay", () => {
         minTimestamp={null}
         maxTimestamp={null}
         setSelectedTimestamp={setSelected}
+        locale="en-US"
       />
     );
     const button = getByRole("button");
@@ -40,6 +41,7 @@ describe("CommonCalendarDay", () => {
         minTimestamp={min}
         maxTimestamp={null}
         setSelectedTimestamp={setSelected}
+        locale="en-US"
       />
     );
     fireEvent.click(getByRole("button"));
@@ -61,6 +63,7 @@ describe("CommonCalendarDay", () => {
         minTimestamp={null}
         maxTimestamp={null}
         setSelectedTimestamp={setSelected}
+        locale="en-US"
       />
     );
 
@@ -68,6 +71,30 @@ describe("CommonCalendarDay", () => {
     expect(button).not.toBeDisabled();
     expect(button).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(button);
-    expect(setSelected).toHaveBeenCalledWith(selected);
+    expect(setSelected).not.toHaveBeenCalled();
+  });
+
+  it("uses the active locale for the accessible date", () => {
+    const selected = new Date(2026, 7, 14).getTime();
+    const day: CalendarDay = {
+      date: 14,
+      isActiveMonth: true,
+      startTimestamp: selected,
+    };
+
+    const { getByRole } = render(
+      <CommonCalendarDay
+        day={day}
+        selectedTimestamp={selected}
+        minTimestamp={null}
+        maxTimestamp={null}
+        setSelectedTimestamp={jest.fn()}
+        locale="de-DE"
+      />
+    );
+
+    expect(
+      getByRole("button", { name: /freitag, 14\. august 2026/i })
+    ).toBeEnabled();
   });
 });

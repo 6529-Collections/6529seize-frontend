@@ -1,6 +1,7 @@
 import type { CalendarDay } from "@/helpers/calendar/calendar.helpers";
 import { Time } from "@/helpers/time";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { formatDate } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 
 export type CommonCalendarVariant = "default" | "flat";
 
@@ -17,6 +18,7 @@ export default function CommonCalendarDay({
   minTimestamp,
   maxTimestamp,
   setSelectedTimestamp,
+  locale,
   variant = "default",
 }: {
   readonly day: CalendarDay;
@@ -24,6 +26,7 @@ export default function CommonCalendarDay({
   readonly minTimestamp: number | null;
   readonly maxTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
+  readonly locale: SupportedLocale;
   readonly variant?: CommonCalendarVariant;
 }) {
   const activeClasses =
@@ -75,16 +78,15 @@ export default function CommonCalendarDay({
   const canSelect =
     dayState === CalendarDaySate.AVAILABLE ||
     dayState === CalendarDaySate.ACTIVE;
-  const accessibleDate = new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+  const accessibleDate = formatDate(locale, day.startTimestamp, {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  }).format(day.startTimestamp);
+  });
 
   const handleClick = () => {
-    if (isSelected && selectedTimestamp !== null) {
-      setSelectedTimestamp(selectedTimestamp);
+    if (isSelected) {
       return;
     }
     if (

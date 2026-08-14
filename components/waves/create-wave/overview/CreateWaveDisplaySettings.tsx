@@ -323,7 +323,7 @@ export default function CreateWaveDisplaySettings({
               return (
                 <label
                   key={mode}
-                  className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out sm:tw-p-3 ${
+                  className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-p-3 ${
                     isSelected
                       ? "tw-border-primary-500/60 tw-bg-primary-500/5"
                       : "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10"
@@ -341,7 +341,7 @@ export default function CreateWaveDisplaySettings({
                     />
                     <span
                       aria-hidden="true"
-                      className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+                      className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
                         isSelected
                           ? "tw-border-primary-400 tw-bg-primary-500/10"
                           : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"

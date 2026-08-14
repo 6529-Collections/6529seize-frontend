@@ -18,7 +18,7 @@ export default function CreateWaveOutcomeTypesItem({
 
   return (
     <label
-      className={`tw-group tw-flex tw-min-h-14 tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out sm:tw-min-h-12 sm:tw-gap-3 sm:tw-px-3 ${
+      className={`tw-group tw-flex tw-min-h-14 tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-min-h-12 sm:tw-gap-3 sm:tw-px-3 ${
         isActive
           ? "tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner"
           : "tw-border-white/5 tw-bg-iron-900/60 hover:tw-border-white/10 hover:tw-bg-iron-900"
@@ -35,7 +35,7 @@ export default function CreateWaveOutcomeTypesItem({
       />
       <span
         aria-hidden="true"
-        className={`tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+        className={`tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
           isActive
             ? "tw-border-primary-400 tw-bg-primary-500/10"
             : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"

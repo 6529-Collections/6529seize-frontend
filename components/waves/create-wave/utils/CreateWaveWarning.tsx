@@ -6,7 +6,7 @@ export default function CreateWaveWarning({
   readonly description: string;
 }) {
   return (
-    <div className="tw-text-xs tw-font-medium tw-text-yellow-100" role="status">
+    <div className="tw-text-xs tw-font-medium tw-text-yellow-100">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <svg
           className="tw-size-5 tw-flex-shrink-0 tw-text-yellow-100"
