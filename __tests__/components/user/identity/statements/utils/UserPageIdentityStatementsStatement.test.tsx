@@ -20,6 +20,7 @@ jest.mock("react-tooltip", () => ({
 }));
 
 const mockCopyToClipboard = jest.fn();
+const mockClipboardWriteText = jest.fn().mockResolvedValue(undefined);
 jest.mock("react-use", () => ({
   useCopyToClipboard: () => [null, mockCopyToClipboard],
 }));
@@ -39,6 +40,12 @@ describe("UserPageIdentityStatementsStatement", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     setMatchMedia(false);
+    mockCopyToClipboard.mockClear();
+    mockClipboardWriteText.mockReset().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: mockClipboardWriteText },
+    });
   });
 
   afterEach(() => {
@@ -73,14 +80,15 @@ describe("UserPageIdentityStatementsStatement", () => {
       await user.click(copyButton);
     });
 
-    expect(mockCopyToClipboard).toHaveBeenCalledWith("test-value");
+    expect(mockClipboardWriteText).toHaveBeenCalledWith("test-value");
+    expect(mockCopyToClipboard).not.toHaveBeenCalled();
 
     // Check that the text changed to "Copied!"
     expect(screen.getAllByText("Copied!")).toHaveLength(2);
 
     // Fast-forward time to check that the text reverts
     await act(async () => {
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(1800);
     });
 
     expect(screen.getByText("test-value")).toBeInTheDocument();
