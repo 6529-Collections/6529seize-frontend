@@ -86,16 +86,11 @@ function selectAboutWorks(publication: MuseumPublication) {
       ...(artistName === undefined ? {} : { artistName }),
     });
   };
-  const artistName = (artistId: string) =>
-    publication.artists
-      .find((artist) => artist.id === artistId)
-      ?.preferredName.toLocaleLowerCase() ?? "";
+  const caseyArtistId = publication.artists.find(
+    (artist) => artist.slug === "casey-reas"
+  )?.id;
 
-  add(
-    collectionWorks.find((work) =>
-      artistName(work.artistId).includes("casey reas")
-    )
-  );
+  add(collectionWorks.find((work) => work.artistId === caseyArtistId));
   add(
     collectionWorks.find((work) =>
       work.acquisitionIds.includes(MUSEUM_MAGNUM_ACQUISITION_ID)

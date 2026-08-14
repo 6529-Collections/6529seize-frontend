@@ -45,6 +45,25 @@ const ENTRY = {
   media: MEDIA,
 };
 
+const LAUNCH_COPY = {
+  launchEyebrow: "Selected publications",
+  launchTitle: "Casey, Magnum, and Keys and Gates",
+  launchDescription:
+    "Three entry points connect artists, photographic history, and active selection work.",
+} as const;
+
+const BROWSE_LABELS = {
+  eyebrow: "Reference index",
+  searchLabel: "Search publications and source records",
+  searchPlaceholder: "Title, artist, subject, or source",
+  filterLabel: "Filter by subject",
+  allSubjectsLabel: "All subjects",
+  noResultsLabel: "No research records match this search.",
+  resultCountOne: "{count} record",
+  resultCountOther: "{count} records",
+  sourceLabel: "Source",
+} as const;
+
 describe("MuseumResearchLanding", () => {
   it("puts the visual study first and keeps the complete register findable", () => {
     render(
@@ -61,6 +80,7 @@ describe("MuseumResearchLanding", () => {
           actionLabel: "Read the study",
         }}
         launchEntries={[]}
+        {...LAUNCH_COPY}
         sections={[
           {
             id: "art",
@@ -88,6 +108,7 @@ describe("MuseumResearchLanding", () => {
         ]}
         browseTitle="Research reference index"
         browseDescription="Every record remains available."
+        browseLabels={BROWSE_LABELS}
       />
     );
 
@@ -143,6 +164,7 @@ describe("MuseumResearchLanding", () => {
           actionLabel: "Read the study",
         }}
         launchEntries={[]}
+        {...LAUNCH_COPY}
         sections={[
           {
             id: "art",
@@ -164,6 +186,7 @@ describe("MuseumResearchLanding", () => {
         browseGroups={[]}
         browseTitle="Research reference index"
         browseDescription="Every record remains available."
+        browseLabels={BROWSE_LABELS}
       />
     );
 

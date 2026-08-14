@@ -327,9 +327,15 @@ function museumResearchDescription(
         !paragraph.startsWith("-")
     );
   if (firstParagraph !== undefined) {
-    return firstParagraph.length > 220
-      ? `${firstParagraph.slice(0, 217).trimEnd()}...`
-      : firstParagraph;
+    const characters = Array.from(firstParagraph);
+    if (characters.length <= 220) return firstParagraph;
+    const excerpt = characters.slice(0, 217).join("").trimEnd();
+    const finalWordBoundary = excerpt.lastIndexOf(" ");
+    const wordSafeExcerpt =
+      finalWordBoundary >= 160
+        ? excerpt.slice(0, finalWordBoundary).trimEnd()
+        : excerpt;
+    return `${wordSafeExcerpt}...`;
   }
   if (subjectLabels.length > 0) {
     return `${kindLabel} concerning ${subjectLabels.join(", ")}.`;
@@ -647,6 +653,15 @@ export default async function MuseumResearchPage() {
         actionLabel: t(DEFAULT_LOCALE, "museum.network.research.readStudy"),
       }}
       launchEntries={launchEntries}
+      launchEyebrow={t(
+        DEFAULT_LOCALE,
+        "museum.network.research.selectedEyebrow"
+      )}
+      launchTitle={t(DEFAULT_LOCALE, "museum.network.research.selectedTitle")}
+      launchDescription={t(
+        DEFAULT_LOCALE,
+        "museum.network.research.selectedDescription"
+      )}
       sections={groups.map((group) => ({
         ...group,
         eyebrow: researchSectionEyebrow(group.id),
@@ -658,6 +673,34 @@ export default async function MuseumResearchPage() {
         DEFAULT_LOCALE,
         "museum.network.research.browseDescription"
       )}
+      browseLabels={{
+        eyebrow: t(DEFAULT_LOCALE, "museum.network.research.referenceEyebrow"),
+        searchLabel: t(DEFAULT_LOCALE, "museum.network.research.searchLabel"),
+        searchPlaceholder: t(
+          DEFAULT_LOCALE,
+          "museum.network.research.searchPlaceholder"
+        ),
+        filterLabel: t(DEFAULT_LOCALE, "museum.network.research.filterLabel"),
+        allSubjectsLabel: t(
+          DEFAULT_LOCALE,
+          "museum.network.research.allSubjectsLabel"
+        ),
+        noResultsLabel: t(
+          DEFAULT_LOCALE,
+          "museum.network.research.noResultsLabel"
+        ),
+        resultCountOne: t(
+          DEFAULT_LOCALE,
+          "museum.network.research.resultCountOne",
+          { count: "{count}" }
+        ),
+        resultCountOther: t(
+          DEFAULT_LOCALE,
+          "museum.network.research.resultCountOther",
+          { count: "{count}" }
+        ),
+        sourceLabel: t(DEFAULT_LOCALE, "museum.network.research.sourceLabel"),
+      }}
     />
   );
 }

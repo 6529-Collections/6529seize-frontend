@@ -1,6 +1,6 @@
 # Active context
 
-Updated: 2026-08-14T13:35:00Z
+Updated: 2026-08-14T13:42:32Z
 
 ## Objective
 
@@ -24,13 +24,13 @@ production, production E2E, and live visual readback.
 
 ## Parallel lanes
 
-| Lane | Task | Ownership |
-|---|---|---|
-| A | Home, Collection, Acquisitions | runtime and focused tests |
-| B | Acquisition Programs, About | runtime copy, layout, focused tests |
-| C | Research landing | runtime and focused tests |
-| D | deterministic release acceptance | Museum tests and test helpers only |
-| Captain | shared source strip, integration, full qualification, release | this worktree |
+| Lane    | Task                                                          | Ownership                           |
+| ------- | ------------------------------------------------------------- | ----------------------------------- |
+| A       | Home, Collection, Acquisitions                                | runtime and focused tests           |
+| B       | Acquisition Programs, About                                   | runtime copy, layout, focused tests |
+| C       | Research landing                                              | runtime and focused tests           |
+| D       | deterministic release acceptance                              | Museum tests and test helpers only  |
+| Captain | shared source strip, integration, full qualification, release | this worktree                       |
 
 ## Non-negotiable acceptance
 
@@ -49,11 +49,13 @@ production, production E2E, and live visual readback.
 
 ## Current phase
 
-Ready PR `#3751` is open. Exact-head CI run `31804454944` found one real mobile
-media defect and canceled its sibling lanes. The corrected local state resolves
-Magnum Work media through typed aliases so a reviewed derivative renders before
-the large original, and recognizes the canonical Gift Acquisitions entity in the
-fail-closed framework classifier. Focused component tests, changed lint,
-changed typecheck, diff hygiene, and the complete Network IA replay in desktop
-and 390 px mobile Chromium pass. The next mutation is a signed corrective commit
-to PR `#3751`, followed by fresh exact-head CI.
+Ready PR `#3751` is open. The current local follow-up resolves the final valid
+review findings on top of exact PR head `9463659f195596f61f0105feb415165e0c036345`:
+in-progress works are de-duplicated across acquisitions; Research excerpts are
+Unicode- and word-boundary-safe; result-count announcements are debounced; all
+remaining Research interface copy comes from the Museum message catalog; About
+selects Casey by stable slug; and internal work IDs no longer leak into About
+figure titles or alt fallbacks. Four focused suites pass with 23 assertions,
+along with changed lint, changed typecheck across 1,715 files, and diff hygiene.
+The next mutation is one signed follow-up commit, then exact-head hosted CI and
+merge.

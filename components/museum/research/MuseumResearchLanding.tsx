@@ -2,7 +2,10 @@ import { MuseumSectionHeading } from "../MuseumShell";
 import { MuseumResearchBrowse } from "./MuseumResearchBrowse";
 import { MuseumResearchDocumentCard } from "./MuseumResearchDocumentCard";
 import { MuseumResearchStoryCard } from "./MuseumResearchStoryCard";
-import type { MuseumResearchBrowseGroup } from "./MuseumResearchBrowse";
+import type {
+  MuseumResearchBrowseGroup,
+  MuseumResearchBrowseLabels,
+} from "./MuseumResearchBrowse";
 import type { MuseumResearchDocumentCardEntry } from "./MuseumResearchDocumentCard";
 import type { MuseumResearchStoryCardProps } from "./MuseumResearchStoryCard";
 
@@ -29,20 +32,28 @@ export function MuseumResearchLanding({
   description,
   featured,
   launchEntries,
+  launchEyebrow,
+  launchTitle,
+  launchDescription,
   sections,
   browseGroups,
   browseTitle,
   browseDescription,
+  browseLabels,
 }: {
   readonly eyebrow: string;
   readonly title: string;
   readonly description: string;
   readonly featured: MuseumResearchStoryCardProps;
   readonly launchEntries: readonly MuseumResearchDocumentCardEntry[];
+  readonly launchEyebrow: string;
+  readonly launchTitle: string;
+  readonly launchDescription: string;
   readonly sections: readonly MuseumResearchLandingSectionProps[];
   readonly browseGroups: readonly MuseumResearchBrowseGroup[];
   readonly browseTitle: string;
   readonly browseDescription: string;
+  readonly browseLabels: MuseumResearchBrowseLabels;
 }) {
   return (
     <section>
@@ -60,17 +71,16 @@ export function MuseumResearchLanding({
           >
             <div className="tw-max-w-3xl">
               <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-                Selected publications
+                {launchEyebrow}
               </p>
               <h2
                 id="museum-research-launch-title"
                 className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
               >
-                Casey, Magnum, and Keys and Gates
+                {launchTitle}
               </h2>
               <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-300">
-                Three entry points connect artists, photographic history, and
-                the Museum&apos;s active selection work.
+                {launchDescription}
               </p>
             </div>
             <ul className="tw-m-0 tw-mt-7 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-12 tw-p-0 md:tw-grid-cols-2">
@@ -122,6 +132,7 @@ export function MuseumResearchLanding({
           groups={browseGroups}
           title={browseTitle}
           description={browseDescription}
+          labels={browseLabels}
         />
       </div>
     </section>

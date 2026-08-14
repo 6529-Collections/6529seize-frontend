@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { museumResearchHref } from "@/lib/museum/publication/routes";
 import type { MuseumPublicDocument } from "@/lib/museum/publication/types";
 
@@ -24,14 +24,37 @@ export interface MuseumResearchBrowseGroup {
   readonly entries: readonly MuseumResearchBrowseEntry[];
 }
 
+export interface MuseumResearchBrowseLabels {
+  readonly eyebrow: string;
+  readonly searchLabel: string;
+  readonly searchPlaceholder: string;
+  readonly filterLabel: string;
+  readonly allSubjectsLabel: string;
+  readonly noResultsLabel: string;
+  readonly resultCountOne: string;
+  readonly resultCountOther: string;
+  readonly sourceLabel: string;
+}
+
+function resultCountText(
+  labels: MuseumResearchBrowseLabels,
+  count: number
+): string {
+  const template =
+    count === 1 ? labels.resultCountOne : labels.resultCountOther;
+  return template.replace("{count}", String(count));
+}
+
 export function MuseumResearchBrowse({
   groups,
   title,
   description,
+  labels,
 }: {
   readonly groups: readonly MuseumResearchBrowseGroup[];
   readonly title: string;
   readonly description: string;
+  readonly labels: MuseumResearchBrowseLabels;
 }) {
   const [query, setQuery] = useState("");
   const [groupId, setGroupId] = useState("all");
@@ -65,6 +88,15 @@ export function MuseumResearchBrowse({
     (count, group) => count + group.entries.length,
     0
   );
+  const [announcedResultCount, setAnnouncedResultCount] = useState(resultCount);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(
+      () => setAnnouncedResultCount(resultCount),
+      350
+    );
+    return () => window.clearTimeout(timeout);
+  }, [resultCount]);
 
   return (
     <section
@@ -73,7 +105,7 @@ export function MuseumResearchBrowse({
     >
       <div className="tw-min-w-0">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          Reference layer
+          {labels.eyebrow}
         </p>
         <h2
           id="museum-research-reference-title"
@@ -92,14 +124,14 @@ export function MuseumResearchBrowse({
             htmlFor="museum-research-search"
             className="tw-text-sm tw-font-semibold tw-text-iron-200"
           >
-            Search publications and source records
+            {labels.searchLabel}
           </label>
           <input
             id="museum-research-search"
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Title, artist, subject, or source"
+            placeholder={labels.searchPlaceholder}
             className="tw-mt-2 tw-block tw-min-h-11 tw-w-full tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-px-3 tw-py-2 tw-text-base tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
           />
         </div>
@@ -108,7 +140,7 @@ export function MuseumResearchBrowse({
             htmlFor="museum-research-filter"
             className="tw-text-sm tw-font-semibold tw-text-iron-200"
           >
-            Filter by subject
+            {labels.filterLabel}
           </label>
           <select
             id="museum-research-filter"
@@ -116,7 +148,7 @@ export function MuseumResearchBrowse({
             onChange={(event) => setGroupId(event.target.value)}
             className="tw-mt-2 tw-block tw-min-h-11 tw-w-full tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-px-3 tw-py-2 tw-text-base tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
           >
-            <option value="all">All subjects</option>
+            <option value="all">{labels.allSubjectsLabel}</option>
             {groups.map((group) => (
               <option key={group.id} value={group.id}>
                 {group.title}
@@ -125,17 +157,17 @@ export function MuseumResearchBrowse({
           </select>
         </div>
       </div>
-      <p
-        className="tw-m-0 tw-mt-4 tw-text-sm tw-text-iron-400"
-        aria-live="polite"
-      >
-        {resultCount} {resultCount === 1 ? "record" : "records"}
+      <p className="tw-m-0 tw-mt-4 tw-text-sm tw-text-iron-400">
+        {resultCountText(labels, resultCount)}
       </p>
+      <span className="tw-sr-only" aria-live="polite" aria-atomic="true">
+        {resultCountText(labels, announcedResultCount)}
+      </span>
 
       <div className="tw-mt-5 tw-min-w-0">
         {filteredGroups.length === 0 ? (
           <p className="tw-m-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-6 tw-text-base tw-leading-7 tw-text-iron-300">
-            No research records match this search.
+            {labels.noResultsLabel}
           </p>
         ) : (
           filteredGroups.map((group) => (
@@ -186,7 +218,7 @@ export function MuseumResearchBrowse({
                         rel="noopener noreferrer"
                         className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-self-start tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                       >
-                        Source
+                        {labels.sourceLabel}
                       </a>
                     )}
                   </li>

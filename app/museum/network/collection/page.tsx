@@ -214,12 +214,19 @@ export default async function MuseumCollectionPage() {
         "selected_through_acquisition_program_acquisition_pending" &&
       acquisition.workIds.some((workId) => !holdingIds.has(workId))
   );
+  const seenInProgressWorkIds = new Set<string>();
   const inProgressWorks = inProgressAcquisitions.flatMap((acquisition) =>
     acquisition.workIds.flatMap((workId) => {
       const work = publication.works?.find((item) => item.id === workId);
-      return work === undefined || holdingIds.has(work.id)
-        ? []
-        : [publicWorkItem(work, publication, view)];
+      if (
+        work === undefined ||
+        holdingIds.has(work.id) ||
+        seenInProgressWorkIds.has(work.id)
+      ) {
+        return [];
+      }
+      seenInProgressWorkIds.add(work.id);
+      return [publicWorkItem(work, publication, view)];
     })
   );
   const completedGiftCount = accessionedAcquisitions.filter(

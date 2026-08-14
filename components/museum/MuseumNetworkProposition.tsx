@@ -114,7 +114,10 @@ function MuseumAboutArtworkFigure({
     media?.height ?? delivery?.height ?? presentation?.height ?? null;
   const retainedAlt = media?.altText?.trim();
   const presentationAlt = presentation?.altText.trim();
-  let alt = work.title;
+  const displayTitle = /^6529NM[-.]/u.test(work.title.trim())
+    ? t(DEFAULT_LOCALE, "museum.network.collection.untitledWork")
+    : work.title;
+  let alt = displayTitle;
   if (presentationAlt !== undefined && presentationAlt.length > 0) {
     alt = presentationAlt;
   }
@@ -128,7 +131,7 @@ function MuseumAboutArtworkFigure({
       height={height}
       alt={alt}
       href={museumWorkHref(work.id)}
-      title={work.title}
+      title={displayTitle}
       {...(artistName === undefined ? {} : { byline: artistName })}
       eager={eager}
       sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"

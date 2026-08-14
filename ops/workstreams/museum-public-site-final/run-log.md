@@ -102,3 +102,19 @@
   pass. The full Network IA replay passes in both desktop and 390 px mobile
   Chromium, including derivative-first Magnum media and the permanent versus
   in-progress Collection boundary.
+
+## 2026-08-14T13:42:32Z
+
+- Exact-head review on `9463659f195596f61f0105feb415165e0c036345`
+  identified four valid bounded issues: duplicate in-progress work IDs across
+  acquisitions, UTF-16 excerpt slicing, an overactive live result count, and
+  remaining Research interface strings outside the Museum message catalog.
+- Added a cross-acquisition work-ID guard; made excerpts Unicode- and
+  word-boundary-safe; separated the immediate visible count from a 350 ms
+  debounced live announcement; and moved all Research controls, count forms,
+  selected-publication copy, and source labels into the message catalog.
+- Also closed the two recurring review advisories: About now selects Casey by
+  stable artist slug, and internal work IDs cannot become About figure titles
+  or alt fallbacks.
+- Exact local follow-up gates pass: four focused suites / 23 assertions,
+  changed lint, changed typecheck across 1,715 files, and diff hygiene.
