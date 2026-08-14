@@ -8,7 +8,7 @@ import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -21,8 +21,10 @@ import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accoun
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
 export default function UserPageIdentityStatements({
   profile,
+  headerAction,
 }: {
   readonly profile: ApiIdentity;
+  readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
   const params = useParams();
@@ -86,6 +88,7 @@ export default function UserPageIdentityStatements({
                 <div>
                   <UserPageIdentityStatementsConsolidatedAddresses
                     profile={profile}
+                    headerAction={headerAction}
                   />
                 </div>
                 {isError && (
@@ -109,11 +112,6 @@ export default function UserPageIdentityStatements({
                       {t(locale, "user.profile.identity.statements.retry")}
                     </Button>
                   </div>
-                )}
-                {!isLoading && !isError && (statements?.length ?? 0) === 0 && (
-                  <p className="tw-m-0 tw-rounded-lg tw-border tw-border-dashed tw-border-white/10 tw-p-4 tw-text-sm tw-text-iron-400">
-                    {t(locale, "user.profile.identity.statements.empty")}
-                  </p>
                 )}
                 {!isError &&
                   shouldShowStatementGroup(
@@ -173,6 +171,7 @@ export default function UserPageIdentityStatements({
           offset={8}
           opacity={1}
           style={TOOLTIP_STYLES}
+          className="!tw-w-72 !tw-max-w-[calc(100vw-11rem)] tw-whitespace-normal tw-text-left tw-leading-4 lg:!tw-max-w-none"
         >
           <ul className="tw-m-0 tw-list-disc tw-space-y-1 tw-py-2 tw-pl-4 tw-font-normal tw-text-iron-300">
             <li>{t(locale, "user.profile.identity.statements.optional")}</li>

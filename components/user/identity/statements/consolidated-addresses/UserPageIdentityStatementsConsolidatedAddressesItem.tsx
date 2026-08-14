@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/delegation-constants";
 import EtherscanIcon from "@/components/user/utils/icons/EtherscanIcon";
 import OpenseaIcon from "@/components/user/utils/icons/OpenseaIcon";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -19,7 +20,13 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
@@ -27,6 +34,7 @@ import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPa
 
 const PRIMARY_ERROR_TITLE_KEY =
   "user.profile.identity.statements.primaryErrorTitle" as const;
+const COPIED_FEEDBACK_DURATION_MS = 1800;
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
@@ -61,21 +69,51 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     null
   );
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [_, copyToClipboard] = useCopyToClipboard();
+  const [_, copyToClipboardLegacy] = useCopyToClipboard();
+
+  const copyToClipboard = (value: string) => {
+    const writeText = globalThis.navigator?.clipboard?.writeText;
+    if (typeof writeText !== "function") {
+      copyToClipboardLegacy(value);
+      return;
+    }
+
+    void writeText.call(globalThis.navigator.clipboard, value).catch(() => {
+      copyToClipboardLegacy(value);
+    });
+  };
+
+  const showTouchCopyFeedback = (
+    event: PointerEvent<HTMLButtonElement>,
+    item: "full-address" | "ens"
+  ) => {
+    if (event.pointerType === "touch") {
+      setCopiedItem(item);
+    }
+  };
+
+  const clearCanceledTouchCopyFeedback = (
+    event: PointerEvent<HTMLButtonElement>,
+    item: "full-address" | "ens"
+  ) => {
+    if (event.pointerType === "touch") {
+      setCopiedItem((current) => (current === item ? null : current));
+    }
+  };
 
   const handleCopyAddress = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.stopPropagation();
-    copyToClipboard(address.wallet);
     setCopiedItem("full-address");
+    copyToClipboard(address.wallet);
     if (resetTimerRef.current) {
       clearTimeout(resetTimerRef.current);
     }
     resetTimerRef.current = setTimeout(() => {
       setCopiedItem((current) => (current === "full-address" ? null : current));
       resetTimerRef.current = null;
-    }, 1000);
+    }, COPIED_FEEDBACK_DURATION_MS);
   };
 
   const handleCopyEns = (
@@ -86,15 +124,15 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     }
 
     event.stopPropagation();
-    copyToClipboard(ensName);
     setCopiedItem("ens");
+    copyToClipboard(ensName);
     if (resetTimerRef.current) {
       clearTimeout(resetTimerRef.current);
     }
     resetTimerRef.current = setTimeout(() => {
       setCopiedItem((current) => (current === "ens" ? null : current));
       resetTimerRef.current = null;
-    }, 1000);
+    }, COPIED_FEEDBACK_DURATION_MS);
   };
 
   useEffect(() => {
@@ -256,6 +294,9 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       "user.profile.identity.statements.ensCopied"
     );
   }
+  const showAddressCopiedFeedback =
+    isTouchScreen && copiedItem === "full-address";
+  const showEnsCopiedFeedback = isTouchScreen && copiedItem === "ens";
 
   const assignPrimary = async () => {
     writeDelegation.writeContract({
@@ -276,8 +317,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   return (
     <li>
-      <div className="tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/30">
-        <div className="tw-flex tw-items-center tw-gap-1 tw-px-1.5 tw-py-1 lg:tw-gap-2 lg:tw-px-3 lg:tw-py-2">
+      <div
+        className={`tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-bg-iron-950/30 tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${
+          isOpen ? "tw-border-white/20" : "tw-border-white/10"
+        }`}
+      >
+        <div className="tw-flex tw-items-center tw-gap-1 tw-px-1.5 tw-py-1 lg:tw-gap-2 lg:tw-px-3">
           <button
             type="button"
             aria-label={t(
@@ -289,11 +334,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             aria-expanded={isOpen}
             aria-controls={`consolidated-address-panel-${address.wallet}`}
             onClick={onToggleOpen}
-            className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-0.5 tw-text-left tw-text-iron-100 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-px-0"
+            className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-0.5 tw-text-left tw-text-iron-100 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white/40 lg:tw-min-h-0 lg:tw-px-0"
           >
             <span className="tw-min-w-0 tw-flex-1">
               {ensName && (
-                <span className="tw-block tw-truncate tw-font-mono tw-text-sm tw-font-semibold tw-leading-4">
+                <span className="tw-block tw-truncate tw-font-mono tw-text-[13px] tw-font-semibold tw-leading-4">
                   {ensName}
                 </span>
               )}
@@ -305,12 +350,6 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 {address.wallet.slice(0, 6)}…{address.wallet.slice(-4)}
               </span>
             </span>
-            <ChevronDownIcon
-              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none lg:tw-hidden ${
-                isOpen ? "tw-rotate-180" : ""
-              }`}
-              aria-hidden="true"
-            />
           </button>
 
           <UserPageIdentityStatementsConsolidatedAddressesItemPrimary
@@ -322,6 +361,27 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             }
           />
 
+          <button
+            type="button"
+            aria-label={t(
+              locale,
+              isOpen
+                ? "user.profile.identity.statements.collapseAddress"
+                : "user.profile.identity.statements.expandAddress"
+            )}
+            aria-expanded={isOpen}
+            aria-controls={`consolidated-address-panel-${address.wallet}`}
+            onClick={onToggleOpen}
+            className="tw-ml-1 tw-inline-flex tw-h-11 tw-w-11 tw-touch-manipulation tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white/40 lg:tw-hidden"
+          >
+            <ChevronDownIcon
+              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
+                isOpen ? "tw-rotate-180" : ""
+              }`}
+              aria-hidden="true"
+            />
+          </button>
+
           <div className="tw-ml-auto tw-hidden tw-flex-shrink-0 tw-items-center tw-gap-1.5 lg:tw-flex">
             <a
               href={`https://etherscan.io/address/${address.wallet}`}
@@ -331,7 +391,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 locale,
                 "user.profile.identity.statements.openEtherscan"
               )}
-              className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-500 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-p-0.5 tw-text-iron-500 tw-transition-colors hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               data-tooltip-id={`etherscan-tooltip-${address.wallet}`}
               data-tooltip-content={
                 isTouchScreen
@@ -364,7 +424,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 locale,
                 "user.profile.identity.statements.openOpenSea"
               )}
-              className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-500 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-p-0.5 tw-text-iron-500 tw-transition-colors hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               data-tooltip-id={`opensea-tooltip-${address.wallet}`}
               data-tooltip-content={
                 isTouchScreen
@@ -400,7 +460,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               aria-expanded={isOpen}
               aria-controls={`consolidated-address-panel-${address.wallet}`}
               onClick={onToggleOpen}
-              className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0.5 tw-text-iron-500 tw-transition hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
               <ChevronDownIcon
                 className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
@@ -415,35 +475,81 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         {isOpen && (
           <div
             id={`consolidated-address-panel-${address.wallet}`}
-            className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-pb-3 tw-pt-2"
+            className="tw-px-3 tw-pb-3 tw-pt-1"
           >
             <div className="tw-space-y-2.5">
               <div>
                 <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
                   {t(locale, "user.profile.identity.statements.fullAddress")}
                 </div>
-                <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-pl-3 tw-pr-1">
-                  <span className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+                <button
+                  type="button"
+                  aria-label={t(
+                    locale,
+                    "user.profile.identity.statements.copyFullAddress"
+                  )}
+                  onClick={handleCopyAddress}
+                  onPointerDown={(event) =>
+                    showTouchCopyFeedback(event, "full-address")
+                  }
+                  onPointerCancel={(event) =>
+                    clearCanceledTouchCopyFeedback(event, "full-address")
+                  }
+                  data-tooltip-id={
+                    isTouchScreen
+                      ? undefined
+                      : `copy-address-tooltip-${address.wallet}`
+                  }
+                  className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-touch-manipulation tw-cursor-pointer tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-pr-9"
+                >
+                  <span
+                    className={`tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100 ${
+                      showAddressCopiedFeedback ? "tw-invisible" : ""
+                    }`}
+                  >
                     {address.wallet}
                   </span>
-                  <button
-                    type="button"
-                    aria-label={t(
-                      locale,
-                      "user.profile.identity.statements.copyFullAddress"
-                    )}
-                    onClick={handleCopyAddress}
-                    className={`tw-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-transition hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
+                  {showAddressCopiedFeedback && (
+                    <span
+                      aria-hidden="true"
+                      className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-2 tw-right-12 tw-flex tw-items-center tw-font-sans tw-text-xs tw-font-semibold tw-text-primary-400"
+                    >
+                      {t(locale, "user.profile.identity.statements.copied")}
+                    </span>
+                  )}
+                  <span
+                    aria-hidden="true"
+                    className={`tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-h-11 tw-w-11 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
                       copiedItem === "full-address"
                         ? "tw-text-primary-400"
-                        : "tw-text-iron-400 hover:tw-text-iron-200"
+                        : "tw-text-iron-400 group-focus-visible:tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-200"
                     }`}
                   >
                     <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
                       <CopyIcon />
                     </div>
-                  </button>
-                </div>
+                  </span>
+                </button>
+                {!isTouchScreen && (
+                  <Tooltip
+                    id={`copy-address-tooltip-${address.wallet}`}
+                    place="top"
+                    positionStrategy="fixed"
+                    offset={8}
+                    opacity={1}
+                    isOpen={copiedItem === "full-address" ? true : undefined}
+                    style={TOOLTIP_STYLES}
+                  >
+                    <span className="tw-text-xs">
+                      {t(
+                        locale,
+                        copiedItem === "full-address"
+                          ? "user.profile.identity.statements.copied"
+                          : "user.profile.identity.statements.copyFullAddress"
+                      )}
+                    </span>
+                  </Tooltip>
+                )}
               </div>
 
               {ensName && (
@@ -451,60 +557,114 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                   <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
                     {t(locale, "user.profile.identity.statements.ensName")}
                   </div>
-                  <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-pl-3 tw-pr-1">
-                    <span className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+                  <button
+                    type="button"
+                    aria-label={t(
+                      locale,
+                      "user.profile.identity.statements.copyEnsName"
+                    )}
+                    onClick={handleCopyEns}
+                    onPointerDown={(event) =>
+                      showTouchCopyFeedback(event, "ens")
+                    }
+                    onPointerCancel={(event) =>
+                      clearCanceledTouchCopyFeedback(event, "ens")
+                    }
+                    data-tooltip-id={
+                      isTouchScreen
+                        ? undefined
+                        : `copy-ens-tooltip-${address.wallet}`
+                    }
+                    className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-touch-manipulation tw-cursor-pointer tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-pr-9"
+                  >
+                    <span
+                      className={`tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100 ${
+                        showEnsCopiedFeedback ? "tw-invisible" : ""
+                      }`}
+                    >
                       {ensName}
                     </span>
-                    <button
-                      type="button"
-                      aria-label={t(
-                        locale,
-                        "user.profile.identity.statements.copyEnsName"
-                      )}
-                      onClick={handleCopyEns}
-                      className={`tw-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-transition hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
+                    {showEnsCopiedFeedback && (
+                      <span
+                        aria-hidden="true"
+                        className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-2 tw-right-12 tw-flex tw-items-center tw-font-sans tw-text-xs tw-font-semibold tw-text-primary-400"
+                      >
+                        {t(locale, "user.profile.identity.statements.copied")}
+                      </span>
+                    )}
+                    <span
+                      aria-hidden="true"
+                      className={`tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-h-11 tw-w-11 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
                         copiedItem === "ens"
                           ? "tw-text-primary-400"
-                          : "tw-text-iron-400 hover:tw-text-iron-200"
+                          : "tw-text-iron-400 group-focus-visible:tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-200"
                       }`}
                     >
                       <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
                         <CopyIcon />
                       </div>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
+                  {!isTouchScreen && (
+                    <Tooltip
+                      id={`copy-ens-tooltip-${address.wallet}`}
+                      place="top"
+                      positionStrategy="fixed"
+                      offset={8}
+                      opacity={1}
+                      isOpen={copiedItem === "ens" ? true : undefined}
+                      style={TOOLTIP_STYLES}
+                    >
+                      <span className="tw-text-xs">
+                        {t(
+                          locale,
+                          copiedItem === "ens"
+                            ? "user.profile.identity.statements.copied"
+                            : "user.profile.identity.statements.copyEnsName"
+                        )}
+                      </span>
+                    </Tooltip>
+                  )}
                 </div>
               )}
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-2 lg:tw-hidden">
-                <a
+                <ButtonLink
                   href={`https://etherscan.io/address/${address.wallet}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  prefetch={false}
+                  variant="secondary"
+                  size="xs"
+                  fullWidth
+                  aria-label={t(
+                    locale,
+                    "user.profile.identity.statements.openEtherscan"
+                  )}
                 >
                   <span className="tw-h-4 tw-w-4" aria-hidden="true">
                     <EtherscanIcon />
                   </span>
-                  {t(
-                    locale,
-                    "user.profile.identity.statements.openEtherscan"
-                  )}
-                </a>
-                <a
+                  {t(locale, "user.profile.identity.statements.etherscan")}
+                </ButtonLink>
+                <ButtonLink
                   href={`https://opensea.io/${address.wallet}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  prefetch={false}
+                  variant="secondary"
+                  size="xs"
+                  fullWidth
+                  aria-label={t(
+                    locale,
+                    "user.profile.identity.statements.openOpenSea"
+                  )}
                 >
                   <span className="tw-h-4 tw-w-4" aria-hidden="true">
                     <OpenseaIcon />
                   </span>
-                  {t(
-                    locale,
-                    "user.profile.identity.statements.openOpenSea"
-                  )}
-                </a>
+                  {t(locale, "user.profile.identity.statements.openSea")}
+                </ButtonLink>
               </div>
             </div>
             <span className="tw-sr-only" aria-live="polite">

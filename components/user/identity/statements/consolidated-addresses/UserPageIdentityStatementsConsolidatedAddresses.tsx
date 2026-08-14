@@ -1,7 +1,7 @@
 "use client";
 
 import type { WalletConsolidationState } from "@/entities/IProfile";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -49,8 +49,10 @@ function sortByPrimary(
 
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
+  headerAction,
 }: {
   readonly profile: ApiIdentity;
+  readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
   const { address } = useSeizeConnectContext();
@@ -124,8 +126,9 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             </svg>
           </button>
         </div>
+        {headerAction}
       </div>
-      <ul className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-2 tw-pl-0">
+      <ul className="tw-mb-0 tw-mt-1 tw-list-none tw-space-y-2 tw-pl-0">
         {sortedByPrimary.map((wallet) => (
           <UserPageIdentityStatementsConsolidatedAddressesItem
             key={wallet.wallet}
@@ -142,13 +145,11 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           />
         ))}
       </ul>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-2 tw-pt-5 min-[360px]:tw-grid-cols-2 lg:tw-flex xl:tw-pt-4">
+      <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
         <ButtonLink
           href={`/delegation/wallet-checker?address=${primaryAddress}`}
           variant="secondary"
-          size="lg"
-          fullWidth
-          className="lg:tw-h-8 lg:tw-w-auto lg:tw-px-2.5 lg:tw-py-0 lg:tw-text-xs"
+          size="xs"
         >
           {t(locale, "user.profile.identity.statements.walletChecker")}
         </ButtonLink>
@@ -157,9 +158,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             <ButtonLink
               href="/delegation/delegation-center"
               variant="secondary"
-              size="lg"
-              fullWidth
-              className="lg:tw-h-8 lg:tw-w-auto lg:tw-px-2.5 lg:tw-py-0 lg:tw-text-xs"
+              size="xs"
             >
               {t(
                 locale,

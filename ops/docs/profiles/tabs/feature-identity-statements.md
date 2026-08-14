@@ -11,10 +11,11 @@ This surface includes:
 - `Contact`
 - `Social Media Verification Posts`
 
-On mobile, the selected profile's possessive `ID Statements` heading and a
-short public-data description sit above a single statements card. Owners who
-can edit see `Add` beside that heading. Desktop keeps the statements surface in
-the right side of the combined Identity layout.
+On mobile, selecting the `ID Statements` score card opens a compact statements
+card without repeating the profile heading or description. Owners who can edit
+see a compact `Add` action at the right of the `Consolidated Addresses` header.
+Desktop keeps the statements heading and surface in the right side of the
+combined Identity layout.
 
 ## Location in the Site
 
@@ -42,7 +43,8 @@ the right side of the combined Identity layout.
 5. Choose a platform or statement type, enter a value, then select `Save`.
    Select `Back to statement types` to choose a different group without closing
    the sheet or dialog.
-6. Use statement row actions: `Open` (URL types only), `Copy`, `Delete`.
+6. Select a URL-capable statement row to open its destination. Use the
+   independent copy icon to copy its value; eligible owners can also delete it.
 7. On non-primary wallet rows, use `Set primary` when available.
 
 ## Statement Types in Add Sheet or Dialog
@@ -73,8 +75,9 @@ contact details are not rewritten by mobile keyboards.
 - Consolidated wallets are sorted with primary first, then remaining wallets by
   TDH.
 - Each wallet row shows an ENS name when available and a shortened address.
-- Opening a wallet row shows the full address, ENS name when available, and
-  separate copy controls. Only one wallet row stays expanded at a time.
+- Opening a wallet row shows the full address and ENS name when available. Each
+  dark value field is itself a copy control, and only one wallet row stays
+  expanded at a time.
 - On mobile, expanded wallet rows show labeled `Open on Etherscan` and `Open on
   OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
@@ -82,16 +85,18 @@ contact details are not rewritten by mobile keyboards.
 - `Delegation Center` link is shown only when the connected wallet appears in
   at least one consolidation relationship for that profile.
 - Statement rows are grouped by section and sorted newest first in each section.
-- `Open` appears only for URL-capable types (for example hidden for `Discord`,
-  `Telegram`, `WeChat`, `Phone`, `Email`).
-- Mobile statement actions use labeled, touch-sized `Open`, `Copy`, and
-  `Delete` controls. Desktop uses compact equivalents.
-- `Copy` briefly changes the displayed value to `Copied!` and announces the
-  result to assistive technology.
+- URL-capable statement rows are links with a right-aligned external-link cue.
+  Non-URL types (for example `Discord`, `Telegram`, `WeChat`, `Phone`, and
+  `Email`) are not links and omit that cue.
+- Copy remains an independent right-aligned control, so selecting it never opens
+  the statement destination. Mobile keeps a touch-sized target while desktop
+  uses the same compact icon treatment.
+- `Copy` gives the icon a short active treatment, changes the displayed value
+  briefly to `Copied!`, and announces the result to assistive technology.
 - While IME composition is active, input text is not rewritten; repeated URL
   protocol prefixes are normalized after composition ends.
-- Empty statement groups are omitted after loading. If the profile has no
-  statements, one `No ID statements have been added yet.` message is shown.
+- Empty statement groups are omitted after loading without showing a separate
+  overall placeholder.
 
 ## Common Scenarios
 
@@ -110,6 +115,8 @@ contact details are not rewritten by mobile keyboards.
   wallet row and omit the ENS field when expanded.
 - Long addresses wrap inside the expanded wallet panel instead of overflowing
   the card.
+- Long statement values use a single-line ellipsis instead of creating orphaned
+  characters; the full value remains available through the row or copy action.
 - Closing the add flow resets it to the statement-group choices for the next
   opening.
 - While save or delete is pending, the submitting action shows progress. The

@@ -758,7 +758,6 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     help: "About identity statements",
     loading: "Loading ID statements",
     loadError: "ID statements couldn’t be loaded.",
-    empty: "No ID statements have been added yet.",
     retry: "Try again",
     add: "Add",
     walletChecker: "Wallet Checker",
@@ -776,6 +775,8 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     ensCopied: "ENS name copied",
     openEtherscan: "Open on Etherscan",
     openOpenSea: "Open on OpenSea",
+    etherscan: "Etherscan",
+    openSea: "OpenSea",
     confirmWallet: "Confirm in your wallet…",
     waitingConfirmation: "Waiting for confirmation…",
     primaryConfirmed:

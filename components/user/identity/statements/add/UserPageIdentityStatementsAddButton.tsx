@@ -10,7 +10,7 @@ import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,
-  size,
+  size = "sm",
 }: {
   readonly profile: ApiIdentity;
   readonly size?: ButtonSize;

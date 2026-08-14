@@ -1,6 +1,7 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import type { MouseEvent } from "react";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItemPrimary({
   isPrimary,
@@ -24,17 +25,22 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
   }
 
   if (canEdit) {
+    const handleAssignPrimary = (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      assignPrimary();
+    };
+
     return (
       <button
         type="button"
         disabled={isAssigningPrimary}
-        onClick={assignPrimary}
+        onClick={handleAssignPrimary}
         aria-label={
           isAssigningPrimary
             ? t(locale, "user.profile.identity.statements.settingPrimary")
             : t(locale, "user.profile.identity.statements.setPrimary")
         }
-        className="tw-inline-flex tw-min-h-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-[11px] tw-font-semibold tw-text-primary-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-60 lg:tw-ml-1 lg:tw-min-h-0 lg:tw-rounded-none lg:tw-px-0 lg:tw-text-xs lg:tw-font-medium"
+        className="tw-inline-flex tw-min-h-11 tw-touch-manipulation tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-[11px] tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-60 lg:tw-ml-1 lg:tw-min-h-0 lg:tw-rounded-none lg:tw-px-0 lg:tw-text-xs lg:tw-font-medium"
       >
         {isAssigningPrimary ? (
           <>

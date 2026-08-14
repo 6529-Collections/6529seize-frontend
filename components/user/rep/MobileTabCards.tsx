@@ -39,7 +39,7 @@ function MobileTabButton({
       type="button"
       aria-pressed={isSelected}
       onClick={() => onTabChange(tab)}
-      className={`tw-flex tw-min-h-16 tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-center tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 active:tw-bg-white/[0.08] motion-reduce:tw-transition-none ${buttonStateClasses}`}
+      className={`tw-flex tw-min-h-16 tw-flex-auto tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-px-0 tw-py-2.5 tw-text-center tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 active:tw-bg-white/[0.08] motion-reduce:tw-transition-none ${buttonStateClasses}`}
     >
       <span className="tw-flex tw-items-center tw-justify-center tw-gap-1 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-normal tw-text-iron-500 min-[360px]:tw-text-[0.6875rem] min-[360px]:tw-tracking-wider">
         <span className="tw-whitespace-nowrap">{label}</span>
@@ -76,8 +76,8 @@ export default function MobileTabCards({
   const nicValue = cicOverview?.total_cic ?? profile.cic;
 
   return (
-    <div className="tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05]">
-      <div className="tw-grid tw-w-max tw-min-w-full tw-grid-cols-[repeat(3,minmax(max-content,1fr))] tw-gap-1 tw-p-1.5">
+    <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-scrollbar-none">
+      <div className="tw-flex tw-w-max tw-min-w-full tw-gap-1 tw-p-1.5">
         <MobileTabButton
           tab="rep"
           label={t(locale, "user.profile.identity.mobileTabs.totalRep")}
