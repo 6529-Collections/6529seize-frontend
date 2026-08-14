@@ -24,7 +24,7 @@ interface OverlappingAvatarItem {
 interface OverlappingAvatarsProps {
   readonly items: OverlappingAvatarItem[];
   readonly maxCount?: number;
-  readonly size?: "sm" | "md";
+  readonly size?: "xs" | "sm" | "md";
   readonly overlapClass?: string;
   readonly onItemClick?: (
     e: MouseEvent<HTMLAnchorElement>,
@@ -33,6 +33,7 @@ interface OverlappingAvatarsProps {
 }
 
 const SIZE_CLASS = {
+  xs: "tw-h-5 tw-w-5",
   sm: "tw-h-6 tw-w-6",
   md: "tw-h-7 tw-w-7",
 } as const;
