@@ -24,7 +24,9 @@ import {
   useEffect,
   useRef,
   useState,
+  type MouseEventHandler,
   type PointerEvent,
+  type PointerEventHandler,
   type ReactNode,
 } from "react";
 import { Tooltip } from "react-tooltip";
@@ -35,6 +37,92 @@ import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPa
 const PRIMARY_ERROR_TITLE_KEY =
   "user.profile.identity.statements.primaryErrorTitle" as const;
 const COPIED_FEEDBACK_DURATION_MS = 1800;
+
+function CopyValueField({
+  label,
+  value,
+  copyLabel,
+  copiedLabel,
+  tooltipId,
+  isCopied,
+  isTouchScreen,
+  onCopy,
+  onPointerDown,
+  onPointerCancel,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly copyLabel: string;
+  readonly copiedLabel: string;
+  readonly tooltipId: string;
+  readonly isCopied: boolean;
+  readonly isTouchScreen: boolean;
+  readonly onCopy: MouseEventHandler<HTMLButtonElement>;
+  readonly onPointerDown: PointerEventHandler<HTMLButtonElement>;
+  readonly onPointerCancel: PointerEventHandler<HTMLButtonElement>;
+}) {
+  const showCopiedFeedback = isTouchScreen && isCopied;
+
+  return (
+    <div>
+      <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+        {label}
+      </div>
+      <button
+        type="button"
+        aria-label={copyLabel}
+        onClick={onCopy}
+        onPointerDown={onPointerDown}
+        onPointerCancel={onPointerCancel}
+        data-tooltip-id={isTouchScreen ? undefined : tooltipId}
+        className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-touch-manipulation tw-cursor-pointer tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-pr-9"
+      >
+        <span
+          className={`tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100 ${
+            showCopiedFeedback ? "tw-invisible" : ""
+          }`}
+        >
+          {value}
+        </span>
+        {showCopiedFeedback && (
+          <span
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-2 tw-right-12 tw-flex tw-items-center tw-font-sans tw-text-xs tw-font-semibold tw-text-primary-400"
+          >
+            {copiedLabel}
+          </span>
+        )}
+        <span
+          aria-hidden="true"
+          className={`tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-h-11 tw-w-11 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
+            isCopied
+              ? "tw-text-primary-400"
+              : "tw-text-iron-400 group-focus-visible:tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-200"
+          }`}
+        >
+          <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
+            <CopyIcon />
+          </div>
+        </span>
+      </button>
+      {!isTouchScreen && (
+        <Tooltip
+          id={tooltipId}
+          place="top"
+          positionStrategy="fixed"
+          offset={8}
+          opacity={1}
+          isOpen={isCopied ? true : undefined}
+          style={TOOLTIP_STYLES}
+        >
+          <span className="tw-text-xs">
+            {isCopied ? copiedLabel : copyLabel}
+          </span>
+        </Tooltip>
+      )}
+    </div>
+  );
+}
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   address,
@@ -294,10 +382,6 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       "user.profile.identity.statements.ensCopied"
     );
   }
-  const showAddressCopiedFeedback =
-    isTouchScreen && copiedItem === "full-address";
-  const showEnsCopiedFeedback = isTouchScreen && copiedItem === "ens";
-
   const assignPrimary = async () => {
     writeDelegation.writeContract({
       address: DELEGATION_CONTRACT.contract,
@@ -478,154 +562,58 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             className="tw-px-3 tw-pb-3 tw-pt-1"
           >
             <div className="tw-space-y-2.5">
-              <div>
-                <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                  {t(locale, "user.profile.identity.statements.fullAddress")}
-                </div>
-                <button
-                  type="button"
-                  aria-label={t(
-                    locale,
-                    "user.profile.identity.statements.copyFullAddress"
-                  )}
-                  onClick={handleCopyAddress}
-                  onPointerDown={(event) =>
-                    showTouchCopyFeedback(event, "full-address")
-                  }
-                  onPointerCancel={(event) =>
-                    clearCanceledTouchCopyFeedback(event, "full-address")
-                  }
-                  data-tooltip-id={
-                    isTouchScreen
-                      ? undefined
-                      : `copy-address-tooltip-${address.wallet}`
-                  }
-                  className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-touch-manipulation tw-cursor-pointer tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-pr-9"
-                >
-                  <span
-                    className={`tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100 ${
-                      showAddressCopiedFeedback ? "tw-invisible" : ""
-                    }`}
-                  >
-                    {address.wallet}
-                  </span>
-                  {showAddressCopiedFeedback && (
-                    <span
-                      aria-hidden="true"
-                      className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-2 tw-right-12 tw-flex tw-items-center tw-font-sans tw-text-xs tw-font-semibold tw-text-primary-400"
-                    >
-                      {t(locale, "user.profile.identity.statements.copied")}
-                    </span>
-                  )}
-                  <span
-                    aria-hidden="true"
-                    className={`tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-h-11 tw-w-11 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
-                      copiedItem === "full-address"
-                        ? "tw-text-primary-400"
-                        : "tw-text-iron-400 group-focus-visible:tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-200"
-                    }`}
-                  >
-                    <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
-                      <CopyIcon />
-                    </div>
-                  </span>
-                </button>
-                {!isTouchScreen && (
-                  <Tooltip
-                    id={`copy-address-tooltip-${address.wallet}`}
-                    place="top"
-                    positionStrategy="fixed"
-                    offset={8}
-                    opacity={1}
-                    isOpen={copiedItem === "full-address" ? true : undefined}
-                    style={TOOLTIP_STYLES}
-                  >
-                    <span className="tw-text-xs">
-                      {t(
-                        locale,
-                        copiedItem === "full-address"
-                          ? "user.profile.identity.statements.copied"
-                          : "user.profile.identity.statements.copyFullAddress"
-                      )}
-                    </span>
-                  </Tooltip>
+              <CopyValueField
+                label={t(
+                  locale,
+                  "user.profile.identity.statements.fullAddress"
                 )}
-              </div>
+                value={address.wallet}
+                copyLabel={t(
+                  locale,
+                  "user.profile.identity.statements.copyFullAddress"
+                )}
+                copiedLabel={t(
+                  locale,
+                  "user.profile.identity.statements.copied"
+                )}
+                tooltipId={`copy-address-tooltip-${address.wallet}`}
+                isCopied={copiedItem === "full-address"}
+                isTouchScreen={isTouchScreen}
+                onCopy={handleCopyAddress}
+                onPointerDown={(event) =>
+                  showTouchCopyFeedback(event, "full-address")
+                }
+                onPointerCancel={(event) =>
+                  clearCanceledTouchCopyFeedback(event, "full-address")
+                }
+              />
 
               {ensName && (
-                <div>
-                  <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                    {t(locale, "user.profile.identity.statements.ensName")}
-                  </div>
-                  <button
-                    type="button"
-                    aria-label={t(
-                      locale,
-                      "user.profile.identity.statements.copyEnsName"
-                    )}
-                    onClick={handleCopyEns}
-                    onPointerDown={(event) =>
-                      showTouchCopyFeedback(event, "ens")
-                    }
-                    onPointerCancel={(event) =>
-                      clearCanceledTouchCopyFeedback(event, "ens")
-                    }
-                    data-tooltip-id={
-                      isTouchScreen
-                        ? undefined
-                        : `copy-ens-tooltip-${address.wallet}`
-                    }
-                    className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-touch-manipulation tw-cursor-pointer tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-pr-9"
-                  >
-                    <span
-                      className={`tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100 ${
-                        showEnsCopiedFeedback ? "tw-invisible" : ""
-                      }`}
-                    >
-                      {ensName}
-                    </span>
-                    {showEnsCopiedFeedback && (
-                      <span
-                        aria-hidden="true"
-                        className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-2 tw-right-12 tw-flex tw-items-center tw-font-sans tw-text-xs tw-font-semibold tw-text-primary-400"
-                      >
-                        {t(locale, "user.profile.identity.statements.copied")}
-                      </span>
-                    )}
-                    <span
-                      aria-hidden="true"
-                      className={`tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-h-11 tw-w-11 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors lg:tw-h-7 lg:tw-w-7 lg:tw-rounded ${
-                        copiedItem === "ens"
-                          ? "tw-text-primary-400"
-                          : "tw-text-iron-400 group-focus-visible:tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-200"
-                      }`}
-                    >
-                      <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
-                        <CopyIcon />
-                      </div>
-                    </span>
-                  </button>
-                  {!isTouchScreen && (
-                    <Tooltip
-                      id={`copy-ens-tooltip-${address.wallet}`}
-                      place="top"
-                      positionStrategy="fixed"
-                      offset={8}
-                      opacity={1}
-                      isOpen={copiedItem === "ens" ? true : undefined}
-                      style={TOOLTIP_STYLES}
-                    >
-                      <span className="tw-text-xs">
-                        {t(
-                          locale,
-                          copiedItem === "ens"
-                            ? "user.profile.identity.statements.copied"
-                            : "user.profile.identity.statements.copyEnsName"
-                        )}
-                      </span>
-                    </Tooltip>
+                <CopyValueField
+                  label={t(
+                    locale,
+                    "user.profile.identity.statements.ensName"
                   )}
-                </div>
+                  value={ensName}
+                  copyLabel={t(
+                    locale,
+                    "user.profile.identity.statements.copyEnsName"
+                  )}
+                  copiedLabel={t(
+                    locale,
+                    "user.profile.identity.statements.copied"
+                  )}
+                  tooltipId={`copy-ens-tooltip-${address.wallet}`}
+                  isCopied={copiedItem === "ens"}
+                  isTouchScreen={isTouchScreen}
+                  onCopy={handleCopyEns}
+                  onPointerDown={(event) =>
+                    showTouchCopyFeedback(event, "ens")
+                  }
+                  onPointerCancel={(event) =>
+                    clearCanceledTouchCopyFeedback(event, "ens")
+                  }
+                />
               )}
 
               <div className="tw-grid tw-grid-cols-2 tw-gap-2 lg:tw-hidden">
