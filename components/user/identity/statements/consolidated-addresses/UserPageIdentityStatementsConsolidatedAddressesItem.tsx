@@ -74,7 +74,7 @@ function CopyValueField({
         onClick={onCopy}
         onPointerDown={onPointerDown}
         onPointerCancel={onPointerCancel}
-        data-tooltip-id={isTouchScreen ? undefined : tooltipId}
+        {...(!isTouchScreen && { "data-tooltip-id": tooltipId })}
         className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-touch-manipulation tw-cursor-pointer tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-pr-9"
       >
         <span
@@ -112,7 +112,7 @@ function CopyValueField({
           positionStrategy="fixed"
           offset={8}
           opacity={1}
-          isOpen={isCopied ? true : undefined}
+          {...(isCopied && { isOpen: true })}
           style={TOOLTIP_STYLES}
         >
           <span className="tw-text-xs">
