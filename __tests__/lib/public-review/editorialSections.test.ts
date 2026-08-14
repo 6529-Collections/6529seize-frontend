@@ -32,6 +32,36 @@ describe("public review editorial sections", () => {
     expect(getPublicReviewHeadingId("  ")).toBe("");
   });
 
+  it("keeps renamed review headings on their existing feedback anchors", () => {
+    expect(getPublicReviewHeadingId("What the signed details contain")).toBe(
+      "the-exact-authorization"
+    );
+    expect(getPublicReviewHeadingId("Who can approve mints and auctions")).toBe(
+      "eoa-and-contract-wallet-signers"
+    );
+    expect(getPublicReviewHeadingId("How a fixed-price mint works")).toBe(
+      "fixed-price-execution"
+    );
+    expect(getPublicReviewHeadingId("How an auction starts")).toBe(
+      "auction-registration"
+    );
+    expect(
+      getPublicReviewHeadingId("How unused permissions can be stopped")
+    ).toBe("cancellation-consumption-and-rotation");
+    expect(getPublicReviewHeadingId("Can someone copy the transaction?")).toBe(
+      "transaction-ordering-and-mev"
+    );
+    expect(getPublicReviewHeadingId("What the contract cannot verify")).toBe(
+      "offchain-evidence-completes-the-authorization"
+    );
+    expect(
+      getPublicReviewHeadingId("A public proof page is still needed")
+    ).toBe("the-authorization-receipt");
+    expect(
+      getPublicReviewHeadingId("How to test that Stream fails safely")
+    ).toBe("failure-modes-reviewers-should-test");
+  });
+
   it("suffixes repeated section titles deterministically", () => {
     expect(
       extractPublicReviewSections("## Same title\n\n## Same title\n")
