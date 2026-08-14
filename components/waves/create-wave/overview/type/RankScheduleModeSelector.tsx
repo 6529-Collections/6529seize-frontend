@@ -37,9 +37,7 @@ function RankScheduleModePreview({
   readonly mode: RankScheduleMode;
   readonly isSelected: boolean;
 }) {
-  const accentClass = isSelected
-    ? "tw-bg-primary-400/80"
-    : "tw-bg-iron-650";
+  const accentClass = isSelected ? "tw-bg-primary-400/80" : "tw-bg-iron-650";
   const timelineDotClasses = [
     "tw-bg-iron-600",
     `${accentClass} tw-ring-2 tw-ring-primary-400/15`,

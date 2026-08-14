@@ -154,9 +154,7 @@ function SubmissionModePreview({
   readonly mode: CreateWaveSubmissionMode;
   readonly isSelected: boolean;
 }) {
-  const accentClass = isSelected
-    ? "tw-bg-primary-400/80"
-    : "tw-bg-iron-650";
+  const accentClass = isSelected ? "tw-bg-primary-400/80" : "tw-bg-iron-650";
 
   return (
     <div

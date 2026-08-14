@@ -23,9 +23,7 @@ describe("ToggleViewButtonPlugin", () => {
   it("does not call onViewClick when disabled", () => {
     const onViewClick = jest.fn();
     render(<ToggleViewButtonPlugin disabled onViewClick={onViewClick} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: /expand editor/i })
-    );
+    fireEvent.click(screen.getByRole("button", { name: /expand editor/i }));
     expect(onViewClick).not.toHaveBeenCalled();
   });
 });

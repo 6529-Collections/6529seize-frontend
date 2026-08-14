@@ -93,12 +93,8 @@ function CreditScopePreview({
   readonly scope: ApiWaveCreditScope;
   readonly isSelected: boolean;
 }) {
-  const accentClass = isSelected
-    ? "tw-bg-primary-400/80"
-    : "tw-bg-iron-650";
-  const connectorClass = isSelected
-    ? "tw-bg-primary-500/30"
-    : "tw-bg-iron-700";
+  const accentClass = isSelected ? "tw-bg-primary-400/80" : "tw-bg-iron-650";
+  const connectorClass = isSelected ? "tw-bg-primary-500/30" : "tw-bg-iron-700";
   const sharedConnectorClasses = [
     "-tw-right-1.5 tw-left-1/2 sm:-tw-right-2",
     "-tw-right-1.5 tw-left-0 sm:-tw-right-2",
