@@ -143,6 +143,7 @@ export default function AboutDataDecentral() {
             <li>
               6529 Team addresses. A record of these can be found on Arweave{" "}
               <Link
+                aria-label="Arweave record of 6529 Team addresses (opens in a new tab)"
                 className={DATA_SOURCE_LINK_CLASS}
                 href={`https://media.6529.io/arweave/fy83ffOGqR9cR2zooI7u9JxsG0oEWVJxH3B-bNxXKJg`}
                 target="_blank"
@@ -192,6 +193,7 @@ export default function AboutDataDecentral() {
               values shown on the site to Arweave as a CSV. The specific links
               can be found{" "}
               <Link
+                aria-label="Compiled 6529.io data on the Open Data page (opens in a new tab)"
                 className={DATA_SOURCE_LINK_CLASS}
                 href="/open-data"
                 target="_blank"
