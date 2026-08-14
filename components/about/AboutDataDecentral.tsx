@@ -24,7 +24,11 @@ const FEATURED_DATA_SOURCE_SECTION_CLASS =
   "tw-group tw-mt-8 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/[0.05] tw-p-5 tw-shadow-[0_15px_40px_rgba(0,240,255,0.05)] sm:tw-mt-10 sm:tw-p-6";
 
 const DATA_SOURCE_LIST_CLASS =
-  "tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 md:tw-pt-1";
+  "tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-font-normal tw-leading-7 md:tw-pt-1";
+
+const STANDARD_DATA_SOURCE_LIST_CLASS = `${DATA_SOURCE_LIST_CLASS} tw-text-iron-300`;
+
+const FEATURED_DATA_SOURCE_LIST_CLASS = `${DATA_SOURCE_LIST_CLASS} tw-text-iron-200`;
 
 const DATA_SOURCE_LINK_CLASS =
   "tw-rounded-sm tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
@@ -41,7 +45,6 @@ function DataSourceSection({
   iconIsUnframed = false,
   iconWrapperClassName,
   title,
-  titleClassName,
 }: {
   readonly children: ReactNode;
   readonly featured?: boolean;
@@ -51,7 +54,6 @@ function DataSourceSection({
   readonly iconIsUnframed?: boolean;
   readonly iconWrapperClassName?: string;
   readonly title: string;
-  readonly titleClassName?: string;
 }) {
   return (
     <section
@@ -87,8 +89,10 @@ function DataSourceSection({
         </span>
         <h2
           className={clsx(
-            "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl",
-            titleClassName
+            "tw-m-0 tw-text-lg tw-leading-tight tw-tracking-tight sm:tw-text-xl",
+            featured
+              ? "tw-font-semibold tw-text-[#00f0ff]"
+              : "tw-font-medium tw-text-iron-100"
           )}
           id={headingId}
         >
@@ -110,7 +114,7 @@ export default function AboutDataDecentral() {
           Data Decentralization
         </h1>
         <div className="tw-mt-6 tw-space-y-4 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
-          <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-7 sm:tw-text-xl sm:tw-leading-8">
+          <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-normal tw-leading-7 tw-text-iron-300 sm:tw-text-xl sm:tw-leading-8">
             One of our goals is to demonstrate how applications can be built in
             a decentralized manner.
           </p>
@@ -139,7 +143,9 @@ export default function AboutDataDecentral() {
           iconWrapperClassName="tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10"
           title="On-Chain (Ethereum)"
         >
-          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-[#00f0ff]`}>
+          <ul
+            className={`${STANDARD_DATA_SOURCE_LIST_CLASS} marker:tw-text-[#00f0ff]`}
+          >
             <li>The token #</li>
             <li>
               The location (URI/URL) of the JSON with the token&apos;s metadata
@@ -165,7 +171,7 @@ export default function AboutDataDecentral() {
           title="Arweave (Decentralized storage)"
         >
           <ul
-            className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-emerald-400`}
+            className={`${STANDARD_DATA_SOURCE_LIST_CLASS} marker:tw-text-emerald-400`}
           >
             <li>The image of the art associated with each NFT</li>
             <li>The metadata for the NFT</li>
@@ -182,7 +188,9 @@ export default function AboutDataDecentral() {
           iconWrapperClassName="tw-border-[#2081E2]/30 tw-bg-[#2081E2]/10"
           title="OpenSea API"
         >
-          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-[#2081E2]`}>
+          <ul
+            className={`${STANDARD_DATA_SOURCE_LIST_CLASS} marker:tw-text-[#2081E2]`}
+          >
             <li>NFT listing prices on OpenSea</li>
           </ul>
         </DataSourceSection>
@@ -198,7 +206,9 @@ export default function AboutDataDecentral() {
           iconWrapperClassName="tw-border-orange-500/20 tw-bg-orange-500/10"
           title="Internal Database"
         >
-          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-orange-400`}>
+          <ul
+            className={`${STANDARD_DATA_SOURCE_LIST_CLASS} marker:tw-text-orange-400`}
+          >
             <li>
               6529 Team addresses. A record of these can be found on Arweave{" "}
               <Link
@@ -226,7 +236,9 @@ export default function AboutDataDecentral() {
           iconWrapperClassName="tw-border-white/10 tw-bg-white/[0.05]"
           title="Internally Calculated / Computed"
         >
-          <ul className={`${DATA_SOURCE_LIST_CLASS} marker:tw-text-iron-400`}>
+          <ul
+            className={`${STANDARD_DATA_SOURCE_LIST_CLASS} marker:tw-text-iron-400`}
+          >
             <li>
               Thumbnail images to match the site design (transformed from the
               original image from Arweave)
@@ -250,10 +262,9 @@ export default function AboutDataDecentral() {
           }
           iconIsUnframed
           title="Compiled 6529.io Data"
-          titleClassName="!tw-text-[#00f0ff]"
         >
           <ul
-            className={`${DATA_SOURCE_LIST_CLASS} !tw-text-iron-200 marker:tw-text-[#00f0ff]`}
+            className={`${FEATURED_DATA_SOURCE_LIST_CLASS} marker:tw-text-[#00f0ff]`}
           >
             <li>
               Even though everyone can compile and calculate the same data as

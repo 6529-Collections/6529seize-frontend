@@ -17,9 +17,11 @@ export default function DistributionPlanToolConnected() {
 
   return (
     <div className="tw-flex tw-flex-col">
-      <h1 className="tw-text-white">Sign in</h1>
-      <div className="tw-mb-6 lg:tw-max-w-2xl">
-        <ul className="tw-mb-0 tw-mt-2 tw-space-y-1 tw-text-left tw-text-base tw-font-normal tw-leading-[1.6] tw-text-iron-300">
+      <h1 className="tw-text-white">
+        Sign in
+      </h1>
+      <div className="tw-mb-6 tw-max-w-2xl">
+        <ul className="tw-text-justify tw-space-y-1 tw-mb-0 tw-mt-2 tw-text-base tw-leading-[1.6] tw-font-normal tw-text-iron-300">
           <li>
             Sign in with an address that&apos;s a part of your consolidated
             account to proceed, so that we can verify your TDH to grant you
