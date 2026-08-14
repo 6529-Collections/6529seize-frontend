@@ -35,6 +35,7 @@ export type MuseumAcquisitionLandingMedia =
       readonly height: number;
       readonly alt: string;
       readonly sourceByteSize: number;
+      readonly variants?: MuseumExternalProposalPresentationMedia["variants"];
       readonly sourceHref?: string;
       readonly creditLine: string;
     }
@@ -81,6 +82,7 @@ function proposalMedia(
     height: media.height,
     alt: media.altText,
     sourceByteSize: media.sourceByteSize,
+    ...(media.variants === undefined ? {} : { variants: media.variants }),
     ...(sourceHref === null ? {} : { sourceHref }),
     creditLine: media.credit.creditLine,
   };
@@ -393,6 +395,7 @@ function MuseumAcquisitionMediaFrame({
       width={media.width}
       height={media.height}
       sourceByteSize={media.sourceByteSize}
+      variants={media.variants}
       requireIntentForLargeSource={false}
       eager={eager}
       className={imageClassName}

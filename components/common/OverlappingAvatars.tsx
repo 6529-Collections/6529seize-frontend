@@ -6,7 +6,8 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import Image from "next/image";
 import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
-import { useId } from "react";
+import { useId, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import { useGatewayImageLoadState } from "@/components/common/image/useGatewayImageLoadState";
 
@@ -84,6 +85,11 @@ export default function OverlappingAvatars({
 }: OverlappingAvatarsProps) {
   const baseId = useId();
   const isTouchDevice = useIsTouchDevice();
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const slice = items.slice(0, maxCount);
   const sizeClass = SIZE_CLASS[size];
   const avatarRing =
@@ -145,14 +151,19 @@ export default function OverlappingAvatars({
           return (
             <span key={item.key} className="tw-inline-flex">
               {anchor}
-              <Tooltip
-                id={tooltipId}
-                place="top"
-                delayShow={250}
-                style={TOOLTIP_STYLES}
-              >
-                {item.tooltipContent ?? item.title}
-              </Tooltip>
+              {hydrated &&
+                createPortal(
+                  <Tooltip
+                    id={tooltipId}
+                    place="top"
+                    positionStrategy="fixed"
+                    delayShow={250}
+                    style={TOOLTIP_STYLES}
+                  >
+                    {item.tooltipContent ?? item.title}
+                  </Tooltip>,
+                  document.body
+                )}
             </span>
           );
         }

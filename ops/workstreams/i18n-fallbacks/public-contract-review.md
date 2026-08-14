@@ -11,11 +11,12 @@ through `publicReview.*` message keys. The current route resolves those messages
 with `DEFAULT_LOCALE`; supported `en-GB`, `fr-FR`, `es-ES`, and `de-DE` locales
 fall back to `en-US`.
 
-The current Overview, Artwork Lifecycle, For Artists, Who Can Do What, Where
-Development Stands, and Community Review improvements follow the same boundary.
-Their headings, status labels, list labels, links, reviewer questions, and
-plain-language editorial builders are message-backed, but the review routes do
-not yet select a request locale and their source copy exists only in `en-US`.
+The current Overview, Artwork Lifecycle, For Artists, Who Can Do What, Metadata,
+Scripts, and Dependencies, Where Development Stands, and Community Review
+improvements follow the same boundary. Their headings, status labels, list
+labels, links, reviewer questions, and plain-language editorial builders are
+message-backed, but the review routes do not yet select a request locale and
+their source copy exists only in `en-US`.
 
 The immutable Stream editorial Markdown is also maintained as source-locale
 English and does not yet have translated content snapshots.

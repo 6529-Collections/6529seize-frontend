@@ -45,6 +45,13 @@ describe("Decisions", () => {
     endDate: 0,
   } as any;
 
+  const openAdvancedSettings = () =>
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Winner schedule/,
+      })
+    );
+
   it("updates decisions when subsequent decisions added", async () => {
     const setDates = jest.fn();
     render(
@@ -57,6 +64,7 @@ describe("Decisions", () => {
         setIsExpanded={jest.fn()}
       />
     );
+    openAdvancedSettings();
     fireEvent.click(screen.getByTestId("sub"));
     expect(setDates).toHaveBeenCalledWith({
       ...baseDates,
@@ -77,6 +85,7 @@ describe("Decisions", () => {
         setIsExpanded={jest.fn()}
       />
     );
+    openAdvancedSettings();
     fireEvent.click(screen.getByRole("switch"));
     expect(onRollingEnabled).toHaveBeenCalled();
     expect(setDates).toHaveBeenCalledWith(
@@ -151,5 +160,27 @@ describe("Decisions", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "First winners announcement cannot be before voting begins. Move voting start earlier or move first winners announcement later."
     );
+  });
+
+  it("opens advanced settings when an advanced date has an error", () => {
+    render(
+      <Decisions
+        dates={{ ...baseDates, subsequentDecisions: [1] }}
+        errors={[]}
+        setDates={jest.fn()}
+        onRollingEnabled={jest.fn()}
+        isExpanded={true}
+        setIsExpanded={jest.fn()}
+        hasAdvancedError={true}
+        advancedContent={<div>Invalid optional end date</div>}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: /Winner schedule Needs attention/,
+      })
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Invalid optional end date")).toBeVisible();
   });
 });

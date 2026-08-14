@@ -46,6 +46,7 @@ export default function IdentitySearch({
   dropdownListClassName,
   iconPositionClassName,
   inputClassName,
+  labelClassName,
   onSelectionChange,
   setIdentity,
 }: {
@@ -61,6 +62,7 @@ export default function IdentitySearch({
   readonly dropdownListClassName?: string | undefined;
   readonly iconPositionClassName?: string | undefined;
   readonly inputClassName?: string | undefined;
+  readonly labelClassName?: string | undefined;
   readonly onSelectionChange?:
     | ((selection: SelectableIdentityOption | null) => void)
     | undefined;
@@ -346,6 +348,7 @@ export default function IdentitySearch({
             ? highlightedOptionId
             : undefined
         }
+        aria-invalid={error || undefined}
         className={`${INPUT_CLASSES[size]} ${
           error
             ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
@@ -380,7 +383,7 @@ export default function IdentitySearch({
           error
             ? "peer-placeholder-shown:tw-top-1/4 peer-placeholder-shown:-tw-translate-y-1/4 peer-focus:tw-text-error"
             : "peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-focus:tw-text-primary-400"
-        } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-6 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+        } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-6 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4 ${labelClassName ?? ""}`}
       >
         {label}
       </label>

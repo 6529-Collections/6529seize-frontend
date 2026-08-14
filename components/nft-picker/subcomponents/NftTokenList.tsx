@@ -11,6 +11,7 @@ interface NftTokenListProps {
   readonly chain: SupportedChain;
   readonly ranges: TokenRange[];
   readonly overscan?: number | undefined;
+  readonly variant: "card" | "flat";
   readonly renderTokenExtra?:
     | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
     | undefined
@@ -23,9 +24,12 @@ export function NftTokenList({
   chain,
   ranges,
   overscan,
+  variant,
   renderTokenExtra,
   onRemove,
 }: NftTokenListProps) {
+  const isFlat = variant === "flat";
+
   return (
     <VirtualizedTokenList
       contractAddress={contractAddress}
@@ -41,10 +45,19 @@ export function NftTokenList({
               onClick: onRemove,
               getAriaLabel: (tokenLabel: string) =>
                 `Remove token ${tokenLabel}`,
+              className: isFlat
+                ? "tw-h-9 tw-rounded-lg tw-border-white/10 tw-px-3 tw-text-xs tw-font-semibold"
+                : undefined,
             }
           : undefined
       }
-      footerContent={formatCanonical(ranges)}
+      className={
+        isFlat
+          ? "tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40"
+          : undefined
+      }
+      rowClassName={isFlat ? "tw-px-4" : undefined}
+      footerContent={isFlat ? undefined : formatCanonical(ranges)}
       emptyState={
         <div className="tw-text-sm tw-text-iron-300">No tokens selected.</div>
       }

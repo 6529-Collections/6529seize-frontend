@@ -1,5 +1,7 @@
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveNameInput({
   name,
@@ -13,6 +15,7 @@ export default function CreateWaveNameInput({
     readonly value: string;
   }) => void;
 }) {
+  const locale = useBrowserLocale();
   const isNameError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED
   );
@@ -36,6 +39,7 @@ export default function CreateWaveNameInput({
               aria-required={true}
               aria-invalid={isNameError}
               aria-describedby={isNameError ? errorId : undefined}
+              placeholder=" "
               className={`${
                 isNameError
                   ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
@@ -45,7 +49,6 @@ export default function CreateWaveNameInput({
                   ? "tw-text-primary-400 focus:tw-text-white"
                   : "tw-text-white"
               } tw-peer tw-bg-iron-900 tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset`}
-              placeholder=" "
             />
             <label
               htmlFor="create-wave-name"
@@ -55,7 +58,7 @@ export default function CreateWaveNameInput({
                   : "peer-focus:tw-text-primary-400"
               } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-normal tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
             >
-              Wave Name{" "}
+              {t(locale, "waves.create.overview.name")}{" "}
               <span className="tw-text-error" aria-hidden="true">
                 *
               </span>

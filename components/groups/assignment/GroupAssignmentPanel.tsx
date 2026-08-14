@@ -211,7 +211,7 @@ function DialogNewGroupActions({
   );
 }
 
-function renderSearchPanel({
+function SearchPanel({
   allowGroupClear,
   defaultLabel,
   disabled,
@@ -261,7 +261,6 @@ export default function GroupAssignmentPanel({
     hasUnsavedGroup,
     isCreating,
     isDraftValid,
-    isExpandedPanel,
     isIdentityPanel,
     isRulePanel,
     isSearchPanel,
@@ -310,15 +309,15 @@ export default function GroupAssignmentPanel({
 
         {isSearchPanel ? (
           <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/40 tw-p-3">
-            {renderSearchPanel({
-              allowGroupClear,
-              defaultLabel,
-              disabled,
-              hasUnsavedGroup,
-              onExistingGroupSelect,
-              resultsLayout: "inline",
-              selectedGroup,
-            })}
+            <SearchPanel
+              allowGroupClear={allowGroupClear}
+              defaultLabel={defaultLabel}
+              disabled={disabled}
+              hasUnsavedGroup={hasUnsavedGroup}
+              onExistingGroupSelect={onExistingGroupSelect}
+              resultsLayout="inline"
+              selectedGroup={selectedGroup}
+            />
           </div>
         ) : (
           <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/40 tw-p-3">
@@ -401,11 +400,7 @@ export default function GroupAssignmentPanel({
   return (
     <div
       ref={panelRef}
-      className={`tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-transition-all tw-duration-300 ${
-        isExpandedPanel
-          ? "tw-border-white/10 tw-bg-iron-900 tw-shadow-2xl"
-          : "tw-border-white/5 tw-bg-iron-900/60"
-      }`}
+      className="tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 tw-shadow-none tw-transition-all tw-duration-300"
     >
       <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
         <CreateWaveInlineGroupHeader
@@ -466,16 +461,16 @@ export default function GroupAssignmentPanel({
         {displayedBuilder.panel === "search" ? (
           <CreateWaveInlineGroupExpandedPanel
             onCancel={onCancelPanel}
-            cancelClassName="tw-mt-3"
+            cancelSize="md"
           >
-            {renderSearchPanel({
-              allowGroupClear,
-              defaultLabel,
-              disabled,
-              hasUnsavedGroup,
-              onExistingGroupSelect,
-              selectedGroup,
-            })}
+            <SearchPanel
+              allowGroupClear={allowGroupClear}
+              defaultLabel={defaultLabel}
+              disabled={disabled}
+              hasUnsavedGroup={hasUnsavedGroup}
+              onExistingGroupSelect={onExistingGroupSelect}
+              selectedGroup={selectedGroup}
+            />
           </CreateWaveInlineGroupExpandedPanel>
         ) : null}
 

@@ -33,15 +33,18 @@ export default function GroupCreateIdentitySelectedItems({
     selectedItemClass =
       "tw-flex tw-items-center tw-gap-x-2 tw-rounded-full tw-bg-iron-900/70 tw-py-1.5 tw-pl-1.5 tw-pr-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-white/10";
   }
+  let selectedItemsContainerClass =
+    "tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 empty:tw-hidden";
+  if (isInline) {
+    selectedItemsContainerClass =
+      "tw-flex tw-flex-wrap tw-gap-2 empty:tw-hidden";
+  } else if (isQuickTag) {
+    selectedItemsContainerClass =
+      "tw-mt-2 tw-flex tw-flex-wrap tw-gap-1.5 empty:tw-hidden";
+  }
 
   return (
-    <div
-      className={
-        isQuickTag
-          ? "tw-mt-2 tw-flex tw-flex-wrap tw-gap-1.5 empty:tw-hidden"
-          : "tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 empty:tw-hidden"
-      }
-    >
+    <div className={selectedItemsContainerClass}>
       {selectedIdentities.map((identity) => (
         <div key={identity.wallet} className={selectedItemClass}>
           <div

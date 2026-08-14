@@ -8,11 +8,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import type { ParseError, TokenRange } from "../types";
 import { formatBigIntWithSeparators, formatCanonical } from "../utils";
+import Button from "@/components/utils/button/Button";
 
 const BIGINT_ZERO = BigInt(0);
 const BIGINT_ONE = BigInt(1);
 
 type CopyStatus = "idle" | "copied" | "error";
+
+interface CopyFeedbackState {
+  readonly canonical: string;
+  readonly status: CopyStatus;
+}
 
 const COPY_FEEDBACK: Record<
   CopyStatus,
@@ -38,6 +44,7 @@ interface NftEditRangesProps {
   readonly textValue: string;
   readonly parseErrors: ParseError[];
   readonly allowAll?: boolean | undefined;
+  readonly variant: "card" | "flat";
   readonly onToggle: () => void;
   readonly onTextChange: (value: string) => void;
   readonly onApply: () => void;
@@ -51,12 +58,14 @@ export function NftEditRanges({
   textValue,
   parseErrors,
   allowAll = true,
+  variant,
   onToggle,
   onTextChange,
   onApply,
   onCancel,
   onClear,
 }: NftEditRangesProps) {
+  const isFlat = variant === "flat";
   const canonical = useMemo(() => formatCanonical(ranges), [ranges]);
   const total = useMemo(
     () =>
@@ -76,21 +85,22 @@ export function NftEditRanges({
     ? "Add tokens using the input above or choose Select All to include every token."
     : "Add tokens using the input above.";
   const summaryText = hasTokens ? canonical : emptySummaryText;
-  const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
+  const [copyFeedback, setCopyFeedback] = useState<CopyFeedbackState>({
+    canonical: "",
+    status: "idle",
+  });
+  const copyStatus =
+    copyFeedback.canonical === canonical ? copyFeedback.status : "idle";
 
   useEffect(() => {
     if (copyStatus === "idle") {
       return undefined;
     }
     const timeout = globalThis.setTimeout(() => {
-      setCopyStatus("idle");
+      setCopyFeedback({ canonical, status: "idle" });
     }, 2000);
     return () => globalThis.clearTimeout(timeout);
-  }, [copyStatus]);
-
-  useEffect(() => {
-    setCopyStatus("idle");
-  }, [canonical]);
+  }, [canonical, copyStatus]);
 
   const handleCopy = async () => {
     if (!canonical) {
@@ -103,10 +113,10 @@ export function NftEditRanges({
       }
 
       await navigator.clipboard.writeText(canonical);
-      setCopyStatus("copied");
+      setCopyFeedback({ canonical, status: "copied" });
     } catch (error) {
       console.warn("NftEditRanges: clipboard copy failed", error);
-      setCopyStatus("error");
+      setCopyFeedback({ canonical, status: "error" });
     }
   };
 
@@ -126,21 +136,28 @@ export function NftEditRanges({
   const showActionButtons = showToggleButton || showClearButton;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-border tw-border-primary-500/30 tw-bg-primary-500/5 tw-p-4">
+    <div className="tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-primary-500/30 tw-bg-primary-500/5 tw-p-4">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-start sm:tw-justify-between">
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
           <span className="tw-text-base tw-font-semibold tw-text-white">
             {selectionLabel}
           </span>
           <div className="tw-flex tw-flex-col tw-gap-2 lg:tw-flex-row lg:tw-items-center">
-            <span className="tw-flex-1 tw-break-words tw-font-mono tw-text-xs tw-text-iron-200">
+            <span
+              className={`tw-flex-1 tw-break-words ${
+                isFlat
+                  ? "tw-text-sm tw-font-medium tw-text-iron-100"
+                  : "tw-font-mono tw-text-xs tw-text-iron-200"
+              }`}
+            >
               {summaryText}
             </span>
             {showCopyButton && (
               <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-                <button
-                  type="button"
-                  className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-primary-500/50 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-primary-300 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  className="tw-border-primary-500/50 tw-bg-transparent tw-text-primary-300 desktop-hover:hover:tw-border-primary-500 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
                   onClick={handleCopy}
                   aria-label="Copy token selection"
                 >
@@ -155,7 +172,7 @@ export function NftEditRanges({
                       <span>Copy</span>
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -171,22 +188,24 @@ export function NftEditRanges({
         {showActionButtons && (
           <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row">
             {showToggleButton && (
-              <button
-                type="button"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+              <Button
+                variant="secondary"
+                size="sm"
+                className="tw-bg-transparent desktop-hover:hover:tw-border-primary-500 desktop-hover:hover:tw-bg-transparent"
                 onClick={onToggle}
               >
                 {isEditing ? "Hide text editor" : "Edit as text"}
-              </button>
+              </Button>
             )}
             {showClearButton && (
-              <button
-                type="button"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500"
+              <Button
+                variant="secondary"
+                size="sm"
+                className="tw-bg-transparent desktop-hover:hover:tw-border-primary-500 desktop-hover:hover:tw-bg-transparent"
                 onClick={onClear}
               >
                 Clear All
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -202,28 +221,20 @@ export function NftEditRanges({
           />
           {parseErrors.length > 0 && (
             <ul className="tw-text-red-300 tw-list-disc tw-pl-5 tw-text-xs">
-              {parseErrors.map((error, index) => (
-                <li key={`${error.input}-${error.index}-${index}`}>
+              {parseErrors.map((error) => (
+                <li key={`${error.input}-${error.index}`}>
                   {error.message} ({error.input})
                 </li>
               ))}
             </ul>
           )}
           <div className="tw-flex tw-justify-end tw-gap-2">
-            <button
-              type="button"
-              className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-1 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
-              onClick={onCancel}
-            >
+            <Button variant="secondary" size="sm" onClick={onCancel}>
               Cancel
-            </button>
-            <button
-              type="button"
-              className="tw-rounded tw-bg-primary-500 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-black hover:tw-bg-primary-400"
-              onClick={onApply}
-            >
+            </Button>
+            <Button variant="action" size="sm" onClick={onApply}>
               Apply
-            </button>
+            </Button>
           </div>
         </div>
       )}
