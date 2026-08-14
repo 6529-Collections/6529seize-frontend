@@ -10,6 +10,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
 import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
 import {
   applyMuseumCollectionSemantics,
@@ -29,6 +30,7 @@ import type {
 } from "@/lib/museum/publication/types";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication/types";
 import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import type { MuseumView } from "@/lib/museum/types";
 
 export const metadata: Metadata = {
   ...getAppMetadata({
@@ -47,6 +49,12 @@ type CollectionItem = {
   readonly metadata?: MuseumMediaMetadata;
 };
 
+function workTitle(title: string): string {
+  return /^6529NM[-.]/u.test(title.trim())
+    ? t(DEFAULT_LOCALE, "museum.network.collection.untitledWork")
+    : title;
+}
+
 function collectionCountLabel(count: number): string {
   return t(
     DEFAULT_LOCALE,
@@ -59,7 +67,8 @@ function collectionCountLabel(count: number): string {
 
 function publicWorkItem(
   work: MuseumPublicWork,
-  publication: MuseumPublication
+  publication: MuseumPublication,
+  view: MuseumView | null
 ): CollectionItem {
   const artist = publication.artists.find(
     (candidate) => candidate.id === work.artistId
@@ -110,12 +119,35 @@ function publicWorkItem(
       },
       ...(mediaMetadata === undefined ? {} : { metadata: mediaMetadata }),
     };
-  } else if (mediaMetadata !== undefined) {
+  } else {
+    const reviewedProgramMedia = findReviewedProgramMediaMatch(view, [
+      work.id,
+      ...(work.sourceRecordIds ?? []),
+    ]);
+    if (reviewedProgramMedia !== null) {
+      presentation = {
+        media: {
+          kind: "program" as const,
+          media: reviewedProgramMedia.media,
+          ...(mediaMetadata === undefined
+            ? {}
+            : { creditLine: mediaMetadata.credit.creditLine }),
+        },
+        ...(mediaMetadata === undefined ? {} : { metadata: mediaMetadata }),
+      };
+    }
+  }
+  if (
+    media === undefined &&
+    work.presentationMedia?.[0] === undefined &&
+    presentation.media === undefined &&
+    mediaMetadata !== undefined
+  ) {
     presentation = { metadata: mediaMetadata };
   }
   return {
     id: work.id,
-    title: work.title,
+    title: workTitle(work.title),
     href: museumWorkHref(work.id),
     subtitle: artist?.preferredName ?? work.artistId,
     ...presentation,
@@ -144,12 +176,13 @@ function legacyCollectionItems(
 }
 
 function collectionItems(
-  publication: MuseumPublication
+  publication: MuseumPublication,
+  view: MuseumView | null
 ): readonly CollectionItem[] | null {
   if (publication.works !== undefined) {
     const holdings = publication.works
       .filter((work) => isMuseumPermanentCollectionWork(work))
-      .map((work) => publicWorkItem(work, publication));
+      .map((work) => publicWorkItem(work, publication, view));
     return holdings.length === 0 ? null : holdings;
   }
   const legacy = legacyCollectionItems(publication);
@@ -165,22 +198,29 @@ export default async function MuseumCollectionPage() {
     publicationState.publication
   );
 
-  const holdings = collectionItems(publication);
+  const holdings = collectionItems(publication, view);
   if (holdings === null) return <MuseumPublicationUnavailable />;
 
-  const hero =
-    holdings.find(
-      (item) => item.media !== undefined || item.metadata !== undefined
-    ) ?? holdings[0];
-  if (hero === undefined) return <MuseumPublicationUnavailable />;
   const holdingIds = new Set(holdings.map((item) => item.id));
-  const accessionedAcquisitions = buildMuseumAcquisitionIndex(
-    publication,
-    view
-  ).filter(
+  const acquisitions = buildMuseumAcquisitionIndex(publication, view);
+  const accessionedAcquisitions = acquisitions.filter(
     (acquisition) =>
       acquisition.status === "accessioned_into_permanent_collection" &&
       acquisition.workIds.some((workId) => holdingIds.has(workId))
+  );
+  const inProgressAcquisitions = acquisitions.filter(
+    (acquisition) =>
+      acquisition.status ===
+        "selected_through_acquisition_program_acquisition_pending" &&
+      acquisition.workIds.some((workId) => !holdingIds.has(workId))
+  );
+  const inProgressWorks = inProgressAcquisitions.flatMap((acquisition) =>
+    acquisition.workIds.flatMap((workId) => {
+      const work = publication.works?.find((item) => item.id === workId);
+      return work === undefined || holdingIds.has(work.id)
+        ? []
+        : [publicWorkItem(work, publication, view)];
+    })
   );
   const completedGiftCount = accessionedAcquisitions.filter(
     (acquisition) =>
@@ -210,13 +250,6 @@ export default async function MuseumCollectionPage() {
           DEFAULT_LOCALE,
           "museum.network.collection.heroDescription"
         )}
-        {...(hero.media === undefined ? {} : { media: hero.media })}
-        {...(hero.metadata === undefined
-          ? {}
-          : { mediaMetadata: hero.metadata })}
-        mediaTitle={hero.title}
-        mediaSubtitle={hero.subtitle}
-        {...(hero.href === null ? {} : { mediaHref: hero.href })}
         actions={
           <>
             <Link
@@ -278,9 +311,53 @@ export default async function MuseumCollectionPage() {
         </div>
       </section>
 
+      {inProgressWorks.length === 0 ? null : (
+        <section
+          className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-12 sm:tw-mt-20 sm:tw-pt-16"
+          aria-labelledby="collection-in-progress-title"
+        >
+          <div className="tw-max-w-2xl">
+            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+              {t(DEFAULT_LOCALE, "museum.network.collection.inProgressEyebrow")}
+            </p>
+            <h2
+              id="collection-in-progress-title"
+              className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.collection.inProgressTitle")}
+            </h2>
+            <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.collection.inProgressDescription"
+              )}
+            </p>
+          </div>
+          <div className="tw-mt-8 tw-grid tw-min-w-0 tw-gap-6 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+            {inProgressWorks.map((item) => (
+              <MuseumLandingMediaCard
+                key={item.id}
+                {...(item.media === undefined ? {} : { media: item.media })}
+                {...(item.metadata === undefined
+                  ? {}
+                  : { metadata: item.metadata })}
+                {...(item.href === null ? {} : { href: item.href })}
+                title={item.title}
+                subtitle={item.subtitle}
+                status={t(
+                  DEFAULT_LOCALE,
+                  "museum.network.acquisitions.selectedStatus"
+                )}
+                eager={false}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {accessionedAcquisitions.length === 0 ? null : (
         <section
-          className="tw-mt-16 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-12 sm:tw-mt-20 sm:tw-pt-16"
+          className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-12 sm:tw-mt-20 sm:tw-pt-16"
           aria-labelledby="collection-acquisitions-title"
         >
           <div className="tw-max-w-2xl">

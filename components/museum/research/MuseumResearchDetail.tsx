@@ -14,6 +14,7 @@ import { MuseumEntityContext } from "../MuseumEntityContext";
 import { MuseumMarkdown } from "../MuseumMarkdown";
 import { MuseumPublicMediaFigure } from "../MuseumPublicMediaFigure";
 import { MuseumRelatedEntities } from "../MuseumRelatedEntities";
+import { museumResearchMediaAspectRatio } from "./museumResearchMediaAspectRatio";
 
 export interface MuseumResearchDetailEntry {
   readonly id: string;
@@ -39,6 +40,17 @@ export function MuseumResearchDetail({
   readonly context: MuseumEntityContextModel;
   readonly workHrefs: Readonly<Record<string, string>>;
 }) {
+  const mediaAspectRatioProps: { aspectRatio?: number } = {};
+  if (entry.media !== undefined) {
+    const aspectRatio = museumResearchMediaAspectRatio(
+      entry.media.width,
+      entry.media.height
+    );
+    if (aspectRatio !== undefined) {
+      mediaAspectRatioProps.aspectRatio = aspectRatio;
+    }
+  }
+
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -77,6 +89,7 @@ export function MuseumResearchDetail({
             eager
             qualifier={entry.media.credit.creditLine}
             sizes="(min-width: 1024px) 60vw, 100vw"
+            {...mediaAspectRatioProps}
           />
         </div>
       )}

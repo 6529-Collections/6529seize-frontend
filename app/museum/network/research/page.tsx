@@ -5,10 +5,12 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import { museumDocumentKindLabelKey } from "@/lib/museum/publication/documentLabels";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { museumResearchHref } from "@/lib/museum/publication/routes";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import type {
+  MuseumExternalProposalPresentationMedia,
   MuseumMedia,
   MuseumPublication,
   MuseumPublicDocument,
@@ -38,6 +40,9 @@ export interface MuseumResearchIndexEntry {
   readonly document?: MuseumPublicDocument;
   readonly publicationUri?: string;
   readonly media?: MuseumMedia;
+  readonly kindLabel?: string;
+  readonly subjectLabels?: readonly string[];
+  readonly description?: string;
 }
 
 function researchGroup(value: string): MuseumResearchGroup {
@@ -129,11 +134,79 @@ function uniqueMuseumResearchDocumentSlug(
   return candidate;
 }
 
+function proposalPresentationMedia(
+  workId: string,
+  media: MuseumExternalProposalPresentationMedia
+): MuseumMedia {
+  const delivery =
+    media.variants?.find((variant) => variant.width >= 1280) ??
+    media.variants?.at(-1);
+  return {
+    id: media.id,
+    artworkId: workId,
+    kind: "still",
+    role: "source",
+    mediaType: media.mediaMimeType,
+    width: delivery?.width ?? media.width,
+    height: delivery?.height ?? media.height,
+    altText: media.altText,
+    credit: {
+      creditLine: media.credit.creditLine,
+      licenseLabel: media.rights.licenseLabel,
+      licenseUrl: media.rights.licenseUrl,
+      rightsExpressionId: null,
+      sourcePath: media.credit.sourcePath,
+    },
+    sourcePath: media.source.mediaRecordPath,
+    custody: "upstream",
+    url: delivery?.url ?? media.mediaUrl,
+    preservationStatus: "not_retained",
+    sha256: null,
+    upstreamProvider: "museum_public_derivative",
+  };
+}
+
 function researchMedia(
   publication: MuseumPublication,
-  document: MuseumPublicDocument
+  document: MuseumPublicDocument,
+  subjectIds: readonly string[] = []
 ): MuseumMedia | undefined {
-  const sourceIds = new Set([
+  const acquisitionWorkIds = [
+    ...(document.acquisitionIds ?? []),
+    ...subjectIds,
+  ].flatMap((acquisitionId) => {
+    const canonicalId =
+      publication.acquisitionAliases?.find(
+        (alias) => alias.alias === acquisitionId
+      )?.acquisitionId ?? acquisitionId;
+    return (
+      publication.curatedAcquisitions?.find(
+        (acquisition) => acquisition.id === canonicalId
+      )?.workIds ?? []
+    );
+  });
+  const programWorkIds = [
+    ...(document.programIds ?? []),
+    ...subjectIds,
+  ].flatMap((programId) => {
+    const canonicalId =
+      publication.entityGraph?.identityInventory.programAliases.find(
+        (alias) => alias.alias === programId
+      )?.programId ?? programId;
+    const acquisitionIds =
+      publication.acquisitionPrograms?.find(
+        (program) => program.id === canonicalId
+      )?.acquisitionIds ?? [];
+    return acquisitionIds.flatMap(
+      (acquisitionId) =>
+        publication.curatedAcquisitions?.find(
+          (acquisition) => acquisition.id === acquisitionId
+        )?.workIds ?? []
+    );
+  });
+  const sourceIds = [
+    ...acquisitionWorkIds,
+    ...programWorkIds,
     ...(document.workIds ?? []),
     ...document.artworkIds,
     ...document.projectIds.flatMap((projectId) => {
@@ -148,22 +221,147 @@ function researchMedia(
       );
       return [...(artist?.workIds ?? []), ...(artist?.artworkIds ?? [])];
     }),
-  ]);
-  const workIds = new Set([
-    ...sourceIds,
-    ...(publication.workAliases ?? [])
-      .filter((alias) => sourceIds.has(alias.sourceObjectId))
-      .map((alias) => alias.workId),
-  ]);
-  const typedMedia = (publication.works ?? [])
-    .filter((work) => workIds.has(work.id))
-    .map((work) => selectMuseumStillMedia(work.media))
-    .find((media): media is MuseumMedia => media !== undefined);
-  if (typedMedia !== undefined) return typedMedia;
-  return publication.artworks
-    .filter((artwork) => workIds.has(artwork.id))
-    .map((artwork) => selectMuseumStillMedia(artwork.media))
-    .find((media): media is MuseumMedia => media !== undefined);
+  ];
+  const aliases = publication.workAliases ?? [];
+  const orderedIds = [
+    ...new Set(
+      sourceIds.flatMap((sourceId) => {
+        const alias = aliases.find(
+          (candidate) => candidate.sourceObjectId === sourceId
+        );
+        return alias === undefined ? [sourceId] : [alias.workId, sourceId];
+      })
+    ),
+  ];
+  for (const id of orderedIds) {
+    const work = publication.works?.find((candidate) => candidate.id === id);
+    const typedMedia = selectMuseumStillMedia(work?.media ?? []);
+    if (typedMedia !== undefined) return typedMedia;
+    const proposalMedia = work?.presentationMedia?.[0];
+    if (proposalMedia !== undefined) {
+      return proposalPresentationMedia(id, proposalMedia);
+    }
+    const artwork = publication.artworks.find(
+      (candidate) => candidate.id === id
+    );
+    const legacyMedia = selectMuseumStillMedia(artwork?.media ?? []);
+    if (legacyMedia !== undefined) return legacyMedia;
+  }
+  return undefined;
+}
+
+function museumResearchKnownLabel(
+  publication: MuseumPublication,
+  id: string
+): string | undefined {
+  const graphLabel = publication.entityGraph?.entities.find(
+    (entity) => entity.id === id
+  )?.label;
+  if (graphLabel !== undefined) return graphLabel;
+
+  return (
+    publication.artists.find((artist) => artist.id === id)?.preferredName ??
+    publication.projects.find((project) => project.id === id)?.title ??
+    publication.organizations?.find((organization) => organization.id === id)
+      ?.preferredName ??
+    publication.works?.find((work) => work.id === id)?.title ??
+    publication.artworks.find((artwork) => artwork.id === id)?.title ??
+    publication.curatedAcquisitions?.find(
+      (acquisition) => acquisition.id === id
+    )?.title ??
+    publication.acquisitionPrograms?.find((program) => program.id === id)?.title
+  );
+}
+
+function researchSubjectLabels(
+  publication: MuseumPublication,
+  document: MuseumPublicDocument,
+  subjectIds: readonly string[] = []
+): readonly string[] {
+  const associatedIds = [
+    ...subjectIds,
+    ...document.artistIds,
+    ...document.projectIds,
+    ...(document.workIds ?? []),
+    ...document.artworkIds,
+    ...(document.acquisitionIds ?? []),
+    ...(document.programIds ?? []),
+    ...(document.organizationIds ?? []),
+  ];
+  return [...new Set(associatedIds)]
+    .map((id) => museumResearchKnownLabel(publication, id))
+    .filter(
+      (label): label is string => label !== undefined && label.length > 0
+    );
+}
+
+function museumResearchEditorialTitle(
+  title: string,
+  subjectLabels: readonly string[]
+): string {
+  if (!/^(?:6529NM|OUT-|RP-|RESEARCH-|[0-9a-f]{24,})/iu.test(title)) {
+    return title;
+  }
+  return subjectLabels[0] ?? "Research record";
+}
+
+function museumResearchDescription(
+  document: MuseumPublicDocument,
+  kindLabel: string,
+  subjectLabels: readonly string[]
+): string {
+  const firstParagraph = document.markdown
+    .split(/\n\s*\n/u)
+    .map((paragraph) =>
+      paragraph
+        .replace(/\[([^\]]+)\]\([^)]*\)/gu, "$1")
+        .replace(/[*_`]/gu, "")
+        .replace(/\s+/gu, " ")
+        .trim()
+    )
+    .find(
+      (paragraph) =>
+        paragraph.length > 0 &&
+        !paragraph.startsWith("#") &&
+        !paragraph.startsWith("|") &&
+        !paragraph.startsWith("-")
+    );
+  if (firstParagraph !== undefined) {
+    return firstParagraph.length > 220
+      ? `${firstParagraph.slice(0, 217).trimEnd()}...`
+      : firstParagraph;
+  }
+  if (subjectLabels.length > 0) {
+    return `${kindLabel} concerning ${subjectLabels.join(", ")}.`;
+  }
+  return `${kindLabel} from the Museum's published research record.`;
+}
+
+function researchEntryFields(
+  publication: MuseumPublication,
+  document: MuseumPublicDocument,
+  subjectIds: readonly string[] = []
+): {
+  readonly title: string;
+  readonly kindLabel: string;
+  readonly subjectLabels: readonly string[];
+  readonly description: string;
+} {
+  const kindLabel = t(
+    DEFAULT_LOCALE,
+    museumDocumentKindLabelKey(document.kind)
+  );
+  const subjectLabels = researchSubjectLabels(
+    publication,
+    document,
+    subjectIds
+  );
+  return {
+    title: museumResearchEditorialTitle(document.title, subjectLabels),
+    kindLabel,
+    subjectLabels,
+    description: museumResearchDescription(document, kindLabel, subjectLabels),
+  };
 }
 
 function typedResearchDocument(
@@ -200,12 +398,18 @@ export function buildMuseumResearchIndex(
     ) {
       return [];
     }
-    const media = researchMedia(publication, document);
+    const media = researchMedia(publication, document, record.subjectIds);
+    const fields = researchEntryFields(
+      publication,
+      document,
+      record.subjectIds
+    );
     return [
       {
         id: record.id,
         slug: record.slug,
-        title: record.title,
+        ...fields,
+        title: museumResearchEditorialTitle(record.title, fields.subjectLabels),
         group: researchGroup(record.publicationKind),
         sourcePath: record.sourcePath,
         typed: true,
@@ -233,7 +437,7 @@ export function buildMuseumResearchIndex(
       return {
         id: document.id,
         slug,
-        title: document.title,
+        ...researchEntryFields(publication, document),
         group: documentGroup(document),
         sourcePath: document.sourcePath,
         typed: false,
@@ -280,29 +484,6 @@ export const MUSEUM_RESEARCH_GROUPS: readonly [
   ],
 ];
 
-const MUSEUM_RESEARCH_TIERS: readonly [
-  string,
-  MessageKey,
-  MessageKey,
-  MessageKey,
-  readonly MuseumResearchGroup[],
-][] = [
-  [
-    "scholarship",
-    "museum.network.research.scholarshipTierEyebrow",
-    "museum.network.research.scholarshipTierTitle",
-    "museum.network.research.scholarshipTierDescription",
-    ["art", "collection"],
-  ],
-  [
-    "institution",
-    "museum.network.research.institutionTierEyebrow",
-    "museum.network.research.institutionTierTitle",
-    "museum.network.research.institutionTierDescription",
-    ["stewardship", "practice"],
-  ],
-];
-
 export function museumResearchGroupCopy(group: MuseumResearchGroup): {
   readonly label: string;
   readonly description: string;
@@ -341,6 +522,79 @@ function researchGroupView(
   };
 }
 
+function researchBrowseGroupView(group: ReturnType<typeof researchGroupView>) {
+  return {
+    ...group,
+    entries: group.entries.map((entry) => ({
+      id: entry.id,
+      slug: entry.slug,
+      title: entry.title,
+      sourcePath: entry.sourcePath,
+      ...(entry.kindLabel === undefined ? {} : { kindLabel: entry.kindLabel }),
+      ...(entry.subjectLabels === undefined
+        ? {}
+        : { subjectLabels: entry.subjectLabels }),
+      ...(entry.description === undefined
+        ? {}
+        : { description: entry.description }),
+      ...(entry.publicationUri === undefined
+        ? {}
+        : { publicationUri: entry.publicationUri }),
+    })),
+  };
+}
+
+function researchEntrySubjectText(entry: MuseumResearchIndexEntry): string {
+  return [entry.title, ...(entry.subjectLabels ?? [])]
+    .join(" ")
+    .toLocaleLowerCase();
+}
+
+function selectResearchLaunchEntries(
+  entries: readonly MuseumResearchIndexEntry[],
+  featuredId: string
+): readonly MuseumResearchIndexEntry[] {
+  const illustrated = entries.filter(
+    (entry) => entry.id !== featuredId && entry.media !== undefined
+  );
+  const subjectPatterns = [
+    /magnum|seymour|towell|bar-am|saman|cartagena|salgado|meloni/iu,
+    /keys\s*(?:and|&)\s*gates|selected[_ -]unminted/iu,
+    /casey|reas/iu,
+    /museum practice|institutional/iu,
+  ];
+  const selected: MuseumResearchIndexEntry[] = [];
+  for (const pattern of subjectPatterns) {
+    const match = illustrated.find(
+      (entry) =>
+        !selected.some((selectedEntry) => selectedEntry.id === entry.id) &&
+        pattern.test(researchEntrySubjectText(entry))
+    );
+    if (match !== undefined) selected.push(match);
+    if (selected.length === 2) return selected;
+  }
+  for (const entry of illustrated) {
+    if (!selected.some((selectedEntry) => selectedEntry.id === entry.id)) {
+      selected.push(entry);
+    }
+    if (selected.length === 2) break;
+  }
+  return selected;
+}
+
+function researchSectionEyebrow(group: MuseumResearchGroup): string {
+  switch (group) {
+    case "collection":
+      return "Acquisition scholarship";
+    case "stewardship":
+      return "Digital stewardship";
+    case "practice":
+      return "Museum practice";
+    case "art":
+      return "Artists and projects";
+  }
+}
+
 export default async function MuseumResearchPage() {
   const publication = (await getMuseumPublicationState()).publication;
   if (publication === null) return <MuseumPublicationUnavailable />;
@@ -356,6 +610,14 @@ export default async function MuseumResearchPage() {
     entries.find((entry) => entry.media !== undefined) ??
     entries[0];
   if (featuredEntry === undefined) return <MuseumPublicationUnavailable />;
+  const launchEntries = selectResearchLaunchEntries(entries, featuredEntry.id);
+  const launchIds = new Set([
+    featuredEntry.id,
+    ...launchEntries.map((entry) => entry.id),
+  ]);
+  const groups = MUSEUM_RESEARCH_GROUPS.map(([group]) =>
+    researchGroupView(entries, group)
+  ).filter((group) => group.entries.length > 0);
 
   return (
     <MuseumResearchLanding
@@ -369,32 +631,21 @@ export default async function MuseumResearchPage() {
         href: museumResearchHref(featuredEntry.slug),
         eyebrow: t(DEFAULT_LOCALE, "museum.network.research.featuredLabel"),
         title: featuredEntry.title,
-        description: t(
-          DEFAULT_LOCALE,
-          "museum.network.research.featuredDescription"
-        ),
+        description:
+          featuredEntry.description ??
+          t(DEFAULT_LOCALE, "museum.network.research.featuredDescription"),
         media: featuredEntry.media,
         actionLabel: t(DEFAULT_LOCALE, "museum.network.research.readStudy"),
       }}
-      tiers={MUSEUM_RESEARCH_TIERS.map(
-        ([id, eyebrowKey, titleKey, descriptionKey, groupIds]) => ({
-          id,
-          eyebrow: t(DEFAULT_LOCALE, eyebrowKey),
-          title: t(DEFAULT_LOCALE, titleKey),
-          description: t(DEFAULT_LOCALE, descriptionKey),
-          groups: groupIds
-            .map((group) => researchGroupView(entries, group))
-            .filter((group) => group.entries.length > 0),
-        })
-      ).filter((tier) => tier.groups.length > 0)}
-      browseGroups={MUSEUM_RESEARCH_GROUPS.map(([group]) =>
-        researchGroupView(entries, group)
-      ).filter((group) => group.entries.length > 0)}
+      launchEntries={launchEntries}
+      sections={groups.map((group) => ({
+        ...group,
+        eyebrow: researchSectionEyebrow(group.id),
+        entries: group.entries.filter((entry) => !launchIds.has(entry.id)),
+      }))}
+      browseGroups={groups.map(researchBrowseGroupView)}
       browseTitle={t(DEFAULT_LOCALE, "museum.network.research.browseTitle")}
-      browseDescription={t(
-        DEFAULT_LOCALE,
-        "museum.network.research.browseDescription"
-      )}
+      browseDescription="Find the full publication record by subject, type, or source path."
     />
   );
 }

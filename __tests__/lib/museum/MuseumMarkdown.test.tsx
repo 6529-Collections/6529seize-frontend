@@ -166,16 +166,14 @@ describe("MuseumMarkdown public links", () => {
     expect(screen.getAllByText("Note")).toHaveLength(2);
   });
 
-  it("keeps an unusually long manuscript closed while preserving the full source", () => {
+  it("presents an unusually long research manuscript as open editorial text", () => {
     const longRecord = `# Long record\n\n${"Complete source paragraph. ".repeat(1_400)}`;
 
     renderMarkdown(longRecord);
 
-    const disclosure = screen
-      .getByText("Read the complete research manuscript")
-      .closest("details");
-    expect(disclosure).not.toBeNull();
-    expect(disclosure).not.toHaveAttribute("open");
+    expect(
+      screen.queryByText("Read the complete research manuscript")
+    ).not.toBeInTheDocument();
     expect(
       screen.getByText(/Complete source paragraph\./u)
     ).toBeInTheDocument();

@@ -330,6 +330,10 @@ function MuseumCanonicalWorkRecordPage({
           work.presentationMedia[0].rights.licenseLabel
         ));
   const insideSystemHref = museumWorkInsideSystemHref(work, publication);
+  const qualifierLabels = work.qualifiers.flatMap((qualifier) => {
+    const label = workQualifierLabel(work, qualifier);
+    return label === null ? [] : [{ qualifier, label }];
+  });
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -427,7 +431,6 @@ function MuseumCanonicalWorkRecordPage({
                       height={media.height}
                       sourceByteSize={media.sourceByteSize}
                       variants={media.variants}
-                      requireIntentForLargeSource={false}
                       {...(sourceHref === null || !canOpenPresentation
                         ? {}
                         : {
@@ -544,16 +547,14 @@ function MuseumCanonicalWorkRecordPage({
           )}
         </p>
       ) : null}
-      {work.qualifiers.length > 0 ? (
+      {qualifierLabels.length > 0 ? (
         <dl className="tw-mt-10 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-4">
-          {work.qualifiers.map((qualifier) => (
+          {qualifierLabels.map(({ qualifier, label }) => (
             <div
               key={`${qualifier.kind}:${qualifier.sourcePath}`}
               className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-text-sm"
             >
-              <dt className="tw-font-semibold tw-text-iron-300">
-                {workQualifierLabel(work, qualifier)}
-              </dt>
+              <dt className="tw-font-semibold tw-text-iron-300">{label}</dt>
             </div>
           ))}
         </dl>

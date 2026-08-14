@@ -396,7 +396,6 @@ function MuseumAcquisitionMediaFrame({
       height={media.height}
       sourceByteSize={media.sourceByteSize}
       variants={media.variants}
-      requireIntentForLargeSource={false}
       eager={eager}
       className={imageClassName}
     />
@@ -440,7 +439,7 @@ export function MuseumAcquisitionMediaCard({
           />
         </div>
       </div>
-      <figcaption className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-5">
+      <figcaption className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-5">
         <Link
           href={textHref}
           className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
@@ -477,13 +476,73 @@ export function MuseumAcquisitionMediaCard({
   );
 }
 
-function pathwayHref(
-  acquisition: MuseumAcquisitionViewModel
-): string | undefined {
+function MuseumAcquisitionLandingMediaCard({
+  record,
+  eager,
+}: {
+  readonly record: MuseumAcquisitionLandingRecord;
+  readonly eager: boolean;
+}) {
+  const { acquisition } = record;
+  const sourceHref =
+    record.media?.kind === "proposal" ? record.media.sourceHref : undefined;
+  const aspectRatio = mediaAspectRatio(record.media, record.metadata);
+  const displayMediaTitle = /^6529NM[-.]/u.test(record.mediaTitle.trim())
+    ? acquisition.title
+    : record.mediaTitle;
+  const hasDistinctMediaTitle = displayMediaTitle !== acquisition.title;
   return (
-    acquisition.secondaryRelations.find(
-      (item) => item.kind === "acquisition_program"
-    )?.href ?? undefined
+    <figure
+      className="group tw-m-0 tw-min-w-0"
+      data-testid="museum-acquisition-landing-media-card"
+    >
+      <div
+        className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950"
+        style={aspectRatio === undefined ? undefined : { aspectRatio }}
+      >
+        <MuseumAcquisitionMediaFrame
+          {...(record.media === undefined ? {} : { media: record.media })}
+          {...(record.metadata === undefined
+            ? {}
+            : { metadata: record.metadata })}
+          title={displayMediaTitle}
+          eager={eager}
+        />
+      </div>
+      <figcaption className="tw-pt-4">
+        {hasDistinctMediaTitle ? (
+          <span className="tw-block tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {displayMediaTitle}
+          </span>
+        ) : null}
+        {record.mediaSubtitle === undefined ? null : (
+          <span className="tw-mt-1 tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
+            {record.mediaSubtitle}
+          </span>
+        )}
+        {record.media?.creditLine === undefined ? null : (
+          <span className="tw-mt-3 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
+            {record.media.creditLine}
+          </span>
+        )}
+        {sourceHref === undefined ? null : (
+          <a
+            href={sourceHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.openPresentation")}
+          </a>
+        )}
+      </figcaption>
+    </figure>
+  );
+}
+
+function pathwayRelation(acquisition: MuseumAcquisitionViewModel) {
+  return acquisition.secondaryRelations.find(
+    (item) => item.kind === "acquisition_program"
   );
 }
 
@@ -518,25 +577,15 @@ function AcquisitionFeature({
 }) {
   const { acquisition } = record;
   const href = museumAcquisitionHref(acquisition.slug);
-  const programHref = pathwayHref(acquisition);
+  const program = pathwayRelation(acquisition);
   return (
-    <article className="tw-grid tw-min-w-0 tw-gap-8 tw-border-b tw-border-solid tw-border-iron-800 tw-py-12 first:tw-pt-0 md:tw-grid-cols-[minmax(0,1.12fr)_minmax(18rem,0.88fr)] md:tw-items-start md:tw-gap-14 md:tw-py-16">
-      <div
-        className={index % 2 === 0 ? "tw-order-1" : "tw-order-1 md:tw-order-2"}
-      >
-        <MuseumAcquisitionMediaCard record={record} eager={index === 0} />
-      </div>
-      <div
-        className={
-          index % 2 === 0
-            ? "tw-order-2 md:tw-pt-3"
-            : "tw-order-2 md:tw-order-1 md:tw-pt-3"
-        }
-      >
+    <article className="tw-min-w-0" data-testid="museum-acquisition-card">
+      <MuseumAcquisitionLandingMediaCard record={record} eager={index < 3} />
+      <div className="tw-mt-5">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.acquisitions.eyebrow")}
         </p>
-        <h2 className="tw-m-0 tw-mt-4 tw-max-w-xl tw-text-3xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.025em] tw-text-iron-50 sm:tw-text-4xl">
+        <h2 className="tw-m-0 tw-mt-3 tw-max-w-xl tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-3xl">
           <Link
             href={href}
             className="hover:tw-text-primary-200 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
@@ -544,10 +593,7 @@ function AcquisitionFeature({
             {acquisition.title}
           </Link>
         </h2>
-        <p className="tw-m-0 tw-mt-5 tw-max-w-xl tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-8">
-          {acquisition.thesis}
-        </p>
-        <div className="tw-mt-7 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-3">
+        <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
           <MuseumStatusBadge
             label={museumAcquisitionStatusLabel(acquisition.status)}
             tone={museumAcquisitionStatusTone(acquisition.status)}
@@ -556,12 +602,15 @@ function AcquisitionFeature({
             {acquisitionPathLabel(acquisition)}
           </span>
         </div>
-        <dl className="tw-mt-8 tw-grid tw-grid-cols-2 tw-gap-5 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5 sm:tw-max-w-md">
+        <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+          {acquisition.thesis}
+        </p>
+        <dl className="tw-mt-5 tw-grid tw-grid-cols-2 tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
           <div>
             <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
               {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
             </dt>
-            <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-200">
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
               {workCountLabel(acquisition.workIds.length)}
             </dd>
           </div>
@@ -569,12 +618,12 @@ function AcquisitionFeature({
             <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
               {t(DEFAULT_LOCALE, "museum.network.acquisitions.method")}
             </dt>
-            <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-200">
+            <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-200">
               {acquisitionMethodLabel(acquisition)}
             </dd>
           </div>
         </dl>
-        <div className="tw-mt-7 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
+        <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
           <Link
             href={href}
             className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
@@ -584,13 +633,12 @@ function AcquisitionFeature({
               →
             </span>
           </Link>
-          {programHref === undefined ? null : (
+          {program === undefined ? null : (
             <Link
-              href={programHref}
+              href={program.href}
               className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              {acquisition.pathway ??
-                t(DEFAULT_LOCALE, "museum.network.acquisitions.program")}
+              {program.label}
             </Link>
           )}
         </div>
@@ -606,22 +654,14 @@ export function MuseumAcquisitionLandingPage({
 }) {
   if (records.length === 0) return null;
   const orderedRecords = editorialOrder(records);
-  const hero =
-    orderedRecords.find(
-      (record) => record.media !== undefined || record.metadata !== undefined
-    ) ?? orderedRecords[0];
-  if (hero === undefined) return null;
 
   return (
     <div className="tw-min-w-0 tw-space-y-20 sm:tw-space-y-28">
       <header
-        className="tw-grid tw-min-w-0 tw-gap-10 md:tw-grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] md:tw-items-center md:tw-gap-14"
+        className="tw-min-w-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-12 sm:tw-pb-16"
         aria-labelledby="museum-acquisitions-title"
       >
-        <div className="tw-order-1 tw-min-w-0">
-          <MuseumAcquisitionMediaCard record={hero} eager featured />
-        </div>
-        <div className="tw-order-2 tw-max-w-xl md:tw-order-2">
+        <div className="tw-max-w-3xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-primary-300">
             {t(DEFAULT_LOCALE, "museum.network.acquisitions.eyebrow")}
           </p>
@@ -631,10 +671,8 @@ export function MuseumAcquisitionLandingPage({
           >
             {t(DEFAULT_LOCALE, "museum.network.acquisitions.title")}
           </h1>
-          <p className="tw-m-0 tw-mt-6 tw-max-w-lg tw-text-lg tw-leading-8 tw-text-iron-300">
-            Curated units of art, each gathered under a title and a thesis. Each
-            brings the works, their shared context, and their place in the
-            Museum&apos;s public record into a single view.
+          <p className="tw-m-0 tw-mt-6 tw-max-w-2xl tw-text-lg tw-leading-8 tw-text-iron-300">
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.description")}
           </p>
           <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <Link
@@ -665,21 +703,24 @@ export function MuseumAcquisitionLandingPage({
             id="acquisition-units-title"
             className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-[-0.02em] tw-text-iron-50 sm:tw-text-4xl"
           >
-            Coherent groups, distinct histories
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.currentTitle")}
           </h2>
           <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-300">
-            An acquisition is the curated unit: the works, the artist or
-            artists, and the idea that holds them together. Its status stays
-            visible without taking the place of the art.
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.acquisitions.currentDescription"
+            )}
           </p>
         </div>
-        <ul className="tw-m-0 tw-mt-8 tw-list-none tw-p-0">
+        <div className="tw-mt-8 tw-grid tw-min-w-0 tw-gap-x-8 tw-gap-y-12 lg:tw-grid-cols-3">
           {orderedRecords.map((record, index) => (
-            <li key={record.acquisition.acquisitionId}>
-              <AcquisitionFeature record={record} index={index} />
-            </li>
+            <AcquisitionFeature
+              key={record.acquisition.acquisitionId}
+              record={record}
+              index={index}
+            />
           ))}
-        </ul>
+        </div>
       </section>
     </div>
   );

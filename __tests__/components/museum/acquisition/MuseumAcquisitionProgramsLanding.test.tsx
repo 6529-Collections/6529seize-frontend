@@ -210,14 +210,28 @@ describe("Museum acquisition programs landing", () => {
     expect(
       screen.getByRole("heading", { name: "Acquisition programs" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Gifts" })).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Gift Acquisitions" })
+      screen.getByRole("heading", {
+        name: "Meme Card-funded acquisition programs",
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Completed gifts")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Casey Reas and Magnum Photos are represented here as completed gifts. Each named acquisition has its own curatorial record and accession status."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Keys and Gates" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "How works enter the Collection" })
+      screen.getByText(
+        "Keys and Gates is the first Meme Card-funded acquisition program. Selected photographic works are being prepared for acquisition and accession."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Acquisition methods" })
     ).toBeInTheDocument();
     expect(screen.getByText("Gift", { selector: "dt" })).toBeInTheDocument();
     expect(
@@ -230,14 +244,11 @@ describe("Museum acquisition programs landing", () => {
       screen.getByText("Bequest, exchange, or transfer", { selector: "dt" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
+      screen.queryByText(
         /An offer, selection, mint, or wallet transfer is not an accession\./u
       )
-    ).toBeInTheDocument();
-    expect(screen.getByText("Current programs")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Programs now in use" })
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Accession in progress/)).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: "Program, acquisition, and accession",

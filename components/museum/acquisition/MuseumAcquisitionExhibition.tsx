@@ -242,7 +242,7 @@ export function AcquisitionWorkFigure({
           {media}
         </Link>
       )}
-      <figcaption className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4">
+      <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
         <Link
           href={work.href}
           className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"

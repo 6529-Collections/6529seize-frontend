@@ -44,7 +44,7 @@ function MuseumDirectoryIntro({
         title={title}
         description={description}
       />
-      <div className="tw-mb-12 tw-grid tw-gap-5 tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-py-6 sm:tw-grid-cols-3">
+      <div className="tw-mb-12 tw-grid tw-gap-5 tw-border-x-0 tw-border-b tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-6 sm:tw-grid-cols-3">
         <MuseumDirectoryMetric
           value={model.permanentWorks.length}
           label={t(DEFAULT_LOCALE, "museum.network.collection.eyebrow")}
@@ -130,7 +130,7 @@ export function MuseumDirectoryArtistsPage({
       {model.acquisitionArtists.length > 0 ? (
         <section
           aria-labelledby="museum-directory-acquisition-artists-heading"
-          className="tw-mt-20 tw-border-x-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+          className="tw-mt-20 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
         >
           <MuseumDirectorySectionHeading
             id="museum-directory-acquisition-artists-heading"
@@ -197,7 +197,7 @@ export function MuseumDirectoryWorksPage({
       {model.acquisitionWorks.length > 0 ? (
         <section
           aria-labelledby="museum-directory-acquisition-works-heading"
-          className="tw-mt-20 tw-border-x-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+          className="tw-mt-20 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
         >
           <MuseumDirectorySectionHeading
             id="museum-directory-acquisition-works-heading"

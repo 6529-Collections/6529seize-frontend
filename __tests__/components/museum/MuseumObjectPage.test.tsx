@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MuseumObjectPage } from "@/components/museum/MuseumObjectPage";
 import type {
   MuseumExternalProposalPresentationMedia,
@@ -338,7 +338,7 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows a large governed Magnum presentation immediately on its canonical Work page", async () => {
+  it("gates a large Magnum original until the visitor asks to load it", async () => {
     const magnumWork: MuseumPublicWork = {
       ...work([]),
       acquisitionIds: [MUSEUM_MAGNUM_ACQUISITION_ID],
@@ -354,6 +354,11 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       })
     );
 
+    const loadButton = screen.getByRole("button", {
+      name: "View image · loads 16.9 MB",
+    });
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    fireEvent.click(loadButton);
     expect(screen.getByRole("img")).toHaveAttribute(
       "src",
       magnumPresentationMedia().mediaUrl
@@ -484,7 +489,9 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       screen.getByText("Selected through an acquisition program; unminted")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Minting comes first; acquisition and accession follow.")
+      screen.getByText(
+        "Selected and unminted. Acquisition and accession remain pending."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getAllByText("Artist name, Work title.").length

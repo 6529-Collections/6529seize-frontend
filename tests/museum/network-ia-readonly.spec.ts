@@ -10,6 +10,15 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import {
+  expectAcquisitionsAcceptance,
+  expectCollectionAcceptance,
+  expectMuseumGeometryAcceptance,
+  expectResearchAcceptance,
+  MUSEUM_RELEASE_ACCEPTANCE_ROUTES,
+  MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS,
+  openMuseumAcceptanceRoute,
+} from "../support/museumReleaseAcceptance";
 
 const SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
@@ -450,5 +459,63 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     });
     expect(focusAndTarget.hasVisibleFocus).toBe(true);
     expect(focusAndTarget.height).toBeGreaterThanOrEqual(44);
+  });
+});
+
+test.describe("Museum deterministic release acceptance @surface @readonly", () => {
+  test.setTimeout(180_000);
+
+  test("accepts Collection media, lifecycle, derivatives, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.collection
+      );
+      await expectCollectionAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
+  });
+
+  test("accepts Acquisitions lifecycle, identifiers, media, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.acquisitions
+      );
+      await expectAcquisitionsAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
+  });
+
+  test("accepts Research coverage, title controls, media, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.research
+      );
+      await expectResearchAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { MuseumSourceContribution } from "@/components/museum/MuseumSourceContribution";
 import type {
@@ -57,7 +57,7 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/public record at commit aaaaaaaaaaaa/u)
+      screen.getByText(/public record at commit aaaaaaaaaaaa/iu)
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Read the source" })
@@ -77,6 +77,8 @@ describe("MuseumSourceContribution", () => {
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/CONTRIBUTING.md`
     );
+    const relatedSources = screen.getByText("Related works and context");
+    fireEvent.click(relatedSources);
     const structuredRecord = screen.getByRole("link", {
       name: "Structured record",
     });
@@ -84,7 +86,7 @@ describe("MuseumSourceContribution", () => {
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json`
     );
-    expect(screen.getByText("Related works and context")).toBeInTheDocument();
+    expect(relatedSources).toBeInTheDocument();
     expect(structuredRecord).not.toHaveAttribute("title");
     expect(structuredRecord).not.toHaveAttribute("aria-label");
   });
@@ -99,9 +101,9 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/latest verified release available here/u)
+      screen.getByText(/latest verified public record/iu)
     ).toHaveTextContent(
-      "aaaaaaaaaaaa, the latest verified release available here. A source refresh is in progress."
+      "Latest verified public record at commit aaaaaaaaaaaa; a source refresh is in progress."
     );
   });
 
@@ -167,10 +169,7 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(
-        "Published from the Museum's public record at aaaaaaaaaaaa.",
-        { exact: true }
-      )
+      screen.getByText("Public record at commit aaaaaaaaaaaa.", { exact: true })
     ).toBeInTheDocument();
     expect(screen.queryByText(/unassigned/u)).not.toBeInTheDocument();
     expect(

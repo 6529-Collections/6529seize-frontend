@@ -6,27 +6,21 @@ import type { MuseumResearchBrowseGroup } from "./MuseumResearchBrowse";
 import type { MuseumResearchDocumentCardEntry } from "./MuseumResearchDocumentCard";
 import type { MuseumResearchStoryCardProps } from "./MuseumResearchStoryCard";
 
-interface MuseumResearchLandingGroup {
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-  readonly entries: readonly MuseumResearchDocumentCardEntry[];
+function selectEditorialEntries(
+  entries: readonly MuseumResearchDocumentCardEntry[],
+  limit = 4
+): readonly MuseumResearchDocumentCardEntry[] {
+  const illustrated = entries.filter((entry) => entry.media !== undefined);
+  const textOnly = entries.filter((entry) => entry.media === undefined);
+  return [...illustrated, ...textOnly].slice(0, limit);
 }
 
-interface MuseumResearchLandingTier {
+export interface MuseumResearchLandingSectionProps {
   readonly id: string;
   readonly eyebrow: string;
   readonly title: string;
   readonly description: string;
-  readonly groups: readonly MuseumResearchLandingGroup[];
-}
-
-function selectEditorialEntries(
-  entries: readonly MuseumResearchDocumentCardEntry[]
-): readonly MuseumResearchDocumentCardEntry[] {
-  const illustrated = entries.filter((entry) => entry.media !== undefined);
-  const textOnly = entries.filter((entry) => entry.media === undefined);
-  return [...illustrated, ...textOnly].slice(0, 3);
+  readonly entries: readonly MuseumResearchDocumentCardEntry[];
 }
 
 export function MuseumResearchLanding({
@@ -34,7 +28,8 @@ export function MuseumResearchLanding({
   title,
   description,
   featured,
-  tiers,
+  launchEntries,
+  sections,
   browseGroups,
   browseTitle,
   browseDescription,
@@ -43,7 +38,8 @@ export function MuseumResearchLanding({
   readonly title: string;
   readonly description: string;
   readonly featured: MuseumResearchStoryCardProps;
-  readonly tiers: readonly MuseumResearchLandingTier[];
+  readonly launchEntries: readonly MuseumResearchDocumentCardEntry[];
+  readonly sections: readonly MuseumResearchLandingSectionProps[];
   readonly browseGroups: readonly MuseumResearchBrowseGroup[];
   readonly browseTitle: string;
   readonly browseDescription: string;
@@ -57,63 +53,68 @@ export function MuseumResearchLanding({
       />
       <div className="tw-space-y-16">
         <MuseumResearchStoryCard {...featured} />
-        {tiers.map((tier) => {
-          if (tier.groups.length === 0) return null;
+        {launchEntries.length === 0 ? null : (
+          <section
+            aria-labelledby="museum-research-launch-title"
+            className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
+          >
+            <div className="tw-max-w-3xl">
+              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+                Selected publications
+              </p>
+              <h2
+                id="museum-research-launch-title"
+                className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
+              >
+                Casey, Magnum, and Keys and Gates
+              </h2>
+              <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-300">
+                Three entry points connect artists, photographic history, and
+                the Museum&apos;s active selection work.
+              </p>
+            </div>
+            <ul className="tw-m-0 tw-mt-7 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-12 tw-p-0 md:tw-grid-cols-2">
+              {launchEntries.map((entry) => (
+                <li key={entry.id} className="tw-min-w-0">
+                  <MuseumResearchDocumentCard entry={entry} headingLevel={3} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {sections.map((section) => {
+          const editorialEntries = selectEditorialEntries(section.entries);
+          if (editorialEntries.length === 0) return null;
           return (
             <section
-              key={tier.id}
-              aria-labelledby={`museum-research-tier-${tier.id}`}
-              className="tw-space-y-10"
+              key={section.id}
+              aria-labelledby={`museum-research-section-${section.id}`}
+              className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
             >
-              <header className="tw-max-w-4xl tw-border-l-2 tw-border-solid tw-border-primary-400 tw-pl-5 sm:tw-pl-6">
+              <header className="tw-max-w-4xl">
                 <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-                  {tier.eyebrow}
+                  {section.eyebrow}
                 </p>
                 <h2
-                  id={`museum-research-tier-${tier.id}`}
+                  id={`museum-research-section-${section.id}`}
                   className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
                 >
-                  {tier.title}
+                  {section.title}
                 </h2>
                 <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-                  {tier.description}
+                  {section.description}
                 </p>
               </header>
-              <div className="tw-space-y-12">
-                {tier.groups.map((group) => {
-                  const imageLedEntries = selectEditorialEntries(group.entries);
-                  if (imageLedEntries.length === 0) return null;
-                  return (
-                    <section
-                      key={group.id}
-                      aria-labelledby={`museum-research-group-${group.id}`}
-                      className="tw-min-w-0"
-                    >
-                      <div className="tw-max-w-3xl">
-                        <h3
-                          id={`museum-research-group-${group.id}`}
-                          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-2xl"
-                        >
-                          {group.title}
-                        </h3>
-                        <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-300">
-                          {group.description}
-                        </p>
-                      </div>
-                      <ul className="tw-m-0 tw-mt-6 tw-grid tw-list-none tw-gap-6 tw-p-0 md:tw-grid-cols-2 xl:tw-grid-cols-3">
-                        {imageLedEntries.map((entry) => (
-                          <li key={entry.id} className="tw-min-w-0">
-                            <MuseumResearchDocumentCard
-                              entry={entry}
-                              headingLevel={4}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  );
-                })}
-              </div>
+              <ul className="tw-m-0 tw-mt-7 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-12 tw-p-0 md:tw-grid-cols-2 xl:tw-grid-cols-3">
+                {editorialEntries.map((entry) => (
+                  <li key={entry.id} className="tw-min-w-0">
+                    <MuseumResearchDocumentCard
+                      entry={entry}
+                      headingLevel={3}
+                    />
+                  </li>
+                ))}
+              </ul>
             </section>
           );
         })}
