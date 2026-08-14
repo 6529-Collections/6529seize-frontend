@@ -430,9 +430,10 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       })
     ).toHaveCount(16);
     await expect(
-      page.getByText("Minting comes first; acquisition and accession follow.", {
-        exact: true,
-      })
+      page.getByText(
+        "Selected and unminted. Acquisition and accession remain pending.",
+        { exact: true }
+      )
     ).toHaveCount(16);
     await expect(page.locator("main figure img")).toHaveCount(16);
     await expect(
@@ -462,9 +463,10 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       })
     ).toBeVisible();
     await expect(
-      page.getByText("Minting comes first; acquisition and accession follow.", {
-        exact: true,
-      })
+      page.getByText(
+        "Selected and unminted. Acquisition and accession remain pending.",
+        { exact: true }
+      )
     ).toBeVisible();
     await expect(
       page.getByText("No public image is available for this record.", {

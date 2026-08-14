@@ -194,3 +194,15 @@
   page correctly states `Selected and unminted. Acquisition and accession remain
 pending.`; its unit test still expected the discarded mint-first phrasing.
   Updated the assertion to the shipped lifecycle language.
+
+## 2026-08-14T15:34:00Z
+
+- Exact-head App PR CI run `31813319721` passed Plan, quality/contracts, smoke,
+  critical shell, and the production build. The mobile corpus passed 44 tests
+  through the complete About, data architecture, Inside the System, and
+  institutional-practice routes before finding the same superseded Keys and
+  Gates sentence in the browser-level contract.
+- Updated both the 16-work program assertion and representative Work assertion
+  to the public lifecycle language: `Selected and unminted. Acquisition and
+accession remain pending.` No runtime code, copy, media, layout, or rendered
+  pixels changed.
