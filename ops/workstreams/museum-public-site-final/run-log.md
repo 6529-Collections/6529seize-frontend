@@ -149,3 +149,16 @@
   type that requires `textContent` rather than `innerText`.
 - Corrected both without changing runtime behavior or rendered pixels. The full
   Jest typecheck ratchet and exact Playwright TypeScript check pass locally.
+
+## 2026-08-14T14:28:00Z
+
+- Exact-head desktop Museum CI on run `31808802608` proved that Collection cards
+  for the five accessioned Magnum works still lacked responsive derivative
+  candidates, even though their full-size source images rendered.
+- Centralized the rights-bounded Magnum institutional-display predicate and
+  applied the Next image-optimizer delivery path to both Work pages and
+  Collection cards. The governed source remains the input and source of record.
+- Replayed the exact CI catalog/source fixture pair `975f041a` / `9aea66c0` in
+  desktop Chromium. Collection media, lifecycle, derivative, and geometry
+  acceptance now passes. Focused component tests pass, 19 assertions; changed
+  lint, changed typecheck, and Playwright typecheck pass.

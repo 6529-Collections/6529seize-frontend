@@ -35,6 +35,29 @@ function workProgramIds(work: MuseumPublicWork): readonly string[] {
   return programIds ?? [];
 }
 
+export function hasMuseumMagnumInstitutionalDisplayRights(
+  work: MuseumPublicWork
+): boolean {
+  if (
+    museumPublicWorkStatus(work) !== "accessioned_into_permanent_collection" ||
+    !isMuseumPermanentCollectionWork(work) ||
+    !workAcquisitionIds(work).includes(MUSEUM_MAGNUM_ACQUISITION_ID)
+  ) {
+    return false;
+  }
+
+  return (
+    [...work.media, ...(work.mediaMetadata ?? [])].some(
+      (media) =>
+        media.credit.licenseLabel === "All Rights Reserved" &&
+        media.credit.sourcePath.trim().length > 0
+    ) ||
+    (work.presentationMedia ?? []).some(
+      (media) => media.credit.sourcePath.trim().length > 0
+    )
+  );
+}
+
 /**
  * Keys and Gates is a selected, unminted acquisition-program outcome. Its
  * explicit acquisition/program identity keeps it out of the permanent

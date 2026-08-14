@@ -14,6 +14,7 @@ import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
 import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
 import {
   applyMuseumCollectionSemantics,
+  hasMuseumMagnumInstitutionalDisplayRights,
   isMuseumPermanentCollectionWork,
 } from "@/lib/museum/publication/collectionSemantics";
 import { buildMuseumAcquisitionIndex } from "@/lib/museum/publication/ia";
@@ -106,6 +107,7 @@ function publicWorkItem(
           : { variants: presentationMedia.variants }),
         creditLine: presentationMedia.credit.creditLine,
         requireIntentForLargeSource: false,
+        optimizeSource: hasMuseumMagnumInstitutionalDisplayRights(work),
         ...(sourceHref === null ||
         !presentationMedia.affordances.includes("open_upstream_presentation")
           ? {}

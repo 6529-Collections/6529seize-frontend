@@ -28,7 +28,7 @@ import {
   getMuseumView,
 } from "@/lib/museum/normalize";
 import { buildMuseumWorkContext } from "@/lib/museum/publication/ia";
-import { MUSEUM_MAGNUM_ACQUISITION_ID } from "@/lib/museum/publication/collectionSemantics";
+import { hasMuseumMagnumInstitutionalDisplayRights } from "@/lib/museum/publication/collectionSemantics";
 import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
 import type {
   MuseumMedia,
@@ -114,27 +114,6 @@ function workQualifierLabel(
     );
   }
   return t(DEFAULT_LOCALE, "museum.network.works.mintPending");
-}
-
-function hasMagnumInstitutionalDisplayRights(work: MuseumPublicWork): boolean {
-  if (
-    work.status !== "accessioned_into_permanent_collection" ||
-    work.collectionMembership !== true ||
-    !work.acquisitionIds.includes(MUSEUM_MAGNUM_ACQUISITION_ID)
-  ) {
-    return false;
-  }
-
-  return (
-    [...work.media, ...(work.mediaMetadata ?? [])].some(
-      (media) =>
-        media.credit.licenseLabel === "All Rights Reserved" &&
-        media.credit.sourcePath.trim().length > 0
-    ) ||
-    (work.presentationMedia ?? []).some(
-      (media) => media.credit.sourcePath.trim().length > 0
-    )
-  );
 }
 
 function MuseumCanonicalWorkMedia({
@@ -468,7 +447,9 @@ function MuseumCanonicalWorkRecordPage({
                       height={media.height}
                       sourceByteSize={media.sourceByteSize}
                       variants={media.variants}
-                      optimizeSource={hasMagnumInstitutionalDisplayRights(work)}
+                      optimizeSource={hasMuseumMagnumInstitutionalDisplayRights(
+                        work
+                      )}
                       {...(sourceHref === null || !canOpenPresentation
                         ? {}
                         : {
@@ -577,7 +558,7 @@ function MuseumCanonicalWorkRecordPage({
           </div>
         )}
       </dl>
-      {hasMagnumInstitutionalDisplayRights(work) ? (
+      {hasMuseumMagnumInstitutionalDisplayRights(work) ? (
         <p className="tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(
             DEFAULT_LOCALE,
