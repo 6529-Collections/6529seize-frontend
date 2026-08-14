@@ -89,7 +89,7 @@ export default function CreateWaveDrops({
   );
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-4">
+    <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveStepHeader
         title={t(locale, "waves.create.drops.title")}
         description={t(locale, "waves.create.drops.description")}

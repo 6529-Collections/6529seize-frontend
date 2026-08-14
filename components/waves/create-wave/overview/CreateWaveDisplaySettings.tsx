@@ -66,29 +66,29 @@ function ProposalCardAppearancePreview({
   return (
     <div
       aria-hidden="true"
-      className="tw-mb-3 tw-h-24 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-3"
+      className="tw-mb-2 tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-mb-3 sm:tw-h-24 sm:tw-p-3"
     >
       {mode === "standard" ? (
         <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
-          <div className="tw-flex tw-items-center tw-gap-2">
-            <span className="tw-size-4 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-650" />
-            <span className="tw-h-1.5 tw-w-16 tw-rounded-full tw-bg-iron-650" />
+          <div className="tw-flex tw-items-center tw-gap-1.5 sm:tw-gap-2">
+            <span className="tw-size-3 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-650 sm:tw-size-4" />
+            <span className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-iron-650 sm:tw-h-1.5 sm:tw-w-16" />
           </div>
-          <div className="tw-mt-2 tw-space-y-1.5">
-            <span className="tw-block tw-h-1.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
-            <span className="tw-block tw-h-1.5 tw-w-11/12 tw-rounded-full tw-bg-iron-800" />
-            <span className="tw-block tw-h-1.5 tw-w-full tw-rounded-full tw-bg-iron-800" />
-            <span className="tw-block tw-h-1.5 tw-w-3/4 tw-rounded-full tw-bg-iron-800" />
-            <span className="tw-block tw-h-1.5 tw-w-5/6 tw-rounded-full tw-bg-iron-800" />
+          <div className="tw-mt-1.5 tw-space-y-1 sm:tw-mt-2 sm:tw-space-y-1.5">
+            <span className="tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+            <span className="tw-block tw-h-1 tw-w-11/12 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+            <span className="tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+            <span className="tw-block tw-h-1 tw-w-3/4 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+            <span className="tw-block tw-h-1 tw-w-5/6 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
           </div>
         </div>
       ) : (
-        <div className="tw-flex tw-h-full tw-items-center tw-gap-3">
+        <div className="tw-flex tw-h-full tw-items-center tw-gap-2 sm:tw-gap-3">
           <div className="tw-min-w-0 tw-flex-1">
-            <span className="tw-block tw-h-2 tw-w-2/3 tw-rounded-full tw-bg-iron-650" />
-            <span className="tw-mt-2 tw-block tw-h-1.5 tw-w-4/5 tw-rounded-full tw-bg-iron-800" />
+            <span className="tw-block tw-h-1.5 tw-w-2/3 tw-rounded-full tw-bg-iron-650 sm:tw-h-2" />
+            <span className="tw-mt-1.5 tw-block tw-h-1 tw-w-4/5 tw-rounded-full tw-bg-iron-800 sm:tw-mt-2 sm:tw-h-1.5" />
           </div>
-          <span className="tw-size-11 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800" />
+          <span className="tw-size-8 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 sm:tw-size-11 sm:tw-rounded-lg" />
         </div>
       )}
     </div>
@@ -303,7 +303,7 @@ export default function CreateWaveDisplaySettings({
           <legend className={CREATE_WAVE_FORM_STYLES.fieldLabel}>
             {t(locale, "waves.proposalCard.appearanceLabel")}
           </legend>
-          <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
+          <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-3">
             {(["standard", "custom"] as const).map((mode) => {
               const isSelected = proposalCards.mode === mode;
               const isStandard = mode === "standard";
@@ -323,14 +323,14 @@ export default function CreateWaveDisplaySettings({
               return (
                 <label
                   key={mode}
-                  className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-transition tw-duration-300 tw-ease-out ${
+                  className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-p-3 ${
                     isSelected
                       ? "tw-border-primary-500/60 tw-bg-primary-500/5"
                       : "tw-border-white/5 tw-bg-iron-950 hover:tw-border-white/10"
                   }`}
                 >
                   <ProposalCardAppearancePreview mode={mode} />
-                  <div className="tw-flex tw-items-start tw-gap-3">
+                  <div className="tw-flex tw-items-start tw-gap-2 sm:tw-gap-3">
                     <input
                       id={mode}
                       type="radio"
@@ -341,7 +341,7 @@ export default function CreateWaveDisplaySettings({
                     />
                     <span
                       aria-hidden="true"
-                      className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+                      className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
                         isSelected
                           ? "tw-border-primary-400 tw-bg-primary-500/10"
                           : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
@@ -381,10 +381,10 @@ export default function CreateWaveDisplaySettings({
               <div className="tw-pt-3">
                 <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
                   <div className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4">
-                    <div className="tw-flex tw-min-h-10 tw-items-center tw-justify-between tw-gap-3">
+                    <div className="tw-flex tw-min-h-10 tw-flex-col tw-items-start tw-gap-3 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
                       <label
                         htmlFor="create-wave-proposal-card-excerpt-length"
-                        className="tw-text-sm tw-font-medium tw-text-iron-300"
+                        className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300"
                       >
                         {t(locale, "waves.proposalCard.excerptLabel")}
                       </label>
