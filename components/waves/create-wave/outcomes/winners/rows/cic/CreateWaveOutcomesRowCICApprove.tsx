@@ -28,6 +28,7 @@ export default function CreateWaveOutcomesRowCICApprove({
         </div>
         <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-end">
           <button
+            type="button"
             onClick={removeOutcome}
             aria-label="Remove"
             className={CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES}

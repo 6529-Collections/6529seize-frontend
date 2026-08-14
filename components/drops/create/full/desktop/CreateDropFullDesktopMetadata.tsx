@@ -86,9 +86,9 @@ export default function CreateDropFullDesktopMetadata({
           tooltipWidth="tw-w-32"
           tooltipPosition="top"
           icon={faPlus}
-          iconClassName="tw-size-5 tw-text-current"
+          iconClassName="tw-size-4 tw-text-current"
           disabled={disabled}
-          className="!tw-size-10 !tw-rounded-lg !tw-bg-iron-800 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:!tw-bg-iron-700 desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-ring-white/15"
+          className="!tw-size-8 !tw-rounded-lg !tw-bg-iron-800 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out after:tw-absolute after:-tw-inset-1.5 after:tw-content-[''] disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:!tw-bg-iron-700 desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-ring-white/15"
         />
       </form>
       <CreateDropMetadataItems
