@@ -162,3 +162,19 @@
   desktop Chromium. Collection media, lifecycle, derivative, and geometry
   acceptance now passes. Focused component tests pass, 19 assertions; changed
   lint, changed typecheck, and Playwright typecheck pass.
+
+## 2026-08-14T14:39:00Z
+
+- Exact-head desktop CI run `31809806346` confirmed that Collection cards now
+  expose responsive candidates and an accurate `sizes` hint. Its remaining
+  failure was an invalid acceptance assumption that Next's fallback `src`
+  attribute must equal the smallest `srcset` candidate.
+- Corrected the acceptance gate to inspect the browser-selected `currentSrc`,
+  require that it matches a declared derivative candidate, and bound the
+  selected candidate width to twice the active viewport. This verifies the
+  resource the browser actually requests without fighting Next's standards-based
+  responsive-image fallback behavior.
+- A fresh-server replay against the exact branch and production API endpoints
+  passed the corrected Collection acceptance gate. The first attempt timed out
+  on one upstream Arweave image request; Playwright's automatic retry completed
+  the same acceptance flow successfully.

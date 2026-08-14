@@ -145,19 +145,29 @@ export async function expectCollectionAcceptance(page: Page) {
       .toBe(true);
 
     const derivative = await card.locator("img").evaluate((element) => {
+      if (!(element instanceof HTMLImageElement)) {
+        throw new Error("Collection media must render as an image");
+      }
       const srcSet = element.getAttribute("srcset") ?? "";
       const candidates = srcSet
         .split(",")
         .map((candidate) => candidate.trim().split(/\s+/u))
         .filter((candidate) => candidate.length === 2)
-        .map(([url, width]) => ({
-          url,
-          width: Number.parseInt(width ?? "", 10),
+        .map((candidate) => ({
+          url: candidate[0] ?? "",
+          width: Number.parseInt(candidate[1] ?? "", 10),
         }))
         .filter((candidate) => Number.isFinite(candidate.width))
         .sort((left, right) => left.width - right.width);
       return {
-        src: element.getAttribute("src") ?? "",
+        currentSrc: element.currentSrc,
+        currentCandidateWidth:
+          candidates.find(
+            (candidate) =>
+              new URL(candidate.url, document.baseURI).href ===
+              new URL(element.currentSrc, document.baseURI).href
+          )?.width ?? null,
+        viewportWidth: window.innerWidth,
         sizes: element.getAttribute("sizes") ?? "",
         candidates,
       };
@@ -171,9 +181,13 @@ export async function expectCollectionAcceptance(page: Page) {
       `${title} is missing an accurate sizes hint`
     ).not.toBe("");
     expect(
-      derivative.src,
-      `${title} must load the smallest derivative first`
-    ).toBe(derivative.candidates[0]?.url);
+      derivative.currentCandidateWidth,
+      `${title} must load one of its responsive derivative candidates`
+    ).not.toBeNull();
+    expect(
+      derivative.currentCandidateWidth ?? Number.POSITIVE_INFINITY,
+      `${title} must load a derivative bounded to the active viewport`
+    ).toBeLessThanOrEqual(derivative.viewportWidth * 2);
   }
 
   const inProgressHeading = page.getByRole("heading", {
