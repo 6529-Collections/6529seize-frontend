@@ -48,7 +48,7 @@ A Stream artwork is more than an image. Its package can include:
 
 ### Who controls each part
 
-Different records can have different approved writers. For example, an artist controls an artist statement. An independent institution can add preservation evidence.
+Different records can have different approved writers. For example, an artist controls an artist statement. An outside museum or archive can add its own record about how it checked or stored the artwork. It cannot change the artwork or speak for the artist.
 
 ### What stays permanent
 
