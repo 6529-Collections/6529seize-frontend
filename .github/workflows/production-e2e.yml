@@ -1017,3 +1017,39 @@ jobs:
           test "$EVIDENCE_DOWNLOAD_OUTCOME" = success
           test "$SELECTION_DOWNLOAD_OUTCOME" = success
           test "$ISOLATED_EVIDENCE_OUTCOME" = success
+
+  notify-ci-wave:
+    name: Notify CI wave about production WEB validation
+    needs: [readonly, verify-evidence]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out CI wave notifier
+        continue-on-error: true
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Post production WEB validation outcome
+        if: always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_ALERT_TYPE: web_e2e
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: ${{ needs.verify-evidence.result == 'success' && 'success' || 'failure' }}
+          CI_PIPELINES_TITLE: ${{ needs.verify-evidence.result == 'success' && 'WEB E2E passed' || 'WEB E2E failed' }}
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
+          CI_PIPELINES_PARENT_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          CI_PIPELINES_PARENT_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
+          CI_PIPELINES_VALIDATION_PACK: all
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

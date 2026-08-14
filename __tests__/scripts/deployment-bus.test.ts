@@ -376,11 +376,14 @@ describe("release bus contributor notifications", () => {
       });
       for (const notifyStep of [failure, success]) {
         expect(notifyStep.env).toMatchObject({
+          CI_PIPELINES_ALERT_TYPE: "deploy",
           CI_PIPELINES_SHA: "${{ inputs.expected_sha }}",
           CI_RELEASE_TRAIN_ID: "${{ inputs.release_train_id }}",
           CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
         });
       }
+      expect(failure.env.CI_PIPELINES_TITLE).toBe("WEB deploy failed");
+      expect(success.env.CI_PIPELINES_TITLE).toBe("WEB deploy complete");
       expect(failure.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
       if (_environment === "production") {
         expect(success.env).toMatchObject({
