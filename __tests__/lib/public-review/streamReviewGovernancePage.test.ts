@@ -51,9 +51,7 @@ describe("getCurrentGovernanceEditorialMarkdown", () => {
       expect(currentMarkdown).not.toContain(
         "A new system needs temporary setup power."
       );
-      expect(currentMarkdown).toContain(
-        "This accepted ADR sets the design."
-      );
+      expect(currentMarkdown).toContain("This accepted ADR sets the design.");
       expect(currentMarkdown).toContain(
         "Open high risk RISK-GOV-004 says the planned production settings still need deployment evidence"
       );

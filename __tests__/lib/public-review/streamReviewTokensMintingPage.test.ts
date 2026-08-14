@@ -42,17 +42,19 @@ describe("getCurrentTokensMintingEditorialMarkdown", () => {
 
       expect(currentMarkdown).toContain("## Minting in one minute");
       expect(currentMarkdown).toContain(
-        "## One permanent identity surface for many collections"
+        "## One shared contract records every Stream NFT"
       );
-      expect(currentMarkdown).toContain("## The two source mint lanes");
+      expect(currentMarkdown).toContain(
+        "## The code has two separate ways to mint"
+      );
       expect(currentMarkdown).toContain(
         "The two paths are both present, but they are not one combined launch path."
       );
       expect(currentMarkdown).toContain(
-        "That ADR is not accepted or implemented in the pinned source."
+        "This ADR is only a proposal. It is not accepted or implemented in the pinned code."
       );
       expect(currentMarkdown).toContain(
-        "`setFinalSupply` alone is not a one-way zero-mint closure"
+        "`setFinalSupply` alone does not close an empty collection forever"
       );
       expect(currentMarkdown.match(/^## /gm)).toHaveLength(17);
       expect(currentMarkdown).not.toContain(
@@ -75,7 +77,7 @@ describe("getCurrentTokensMintingEditorialMarkdown", () => {
     });
 
     expect(currentMarkdown).toContain(
-      `https://github.com/${repository}/blob/${commit}/smart-contracts/StreamCore.sol#L336-L375`
+      `https://github.com/${repository}/blob/${commit}/smart-contracts/StreamCore.sol#L312-L352`
     );
     expect(currentMarkdown).toContain(
       `https://github.com/${repository}/blob/${commit}/docs/adr/0018-batch-operation-root-and-token-identity.md#L3-L33`

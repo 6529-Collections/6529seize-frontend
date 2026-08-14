@@ -936,10 +936,10 @@ describe("renderStreamReviewRoutePage", () => {
       "they are not one combined launch path"
     );
     expect(editorialCopy).toHaveTextContent(
-      "That ADR is not accepted or implemented in the pinned source"
+      "This ADR is only a proposal. It is not accepted or implemented in the pinned code"
     );
     expect(editorialCopy).toHaveTextContent(
-      "`setFinalSupply` alone is not a one-way zero-mint closure"
+      "`setFinalSupply` alone does not close an empty collection forever"
     );
     expect(editorialCopy).not.toHaveTextContent("Old identity copy.");
     expect(editorialCopy).not.toHaveTextContent("Old replay copy.");
@@ -1004,7 +1004,7 @@ describe("renderStreamReviewRoutePage", () => {
       "The reviewed source has two payment systems."
     );
     expect(editorialCopy).toHaveTextContent(
-      "The current fixed-price and auction paths do not call that foundation."
+      "the current sale paths do not use it."
     );
     expect(editorialCopy).toHaveTextContent(
       "ADR 0021 is accepted design, not implemented behavior"
@@ -1016,7 +1016,7 @@ describe("renderStreamReviewRoutePage", () => {
       "A marketplace can choose whether to pay it."
     );
     expect(editorialCopy).toHaveTextContent(
-      "Source and test evidence do not prove deployment, audit, or safety."
+      "Implementation review and deployment proof are still separate steps."
     );
     expect(editorialCopy).not.toHaveTextContent("Old technical introduction.");
     expect(editorialCopy).not.toHaveTextContent("Old settlement path.");
