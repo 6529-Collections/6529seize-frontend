@@ -160,13 +160,13 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   const [_, copyToClipboardLegacy] = useCopyToClipboard();
 
   const copyToClipboard = (value: string) => {
-    const writeText = globalThis.navigator?.clipboard?.writeText;
-    if (typeof writeText !== "function") {
+    const clipboard = globalThis.navigator.clipboard as Clipboard | undefined;
+    if (!clipboard) {
       copyToClipboardLegacy(value);
       return;
     }
 
-    void writeText.call(globalThis.navigator.clipboard, value).catch(() => {
+    void clipboard.writeText(value).catch(() => {
       copyToClipboardLegacy(value);
     });
   };
