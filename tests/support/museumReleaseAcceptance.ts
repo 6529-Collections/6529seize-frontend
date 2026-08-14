@@ -41,20 +41,23 @@ export async function openMuseumAcceptanceRoute(
 
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
-  for (let index = 0; index < (await images.count()); index += 1) {
-    const image = images.nth(index);
-    await image.scrollIntoViewIfNeeded();
-    await expect
-      .poll(
-        () =>
-          image.evaluate((element) => {
-            if (!(element instanceof HTMLImageElement)) return false;
-            return element.complete && element.naturalWidth > 0;
-          }),
-        { timeout: 20_000 }
-      )
-      .toBe(true);
-  }
+  const imageCount = await images.count();
+  await Promise.all(
+    Array.from({ length: imageCount }, async (_, index) => {
+      const image = images.nth(index);
+      await image.scrollIntoViewIfNeeded();
+      await expect
+        .poll(
+          () =>
+            image.evaluate((element) => {
+              if (!(element instanceof HTMLImageElement)) return false;
+              return element.complete && element.naturalWidth > 0;
+            }),
+          { timeout: 20_000 }
+        )
+        .toBe(true);
+    })
+  );
 }
 
 export async function expectNoUnresolvedMuseumMedia(

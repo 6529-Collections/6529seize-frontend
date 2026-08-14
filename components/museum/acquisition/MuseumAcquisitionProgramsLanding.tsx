@@ -445,6 +445,16 @@ export function MuseumAcquisitionProgramsLandingPage({
       (record) => frameworkForProgram(record.program) === framework.id
     ),
   })).filter((entry) => entry.records.length > 0);
+  const unclassifiedPrograms = records.filter(
+    (record) => frameworkForProgram(record.program) === null
+  );
+  if (unclassifiedPrograms.length > 0) {
+    throw new Error(
+      `museum_acquisition_program_framework:${unclassifiedPrograms
+        .map((record) => record.program.id)
+        .join(",")}`
+    );
+  }
 
   return (
     <div className="tw-min-w-0 tw-space-y-20 sm:tw-space-y-28">

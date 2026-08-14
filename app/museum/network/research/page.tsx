@@ -585,13 +585,22 @@ function selectResearchLaunchEntries(
 function researchSectionEyebrow(group: MuseumResearchGroup): string {
   switch (group) {
     case "collection":
-      return "Acquisition scholarship";
+      return t(
+        DEFAULT_LOCALE,
+        "museum.network.research.sectionEyebrow.collection"
+      );
     case "stewardship":
-      return "Digital stewardship";
+      return t(
+        DEFAULT_LOCALE,
+        "museum.network.research.sectionEyebrow.stewardship"
+      );
     case "practice":
-      return "Museum practice";
+      return t(
+        DEFAULT_LOCALE,
+        "museum.network.research.sectionEyebrow.practice"
+      );
     case "art":
-      return "Artists and projects";
+      return t(DEFAULT_LOCALE, "museum.network.research.sectionEyebrow.art");
   }
 }
 
@@ -645,7 +654,10 @@ export default async function MuseumResearchPage() {
       }))}
       browseGroups={groups.map(researchBrowseGroupView)}
       browseTitle={t(DEFAULT_LOCALE, "museum.network.research.browseTitle")}
-      browseDescription="Find the full publication record by subject, type, or source path."
+      browseDescription={t(
+        DEFAULT_LOCALE,
+        "museum.network.research.browseDescription"
+      )}
     />
   );
 }

@@ -55,3 +55,11 @@
 - Added the helper to the `museum.research` surface. Exact local registry replay
   now passes with 65 components, 57 routes, 22 surfaces, no unmapped files, and
   no unresolved imports.
+- Disposed the first advisory bot review on substance. Moved the remaining
+  Research labels into the Museum message catalog, made image readiness checks
+  concurrent within the release timeout, and made an unclassified acquisition
+  program fail closed instead of silently disappearing. The Collection program
+  media path is already non-null and type-safe through
+  `MuseumReviewedProgramMediaMatch`; no runtime change was required there.
+- Follow-up validation passed: focused Programs and Research suites, four
+  assertions; changed-file lint; and changed-file typecheck across 1,715 files.

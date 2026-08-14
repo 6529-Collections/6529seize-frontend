@@ -153,6 +153,30 @@ function program(
 }
 
 describe("Museum acquisition programs landing", () => {
+  it("fails closed when a program has no published framework", () => {
+    const unknown = program(
+      "6529NM-AP-UNKNOWN",
+      "unknown-program",
+      "Unknown program",
+      "unknown-acquisition",
+      "purchase"
+    );
+
+    expect(() =>
+      render(
+        <MuseumAcquisitionProgramsLandingPage
+          records={[
+            {
+              program: unknown,
+              acquisitions: [],
+              acquisitionArtistNames: {},
+            },
+          ]}
+        />
+      )
+    ).toThrow("museum_acquisition_program_framework:6529NM-AP-UNKNOWN");
+  });
+
   it("presents pathways separately from the acquisitions they produce", () => {
     const casey = acquisition(
       "casey-acquisition",
