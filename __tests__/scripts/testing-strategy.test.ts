@@ -346,7 +346,14 @@ describe("testing strategy CI plan", () => {
       "utf8"
     );
 
-    expect(workflow).toContain('if [ -z "$related_test" ]; then');
+    const guardIndex = workflow.indexOf('if [ -z "$related_test" ]; then');
+    const resolveIndex = workflow.indexOf(
+      'related_path="$(realpath "$related_test")"'
+    );
+
+    expect(guardIndex).toBeGreaterThanOrEqual(0);
+    expect(resolveIndex).toBeGreaterThan(guardIndex);
+    expect(workflow.slice(guardIndex, resolveIndex)).toContain("continue");
   });
 
   it.each([

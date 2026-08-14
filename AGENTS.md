@@ -40,9 +40,11 @@
   the parent deploy run ID and Release Bus train ID through WEB E2E reruns; the
   backend alone resolves and supplies the drop `reply_to` target.
 - Keep CI wave notification jobs best effort. Roll out the backend `api`
-  receiver before frontend workflow senders, and remember that automatic E2E
-  dispatchers source their called workflow from `main`, not `1a-staging`. See
-  `ops/docs/developer/ci-wave-deploy-validation-notifications.md`.
+  receiver before frontend workflow senders. The related backend rollout also
+  updates the production-only `releaseBus` service's trusted frontend PR-CI
+  policy digest; staging notification validation needs only `api`. Automatic
+  E2E dispatchers source their called workflow from `main`, not `1a-staging`.
+  See `ops/docs/developer/ci-wave-deploy-validation-notifications.md`.
 - Normal train preflight reuses exact-head/merge-tree PR CI evidence, not
   environment-incompatible artifact bytes. It builds only the target
   environment profile and emits an immutable environment-bound manifest.

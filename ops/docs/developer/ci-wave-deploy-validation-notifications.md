@@ -76,7 +76,17 @@ workflow with the intended parent deploy identity.
 
 ## Rollout
 
-Deploy the backend `api` receiver before merging the frontend workflow changes.
-The older receiver does not accept the new WEB E2E fields. Rollback the
-frontend workflow sender first, then the backend receiver, so no active sender
-targets an older contract.
+The backend PR changes two runtime services for different reasons:
+
+- `api` owns alert validation, rendering, Redis correlation, and wave posting;
+- the production-only `releaseBus` service trusts the frontend PR-CI policy
+  bundle introduced by these workflow changes.
+
+Deploy `api` before merging the frontend workflow changes because the older
+receiver does not accept the new WEB E2E fields. Deploy `releaseBus` before
+asking the production Release Bus to accept frontend heads with the new policy
+bundle. A staging-only notification test needs the updated `api`, not a
+`releaseBus` deployment. For rollback, revert the frontend sender and policy
+bundle before rolling back the corresponding backend services, so no active
+sender targets an older receiver and no accepted frontend policy loses its
+trusted digest.

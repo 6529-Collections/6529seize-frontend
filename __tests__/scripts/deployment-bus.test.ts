@@ -408,7 +408,9 @@ describe("release bus contributor notifications", () => {
     expect(notifier).toContain(
       "contributor_github_logins: releaseContributors"
     );
-    expect(notifier).toContain("sha: CI_PIPELINES_SHA || GITHUB_SHA || null");
+    expect(notifier).toContain("sha: alertSha");
+    expect(notifier).toContain('alertType === "web_e2e"');
+    expect(notifier).toContain("GITHUB_SHA || null");
   });
 });
 
