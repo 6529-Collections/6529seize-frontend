@@ -127,7 +127,7 @@ export default function LatestDropAllowlistStatus({
         {t(locale, "home.mintAllowlist.label")}
       </h3>
       <div
-        className="tw-mt-2 tw-min-h-7 tw-min-w-0"
+        className="tw-mt-2 tw-min-w-0"
         role="status"
         aria-live="polite"
         aria-atomic="true"

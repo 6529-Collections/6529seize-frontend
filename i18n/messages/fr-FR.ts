@@ -648,13 +648,12 @@ export const FR_FR_MESSAGES = {
   "home.mintAllowlist.allocationsAriaLabel":
     "Allocations de mint pour le wallet connecté",
   "home.mintAllowlist.connectWallet":
-    "Connectez votre wallet pour voir votre allocation.",
-  "home.mintAllowlist.checking": "Vérification de votre allocation…",
+    "Connectez votre wallet pour voir les détails.",
+  "home.mintAllowlist.checking": "Vérification…",
   "home.mintAllowlist.notPublished":
-    "L’allocation sera disponible après la publication de la distribution.",
-  "home.mintAllowlist.notFound": "Aucune allocation trouvée pour ce wallet.",
-  "home.mintAllowlist.unavailable":
-    "Les informations d’allocation sont temporairement indisponibles.",
+    "Disponible après la publication de la distribution.",
+  "home.mintAllowlist.notFound": "Aucune pour ce wallet.",
+  "home.mintAllowlist.unavailable": "Temporairement indisponible.",
   "home.mintAllowlist.phase.phase0": "Phase 0",
   "home.mintAllowlist.phase.phase1": "Phase 1",
   "home.mintAllowlist.phase.phase2": "Phase 2",

@@ -106,9 +106,9 @@ describe("LatestDropAllowlistStatus", () => {
     expect(
       screen.getByRole("heading", { name: "Your allowance" })
     ).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Connect your wallet to view your allowance."
-    );
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Connect your wallet to view details.");
+    expect(status).not.toHaveClass("tw-min-h-7");
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
     expect(useQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({ enabled: false })
@@ -119,7 +119,7 @@ describe("LatestDropAllowlistStatus", () => {
     [
       "loading",
       { data: undefined, isError: false, isPending: true },
-      "Checking your allowance…",
+      "Checking…",
     ],
     [
       "unpublished",
@@ -128,22 +128,22 @@ describe("LatestDropAllowlistStatus", () => {
         isError: false,
         isPending: false,
       },
-      "Your allowance will be available once distribution is published.",
+      "Available once distribution is published.",
     ],
     [
       "published empty",
       { data: result(), isError: false, isPending: false },
-      "No allowance found for this wallet.",
+      "None found for this wallet.",
     ],
     [
       "settled query without data",
       { data: undefined, isError: false, isPending: false },
-      "No allowance found for this wallet.",
+      "None found for this wallet.",
     ],
     [
       "unavailable",
       { data: undefined, isError: true, isPending: false },
-      "Allowance information is temporarily unavailable.",
+      "Temporarily unavailable.",
     ],
   ])("shows the %s state", (_name, queryResult, expected) => {
     useQueryMock.mockReturnValue(queryResult);
@@ -161,9 +161,7 @@ describe("LatestDropAllowlistStatus", () => {
 
       render(<LatestDropAllowlistStatus tokenId={532} />);
 
-      expect(screen.getByRole("status")).toHaveTextContent(
-        "Checking your allowance…"
-      );
+      expect(screen.getByRole("status")).toHaveTextContent("Checking…");
       expect(screen.queryByRole("list")).not.toBeInTheDocument();
     }
   );
@@ -177,7 +175,7 @@ describe("LatestDropAllowlistStatus", () => {
     render(<LatestDropAllowlistStatus tokenId={532} />);
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Allowance information is temporarily unavailable."
+      "Temporarily unavailable."
     );
   });
 

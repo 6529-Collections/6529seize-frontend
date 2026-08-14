@@ -545,14 +545,12 @@ export const EN_GB_MESSAGES = {
   "home.mintAllowlist.label": "Your allowance",
   "home.mintAllowlist.allocationsAriaLabel":
     "Mint allocations for the connected wallet",
-  "home.mintAllowlist.connectWallet":
-    "Connect your wallet to view your allowance.",
-  "home.mintAllowlist.checking": "Checking your allowance…",
+  "home.mintAllowlist.connectWallet": "Connect your wallet to view details.",
+  "home.mintAllowlist.checking": "Checking…",
   "home.mintAllowlist.notPublished":
-    "Your allowance will be available once distribution is published.",
-  "home.mintAllowlist.notFound": "No allowance found for this wallet.",
-  "home.mintAllowlist.unavailable":
-    "Allowance information is temporarily unavailable.",
+    "Available once distribution is published.",
+  "home.mintAllowlist.notFound": "None found for this wallet.",
+  "home.mintAllowlist.unavailable": "Temporarily unavailable.",
   "home.mintAllowlist.phase.phase0": "Phase 0",
   "home.mintAllowlist.phase.phase1": "Phase 1",
   "home.mintAllowlist.phase.phase2": "Phase 2",
