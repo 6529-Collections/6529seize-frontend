@@ -304,13 +304,14 @@ describe("Museum research detail enrichment", () => {
       ...DOCUMENT,
       workIds: [WORK_ID],
     };
+    const currentWorks = current.works ?? [];
     const withProgramContext = {
       ...current,
       documents: [directDocument],
       works: [
-        ...current.works,
+        ...currentWorks,
         {
-          ...current.works[0]!,
+          ...currentWorks[0]!,
           id: FALLBACK_WORK_ID,
           slug: "the-broad-program-work",
           title: "The Broad Program Work",
@@ -343,7 +344,7 @@ describe("Museum research detail enrichment", () => {
           id: PROGRAM_ID,
           slug: "the-broad-program",
           title: "The Broad Program",
-          status: "active" as const,
+          status: "open" as const,
           statusAsOf: "2026-08-01T00:00:00Z",
           acquisitionMethod: "gift" as const,
           acquisitionIds: [ACQUISITION_ID],

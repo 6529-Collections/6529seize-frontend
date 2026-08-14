@@ -251,3 +251,7 @@ accession remain pending.` No runtime code, copy, media, layout, or rendered
   fallback. The focused Jest suite passes, 6 tests; the exact desktop Research
   browser acceptance passes; changed lint, changed typecheck, Playwright
   typecheck, and the Windows-safe diff check pass.
+- Hosted Jest typecheck then identified three fixture-only typing errors in that
+  regression: an optional Work list, an optional indexed Work, and an invalid
+  program-status literal. The fixture now uses an explicit Work fallback and the
+  canonical `open` program status; its diagnostic count is back to zero.
