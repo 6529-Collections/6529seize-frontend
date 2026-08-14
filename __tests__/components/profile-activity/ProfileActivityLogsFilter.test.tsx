@@ -19,6 +19,7 @@ jest.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: any) => <div>{children}</div>,
   motion: { div: "div" },
   useAnimate: () => [React.createRef(), jest.fn()],
+  useReducedMotion: () => false,
 }));
 
 test("title updates based on selection", () => {
