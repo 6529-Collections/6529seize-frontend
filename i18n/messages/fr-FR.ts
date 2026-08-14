@@ -658,9 +658,9 @@ export const FR_FR_MESSAGES = {
   "home.mintAllowlist.phase.phase1": "Phase 1",
   "home.mintAllowlist.phase.phase2": "Phase 2",
   "home.mintAllowlist.phase.public": "Public",
-  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
-  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}x Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
-    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
+    "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
   ...FR_FR_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

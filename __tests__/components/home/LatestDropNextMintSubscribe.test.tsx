@@ -166,7 +166,7 @@ describe("LatestDropNextMintSubscribe", () => {
       "tw-border-white/5",
       "tw-bg-iron-900/60"
     );
-    expect(screen.getByText("x12 subscribers")).toBeInTheDocument();
+    expect(screen.getByText("x12 subscriptions")).toBeInTheDocument();
     expect(screen.getByText("x1")).toBeInTheDocument();
     expectReadonlySubscriptionToggle(
       container,
@@ -181,6 +181,33 @@ describe("LatestDropNextMintSubscribe", () => {
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")
     ).toHaveAttribute("href", "/about/subscriptions");
+  });
+
+  it.each([
+    [0, "No subscriptions"],
+    [1, "x1 subscription"],
+  ])("formats an aggregate count of %i", (count, expected) => {
+    const defaultImplementation = useQueryMock.getMockImplementation();
+    useQueryMock.mockImplementation((options) => {
+      if (
+        options.queryKey[0] === "mint-subscription-counts" &&
+        options.queryKey[1] === "by-token"
+      ) {
+        return {
+          data: {
+            token_id: options.queryKey[2],
+            count,
+          },
+        };
+      }
+
+      return defaultImplementation?.(options);
+    });
+
+    renderWithAuth(<LatestDropNextMintSubscribe />);
+
+    expect(screen.getByText(expected)).toBeInTheDocument();
+    expect(screen.queryByText("x0 subscriptions")).not.toBeInTheDocument();
   });
 
   it("surfaces connected-profile coverage and routes low runway to top up", () => {
@@ -238,7 +265,7 @@ describe("LatestDropNextMintSubscribe", () => {
     );
   });
 
-  it("keeps the info link stable while subscriber count loads", () => {
+  it("keeps the info link stable while subscription count loads", () => {
     useQueryMock.mockImplementation(({ queryKey }) => {
       if (
         queryKey[0] === "mint-subscription-status" &&
@@ -271,7 +298,7 @@ describe("LatestDropNextMintSubscribe", () => {
     renderWithAuth(<LatestDropNextMintSubscribe />);
 
     expect(
-      screen.getByRole("status", { name: "Loading subscriber count" })
+      screen.getByRole("status", { name: "Loading subscription count" })
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")
@@ -284,7 +311,7 @@ describe("LatestDropNextMintSubscribe", () => {
     );
 
     expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
-    expect(screen.getByText("x13 subscribers")).toBeInTheDocument();
+    expect(screen.getByText("x13 subscriptions")).toBeInTheDocument();
     expect(
       screen.queryByText("Cannot change active drops")
     ).not.toBeInTheDocument();

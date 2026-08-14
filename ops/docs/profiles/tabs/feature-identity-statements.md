@@ -67,6 +67,9 @@ This surface includes:
 - `Copy` briefly changes the displayed value to `Copied!`.
 - While IME composition is active, input text is not rewritten; repeated URL
   protocol prefixes are normalized after composition ends.
+- On mobile web and Capacitor, the add modal uses a scrollable, keyboard-aware
+  sheet so the focused field and Save/Cancel actions remain reachable above the
+  software keyboard as it opens and closes.
 - Empty sections show explicit copy (for example `No Contact added yet`).
 
 ## Loading, Errors, and Recovery

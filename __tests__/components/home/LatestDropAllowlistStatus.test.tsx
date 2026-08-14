@@ -87,9 +87,9 @@ describe("LatestDropAllowlistStatus", () => {
     expect(
       screen.getAllByRole("listitem").map((item) => item.textContent)
     ).toEqual([
-      "Phase 0 · 11× Airdrop",
-      "Phase 2 · 3× Airdrop · 1× Allowlist",
-      "Public · 2× Airdrop",
+      "Phase 0 · 11x Airdrop",
+      "Phase 2 · 3x Airdrop · 1x Allowlist",
+      "Public · 2x Airdrop",
     ]);
     expect(screen.getAllByRole("listitem")[0]).toHaveClass(
       "tw-whitespace-nowrap"

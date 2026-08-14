@@ -1348,8 +1348,8 @@
       "keywords": ["profile", "quick tags", "mentions", "aliases", "shortcuts"],
       "facts": [
         "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
-        "The section shows up to three tags in one row and uses a +N more chip when additional tags exist.",
-        "Manage, a visible Quick Tag, and +N more open the Quick Tags manager.",
+        "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
+        "Manage, a visible Quick Tag, and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
@@ -4555,6 +4555,7 @@
         "Identity statements are managed from profile identity surfaces on /{user}.",
         "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
         "The add modal supports documented statement types and visibility rules.",
+        "On mobile web and Capacitor, the add-statements sheet stays above the software keyboard and keeps its fields and Save/Cancel actions reachable by scrolling.",
         "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state."
       ],
       "canonical_path": "/{user}",
