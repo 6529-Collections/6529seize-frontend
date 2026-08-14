@@ -641,13 +641,12 @@ export const ES_ES_MESSAGES = {
   "home.mintAllowlist.allocationsAriaLabel":
     "Asignaciones de mint de la wallet conectada",
   "home.mintAllowlist.connectWallet":
-    "Conecta tu wallet para ver tu asignación.",
-  "home.mintAllowlist.checking": "Comprobando tu asignación…",
+    "Conecta tu wallet para ver los detalles.",
+  "home.mintAllowlist.checking": "Comprobando…",
   "home.mintAllowlist.notPublished":
-    "La asignación estará disponible cuando se publique la distribución.",
-  "home.mintAllowlist.notFound": "No se encontró asignación para esta wallet.",
-  "home.mintAllowlist.unavailable":
-    "La información de la asignación no está disponible por el momento.",
+    "Disponible cuando se publique la distribución.",
+  "home.mintAllowlist.notFound": "Ninguna para esta wallet.",
+  "home.mintAllowlist.unavailable": "No disponible por el momento.",
   "home.mintAllowlist.phase.phase0": "Fase 0",
   "home.mintAllowlist.phase.phase1": "Fase 1",
   "home.mintAllowlist.phase.phase2": "Fase 2",

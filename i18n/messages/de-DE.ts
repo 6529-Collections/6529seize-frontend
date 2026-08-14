@@ -636,13 +636,12 @@ export const DE_DE_MESSAGES = {
   "home.mintAllowlist.allocationsAriaLabel":
     "Mint-Zuteilungen für die verbundene Wallet",
   "home.mintAllowlist.connectWallet":
-    "Verbinde deine Wallet, um deine Zuteilung anzuzeigen.",
-  "home.mintAllowlist.checking": "Deine Zuteilung wird geprüft…",
+    "Verbinde deine Wallet, um Details anzuzeigen.",
+  "home.mintAllowlist.checking": "Wird geprüft…",
   "home.mintAllowlist.notPublished":
-    "Die Zuteilung ist verfügbar, sobald die Verteilung veröffentlicht wurde.",
-  "home.mintAllowlist.notFound": "Keine Zuteilung für diese Wallet gefunden.",
-  "home.mintAllowlist.unavailable":
-    "Zuteilungsinformationen sind vorübergehend nicht verfügbar.",
+    "Verfügbar, sobald die Verteilung veröffentlicht wurde.",
+  "home.mintAllowlist.notFound": "Keine für diese Wallet.",
+  "home.mintAllowlist.unavailable": "Vorübergehend nicht verfügbar.",
   "home.mintAllowlist.phase.phase0": "Phase 0",
   "home.mintAllowlist.phase.phase1": "Phase 1",
   "home.mintAllowlist.phase.phase2": "Phase 2",
