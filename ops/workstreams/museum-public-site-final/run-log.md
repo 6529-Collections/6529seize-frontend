@@ -46,3 +46,12 @@
   lint; changed-file typecheck across 1,715 files; diff hygiene; deterministic
   browser acceptance for Collection, Acquisitions, and Research; desktop route
   sweep with no horizontal overflow or broken visible images.
+
+## 2026-08-14T13:00:00Z
+
+- Hosted App PR CI run `31802132247` stopped at the Museum surface registry
+  before browser execution. The registry identified one exact omission: the new
+  Research media aspect-ratio helper was absent from the component inventory.
+- Added the helper to the `museum.research` surface. Exact local registry replay
+  now passes with 65 components, 57 routes, 22 surfaces, no unmapped files, and
+  no unresolved imports.
