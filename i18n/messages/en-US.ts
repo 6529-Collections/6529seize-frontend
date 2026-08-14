@@ -2356,8 +2356,10 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.action.setUp": "Set up",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
-  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
-  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
+  "home.mintSubscriptions.subscriptionsCount.none": "No subscriptions",
+  "home.mintSubscriptions.subscriptionsCount.value":
+    "x{count} subscription{pluralSuffix}",
+  "home.mintSubscriptions.subscriptionsLoading": "Loading subscription count",
   "home.mintSubscriptions.tooltip.connect":
     "Connect to set up subscription minting.",
   "home.mintSubscriptions.tooltip.dropped":
@@ -2387,10 +2389,10 @@ export const EN_US_MESSAGES = {
   "home.mintAllowlist.phase.phase1": "Phase 1",
   "home.mintAllowlist.phase.phase2": "Phase 2",
   "home.mintAllowlist.phase.public": "Public",
-  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}× Airdrop",
-  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}× Allowlist",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}x Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
-    "{phase} · {airdrop}× Airdrop · {allowlist}× Allowlist",
+    "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
