@@ -181,6 +181,21 @@ describe("notify-ci-wave payload", () => {
         parent_release_train_id: "train-123",
         validation_pack: "core",
         run_attempt: 2,
+        sha: null,
+      },
+    });
+  });
+
+  it("normalizes an uppercase deployed SHA override", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_SHA: "ABCDEF0123456789ABCDEF0123456789ABCDEF01",
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        sha: "abcdef0123456789abcdef0123456789abcdef01",
       },
     });
   });
@@ -232,7 +247,7 @@ describe("notify-ci-wave payload", () => {
 
     expect(result.code).toBe(1);
     expect(result.stderr).toContain(
-      "CI_PIPELINES_SHA must be a 40-character lowercase Git SHA"
+      "CI_PIPELINES_SHA must be a 40-character Git SHA"
     );
     expect(result.payload).toBeNull();
   });

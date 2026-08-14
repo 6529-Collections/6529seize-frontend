@@ -36,6 +36,13 @@
   together.
 - `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
   bound E2E, and never infer production readiness from staging validation.
+- CI wave workflows send deploy/run identities, never raw drop IDs. Preserve
+  the parent deploy run ID and Release Bus train ID through WEB E2E reruns; the
+  backend alone resolves and supplies the drop `reply_to` target.
+- Keep CI wave notification jobs best effort. Roll out the backend `api`
+  receiver before frontend workflow senders, and remember that automatic E2E
+  dispatchers source their called workflow from `main`, not `1a-staging`. See
+  `ops/docs/developer/ci-wave-deploy-validation-notifications.md`.
 - Normal train preflight reuses exact-head/merge-tree PR CI evidence, not
   environment-incompatible artifact bytes. It builds only the target
   environment profile and emits an immutable environment-bound manifest.

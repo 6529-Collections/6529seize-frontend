@@ -179,10 +179,15 @@ if (releaseContributors.length > 0 && !CI_RELEASE_TRAIN_ID) {
   console.error("CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS");
   process.exit(1);
 }
-if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/.test(CI_PIPELINES_SHA)) {
-  console.error("CI_PIPELINES_SHA must be a 40-character lowercase Git SHA");
+if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/i.test(CI_PIPELINES_SHA)) {
+  console.error("CI_PIPELINES_SHA must be a 40-character Git SHA");
   process.exit(1);
 }
+const alertSha = CI_PIPELINES_SHA
+  ? CI_PIPELINES_SHA.toLowerCase()
+  : alertType === "web_e2e"
+    ? null
+    : GITHUB_SHA || null;
 const isReleaseNotesEligible =
   status === "success" &&
   targetEnvironment === "prod" &&
@@ -236,7 +241,7 @@ const payload = {
   run_number: GITHUB_RUN_NUMBER || null,
   run_attempt: runAttempt,
   run_url: `${GITHUB_SERVER_URL}/${repository}/actions/runs/${runId}`,
-  sha: CI_PIPELINES_SHA || GITHUB_SHA || null,
+  sha: alertSha,
   branch: GITHUB_REF_NAME || null,
   environment: targetEnvironment || null,
   service: CI_PIPELINES_SERVICE || null,
