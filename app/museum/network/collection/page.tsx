@@ -274,6 +274,7 @@ export default async function MuseumCollectionPage() {
       <section
         className="tw-mt-14 sm:tw-mt-16"
         aria-labelledby="collection-holdings-title"
+        data-testid="museum-permanent-holdings"
       >
         <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-4">
           <div>
@@ -315,6 +316,7 @@ export default async function MuseumCollectionPage() {
         <section
           className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-12 sm:tw-mt-20 sm:tw-pt-16"
           aria-labelledby="collection-in-progress-title"
+          data-testid="museum-in-progress-works"
         >
           <div className="tw-max-w-2xl">
             <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">

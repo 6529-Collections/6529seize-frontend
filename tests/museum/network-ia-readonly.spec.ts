@@ -161,7 +161,8 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await retainScreenshot(page, testInfo, "museum-network-home");
 
     await openRoute(page, "/museum/network/collection");
-    const collectionWorkHrefs = await page
+    const permanentHoldings = page.getByTestId("museum-permanent-holdings");
+    const collectionWorkHrefs = await permanentHoldings
       .locator('a[href^="/museum/network/works/"]')
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
@@ -172,6 +173,21 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         (href): href is string =>
           typeof href === "string" &&
           /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href)
+      )
+    ).toBe(true);
+    const inProgressWorkHrefs = await page
+      .getByTestId("museum-in-progress-works")
+      .locator('a[href^="/museum/network/works/"]')
+      .evaluateAll((links) => [
+        ...new Set(links.map((link) => link.getAttribute("href"))),
+      ]);
+    expect(inProgressWorkHrefs).toHaveLength(16);
+    expect(
+      inProgressWorkHrefs.every(
+        (href): href is string =>
+          typeof href === "string" &&
+          /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href) &&
+          !collectionWorkHrefs.includes(href)
       )
     ).toBe(true);
     for (const title of [

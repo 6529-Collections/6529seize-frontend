@@ -76,3 +76,8 @@
 - The optimized build proved the former exported acquisition media-card helper
   was wholly unused, not merely module-local. Deleted the dead component rather
   than suppressing the lint finding.
+- Mobile Network IA exposed an assertion that counted every work link while
+  claiming to measure the permanent Collection. Scoped the lifecycle contract
+  to the permanent-holdings section and added an independent assertion for the
+  16 selected, in-progress Keys and Gates works. The sections remain visually
+  unchanged and are now machine-distinguishable.
