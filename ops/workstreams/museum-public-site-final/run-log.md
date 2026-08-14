@@ -67,3 +67,6 @@
   implementation. Release acceptance now triggers lazy media in document order,
   then waits for all decoded images concurrently. Exact desktop acceptance for
   Collection, Acquisitions, and Research passes in 33.7 seconds.
+- A stale-head hosted quality job identified two module-local symbols exported
+  unnecessarily. Removed both exports; full Knip now passes with no dead-code
+  findings introduced by the release.

@@ -402,7 +402,7 @@ function MuseumAcquisitionMediaFrame({
   );
 }
 
-export function MuseumAcquisitionMediaCard({
+function MuseumAcquisitionMediaCard({
   record,
   eager = false,
   featured = false,

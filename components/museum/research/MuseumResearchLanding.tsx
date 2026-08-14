@@ -15,7 +15,7 @@ function selectEditorialEntries(
   return [...illustrated, ...textOnly].slice(0, limit);
 }
 
-export interface MuseumResearchLandingSectionProps {
+interface MuseumResearchLandingSectionProps {
   readonly id: string;
   readonly eyebrow: string;
   readonly title: string;
