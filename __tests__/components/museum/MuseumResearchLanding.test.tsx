@@ -45,6 +45,25 @@ const ENTRY = {
   media: MEDIA,
 };
 
+const LAUNCH_COPY = {
+  launchEyebrow: "Selected publications",
+  launchTitle: "Casey, Magnum, and Keys and Gates",
+  launchDescription:
+    "Three entry points connect artists, photographic history, and active selection work.",
+} as const;
+
+const BROWSE_LABELS = {
+  eyebrow: "Reference index",
+  searchLabel: "Search publications and source records",
+  searchPlaceholder: "Title, artist, subject, or source",
+  filterLabel: "Filter by subject",
+  allSubjectsLabel: "All subjects",
+  noResultsLabel: "No research records match this search.",
+  resultCountOne: "{count} record",
+  resultCountOther: "{count} records",
+  sourceLabel: "Source",
+} as const;
+
 describe("MuseumResearchLanding", () => {
   it("puts the visual study first and keeps the complete register findable", () => {
     render(
@@ -60,20 +79,15 @@ describe("MuseumResearchLanding", () => {
           media: MEDIA,
           actionLabel: "Read the study",
         }}
-        tiers={[
+        launchEntries={[]}
+        {...LAUNCH_COPY}
+        sections={[
           {
-            id: "scholarship",
-            eyebrow: "Start with the art",
-            title: "Close looking",
+            id: "art",
+            eyebrow: "Artists and projects",
+            title: "Art and artists",
             description: "Close readings.",
-            groups: [
-              {
-                id: "art",
-                title: "Art and artists",
-                description: "Artist and project studies.",
-                entries: [ENTRY],
-              },
-            ],
+            entries: [ENTRY],
           },
         ]}
         browseGroups={[
@@ -92,8 +106,9 @@ describe("MuseumResearchLanding", () => {
             ],
           },
         ]}
-        browseTitle="Browse the complete research record"
+        browseTitle="Research reference index"
         browseDescription="Every record remains available."
+        browseLabels={BROWSE_LABELS}
       />
     );
 
@@ -106,11 +121,11 @@ describe("MuseumResearchLanding", () => {
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: "Browse the complete research record",
+        name: "Research reference index",
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "Close looking" })
+      screen.getByRole("heading", { level: 2, name: "Art and artists" })
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", { name: "A study of the work" }).length
@@ -148,34 +163,30 @@ describe("MuseumResearchLanding", () => {
           media: undefined,
           actionLabel: "Read the study",
         }}
-        tiers={[
+        launchEntries={[]}
+        {...LAUNCH_COPY}
+        sections={[
           {
-            id: "scholarship",
-            eyebrow: "Start with the art",
-            title: "Close looking",
+            id: "art",
+            eyebrow: "Artists and projects",
+            title: "Art and artists",
             description: "Close readings.",
-            groups: [
+            entries: [
+              ...textOnlyEntries,
               {
-                id: "art",
-                title: "Art and artists",
-                description: "Artist and project studies.",
-                entries: [
-                  ...textOnlyEntries,
-                  {
-                    ...ENTRY,
-                    id: "late-illustrated",
-                    slug: "late-illustrated",
-                    title: "Late illustrated study",
-                    media: lateMedia,
-                  },
-                ],
+                ...ENTRY,
+                id: "late-illustrated",
+                slug: "late-illustrated",
+                title: "Late illustrated study",
+                media: lateMedia,
               },
             ],
           },
         ]}
         browseGroups={[]}
-        browseTitle="Browse the complete research record"
+        browseTitle="Research reference index"
         browseDescription="Every record remains available."
+        browseLabels={BROWSE_LABELS}
       />
     );
 
@@ -185,7 +196,7 @@ describe("MuseumResearchLanding", () => {
     const lateStudyLinks = screen.getAllByRole("link", {
       name: "Late illustrated study",
     });
-    expect(lateStudyLinks).toHaveLength(2);
+    expect(lateStudyLinks).toHaveLength(1);
     for (const link of lateStudyLinks) {
       expect(link).toHaveAttribute(
         "href",

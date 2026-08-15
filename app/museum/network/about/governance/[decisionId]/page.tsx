@@ -95,7 +95,7 @@ export default async function MuseumAboutGovernanceDetailPage({
         </div>
       </div>
       <dl className="tw-mt-8 tw-grid tw-gap-4 sm:tw-grid-cols-2">
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.waveStatus")}
           </dt>
@@ -103,7 +103,7 @@ export default async function MuseumAboutGovernanceDetailPage({
             {displayGovernanceWaveStatus(decision.observedWaveStatus)}
           </dd>
         </div>
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.recorded")}
           </dt>
@@ -113,7 +113,7 @@ export default async function MuseumAboutGovernanceDetailPage({
               : t(DEFAULT_LOCALE, "museum.network.governance.notRecorded")}
           </dd>
         </div>
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.disposition")}
           </dt>
@@ -123,7 +123,7 @@ export default async function MuseumAboutGovernanceDetailPage({
               : displayGovernanceDisposition(decision.disposition)}
           </dd>
         </div>
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.rating")}
           </dt>

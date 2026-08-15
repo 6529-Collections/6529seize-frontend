@@ -211,7 +211,7 @@ async function expectFreshExactSource(
   );
   await expect(sourcePanel).toBeVisible();
   await expect(sourcePanel).toContainText(
-    /Published from the Museum's public record at commit [a-f0-9]{12}\./u
+    /Public record at commit [a-f0-9]{12}\./u
   );
   await expect(sourcePanel).not.toContainText(
     /latest verified release|temporarily unavailable|Page-level source: unassigned/iu
@@ -430,9 +430,10 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       })
     ).toHaveCount(16);
     await expect(
-      page.getByText("Minting comes first; acquisition and accession follow.", {
-        exact: true,
-      })
+      page.getByText(
+        "Selected and unminted. Acquisition and accession remain pending.",
+        { exact: true }
+      )
     ).toHaveCount(16);
     await expect(page.locator("main figure img")).toHaveCount(16);
     await expect(
@@ -462,9 +463,10 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       })
     ).toBeVisible();
     await expect(
-      page.getByText("Minting comes first; acquisition and accession follow.", {
-        exact: true,
-      })
+      page.getByText(
+        "Selected and unminted. Acquisition and accession remain pending.",
+        { exact: true }
+      )
     ).toBeVisible();
     await expect(
       page.getByText("No public image is available for this record.", {

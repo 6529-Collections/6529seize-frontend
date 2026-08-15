@@ -20,7 +20,7 @@ export interface MuseumManagedImageProps {
   readonly onStatusChange?: (status: "loading" | "revealed" | "error") => void;
 }
 
-function MuseumMediaFailure({
+export function MuseumMediaFailure({
   message,
   retryLabel,
   sourceHref,

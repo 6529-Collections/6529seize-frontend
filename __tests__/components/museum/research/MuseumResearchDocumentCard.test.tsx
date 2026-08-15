@@ -34,4 +34,19 @@ describe("MuseumResearchDocumentCard", () => {
     ).not.toBeInTheDocument();
     expect(screen.getAllByText("A study of a work")).toHaveLength(1);
   });
+
+  it("does not render an empty subject paragraph", () => {
+    const { container } = render(
+      <MuseumResearchDocumentCard
+        entry={{
+          id: "research-2",
+          slug: "a-record",
+          title: "A record",
+          subjectLabels: [],
+        }}
+      />
+    );
+
+    expect(container.querySelector("p.tw-mt-2")).not.toBeInTheDocument();
+  });
 });

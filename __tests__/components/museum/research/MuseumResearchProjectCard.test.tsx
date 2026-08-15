@@ -52,7 +52,7 @@ describe("MuseumResearchProjectCard", () => {
     );
   });
 
-  it("shows accession-reviewed presentation media without bogus empty metadata", () => {
+  it("keeps large presentation media gated and matches the landscape source ratio", () => {
     render(
       <MuseumResearchProjectCard
         project={{
@@ -99,12 +99,13 @@ describe("MuseumResearchProjectCard", () => {
       />
     );
 
-    expect(
-      screen.getByRole("img", {
-        name: "David Seymour's 1952 photograph of the Negev border.",
-      })
-    ).toBeInTheDocument();
+    const intentButton = screen.getByRole("button", {
+      name: /View image.*loads 16\.9 MB/i,
+    });
+    expect(intentButton).toBeInTheDocument();
+    expect(intentButton.parentElement?.style.aspectRatio).toBe(
+      "1.499531396438613"
+    );
     expect(screen.queryByText("0")).not.toBeInTheDocument();
-    expect(screen.queryByText(/loads 16\.9 MB/i)).not.toBeInTheDocument();
   });
 });
