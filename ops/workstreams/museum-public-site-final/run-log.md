@@ -255,3 +255,8 @@ accession remain pending.` No runtime code, copy, media, layout, or rendered
   regression: an optional Work list, an optional indexed Work, and an invalid
   program-status literal. The fixture now uses an explicit Work fallback and the
   canonical `open` program status; its diagnostic count is back to zero.
+- Exact-head mobile CI passed 44 of 46 remaining Museum routes before finding a
+  stale rights test that searched a closed `Related works and context`
+  disclosure for the immutable legal-text link. The public disclosure is
+  intentional; the test now opens it before checking the exact-commit URL. The
+  focused 390px Chromium replay passes.
