@@ -1,6 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { MuseumDirectoryWorkCard } from "@/components/museum/directory/MuseumDirectoryMediaCard";
-import type { MuseumDirectoryWorkRecord } from "@/components/museum/directory/MuseumDirectoryData";
+import userEvent from "@testing-library/user-event";
+import {
+  MuseumDirectoryArtistCard,
+  MuseumDirectoryWorkCard,
+} from "@/components/museum/directory/MuseumDirectoryMediaCard";
+import type {
+  MuseumDirectoryArtistRecord,
+  MuseumDirectoryWorkRecord,
+} from "@/components/museum/directory/MuseumDirectoryData";
 import type {
   MuseumExternalProposalPresentationMedia,
   MuseumMediaMetadata,
@@ -95,20 +102,59 @@ function record(
 }
 
 describe("MuseumDirectoryMediaStage", () => {
-  it("keeps the large upstream source behind an intentional view in the directory", () => {
+  it("shows governed presentation media directly in the directory", async () => {
+    const user = userEvent.setup();
     render(
       <MuseumDirectoryWorkCard
         record={record({ presentationMedia: [presentation] })}
       />
     );
 
-    expect(screen.queryByRole("img")).not.toBeInTheDocument();
-    const viewButton = screen.getByRole("button");
-    expect(viewButton).toHaveClass(
-      "tw-h-full",
-      "tw-items-center",
-      "tw-justify-center"
+    const imageGate = screen.getByRole("button", {
+      name: "View image · loads 16.9 MB",
+    });
+    expect(
+      imageGate.closest('[style*="aspect-ratio"]')?.getAttribute("style")
+    ).toContain("aspect-ratio: 2400 / 1600");
+    await user.click(imageGate);
+    const image = screen.getByRole("img", { name: presentation.altText });
+    expect(image).toHaveAttribute("src", presentation.mediaUrl);
+  });
+
+  it("shows the governed presentation image on the artist card", async () => {
+    const user = userEvent.setup();
+    const workRecord = record({
+      id: "6529NM-W-LORENZO-01",
+      slug: "lorenzo-meloni-01",
+      title: "Lorenzo Meloni 01",
+      artistId: "artist-lorenzo-meloni",
+      presentationMedia: [presentation],
+    });
+    const artistRecord: MuseumDirectoryArtistRecord = {
+      artist: {
+        id: "artist-lorenzo-meloni",
+        slug: "lorenzo-meloni",
+        preferredName: "Lorenzo Meloni",
+        projectIds: [],
+        artworkIds: [],
+        documentIds: [],
+        sourcePaths: ["records/entities/artist-lorenzo-meloni.json"],
+      },
+      works: [workRecord],
+      permanentWorks: [workRecord],
+      acquisitionWorks: [],
+      relationship: "1 work in the permanent Collection",
+      representative: workRecord,
+    };
+
+    render(<MuseumDirectoryArtistCard record={artistRecord} />);
+
+    await user.click(
+      screen.getByRole("button", { name: "View image · loads 16.9 MB" })
     );
+    expect(
+      screen.getByRole("img", { name: presentation.altText })
+    ).toHaveAttribute("src", presentation.mediaUrl);
   });
 
   it("fills and centers metadata-only states in the directory media frame", () => {

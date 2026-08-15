@@ -12,6 +12,8 @@ import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
 import RankScheduleModeSelector from "./type/RankScheduleModeSelector";
 import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
+import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
   proposalCards: {
@@ -62,15 +64,16 @@ export default function CreateWaveOverview({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
+      <CreateWaveStepHeader title={t(locale, "waves.create.overview.title")} />
       <CreateWaveNameInput
         onChange={onChange}
         name={overview.name}
         errors={errors}
       />
       <div className="tw-space-y-3">
-        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+        <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
           {t(locale, "waves.create.overview.picture")}
-        </p>
+        </h3>
         <CreateWaveImageInput
           imageToShow={overview.image}
           setFile={(file) =>

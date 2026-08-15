@@ -6,13 +6,16 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import UserSettingsClassificationItem from "./UserSettingsClassificationItem";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { CLASSIFICATIONS } from "@/entities/IProfile";
+import clsx from "clsx";
 
 export default function UserSettingsClassification({
   selected,
   onSelect,
+  inlineOptions,
 }: {
   readonly selected: ApiProfileClassification;
   readonly onSelect: (selected: ApiProfileClassification) => void;
+  readonly inlineOptions?: boolean | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const toggleOpen = () => setIsOpen((open) => !open);
@@ -80,7 +83,10 @@ export default function UserSettingsClassification({
         <AnimatePresence mode="wait" initial={false}>
           {isOpen && (
             <m.div
-              className="tw-absolute tw-right-0 tw-z-30 tw-mt-2 tw-w-full tw-origin-top-right tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/50"
+              className={clsx(
+                "tw-right-0 tw-z-30 tw-mt-2 tw-w-full tw-origin-top-right tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/50",
+                inlineOptions ? "tw-relative" : "tw-absolute"
+              )}
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}

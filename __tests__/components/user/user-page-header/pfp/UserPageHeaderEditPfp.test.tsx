@@ -8,11 +8,6 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 global.URL.createObjectURL = jest.fn(() => "mocked-object-url");
 global.URL.revokeObjectURL = jest.fn();
 
-jest.mock("react-use", () => ({
-  useClickAway: jest.fn(),
-  useKeyPressEvent: jest.fn(),
-}));
-
 jest.mock("@/components/user/settings/UserSettingsImgSelectMeme", () => ({
   __esModule: true,
   default: ({ onMeme }: any) => (
@@ -55,6 +50,20 @@ const profile = {
 } as any;
 
 describe("UserPageHeaderEditPfp", () => {
+  it("renders in the shared responsive profile picture dialog", () => {
+    render(
+      <AuthContext.Provider value={authCtx}>
+        <ReactQueryWrapperContext.Provider value={queryCtx}>
+          <UserPageHeaderEditPfp profile={profile} onClose={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.getByRole("dialog", { name: "Profile picture" })
+    ).toBeInTheDocument();
+  });
+
   it("shows error when file too big", async () => {
     render(
       <AuthContext.Provider value={authCtx}>
@@ -68,6 +77,9 @@ describe("UserPageHeaderEditPfp", () => {
     expect(
       screen.getByText("File size must be less than 2MB")
     ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "File size must be less than 2MB"
+    );
   });
 
   it("submits selected meme", async () => {

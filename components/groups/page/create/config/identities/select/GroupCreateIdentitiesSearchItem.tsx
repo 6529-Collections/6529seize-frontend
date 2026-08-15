@@ -19,7 +19,7 @@ export default function GroupCreateIdentitiesSearchItem({
       <button
         type="button"
         aria-pressed={selected}
-        className="tw-relative tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-900"
+        className="tw-relative tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800"
         onClick={onProfileClick}
       >
         <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-2.5">

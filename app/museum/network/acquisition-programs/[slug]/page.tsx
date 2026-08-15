@@ -377,7 +377,7 @@ export default async function MuseumAcquisitionProgramPage({
                         height={presentation.height}
                         alt={presentation.altText.trim() || work.title}
                         sourceByteSize={presentation.sourceByteSize}
-                        requireIntentForLargeSource={false}
+                        variants={presentation.variants}
                         eager={index === 0}
                         className="tw-h-full tw-w-full tw-object-contain"
                       />
@@ -408,7 +408,7 @@ export default async function MuseumAcquisitionProgramPage({
               return (
                 <article
                   key={work.id}
-                  className="tw-min-w-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4"
+                  className="tw-min-w-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4"
                 >
                   <Link
                     href={museumWorkHref(work.id)}
@@ -466,7 +466,7 @@ export default async function MuseumAcquisitionProgramPage({
                   </p>
                 </>
               ) : (
-                <span className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-primary-300">
+                <span className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 tw-text-primary-300">
                   {work.title}
                 </span>
               );
@@ -506,7 +506,7 @@ export default async function MuseumAcquisitionProgramPage({
               <li
                 key={collection.approvalId}
                 id={museumApprovedCollectionSlug(collection.preferredName)}
-                className="tw-scroll-mt-8 tw-border-b tw-border-solid tw-border-iron-800 tw-py-5 last:tw-border-b-0"
+                className="tw-scroll-mt-8 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-5 last:tw-border-b-0"
               >
                 <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
                   {collection.preferredName}
@@ -522,7 +522,7 @@ export default async function MuseumAcquisitionProgramPage({
       {documents.map((document) => (
         <section
           key={document.id}
-          className="tw-mt-14 tw-max-w-4xl tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+          className="tw-mt-14 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
         >
           <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
             {document.title}

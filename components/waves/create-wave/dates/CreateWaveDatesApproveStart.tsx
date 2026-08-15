@@ -8,15 +8,19 @@ import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { Time } from "@/helpers/time";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getEarliestApproveWaveEndTimestamp } from "./approveWaveDates.helpers";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface CreateWaveDatesApproveStartProps {
   readonly dates: CreateWaveDatesConfig;
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
 }
 
-const formatShortDate = (timestamp: number) =>
-  new Date(timestamp).toLocaleString("en-US", {
+const formatShortDate = (timestamp: number, locale: SupportedLocale) =>
+  new Date(timestamp).toLocaleString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -26,10 +30,11 @@ export default function CreateWaveDatesApproveStart({
   dates,
   setDates,
 }: CreateWaveDatesApproveStartProps) {
+  const locale = useBrowserLocale();
   const minStartTimestamp = Time.currentMillis();
   const startDateFormatted = useMemo(
-    () => formatShortDate(dates.submissionStartDate),
-    [dates.submissionStartDate]
+    () => formatShortDate(dates.submissionStartDate, locale),
+    [dates.submissionStartDate, locale]
   );
 
   const handleStartDateChange = (timestamp: number) => {
@@ -54,24 +59,30 @@ export default function CreateWaveDatesApproveStart({
   };
 
   return (
-    <section className="tw-rounded-xl tw-bg-iron-900 tw-p-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-5 tw-shadow-sm">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-5 tw-text-iron-300">
-              Wave Start
+            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+              {t(locale, "waves.create.dates.approve.start.title")}
             </h3>
             <TooltipIconButton
               icon={faInfoCircle}
-              tooltipText="Choose when the approve wave opens. Approvals and submissions start at the same moment."
+              tooltipText={t(
+                locale,
+                "waves.create.dates.approve.start.tooltip"
+              )}
               tooltipPosition="bottom"
               tooltipWidth="tw-w-80"
-              aria-label="About wave start"
+              aria-label={t(
+                locale,
+                "waves.create.dates.approve.start.infoLabel"
+              )}
               className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-leading-none"
             />
           </div>
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-            This is when the approve wave opens for submissions and approvals.
+          <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
+            {t(locale, "waves.create.dates.approve.start.description")}
           </p>
         </div>
 
@@ -81,7 +92,9 @@ export default function CreateWaveDatesApproveStart({
             className="tw-mr-2 tw-size-4 tw-text-primary-400"
           />
           <div>
-            <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">Wave Starts</p>
+            <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">
+              {t(locale, "waves.create.dates.approve.start.summaryLabel")}
+            </p>
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-50">
               {startDateFormatted}
             </p>
@@ -89,15 +102,18 @@ export default function CreateWaveDatesApproveStart({
         </div>
       </div>
 
-      <div className="tw-mt-4 tw-w-full tw-max-w-md">
-        <CommonCalendar
-          initialMonth={new Date().getMonth()}
-          initialYear={new Date().getFullYear()}
-          selectedTimestamp={dates.submissionStartDate}
-          minTimestamp={minStartTimestamp}
-          maxTimestamp={null}
-          setSelectedTimestamp={handleStartDateChange}
-        />
+      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-x-10 md:tw-grid-cols-2">
+        <div className="tw-w-full">
+          <CommonCalendar
+            initialMonth={new Date().getMonth()}
+            initialYear={new Date().getFullYear()}
+            selectedTimestamp={dates.submissionStartDate}
+            minTimestamp={minStartTimestamp}
+            maxTimestamp={null}
+            setSelectedTimestamp={handleStartDateChange}
+            variant="flat"
+          />
+        </div>
       </div>
     </section>
   );

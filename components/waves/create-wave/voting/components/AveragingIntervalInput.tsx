@@ -5,9 +5,12 @@ import type { KeyboardEvent } from "react";
 import type { TimeUnit } from "../types";
 import { MAX_HOURS, MIN_MINUTES } from "../types";
 import { parseWholeNumberInput } from "../utils";
+import CreateWaveDropdown from "../../utils/CreateWaveDropdown";
 import VotingSettingBox, {
   getVotingSettingInputClasses,
 } from "../VotingSettingBox";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface AveragingIntervalInputProps {
   /** Current value of the averaging interval */
@@ -34,6 +37,7 @@ const AveragingIntervalInput = memo(
     onUnitChange,
     validationError,
   }: AveragingIntervalInputProps) => {
+    const locale = useBrowserLocale();
     // Get minimum value based on current unit
     const minForCurrentUnit = unit === "minutes" ? MIN_MINUTES : 1;
     const hasError = validationError !== undefined;
@@ -41,6 +45,19 @@ const AveragingIntervalInput = memo(
     const inputId = "averaging-interval";
     const errorId = "averaging-interval-error";
     const helpId = "averaging-interval-description";
+    const timeUnitOptions: ReadonlyArray<{
+      readonly value: TimeUnit;
+      readonly label: string;
+    }> = [
+      {
+        value: "minutes",
+        label: t(locale, "waves.create.voting.timeUnit.minutes"),
+      },
+      {
+        value: "hours",
+        label: t(locale, "waves.create.voting.timeUnit.hours"),
+      },
+    ];
 
     /**
      * Handles the input field losing focus
@@ -76,13 +93,15 @@ const AveragingIntervalInput = memo(
         helpId={helpId}
         helpText={
           <>
-            The time period over which votes are averaged. Must be between{" "}
-            {MIN_MINUTES} minutes and {MAX_HOURS} hours. Longer intervals are
-            more resistant to manipulation.
+            {t(locale, "waves.create.voting.averaging.description", {
+              minMinutes: MIN_MINUTES,
+              maxHours: MAX_HOURS,
+            })}
           </>
         }
         inputId={inputId}
-        label="Averaging Interval"
+        label={t(locale, "waves.create.voting.averaging.label")}
+        surface="plain"
       >
         <div className="tw-grid tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_9rem]">
           <input
@@ -100,17 +119,17 @@ const AveragingIntervalInput = memo(
             aria-describedby={hasError ? `${errorId} ${helpId}` : helpId}
             data-testid="averaging-interval-input"
           />
-          <select
-            id={`${inputId}-unit`}
-            aria-label="Averaging interval time unit"
+          <CreateWaveDropdown
             value={unit}
-            onChange={(e) => onUnitChange(e.target.value as TimeUnit)}
-            className={getVotingSettingInputClasses({ hasError, hasValue })}
-            data-testid="time-unit-selector"
-          >
-            <option value="minutes">Minutes</option>
-            <option value="hours">Hours</option>
-          </select>
+            options={timeUnitOptions}
+            ariaLabel={t(locale, "waves.create.voting.averaging.unitAriaLabel")}
+            ariaDescribedBy={hasError ? `${errorId} ${helpId}` : helpId}
+            ariaInvalid={hasError}
+            dataTestId="time-unit-selector"
+            hasError={hasError}
+            accentValue={hasValue}
+            onChange={onUnitChange}
+          />
         </div>
       </VotingSettingBox>
     );

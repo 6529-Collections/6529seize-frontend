@@ -95,6 +95,7 @@ export function TypedArtistWorkCard({
               width={presentation.width}
               height={presentation.height}
               sourceByteSize={presentation.sourceByteSize}
+              variants={presentation.variants}
               {...(sourceHref === null || !canOpenPresentation
                 ? {}
                 : {
@@ -136,7 +137,7 @@ export function TypedArtistWorkCard({
   return (
     <p
       key={work.id}
-      className="tw-m-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4"
+      className="tw-m-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4"
     >
       <Link
         href={museumWorkHref(work.id)}

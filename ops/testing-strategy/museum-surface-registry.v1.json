@@ -353,6 +353,10 @@
       "surface_ids": ["museum.artist"]
     },
     {
+      "file": "app/museum/network/artists/[slug]/MuseumArtistRecordSummary.tsx",
+      "surface_ids": ["museum.artist"]
+    },
+    {
       "file": "app/museum/network/artists/[slug]/TypedArtistProjects.tsx",
       "surface_ids": ["museum.artist"]
     },
@@ -374,11 +378,27 @@
       "surface_ids": ["museum.shell"]
     },
     {
+      "file": "app/museum/network/acquisitions/loading.tsx",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "app/museum/network/artists/loading.tsx",
+      "surface_ids": ["museum.artist"]
+    },
+    {
       "file": "app/museum/network/not-found.tsx",
       "surface_ids": ["museum.shell"]
     }
   ],
   "components": [
+    {
+      "file": "components/museum/MuseumNetworkIndexLoading.tsx",
+      "surface_ids": ["museum.shell"]
+    },
+    {
+      "file": "components/museum/acquisition/MuseumAcquisitionCopy.ts",
+      "surface_ids": ["museum.acquisition"]
+    },
     {
       "file": "components/museum/acquisition/MuseumAcquisitionLanding.tsx",
       "surface_ids": ["museum.acquisition"]
@@ -421,6 +441,10 @@
     },
     {
       "file": "components/museum/research/MuseumResearchLanding.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/museumResearchMediaAspectRatio.ts",
       "surface_ids": ["museum.research"]
     },
     {

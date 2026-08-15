@@ -172,7 +172,7 @@ export default function CreateWaveImageInput({
                 </span>{" "}
                 or drag and drop
               </p>
-              <p className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-500">
+              <p className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-400">
                 JPEG, JPG, PNG, GIF, WEBP
               </p>
             </div>

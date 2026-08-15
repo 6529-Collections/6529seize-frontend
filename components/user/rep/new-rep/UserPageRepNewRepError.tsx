@@ -19,8 +19,8 @@ export default function UserPageRepNewRepError({
       closeError={closeError}
       closeLabel={t(locale, "rep.categories.validation.closeErrorLabel")}
     >
-      <div className="tw-ml-3 tw-flex tw-min-w-0 tw-flex-col">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-snug tw-text-red">
+      <div className="tw-flex tw-min-w-0 tw-flex-col">
+        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-error">
           {t(locale, "rep.categories.validation.errorTitle")}
         </h3>
         <p className="tw-mb-0 tw-mt-1 tw-break-words tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-100">

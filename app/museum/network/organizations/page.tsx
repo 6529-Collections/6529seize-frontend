@@ -37,7 +37,7 @@ export default async function MuseumOrganizationsPage() {
         {publication.organizations.map((organization) => (
           <li
             key={organization.id}
-            className="tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0"
+            className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 last:tw-border-b-0"
           >
             <Link
               href={museumOrganizationHref(organization.slug)}

@@ -43,7 +43,7 @@ const FOLLOW_BTN_LOADER_SIZES: Record<UserFollowBtnSize, CircleLoaderSize> = {
 
 export const FOLLOW_BUTTON_SIZES: Record<UserFollowBtnSize, ButtonSize> = {
   [UserFollowBtnSize.SMALL]: "xs",
-  [UserFollowBtnSize.MEDIUM]: "md",
+  [UserFollowBtnSize.MEDIUM]: "sm",
 };
 
 const DIRECT_MESSAGE_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {

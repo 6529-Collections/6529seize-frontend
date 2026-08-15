@@ -30,4 +30,28 @@ describe("MuseumLandingMediaCard", () => {
       screen.getByText("© Lorenzo Meloni/Magnum Photos 2022.")
     ).toBeInTheDocument();
   });
+
+  it("keeps status in the open caption without adding a second card surface", () => {
+    render(
+      <MuseumLandingMediaCard
+        title="Keys and Gates"
+        subtitle="Selected works"
+        status="Selected through an acquisition program; unminted"
+      />
+    );
+
+    const hasBorderClass = (element: Element | null) =>
+      element !== null &&
+      Array.from(element.classList).some(
+        (className) =>
+          className === "tw-border" || className.startsWith("tw-border-")
+      );
+
+    const card = screen.getByTestId("museum-landing-media-card");
+    expect(card).toHaveTextContent(
+      "Selected through an acquisition program; unminted"
+    );
+    expect(hasBorderClass(card)).toBe(false);
+    expect(hasBorderClass(card.querySelector("figcaption"))).toBe(false);
+  });
 });

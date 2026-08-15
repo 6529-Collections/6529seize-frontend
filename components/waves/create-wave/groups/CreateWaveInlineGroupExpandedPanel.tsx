@@ -1,17 +1,20 @@
 import type { ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
+import type { ButtonSize } from "@/components/utils/button/buttonStyles";
 
 export default function CreateWaveInlineGroupExpandedPanel({
   children,
   onCancel,
   cancelClassName = "",
   cancelLabel = "Cancel",
+  cancelSize = "md",
   showCancel = true,
 }: {
   readonly children: ReactNode;
   readonly onCancel: () => void;
   readonly cancelClassName?: string;
   readonly cancelLabel?: string;
+  readonly cancelSize?: ButtonSize;
   readonly showCancel?: boolean;
 }) {
   return (
@@ -21,7 +24,7 @@ export default function CreateWaveInlineGroupExpandedPanel({
           <div className="tw-min-w-0 tw-flex-1">{children}</div>
           <Button
             variant="secondary"
-            size="xs"
+            size={cancelSize}
             onClick={onCancel}
             className={cancelClassName}
           >

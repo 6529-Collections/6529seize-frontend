@@ -206,6 +206,7 @@ const CreateDropContent = forwardRef<
           return "";
       }
     };
+    const placeholderText = getPlaceHolderText();
 
     const urlRegExp = new RegExp(
       /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/
@@ -309,6 +310,7 @@ const CreateDropContent = forwardRef<
                       spellCheck={true}
                       autoCorrect="on"
                       aria-disabled={loading}
+                      ariaLabel={placeholderText}
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"
@@ -321,8 +323,14 @@ const CreateDropContent = forwardRef<
                   </div>
                 }
                 placeholder={
-                  <span className="editor-placeholder">
-                    {getPlaceHolderText()}
+                  <span
+                    className={`editor-placeholder ${
+                      viewType === CreateDropViewType.COMPACT
+                        ? "tw-top-1/2 -tw-translate-y-1/2 tw-leading-6"
+                        : ""
+                    }`}
+                  >
+                    {placeholderText}
                   </span>
                 }
                 ErrorBoundary={LexicalErrorBoundary}

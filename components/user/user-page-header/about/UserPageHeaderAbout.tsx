@@ -2,6 +2,8 @@
 
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useState } from "react";
 import PencilIcon, {
   PencilIconSize,
@@ -27,11 +29,22 @@ function UserPageHeaderAboutContent({
   const [view, setView] = useState<AboutStatementView>(
     AboutStatementView.STATEMENT
   );
+  const [draftValue, setDraftValue] = useState(
+    statement?.statement_value ?? ""
+  );
+  const [editorErrorMsg, setEditorErrorMsg] = useState<string | null>(null);
+  const isDesktopAboutEditor = useMediaQuery("(min-width: 768px)");
 
-  const closeEditor = () => setView(AboutStatementView.STATEMENT);
+  const closeEditor = () => {
+    setView(AboutStatementView.STATEMENT);
+    setDraftValue(statement?.statement_value ?? "");
+    setEditorErrorMsg(null);
+  };
 
   const onEditClick = () => {
     if (view === AboutStatementView.STATEMENT) {
+      setDraftValue(statement?.statement_value ?? "");
+      setEditorErrorMsg(null);
       setView(AboutStatementView.EDIT);
     }
   };
@@ -81,20 +94,47 @@ function UserPageHeaderAboutContent({
         </div>
       )}
 
-      {view === AboutStatementView.EDIT && (
+      {view === AboutStatementView.EDIT && isDesktopAboutEditor && (
+        <UserPageHeaderAboutEdit
+          profile={profile}
+          statement={statement}
+          onClose={closeEditor}
+          value={draftValue}
+          onValueChange={setDraftValue}
+          errorMsg={editorErrorMsg}
+          onErrorMsgChange={setEditorErrorMsg}
+        />
+      )}
+
+      {view === AboutStatementView.EDIT && !isDesktopAboutEditor && (
         <>
           {statement && (
-            <div className="sm:tw-hidden">
+            <div className="tw-max-w-2xl">
               <UserPageHeaderAboutStatement statement={statement} />
             </div>
           )}
-          <div className="tw-hidden sm:tw-block">
-            <UserPageHeaderAboutEdit
-              profile={profile}
-              statement={statement}
-              onClose={closeEditor}
-            />
-          </div>
+          <MobileWrapperDialog
+            title={getUserProfileHeaderMessage(
+              "user.profileHeader.edit.aboutTitle"
+            )}
+            isOpen
+            onClose={closeEditor}
+            tabletModal
+            showHeaderCloseButton
+            headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
+          >
+            <div className="tw-px-4 sm:tw-px-6">
+              <UserPageHeaderAboutEdit
+                profile={profile}
+                statement={statement}
+                onClose={closeEditor}
+                value={draftValue}
+                onValueChange={setDraftValue}
+                errorMsg={editorErrorMsg}
+                onErrorMsgChange={setEditorErrorMsg}
+              />
+            </div>
+          </MobileWrapperDialog>
         </>
       )}
     </>

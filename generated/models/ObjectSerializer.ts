@@ -204,6 +204,7 @@ export * from '../models/ApiDropWithoutWavesPageWithoutCount';
 export * from '../models/ApiDropsLeaderboardPage';
 export * from '../models/ApiDropsLeaderboardPageV2';
 export * from '../models/ApiDropsPage';
+export * from '../models/ApiErrorResponse';
 export * from '../models/ApiFeedItem';
 export * from '../models/ApiFeedItemType';
 export * from '../models/ApiGlobalRepCategoryGiver';
@@ -442,6 +443,8 @@ export * from '../models/ApiUploadsPage';
 export * from '../models/ApiValidateProfileCmsAgentPatchRequest';
 export * from '../models/ApiValidateProfileCmsPackageRequest';
 export * from '../models/ApiWallet';
+export * from '../models/ApiWalletDistributionAllocation';
+export * from '../models/ApiWalletDistributionAllocations';
 export * from '../models/ApiWave';
 export * from '../models/ApiWaveChatConfig';
 export * from '../models/ApiWaveConfig';
@@ -840,6 +843,7 @@ import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWav
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
 import { ApiDropsPage } from '../models/ApiDropsPage';
+import { ApiErrorResponse } from '../models/ApiErrorResponse';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
 import { ApiFeedItemType } from '../models/ApiFeedItemType';
 import { ApiGlobalRepCategoryGiver } from '../models/ApiGlobalRepCategoryGiver';
@@ -1078,6 +1082,8 @@ import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiValidateProfileCmsAgentPatchRequest } from '../models/ApiValidateProfileCmsAgentPatchRequest';
 import { ApiValidateProfileCmsPackageRequest } from '../models/ApiValidateProfileCmsPackageRequest';
 import { ApiWallet } from '../models/ApiWallet';
+import { ApiWalletDistributionAllocation, ApiWalletDistributionAllocationPhaseEnum     } from '../models/ApiWalletDistributionAllocation';
+import { ApiWalletDistributionAllocations } from '../models/ApiWalletDistributionAllocations';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
 import { ApiWaveConfig               } from '../models/ApiWaveConfig';
@@ -1404,6 +1410,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiSubscriptionCoverageUnknownReason",
     "ApiSubwavesSort",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
+    "ApiWalletDistributionAllocationPhaseEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
     "ApiWaveMetadataType",
@@ -1671,6 +1678,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropsLeaderboardPage": ApiDropsLeaderboardPage,
     "ApiDropsLeaderboardPageV2": ApiDropsLeaderboardPageV2,
     "ApiDropsPage": ApiDropsPage,
+    "ApiErrorResponse": ApiErrorResponse,
     "ApiFeedItem": ApiFeedItem,
     "ApiGlobalRepCategoryGiver": ApiGlobalRepCategoryGiver,
     "ApiGlobalRepCategoryGiversPage": ApiGlobalRepCategoryGiversPage,
@@ -1884,6 +1892,8 @@ let typeMap: {[index: string]: any} = {
     "ApiValidateProfileCmsAgentPatchRequest": ApiValidateProfileCmsAgentPatchRequest,
     "ApiValidateProfileCmsPackageRequest": ApiValidateProfileCmsPackageRequest,
     "ApiWallet": ApiWallet,
+    "ApiWalletDistributionAllocation": ApiWalletDistributionAllocation,
+    "ApiWalletDistributionAllocations": ApiWalletDistributionAllocations,
     "ApiWave": ApiWave,
     "ApiWaveChatConfig": ApiWaveChatConfig,
     "ApiWaveConfig": ApiWaveConfig,

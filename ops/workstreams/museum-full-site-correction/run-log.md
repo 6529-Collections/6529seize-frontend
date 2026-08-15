@@ -137,3 +137,63 @@ comes first; acquisition and accession follow.` before the next hosted lane
   668 returned successful Museum-bound responses with no visible soft-404 or
   publication-unavailable state. This preliminary result will be repeated
   against the corrected staging and production releases.
+- PR #3733 merged as frontend main
+  `d438a57eb58d3abaf4d7fc549441c9a5af253190`. Staging deploy run
+  `31681902527` and automatic staging E2E `31682667244` passed. The repeated
+  authenticated crawl passed all 668 routes; a separate decoded-media audit
+  confirmed all 12 permanent Collection works, all five Magnum works, and all
+  16 Keys and Gates selections painted nonzero images.
+- Independent post-staging editorial, IA, media, and visual audits found
+  release-blocking document association and presentation defects: sibling
+  object and artist manuscripts could be inherited through shared parent IDs;
+  document IDs containing slashes or colons produced broken Research routes;
+  the Collection hero left the first desktop viewport blank; portrait project
+  media clipped; wide tables were unusable on mobile; and complete technical
+  manuscripts produced 100,000–300,000-pixel continuous pages.
+- PR #3735 exact head `17e6fb8e2fdfbc30318fa6b16656775d3627b917`
+  corrects those defects and adds plain museum-language accession channels.
+  Local qualification passed 78 focused/regression tests, changed lint,
+  changed typecheck, formatting, and the Windows-safe diff check. Hosted
+  exact-head review and CI are in progress.
+- PR #3735 passed its final exact-head review and CI gates and merged as
+  frontend main `3bf97fb98a330e9fd42bcef40b0ffaec1d415aaf`.
+- Staging composition `025db98989f8b2150323d860a9c9f22e98005900`
+  deployed successfully in run `31689338698`. Independent qualification
+  passed all 651 current Museum routes, all 12 permanent Collection images,
+  all five Magnum images, all 16 Keys and Gates images, and 12 retained
+  desktop/mobile overflow and visual checks.
+- Automatic staging E2E run `31690074532` passed 16 of 17 packs. The sole
+  failing pack exposed four stale assertions: two expected long manuscripts
+  to remain permanently expanded and two counted every contextual Work link
+  as a unique artwork card. The runtime, route crawl, media paint, layout, and
+  public copy all passed.
+- Updated the institutional-practice browser contract to open semantic
+  disclosure ancestors before checking tiered manuscript content and to count
+  artwork figures rather than unrelated contextual links. The exact failing
+  pack now passes 70/70 against staging across desktop and mobile. Changed
+  lint, changed typecheck, formatting, and the Windows-safe diff check pass.
+- PR #3737 passed all hosted review and CI gates and merged as
+  `3fe402fc2e0c13be5ffb18bf16785c6560d7f7a2`. Staging composition
+  `e1be20a52eb197f0b2dc6ca3332a79ebb7c35e78` deployed in run
+  `31693491032`; automatic staging E2E run `31694252972` passed all 17 packs.
+- Two unrelated profile-interface PRs merged to protected main while the
+  Museum staging gates ran. The final production candidate therefore became
+  `6c7914a4eb270cb6acfa96eb7a8470106db91eb0`; neither intervening change
+  touched Museum runtime, tests, publication code, or routes. The unchanged
+  Museum release had already passed staging twice, and the final production
+  E2E exercised the complete exact candidate.
+- Production deploy run `31697156091` succeeded. Three consecutive live
+  `/api/version` checks returned exact version and announced version
+  `6c7914a4eb270cb6acfa96eb7a8470106db91eb0` with `stale:false`.
+- Automatic production E2E run `31698559323` succeeded: the read-only pack
+  job passed and the isolated verifier accepted the resulting evidence.
+- Independent live qualification expanded the current Museum surface
+  registry and publication into 651 concrete routes. All 651 passed with no
+  HTTP failure, soft 404, publication-unavailable state, or redirect outside
+  the Museum boundary. Report:
+  `C:\Users\Administrator\.codex\artifacts\museum-full-site-correction\production-6c7914a4-651-routes.json`.
+- The exact-source desktop/mobile Museum IA suite passed 6/6 on production.
+  It verified the two completed accessions in the permanent Collection,
+  Keys and Gates as selected and unminted, all five Magnum images, all 16
+  Keys and Gates images, canonical Work relations, responsive overflow,
+  keyboard/touch navigation, and automated WCAG A/AA checks.

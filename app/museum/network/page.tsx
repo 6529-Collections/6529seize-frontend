@@ -39,6 +39,9 @@ const HERO_EDITORIAL_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black";
 const TEXT_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+const MUSEUM_OPEN_PRESENTATION_MESSAGE =
+  "museum.network.acquisitions.openPresentation";
+const EMPTY_EXCLUDED_WORK_IDS: readonly string[] = [];
 
 function MuseumHomeHero({
   artwork,
@@ -111,6 +114,9 @@ function MuseumTypedWorkFigure({
       ? null
       : publication.projects.find((item) => item.id === work.projectId);
   const href = museumWorkHref(work.id);
+  const displayTitle = /^6529NM[-.]/u.test(work.title.trim())
+    ? t(DEFAULT_LOCALE, "museum.network.collection.untitledWork")
+    : work.title;
   const byline = [artist?.preferredName, project?.title]
     .filter(
       (value): value is string => value !== undefined && value.trim().length > 0
@@ -126,15 +132,78 @@ function MuseumTypedWorkFigure({
         height={media.height}
         alt={
           mediaAltText === undefined || mediaAltText.length === 0
-            ? work.title
+            ? displayTitle
             : mediaAltText
         }
         href={href}
-        title={work.title}
+        title={displayTitle}
         byline={byline}
         eager={eager}
         sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
       />
+    );
+  }
+  const presentation = work.presentationMedia?.[0];
+  if (presentation !== undefined) {
+    const sourceHref = buildMuseumSignedWaveStormDropUrl(
+      presentation.source.waveId,
+      presentation.source.dropId
+    );
+    const canOpenPresentation = presentation.affordances.includes(
+      "open_upstream_presentation"
+    );
+    return (
+      <figure className="tw-group tw-m-0 tw-min-w-0">
+        <div className="tw-aspect-square tw-overflow-hidden tw-rounded-xl tw-bg-black">
+          <MuseumProposalImage
+            src={presentation.mediaUrl}
+            alt={presentation.altText || displayTitle}
+            width={presentation.width}
+            height={presentation.height}
+            sourceByteSize={presentation.sourceByteSize}
+            variants={presentation.variants}
+            requireIntentForLargeSource={false}
+            optimizeSource
+            eager={eager}
+            {...(sourceHref === null || !canOpenPresentation
+              ? {}
+              : {
+                  sourceHref,
+                  sourceLabel: t(
+                    DEFAULT_LOCALE,
+                    MUSEUM_OPEN_PRESENTATION_MESSAGE
+                  ),
+                })}
+            className="tw-block tw-h-full tw-w-full tw-object-contain"
+          />
+        </div>
+        <figcaption className="tw-pt-4">
+          <Link
+            href={href}
+            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {displayTitle}
+          </Link>
+          {byline ? (
+            <span className="tw-mt-1 tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
+              {byline}
+            </span>
+          ) : null}
+          <span className="tw-mt-3 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
+            {presentation.credit.creditLine}
+          </span>
+          {sourceHref === null || !canOpenPresentation ? null : (
+            <a
+              href={sourceHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
+            </a>
+          )}
+        </figcaption>
+      </figure>
     );
   }
   const metadata = work.mediaMetadata?.[0];
@@ -148,16 +217,16 @@ function MuseumTypedWorkFigure({
         </div>
       ) : (
         <MuseumMediaMetadataPlaceholder
-          title={work.title}
+          title={displayTitle}
           metadata={metadata}
         />
       )}
-      <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
+      <figcaption className="tw-pt-4">
         <Link
           href={href}
           className="hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
-          {work.title}
+          {displayTitle}
         </Link>
         {byline ? (
           <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
@@ -224,13 +293,14 @@ function MuseumTypedCollectionPresentation({
   readonly works: readonly MuseumPublicWork[];
   readonly publication: MuseumPublication;
 }) {
+  if (works.length === 0) return null;
   const artist = publication.artists.find((item) =>
     works.some(
       (work) => work.artistId === item.id && item.slug === "casey-reas"
     )
   );
   const title =
-    artist !== undefined && works.length === 7
+    artist !== undefined
       ? t(DEFAULT_LOCALE, "museum.network.home.caseyTitle")
       : t(DEFAULT_LOCALE, "museum.network.collection.title");
   return (
@@ -291,8 +361,11 @@ function MuseumTypedNetworkHome({
       (artist) => artist.id === work.artistId && artist.slug === "casey-reas"
     )
   );
-  const presentationWorks =
-    caseyWorks.length > 0 ? caseyWorks : collectionWorks;
+  const presentationWorks = (
+    caseyWorks.length > 0 ? caseyWorks : collectionWorks
+  )
+    .filter((work) => work.id !== featuredWork.id)
+    .slice(0, 6);
   return (
     <div className="tw-min-w-0 tw-space-y-20 sm:tw-space-y-28">
       <MuseumTypedHomeHero work={featuredWork} publication={publication} />
@@ -300,7 +373,11 @@ function MuseumTypedNetworkHome({
         works={presentationWorks}
         publication={publication}
       />
-      <MuseumAcquisitionStories publication={publication} view={view} />
+      <MuseumAcquisitionStories
+        publication={publication}
+        view={view}
+        excludeWorkIds={[featuredWork.id]}
+      />
       <MuseumNetworkHomeSecondarySections />
     </div>
   );
@@ -385,6 +462,7 @@ function typedAcquisitionStoryWork(input: {
   const { work, publication } = input;
   if (
     selectMuseumStillMedia(work.media) === undefined &&
+    work.presentationMedia?.[0] === undefined &&
     work.mediaMetadata?.[0] === undefined
   ) {
     return null;
@@ -414,20 +492,21 @@ function MuseumAcquisitionProposalFigure({
             width={presentation.width}
             height={presentation.height}
             sourceByteSize={presentation.sourceByteSize}
+            variants={presentation.variants}
             {...(sourceHref === null || !canOpenPresentation
               ? {}
               : {
                   sourceHref,
                   sourceLabel: t(
                     DEFAULT_LOCALE,
-                    "museum.network.acquisitions.openPresentation"
+                    MUSEUM_OPEN_PRESENTATION_MESSAGE
                   ),
                 })}
             className="tw-block tw-h-full tw-w-full tw-object-contain"
           />
         </div>
       </div>
-      <figcaption className="tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+      <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-400">
         <span className="tw-block tw-text-iron-200">
           {presentation.credit.creditLine}
         </span>
@@ -447,10 +526,7 @@ function MuseumAcquisitionProposalFigure({
               rel="noopener noreferrer"
               className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.acquisitions.openPresentation"
-              )}
+              {t(DEFAULT_LOCALE, MUSEUM_OPEN_PRESENTATION_MESSAGE)}
             </a>
           </span>
         )}
@@ -464,10 +540,13 @@ function legacyAcquisitionStoryMedia(input: {
   readonly publication: MuseumPublication;
   readonly view: MuseumView | null;
   readonly href: string;
+  readonly excludeWorkIds: readonly string[];
 }) {
-  const { acquisition, publication, view, href } = input;
+  const { acquisition, publication, view, href, excludeWorkIds } = input;
   const caseyArtwork = tryCaseyArtworksFromPublication(publication)?.find(
-    (artwork) => acquisition.workIds.includes(artwork.objectId)
+    (artwork) =>
+      acquisition.workIds.includes(artwork.objectId) &&
+      !excludeWorkIds.includes(artwork.objectId)
   );
   if (caseyArtwork !== undefined) {
     return (
@@ -505,14 +584,17 @@ function MuseumAcquisitionStoryMedia({
   acquisition,
   publication,
   view,
+  excludeWorkIds,
 }: {
   readonly acquisition: MuseumAcquisitionViewModel;
   readonly publication: MuseumPublication;
   readonly view: MuseumView | null;
+  readonly excludeWorkIds: readonly string[];
 }) {
   const href = museumAcquisitionHref(acquisition.slug);
-  const typedWork = publication.works?.find((work) =>
-    acquisition.workIds.includes(work.id)
+  const typedWork = publication.works?.find(
+    (work) =>
+      acquisition.workIds.includes(work.id) && !excludeWorkIds.includes(work.id)
   );
   if (typedWork !== undefined) {
     const typedPreview = typedAcquisitionStoryWork({
@@ -543,15 +625,18 @@ function MuseumAcquisitionStoryMedia({
     publication,
     view,
     href,
+    excludeWorkIds,
   });
 }
 
 function MuseumAcquisitionStories({
   publication,
   view,
+  excludeWorkIds = EMPTY_EXCLUDED_WORK_IDS,
 }: {
   readonly publication: MuseumPublication;
   readonly view: MuseumView | null;
+  readonly excludeWorkIds?: readonly string[];
 }) {
   const acquisitions = buildMuseumAcquisitionIndex(publication, view);
   if (acquisitions.length === 0) return null;
@@ -584,6 +669,7 @@ function MuseumAcquisitionStories({
               acquisition={acquisition}
               publication={publication}
               view={view}
+              excludeWorkIds={excludeWorkIds}
             />
             <div className="tw-mt-4">
               <h3 className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-text-iron-50">
@@ -645,6 +731,7 @@ export default async function MuseumNetworkPage() {
       <MuseumAcquisitionStories
         publication={publicationState.publication}
         view={view}
+        excludeWorkIds={[featuredArtwork.objectId]}
       />
       <MuseumNetworkHomeSecondarySections />
     </div>

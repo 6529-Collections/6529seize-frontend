@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { ENTITY_ID_PATTERNS } from "@/lib/museum/publication/publicEntityGraphSchema";
 import {
   buildMuseumAcquisitionProgramLandingRecords,
   MuseumAcquisitionProgramsLandingPage,
@@ -153,6 +154,66 @@ function program(
 }
 
 describe("Museum acquisition programs landing", () => {
+  it("renders a valid but unclassified program in a neutral fallback section", () => {
+    const unknownProgramId = "6529NM-AP-ENT-0099";
+    const unknown = program(
+      unknownProgramId,
+      "unknown-program",
+      "Unknown program",
+      "unknown-acquisition",
+      "purchase"
+    );
+
+    expect(ENTITY_ID_PATTERNS.ACQUISITION_PROGRAM?.test(unknown.id)).toBe(true);
+    render(
+      <MuseumAcquisitionProgramsLandingPage
+        records={[
+          {
+            program: unknown,
+            acquisitions: [],
+            acquisitionArtistNames: {},
+          },
+        ]}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Other published programs" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Unknown program", { exact: true })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "These published programs have not been assigned to one of the Museum's standing collecting frameworks."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("classifies the canonical Gift Acquisitions entity", () => {
+    const canonicalGiftProgram = program(
+      "6529NM-AP-ENT-0001",
+      "gift-acquisitions",
+      "Gift Acquisitions",
+      "6529NM-CA-2026-001",
+      "donation"
+    );
+    expect(() =>
+      render(
+        <MuseumAcquisitionProgramsLandingPage
+          records={[
+            {
+              program: canonicalGiftProgram,
+              acquisitions: [],
+              acquisitionArtistNames: {},
+            },
+          ]}
+        />
+      )
+    ).not.toThrow();
+    expect(screen.getByText("Gifts", { exact: true })).toBeInTheDocument();
+  });
+
   it("presents pathways separately from the acquisitions they produce", () => {
     const casey = acquisition(
       "casey-acquisition",
@@ -210,14 +271,49 @@ describe("Museum acquisition programs landing", () => {
     expect(
       screen.getByRole("heading", { name: "Acquisition programs" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Gifts" })).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Gift Acquisitions" })
+      screen.getByRole("heading", {
+        name: "Meme Card-funded acquisition programs",
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Completed gifts")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Casey Reas and Magnum Photos are represented here as completed gifts. Each named acquisition has its own curatorial record and accession status."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Keys and Gates" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Two routes, distinct histories")
+      screen.getByText(
+        "Keys and Gates is the first Meme Card-funded acquisition program. Selected photographic works are being prepared for acquisition and accession."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Acquisition methods" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Gift", { selector: "dt" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Purchase", { selector: "dt" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Commission or primary mint", { selector: "dt" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Bequest, exchange, or transfer", { selector: "dt" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /An offer, selection, mint, or wallet transfer is not an accession\./u
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Accession in progress/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Program, acquisition, and accession",
+      })
     ).toBeInTheDocument();
     expect(
       screen.queryByText(/registry|database|connected work/u)

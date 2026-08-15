@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import type { MuseumPublicDocument } from "@/lib/museum/publication";
+import type {
+  MuseumPublicDocument,
+  MuseumPublicWork,
+} from "@/lib/museum/publication";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication";
+import { museumWorkHref } from "@/lib/museum/publication/routes";
+import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import {
   MUSEUM_REPOSITORY_URL,
   MUSEUM_SAFE_ETHERSCAN_URL,
 } from "@/lib/museum/types";
+import { MuseumPublicMediaFigure } from "./MuseumPublicMediaFigure";
 
 const TEXT_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
@@ -17,74 +23,24 @@ const PRIMARY_LINK_CLASS =
 const SECONDARY_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline hover:tw-border-iron-500 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black";
 
-const NETWORK_NATIVE_PILLARS = [
-  {
-    titleKey: "museum.network.proposition.pillars.held.title",
-    bodyKeys: [
-      "museum.network.proposition.pillars.held.body1",
-      "museum.network.proposition.pillars.held.body2",
-    ],
-  },
-  {
-    titleKey: "museum.network.proposition.pillars.decentralized.title",
-    bodyKeys: [
-      "museum.network.proposition.pillars.decentralized.body1",
-      "museum.network.proposition.pillars.decentralized.body2",
-    ],
-  },
-  {
-    titleKey: "museum.network.proposition.pillars.ethereum.title",
-    bodyKeys: [
-      "museum.network.proposition.pillars.ethereum.body1",
-      "museum.network.proposition.pillars.ethereum.body2",
-      "museum.network.proposition.pillars.ethereum.body3",
-    ],
-  },
-  {
-    titleKey: "museum.network.proposition.pillars.open.title",
-    bodyKeys: [
-      "museum.network.proposition.pillars.open.body1",
-      "museum.network.proposition.pillars.open.body2",
-      "museum.network.proposition.pillars.open.body3",
-    ],
-  },
-  {
-    titleKey: "museum.network.proposition.pillars.machine.title",
-    bodyKeys: [
-      "museum.network.proposition.pillars.machine.body1",
-      "museum.network.proposition.pillars.machine.body2",
-    ],
-  },
-] as const;
-
-const PRESENT_STATE = [
-  {
-    titleKey: "museum.network.proposition.today.collection.title",
-    bodyKey: "museum.network.proposition.today.collection.body",
-    actionKey: "museum.network.proposition.today.collection.action",
-    href: "/museum/network/collection",
-    external: false,
-  },
+const OPERATING_RECORDS = [
   {
     titleKey: "museum.network.proposition.today.governance.title",
     bodyKey: "museum.network.proposition.today.governance.body",
     actionKey: "museum.network.proposition.today.governance.action",
     href: "/museum/network/about/governance",
-    external: false,
   },
   {
     titleKey: "museum.network.proposition.today.record.title",
     bodyKey: "museum.network.proposition.today.record.body",
     actionKey: "museum.network.proposition.today.record.action",
     href: MUSEUM_REPOSITORY_URL,
-    external: true,
   },
   {
     titleKey: "museum.network.proposition.today.rights.title",
     bodyKey: "museum.network.proposition.today.rights.body",
     actionKey: "museum.network.proposition.today.rights.action",
     href: "/museum/network/research/rights",
-    external: false,
   },
 ] as const;
 
@@ -108,6 +64,10 @@ interface MuseumNetworkPropositionProps {
   readonly missionSourceUrl: string;
   readonly openMuseum: MuseumPublicDocument;
   readonly transition: MuseumPublicDocument;
+  readonly featuredWorks?: readonly {
+    readonly work: MuseumPublicWork;
+    readonly artistName?: string;
+  }[];
 }
 
 function ExactDocumentLink({
@@ -132,14 +92,62 @@ function ExactDocumentLink({
   );
 }
 
+function MuseumAboutArtworkFigure({
+  work,
+  artistName,
+  eager,
+}: {
+  readonly work: MuseumPublicWork;
+  readonly artistName?: string;
+  readonly eager: boolean;
+}) {
+  const media = selectMuseumStillMedia(work.media);
+  const presentation = work.presentationMedia?.[0];
+  const delivery =
+    presentation?.variants?.find((variant) => variant.width >= 1280) ??
+    presentation?.variants?.at(-1);
+  if (media === undefined && presentation === undefined) return null;
+  const src = media?.url ?? delivery?.url ?? presentation?.mediaUrl;
+  if (src === undefined) return null;
+  const width = media?.width ?? delivery?.width ?? presentation?.width ?? null;
+  const height =
+    media?.height ?? delivery?.height ?? presentation?.height ?? null;
+  const retainedAlt = media?.altText?.trim();
+  const presentationAlt = presentation?.altText.trim();
+  const displayTitle = /^6529NM[-.]/u.test(work.title.trim())
+    ? t(DEFAULT_LOCALE, "museum.network.collection.untitledWork")
+    : work.title;
+  let alt = displayTitle;
+  if (presentationAlt !== undefined && presentationAlt.length > 0) {
+    alt = presentationAlt;
+  }
+  if (retainedAlt !== undefined && retainedAlt.length > 0) {
+    alt = retainedAlt;
+  }
+  return (
+    <MuseumPublicMediaFigure
+      src={src}
+      width={width}
+      height={height}
+      alt={alt}
+      href={museumWorkHref(work.id)}
+      title={displayTitle}
+      {...(artistName === undefined ? {} : { byline: artistName })}
+      eager={eager}
+      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+    />
+  );
+}
+
 export function MuseumNetworkProposition({
   commit,
   missionSourceUrl,
   openMuseum,
   transition,
+  featuredWorks = [],
 }: MuseumNetworkPropositionProps) {
   return (
-    <div className="tw-min-w-0">
+    <div className="tw-min-w-0 tw-space-y-20 sm:tw-space-y-28">
       <header className="tw-max-w-5xl">
         <p className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.proposition.eyebrow")}
@@ -150,158 +158,228 @@ export function MuseumNetworkProposition({
         <p className="tw-m-0 tw-mt-7 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-9">
           {t(DEFAULT_LOCALE, "museum.network.proposition.intro")}
         </p>
-        <p className="tw-m-0 tw-mt-5 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-9">
+        <p className="tw-m-0 tw-mt-5 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-8">
           {t(DEFAULT_LOCALE, "museum.network.proposition.principle")}
         </p>
       </header>
 
+      {featuredWorks.length === 0 ? null : (
+        <section aria-labelledby="museum-about-art-title">
+          <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-5">
+            <div>
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+                {t(DEFAULT_LOCALE, "museum.network.proposition.art.eyebrow")}
+              </p>
+              <h2
+                id="museum-about-art-title"
+                className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+              >
+                {t(DEFAULT_LOCALE, "museum.network.proposition.art.title")}
+              </h2>
+            </div>
+            <Link href="/museum/network/collection" className={TEXT_LINK_CLASS}>
+              {t(DEFAULT_LOCALE, "museum.network.proposition.art.action")}
+            </Link>
+          </div>
+          <div className="tw-mt-8 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+            {featuredWorks.map(({ work, artistName }, index) => (
+              <MuseumAboutArtworkFigure
+                key={work.id}
+                work={work}
+                {...(artistName === undefined ? {} : { artistName })}
+                eager={index === 0}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section
-        aria-labelledby="museum-of-network-title"
-        className="tw-mt-16 tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:tw-gap-16"
+        aria-labelledby="museum-collection-purpose-title"
+        className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
       >
         <h2
-          id="museum-of-network-title"
-          className="tw-m-0 tw-max-w-md tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
+          id="museum-collection-purpose-title"
+          className="tw-m-0 tw-max-w-md tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
         >
-          {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.title")}
+          {t(DEFAULT_LOCALE, "museum.network.proposition.collection.title")}
         </h2>
         <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
           <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
-            {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body1")}
+            {t(DEFAULT_LOCALE, "museum.network.proposition.collection.body")}
           </p>
           <p className="tw-m-0">
-            {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body2")}
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.proposition.collection.acquisitions"
+            )}
           </p>
-          <p className="tw-m-0">
-            {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body3")}
-          </p>
-          <p className="tw-m-0">
-            {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body4")}
-          </p>
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="network-native-title"
-        className="tw-mt-20 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
-      >
-        <h2
-          id="network-native-title"
-          className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.proposition.pillars.title")}
-        </h2>
-        <div className="tw-mt-10 tw-grid tw-gap-x-12 tw-gap-y-10 lg:tw-grid-cols-2">
-          {NETWORK_NATIVE_PILLARS.map((pillar) => (
-            <article
-              key={pillar.titleKey}
-              className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6"
+          <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
+            <Link href="/museum/network/collection" className={TEXT_LINK_CLASS}>
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.proposition.collection.action"
+              )}
+            </Link>
+            <Link
+              href="/museum/network/acquisition-programs"
+              className={TEXT_LINK_CLASS}
             >
-              <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-100">
-                {t(DEFAULT_LOCALE, pillar.titleKey)}
-              </h3>
-              <div className="tw-mt-4 tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-400">
-                {pillar.bodyKeys.map((bodyKey) => (
-                  <p key={bodyKey} className="tw-m-0">
-                    {t(DEFAULT_LOCALE, bodyKey)}
-                  </p>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="museum-today-title"
-        className="tw-mt-20 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
-      >
-        <div className="tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:tw-gap-16">
-          <h2
-            id="museum-today-title"
-            className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
-          >
-            {t(DEFAULT_LOCALE, "museum.network.proposition.today.title")}
-          </h2>
-          <div className="tw-max-w-3xl tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-300">
-            <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
-              {t(DEFAULT_LOCALE, "museum.network.proposition.today.body1")}
-            </p>
-            <p className="tw-m-0">
-              {t(DEFAULT_LOCALE, "museum.network.proposition.today.body2")}
-            </p>
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.proposition.collection.programsAction"
+              )}
+            </Link>
           </div>
         </div>
-        <div className="tw-mt-10 tw-grid tw-gap-8 md:tw-grid-cols-2">
-          {PRESENT_STATE.map((item) => (
-            <article
-              key={item.titleKey}
-              className="tw-flex tw-flex-col tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-6"
+      </section>
+
+      <section
+        aria-labelledby="museum-scholarship-title"
+        className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
+      >
+        <h2
+          id="museum-scholarship-title"
+          className="tw-m-0 tw-max-w-md tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+        >
+          {t(DEFAULT_LOCALE, "museum.network.proposition.scholarship.title")}
+        </h2>
+        <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+          <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
+            {t(DEFAULT_LOCALE, "museum.network.proposition.scholarship.body")}
+          </p>
+          <Link href="/museum/network/research" className={TEXT_LINK_CLASS}>
+            {t(DEFAULT_LOCALE, "museum.network.proposition.scholarship.action")}
+          </Link>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="museum-public-purpose-title"
+        className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
+      >
+        <h2
+          id="museum-public-purpose-title"
+          className="tw-m-0 tw-max-w-md tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+        >
+          {t(DEFAULT_LOCALE, "museum.network.proposition.public.title")}
+        </h2>
+        <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+          <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
+            {t(DEFAULT_LOCALE, "museum.network.proposition.public.body1")}
+          </p>
+          <p className="tw-m-0">
+            {t(DEFAULT_LOCALE, "museum.network.proposition.public.body2")}
+          </p>
+          <div className="tw-flex tw-flex-wrap tw-gap-3">
+            <Link
+              href="/museum/network/collection"
+              className={PRIMARY_LINK_CLASS}
             >
-              <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-                {t(DEFAULT_LOCALE, item.titleKey)}
-              </h3>
-              <p className="tw-m-0 tw-mt-3 tw-flex-1 tw-text-base tw-leading-7 tw-text-iron-400">
-                {t(DEFAULT_LOCALE, item.bodyKey)}
-              </p>
-              {item.external ? (
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${TEXT_LINK_CLASS} tw-mt-4 tw-self-start`}
-                >
-                  {t(DEFAULT_LOCALE, item.actionKey)}
-                </a>
-              ) : (
-                <Link
-                  href={item.href}
-                  className={`${TEXT_LINK_CLASS} tw-mt-4 tw-self-start`}
-                >
-                  {t(DEFAULT_LOCALE, item.actionKey)}
-                </Link>
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.proposition.actions.collection"
               )}
-            </article>
-          ))}
+            </Link>
+            <Link href="/network" className={SECONDARY_LINK_CLASS}>
+              {t(DEFAULT_LOCALE, "museum.network.proposition.actions.network")}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="museum-works-title"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 sm:tw-pt-14"
+      >
+        <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16">
+          <div>
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+              {t(DEFAULT_LOCALE, "museum.network.proposition.working.eyebrow")}
+            </p>
+            <h2
+              id="museum-works-title"
+              className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.proposition.working.title")}
+            </h2>
+          </div>
+          <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+            <p className="tw-m-0">
+              {t(DEFAULT_LOCALE, "museum.network.proposition.working.intro")}
+            </p>
+            <div className="tw-grid tw-gap-x-8 tw-gap-y-8 md:tw-grid-cols-2">
+              {OPERATING_RECORDS.map((item) => {
+                const external = item.href.startsWith("http");
+                return (
+                  <article
+                    key={item.titleKey}
+                    className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5"
+                  >
+                    <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+                      {t(DEFAULT_LOCALE, item.titleKey)}
+                    </h3>
+                    <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-400">
+                      {t(DEFAULT_LOCALE, item.bodyKey)}
+                    </p>
+                    {external ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`${TEXT_LINK_CLASS} tw-mt-3`}
+                      >
+                        {t(DEFAULT_LOCALE, item.actionKey)}
+                      </a>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className={`${TEXT_LINK_CLASS} tw-mt-3`}
+                      >
+                        {t(DEFAULT_LOCALE, item.actionKey)}
+                      </Link>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
       <section
         aria-labelledby="museum-next-title"
-        className="tw-mt-20 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
       >
         <h2
           id="museum-next-title"
-          className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
+          className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.next.title")}
         </h2>
         <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
           {t(DEFAULT_LOCALE, "museum.network.proposition.next.intro")}
         </p>
-        <div className="tw-mt-10 tw-grid tw-gap-8 lg:tw-grid-cols-3">
+        <div className="tw-mt-8 tw-grid tw-gap-x-8 tw-gap-y-8 lg:tw-grid-cols-3">
           {NEXT_STAGE.map((item) => (
             <article
               key={item.titleKey}
-              className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6"
+              className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5"
             >
-              <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-100">
+              <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
                 {t(DEFAULT_LOCALE, item.titleKey)}
               </h3>
-              <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-400">
+              <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-400">
                 {t(DEFAULT_LOCALE, item.bodyKey)}
               </p>
             </article>
           ))}
         </div>
-        <p className="tw-m-0 tw-mt-8 tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "museum.network.proposition.next.conclusion")}
-        </p>
       </section>
 
       <section
         aria-labelledby="museum-permanence-title"
-        className="tw-mt-20 tw-grid tw-gap-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-10 lg:tw-grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:tw-gap-16"
+        className="tw-grid tw-gap-8 tw-border-y tw-border-solid tw-border-iron-800 tw-py-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
       >
         <h2
           id="museum-permanence-title"
@@ -322,53 +400,8 @@ export function MuseumNetworkProposition({
         </div>
       </section>
 
-      <section
-        aria-labelledby="public-institution-title"
-        className="tw-mt-20 tw-max-w-5xl"
-      >
-        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          {t(DEFAULT_LOCALE, "museum.network.proposition.final.eyebrow")}
-        </p>
-        <h2
-          id="public-institution-title"
-          className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.proposition.final.title")}
-        </h2>
-        <div className="tw-mt-6 tw-max-w-4xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
-          <p className="tw-m-0">
-            {t(DEFAULT_LOCALE, "museum.network.proposition.final.body1")}
-          </p>
-          <p className="tw-m-0">
-            {t(DEFAULT_LOCALE, "museum.network.proposition.final.body2")}
-          </p>
-          <p className="tw-m-0 tw-text-xl tw-leading-8 tw-text-iron-100">
-            {t(DEFAULT_LOCALE, "museum.network.proposition.final.closing")}
-          </p>
-        </div>
-        <div className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3">
-          <Link
-            href="/museum/network/collection"
-            className={PRIMARY_LINK_CLASS}
-          >
-            {t(DEFAULT_LOCALE, "museum.network.proposition.actions.collection")}
-          </Link>
-          <a
-            href={MUSEUM_REPOSITORY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={SECONDARY_LINK_CLASS}
-          >
-            {t(DEFAULT_LOCALE, "museum.network.proposition.actions.record")}
-          </a>
-          <Link href="/network" className={SECONDARY_LINK_CLASS}>
-            {t(DEFAULT_LOCALE, "museum.network.proposition.actions.network")}
-          </Link>
-        </div>
-      </section>
-
       <nav
-        className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
         aria-labelledby="museum-proposition-sources-title"
       >
         <h2
@@ -399,6 +432,14 @@ export function MuseumNetworkProposition({
             className={TEXT_LINK_CLASS}
           >
             {t(DEFAULT_LOCALE, "museum.network.proposition.sources.safe")}
+          </a>
+          <a
+            href={MUSEUM_REPOSITORY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={TEXT_LINK_CLASS}
+          >
+            {t(DEFAULT_LOCALE, "museum.network.proposition.actions.record")}
           </a>
         </div>
       </nav>
