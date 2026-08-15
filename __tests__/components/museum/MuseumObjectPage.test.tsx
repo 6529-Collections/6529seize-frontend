@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MuseumObjectPage } from "@/components/museum/MuseumObjectPage";
 import type {
   MuseumExternalProposalPresentationMedia,
@@ -338,32 +338,82 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows a large governed Magnum presentation immediately on its canonical Work page", async () => {
-    const magnumWork: MuseumPublicWork = {
+  it("gates a large proposal original until the visitor asks to load it", async () => {
+    const proposedWork: MuseumPublicWork = {
       ...work([]),
-      acquisitionIds: [MUSEUM_MAGNUM_ACQUISITION_ID],
-      collectionMembership: true,
+      status: "proposed_in_museum_wave",
+      acquisitionIds: [],
+      collectionMembership: false,
       presentationMedia: [magnumPresentationMedia()],
     };
 
     render(
       await MuseumObjectPage({
-        objectId: magnumWork.id,
-        publication: publication(magnumWork),
+        objectId: proposedWork.id,
+        publication: publication(proposedWork),
         view: null,
       })
     );
 
-    expect(screen.getByRole("img")).toHaveAttribute(
-      "src",
-      magnumPresentationMedia().mediaUrl
-    );
+    const loadButton = screen.getByRole("button", {
+      name: "View image · loads 16.9 MB",
+    });
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    fireEvent.click(loadButton);
+    const image = await screen.findByRole("img", {
+      name: "A governed Magnum accession photograph.",
+    });
+    expect(image).toHaveAttribute("src", magnumPresentationMedia().mediaUrl);
     expect(
       screen.queryByRole("button", { name: /historical proposal image/u })
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /download/u })
     ).not.toBeInTheDocument();
+  });
+
+  it("uses an aliased reviewed derivative before a large Magnum original", async () => {
+    const magnumWork: MuseumPublicWork = {
+      ...work([]),
+      acquisitionIds: [MUSEUM_MAGNUM_ACQUISITION_ID],
+      collectionMembership: true,
+      presentationMedia: [magnumPresentationMedia()],
+    };
+    const magnumPublication: MuseumPublication = {
+      ...publication(magnumWork),
+      workAliases: [
+        {
+          kind: "work_source_alias",
+          sourceObjectId: "6529NM-PG-2026-001.OBJ-005",
+          workId: magnumWork.id,
+          sourcePath: "records/entities/6529NM-W-0001.json",
+        },
+      ],
+    };
+
+    render(
+      await MuseumObjectPage({
+        objectId: magnumWork.id,
+        publication: magnumPublication,
+        view: viewWithReviewedProgramMedia("6529NM-PG-2026-001.OBJ-005"),
+      })
+    );
+
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute(
+      "src",
+      "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp"
+    );
+    expect(image).toHaveAttribute("srcset");
+    expect(
+      screen.queryByRole("button", { name: /loads 16\.9 MB/u })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View Wave publication" })
+    ).toHaveAttribute(
+      "href",
+      "https://6529.io/waves/5f207393-5418-4a75-8738-e40edb44a94d?drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0"
+    );
   });
 
   it("links a metadata-only Work license through MuseumRightsLink", async () => {
@@ -484,7 +534,9 @@ describe("MuseumObjectPage canonical typed Work rights", () => {
       screen.getByText("Selected through an acquisition program; unminted")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Minting comes first; acquisition and accession follow.")
+      screen.getByText(
+        "Selected and unminted. Acquisition and accession remain pending."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getAllByText("Artist name, Work title.").length

@@ -14,6 +14,7 @@ and product-impact operations.
 ## Flows
 
 - [Frontend deployment](frontend-deployment.md)
+- [CI wave deployment notifications](ci-wave-deploy-validation-notifications.md)
 - [Build-runner benchmark and activation](runner-activation-playbook.md)
 - [Device farm QA](device-farm-qa.md)
 - [Product-impact Mixpanel runbook](product-impact-mixpanel-runbook.md)

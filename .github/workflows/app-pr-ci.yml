@@ -534,6 +534,9 @@ jobs:
               done
               filtered_related_tests=()
               for related_test in "${related_jest_tests[@]}"; do
+                if [ -z "$related_test" ]; then
+                  continue
+                fi
                 related_path="$(realpath "$related_test")"
                 if [ -n "${direct_jest_paths[$related_path]:-}" ]; then
                   echo "Skipping related Jest duplicate already selected directly: $related_test"

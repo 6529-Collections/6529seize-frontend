@@ -32,8 +32,11 @@ export function MuseumLandingHero({
   const hrefProps = mediaHref === undefined ? {} : { href: mediaHref };
   const subtitleProps =
     mediaSubtitle === undefined ? {} : { subtitle: mediaSubtitle };
+  const hasMedia = mediaTitle !== undefined;
   return (
-    <header className="tw-grid tw-gap-10 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-12 md:tw-grid-cols-[minmax(0,0.8fr)_minmax(22rem,1.2fr)] md:tw-items-start md:tw-gap-14 md:tw-pb-16">
+    <header
+      className={`tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-12 md:tw-pb-16 ${hasMedia ? "tw-grid tw-gap-10 md:tw-grid-cols-[minmax(0,0.8fr)_minmax(22rem,1.2fr)] md:tw-items-start md:tw-gap-14" : ""}`}
+    >
       <div className="tw-max-w-2xl">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-primary-300">
           {eyebrow}

@@ -153,7 +153,7 @@ describe("Museum acquisition program status projection", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Minting comes first; acquisition and accession follow.",
+        "Selected and unminted. Acquisition and accession remain pending.",
         { exact: true }
       )
     ).toBeInTheDocument();

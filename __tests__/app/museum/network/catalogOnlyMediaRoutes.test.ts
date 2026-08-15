@@ -32,7 +32,7 @@ describe("typed Museum routes keep media catalog-only", () => {
     expect(typedBranch).not.toContain("publication.artworks");
     expect(typedBranch).not.toContain("legacyMedia");
     expect(typedBranch).toContain("isMuseumPermanentCollectionWork");
-    expect(typedBranch).toContain("publicWorkItem(work, publication)");
+    expect(typedBranch).toContain("publicWorkItem(work, publication, view)");
   });
 
   it("presents governed accession media on permanent Collection cards", () => {
@@ -73,6 +73,15 @@ describe("typed Museum routes keep media catalog-only", () => {
     expect(landing).toContain("selectMuseumStillMedia(work.media)");
     expect(landing).not.toContain("tryCaseyArtworksFromPublication");
     expect(landing).not.toContain("publication.artworks");
+  });
+
+  it("keeps large acquisition originals behind the existing intent gate", () => {
+    const landing = routeSource(
+      "components/museum/acquisition/MuseumAcquisitionLanding.tsx"
+    );
+
+    expect(landing).toContain("variants={media.variants}");
+    expect(landing).not.toContain("requireIntentForLargeSource={false}");
   });
 
   it("selects the typed home branch before the legacy adapter", () => {

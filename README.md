@@ -186,6 +186,8 @@ deployment-sensitive code:
 - Agent and automation instructions: [AGENTS.md](AGENTS.md)
 - Package-manager and deployment-wrapper guidance:
   [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md)
+- CI wave deployment notification lifecycle:
+  [ops/docs/developer/ci-wave-deploy-validation-notifications.md](ops/docs/developer/ci-wave-deploy-validation-notifications.md)
 - Standalone Memes mint page notes:
   [standalone/standalone-memes-mint/README.md](standalone/standalone-memes-mint/README.md)
 

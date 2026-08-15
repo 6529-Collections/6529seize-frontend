@@ -1,5 +1,11 @@
 import { formatLargeNumber } from "@/helpers/Helpers";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
+import {
+  CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES,
+  CREATE_WAVE_OUTCOME_ROW_HEADER_GRID_CLASSES,
+  CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES,
+  CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES,
+} from "../createWaveOutcomeRowStyles";
 
 export default function CreateWaveOutcomesRowCICRank({
   outcome,
@@ -9,16 +15,15 @@ export default function CreateWaveOutcomesRowCICRank({
   readonly removeOutcome: () => void;
 }) {
   return (
-    <div className="tw-rounded-lg tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-px-5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-primary-400/10">
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-4">
-        <h3 className="tw-mb-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-font-semibold tw-text-white">
-          NIC
-        </h3>
-        <div className="tw-flex tw-shrink-0 tw-justify-end">
+    <div className={CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES}>
+      <div className={CREATE_WAVE_OUTCOME_ROW_HEADER_GRID_CLASSES}>
+        <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>NIC</h3>
+        <div className="tw-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-justify-end">
           <button
+            type="button"
             onClick={removeOutcome}
             aria-label="Remove"
-            className="tw-flex tw-h-8 tw-w-8 tw-transform tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-error tw-transition tw-duration-300 tw-ease-out hover:tw-bg-error/10 focus:tw-scale-90"
+            className={CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES}
           >
             <svg
               className="tw-h-5 tw-w-5 tw-flex-shrink-0"
@@ -38,7 +43,7 @@ export default function CreateWaveOutcomesRowCICRank({
           </button>
         </div>
       </div>
-      <div className="tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1">
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1">
         <p className="tw-mb-0 tw-text-nowrap tw-text-sm tw-font-normal tw-text-white">
           Total: {formatLargeNumber(outcome.winnersConfig?.totalAmount ?? 0)}{" "}
           NIC

@@ -7,7 +7,9 @@ import type { CreateWaveDisplayConfig } from "@/types/waves.types";
 
 describe("CreateWaveDisplaySettings", () => {
   const openAdvancedSettings = () => {
-    fireEvent.click(screen.getByRole("button", { name: /advanced settings/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /appearance and labels/i })
+    );
   };
 
   const baseDisplay: CreateWaveDisplayConfig = {

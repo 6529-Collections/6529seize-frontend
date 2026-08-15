@@ -444,6 +444,10 @@
       "surface_ids": ["museum.research"]
     },
     {
+      "file": "components/museum/research/museumResearchMediaAspectRatio.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
       "file": "components/museum/research/MuseumResearchProjectCard.tsx",
       "surface_ids": ["museum.project", "museum.research"]
     },

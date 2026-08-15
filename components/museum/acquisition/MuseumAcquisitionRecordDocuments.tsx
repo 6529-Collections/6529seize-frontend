@@ -82,7 +82,7 @@ export function MuseumAcquisitionRecordDocuments({
             "museum.network.acquisitions.acquisitionRecordAndSources"
           )}
         </summary>
-        <div className="tw-space-y-10 tw-border-t tw-border-solid tw-border-white/10 tw-px-5 tw-py-6 sm:tw-px-6">
+        <div className="tw-space-y-10 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-5 tw-py-6 sm:tw-px-6">
           <MuseumEntityContext
             context={context}
             labels={{

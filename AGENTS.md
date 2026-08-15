@@ -18,6 +18,10 @@ STAGING` builds and deploys that exact commit, then calls automatic `Staging
   artifact checks, or dispatch a deployment without the user's explicit
   authorization. Follow `ops/skills/deploy-6529/SKILL.md` and
   `ops/docs/developer/frontend-deployment.md` for operations and recovery.
+- CI staging receives one aggregate pipeline outcome after automatic E2E; it
+  does not receive a separate validation post. CI production receives the
+  deployment outcome, while production E2E validation is threaded under the
+  corresponding release-note post.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

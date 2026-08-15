@@ -1,5 +1,14 @@
 import { Tooltip } from "react-tooltip";
+import { useId } from "react";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
+import {
+  CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES,
+  CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES,
+  CREATE_WAVE_OUTCOME_ROW_GRID_CLASSES,
+  CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES,
+  CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES,
+} from "../createWaveOutcomeRowStyles";
 
 export default function CreateWaveOutcomesRowManualRank({
   outcome,
@@ -8,37 +17,24 @@ export default function CreateWaveOutcomesRowManualRank({
   readonly outcome: CreateWaveOutcomeConfig;
   readonly removeOutcome: () => void;
 }) {
+  const tooltipId = useId();
+
   return (
-    <div className="tw-rounded-lg tw-bg-gradient-to-r tw-from-primary-400/[0.15] tw-to-primary-400/[0.05] tw-px-5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-primary-400/10">
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-4">
-        <h3 className="tw-mb-0 tw-shrink-0 tw-text-sm tw-font-semibold tw-text-white">
-          Manual
-        </h3>
-        <div className="tw-min-w-0 tw-flex-1">
-          <>
-            <p
-              className="tw-mb-0 tw-truncate tw-text-sm tw-font-normal tw-text-white"
-              data-tooltip-id={`manual-title-${outcome.title}`}
-            >
-              {outcome.title}
-            </p>
-            <Tooltip
-              id={`manual-title-${outcome.title}`}
-              style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
-              }}
-            >
-              {outcome.title}
-            </Tooltip>
-          </>
-        </div>
-        <div className="tw-flex tw-shrink-0 tw-justify-end">
+    <>
+      <div className={CREATE_WAVE_OUTCOME_ROW_SURFACE_CLASSES}>
+        <div className={CREATE_WAVE_OUTCOME_ROW_GRID_CLASSES}>
+          <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>Manual</h3>
+          <p
+            className={`${CREATE_WAVE_OUTCOME_ROW_DETAIL_CLASSES} tw-truncate`}
+            data-tooltip-id={tooltipId}
+          >
+            {outcome.title}
+          </p>
           <button
+            type="button"
             onClick={removeOutcome}
             aria-label="Remove"
-            className="tw-flex tw-h-8 tw-w-8 tw-transform tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-error tw-transition tw-duration-300 tw-ease-out hover:tw-bg-error/10 focus:tw-scale-90"
+            className={CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES}
           >
             <svg
               className="tw-h-5 tw-w-5 tw-flex-shrink-0"
@@ -58,6 +54,9 @@ export default function CreateWaveOutcomesRowManualRank({
           </button>
         </div>
       </div>
-    </div>
+      <Tooltip id={tooltipId} style={TOOLTIP_STYLES}>
+        {outcome.title}
+      </Tooltip>
+    </>
   );
 }

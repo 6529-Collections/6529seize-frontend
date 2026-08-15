@@ -225,10 +225,10 @@ export default function LatestDropNextMintSubscribe(
       subscribedCount = finalStatus?.subscribed_count;
     }
   }
-  const subscribersCount = useMemo(() => {
+  const subscriptionsCount = useMemo(() => {
     return tokenCount?.token_id === tokenId ? tokenCount.count : undefined;
   }, [tokenId, tokenCount]);
-  const subscribersCountLoading = !!tokenCountLoading;
+  const subscriptionsCountLoading = !!tokenCountLoading;
   const tooltipLabel = getToggleTooltipLabel({
     activeProfileProxy: !!activeProfileProxy,
     isMintingDay,
@@ -273,8 +273,8 @@ export default function LatestDropNextMintSubscribe(
       profileSubscriptionsActionLabel={coverageActionLabel}
       subscribed={subscribed}
       subscribedCount={subscribedCount}
-      subscribersCount={subscribersCount}
-      subscribersCountLoading={subscribersCountLoading}
+      subscriptionsCount={subscriptionsCount}
+      subscriptionsCountLoading={subscriptionsCountLoading}
       tooltipLabel={tooltipLabel}
     />
   );

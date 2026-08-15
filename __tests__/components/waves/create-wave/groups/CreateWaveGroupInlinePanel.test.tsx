@@ -340,6 +340,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.getByRole("button", { name: "Choose group" })
     ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm"
+    );
 
     await user.click(screen.getByRole("button", { name: "Choose group" }));
 

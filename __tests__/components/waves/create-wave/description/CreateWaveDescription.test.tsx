@@ -120,10 +120,14 @@ describe("CreateWaveDescription", () => {
   it("renders description title and instructions", () => {
     render(<CreateWaveDescription {...defaultProps} />);
 
-    expect(screen.getByText("Description")).toBeInTheDocument();
     expect(
-      screen.getByText(/Give a good description of your wave/)
-    ).toBeInTheDocument();
+      screen.getByRole("heading", { level: 2, name: "Description" })
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less."
+      )
+    ).toBeVisible();
   });
 
   it("renders DropEditor with correct props", () => {
@@ -255,23 +259,28 @@ describe("CreateWaveDescription", () => {
   });
 
   it("displays proper styling classes", () => {
-    const { container } = render(<CreateWaveDescription {...defaultProps} />);
+    render(<CreateWaveDescription {...defaultProps} />);
 
-    const title = screen.getByText("Description");
+    const title = screen.getByRole("heading", {
+      level: 2,
+      name: "Description",
+    });
     expect(title).toHaveClass(
-      "tw-mb-0",
-      "tw-text-lg",
-      "sm:tw-text-xl",
+      "tw-m-0",
+      "tw-text-xl",
       "tw-font-semibold",
-      "tw-text-iron-50"
+      "tw-leading-7",
+      "tw-text-white"
     );
 
-    const subtitle = screen.getByText(/Give a good description of your wave/);
+    const subtitle = screen.getByText(
+      "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less."
+    );
     expect(subtitle).toHaveClass(
-      "tw-mt-2",
-      "tw-mb-0",
-      "tw-text-base",
+      "tw-m-0",
+      "tw-text-sm",
       "tw-font-normal",
+      "tw-leading-5",
       "tw-text-iron-300"
     );
   });
