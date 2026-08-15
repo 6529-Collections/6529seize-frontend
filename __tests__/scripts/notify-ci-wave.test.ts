@@ -89,6 +89,7 @@ async function runNotifier(
         GITHUB_RUN_NUMBER: "45",
         GITHUB_SHA: "a".repeat(40),
         GITHUB_REF_NAME: "main",
+        GITHUB_TOKEN: "",
         ...overrides,
       },
     }
@@ -755,6 +756,76 @@ describe("notify-ci-wave Release Train metadata", () => {
     expect(result.payload).toBeNull();
   });
 
+  it("sends a Release Bus deploy identity without requiring contributor credits", async () => {
+    const trainId = "a7d3433d-e145-4578-bc78-e96fbd34f591";
+    const operationKey = `rb2:${trainId}:deploy:prod:frontend:a1`;
+    const result = await runNotifier({
+      CI_PIPELINES_ALERT_TYPE: "deploy",
+      CI_RELEASE_TRAIN_ID: trainId,
+      CI_RELEASE_OPERATION_KEY: operationKey,
+      CI_RELEASE_CONTRIBUTORS: "[]",
+      GITHUB_RUN_ATTEMPT: "2",
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        alert_type: "deploy",
+        release_train_id: trainId,
+        release_operation_key: operationKey,
+        run_attempt: 2,
+      },
+    });
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+  });
+
+  it("sends WEB E2E parent identity and validation metadata", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_ALERT_TYPE: "web_e2e",
+      CI_PIPELINES_PARENT_DEPLOY_RUN_ID: "791",
+      CI_PIPELINES_PARENT_RELEASE_TRAIN_ID: "train-123",
+      CI_PIPELINES_VALIDATION_PACK: "core",
+      GITHUB_RUN_ATTEMPT: "2",
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        alert_type: "web_e2e",
+        parent_deploy_run_id: "791",
+        parent_release_train_id: "train-123",
+        validation_pack: "core",
+        run_attempt: 2,
+        sha: null,
+      },
+    });
+  });
+
+  it("normalizes an uppercase deployed SHA override", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_SHA: "ABCDEF0123456789ABCDEF0123456789ABCDEF01",
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: { sha: "abcdef0123456789abcdef0123456789abcdef01" },
+    });
+  });
+
+  it("requires a validation pack for WEB E2E alerts", async () => {
+    const result = await runNotifier({ CI_PIPELINES_ALERT_TYPE: "web_e2e" });
+
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain(
+      "CI_PIPELINES_VALIDATION_PACK is required for web_e2e alerts"
+    );
+    expect(result.payload).toBeNull();
+  });
+
   it("rejects an invalid contributor login", async () => {
     const result = await runNotifier({
       CI_RELEASE_TRAIN_ID: "a7d3433d-e145-4578-bc78-e96fbd34f591",
@@ -794,7 +865,7 @@ describe("notify-ci-wave Release Train metadata", () => {
 
     expect(result.code).toBe(1);
     expect(result.stderr).toContain(
-      "CI_PIPELINES_SHA must be a 40-character lowercase Git SHA"
+      "CI_PIPELINES_SHA must be a 40-character Git SHA"
     );
     expect(result.payload).toBeNull();
   });

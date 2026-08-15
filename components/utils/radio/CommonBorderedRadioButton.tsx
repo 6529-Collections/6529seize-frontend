@@ -98,6 +98,10 @@ export default function CommonBorderedRadioButton<T extends string>({
         isSubtle ? "tw-items-start" : "tw-items-center"
       } tw-gap-x-3 tw-border tw-border-solid tw-px-4 tw-py-4 ${
         isSubtle ? "" : "tw-ring-1 tw-ring-inset"
+      } ${
+        isSubtle
+          ? "focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400"
+          : ""
       } tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
         disabled ? "tw-cursor-not-allowed tw-opacity-50" : "tw-cursor-pointer"
       }`}
@@ -119,7 +123,7 @@ export default function CommonBorderedRadioButton<T extends string>({
       {isSubtle && (
         <span
           aria-hidden="true"
-          className={`tw-mt-0.5 tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+          className={`tw-mt-0.5 tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
             isSelected
               ? "tw-border-primary-400 tw-bg-primary-500/10"
               : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"

@@ -632,5 +632,23 @@ export const DE_DE_MESSAGES = {
   "theMemes.volume.7Days": "7 Tage",
   "theMemes.volume.30Days": "30 Tage",
   "theMemes.volume.allTime": "Gesamt",
+  "home.mintAllowlist.label": "Deine Zuteilung",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint-Zuteilungen für die verbundene Wallet",
+  "home.mintAllowlist.connectWallet":
+    "Verbinde deine Wallet, um Details anzuzeigen.",
+  "home.mintAllowlist.checking": "Wird geprüft…",
+  "home.mintAllowlist.notPublished":
+    "Verfügbar, sobald die Verteilung veröffentlicht wurde.",
+  "home.mintAllowlist.notFound": "Keine für diese Wallet.",
+  "home.mintAllowlist.unavailable": "Vorübergehend nicht verfügbar.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Öffentlich",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}x Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
   ...DE_DE_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

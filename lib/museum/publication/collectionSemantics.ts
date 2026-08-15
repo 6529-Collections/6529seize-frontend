@@ -11,6 +11,15 @@ const MUSEUM_KEYS_AND_GATES_ACQUISITION_ID = "6529NM-CA-2026-002" as const;
 const MUSEUM_KEYS_AND_GATES_PROGRAM_ID = "6529NM-AP-ENT-0002" as const;
 const MUSEUM_KEYS_AND_GATES_LEGACY_PROGRAM_ID = "6529NM-AP-01" as const;
 
+export function isMuseumKeysAndGatesProgramId(
+  programId: string | null | undefined
+): boolean {
+  return (
+    programId === MUSEUM_KEYS_AND_GATES_PROGRAM_ID ||
+    programId === MUSEUM_KEYS_AND_GATES_LEGACY_PROGRAM_ID
+  );
+}
+
 const PERMANENT_COLLECTION_ACQUISITION_IDS: ReadonlySet<string> = new Set([
   "6529NM-CA-2026-001",
   MUSEUM_MAGNUM_ACQUISITION_ID,
@@ -26,6 +35,29 @@ function workProgramIds(work: MuseumPublicWork): readonly string[] {
   return programIds ?? [];
 }
 
+export function hasMuseumMagnumInstitutionalDisplayRights(
+  work: MuseumPublicWork
+): boolean {
+  if (
+    museumPublicWorkStatus(work) !== "accessioned_into_permanent_collection" ||
+    !isMuseumPermanentCollectionWork(work) ||
+    !workAcquisitionIds(work).includes(MUSEUM_MAGNUM_ACQUISITION_ID)
+  ) {
+    return false;
+  }
+
+  return (
+    [...work.media, ...(work.mediaMetadata ?? [])].some(
+      (media) =>
+        media.credit.licenseLabel === "All Rights Reserved" &&
+        media.credit.sourcePath.trim().length > 0
+    ) ||
+    (work.presentationMedia ?? []).some(
+      (media) => media.credit.sourcePath.trim().length > 0
+    )
+  );
+}
+
 /**
  * Keys and Gates is a selected, unminted acquisition-program outcome. Its
  * explicit acquisition/program identity keeps it out of the permanent
@@ -34,11 +66,7 @@ function workProgramIds(work: MuseumPublicWork): readonly string[] {
 function isMuseumKeysAndGatesWork(work: MuseumPublicWork): boolean {
   return (
     workAcquisitionIds(work).includes(MUSEUM_KEYS_AND_GATES_ACQUISITION_ID) ||
-    workProgramIds(work).some(
-      (id) =>
-        id === MUSEUM_KEYS_AND_GATES_PROGRAM_ID ||
-        id === MUSEUM_KEYS_AND_GATES_LEGACY_PROGRAM_ID
-    )
+    workProgramIds(work).some(isMuseumKeysAndGatesProgramId)
   );
 }
 
@@ -78,8 +106,7 @@ export function museumPublicAcquisitionStatus(
   }
   if (
     acquisition.id === MUSEUM_KEYS_AND_GATES_ACQUISITION_ID ||
-    acquisition.programId === MUSEUM_KEYS_AND_GATES_PROGRAM_ID ||
-    acquisition.programId === MUSEUM_KEYS_AND_GATES_LEGACY_PROGRAM_ID
+    isMuseumKeysAndGatesProgramId(acquisition.programId)
   ) {
     return "selected_through_acquisition_program_acquisition_pending";
   }

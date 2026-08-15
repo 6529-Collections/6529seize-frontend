@@ -7,6 +7,7 @@ import type {
 } from "@/lib/museum/publication/types";
 import { MuseumProposalImage } from "../MuseumProposalImage";
 import { MuseumPublicMediaFigure } from "../MuseumPublicMediaFigure";
+import { museumResearchMediaAspectRatio } from "./museumResearchMediaAspectRatio";
 
 export interface MuseumResearchProjectCardData {
   readonly id: string;
@@ -20,24 +21,16 @@ export interface MuseumResearchProjectCardData {
   readonly presentationMedia?: MuseumExternalProposalPresentationMedia;
 }
 
-function portraitAspectRatio(
-  width: number | null,
-  height: number | null
-): number | undefined {
-  if (width === null || height === null || height <= width) return undefined;
-  return width / height;
-}
-
 export function MuseumResearchProjectCard({
   project,
 }: {
   readonly project: MuseumResearchProjectCardData;
 }) {
   const mediaAspectRatio = project.media
-    ? portraitAspectRatio(project.media.width, project.media.height)
+    ? museumResearchMediaAspectRatio(project.media.width, project.media.height)
     : undefined;
   const presentationAspectRatio = project.presentationMedia
-    ? portraitAspectRatio(
+    ? museumResearchMediaAspectRatio(
         project.presentationMedia.width,
         project.presentationMedia.height
       )
@@ -65,7 +58,7 @@ export function MuseumResearchProjectCard({
       {project.media !== undefined ||
       project.presentationMedia === undefined ? null : (
         <div
-          className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black"
+          className="tw-relative tw-w-full tw-overflow-hidden tw-bg-black"
           {...presentationStyleProps}
         >
           <MuseumProposalImage
@@ -75,7 +68,6 @@ export function MuseumResearchProjectCard({
             alt={project.presentationMedia.altText.trim() || project.title}
             sourceByteSize={project.presentationMedia.sourceByteSize}
             variants={project.presentationMedia.variants}
-            requireIntentForLargeSource={false}
             className="tw-h-full tw-w-full tw-object-contain"
           />
         </div>

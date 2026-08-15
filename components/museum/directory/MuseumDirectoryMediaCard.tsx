@@ -34,10 +34,21 @@ function MuseumDirectoryMediaStage({
 }) {
   if (record === null) return <MuseumDirectoryEmptyStage />;
 
+  const mediaStageStyle = (
+    width: number | null,
+    height: number | null
+  ): { readonly aspectRatio: string } | undefined =>
+    width !== null && height !== null && width > 0 && height > 0
+      ? { aspectRatio: `${width} / ${height}` }
+      : undefined;
+
   const retained = selectMuseumStillMedia(record.work.media);
   if (retained !== undefined) {
     return (
-      <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
+      <div
+        className="tw-w-full tw-overflow-hidden tw-bg-black"
+        style={mediaStageStyle(retained.width, retained.height)}
+      >
         <MuseumManagedImage
           src={retained.url}
           {...(retained.width === null ? {} : { width: retained.width })}
@@ -64,7 +75,10 @@ function MuseumDirectoryMediaStage({
       "open_upstream_presentation"
     );
     return (
-      <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
+      <div
+        className="tw-w-full tw-overflow-hidden tw-bg-black"
+        style={mediaStageStyle(presentation.width, presentation.height)}
+      >
         <MuseumProposalImage
           src={presentation.mediaUrl}
           alt={presentation.altText}
@@ -72,7 +86,6 @@ function MuseumDirectoryMediaStage({
           height={presentation.height}
           sourceByteSize={presentation.sourceByteSize}
           variants={presentation.variants}
-          requireIntentForLargeSource={false}
           eager={eager}
           {...(sourceHref === null || !canOpenPresentation
             ? {}

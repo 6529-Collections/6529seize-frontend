@@ -5,7 +5,7 @@ import { MuseumStatusBadge } from "./MuseumShell";
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { KEYS_AND_GATES_PROGRAM_ID } from "@/lib/museum/constants";
+import { isMuseumKeysAndGatesProgramId } from "@/lib/museum/publication/collectionSemantics";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { displayMuseumStatus, statusTone } from "@/lib/museum/presentation";
 import type { MuseumObjectRecord } from "@/lib/museum/types";
@@ -17,11 +17,10 @@ export function MuseumProgramOutcomePage({
   readonly outcome: MuseumObjectRecord;
   readonly sourceCommit: string;
 }) {
-  const isKeysAndGates = outcome.programId === KEYS_AND_GATES_PROGRAM_ID;
-  const programHref =
-    outcome.programId === KEYS_AND_GATES_PROGRAM_ID
-      ? "/museum/network/acquisitions/keys-and-gates"
-      : null;
+  const isKeysAndGates = isMuseumKeysAndGatesProgramId(outcome.programId);
+  const programHref = isKeysAndGates
+    ? "/museum/network/acquisitions/keys-and-gates"
+    : null;
   const sourceHref = buildImmutableMuseumBlobUrl(
     sourceCommit,
     outcome.sourcePath

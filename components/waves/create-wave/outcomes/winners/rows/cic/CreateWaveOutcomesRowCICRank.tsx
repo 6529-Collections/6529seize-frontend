@@ -20,6 +20,7 @@ export default function CreateWaveOutcomesRowCICRank({
         <h3 className={CREATE_WAVE_OUTCOME_ROW_TYPE_CLASSES}>NIC</h3>
         <div className="tw-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-justify-end">
           <button
+            type="button"
             onClick={removeOutcome}
             aria-label="Remove"
             className={CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES}

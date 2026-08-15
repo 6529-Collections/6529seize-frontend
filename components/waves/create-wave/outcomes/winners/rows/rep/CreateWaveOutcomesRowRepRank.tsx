@@ -1,5 +1,6 @@
 import { Tooltip } from "react-tooltip";
 import { useId } from "react";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import {
@@ -34,6 +35,7 @@ export default function CreateWaveOutcomesRowRepRank({
           </div>
           <div className="tw-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-justify-end">
             <button
+              type="button"
               onClick={removeOutcome}
               aria-label="Remove"
               className={CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES}
@@ -84,14 +86,7 @@ export default function CreateWaveOutcomesRowRepRank({
           </div>
         </div>
       </div>
-      <Tooltip
-        id={tooltipId}
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
+      <Tooltip id={tooltipId} style={TOOLTIP_STYLES}>
         {outcome.category}
       </Tooltip>
     </>
