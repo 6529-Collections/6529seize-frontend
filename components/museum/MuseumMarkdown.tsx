@@ -385,8 +385,6 @@ function MuseumMarkdownLink({
   );
 }
 
-const LONG_MARKDOWN_CHARACTER_THRESHOLD = 32_000;
-
 interface MuseumMarkdownTableElementProps {
   readonly children?: ReactNode;
 }
@@ -399,7 +397,7 @@ function MuseumMarkdownTableHead({
   children,
 }: MuseumMarkdownTableElementProps) {
   return (
-    <thead className="tw-hidden tw-border-b tw-border-solid tw-border-iron-700 tw-text-iron-100 sm:tw-table-header-group">
+    <thead className="tw-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-text-iron-100 sm:tw-table-header-group">
       {children}
     </thead>
   );
@@ -657,18 +655,7 @@ export function MuseumMarkdown({
 
   return (
     <div className={`tw-space-y-4 tw-text-base ${className}`}>
-      {markdown.length >= LONG_MARKDOWN_CHARACTER_THRESHOLD ? (
-        <details className="tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-950/40">
-          <summary className="tw-flex tw-min-h-12 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 [&::-webkit-details-marker]:tw-hidden">
-            {t(DEFAULT_LOCALE, "museum.network.research.completeSource")}
-          </summary>
-          <div className="tw-border-t tw-border-solid tw-border-white/10 tw-p-4 sm:tw-p-6">
-            {renderedMarkdown}
-          </div>
-        </details>
-      ) : (
-        renderedMarkdown
-      )}
+      {renderedMarkdown}
     </div>
   );
 }

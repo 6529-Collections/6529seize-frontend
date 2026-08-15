@@ -294,39 +294,42 @@ describe("Museum finished publication routes", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "A public museum for a network state",
+        name: "The 6529 Network Museum",
       })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The 6529 Network is building a decentralized network state. The Museum is one of its first public institutions: a permanent collection of digital art held by the Network on Ethereum, governed through TDH, and open online to anyone in the world."
+        "The 6529 Network Museum is a permanent collection of digital art held for the benefit of the 6529 Network and the public. It collects, preserves, studies, and shares art from the history of internet-native culture."
       )
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: "The Museum of the Network",
+        name: "Collection and acquisition",
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "The Museum today" })
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Scholarship and interpretation",
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "It is meaningfully network-governed and moving toward fuller decentralization. Governance outcomes remain institutional records published by repository maintainers, while Museum Safe signers execute Ethereum transactions."
+        "The 6529 Network holds the Collection for the public commons. Museum governance, rights, provenance, and preservation records explain how that responsibility is carried out."
       )
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        level: 3,
-        name: "Decision-constrained custody",
+        level: 2,
+        name: "A museum open to the public",
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "Permanence" })
+      screen.getByRole("heading", { level: 2, name: "How the Museum works" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Permanence requires more than token ownership/u)
+      screen.getByText(/Long-term care joins Ethereum state/u)
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Founding record" })

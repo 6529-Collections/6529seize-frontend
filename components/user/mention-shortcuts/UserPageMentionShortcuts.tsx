@@ -41,6 +41,7 @@ import {
 import type { ReactNode, RefObject } from "react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 const MAX_MEMBERS = 25;
@@ -50,6 +51,39 @@ const VISIBLE_QUICK_TAGS = 3;
 const LOADING_MESSAGE_KEY = "user.mentionShortcuts.loading";
 
 type QuickTagsView = "summary" | "manage" | "editor";
+
+function getAliasErrorDescription(
+  reserved: boolean,
+  aliasIsValid: boolean,
+  hasAlias: boolean
+): string | undefined {
+  if (reserved) return "mention-shortcut-reserved-error";
+  if (!aliasIsValid && hasAlias) return "mention-shortcut-name-error";
+  return undefined;
+}
+
+function getSearchStatus({
+  isFetching,
+  locale,
+  searchIsReady,
+  visibleResultCount,
+}: {
+  readonly isFetching: boolean;
+  readonly locale: SupportedLocale;
+  readonly searchIsReady: boolean;
+  readonly visibleResultCount: number;
+}): string {
+  if (!searchIsReady) {
+    return t(locale, "user.mentionShortcuts.searchPrompt");
+  }
+  if (isFetching) return t(locale, LOADING_MESSAGE_KEY);
+  if (visibleResultCount === 1) {
+    return t(locale, "user.mentionShortcuts.searchResult");
+  }
+  return t(locale, "user.mentionShortcuts.searchResults", {
+    count: visibleResultCount,
+  });
+}
 
 function AliasEditor({
   backLabel,
@@ -97,12 +131,11 @@ function AliasEditor({
   const aliasIsValid = /^\w{3,15}$/.test(normalizedAlias);
   const reserved = isReservedMentionAlias(normalizedAlias);
   const aliasHasError = alias.length > 0 && (!aliasIsValid || reserved);
-  let aliasErrorDescription: string | undefined;
-  if (reserved) {
-    aliasErrorDescription = "mention-shortcut-reserved-error";
-  } else if (!aliasIsValid && alias.length > 0) {
-    aliasErrorDescription = "mention-shortcut-name-error";
-  }
+  const aliasErrorDescription = getAliasErrorDescription(
+    reserved,
+    aliasIsValid,
+    alias.length > 0
+  );
   const canSave = aliasIsValid && !reserved && members.length > 0;
 
   const mutation = useMutation({
@@ -144,17 +177,12 @@ function AliasEditor({
     members.length < MAX_MEMBERS &&
     search.length >= MIN_SEARCH_LENGTH &&
     debouncedSearch === search;
-  let searchStatus = t(locale, "user.mentionShortcuts.searchPrompt");
-  if (searchIsReady && profileSearchQuery.isFetching) {
-    searchStatus = t(locale, LOADING_MESSAGE_KEY);
-  } else if (searchIsReady) {
-    searchStatus =
-      visibleIdentities.length === 1
-        ? t(locale, "user.mentionShortcuts.searchResult")
-        : t(locale, "user.mentionShortcuts.searchResults", {
-            count: visibleIdentities.length,
-          });
-  }
+  const searchStatus = getSearchStatus({
+    isFetching: profileSearchQuery.isFetching,
+    locale,
+    searchIsReady,
+    visibleResultCount: visibleIdentities.length,
+  });
 
   const addMember = (identity: CommunityMemberMinimal) => {
     const { profile_id: profileId, handle } = identity;
@@ -411,7 +439,9 @@ export default function UserPageMentionShortcuts({
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
   const isOwner =
-    !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
+    !!profile.id &&
+    connectedProfile?.id === profile.id &&
+    !activeProfileProxy;
   const queryClient = useQueryClient();
   const { aliases, isPending, isError, refetch } = useMentionAliases({
     enabled: isOwner,
@@ -452,7 +482,9 @@ export default function UserPageMentionShortcuts({
 
   const deleteMutation = useMutation({
     mutationFn: deleteMentionAlias,
-    onSuccess: async () => {
+    onSuccess: async (_data, deletedAliasId) => {
+      const deletedLastAlias =
+        aliases.length === 1 && aliases[0]?.id === deletedAliasId;
       await queryClient.invalidateQueries({
         queryKey: [QueryKey.MENTION_ALIASES],
       });
@@ -461,6 +493,9 @@ export default function UserPageMentionShortcuts({
         message: t(locale, "user.mentionShortcuts.deleted"),
       });
       requestViewHeadingFocus();
+      if (deletedLastAlias) {
+        setView("summary");
+      }
       setAliasToDelete(null);
       setEditorAlias(null);
     },
@@ -543,13 +578,15 @@ export default function UserPageMentionShortcuts({
               {t(locale, "user.mentionShortcuts.summaryDescription")}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => changeView("manage")}
-            className="tw-min-h-11 tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-400 sm:tw-min-h-6 sm:tw-py-0"
-          >
-            {t(locale, "user.mentionShortcuts.manage")}
-          </button>
+          {sortedAliases.length > 0 && (
+            <button
+              type="button"
+              onClick={() => changeView("manage")}
+              className="tw-min-h-11 tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-400 sm:tw-min-h-6 sm:tw-py-0"
+            >
+              {t(locale, "user.mentionShortcuts.manage")}
+            </button>
+          )}
         </div>
 
         <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-gap-2">
@@ -563,14 +600,18 @@ export default function UserPageMentionShortcuts({
           )}
           {isError && <QuickTagsLoadError onRetry={() => void refetch()} />}
           {!isPending && !isError && sortedAliases.length === 0 && (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => startEditing(null, "summary")}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/5 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/10 sm:tw-min-h-9 sm:tw-py-2"
+              className="tw-min-h-11 sm:tw-min-h-9"
             >
-              <PlusIcon aria-hidden="true" className="tw-size-4" />
+              <PlusIcon
+                aria-hidden="true"
+                className="-tw-ml-0.5 tw-size-4"
+              />
               {t(locale, "user.mentionShortcuts.new")}
-            </button>
+            </Button>
           )}
           {!isPending &&
             !isError &&

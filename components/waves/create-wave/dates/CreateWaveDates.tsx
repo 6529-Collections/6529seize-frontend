@@ -26,7 +26,7 @@ export default function CreateWaveDates({
   const isApprove = waveType === ApiWaveType.Approve;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-4">
+    <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveStepHeader
         title={t(locale, "waves.create.dates.title")}
         description={t(locale, "waves.create.dates.description")}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { generateCalendar } from "@/helpers/calendar/calendar.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import CommonCalendarDay, {
   type CommonCalendarVariant,
 } from "./CommonCalendarDay";
@@ -56,6 +57,7 @@ function CommonCalendarView({
   setSelectedTimestamp,
   variant = "default",
 }: CommonCalendarProps) {
+  const locale = useBrowserLocale();
   const [visibleDate, setVisibleDate] = useState(() =>
     getInitialVisibleDate({
       initialMonth,
@@ -175,6 +177,7 @@ function CommonCalendarView({
               maxTimestamp={maxTimestamp}
               selectedTimestamp={selectedTimestamp}
               setSelectedTimestamp={setSelectedTimestamp}
+              locale={locale}
               variant={variant}
             />
           ))}

@@ -28,7 +28,7 @@ import {
   getMuseumView,
 } from "@/lib/museum/normalize";
 import { buildMuseumWorkContext } from "@/lib/museum/publication/ia";
-import { MUSEUM_MAGNUM_ACQUISITION_ID } from "@/lib/museum/publication/collectionSemantics";
+import { hasMuseumMagnumInstitutionalDisplayRights } from "@/lib/museum/publication/collectionSemantics";
 import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
 import type {
   MuseumMedia,
@@ -116,33 +116,14 @@ function workQualifierLabel(
   return t(DEFAULT_LOCALE, "museum.network.works.mintPending");
 }
 
-function hasMagnumInstitutionalDisplayRights(work: MuseumPublicWork): boolean {
-  if (
-    work.status !== "accessioned_into_permanent_collection" ||
-    work.collectionMembership !== true ||
-    !work.acquisitionIds.includes(MUSEUM_MAGNUM_ACQUISITION_ID)
-  ) {
-    return false;
-  }
-
-  return (
-    [...work.media, ...(work.mediaMetadata ?? [])].some(
-      (media) =>
-        media.credit.licenseLabel === "All Rights Reserved" &&
-        media.credit.sourcePath.trim().length > 0
-    ) ||
-    (work.presentationMedia ?? []).some(
-      (media) => media.credit.sourcePath.trim().length > 0
-    )
-  );
-}
-
 function MuseumCanonicalWorkMedia({
   work,
   programMediaMatch,
+  presentationSourceHref,
 }: {
   readonly work: MuseumPublicWork;
   readonly programMediaMatch: ReturnType<typeof findReviewedProgramMediaMatch>;
+  readonly presentationSourceHref: string | null;
 }) {
   const stillMedia = selectMuseumStillMedia(work.media);
   if (stillMedia !== undefined) {
@@ -204,13 +185,32 @@ function MuseumCanonicalWorkMedia({
           creditLineClassName="tw-block tw-text-iron-200"
           licenseWrapperClassName="tw-mt-1 tw-block"
           rightsLayout="block"
-        />
+        >
+          {presentationSourceHref === null ? null : (
+            <span className="tw-mt-1 tw-block tw-text-iron-400">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.acquisitions.presentationSource"
+              )}
+              {": "}
+              <a
+                href={presentationSourceHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.acquisitions.openPresentation"
+                )}
+              </a>
+            </span>
+          )}
+        </MuseumReviewedProgramMediaFigure>
       </section>
     );
   }
-  // A reviewed Wave presentation is the public image for this downstream
-  // accession record. Its dedicated figure follows immediately below; do not
-  // put a metadata-only placeholder in front of it.
+  // The dedicated Wave figure follows below; do not precede it with metadata.
   if (
     work.presentationMedia !== undefined &&
     work.presentationMedia.length > 0
@@ -296,10 +296,25 @@ function MuseumCanonicalWorkRecordPage({
   });
   const documents = selectMuseumPublicWorkDocuments(work, projectedDocuments);
   const workHrefs = museumWorkHrefIndex(publication, view);
+  const workAliasIds = (publication.workAliases ?? [])
+    .filter((alias) => alias.workId === work.id)
+    .map((alias) => alias.sourceObjectId);
   const programMediaMatch = findReviewedProgramMediaMatch(view, [
     work.id,
     ...(work.sourceRecordIds ?? []),
+    ...workAliasIds,
   ]);
+  const presentationSourceHref = (() => {
+    const presentation = work.presentationMedia?.find((media) =>
+      media.affordances.includes("open_upstream_presentation")
+    );
+    return presentation === undefined
+      ? null
+      : buildMuseumSignedWaveStormDropUrl(
+          presentation.source.waveId,
+          presentation.source.dropId
+        );
+  })();
   const programMediaMetadata =
     programMediaMatch === null
       ? undefined
@@ -330,6 +345,10 @@ function MuseumCanonicalWorkRecordPage({
           work.presentationMedia[0].rights.licenseLabel
         ));
   const insideSystemHref = museumWorkInsideSystemHref(work, publication);
+  const qualifierLabels = work.qualifiers.flatMap((qualifier) => {
+    const label = workQualifierLabel(work, qualifier);
+    return label === null ? [] : [{ qualifier, label }];
+  });
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -378,6 +397,7 @@ function MuseumCanonicalWorkRecordPage({
       <MuseumCanonicalWorkMedia
         work={work}
         programMediaMatch={programMediaMatch}
+        presentationSourceHref={presentationSourceHref}
       />
       {insideSystemHref !== null ? (
         <div className="tw-mt-8">
@@ -389,7 +409,8 @@ function MuseumCanonicalWorkRecordPage({
           </Link>
         </div>
       ) : null}
-      {work.presentationMedia !== undefined &&
+      {programMediaMatch === null &&
+      work.presentationMedia !== undefined &&
       work.presentationMedia.length > 0 ? (
         <section
           className="tw-mt-10"
@@ -427,7 +448,9 @@ function MuseumCanonicalWorkRecordPage({
                       height={media.height}
                       sourceByteSize={media.sourceByteSize}
                       variants={media.variants}
-                      requireIntentForLargeSource={false}
+                      optimizeSource={hasMuseumMagnumInstitutionalDisplayRights(
+                        work
+                      )}
                       {...(sourceHref === null || !canOpenPresentation
                         ? {}
                         : {
@@ -536,7 +559,7 @@ function MuseumCanonicalWorkRecordPage({
           </div>
         )}
       </dl>
-      {hasMagnumInstitutionalDisplayRights(work) ? (
+      {hasMuseumMagnumInstitutionalDisplayRights(work) ? (
         <p className="tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(
             DEFAULT_LOCALE,
@@ -544,16 +567,14 @@ function MuseumCanonicalWorkRecordPage({
           )}
         </p>
       ) : null}
-      {work.qualifiers.length > 0 ? (
+      {qualifierLabels.length > 0 ? (
         <dl className="tw-mt-10 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-4">
-          {work.qualifiers.map((qualifier) => (
+          {qualifierLabels.map(({ qualifier, label }) => (
             <div
               key={`${qualifier.kind}:${qualifier.sourcePath}`}
               className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-text-sm"
             >
-              <dt className="tw-font-semibold tw-text-iron-300">
-                {workQualifierLabel(work, qualifier)}
-              </dt>
+              <dt className="tw-font-semibold tw-text-iron-300">{label}</dt>
             </div>
           ))}
         </dl>
