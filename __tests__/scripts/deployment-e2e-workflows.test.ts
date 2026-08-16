@@ -99,8 +99,7 @@ describe("serialized post-deploy E2E", () => {
       );
       const sourceMaterialization = job.steps.find(
         (step: { name?: string }) =>
-          step.name === "Check out exact deployed source" ||
-          step.name === "Materialize exact deployed source"
+          step.name === "Check out exact deployed source"
       );
 
       expect(
@@ -131,18 +130,10 @@ describe("serialized post-deploy E2E", () => {
       expect(e2e.workflow.concurrency.group).toContain(environmentGroup);
       expect(e2e.workflow.concurrency.group).toContain(automaticGroup);
 
-      if (environment === "production") {
-        expect(sourceMaterialization.run).toContain(
-          'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
-        );
-        expect(sourceMaterialization.env.EXPECTED_SHA).toBe(
-          "${{ steps.source.outputs.sha }}"
-        );
-      } else {
-        expect(sourceMaterialization.with.ref).toBe(
-          "${{ steps.source.outputs.sha }}"
-        );
-      }
+      expect(sourceMaterialization.with.ref).toBe(
+        "${{ steps.source.outputs.sha }}"
+      );
+      expect(sourceMaterialization.with["persist-credentials"]).toBe(false);
       expect(e2e.source).toContain(
         'test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"'
       );
