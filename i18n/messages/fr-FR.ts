@@ -458,7 +458,7 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.validation.invalidTitle":
     "Certains groupes d’accès doivent être corrigés.",
   "waves.create.groups.validation.invalidDescription":
-    "Chaque membre des groupes de dépôt, vote, chat et administration doit aussi appartenir au groupe de visibilité.",
+    "Chaque membre des groupes de soumission, vote, chat et administration doit aussi appartenir au groupe de visibilité.",
   "waves.create.dates.title": "Calendrier",
   "waves.create.dates.description":
     "Vérifiez le début de la Wave, du vote et des annonces des gagnants.",
