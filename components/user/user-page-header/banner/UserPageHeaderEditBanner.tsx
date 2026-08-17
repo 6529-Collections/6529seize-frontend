@@ -33,17 +33,21 @@ export default function UserPageHeaderEditBanner({
   profile,
   defaultBanner1,
   defaultBanner2,
+  embedded = false,
   isOpen = true,
   onAfterLeave,
   onBack,
+  onBusyChange,
   onClose,
 }: {
   readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
+  readonly embedded?: boolean;
   readonly isOpen?: boolean;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly onBack?: (() => void) | undefined;
+  readonly onBusyChange?: ((isBusy: boolean) => void) | undefined;
   readonly onClose: () => void;
 }) {
   const isSavingRef = useRef(false);
@@ -129,6 +133,17 @@ export default function UserPageHeaderEditBanner({
   const isSaving = isUploading || updateUser.isPending;
   isSavingRef.current = isSaving;
 
+  useEffect(() => {
+    onBusyChange?.(isSaving);
+  }, [isSaving, onBusyChange]);
+
+  useEffect(
+    () => () => {
+      onBusyChange?.(false);
+    },
+    [onBusyChange]
+  );
+
   const uploadBannerImage = async (): Promise<string | null> => {
     if (!bannerFile) {
       return initialBannerImageUrl;
@@ -201,6 +216,57 @@ export default function UserPageHeaderEditBanner({
     await updateUser.mutateAsync(body);
   };
 
+  const form = (
+    <form
+      onSubmit={onSubmit}
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+    >
+      <CommonTabs<BannerEditMode>
+        items={bannerTabs}
+        activeItem={editMode}
+        setSelected={setEditMode}
+        filterLabel="Banner editor mode"
+        fill={false}
+      />
+
+      {editMode === "gradient" ? (
+        <UserSettingsBackground
+          bgColor1={bgColor1}
+          bgColor2={bgColor2}
+          setBgColor1={setBgColor1}
+          setBgColor2={setBgColor2}
+        />
+      ) : (
+        <UserSettingsBannerImageInput
+          imageToShow={bannerPreviewUrl}
+          setFile={setBannerFile}
+        />
+      )}
+
+      <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
+        <UserSettingsSave
+          loading={isSaving}
+          disabled={!haveChanges}
+          responsiveWidthClassName="md:tw-w-auto"
+        />
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={isSaving}
+          onClick={handleClose}
+          fullWidth
+          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (embedded) {
+    return form;
+  }
+
   return (
     <MobileWrapperDialog
       title={getUserProfileHeaderMessage("user.profileHeader.edit.banner")}
@@ -220,50 +286,7 @@ export default function UserPageHeaderEditBanner({
       }
       dismissible={!isSaving}
     >
-      <form
-        onSubmit={onSubmit}
-        className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
-      >
-        <CommonTabs<BannerEditMode>
-          items={bannerTabs}
-          activeItem={editMode}
-          setSelected={setEditMode}
-          filterLabel="Banner editor mode"
-          fill={false}
-        />
-
-        {editMode === "gradient" ? (
-          <UserSettingsBackground
-            bgColor1={bgColor1}
-            bgColor2={bgColor2}
-            setBgColor1={setBgColor1}
-            setBgColor2={setBgColor2}
-          />
-        ) : (
-          <UserSettingsBannerImageInput
-            imageToShow={bannerPreviewUrl}
-            setFile={setBannerFile}
-          />
-        )}
-
-        <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
-          <UserSettingsSave
-            loading={isSaving}
-            disabled={!haveChanges}
-            responsiveWidthClassName="md:tw-w-auto"
-          />
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={isSaving}
-            onClick={handleClose}
-            fullWidth
-            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      {form}
     </MobileWrapperDialog>
   );
 }
