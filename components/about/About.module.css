@@ -28,6 +28,10 @@
   font-family: "Montserrat", sans-serif !important;
 }
 
+.htmlContainer.ensContent h4 {
+  color: #f5f5f5;
+}
+
 .gdrcContent {
   max-width: 64rem;
   color: #cecfd4;
