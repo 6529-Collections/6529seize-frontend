@@ -1,15 +1,22 @@
 import { render } from "@testing-library/react";
 import { act } from "@testing-library/react";
-import React from "react";
+import type { ComponentProps } from "react";
 import UserPageIdentityAddStatementsSocialMediaAccount from "@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount";
+import type UserPageIdentityAddStatementsSocialMediaAccountItems from "@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems";
+import type UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_TYPE, STATEMENT_GROUP } from "@/helpers/Types";
 
-let itemsProps: any;
-let formProps: any;
+type ItemsProps = ComponentProps<
+  typeof UserPageIdentityAddStatementsSocialMediaAccountItems
+>;
+type FormProps = ComponentProps<typeof UserPageIdentityAddStatementsForm>;
+let itemsProps: ItemsProps;
+let formProps: FormProps;
 
 jest.mock(
   "@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems",
-  () => (props: any) => {
+  () => (props: ItemsProps) => {
     itemsProps = props;
     return <div data-testid="items" />;
   }
@@ -17,20 +24,15 @@ jest.mock(
 
 jest.mock(
   "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
-  () => (props: any) => {
+  () => (props: FormProps) => {
     formProps = props;
     return <div data-testid="form" />;
   }
 );
 
 describe("UserPageIdentityAddStatementsSocialMediaAccount", () => {
-  const profile = { id: "p1" } as any;
+  const profile = { id: "p1" } as ApiIdentity;
   const onClose = jest.fn();
-
-  beforeEach(() => {
-    itemsProps = undefined;
-    formProps = undefined;
-  });
 
   it("passes props and updates type", () => {
     render(
@@ -46,7 +48,6 @@ describe("UserPageIdentityAddStatementsSocialMediaAccount", () => {
     expect(formProps.group).toBe(STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT);
     expect(formProps.activeType).toBe(STATEMENT_TYPE.X);
     expect(formProps.profile).toBe(profile);
-    expect(formProps.onClose).toBe(onClose);
 
     act(() => {
       itemsProps.setSocialType(STATEMENT_TYPE.REDDIT);

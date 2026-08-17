@@ -26,12 +26,14 @@ import { useContext, useEffect, useState } from "react";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 export default function UserPageHeaderEditPfp({
   profile,
+  embedded = false,
   isOpen = true,
   onAfterLeave,
   onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
+  readonly embedded?: boolean;
   readonly isOpen?: boolean;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly onBack?: (() => void) | undefined;
@@ -189,6 +191,63 @@ export default function UserPageHeaderEditPfp({
     await updatePfp.mutateAsync(formData);
   };
 
+  const form = (
+    <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
+      <UserSettingsImgSelectMeme
+        memes={memes ?? []}
+        onMeme={setSelectedMemeAndRemoveFile}
+      />
+
+      <div className="tw-my-5 tw-flex tw-w-full tw-items-center tw-gap-3">
+        <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
+        <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
+          or
+        </span>
+        <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
+      </div>
+
+      <UserSettingsImgSelectFile
+        imageToShow={imageToShow}
+        setFile={setFileAndRemoveMeme}
+      />
+      {error && (
+        <p
+          role="alert"
+          className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-sm tw-text-error"
+        >
+          {error}
+        </p>
+      )}
+      <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
+        <Button
+          type="submit"
+          variant="action"
+          size="lg"
+          loading={saving}
+          disabled={!file && !selectedMeme}
+          fullWidth
+          className="md:tw-w-auto"
+        >
+          Save PFP
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={saving}
+          onClick={onClose}
+          fullWidth
+          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (embedded) {
+    return form;
+  }
+
   return (
     <MobileWrapperDialog
       title={getUserProfileHeaderMessage("user.profileHeader.edit.pfp")}
@@ -202,56 +261,7 @@ export default function UserPageHeaderEditPfp({
       maxWidthClass="md:tw-max-w-2xl"
       headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
     >
-      <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
-        <UserSettingsImgSelectMeme
-          memes={memes ?? []}
-          onMeme={setSelectedMemeAndRemoveFile}
-        />
-
-        <div className="tw-my-5 tw-flex tw-w-full tw-items-center tw-gap-3">
-          <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
-          <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600">
-            or
-          </span>
-          <span className="tw-h-px tw-flex-1 tw-bg-white/5" />
-        </div>
-
-        <UserSettingsImgSelectFile
-          imageToShow={imageToShow}
-          setFile={setFileAndRemoveMeme}
-        />
-        {error && (
-          <p
-            role="alert"
-            className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-sm tw-text-error"
-          >
-            {error}
-          </p>
-        )}
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
-          <Button
-            type="submit"
-            variant="action"
-            size="lg"
-            loading={saving}
-            disabled={!file && !selectedMeme}
-            fullWidth
-            className="md:tw-w-auto"
-          >
-            Save PFP
-          </Button>
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={saving}
-            onClick={onClose}
-            fullWidth
-            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      {form}
     </MobileWrapperDialog>
   );
 }

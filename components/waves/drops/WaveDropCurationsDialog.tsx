@@ -313,7 +313,6 @@ export default function WaveDropCurationsDialog({
       tall={true}
       maxWidthClass="md:tw-max-w-lg"
       headerClassName="tw-mb-4 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-iron-800 tw-pb-3 tw-pt-6"
-      mobileCloseButtonClassName="-tw-translate-x-0.5 tw-translate-y-2 tw-z-10 tw-bg-transparent tw-text-white tw-shadow-lg"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-2">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">

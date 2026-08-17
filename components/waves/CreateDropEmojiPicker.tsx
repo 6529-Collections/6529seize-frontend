@@ -182,6 +182,7 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
           isOpen={isPickerOpen}
           onClose={() => setShowPicker(false)}
           zIndexClassName={mobileZIndexClassName}
+          showHeaderCloseButton={false}
         >
           <div
             className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
