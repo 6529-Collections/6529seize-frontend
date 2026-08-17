@@ -150,7 +150,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           />
         ))}
       </ul>
-      {(primaryAddress || showDelegationCenter) && (
+      {(primaryAddress !== null || showDelegationCenter) && (
         <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
           {primaryAddress && (
             <ButtonLink
