@@ -82,13 +82,12 @@ export default function CreateWaveGroup({
   const errorId = `wave-group-${groupType.toLowerCase()}-error`;
 
   return (
-    <div
-      className={`tw-flex tw-flex-col tw-gap-y-3 tw-rounded-lg ${
+    <fieldset
+      className={`tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 tw-rounded-lg ${
         errorMessage
           ? "tw-scroll-mb-32 tw-border tw-border-solid tw-border-error/70 tw-p-3"
-          : ""
+          : "tw-border-0 tw-p-0"
       }`}
-      role="group"
       aria-labelledby={labelId}
       aria-describedby={errorMessage ? errorId : undefined}
       data-wave-group-invalid={errorMessage ? true : undefined}
@@ -136,6 +135,6 @@ export default function CreateWaveGroup({
           {errorMessage}
         </p>
       )}
-    </div>
+    </fieldset>
   );
 }

@@ -6,6 +6,25 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 
 describe("wave group validation helpers", () => {
+  it("preserves a public View scope as Everyone", () => {
+    expect(
+      getWaveGroupValidationRequest({
+        groups: {
+          canView: null,
+          canDrop: null,
+          canVote: null,
+          canChat: null,
+          admin: null,
+        },
+        waveType: ApiWaveType.Chat,
+        chatEnabled: true,
+      })
+    ).toEqual({
+      visibility_group_id: null,
+      chat_group_id: null,
+    });
+  });
+
   it("checks only active Chat-wave roles and the default authenticated admin", () => {
     expect(
       getWaveGroupValidationRequest({

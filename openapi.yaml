@@ -10543,7 +10543,9 @@ paths:
         Returns the active privilege scopes that contain at least one member
         outside the supplied View group. Omitted privilege properties are not
         checked. A null Drop, Vote, or Chat property represents Everyone; a null
-        Admin property means there is no explicit Admin group.
+        Admin property means there is no explicit Admin group. Private groups
+        are available only to their creator or eligible members; other private
+        group ids are treated as unavailable.
       operationId: validateWaveGroups
       x-6529-router:
         enabled: true
@@ -10565,7 +10567,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiWaveGroupValidationResponse"
         "400":
-          description: Invalid request or unknown group
+          description: Invalid request or unavailable group
         "403":
           description: Authentication is required when validating the caller as Admin
   /waves/direct-message/new:

@@ -95,7 +95,7 @@ export default function CreateWaveGroups({
       </div>
       <div aria-live="polite" aria-atomic="true">
         {isValidating && (
-          <p className="tw-m-0 tw-text-sm tw-text-iron-400" role="status">
+          <p className="tw-m-0 tw-text-sm tw-text-iron-400">
             {t(locale, "waves.create.groups.validation.checking")}
           </p>
         )}

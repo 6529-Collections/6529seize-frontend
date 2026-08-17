@@ -276,9 +276,24 @@ export function useWaveConfig() {
         step === CreateWaveStep.GROUPS &&
         effectiveConfig.groups.canView !== null
       ) {
-        const validationResult = await groupValidationQuery.refetch();
+        let validationResult;
+        try {
+          // An explicit refetch always goes to the server, even while the
+          // background query data is still within its stale-time window.
+          validationResult = await groupValidationQuery.refetch();
+        } catch {
+          setGroupValidationErrorVisible(true);
+          setErrorFocusRequest((count) => count + 1);
+          return;
+        }
         if (validationResult.isError || !validationResult.data?.valid) {
-          setGroupValidationErrorVisible(validationResult.isError);
+          const hasActionableRoleErrors =
+            (validationResult.data?.invalid_roles.length ?? 0) > 0;
+          setGroupValidationErrorVisible(
+            validationResult.isError ||
+              !validationResult.data ||
+              !hasActionableRoleErrors
+          );
           setErrorFocusRequest((count) => count + 1);
           return;
         }

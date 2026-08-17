@@ -6,14 +6,29 @@ import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
 export const useWaveGroupValidation = (config: CreateWaveConfig) => {
+  const { admin, canChat, canDrop, canView, canVote } = config.groups;
   const request = useMemo(
     () =>
       getWaveGroupValidationRequest({
-        groups: config.groups,
+        groups: {
+          admin,
+          canChat,
+          canDrop,
+          canView,
+          canVote,
+        },
         waveType: config.overview.type,
         chatEnabled: config.chat.enabled,
       }),
-    [config.chat.enabled, config.groups, config.overview.type]
+    [
+      admin,
+      canChat,
+      canDrop,
+      canView,
+      canVote,
+      config.chat.enabled,
+      config.overview.type,
+    ]
   );
 
   return useQuery({
