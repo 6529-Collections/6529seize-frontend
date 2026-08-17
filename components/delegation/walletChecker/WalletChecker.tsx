@@ -160,7 +160,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                   loading={props.checking}
                   disabled={props.formDisabled}
                   onClicked={props.onSubmit}
-                  className="tw-h-11 tw-w-full !tw-bg-primary-500 !tw-text-white !tw-ring-primary-400 hover:!tw-bg-primary-600 hover:!tw-ring-primary-500 sm:tw-w-auto sm:tw-min-w-32"
+                  className="active:!tw-border-primary-700 active:!tw-bg-primary-700 tw-h-11 tw-w-full !tw-border-primary-500 !tw-bg-primary-500 !tw-text-white desktop-hover:hover:!tw-border-primary-600 desktop-hover:hover:!tw-bg-primary-600 sm:tw-w-auto sm:tw-min-w-32"
                 >
                   {props.checking ? "Checking..." : "Check Wallet"}
                 </PrimaryButton>
@@ -222,7 +222,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                   loading={props.refreshing}
                   disabled={props.refreshing}
                   onClicked={props.onRefresh}
-                  className="tw-w-full !tw-bg-primary-500 !tw-text-white !tw-ring-primary-400 hover:!tw-bg-primary-600 hover:!tw-ring-primary-500 sm:tw-w-auto"
+                  className="active:!tw-border-primary-700 active:!tw-bg-primary-700 tw-w-full !tw-border-primary-500 !tw-bg-primary-500 !tw-text-white desktop-hover:hover:!tw-border-primary-600 desktop-hover:hover:!tw-bg-primary-600 sm:tw-w-auto"
                 >
                   {props.refreshing ? "Refreshing..." : "Refresh"}
                 </PrimaryButton>

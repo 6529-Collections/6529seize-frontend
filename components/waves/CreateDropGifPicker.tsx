@@ -288,6 +288,7 @@ function GifPickerDialog({
         isOpen={true}
         onClose={onClose}
         noPadding={true}
+        showHeaderCloseButton={false}
         headerClassName="tw-sr-only"
       >
         <GifPickerUnavailable
@@ -306,6 +307,7 @@ function GifPickerDialog({
       isOpen={true}
       onClose={onClose}
       noPadding={true}
+      showHeaderCloseButton={false}
       headerClassName="tw-sr-only"
     >
       <div

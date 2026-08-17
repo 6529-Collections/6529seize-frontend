@@ -1,17 +1,34 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import UserPageIdentityAddStatementsSocialMediaPosts from '@/components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts';
+import { render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
+import UserPageIdentityAddStatementsSocialMediaPosts from "@/components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts";
+import type UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-jest.mock('@/components/user/identity/statements/add/social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPostsHeader', () => ({ __esModule: true, default: (p:any) => <div data-testid="header" onClick={p.onClose}/> }));
-jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => ({ __esModule: true, default: (p:any) => { (global as any).formProps = p; return <div data-testid="form"/>; }}));
+type FormProps = ComponentProps<typeof UserPageIdentityAddStatementsForm>;
+let formProps: FormProps;
 
-test('renders header and passes props to form', () => {
-  const profile = { handle: 'a' } as any;
+jest.mock(
+  "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
+  () => ({
+    __esModule: true,
+    default: (props: FormProps) => {
+      formProps = props;
+      return <div data-testid="form" />;
+    },
+  })
+);
+
+test("passes props to form", () => {
+  const profile = { handle: "a" } as ApiIdentity;
   const onClose = jest.fn();
-  render(<UserPageIdentityAddStatementsSocialMediaPosts profile={profile} onClose={onClose} />);
-  expect(screen.getByTestId('header')).toBeInTheDocument();
-  expect(screen.getByTestId('form')).toBeInTheDocument();
-  expect((global as any).formProps.profile).toBe(profile);
-  expect((global as any).formProps.activeType).toBe('LINK');
-  expect((global as any).formProps.group).toBe('SOCIAL_MEDIA_VERIFICATION_POST');
+  render(
+    <UserPageIdentityAddStatementsSocialMediaPosts
+      profile={profile}
+      onClose={onClose}
+    />
+  );
+  expect(screen.getByTestId("form")).toBeInTheDocument();
+  expect(formProps.profile).toBe(profile);
+  expect(formProps.activeType).toBe("LINK");
+  expect(formProps.group).toBe("SOCIAL_MEDIA_VERIFICATION_POST");
 });

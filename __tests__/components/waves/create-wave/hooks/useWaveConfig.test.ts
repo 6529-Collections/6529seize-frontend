@@ -12,12 +12,27 @@ import {
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import * as createWaveValidation from "@/helpers/waves/create-wave.validation";
 import { getDefaultFirstDecisionTime } from "@/components/waves/create-wave/services/waveDecisionService";
+import { useWaveGroupValidation } from "@/components/waves/create-wave/hooks/useWaveGroupValidation";
 
 // Mock dependencies
 jest.mock("@/helpers/waves/create-wave.validation");
 jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
   useMemeCardCount: jest.fn(),
 }));
+jest.mock(
+  "@/components/waves/create-wave/hooks/useWaveGroupValidation",
+  () => ({
+    useWaveGroupValidation: jest.fn(() => ({
+      data: { valid: true, invalid_roles: [] },
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      }),
+    })),
+  })
+);
 jest.mock("@/helpers/time", () => ({
   Time: {
     currentMillis: jest.fn(() => 1000000),
@@ -29,6 +44,7 @@ const mockGetCreateWaveValidationErrors =
     typeof createWaveValidation.getCreateWaveValidationErrors
   >;
 const mockedUseMemeCardCount = useMemeCardCount as jest.Mock;
+const mockedUseWaveGroupValidation = useWaveGroupValidation as jest.Mock;
 
 describe("useWaveConfig", () => {
   beforeEach(() => {
@@ -37,6 +53,15 @@ describe("useWaveConfig", () => {
       data: undefined,
       isLoading: false,
       isError: false,
+    });
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: { valid: true, invalid_roles: [] },
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      }),
     });
     mockGetCreateWaveValidationErrors.mockReturnValue([]);
   });
@@ -151,6 +176,73 @@ describe("useWaveConfig", () => {
         period: null,
       });
     });
+  });
+
+  it("surfaces a generic error when a restricted group check has no result", async () => {
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: undefined,
+        isError: false,
+      }),
+    });
+    const { result } = renderHook(() => useWaveConfig());
+
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.GROUPS,
+        direction: "backward",
+      });
+    });
+    act(() => {
+      result.current.onGroupSelect({
+        group: { id: "view-group" } as ApiGroupFull,
+        groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      });
+    });
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.DATES,
+        direction: "forward",
+      });
+    });
+
+    expect(result.current.step).toBe(CreateWaveStep.GROUPS);
+    expect(result.current.groupValidation.unavailable).toBe(true);
+  });
+
+  it("handles a rejected restricted group check without changing steps", async () => {
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockRejectedValue(new Error("network unavailable")),
+    });
+    const { result } = renderHook(() => useWaveConfig());
+
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.GROUPS,
+        direction: "backward",
+      });
+    });
+    act(() => {
+      result.current.onGroupSelect({
+        group: { id: "view-group" } as ApiGroupFull,
+        groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      });
+    });
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.DATES,
+        direction: "forward",
+      });
+    });
+
+    expect(result.current.step).toBe(CreateWaveStep.GROUPS);
+    expect(result.current.groupValidation.unavailable).toBe(true);
   });
 
   describe("Overview Updates", () => {

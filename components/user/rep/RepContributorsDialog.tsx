@@ -309,7 +309,7 @@ export default function RepContributorsDialog({
       maxWidthClass="md:tw-max-w-xl"
       showScrollbar
       showHeaderCloseButton
-      headerClassName="tw-pb-2 tw-pt-2"
+      headerClassName="tw-pb-2 tw-pt-4"
     >
       <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
         <div className="tw-mb-4 tw-mt-2 tw-flex tw-items-center tw-justify-between tw-gap-3">

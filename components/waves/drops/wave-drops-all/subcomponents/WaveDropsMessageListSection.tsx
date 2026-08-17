@@ -7,7 +7,6 @@ import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { BoostedDropsDisplayPreference } from "@/types/boosted-drops.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject, Ref } from "react";
-import type { DropContentPresentation } from "../../dropContentPresentation";
 
 type WaveMessagesResult = ReturnType<
   typeof useVirtualizedWaveDrops
@@ -55,9 +54,6 @@ interface WaveDropsMessageListSectionProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
-  readonly participationContentPresentation?:
-    | DropContentPresentation
-    | undefined;
 }
 
 export const WaveDropsMessageListSection: React.FC<
@@ -96,7 +92,6 @@ export const WaveDropsMessageListSection: React.FC<
   winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
-  participationContentPresentation,
 }) => {
   const hasNextPage =
     !!waveMessages?.hasNextPage &&
@@ -138,7 +133,6 @@ export const WaveDropsMessageListSection: React.FC<
           winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
-          participationContentPresentation={participationContentPresentation}
           key="drops-list"
         />
         <div ref={anchorRef} style={{ height: "1px" }} />

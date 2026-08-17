@@ -186,6 +186,7 @@ const WaveDropActionsAddReaction: React.FC<{
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
           zIndexClassName={dialogZIndexClassName}
+          showHeaderCloseButton={false}
         >
           <div
             className="tw-flex tw-size-full tw-items-center tw-justify-center"

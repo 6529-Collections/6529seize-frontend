@@ -2,13 +2,8 @@
 
 import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import UserPageIdentityAddStatementsNFTAccountHeader from "./UserPageIdentityAddStatementsNFTAccountHeader";
-import type {
-  NFT_ACCOUNTS_STATEMENT_TYPE} from "@/helpers/Types";
-import {
-  STATEMENT_GROUP,
-  STATEMENT_TYPE,
-} from "@/helpers/Types";
+import type { NFT_ACCOUNTS_STATEMENT_TYPE } from "@/helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
 import UserPageIdentityAddStatementsNFTAccountItems from "./UserPageIdentityAddStatementsNFTAccountItems";
 
@@ -26,7 +21,6 @@ export default function UserPageIdentityAddStatementsNFTAccounts({
 
   return (
     <>
-      <UserPageIdentityAddStatementsNFTAccountHeader onClose={onClose} />
       <UserPageIdentityAddStatementsNFTAccountItems
         activeType={nftAccountType}
         setType={setNFTAccountType}

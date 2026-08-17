@@ -32,7 +32,6 @@ import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
-import type { DropContentPresentation } from "../dropContentPresentation";
 
 const EMPTY_DROPS: Drop[] = [];
 const DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE = 50;
@@ -66,9 +65,6 @@ interface WaveDropsAllProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
-  readonly participationContentPresentation?:
-    | DropContentPresentation
-    | undefined;
 }
 
 const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
@@ -87,7 +83,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
-  participationContentPresentation,
 }) => {
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
@@ -318,7 +313,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
-        participationContentPresentation={participationContentPresentation}
       />
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>
@@ -344,7 +338,6 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
-  participationContentPresentation,
 }) => {
   return (
     <UnreadDividerProvider
@@ -368,7 +361,6 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
-        participationContentPresentation={participationContentPresentation}
       />
     </UnreadDividerProvider>
   );

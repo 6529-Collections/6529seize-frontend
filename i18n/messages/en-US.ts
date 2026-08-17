@@ -564,11 +564,6 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   "tabLabels.errorReserved": "Labels cannot match existing tabs.",
 } as const);
 
-const WAVE_DROP_CONTENT_MESSAGES = objectMessages("waves.drop.content", {
-  showMore: "Show more",
-  showLess: "Show less",
-} as const);
-
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
   "waves.competitionBadges",
   {
@@ -754,6 +749,118 @@ const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
+  "user.profile.identity.statements.add",
+  {
+    triggerLabel: "Add",
+    dialogTitle: "Add identity statement",
+    contactDialogTitle: "Add contact",
+    nftDialogTitle: "Add NFT account",
+    socialDialogTitle: "Add social media account",
+    verificationDialogTitle: "Add verification post",
+    desktopTitle: "Add Statements About Your Identity",
+    mobileDescription: "Choose a type to add to your public profile.",
+    desktopDescription:
+      "Seize users can make statements asserting their identity (eponymous, pseudonymous or organizational). It is up to the community to evaluate if they are accurate.",
+    socialTitle: "Social Media Accounts",
+    socialDescription: "Your handle on social media platforms.",
+    nftTitle: "NFT Accounts",
+    nftDescription: "Your handle on NFT platforms.",
+    contactTitle: "Contact",
+    contactDescription: "Your handle on messaging platforms.",
+    verificationTitle: "Social Media Verification Posts",
+    verificationDescription: "Your posts verifying your profile here.",
+    aboutStatements: "About identity statements",
+    caveatOptional: "All statements are optional.",
+    caveatPublic: "All statements are fully and permanently public.",
+    caveatNoVerification:
+      "Seize does not connect to social media accounts or verify posts.",
+    caveatCommunityRates: "The community will rate the accuracy of statements.",
+  } as const
+);
+
+const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
+  "user.profile.identity.statements",
+  {
+    heading: "{name} ID Statements",
+    description: "Public identity links and consolidated wallet addresses.",
+    consolidatedAddresses: "Consolidated addresses",
+    help: "About identity statements",
+    loading: "Loading ID statements",
+    loadError: "ID statements couldn’t be loaded.",
+    retry: "Try again",
+    add: "Add",
+    walletChecker: "Wallet Checker",
+    delegationCenter: "Delegation Center",
+    primary: "Primary",
+    setPrimary: "Set primary",
+    settingPrimary: "Setting primary",
+    expandAddress: "Show wallet details",
+    collapseAddress: "Hide wallet details",
+    fullAddress: "Full address",
+    ensName: "ENS name",
+    copyFullAddress: "Copy full address",
+    copyEnsName: "Copy ENS name",
+    addressCopied: "Address copied",
+    ensCopied: "ENS name copied",
+    openEtherscan: "Open on Etherscan",
+    openOpenSea: "Open on OpenSea",
+    etherscan: "Etherscan",
+    openSea: "OpenSea",
+    confirmWallet: "Confirm in your wallet…",
+    waitingConfirmation: "Waiting for confirmation…",
+    primaryConfirmed:
+      "Confirmed. Check back in a few minutes to see the change.",
+    viewTransaction: "View transaction",
+    primarySuccess: "Primary address set.",
+    primaryErrorTitle: "Couldn’t set the primary address.",
+    primaryErrorDescription: "Please try again.",
+    openStatement: "Open",
+    copyStatement: "Copy",
+    deleteStatement: "Delete",
+    copied: "Copied!",
+    socialMediaAccounts: "Social media accounts",
+    nftAccounts: "NFT accounts",
+    contact: "Contact",
+    verificationPosts: "Social media verification posts",
+    noSocialMediaAccounts: "No social media accounts added yet.",
+    noNftAccounts: "No NFT accounts added yet.",
+    noContact: "No contact details added yet.",
+    noVerificationPosts: "No verification posts added yet.",
+    addTitle: "Add an ID statement",
+    addDescription:
+      "Choose what you want to add. Every statement is public and the community decides whether it is accurate.",
+    addSocialTitle: "Social media account",
+    addSocialDescription: "Share your profile on a social platform.",
+    addNftTitle: "NFT account",
+    addNftDescription: "Share your profile on an NFT platform.",
+    addContactTitle: "Contact",
+    addContactDescription: "Share a messaging or contact detail.",
+    addVerificationTitle: "Verification post",
+    addVerificationDescription: "Link to a post that verifies this profile.",
+    addSocialDialogTitle: "Add social media account",
+    addNftDialogTitle: "Add NFT account",
+    addContactDialogTitle: "Add contact",
+    addVerificationDialogTitle: "Add verification post",
+    backToTypes: "Back to statement types",
+    selectPlatform: "Choose a platform",
+    save: "Save",
+    cancel: "Cancel",
+    optional: "All statements are optional.",
+    permanentlyPublic: "All statements are fully and permanently public.",
+    noVerification:
+      "Seize does not connect to social media accounts or verify posts.",
+    communityRates: "The community will rate statement accuracy.",
+    addSuccess: "ID statement added.",
+    addErrorTitle: "Couldn’t add this ID statement.",
+    deleteTitle: "Delete statement?",
+    deleteDescription:
+      "This removes the statement from the profile. You can’t undo this action.",
+    deleteSuccess: "ID statement deleted.",
+    deleteErrorTitle: "Couldn’t delete this ID statement.",
+  } as const
+);
+
 const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
   "waves.composer.mentionShortcuts",
   {
@@ -865,6 +972,9 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "edit.open": "Edit profile",
   "edit.title": "Edit profile",
   "edit.banner": "Profile cover",
+  "edit.bannerDescription":
+    "Choose a gradient or upload an image for your profile cover.",
+  "edit.bannerImageRequired": "Select an image to use as your banner.",
   "edit.pfp": "Profile picture",
   "edit.name": "Profile name",
   "edit.classification": "Classification",
@@ -1037,7 +1147,16 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   selectedGroup: "Selected group",
   limitedAccessTitle: "Warning: Limited Access",
   limitedAccessDescription:
-    'This wave is configured with restricted access. It can only be viewed by members of the "{viewGroupName}" group and managed by members of the "{adminGroupName}" group. If you are not in a group that can view it, you will not be able to access this wave.',
+    'This wave is restricted to the "{viewGroupName}" group. Every Drop, Vote, Chat, and "{adminGroupName}" group member must also belong to that group.',
+  "validation.checking": "Checking group access…",
+  "validation.unavailableTitle": "Couldn't verify group access.",
+  "validation.unavailable":
+    "Group access could not be verified. Try again before continuing.",
+  "validation.outsideView":
+    'The "{groupName}" group includes people who are not in "{viewGroupName}".',
+  "validation.invalidTitle": "Some access groups need attention.",
+  "validation.invalidDescription":
+    "Every Drop, Vote, Chat, and Admin group member must also belong to the View group.",
   "inlineIdentities.emptyHelper":
     "Add identities one by one to build this access group.",
   "inlineIdentities.creatorExcludedWarning":
@@ -2966,6 +3085,8 @@ export const EN_US_MESSAGES = {
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
   ...USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES,
+  ...USER_PROFILE_IDENTITY_STATEMENT_MESSAGES,
+  ...USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES,
   ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
   ...GROUP_MENTION_COMPOSER_MESSAGES,
   ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
@@ -3044,7 +3165,6 @@ export const EN_US_MESSAGES = {
   ...WAVE_LEADERBOARD_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,
-  ...WAVE_DROP_CONTENT_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,

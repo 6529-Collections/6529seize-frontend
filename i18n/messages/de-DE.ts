@@ -16,8 +16,6 @@ export const DE_DE_MESSAGES = {
   "waves.drop.actions.copyLink": "Link kopieren",
   "waves.drop.actions.copied": "Kopiert!",
   "waves.drop.actions.copyFailed": "Kopieren fehlgeschlagen",
-  "waves.drop.content.showMore": "Mehr anzeigen",
-  "waves.drop.content.showLess": "Weniger anzeigen",
   "media.video.captions": "Untertitel",
   "media.video.download": "Medien herunterladen",
   "media.video.downloading": "Medien werden heruntergeladen",
@@ -442,6 +440,17 @@ export const DE_DE_MESSAGES = {
     "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
   "waves.create.groups.viewGroupName": "Wer darf ansehen",
   "waves.create.groups.adminGroupName": "Admin",
+  "waves.create.groups.validation.checking": "Gruppenzugriff wird geprüft…",
+  "waves.create.groups.validation.unavailableTitle":
+    "Der Gruppenzugriff konnte nicht geprüft werden.",
+  "waves.create.groups.validation.unavailable":
+    "Der Gruppenzugriff konnte nicht geprüft werden. Versuche es erneut, bevor du fortfährst.",
+  "waves.create.groups.validation.outsideView":
+    "Die Gruppe „{groupName}“ enthält Personen, die nicht in „{viewGroupName}“ sind.",
+  "waves.create.groups.validation.invalidTitle":
+    "Einige Zugriffsgruppen müssen angepasst werden.",
+  "waves.create.groups.validation.invalidDescription":
+    "Alle Mitglieder der Einreichungs-, Abstimmungs-, Chat- und Admin-Gruppen müssen auch der Ansichtsgruppe angehören.",
   "waves.create.dates.title": "Zeitplan",
   "waves.create.dates.description":
     "Prüfe, wann diese Wave startet, die Abstimmung beginnt und Gewinner bekannt gegeben werden.",

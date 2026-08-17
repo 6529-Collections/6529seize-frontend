@@ -94,6 +94,10 @@ jest.mock("@/services/api/waves-v2-api", () => ({
   createWaveMetadata: jest.fn(),
 }));
 
+jest.mock("@/services/api/wave-group-validation-api", () => ({
+  validateWaveGroups: jest.fn(),
+}));
+
 // Mock step components
 jest.mock("@/components/waves/create-wave/overview/CreateWaveOverview", () => {
   return function MockCreateWaveOverview() {
@@ -161,6 +165,7 @@ import { generateDropPart } from "@/components/waves/create-wave/services/waveMe
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { createWaveMetadata } from "@/services/api/waves-v2-api";
+import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 
 const mockedUseRouter = useRouter as jest.Mock;
 const mockedUseWaveConfig = useWaveConfig as jest.Mock;
@@ -171,6 +176,7 @@ const mockedGetAdminGroupId = getAdminGroupId as jest.Mock;
 const mockedMultiPartUpload = multiPartUpload as jest.Mock;
 const mockedUseGroupMutations = useGroupMutations as jest.Mock;
 const mockedCreateWaveMetadata = createWaveMetadata as jest.Mock;
+const mockedValidateWaveGroups = validateWaveGroups as jest.Mock;
 
 describe("CreateWave", () => {
   const mockRouter = {
@@ -273,6 +279,11 @@ describe("CreateWave", () => {
     selectedOutcomeType: null,
     errors: [],
     groupsCache: {},
+    groupValidation: {
+      invalidRoles: [],
+      isFetching: false,
+      unavailable: false,
+    },
     isMemeCountLoading: false,
     isMemeCountError: false,
     setOverview: jest.fn(),
@@ -329,6 +340,10 @@ describe("CreateWave", () => {
       id: 1,
       data_key: "key",
       data_value: "value",
+    });
+    mockedValidateWaveGroups.mockResolvedValue({
+      valid: true,
+      invalid_roles: [],
     });
     mockedMultiPartUpload.mockResolvedValue({
       url: "https://example.com/image.jpg",
@@ -510,6 +525,40 @@ describe("CreateWave", () => {
           displayMetadataRequests: [],
         });
       });
+    });
+
+    it("blocks a restricted Wave before creating an Admin group when access is invalid", async () => {
+      mockedValidateWaveGroups.mockResolvedValue({
+        valid: false,
+        invalid_roles: ["CHAT"],
+      });
+      mockedUseWaveConfig.mockReturnValue({
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+        config: {
+          ...mockWaveConfig.config,
+          groups: {
+            ...mockWaveConfig.config.groups,
+            admin: null,
+            canView: "view-group-id",
+          },
+        },
+      });
+
+      renderCreateWave();
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedValidateWaveGroups).toHaveBeenCalled();
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "Some access groups need attention.",
+            type: "error",
+          })
+        );
+      });
+      expect(mockedGetAdminGroupId).not.toHaveBeenCalled();
+      expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
     });
 
     it("passes parent wave id into submitted subwave body", async () => {

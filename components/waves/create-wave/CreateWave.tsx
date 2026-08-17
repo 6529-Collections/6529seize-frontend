@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
-import type { CreateWaveStep } from "@/types/waves.types";
+import { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
@@ -93,7 +93,7 @@ export default function CreateWave({
       return;
     }
     const invalidField = containerRef.current?.querySelector(
-      '[aria-invalid="true"]'
+      '[aria-invalid="true"], [data-wave-group-invalid="true"]'
     );
     if (!(invalidField instanceof HTMLElement)) {
       return;
@@ -132,9 +132,11 @@ export default function CreateWave({
   const setStep = (
     targetStep: CreateWaveStep,
     direction: "forward" | "backward"
-  ) => {
-    onStep({ step: targetStep, direction });
-  };
+  ): Promise<void> => onStep({ step: targetStep, direction });
+
+  const actionInProgress =
+    submitting ||
+    (step === CreateWaveStep.GROUPS && waveConfig.groupValidation.isFetching);
 
   return (
     // The bottom safe-area region is inside the viewport (viewport-fit=cover)
@@ -159,7 +161,7 @@ export default function CreateWave({
           config={config}
           step={step}
           showActions={selectedOutcomeType === null}
-          submitting={submitting}
+          submitting={actionInProgress}
           setStep={setStep}
           onComplete={onComplete}
         >

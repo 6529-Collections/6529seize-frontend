@@ -18,6 +18,11 @@ jest.mock("react-use", () => ({
   useCopyToClipboard: () => [null, mockCopy],
 }));
 
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => true,
+}));
+
 jest.mock(
   "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItemPrimary",
   () => ({
@@ -61,43 +66,42 @@ function renderComponent(props: any = {}) {
 describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (window as any).open = jest.fn();
-    (window as any).matchMedia = jest.fn().mockReturnValue({
-      matches: true,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    });
+    (window as any).matchMedia = jest
+      .fn()
+      .mockImplementation((query: string) => ({
+        matches: query === "(any-pointer: coarse)",
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      }));
   });
 
-  it("opens external links", () => {
+  it("uses semantic external links", () => {
     renderComponent();
-    fireEvent.click(screen.getByRole("button", { name: "Go to Opensea" }));
-    expect(window.open).toHaveBeenCalledWith(
-      "https://opensea.io/0x1234567890abcdef",
-      "_blank"
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Go to Etherscan" }));
-    expect(window.open).toHaveBeenCalledWith(
-      "https://etherscan.io/address/0x1234567890abcdef",
-      "_blank"
+    expect(
+      screen.getByRole("link", { name: "Open on OpenSea" })
+    ).toHaveAttribute("href", "https://opensea.io/0x1234567890abcdef");
+    expect(
+      screen.getByRole("link", { name: "Open on Etherscan" })
+    ).toHaveAttribute(
+      "href",
+      "https://etherscan.io/address/0x1234567890abcdef"
     );
   });
 
   it("is collapsed by default", () => {
     renderComponent();
-    expect(screen.queryByText("Full Address")).not.toBeInTheDocument();
+    expect(screen.queryByText(/full address/i)).not.toBeInTheDocument();
   });
 
   it("calls toggle callback from header and chevron", () => {
     const onToggleOpen = jest.fn();
     renderComponent({ onToggleOpen });
 
-    fireEvent.click(screen.getByRole("button", { name: "0x1234" }));
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Expand consolidated address details",
-      })
-    );
+    const expandButtons = screen.getAllByRole("button", {
+      name: "Show wallet details",
+    });
+    fireEvent.click(expandButtons[0]!);
+    fireEvent.click(expandButtons[1]!);
 
     expect(onToggleOpen).toHaveBeenCalledTimes(2);
   });
@@ -114,13 +118,32 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
     });
   });
 
+  it("clears touch feedback when a press does not produce a copy", () => {
+    renderComponent({ isOpen: true });
+    const copyButton = screen.getByRole("button", {
+      name: "Copy full address",
+    });
+
+    const pointerDown = new Event("pointerdown", { bubbles: true });
+    Object.defineProperty(pointerDown, "pointerType", { value: "touch" });
+    fireEvent(copyButton, pointerDown);
+    expect(screen.getByText("Copied!")).toBeInTheDocument();
+    expect(mockCopy).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1800);
+    });
+
+    expect(screen.queryByText("Copied!")).not.toBeInTheDocument();
+  });
+
   it("hides ens block when display is missing", () => {
     renderComponent({
       isOpen: true,
       address: { wallet: "0x1234567890abcdef", display: "", tdh: 0 },
     });
 
-    expect(screen.queryByText("ENS Name")).not.toBeInTheDocument();
+    expect(screen.queryByText(/ens name/i)).not.toBeInTheDocument();
   });
 
   it("assigns primary address when clicked", () => {

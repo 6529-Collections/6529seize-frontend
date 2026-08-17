@@ -50,7 +50,6 @@ import type {
   ChatSubmitDropAction,
   ChatSubmitDropState,
 } from "./chatSubmitDrop.types";
-import { isApproveWave } from "@/helpers/waves/approve-wave.helpers";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -207,7 +206,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const { editingDropId } = useEditingDrop();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
-  const showCompactProposals = isApproveWave(wave);
   const [isDragDropActive, setIsDragDropActive] = useState(false);
   const [externalAttachmentDrop, setExternalAttachmentDrop] = useState<{
     readonly token: number;
@@ -617,9 +615,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
-          participationContentPresentation={
-            showCompactProposals ? "approveChatCompact" : undefined
-          }
         />
         {!(isApp && editingDropId) && (
           <div
