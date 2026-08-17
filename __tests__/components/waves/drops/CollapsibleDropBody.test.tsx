@@ -60,7 +60,11 @@ describe("CollapsibleDropBody", () => {
 
     const clippedLink = screen.getByRole("link", { name: "Clipped link" });
     const showMore = screen.getByRole("button", { name: "Show more" });
+    const contentRegion = globalThis.document.getElementById(
+      showMore.getAttribute("aria-controls") ?? ""
+    );
     expect(showMore).toHaveAttribute("aria-expanded", "false");
+    expect(contentRegion).not.toHaveAttribute("aria-hidden");
     expect(clippedLink).toHaveAttribute("tabindex", "-1");
 
     fireEvent.click(showMore);
@@ -147,10 +151,7 @@ describe("CollapsibleDropBody", () => {
       </CollapsibleDropBody>
     );
 
-    const link = screen.getByRole("link", {
-      hidden: true,
-      name: "Focusable link",
-    });
+    const link = screen.getByRole("link", { name: "Focusable link" });
     link.focus();
     linkBottom = 240;
     act(() => {
@@ -188,10 +189,7 @@ describe("CollapsibleDropBody", () => {
       </CollapsibleDropBody>
     );
 
-    const link = screen.getByRole("link", {
-      hidden: true,
-      name: "Responsive link",
-    });
+    const link = screen.getByRole("link", { name: "Responsive link" });
     expect(link).toHaveAttribute("tabindex", "-1");
 
     linkBottom = 100;

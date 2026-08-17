@@ -99,6 +99,9 @@ Multipart drops ("storms") stay in one card while users switch parts.
   long-post collapse control.
 - The height control applies to the main body in Wave and DM feeds. Quoted-drop
   blocks and specialized compact proposal layouts manage their own presentation.
+- The height clamp is visual: body text remains available to assistive
+  technology, while visually clipped interactive controls leave the sequential
+  keyboard focus order until the body is expanded.
 - Mention links render only when the drop includes matching mention data.
 - This page covers shared body rendering. Provider-specific preview behavior and image-viewer controls are documented in separate pages.
 

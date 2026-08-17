@@ -344,6 +344,9 @@ describe("MyStreamWaveChat", () => {
     });
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBeNull();
+    expect(
+      capturedPropsHolder.current.participationContentPresentation
+    ).toBeUndefined();
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
   });
 
