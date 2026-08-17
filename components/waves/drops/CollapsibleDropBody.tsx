@@ -126,14 +126,18 @@ export default function CollapsibleDropBody({
       return;
     }
 
-    if (typeof globalThis.ResizeObserver === "undefined") {
+    const ResizeObserverConstructor = Reflect.get(
+      globalThis,
+      "ResizeObserver"
+    ) as typeof ResizeObserver | undefined;
+    if (ResizeObserverConstructor === undefined) {
       globalThis.addEventListener("resize", handleResize);
       return () => {
         globalThis.removeEventListener("resize", handleResize);
       };
     }
 
-    const observer = new globalThis.ResizeObserver(handleResize);
+    const observer = new ResizeObserverConstructor(handleResize);
     observer.observe(content);
     if (thresholdRef.current) {
       observer.observe(thresholdRef.current);

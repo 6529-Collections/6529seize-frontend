@@ -22,7 +22,7 @@ export default function MemeDropDescription({
   );
 
   return dropContext?.location === DropLocation.WAVE ? (
-    <CollapsibleDropBody key={description}>{content}</CollapsibleDropBody>
+    <CollapsibleDropBody>{content}</CollapsibleDropBody>
   ) : (
     <div>{content}</div>
   );

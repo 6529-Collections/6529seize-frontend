@@ -80,6 +80,16 @@ describe("CollapsibleDropBody", () => {
   });
 
   it("does not show a disclosure control when the body fits", () => {
+    jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute("aria-hidden") === "true") {
+          return { bottom: 120, height: 120, top: 0 } as DOMRect;
+        }
+
+        return { bottom: 40, height: 40, top: 0 } as DOMRect;
+      });
+
     render(
       <CollapsibleDropBody>
         <p data-drop-body-text="true">Short Wave message</p>
@@ -149,5 +159,38 @@ describe("CollapsibleDropBody", () => {
       "true"
     );
     expect(link).toHaveFocus();
+  });
+
+  it("recomputes clipped focus targets in the resize fallback", () => {
+    let linkBottom = 240;
+    globalThis.ResizeObserver = undefined as unknown as typeof ResizeObserver;
+    jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute("aria-hidden") === "true") {
+          return { bottom: 120, height: 120, top: 0 } as DOMRect;
+        }
+
+        const bottom = this instanceof HTMLAnchorElement ? linkBottom : 240;
+        return { bottom, height: bottom, top: 0 } as DOMRect;
+      });
+
+    render(
+      <CollapsibleDropBody>
+        <p data-drop-body-text="true">Long Wave message</p>
+        <a href="https://example.com">Responsive link</a>
+      </CollapsibleDropBody>
+    );
+
+    const link = screen.getByRole("link", {
+      hidden: true,
+      name: "Responsive link",
+    });
+    expect(link).toHaveAttribute("tabindex", "-1");
+
+    linkBottom = 100;
+    fireEvent(globalThis.window, new Event("resize"));
+
+    expect(link).not.toHaveAttribute("tabindex");
   });
 });
