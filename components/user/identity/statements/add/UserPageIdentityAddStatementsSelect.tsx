@@ -71,7 +71,7 @@ export default function UserPageIdentityAddStatementsSelect({
             <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.add.socialTitle")}
             </p>
-            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
+            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-pretty tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
               {t(
                 locale,
                 "user.profile.identity.statements.add.socialDescription"
@@ -106,7 +106,7 @@ export default function UserPageIdentityAddStatementsSelect({
             <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.add.nftTitle")}
             </p>
-            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
+            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-pretty tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
               {t(locale, "user.profile.identity.statements.add.nftDescription")}
             </p>
           </div>
@@ -138,7 +138,7 @@ export default function UserPageIdentityAddStatementsSelect({
             <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.add.contactTitle")}
             </p>
-            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
+            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-pretty tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
               {t(
                 locale,
                 "user.profile.identity.statements.add.contactDescription"
@@ -178,7 +178,7 @@ export default function UserPageIdentityAddStatementsSelect({
                 "user.profile.identity.statements.add.verificationTitle"
               )}
             </p>
-            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
+            <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-pretty tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
               {t(
                 locale,
                 "user.profile.identity.statements.add.verificationDescription"
