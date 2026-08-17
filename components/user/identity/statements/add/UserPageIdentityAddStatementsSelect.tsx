@@ -17,9 +17,9 @@ export default function UserPageIdentityAddStatementsSelect({
 }) {
   const locale = useBrowserLocale();
   const tileClassName =
-    "tw-group tw-relative tw-flex tw-min-h-28 tw-w-full tw-flex-col tw-items-start tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-4 tw-text-left tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/10 motion-reduce:tw-transition-none md:tw-block md:tw-min-h-0 md:tw-border-iron-700 md:tw-bg-iron-900 md:tw-p-6 md:desktop-hover:hover:tw-bg-iron-800";
+    "tw-group tw-relative tw-flex tw-min-h-24 tw-w-full tw-flex-col tw-items-start tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-3 tw-text-left tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/10 motion-reduce:tw-transition-none md:tw-block md:tw-min-h-0 md:tw-border-iron-700 md:tw-bg-iron-900 md:tw-p-6 md:desktop-hover:hover:tw-bg-iron-800";
   const tileIconClassName =
-    "tw-inline-flex tw-size-7 tw-items-center tw-justify-center md:tw-size-6";
+    "tw-inline-flex tw-size-6 tw-items-center tw-justify-center";
 
   return (
     <>
@@ -52,7 +52,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-size-7 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none md:tw-size-6"
+                className="tw-size-6 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -67,8 +67,8 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-4 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+          <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
+            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.add.socialTitle")}
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
@@ -87,7 +87,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-size-7 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none md:tw-size-6"
+                className="tw-size-6 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -102,8 +102,8 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-4 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+          <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
+            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.add.nftTitle")}
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
@@ -119,7 +119,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-size-7 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none md:tw-size-6"
+                className="tw-size-6 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -134,8 +134,8 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-4 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+          <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
+            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.add.contactTitle")}
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
@@ -156,7 +156,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-size-7 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none md:tw-size-6"
+                className="tw-size-6 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -171,8 +171,8 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-4 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+          <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
+            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
               {t(
                 locale,
                 "user.profile.identity.statements.add.verificationTitle"
