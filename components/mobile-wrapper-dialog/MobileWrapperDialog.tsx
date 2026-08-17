@@ -32,7 +32,7 @@ const DISMISS_DRAG_SETTLE_MS = 180;
 const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
 const TABLET_MODAL_DESKTOP_QUERY = "(min-width: 768px)";
-const FIXED_MOBILE_DIALOG_MAX_HEIGHT = "30rem";
+const FIXED_MOBILE_DIALOG_HEIGHT = "min(60vh, 60svh)";
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
@@ -284,7 +284,7 @@ function getSurfaceStyle({
 }): CSSProperties & { "--mobile-wrapper-dialog-height"?: string } {
   if (fixedHeightOnMobile) {
     return {
-      "--mobile-wrapper-dialog-height": `min(${FIXED_MOBILE_DIALOG_MAX_HEIGHT}, ${dialogHeight})`,
+      "--mobile-wrapper-dialog-height": `min(${FIXED_MOBILE_DIALOG_HEIGHT}, ${dialogHeight})`,
       maxHeight: dialogHeight,
       transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
     };
