@@ -1,51 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { STATEMENT_TYPE } from "@/helpers/Types";
-import { STATEMENT_META } from "@/helpers/Types";
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
+import { STATEMENT_META, type STATEMENT_TYPE } from "@/helpers/Types";
+import clsx from "clsx";
 
 export default function UserPageIdentityAddStatementsTypeButton({
   statementType,
   isActive,
-  isFirst,
-  isLast,
   onClick,
 }: {
   readonly statementType: STATEMENT_TYPE;
   readonly isActive: boolean;
-  readonly isFirst: boolean;
-  readonly isLast: boolean;
   readonly onClick: () => void;
 }) {
-  const getActivityClass = () =>
-    isActive ? "tw-bg-iron-800" : "tw-bg-transparent";
-
-  const getPositionClass = () => {
-    if (isFirst) {
-      return "tw-rounded-l-md";
-    } else if (isLast) {
-      return "tw-rounded-r-md";
-    }
-    return "";
-  };
-
-  const getDynamicClasses = () => `${getActivityClass()} ${getPositionClass()}`;
-  const [dynamicClasses, setDynamicClasses] = useState(getDynamicClasses());
-
-  useEffect(() => {
-    setDynamicClasses(getDynamicClasses());
-  }, [isActive, isFirst, isLast]);
-
   return (
     <button
       onClick={onClick}
       type="button"
-      className={`${dynamicClasses} tw-relative -tw-ml-px tw-flex tw-items-center tw-justify-center tw-flex-1 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-border-none tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-focus:tw-z-10`}>
-      <div className="tw-flex-shrink-0 tw-w-5 tw-h-5">
+      aria-pressed={isActive}
+      className={clsx(
+        "tw-flex tw-min-h-12 tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+        isActive
+          ? "tw-border-primary-400/50 tw-bg-primary-500/10 tw-text-white"
+          : "tw-border-white/10 tw-bg-white/[0.035] desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07]"
+      )}
+    >
+      <span className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center">
         <SocialStatementIcon statementType={statementType} />
-      </div>
-      <span className="tw-sr-only">{STATEMENT_META[statementType].title}</span>
+      </span>
+      <span className="tw-min-w-0 tw-truncate">
+        {STATEMENT_META[statementType].title}
+      </span>
     </button>
   );
 }

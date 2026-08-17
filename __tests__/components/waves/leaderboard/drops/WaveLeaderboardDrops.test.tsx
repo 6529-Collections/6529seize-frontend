@@ -16,6 +16,7 @@ const hook = jest.fn<LeaderboardHookResult, []>();
 const proposalCardPresentationHook = jest.fn(
   (_waveId: string | null | undefined) => "default"
 );
+const isQuorumWave = jest.fn((_waveId: string | null | undefined) => false);
 let mockVirtualizedRowsProps:
   | {
       readonly estimatedRowHeight?: number | undefined;
@@ -26,6 +27,10 @@ let mockVirtualizedRowsProps:
 jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
   useWaveProposalCardPresentation: (waveId: string | null | undefined) =>
     proposalCardPresentationHook(waveId),
+}));
+
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: () => ({ isQuorumWave }),
 }));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => {
@@ -104,9 +109,7 @@ jest.mock(
   () => ({
     WaveLeaderboardEmptyState: (props: {
       readonly onCreateDrop?: (() => void) | undefined;
-    }) => (
-      <div data-testid="empty" onClick={props.onCreateDrop} />
-    ),
+    }) => <div data-testid="empty" onClick={props.onCreateDrop} />,
   })
 );
 jest.mock(
@@ -173,6 +176,7 @@ const renderComp = (
 describe("WaveLeaderboardDrops", () => {
   beforeEach(() => {
     proposalCardPresentationHook.mockReturnValue("default");
+    isQuorumWave.mockReturnValue(false);
     mockVirtualizedRowsProps = undefined;
   });
 
@@ -223,6 +227,24 @@ describe("WaveLeaderboardDrops", () => {
       hasNextPage: false,
     });
 
+    expect(mockVirtualizedRowsProps?.estimatedRowHeight).toBe(360);
+    expect(mockVirtualizedRowsProps?.measureLoadedRowsAtNaturalHeight).toBe(
+      true
+    );
+  });
+
+  it("uses naturally measured compact rows for Quorum proposals", () => {
+    isQuorumWave.mockReturnValue(true);
+
+    renderComp({
+      drops: [makeDrop("d1")],
+      isFetching: false,
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+
+    expect(isQuorumWave).toHaveBeenCalledWith(wave.id);
     expect(mockVirtualizedRowsProps?.estimatedRowHeight).toBe(360);
     expect(mockVirtualizedRowsProps?.measureLoadedRowsAtNaturalHeight).toBe(
       true
