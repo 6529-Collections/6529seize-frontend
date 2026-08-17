@@ -10,6 +10,8 @@ export const EN_GB_MESSAGES = {
   "linkPreview.twitter.kind.post": "Post",
   "linkPreview.twitter.article.provider": "Article on X",
   "linkPreview.twitter.article.read": "Read article: {title}",
+  "waves.drop.content.showMore": "Show more",
+  "waves.drop.content.showLess": "Show less",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",
