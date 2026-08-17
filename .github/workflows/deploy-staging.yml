@@ -562,6 +562,7 @@ jobs:
     uses: ./.github/workflows/staging-e2e.yml
     with:
       trusted_deployed_sha: ${{ github.sha }}
+      canonical_deploy_call: true
       pack: all
     secrets:
       STAGING_AUTH: ${{ secrets.STAGING_AUTH }}

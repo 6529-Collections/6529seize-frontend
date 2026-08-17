@@ -7,6 +7,10 @@ on:
         description: Exact SHA deployed by the calling canonical production workflow
         type: string
         required: true
+      canonical_deploy_call:
+        description: Confirms invocation by the canonical production deploy workflow
+        type: boolean
+        required: true
   workflow_dispatch:
     inputs:
       automatic_deploy_run_id:
@@ -49,6 +53,7 @@ jobs:
         id: source
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          CANONICAL_DEPLOY_CALL: ${{ inputs.canonical_deploy_call && 'true' || 'false' }}
           GH_TOKEN: ${{ github.token }}
           TRACKING_ID: ${{ inputs.tracking_id }}
           TRUSTED_DEPLOYED_SHA: ${{ inputs.trusted_deployed_sha }}
@@ -61,7 +66,7 @@ jobs:
               test "$GITHUB_ACTOR" = '6529-release-bus[bot]'
               [[ "$TRACKING_ID" =~ ^[A-Za-z0-9._:-]{1,200}$ ]]
             else
-              test -z "$TRACKING_ID"
+              test "$CANONICAL_DEPLOY_CALL" = true
             fi
             deployed_sha="$TRUSTED_DEPLOYED_SHA"
           else

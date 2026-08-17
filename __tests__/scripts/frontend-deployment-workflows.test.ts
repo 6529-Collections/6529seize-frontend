@@ -267,7 +267,11 @@ describe("frontend deployment workflow contract", () => {
   it("keeps exact-production provenance and late downgrade guards fail-closed", () => {
     const production = readWorkflow("build-upload-deploy-prod.yml").source;
     const verifier = readWorkflow("production-artifact-verifier.yml").source;
-    const productionE2e = readWorkflow("production-e2e.yml").source;
+    const productionE2e = readWorkflow("production-e2e.yml");
+    const sourceCheckout = productionE2e.workflow.jobs.readonly.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Check out exact deployed source"
+    );
 
     expect(verifier).toContain(
       '.path == ".github/workflows/production-build-artifact.yml"'
@@ -287,13 +291,14 @@ describe("frontend deployment workflow contract", () => {
     );
     expect(production).not.toContain("refusing to announce stale production");
     expect(production).toContain("refusing to overwrite it with $COMMIT_SHA");
-    expect(productionE2e).toContain(
-      'git fetch --no-tags --depth=1 origin "$EXPECTED_SHA"'
-    );
-    expect(productionE2e).not.toMatch(
-      /uses: actions\/checkout@[^\n]+\n\s+with:\n\s+ref: \$\{\{ steps\.source\.outputs\.sha \}\}/u
-    );
-    expect(productionE2e).toContain("path: .version-verifier");
+    expect(sourceCheckout).toMatchObject({
+      uses: expect.stringMatching(/^actions\/checkout@/u),
+      with: {
+        ref: "${{ steps.source.outputs.sha }}",
+        "persist-credentials": false,
+      },
+    });
+    expect(productionE2e.source).toContain("path: .version-verifier");
   });
 
   it("keeps exact source-commit copies of every modified workflow", () => {

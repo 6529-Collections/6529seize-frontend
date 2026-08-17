@@ -40,7 +40,10 @@ describe("serialized post-deploy E2E", () => {
       expect(deploy.jobs[e2eJobName]).toMatchObject({
         needs: deployJobName,
         uses: workflowPath,
-        with: { trusted_deployed_sha: "${{ github.sha }}" },
+        with: {
+          trusted_deployed_sha: "${{ github.sha }}",
+          canonical_deploy_call: true,
+        },
       });
     }
   );
@@ -112,6 +115,12 @@ describe("serialized post-deploy E2E", () => {
       expect(e2e.workflow.on.workflow_call.inputs.trusted_deployed_sha).toEqual(
         expect.objectContaining({ required: true, type: "string" })
       );
+      expect(
+        e2e.workflow.on.workflow_call.inputs.canonical_deploy_call
+      ).toEqual(expect.objectContaining({ required: true, type: "boolean" }));
+      expect(
+        e2e.workflow.on.workflow_dispatch.inputs.canonical_deploy_call
+      ).toBeUndefined();
       expect(resolve.run).toContain(
         `.path == ".github/workflows/${deployPath}"`
       );
@@ -171,7 +180,11 @@ describe("serialized post-deploy E2E", () => {
         "test \"$GITHUB_ACTOR\" = '6529-release-bus[bot]'"
       );
       expect(resolve?.env?.["TRACKING_ID"]).toBe("${{ inputs.tracking_id }}");
+      expect(resolve?.env?.["CANONICAL_DEPLOY_CALL"]).toContain(
+        "inputs.canonical_deploy_call"
+      );
       expect(resolve?.run).toContain("$TRACKING_ID");
+      expect(resolve?.run).toContain('test "$CANONICAL_DEPLOY_CALL" = true');
       expect(resolve?.run).not.toContain("inputs.tracking_id");
       expect(resolve?.run).not.toContain("GITHUB_EVENT_NAME");
       expect(e2e.source).not.toMatch(

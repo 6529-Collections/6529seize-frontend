@@ -319,6 +319,7 @@ jobs:
     uses: ./.github/workflows/production-e2e.yml
     with:
       trusted_deployed_sha: ${{ github.sha }}
+      canonical_deploy_call: true
 
   notify-production-deployment:
     name: Notify production deployment outcome
