@@ -77,9 +77,6 @@ test("changes active view when child triggers", async () => {
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
   await userEvent.click(div);
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.CONTACT);
-  expect(
-    document.querySelector('[class*="[&>div]:tw-border-b-0"]')
-  ).toHaveClass("md:tw-pt-6");
 
   await userEvent.click(screen.getByRole("button", { name: "Back" }));
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);

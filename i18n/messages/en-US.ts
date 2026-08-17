@@ -752,6 +752,7 @@ const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
 const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
   "user.profile.identity.statements.add",
   {
+    triggerLabel: "Add",
     dialogTitle: "Add identity statement",
     contactDialogTitle: "Add contact",
     nftDialogTitle: "Add NFT account",

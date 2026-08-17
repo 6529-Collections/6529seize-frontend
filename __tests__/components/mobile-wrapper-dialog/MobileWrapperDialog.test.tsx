@@ -16,11 +16,11 @@ describe("MobileWrapperDialog", () => {
   const fireTouch = (
     element: Element,
     type: "touchstart" | "touchmove" | "touchend",
-    clientY = 0
+    clientY: number | null = 0
   ) => {
     const event = new Event(type, { bubbles: true, cancelable: true });
-    const touch = { clientX: 0, clientY };
-    const touches = type === "touchend" ? [] : [touch];
+    const touch = clientY === null ? null : { clientX: 0, clientY };
+    const touches = type === "touchend" || !touch ? [] : [touch];
     Object.assign(touches, {
       item: (index: number) => touches[index] ?? null,
     });
@@ -28,7 +28,7 @@ describe("MobileWrapperDialog", () => {
       value: touches,
     });
     Object.defineProperty(event, "changedTouches", {
-      value: Object.assign([touch], {
+      value: Object.assign(touch ? [touch] : [], {
         item: (index: number) => (index === 0 ? touch : null),
       }),
     });
@@ -338,6 +338,29 @@ describe("MobileWrapperDialog", () => {
       fireTouch(dragSurface!, "touchend");
 
       await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    it("ignores drag moves without an active touch", () => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          onClose={onClose}
+          enableDragToClose
+        />
+      );
+
+      const dragSurface = document.querySelector<HTMLElement>(
+        ".mobile-wrapper-dialog"
+      );
+      expect(dragSurface).toBeInTheDocument();
+
+      fireTouch(dragSurface!, "touchstart", 20);
+      expect(() => fireTouch(dragSurface!, "touchmove", null)).not.toThrow();
+      fireTouch(dragSurface!, "touchend");
+
+      expect(onClose).not.toHaveBeenCalled();
     });
 
     it("does not drag a responsive tablet modal at the desktop breakpoint", () => {

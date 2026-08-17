@@ -5,6 +5,8 @@ import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Button from "@/components/utils/button/Button";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,
@@ -13,6 +15,7 @@ export default function UserPageIdentityStatementsAddButton({
   readonly profile: ApiIdentity;
   readonly size?: ButtonSize;
 }) {
+  const locale = useBrowserLocale();
   const [isAddStatementsOpen, setIsAddStatementsOpen] =
     useState<boolean>(false);
 
@@ -38,7 +41,9 @@ export default function UserPageIdentityStatementsAddButton({
             strokeLinejoin="round"
           />
         </svg>
-        <span>Add</span>
+        <span>
+          {t(locale, "user.profile.identity.statements.add.triggerLabel")}
+        </span>
       </Button>
 
       <UserPageIdentityAddStatements

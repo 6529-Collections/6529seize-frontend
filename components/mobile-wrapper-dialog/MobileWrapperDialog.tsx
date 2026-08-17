@@ -380,7 +380,11 @@ function getDragTouchHandlers({
 }
 
 function startsInDragRegion(event: TouchEvent<HTMLDivElement>): boolean {
-  const touch = event.touches.item(0);
+  const touch = event.touches[0];
+  if (!touch) {
+    return false;
+  }
+
   return (
     touch.clientY - event.currentTarget.getBoundingClientRect().top <=
     DRAG_START_REGION_PX
@@ -508,7 +512,9 @@ function useMobileDialogDrag({
 
   const handleDragStart = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
+      const touch = event.touches[0];
       if (
+        !touch ||
         !canDragToClose ||
         isCenteredTabletModal(tabletModal) ||
         !startsInDragRegion(event)
@@ -516,7 +522,7 @@ function useMobileDialogDrag({
         return;
       }
 
-      dragStartYRef.current = event.touches.item(0).clientY;
+      dragStartYRef.current = touch.clientY;
       dragStartedAtRef.current = performance.now();
       setIsDragging(true);
       setClampedDragOffset(0);
@@ -526,11 +532,12 @@ function useMobileDialogDrag({
 
   const handleDragMove = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
-      if (!canDragToClose || dragStartYRef.current === null) {
+      const touch = event.touches[0];
+      if (!touch || !canDragToClose || dragStartYRef.current === null) {
         return;
       }
 
-      const nextOffset = event.touches.item(0).clientY - dragStartYRef.current;
+      const nextOffset = touch.clientY - dragStartYRef.current;
       if (nextOffset <= 0) {
         setClampedDragOffset(0);
         return;
