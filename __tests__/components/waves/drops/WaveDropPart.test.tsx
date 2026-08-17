@@ -13,7 +13,10 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 jest.mock("@/components/waves/drops/WaveDropPartDrop", () => {
   return function MockWaveDropPartDrop(props: any) {
     return (
-      <div data-testid="wave-drop-part-drop">
+      <div
+        data-testid="wave-drop-part-drop"
+        data-content-presentation={props.contentPresentation}
+      >
         <div data-testid="drop-id">{props.drop.id}</div>
         <div data-testid="active-part-index">{props.activePartIndex}</div>
         <div data-testid="is-storm">{props.isStorm.toString()}</div>
@@ -187,6 +190,25 @@ describe("WaveDropPart", () => {
 
       expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
       expect(parentOnClick).not.toHaveBeenCalled();
+    });
+
+    it("opens an Approve Chat compact proposal through the shared click path", async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <WaveDropPart
+          {...defaultProps}
+          contentPresentation="approveChatCompact"
+        />
+      );
+
+      expect(screen.getByTestId("wave-drop-part-drop")).toHaveAttribute(
+        "data-content-presentation",
+        "approveChatCompact"
+      );
+
+      await user.click(getDropContainer());
+
+      expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
     });
 
     it("does not call onDropContentClick for temporary drops", async () => {

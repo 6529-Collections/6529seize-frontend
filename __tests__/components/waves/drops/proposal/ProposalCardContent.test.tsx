@@ -136,4 +136,26 @@ describe("ProposalCardContent", () => {
       })
     ).not.toBeInTheDocument();
   });
+
+  it("applies the compact density without changing the default", () => {
+    const { rerender } = render(
+      <ProposalCardContent drop={proposal} density="compact" />
+    );
+
+    expect(screen.getByTestId("proposal-card-content-proposal-1")).toHaveClass(
+      "tw-py-0.5"
+    );
+    expect(
+      screen.getByRole("heading", { name: "Donation Proposal: Token #0" })
+    ).toHaveClass("tw-text-sm");
+
+    rerender(<ProposalCardContent drop={proposal} />);
+
+    expect(screen.getByTestId("proposal-card-content-proposal-1")).toHaveClass(
+      "tw-py-1"
+    );
+    expect(
+      screen.getByRole("heading", { name: "Donation Proposal: Token #0" })
+    ).toHaveClass("tw-text-base");
+  });
 });

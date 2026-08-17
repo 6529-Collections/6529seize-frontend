@@ -21,6 +21,7 @@ import {
   DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
   type BoostedDropsDisplayPreference,
 } from "@/types/boosted-drops.types";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 // Logarithmic positions for boost cards (visual positions, 1-indexed)
 const BOOST_CARD_POSITIONS = [5, 10, 20, 40, 80, 160];
@@ -60,6 +61,9 @@ interface DropsListProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly participationContentPresentation?:
+    | DropContentPresentation
+    | undefined;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -90,6 +94,7 @@ const DropsList = memo(
     winningThresholdMinDurationMs,
     isVotingClosed = false,
     isVotingControlsLocked = false,
+    participationContentPresentation,
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -128,6 +133,7 @@ const DropsList = memo(
         winningThresholdMinDurationMs,
         isVotingClosed,
         isVotingControlsLocked,
+        participationContentPresentation,
       };
     }, [
       showWaveInfo,
@@ -146,6 +152,7 @@ const DropsList = memo(
       winningThresholdMinDurationMs,
       isVotingClosed,
       isVotingControlsLocked,
+      participationContentPresentation,
     ]);
 
     // Store the serial_no of drops that boosted cards should appear BEFORE
@@ -297,6 +304,9 @@ const DropsList = memo(
               }
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
+              participationContentPresentation={
+                getItemData.participationContentPresentation
+              }
             />
           ) : (
             <MemoizedLightDrop drop={drop} />
