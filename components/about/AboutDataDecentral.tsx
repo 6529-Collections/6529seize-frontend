@@ -15,7 +15,7 @@ import OpenSeaIcon from "@/components/user/utils/icons/OpenseaIcon";
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 
 const DATA_SOURCE_SECTION_CLASS =
-  "tw-relative tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-[minmax(12rem,0.36fr)_minmax(0,1fr)] md:tw-gap-16";
+  "tw-relative tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-[minmax(12rem,0.36fr)_minmax(0,1fr)] md:tw-gap-16 lg:tw-gap-24";
 
 const STANDARD_DATA_SOURCE_SECTION_CLASS =
   "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-10";
@@ -212,7 +212,6 @@ export default function AboutDataDecentral() {
             <li>
               6529 Team addresses. A record of these can be found on Arweave{" "}
               <Link
-                aria-label="Arweave record of 6529 Team addresses (opens in a new tab)"
                 className={DATA_SOURCE_LINK_CLASS}
                 href={`https://media.6529.io/arweave/fy83ffOGqR9cR2zooI7u9JxsG0oEWVJxH3B-bNxXKJg`}
                 target="_blank"
@@ -276,7 +275,6 @@ export default function AboutDataDecentral() {
               values shown on the site to Arweave as a CSV. The specific links
               can be found{" "}
               <Link
-                aria-label="Compiled 6529.io data on the Open Data page (opens in a new tab)"
                 className={FEATURED_DATA_SOURCE_LINK_CLASS}
                 href="/open-data"
                 target="_blank"

@@ -255,6 +255,7 @@ const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
   AboutSection.MINTING,
   AboutSection.PRIMARY_ADDRESS,
   AboutSection.GDRC1,
+  AboutSection.ENS,
 ]);
 
 const ABOUT_LEGAL_SECTIONS = new Set<AboutSection>(
