@@ -41,6 +41,8 @@ export default function CreateWaveTypeInputs({
             type={waveType}
             selected={selected ?? NO_SELECTION}
             variant="subtle"
+            name="create-wave-type"
+            ariaLabel={WAVE_LABELS[waveType]}
             onChange={onChange}
           >
             <div className="tw-min-w-0 tw-whitespace-normal">

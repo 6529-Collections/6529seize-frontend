@@ -10,6 +10,15 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import {
+  expectAcquisitionsAcceptance,
+  expectCollectionAcceptance,
+  expectMuseumGeometryAcceptance,
+  expectResearchAcceptance,
+  MUSEUM_RELEASE_ACCEPTANCE_ROUTES,
+  MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS,
+  openMuseumAcceptanceRoute,
+} from "../support/museumReleaseAcceptance";
 
 const SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
@@ -152,7 +161,8 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await retainScreenshot(page, testInfo, "museum-network-home");
 
     await openRoute(page, "/museum/network/collection");
-    const collectionWorkHrefs = await page
+    const permanentHoldings = page.getByTestId("museum-permanent-holdings");
+    const collectionWorkHrefs = await permanentHoldings
       .locator('a[href^="/museum/network/works/"]')
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
@@ -163,6 +173,21 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         (href): href is string =>
           typeof href === "string" &&
           /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href)
+      )
+    ).toBe(true);
+    const inProgressWorkHrefValues = await page
+      .getByTestId("museum-in-progress-works")
+      .locator('a[href^="/museum/network/works/"]')
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+    const inProgressWorkHrefs = [...new Set(inProgressWorkHrefValues)];
+    expect(inProgressWorkHrefValues).toHaveLength(16);
+    expect(inProgressWorkHrefs).toHaveLength(16);
+    expect(
+      inProgressWorkHrefs.every(
+        (href): href is string =>
+          typeof href === "string" &&
+          /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href) &&
+          !collectionWorkHrefs.includes(href)
       )
     ).toBe(true);
     for (const title of [
@@ -190,15 +215,17 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       });
     await firstMagnumCollectionCard.scrollIntoViewIfNeeded();
     await expect
-      .poll(() =>
-        firstMagnumCollectionCard
-          .locator("img")
-          .evaluate(
-            (image) =>
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-          )
+      .poll(
+        () =>
+          firstMagnumCollectionCard
+            .locator("img")
+            .evaluate(
+              (image) =>
+                image instanceof HTMLImageElement &&
+                image.complete &&
+                image.naturalWidth > 0
+            ),
+        { timeout: 20_000 }
       )
       .toBe(true);
     await retainScreenshot(page, testInfo, "museum-network-collection");
@@ -309,6 +336,9 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(
       page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
     ).toHaveCount(1);
+    await expect(
+      page.getByRole("button", { name: /loads 16\.9 MB/u })
+    ).toHaveCount(0);
     await expect(page.locator("[download]")).toHaveCount(0);
     await expect(
       page.locator(`a[href="${MAGNUM_WAVE_CONTEXT_HREF}"]`)
@@ -450,5 +480,63 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     });
     expect(focusAndTarget.hasVisibleFocus).toBe(true);
     expect(focusAndTarget.height).toBeGreaterThanOrEqual(44);
+  });
+});
+
+test.describe("Museum deterministic release acceptance @surface @readonly", () => {
+  test.setTimeout(180_000);
+
+  test("accepts Collection media, lifecycle, derivatives, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.collection
+      );
+      await expectCollectionAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
+  });
+
+  test("accepts Acquisitions lifecycle, identifiers, media, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.acquisitions
+      );
+      await expectAcquisitionsAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
+  });
+
+  test("accepts Research coverage, title controls, media, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.research
+      );
+      await expectResearchAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
   });
 });

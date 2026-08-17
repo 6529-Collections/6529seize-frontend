@@ -8,7 +8,6 @@ import type {
   MuseumPageSourceCatalog,
   MuseumPublicationIdentity,
 } from "@/lib/museum/publication";
-import { MUSEUM_REPOSITORY_URL } from "@/lib/museum/types";
 import type { MuseumSourceState } from "@/lib/museum/types";
 
 function MuseumSourceNotice({
@@ -80,22 +79,6 @@ export function MuseumShell({
         pageSources={view.pageSources}
         sourceState={view.sourceState}
       />
-
-      <footer className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
-        <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-[1324px] tw-flex-col tw-gap-3 tw-px-4 tw-py-8 tw-text-xs tw-leading-5 tw-text-iron-500 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between lg:tw-px-8">
-          <p className="tw-m-0 tw-max-w-3xl">
-            {t(DEFAULT_LOCALE, "museum.network.footer.disclaimer")}
-          </p>
-          <a
-            href={MUSEUM_REPOSITORY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tw-min-h-11 tw-shrink-0 tw-content-center tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {t(DEFAULT_LOCALE, "museum.network.source.github")}
-          </a>
-        </div>
-      </footer>
     </main>
   );
 }

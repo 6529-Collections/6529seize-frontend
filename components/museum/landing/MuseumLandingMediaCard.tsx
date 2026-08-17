@@ -32,6 +32,7 @@ export type MuseumLandingMedia =
       readonly sourceLabel?: string;
       readonly creditLine?: string;
       readonly requireIntentForLargeSource?: boolean;
+      readonly optimizeSource?: boolean;
     }
   | {
       readonly kind: "program";
@@ -70,6 +71,7 @@ function MediaFrame({
         sourceByteSize={media.sourceByteSize}
         variants={media.variants}
         requireIntentForLargeSource={media.requireIntentForLargeSource ?? true}
+        optimizeSource={media.optimizeSource ?? false}
         {...(media.sourceHref === undefined || media.sourceLabel === undefined
           ? {}
           : {
@@ -98,12 +100,30 @@ function MediaFrame({
   );
 }
 
+function mediaAspectRatio(media: MuseumLandingMedia): string | undefined {
+  if (media.kind === "governed" || media.kind === "proposal") {
+    return media.width !== null &&
+      media.height !== null &&
+      media.width > 0 &&
+      media.height > 0
+      ? `${media.width} / ${media.height}`
+      : undefined;
+  }
+  const variant = media.media.variants[0];
+  const width = media.media.sourceWidth ?? variant?.width ?? null;
+  const height = media.media.sourceHeight ?? variant?.height ?? null;
+  return width !== null && height !== null && width > 0 && height > 0
+    ? `${width} / ${height}`
+    : undefined;
+}
+
 export function MuseumLandingMediaCard({
   media,
   metadata,
   href,
   title,
   subtitle,
+  status,
   creditLine,
   eager = false,
   featured = false,
@@ -113,6 +133,7 @@ export function MuseumLandingMediaCard({
   readonly href?: string;
   readonly title: string;
   readonly subtitle?: string;
+  readonly status?: string;
   readonly creditLine?: string;
   readonly eager?: boolean;
   readonly featured?: boolean;
@@ -120,7 +141,10 @@ export function MuseumLandingMediaCard({
   let frame;
   if (media !== undefined) {
     frame = (
-      <div className="tw-flex tw-aspect-[4/5] tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
+      <div
+        className="tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950"
+        style={{ aspectRatio: mediaAspectRatio(media) ?? "4 / 5" }}
+      >
         <MediaFrame media={media} eager={eager} />
       </div>
     );
@@ -142,11 +166,15 @@ export function MuseumLandingMediaCard({
 
   return (
     <figure
-      className={`tw-group tw-m-0 tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${featured ? "tw-shadow-[0_24px_80px_rgba(0,0,0,0.35)]" : ""}`}
+      className="tw-group tw-m-0 tw-min-w-0"
       data-testid="museum-landing-media-card"
     >
-      {frame}
-      <figcaption className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-5">
+      <div
+        className={`tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 ${featured ? "tw-shadow-[0_24px_80px_rgba(0,0,0,0.35)]" : ""}`}
+      >
+        {frame}
+      </div>
+      <figcaption className="tw-pt-4 sm:tw-pt-5">
         {href === undefined ? (
           <span className="tw-block tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
             {title}
@@ -162,6 +190,11 @@ export function MuseumLandingMediaCard({
         {subtitle === undefined ? null : (
           <span className="tw-mt-1 tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
             {subtitle}
+          </span>
+        )}
+        {status === undefined ? null : (
+          <span className="tw-mt-2 tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
+            {status}
           </span>
         )}
         {resolvedCreditLine === undefined ? null : (

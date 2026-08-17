@@ -228,7 +228,8 @@ describe("Museum acquisitions landing", () => {
     expect(screen.getAllByText("Gift acquisition")).toHaveLength(2);
     expect(screen.getAllByText("Acquisition program")).toHaveLength(1);
     expect(screen.queryByText(/connected work/u)).not.toBeInTheDocument();
-    expect(screen.getAllByRole("img")).toHaveLength(4);
+    expect(screen.getAllByTestId("museum-acquisition-card")).toHaveLength(3);
+    expect(screen.getAllByRole("img")).toHaveLength(3);
   });
 
   it("keeps proposal disclosure controls outside navigation links", () => {
@@ -297,13 +298,19 @@ describe("Museum acquisitions landing", () => {
     render(<MuseumAcquisitionLandingPage records={records} />);
 
     expect(
-      screen.queryByRole("button", {
-        name: /View image/,
+      screen.getByRole("button", {
+        name: /View image.*loads 16\.9 MB/u,
       })
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
     expect(
-      screen.getAllByRole("img", { name: "Palmyra by Lorenzo Meloni" })
-    ).toHaveLength(2);
+      screen.queryAllByRole("img", { name: "Palmyra by Lorenzo Meloni" })
+    ).toHaveLength(0);
+    expect(
+      screen.getByRole("link", { name: "View Wave publication" })
+    ).toHaveAttribute(
+      "href",
+      "https://6529.io/waves/5f207393-5418-4a75-8738-e40edb44a94d?drop=002bfa4f-8416-48bf-b35e-38f354e9a9f0"
+    );
     for (const link of screen.getAllByRole("link", {
       name: "Conflict at Its Edges",
     })) {

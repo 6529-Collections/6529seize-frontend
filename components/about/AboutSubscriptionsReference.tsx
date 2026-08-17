@@ -318,7 +318,7 @@ function GasSavings({ locale }: { readonly locale: SupportedLocale }) {
       className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
     >
       <div className="tw-flex tw-items-center tw-gap-3 sm:tw-gap-4">
-        <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#00f0ff]/10 tw-text-lg tw-text-[#00f0ff] sm:tw-size-12 sm:tw-text-xl">
+        <span className="tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10 tw-text-lg tw-text-[#00f0ff] sm:tw-size-11 sm:tw-text-xl">
           <FontAwesomeIcon aria-hidden="true" icon={faGasPump} />
         </span>
         <h2
@@ -383,7 +383,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
       className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
     >
       <div className="tw-flex tw-items-center tw-gap-3 sm:tw-gap-4">
-        <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#7000ff]/20 tw-text-lg tw-text-[#8f5cff] sm:tw-size-12 sm:tw-text-xl">
+        <span className="tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-[#8f5cff]/25 tw-bg-[#7000ff]/20 tw-text-lg tw-text-[#8f5cff] sm:tw-size-11 sm:tw-text-xl">
           <FontAwesomeIcon aria-hidden="true" icon={faEarthAmericas} />
         </span>
         <h2

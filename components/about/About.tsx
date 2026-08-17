@@ -68,7 +68,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
         className={`tw-min-h-[calc(100vh-100px)] ${ABOUT_PAGE_SURFACE_CLASS_NAME}`}
       >
         <AboutContentsDropdown
-          className="tw-mx-auto !tw-mb-0 tw-w-full tw-max-w-[1400px] !tw-bg-[#0D0D0F] tw-px-4 sm:tw-px-6 lg:tw-px-8"
+          className="tw-mx-auto !tw-mb-0 tw-w-full tw-max-w-[1400px] tw-px-4 sm:tw-px-6 lg:tw-px-8"
           currentSection={section}
           withDivider
         />

@@ -53,7 +53,8 @@ const ADVANCED_VOTING_ERRORS = new Set<CREATE_WAVE_VALIDATION_ERROR>([
 const VOTING_SETTINGS_GRID_CLASSES =
   "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6";
 const VOTING_OPTIONS_GRID_CLASSES =
-  "tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4 [&>div]:tw-gap-x-2 [&>div]:tw-px-3 [&>div]:tw-py-3";
+  "tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 md:tw-grid-cols-4 [&>div]:tw-gap-x-2 [&>div]:tw-px-3 [&>div]:tw-py-3";
+const CREDIT_SCOPE_PREVIEW_ITEMS = [0, 1, 2] as const;
 
 const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
   if (votingType === ApiWaveCreditType.CardSetTdh) {
@@ -85,6 +86,84 @@ const getApprovalThresholdTimeErrorMessage = (
   return undefined;
 };
 
+function CreditScopePreview({
+  scope,
+  isSelected,
+}: {
+  readonly scope: ApiWaveCreditScope;
+  readonly isSelected: boolean;
+}) {
+  const accentClass = isSelected ? "tw-bg-primary-400/80" : "tw-bg-iron-650";
+  const connectorClass = isSelected ? "tw-bg-primary-500/30" : "tw-bg-iron-700";
+  const sharedConnectorClasses = [
+    "-tw-right-1.5 tw-left-1/2 sm:-tw-right-2",
+    "-tw-right-1.5 tw-left-0 sm:-tw-right-2",
+    "tw-left-0 tw-right-1/2",
+  ] as const;
+  const creditPool = (
+    <span className="tw-flex tw-h-3 tw-w-9 tw-items-center tw-gap-0.5 tw-rounded-full tw-bg-iron-800 tw-px-1">
+      {CREDIT_SCOPE_PREVIEW_ITEMS.map((item) => (
+        <span
+          key={item}
+          className={`tw-h-1 tw-min-w-0 tw-flex-1 tw-rounded-full ${accentClass}`}
+        />
+      ))}
+    </span>
+  );
+
+  return (
+    <div
+      aria-hidden="true"
+      className="tw-mb-2 tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-mb-3 sm:tw-h-20 sm:tw-p-2.5"
+    >
+      <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center">
+        <div className="tw-grid tw-h-3 tw-w-full tw-max-w-36 tw-grid-cols-3 tw-gap-1.5 sm:tw-gap-2">
+          {scope === ApiWaveCreditScope.Wave ? (
+            <span className="tw-col-span-3 tw-flex tw-justify-center">
+              {creditPool}
+            </span>
+          ) : (
+            CREDIT_SCOPE_PREVIEW_ITEMS.map((item) => (
+              <span key={item} className="tw-flex tw-justify-center">
+                {creditPool}
+              </span>
+            ))
+          )}
+        </div>
+        <div className="tw-relative tw-grid tw-h-3 tw-w-full tw-max-w-36 tw-grid-cols-3 tw-gap-1.5 sm:tw-gap-2">
+          {CREDIT_SCOPE_PREVIEW_ITEMS.map((item) => (
+            <span key={item} className="tw-relative">
+              {scope === ApiWaveCreditScope.Wave && (
+                <span
+                  className={`tw-absolute tw-top-1.5 tw-h-px ${connectorClass} ${sharedConnectorClasses[item]}`}
+                />
+              )}
+              <span
+                className={`tw-relative tw-z-[1] tw-mx-auto tw-block tw-w-px ${connectorClass} ${
+                  scope === ApiWaveCreditScope.Wave && item !== 1
+                    ? "tw-mt-1.5 tw-h-1.5"
+                    : "tw-h-full"
+                }`}
+              />
+            </span>
+          ))}
+        </div>
+        <div className="tw-grid tw-w-full tw-max-w-36 tw-grid-cols-3 tw-gap-1.5 sm:tw-gap-2">
+          {CREDIT_SCOPE_PREVIEW_ITEMS.map((item) => (
+            <span
+              key={item}
+              className="tw-flex tw-h-6 tw-flex-col tw-justify-center tw-gap-1 tw-rounded-sm tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-1.5"
+            >
+              <span className="tw-block tw-h-1 tw-w-2/3 tw-rounded-full tw-bg-iron-700" />
+              <span className="tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800" />
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CreateWaveCreditScopeSelect({
   creditScope,
   onCreditScopeChange,
@@ -111,38 +190,66 @@ function CreateWaveCreditScopeSelect({
       <legend className="tw-mb-3 tw-mt-0 tw-block tw-pr-4 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
         {t(locale, "waves.create.voting.scope.legend")}
       </legend>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3">
         {creditScopeOptions.map((option) => {
           const isSelected = creditScope === option.scope;
           return (
-            <CommonBorderedRadioButton
+            <label
               key={option.scope}
-              type={option.scope}
-              selected={creditScope}
-              variant="subtle"
-              name="create-wave-credit-scope"
-              ariaLabel={option.label}
-              onChange={onCreditScopeChange}
+              className={`tw-group tw-min-w-0 tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-p-3 ${
+                isSelected
+                  ? "tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner"
+                  : "tw-border-white/5 tw-bg-iron-900/60 hover:tw-border-white/10 hover:tw-bg-iron-900"
+              }`}
             >
-              <span className="tw-min-w-0 tw-whitespace-normal">
+              <CreditScopePreview
+                scope={option.scope}
+                isSelected={isSelected}
+              />
+              <div className="tw-flex tw-items-start tw-gap-2 sm:tw-gap-3">
+                <input
+                  id={`create-wave-credit-scope-${option.scope}`}
+                  type="radio"
+                  name="create-wave-credit-scope"
+                  checked={isSelected}
+                  aria-label={option.label}
+                  onChange={() => onCreditScopeChange(option.scope)}
+                  className="tw-peer tw-sr-only"
+                />
                 <span
-                  className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                  aria-hidden="true"
+                  className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
                     isSelected
-                      ? "tw-text-white"
-                      : "tw-text-iron-300 group-hover:tw-text-white"
+                      ? "tw-border-primary-400 tw-bg-primary-500/10"
+                      : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
                   }`}
                 >
-                  {option.label}
+                  <span
+                    className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
+                      isSelected ? "tw-scale-100" : "tw-scale-0"
+                    }`}
+                  />
                 </span>
-                <span
-                  className={`tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-4 ${
-                    isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
-                  }`}
-                >
-                  {option.description}
+                <span className="tw-min-w-0 tw-whitespace-normal">
+                  <span
+                    className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
+                      isSelected
+                        ? "tw-text-white"
+                        : "tw-text-iron-300 group-hover:tw-text-white"
+                    }`}
+                  >
+                    {option.label}
+                  </span>
+                  <span
+                    className={`tw-mt-1 tw-block tw-min-h-8 tw-text-xs tw-font-normal tw-leading-4 ${
+                      isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
+                    }`}
+                  >
+                    {option.description}
+                  </span>
                 </span>
-              </span>
-            </CommonBorderedRadioButton>
+              </div>
+            </label>
           );
         })}
       </div>

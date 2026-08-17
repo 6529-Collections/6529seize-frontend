@@ -7,7 +7,10 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import WaveDropPartTitle from "./WaveDropPartTitle";
 import WaveDropPartContent from "./WaveDropPartContent";
 import { ImageScale } from "@/helpers/image.helpers";
-import type { DropContentPresentation } from "./dropContentPresentation";
+import {
+  isProposalCardPresentation,
+  type DropContentPresentation,
+} from "./dropContentPresentation";
 import ProposalCardContent from "./proposal/ProposalCardContent";
 
 interface WaveDropPartDropProps {
@@ -71,14 +74,22 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   maxEmbedDepth,
 }) => {
   const showStandaloneTitle = contentPresentation === "default";
-  const showProposalCard = contentPresentation === "proposalCard" && !isEditing;
+  const showProposalCard =
+    isProposalCardPresentation(contentPresentation) && !isEditing;
 
   return (
     <div className="tw-relative tw-flex tw-h-full tw-gap-x-3">
       <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-self-center sm:tw-self-start">
         <div>
           {showProposalCard ? (
-            <ProposalCardContent drop={drop} />
+            <ProposalCardContent
+              drop={drop}
+              density={
+                contentPresentation === "approveChatCompact"
+                  ? "compact"
+                  : "default"
+              }
+            />
           ) : (
             <>
               {showStandaloneTitle && <WaveDropPartTitle title={drop.title} />}

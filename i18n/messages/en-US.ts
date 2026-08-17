@@ -564,6 +564,11 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   "tabLabels.errorReserved": "Labels cannot match existing tabs.",
 } as const);
 
+const WAVE_DROP_CONTENT_MESSAGES = objectMessages("waves.drop.content", {
+  showMore: "Show more",
+  showLess: "Show less",
+} as const);
+
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
   "waves.competitionBadges",
   {
@@ -1288,6 +1293,11 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
   title: "Drops",
   description: "Choose what participants can submit to this wave.",
   requirementsTitle: "Submission requirements",
+  requiredTypesLegend: "Required Types",
+  "requiredType.none": "None",
+  "requiredType.image": "Image",
+  "requiredType.audio": "Audio",
+  "requiredType.video": "Video",
   "advanced.defaultSummary": "No additional submission requirements.",
   "advanced.customSummary": "Submission requirements customized.",
   "maxSimultaneousSubmissions.label": "Max simultaneous submissions",
@@ -1811,6 +1821,7 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 const COMMON_MESSAGES = objectMessages("common", {
   back: "Back",
   close: "Close",
+  expandEditor: "Expand editor",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
@@ -3116,6 +3127,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_LEADERBOARD_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,
+  ...WAVE_DROP_CONTENT_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,

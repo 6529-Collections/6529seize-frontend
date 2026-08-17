@@ -1,5 +1,6 @@
 import { Tooltip } from "react-tooltip";
 import { useId } from "react";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import {
   CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES,
@@ -30,6 +31,7 @@ export default function CreateWaveOutcomesRowManualApprove({
             {outcome.title}
           </p>
           <button
+            type="button"
             onClick={removeOutcome}
             aria-label="Remove"
             className={CREATE_WAVE_OUTCOME_ROW_ACTION_CLASSES}
@@ -52,14 +54,7 @@ export default function CreateWaveOutcomesRowManualApprove({
           </button>
         </div>
       </div>
-      <Tooltip
-        id={tooltipId}
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
+      <Tooltip id={tooltipId} style={TOOLTIP_STYLES}>
         {outcome.title}
       </Tooltip>
     </>

@@ -168,14 +168,14 @@ describe("CreateWaveOutcomesCICApprove", () => {
     expect(nicInput).toHaveClass("tw-caret-error");
   });
 
-  it("uses the shared large primary button", () => {
+  it("uses the shared medium primary button", () => {
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
     const primaryButton = screen.getByRole("button", { name: "Save" });
 
     expect(primaryButton).not.toHaveAttribute("aria-busy");
     expect(primaryButton).not.toBeDisabled();
-    expect(primaryButton).toHaveClass("tw-min-h-11", "tw-px-5", "tw-py-2.5");
+    expect(primaryButton).toHaveClass("tw-h-10", "tw-px-3.5", "tw-text-sm");
   });
 
   it("applies normal styling when no error is present", () => {

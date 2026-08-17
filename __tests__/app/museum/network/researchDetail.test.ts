@@ -15,8 +15,11 @@ import type {
 
 const SOURCE_COMMIT = "a".repeat(40);
 const WORK_ID = "6529NM-W-0001";
+const FALLBACK_WORK_ID = "6529NM-W-0002";
 const ARTIST_ID = "6529NM-AGT-0001";
 const RESEARCH_ID = "6529NM-RP-0001";
+const ACQUISITION_ID = "6529NM-AP-0001";
+const PROGRAM_ID = "6529NM-PRG-0001";
 
 const MEDIA: MuseumMedia = {
   id: "6529NM-MED-0001",
@@ -282,6 +285,84 @@ describe("Museum research detail enrichment", () => {
         }),
       ])
     );
+  });
+
+  it("prefers a document's directly associated work over broader program media", () => {
+    const fallbackMedia: MuseumMedia = {
+      ...MEDIA,
+      id: "6529NM-MED-0002",
+      artworkId: FALLBACK_WORK_ID,
+      url: "https://example.com/broad-program-fallback.jpg",
+      sourcePath: "records/media/6529NM-MED-0002.json",
+      credit: {
+        ...MEDIA.credit,
+        sourcePath: "records/media/6529NM-MED-0002.json",
+      },
+    };
+    const current = publication();
+    const directDocument = {
+      ...DOCUMENT,
+      workIds: [WORK_ID],
+    };
+    const currentWorks = current.works ?? [];
+    const withProgramContext = {
+      ...current,
+      documents: [directDocument],
+      works: [
+        ...currentWorks,
+        {
+          ...currentWorks[0]!,
+          id: FALLBACK_WORK_ID,
+          slug: "the-broad-program-work",
+          title: "The Broad Program Work",
+          media: [fallbackMedia],
+        },
+      ],
+      curatedAcquisitions: [
+        {
+          kind: "curated_acquisition" as const,
+          id: ACQUISITION_ID,
+          slug: "the-program-acquisition",
+          title: "The Program Acquisition",
+          thesis: "A broad acquisition used only as research context.",
+          status: "accessioned_into_permanent_collection" as const,
+          statusAsOf: "2026-08-01T00:00:00Z",
+          acquisitionMethod: "gift" as const,
+          programId: PROGRAM_ID,
+          artistIds: [],
+          organizationIds: [],
+          projectIds: [],
+          workIds: [FALLBACK_WORK_ID],
+          accessionLotIds: [],
+          sourceDocumentIds: [],
+          sourcePaths: ["records/entities/6529NM-AP-0001.json"],
+        },
+      ],
+      acquisitionPrograms: [
+        {
+          kind: "acquisition_program" as const,
+          id: PROGRAM_ID,
+          slug: "the-broad-program",
+          title: "The Broad Program",
+          status: "open" as const,
+          statusAsOf: "2026-08-01T00:00:00Z",
+          acquisitionMethod: "gift" as const,
+          acquisitionIds: [ACQUISITION_ID],
+          sourceDocumentIds: [],
+          sourcePaths: ["records/entities/6529NM-PRG-0001.json"],
+        },
+      ],
+      researchPublications: [
+        {
+          ...current.researchPublications![0]!,
+          subjectIds: [PROGRAM_ID],
+        },
+      ],
+    } as MuseumPublication;
+
+    const entry = findMuseumResearchIndexEntry(withProgramContext, ENTRY.slug);
+
+    expect(entry?.media?.url).toBe(MEDIA.url);
   });
 
   it("includes explicit interpretation relations without inventing unresolved entities", () => {
