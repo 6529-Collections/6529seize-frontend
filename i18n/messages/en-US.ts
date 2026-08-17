@@ -749,6 +749,35 @@ const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
+  "user.profile.identity.statements.add",
+  {
+    dialogTitle: "Add identity statement",
+    contactDialogTitle: "Add contact",
+    nftDialogTitle: "Add NFT account",
+    socialDialogTitle: "Add social media account",
+    verificationDialogTitle: "Add verification post",
+    desktopTitle: "Add Statements About Your Identity",
+    mobileDescription: "Choose a type to add to your public profile.",
+    desktopDescription:
+      "Seize users can make statements asserting their identity (eponymous, pseudonymous or organizational). It is up to the community to evaluate if they are accurate.",
+    socialTitle: "Social Media Accounts",
+    socialDescription: "Your handle on social media platforms.",
+    nftTitle: "NFT Accounts",
+    nftDescription: "Your handle on NFT platforms.",
+    contactTitle: "Contact",
+    contactDescription: "Your handle on messaging platforms.",
+    verificationTitle: "Social Media Verification Posts",
+    verificationDescription: "Your posts verifying your profile here.",
+    aboutStatements: "About identity statements",
+    caveatOptional: "All statements are optional.",
+    caveatPublic: "All statements are fully and permanently public.",
+    caveatNoVerification:
+      "Seize does not connect to social media accounts or verify posts.",
+    caveatCommunityRates: "The community will rate the accuracy of statements.",
+  } as const
+);
+
 const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
   "waves.composer.mentionShortcuts",
   {
@@ -2961,6 +2990,7 @@ export const EN_US_MESSAGES = {
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
   ...USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES,
+  ...USER_PROFILE_IDENTITY_STATEMENT_MESSAGES,
   ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
   ...GROUP_MENTION_COMPOSER_MESSAGES,
   ...MENTION_SHORTCUT_SETTINGS_MESSAGES,

@@ -29,9 +29,13 @@ This surface includes:
 1. Open `/{user}` and show the `Identity` surface.
 2. Review `Consolidated Addresses` and statement sections.
 3. If `Add` is visible, open the add-statements modal.
-4. Pick a group, pick a type, enter a value, select `Save`.
-5. Use statement row actions: `Open` (URL types only), `Copy`, `Delete`.
-6. On non-primary wallet rows, use `Set Primary` when available.
+4. On mobile, pick one of the four compact statement groups; expand `About
+   identity statements` when the public-visibility notes are needed.
+5. Pick a type, enter a value, select `Save`.
+6. Use the sheet header's back button to return to the four statement groups,
+   or close with the header button, backdrop, Escape key, or swipe-down gesture.
+7. Use statement row actions: `Open` (URL types only), `Copy`, `Delete`.
+8. On non-primary wallet rows, use `Set Primary` when available.
 
 ## Statement Types in Add Modal
 
@@ -70,6 +74,10 @@ This surface includes:
 - On mobile web and Capacitor, the add modal uses a scrollable, keyboard-aware
   sheet so the focused field and Save/Cancel actions remain reachable above the
   software keyboard as it opens and closes.
+- The mobile statement-group picker is content-sized at common phone heights,
+  keeps its close action in the sheet header, and supports a visible drag handle
+  plus swipe-down dismissal. Tablet and desktop keep the centered modal and
+  multi-column card presentation.
 - Empty sections show explicit copy (for example `No Contact added yet`).
 
 ## Loading, Errors, and Recovery

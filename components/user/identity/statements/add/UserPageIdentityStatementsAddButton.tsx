@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Button from "@/components/utils/button/Button";
@@ -15,17 +15,14 @@ export default function UserPageIdentityStatementsAddButton({
 }) {
   const [isAddStatementsOpen, setIsAddStatementsOpen] =
     useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   return (
     <div>
       <Button
         size={size}
-        onClick={() => setIsAddStatementsOpen(!isAddStatementsOpen)}
+        aria-haspopup="dialog"
+        aria-expanded={isAddStatementsOpen}
+        onClick={() => setIsAddStatementsOpen(true)}
       >
         <svg
           className="-tw-ml-1 tw-h-5 tw-w-5"
@@ -44,12 +41,11 @@ export default function UserPageIdentityStatementsAddButton({
         <span>Add</span>
       </Button>
 
-      {isMounted && isAddStatementsOpen && (
-        <UserPageIdentityAddStatements
-          profile={profile}
-          onClose={() => setIsAddStatementsOpen(false)}
-        />
-      )}
+      <UserPageIdentityAddStatements
+        profile={profile}
+        isOpen={isAddStatementsOpen}
+        onClose={() => setIsAddStatementsOpen(false)}
+      />
     </div>
   );
 }

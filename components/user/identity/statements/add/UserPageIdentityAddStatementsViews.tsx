@@ -21,10 +21,7 @@ export default function UserPageIdentityAddStatementsViews({
   switch (activeView) {
     case STATEMENT_ADD_VIEW.SELECT:
       return (
-        <UserPageIdentityAddStatementsSelect
-          onClose={onClose}
-          onViewChange={setActiveView}
-        />
+        <UserPageIdentityAddStatementsSelect onViewChange={setActiveView} />
       );
     case STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT:
       return (
