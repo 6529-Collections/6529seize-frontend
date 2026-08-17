@@ -300,17 +300,8 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   }
 
   function printMenuRows() {
-    return DELEGATION_MENU_ITEMS.map((item, index) => (
-      <div
-        key={item.section}
-        className={
-          index === DELEGATION_MENU_ITEMS.length - 1
-            ? "tw-col-span-2 lg:tw-col-span-1"
-            : undefined
-        }
-      >
-        {printMenuButton(item.section, item.label)}
-      </div>
+    return DELEGATION_MENU_ITEMS.map((item) => (
+      <div key={item.section}>{printMenuButton(item.section, item.label)}</div>
     ));
   }
 
@@ -325,7 +316,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
             {printExternalLinkRows()}
           </div>
-          <div className="tw-grid tw-grid-cols-2 tw-gap-2 lg:tw-grid-cols-3 xl:tw-grid-cols-5">
+          <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2 md:tw-grid-cols-3 min-[1200px]:tw-grid-cols-5">
             {printMenuRows()}
           </div>
         </nav>

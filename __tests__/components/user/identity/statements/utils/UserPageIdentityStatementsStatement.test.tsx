@@ -20,6 +20,7 @@ jest.mock("react-tooltip", () => ({
 }));
 
 const mockCopyToClipboard = jest.fn();
+const mockClipboardWriteText = jest.fn().mockResolvedValue(undefined);
 jest.mock("react-use", () => ({
   useCopyToClipboard: () => [null, mockCopyToClipboard],
 }));
@@ -27,11 +28,11 @@ jest.mock("react-use", () => ({
 function setMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockReturnValue({
-      matches,
+    value: jest.fn().mockImplementation((query: string) => ({
+      matches: matches && query === "(any-pointer: coarse)",
       addListener: jest.fn(),
       removeListener: jest.fn(),
-    }),
+    })),
   });
 }
 
@@ -39,6 +40,8 @@ describe("UserPageIdentityStatementsStatement", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     setMatchMedia(false);
+    mockCopyToClipboard.mockClear();
+    mockClipboardWriteText.mockReset().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -48,6 +51,10 @@ describe("UserPageIdentityStatementsStatement", () => {
 
   it("copies text when copy button clicked", async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: mockClipboardWriteText },
+    });
     const statement = {
       statement_value: "test-value",
       statement_type: STATEMENT_TYPE.X,
@@ -73,17 +80,51 @@ describe("UserPageIdentityStatementsStatement", () => {
       await user.click(copyButton);
     });
 
-    expect(mockCopyToClipboard).toHaveBeenCalledWith("test-value");
+    expect(mockClipboardWriteText).toHaveBeenCalledWith("test-value");
+    expect(mockCopyToClipboard).not.toHaveBeenCalled();
 
-    // Check that the text changed to "Copied!"
-    expect(screen.getByText("Copied!")).toBeInTheDocument();
+    // Desktop keeps the value stable and announces the copy once.
+    expect(screen.getAllByText("Copied!")).toHaveLength(1);
+    expect(screen.getByText("test-value")).toBeInTheDocument();
 
     // Fast-forward time to check that the text reverts
     await act(async () => {
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(1800);
     });
 
     expect(screen.getByText("test-value")).toBeInTheDocument();
+  });
+
+  it("hides touch-only visual feedback from the accessibility tree", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    setMatchMedia(true);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: mockClipboardWriteText },
+    });
+
+    render(
+      <UserPageIdentityStatementsStatement
+        statement={
+          {
+            statement_value: "test-value",
+            statement_type: STATEMENT_TYPE.X,
+          } as any
+        }
+        profile={{} as any}
+        canEdit={false}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /copy/i }));
+
+    const copiedMessages = screen.getAllByText("Copied!");
+    expect(copiedMessages).toHaveLength(2);
+    expect(
+      copiedMessages.some(
+        (message) => message.getAttribute("aria-hidden") === "true"
+      )
+    ).toBe(true);
   });
 
   it("shows external link when canOpen is true", () => {

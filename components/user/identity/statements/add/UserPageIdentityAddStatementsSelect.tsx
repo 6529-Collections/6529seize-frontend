@@ -1,64 +1,35 @@
 import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
 export default function UserPageIdentityAddStatementsSelect({
-  onClose,
   onViewChange,
 }: {
-  readonly onClose: () => void;
   readonly onViewChange: (view: STATEMENT_ADD_VIEW) => void;
 }) {
+  const locale = useBrowserLocale();
   const tileClassName =
-    "tw-text-left tw-rounded-lg tw-group tw-relative tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700  hover:tw-bg-iron-800 tw-p-6 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-iron-600";
+    "tw-group tw-relative tw-flex tw-min-h-20 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-3 tw-text-left tw-transition-colors desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
   const tileIconClassName =
-    "tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-11 tw-w-11 tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700 group-hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out";
+    "tw-inline-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-transition-colors group-hover:tw-bg-white/[0.05]";
 
   return (
-    <>
-      <div className="tw-flex tw-justify-between">
-        <div className="tw-max-w-xl tw-flex tw-flex-col">
-          <p className="tw-max-w-sm tw-text-lg tw-text-iron-100 tw-font-medium tw-mb-0">
-            Add Statements About Your Identity
-          </p>
-          <p className="tw-mt-2 tw-text-sm tw-font-normal tw-text-iron-400 tw-mb-0">
-            Seize users can make statements asserting their identity (eponymous,
-            pseudonymous or organizational). It is up to the community to
-            evaluate if they are accurate.
-          </p>
-        </div>
-        <div className="tw-absolute tw-right-4 tw-top-4 tw-flex tw-justify-between tw-items-center">
-          <button
-            onClick={onClose}
-            type="button"
-            className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out"
-          >
-            <span className="tw-sr-only tw-text-sm">Close</span>
-            <svg
-              className="tw-h-6 tw-w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
+    <div className="tw-px-4 sm:tw-px-6">
+      <p className="tw-mb-0 tw-max-w-2xl tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
+        {t(locale, "user.profile.identity.statements.addDescription")}
+      </p>
 
-      {/*  Grid starts here */}
-      <div className="tw-mt-8 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-6">
+      <div className="tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-2 md:tw-grid-cols-2">
         <button
+          type="button"
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT)}
           className={tileClassName}
         >
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -73,23 +44,31 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-8 lg:tw-h-20">
+          <div className="tw-min-w-0 tw-flex-1">
             <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-hover:tw-text-white">
-              Social Media Accounts
+              {t(locale, "user.profile.identity.statements.addSocialTitle")}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
-              Your handle on social media platforms.
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
+              {t(
+                locale,
+                "user.profile.identity.statements.addSocialDescription"
+              )}
             </p>
           </div>
+          <ChevronRightIcon
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500"
+            aria-hidden="true"
+          />
         </button>
         <button
+          type="button"
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.NFT_ACCOUNT)}
           className={tileClassName}
         >
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -104,23 +83,28 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-8 lg:tw-h-20">
+          <div className="tw-min-w-0 tw-flex-1">
             <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-hover:tw-text-white">
-              NFT Accounts
+              {t(locale, "user.profile.identity.statements.addNftTitle")}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
-              Your handle on NFT platforms.
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
+              {t(locale, "user.profile.identity.statements.addNftDescription")}
             </p>
           </div>
+          <ChevronRightIcon
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500"
+            aria-hidden="true"
+          />
         </button>
         <button
+          type="button"
           onClick={() => onViewChange(STATEMENT_ADD_VIEW.CONTACT)}
           className={tileClassName}
         >
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -135,16 +119,24 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-8 lg:tw-h-20">
+          <div className="tw-min-w-0 tw-flex-1">
             <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-hover:tw-text-white">
-              Contact
+              {t(locale, "user.profile.identity.statements.addContactTitle")}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
-              Your handle on messaging platforms.
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
+              {t(
+                locale,
+                "user.profile.identity.statements.addContactDescription"
+              )}
             </p>
           </div>
+          <ChevronRightIcon
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500"
+            aria-hidden="true"
+          />
         </button>
         <button
+          type="button"
           onClick={() =>
             onViewChange(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST)
           }
@@ -153,7 +145,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -168,27 +160,41 @@ export default function UserPageIdentityAddStatementsSelect({
               </svg>
             </span>
           </div>
-          <div className="tw-mt-8 lg:tw-h-20">
+          <div className="tw-min-w-0 tw-flex-1">
             <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-hover:tw-text-white">
-              Social Media Verification Posts
+              {t(
+                locale,
+                "user.profile.identity.statements.addVerificationTitle"
+              )}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
-              Your posts verifying your profile here.
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
+              {t(
+                locale,
+                "user.profile.identity.statements.addVerificationDescription"
+              )}
             </p>
           </div>
+          <ChevronRightIcon
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500"
+            aria-hidden="true"
+          />
         </button>
       </div>
-      {/* Bottom bullet points */}
-      <div className="tw-px-4 tw-pt-5 tw-mt-5 tw-border-t tw-border-solid tw-border-iron-700 tw-border-x-0 tw-border-b-0">
-        <ul className="tw-pl-0 tw-mb-0 tw-list-disc tw-text-iron-500 tw-text-xs tw-font-normal tw-space-y-1">
-          <li>All statements are optional.</li>
-          <li>All statements are fully and permanently public.</li>
+
+      <div className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
+        <ul className="tw-mb-0 tw-list-disc tw-space-y-1 tw-pl-5 tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-500">
+          <li>{t(locale, "user.profile.identity.statements.optional")}</li>
           <li>
-            Seize does not connect to social media accounts or verify posts.
+            {t(locale, "user.profile.identity.statements.permanentlyPublic")}
           </li>
-          <li>The community will rate the accuracy of statements.</li>
+          <li>
+            {t(locale, "user.profile.identity.statements.noVerification")}
+          </li>
+          <li>
+            {t(locale, "user.profile.identity.statements.communityRates")}
+          </li>
         </ul>
       </div>
-    </>
+    </div>
   );
 }
