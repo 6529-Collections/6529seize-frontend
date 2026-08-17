@@ -53,6 +53,7 @@ type MobileWrapperDialogProps = {
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
+  readonly fixedHeightOnMobile?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
@@ -209,13 +210,17 @@ function getSurfaceClassNames({
   surfaceClassName,
   allowOverflow,
   tabletModal,
+  fixedHeightOnMobile,
 }: {
   readonly surfaceClassName?: string | undefined;
   readonly allowOverflow?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
+  readonly fixedHeightOnMobile?: boolean | undefined;
 }) {
   return clsx(
     "tw-flex tw-flex-col tw-rounded-t-xl",
+    fixedHeightOnMobile &&
+      "tw-h-[var(--mobile-wrapper-dialog-height)] md:tw-h-auto",
     surfaceClassName ?? "tw-bg-iron-950",
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-surface tw-overflow-visible"
@@ -270,10 +275,20 @@ function getPanelStyle({
 function getSurfaceStyle({
   dialogHeight,
   fixedHeight,
+  fixedHeightOnMobile,
 }: {
   readonly dialogHeight: string;
   readonly fixedHeight?: boolean | undefined;
-}): CSSProperties {
+  readonly fixedHeightOnMobile?: boolean | undefined;
+}): CSSProperties & { "--mobile-wrapper-dialog-height"?: string } {
+  if (fixedHeightOnMobile) {
+    return {
+      "--mobile-wrapper-dialog-height": dialogHeight,
+      maxHeight: dialogHeight,
+      transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+    };
+  }
+
   const dimension = fixedHeight ? "height" : "max-height";
   const size = fixedHeight
     ? { height: dialogHeight }
@@ -615,6 +630,7 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
+  fixedHeightOnMobile,
   tabletModal,
   showScrollbar,
   allowOverflow,
@@ -677,6 +693,7 @@ export default function MobileWrapperDialog({
     surfaceClassName,
     allowOverflow,
     tabletModal,
+    fixedHeightOnMobile,
   });
   const contentClassNames = getContentClassNames({
     allowOverflow,
@@ -686,6 +703,7 @@ export default function MobileWrapperDialog({
   const surfaceStyle = getSurfaceStyle({
     dialogHeight,
     fixedHeight,
+    fixedHeightOnMobile,
   });
   const showDesktopHeaderCloseButton =
     dismissible && !!tabletModal && !showHeaderCloseButton;

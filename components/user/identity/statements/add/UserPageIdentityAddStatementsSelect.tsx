@@ -19,7 +19,7 @@ export default function UserPageIdentityAddStatementsSelect({
   const tileClassName =
     "tw-group tw-relative tw-flex tw-min-h-24 tw-w-full tw-flex-col tw-items-start tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-3 tw-text-left tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/10 md:tw-block md:tw-min-h-0 md:tw-border-iron-700 md:tw-bg-iron-900 md:tw-p-6 md:desktop-hover:hover:tw-bg-iron-800";
   const tileIconClassName =
-    "tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-bg-white/[0.05] md:tw-size-11 md:tw-rounded-xl md:tw-border-iron-700 md:tw-bg-iron-900 md:group-hover:tw-bg-iron-800";
+    "tw-inline-flex tw-size-7 tw-items-center tw-justify-center md:tw-size-8";
 
   return (
     <>
