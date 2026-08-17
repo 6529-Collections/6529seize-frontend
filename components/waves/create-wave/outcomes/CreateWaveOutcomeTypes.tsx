@@ -21,7 +21,7 @@ export default function CreateWaveOutcomeTypes({
       <legend className="tw-sr-only">
         {t(locale, "waves.create.outcomes.chooseType")}
       </legend>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3 [&>div]:tw-rounded-xl [&>div]:tw-px-3 [&>div]:tw-py-3 [&>div]:tw-shadow-none [&_input]:tw-h-4 [&_input]:tw-w-4">
+      <div className="tw-grid tw-grid-cols-3 tw-gap-2 sm:tw-gap-3">
         {Object.values(CreateWaveOutcomeType).map((type) => (
           <CreateWaveOutcomeTypesItem
             key={type}

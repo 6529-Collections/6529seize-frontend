@@ -777,6 +777,7 @@ const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
       "Create private tags such as @frens. In a Wave composer, each Quick Tag expands into the profile handles you choose.",
     summaryDescription: "Mention several profiles with one shortcut.",
     manage: "Manage",
+    back: "Back to Quick Tags",
     more: "+{count} more",
     memberCount: "{count} member",
     memberCountMany: "{count} members",
@@ -813,6 +814,7 @@ const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
     deleteErrorDetails: "Unable to delete Quick Tag",
     loading: "Loading…",
     loadError: "Quick Tags could not be loaded.",
+    retry: "Retry",
     empty: "You have no Quick Tags yet.",
     editAction: "Edit",
     deleteAction: "Delete",
@@ -1204,6 +1206,11 @@ const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
   title: "Drops",
   description: "Choose what participants can submit to this wave.",
   requirementsTitle: "Submission requirements",
+  requiredTypesLegend: "Required Types",
+  "requiredType.none": "None",
+  "requiredType.image": "Image",
+  "requiredType.audio": "Audio",
+  "requiredType.video": "Video",
   "advanced.defaultSummary": "No additional submission requirements.",
   "advanced.customSummary": "Submission requirements customized.",
   "maxSimultaneousSubmissions.label": "Max simultaneous submissions",
@@ -1727,6 +1734,7 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 const COMMON_MESSAGES = objectMessages("common", {
   back: "Back",
   close: "Close",
+  expandEditor: "Expand editor",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
@@ -2272,8 +2280,10 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.action.setUp": "Set up",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
-  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
-  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
+  "home.mintSubscriptions.subscriptionsCount.none": "No subscriptions",
+  "home.mintSubscriptions.subscriptionsCount.value":
+    "x{count} subscription{pluralSuffix}",
+  "home.mintSubscriptions.subscriptionsLoading": "Loading subscription count",
   "home.mintSubscriptions.tooltip.connect":
     "Connect to set up subscription minting.",
   "home.mintSubscriptions.tooltip.dropped":
@@ -2290,17 +2300,23 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
-  "home.mintAllowlist.label": "Your allowlist",
-  "home.mintAllowlist.connectedWallet": "Connected wallet",
-  "home.mintAllowlist.phase": "Phase {number}",
-  "home.mintAllowlist.phasesAriaLabel":
-    "Allowlist phases for the connected wallet",
-  "home.mintAllowlist.checking": "Checking your connected wallet…",
-  "home.mintAllowlist.connectWallet":
-    "Connect a wallet to check your allowlist phase.",
-  "home.mintAllowlist.notFound": "No allowlist phase found for this wallet.",
-  "home.mintAllowlist.unavailable":
-    "Allowlist status is temporarily unavailable.",
+  "home.mintAllowlist.label": "Your allowance",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint allocations for the connected wallet",
+  "home.mintAllowlist.connectWallet": "Connect your wallet to view details.",
+  "home.mintAllowlist.checking": "Checking…",
+  "home.mintAllowlist.notPublished":
+    "Available once distribution is published.",
+  "home.mintAllowlist.notFound": "None found for this wallet.",
+  "home.mintAllowlist.unavailable": "Temporarily unavailable.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Public",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}x Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":

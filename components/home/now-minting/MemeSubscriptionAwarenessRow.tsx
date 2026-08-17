@@ -134,7 +134,7 @@ function SubscriptionInfoLink({
         aria-label={label}
         data-tooltip-id={tooltipId}
         data-tooltip-content={label}
-        className="tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-primary-300/70 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-primary-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+        className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-primary-300/70 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
       >
         {children}
       </Link>
@@ -149,24 +149,27 @@ function SubscriptionInfoLink({
   );
 }
 
-function SubscribersCountText({
+function SubscriptionsCountText({
   loading,
-  safeSubscribersCount,
+  safeSubscriptionsCount,
 }: Readonly<{
   loading?: boolean | undefined;
-  safeSubscribersCount?: number | undefined;
+  safeSubscriptionsCount?: number | undefined;
 }>) {
   const locale = useBrowserLocale();
-  const loadingText = t(locale, "home.mintSubscriptions.subscribersLoading");
+  const loadingText = t(locale, "home.mintSubscriptions.subscriptionsLoading");
 
-  if (safeSubscribersCount !== undefined) {
+  if (safeSubscriptionsCount !== undefined) {
     return (
       <>
-        {t(locale, "home.mintSubscriptions.subscribersCount", {
-          count: formatNumber(locale, safeSubscribersCount, {
-            maximumFractionDigits: 0,
-          }),
-        })}
+        {safeSubscriptionsCount === 0
+          ? t(locale, "home.mintSubscriptions.subscriptionsCount.none")
+          : t(locale, "home.mintSubscriptions.subscriptionsCount.value", {
+              count: formatNumber(locale, safeSubscriptionsCount, {
+                maximumFractionDigits: 0,
+              }),
+              pluralSuffix: safeSubscriptionsCount > 1 ? "s" : "",
+            })}
       </>
     );
   }
@@ -200,8 +203,8 @@ export default function MemeSubscriptionAwarenessRow({
   profileSubscriptionsHref,
   subscribed,
   subscribedCount,
-  subscribersCount,
-  subscribersCountLoading,
+  subscriptionsCount,
+  subscriptionsCountLoading,
   tooltipLabel,
 }: Readonly<{
   onProfileSubscriptionsAction?: (() => void | Promise<void>) | undefined;
@@ -211,8 +214,8 @@ export default function MemeSubscriptionAwarenessRow({
   profileSubscriptionsHref?: string | undefined;
   subscribed: boolean;
   subscribedCount?: number | undefined;
-  subscribersCount?: number | undefined;
-  subscribersCountLoading?: boolean | undefined;
+  subscriptionsCount?: number | undefined;
+  subscriptionsCountLoading?: boolean | undefined;
   tooltipLabel: string;
 }>) {
   const locale = useBrowserLocale();
@@ -220,9 +223,9 @@ export default function MemeSubscriptionAwarenessRow({
     subscribed && Number.isFinite(subscribedCount) && (subscribedCount ?? 0) > 0
       ? subscribedCount
       : undefined;
-  const safeSubscribersCount =
-    Number.isFinite(subscribersCount) && (subscribersCount ?? -1) >= 0
-      ? subscribersCount
+  const safeSubscriptionsCount =
+    Number.isFinite(subscriptionsCount) && (subscriptionsCount ?? -1) >= 0
+      ? subscriptionsCount
       : undefined;
   const actionLabel =
     profileSubscriptionsActionLabel ??
@@ -277,14 +280,15 @@ export default function MemeSubscriptionAwarenessRow({
             </span>
           ) : null}
           {profileCoverageSummary &&
-          (safeSubscribersCount !== undefined || subscribersCountLoading) ? (
+          (safeSubscriptionsCount !== undefined ||
+            subscriptionsCountLoading) ? (
             <span aria-hidden="true" className="tw-text-iron-600">
               ·
             </span>
           ) : null}
-          <SubscribersCountText
-            loading={subscribersCountLoading}
-            safeSubscribersCount={safeSubscribersCount}
+          <SubscriptionsCountText
+            loading={subscriptionsCountLoading}
+            safeSubscriptionsCount={safeSubscriptionsCount}
           />
         </div>
         <div className="tw-flex tw-min-h-7 tw-items-center tw-justify-end">

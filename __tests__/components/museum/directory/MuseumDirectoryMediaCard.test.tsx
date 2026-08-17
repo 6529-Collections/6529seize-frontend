@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {
   MuseumDirectoryArtistCard,
   MuseumDirectoryWorkCard,
@@ -101,19 +102,27 @@ function record(
 }
 
 describe("MuseumDirectoryMediaStage", () => {
-  it("shows governed presentation media directly in the directory", () => {
+  it("shows governed presentation media directly in the directory", async () => {
+    const user = userEvent.setup();
     render(
       <MuseumDirectoryWorkCard
         record={record({ presentationMedia: [presentation] })}
       />
     );
 
+    const imageGate = screen.getByRole("button", {
+      name: "View image · loads 16.9 MB",
+    });
     expect(
-      screen.getByRole("img", { name: presentation.altText })
-    ).toHaveAttribute("src", presentation.mediaUrl);
+      imageGate.closest('[style*="aspect-ratio"]')?.getAttribute("style")
+    ).toContain("aspect-ratio: 2400 / 1600");
+    await user.click(imageGate);
+    const image = screen.getByRole("img", { name: presentation.altText });
+    expect(image).toHaveAttribute("src", presentation.mediaUrl);
   });
 
-  it("shows the governed presentation image on the artist card", () => {
+  it("shows the governed presentation image on the artist card", async () => {
+    const user = userEvent.setup();
     const workRecord = record({
       id: "6529NM-W-LORENZO-01",
       slug: "lorenzo-meloni-01",
@@ -140,6 +149,9 @@ describe("MuseumDirectoryMediaStage", () => {
 
     render(<MuseumDirectoryArtistCard record={artistRecord} />);
 
+    await user.click(
+      screen.getByRole("button", { name: "View image · loads 16.9 MB" })
+    );
     expect(
       screen.getByRole("img", { name: presentation.altText })
     ).toHaveAttribute("src", presentation.mediaUrl);
