@@ -93,6 +93,7 @@ const InlineCodeRenderer = ({
 }: MarkdownCodeProps) => (
   <code
     {...props}
+    data-drop-body-text="true"
     style={{ ...style, textOverflow: "unset" }}
     className={mergeClassNames(
       "tw-whitespace-pre-wrap tw-break-words tw-text-iron-200",
@@ -140,6 +141,7 @@ const CodeBlockRenderer = ({
     <code
       {...props}
       ref={codeRef}
+      data-drop-body-text="true"
       style={{ ...style, textOverflow: "unset" }}
       className={mergeClassNames(
         "tw-whitespace-pre-wrap tw-break-words tw-text-iron-200",
@@ -170,6 +172,7 @@ const createMarkdownComponents = ({
       const mergedProps = {
         ...(props as Record<string, unknown>),
         className: mergeClassNames(headingClassName, className),
+        "data-drop-body-text": "true",
       };
 
       return createElement(TagComponent, mergedProps, customRenderer(children));
@@ -190,6 +193,7 @@ const createMarkdownComponents = ({
   }: MarkdownRendererProps<"li">) => (
     <li
       {...props}
+      data-drop-body-text="true"
       className={mergeClassNames(
         "word-break tw-break-words tw-text-md tw-text-iron-200",
         className
@@ -206,6 +210,7 @@ const createMarkdownComponents = ({
   }: MarkdownRendererProps<"blockquote">) => (
     <blockquote
       {...props}
+      data-drop-body-text="true"
       className={mergeClassNames(
         "word-break tw-break-words tw-border-b-0 tw-border-l-4 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-l-iron-500 tw-pl-4 tw-text-iron-200",
         className

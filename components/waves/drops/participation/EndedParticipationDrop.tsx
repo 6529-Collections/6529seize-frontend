@@ -34,6 +34,7 @@ import type {
 import { DropLocation, hasDropFooter } from "../drop.types";
 import {
   CHAT_PROPOSAL_CARD_SURFACE_CLASS,
+  isProposalCardPresentation,
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
@@ -120,7 +121,9 @@ function EndedParticipationDropInner({
   const showIdentity = identityMode !== "hidden";
   const isStackedTimestamp = timestampLayout === "stacked";
   const isChatProposal =
-    contentPresentation === "proposalCard" && location === DropLocation.WAVE;
+    isProposalCardPresentation(contentPresentation) &&
+    location === DropLocation.WAVE;
+  const isApproveChatCompact = contentPresentation === "approveChatCompact";
   const shouldOffsetRows =
     showIdentity && !inlineAuthorOnDesktop && !isChatProposal;
 
@@ -257,10 +260,7 @@ function EndedParticipationDropInner({
   );
   const detachedProposalHeader =
     isChatProposal && showIdentity ? (
-      <ProposalCardDetachedHeader
-        drop={drop}
-        identityHeader={identityHeader}
-      />
+      <ProposalCardDetachedHeader drop={drop} identityHeader={identityHeader} />
     ) : null;
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
@@ -377,7 +377,7 @@ function EndedParticipationDropInner({
             </div>
           </div>
 
-          {identityProfile && (
+          {!isApproveChatCompact && identityProfile && (
             <div className={shouldOffsetRows ? "tw-ml-[3.25rem]" : ""}>
               <ParticipationIdentityProfileCard
                 profile={identityProfile}
@@ -388,17 +388,17 @@ function EndedParticipationDropInner({
             </div>
           )}
 
-          {visibleMetadata.length > 0 && (
+          {!isApproveChatCompact && visibleMetadata.length > 0 && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               <WaveDropMetadata metadata={visibleMetadata} />
             </div>
           )}
-          {showInteractions && (
+          {!isApproveChatCompact && showInteractions && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               <WaveDropReactions drop={drop} />
             </div>
           )}
-          {hasDropFooter(footer) && (
+          {!isApproveChatCompact && hasDropFooter(footer) && (
             <div
               className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
             >
