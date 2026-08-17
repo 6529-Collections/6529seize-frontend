@@ -1,5 +1,5 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 describe("MobileWrapperDialog", () => {
@@ -12,6 +12,28 @@ describe("MobileWrapperDialog", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  const fireTouch = (
+    element: Element,
+    type: "touchstart" | "touchmove" | "touchend",
+    clientY = 0
+  ) => {
+    const event = new Event(type, { bubbles: true, cancelable: true });
+    const touch = { clientX: 0, clientY };
+    const touches = type === "touchend" ? [] : [touch];
+    Object.assign(touches, {
+      item: (index: number) => touches[index] ?? null,
+    });
+    Object.defineProperty(event, "touches", {
+      value: touches,
+    });
+    Object.defineProperty(event, "changedTouches", {
+      value: Object.assign([touch], {
+        item: (index: number) => (index === 0 ? touch : null),
+      }),
+    });
+    fireEvent(element, event);
+  };
 
   describe("rendering", () => {
     it("does not render children when closed", () => {
@@ -57,12 +79,10 @@ describe("MobileWrapperDialog", () => {
     it("renders close button when open", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
-      expect(
-        screen.getByRole("button", { name: "Close" })
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
     });
 
-    it("applies custom styling to the tablet modal close button", () => {
+    it("renders the tablet modal close button in the shared header by default", () => {
       render(
         <MobileWrapperDialog
           {...defaultProps}
@@ -72,11 +92,24 @@ describe("MobileWrapperDialog", () => {
         />
       );
 
-      const desktopCloseButton = screen
-        .getAllByRole("button", { name: "Close" })
-        .find((button) => button.classList.contains("md:tw-inline-flex"));
+      const closeButton = screen.getByRole("button", { name: "Close" });
 
-      expect(desktopCloseButton).toHaveClass("!tw-rounded-lg");
+      expect(closeButton).toHaveClass("!tw-rounded-lg");
+      expect(closeButton.closest(".-tw-top-16")).not.toBeInTheDocument();
+    });
+
+    it("keeps the floating close button available as an explicit exception", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          showHeaderCloseButton={false}
+        />
+      );
+
+      const closeButton = screen.getByRole("button", { name: "Close" });
+
+      expect(closeButton.closest(".-tw-top-16")).toBeInTheDocument();
     });
   });
 
@@ -199,9 +232,9 @@ describe("MobileWrapperDialog", () => {
         showsHandle: false,
       },
       {
-        name: "disables dragging for tablet modals",
+        name: "enables mobile dragging for responsive tablet modals",
         props: { enableDragToClose: true, tabletModal: true },
-        canDrag: false,
+        canDrag: true,
         showsHandle: false,
       },
     ])("$name", ({ props, canDrag, showsHandle }) => {
@@ -281,6 +314,73 @@ describe("MobileWrapperDialog", () => {
       }
 
       expect(onClose).toHaveBeenCalled();
+    });
+
+    it("dismisses a responsive tablet modal after a mobile swipe", async () => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          onClose={onClose}
+          tabletModal
+          enableDragToClose
+        />
+      );
+
+      const dragSurface = document.querySelector<HTMLElement>(
+        ".mobile-wrapper-dialog"
+      );
+      expect(dragSurface).toBeInTheDocument();
+
+      fireTouch(dragSurface!, "touchstart", 20);
+      fireTouch(dragSurface!, "touchmove", 90);
+      fireTouch(dragSurface!, "touchend");
+
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    it("does not drag a responsive tablet modal at the desktop breakpoint", () => {
+      const originalMatchMedia = globalThis.matchMedia;
+      Object.defineProperty(globalThis, "matchMedia", {
+        configurable: true,
+        value: jest.fn().mockReturnValue({
+          matches: true,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+          addListener: jest.fn(),
+          removeListener: jest.fn(),
+        }),
+      });
+      const onClose = jest.fn();
+
+      try {
+        render(
+          <MobileWrapperDialog
+            {...defaultProps}
+            isOpen={true}
+            onClose={onClose}
+            tabletModal
+            enableDragToClose
+          />
+        );
+
+        const dragSurface = document.querySelector<HTMLElement>(
+          ".mobile-wrapper-dialog"
+        );
+        expect(dragSurface).toBeInTheDocument();
+
+        fireTouch(dragSurface!, "touchstart", 20);
+        fireTouch(dragSurface!, "touchmove", 90);
+        fireTouch(dragSurface!, "touchend");
+
+        expect(onClose).not.toHaveBeenCalled();
+      } finally {
+        Object.defineProperty(globalThis, "matchMedia", {
+          configurable: true,
+          value: originalMatchMedia,
+        });
+      }
     });
   });
 
