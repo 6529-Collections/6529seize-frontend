@@ -4,6 +4,7 @@ import React from "react";
 import OngoingParticipationDrop from "@/components/waves/drops/participation/OngoingParticipationDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 // Mock hooks and child components
 const useIsMobileDevice = jest.fn();
@@ -185,6 +186,8 @@ const renderComp = ({
   isVotingControlsLocked = false,
   onDropContentClick,
   showInteractions = true,
+  contentPresentation,
+  footer,
 }: {
   readonly mobile?: boolean;
   readonly dropOverride?: ExtendedDrop;
@@ -192,6 +195,8 @@ const renderComp = ({
   readonly isVotingControlsLocked?: boolean;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly footer?: React.ReactNode | undefined;
 } = {}) => {
   const onReply = jest.fn();
   useIsMobileDevice.mockReturnValue(mobile);
@@ -209,6 +214,8 @@ const renderComp = ({
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       showInteractions={showInteractions}
+      contentPresentation={contentPresentation}
+      footer={footer}
     />
   );
   return { onReply, ...view };
@@ -343,6 +350,28 @@ describe("OngoingParticipationDrop", () => {
     expect(
       (mobileMenuProps as { readonly showVoting?: boolean }).showVoting
     ).toBe(false);
+  });
+
+  it("keeps an ongoing Approve Chat proposal compact", () => {
+    const onDropContentClick = jest.fn();
+
+    renderComp({
+      contentPresentation: "approveChatCompact",
+      footer: <div data-testid="custom-footer">Footer</div>,
+      onDropContentClick,
+    });
+
+    expect(participationDropContentProps).toEqual(
+      expect.objectContaining({
+        contentPresentation: "approveChatCompact",
+        onDropContentClick,
+      })
+    );
+    expect(screen.queryByTestId("metadata")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("footer")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("custom-footer")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("voting-modal")).not.toBeInTheDocument();
   });
 
   it("closes the voting modal when voting closes", async () => {

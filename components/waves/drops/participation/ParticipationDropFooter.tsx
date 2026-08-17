@@ -6,6 +6,7 @@ import { Children, type ReactNode } from "react";
 import WaveDropReactions from "../WaveDropReactions";
 import {
   PROPOSAL_CARD_FOOTER_CLASS,
+  isProposalCardPresentation,
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
@@ -54,7 +55,7 @@ export default function ParticipationDropFooter({
   const shouldShowReactionsFooter = hasReactions;
   const shouldShowReactionsBeforeVoteFooter =
     hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
-  const isProposalCard = contentPresentation === "proposalCard";
+  const isProposalCard = isProposalCardPresentation(contentPresentation);
   const isChatProposal = isProposalCard && !indentContent;
   const useInlineVotingLayout = isChatProposal || inlineVotingActions;
   const hasChatVotingSurface =

@@ -3,6 +3,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
   CHAT_PROPOSAL_CARD_SURFACE_CLASS,
   PROPOSAL_CARD_SURFACE_CLASS,
+  isProposalCardPresentation,
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import { DropLocation } from "../drop.types";
@@ -79,7 +80,7 @@ const getBackgroundClass = ({
     return "";
   }
 
-  if (contentPresentation === "proposalCard") {
+  if (isProposalCardPresentation(contentPresentation)) {
     return PROPOSAL_CARD_SURFACE_CLASS;
   }
 
@@ -99,7 +100,7 @@ export default function ParticipationDropContainer({
 }: ParticipationDropContainerProps) {
   const isDrop = drop.drop_type === ApiDropType.Participatory;
   const isChatProposal =
-    contentPresentation === "proposalCard" && alignCardWithContent;
+    isProposalCardPresentation(contentPresentation) && alignCardWithContent;
   const dropStyles = getDropStyles({
     isActiveDrop,
     rank: useRankStyles ? drop.rank : null,

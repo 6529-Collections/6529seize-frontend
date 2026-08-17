@@ -4908,6 +4908,8 @@
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
+        "In Approve waves, Chat shows participation drops as compact proposal notices; opening one shows the proposal, while Proposals contains the full body, status, and voting controls.",
+        "A focused proposal workshop can use a subwave, which keeps its own drops and unread state.",
         "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
       "canonical_path": "/waves",
@@ -5359,6 +5361,9 @@
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
         "Content display is separate from composer submission behavior.",
+        "Long main drop bodies in Wave and direct-message feeds use rendered height to show Show more and Show less controls, while full detail views remain expanded.",
+        "Collapsed body text stays available to assistive technology, while visually clipped controls remain outside the keyboard tab order until expansion.",
+        "Media, file attachments, and quoted drops stay outside the text clamp.",
         "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],
