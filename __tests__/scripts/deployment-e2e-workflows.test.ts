@@ -183,12 +183,41 @@ describe("serialized post-deploy E2E", () => {
       expect(resolve?.env?.["CANONICAL_DEPLOY_CALL"]).toContain(
         "inputs.canonical_deploy_call"
       );
+      expect(resolve?.env?.["CALLER_WORKFLOW_REF"]).toBe(
+        "${{ github.workflow_ref }}"
+      );
       expect(resolve?.run).toContain("$TRACKING_ID");
       expect(resolve?.run).toContain('test "$CANONICAL_DEPLOY_CALL" = true');
       expect(resolve?.run).not.toContain("inputs.tracking_id");
       expect(resolve?.run).not.toContain("GITHUB_EVENT_NAME");
       expect(e2e.source).not.toMatch(
         /release_manifest|artifact_digest|authorize|report-progress/i
+      );
+    }
+  );
+
+  it.each([
+    ["staging", stagingE2e, "deploy-staging.yml", "1a-staging"],
+    ["production", productionE2e, "build-upload-deploy-prod.yml", "main"],
+  ])(
+    "authenticates the canonical %s reusable-workflow caller",
+    (_environment, e2e, deployPath, branch) => {
+      const job = Object.values(e2e.workflow.jobs)[0] as {
+        steps: Array<{
+          name?: string;
+          run?: string;
+          env?: Record<string, string>;
+        }>;
+      };
+      const resolve = job.steps.find(
+        (step: { name?: string }) => step.name === "Resolve exact deployed SHA"
+      );
+
+      expect(resolve?.env?.["CALLER_WORKFLOW_REF"]).toBe(
+        "${{ github.workflow_ref }}"
+      );
+      expect(resolve?.run).toContain(
+        `"$GITHUB_REPOSITORY/.github/workflows/${deployPath}@refs/heads/${branch}"`
       );
     }
   );

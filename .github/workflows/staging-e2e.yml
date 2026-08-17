@@ -89,6 +89,7 @@ jobs:
         id: source
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          CALLER_WORKFLOW_REF: ${{ github.workflow_ref }}
           CANONICAL_DEPLOY_CALL: ${{ inputs.canonical_deploy_call && 'true' || 'false' }}
           GH_TOKEN: ${{ github.token }}
           TRACKING_ID: ${{ inputs.tracking_id }}
@@ -103,6 +104,8 @@ jobs:
               [[ "$TRACKING_ID" =~ ^[A-Za-z0-9._:-]{1,200}$ ]]
             else
               test "$CANONICAL_DEPLOY_CALL" = true
+              test "$CALLER_WORKFLOW_REF" = \
+                "$GITHUB_REPOSITORY/.github/workflows/deploy-staging.yml@refs/heads/1a-staging"
             fi
             deployed_sha="$TRUSTED_DEPLOYED_SHA"
           else
