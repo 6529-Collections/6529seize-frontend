@@ -285,22 +285,88 @@ describe("DmUnreadStore", () => {
 
   it("rejects a stale snapshot after a WebSocket event", () => {
     const store = new DmUnreadStore();
+    const startedAtSequence = store.beginSnapshot();
     store.applyServerState(
       state({ unreadCount: 2, latestDropSerialNo: 12, version: 2 })
     );
 
-    store.applySnapshot({
-      profile_id: "profile-a",
-      count: 1,
-      conversations: [
-        state({ unreadCount: 1, latestDropSerialNo: 11, version: 1 }),
-      ],
-    });
+    store.applySnapshot(
+      {
+        profile_id: "profile-a",
+        count: 1,
+        conversations: [
+          state({ unreadCount: 1, latestDropSerialNo: 11, version: 1 }),
+        ],
+      },
+      startedAtSequence
+    );
 
     expect(
       getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
         ?.unread_count
     ).toBe(2);
+  });
+
+  it("treats a completed snapshot as authoritative for equal-version changes", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(state({ unreadCount: 2, version: 2 }));
+    const startedAtSequence = store.beginSnapshot();
+
+    store.applySnapshot(
+      {
+        profile_id: "profile-a",
+        count: 0,
+        conversations: [state({ unreadCount: 0, version: 2 })],
+      },
+      startedAtSequence
+    );
+
+    expect(
+      getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
+        ?.unread_count
+    ).toBe(0);
+  });
+
+  it("removes conversations omitted from an authoritative snapshot", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(state({ unreadCount: 2, version: 2 }));
+    const startedAtSequence = store.beginSnapshot();
+
+    store.applySnapshot(
+      { profile_id: "profile-a", count: 0, conversations: [] },
+      startedAtSequence
+    );
+
+    expect(
+      getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
+    ).toBeNull();
+  });
+
+  it("preserves a conversation received after a snapshot request began", () => {
+    const store = new DmUnreadStore();
+    const startedAtSequence = store.beginSnapshot();
+    store.applyServerState(state({ unreadCount: 1, version: 1 }));
+
+    store.applySnapshot(
+      { profile_id: "profile-a", count: 0, conversations: [] },
+      startedAtSequence
+    );
+
+    expect(
+      getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
+        ?.unread_count
+    ).toBe(1);
+  });
+
+  it("preserves an explicit read-through boundary below the latest store serial", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(
+      state({ unreadCount: 2, latestDropSerialNo: 12, version: 2 })
+    );
+
+    expect(
+      store.beginRead("profile-a", "wave-a", 10)?.readThroughSerialNo
+    ).toBe(10);
   });
 
   it("does not let a snapshot overwrite an in-flight local read", () => {
@@ -336,5 +402,24 @@ describe("DmUnreadStore", () => {
       unreadConversationCount: 1,
       hasUnread: true,
     });
+  });
+
+  it("clears cached state before a profile is reactivated", () => {
+    const store = new DmUnreadStore();
+    store.applySnapshot({
+      profile_id: "profile-a",
+      count: 1,
+      conversations: [state({ unreadCount: 1, version: 1 })],
+    });
+
+    expect(store.resetProfile("profile-a")).toBe(true);
+    expect(getDmUnreadSummary(store.getSnapshot(), "profile-a")).toEqual({
+      totalUnreadMessages: 0,
+      unreadConversationCount: 0,
+      hasUnread: false,
+    });
+    expect(getDmUnreadSnapshotReady(store.getSnapshot(), "profile-a")).toBe(
+      false
+    );
   });
 });

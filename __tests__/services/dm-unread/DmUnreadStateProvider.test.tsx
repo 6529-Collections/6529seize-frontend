@@ -189,7 +189,8 @@ describe("DmUnreadStateProvider", () => {
     expect(screen.getByTestId("ready")).toHaveTextContent("false");
   });
 
-  it("takes one recovery snapshot on reconnect and visible foreground events", async () => {
+  it("coalesces reconnect and browser recovery events", async () => {
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
     const { rerender } = render(
       <DmUnreadStateProvider>
         <Capture />
@@ -205,8 +206,35 @@ describe("DmUnreadStateProvider", () => {
     );
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(2));
 
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+      window.dispatchEvent(new Event("online"));
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+
+    nowSpy.mockReturnValue(11_501);
     act(() => window.dispatchEvent(new Event("focus")));
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(3));
+    nowSpy.mockRestore();
+  });
+
+  it("coalesces DM wave-list invalidations for websocket bursts", async () => {
+    render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("messages")).toHaveTextContent("1")
+    );
+
+    act(() => {
+      websocketHandler?.(state({ unreadCount: 2, version: 2 }));
+      websocketHandler?.(state({ unreadCount: 3, version: 3 }));
+    });
+
+    await waitFor(() => expect(invalidateQueriesMock).toHaveBeenCalledTimes(1));
   });
 
   it("does not let a stale profile snapshot bleed into the switched profile", async () => {
@@ -318,7 +346,8 @@ describe("DmUnreadStateProvider", () => {
       </DmUnreadStateProvider>
     );
 
-    expect(screen.getByTestId("messages")).toHaveTextContent("1");
+    expect(screen.getByTestId("messages")).toHaveTextContent("0");
+    expect(screen.getByTestId("ready")).toHaveTextContent("false");
   });
 
   it("takes one snapshot when the native app returns to the foreground", async () => {

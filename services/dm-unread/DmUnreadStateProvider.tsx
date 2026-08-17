@@ -49,6 +49,13 @@ interface DmUnreadContextValue {
 }
 
 const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
+const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
+const DM_WAVE_LIST_INVALIDATION_DELAY_MS = 250;
+
+interface InFlightSnapshotRequest {
+  readonly jwt: string;
+  readonly promise: Promise<boolean>;
+}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -97,7 +104,14 @@ export function DmUnreadStateProvider({
     activeProfileProxy?.created_by.id ?? connectedProfile?.id ?? null;
   const activeProfileIdRef = useRef(activeProfileId);
   const latestSnapshotRequestByProfileRef = useRef(new Map<string, number>());
+  const inFlightSnapshotByProfileRef = useRef(
+    new Map<string, InFlightSnapshotRequest>()
+  );
   const nextSnapshotRequestIdRef = useRef(1);
+  const lastRecoverySnapshotAtRef = useRef(0);
+  const dmWaveListInvalidationTimerRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
   const previousMobileActiveRef = useRef(isActive);
   const authJwt = getAuthJwt();
@@ -105,7 +119,10 @@ export function DmUnreadStateProvider({
 
   useEffect(() => {
     activeProfileIdRef.current = activeProfileId;
-  }, [activeProfileId]);
+    if (activeProfileId) {
+      store.resetProfile(activeProfileId);
+    }
+  }, [activeProfileId, store]);
 
   useEffect(() => {
     const handleAuthChanged = () =>
@@ -125,42 +142,70 @@ export function DmUnreadStateProvider({
 
   const requestSnapshot = useCallback(
     async (expectedProfileId: string, jwt: string): Promise<boolean> => {
+      const existingRequest =
+        inFlightSnapshotByProfileRef.current.get(expectedProfileId);
+      if (existingRequest?.jwt === jwt) {
+        return existingRequest.promise;
+      }
       const requestId = nextSnapshotRequestIdRef.current++;
+      const startedAtSequence = store.beginSnapshot();
       latestSnapshotRequestByProfileRef.current.set(
         expectedProfileId,
         requestId
       );
-      try {
-        const response = await commonApiFetch<unknown>({
-          endpoint: "dm-drops/unread",
-          headers: { Authorization: `Bearer ${jwt}` },
-          errorMode: "structured",
-        });
-        if (
-          latestSnapshotRequestByProfileRef.current.get(expectedProfileId) !==
-            requestId ||
-          activeProfileIdRef.current !== expectedProfileId ||
-          !isDmUnreadSnapshot(response) ||
-          response.profile_id !== expectedProfileId
-        ) {
+      const requestPromise = (async () => {
+        try {
+          const response = await commonApiFetch<unknown>({
+            endpoint: "dm-drops/unread",
+            headers: { Authorization: `Bearer ${jwt}` },
+            errorMode: "structured",
+          });
+          if (
+            latestSnapshotRequestByProfileRef.current.get(expectedProfileId) !==
+              requestId ||
+            activeProfileIdRef.current !== expectedProfileId ||
+            !isDmUnreadSnapshot(response) ||
+            response.profile_id !== expectedProfileId
+          ) {
+            return false;
+          }
+          store.applySnapshot(response, startedAtSequence);
+          return true;
+        } catch (error) {
+          console.error("Failed to synchronize DM unread state", error);
           return false;
+        } finally {
+          if (
+            latestSnapshotRequestByProfileRef.current.get(expectedProfileId) ===
+            requestId
+          ) {
+            inFlightSnapshotByProfileRef.current.delete(expectedProfileId);
+          }
         }
-        store.applySnapshot(response);
-        return true;
-      } catch (error) {
-        console.error("Failed to synchronize DM unread state", error);
-        return false;
-      }
+      })();
+      inFlightSnapshotByProfileRef.current.set(expectedProfileId, {
+        jwt,
+        promise: requestPromise,
+      });
+      return requestPromise;
     },
     [store]
   );
 
   const requestActiveSnapshot = useCallback(async (): Promise<boolean> => {
+    const now = Date.now();
+    if (
+      now - lastRecoverySnapshotAtRef.current <
+      RECOVERY_SNAPSHOT_COOLDOWN_MS
+    ) {
+      return false;
+    }
     const profileId = activeProfileIdRef.current;
     const jwt = getAuthJwt();
     if (!profileId || typeof jwt !== "string" || !isAuthJwtUsable(jwt)) {
       return false;
     }
+    lastRecoverySnapshotAtRef.current = now;
     return requestSnapshot(profileId, jwt);
   }, [requestSnapshot]);
 
@@ -184,22 +229,37 @@ export function DmUnreadStateProvider({
   ]);
 
   const invalidateDmWaveLists = useCallback(() => {
-    queryClient
-      .invalidateQueries(
-        {
-          predicate: (query) => {
-            const [key, params] = query.queryKey;
-            return (
-              key === QueryKey.WAVES_V2 &&
-              isRecord(params) &&
-              params["direct_message"] === true
-            );
+    if (dmWaveListInvalidationTimerRef.current !== null) {
+      return;
+    }
+    dmWaveListInvalidationTimerRef.current = setTimeout(() => {
+      dmWaveListInvalidationTimerRef.current = null;
+      queryClient
+        .invalidateQueries(
+          {
+            predicate: (query) => {
+              const [key, params] = query.queryKey;
+              return (
+                key === QueryKey.WAVES_V2 &&
+                isRecord(params) &&
+                params["direct_message"] === true
+              );
+            },
           },
-        },
-        { cancelRefetch: false }
-      )
-      .catch(() => undefined);
+          { cancelRefetch: false }
+        )
+        .catch(() => undefined);
+    }, DM_WAVE_LIST_INVALIDATION_DELAY_MS);
   }, [queryClient]);
+
+  useEffect(
+    () => () => {
+      if (dmWaveListInvalidationTimerRef.current !== null) {
+        clearTimeout(dmWaveListInvalidationTimerRef.current);
+      }
+    },
+    []
+  );
 
   const handleUnreadStateChanged = useCallback(
     (value: unknown) => {
