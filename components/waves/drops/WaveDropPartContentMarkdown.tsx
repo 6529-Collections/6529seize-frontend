@@ -21,9 +21,6 @@ import {
   areHandlesEqual,
   isChatLinkRestrictionApplicable,
 } from "@/helpers/waves/chat-link-restriction.helpers";
-import CollapsibleDropBody from "./CollapsibleDropBody";
-import { useOptionalDropContext } from "./DropContext";
-import { DropLocation } from "./drop.types";
 
 interface WaveDropPartContentMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -92,7 +89,6 @@ const WaveDropPartContentMarkdown: React.FC<
   onQuorumCompactSectionOpenChange,
 }) => {
   const { connectedProfile } = useAuth();
-  const dropContext = useOptionalDropContext();
   const linkPreviewToggleControl = useDropLinkPreviewToggleControl(drop);
   const dropId = drop?.id;
   const dropSerialNo = drop?.serial_no;
@@ -167,37 +163,6 @@ const WaveDropPartContentMarkdown: React.FC<
     );
   }
 
-  const markdownContent = (
-    <DropPartMarkdownWithPropLogger
-      mentionedUsers={mentionedUsers}
-      mentionedGroups={mentionedGroups}
-      mentionedWaves={mentionedWaves}
-      referencedNfts={referencedNfts}
-      nftLinks={drop?.nft_links}
-      partContent={part.content}
-      onQuoteClick={onQuoteClick}
-      currentDropId={drop?.id}
-      hideLinkPreviews={drop?.hide_link_preview}
-      embedPath={currentDropEmbedPath}
-      quotePath={currentQuotePath}
-      embedDepth={embedDepth}
-      maxEmbedDepth={maxEmbedDepth}
-      fullWidthLinkPreviews={fullWidthLinkPreviews}
-      linkPreviewToggleControl={linkPreviewToggleControl}
-      onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
-    />
-  );
-  const shouldCollapseBody =
-    contentPresentation === "default" &&
-    dropContext?.location === DropLocation.WAVE;
-  const bodyContent = shouldCollapseBody ? (
-    <CollapsibleDropBody key={`${dropId ?? waveId}:${part.part_id}`}>
-      {markdownContent}
-    </CollapsibleDropBody>
-  ) : (
-    markdownContent
-  );
-
   return (
     <>
       <div>
@@ -225,7 +190,24 @@ const WaveDropPartContentMarkdown: React.FC<
             onSectionOpenChange={onQuorumCompactSectionOpenChange}
           />
         ) : (
-          bodyContent
+          <DropPartMarkdownWithPropLogger
+            mentionedUsers={mentionedUsers}
+            mentionedGroups={mentionedGroups}
+            mentionedWaves={mentionedWaves}
+            referencedNfts={referencedNfts}
+            nftLinks={drop?.nft_links}
+            partContent={part.content}
+            onQuoteClick={onQuoteClick}
+            currentDropId={drop?.id}
+            hideLinkPreviews={drop?.hide_link_preview}
+            embedPath={currentDropEmbedPath}
+            quotePath={currentQuotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
+            linkPreviewToggleControl={linkPreviewToggleControl}
+            onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+          />
         )}
         {typeof drop?.updated_at === "number" &&
           drop.updated_at !== drop.created_at && (
