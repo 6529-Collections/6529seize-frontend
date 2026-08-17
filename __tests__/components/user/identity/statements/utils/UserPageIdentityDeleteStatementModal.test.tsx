@@ -6,6 +6,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ComponentProps } from "react";
 
@@ -45,26 +46,31 @@ const mockStatement: CicStatement = {
 };
 
 const mockProfile: ApiIdentity = {
+  id: "profile-1",
   query: "test-profile",
   handle: "testhandle",
-  classification: "General",
+  normalised_handle: "testhandle",
   pfp: null,
-  cic_rating: 1000,
-  rep_rating: 500,
-  rep_category: "General",
-  primary_wallet: "test-wallet",
-  created_at: new Date().toISOString(),
-  wallet_tdh: null,
-  wallet_balance: null,
-  consolidation_display: null,
-  consolidation_non_display: null,
-  external_metadata: null,
-  statements: [],
-  social_links: [],
-  contact: null,
-  general: null,
-  sub_classification: null,
+  cic: 1000,
+  rep: 500,
   level: 1,
+  tdh: 0,
+  tdh_rate: 0,
+  xtdh: 0,
+  xtdh_rate: 0,
+  consolidation_key: "test-consolidation",
+  display: "testhandle",
+  primary_wallet: "test-wallet",
+  banner1: null,
+  banner2: null,
+  classification: ApiProfileClassification.Pseudonym,
+  sub_classification: null,
+  wallets: [],
+  active_main_stage_submission_ids: [],
+  winner_main_stage_drop_ids: [],
+  artist_of_prevote_cards: [],
+  profile_wave_id: null,
+  is_wave_creator: false,
 };
 
 const mockAuthContext = {
