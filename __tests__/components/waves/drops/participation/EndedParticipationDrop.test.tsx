@@ -1,4 +1,10 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import EndedParticipationDrop from "@/components/waves/drops/participation/EndedParticipationDrop";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
@@ -77,6 +83,54 @@ const drop: any = {
   author: { handle: "alice", level: 1, cic: {} },
   parts: [{ part_id: 1 }],
   metadata: [],
+};
+
+const identityDrop = {
+  ...drop,
+  title: "Compact proposal",
+  parts_count: 1,
+  parts: [
+    {
+      part_id: 1,
+      content: "Compact proposal content",
+      media: [],
+      attachments: [],
+      quoted_drop: null,
+    },
+  ],
+  nft_links: [],
+  wave: {
+    ...drop.wave,
+    submission_type: ApiWaveParticipationSubmissionStrategyType.Identity,
+  },
+  metadata: [
+    {
+      data_key: "identity",
+      data_value: "0xabc",
+      resolved_profile: {
+        id: "p1",
+        handle: "bob",
+        primary_address: "0xabc",
+        pfp: null,
+        banner1_color: null,
+        banner2_color: null,
+        cic: 12,
+        rep: 34,
+        tdh: 56,
+        tdh_rate: 1,
+        xtdh: 78,
+        xtdh_rate: 2,
+        level: 3,
+        subscribed_actions: [],
+        archived: false,
+        active_main_stage_submission_ids: [],
+        winner_main_stage_drop_ids: [],
+        artist_of_prevote_cards: [],
+        is_wave_creator: false,
+      },
+    },
+    { data_key: "title", data_value: "drop title" },
+  ],
 };
 
 const HOVER_INPUT_MEDIA_QUERIES = new Set([
@@ -339,43 +393,42 @@ describe("EndedParticipationDrop", () => {
     expect(WaveDropMobileMenuMock).not.toHaveBeenCalled();
   });
 
-  it("renders the identity profile card and filters identity metadata", () => {
-    const identityDrop = {
-      ...drop,
-      wave: {
-        ...drop.wave,
-        submission_type: ApiWaveParticipationSubmissionStrategyType.Identity,
-      },
-      metadata: [
-        {
-          data_key: "identity",
-          data_value: "0xabc",
-          resolved_profile: {
-            id: "p1",
-            handle: "bob",
-            primary_address: "0xabc",
-            pfp: null,
-            banner1_color: null,
-            banner2_color: null,
-            cic: 12,
-            rep: 34,
-            tdh: 56,
-            tdh_rate: 1,
-            xtdh: 78,
-            xtdh_rate: 2,
-            level: 3,
-            subscribed_actions: [],
-            archived: false,
-            active_main_stage_submission_ids: [],
-            winner_main_stage_drop_ids: [],
-            artist_of_prevote_cards: [],
-            is_wave_creator: false,
-          },
-        },
-        { data_key: "title", data_value: "drop title" },
-      ],
-    };
+  it("keeps an ended Approve Chat proposal compact and openable", () => {
+    const onDropContentClick = jest.fn();
 
+    render(
+      <EndedParticipationDrop
+        drop={identityDrop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={onDropContentClick}
+        footer={<div data-testid="custom-footer">Footer</div>}
+        contentPresentation="approveChatCompact"
+      />
+    );
+
+    expect(WaveDropContentMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        contentPresentation: "approveChatCompact",
+        onDropContentClick,
+      })
+    );
+    expect(screen.queryByTestId("identity-card")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("metadata")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("reactions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("custom-footer")).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Read full: Compact proposal" })
+    );
+    expect(onDropContentClick).toHaveBeenCalledWith(identityDrop);
+  });
+
+  it("renders the identity profile card and filters identity metadata", () => {
     render(
       <EndedParticipationDrop
         drop={identityDrop}

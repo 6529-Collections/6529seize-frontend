@@ -49,10 +49,15 @@ restores it whenever that wave is opened again and the tab is still available.
 9. Eligible admins can open the `+` menu and select `New subwave`. The new
    subwave starts with the parent wave's admin group, which can still be changed
    in the `Groups` step before submission.
+10. In Approve waves, participation drops appear in `Chat` as compact proposal
+   notices. Opening a notice opens the proposal, while `Proposals` remains the
+   canonical surface for the full body, status, and voting controls.
 
 ## Common Scenarios
 
 - Switch between `Chat` and `Leaderboard` while a wave is active.
+- In Approve waves, use `Chat` for the conversational timeline and open
+  `Proposals` for complete proposal content and voting.
 - Open `Winners` once the first decision has passed.
 - In memes waves, move between `Leaderboard`, `My Votes`, `FAQ`, and other
   available tabs.
@@ -90,6 +95,9 @@ restores it whenever that wave is opened again and the tab is still available.
   is unavailable, `Chat` becomes the fallback tab.
 - Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
   results-slot instead.
+- Approve-wave proposal notices stay in the Chat timeline so serial links,
+  replies, and unread ordering remain aligned with the underlying Wave feed;
+  the notice does not duplicate the full proposal controls.
 - In `My Votes`, non-image rows suppress inline media interaction even when the row
   includes video, audio, or HTML media.
 - If `preview_image` is missing or invalid, the row still shows the drop by using
@@ -125,6 +133,8 @@ restores it whenever that wave is opened again and the tab is still available.
   first-decision status.
 - The app and web layouts present the tab row differently, but eligible root
   wave admins receive the same curation and subwave create actions.
+- A focused proposal workshop can use a subwave when a separate working
+  conversation is needed; subwaves retain their own drops and unread state.
 
 ## Related Pages
 
