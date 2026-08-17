@@ -9,11 +9,11 @@ export default function BlockPickerResultHeader({
   blocknumber: number;
 }) {
   return (
-    <div className="tw-mt-8 tw-pt-6 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
+    <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
       <div className="sm:tw-flex sm:tw-items-baseline sm:tw-justify-between">
         <div className="tw-inline-flex tw-items-center tw-space-x-2">
           <div className="tw-space-x-1">
-            <span className="tw-text-base tw-text-lg tw-text-white tw-font-semibold">
+            <span className="tw-text-lg tw-font-semibold tw-text-iron-50">
               <BlockPickerAdvancedItemBlockLink
                 block={blocknumber}
                 blockParts={[blocknumber.toString()]}
@@ -33,7 +33,7 @@ export default function BlockPickerResultHeader({
           </div>
         </div>
       </div>
-      <div className="tw-mt-1 tw-text-sm tw-text-white tw-font-semibold">
+      <div className="tw-mt-1 tw-text-sm tw-font-semibold tw-text-iron-100">
         <Countdown timestamp={timestamp} />
       </div>
     </div>
