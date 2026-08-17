@@ -171,7 +171,9 @@ export default function UserPageHeaderEditBanner({
 
     if (editMode === "image" && !bannerFile && !initialBannerImageUrl) {
       setToast({
-        message: "Select an image to use as your banner.",
+        message: getUserProfileHeaderMessage(
+          "user.profileHeader.edit.bannerImageRequired"
+        ),
         type: "error",
       });
       return;
