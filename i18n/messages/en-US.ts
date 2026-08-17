@@ -895,6 +895,8 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "edit.open": "Edit profile",
   "edit.title": "Edit profile",
   "edit.banner": "Profile cover",
+  "edit.bannerDescription":
+    "Choose a gradient or upload an image for your profile cover.",
   "edit.pfp": "Profile picture",
   "edit.name": "Profile name",
   "edit.classification": "Classification",

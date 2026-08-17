@@ -1,5 +1,6 @@
 "use client";
 
+import clsx from "clsx";
 import { useEffect, useState } from "react";
 import {
   AboutCol as Col,
@@ -44,7 +45,10 @@ export default function AboutHTML(props: Readonly<Props>) {
       )}
       <Row>
         <Col
-          className={`${styles["htmlContainer"]} ${ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME}`}
+          className={clsx(
+            styles["htmlContainer"],
+            ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME
+          )}
           dangerouslySetInnerHTML={{
             __html: html,
           }}
