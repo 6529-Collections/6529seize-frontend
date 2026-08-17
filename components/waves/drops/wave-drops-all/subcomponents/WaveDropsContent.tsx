@@ -11,7 +11,6 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject, Ref } from "react";
 import { WaveDropsMessageListSection } from "./WaveDropsMessageListSection";
 import { WaveDropsTypingIndicator } from "./WaveDropsTypingIndicator";
-import type { DropContentPresentation } from "../../dropContentPresentation";
 
 type WaveMessagesResult = ReturnType<
   typeof useVirtualizedWaveDrops
@@ -58,9 +57,6 @@ interface WaveDropsContentProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
-  readonly participationContentPresentation?:
-    | DropContentPresentation
-    | undefined;
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
@@ -96,7 +92,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
-  participationContentPresentation,
 }) => {
   const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
     useUnreadDivider();
@@ -160,7 +155,6 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
-        participationContentPresentation={participationContentPresentation}
       />
       <WaveDropsTypingIndicator typingMessage={typingMessage} />
     </>

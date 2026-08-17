@@ -33,10 +33,7 @@ import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
 } from "./participationIdentityProfile.helpers";
-import {
-  isProposalCardPresentation,
-  type DropContentPresentation,
-} from "../dropContentPresentation";
+import type { DropContentPresentation } from "../dropContentPresentation";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -121,9 +118,7 @@ function OngoingParticipationDropInner({
     : false;
   const showIdentity = identityMode !== "hidden";
   const isChatProposal =
-    isProposalCardPresentation(contentPresentation) &&
-    location === DropLocation.WAVE;
-  const isApproveChatCompact = contentPresentation === "approveChatCompact";
+    contentPresentation === "proposalCard" && location === DropLocation.WAVE;
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
@@ -209,7 +204,10 @@ function OngoingParticipationDropInner({
 
   const detachedProposalHeader =
     isChatProposal && showIdentity ? (
-      <ProposalCardDetachedHeader drop={drop} identityHeader={identityHeader} />
+      <ProposalCardDetachedHeader
+        drop={drop}
+        identityHeader={identityHeader}
+      />
     ) : null;
 
   const primaryContent = isChatProposal ? (
@@ -272,7 +270,7 @@ function OngoingParticipationDropInner({
     onOpenChange: setIsSlideUp,
     onReply: handleOnReply,
     onAddReaction: handleOnAddReaction,
-    showVoting: !isVotingActionLocked && !isApproveChatCompact,
+    showVoting: !isVotingActionLocked,
   });
 
   return (
@@ -298,7 +296,7 @@ function OngoingParticipationDropInner({
       {primaryContent}
 
       <div className="tw-flex tw-w-full tw-flex-col">
-        {!isApproveChatCompact && identityProfile && (
+        {identityProfile && (
           <div
             className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-px-4`}
           >
@@ -310,28 +308,25 @@ function OngoingParticipationDropInner({
             />
           </div>
         )}
-        {!isApproveChatCompact && (
-          <ParticipationDropMetadata
-            metadata={visibleMetadata}
-            contextId={drop.id}
+        <ParticipationDropMetadata
+          metadata={visibleMetadata}
+          contextId={drop.id}
+        />
+        {(showInteractions || !hasDropFooter(footer)) && (
+          <ParticipationDropFooter
+            drop={drop}
+            voteAction={voteAction}
+            contentPresentation={contentPresentation}
+            indentContent={!isChatProposal}
+            inlineVotingActions={location === DropLocation.WAVE}
+            showInteractions={showInteractions}
+            winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
           />
         )}
-        {!isApproveChatCompact &&
-          (showInteractions || !hasDropFooter(footer)) && (
-            <ParticipationDropFooter
-              drop={drop}
-              voteAction={voteAction}
-              contentPresentation={contentPresentation}
-              indentContent={!isChatProposal}
-              inlineVotingActions={location === DropLocation.WAVE}
-              showInteractions={showInteractions}
-              winningThreshold={winningThreshold}
-              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-              isVotingClosed={isVotingClosed}
-              isVotingControlsLocked={isVotingControlsLocked}
-            />
-          )}
-        {!isApproveChatCompact && hasDropFooter(footer) && (
+        {hasDropFooter(footer) && (
           <div
             className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-px-4 tw-pb-4 tw-pt-2`}
           >
@@ -340,7 +335,7 @@ function OngoingParticipationDropInner({
         )}
       </div>
 
-      {showInteractions && !isApproveChatCompact && votingModal}
+      {showInteractions && votingModal}
     </ParticipationDropContainer>
   );
 }

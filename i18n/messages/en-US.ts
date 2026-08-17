@@ -564,11 +564,6 @@ const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   "tabLabels.errorReserved": "Labels cannot match existing tabs.",
 } as const);
 
-const WAVE_DROP_CONTENT_MESSAGES = objectMessages("waves.drop.content", {
-  showMore: "Show more",
-  showLess: "Show less",
-} as const);
-
 const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
   "waves.competitionBadges",
   {
@@ -3161,7 +3156,6 @@ export const EN_US_MESSAGES = {
   ...WAVE_LEADERBOARD_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,
-  ...WAVE_DROP_CONTENT_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,

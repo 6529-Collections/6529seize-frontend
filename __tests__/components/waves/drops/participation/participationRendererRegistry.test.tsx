@@ -115,7 +115,9 @@ describe("useWaveParticipationRendererSet", () => {
 
     render(
       <ParticipationDrop
-        {...({ drop: {} } as ComponentProps<typeof DefaultParticipationDrop>)}
+        {...({ drop: {} } as ComponentProps<
+          typeof DefaultParticipationDrop
+        >)}
       />
     );
 
@@ -124,28 +126,5 @@ describe("useWaveParticipationRendererSet", () => {
       undefined
     );
     expect(result.current.SingleWaveDrop).toBe(DefaultSingleWaveDrop);
-  });
-
-  it("preserves an explicit chat presentation in proposal-card waves", () => {
-    mockUseWaveProposalCardPresentation.mockReturnValue("proposalCard");
-
-    const { result } = renderHook(() =>
-      useWaveParticipationRendererSet("approval-wave")
-    );
-    const ParticipationDrop = result.current.ParticipationDrop;
-
-    render(
-      <ParticipationDrop
-        {...({ drop: {} } as ComponentProps<typeof DefaultParticipationDrop>)}
-        contentPresentation="approveChatCompact"
-      />
-    );
-
-    expect(DefaultParticipationDrop).toHaveBeenCalledWith(
-      expect.objectContaining({
-        contentPresentation: "approveChatCompact",
-      }),
-      undefined
-    );
   });
 });
