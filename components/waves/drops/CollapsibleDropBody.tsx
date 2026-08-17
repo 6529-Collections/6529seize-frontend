@@ -166,13 +166,14 @@ export default function CollapsibleDropBody({
       <div
         ref={thresholdRef}
         aria-hidden="true"
+        data-drop-body-threshold="true"
         className="tw-pointer-events-none tw-invisible tw-absolute tw-h-[7.5rem] sm:tw-h-[10.5rem]"
       />
       <div className="tw-relative">
         <div
           id={contentId}
           ref={viewportRef}
-          aria-hidden={isOverflowing && !isExpanded ? true : undefined}
+          data-drop-body-viewport="true"
           className={
             isOverflowing && !isExpanded
               ? "tw-max-h-[7.5rem] tw-overflow-hidden sm:tw-max-h-[10.5rem]"

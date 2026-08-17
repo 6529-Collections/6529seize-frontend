@@ -24,7 +24,10 @@ describe("CollapsibleDropBody", () => {
     jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
-        if (this.getAttribute("aria-hidden") === "true") {
+        if (
+          this.hasAttribute("data-drop-body-threshold") ||
+          this.hasAttribute("data-drop-body-viewport")
+        ) {
           return { bottom: 120, height: 120, top: 0 } as DOMRect;
         }
 
@@ -55,18 +58,10 @@ describe("CollapsibleDropBody", () => {
       </div>
     );
 
-    const clippedLink = screen.getByRole("link", {
-      hidden: true,
-      name: "Clipped link",
-    });
+    const clippedLink = screen.getByRole("link", { name: "Clipped link" });
     const showMore = screen.getByRole("button", { name: "Show more" });
-    const contentRegion = globalThis.document.getElementById(
-      showMore.getAttribute("aria-controls") ?? ""
-    );
-
     expect(showMore).toHaveAttribute("aria-expanded", "false");
     expect(clippedLink).toHaveAttribute("tabindex", "-1");
-    expect(contentRegion).toHaveAttribute("aria-hidden", "true");
 
     fireEvent.click(showMore);
 
@@ -76,14 +71,16 @@ describe("CollapsibleDropBody", () => {
       "true"
     );
     expect(clippedLink).not.toHaveAttribute("tabindex");
-    expect(contentRegion).not.toHaveAttribute("aria-hidden");
   });
 
   it("does not show a disclosure control when the body fits", () => {
     jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
-        if (this.getAttribute("aria-hidden") === "true") {
+        if (
+          this.hasAttribute("data-drop-body-threshold") ||
+          this.hasAttribute("data-drop-body-viewport")
+        ) {
           return { bottom: 120, height: 120, top: 0 } as DOMRect;
         }
 
@@ -103,7 +100,10 @@ describe("CollapsibleDropBody", () => {
     jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
-        if (this.getAttribute("aria-hidden") === "true") {
+        if (
+          this.hasAttribute("data-drop-body-threshold") ||
+          this.hasAttribute("data-drop-body-viewport")
+        ) {
           return { bottom: 120, height: 120, top: 0 } as DOMRect;
         }
 
@@ -129,7 +129,10 @@ describe("CollapsibleDropBody", () => {
     jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
-        if (this.getAttribute("aria-hidden") === "true") {
+        if (
+          this.hasAttribute("data-drop-body-threshold") ||
+          this.hasAttribute("data-drop-body-viewport")
+        ) {
           return { bottom: 120, height: 120, top: 0 } as DOMRect;
         }
 
@@ -167,7 +170,10 @@ describe("CollapsibleDropBody", () => {
     jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
-        if (this.getAttribute("aria-hidden") === "true") {
+        if (
+          this.hasAttribute("data-drop-body-threshold") ||
+          this.hasAttribute("data-drop-body-viewport")
+        ) {
           return { bottom: 120, height: 120, top: 0 } as DOMRect;
         }
 

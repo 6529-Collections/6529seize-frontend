@@ -69,7 +69,8 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - If a drop part contains `quoted_drop` data, a quoted-drop block renders below that part.
 - Edited drops show an `(edited)` marker below content.
 - Media attachments in the same part render under the text body in the same card.
-- Media and file attachments remain outside the main text-body clamp.
+- Media, file attachments, and quoted-drop blocks remain outside the main
+  text-body clamp.
 - Drop-author profile pictures first request a scaled image variant when supported by the media host.
 - If that optimized avatar load fails, the card retries with an unoptimized load of the same source.
 - If both avatar attempts fail (or no avatar source exists), the card keeps layout with a neutral profile placeholder.
