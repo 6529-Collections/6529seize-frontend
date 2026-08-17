@@ -10,7 +10,7 @@ import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,
-  size = "sm",
+  size,
 }: {
   readonly profile: ApiIdentity;
   readonly size?: ButtonSize;
@@ -21,12 +21,16 @@ export default function UserPageIdentityStatementsAddButton({
 
   return (
     <div>
-      <Button size={size} onClick={() => setIsAddStatementsOpen(true)}>
+      <Button
+        size={size}
+        aria-haspopup="dialog"
+        aria-expanded={isAddStatementsOpen}
+        onClick={() => setIsAddStatementsOpen(true)}
+      >
         <svg
           className="-tw-ml-1 tw-h-5 tw-w-5"
           viewBox="0 0 24 24"
           fill="none"
-          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -37,7 +41,9 @@ export default function UserPageIdentityStatementsAddButton({
             strokeLinejoin="round"
           />
         </svg>
-        <span>{t(locale, "user.profile.identity.statements.add")}</span>
+        <span>
+          {t(locale, "user.profile.identity.statements.add.triggerLabel")}
+        </span>
       </Button>
 
       <UserPageIdentityAddStatements

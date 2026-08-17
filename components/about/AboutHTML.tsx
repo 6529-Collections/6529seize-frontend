@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   AboutCol as Col,
   AboutContainer as Container,
+  ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME,
   AboutRow as Row,
   ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
 } from "./AboutLayout";
@@ -142,6 +143,7 @@ export default function AboutHTML(props: Readonly<Props>) {
         <Col
           className={clsx(
             styles["htmlContainer"],
+            ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME,
             isEns && styles["ensContent"],
             isEns && ENS_HTML_CONTENT_CLASS,
             isEns && "max-sm:tw-px-1"

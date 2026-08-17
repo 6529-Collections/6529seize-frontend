@@ -148,6 +148,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
           noPadding
           showScrollbar
           tall
+          showHeaderCloseButton={false}
           zIndexClassName="tw-z-[1200]"
         >
           {previewCard}

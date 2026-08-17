@@ -38,14 +38,16 @@ combined Identity layout.
 2. Review `Consolidated Addresses` and statement sections.
 3. If `Add` is visible, open the add-statements sheet on mobile or dialog on
    desktop.
-4. Choose `Social media account`, `NFT account`, `Contact`, or `Verification
-   post`.
+4. Choose one of the four compact statement groups. On mobile, expand `About
+   identity statements` when the public-visibility notes are needed.
 5. Choose a platform or statement type, enter a value, then select `Save`.
-   Select `Back to statement types` to choose a different group without closing
-   the sheet or dialog.
-6. Select a URL-capable statement row to open its destination. Use the
+   Use the sheet or dialog header's back button to choose a different group
+   without closing the flow.
+6. Close with the header button, backdrop, Escape key, or a swipe-down gesture
+   on phones.
+7. Select a URL-capable statement row to open its destination. Use the
    independent copy icon to copy its value; eligible owners can also delete it.
-7. On non-primary wallet rows, use `Set primary` when available.
+8. On non-primary wallet rows, use `Set primary` when available.
 
 ## Statement Types in Add Sheet or Dialog
 
@@ -98,6 +100,10 @@ contact details are not rewritten by mobile keyboards.
 - On mobile web and Capacitor, the add flow uses a scrollable, keyboard-aware
   sheet so the focused field and Save/Cancel actions remain reachable above the
   software keyboard as it opens and closes.
+- The mobile statement-group picker is content-sized at common phone heights,
+  keeps its close action in the sheet header, and supports swipe-down dismissal
+  without a decorative drag-handle stripe. Tablet and desktop keep the centered
+  modal and multi-column card presentation.
 - Empty statement groups are omitted after loading without showing a separate
   overall placeholder.
 

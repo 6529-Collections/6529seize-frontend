@@ -1,7 +1,7 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import UserPageIdentityAddStatementsViews from "@/components/user/identity/statements/add/UserPageIdentityAddStatementsViews";
-import { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
+import { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements.constants";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock(
@@ -28,13 +28,12 @@ jest.mock(
 const profile = { id: "1" } as ApiIdentity;
 
 describe("UserPageIdentityAddStatementsViews", () => {
-  const renderView = (activeView: STATEMENT_ADD_VIEW, onBack = jest.fn()) =>
+  const renderView = (activeView: STATEMENT_ADD_VIEW) =>
     render(
       <UserPageIdentityAddStatementsViews
         profile={profile}
         activeView={activeView}
         setActiveView={jest.fn()}
-        onBack={onBack}
         onClose={jest.fn()}
       />
     );
@@ -42,19 +41,11 @@ describe("UserPageIdentityAddStatementsViews", () => {
   it("renders select view", () => {
     renderView(STATEMENT_ADD_VIEW.SELECT);
     expect(screen.getByTestId("select")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /back to statement types/i })
-    ).toBeNull();
   });
 
   it("renders social media account view", () => {
-    const onBack = jest.fn();
-    renderView(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT, onBack);
+    renderView(STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT);
     expect(screen.getByTestId("sma")).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: /back to statement types/i })
-    );
-    expect(onBack).toHaveBeenCalled();
   });
 
   it("renders nft account view", () => {

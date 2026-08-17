@@ -1,15 +1,22 @@
 import { render } from "@testing-library/react";
-import React from "react";
 import { act } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import UserPageIdentityAddStatementsNFTAccounts from "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
+import type UserPageIdentityAddStatementsNFTAccountItems from "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems";
+import type UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_TYPE, STATEMENT_GROUP } from "@/helpers/Types";
 
-let itemsProps: any;
-let formProps: any;
+type ItemsProps = ComponentProps<
+  typeof UserPageIdentityAddStatementsNFTAccountItems
+>;
+type FormProps = ComponentProps<typeof UserPageIdentityAddStatementsForm>;
+let itemsProps: ItemsProps;
+let formProps: FormProps;
 
 jest.mock(
   "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems",
-  () => (props: any) => {
+  () => (props: ItemsProps) => {
     itemsProps = props;
     return <div data-testid="items" />;
   }
@@ -17,20 +24,15 @@ jest.mock(
 
 jest.mock(
   "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
-  () => (props: any) => {
+  () => (props: FormProps) => {
     formProps = props;
     return <div data-testid="form" />;
   }
 );
 
 describe("UserPageIdentityAddStatementsNFTAccounts", () => {
-  const profile = { query: "foo" } as any;
+  const profile = { query: "foo" } as ApiIdentity;
   const onClose = jest.fn();
-
-  beforeEach(() => {
-    itemsProps = undefined;
-    formProps = undefined;
-  });
 
   it("passes initial props to children", () => {
     render(

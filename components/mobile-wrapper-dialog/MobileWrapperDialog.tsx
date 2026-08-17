@@ -31,6 +31,7 @@ const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
 const DISMISS_DRAG_SETTLE_MS = 180;
 const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
+const TABLET_MODAL_DESKTOP_QUERY = "(min-width: 768px)";
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
@@ -63,6 +64,10 @@ type MobileWrapperDialogProps = {
   readonly mobileCloseButtonClassName?: string | undefined;
   readonly showDragHandle?: boolean | undefined;
   readonly enableDragToClose?: boolean | undefined;
+  /**
+   * Defaults to the shared in-sheet header close button. Disable only for an
+   * intentional full-bleed surface that requires the shared floating control.
+   */
   readonly showHeaderCloseButton?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
@@ -325,13 +330,25 @@ function FloatingCloseButton({
   );
 }
 
-function DragHandle({ show }: { readonly show?: boolean | undefined }) {
+function DragHandle({
+  show,
+  tabletModal,
+}: {
+  readonly show?: boolean | undefined;
+  readonly tabletModal?: boolean | undefined;
+}) {
   if (!show) {
     return null;
   }
 
   return (
-    <div className="tw-flex tw-justify-center tw-pt-3">
+    <div
+      aria-hidden="true"
+      className={clsx(
+        "tw-flex tw-justify-center tw-pt-3",
+        tabletModal && "md:tw-hidden"
+      )}
+    >
       <div className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-iron-700" />
     </div>
   );
@@ -363,7 +380,11 @@ function getDragTouchHandlers({
 }
 
 function startsInDragRegion(event: TouchEvent<HTMLDivElement>): boolean {
-  const touch = event.touches.item(0);
+  const touch = event.touches[0];
+  if (!touch) {
+    return false;
+  }
+
   return (
     touch.clientY - event.currentTarget.getBoundingClientRect().top <=
     DRAG_START_REGION_PX
@@ -378,6 +399,14 @@ function shouldDismissDrag(releasedOffset: number, startedAt: number): boolean {
     releasedOffset >= DISMISS_DRAG_DISTANCE_PX ||
     (releasedOffset >= DISMISS_DRAG_FLICK_DISTANCE_PX &&
       velocity >= DISMISS_DRAG_FLICK_VELOCITY_PX_MS)
+  );
+}
+
+function isCenteredTabletModal(tabletModal?: boolean): boolean {
+  return (
+    !!tabletModal &&
+    typeof globalThis.matchMedia === "function" &&
+    globalThis.matchMedia(TABLET_MODAL_DESKTOP_QUERY).matches
   );
 }
 
@@ -411,8 +440,7 @@ function useMobileDialogDrag({
     }
   }, [dismissible, onClose]);
 
-  const canDragToClose =
-    dismissible && (enableDragToClose ?? !!showDragHandle) && !tabletModal;
+  const canDragToClose = dismissible && (enableDragToClose ?? !!showDragHandle);
 
   const cancelScheduledDragFrame = useCallback(() => {
     if (dragFrameRef.current === null) {
@@ -484,25 +512,32 @@ function useMobileDialogDrag({
 
   const handleDragStart = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
-      if (!canDragToClose || !startsInDragRegion(event)) {
+      const touch = event.touches[0];
+      if (
+        !touch ||
+        !canDragToClose ||
+        isCenteredTabletModal(tabletModal) ||
+        !startsInDragRegion(event)
+      ) {
         return;
       }
 
-      dragStartYRef.current = event.touches.item(0).clientY;
+      dragStartYRef.current = touch.clientY;
       dragStartedAtRef.current = performance.now();
       setIsDragging(true);
       setClampedDragOffset(0);
     },
-    [canDragToClose, setClampedDragOffset]
+    [canDragToClose, setClampedDragOffset, tabletModal]
   );
 
   const handleDragMove = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
-      if (!canDragToClose || dragStartYRef.current === null) {
+      const touch = event.touches[0];
+      if (!touch || !canDragToClose || dragStartYRef.current === null) {
         return;
       }
 
-      const nextOffset = event.touches.item(0).clientY - dragStartYRef.current;
+      const nextOffset = touch.clientY - dragStartYRef.current;
       if (nextOffset <= 0) {
         setClampedDragOffset(0);
         return;
@@ -591,7 +626,7 @@ export default function MobileWrapperDialog({
   mobileCloseButtonClassName,
   showDragHandle,
   enableDragToClose,
-  showHeaderCloseButton,
+  showHeaderCloseButton = true,
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
@@ -704,7 +739,10 @@ export default function MobileWrapperDialog({
                         className={contentClassNames}
                         style={{ paddingBottom: bottomPadding }}
                       >
-                        <DragHandle show={showDragHandle} />
+                        <DragHandle
+                          show={showDragHandle}
+                          tabletModal={tabletModal}
+                        />
                         <MobileWrapperDialogHeader
                           title={title}
                           showDesktopCloseButton={showDesktopHeaderCloseButton}
