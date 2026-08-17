@@ -14,7 +14,7 @@ import type { ReactNode } from "react";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
@@ -161,7 +161,10 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
 
       <div className="tw-mt-8 tw-flex tw-max-w-4xl tw-flex-col tw-gap-10 sm:tw-mt-10 sm:tw-gap-12">
         <OverviewRule
-          title={m(locale, "about.subscriptions.overview.notMintpass.title")}
+          title={subscriptionRuleTitle(
+            locale,
+            "about.subscriptions.overview.notMintpass.title"
+          )}
         >
           <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-[#00f0ff]">
             <li>
@@ -183,7 +186,10 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         </OverviewRule>
 
         <OverviewRule
-          title={m(locale, "about.subscriptions.overview.regularMinting.title")}
+          title={subscriptionRuleTitle(
+            locale,
+            "about.subscriptions.overview.regularMinting.title"
+          )}
         >
           <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-[#8f5cff]">
             <li>
@@ -207,27 +213,32 @@ function OverviewRule({
   title,
 }: {
   readonly children: ReactNode;
-  readonly title: string;
+  readonly title: ReactNode;
 }) {
-  const emphasizedWord = "not";
-  const emphasizedWordIndex = title.indexOf(emphasizedWord);
-
   return (
     <section>
       <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-xl">
-        {emphasizedWordIndex >= 0 ? (
-          <>
-            {title.slice(0, emphasizedWordIndex)}
-            <span className="tw-underline tw-decoration-red tw-decoration-[3px] tw-underline-offset-[8px]">
-              {emphasizedWord}
-            </span>
-            {title.slice(emphasizedWordIndex + emphasizedWord.length)}
-          </>
-        ) : (
-          title
-        )}
+        {title}
       </h3>
       <div className="tw-mt-4">{children}</div>
     </section>
   );
+}
+
+function subscriptionRuleTitle(
+  locale: SupportedLocale,
+  key:
+    | "about.subscriptions.overview.notMintpass.title"
+    | "about.subscriptions.overview.regularMinting.title"
+): ReactNode {
+  return tRich<ReactNode>(locale, key, {
+    not: (
+      <span
+        className="tw-underline tw-decoration-red tw-decoration-[3px] tw-underline-offset-[8px]"
+        key="not"
+      >
+        {m(locale, "about.subscriptions.overview.emphasis.not")}
+      </span>
+    ),
+  });
 }
