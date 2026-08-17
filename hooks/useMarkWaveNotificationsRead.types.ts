@@ -5,12 +5,16 @@ import type {
   WaveReadVerifiedIdentity,
 } from "@/hooks/useMarkWaveNotificationsRead.identity";
 import type { RefObject } from "react";
+import type { ApiMarkWaveReadResponse } from "@/generated/models/ApiMarkWaveReadResponse";
 
 export type MarkWaveNotificationsReadResult = "sent" | "skipped";
 
 export interface MarkWaveNotificationsReadOptions {
   readonly shouldSend?: () => boolean;
   readonly queueIfBlocked?: boolean;
+  readonly readThroughSerialNo?: number | undefined;
+  readonly requestDmUnreadState?: boolean;
+  readonly onReadResponse?: (response: ApiMarkWaveReadResponse) => void;
 }
 
 export interface WaveNotificationsReadMarkerState {
@@ -48,6 +52,10 @@ export interface WaveReadSendRetryContext {
 export interface WaveReadSendIntent {
   readonly shouldSend: WaveReadShouldSend;
   readonly retryContext: WaveReadSendRetryContext | undefined;
+  readonly readThroughSerialNo: number | undefined;
+  readonly onReadResponse:
+    | ((response: ApiMarkWaveReadResponse) => void)
+    | undefined;
 }
 
 export interface WaveReadRequestState {

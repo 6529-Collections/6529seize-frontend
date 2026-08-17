@@ -864,7 +864,6 @@
     "__tests__/services/api/notifications-v2-api.test.ts": 1,
     "__tests__/services/api/quorum-participation-drop-preview-v2-api.test.ts": 2,
     "__tests__/services/api/wave-drops-v2-api.test.ts": 4,
-    "__tests__/services/AppWebSocketProvider.test.tsx": 1,
     "__tests__/services/auth/immediate-validation.utils.test.ts": 2,
     "__tests__/services/auth/session-v2.utils.test.ts": 5,
     "__tests__/services/wallet-signatures/structured-wallet-signatures.test.ts": 1,
