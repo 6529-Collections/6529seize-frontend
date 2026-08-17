@@ -37,6 +37,91 @@ import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPa
 const PRIMARY_ERROR_TITLE_KEY =
   "user.profile.identity.statements.primaryErrorTitle" as const;
 const COPIED_FEEDBACK_DURATION_MS = 1800;
+const FULL_ADDRESS_COPY_ITEM = "full-address" as const;
+const ENS_COPY_ITEM = "ens" as const;
+type CopiedItem = typeof FULL_ADDRESS_COPY_ITEM | typeof ENS_COPY_ITEM;
+
+function getError(error: unknown): string {
+  const record = error as { message?: unknown } | null;
+  const message = typeof record?.message === "string" ? record.message : "";
+  return message.split("Request Arguments")[0] ?? "";
+}
+
+function getDelegationStatusMessage({
+  locale,
+  isWritePending,
+  writeError,
+  hasWriteData,
+  isReceiptLoading,
+  hasReceiptData,
+  receiptError,
+  transactionLink,
+}: {
+  readonly locale: ReturnType<typeof useBrowserLocale>;
+  readonly isWritePending: boolean;
+  readonly writeError: unknown;
+  readonly hasWriteData: boolean;
+  readonly isReceiptLoading: boolean;
+  readonly hasReceiptData: boolean;
+  readonly receiptError: unknown;
+  readonly transactionLink: ReactNode;
+}): ReactNode {
+  if (isWritePending) {
+    return t(locale, "user.profile.identity.statements.confirmWallet");
+  }
+
+  if (writeError !== undefined && writeError !== null) {
+    return (
+      <>
+        {t(locale, PRIMARY_ERROR_TITLE_KEY)} {getError(writeError)}
+      </>
+    );
+  }
+
+  if (hasWriteData && isReceiptLoading) {
+    return (
+      <>
+        {t(locale, "user.profile.identity.statements.waitingConfirmation")}{" "}
+        {transactionLink}
+      </>
+    );
+  }
+
+  if (hasWriteData && hasReceiptData) {
+    return (
+      <>
+        {t(locale, "user.profile.identity.statements.primaryConfirmed")}{" "}
+        {transactionLink}
+      </>
+    );
+  }
+
+  if (receiptError !== undefined && receiptError !== null) {
+    return (
+      <>
+        {t(locale, PRIMARY_ERROR_TITLE_KEY)} {getError(receiptError)}{" "}
+        {transactionLink}
+      </>
+    );
+  }
+
+  return null;
+}
+
+function getCopiedAnnouncement(
+  locale: ReturnType<typeof useBrowserLocale>,
+  copiedItem: CopiedItem | null
+): string {
+  if (copiedItem === FULL_ADDRESS_COPY_ITEM) {
+    return t(locale, "user.profile.identity.statements.addressCopied");
+  }
+
+  if (copiedItem === ENS_COPY_ITEM) {
+    return t(locale, "user.profile.identity.statements.ensCopied");
+  }
+
+  return "";
+}
 
 function CopyValueField({
   label,
@@ -153,9 +238,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   const isPrimary =
     address.wallet.toLowerCase() === primaryAddress?.toLowerCase();
 
-  const [copiedItem, setCopiedItem] = useState<"full-address" | "ens" | null>(
-    null
-  );
+  const [copiedItem, setCopiedItem] = useState<CopiedItem | null>(null);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [_, copyToClipboardLegacy] = useCopyToClipboard();
 
@@ -171,7 +254,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     });
   };
 
-  const scheduleCopiedReset = (item: "full-address" | "ens") => {
+  const scheduleCopiedReset = (item: CopiedItem) => {
     if (resetTimerRef.current) {
       clearTimeout(resetTimerRef.current);
     }
@@ -183,7 +266,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   const showTouchCopyFeedback = (
     event: PointerEvent<HTMLButtonElement>,
-    item: "full-address" | "ens"
+    item: CopiedItem
   ) => {
     if (event.pointerType === "touch") {
       setCopiedItem(item);
@@ -193,7 +276,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   const clearCanceledTouchCopyFeedback = (
     event: PointerEvent<HTMLButtonElement>,
-    item: "full-address" | "ens"
+    item: CopiedItem
   ) => {
     if (event.pointerType === "touch") {
       if (resetTimerRef.current) {
@@ -208,9 +291,9 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.stopPropagation();
-    setCopiedItem("full-address");
+    setCopiedItem(FULL_ADDRESS_COPY_ITEM);
     copyToClipboard(address.wallet);
-    scheduleCopiedReset("full-address");
+    scheduleCopiedReset(FULL_ADDRESS_COPY_ITEM);
   };
 
   const handleCopyEns = (
@@ -221,9 +304,9 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     }
 
     event.stopPropagation();
-    setCopiedItem("ens");
+    setCopiedItem(ENS_COPY_ITEM);
     copyToClipboard(ensName);
-    scheduleCopiedReset("ens");
+    scheduleCopiedReset(ENS_COPY_ITEM);
   };
 
   useEffect(() => {
@@ -241,12 +324,6 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     hash: writeDelegation.data,
   });
   const lastToastKeyRef = useRef<string | null>(null);
-
-  function getError(e: unknown) {
-    const record = e as { message?: unknown } | null;
-    const message = typeof record?.message === "string" ? record.message : "";
-    return message.split("Request Arguments")[0] ?? "";
-  }
 
   useEffect(() => {
     if (writeDelegation.isPending || waitWriteDelegation.isLoading) {
@@ -328,50 +405,17 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     </a>
   ) : null;
 
-  let statusMessage: ReactNode = null;
-  if (writeDelegation.isPending) {
-    statusMessage = t(locale, "user.profile.identity.statements.confirmWallet");
-  } else if (writeDelegation.error) {
-    statusMessage = (
-      <>
-        {t(locale, PRIMARY_ERROR_TITLE_KEY)} {getError(writeDelegation.error)}
-      </>
-    );
-  } else if (writeDelegation.data && waitWriteDelegation.isLoading) {
-    statusMessage = (
-      <>
-        {t(locale, "user.profile.identity.statements.waitingConfirmation")}{" "}
-        {transactionLink}
-      </>
-    );
-  } else if (writeDelegation.data && waitWriteDelegation.data) {
-    statusMessage = (
-      <>
-        {t(locale, "user.profile.identity.statements.primaryConfirmed")}{" "}
-        {transactionLink}
-      </>
-    );
-  } else if (waitWriteDelegation.error) {
-    statusMessage = (
-      <>
-        {t(locale, PRIMARY_ERROR_TITLE_KEY)}{" "}
-        {getError(waitWriteDelegation.error)} {transactionLink}
-      </>
-    );
-  }
-
-  let copiedAnnouncement = "";
-  if (copiedItem === "full-address") {
-    copiedAnnouncement = t(
-      locale,
-      "user.profile.identity.statements.addressCopied"
-    );
-  } else if (copiedItem === "ens") {
-    copiedAnnouncement = t(
-      locale,
-      "user.profile.identity.statements.ensCopied"
-    );
-  }
+  const statusMessage = getDelegationStatusMessage({
+    locale,
+    isWritePending: writeDelegation.isPending,
+    writeError: writeDelegation.error,
+    hasWriteData: !!writeDelegation.data,
+    isReceiptLoading: waitWriteDelegation.isLoading,
+    hasReceiptData: !!waitWriteDelegation.data,
+    receiptError: waitWriteDelegation.error,
+    transactionLink,
+  });
+  const copiedAnnouncement = getCopiedAnnouncement(locale, copiedItem);
   const assignPrimary = async () => {
     writeDelegation.writeContract({
       address: DELEGATION_CONTRACT.contract,
@@ -561,14 +605,14 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                   "user.profile.identity.statements.copied"
                 )}
                 tooltipId={`copy-address-tooltip-${address.wallet}`}
-                isCopied={copiedItem === "full-address"}
+                isCopied={copiedItem === FULL_ADDRESS_COPY_ITEM}
                 isTouchScreen={isTouchScreen}
                 onCopy={handleCopyAddress}
                 onPointerDown={(event) =>
-                  showTouchCopyFeedback(event, "full-address")
+                  showTouchCopyFeedback(event, FULL_ADDRESS_COPY_ITEM)
                 }
                 onPointerCancel={(event) =>
-                  clearCanceledTouchCopyFeedback(event, "full-address")
+                  clearCanceledTouchCopyFeedback(event, FULL_ADDRESS_COPY_ITEM)
                 }
               />
 
@@ -585,12 +629,14 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                     "user.profile.identity.statements.copied"
                   )}
                   tooltipId={`copy-ens-tooltip-${address.wallet}`}
-                  isCopied={copiedItem === "ens"}
+                  isCopied={copiedItem === ENS_COPY_ITEM}
                   isTouchScreen={isTouchScreen}
                   onCopy={handleCopyEns}
-                  onPointerDown={(event) => showTouchCopyFeedback(event, "ens")}
+                  onPointerDown={(event) =>
+                    showTouchCopyFeedback(event, ENS_COPY_ITEM)
+                  }
                   onPointerCancel={(event) =>
-                    clearCanceledTouchCopyFeedback(event, "ens")
+                    clearCanceledTouchCopyFeedback(event, ENS_COPY_ITEM)
                   }
                 />
               )}

@@ -28,9 +28,15 @@ function getPrimaryAddress(profile: ApiIdentity): string | null {
     return null;
   }
 
-  const highestTdhWallet = wallets.reduce((highest, wallet) => {
-    return wallet.tdh > highest.tdh ? wallet : highest;
-  });
+  const [firstWallet, ...remainingWallets] = wallets;
+  if (!firstWallet) {
+    return null;
+  }
+
+  const highestTdhWallet = remainingWallets.reduce(
+    (highest, wallet) => (wallet.tdh > highest.tdh ? wallet : highest),
+    firstWallet
+  );
 
   return highestTdhWallet.wallet.toLowerCase();
 }

@@ -28,13 +28,12 @@ export default function UserPageIdentityStatementsStatementsList({
 
   if (loading) {
     return (
-      <div
-        role="status"
+      <output
         aria-label={t(locale, "user.profile.identity.statements.loading")}
-        className="tw-pt-2"
+        className="tw-block tw-pt-2"
       >
         <CommonSkeletonLoader />
-      </div>
+      </output>
     );
   }
 
