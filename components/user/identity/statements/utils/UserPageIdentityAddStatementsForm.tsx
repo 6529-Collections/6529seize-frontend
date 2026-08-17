@@ -87,15 +87,18 @@ export default function UserPageIdentityAddStatementsForm({
     onClose();
   };
   return (
-    <div className="tw-mt-4">
-      <form onSubmit={onSubmit}>
+    <div className="tw-mt-4 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col md:tw-block">
+      <form
+        onSubmit={onSubmit}
+        className="tw-flex tw-flex-1 tw-flex-col md:tw-block"
+      >
         <UserPageIdentityAddStatementsInput
           activeType={activeType}
           value={value}
           onChange={setValue}
         />
 
-        <div className="tw-mt-8">
+        <div className="tw-mt-auto tw-pt-8 md:tw-mt-8 md:tw-pt-0">
           <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
             <Button
               type="submit"

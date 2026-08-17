@@ -86,7 +86,7 @@ export default function UserPageIdentityAddStatements({
     >
       <div
         ref={contentRef}
-        className="tw-px-4 tw-pb-4 sm:tw-px-6 md:tw-py-6 lg:tw-px-8 lg:tw-py-8"
+        className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-px-4 tw-pb-4 sm:tw-px-6 md:tw-block md:tw-flex-none md:tw-py-6 lg:tw-px-8 lg:tw-py-8"
       >
         <UserPageIdentityAddStatementsViews
           profile={profile}
