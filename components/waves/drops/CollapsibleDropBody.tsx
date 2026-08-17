@@ -55,19 +55,26 @@ export default function CollapsibleDropBody({
     }
 
     const viewportBottom = viewport.getBoundingClientRect().bottom;
-    content
-      .querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-      .forEach((element) => {
-        if (element.getBoundingClientRect().bottom <= viewportBottom + 1) {
-          return;
-        }
+    const clippedElements = Array.from(
+      content.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+    ).filter(
+      (element) => element.getBoundingClientRect().bottom > viewportBottom + 1
+    );
 
-        managedTabIndexesRef.current.set(
-          element,
-          element.getAttribute("tabindex")
-        );
-        element.setAttribute("tabindex", "-1");
-      });
+    if (
+      clippedElements.includes(globalThis.document.activeElement as HTMLElement)
+    ) {
+      setIsExpanded(true);
+      return;
+    }
+
+    clippedElements.forEach((element) => {
+      managedTabIndexesRef.current.set(
+        element,
+        element.getAttribute("tabindex")
+      );
+      element.setAttribute("tabindex", "-1");
+    });
   }, [isExpanded, isOverflowing, restoreManagedTabIndexes]);
 
   const measureOverflow = useCallback(() => {
@@ -108,6 +115,11 @@ export default function CollapsibleDropBody({
     syncClippedFocusableElements();
   }, [children, syncClippedFocusableElements]);
 
+  const handleResize = useCallback(() => {
+    measureOverflow();
+    syncClippedFocusableElements();
+  }, [measureOverflow, syncClippedFocusableElements]);
+
   useEffect(() => {
     const content = contentRef.current;
     if (!content) {
@@ -115,14 +127,13 @@ export default function CollapsibleDropBody({
     }
 
     if (typeof globalThis.ResizeObserver === "undefined") {
-      globalThis.addEventListener("resize", measureOverflow);
+      globalThis.addEventListener("resize", handleResize);
       return () => {
-        globalThis.removeEventListener("resize", measureOverflow);
-        restoreManagedTabIndexes();
+        globalThis.removeEventListener("resize", handleResize);
       };
     }
 
-    const observer = new globalThis.ResizeObserver(measureOverflow);
+    const observer = new globalThis.ResizeObserver(handleResize);
     observer.observe(content);
     if (thresholdRef.current) {
       observer.observe(thresholdRef.current);
@@ -130,9 +141,15 @@ export default function CollapsibleDropBody({
 
     return () => {
       observer.disconnect();
-      restoreManagedTabIndexes();
     };
-  }, [measureOverflow, restoreManagedTabIndexes]);
+  }, [handleResize]);
+
+  useEffect(
+    () => () => {
+      restoreManagedTabIndexes();
+    },
+    [restoreManagedTabIndexes]
+  );
 
   const handleToggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -151,6 +168,7 @@ export default function CollapsibleDropBody({
         <div
           id={contentId}
           ref={viewportRef}
+          aria-hidden={isOverflowing && !isExpanded ? true : undefined}
           className={
             isOverflowing && !isExpanded
               ? "tw-max-h-[7.5rem] tw-overflow-hidden sm:tw-max-h-[10.5rem]"
@@ -172,7 +190,11 @@ export default function CollapsibleDropBody({
           aria-controls={contentId}
           aria-expanded={isExpanded}
           onClick={handleToggle}
-          onKeyDown={(event) => event.stopPropagation()}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.stopPropagation();
+            }
+          }}
           className="tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-x-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
         >
           {t(

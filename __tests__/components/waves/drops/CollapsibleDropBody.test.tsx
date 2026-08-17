@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import CollapsibleDropBody from "@/components/waves/drops/CollapsibleDropBody";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -6,7 +6,21 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 }));
 
 describe("CollapsibleDropBody", () => {
+  const originalResizeObserver = globalThis.ResizeObserver;
+  let resizeObserverCallback: ResizeObserverCallback | null = null;
+
   beforeEach(() => {
+    resizeObserverCallback = null;
+    globalThis.ResizeObserver = jest
+      .fn()
+      .mockImplementation((callback: ResizeObserverCallback) => {
+        resizeObserverCallback = callback;
+        return {
+          disconnect: jest.fn(),
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+        };
+      }) as unknown as typeof ResizeObserver;
     jest
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
@@ -24,6 +38,7 @@ describe("CollapsibleDropBody", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    globalThis.ResizeObserver = originalResizeObserver;
   });
 
   it("expands without triggering its parent and restores clipped links", () => {
@@ -40,11 +55,18 @@ describe("CollapsibleDropBody", () => {
       </div>
     );
 
-    const clippedLink = screen.getByRole("link", { name: "Clipped link" });
+    const clippedLink = screen.getByRole("link", {
+      hidden: true,
+      name: "Clipped link",
+    });
     const showMore = screen.getByRole("button", { name: "Show more" });
+    const contentRegion = globalThis.document.getElementById(
+      showMore.getAttribute("aria-controls") ?? ""
+    );
 
     expect(showMore).toHaveAttribute("aria-expanded", "false");
     expect(clippedLink).toHaveAttribute("tabindex", "-1");
+    expect(contentRegion).toHaveAttribute("aria-hidden", "true");
 
     fireEvent.click(showMore);
 
@@ -54,6 +76,7 @@ describe("CollapsibleDropBody", () => {
       "true"
     );
     expect(clippedLink).not.toHaveAttribute("tabindex");
+    expect(contentRegion).not.toHaveAttribute("aria-hidden");
   });
 
   it("does not show a disclosure control when the body fits", () => {
@@ -89,5 +112,42 @@ describe("CollapsibleDropBody", () => {
     expect(
       screen.getByText("Short Wave message").parentElement?.parentElement
     ).toHaveClass("tw-overflow-visible");
+  });
+
+  it("expands if a focused descendant becomes clipped", () => {
+    let linkBottom = 100;
+    jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute("aria-hidden") === "true") {
+          return { bottom: 120, height: 120, top: 0 } as DOMRect;
+        }
+
+        const bottom = this instanceof HTMLAnchorElement ? linkBottom : 240;
+        return { bottom, height: bottom, top: 0 } as DOMRect;
+      });
+
+    render(
+      <CollapsibleDropBody>
+        <p data-drop-body-text="true">Long Wave message</p>
+        <a href="https://example.com">Focusable link</a>
+      </CollapsibleDropBody>
+    );
+
+    const link = screen.getByRole("link", {
+      hidden: true,
+      name: "Focusable link",
+    });
+    link.focus();
+    linkBottom = 240;
+    act(() => {
+      resizeObserverCallback?.([], {} as ResizeObserver);
+    });
+
+    expect(screen.getByRole("button", { name: "Show less" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(link).toHaveFocus();
   });
 });
