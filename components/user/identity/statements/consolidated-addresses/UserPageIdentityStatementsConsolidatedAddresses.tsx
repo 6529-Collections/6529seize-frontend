@@ -23,11 +23,16 @@ function getPrimaryAddress(profile: ApiIdentity): string | null {
     return profile.primary_wallet.toLowerCase();
   }
 
-  const highestTdhWallet = profile.wallets?.reduce((highest, wallet) => {
+  const wallets = profile.wallets ?? [];
+  if (wallets.length === 0) {
+    return null;
+  }
+
+  const highestTdhWallet = wallets.reduce((highest, wallet) => {
     return wallet.tdh > highest.tdh ? wallet : highest;
   });
 
-  return highestTdhWallet?.wallet.toLowerCase() ?? null;
+  return highestTdhWallet.wallet.toLowerCase();
 }
 
 function sortByPrimary(
@@ -145,26 +150,30 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
           />
         ))}
       </ul>
-      <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
-        <ButtonLink
-          href={`/delegation/wallet-checker?address=${primaryAddress}`}
-          variant="secondary"
-          size="xs"
-        >
-          {t(locale, "user.profile.identity.statements.walletChecker")}
-        </ButtonLink>
-        <AnimatePresence mode="wait" initial={false}>
-          {showDelegationCenter && (
+      {(primaryAddress || showDelegationCenter) && (
+        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
+          {primaryAddress && (
             <ButtonLink
-              href="/delegation/delegation-center"
+              href={`/delegation/wallet-checker?address=${primaryAddress}`}
               variant="secondary"
               size="xs"
             >
-              {t(locale, "user.profile.identity.statements.delegationCenter")}
+              {t(locale, "user.profile.identity.statements.walletChecker")}
             </ButtonLink>
           )}
-        </AnimatePresence>
-      </div>
+          <AnimatePresence mode="wait" initial={false}>
+            {showDelegationCenter && (
+              <ButtonLink
+                href="/delegation/delegation-center"
+                variant="secondary"
+                size="xs"
+              >
+                {t(locale, "user.profile.identity.statements.delegationCenter")}
+              </ButtonLink>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

@@ -18,6 +18,11 @@ jest.mock("react-use", () => ({
   useCopyToClipboard: () => [null, mockCopy],
 }));
 
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => true,
+}));
+
 jest.mock(
   "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItemPrimary",
   () => ({
@@ -61,11 +66,13 @@ function renderComponent(props: any = {}) {
 describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (window as any).matchMedia = jest.fn().mockReturnValue({
-      matches: true,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    });
+    (window as any).matchMedia = jest
+      .fn()
+      .mockImplementation((query: string) => ({
+        matches: query === "(any-pointer: coarse)",
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      }));
   });
 
   it("uses semantic external links", () => {
@@ -109,6 +116,25 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
     act(() => {
       jest.advanceTimersByTime(1000);
     });
+  });
+
+  it("clears touch feedback when a press does not produce a copy", () => {
+    renderComponent({ isOpen: true });
+    const copyButton = screen.getByRole("button", {
+      name: "Copy full address",
+    });
+
+    const pointerDown = new Event("pointerdown", { bubbles: true });
+    Object.defineProperty(pointerDown, "pointerType", { value: "touch" });
+    fireEvent(copyButton, pointerDown);
+    expect(screen.getByText("Copied!")).toBeInTheDocument();
+    expect(mockCopy).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1800);
+    });
+
+    expect(screen.queryByText("Copied!")).not.toBeInTheDocument();
   });
 
   it("hides ens block when display is missing", () => {

@@ -1,13 +1,21 @@
 import UserPageIdentityDeleteStatementButton from "@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton";
+import type UserPageIdentityDeleteStatementModal from "@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal";
+import type { CicStatement } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps, ReactNode } from "react";
 
-let modalProps: any;
+type DeleteStatementModalProps = ComponentProps<
+  typeof UserPageIdentityDeleteStatementModal
+>;
+
+let modalProps: DeleteStatementModalProps;
 jest.mock(
   "@/components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal",
   () => ({
     __esModule: true,
-    default: (props: any) => {
+    default: (props: DeleteStatementModalProps) => {
       modalProps = props;
       return (
         <div data-testid="modal" data-open={String(props.isOpen)}>
@@ -19,15 +27,15 @@ jest.mock(
 );
 
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id }: any) => (
+  Tooltip: ({ children, id }: { children: ReactNode; id: string }) => (
     <div data-testid="react-tooltip" data-tooltip-id={id}>
       {children}
     </div>
   ),
 }));
 
-const statement = { id: "1" } as any;
-const profile = { id: "p" } as any;
+const statement = { id: "1" } as CicStatement;
+const profile = { id: "p" } as ApiIdentity;
 
 let isTouchDevice = false;
 jest.mock("@/hooks/useIsTouchDevice", () => () => isTouchDevice);

@@ -57,7 +57,6 @@ export default function ProfileActivityLogsFilter({
               aria-label={`Filter activity types: ${title}`}
               aria-expanded={isOpen}
               aria-controls={isOpen ? listId : undefined}
-              aria-haspopup="true"
               className={`tw-group tw-flex tw-min-h-11 tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-2.5 tw-font-normal tw-text-iron-50 tw-shadow-sm tw-transition-[background-color,border-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${
                 isOpen
                   ? "tw-border-white/20 tw-bg-iron-950 tw-shadow-lg tw-shadow-black/20"

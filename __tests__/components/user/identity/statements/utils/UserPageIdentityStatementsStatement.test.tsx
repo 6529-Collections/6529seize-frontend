@@ -28,11 +28,11 @@ jest.mock("react-use", () => ({
 function setMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockReturnValue({
-      matches,
+    value: jest.fn().mockImplementation((query: string) => ({
+      matches: matches && query === "(any-pointer: coarse)",
       addListener: jest.fn(),
       removeListener: jest.fn(),
-    }),
+    })),
   });
 }
 
@@ -83,8 +83,9 @@ describe("UserPageIdentityStatementsStatement", () => {
     expect(mockClipboardWriteText).toHaveBeenCalledWith("test-value");
     expect(mockCopyToClipboard).not.toHaveBeenCalled();
 
-    // Check that the text changed to "Copied!"
-    expect(screen.getAllByText("Copied!")).toHaveLength(2);
+    // Desktop keeps the value stable and announces the copy once.
+    expect(screen.getAllByText("Copied!")).toHaveLength(1);
+    expect(screen.getByText("test-value")).toBeInTheDocument();
 
     // Fast-forward time to check that the text reverts
     await act(async () => {
@@ -92,6 +93,38 @@ describe("UserPageIdentityStatementsStatement", () => {
     });
 
     expect(screen.getByText("test-value")).toBeInTheDocument();
+  });
+
+  it("hides touch-only visual feedback from the accessibility tree", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    setMatchMedia(true);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: mockClipboardWriteText },
+    });
+
+    render(
+      <UserPageIdentityStatementsStatement
+        statement={
+          {
+            statement_value: "test-value",
+            statement_type: STATEMENT_TYPE.X,
+          } as any
+        }
+        profile={{} as any}
+        canEdit={false}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /copy/i }));
+
+    const copiedMessages = screen.getAllByText("Copied!");
+    expect(copiedMessages).toHaveLength(2);
+    expect(
+      copiedMessages.some(
+        (message) => message.getAttribute("aria-hidden") === "true"
+      )
+    ).toBe(true);
   });
 
   it("shows external link when canOpen is true", () => {

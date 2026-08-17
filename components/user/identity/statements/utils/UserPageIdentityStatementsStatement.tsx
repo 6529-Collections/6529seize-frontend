@@ -56,15 +56,13 @@ export default function UserPageIdentityStatementsStatement({
     if (event.pointerType !== "touch") {
       return;
     }
-    setCopied(true);
     setIsCopyIconActive(true);
   };
 
-  const handleCopyPointerCancel = (event: PointerEvent<HTMLButtonElement>) => {
+  const handleCopyPointerEnd = (event: PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType !== "touch") {
       return;
     }
-    setCopied(false);
     setIsCopyIconActive(false);
   };
 
@@ -113,8 +111,11 @@ export default function UserPageIdentityStatementsStatement({
           {STATEMENT_META[statement.statement_type].title}
         </div>
         <div className="tw-mt-1.5 tw-truncate tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
-          {copied ? (
-            <span className="tw-font-semibold tw-text-primary-400">
+          {isTouchScreen && copied ? (
+            <span
+              aria-hidden="true"
+              className="tw-font-semibold tw-text-primary-400"
+            >
               {t(locale, "user.profile.identity.statements.copied")}
             </span>
           ) : (
@@ -167,7 +168,9 @@ export default function UserPageIdentityStatementsStatement({
             }`}
             onClick={handleCopy}
             onPointerDown={handleCopyPointerDown}
-            onPointerCancel={handleCopyPointerCancel}
+            onPointerUp={handleCopyPointerEnd}
+            onPointerLeave={handleCopyPointerEnd}
+            onPointerCancel={handleCopyPointerEnd}
             data-tooltip-id={`copy-statement-${statement.id}`}
           >
             <div className="tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">

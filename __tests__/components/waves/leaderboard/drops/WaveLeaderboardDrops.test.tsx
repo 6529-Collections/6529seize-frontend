@@ -109,9 +109,7 @@ jest.mock(
   () => ({
     WaveLeaderboardEmptyState: (props: {
       readonly onCreateDrop?: (() => void) | undefined;
-    }) => (
-      <div data-testid="empty" onClick={props.onCreateDrop} />
-    ),
+    }) => <div data-testid="empty" onClick={props.onCreateDrop} />,
   })
 );
 jest.mock(

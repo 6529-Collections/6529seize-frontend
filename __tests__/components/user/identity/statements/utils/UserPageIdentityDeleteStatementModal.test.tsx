@@ -6,13 +6,17 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import type { ComponentProps } from "react";
 
 jest.mock("@tanstack/react-query");
 
-let dialogProps: any;
+type MobileWrapperDialogProps = ComponentProps<typeof MobileWrapperDialog>;
+
+let dialogProps: MobileWrapperDialogProps;
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
-  default: (props: any) => {
+  default: (props: MobileWrapperDialogProps) => {
     dialogProps = props;
     return props.isOpen ? (
       <div role="dialog" aria-label={props.title}>

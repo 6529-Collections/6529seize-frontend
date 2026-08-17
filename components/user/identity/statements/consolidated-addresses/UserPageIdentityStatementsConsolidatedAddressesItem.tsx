@@ -171,12 +171,23 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     });
   };
 
+  const scheduleCopiedReset = (item: "full-address" | "ens") => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = setTimeout(() => {
+      setCopiedItem((current) => (current === item ? null : current));
+      resetTimerRef.current = null;
+    }, COPIED_FEEDBACK_DURATION_MS);
+  };
+
   const showTouchCopyFeedback = (
     event: PointerEvent<HTMLButtonElement>,
     item: "full-address" | "ens"
   ) => {
     if (event.pointerType === "touch") {
       setCopiedItem(item);
+      scheduleCopiedReset(item);
     }
   };
 
@@ -185,6 +196,10 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     item: "full-address" | "ens"
   ) => {
     if (event.pointerType === "touch") {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+        resetTimerRef.current = null;
+      }
       setCopiedItem((current) => (current === item ? null : current));
     }
   };
@@ -195,13 +210,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     event.stopPropagation();
     setCopiedItem("full-address");
     copyToClipboard(address.wallet);
-    if (resetTimerRef.current) {
-      clearTimeout(resetTimerRef.current);
-    }
-    resetTimerRef.current = setTimeout(() => {
-      setCopiedItem((current) => (current === "full-address" ? null : current));
-      resetTimerRef.current = null;
-    }, COPIED_FEEDBACK_DURATION_MS);
+    scheduleCopiedReset("full-address");
   };
 
   const handleCopyEns = (
@@ -214,13 +223,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     event.stopPropagation();
     setCopiedItem("ens");
     copyToClipboard(ensName);
-    if (resetTimerRef.current) {
-      clearTimeout(resetTimerRef.current);
-    }
-    resetTimerRef.current = setTimeout(() => {
-      setCopiedItem((current) => (current === "ens" ? null : current));
-      resetTimerRef.current = null;
-    }, COPIED_FEEDBACK_DURATION_MS);
+    scheduleCopiedReset("ens");
   };
 
   useEffect(() => {
