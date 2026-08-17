@@ -1,9 +1,10 @@
-import type {
-  SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE} from "@/helpers/Types";
+import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
 import {
   SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES,
+  type SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE,
 } from "@/helpers/Types";
-import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityAddStatementsSocialMediaAccountItems({
   activeType,
@@ -12,40 +13,23 @@ export default function UserPageIdentityAddStatementsSocialMediaAccountItems({
   readonly activeType: SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE;
   readonly setSocialType: (type: SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE) => void;
 }) {
-  const firstRow = SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES.slice(
-    0,
-    +(SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES.length / 2).toFixed(0)
-  );
+  const locale = useBrowserLocale();
 
-  const secondRow = SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES.slice(
-    +(SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES.length / 2).toFixed(0)
-  );
   return (
-    <div className="tw-mt-8">
-      <span className="tw-isolate tw-inline-flex tw-rounded-md tw-shadow-sm tw-w-full">
-        {firstRow.map((type, i) => (
+    <div>
+      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+        {t(locale, "user.profile.identity.statements.selectPlatform")}
+      </p>
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+        {SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES.map((type) => (
           <UserPageIdentityAddStatementsTypeButton
             key={type}
             statementType={type}
             isActive={activeType === type}
-            isFirst={i === 0}
-            isLast={i === firstRow.length - 1}
             onClick={() => setSocialType(type)}
           />
         ))}
-      </span>
-      <span className="tw-mt-3 md:tw-mt-2 tw-isolate tw-inline-flex tw-rounded-md tw-shadow-sm tw-w-full">
-        {secondRow.map((type, i) => (
-          <UserPageIdentityAddStatementsTypeButton
-            key={type}
-            statementType={type}
-            isActive={activeType === type}
-            isFirst={i === 0}
-            isLast={i === secondRow.length - 1}
-            onClick={() => setSocialType(type)}
-          />
-        ))}
-      </span>
+      </div>
     </div>
   );
 }

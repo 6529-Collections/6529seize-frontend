@@ -1,9 +1,11 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
-import { useRef, useState } from "react";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
+import { useRef, useState, type ReactNode } from "react";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
 
 export enum STATEMENT_ADD_VIEW {
@@ -14,52 +16,74 @@ export enum STATEMENT_ADD_VIEW {
   SOCIAL_MEDIA_VERIFICATION_POST = "SOCIAL_MEDIA_VERIFICATION_POST",
 }
 
-const VIEW_W_CLASS: Record<STATEMENT_ADD_VIEW, string> = {
-  [STATEMENT_ADD_VIEW.SELECT]: "sm:tw-max-w-[74rem]",
-  [STATEMENT_ADD_VIEW.CONTACT]: "sm:tw-max-w-[26.25rem]",
-  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
-  [STATEMENT_ADD_VIEW.NFT_ACCOUNT]: "sm:tw-max-w-[26.25rem]",
-  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]: "sm:tw-max-w-lg",
+const VIEW_TITLE_KEYS: Record<STATEMENT_ADD_VIEW, MessageKey> = {
+  [STATEMENT_ADD_VIEW.SELECT]: "user.profile.identity.statements.addTitle",
+  [STATEMENT_ADD_VIEW.CONTACT]:
+    "user.profile.identity.statements.addContactDialogTitle",
+  [STATEMENT_ADD_VIEW.NFT_ACCOUNT]:
+    "user.profile.identity.statements.addNftDialogTitle",
+  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT]:
+    "user.profile.identity.statements.addSocialDialogTitle",
+  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]:
+    "user.profile.identity.statements.addVerificationDialogTitle",
 };
 
-export default function UserPageIdentityAddStatements({
-  profile,
-  onClose,
-}: {
-  readonly profile: ApiIdentity;
-  readonly onClose: () => void;
-}) {
+const DETAIL_DIALOG_WIDTH_CLASS = "md:tw-max-w-lg";
+
+const VIEW_WIDTH_CLASSES: Record<STATEMENT_ADD_VIEW, string> = {
+  [STATEMENT_ADD_VIEW.SELECT]: "md:tw-max-w-4xl",
+  [STATEMENT_ADD_VIEW.CONTACT]: DETAIL_DIALOG_WIDTH_CLASS,
+  [STATEMENT_ADD_VIEW.NFT_ACCOUNT]: DETAIL_DIALOG_WIDTH_CLASS,
+  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_ACCOUNT]: DETAIL_DIALOG_WIDTH_CLASS,
+  [STATEMENT_ADD_VIEW.SOCIAL_MEDIA_VERIFICATION_POST]:
+    DETAIL_DIALOG_WIDTH_CLASS,
+};
+
+function KeyboardAwareContent({ children }: { readonly children: ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
   useKeyboardFocusScroll(contentRef);
 
+  return <div ref={contentRef}>{children}</div>;
+}
+
+export default function UserPageIdentityAddStatements({
+  profile,
+  isOpen,
+  onClose,
+}: {
+  readonly profile: ApiIdentity;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+}) {
+  const locale = useBrowserLocale();
   const [activeView, setActiveView] = useState<STATEMENT_ADD_VIEW>(
     STATEMENT_ADD_VIEW.SELECT
   );
 
-  // Each statement view retains its existing close button.
   return (
     <MobileWrapperDialog
-      isOpen
+      title={t(locale, VIEW_TITLE_KEYS[activeView])}
+      isOpen={isOpen}
       onClose={onClose}
+      onAfterLeave={() => setActiveView(STATEMENT_ADD_VIEW.SELECT)}
+      tall
       tabletModal
       showScrollbar
-      maxWidthClass={VIEW_W_CLASS[activeView]}
+      showHeaderCloseButton
+      maxWidthClass={VIEW_WIDTH_CLASSES[activeView]}
+      headerClassName="-tw-mt-2 md:tw-mt-0"
       zIndexClassName="tw-z-[1100]"
-      mobileCloseButtonClassName="!tw-hidden"
-      headerCloseButtonClassName="md:!tw-hidden"
       surfaceClassName="tw-bg-iron-950 tw-shadow-xl"
     >
-      <div
-        ref={contentRef}
-        className="tw-px-6 lg:tw-px-8 lg:tw-py-2"
-      >
+      <KeyboardAwareContent>
         <UserPageIdentityAddStatementsViews
           profile={profile}
           activeView={activeView}
           setActiveView={setActiveView}
+          onBack={() => setActiveView(STATEMENT_ADD_VIEW.SELECT)}
           onClose={onClose}
         />
-      </div>
+      </KeyboardAwareContent>
     </MobileWrapperDialog>
   );
 }
