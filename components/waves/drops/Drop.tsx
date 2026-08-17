@@ -20,6 +20,7 @@ import type {
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
+import type { DropContentPresentation } from "./dropContentPresentation";
 export type { DropInteractionParams } from "./drop.types";
 export { DropLocation } from "./drop.types";
 
@@ -52,6 +53,9 @@ interface DropProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly participationContentPresentation?:
+    | DropContentPresentation
+    | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -87,6 +91,7 @@ export default function Drop({
   winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  participationContentPresentation,
   embedPath,
   quotePath,
   embedDepth,
@@ -120,6 +125,7 @@ export default function Drop({
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
+        contentPresentation={participationContentPresentation}
         embedPath={embedPath}
         quotePath={quotePath}
         embedDepth={embedDepth}

@@ -4,10 +4,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { EditingDropProvider } from "@/contexts/EditingDropContext";
-import {
-  WsMessageType,
-  type WsDropDeleteMessage,
-} from "@/helpers/Types";
+import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import {
   act,
@@ -721,6 +718,9 @@ describe("MyStreamWaveChat", () => {
     );
     expect(capturedPropsHolder.current.isVotingClosed).toBe(false);
     expect(capturedPropsHolder.current.isVotingControlsLocked).toBe(true);
+    expect(capturedPropsHolder.current.participationContentPresentation).toBe(
+      "approveChatCompact"
+    );
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
   });
 

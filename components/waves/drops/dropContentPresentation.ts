@@ -1,7 +1,13 @@
 export type DropContentPresentation =
   | "default"
   | "proposalCard"
-  | "quorumCompact";
+  | "quorumCompact"
+  | "approveChatCompact";
+
+export const isProposalCardPresentation = (
+  presentation: DropContentPresentation
+): boolean =>
+  presentation === "proposalCard" || presentation === "approveChatCompact";
 
 export const PROPOSAL_CARD_SURFACE_CLASS = "tw-bg-iron-900/90";
 

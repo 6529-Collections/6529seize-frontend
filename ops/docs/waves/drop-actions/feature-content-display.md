@@ -4,11 +4,11 @@ Parent: [Wave Drop Actions Index](README.md)
 
 ## Overview
 
-Standard Wave and direct-message drop cards render full body text inline.
-There is no `Show full post` or collapse toggle for long bodies. Published
-proposals in a standard Wave configured for compact proposal cards are the
-exception: list, winner, approved, and quoted-preview surfaces show an authored
-preview card, and selecting it opens the complete original proposal.
+Wave and direct-message feeds keep long main drop bodies compact. Bodies that
+exceed the rendered-height limit show `Show more` and `Show less` controls;
+short bodies remain unchanged. Published proposals in a standard Wave
+configured for compact proposal cards use an authored preview card instead;
+selecting it opens the complete original proposal.
 
 The shared body renderer handles markdown, mentions, emoji shortcodes, and links.
 Multipart drops ("storms") stay in one card while users switch parts.
@@ -28,9 +28,13 @@ Multipart drops ("storms") stay in one card while users switch parts.
 ## User Journey
 
 1. Open a thread and locate a drop.
-2. Read full content inline in the card, or select a configured compact proposal
-   card to open the complete proposal.
-3. Use markdown links, mentions, and quoted-drop content from the body.
+2. Read the visible body preview. If the main body exceeds roughly five text
+   lines on small screens or seven on larger screens, select `Show more` to
+   reveal it and `Show less` to collapse it again. For a configured compact
+   proposal card, select the card to open the complete proposal.
+3. Use markdown links, mentions, and quoted-drop content from the body. Controls
+   clipped below the collapsed boundary stay out of the keyboard tab order
+   until the body is expanded.
 4. If the drop is a storm, switch parts with previous/next controls and the part counter.
 5. In click-through surfaces, open drop detail only when no text is selected.
 6. Marketplace preview-card interactions stay scoped to the preview and do not
@@ -39,8 +43,12 @@ Multipart drops ("storms") stay in one card while users switch parts.
 ## Common Scenarios
 
 - Full markdown body renders inline, including headings, lists, quotes, and code.
-- Normal messages remain full inline content even when the Wave uses compact
-  cards for published proposals.
+- Normal messages use the standard body presentation even when the Wave uses
+  compact cards for published proposals.
+- The feed collapse decision uses rendered height rather than raw character
+  count, so markdown structure and the available width determine whether the
+  control appears.
+- Full single-drop/detail views keep the complete body visible.
 - Ordered lists accept both `1.` and `1)` markers and keep the chosen delimiter
   when rendered.
 - Code blocks use syntax highlighting when available.
@@ -61,6 +69,7 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - If a drop part contains `quoted_drop` data, a quoted-drop block renders below that part.
 - Edited drops show an `(edited)` marker below content.
 - Media attachments in the same part render under the text body in the same card.
+- Media and file attachments remain outside the main text-body clamp.
 - Drop-author profile pictures first request a scaled image variant when supported by the media host.
 - If that optimized avatar load fails, the card retries with an unoptimized load of the same source.
 - If both avatar attempts fail (or no avatar source exists), the card keeps layout with a neutral profile placeholder.
@@ -85,10 +94,10 @@ Multipart drops ("storms") stay in one card while users switch parts.
 
 ## Limitations / Notes
 
-- Users cannot collapse long posts back to shortened previews in standard drop
-  cards.
 - Compact proposal cards are a per-Wave proposal presentation, not a generic
   long-post collapse control.
+- The height control applies to the main body in Wave and DM feeds. Quoted-drop
+  blocks and specialized compact proposal layouts manage their own presentation.
 - Mention links render only when the drop includes matching mention data.
 - This page covers shared body rendering. Provider-specific preview behavior and image-viewer controls are documented in separate pages.
 
