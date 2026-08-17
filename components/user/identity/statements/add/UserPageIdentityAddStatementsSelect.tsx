@@ -1,7 +1,7 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
+import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements.constants";
 
 const CAVEAT_MESSAGE_KEYS = [
   "user.profile.identity.statements.add.caveatOptional",

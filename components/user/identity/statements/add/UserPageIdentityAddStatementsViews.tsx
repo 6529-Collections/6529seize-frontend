@@ -4,7 +4,7 @@ import UserPageIdentityAddStatementsContact from "./contact/UserPageIdentityAddS
 import UserPageIdentityAddStatementsSocialMediaAccount from "./social-media/UserPageIdentityAddStatementsSocialMediaAccount";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityAddStatementsSocialMediaPosts from "./social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts";
-import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
+import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements.constants";
 import UserPageIdentityAddStatementsNFTAccounts from "./nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
 
 export default function UserPageIdentityAddStatementsViews({
@@ -52,7 +52,6 @@ export default function UserPageIdentityAddStatementsViews({
         />
       );
     default:
-      assertUnreachable(activeView);
-      return;
+      return assertUnreachable(activeView);
   }
 }

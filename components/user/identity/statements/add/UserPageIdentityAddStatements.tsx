@@ -6,15 +6,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useRef, useState } from "react";
+import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements.constants";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
 
-export enum STATEMENT_ADD_VIEW {
-  SELECT = "SELECT",
-  CONTACT = "CONTACT",
-  NFT_ACCOUNT = "NFT_ACCOUNT",
-  SOCIAL_MEDIA_ACCOUNT = "SOCIAL_MEDIA_ACCOUNT",
-  SOCIAL_MEDIA_VERIFICATION_POST = "SOCIAL_MEDIA_VERIFICATION_POST",
-}
+export { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements.constants";
 
 const VIEW_W_CLASS: Record<STATEMENT_ADD_VIEW, string> = {
   [STATEMENT_ADD_VIEW.SELECT]: "sm:tw-max-w-[74rem]",
