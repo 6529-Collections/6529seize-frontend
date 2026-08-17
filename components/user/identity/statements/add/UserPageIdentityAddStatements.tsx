@@ -38,9 +38,9 @@ const VIEW_TITLE_KEYS: Record<STATEMENT_ADD_VIEW, MessageKey> = {
 };
 
 const SELECT_HEADER_CLASS_NAME =
-  "tw-sticky tw-top-0 tw-z-20 tw-bg-iron-950 tw-pb-3 md:!tw-absolute md:tw-right-6 md:tw-top-6 md:!tw-p-0";
+  "tw-sticky tw-top-0 tw-z-20 tw-bg-iron-950 tw-pb-3 tw-pt-4 md:!tw-absolute md:tw-right-6 md:tw-top-6 md:!tw-p-0";
 const DETAIL_HEADER_CLASS_NAME =
-  "tw-sticky tw-top-0 tw-z-20 tw-bg-iron-950 tw-pb-4 md:tw-pt-6";
+  "tw-sticky tw-top-0 tw-z-20 tw-bg-iron-950 tw-pb-4 tw-pt-4 md:tw-pt-6";
 
 export default function UserPageIdentityAddStatements({
   profile,
