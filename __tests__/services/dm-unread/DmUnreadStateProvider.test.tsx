@@ -124,7 +124,7 @@ describe("DmUnreadStateProvider", () => {
       expect(screen.getByTestId("messages")).toHaveTextContent("1")
     );
     expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "dm-drops/unread",
+      endpoint: "dm-drops/unread/snapshot",
       headers: { Authorization: "Bearer jwt-profile-1" },
       errorMode: "structured",
     });

@@ -3156,7 +3156,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get authenticated user's direct-message unread snapshot.
+      summary: Get authenticated user's direct-message unread count.
       operationId: getDmDropsUnread
       x-6529-router:
         enabled: true
@@ -3164,6 +3164,31 @@ paths:
         handler:
           import: "@/api/dm-drops/dm-drops.handlers"
           name: handleGetDmDropsUnread
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDmDropsUnreadCount"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
+  /dm-drops/unread/snapshot:
+    get:
+      tags:
+        - Drops
+      summary: Get authenticated user's direct-message unread snapshot.
+      operationId: getDmUnreadSnapshot
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/dm-drops/dm-drops.handlers"
+          name: handleGetDmUnreadSnapshot
       responses:
         "200":
           description: successful operation

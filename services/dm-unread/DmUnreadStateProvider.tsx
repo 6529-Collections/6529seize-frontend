@@ -156,7 +156,7 @@ export function DmUnreadStateProvider({
       const requestPromise = (async () => {
         try {
           const response = await commonApiFetch<unknown>({
-            endpoint: "dm-drops/unread",
+            endpoint: "dm-drops/unread/snapshot",
             headers: { Authorization: `Bearer ${jwt}` },
             errorMode: "structured",
           });
