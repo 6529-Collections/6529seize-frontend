@@ -27,7 +27,7 @@ export default function UserPageIdentityAddStatementsSelect({
         <p className="tw-mb-0 tw-hidden tw-max-w-sm tw-text-lg tw-font-medium tw-text-iron-100 md:tw-block">
           {t(locale, "user.profile.identity.statements.add.desktopTitle")}
         </p>
-        <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400 md:tw-mt-2">
+        <p className="tw-mb-0 tw-text-pretty tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400 md:tw-mt-2">
           <span className="md:tw-hidden">
             {t(
               locale,
