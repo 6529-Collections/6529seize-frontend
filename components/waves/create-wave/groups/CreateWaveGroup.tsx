@@ -27,6 +27,7 @@ export default function CreateWaveGroup({
   groupsCache,
   groups,
   setDropsAdminCanDelete,
+  errorMessage,
 }: {
   readonly waveName: string;
   readonly waveType: ApiWaveType;
@@ -41,6 +42,7 @@ export default function CreateWaveGroup({
   readonly groupsCache: Record<string, ApiGroupFull>;
   readonly groups: WaveGroupsConfig;
   readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
+  readonly errorMessage: string | null;
 }) {
   const locale = useBrowserLocale();
   const getSelectedGroupId = () => {
@@ -76,11 +78,27 @@ export default function CreateWaveGroup({
     : CREATE_WAVE_NONE_GROUP_LABELS[groupType];
   const groupLabel = CREATE_WAVE_SELECT_GROUP_LABELS[waveType][groupType];
   const suggestedName = buildInlineGroupName({ waveName, groupLabel });
+  const labelId = `wave-group-${groupType.toLowerCase()}-label`;
+  const errorId = `wave-group-${groupType.toLowerCase()}-error`;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-3">
+    <div
+      className={`tw-flex tw-flex-col tw-gap-y-3 tw-rounded-lg ${
+        errorMessage
+          ? "tw-scroll-mb-32 tw-border tw-border-solid tw-border-error/70 tw-p-3"
+          : ""
+      }`}
+      role="group"
+      aria-labelledby={labelId}
+      aria-describedby={errorMessage ? errorId : undefined}
+      data-wave-group-invalid={errorMessage ? true : undefined}
+      tabIndex={errorMessage ? -1 : undefined}
+    >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+        <h3
+          id={labelId}
+          className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100"
+        >
           {groupLabel}
         </h3>
         {isNotChatWave && groupType === CreateWaveGroupConfigType.CAN_CHAT && (
@@ -109,6 +127,15 @@ export default function CreateWaveGroup({
         onChange={onGroupSelect}
         onCreateGroup={onInlineGroupCreate}
       />
+      {errorMessage && (
+        <p
+          id={errorId}
+          className="tw-m-0 tw-text-sm tw-text-error"
+          role="alert"
+        >
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

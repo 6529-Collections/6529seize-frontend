@@ -20,10 +20,13 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useMemeCardCount } from "./useMemeCardCount";
 import { getDefaultFirstDecisionTime } from "../services/waveDecisionService";
 import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
+import { useWaveGroupValidation } from "./useWaveGroupValidation";
+import type { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 
 // Stable empty reference so the derived `errors` keeps identity while there
 // is nothing to show (no surfaced errors), avoiding needless re-renders.
 const EMPTY_VALIDATION_ERRORS: CREATE_WAVE_VALIDATION_ERROR[] = [];
+const EMPTY_INVALID_GROUP_ROLES: ApiWaveGroupRole[] = [];
 
 interface EndDateConfig {
   time: number | null;
@@ -142,6 +145,8 @@ export function useWaveConfig() {
   // Bumped on every failed forward navigation; CreateWave watches it to
   // focus the first invalid field after the error state has committed.
   const [errorFocusRequest, setErrorFocusRequest] = useState(0);
+  const [groupValidationErrorVisible, setGroupValidationErrorVisible] =
+    useState(false);
 
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
@@ -168,6 +173,7 @@ export function useWaveConfig() {
       },
     };
   }, [config, memeCount]);
+  const groupValidationQuery = useWaveGroupValidation(effectiveConfig);
 
   // Update end date config when config changes
   useEffect(() => {
@@ -249,7 +255,7 @@ export function useWaveConfig() {
   };
 
   // Step navigation with validation
-  const onStep = ({
+  const onStep = async ({
     step: newStep,
     direction,
   }: {
@@ -266,8 +272,20 @@ export function useWaveConfig() {
         setErrorFocusRequest((count) => count + 1);
         return;
       }
+      if (
+        step === CreateWaveStep.GROUPS &&
+        effectiveConfig.groups.canView !== null
+      ) {
+        const validationResult = await groupValidationQuery.refetch();
+        if (validationResult.isError || !validationResult.data?.valid) {
+          setGroupValidationErrorVisible(validationResult.isError);
+          setErrorFocusRequest((count) => count + 1);
+          return;
+        }
+      }
     }
     setSurfacedErrors([]);
+    setGroupValidationErrorVisible(false);
     setSelectedOutcomeType(null);
     setStep(newStep);
   };
@@ -286,6 +304,7 @@ export function useWaveConfig() {
     readonly group: ApiGroupFull | null;
     readonly groupType: CreateWaveGroupConfigType;
   }) => {
+    setGroupValidationErrorVisible(false);
     if (group) {
       setGroupsCache((prev) => ({
         ...prev,
@@ -495,6 +514,12 @@ export function useWaveConfig() {
     selectedOutcomeType,
     errors,
     errorFocusRequest,
+    groupValidation: {
+      invalidRoles:
+        groupValidationQuery.data?.invalid_roles ?? EMPTY_INVALID_GROUP_ROLES,
+      isFetching: groupValidationQuery.isFetching,
+      unavailable: groupValidationErrorVisible,
+    },
     groupsCache,
     isMemeCountLoading: shouldLoadMemeCount && memeCountQuery.isLoading,
     isMemeCountError: shouldLoadMemeCount && memeCountQuery.isError,

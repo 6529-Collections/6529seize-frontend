@@ -18,6 +18,20 @@ jest.mock("@/helpers/waves/create-wave.validation");
 jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
   useMemeCardCount: jest.fn(),
 }));
+jest.mock(
+  "@/components/waves/create-wave/hooks/useWaveGroupValidation",
+  () => ({
+    useWaveGroupValidation: jest.fn(() => ({
+      data: { valid: true, invalid_roles: [] },
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      }),
+    })),
+  })
+);
 jest.mock("@/helpers/time", () => ({
   Time: {
     currentMillis: jest.fn(() => 1000000),

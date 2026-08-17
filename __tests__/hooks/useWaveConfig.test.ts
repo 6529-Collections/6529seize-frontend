@@ -10,6 +10,20 @@ jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
     isError: false,
   })),
 }));
+jest.mock(
+  "@/components/waves/create-wave/hooks/useWaveGroupValidation",
+  () => ({
+    useWaveGroupValidation: jest.fn(() => ({
+      data: { valid: true, invalid_roles: [] },
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      }),
+    })),
+  })
+);
 
 describe("useWaveConfig", () => {
   it("prevents step change when validation fails", () => {

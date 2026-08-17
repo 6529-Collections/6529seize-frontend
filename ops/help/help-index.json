@@ -2259,6 +2259,8 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Groups step shows all access and moderation rows immediately, organized from Who can view through Admin without an Advanced settings disclosure.",
         "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "When Who can view is restricted, every active Drop, Vote, Chat, and Admin group member must also belong to the View group; incompatible rows are highlighted and block progress.",
+        "Wave creation verifies the final access groups again after authentication and before creating a personal Admin group or the Wave.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include Rules; Rank and Approve also include Dates, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
         "Dates keeps core start, voting, and applicable first-announcement controls visible. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Dates optional section.",
@@ -2868,7 +2870,8 @@
         "For token-specific xTDH grants, group creators can require members to own any specified token or all specified tokens.",
         "For full-collection xTDH grants, group membership requires ownership of at least one collection token.",
         "Group creation requires the relevant connected profile permissions.",
-        "Groups can be used later in workflows such as wave access or participation settings."
+        "Groups can be used later in workflows such as wave access or participation settings.",
+        "Publishing a replacement for a group used by a Wave is rejected if it would leave any active Drop, Vote, Chat, or Admin group member outside that Wave's View group."
       ],
       "canonical_path": "/network/groups",
       "related_paths": ["/network/groups"],
