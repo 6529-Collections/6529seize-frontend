@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   AboutCol as Col,
   AboutContainer as Container,
+  ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME,
   AboutRow as Row,
 } from "./AboutLayout";
 import styles from "./About.module.css";
@@ -43,7 +44,7 @@ export default function AboutHTML(props: Readonly<Props>) {
       )}
       <Row>
         <Col
-          className={styles["htmlContainer"]}
+          className={`${styles["htmlContainer"]} ${ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME}`}
           dangerouslySetInnerHTML={{
             __html: html,
           }}
