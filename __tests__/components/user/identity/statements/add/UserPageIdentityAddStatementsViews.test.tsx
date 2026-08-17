@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import UserPageIdentityAddStatementsViews from "@/components/user/identity/statements/add/UserPageIdentityAddStatementsViews";
-import { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
+import { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements.constants";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock(

@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageIdentityAddStatements, {
-  STATEMENT_ADD_VIEW,
-} from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
+import UserPageIdentityAddStatements from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
+import { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements.constants";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { RefObject } from "react";
 

@@ -9,8 +9,6 @@ import { useRef, useState } from "react";
 import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements.constants";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
 
-export { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements.constants";
-
 const VIEW_W_CLASS: Record<STATEMENT_ADD_VIEW, string> = {
   [STATEMENT_ADD_VIEW.SELECT]: "sm:tw-max-w-[74rem]",
   [STATEMENT_ADD_VIEW.CONTACT]: "sm:tw-max-w-[26.25rem]",
