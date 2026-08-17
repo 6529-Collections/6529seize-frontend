@@ -36,10 +36,7 @@ export default function UserPageIdentityDeleteStatementModal({
     onError: (error) => {
       setToast({
         type: "error",
-        title: t(
-          locale,
-          "user.profile.identity.statements.deleteErrorTitle"
-        ),
+        title: t(locale, "user.profile.identity.statements.deleteErrorTitle"),
         description: t(
           locale,
           "user.profile.identity.statements.primaryErrorDescription"
@@ -49,10 +46,7 @@ export default function UserPageIdentityDeleteStatementModal({
     },
     onSuccess: () => {
       setToast({
-        message: t(
-          locale,
-          "user.profile.identity.statements.deleteSuccess"
-        ),
+        message: t(locale, "user.profile.identity.statements.deleteSuccess"),
         type: "warning",
       });
       onProfileStatementRemove({ profile });
@@ -80,10 +74,7 @@ export default function UserPageIdentityDeleteStatementModal({
     >
       <div className="tw-px-4 sm:tw-px-6">
         <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
-          {t(
-            locale,
-            "user.profile.identity.statements.deleteDescription"
-          )}
+          {t(locale, "user.profile.identity.statements.deleteDescription")}
         </p>
         <div className="tw-mt-6 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
           <Button

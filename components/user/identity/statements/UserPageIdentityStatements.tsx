@@ -97,10 +97,7 @@ export default function UserPageIdentityStatements({
                     className="tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/10 tw-p-4"
                   >
                     <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
-                      {t(
-                        locale,
-                        "user.profile.identity.statements.loadError"
-                      )}
+                      {t(locale, "user.profile.identity.statements.loadError")}
                     </p>
                     <Button
                       variant="secondary"
@@ -117,49 +114,49 @@ export default function UserPageIdentityStatements({
                   shouldShowStatementGroup(
                     groupedStatements.socialMediaAccounts
                   ) && (
-                  <div>
-                    <UserPageIdentityStatementsSocialMediaAccounts
-                      statements={groupedStatements.socialMediaAccounts}
-                      profile={profile}
-                      loading={isLoading}
-                    />
-                  </div>
-                )}
+                    <div>
+                      <UserPageIdentityStatementsSocialMediaAccounts
+                        statements={groupedStatements.socialMediaAccounts}
+                        profile={profile}
+                        loading={isLoading}
+                      />
+                    </div>
+                  )}
                 {!isError &&
                   shouldShowStatementGroup(groupedStatements.nftAccounts) && (
-                  <div>
-                    <UserPageIdentityStatementsNFTAccounts
-                      statements={groupedStatements.nftAccounts}
-                      profile={profile}
-                      loading={isLoading}
-                    />
-                  </div>
-                )}
+                    <div>
+                      <UserPageIdentityStatementsNFTAccounts
+                        statements={groupedStatements.nftAccounts}
+                        profile={profile}
+                        loading={isLoading}
+                      />
+                    </div>
+                  )}
 
                 {!isError &&
                   shouldShowStatementGroup(groupedStatements.contacts) && (
-                  <div>
-                    <UserPageIdentityStatementsContacts
-                      statements={groupedStatements.contacts}
-                      profile={profile}
-                      loading={isLoading}
-                    />
-                  </div>
-                )}
+                    <div>
+                      <UserPageIdentityStatementsContacts
+                        statements={groupedStatements.contacts}
+                        profile={profile}
+                        loading={isLoading}
+                      />
+                    </div>
+                  )}
                 {!isError &&
                   shouldShowStatementGroup(
                     groupedStatements.socialMediaVerificationPosts
                   ) && (
-                  <div>
-                    <UserPageIdentityStatementsSocialMediaVerificationPosts
-                      statements={
-                        groupedStatements.socialMediaVerificationPosts
-                      }
-                      profile={profile}
-                      loading={isLoading}
-                    />
-                  </div>
-                )}
+                    <div>
+                      <UserPageIdentityStatementsSocialMediaVerificationPosts
+                        statements={
+                          groupedStatements.socialMediaVerificationPosts
+                        }
+                        profile={profile}
+                        loading={isLoading}
+                      />
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -176,10 +173,7 @@ export default function UserPageIdentityStatements({
           <ul className="tw-m-0 tw-list-disc tw-space-y-1 tw-py-2 tw-pl-4 tw-font-normal tw-text-iron-300">
             <li>{t(locale, "user.profile.identity.statements.optional")}</li>
             <li>
-              {t(
-                locale,
-                "user.profile.identity.statements.permanentlyPublic"
-              )}
+              {t(locale, "user.profile.identity.statements.permanentlyPublic")}
             </li>
             <li>
               {t(locale, "user.profile.identity.statements.noVerification")}

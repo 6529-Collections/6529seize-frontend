@@ -21,10 +21,7 @@ export default function UserPageIdentityStatementsAddButton({
 
   return (
     <div>
-      <Button
-        size={size}
-        onClick={() => setIsAddStatementsOpen(true)}
-      >
+      <Button size={size} onClick={() => setIsAddStatementsOpen(true)}>
         <svg
           className="-tw-ml-1 tw-h-5 tw-w-5"
           viewBox="0 0 24 24"

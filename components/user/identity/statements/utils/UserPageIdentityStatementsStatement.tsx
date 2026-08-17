@@ -137,12 +137,14 @@ export default function UserPageIdentityStatementsStatement({
               locale,
               "user.profile.identity.statements.openStatement"
             )} ${STATEMENT_META[statement.statement_type].title}`}
-            className="tw-flex tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-items-center tw-gap-3.5 tw-py-3 tw-text-inherit tw-no-underline focus-visible:tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 lg:tw-py-2">
+            className="tw-flex tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-items-center tw-gap-3.5 tw-py-3 tw-text-inherit tw-no-underline focus-visible:tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 lg:tw-py-2"
+          >
             {statementContent}
             <div
               aria-hidden="true"
-              className="tw-ml-auto tw-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-text-iron-500 tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-200 active:tw-scale-95 motion-reduce:tw-transform-none motion-reduce:tw-transition-none [&>svg]:tw-h-4 [&>svg]:tw-w-4"
-              data-tooltip-id={`open-statement-${statement.id}`}>
+              className="tw-ml-auto tw-flex tw-h-9 tw-w-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-transparent tw-text-iron-500 tw-transition tw-duration-200 tw-ease-out active:tw-scale-95 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-200 motion-reduce:tw-transform-none motion-reduce:tw-transition-none [&>svg]:tw-h-4 [&>svg]:tw-w-4"
+              data-tooltip-id={`open-statement-${statement.id}`}
+            >
               <OutsideLinkIcon />
             </div>
           </a>
@@ -158,15 +160,16 @@ export default function UserPageIdentityStatementsStatement({
               locale,
               "user.profile.identity.statements.copyStatement"
             )} ${STATEMENT_META[statement.statement_type].title}`}
-            className={`tw-inline-flex tw-h-9 tw-w-9 tw-touch-manipulation tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${
+            className={`tw-inline-flex tw-h-9 tw-w-9 tw-cursor-pointer tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${
               isCopyIconActive
                 ? "tw-bg-primary-500/15 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-400/25"
-                : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white focus-visible:tw-bg-white/10 lg:tw-text-iron-600"
+                : "tw-bg-transparent tw-text-iron-500 focus-visible:tw-bg-white/10 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white lg:tw-text-iron-600"
             }`}
             onClick={handleCopy}
             onPointerDown={handleCopyPointerDown}
             onPointerCancel={handleCopyPointerCancel}
-            data-tooltip-id={`copy-statement-${statement.id}`}>
+            data-tooltip-id={`copy-statement-${statement.id}`}
+          >
             <div className="tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center [&>svg]:tw-h-full [&>svg]:tw-w-full">
               <CopyIcon />
             </div>
@@ -181,7 +184,8 @@ export default function UserPageIdentityStatementsStatement({
               positionStrategy="fixed"
               offset={8}
               opacity={1}
-              style={TOOLTIP_STYLES}>
+              style={TOOLTIP_STYLES}
+            >
               <span className="tw-text-xs">
                 {t(locale, "user.profile.identity.statements.copyStatement")}
               </span>
@@ -201,16 +205,15 @@ export default function UserPageIdentityStatementsStatement({
             positionStrategy="fixed"
             offset={8}
             opacity={1}
-            style={TOOLTIP_STYLES}>
+            style={TOOLTIP_STYLES}
+          >
             <span className="tw-text-xs">
               {t(locale, "user.profile.identity.statements.openStatement")}
             </span>
           </Tooltip>
         )}
         <span className="tw-sr-only" aria-live="polite">
-          {copied
-            ? t(locale, "user.profile.identity.statements.copied")
-            : ""}
+          {copied ? t(locale, "user.profile.identity.statements.copied") : ""}
         </span>
       </div>
     </li>

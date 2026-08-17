@@ -1,8 +1,5 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  STATEMENT_GROUP,
-  STATEMENT_TYPE,
-} from "@/helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
 
 export default function UserPageIdentityAddStatementsSocialMediaPosts({

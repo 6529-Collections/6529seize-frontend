@@ -42,10 +42,7 @@ export default function UserPageIdentityAddStatementsForm({
 
   const addStatementMutation = useMutation({
     mutationFn: (statement: string) =>
-      commonApiPost<
-        ApiCreateOrUpdateProfileCicStatement,
-        CicStatement
-      >({
+      commonApiPost<ApiCreateOrUpdateProfileCicStatement, CicStatement>({
         endpoint: `profiles/${profile.query}/cic/statements`,
         body: {
           statement_group: group,
@@ -66,10 +63,7 @@ export default function UserPageIdentityAddStatementsForm({
     onError: (error) => {
       setToast({
         type: "error",
-        title: t(
-          locale,
-          "user.profile.identity.statements.addErrorTitle"
-        ),
+        title: t(locale, "user.profile.identity.statements.addErrorTitle"),
         description: t(
           locale,
           "user.profile.identity.statements.primaryErrorDescription"

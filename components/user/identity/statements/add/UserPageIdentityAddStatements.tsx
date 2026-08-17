@@ -17,8 +17,7 @@ export enum STATEMENT_ADD_VIEW {
 }
 
 const VIEW_TITLE_KEYS: Record<STATEMENT_ADD_VIEW, MessageKey> = {
-  [STATEMENT_ADD_VIEW.SELECT]:
-    "user.profile.identity.statements.addTitle",
+  [STATEMENT_ADD_VIEW.SELECT]: "user.profile.identity.statements.addTitle",
   [STATEMENT_ADD_VIEW.CONTACT]:
     "user.profile.identity.statements.addContactDialogTitle",
   [STATEMENT_ADD_VIEW.NFT_ACCOUNT]:

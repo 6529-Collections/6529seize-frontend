@@ -160,10 +160,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
               variant="secondary"
               size="xs"
             >
-              {t(
-                locale,
-                "user.profile.identity.statements.delegationCenter"
-              )}
+              {t(locale, "user.profile.identity.statements.delegationCenter")}
             </ButtonLink>
           )}
         </AnimatePresence>

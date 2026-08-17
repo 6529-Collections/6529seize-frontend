@@ -10,9 +10,9 @@ jest.mock(
     default: (props: any) => {
       modalProps = props;
       return (
-      <div data-testid="modal" data-open={String(props.isOpen)}>
-        <button onClick={props.onClose}>close</button>
-      </div>
+        <div data-testid="modal" data-open={String(props.isOpen)}>
+          <button onClick={props.onClose}>close</button>
+        </div>
       );
     },
   })
@@ -45,9 +45,7 @@ describe("UserPageIdentityDeleteStatementButton", () => {
       />
     );
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
-    await userEvent.click(
-      screen.getByRole("button", { name: "Delete" })
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Delete" }));
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
     await userEvent.click(screen.getByText("close"));
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");

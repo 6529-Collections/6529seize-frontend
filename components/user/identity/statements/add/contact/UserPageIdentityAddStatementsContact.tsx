@@ -2,12 +2,8 @@
 
 import { useState } from "react";
 import UserPageIdentityAddStatementsContactItems from "./UserPageIdentityAddStatementsContactItems";
-import type {
-  CONTACT_STATEMENT_TYPE} from "@/helpers/Types";
-import {
-  STATEMENT_GROUP,
-  STATEMENT_TYPE,
-} from "@/helpers/Types";
+import type { CONTACT_STATEMENT_TYPE } from "@/helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 

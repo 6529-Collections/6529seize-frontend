@@ -70,11 +70,12 @@ describe("UserPageIdentityStatementsConsolidatedAddressesItem", () => {
 
   it("uses semantic external links", () => {
     renderComponent();
-    expect(screen.getByRole("link", { name: "Open on OpenSea" })).toHaveAttribute(
-      "href",
-      "https://opensea.io/0x1234567890abcdef"
-    );
-    expect(screen.getByRole("link", { name: "Open on Etherscan" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Open on OpenSea" })
+    ).toHaveAttribute("href", "https://opensea.io/0x1234567890abcdef");
+    expect(
+      screen.getByRole("link", { name: "Open on Etherscan" })
+    ).toHaveAttribute(
       "href",
       "https://etherscan.io/address/0x1234567890abcdef"
     );

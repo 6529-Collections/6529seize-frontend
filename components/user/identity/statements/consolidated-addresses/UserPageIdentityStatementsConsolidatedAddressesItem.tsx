@@ -75,7 +75,7 @@ function CopyValueField({
         onPointerDown={onPointerDown}
         onPointerCancel={onPointerCancel}
         {...(!isTouchScreen && { "data-tooltip-id": tooltipId })}
-        className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-touch-manipulation tw-cursor-pointer tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0 lg:tw-pr-9"
+        className="tw-group tw-relative tw-mt-1 tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-touch-manipulation tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-py-2 tw-pl-2 tw-pr-12 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.06] lg:tw-min-h-0 lg:tw-pr-9"
       >
         <span
           className={`tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100 ${
@@ -241,8 +241,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   function getError(e: unknown) {
     const record = e as { message?: unknown } | null;
-    const message =
-      typeof record?.message === "string" ? record.message : "";
+    const message = typeof record?.message === "string" ? record.message : "";
     return message.split("Request Arguments")[0] ?? "";
   }
 
@@ -279,10 +278,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
       lastToastKeyRef.current = toastKey;
       setToast({
         type: "success",
-        message: t(
-          locale,
-          "user.profile.identity.statements.primarySuccess"
-        ),
+        message: t(locale, "user.profile.identity.statements.primarySuccess"),
       });
       return;
     }
@@ -301,10 +297,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           locale,
           "user.profile.identity.statements.primaryErrorDescription"
         ),
-        details: getToastErrorDetails(
-          waitWriteDelegation.error,
-          errorMessage
-        ),
+        details: getToastErrorDetails(waitWriteDelegation.error, errorMessage),
       });
     }
   }, [
@@ -334,10 +327,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   let statusMessage: ReactNode = null;
   if (writeDelegation.isPending) {
-    statusMessage = t(
-      locale,
-      "user.profile.identity.statements.confirmWallet"
-    );
+    statusMessage = t(locale, "user.profile.identity.statements.confirmWallet");
   } else if (writeDelegation.error) {
     statusMessage = (
       <>
@@ -347,10 +337,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   } else if (writeDelegation.data && waitWriteDelegation.isLoading) {
     statusMessage = (
       <>
-        {t(
-          locale,
-          "user.profile.identity.statements.waitingConfirmation"
-        )}{" "}
+        {t(locale, "user.profile.identity.statements.waitingConfirmation")}{" "}
         {transactionLink}
       </>
     );
@@ -364,8 +351,8 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   } else if (waitWriteDelegation.error) {
     statusMessage = (
       <>
-        {t(locale, PRIMARY_ERROR_TITLE_KEY)} {getError(waitWriteDelegation.error)}{" "}
-        {transactionLink}
+        {t(locale, PRIMARY_ERROR_TITLE_KEY)}{" "}
+        {getError(waitWriteDelegation.error)} {transactionLink}
       </>
     );
   }
@@ -418,7 +405,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             aria-expanded={isOpen}
             aria-controls={`consolidated-address-panel-${address.wallet}`}
             onClick={onToggleOpen}
-            className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-0.5 tw-text-left tw-text-iron-100 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white/40 lg:tw-min-h-0 lg:tw-px-0"
+            className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-0.5 tw-text-left tw-text-iron-100 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white/40 desktop-hover:hover:tw-bg-white/[0.04] lg:tw-min-h-0 lg:tw-px-0"
           >
             <span className="tw-min-w-0 tw-flex-1">
               {ensName && (
@@ -456,7 +443,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             aria-expanded={isOpen}
             aria-controls={`consolidated-address-panel-${address.wallet}`}
             onClick={onToggleOpen}
-            className="tw-ml-1 tw-inline-flex tw-h-11 tw-w-11 tw-touch-manipulation tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white/40 lg:tw-hidden"
+            className="tw-ml-1 tw-inline-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white/40 lg:tw-hidden"
           >
             <ChevronDownIcon
               className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
@@ -480,10 +467,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               data-tooltip-content={
                 isTouchScreen
                   ? null
-                  : t(
-                      locale,
-                      "user.profile.identity.statements.openEtherscan"
-                    )
+                  : t(locale, "user.profile.identity.statements.openEtherscan")
               }
             >
               <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
@@ -513,10 +497,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               data-tooltip-content={
                 isTouchScreen
                   ? null
-                  : t(
-                      locale,
-                      "user.profile.identity.statements.openOpenSea"
-                    )
+                  : t(locale, "user.profile.identity.statements.openOpenSea")
               }
             >
               <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
@@ -590,10 +571,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
               {ensName && (
                 <CopyValueField
-                  label={t(
-                    locale,
-                    "user.profile.identity.statements.ensName"
-                  )}
+                  label={t(locale, "user.profile.identity.statements.ensName")}
                   value={ensName}
                   copyLabel={t(
                     locale,
@@ -607,9 +585,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                   isCopied={copiedItem === "ens"}
                   isTouchScreen={isTouchScreen}
                   onCopy={handleCopyEns}
-                  onPointerDown={(event) =>
-                    showTouchCopyFeedback(event, "ens")
-                  }
+                  onPointerDown={(event) => showTouchCopyFeedback(event, "ens")}
                   onPointerCancel={(event) =>
                     clearCanceledTouchCopyFeedback(event, "ens")
                   }

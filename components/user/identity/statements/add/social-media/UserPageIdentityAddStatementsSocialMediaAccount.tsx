@@ -1,12 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type {
-  SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE} from "@/helpers/Types";
-import {
-  STATEMENT_GROUP,
-  STATEMENT_TYPE,
-} from "@/helpers/Types";
+import type { SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPE } from "@/helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageIdentityAddStatementsSocialMediaAccountItems from "./UserPageIdentityAddStatementsSocialMediaAccountItems";
 import UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";

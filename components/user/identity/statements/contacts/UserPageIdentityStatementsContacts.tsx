@@ -23,10 +23,7 @@ export default function UserPageIdentityStatementsContacts({
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
-        noItemsMessage={t(
-          locale,
-          "user.profile.identity.statements.noContact"
-        )}
+        noItemsMessage={t(locale, "user.profile.identity.statements.noContact")}
         loading={loading}
       />
     </div>

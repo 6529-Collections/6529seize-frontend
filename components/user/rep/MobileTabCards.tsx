@@ -86,7 +86,9 @@ export default function MobileTabCards({
         <MobileTabButton
           tab="rep"
           label={t(locale, "user.profile.identity.mobileTabs.totalRep")}
-          value={overview ? formatInteger(locale, overview.total_rep) : "\u2014"}
+          value={
+            overview ? formatInteger(locale, overview.total_rep) : "\u2014"
+          }
           activeTab={activeTab}
           onTabChange={onTabChange}
         />

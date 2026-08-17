@@ -34,7 +34,10 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
 
   it("passes initial props to children", () => {
     render(
-      <UserPageIdentityAddStatementsNFTAccounts onClose={onClose} profile={profile} />
+      <UserPageIdentityAddStatementsNFTAccounts
+        onClose={onClose}
+        profile={profile}
+      />
     );
 
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.SUPER_RARE);
@@ -48,7 +51,10 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
 
   it("updates active type when setType called", () => {
     render(
-      <UserPageIdentityAddStatementsNFTAccounts onClose={onClose} profile={profile} />
+      <UserPageIdentityAddStatementsNFTAccounts
+        onClose={onClose}
+        profile={profile}
+      />
     );
 
     act(() => {

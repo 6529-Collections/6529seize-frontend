@@ -47,11 +47,7 @@ test("calls onClose on Escape and backdrop click", async () => {
   const onClose = jest.fn();
   const user = userEvent.setup();
   render(
-    <UserPageIdentityAddStatements
-      profile={profile}
-      isOpen
-      onClose={onClose}
-    />
+    <UserPageIdentityAddStatements profile={profile} isOpen onClose={onClose} />
   );
 
   await user.keyboard("{Escape}");

@@ -39,7 +39,7 @@ export default function UserPageIdentityStatementsStatementsList({
   }
 
   return (
-    <ul className="tw-mb-0 tw-mt-2 tw-list-none tw-space-y-0 tw-inline-flex tw-flex-col tw-w-full tw-pl-0 tw-text-base tw-text-iron-300">
+    <ul className="tw-mb-0 tw-mt-2 tw-inline-flex tw-w-full tw-list-none tw-flex-col tw-space-y-0 tw-pl-0 tw-text-base tw-text-iron-300">
       {statements.map((statement) => (
         <UserPageIdentityStatementsStatement
           key={statement.id}

@@ -29,7 +29,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +48,7 @@ export default function UserPageIdentityAddStatementsSelect({
             <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.addSocialTitle")}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
               {t(
                 locale,
                 "user.profile.identity.statements.addSocialDescription"
@@ -68,7 +68,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -87,11 +87,8 @@ export default function UserPageIdentityAddStatementsSelect({
             <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.addNftTitle")}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
-              {t(
-                locale,
-                "user.profile.identity.statements.addNftDescription"
-              )}
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
+              {t(locale, "user.profile.identity.statements.addNftDescription")}
             </p>
           </div>
           <ChevronRightIcon
@@ -107,7 +104,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +123,7 @@ export default function UserPageIdentityAddStatementsSelect({
             <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100 group-hover:tw-text-white">
               {t(locale, "user.profile.identity.statements.addContactTitle")}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
               {t(
                 locale,
                 "user.profile.identity.statements.addContactDescription"
@@ -148,7 +145,7 @@ export default function UserPageIdentityAddStatementsSelect({
           <div>
             <span className={tileIconClassName}>
               <svg
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50 group-hover:tw-scale-105 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out group-hover:tw-scale-105"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -170,7 +167,7 @@ export default function UserPageIdentityAddStatementsSelect({
                 "user.profile.identity.statements.addVerificationTitle"
               )}
             </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
               {t(
                 locale,
                 "user.profile.identity.statements.addVerificationDescription"
@@ -188,13 +185,14 @@ export default function UserPageIdentityAddStatementsSelect({
         <ul className="tw-mb-0 tw-list-disc tw-space-y-1 tw-pl-5 tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-500">
           <li>{t(locale, "user.profile.identity.statements.optional")}</li>
           <li>
-            {t(
-              locale,
-              "user.profile.identity.statements.permanentlyPublic"
-            )}
+            {t(locale, "user.profile.identity.statements.permanentlyPublic")}
           </li>
-          <li>{t(locale, "user.profile.identity.statements.noVerification")}</li>
-          <li>{t(locale, "user.profile.identity.statements.communityRates")}</li>
+          <li>
+            {t(locale, "user.profile.identity.statements.noVerification")}
+          </li>
+          <li>
+            {t(locale, "user.profile.identity.statements.communityRates")}
+          </li>
         </ul>
       </div>
     </div>

@@ -73,7 +73,7 @@ export default function UserPageIdentityAddStatementsViews({
       <button
         type="button"
         onClick={onBack}
-        className="tw-mb-5 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        className="tw-mb-5 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-white"
       >
         <ArrowLeftIcon className="tw-h-5 tw-w-5" aria-hidden="true" />
         {t(locale, "user.profile.identity.statements.backToTypes")}
