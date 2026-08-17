@@ -32,7 +32,6 @@ const DISMISS_DRAG_SETTLE_MS = 180;
 const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
 const TABLET_MODAL_DESKTOP_QUERY = "(min-width: 768px)";
-const FIXED_MOBILE_DIALOG_HEIGHT = "min(60vh, 60svh)";
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
@@ -54,7 +53,6 @@ type MobileWrapperDialogProps = {
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
-  readonly fixedHeightOnMobile?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
@@ -211,17 +209,13 @@ function getSurfaceClassNames({
   surfaceClassName,
   allowOverflow,
   tabletModal,
-  fixedHeightOnMobile,
 }: {
   readonly surfaceClassName?: string | undefined;
   readonly allowOverflow?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
-  readonly fixedHeightOnMobile?: boolean | undefined;
 }) {
   return clsx(
     "tw-flex tw-flex-col tw-rounded-t-xl",
-    fixedHeightOnMobile &&
-      "tw-h-[var(--mobile-wrapper-dialog-height)] md:tw-h-auto",
     surfaceClassName ?? "tw-bg-iron-950",
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-surface tw-overflow-visible"
@@ -276,20 +270,10 @@ function getPanelStyle({
 function getSurfaceStyle({
   dialogHeight,
   fixedHeight,
-  fixedHeightOnMobile,
 }: {
   readonly dialogHeight: string;
   readonly fixedHeight?: boolean | undefined;
-  readonly fixedHeightOnMobile?: boolean | undefined;
-}): CSSProperties & { "--mobile-wrapper-dialog-height"?: string } {
-  if (fixedHeightOnMobile) {
-    return {
-      "--mobile-wrapper-dialog-height": `min(${FIXED_MOBILE_DIALOG_HEIGHT}, ${dialogHeight})`,
-      maxHeight: dialogHeight,
-      transition: `height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out, max-height ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
-    };
-  }
-
+}): CSSProperties {
   const dimension = fixedHeight ? "height" : "max-height";
   const size = fixedHeight
     ? { height: dialogHeight }
@@ -631,7 +615,6 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
-  fixedHeightOnMobile,
   tabletModal,
   showScrollbar,
   allowOverflow,
@@ -694,7 +677,6 @@ export default function MobileWrapperDialog({
     surfaceClassName,
     allowOverflow,
     tabletModal,
-    fixedHeightOnMobile,
   });
   const contentClassNames = getContentClassNames({
     allowOverflow,
@@ -704,7 +686,6 @@ export default function MobileWrapperDialog({
   const surfaceStyle = getSurfaceStyle({
     dialogHeight,
     fixedHeight,
-    fixedHeightOnMobile,
   });
   const showDesktopHeaderCloseButton =
     dismissible && !!tabletModal && !showHeaderCloseButton;

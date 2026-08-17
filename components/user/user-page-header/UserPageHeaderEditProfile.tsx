@@ -167,7 +167,6 @@ export default function UserPageHeaderEditProfile({
         onBack={activeTarget ? backToMenu : undefined}
         onAfterLeave={finishDialogLeave}
         tabletModal
-        fixedHeightOnMobile
         showHeaderCloseButton
         enableDragToClose
         showScrollbar={showScrollbar}
