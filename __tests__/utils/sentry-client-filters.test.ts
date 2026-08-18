@@ -5919,7 +5919,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters observed iOS WKWebView wave route parameterization cyclic JSON errors without app context", () => {
+  it("does not filter observed iOS WKWebView cyclic JSON errors without MetaMask evidence", () => {
     // Arrange
     const event = createObservedIosWkWebViewWaveRouteParameterizationEvent();
 
@@ -5927,10 +5927,10 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
-  it("filters the observed Sentry CP notifications event when the SDK frame is marked in-app", () => {
+  it("does not filter the observed Sentry CP event without MetaMask evidence", () => {
     // Arrange
     const event = createObservedSentryCpNotificationsEvent();
 
@@ -5938,7 +5938,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("preserves the observed Sentry CP event when a real app-owned frame is present", () => {
@@ -5960,12 +5960,21 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("filters the observed Sentry CP event when native stringify is marked in-app", () => {
+  it("filters MetaMask Mobile noise when native stringify is marked in-app", () => {
     // Arrange
     const frames = observedSentryCpNotificationsFrames.map((frame) =>
       frame.function === "stringify" ? { ...frame, in_app: true } : frame
     );
-    const event = createObservedSentryCpNotificationsEvent({}, frames);
+    const event = createObservedSentryCpNotificationsEvent(
+      {
+        request: {
+          headers: {
+            "User-Agent": metaMaskMobileWebViewUserAgent,
+          },
+        },
+      },
+      frames
+    );
 
     // Act
     const result = shouldFilterSentryRouteParameterizationError(event);
@@ -6114,6 +6123,23 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("does not filter cyclic JSON errors with an app-owned hint stack", () => {
+    // Arrange
+    const event = createSentryRouteParameterizationEvent();
+    const hint = {
+      originalException: {
+        stack:
+          "TypeError: JSON.stringify cannot serialize cyclic structures.\n    at serializeWaveParams (webpack-internal:///(app-pages-browser)/./utils/routeParams.ts:10:1)",
+      },
+    };
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event, hint);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("does not filter Sentry parameterization errors when an app-owned frame is present", () => {
     // Arrange
     const event = createObservedSentryRouteParameterizationEvent({
@@ -6246,7 +6272,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("filters WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
+  it("does not filter WKWebView route parameterization errors without MetaMaskMobile evidence", () => {
     // Arrange
     const event =
       createObservedMetaMaskMobileWkWebViewWaveRouteParameterizationEvent({
@@ -6263,7 +6289,7 @@ describe("sentry-client-filters", () => {
     const result = shouldFilterSentryRouteParameterizationError(event);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it("does not filter MetaMaskMobile route parameterization errors without route evidence", () => {
