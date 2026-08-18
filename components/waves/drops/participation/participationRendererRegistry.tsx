@@ -47,10 +47,7 @@ const WAVE_PARTICIPATION_RENDERERS: Readonly<
 };
 
 const ProposalCardParticipationDrop: FC<ParticipationDropProps> = (props) => (
-  <DefaultParticipationDrop
-    {...props}
-    contentPresentation={props.contentPresentation ?? "proposalCard"}
-  />
+  <DefaultParticipationDrop {...props} contentPresentation="proposalCard" />
 );
 
 export const useWaveParticipationRendererSet = (

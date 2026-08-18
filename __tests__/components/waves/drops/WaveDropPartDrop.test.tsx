@@ -11,11 +11,7 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/drops/proposal/ProposalCardContent",
-  () => (props: any) => (
-    <div data-testid="proposal-card" data-density={props.density}>
-      {props.drop.id}
-    </div>
-  )
+  () => (props: any) => <div data-testid="proposal-card">{props.drop.id}</div>
 );
 
 describe("WaveDropPartDrop", () => {
@@ -63,32 +59,7 @@ describe("WaveDropPartDrop", () => {
     );
 
     expect(screen.getByTestId("proposal-card")).toHaveTextContent("1");
-    expect(screen.getByTestId("proposal-card")).toHaveAttribute(
-      "data-density",
-      "default"
-    );
     expect(screen.queryByTestId("title")).not.toBeInTheDocument();
     expect(screen.queryByTestId("content")).not.toBeInTheDocument();
-  });
-
-  it("uses the compact proposal-card density in Approve Chat", () => {
-    render(
-      <WaveDropPartDrop
-        drop={drop}
-        activePart={part}
-        havePreviousPart={false}
-        haveNextPart={false}
-        isStorm={false}
-        activePartIndex={0}
-        setActivePartIndex={() => {}}
-        onQuoteClick={() => {}}
-        contentPresentation="approveChatCompact"
-      />
-    );
-
-    expect(screen.getByTestId("proposal-card")).toHaveAttribute(
-      "data-density",
-      "compact"
-    );
   });
 });
