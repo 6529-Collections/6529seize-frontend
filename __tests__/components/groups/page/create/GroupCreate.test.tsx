@@ -237,7 +237,7 @@ describe("GroupCreate", () => {
     expect(configProps.excludeWallets).toEqual(excludedWallets);
   });
 
-  it("preserves unsaved edits during background query refreshes", async () => {
+  it("preserves unsaved edits when a background query refresh fails", async () => {
     const originalGroup = {
       id: "group-1",
       name: "Saved group",
@@ -261,13 +261,13 @@ describe("GroupCreate", () => {
       },
       is_private: false,
     };
-    let isFetching = false;
+    let isError = false;
 
     mockedUseQuery.mockImplementation(({ queryKey }: any) => {
       if (queryKey[0] === QueryKey.GROUP) {
-        return { isFetching, data: originalGroup };
+        return { isFetching: false, isError, data: originalGroup };
       }
-      return { isFetching, data: ["0x111"] };
+      return { isFetching: false, isError, data: ["0x111"] };
     });
 
     const view = render(
@@ -280,13 +280,14 @@ describe("GroupCreate", () => {
     act(() => nameProps.setName("Unsaved group name"));
     expect(nameProps.name).toBe("Unsaved group name");
 
-    isFetching = true;
+    isError = true;
     view.rerender(
       <AuthContext.Provider value={{ connectedProfile: null } as any}>
         <GroupCreate edit="group-1" onCompleted={jest.fn()} />
       </AuthContext.Provider>
     );
 
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(nameProps.name).toBe("Unsaved group name");
   });
 });

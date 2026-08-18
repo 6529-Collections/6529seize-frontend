@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useRef, useState } from "react";
+import { useContext, useId, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
@@ -19,6 +19,10 @@ export default function GroupCardEditActions({
   const { connectedProfile } = useContext(AuthContext);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const optionsMenuId = `group-options-menu-${useId()}`;
+  const optionsMenuButtonId = `${optionsMenuId}-button`;
+  const editMenuItemId = `${optionsMenuId}-item-edit`;
+  const deleteMenuItemId = `${optionsMenuId}-item-delete`;
   useClickAway(listRef, () => setIsOptionsOpen(false));
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
@@ -32,10 +36,10 @@ export default function GroupCardEditActions({
       <button
         type="button"
         className="tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
-        id="options-menu-0-button"
+        id={optionsMenuButtonId}
         aria-expanded={isOptionsOpen}
         aria-haspopup="menu"
-        aria-controls="options-menu-0"
+        aria-controls={optionsMenuId}
         onClick={(e) => {
           e.stopPropagation();
           setIsOptionsOpen(!isOptionsOpen);
@@ -51,11 +55,11 @@ export default function GroupCardEditActions({
       <AnimatePresence mode="wait" initial={false}>
         {isOptionsOpen && (
           <motion.div
-            id="options-menu-0"
+            id={optionsMenuId}
             className="tw-focus:tw-outline-none tw-absolute tw-right-0 tw-z-40 tw-mt-2 tw-w-32 tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-py-2 tw-shadow-lg tw-ring-1 tw-ring-white/10"
             role="menu"
             aria-orientation="vertical"
-            aria-labelledby="options-menu-0-button"
+            aria-labelledby={optionsMenuButtonId}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -70,11 +74,13 @@ export default function GroupCardEditActions({
                 }}
                 className="tw-block tw-w-full tw-border-none tw-bg-transparent tw-px-3 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-text-iron-50"
                 role="menuitem"
-                id="options-menu-0-item-0"
+                id={editMenuItemId}
               >
                 {editTitle}
               </button>
-              {isMyFilter && <GroupCardDelete group={group} />}
+              {isMyFilter && (
+                <GroupCardDelete group={group} menuItemId={deleteMenuItemId} />
+              )}
             </div>
           </motion.div>
         )}

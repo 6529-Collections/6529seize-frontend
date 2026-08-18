@@ -114,24 +114,34 @@ function createWalletSources(
 
 function hasGroupInitialLoadError({
   isEditMode,
+  originalGroup,
   isOriginalGroupError,
   hasIdentityGroupId,
+  originalGroupWallets,
   isOriginalGroupWalletsError,
   hasExcludedIdentityGroupId,
+  originalGroupExcludedWallets,
   isOriginalGroupExcludedWalletsError,
 }: {
   readonly isEditMode: boolean;
+  readonly originalGroup: ApiGroupFull | undefined;
   readonly isOriginalGroupError: boolean;
   readonly hasIdentityGroupId: boolean;
+  readonly originalGroupWallets: string[] | undefined;
   readonly isOriginalGroupWalletsError: boolean;
   readonly hasExcludedIdentityGroupId: boolean;
+  readonly originalGroupExcludedWallets: string[] | undefined;
   readonly isOriginalGroupExcludedWalletsError: boolean;
 }): boolean {
   return (
     isEditMode &&
-    (isOriginalGroupError ||
-      (hasIdentityGroupId && isOriginalGroupWalletsError) ||
-      (hasExcludedIdentityGroupId && isOriginalGroupExcludedWalletsError))
+    ((isOriginalGroupError && originalGroup === undefined) ||
+      (hasIdentityGroupId &&
+        isOriginalGroupWalletsError &&
+        originalGroupWallets === undefined) ||
+      (hasExcludedIdentityGroupId &&
+        isOriginalGroupExcludedWalletsError &&
+        originalGroupExcludedWallets === undefined))
   );
 }
 
@@ -440,10 +450,13 @@ export default function GroupCreate({
 
   const hasInitialLoadError = hasGroupInitialLoadError({
     isEditMode,
+    originalGroup,
     isOriginalGroupError,
     hasIdentityGroupId,
+    originalGroupWallets,
     isOriginalGroupWalletsError,
     hasExcludedIdentityGroupId,
+    originalGroupExcludedWallets,
     isOriginalGroupExcludedWalletsError,
   });
 

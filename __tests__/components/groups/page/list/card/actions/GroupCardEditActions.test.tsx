@@ -51,4 +51,37 @@ describe("GroupCardEditActions", () => {
     await user.click(screen.getByRole("menuitem"));
     expect(onEditClick).toHaveBeenCalledWith(group);
   });
+
+  it("uses unique ids for each options menu", async () => {
+    const user = userEvent.setup();
+    render(
+      <AuthContext.Provider value={{ connectedProfile: null } as any}>
+        <GroupCardEditActions group={group} onEditClick={onEditClick} />
+        <GroupCardEditActions group={group} onEditClick={onEditClick} />
+      </AuthContext.Provider>
+    );
+
+    const buttons = screen.getAllByRole("button", { name: "Open options" });
+    const buttonIds = buttons.map((button) => button.id);
+    const menuIds = buttons.map((button) =>
+      button.getAttribute("aria-controls")
+    );
+
+    expect(new Set(buttonIds).size).toBe(buttons.length);
+    expect(new Set(menuIds).size).toBe(buttons.length);
+
+    await user.click(buttons[0]!);
+    const firstMenu = screen.getByRole("menu");
+    const firstMenuItemId = screen.getByRole("menuitem").id;
+    expect(firstMenu).toHaveAttribute("id", menuIds[0]);
+    expect(firstMenu).toHaveAttribute("aria-labelledby", buttonIds[0]);
+
+    await user.click(buttons[0]!);
+    await user.click(buttons[1]!);
+    const secondMenu = screen.getByRole("menu");
+    const secondMenuItemId = screen.getByRole("menuitem").id;
+    expect(secondMenu).toHaveAttribute("id", menuIds[1]);
+    expect(secondMenu).toHaveAttribute("aria-labelledby", buttonIds[1]);
+    expect(secondMenuItemId).not.toBe(firstMenuItemId);
+  });
 });
