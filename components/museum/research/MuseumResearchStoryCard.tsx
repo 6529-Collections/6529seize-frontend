@@ -5,7 +5,7 @@ import type { MuseumMedia } from "@/lib/museum/publication/types";
 import { MuseumManagedImage } from "../MuseumManagedImage";
 import { museumResearchMediaAspectRatio } from "./museumResearchMediaAspectRatio";
 
-export interface MuseumResearchStoryCardProps {
+interface MuseumResearchStoryCardProps {
   readonly href: string;
   readonly eyebrow: string;
   readonly title: string;

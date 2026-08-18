@@ -55,6 +55,8 @@ export interface MuseumEntityRefMedia {
   readonly height: number | null;
   readonly alt: string;
   readonly creditLine?: string;
+  readonly srcSet?: string;
+  readonly sizes?: string;
 }
 
 export interface MuseumEntityRef {

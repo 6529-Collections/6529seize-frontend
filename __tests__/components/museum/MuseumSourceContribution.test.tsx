@@ -57,7 +57,7 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/public record at commit aaaaaaaaaaaa/iu)
+      screen.getByText("Published from the Museum's public record.")
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Read the source" })
@@ -91,7 +91,7 @@ describe("MuseumSourceContribution", () => {
     expect(structuredRecord).not.toHaveAttribute("aria-label");
   });
 
-  it("keeps the exact stale commit visible", () => {
+  it("keeps the exact stale source links while presenting status in museum language", () => {
     render(
       <MuseumSourceContribution
         identity={identity}
@@ -103,7 +103,13 @@ describe("MuseumSourceContribution", () => {
     expect(
       screen.getByText(/latest verified public record/iu)
     ).toHaveTextContent(
-      "Latest verified public record at commit aaaaaaaaaaaa; a source refresh is in progress."
+      "Latest verified public record; a source refresh is in progress."
+    );
+    expect(
+      screen.getByRole("link", { name: "Read the source" })
+    ).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md`
     );
   });
 
@@ -169,7 +175,9 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText("Public record at commit aaaaaaaaaaaa.", { exact: true })
+      screen.getByText("Published from the Museum's public record.", {
+        exact: true,
+      })
     ).toBeInTheDocument();
     expect(screen.queryByText(/unassigned/u)).not.toBeInTheDocument();
     expect(

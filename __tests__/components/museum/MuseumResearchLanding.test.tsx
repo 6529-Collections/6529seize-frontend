@@ -45,13 +45,6 @@ const ENTRY = {
   media: MEDIA,
 };
 
-const LAUNCH_COPY = {
-  launchEyebrow: "Selected publications",
-  launchTitle: "Casey, Magnum, and Keys and Gates",
-  launchDescription:
-    "Three entry points connect artists, photographic history, and active selection work.",
-} as const;
-
 const BROWSE_LABELS = {
   eyebrow: "Reference index",
   searchLabel: "Search publications and source records",
@@ -62,25 +55,16 @@ const BROWSE_LABELS = {
   resultCountOne: "{count} record",
   resultCountOther: "{count} records",
   sourceLabel: "Source",
+  opensInNewTab: "Opens in a new tab.",
 } as const;
 
 describe("MuseumResearchLanding", () => {
-  it("puts the visual study first and keeps the complete register findable", () => {
+  it("renders the authored section order and keeps the complete library findable", () => {
     render(
       <MuseumResearchLanding
         eyebrow="Research"
         title="Research, in public"
         description="Public scholarship."
-        featured={{
-          href: "/museum/network/research/research-1",
-          eyebrow: "Project study",
-          title: "A study of the work",
-          description: "A close reading.",
-          media: MEDIA,
-          actionLabel: "Read the study",
-        }}
-        launchEntries={[]}
-        {...LAUNCH_COPY}
         sections={[
           {
             id: "art",
@@ -88,6 +72,7 @@ describe("MuseumResearchLanding", () => {
             title: "Art and artists",
             description: "Close readings.",
             entries: [ENTRY],
+            layout: "tablet-lead",
           },
         ]}
         browseGroups={[
@@ -108,6 +93,7 @@ describe("MuseumResearchLanding", () => {
         ]}
         browseTitle="Research reference index"
         browseDescription="Every record remains available."
+        browseOpenLabel="Search the complete research index"
         browseLabels={BROWSE_LABELS}
       />
     );
@@ -115,9 +101,14 @@ describe("MuseumResearchLanding", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Research, in public" })
     ).toBeInTheDocument();
-    expect(screen.getAllByRole("img", { name: MEDIA.altText! })).toHaveLength(
-      2
-    );
+    expect(
+      screen.getByRole("img", { name: MEDIA.altText! })
+    ).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("link", { name: "A study of the work" })[0]
+        ?.closest("li")
+    ).toHaveClass("md:tw-col-span-2", "xl:tw-col-span-1");
     expect(
       screen.getByRole("heading", {
         level: 2,
@@ -129,13 +120,13 @@ describe("MuseumResearchLanding", () => {
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", { name: "A study of the work" }).length
-    ).toBeGreaterThan(2);
+    ).toBeGreaterThan(1);
     expect(
       screen.getByRole("link", { name: /^A source record\b/ })
     ).toHaveAttribute("href", "/museum/network/research/research-2");
   });
 
-  it("chooses a later illustrated entry before the three-card editorial limit", () => {
+  it("keeps every authored section entry without media-priority sorting", () => {
     const lateMedia: MuseumMedia = {
       ...MEDIA,
       id: "media-late",
@@ -155,16 +146,6 @@ describe("MuseumResearchLanding", () => {
         eyebrow="Research"
         title="Research, in public"
         description="Public scholarship."
-        featured={{
-          href: "/museum/network/research/text-only-1",
-          eyebrow: "Research record",
-          title: "Text-only record 1",
-          description: "A textual record.",
-          media: undefined,
-          actionLabel: "Read the study",
-        }}
-        launchEntries={[]}
-        {...LAUNCH_COPY}
         sections={[
           {
             id: "art",
@@ -186,6 +167,7 @@ describe("MuseumResearchLanding", () => {
         browseGroups={[]}
         browseTitle="Research reference index"
         browseDescription="Every record remains available."
+        browseOpenLabel="Search the complete research index"
         browseLabels={BROWSE_LABELS}
       />
     );
