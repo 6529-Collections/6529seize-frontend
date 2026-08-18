@@ -44,6 +44,25 @@ describe("getMentionedGroupsFromEditorState", () => {
     ).toEqual([ApiDropGroupMention.Contributors, ApiDropGroupMention.Admins]);
   });
 
+  it.each(["@all", "notify @all.", "notify @all, now"])(
+    "detects an exact global mention with punctuation in %s",
+    (content) => {
+      const editor = createTestEditor();
+      editor.update(
+        () => {
+          $getRoot().append(
+            $createParagraphNode().append($createTextNode(content))
+          );
+        },
+        { discrete: true }
+      );
+
+      expect(
+        getMentionedGroupsFromEditorState(editor.getEditorState(), true)
+      ).toEqual([ApiDropGroupMention.All]);
+    }
+  );
+
   it("ignores global mention text inside code and links", () => {
     const editor = createTestEditor();
     editor.update(

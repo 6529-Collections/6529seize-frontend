@@ -334,10 +334,17 @@ describe("EditDropLexical", () => {
   });
 
   it("keeps global mentions for import and export but not live typing", () => {
+    editorMock.update.mockImplementationOnce((callback: () => void) =>
+      callback()
+    );
     render(<EditDropLexical {...defaultProps} canMentionAll={false} />);
 
     expect(markdownShortcutTransformers).not.toContain(
       groupMentionTransformerMock
+    );
+    expect(convertFromMarkdownStringMock).toHaveBeenCalledWith(
+      "Initial content here",
+      expect.arrayContaining([groupMentionTransformerMock])
     );
     expect(exportDropMarkdownMock).toHaveBeenCalledWith(
       expect.anything(),

@@ -12,6 +12,8 @@ import {
   $isRangeSelection,
   type LexicalEditor,
 } from "lexical";
+import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import CreateDropInput, {
   type CreateDropInputHandles,
 } from "@/components/waves/CreateDropInput";
@@ -192,3 +194,35 @@ it.each(["@allexpop", "@alligator", "@AllExPop", "@ALLexPop"])(
     expect(editor.querySelector(".editor-group-mention")).toBeNull();
   }
 );
+
+it("keeps exact @all metadata detectable without live shortcut conversion", async () => {
+  const ref = createRef<CreateDropInputHandles>();
+  renderInput(ref);
+
+  const editor = screen.getByRole("textbox");
+  await waitFor(() => expect(editor.querySelector("p")).not.toBeNull());
+  await waitFor(() => expect(mockLexicalEditor).not.toBeNull());
+
+  act(() => {
+    mockLexicalEditor?.update(
+      () => {
+        $getRoot().selectEnd();
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) {
+          throw new Error("Expected a range selection while typing");
+        }
+        selection.insertText("@all,");
+      },
+      { discrete: true }
+    );
+  });
+
+  await waitFor(() => expect(editor).toHaveTextContent("@all,"));
+  expect(editor.querySelector(".editor-group-mention")).toBeNull();
+  expect(
+    getMentionedGroupsFromEditorState(
+      mockLexicalEditor!.getEditorState(),
+      true
+    )
+  ).toEqual([ApiDropGroupMention.All]);
+});

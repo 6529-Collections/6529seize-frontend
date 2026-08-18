@@ -23,6 +23,8 @@ const getInlineText = (node: LexicalNode): string => {
     return node.getChildren().map(getInlineText).join("");
   }
 
+  // Keep custom/decorator node text token-delimited so it cannot combine with
+  // adjacent plain text into a different group mention.
   const text = node.getTextContent();
   return text ? ` ${text} ` : " ";
 };
