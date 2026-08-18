@@ -31,10 +31,10 @@ function museumDirectoryMediaStageStyle(
   width: number | null,
   height: number | null
 ): { readonly aspectRatio: string } | undefined {
-  if (shape === "artist") return undefined;
-  return hasMuseumDirectoryMediaDimensions(width, height)
-    ? { aspectRatio: `${width} / ${height}` }
-    : undefined;
+  if (shape === "artist" || !hasMuseumDirectoryMediaDimensions(width, height)) {
+    return undefined;
+  }
+  return { aspectRatio: `${String(width)} / ${String(height)}` };
 }
 
 function museumDirectoryMediaStageClassName(
@@ -42,12 +42,12 @@ function museumDirectoryMediaStageClassName(
   width: number | null,
   height: number | null
 ): string {
-  const aspectClassName =
-    shape === "artist"
-      ? "tw-aspect-[4/3]"
-      : hasMuseumDirectoryMediaDimensions(width, height)
-        ? ""
-        : "tw-aspect-square";
+  let aspectClassName = "";
+  if (shape === "artist") {
+    aspectClassName = "tw-aspect-[4/3]";
+  } else if (!hasMuseumDirectoryMediaDimensions(width, height)) {
+    aspectClassName = "tw-aspect-square";
+  }
   return [
     "tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black",
     aspectClassName,

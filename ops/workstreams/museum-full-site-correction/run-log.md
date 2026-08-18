@@ -400,3 +400,8 @@ comes first; acquisition and accession follow.` before the next hosted lane
   source media in the unchanged Works-card behavior, removes a hardcoded
   responsive-breakpoint expectation from the browser contract, and avoids an
   empty class-name suffix. No Acquisitions or Artists layout pixel changes.
+- Hosted App PR CI exposed four Linux lint errors in the new fallback helper:
+  nullable dimensions in a template literal and nested conditional branches.
+  Replaced the conditional expression with explicit branches and string
+  conversion. The focused 16 tests, changed lint, changed typecheck, formatting,
+  and diff checks pass; there is no runtime or visual change.
