@@ -7188,6 +7188,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributorsPage"
+  /profiles/preferences:
+    get:
+      tags:
+        - Profiles
+      summary: Get the authenticated profile's privacy and notification preferences
+      operationId: getProfilePreferences
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: profile-preferences
+        handler:
+          import: "@/api/profile-preferences/profile-preferences.handlers"
+          name: handleGetProfilePreferences
+      responses:
+        "200":
+          description: Profile preferences, including backward-compatible defaults
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfilePreferences"
+    put:
+      tags:
+        - Profiles
+      summary: Update the authenticated profile's privacy and notification preferences
+      operationId: putProfilePreferences
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: profile-preferences
+        handler:
+          import: "@/api/profile-preferences/profile-preferences.handlers"
+          name: handlePutProfilePreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdateProfilePreferences"
+      responses:
+        "200":
+          description: Updated profile preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfilePreferences"
   /profiles:
     post:
       tags:
@@ -12717,14 +12766,6 @@ components:
       type: http
       scheme: bearer
   schemas:
-    ApiErrorResponse:
-      type: object
-      additionalProperties: false
-      required:
-        - error
-      properties:
-        error:
-          type: string
     AirdropAddressResponse:
       type: object
       required:
@@ -17125,6 +17166,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropWithoutWave"
+    ApiErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
     ApiEthereumAddress:
       type: string
       pattern: ^0x[a-fA-F0-9]{40}$
@@ -20388,6 +20437,48 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiProfileMin"
+    ApiProfileNotificationCategories:
+      type: object
+      required:
+        - direct_messages
+        - mentions_replies_quotes
+        - reactions_votes_boosts
+        - new_followers
+        - rep_and_nic
+        - subscription_coverage
+      properties:
+        direct_messages:
+          type: boolean
+        mentions_replies_quotes:
+          type: boolean
+        reactions_votes_boosts:
+          type: boolean
+        new_followers:
+          type: boolean
+        rep_and_nic:
+          type: boolean
+        subscription_coverage:
+          type: boolean
+    ApiProfilePreferences:
+      type: object
+      required:
+        - direct_message_policy
+        - notification_level
+        - notifications
+      properties:
+        direct_message_policy:
+          type: string
+          enum:
+            - EVERYONE
+            - PEOPLE_I_FOLLOW
+            - NOBODY
+        notification_level:
+          type: string
+          enum:
+            - ALL
+            - ESSENTIAL_ONLY
+        notifications:
+          $ref: "#/components/schemas/ApiProfileNotificationCategories"
     ApiProfileProxy:
       type: object
       required:
@@ -22429,6 +22520,38 @@ components:
       type: object
       allOf:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
+    ApiUpdateProfileNotificationCategories:
+      type: object
+      properties:
+        direct_messages:
+          type: boolean
+        mentions_replies_quotes:
+          type: boolean
+        reactions_votes_boosts:
+          type: boolean
+        new_followers:
+          type: boolean
+        rep_and_nic:
+          type: boolean
+        subscription_coverage:
+          type: boolean
+    ApiUpdateProfilePreferences:
+      type: object
+      minProperties: 1
+      properties:
+        direct_message_policy:
+          type: string
+          enum:
+            - EVERYONE
+            - PEOPLE_I_FOLLOW
+            - NOBODY
+        notification_level:
+          type: string
+          enum:
+            - ALL
+            - ESSENTIAL_ONLY
+        notifications:
+          $ref: "#/components/schemas/ApiUpdateProfileNotificationCategories"
     ApiUpdateProxyActionRequest:
       type: object
       properties:

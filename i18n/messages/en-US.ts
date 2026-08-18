@@ -2130,6 +2130,52 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  "profilePreferences.title": "Profile Preferences",
+  "profilePreferences.loading": "Loading profile preferences",
+  "profilePreferences.loadError":
+    "Couldn’t load profile preferences. Please try again.",
+  "profilePreferences.save": "Save Changes",
+  "profilePreferences.saving": "Saving…",
+  "profilePreferences.saveSuccess": "Profile preferences saved.",
+  "profilePreferences.saveError":
+    "Couldn’t save profile preferences. Please try again.",
+  "profilePreferences.dm.heading": "Who can start a direct message with me?",
+  "profilePreferences.dm.description":
+    "This only affects new conversations. Existing direct messages and group messages stay available.",
+  "profilePreferences.dm.EVERYONE.label": "Everyone",
+  "profilePreferences.dm.EVERYONE.description":
+    "Any profile can start a new conversation with you.",
+  "profilePreferences.dm.PEOPLE_I_FOLLOW.label": "People I follow",
+  "profilePreferences.dm.PEOPLE_I_FOLLOW.description":
+    "Only profiles you follow can start a new conversation with you.",
+  "profilePreferences.dm.NOBODY.label": "Nobody",
+  "profilePreferences.dm.NOBODY.description":
+    "No one can start a new conversation with you.",
+  "profilePreferences.notifications.heading": "Notifications",
+  "profilePreferences.notifications.description":
+    "Choose between all notifications and essential account notices only.",
+  "profilePreferences.notifications.ALL.label": "All",
+  "profilePreferences.notifications.ALL.description":
+    "Receive essential account notices plus the optional categories selected below.",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential only",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.description":
+    "Receive only critical security, account access, and account notices. Direct messages still arrive, but their alerts are paused.",
+  "profilePreferences.notifications.pausedInfo":
+    "Optional notification preferences are paused. Your choices are saved and restored if you switch back to All.",
+  "profilePreferences.notifications.paused": "Paused",
+  "profilePreferences.notifications.category.direct_messages":
+    "Direct messages and wave activity",
+  "profilePreferences.notifications.category.mentions_replies_quotes":
+    "Mentions, replies, and quotes",
+  "profilePreferences.notifications.category.reactions_votes_boosts":
+    "Reactions, votes, and boosts",
+  "profilePreferences.notifications.category.new_followers": "New followers",
+  "profilePreferences.notifications.category.rep_and_nic":
+    "REP and NIC updates",
+  "profilePreferences.notifications.category.subscription_coverage":
+    "Subscription coverage",
+  "profilePreferences.notifications.deviceNote":
+    "Push notification settings remain separate for each device.",
   "linkPreview.twitter.kind.article": "Article",
   "linkPreview.twitter.kind.post": "Post",
   "linkPreview.twitter.article.provider": "Article on X",

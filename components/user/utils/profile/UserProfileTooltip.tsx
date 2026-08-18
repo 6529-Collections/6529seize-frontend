@@ -147,11 +147,11 @@ export default function UserProfileTooltip({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
+      const errorMessage = getToastErrorDetails(error);
       setToast({
         type: "error",
         title: "Couldn't create this direct message.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        description: errorMessage ?? "Please try again.",
       });
     } finally {
       setDirectMessageLoading(false);

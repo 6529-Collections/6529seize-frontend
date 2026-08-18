@@ -179,15 +179,17 @@ export default function UserPageHeaderClient({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
+      const errorMessage = getToastErrorDetails(error);
       setToast({
         type: "error",
         title: getUserProfileHeaderMessage(
           "user.profileHeader.dm.createFailed.title"
         ),
-        description: getUserProfileHeaderMessage(
-          "user.profileHeader.dm.createFailed.description"
-        ),
-        details: getToastErrorDetails(error),
+        description:
+          errorMessage ??
+          getUserProfileHeaderMessage(
+            "user.profileHeader.dm.createFailed.description"
+          ),
       });
     } finally {
       setDirectMessageLoading(false);

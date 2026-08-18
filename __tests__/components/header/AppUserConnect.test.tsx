@@ -9,6 +9,9 @@ jest.mock("@/components/header/share/HeaderQRScanner", () => () => (
 jest.mock("@/components/header/PushNotificationSettings", () => () => (
   <div data-testid="push-settings" />
 ));
+jest.mock("@/components/header/ProfilePreferencesSettings", () => () => (
+  <div data-testid="profile-preferences-settings" />
+));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
@@ -123,6 +126,9 @@ describe("AppUserConnect", () => {
     const disconnectBtn = screen.getByRole("button", {
       name: "Disconnect & Logout",
     });
+    expect(
+      screen.getByRole("button", { name: "Profile Preferences" })
+    ).toBeInTheDocument();
 
     fireEvent.click(disconnectWalletBtn);
     expect(seizeDisconnect).toHaveBeenCalled();

@@ -333,6 +333,8 @@ export * from '../models/ApiProfileCmsWalletGalleryTotals';
 export * from '../models/ApiProfileCmsWalletGalleryWallet';
 export * from '../models/ApiProfileMin';
 export * from '../models/ApiProfileMinsPage';
+export * from '../models/ApiProfileNotificationCategories';
+export * from '../models/ApiProfilePreferences';
 export * from '../models/ApiProfileProxy';
 export * from '../models/ApiProfileProxyAction';
 export * from '../models/ApiProfileProxyActionType';
@@ -427,6 +429,8 @@ export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUndiscoveredDrop';
 export * from '../models/ApiUpcomingMemeSubscriptionStatus';
 export * from '../models/ApiUpdateDropRequest';
+export * from '../models/ApiUpdateProfileNotificationCategories';
+export * from '../models/ApiUpdateProfilePreferences';
 export * from '../models/ApiUpdateProxyActionRequest';
 export * from '../models/ApiUpdateWaveDecisionPause';
 export * from '../models/ApiUpdateWaveNotificationPreferencesRequest';
@@ -968,6 +972,8 @@ import { ApiProfileCmsWalletGalleryTotals } from '../models/ApiProfileCmsWalletG
 import { ApiProfileCmsWalletGalleryWallet    , ApiProfileCmsWalletGalleryWalletStatusEnum    } from '../models/ApiProfileCmsWalletGalleryWallet';
 import { ApiProfileMin                       } from '../models/ApiProfileMin';
 import { ApiProfileMinsPage } from '../models/ApiProfileMinsPage';
+import { ApiProfileNotificationCategories } from '../models/ApiProfileNotificationCategories';
+import { ApiProfilePreferences, ApiProfilePreferencesDirectMessagePolicyEnum  , ApiProfilePreferencesNotificationLevelEnum    } from '../models/ApiProfilePreferences';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
 import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
@@ -1062,6 +1068,8 @@ import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUndiscoveredDrop } from '../models/ApiUndiscoveredDrop';
 import { ApiUpcomingMemeSubscriptionStatus   , ApiUpcomingMemeSubscriptionStatusSourceEnum   } from '../models/ApiUpcomingMemeSubscriptionStatus';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
+import { ApiUpdateProfileNotificationCategories } from '../models/ApiUpdateProfileNotificationCategories';
+import { ApiUpdateProfilePreferences, ApiUpdateProfilePreferencesDirectMessagePolicyEnum  , ApiUpdateProfilePreferencesNotificationLevelEnum    } from '../models/ApiUpdateProfilePreferences';
 import { ApiUpdateProxyActionRequest } from '../models/ApiUpdateProxyActionRequest';
 import { ApiUpdateWaveDecisionPause } from '../models/ApiUpdateWaveDecisionPause';
 import { ApiUpdateWaveNotificationPreferencesRequest } from '../models/ApiUpdateWaveNotificationPreferencesRequest';
@@ -1352,6 +1360,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiProfileCmsWalletGalleryExcludedAssetReasonEnum",
     "ApiProfileCmsWalletGallerySnapshotSourceEnum",
     "ApiProfileCmsWalletGalleryWalletStatusEnum",
+    "ApiProfilePreferencesDirectMessagePolicyEnum",
+    "ApiProfilePreferencesNotificationLevelEnum",
     "ApiProfileProxyActionType",
     "ApiRateMatter",
     "ApiRedeemConnectionShareRequestTargetClientTypeEnum",
@@ -1402,6 +1412,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiSubscriptionCoverageUnknownReason",
     "ApiSubwavesSort",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
+    "ApiUpdateProfilePreferencesDirectMessagePolicyEnum",
+    "ApiUpdateProfilePreferencesNotificationLevelEnum",
     "ApiWalletDistributionAllocationPhaseEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
@@ -1786,6 +1798,8 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileCmsWalletGalleryWallet": ApiProfileCmsWalletGalleryWallet,
     "ApiProfileMin": ApiProfileMin,
     "ApiProfileMinsPage": ApiProfileMinsPage,
+    "ApiProfileNotificationCategories": ApiProfileNotificationCategories,
+    "ApiProfilePreferences": ApiProfilePreferences,
     "ApiProfileProxy": ApiProfileProxy,
     "ApiProfileProxyAction": ApiProfileProxyAction,
     "ApiProfileRepCategorySummary": ApiProfileRepCategorySummary,
@@ -1868,6 +1882,8 @@ let typeMap: {[index: string]: any} = {
     "ApiUndiscoveredDrop": ApiUndiscoveredDrop,
     "ApiUpcomingMemeSubscriptionStatus": ApiUpcomingMemeSubscriptionStatus,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
+    "ApiUpdateProfileNotificationCategories": ApiUpdateProfileNotificationCategories,
+    "ApiUpdateProfilePreferences": ApiUpdateProfilePreferences,
     "ApiUpdateProxyActionRequest": ApiUpdateProxyActionRequest,
     "ApiUpdateWaveDecisionPause": ApiUpdateWaveDecisionPause,
     "ApiUpdateWaveNotificationPreferencesRequest": ApiUpdateWaveNotificationPreferencesRequest,

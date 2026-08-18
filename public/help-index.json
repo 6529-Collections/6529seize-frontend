@@ -4324,6 +4324,45 @@
       ]
     },
     {
+      "id": "profile.preferences",
+      "kind": "ui_affordance",
+      "title": "Profile privacy and notification preferences",
+      "aliases": [
+        "profile preferences",
+        "who can DM me",
+        "people I follow can DM me",
+        "disable notifications",
+        "essential notifications",
+        "subscription coverage notifications"
+      ],
+      "keywords": [
+        "profile",
+        "privacy",
+        "direct messages",
+        "group DM",
+        "notifications",
+        "essential",
+        "paused",
+        "subscription coverage"
+      ],
+      "facts": [
+        "Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, or Nobody can start a new direct-message conversation.",
+        "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
+        "Every recipient must allow the creator before a new group direct message can be created.",
+        "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation while preserving category choices.",
+        "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
+        "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push."
+      ],
+      "canonical_path": "/notifications",
+      "related_paths": ["/messages", "/notifications"],
+      "tags": ["profile", "privacy", "direct messages", "notifications"],
+      "source_refs": [
+        "components/header/ProfilePreferencesSettings.tsx",
+        "ops/docs/notifications/feature-profile-preferences.md",
+        "ops/docs/waves/create/feature-direct-message-creation.md"
+      ]
+    },
+    {
       "id": "notifications.mobile-push",
       "kind": "workflow",
       "title": "Mobile push notifications",
