@@ -40,7 +40,7 @@ export default function CreateWave({
     selectedOutcomeType,
     onStep,
     errorFocusRequest,
-    setConfig,
+    replaceConfig,
     endDateConfig,
     setEndDateConfig,
   } = waveConfig;
@@ -105,7 +105,7 @@ export default function CreateWave({
     useCreateWaveDrafts({ config, endDateConfig, step });
 
   const onLoadDraft = (draft: CreateWaveDraft) => {
-    setConfig(draft.config);
+    replaceConfig(draft.config);
     setEndDateConfig(draft.endDateConfig);
     loadDraft(draft);
   };

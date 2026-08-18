@@ -51,7 +51,7 @@ Users can:
    - confirmation modal for remove
 9. Authenticate when prompted.
 10. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admin`
-    group is contained in `View` before saving.
+   group is contained in `View` before saving.
 11. After success, the row refreshes.
 12. On non-chat waves, use the same actions under `Curation Groups`.
 

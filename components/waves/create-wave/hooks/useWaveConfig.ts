@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CreateWaveConfig,
   CreateWaveOutcomeType,
@@ -32,6 +32,28 @@ interface EndDateConfig {
   time: number | null;
   period: Period | null;
 }
+
+type PrivilegeGroupKey = "canDrop" | "canVote" | "canChat";
+
+const getPrivilegeGroupDefaults = ({
+  groupId,
+  waveType,
+  manuallySelected,
+}: {
+  readonly groupId: string;
+  readonly waveType: ApiWaveType;
+  readonly manuallySelected: ReadonlySet<PrivilegeGroupKey>;
+}): Partial<CreateWaveConfig["groups"]> => {
+  return {
+    ...(!manuallySelected.has("canChat") ? { canChat: groupId } : {}),
+    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canDrop")
+      ? { canDrop: groupId }
+      : {}),
+    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canVote")
+      ? { canVote: groupId }
+      : {}),
+  };
+};
 
 export function useWaveConfig() {
   const initialType = ApiWaveType.Chat;
@@ -151,6 +173,12 @@ export function useWaveConfig() {
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
   );
+  // Manual privilege choices stay sticky while editing the current Wave type,
+  // including an explicit "Anyone" selection represented by null.
+  const manuallySelectedPrivilegeGroups = useRef<Set<PrivilegeGroupKey>>(
+    new Set()
+  );
+  const navigationRequestId = useRef(0);
 
   const shouldLoadMemeCount =
     config.voting.type === ApiWaveCreditType.CardSetTdh;
@@ -174,6 +202,37 @@ export function useWaveConfig() {
     };
   }, [config, memeCount]);
   const groupValidationQuery = useWaveGroupValidation(effectiveConfig);
+
+  const replaceConfig = (nextConfig: CreateWaveConfig) => {
+    manuallySelectedPrivilegeGroups.current.clear();
+    const { canView } = nextConfig.groups;
+    const privilegeGroups: readonly [
+      PrivilegeGroupKey,
+      string | null,
+      boolean,
+    ][] = [
+      ["canChat", nextConfig.groups.canChat, nextConfig.chat.enabled],
+      [
+        "canDrop",
+        nextConfig.groups.canDrop,
+        nextConfig.overview.type !== ApiWaveType.Chat,
+      ],
+      [
+        "canVote",
+        nextConfig.groups.canVote,
+        nextConfig.overview.type !== ApiWaveType.Chat,
+      ],
+    ];
+    for (const [key, groupId, isActive] of privilegeGroups) {
+      // A loaded privilege scope that differs from View represents an
+      // intentional override. Matching scopes remain linked to future View
+      // changes, which is the defaulting behavior users expect.
+      if (isActive && groupId !== canView) {
+        manuallySelectedPrivilegeGroups.current.add(key);
+      }
+    }
+    setConfig(nextConfig);
+  };
 
   // Update end date config when config changes
   useEffect(() => {
@@ -200,6 +259,9 @@ export function useWaveConfig() {
     const isTypeChange = config.overview.type !== overview.type;
     if (isTypeChange) {
       setEndDateConfig({ time: null, period: null });
+      // The type change replaces the entire config (including group choices),
+      // so the next type starts a fresh privilege-defaulting session too.
+      manuallySelectedPrivilegeGroups.current.clear();
     }
     setConfig((prev) => {
       if (prev.overview.type === overview.type) {
@@ -254,6 +316,36 @@ export function useWaveConfig() {
     }));
   };
 
+  const validateCurrentGroups = async (requestId: number): Promise<boolean> => {
+    try {
+      // An explicit refetch always goes to the server, even while the
+      // background query data is still within its stale-time window.
+      const validationResult = await groupValidationQuery.refetch();
+      if (navigationRequestId.current !== requestId) {
+        return false;
+      }
+      if (validationResult.isError || !validationResult.data?.valid) {
+        const hasActionableRoleErrors =
+          (validationResult.data?.invalid_roles.length ?? 0) > 0;
+        setGroupValidationErrorVisible(
+          validationResult.isError ||
+            !validationResult.data ||
+            !hasActionableRoleErrors
+        );
+        setErrorFocusRequest((count) => count + 1);
+        return false;
+      }
+      return true;
+    } catch {
+      if (navigationRequestId.current !== requestId) {
+        return false;
+      }
+      setGroupValidationErrorVisible(true);
+      setErrorFocusRequest((count) => count + 1);
+      return false;
+    }
+  };
+
   // Step navigation with validation
   const onStep = async ({
     step: newStep,
@@ -262,6 +354,7 @@ export function useWaveConfig() {
     readonly step: CreateWaveStep;
     readonly direction: "forward" | "backward";
   }) => {
+    const requestId = ++navigationRequestId.current;
     if (direction === "forward") {
       const newErrors = getCreateWaveValidationErrors({
         config: effectiveConfig,
@@ -276,25 +369,8 @@ export function useWaveConfig() {
         step === CreateWaveStep.GROUPS &&
         effectiveConfig.groups.canView !== null
       ) {
-        let validationResult;
-        try {
-          // An explicit refetch always goes to the server, even while the
-          // background query data is still within its stale-time window.
-          validationResult = await groupValidationQuery.refetch();
-        } catch {
-          setGroupValidationErrorVisible(true);
-          setErrorFocusRequest((count) => count + 1);
-          return;
-        }
-        if (validationResult.isError || !validationResult.data?.valid) {
-          const hasActionableRoleErrors =
-            (validationResult.data?.invalid_roles.length ?? 0) > 0;
-          setGroupValidationErrorVisible(
-            validationResult.isError ||
-              !validationResult.data ||
-              !hasActionableRoleErrors
-          );
-          setErrorFocusRequest((count) => count + 1);
+        const groupsAreValid = await validateCurrentGroups(requestId);
+        if (!groupsAreValid) {
           return;
         }
       }
@@ -333,10 +409,18 @@ export function useWaveConfig() {
           groups: {
             ...prev.groups,
             canView: group?.id ?? null,
+            ...(group
+              ? getPrivilegeGroupDefaults({
+                  groupId: group.id,
+                  waveType: prev.overview.type,
+                  manuallySelected: manuallySelectedPrivilegeGroups.current,
+                })
+              : {}),
           },
         }));
         break;
       case CreateWaveGroupConfigType.CAN_DROP:
+        manuallySelectedPrivilegeGroups.current.add("canDrop");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -346,6 +430,7 @@ export function useWaveConfig() {
         }));
         break;
       case CreateWaveGroupConfigType.CAN_VOTE:
+        manuallySelectedPrivilegeGroups.current.add("canVote");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -355,6 +440,7 @@ export function useWaveConfig() {
         }));
         break;
       case CreateWaveGroupConfigType.CAN_CHAT:
+        manuallySelectedPrivilegeGroups.current.add("canChat");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -522,7 +608,7 @@ export function useWaveConfig() {
 
   return {
     config: effectiveConfig,
-    setConfig,
+    replaceConfig,
     endDateConfig,
     setEndDateConfig,
     step,

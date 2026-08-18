@@ -34,6 +34,7 @@ export default function CreateWaveLayout({
           activeStep={step}
           waveType={config.overview.type}
           ongoingRanking={config.dates?.ongoingRanking ?? false}
+          disabled={submitting}
           onStep={(targetStep) => {
             void setStep(targetStep, "backward");
           }}

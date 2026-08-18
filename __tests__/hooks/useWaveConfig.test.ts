@@ -61,6 +61,9 @@ describe("useWaveConfig", () => {
     });
 
     expect(result.current.config.groups.canView).toBe("group-1");
+    expect(result.current.config.groups.canChat).toBe("group-1");
+    expect(result.current.config.groups.canDrop).toBeNull();
+    expect(result.current.config.groups.canVote).toBeNull();
     expect(result.current.groupsCache["group-1"]).toEqual(group);
   });
 });
