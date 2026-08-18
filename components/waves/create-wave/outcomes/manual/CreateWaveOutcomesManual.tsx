@@ -81,7 +81,7 @@ const parseSegment = (segment: string): PositionsParseResult => {
  * rest of what they typed had been dropped — and a wave's winner structure is
  * fixed at creation.
  */
-export const parseWinningPositions = (input: string): PositionsParseResult => {
+const parseWinningPositions = (input: string): PositionsParseResult => {
   const cleanInput = input.replace(/\s/g, "");
   if (!cleanInput) {
     return rejected(POSITIONS_FORMAT_ERROR);
