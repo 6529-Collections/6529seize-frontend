@@ -70,9 +70,12 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Warnings and State Changes
 
-- If both `Who can view` and `Admin` are set to explicit groups, `Warning:
-  Limited Access` appears and clarifies that the view group controls access
-  while the admin group controls management.
+- When `Who can view` is restricted, every active `Drop`, `Vote`, `Chat`, and
+  `Admin` group must contain only people who also belong to the view group.
+- The app checks the active groups together, highlights each incompatible row,
+  and keeps `Next` unavailable while the check is running.
+- `Warning: Limited Access` explains that all privilege-group members must also
+  be members of `Who can view`.
 - On `Rank` and `Approve`, turning `Enable chat` off disables editing for
   `Who can chat`.
 - `Allow admins to delete posts` does not show extra helper text when enabled.
@@ -80,7 +83,11 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 ## Failure and Recovery
 
 - If search shows no matches, clear or change search text and retry.
-- No group selection is required to leave `Groups` and continue.
+- Public waves can leave every scope as `Anyone`. For a restricted wave,
+  `Next` stops on `Groups` if an active permission is open to `Anyone` or its
+  selected group includes somebody outside `Who can view`.
+- If access cannot be checked, the step stays open and offers a retry through
+  `Next`; changing a group also starts a fresh check.
 - If no explicit admin group is selected, submit tries to create and publish a
   personal admin group (`Only {handle}` / `Only Me`) for a top-level wave.
 - A subwave reuses its parent wave's admin group instead of creating another
@@ -88,6 +95,8 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 - If a top-level personal admin group cannot be created or made visible, submit
   stops and identifies the failed stage. Add a primary wallet when requested,
   choose an existing admin group, or retry later.
+- Submit checks the final group configuration again after authentication and
+  before creating a personal admin group or creating the wave.
 
 ## Limitations / Notes
 
