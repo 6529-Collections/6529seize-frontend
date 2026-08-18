@@ -13,11 +13,18 @@ const mockButton = jest.fn((props: any) => (
 
 jest.mock(
   "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton",
-  () => (props: any) => mockButton(props)
+  () => ({
+    __esModule: true,
+    ADD_STATEMENT_PLATFORM_TOOLTIP_ID: "platform-tooltip",
+    default: (props: any) => mockButton(props),
+  })
 );
 
+jest.mock("@/hooks/useIsTouchDevice", () => () => false);
+jest.mock("react-tooltip", () => ({ Tooltip: () => null }));
+
 describe("UserPageIdentityAddStatementsNFTAccountItems", () => {
-  it("splits statement types into two rows and handles click", async () => {
+  it("renders every statement type in the compact picker and handles click", async () => {
     const user = userEvent.setup();
     const onSet = jest.fn();
     render(
@@ -28,13 +35,16 @@ describe("UserPageIdentityAddStatementsNFTAccountItems", () => {
     );
     const buttons = screen.getAllByTestId("btn");
     expect(buttons).toHaveLength(NFT_ACCOUNTS_STATEMENT_TYPES.length);
+    const rows = Array.from(screen.getByRole("group").children);
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.querySelectorAll("button").length)).toEqual([
+      6, 6,
+    ]);
     const buttonTypes = buttons.map((button) =>
       button.getAttribute("data-type")
     );
     expect(buttonTypes).toContain(STATEMENT_TYPE.MANIFOLD);
     expect(buttonTypes).toContain(STATEMENT_TYPE.TRANSIENT);
-    const firstRowCount = Math.round(NFT_ACCOUNTS_STATEMENT_TYPES.length / 2);
-    expect(buttons.slice(0, firstRowCount).length).toBe(firstRowCount);
     await user.click(buttons[0]);
     expect(onSet).toHaveBeenCalledWith(NFT_ACCOUNTS_STATEMENT_TYPES[0]);
     const transientButton = buttons.find(

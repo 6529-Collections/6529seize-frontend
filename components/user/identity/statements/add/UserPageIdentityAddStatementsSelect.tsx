@@ -10,6 +10,9 @@ const CAVEAT_MESSAGE_KEYS = [
   "user.profile.identity.statements.add.caveatCommunityRates",
 ] as const satisfies readonly MessageKey[];
 
+const TILE_TITLE_CLASS_NAME =
+  "tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold tw-leading-4 tw-tracking-tight tw-text-iron-100 desktop-hover:group-hover:tw-text-white md:tw-text-[15px] md:tw-leading-5 md:tw-tracking-normal";
+
 export default function UserPageIdentityAddStatementsSelect({
   onViewChange,
 }: {
@@ -68,7 +71,7 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+            <p className={TILE_TITLE_CLASS_NAME}>
               {t(locale, "user.profile.identity.statements.add.socialTitle")}
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-pretty tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
@@ -103,7 +106,7 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+            <p className={TILE_TITLE_CLASS_NAME}>
               {t(locale, "user.profile.identity.statements.add.nftTitle")}
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-pretty tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
@@ -135,7 +138,7 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+            <p className={TILE_TITLE_CLASS_NAME}>
               {t(locale, "user.profile.identity.statements.add.contactTitle")}
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-hidden tw-text-pretty tw-text-[13px] tw-leading-5 tw-text-iron-400 md:tw-block">
@@ -172,7 +175,7 @@ export default function UserPageIdentityAddStatementsSelect({
             </span>
           </div>
           <div className="tw-mt-3 tw-min-w-0 md:tw-mt-5 lg:tw-h-20">
-            <p className="tw-mb-0 tw-mt-0 tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
+            <p className={TILE_TITLE_CLASS_NAME}>
               {t(
                 locale,
                 "user.profile.identity.statements.add.verificationTitle"
