@@ -1,6 +1,12 @@
 "use client";
 
-import type { Dispatch, ReactNode, SetStateAction } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  useId,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 
 import type { ContractDelegation } from "../CollectionDelegation.utils";
 
@@ -55,25 +61,41 @@ export function DelegationDisclosurePanel(
     className?: string | undefined;
   }>
 ) {
+  const contentId = useId();
+
   return (
     <section
-      className={`tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 ${props.className ?? ""}`}
+      className={`tw-overflow-hidden tw-rounded-lg tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${
+        props.isOpen
+          ? "tw-bg-white/[0.055]"
+          : "tw-bg-white/[0.035] desktop-hover:hover:tw-bg-white/[0.055]"
+      } ${props.className ?? ""}`}
     >
-      <h6 className="tw-m-0">
+      <h3 className="tw-m-0">
         <button
           type="button"
-          className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-3.5 tw-text-left tw-text-base tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+          className="tw-group tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-left tw-text-base tw-font-semibold tw-text-iron-50 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
+          aria-controls={contentId}
           aria-expanded={props.isOpen}
           onClick={props.onToggle}
         >
           <span>{props.title}</span>
-          <span className="tw-text-xl tw-leading-none" aria-hidden="true">
-            {props.isOpen ? "−" : "+"}
+          <span
+            aria-hidden="true"
+            className={`tw-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-transition-colors motion-reduce:tw-transition-none ${
+              props.isOpen
+                ? "tw-text-primary-300"
+                : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-100"
+            }`}
+          >
+            <ChevronDownIcon
+              className={`tw-size-4 tw-transition-transform motion-reduce:tw-transition-none ${props.isOpen ? "tw-rotate-180" : ""}`}
+            />
           </span>
         </button>
-      </h6>
+      </h3>
       {props.isOpen && (
-        <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 sm:tw-p-4">
+        <div className="tw-bg-black/10 tw-p-3 sm:tw-p-4" id={contentId}>
           {props.children}
         </div>
       )}
