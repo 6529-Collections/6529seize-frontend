@@ -30,9 +30,8 @@ export default function CreateGroupWalletsEmma({
         return [];
       }
       const endpoint = `/allowlists/${selected?.id}/results`;
-      const { data } = await distributionPlanApiFetch<AllowlistResult[]>(
-        endpoint
-      );
+      const { data } =
+        await distributionPlanApiFetch<AllowlistResult[]>(endpoint);
       return data ?? [];
     },
     enabled: !!connectedProfile?.handle && !!selected,
@@ -50,11 +49,11 @@ export default function CreateGroupWalletsEmma({
   };
 
   return (
-    <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
-      <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
+      <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
         EMMA
       </p>
-      <div className="tw-mt-2 sm:tw-mt-3 tw-mb-3">
+      <div className="tw-mb-3 tw-mt-2 sm:tw-mt-3">
         <EmmaListSearch
           selectedId={selected?.id ?? null}
           onSelect={setSelected}

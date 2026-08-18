@@ -45,6 +45,7 @@ describe("GroupCreateIdentitiesSelect", () => {
       />
     );
     await user.click(screen.getByTestId("search"));
+    expect(screen.getByText("Search Identity")).toHaveClass("tw-m-0");
     expect(onSelect).toHaveBeenCalledWith({ wallet: "w1", handle: "h1" });
     expect(searchProps.selectedWallets).toEqual(["w2"]);
     expect(searchProps.appearance).toBe("modal");
