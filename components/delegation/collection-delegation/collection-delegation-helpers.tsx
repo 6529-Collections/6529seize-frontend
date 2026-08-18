@@ -88,7 +88,11 @@ export function getCollectionScopeDescription(
 
 export const CHECKBOX_CLASS =
   "tw-h-4 tw-w-4 tw-flex-none tw-cursor-pointer tw-rounded tw-border-0 tw-bg-white tw-text-black focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
-export const LOCK_SELECT_CLASS =
-  "tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-200 disabled:tw-text-iron-500";
+
+export const COLLECTION_PANEL_CLASS =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/70 tw-p-5 sm:tw-p-6";
+
+export const COLLECTION_PANEL_ICON_CLASS =
+  "tw-flex tw-h-7 tw-w-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-300";
 
 export const BUTTON_ICON_CLASS = "tw-h-4 tw-w-4 tw-flex-none";

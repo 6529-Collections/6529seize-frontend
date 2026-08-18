@@ -2685,8 +2685,11 @@
         "Wave chat has two separate settings for Rank and Approve waves: chat.enabled controls whether chat is on, and chat.scope controls who can chat when chat is enabled.",
         "Chat waves require chat to stay enabled, so their Settings and Rules panels do not show a Chat status enable/disable row.",
         "Rank and Approve wave Settings show Chat status as Enabled or Disabled, and wave admins can edit that row to enable or disable chat.",
-        "The Access row uses Chat access wording; `Anyone when enabled` means no chat access group is attached, not that chat is currently enabled.",
+        "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "The Rank and Approve Rules panels also show Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
+        "Visible access-group names in Rules and Settings link to a filtered Network view that shows both the group criteria and current members.",
+        "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
+        "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
       ],
       "canonical_path": "/waves",
@@ -2695,7 +2698,9 @@
       "source_refs": [
         "components/waves/specs/WaveChatStatus.tsx",
         "helpers/waves/wave-rules.helpers.ts",
+        "components/waves/specs/WaveRulesPanel.tsx",
         "components/waves/specs/groups/group/WaveGroup.tsx",
+        "components/community/CommunityMembersGroupDetails.tsx",
         "ops/docs/waves/chat/feature-chat-composer-availability.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-group-management.md"
       ]
