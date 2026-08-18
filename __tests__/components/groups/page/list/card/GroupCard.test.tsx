@@ -15,13 +15,21 @@ jest.mock("next/navigation", () => ({
 
 jest.mock(
   "@/components/groups/page/list/card/GroupCardView",
-  () => (props: any) =>
-    (
-      <div
-        data-testid="view"
-        onClick={() => props.setState && props.setState(GroupCardState.REP)}
-      />
-    )
+  () => (props: any) => (
+    <div data-testid="view">
+      {props.setState && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            props.setState(GroupCardState.REP);
+          }}
+        >
+          Rep all
+        </button>
+      )}
+    </div>
+  )
 );
 jest.mock(
   "@/components/groups/page/list/card/vote-all/GroupCardVoteAll",
@@ -59,24 +67,27 @@ describe("GroupCard", () => {
   function renderComp(opts: any = {}) {
     return render(
       <AuthContext.Provider
-        value={{ connectedProfile: { handle: "me" } } as any}>
+        value={{ connectedProfile: { handle: "me" } } as any}
+      >
         <GroupCard group={group} {...opts} />
       </AuthContext.Provider>
     );
   }
 
-  it("navigates to community view when idle", () => {
+  it("exposes a native whole-card link when idle", () => {
     const { getByRole } = renderComp();
-    fireEvent.click(getByRole("button"));
-    expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
+    expect(getByRole("link", { name: "Open g" })).toHaveAttribute(
+      "href",
+      `/network?page=1&group=${group.id}`
+    );
   });
 
   it("navigates to community view when pressing Enter", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const button = getByRole("button");
+    const cardLink = getByRole("link", { name: "Open g" });
 
-    button.focus();
+    cardLink.focus();
     await user.keyboard("{Enter}");
 
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
@@ -85,25 +96,56 @@ describe("GroupCard", () => {
   it("navigates to community view when pressing Space", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const button = getByRole("button");
+    const cardLink = getByRole("link", { name: "Open g" });
 
-    button.focus();
+    cardLink.focus();
     await user.keyboard(" ");
 
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
   });
 
-  it("calls setActiveGroupIdVoteAll when view is clicked", () => {
+  it("does not navigate when a nested action is clicked", () => {
     const setActive = jest.fn();
-    const { container } = renderComp({
-      activeGroupIdVoteAll: null,
-      setActiveGroupIdVoteAll: setActive,
-    });
+    function CardHarness() {
+      const [activeGroupId, setActiveGroupId] = React.useState<string | null>(
+        null
+      );
+      return (
+        <AuthContext.Provider
+          value={{ connectedProfile: { handle: "me" } } as any}
+        >
+          <GroupCard
+            group={group}
+            activeGroupIdVoteAll={activeGroupId}
+            setActiveGroupIdVoteAll={(value) => {
+              setActive(value);
+              setActiveGroupId(value);
+            }}
+          />
+        </AuthContext.Provider>
+      );
+    }
+    const { getByRole, queryByRole } = render(<CardHarness />);
 
-    // Click the view to trigger state change
-    fireEvent.click(container.querySelector('[data-testid="view"]')!);
+    fireEvent.click(getByRole("button", { name: "Rep all" }));
 
-    // Should call the callback to notify parent of state change
     expect(setActive).toHaveBeenCalledWith(group.id);
+    expect(push).not.toHaveBeenCalled();
+    expect(queryByRole("link", { name: "Open g" })).not.toBeInTheDocument();
+  });
+
+  it("does not activate whole-card navigation for placeholders", () => {
+    const { getByTestId, queryByRole } = render(
+      <AuthContext.Provider value={{ connectedProfile: null } as any}>
+        <GroupCard titlePlaceholder="Loading group" />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(getByTestId("view"));
+
+    expect(push).not.toHaveBeenCalled();
+    expect(
+      queryByRole("link", { name: "Open Loading group" })
+    ).not.toBeInTheDocument();
   });
 });
