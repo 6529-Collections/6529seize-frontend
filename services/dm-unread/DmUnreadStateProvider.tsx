@@ -353,9 +353,6 @@ export function DmUnreadStateProvider({
         expectedJwt,
         expectedActivationId
       );
-      if (cancelled) {
-        return;
-      }
       if (synchronized) {
         recoveryAttempt = 0;
         scheduleSnapshot(SNAPSHOT_RECONCILIATION_INTERVAL_MS);
