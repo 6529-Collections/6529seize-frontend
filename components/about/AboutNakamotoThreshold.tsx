@@ -188,17 +188,19 @@ export default function AboutNakamotoThreshold() {
         </p>
         <p>It was clear some cards would not hit 300 mints.</p>
         <p>What should we do?</p>
-        <p>
-          There was *a lot* of discussion in Discord and basically it boiled
-          down to 5 ideas:
-        </p>
-        <ol>
-          <li>Change the threshold</li>
-          <li>Mint fewer times per week</li>
-          <li>Airdrop to collectors</li>
-          <li>I mint them</li>
-          <li>Airdrop somewhere else</li>
-        </ol>
+        <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-5 sm:tw-p-6">
+          <p>
+            There was *a lot* of discussion in Discord and basically it boiled
+            down to 5 ideas:
+          </p>
+          <ul className="tw-list-disc !tw-mt-6">
+            <li>Change the threshold</li>
+            <li>Mint fewer times per week</li>
+            <li>Airdrop to collectors</li>
+            <li>I mint them</li>
+            <li>Airdrop somewhere else</li>
+          </ul>
+        </div>
         <p>The first one was the easiest.</p>
         <p>
           &quot;Sure, I said that, but circumstances change, we have to change
