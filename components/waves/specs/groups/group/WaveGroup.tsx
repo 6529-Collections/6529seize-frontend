@@ -10,7 +10,7 @@ import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import WaveGroupScope from "./WaveGroupScope";
-import { WaveGroupType } from "./WaveGroup.types";
+import type { WaveGroupType } from "./WaveGroup.types";
 
 export default function WaveGroup({
   scope,
@@ -25,10 +25,7 @@ export default function WaveGroup({
   const showEdit =
     canEditWave({ connectedProfile, activeProfileProxy, wave }) &&
     !scope.group?.is_direct_message;
-  const emptyScopeLabel =
-    type === WaveGroupType.CHAT
-      ? t(DEFAULT_LOCALE, "waves.chatSettings.access.anyoneWhenEnabled")
-      : t(DEFAULT_LOCALE, "waves.chatSettings.access.anyone");
+  const emptyScopeLabel = t(DEFAULT_LOCALE, "waves.chatSettings.access.anyone");
 
   return (
     <div className="tw-group tw-relative tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-x-2 tw-px-2 tw-py-1.5 tw-text-sm">

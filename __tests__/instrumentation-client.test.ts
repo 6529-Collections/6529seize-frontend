@@ -2466,13 +2466,13 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps cyclic JSON timer errors for origin diagnostics", () => {
+  it("drops exact MetaMask Mobile cyclic JSON timer noise", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
 
     const result = beforeSend(event);
 
-    expect(result).not.toBeNull();
+    expect(result).toBeNull();
   });
 
   it("keeps iOS WKWebView cyclic JSON timer errors without app context", () => {
@@ -2567,6 +2567,23 @@ describe("instrumentation-client", () => {
         tags: {},
       }
     );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps sampled cyclic JSON timer diagnostics", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent([
+      nativeJsonStringifyFrame,
+      {
+        filename: "utils/monitoring/cyclicJsonTimerDiagnostics.ts",
+        function: "diagnosticCallback",
+        lineno: 404,
+        in_app: true,
+      },
+    ]);
 
     const result = beforeSend(event);
 
