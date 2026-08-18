@@ -6,12 +6,15 @@ import GroupCreateName from '@/components/groups/page/create/GroupCreateName';
 describe('GroupCreateName', () => {
   it('renders input with provided name and label', () => {
     const setName = jest.fn();
-    render(<GroupCreateName name="Initial" setName={setName} />);
+    const { container } = render(
+      <GroupCreateName name="Initial" setName={setName} />
+    );
 
     const input = screen.getByRole('textbox');
     expect(input).toHaveValue('Initial');
     expect(input).toHaveAttribute('id', 'floating_name');
     expect(screen.getByLabelText('Name')).toBe(input);
+    expect(container.firstElementChild).toHaveClass("tw-border-iron-900");
   });
 
   it('calls setName on change', async () => {

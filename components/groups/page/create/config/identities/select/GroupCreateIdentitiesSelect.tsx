@@ -1,3 +1,4 @@
+import { GROUP_CREATE_PANEL_STYLES } from "../../../GroupCreate.styles";
 import GroupCreateIdentitiesSearch from "./GroupCreateIdentitiesSearch";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
@@ -28,7 +29,7 @@ export default function GroupCreateIdentitiesSelect({
       className={
         isModal
           ? "tw-w-full"
-          : "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5"
+          : GROUP_CREATE_PANEL_STYLES
       }
     >
       <div className="tw-flex tw-flex-col">

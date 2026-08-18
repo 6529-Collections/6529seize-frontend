@@ -16,6 +16,18 @@ describe('GroupCreateWrapper', () => {
     expect(outer.className).toContain('lg:tw-mt-6');
     expect(outer.className).toContain('tailwind-scope');
     expect(outer.className).toContain('tw-relative');
+    expect(outer.className).toContain(
+      '[&_input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not([type=button]):not([type=submit])]:!tw-h-12'
+    );
+    expect(outer.className).toContain(
+      '[&_input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not([type=button]):not([type=submit])]:!tw-bg-iron-900'
+    );
+    expect(outer.className).toContain(
+      '[&_input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not([type=button]):not([type=submit])]:!tw-py-3'
+    );
+    expect(outer.className).toContain(
+      '[&_input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not([type=button]):not([type=submit])]:!tw-ring-iron-800'
+    );
 
     const inner = outer.firstElementChild as HTMLElement;
     expect(inner.tagName).toBe('DIV');
