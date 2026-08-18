@@ -412,10 +412,10 @@
       "destinations": ["sentry:owner"],
       "sampling": "eligible function timers in iOS WKWebViews are sampled independently at 1/16; only exact unhandled cyclic-JSON timer errors receive sampled provenance",
       "privacy": "timer arguments are removed from every matching event; sampled extras contain bounded sanitized function names, script basenames, line and column numbers, origin enums, WebView family, and sample rate only",
-      "externalUsage": "v1 is live; Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
+      "externalUsage": "v2 is live; Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
       "lifecycle": "temporary",
-      "replacement": "By the review date, verify or migrate every v1-keyed Sentry consumer to v2; remove the timer diagnostics after corrected provenance identifies the caller",
-      "reviewBy": "2026-08-17"
+      "replacement": "After the first production release with the narrow MetaMask Mobile suppression has been live for seven days, review retained diagnostic events and remove the timer diagnostics if near-miss coverage remains intact",
+      "reviewBy": "2026-09-01"
     },
     {
       "name": "reaction.*",

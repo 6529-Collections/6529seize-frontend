@@ -44,6 +44,18 @@ jest.mock(
 jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
   <div data-testid="groups-sidebar" />
 ));
+jest.mock(
+  "@/components/community/CommunityMembersGroupDetails",
+  () =>
+    ({ groupId, onClose }: { groupId: string; onClose: () => void }) => (
+      <div data-testid="group-details">
+        {groupId}
+        <button type="button" onClick={onClose}>
+          Clear selected group
+        </button>
+      </div>
+    )
+);
 
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
@@ -62,6 +74,7 @@ jest.mock(
 
 const push = jest.fn();
 const replace = jest.fn();
+const setActiveGroupId = jest.fn();
 
 const searchParamsMock = new Map<string, string | null>();
 (usePathname as jest.Mock).mockReturnValue("/network");
@@ -71,7 +84,7 @@ const searchParamsMock = new Map<string, string | null>();
 (useRouter as jest.Mock).mockReturnValue({ push, replace });
 (useActiveGroup as unknown as jest.Mock).mockReturnValue({
   activeGroupId: "1",
-  setActiveGroupId: jest.fn(),
+  setActiveGroupId,
 });
 
 function renderComponent() {
@@ -93,7 +106,7 @@ describe("CommunityMembers", () => {
     (useRouter as jest.Mock).mockReturnValue({ push, replace });
     (useActiveGroup as unknown as jest.Mock).mockReturnValue({
       activeGroupId: "1",
-      setActiveGroupId: jest.fn(),
+      setActiveGroupId,
     });
   });
 
@@ -116,6 +129,14 @@ describe("CommunityMembers", () => {
     renderComponent();
     expect(screen.getByTestId("table")).toHaveTextContent("2");
     expect(screen.getByTestId("pagination")).toHaveTextContent("2");
+    expect(screen.getByTestId("group-details")).toHaveTextContent("1");
+    expect(
+      screen.getByRole("heading", { name: "Members" })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Clear selected group" })
+    );
+    expect(setActiveGroupId).toHaveBeenCalledWith(null);
   });
 
   it("navigates to nerd view on button click", () => {
