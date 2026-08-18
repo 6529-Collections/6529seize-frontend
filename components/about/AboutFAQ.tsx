@@ -6,7 +6,7 @@ import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 
 const FAQ_CONTENT_CLASS = [
   "tw-max-w-4xl tw-px-1 tw-py-10 tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-px-2 sm:tw-py-12",
-  "[&_a]:tw-break-words [&_a]:tw-rounded-sm [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 hover:[&_a]:tw-text-primary-200 focus-visible:[&_a]:tw-outline-none focus-visible:[&_a]:tw-ring-2 focus-visible:[&_a]:tw-ring-primary-400",
+  "[&_a]:tw-break-words [&_a]:tw-rounded-sm [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 [&_a:hover]:tw-text-primary-200 [&_a:focus-visible]:tw-outline-none [&_a:focus-visible]:tw-ring-2 [&_a:focus-visible]:tw-ring-primary-400",
   "[&_dd]:tw-m-0 [&_dl]:tw-mb-0 [&_dl]:tw-mt-5 [&_dt]:tw-mb-2 [&_dt]:tw-mt-5 [&_dt]:tw-font-semibold [&_dt]:tw-text-iron-100",
   "[&_em]:tw-text-iron-200 [&_p]:tw-mb-0 [&_p]:tw-mt-4 [&_strong]:tw-font-semibold [&_strong]:tw-text-iron-100",
   "[&_h3]:tw-mb-0 [&_h3]:tw-mt-8 [&_h3]:tw-text-lg [&_h3]:tw-font-semibold [&_h3]:tw-leading-7 [&_h3]:tw-text-iron-100",
