@@ -236,3 +236,50 @@ this workstream.
   exceeded the static export's 60-second limit; hosted CI is the authoritative
   full-build gate. Remaining sequence: ready PR and bots, staging
   qualification, production deployment, and live desktop/mobile readback.
+
+## 2026-08-18 Acquisitions and Artists balance release complete
+
+- Frontend PR #3780 merged as exact main
+  `40a293406b6c04ca8057b02ccb8fbd5e05d192c7` after all exact-head hosted
+  review, security, quality, desktop Museum, and mobile Museum checks passed.
+- Staging composition `80503176dacc334ba8132681486a138d660832c9`
+  deployed successfully in run `32183553695`. Direct staging acceptance passed
+  on desktop and 390-pixel mobile: all 21 artist stages were 4:3; all three
+  acquisition stages shared the responsive 4:5 desktop and 4:3 compact ratio;
+  images loaded without fallback; navigation, links, and horizontal bounds
+  passed.
+- Automatic staging E2E `32184698162` passed the core pack, every selected
+  Museum pack, publication provenance, and immutable evidence validation. Its
+  aggregate result failed only because the unrelated media pack observed a
+  Server Components error on `/the-memes/mint`. An immediate isolated rerun
+  showed that route recovered and instead exposed the pre-existing mobile
+  overflow of the Meme Lab activity table. The active owner-approved serialized
+  fallback explicitly covered this non-Museum baseline; no Museum finding was
+  waived.
+- Waiver traceability: the 6529 Collections repository owner authorized a
+  single-release manual fallback under the `STAGING: OFF` / `PRODUCTION: OFF`,
+  `changeable: true` Release Bus control. Its stable identifier is immutable
+  release main `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`. Its scope was limited to the
+  unrelated staging media-pack observations on `/the-memes/mint` and the Meme
+  Lab activity table; it did not waive any Museum test or product finding. The
+  validity period began when staging E2E `32184698162` reached its terminal
+  result and expired when automatic Production E2E
+  [`32187596393`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32187596393)
+  succeeded. Retained fallback evidence is staging deploy
+  [`32183553695`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32183553695)
+  and staging E2E
+  [`32184698162`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32184698162);
+  the governing procedure is `ops/skills/deploy-6529/SKILL.md`, “Manual fallback
+  while the target lane is OFF and changeable.”
+- Production deploy `32186095060` succeeded on exact main after immutable
+  artifact builder `32186126216` and independent artifact selection and
+  verification passed. Three uncached `/api/version` reads returned exact main
+  with `stale:false`.
+- Automatic Production E2E `32187596393` passed all production-safe read-only
+  packs, selected Museum packs, provenance validation, evidence upload, and the
+  isolated evidence verifier. The live retained Museum matrix passed both
+  desktop and 390-pixel mobile with no dead links or horizontal overflow and
+  exact Acquisitions/Artists image-stage counts and ratios.
+
+The Acquisitions and Artists balancing release is complete on production. No
+runtime work remains in this follow-up.
