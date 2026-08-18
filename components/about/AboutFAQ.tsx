@@ -31,9 +31,9 @@ export default function AboutFAQ() {
           <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
             6529 FAQ
           </h1>
-          <p className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-8">
+          <h2 className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-font-normal tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-8">
             What is 6529?
-          </p>
+          </h2>
           <div className="tw-mt-4 tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-400">
             <p className="tw-m-0">
               6529 is a decentralized Network State open to anyone with an
@@ -62,10 +62,7 @@ export default function AboutFAQ() {
 
       <div className={FAQ_CONTENT_CLASS}>
         <section>
-          <ol
-            className="tw-m-0 tw-space-y-10 tw-pl-6 marker:tw-text-lg marker:tw-font-semibold marker:tw-text-iron-500 sm:tw-space-y-12 sm:tw-pl-8 [&>li]:tw-pl-1 sm:[&>li]:tw-pl-2"
-            start={2}
-          >
+          <ul className="tw-m-0 tw-list-none tw-space-y-10 !tw-pl-0 sm:tw-space-y-12">
             <li className="tw-pl-1 sm:tw-pl-2">
               <h2 className={FAQ_QUESTION_HEADING_CLASS}>
                 How do I get started?
@@ -427,7 +424,7 @@ export default function AboutFAQ() {
               </p>
               <p>The economics of each drop are determined by the artist.</p>
             </li>
-          </ol>
+          </ul>
         </section>
 
         <section className="tw-mt-12 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-10 sm:tw-mt-16 sm:tw-pt-12">
@@ -458,6 +455,7 @@ export default function AboutFAQ() {
         <section
           className="tw-mt-12 tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-10 sm:tw-mt-16 sm:tw-pt-12"
           id="what-is-a-wallet"
+          tabIndex={-1}
         >
           <h2 className={FAQ_QUESTION_HEADING_CLASS}>What is a Wallet?</h2>
 

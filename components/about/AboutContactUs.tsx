@@ -102,7 +102,7 @@ export default function AboutContactUs() {
               target="_blank"
             >
               teexels
-            </Link>{" "}
+            </Link>
           </li>
         </ul>
       </section>

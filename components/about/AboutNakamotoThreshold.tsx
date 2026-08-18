@@ -80,7 +80,10 @@ export default function AboutNakamotoThreshold() {
           </div>
         </div>
       </header>
-      <NakamotoEditorialSection title="Edition Sizes Matter">
+      <NakamotoEditorialSection
+        id="edition-sizes-matter"
+        title="Edition Sizes Matter"
+      >
         <p>
           The Memes were deliberately designed to be relatively low unit price
           and relatively high edition count.
@@ -127,7 +130,10 @@ export default function AboutNakamotoThreshold() {
         <p>Seemed like a safe hurdle.</p>
         <p>The Nakamoto Threshold: all others will exceed 300 </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Testing the Threshold">
+      <NakamotoEditorialSection
+        id="testing-the-threshold"
+        title="Testing the Threshold"
+      >
         <p>Bear market came.</p>
         <p>
           Instead of people yelling me for being &quot;elitist&quot; for only
@@ -168,7 +174,10 @@ export default function AboutNakamotoThreshold() {
         <p>And, in USD terms, we are not at the bottom.</p>
         <p>ETH is expensive again now, so, in USD terms, the mints are fine.</p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Consider the Options">
+      <NakamotoEditorialSection
+        id="consider-the-options"
+        title="Consider the Options"
+      >
         <p>
           If 2 years ago I had not said &quot;Card 4 will be the lowest edition
           count&quot;, we would not even be thinking about this at all.
@@ -253,7 +262,10 @@ export default function AboutNakamotoThreshold() {
         </ul>
         <p>So what should we do?</p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Maintaining the Commitment">
+      <NakamotoEditorialSection
+        id="maintaining-the-commitment"
+        title="Maintaining the Commitment"
+      >
         <p>
           I decided that the correct answer is that those two absolutes never
           change.
@@ -285,7 +297,10 @@ export default function AboutNakamotoThreshold() {
           it.
         </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Managing Tradeoffs">
+      <NakamotoEditorialSection
+        id="managing-tradeoffs"
+        title="Managing Tradeoffs"
+      >
         <p>
           BTC sacrifices many many other things to 21M and its other ideal
           (small blocks for decentralization).
@@ -307,7 +322,10 @@ export default function AboutNakamotoThreshold() {
           what you will sacrifice for.
         </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Implementation Pathways">
+      <NakamotoEditorialSection
+        id="implementation-pathways"
+        title="Implementation Pathways"
+      >
         <p>
           Once this decision was made, we go to step 2: &quot;how do we
           implement staying above 300 edition size&quot;.
@@ -354,7 +372,7 @@ export default function AboutNakamotoThreshold() {
           formula for 0.5 ETH or 1ETH or 2ETH of airdrops.
         </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Decision Time">
+      <NakamotoEditorialSection id="decision-time" title="Decision Time">
         <p>
           So time was running out, I was watching a card that would not mint
           out.
@@ -374,7 +392,7 @@ export default function AboutNakamotoThreshold() {
           solution, I need to pay the price.
         </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Count the Costs">
+      <NakamotoEditorialSection id="count-the-costs" title="Count the Costs">
         <p>
           Now what are the costs (beyond ETH)? Some say it is cringe to mint
           your own drops.
@@ -412,7 +430,7 @@ export default function AboutNakamotoThreshold() {
           unique ownership. Some are B. It is totally fine.
         </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Bigger Plans">
+      <NakamotoEditorialSection id="bigger-plans" title="Bigger Plans">
         <p>
           Now, along the way, I was still thinking about what the long-term
           solution could be.
@@ -441,7 +459,7 @@ export default function AboutNakamotoThreshold() {
         </p>
         <p>In other words, exactly what the name says &quot;research&quot;.</p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Research What?">
+      <NakamotoEditorialSection id="research-what" title="Research What?">
         <p>
           &quot;Wait, what research does an art edition collection need?&quot;
           Imagine thinking that is the goal.
@@ -452,7 +470,10 @@ export default function AboutNakamotoThreshold() {
           seeds now, let them grow.
         </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Evaluating the Outcome">
+      <NakamotoEditorialSection
+        id="evaluating-the-outcome"
+        title="Evaluating the Outcome"
+      >
         <p>I am very happy with this solution.</p>
         <ul>
           <li>
@@ -473,7 +494,10 @@ export default function AboutNakamotoThreshold() {
           <li>✅ Group discussion was very good faith and civilized.</li>
         </ul>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Good Decision Making is Hard">
+      <NakamotoEditorialSection
+        id="good-decision-making-is-hard"
+        title="Good Decision Making is Hard"
+      >
         <p>
           Someone in Discord told me I &quot;overthink&quot; things and I
           laughed. This is literally my defining characteristic.
@@ -492,7 +516,7 @@ export default function AboutNakamotoThreshold() {
           good collective decisions. It is &quot;all the alpha&quot;.
         </p>
       </NakamotoEditorialSection>
-      <NakamotoEditorialSection title="Stacking Goods">
+      <NakamotoEditorialSection id="stacking-goods" title="Stacking Goods">
         <p>
           Coming back to the aesthetically pleasing part, what is currently
           happening in The Memes is pure utter magic of stacking public goods on
@@ -530,15 +554,14 @@ export default function AboutNakamotoThreshold() {
 
 function NakamotoEditorialSection({
   children,
+  id,
   title,
 }: {
   readonly children: ReactNode;
+  readonly id: string;
   readonly title: string;
 }) {
-  const headingId = `nakamoto-${title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")}-heading`;
+  const headingId = `nakamoto-${id}-heading`;
 
   return (
     <section

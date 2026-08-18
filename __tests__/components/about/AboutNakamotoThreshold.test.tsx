@@ -4,7 +4,7 @@ import AboutNakamotoThreshold from "@/components/about/AboutNakamotoThreshold";
 
 describe("AboutNakamotoThreshold", () => {
   it("uses the TDH editorial heading scale and sticky title rail", () => {
-    render(<AboutNakamotoThreshold />);
+    const { container } = render(<AboutNakamotoThreshold />);
 
     const pageHeading = screen.getByRole("heading", {
       level: 1,
@@ -22,6 +22,18 @@ describe("AboutNakamotoThreshold", () => {
     sectionHeadings.forEach((heading) => {
       expect(heading).toHaveClass("tw-text-lg", "sm:tw-text-xl");
       expect(heading.parentElement).toHaveClass("lg:tw-sticky", "lg:tw-top-28");
+    });
+
+    const labelledSections = Array.from(
+      container.querySelectorAll("article > section[aria-labelledby]")
+    );
+    const headingIds = labelledSections.map((section) =>
+      section.getAttribute("aria-labelledby")
+    );
+
+    expect(new Set(headingIds).size).toBe(13);
+    headingIds.forEach((headingId) => {
+      expect(document.getElementById(headingId!)).toBeInTheDocument();
     });
   });
 
