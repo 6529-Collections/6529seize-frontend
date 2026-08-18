@@ -4549,10 +4549,15 @@
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
+        "On mobile, select the ID Statements score card to open a compact statements card without repeating the profile heading or description; eligible owners see Add at the right of the Consolidated Addresses header.",
         "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
-        "The add modal supports documented statement types and visibility rules.",
-        "On mobile web and Capacitor, the add-statements sheet stays above the software keyboard and keeps its fields and Save/Cancel actions reachable by scrolling.",
-        "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state."
+        "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
+        "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
+        "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
+        "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
+        "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
+        "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state.",
+        "If statements fail to load, the page keeps consolidated addresses visible and shows a Retry action; empty statement groups are omitted without an overall placeholder."
       ],
       "canonical_path": "/{user}",
       "related_paths": ["/{user}/identity", "/delegation/wallet-checker"],
@@ -4907,8 +4912,6 @@
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
-        "In Approve waves, Chat shows participation drops as compact proposal notices; opening one shows the proposal, while Proposals contains the full body, status, and voting controls.",
-        "A focused proposal workshop can use a subwave, which keeps its own drops and unread state.",
         "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
       "canonical_path": "/waves",
@@ -5360,9 +5363,6 @@
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
         "Content display is separate from composer submission behavior.",
-        "Long main drop bodies in Wave and direct-message feeds use rendered height to show Show more and Show less controls, while full detail views remain expanded.",
-        "Collapsed body text stays available to assistive technology, while visually clipped controls remain outside the keyboard tab order until expansion.",
-        "Media, file attachments, and quoted drops stay outside the text clamp.",
         "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],

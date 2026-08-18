@@ -15,12 +15,14 @@ import { useContext, useState } from "react";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 export default function UserPageHeaderEditName({
   profile,
+  embedded = false,
   isOpen = true,
   onAfterLeave,
   onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
+  readonly embedded?: boolean;
   readonly isOpen?: boolean;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly onBack?: (() => void) | undefined;
@@ -111,6 +113,49 @@ export default function UserPageHeaderEditName({
   const [available, setAvailable] = useState<boolean>(false);
   const [checkingUsername, setCheckingUsername] = useState<boolean>(false);
 
+  const form = (
+    <form
+      onSubmit={onSubmit}
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+    >
+      <UserSettingsUsername
+        userName={userName}
+        originalUsername={profile.handle ?? ""}
+        setUserName={setUserName}
+        setIsAvailable={setAvailable}
+        setIsLoading={setCheckingUsername}
+      />
+
+      <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row-reverse md:tw-justify-start">
+        <Button
+          type="submit"
+          variant="action"
+          size="lg"
+          loading={mutating}
+          disabled={!haveChanges || !available || checkingUsername}
+          fullWidth
+          className="md:tw-w-auto"
+        >
+          Save
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={mutating}
+          onClick={onClose}
+          fullWidth
+          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (embedded) {
+    return form;
+  }
+
   return (
     <MobileWrapperDialog
       title={getUserProfileHeaderMessage("user.profileHeader.edit.name")}
@@ -123,42 +168,7 @@ export default function UserPageHeaderEditName({
       headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
       maxWidthClass="md:tw-max-w-xl"
     >
-      <form
-        onSubmit={onSubmit}
-        className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
-      >
-        <UserSettingsUsername
-          userName={userName}
-          originalUsername={profile.handle ?? ""}
-          setUserName={setUserName}
-          setIsAvailable={setAvailable}
-          setIsLoading={setCheckingUsername}
-        />
-
-        <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row-reverse md:tw-justify-start">
-          <Button
-            type="submit"
-            variant="action"
-            size="lg"
-            loading={mutating}
-            disabled={!haveChanges || !available || checkingUsername}
-            fullWidth
-            className="md:tw-w-auto"
-          >
-            Save
-          </Button>
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={mutating}
-            onClick={onClose}
-            fullWidth
-            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      {form}
     </MobileWrapperDialog>
   );
 }

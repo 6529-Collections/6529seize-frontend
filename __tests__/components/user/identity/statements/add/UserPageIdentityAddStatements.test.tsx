@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserPageIdentityAddStatements, {
-  STATEMENT_ADD_VIEW,
-} from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
+import UserPageIdentityAddStatements from "@/components/user/identity/statements/add/UserPageIdentityAddStatements";
+import { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements.constants";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { RefObject } from "react";
 
@@ -46,7 +45,13 @@ const profile = { id: "1" } as ApiIdentity;
 test("calls onClose on Escape and backdrop click", async () => {
   const onClose = jest.fn();
   const user = userEvent.setup();
-  render(<UserPageIdentityAddStatements profile={profile} onClose={onClose} />);
+  render(
+    <UserPageIdentityAddStatements
+      profile={profile}
+      isOpen={true}
+      onClose={onClose}
+    />
+  );
 
   await user.keyboard("{Escape}");
   expect(onClose).toHaveBeenCalled();
@@ -57,7 +62,13 @@ test("calls onClose on Escape and backdrop click", async () => {
 });
 
 test("changes active view when child triggers", async () => {
-  render(<UserPageIdentityAddStatements profile={profile} onClose={() => {}} />);
+  render(
+    <UserPageIdentityAddStatements
+      profile={profile}
+      isOpen={true}
+      onClose={() => {}}
+    />
+  );
   const div = screen.getByTestId("views");
   const contentRef = mockKeyboardFocusScroll.mock.calls.at(-1)?.[0];
 
@@ -65,4 +76,7 @@ test("changes active view when child triggers", async () => {
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
   await userEvent.click(div);
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.CONTACT);
+
+  await userEvent.click(screen.getByRole("button", { name: "Back" }));
+  expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
 });

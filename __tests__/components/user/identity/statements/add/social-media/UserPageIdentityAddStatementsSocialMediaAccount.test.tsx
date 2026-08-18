@@ -1,44 +1,49 @@
-import { render } from '@testing-library/react';
-import { act } from '@testing-library/react';
-import React from 'react';
-import UserPageIdentityAddStatementsSocialMediaAccount from '@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount';
-import { STATEMENT_TYPE, STATEMENT_GROUP } from '@/helpers/Types';
+import { render } from "@testing-library/react";
+import { act } from "@testing-library/react";
+import type { ComponentProps } from "react";
+import UserPageIdentityAddStatementsSocialMediaAccount from "@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccount";
+import type UserPageIdentityAddStatementsSocialMediaAccountItems from "@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems";
+import type UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { STATEMENT_TYPE, STATEMENT_GROUP } from "@/helpers/Types";
 
-let headerProps: any;
-let itemsProps: any;
-let formProps: any;
+type ItemsProps = ComponentProps<
+  typeof UserPageIdentityAddStatementsSocialMediaAccountItems
+>;
+type FormProps = ComponentProps<typeof UserPageIdentityAddStatementsForm>;
+let itemsProps: ItemsProps;
+let formProps: FormProps;
 
-jest.mock('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountHeader', () => (props: any) => {
-  headerProps = props;
-  return <div data-testid="header" />;
-});
+jest.mock(
+  "@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems",
+  () => (props: ItemsProps) => {
+    itemsProps = props;
+    return <div data-testid="items" />;
+  }
+);
 
-jest.mock('@/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems', () => (props: any) => {
-  itemsProps = props;
-  return <div data-testid="items" />;
-});
+jest.mock(
+  "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
+  () => (props: FormProps) => {
+    formProps = props;
+    return <div data-testid="form" />;
+  }
+);
 
-jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => (props: any) => {
-  formProps = props;
-  return <div data-testid="form" />;
-});
-
-describe('UserPageIdentityAddStatementsSocialMediaAccount', () => {
-  const profile = { id: 'p1' } as any;
+describe("UserPageIdentityAddStatementsSocialMediaAccount", () => {
+  const profile = { id: "p1" } as ApiIdentity;
   const onClose = jest.fn();
 
-  beforeEach(() => {
-    headerProps = undefined;
-    itemsProps = undefined;
-    formProps = undefined;
-  });
+  it("passes props and updates type", () => {
+    render(
+      <UserPageIdentityAddStatementsSocialMediaAccount
+        profile={profile}
+        onClose={onClose}
+      />
+    );
 
-  it('passes props and updates type', () => {
-    render(<UserPageIdentityAddStatementsSocialMediaAccount profile={profile} onClose={onClose} />);
-
-    expect(headerProps.onClose).toBe(onClose);
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.X);
-    expect(typeof itemsProps.setSocialType).toBe('function');
+    expect(typeof itemsProps.setSocialType).toBe("function");
 
     expect(formProps.group).toBe(STATEMENT_GROUP.SOCIAL_MEDIA_ACCOUNT);
     expect(formProps.activeType).toBe(STATEMENT_TYPE.X);

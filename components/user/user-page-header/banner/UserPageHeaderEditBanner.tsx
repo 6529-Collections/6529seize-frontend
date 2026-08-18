@@ -33,17 +33,21 @@ export default function UserPageHeaderEditBanner({
   profile,
   defaultBanner1,
   defaultBanner2,
+  embedded = false,
   isOpen = true,
   onAfterLeave,
   onBack,
+  onBusyChange,
   onClose,
 }: {
   readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
+  readonly embedded?: boolean;
   readonly isOpen?: boolean;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly onBack?: (() => void) | undefined;
+  readonly onBusyChange?: ((isBusy: boolean) => void) | undefined;
   readonly onClose: () => void;
 }) {
   const isSavingRef = useRef(false);
@@ -74,6 +78,7 @@ export default function UserPageHeaderEditBanner({
       ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx800)
       : null
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (bannerFile) {
@@ -89,8 +94,6 @@ export default function UserPageHeaderEditBanner({
     );
     return undefined;
   }, [bannerFile, initialBannerImageUrl]);
-
-  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const profileHasImage = Boolean(initialBannerImageUrl);
   const hasGradientChanges =
@@ -114,7 +117,6 @@ export default function UserPageHeaderEditBanner({
         type: "success",
       });
       onProfileEdit({ profile: updatedProfile, previousProfile: null });
-      onClose();
     },
     onError: (error: unknown) => {
       setToast({
@@ -126,15 +128,17 @@ export default function UserPageHeaderEditBanner({
     },
   });
 
-  const isSaving = isUploading || updateUser.isPending;
-  isSavingRef.current = isSaving;
+  const setSavingState = (nextIsSaving: boolean) => {
+    isSavingRef.current = nextIsSaving;
+    setIsSaving(nextIsSaving);
+    onBusyChange?.(nextIsSaving);
+  };
 
   const uploadBannerImage = async (): Promise<string | null> => {
     if (!bannerFile) {
       return initialBannerImageUrl;
     }
     try {
-      setIsUploading(true);
       const uploaded = await multiPartUpload({
         file: bannerFile,
         path: "drop",
@@ -147,8 +151,6 @@ export default function UserPageHeaderEditBanner({
           : "Failed to upload banner image";
       setToast({ message, type: "error" });
       return null;
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -167,39 +169,98 @@ export default function UserPageHeaderEditBanner({
       return;
     }
 
-    let banner1Value = bgColor1;
-    let banner2Value: string | undefined = bgColor2;
-
-    if (editMode === "image") {
-      if (!bannerFile && !initialBannerImageUrl) {
-        setToast({
-          message: "Select an image to use as your banner.",
-          type: "error",
-        });
-        return;
-      }
-
-      banner2Value = undefined;
-      const uploadedUrl = await uploadBannerImage();
-      if (!uploadedUrl) {
-        return;
-      }
-      banner1Value = uploadedUrl;
+    if (editMode === "image" && !bannerFile && !initialBannerImageUrl) {
+      setToast({
+        message: getUserProfileHeaderMessage(
+          "user.profileHeader.edit.bannerImageRequired"
+        ),
+        type: "error",
+      });
+      return;
     }
 
-    const body: ApiCreateOrUpdateProfileRequest = {
-      handle: profile.handle,
-      classification: profile.classification,
-      banner_1: banner1Value,
-      banner_2: banner2Value,
-    };
+    setSavingState(true);
+    try {
+      let banner1Value = bgColor1;
+      let banner2Value: string | undefined = bgColor2;
 
-    if (profile.pfp) {
-      body.pfp_url = profile.pfp;
+      if (editMode === "image") {
+        banner2Value = undefined;
+        const uploadedUrl = await uploadBannerImage();
+        if (!uploadedUrl) {
+          return;
+        }
+        banner1Value = uploadedUrl;
+      }
+
+      const body: ApiCreateOrUpdateProfileRequest = {
+        handle: profile.handle,
+        classification: profile.classification,
+        banner_1: banner1Value,
+        banner_2: banner2Value,
+      };
+
+      if (profile.pfp) {
+        body.pfp_url = profile.pfp;
+      }
+
+      await updateUser.mutateAsync(body);
+    } finally {
+      setSavingState(false);
     }
-
-    await updateUser.mutateAsync(body);
+    onClose();
   };
+
+  const form = (
+    <form
+      onSubmit={onSubmit}
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+    >
+      <CommonTabs<BannerEditMode>
+        items={bannerTabs}
+        activeItem={editMode}
+        setSelected={setEditMode}
+        filterLabel="Banner editor mode"
+        fill={false}
+      />
+
+      {editMode === "gradient" ? (
+        <UserSettingsBackground
+          bgColor1={bgColor1}
+          bgColor2={bgColor2}
+          setBgColor1={setBgColor1}
+          setBgColor2={setBgColor2}
+        />
+      ) : (
+        <UserSettingsBannerImageInput
+          imageToShow={bannerPreviewUrl}
+          setFile={setBannerFile}
+        />
+      )}
+
+      <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
+        <UserSettingsSave
+          loading={isSaving}
+          disabled={!haveChanges}
+          responsiveWidthClassName="md:tw-w-auto"
+        />
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={isSaving}
+          onClick={handleClose}
+          fullWidth
+          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (embedded) {
+    return form;
+  }
 
   return (
     <MobileWrapperDialog
@@ -215,55 +276,14 @@ export default function UserPageHeaderEditBanner({
       headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
       headerActions={
         <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
-          Choose a gradient or upload an image for your profile cover.
+          {getUserProfileHeaderMessage(
+            "user.profileHeader.edit.bannerDescription"
+          )}
         </p>
       }
       dismissible={!isSaving}
     >
-      <form
-        onSubmit={onSubmit}
-        className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
-      >
-        <CommonTabs<BannerEditMode>
-          items={bannerTabs}
-          activeItem={editMode}
-          setSelected={setEditMode}
-          filterLabel="Banner editor mode"
-          fill={false}
-        />
-
-        {editMode === "gradient" ? (
-          <UserSettingsBackground
-            bgColor1={bgColor1}
-            bgColor2={bgColor2}
-            setBgColor1={setBgColor1}
-            setBgColor2={setBgColor2}
-          />
-        ) : (
-          <UserSettingsBannerImageInput
-            imageToShow={bannerPreviewUrl}
-            setFile={setBannerFile}
-          />
-        )}
-
-        <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
-          <UserSettingsSave
-            loading={isSaving}
-            disabled={!haveChanges}
-            responsiveWidthClassName="md:tw-w-auto"
-          />
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={isSaving}
-            onClick={handleClose}
-            fullWidth
-            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
+      {form}
     </MobileWrapperDialog>
   );
 }
