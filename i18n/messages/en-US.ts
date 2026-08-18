@@ -844,6 +844,14 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     addVerificationDialogTitle: "Add verification post",
     backToTypes: "Back to statement types",
     selectPlatform: "Choose a platform",
+    otherPlatform: "Other",
+    customLinkLabel: "Display name",
+    customLinkLabelPlaceholder: "For example, AOTM",
+    customLinkUrl: "Art link URL",
+    customLinkUrlPlaceholder: "https://example.art/artist",
+    customLinkHint:
+      "Use a secure HTTPS link. The display name and link will be public.",
+    externalArtLink: "External art link",
     save: "Save",
     cancel: "Cancel",
     optional: "All statements are optional.",
@@ -853,6 +861,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     communityRates: "The community will rate statement accuracy.",
     addSuccess: "ID statement added.",
     addErrorTitle: "Couldn’t add this ID statement.",
+    addErrorDescription: "Check the link or statement details and try again.",
     deleteTitle: "Delete statement?",
     deleteDescription:
       "This removes the statement from the profile. You can’t undo this action.",

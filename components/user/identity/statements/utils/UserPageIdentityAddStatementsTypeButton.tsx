@@ -6,10 +6,12 @@ import clsx from "clsx";
 
 export default function UserPageIdentityAddStatementsTypeButton({
   statementType,
+  label,
   isActive,
   onClick,
 }: {
   readonly statementType: STATEMENT_TYPE;
+  readonly label?: string;
   readonly isActive: boolean;
   readonly onClick: () => void;
 }) {
@@ -29,7 +31,7 @@ export default function UserPageIdentityAddStatementsTypeButton({
         <SocialStatementIcon statementType={statementType} />
       </span>
       <span className="tw-min-w-0 tw-truncate">
-        {STATEMENT_META[statementType].title}
+        {label ?? STATEMENT_META[statementType].title}
       </span>
     </button>
   );

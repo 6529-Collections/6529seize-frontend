@@ -45,7 +45,37 @@ describe("UserPageIdentityAddStatementsForm", () => {
     fireEvent.submit(form);
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutate).toHaveBeenCalledWith(
-      "abc",
+      { comment: null, value: "abc" },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+
+  it("submits a custom NFT art link with its display name", async () => {
+    render(
+      <UserPageIdentityAddStatementsForm
+        profile={profile}
+        activeType={STATEMENT_TYPE.LINK}
+        group={STATEMENT_GROUP.NFT_ACCOUNTS}
+        onClose={jest.fn()}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.change(screen.getByLabelText("Display name"), {
+      target: { value: "  AOTM  " },
+    });
+    const urlInput = screen.getByLabelText("Art link URL");
+    fireEvent.change(urlInput, {
+      target: { value: "https://example.art/artist" },
+    });
+    fireEvent.submit(urlInput.closest("form") as HTMLFormElement);
+
+    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
+    expect(mutate).toHaveBeenCalledWith(
+      {
+        comment: "AOTM",
+        value: "https://example.art/artist",
+      },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
   });

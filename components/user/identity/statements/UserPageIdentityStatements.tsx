@@ -64,9 +64,13 @@ export default function UserPageIdentityStatements({
       contacts: sortedStatements.filter(
         (s) => s.statement_group === STATEMENT_GROUP.CONTACT
       ),
-      nftAccounts: sortedStatements.filter(
-        (s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS
-      ),
+      nftAccounts: sortedStatements
+        .filter((s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS)
+        .sort((first, second) => {
+          const firstIsCustom = first.statement_type === "LINK";
+          const secondIsCustom = second.statement_type === "LINK";
+          return Number(firstIsCustom) - Number(secondIsCustom);
+        }),
       socialMediaVerificationPosts: sortedStatements.filter(
         (s) =>
           s.statement_group === STATEMENT_GROUP.SOCIAL_MEDIA_VERIFICATION_POST

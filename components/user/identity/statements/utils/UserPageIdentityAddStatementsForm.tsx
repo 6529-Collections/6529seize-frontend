@@ -8,17 +8,46 @@ import type {
   CicStatement,
 } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
-import { STATEMENT_META } from "@/helpers/Types";
+import {
+  STATEMENT_GROUP,
+  STATEMENT_META,
+  STATEMENT_TYPE,
+} from "@/helpers/Types";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import UserPageIdentityAddStatementsCustomLinkFields from "../add/nft-accounts/UserPageIdentityAddStatementsCustomLinkFields";
+
+interface StatementFormValue {
+  readonly comment: string | null;
+  readonly value: string;
+}
 
 export default function UserPageIdentityAddStatementsForm({
+  activeType,
+  group,
+  ...props
+}: {
+  readonly profile: ApiIdentity;
+  readonly activeType: STATEMENT_TYPE;
+  readonly group: STATEMENT_GROUP;
+  readonly onClose: () => void;
+}) {
+  return (
+    <UserPageIdentityAddStatementsFormContent
+      key={`${group}-${activeType}`}
+      activeType={activeType}
+      group={group}
+      {...props}
+    />
+  );
+}
+
+function UserPageIdentityAddStatementsFormContent({
   profile,
   activeType,
   group,
@@ -35,20 +64,20 @@ export default function UserPageIdentityAddStatementsForm({
   const [value, setValue] = useState<string>(
     STATEMENT_META[activeType].inputInitialValue
   );
-
-  useEffect(() => {
-    setValue(STATEMENT_META[activeType].inputInitialValue);
-  }, [activeType]);
+  const [comment, setComment] = useState("");
+  const isCustomArtLink =
+    group === STATEMENT_GROUP.NFT_ACCOUNTS &&
+    activeType === STATEMENT_TYPE.LINK;
 
   const addStatementMutation = useMutation({
-    mutationFn: (statement: string) =>
+    mutationFn: (statement: StatementFormValue) =>
       commonApiPost<ApiCreateOrUpdateProfileCicStatement, CicStatement>({
         endpoint: `profiles/${profile.query}/cic/statements`,
         body: {
           statement_group: group,
           statement_type: activeType,
-          statement_comment: null,
-          statement_value: statement,
+          statement_comment: statement.comment,
+          statement_value: statement.value,
         },
       }),
     onSuccess: () => {
@@ -66,7 +95,7 @@ export default function UserPageIdentityAddStatementsForm({
         title: t(locale, "user.profile.identity.statements.addErrorTitle"),
         description: t(
           locale,
-          "user.profile.identity.statements.primaryErrorDescription"
+          "user.profile.identity.statements.addErrorDescription"
         ),
         details: getToastErrorDetails(error),
       });
@@ -75,24 +104,40 @@ export default function UserPageIdentityAddStatementsForm({
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!value) return;
+    if (!value || (isCustomArtLink && !comment.trim())) return;
     const { success } = await requestAuth();
     if (!success) return;
-    addStatementMutation.mutate(value, {
-      onSuccess: () => {
-        setValue("");
-        onClose();
+    addStatementMutation.mutate(
+      {
+        comment: isCustomArtLink ? comment.trim() : null,
+        value,
       },
-    });
+      {
+        onSuccess: () => {
+          setValue("");
+          setComment("");
+          onClose();
+        },
+      }
+    );
   };
   return (
     <div className="tw-mt-4">
       <form onSubmit={onSubmit}>
-        <UserPageIdentityAddStatementsInput
-          activeType={activeType}
-          value={value}
-          onChange={setValue}
-        />
+        {isCustomArtLink ? (
+          <UserPageIdentityAddStatementsCustomLinkFields
+            label={comment}
+            url={value}
+            onLabelChange={setComment}
+            onUrlChange={setValue}
+          />
+        ) : (
+          <UserPageIdentityAddStatementsInput
+            activeType={activeType}
+            value={value}
+            onChange={setValue}
+          />
+        )}
 
         <div className="tw-mt-8">
           <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">

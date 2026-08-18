@@ -142,4 +142,76 @@ describe("UserPageIdentityStatementsStatement", () => {
     );
     expect(screen.getByRole("link")).toHaveAttribute("href", "https://x.com");
   });
+
+  it("does not open an unsafe value from an older known statement", () => {
+    render(
+      <UserPageIdentityStatementsStatement
+        statement={
+          {
+            statement_group: "NFT_ACCOUNTS",
+            statement_type: STATEMENT_TYPE.OPENSEA,
+            statement_value: "javascript:alert(1)",
+          } as any
+        }
+        profile={{} as any}
+        canEdit={false}
+      />
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByText("javascript:alert(1)")).toBeInTheDocument();
+  });
+
+  it("shows a custom art link label and destination hostname", () => {
+    render(
+      <UserPageIdentityStatementsStatement
+        statement={
+          {
+            id: "custom-link",
+            statement_group: "NFT_ACCOUNTS",
+            statement_type: STATEMENT_TYPE.LINK,
+            statement_comment: "AOTM",
+            statement_value: "https://example.art/artist?ref=profile",
+          } as any
+        }
+        profile={{} as any}
+        canEdit={false}
+      />
+    );
+
+    expect(screen.getByText("AOTM")).toBeInTheDocument();
+    expect(screen.getByText("example.art")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "https://example.art/artist?ref=profile"
+    );
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "rel",
+      "noopener noreferrer"
+    );
+  });
+
+  it("renders an unknown secure NFT platform without crashing", () => {
+    render(
+      <UserPageIdentityStatementsStatement
+        statement={
+          {
+            id: "future-link",
+            statement_group: "NFT_ACCOUNTS",
+            statement_type: "FUTURE_PLATFORM",
+            statement_comment: null,
+            statement_value: "https://future.example/artist",
+          } as any
+        }
+        profile={{} as any}
+        canEdit={false}
+      />
+    );
+
+    expect(screen.getByText("External art link")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "https://future.example/artist"
+    );
+  });
 });
