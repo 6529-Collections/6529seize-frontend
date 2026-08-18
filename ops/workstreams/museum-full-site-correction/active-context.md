@@ -256,6 +256,20 @@ this workstream.
   overflow of the Meme Lab activity table. The active owner-approved serialized
   fallback explicitly covered this non-Museum baseline; no Museum finding was
   waived.
+- Waiver traceability: the repository owner authorized a single-release manual
+  fallback under the `STAGING: OFF` / `PRODUCTION: OFF`, `changeable: true`
+  Release Bus control recorded for exact release
+  `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`. Its scope was limited to the
+  unrelated staging media-pack observations on `/the-memes/mint` and the Meme
+  Lab activity table; it did not waive any Museum test or product finding. The
+  authorization expired when automatic Production E2E
+  [`32187596393`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32187596393)
+  succeeded. Retained fallback evidence is staging deploy
+  [`32183553695`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32183553695)
+  and staging E2E
+  [`32184698162`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32184698162);
+  the governing procedure is `ops/skills/deploy-6529/SKILL.md`, “Manual fallback
+  while the target lane is OFF and changeable.”
 - Production deploy `32186095060` succeeded on exact main after immutable
   artifact builder `32186126216` and independent artifact selection and
   verification passed. Three uncached `/api/version` reads returned exact main
