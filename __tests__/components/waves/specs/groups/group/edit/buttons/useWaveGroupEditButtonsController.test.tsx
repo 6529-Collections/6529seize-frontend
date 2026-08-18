@@ -208,6 +208,37 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
     );
   });
 
+  it("treats a disabled Chat scope as inactive during an edit", async () => {
+    const { result } = renderHook(() =>
+      useWaveGroupEditButtonsController({
+        haveGroup: false,
+        wave: buildWave(false),
+        type: WaveGroupType.CHAT,
+        connectedProfile,
+        requestAuth,
+        setToast,
+        onWaveCreated,
+      })
+    );
+
+    await act(async () => {
+      await result.current.updateWave({
+        visibility: { scope: { group_id: "view-group" } },
+        participation: { scope: { group_id: null } },
+        voting: { scope: { group_id: null } },
+        chat: { enabled: false, scope: { group_id: "inactive-chat" } },
+        wave: { type: "CHAT", admin_group: null },
+      } as never);
+    });
+
+    expect(mockValidateWaveGroups).toHaveBeenCalledWith({
+      visibility_group_id: "view-group",
+    });
+    expect(mockCommonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: "waves/wave-1" })
+    );
+  });
+
   it("includes identity by recreating the existing group", async () => {
     mockCommonApiFetch.mockImplementation(
       ({ endpoint }: { endpoint: string }) => {

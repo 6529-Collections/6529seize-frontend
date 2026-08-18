@@ -52,6 +52,17 @@ const VALIDATION_ROLE_BY_GROUP_TYPE: Partial<
   [WaveGroupType.ADMIN]: ApiWaveGroupRole.Admin,
 };
 
+const getValidationRoles = (
+  type: WaveGroupType
+): readonly ApiWaveGroupRole[] | undefined => {
+  if (type === WaveGroupType.VIEW) {
+    return undefined;
+  }
+  const role = VALIDATION_ROLE_BY_GROUP_TYPE[type];
+  // Validate every active role if a future group type is not mapped yet.
+  return role !== undefined ? [role] : undefined;
+};
+
 const normalizeIdentity = (identity: string): string =>
   identity.trim().toLowerCase();
 
@@ -616,12 +627,7 @@ export const useWaveGroupEditButtonsController = ({
       if (body.visibility.scope.group_id !== null) {
         try {
           const validation = await validateWaveGroups(
-            getWaveUpdateGroupValidationRequest(
-              body,
-              type === WaveGroupType.VIEW
-                ? undefined
-                : [VALIDATION_ROLE_BY_GROUP_TYPE[type]!]
-            )
+            getWaveUpdateGroupValidationRequest(body, getValidationRoles(type))
           );
           if (!validation.valid) {
             setToast({
