@@ -316,6 +316,36 @@ export function useWaveConfig() {
     }));
   };
 
+  const validateCurrentGroups = async (requestId: number): Promise<boolean> => {
+    try {
+      // An explicit refetch always goes to the server, even while the
+      // background query data is still within its stale-time window.
+      const validationResult = await groupValidationQuery.refetch();
+      if (navigationRequestId.current !== requestId) {
+        return false;
+      }
+      if (validationResult.isError || !validationResult.data?.valid) {
+        const hasActionableRoleErrors =
+          (validationResult.data?.invalid_roles.length ?? 0) > 0;
+        setGroupValidationErrorVisible(
+          validationResult.isError ||
+            !validationResult.data ||
+            !hasActionableRoleErrors
+        );
+        setErrorFocusRequest((count) => count + 1);
+        return false;
+      }
+      return true;
+    } catch {
+      if (navigationRequestId.current !== requestId) {
+        return false;
+      }
+      setGroupValidationErrorVisible(true);
+      setErrorFocusRequest((count) => count + 1);
+      return false;
+    }
+  };
+
   // Step navigation with validation
   const onStep = async ({
     step: newStep,
@@ -339,31 +369,8 @@ export function useWaveConfig() {
         step === CreateWaveStep.GROUPS &&
         effectiveConfig.groups.canView !== null
       ) {
-        let validationResult;
-        try {
-          // An explicit refetch always goes to the server, even while the
-          // background query data is still within its stale-time window.
-          validationResult = await groupValidationQuery.refetch();
-        } catch {
-          if (navigationRequestId.current !== requestId) {
-            return;
-          }
-          setGroupValidationErrorVisible(true);
-          setErrorFocusRequest((count) => count + 1);
-          return;
-        }
-        if (navigationRequestId.current !== requestId) {
-          return;
-        }
-        if (validationResult.isError || !validationResult.data?.valid) {
-          const hasActionableRoleErrors =
-            (validationResult.data?.invalid_roles.length ?? 0) > 0;
-          setGroupValidationErrorVisible(
-            validationResult.isError ||
-              !validationResult.data ||
-              !hasActionableRoleErrors
-          );
-          setErrorFocusRequest((count) => count + 1);
+        const groupsAreValid = await validateCurrentGroups(requestId);
+        if (!groupsAreValid) {
           return;
         }
       }
