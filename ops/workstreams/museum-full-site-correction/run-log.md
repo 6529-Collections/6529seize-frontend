@@ -405,3 +405,39 @@ comes first; acquisition and accession follow.` before the next hosted lane
   Replaced the conditional expression with explicit branches and string
   conversion. The focused 16 tests, changed lint, changed typecheck, formatting,
   and diff checks pass; there is no runtime or visual change.
+
+## 2026-08-18T21:36:00Z - Acquisitions and Artists release live-qualified
+
+- PR #3780 reached exact signed head
+  `f2f59c1962846598fb2c1e939353f103a0742e35`. App PR CI
+  `32181363168` passed quality, production build, smoke, desktop Museum, mobile
+  Museum, and installed-app checks; all external review, policy, and security
+  lanes were green. The PR merged as exact main
+  `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`.
+- Composed exact main into staging as
+  `80503176dacc334ba8132681486a138d660832c9`. Staging deployment
+  `32183553695` passed artifact build, verification, deployment, and HTTP
+  version checks. A direct desktop and 390-pixel mobile Museum sweep passed.
+- Automatic staging E2E `32184698162` ran 17 read-only packs. The core pack and
+  all selected Museum packs passed, as did publication provenance and immutable
+  evidence validation. The aggregate failed solely in the unrelated media pack
+  on `/the-memes/mint`; a direct rerun proved that failure transient and then
+  exposed an existing mobile overflow in the Meme Lab activity table. The
+  release proceeded under the recorded owner-approved temporary E2E waiver
+  because the failure was outside the Museum diff and all scoped acceptance was
+  green.
+- Production deployment `32186095060` passed exact production authority,
+  immutable artifact selection and verification, Elastic Beanstalk readiness,
+  HTTP version verification, announced-version publication, terminal status,
+  and durable release-report upload. Exact artifact build `32186126216` passed
+  in 10m03s.
+- Production returned exact main on three uncached `/api/version` reads with
+  `stale:false`. Direct live Museum acceptance passed 2/2 viewport projects in
+  20.2 seconds, including all hub routes, 21 artist stages at 4:3, three
+  acquisition stages at the intended responsive ratio, no dead links, and no
+  horizontal overflow.
+- Automatic Production E2E `32187596393` passed the full production-safe
+  read-only pack set, Museum selection, publication provenance, immutable
+  evidence validation, authority evidence, and the isolated evidence verifier.
+
+The exact production release is qualified and the follow-up is closed.
