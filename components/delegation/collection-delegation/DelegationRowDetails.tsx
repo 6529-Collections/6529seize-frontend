@@ -1,5 +1,6 @@
 "use client";
 
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -65,11 +66,7 @@ export function DelegationRowDetails(
                 ></FontAwesomeIcon>
                 <Tooltip
                   id={`consolidation-missing-${label}-${w.wallet}`}
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
+                  style={TOOLTIP_STYLES}
                 >
                   {t(locale, "delegation.collection.row.consolidationMissing", {
                     label,

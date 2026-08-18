@@ -43,7 +43,7 @@ const ARTICLE_CONTENT_CLASS = [
 ].join(" ");
 
 const ARTICLE_SURFACE_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/40 tw-p-4 sm:tw-p-7";
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900/70 tw-p-4 sm:tw-p-7";
 
 const WALLET_ARCHITECTURE_CLASS = [
   "tw-max-w-5xl tw-pb-12",
@@ -223,14 +223,11 @@ function DelegationArticleView({
       <div className="tw-w-full">
         {isFaqChildArticle ? (
           <header className="tw-mb-8 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-6">
-            <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-primary-300">
-                Delegation FAQ
-              </p>
+            <div className="tw-flex tw-flex-col tw-items-start tw-gap-3">
               {article && (
                 <Link
                   href="/delegation/delegation-faq"
-                  className="tw-inline-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto sm:tw-justify-start"
+                  className="tw-inline-flex tw-min-h-10 tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
@@ -239,6 +236,9 @@ function DelegationArticleView({
                   All FAQ topics
                 </Link>
               )}
+              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-primary-300">
+                Delegation FAQ
+              </p>
             </div>
             {pageTitle && (
               <h1 className="tw-mb-3 tw-mt-4 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-iron-50 sm:tw-text-3xl sm:tw-leading-9">
@@ -321,7 +321,7 @@ function DelegationArticleView({
             {previousArticle ? (
               <Link
                 href={previousArticle.href}
-                className={ARTICLE_PAGER_LINK_CLASS}
+                className={`${ARTICLE_PAGER_LINK_CLASS} tw-w-fit tw-max-w-full tw-justify-self-start`}
               >
                 Previous: {previousArticle.title}
               </Link>
@@ -331,7 +331,7 @@ function DelegationArticleView({
             {nextArticle ? (
               <Link
                 href={nextArticle.href}
-                className={`${ARTICLE_PAGER_LINK_CLASS} sm:tw-justify-end sm:tw-text-right`}
+                className={`${ARTICLE_PAGER_LINK_CLASS} tw-w-fit tw-max-w-full tw-justify-self-end sm:tw-justify-end sm:tw-text-right`}
               >
                 Next: {nextArticle.title}
               </Link>
