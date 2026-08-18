@@ -57,7 +57,7 @@ export default function GroupCreateWallets({
   const myWalletKeys = useMemo(
     () =>
       new Set(
-        connectedProfile?.wallets.map((wallet) =>
+        connectedProfile?.wallets?.map((wallet) =>
           wallet.wallet.toLowerCase()
         ) ?? []
       ),

@@ -50,6 +50,7 @@ describe("GroupCreateWallets", () => {
     connectedProfile: any = null
   ) => {
     const setWallets = jest.fn();
+    let setIncludeMe: ((value: boolean) => void) | undefined;
 
     const WalletHarness = () => {
       const initialWallets =
@@ -62,13 +63,17 @@ describe("GroupCreateWallets", () => {
         emmaWallets: null,
         selectedIdentities: [],
       });
+      const [iAmIncluded, setIAmIncluded] = useState(
+        props.iAmIncluded ?? false
+      );
+      setIncludeMe = setIAmIncluded;
 
       return (
         <GroupCreateWallets
           type={props.type ?? GroupCreateWalletsType.INCLUDE}
           wallets={wallets}
           walletsLimit={props.walletsLimit ?? 1}
-          iAmIncluded={props.iAmIncluded ?? false}
+          iAmIncluded={iAmIncluded}
           sources={sources}
           setSources={setSources}
           setWallets={(nextWallets) => {
@@ -84,7 +89,11 @@ describe("GroupCreateWallets", () => {
         <WalletHarness />
       </AuthContext.Provider>
     );
-    return { ...result, setWallets };
+    return {
+      ...result,
+      setWallets,
+      setIAmIncluded: (value: boolean) => setIncludeMe?.(value),
+    };
   };
 
   it("shows over limit warning", () => {
@@ -133,6 +142,24 @@ describe("GroupCreateWallets", () => {
     );
 
     act(() => uploadProps.setWallets(["0xOther"]));
+    await waitFor(() =>
+      expect(setWallets).toHaveBeenLastCalledWith(["0xOther", "0xMine"])
+    );
+  });
+
+  it("keeps the primary wallet when an upload changes after Include me is enabled", async () => {
+    const connectedProfile = {
+      primary_wallet: "0xMine",
+      wallets: [{ wallet: "0xMine" }],
+    };
+    const { setIAmIncluded, setWallets } = renderComp(
+      { wallets: null, walletsLimit: 10000 },
+      connectedProfile
+    );
+
+    act(() => setIAmIncluded(true));
+    act(() => uploadProps.setWallets(["0xOther"]));
+
     await waitFor(() =>
       expect(setWallets).toHaveBeenLastCalledWith(["0xOther", "0xMine"])
     );

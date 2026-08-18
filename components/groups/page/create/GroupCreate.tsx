@@ -149,7 +149,8 @@ function GroupCreateForm({
     );
 
   const connectedWalletKeys = new Set(
-    connectedProfile?.wallets.map((wallet) => wallet.wallet.toLowerCase()) ?? []
+    connectedProfile?.wallets?.map((wallet) => wallet.wallet.toLowerCase()) ??
+      []
   );
   const iAmIncluded =
     groupConfig.group.identity_addresses?.some((address) =>

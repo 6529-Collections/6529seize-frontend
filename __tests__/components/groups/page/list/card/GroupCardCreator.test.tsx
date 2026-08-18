@@ -30,9 +30,7 @@ describe("GroupCardCreator", () => {
     render(<GroupCardCreator userPlaceholder="u" />);
 
     expect(screen.queryByRole("img")).toBeNull();
-    expect(screen.getByRole("link", { name: "u" })).toHaveAttribute(
-      "href",
-      "u"
-    );
+    expect(screen.queryByRole("link", { name: "u" })).toBeNull();
+    expect(screen.getByText("u")).toBeInTheDocument();
   });
 });
