@@ -5,6 +5,7 @@ import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
 import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
+import { useLatestDropTransitionReady } from "./useLatestDropTransitionReady";
 
 export default function LatestDropSection() {
   const { nft, isFetching, isDropComplete, isStatusLoading } =
@@ -18,13 +19,17 @@ export default function LatestDropSection() {
 
   const isNextMintReady = isSettingsLoaded && (!waveId || !isNextMintFetching);
   const isDecisionReady = !isFetching && !isStatusLoading && isNextMintReady;
+  const isLatestDropTransitionReady = useLatestDropTransitionReady({
+    isDropComplete,
+    mintNumber: nft?.id,
+  });
 
   if (!isDecisionReady) {
     return <NowMintingSection nft={undefined} isFetching />;
   }
 
   const shouldShowNextMint = shouldShowNextMintInLatestDrop({
-    isMintEnded: isDropComplete,
+    isMintEnded: isLatestDropTransitionReady,
     nextMintExists: !!nextMint,
   });
 
