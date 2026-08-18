@@ -65,11 +65,14 @@ describe("MuseumProposalImage", () => {
         sourceByteSize={16_871_807}
         alt="Lorenzo Meloni exhibition photograph"
         requireIntentForLargeSource={false}
+        containerClassName="tw-h-full tw-w-full"
       />
     );
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    expect(screen.getByRole("img")).toHaveAttribute("src", media.src);
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute("src", media.src);
+    expect(image.parentElement).toHaveClass("tw-h-full", "tw-w-full");
   });
 
   it("delivers a large governed source through a responsive runtime derivative", () => {
