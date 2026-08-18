@@ -3,6 +3,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { buildWaveRules } from "@/helpers/waves/wave-rules.helpers";
+import { getScopeRuleValue } from "@/helpers/waves/wave-rules.shared";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
 const createConfig = (): CreateWaveConfig => ({
@@ -92,7 +93,7 @@ describe("wave-rules.helpers", () => {
       expect.arrayContaining([
         ["Who can drop", "Artists"],
         ["Chat status", "Enabled"],
-        ["Chat access", "Anyone when enabled"],
+        ["Chat access", "Anyone"],
         ["Required metadata", "artist (Text)"],
         ["Negative voting", "Blocked"],
         ["Approval threshold", "25 Rep"],
@@ -323,7 +324,7 @@ describe("wave-rules.helpers", () => {
         }),
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone when enabled",
+          value: "Anyone",
         }),
       ])
     );
@@ -380,7 +381,7 @@ describe("wave-rules.helpers", () => {
         }),
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone when enabled",
+          value: "Anyone",
         }),
       ])
     );
@@ -442,7 +443,7 @@ describe("wave-rules.helpers", () => {
       expect.arrayContaining([
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone when enabled",
+          value: "Anyone",
         }),
         expect.objectContaining({ label: "Links", value: "Disabled" }),
         expect.objectContaining({ label: "Slow mode", value: "2m" }),
@@ -505,5 +506,75 @@ describe("wave-rules.helpers", () => {
         expect.objectContaining({ label: "Slow mode", value: "30s" }),
       ])
     );
+  });
+
+  it("keeps hidden scope groups private and non-interactive", () => {
+    expect(
+      getScopeRuleValue({
+        scope: { group: { is_hidden: true } },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Private group",
+      valueHref: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
+  it("keeps direct-message scope groups private and non-interactive", () => {
+    expect(
+      getScopeRuleValue({
+        scope: {
+          group: {
+            id: "dm-1",
+            name: "Private conversation",
+            is_hidden: false,
+            is_direct_message: true,
+          },
+        },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Private group",
+      valueHref: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
+  it("does not expose or link an incomplete visible group", () => {
+    expect(
+      getScopeRuleValue({
+        scope: {
+          group: {
+            id: "stale-group-id",
+            is_hidden: false,
+          },
+        },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Group unavailable",
+      valueHref: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
+  it("links visible scope groups to criteria and members", () => {
+    expect(
+      getScopeRuleValue({
+        scope: {
+          group: {
+            id: "artists & curators",
+            name: "Artists and curators",
+            is_hidden: false,
+          },
+        },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Artists and curators",
+      valueHref: "/network?page=1&group=artists%20%26%20curators",
+      valueLinkLabel: "Inspect Artists and curators group criteria and members",
+    });
   });
 });

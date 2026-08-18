@@ -4,6 +4,8 @@ import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { Page } from "@/helpers/Types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +28,7 @@ import {
 } from "@heroicons/react/24/outline";
 import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+import CommunityMembersGroupDetails from "./CommunityMembersGroupDetails";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -91,6 +94,7 @@ function NetworkHeaderActionButton({
 
 export default function CommunityMembers() {
   useSetTitle("Network");
+  const locale = useBrowserLocale();
 
   const defaultSortBy = ApiCommunityMembersSortOption.Level;
   const defaultSortDirection = SortDirection.DESC;
@@ -101,7 +105,7 @@ export default function CommunityMembers() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { activeGroupId } = useActiveGroup();
+  const { activeGroupId, setActiveGroupId } = useActiveGroup();
 
   const convertSortBy = useCallback(
     (sort: string | null): ApiCommunityMembersSortOption => {
@@ -403,6 +407,17 @@ export default function CommunityMembers() {
           </div>
         </div>
       </div>
+      {activeGroupId && (
+        <CommunityMembersGroupDetails
+          groupId={activeGroupId}
+          onClose={() => setActiveGroupId(null)}
+        />
+      )}
+      {activeGroupId && (
+        <h2 className="tw-mb-0 tw-mt-5 !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-50">
+          {t(locale, "network.groupInspection.membersTitle")}
+        </h2>
+      )}
       <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
         {membersContent}
       </div>

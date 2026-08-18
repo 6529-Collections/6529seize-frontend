@@ -1,0 +1,55 @@
+import WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
+import type { WaveRules } from "@/helpers/waves/wave-rules.helpers";
+import { render, screen } from "@testing-library/react";
+
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ children, href, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+const rules: WaveRules = {
+  automatic: [
+    {
+      id: "access",
+      title: "Access",
+      rows: [
+        {
+          id: "chat-access",
+          label: "Chat access",
+          value: "Artists",
+          valueHref: "/network?page=1&group=artists",
+          valueLinkLabel: "Inspect Artists group criteria and members",
+        },
+        {
+          id: "admin",
+          label: "Who can admin",
+          value: "Private group",
+        },
+      ],
+    },
+  ],
+  custom: {
+    binding: null,
+    display: null,
+    signatureRequired: false,
+  },
+};
+
+describe("WaveRulesPanel", () => {
+  it("renders visible groups as accessible links and private groups as text", () => {
+    render(<WaveRulesPanel rules={rules} showCustomRules={false} />);
+
+    const link = screen.getByRole("link", {
+      name: "Inspect Artists group criteria and members",
+    });
+    expect(link).toHaveAttribute("href", "/network?page=1&group=artists");
+    expect(link).toHaveClass("tw-min-h-11");
+    expect(link).toHaveClass("desktop-hover:hover:tw-text-primary-300");
+    expect(screen.getByText("Private group")).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+});

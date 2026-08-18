@@ -43,6 +43,9 @@ jest.mock(
 jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
   <div data-testid="groups-sidebar" />
 ));
+jest.mock("@/components/community/CommunityMembersGroupDetails", () => () => (
+  <div data-testid="group-details" />
+));
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () =>

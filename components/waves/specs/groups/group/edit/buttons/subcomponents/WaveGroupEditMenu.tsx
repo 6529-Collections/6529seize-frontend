@@ -123,7 +123,7 @@ export default function WaveGroupEditMenu({
   return (
     <div className="tw-relative">
       <CompactMenu
-        triggerClassName="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
+        triggerClassName="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out sm:tw-size-7"
         trigger={<WaveGroupEditMenuTrigger label={GROUP_OPTIONS_LABEL} />}
         aria-label={GROUP_OPTIONS_LABEL}
         items={menuItems}
