@@ -15,6 +15,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import type * as AuthUtilsModule from "@/services/auth/auth.utils";
 import type * as SessionV2Module from "@/services/auth/session-v2.utils";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { publicEnv } from "@/config/env";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
@@ -31,6 +32,7 @@ const TEST_SESSION_VALUE = "session-access-token";
 const TEST_SECOND_SESSION_VALUE = "session-access-token-2";
 const TEST_REJECTED_SESSION_VALUE = "rejected-session-value";
 const TEST_REPLACEMENT_SESSION_VALUE = "replacement-session-value";
+const ORIGINAL_USE_DEV_AUTH = publicEnv.USE_DEV_AUTH;
 
 type ReactQueryWrapperContextValue = React.ContextType<
   typeof ReactQueryWrapperContext
@@ -183,9 +185,7 @@ jest.mock("@/services/auth/immediate-validation.utils", () => ({
 
 jest.mock("@/services/analytics/productImpactTelemetry", () => ({
   resetAuthSessionRefreshProductImpactDedupe: (
-    ...args: Parameters<
-      typeof mockResetAuthSessionRefreshProductImpactDedupe
-    >
+    ...args: Parameters<typeof mockResetAuthSessionRefreshProductImpactDedupe>
   ) => mockResetAuthSessionRefreshProductImpactDedupe(...args),
   trackAuthSessionRefreshProductImpact: (
     ...args: Parameters<typeof mockTrackAuthSessionRefreshProductImpact>
@@ -480,6 +480,7 @@ describe("Auth component", () => {
   });
 
   afterEach(() => {
+    publicEnv.USE_DEV_AUTH = ORIGINAL_USE_DEV_AUTH;
     jest.restoreAllMocks();
   });
 
@@ -549,6 +550,53 @@ describe("Auth component", () => {
       );
       await user.click(screen.getByTestId("req"));
       expect(toast).toHaveBeenCalled();
+    });
+
+    it("allows explicit auth requests in development dev-auth mode", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      walletAddress = validAddress;
+      publicEnv.USE_DEV_AUTH = "true";
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+
+        return (
+          <>
+            <button
+              type="button"
+              onClick={() =>
+                void requestAuth().then(({ success }) => {
+                  setResult(String(success));
+                })
+              }
+            >
+              auth with dev mode
+            </button>
+            <span>{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "auth with dev mode" })
+      );
+
+      await waitFor(() => expect(screen.getByText("true")).toBeInTheDocument());
+      expect(mockValidateJwt).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
     });
 
     it("force-validates an authorized session after the server rejects it", async () => {
@@ -2302,8 +2350,7 @@ describe("Auth component", () => {
         );
       });
       const firstTerminalScope =
-        mockTrackAuthSessionRefreshProductImpact.mock.calls[0]?.[0]
-          .dedupeScope;
+        mockTrackAuthSessionRefreshProductImpact.mock.calls[0]?.[0].dedupeScope;
       expect(firstTerminalScope).toEqual(expect.any(String));
 
       currentJwt = "session-b-jwt";

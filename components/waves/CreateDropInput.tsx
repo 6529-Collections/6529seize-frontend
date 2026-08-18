@@ -63,7 +63,10 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "@/hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
-import { CREATE_DROP_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
+import {
+  CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS,
+  CREATE_DROP_MARKDOWN_TRANSFORMERS,
+} from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
@@ -481,7 +484,7 @@ const CreateDropInput = forwardRef<
               <ListPlugin />
               <PlainTextPastePlugin />
               <MarkdownShortcutPlugin
-                transformers={CREATE_DROP_MARKDOWN_TRANSFORMERS}
+                transformers={CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS}
               />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />

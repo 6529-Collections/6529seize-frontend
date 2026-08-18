@@ -2,11 +2,13 @@
 
 ## Overview
 
-The right-sidebar `About` content lets users manage wave access groups in place.
+The Wave details `Rules` and `Settings` content lets users inspect access
+groups. Editors can also manage them in place from `Settings`.
 
 Users can:
 
 - review `View`, `Drop`, `Vote`, `Chat access`, and `Admin` scopes
+- follow visible group names to inspect both criteria and current members
 - add, change, or remove scope groups from row menus
 - include or exclude one identity from a scoped group
 - manage non-chat `Curation Groups` without leaving the thread
@@ -15,40 +17,43 @@ Users can:
 
 - Wave thread: `/waves/{waveId}`
 - Direct-message thread: `/messages/{waveId}`
-- Rank waves: open the right-sidebar `About` tab
+- Rank waves: open Wave details, then select `Rules` or `Settings`
 - Non-rank waves: same content in default non-tabbed sidebar layout
-- Mobile `About` view reuses the same group-management content
+- Mobile Wave details reuses the same Rules and Settings content
 
 ## Entry Points
 
 - Open a wave thread and open the right sidebar.
-- On rank waves, select `About`.
-- In `General`, open `Group options` on a row.
+- On rank waves, select `Rules` to inspect or `Settings` to manage access.
+- In Settings `Access`, open `Group options` on a row.
 - In `Curation Groups` (non-chat waves), use `Add group` or row options.
 
 ## User Journey
 
-1. Open right-sidebar `About`.
-2. Review the `General` rows.
+1. Open Wave details from the right sidebar or mobile wave-actions menu.
+2. Select `Rules` or `Settings`, then review the access rows.
 3. Check current scope value:
    - no group: `Anyone`
-   - no chat access group: `Anyone when enabled`
-   - hidden group: `Hidden`
+   - no chat access group: `Anyone`
+   - hidden/private group: `Private group`
    - visible group: linked name to `/network?page=1&group={groupId}`
-4. Open `Group options` on the row to update.
-5. Choose an available action:
+4. Follow a visible group link. Network shows the group criteria above the
+   current filtered member list.
+5. Return with normal browser back navigation when finished inspecting.
+6. Editors can open `Group options` on the Settings row to update it.
+7. Choose an available action:
    - `Add group` or `Change group`
    - `Remove group` (not shown for `Admin`)
    - `Include identity` or `Exclude identity` (permission-gated)
-6. Complete the modal:
+8. Complete the modal:
    - group picker for add/change
    - identity search modal for include/exclude
    - confirmation modal for remove
-7. Authenticate when prompted.
-8. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admin`
+9. Authenticate when prompted.
+10. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admin`
    group is contained in `View` before saving.
-9. After success, the row refreshes.
-10. On non-chat waves, use the same actions under `Curation Groups`.
+11. After success, the row refreshes.
+12. On non-chat waves, use the same actions under `Curation Groups`.
 
 ## Common Scenarios
 
@@ -67,6 +72,10 @@ Users can:
   `Chat status` separately from `Chat access`.
 - Chat waves do not show `Curation Groups`.
 - General-row edit controls are hidden for direct-message groups.
+- Visible group inspection is available to read-only wave viewers; it does not
+  depend on wave edit permission.
+- Hidden/private scope stubs never render a link, group identity, or group
+  metadata.
 - `Admin` does not show `Remove group`.
 - In `General`, `Include identity` and `Exclude identity` show only when the
   user can edit the wave and is either wave admin or the scope-group author.
@@ -82,6 +91,8 @@ Users can:
 
 - While curation groups load, the section shows `Loading groups`.
 - If curation-group fetch fails, the section shows `Unavailable`.
+- If Network cannot load a linked group's criteria, it shows `Group criteria
+  unavailable` without exposing the group id or treating the scope as public.
 - If authentication fails or is canceled, users see `Failed to authenticate`
   and no changes are applied.
 - If a save request fails, an error toast is shown and existing settings stay as-is.

@@ -256,6 +256,11 @@ const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
   AboutSection.PRIMARY_ADDRESS,
   AboutSection.GDRC1,
   AboutSection.ENS,
+  AboutSection.NAKAMOTO_THRESHOLD,
+  AboutSection.FAQ,
+  AboutSection.APPLY,
+  AboutSection.CONTACT_US,
+  AboutSection.NFT_DELEGATION,
 ]);
 
 const ABOUT_LEGAL_SECTIONS = new Set<AboutSection>(

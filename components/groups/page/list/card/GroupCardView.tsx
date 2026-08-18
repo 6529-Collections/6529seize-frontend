@@ -1,6 +1,7 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { GroupCardState } from "./GroupCard";
 import GroupCardContent from "./GroupCardContent";
+import GroupCardCreator from "./GroupCardCreator";
 import GroupCardHeader from "./GroupCardHeader";
 
 export default function GroupCardView({
@@ -26,15 +27,15 @@ export default function GroupCardView({
       <GroupCardHeader
         group={group}
         onEditClick={onEditClick}
-        userPlaceholder={userPlaceholder}
+        titlePlaceholder={titlePlaceholder}
       />
-      <div className="tw-h-px tw-w-full tw-rounded-full tw-bg-white/10 tw-shadow-[0_1px_0_rgba(8,15,29,0.35)]" />
       <GroupCardContent
         group={group}
         haveActiveGroupVoteAll={haveActiveGroupVoteAll}
         setState={setState}
-        titlePlaceholder={titlePlaceholder}
       />
+      <div className="tw-h-px tw-w-full tw-rounded-full tw-bg-white/10 tw-shadow-[0_1px_0_rgba(8,15,29,0.35)]" />
+      <GroupCardCreator group={group} userPlaceholder={userPlaceholder} />
     </div>
   );
 }

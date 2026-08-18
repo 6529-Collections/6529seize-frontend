@@ -27,6 +27,7 @@
         "Visitors can browse the public home activity without connecting a wallet.",
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
@@ -799,7 +800,7 @@
     {
       "id": "about.minting-meme-cards",
       "kind": "route",
-      "title": "Minting Meme Cards",
+      "title": "Minting The Memes",
       "aliases": [
         "minting meme cards",
         "meme card minting",
@@ -815,25 +816,40 @@
         "meme",
         "memes",
         "allowlist",
+        "subscription",
+        "remote minting",
+        "phase 0",
+        "phase 1",
+        "phase 2",
+        "public phase",
         "price",
         "schedule",
         "primary",
         "sale"
       ],
       "facts": [
-        "The Minting Meme Cards page lives at /about/minting.",
-        "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
-        "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
-        "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
-        "The page has horizontal section navigation for its summary, minting philosophy, allowlist background and current practices, provability, improvements, tools, and technical issues.",
-        "Users should follow @6529collections for current mint dates and times."
+        "The Minting The Memes guide lives at /about/minting.",
+        "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
+        "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
+        "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
+        "The live mint page is the source of truth for the current card, active phase, exact mint price and platform fee, remaining supply, and wallet eligibility.",
+        "The guide links to /meme-calendar and @6529collections for current timing because mint dates can change.",
+        "The February 2023 allowlist explanation is preserved only as dated historical context, not as the eligibility policy for the current card."
       ],
       "canonical_path": "/about/minting",
-      "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
+      "related_paths": [
+        "/the-memes/mint",
+        "/about/subscriptions",
+        "/meme-calendar",
+        "/tools/subscriptions-report",
+        "/the-memes",
+        "/about/the-memes"
+      ],
       "tags": ["about", "memes", "minting"],
       "source_refs": [
         "components/about/AboutMinting.tsx",
-        "components/about/AboutMintingReference.tsx"
+        "components/about/AboutMintingReference.tsx",
+        "ops/docs/media/memes/feature-minting-guide.md"
       ]
     },
     {
@@ -2672,8 +2688,11 @@
         "Wave chat has two separate settings for Rank and Approve waves: chat.enabled controls whether chat is on, and chat.scope controls who can chat when chat is enabled.",
         "Chat waves require chat to stay enabled, so their Settings and Rules panels do not show a Chat status enable/disable row.",
         "Rank and Approve wave Settings show Chat status as Enabled or Disabled, and wave admins can edit that row to enable or disable chat.",
-        "The Access row uses Chat access wording; `Anyone when enabled` means no chat access group is attached, not that chat is currently enabled.",
+        "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "The Rank and Approve Rules panels also show Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
+        "Visible access-group names in Rules and Settings link to a filtered Network view that shows both the group criteria and current members.",
+        "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
+        "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "When chat is disabled, slow mode and disable-links settings are hidden because they only apply when chat is enabled."
       ],
       "canonical_path": "/waves",
@@ -2682,7 +2701,9 @@
       "source_refs": [
         "components/waves/specs/WaveChatStatus.tsx",
         "helpers/waves/wave-rules.helpers.ts",
+        "components/waves/specs/WaveRulesPanel.tsx",
         "components/waves/specs/groups/group/WaveGroup.tsx",
+        "components/community/CommunityMembersGroupDetails.tsx",
         "ops/docs/waves/chat/feature-chat-composer-availability.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-group-management.md"
       ]
@@ -3818,7 +3839,7 @@
       "facts": [
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
         "Home uses explicit Main Stage mappings for its submission and Meme-card links and omits those links when a mapping is unavailable.",
-        "When an unresolved /the-memes/{id} route is the explicitly mapped next Meme and home is in Next Drop mode, it shows the same winning artwork panel with Mint Date and subscription awareness above the calendar; other upcoming Meme routes keep the standalone subscription and calendar view.",
+        "When an unresolved /the-memes/{id} route is the canonical next Meme and its Main Stage winner is explicitly mapped to that id, it shows the winning artwork panel with Mint Date and subscription awareness above the calendar without waiting for the current mint or homepage mode; other upcoming Meme routes keep the standalone subscription and calendar view.",
         "Home Latest Drop and mapped Next Drop cards always show Your allowance. Before a wallet is connected, the row prompts the user to connect to view it. Once connected, wrapping pills list each nonzero Airdrop or Allowlist count for Phase 0, Phase 1, and Phase 2, plus a Public Airdrop count; Public never shows Allowlist. The row distinguishes unavailable distribution data, an unpublished distribution, and a published distribution with no matching allocation; unavailable data does not mean the allocation is zero, and none of these states promises that an allocation is still mintable.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."

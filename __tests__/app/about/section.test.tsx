@@ -66,6 +66,26 @@ describe("AboutPage", () => {
       "tw-bg-[#0D0D0F]"
     );
   });
+
+  it.each([
+    AboutSection.NAKAMOTO_THRESHOLD,
+    AboutSection.FAQ,
+    AboutSection.APPLY,
+    AboutSection.CONTACT_US,
+    AboutSection.NFT_DELEGATION,
+  ])("uses the modern About surface for %s", async (section) => {
+    const element = await AboutPage({
+      params: Promise.resolve({ section }),
+    });
+
+    const { container } = render(element);
+
+    expect(container.querySelector("main")).toHaveClass(
+      "tw-border-r",
+      "tw-border-iron-900",
+      "tw-bg-[#0D0D0F]"
+    );
+  });
 });
 
 describe("generateMetadata", () => {

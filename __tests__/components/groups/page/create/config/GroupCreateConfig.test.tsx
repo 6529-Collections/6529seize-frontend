@@ -1,7 +1,8 @@
-import { render } from '@testing-library/react';
-import React from 'react';
-import GroupCreateConfig from '@/components/groups/page/create/config/GroupCreateConfig';
-import { GroupCreateWalletsType } from '@/components/groups/page/create/config/wallets/GroupCreateWallets';
+import { render } from "@testing-library/react";
+import React from "react";
+import GroupCreateConfig from "@/components/groups/page/create/config/GroupCreateConfig";
+import { GroupCreateWalletsType } from "@/components/groups/page/create/config/wallets/GroupCreateWallets";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 
 let levelProps: any = null;
 let tdhProps: any = null;
@@ -13,68 +14,112 @@ let xtdhGrantProps: any = null;
 let includeWalletsProps: any = null;
 let excludeWalletsProps: any = null;
 
-jest.mock('@/components/groups/page/create/GroupCreateConfigHeader', () => ({
+jest.mock("@/components/groups/page/create/GroupCreateConfigHeader", () => ({
   __esModule: true,
   default: () => <div data-testid="header" />,
 }));
 
-jest.mock('@/components/groups/page/create/config/GroupCreateLevel', () => ({
+jest.mock("@/components/groups/page/create/config/GroupCreateLevel", () => ({
   __esModule: true,
-  default: (props: any) => { levelProps = props; return <div data-testid="level" />; },
-}));
-
-jest.mock('@/components/groups/page/create/config/GroupCreateTDH', () => ({
-  __esModule: true,
-  default: (props: any) => { tdhProps = props; return <div data-testid="tdh" />; },
-}));
-
-jest.mock('@/components/groups/page/create/config/GroupCreateCIC', () => ({
-  __esModule: true,
-  default: (props: any) => { cicProps = props; return <div data-testid="cic" />; },
-}));
-
-jest.mock('@/components/groups/page/create/config/GroupCreateRep', () => ({
-  __esModule: true,
-  default: (props: any) => { repProps = props; return <div data-testid="rep" />; },
-}));
-
-jest.mock('@/components/groups/page/create/config/nfts/GroupCreateNfts', () => ({
-  __esModule: true,
-  default: (props: any) => { nftsProps = props; return <div data-testid="nfts" />; },
-}));
-
-jest.mock('@/components/groups/page/create/config/nfts/GroupCreateCollections', () => ({
-  __esModule: true,
-  default: (props: any) => { collectionsProps = props; return <div data-testid="collections" />; },
-}));
-
-jest.mock('@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrant', () => ({
-  __esModule: true,
-  default: (props: any) => { xtdhGrantProps = props; return <div data-testid="xtdh-grant" />; },
-}));
-
-jest.mock('@/components/groups/page/create/config/wallets/GroupCreateWallets', () => ({
-  __esModule: true,
-  GroupCreateWalletsType: { INCLUDE: 'INCLUDE', EXCLUDE: 'EXCLUDE' },
   default: (props: any) => {
-    if (props.type === 'INCLUDE') {
-      includeWalletsProps = props;
-      return <div data-testid="wallets-include" />;
-    }
-    excludeWalletsProps = props;
-    return <div data-testid="wallets-exclude" />;
+    levelProps = props;
+    return <div data-testid="level" />;
   },
 }));
+
+jest.mock("@/components/groups/page/create/config/GroupCreateTDH", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    tdhProps = props;
+    return <div data-testid="tdh" />;
+  },
+}));
+
+jest.mock("@/components/groups/page/create/config/GroupCreateCIC", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    cicProps = props;
+    return <div data-testid="cic" />;
+  },
+}));
+
+jest.mock("@/components/groups/page/create/config/GroupCreateRep", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    repProps = props;
+    return <div data-testid="rep" />;
+  },
+}));
+
+jest.mock(
+  "@/components/groups/page/create/config/nfts/GroupCreateNfts",
+  () => ({
+    __esModule: true,
+    default: (props: any) => {
+      nftsProps = props;
+      return <div data-testid="nfts" />;
+    },
+  })
+);
+
+jest.mock(
+  "@/components/groups/page/create/config/nfts/GroupCreateCollections",
+  () => ({
+    __esModule: true,
+    default: (props: any) => {
+      collectionsProps = props;
+      return <div data-testid="collections" />;
+    },
+  })
+);
+
+jest.mock(
+  "@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrant",
+  () => ({
+    __esModule: true,
+    default: (props: any) => {
+      xtdhGrantProps = props;
+      return <div data-testid="xtdh-grant" />;
+    },
+  })
+);
+
+jest.mock(
+  "@/components/groups/page/create/config/wallets/GroupCreateWallets",
+  () => ({
+    __esModule: true,
+    GroupCreateWalletsType: { INCLUDE: "INCLUDE", EXCLUDE: "EXCLUDE" },
+    default: (props: any) => {
+      if (props.type === "INCLUDE") {
+        includeWalletsProps = props;
+        return <div data-testid="wallets-include" />;
+      }
+      excludeWalletsProps = props;
+      return <div data-testid="wallets-exclude" />;
+    },
+  })
+);
 
 function renderComponent() {
   const level = { min: 1 } as any;
   const tdh = { min: 2 } as any;
   const cic = { min: 3 } as any;
   const rep = { min: 4 } as any;
-  const wallets: string[] | null = ['a'];
-  const excludeWallets: string[] | null = ['b'];
+  const wallets: string[] | null = ["a"];
+  const excludeWallets: string[] | null = ["b"];
   const nfts: any = [];
-  const beneficiaryGrantId = 'grant-1';
+  const beneficiaryGrantId = "grant-1";
+  const beneficiaryGrantMatchMode = ApiGroupBeneficiaryGrantMatchMode.AnyToken;
+  const includeWalletSources = {
+    uploadedWallets: wallets,
+    emmaWallets: null,
+    selectedIdentities: [],
+  };
+  const excludeWalletSources = {
+    uploadedWallets: excludeWallets,
+    emmaWallets: null,
+    selectedIdentities: [],
+  };
   const setLevel = jest.fn();
   const setTDH = jest.fn();
   const setCIC = jest.fn();
@@ -83,6 +128,9 @@ function renderComponent() {
   const setExcludeWallets = jest.fn();
   const setNfts = jest.fn();
   const setBeneficiaryGrantId = jest.fn();
+  const setBeneficiaryGrantMatchMode = jest.fn();
+  const setIncludeWalletSources = jest.fn();
+  const setExcludeWalletSources = jest.fn();
 
   render(
     <GroupCreateConfig
@@ -94,7 +142,10 @@ function renderComponent() {
       excludeWallets={excludeWallets}
       nfts={nfts}
       beneficiaryGrantId={beneficiaryGrantId}
+      beneficiaryGrantMatchMode={beneficiaryGrantMatchMode}
       iAmIncluded={false}
+      includeWalletSources={includeWalletSources}
+      excludeWalletSources={excludeWalletSources}
       setLevel={setLevel}
       setTDH={setTDH}
       setCIC={setCIC}
@@ -103,13 +154,39 @@ function renderComponent() {
       setExcludeWallets={setExcludeWallets}
       setNfts={setNfts}
       setBeneficiaryGrantId={setBeneficiaryGrantId}
+      setBeneficiaryGrantMatchMode={setBeneficiaryGrantMatchMode}
+      setIncludeWalletSources={setIncludeWalletSources}
+      setExcludeWalletSources={setExcludeWalletSources}
     />
   );
 
-  return { level, tdh, cic, rep, wallets, excludeWallets, nfts, beneficiaryGrantId, setLevel, setTDH, setCIC, setRep, setWallets, setExcludeWallets, setNfts, setBeneficiaryGrantId };
+  return {
+    level,
+    tdh,
+    cic,
+    rep,
+    wallets,
+    excludeWallets,
+    nfts,
+    beneficiaryGrantId,
+    beneficiaryGrantMatchMode,
+    includeWalletSources,
+    excludeWalletSources,
+    setLevel,
+    setTDH,
+    setCIC,
+    setRep,
+    setWallets,
+    setExcludeWallets,
+    setNfts,
+    setBeneficiaryGrantId,
+    setBeneficiaryGrantMatchMode,
+    setIncludeWalletSources,
+    setExcludeWalletSources,
+  };
 }
 
-describe('GroupCreateConfig', () => {
+describe("GroupCreateConfig", () => {
   beforeEach(() => {
     levelProps = null;
     tdhProps = null;
@@ -122,7 +199,7 @@ describe('GroupCreateConfig', () => {
     excludeWalletsProps = null;
   });
 
-  it('passes props to sub components', () => {
+  it("passes props to sub components", () => {
     const refs = renderComponent();
 
     expect(levelProps.level).toBe(refs.level);
@@ -144,16 +221,28 @@ describe('GroupCreateConfig', () => {
     expect(collectionsProps.setNfts).toBe(refs.setNfts);
 
     expect(xtdhGrantProps.beneficiaryGrantId).toBe(refs.beneficiaryGrantId);
-    expect(xtdhGrantProps.setBeneficiaryGrantId).toBe(refs.setBeneficiaryGrantId);
+    expect(xtdhGrantProps.beneficiaryGrantMatchMode).toBe(
+      refs.beneficiaryGrantMatchMode
+    );
+    expect(xtdhGrantProps.setBeneficiaryGrantId).toBe(
+      refs.setBeneficiaryGrantId
+    );
+    expect(xtdhGrantProps.setBeneficiaryGrantMatchMode).toBe(
+      refs.setBeneficiaryGrantMatchMode
+    );
 
     expect(includeWalletsProps.type).toBe(GroupCreateWalletsType.INCLUDE);
     expect(includeWalletsProps.wallets).toBe(refs.wallets);
+    expect(includeWalletsProps.sources).toBe(refs.includeWalletSources);
     expect(includeWalletsProps.setWallets).toBe(refs.setWallets);
+    expect(includeWalletsProps.setSources).toBe(refs.setIncludeWalletSources);
     expect(includeWalletsProps.walletsLimit).toBe(10000);
 
     expect(excludeWalletsProps.type).toBe(GroupCreateWalletsType.EXCLUDE);
     expect(excludeWalletsProps.wallets).toBe(refs.excludeWallets);
+    expect(excludeWalletsProps.sources).toBe(refs.excludeWalletSources);
     expect(excludeWalletsProps.setWallets).toBe(refs.setExcludeWallets);
+    expect(excludeWalletsProps.setSources).toBe(refs.setExcludeWalletSources);
     expect(excludeWalletsProps.walletsLimit).toBe(1000);
   });
 });
