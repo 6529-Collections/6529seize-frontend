@@ -69,12 +69,12 @@ describe("WaveGroup", () => {
     expect(screen.getByText("Anyone")).toBeInTheDocument();
   });
 
-  it("clarifies empty chat scope only applies when chat is enabled", () => {
+  it('shows "Anyone" for an empty chat scope', () => {
     render(
       <WaveGroup {...baseProps} type={WaveGroupType.CHAT} scope={{} as any} />,
       { wrapper }
     );
 
-    expect(screen.getByText("Anyone when enabled")).toBeInTheDocument();
+    expect(screen.getByText("Anyone")).toBeInTheDocument();
   });
 });
