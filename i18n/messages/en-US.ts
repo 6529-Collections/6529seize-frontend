@@ -2166,6 +2166,7 @@ export const EN_US_MESSAGES = {
   "profilePreferences.dm.NOBODY.label": "Nobody",
   "profilePreferences.dm.NOBODY.description":
     "No one can start a new conversation with you.",
+  "profilePreferences.dm.createRetry": "Please try again.",
   "profilePreferences.notifications.heading": "Notifications",
   "profilePreferences.notifications.description":
     "Choose between all notifications and essential account notices only.",

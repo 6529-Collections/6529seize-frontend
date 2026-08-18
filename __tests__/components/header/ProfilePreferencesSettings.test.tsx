@@ -1,6 +1,10 @@
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import { useAuth } from "@/components/auth/Auth";
 import {
+  ReactQueryWrapperContext,
+  type ReactQueryWrapperContextType,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
   ApiProfilePreferencesDirectMessagePolicyEnum as DirectMessagePolicy,
   ApiProfilePreferencesNotificationLevelEnum as NotificationLevel,
 } from "@/generated/models/ApiProfilePreferences";
@@ -71,6 +75,9 @@ describe("ProfilePreferencesSettings", () => {
 
     expect(screen.getAllByText("Paused")).toHaveLength(6);
     expect(
+      screen.getByText("Subscription coverage").closest("label")
+    ).toBeNull();
+    expect(
       screen.getByText(/choices are saved and restored/i)
     ).toBeInTheDocument();
 
@@ -82,7 +89,16 @@ describe("ProfilePreferencesSettings", () => {
   it("saves DM and notification preference changes together", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
-    render(<ProfilePreferencesSettings isOpen onClose={onClose} />);
+    const invalidateNotifications = jest.fn();
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={
+          { invalidateNotifications } as unknown as ReactQueryWrapperContextType
+        }
+      >
+        <ProfilePreferencesSettings isOpen onClose={onClose} />
+      </ReactQueryWrapperContext.Provider>
+    );
     await screen.findByText("Subscription coverage");
 
     await user.click(screen.getByRole("radio", { name: /People I follow/i }));
@@ -99,6 +115,7 @@ describe("ProfilePreferencesSettings", () => {
           }),
         }),
       });
+      expect(invalidateNotifications).toHaveBeenCalledTimes(1);
       expect(onClose).toHaveBeenCalled();
     });
   });

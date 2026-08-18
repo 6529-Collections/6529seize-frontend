@@ -20,7 +20,9 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIdentity } from "@/hooks/useIdentity";
+import { t } from "@/i18n/messages";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -44,6 +46,7 @@ export default function UserProfileTooltip({
   onArtistPreviewOpen,
 }: UserProfileTooltipProps) {
   const router = useRouter();
+  const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const { profile } = useIdentity({
     handleOrWallet: user,
@@ -151,7 +154,8 @@ export default function UserProfileTooltip({
       setToast({
         type: "error",
         title: "Couldn't create this direct message.",
-        description: errorMessage ?? "Please try again.",
+        description:
+          errorMessage ?? t(locale, "profilePreferences.dm.createRetry"),
       });
     } finally {
       setDirectMessageLoading(false);

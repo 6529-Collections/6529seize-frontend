@@ -2,6 +2,10 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
 import type { ApiProfileNotificationCategories } from "@/generated/models/ApiProfileNotificationCategories";
 import type { ApiProfilePreferences } from "@/generated/models/ApiProfilePreferences";
@@ -13,7 +17,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Toggle from "react-toggle";
 
 interface ProfilePreferencesSettingsProps {
@@ -47,7 +51,7 @@ export default function ProfilePreferencesSettings({
 }: ProfilePreferencesSettingsProps) {
   const locale = useBrowserLocale();
   const preferencesQuery = useQuery({
-    queryKey: ["profile-preferences"],
+    queryKey: [QueryKey.PROFILE_PREFERENCES],
     queryFn: () =>
       commonApiFetch<ApiProfilePreferences>({
         endpoint: "profiles/preferences",
@@ -97,6 +101,7 @@ function ProfilePreferencesForm({
 }) {
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
+  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const [original, setOriginal] = useState(preferences);
   const [current, setCurrent] = useState(preferences);
 
@@ -116,6 +121,7 @@ function ProfilePreferencesForm({
         message: t(locale, "profilePreferences.saveSuccess"),
         type: "success",
       });
+      invalidateNotifications();
       onClose();
     },
     onError: (error: unknown) => {
@@ -229,15 +235,24 @@ function ProfilePreferencesForm({
                   key={key}
                   className="tw-flex tw-min-h-12 tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/40 tw-px-3 tw-py-2.5"
                 >
-                  <label
-                    htmlFor={`profile-notification-${key}`}
-                    className="tw-text-sm tw-text-iron-200"
-                  >
-                    {t(
-                      locale,
-                      `profilePreferences.notifications.category.${key}`
-                    )}
-                  </label>
+                  {isEssential ? (
+                    <span className="tw-text-sm tw-text-iron-200">
+                      {t(
+                        locale,
+                        `profilePreferences.notifications.category.${key}`
+                      )}
+                    </span>
+                  ) : (
+                    <label
+                      htmlFor={`profile-notification-${key}`}
+                      className="tw-text-sm tw-text-iron-200"
+                    >
+                      {t(
+                        locale,
+                        `profilePreferences.notifications.category.${key}`
+                      )}
+                    </label>
+                  )}
                   {isEssential ? (
                     <span className="tw-rounded-full tw-bg-iron-700 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300">
                       {t(locale, "profilePreferences.notifications.paused")}
