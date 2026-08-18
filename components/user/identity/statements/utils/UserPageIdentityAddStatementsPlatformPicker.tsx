@@ -31,6 +31,15 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
   const rows = Array.from({ length: rowCount }, (_, rowIndex) =>
     statementTypes.slice(rowIndex * rowSize, (rowIndex + 1) * rowSize)
   ).filter((row) => row.length > 0);
+  const tooltipProps = {
+    id: ADD_STATEMENT_PLATFORM_TOOLTIP_ID,
+    place: "top",
+    positionStrategy: "fixed",
+    offset: 8,
+    opacity: 1,
+    clickable: false,
+    style: TOOLTIP_STYLES,
+  } as const;
 
   return (
     <div>
@@ -63,16 +72,17 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
           </span>
         ))}
       </div>
-      {!isTouchScreen && (
+      {isTouchScreen ? (
         <Tooltip
-          id={ADD_STATEMENT_PLATFORM_TOOLTIP_ID}
-          place="top"
-          positionStrategy="fixed"
-          offset={8}
-          opacity={1}
-          delayShow={250}
-          style={TOOLTIP_STYLES}
+          {...tooltipProps}
+          delayShow={0}
+          clickable
+          openEvents={{ click: true }}
+          closeEvents={{ click: true }}
+          globalCloseEvents={{ clickOutsideAnchor: true }}
         />
+      ) : (
+        <Tooltip {...tooltipProps} delayShow={250} />
       )}
     </div>
   );

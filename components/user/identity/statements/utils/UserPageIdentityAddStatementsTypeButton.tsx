@@ -3,6 +3,7 @@
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import { STATEMENT_META, type STATEMENT_TYPE } from "@/helpers/Types";
 import clsx from "clsx";
+import type { TouchEvent } from "react";
 
 export const ADD_STATEMENT_PLATFORM_TOOLTIP_ID =
   "add-statement-platform-tooltip";
@@ -21,11 +22,16 @@ export default function UserPageIdentityAddStatementsTypeButton({
   readonly onClick: () => void;
 }) {
   const title = STATEMENT_META[statementType].title;
+  const onTouchStart = (event: TouchEvent<HTMLButtonElement>) => {
+    // Platform taps must not start the parent sheet's swipe-to-dismiss
+    // gesture. The picker tooltip handles the same tap independently.
+    event.stopPropagation();
+  };
 
   return (
     <button
       onClick={onClick}
-      onTouchStart={(event) => event.stopPropagation()}
+      onTouchStart={onTouchStart}
       type="button"
       aria-pressed={isActive}
       data-tooltip-id={ADD_STATEMENT_PLATFORM_TOOLTIP_ID}
