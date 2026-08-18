@@ -6,6 +6,12 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
+import {
+  $getRoot,
+  $getSelection,
+  $isRangeSelection,
+  type LexicalEditor,
+} from "lexical";
 import CreateDropInput, {
   type CreateDropInputHandles,
 } from "@/components/waves/CreateDropInput";
@@ -61,7 +67,25 @@ jest.mock(
   "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin",
   createNoopPluginMock
 );
-jest.mock("@/components/waves/EditLastDropArrowUpPlugin", () => () => null);
+
+let mockLexicalEditor: LexicalEditor | null = null;
+jest.mock("@/components/waves/EditLastDropArrowUpPlugin", () => {
+  const React = jest.requireActual<typeof import("react")>("react");
+  const { useLexicalComposerContext } = jest.requireActual<
+    typeof import("@lexical/react/LexicalComposerContext")
+  >("@lexical/react/LexicalComposerContext");
+
+  return function CaptureEditorPlugin() {
+    const [editor] = useLexicalComposerContext();
+    React.useEffect(() => {
+      mockLexicalEditor = editor;
+      return () => {
+        mockLexicalEditor = null;
+      };
+    }, [editor]);
+    return null;
+  };
+});
 
 const renderInput = (ref: React.RefObject<CreateDropInputHandles | null>) =>
   render(
@@ -129,3 +153,42 @@ it("imports global mention tokens for ordinary chat authors", async () => {
     )
   );
 });
+
+it.each(["@allexpop", "@alligator", "@AllExPop", "@ALLexPop"])(
+  "keeps the %s handle open for autocomplete",
+  async (handle) => {
+    const ref = createRef<CreateDropInputHandles>();
+    renderInput(ref);
+
+    const editor = screen.getByRole("textbox");
+    await waitFor(() => expect(editor.querySelector("p")).not.toBeNull());
+    await waitFor(() => expect(mockLexicalEditor).not.toBeNull());
+
+    act(() => {
+      mockLexicalEditor?.update(
+        () => {
+          $getRoot().selectEnd();
+        },
+        { discrete: true }
+      );
+    });
+
+    for (const character of handle) {
+      act(() => {
+        mockLexicalEditor?.update(
+          () => {
+            const selection = $getSelection();
+            if (!$isRangeSelection(selection)) {
+              throw new Error("Expected a range selection while typing");
+            }
+            selection.insertText(character);
+          },
+          { discrete: true }
+        );
+      });
+    }
+
+    await waitFor(() => expect(editor).toHaveTextContent(handle));
+    expect(editor.querySelector(".editor-group-mention")).toBeNull();
+  }
+);

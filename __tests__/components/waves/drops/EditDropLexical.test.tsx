@@ -333,10 +333,12 @@ describe("EditDropLexical", () => {
     expect(screen.getByTestId("emoji-picker")).toBeInTheDocument();
   });
 
-  it("registers global mention tokens for non-admin editors", () => {
+  it("keeps global mentions for import and export but not live typing", () => {
     render(<EditDropLexical {...defaultProps} canMentionAll={false} />);
 
-    expect(markdownShortcutTransformers).toContain(groupMentionTransformerMock);
+    expect(markdownShortcutTransformers).not.toContain(
+      groupMentionTransformerMock
+    );
     expect(exportDropMarkdownMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.arrayContaining([groupMentionTransformerMock])
