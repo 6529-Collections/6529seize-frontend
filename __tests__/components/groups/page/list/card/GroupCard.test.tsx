@@ -74,10 +74,12 @@ describe("GroupCard", () => {
     );
   }
 
-  it("navigates to community view when idle", () => {
-    const { getByTestId } = renderComp();
-    fireEvent.click(getByTestId("view"));
-    expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
+  it("exposes a native whole-card link when idle", () => {
+    const { getByRole } = renderComp();
+    expect(getByRole("link", { name: "Open g" })).toHaveAttribute(
+      "href",
+      `/network?page=1&group=${group.id}`
+    );
   });
 
   it("navigates to community view when pressing Enter", async () => {

@@ -39,7 +39,7 @@ export default function GroupCardHeader({
           <Link
             href={nameHref}
             tabIndex={-1}
-            className={`${nameClasses} tw-no-underline tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-iron-300`}
+            className={`${nameClasses} tw-relative tw-z-30 tw-no-underline tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-iron-300`}
             title={groupName}
           >
             {groupName}

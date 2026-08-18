@@ -100,7 +100,7 @@ export default function GroupsListSearch({
         {showCreateNewGroupButton && (
           <Button onClick={onCreateNewGroup} variant="action" size="md">
             <svg
-              className="-tw-ml-0.5 tw-size-5 tw-flex-shrink-0"
+              className="-tw-ml-1 tw-size-5 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
