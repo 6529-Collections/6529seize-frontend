@@ -9,7 +9,7 @@ import AboutTermsDefinitions from "./AboutTermsDefinitions";
 
 export default function AboutTermsOfService() {
   return (
-    <Container className="!tw-px-0">
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>Terms Of Service</h1>

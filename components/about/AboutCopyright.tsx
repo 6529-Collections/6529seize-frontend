@@ -6,7 +6,7 @@ import {
 
 export default function AboutCopyright() {
   return (
-    <Container className="!tw-px-0">
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>Copyright</h1>

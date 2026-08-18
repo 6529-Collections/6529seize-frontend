@@ -8,7 +8,7 @@ import {
 
 export default function AboutPrivacyPolicy() {
   return (
-    <Container className="!tw-px-0">
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>Privacy Policy</h1>

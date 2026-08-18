@@ -7,7 +7,7 @@ import {
 
 export default function AboutLicense() {
   return (
-    <Container className="!tw-px-0">
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>License</h1>

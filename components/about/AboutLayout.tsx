@@ -25,6 +25,7 @@ export const ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS =
 
 type AboutContainerProps = HTMLAttributes<HTMLDivElement> & {
   readonly fluid?: boolean;
+  readonly horizontalPadding?: boolean;
 };
 
 type AboutColProps = HTMLAttributes<HTMLDivElement> & {
@@ -35,12 +36,14 @@ export function AboutContainer({
   children,
   className,
   fluid = false,
+  horizontalPadding = true,
   ...props
 }: Readonly<AboutContainerProps>) {
   return (
     <div
       className={clsx(
-        "tw-mx-auto tw-w-full tw-px-3",
+        "tw-mx-auto tw-w-full",
+        horizontalPadding && "tw-px-3",
         !fluid && styles["container"],
         className
       )}
