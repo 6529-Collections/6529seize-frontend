@@ -17,9 +17,57 @@ import type {
 } from "./MuseumDirectoryData";
 import { museumDirectoryStatusText } from "./MuseumDirectoryData";
 
-function MuseumDirectoryEmptyStage() {
+type MuseumDirectoryMediaStageShape = "source" | "artist";
+
+function hasMuseumDirectoryMediaDimensions(
+  width: number | null,
+  height: number | null
+): boolean {
+  return width !== null && height !== null && width > 0 && height > 0;
+}
+
+function museumDirectoryMediaStageStyle(
+  shape: MuseumDirectoryMediaStageShape,
+  width: number | null,
+  height: number | null
+): { readonly aspectRatio: string } | undefined {
+  if (shape === "artist" || !hasMuseumDirectoryMediaDimensions(width, height)) {
+    return undefined;
+  }
+  return { aspectRatio: `${String(width)} / ${String(height)}` };
+}
+
+function museumDirectoryMediaStageClassName(
+  shape: MuseumDirectoryMediaStageShape,
+  width: number | null,
+  height: number | null
+): string {
+  let aspectClassName = "";
+  if (shape === "artist") {
+    aspectClassName = "tw-aspect-[4/3]";
+  } else if (!hasMuseumDirectoryMediaDimensions(width, height)) {
+    aspectClassName = "tw-aspect-square";
+  }
+  return [
+    "tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black",
+    aspectClassName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function MuseumDirectoryEmptyStage({
+  shape,
+}: {
+  readonly shape: MuseumDirectoryMediaStageShape;
+}) {
   return (
-    <div className="tw-flex tw-aspect-square tw-items-center tw-justify-center tw-bg-iron-950 tw-p-8 tw-text-center tw-text-sm tw-leading-6 tw-text-iron-500">
+    <div
+      className={`tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-p-8 tw-text-center tw-text-sm tw-leading-6 tw-text-iron-500 ${
+        shape === "artist" ? "tw-aspect-[4/3]" : "tw-aspect-square"
+      }`}
+      data-testid="museum-directory-media-stage"
+    >
       {t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
     </div>
   );
@@ -28,26 +76,29 @@ function MuseumDirectoryEmptyStage() {
 function MuseumDirectoryMediaStage({
   record,
   eager = false,
+  shape = "source",
 }: {
   readonly record: MuseumDirectoryWorkRecord | null;
   readonly eager?: boolean;
+  readonly shape?: MuseumDirectoryMediaStageShape;
 }) {
-  if (record === null) return <MuseumDirectoryEmptyStage />;
-
-  const mediaStageStyle = (
-    width: number | null,
-    height: number | null
-  ): { readonly aspectRatio: string } | undefined =>
-    width !== null && height !== null && width > 0 && height > 0
-      ? { aspectRatio: `${width} / ${height}` }
-      : undefined;
+  if (record === null) return <MuseumDirectoryEmptyStage shape={shape} />;
 
   const retained = selectMuseumStillMedia(record.work.media);
   if (retained !== undefined) {
     return (
       <div
-        className="tw-w-full tw-overflow-hidden tw-bg-black"
-        style={mediaStageStyle(retained.width, retained.height)}
+        className={museumDirectoryMediaStageClassName(
+          shape,
+          retained.width,
+          retained.height
+        )}
+        style={museumDirectoryMediaStageStyle(
+          shape,
+          retained.width,
+          retained.height
+        )}
+        data-testid="museum-directory-media-stage"
       >
         <MuseumManagedImage
           src={retained.url}
@@ -76,8 +127,17 @@ function MuseumDirectoryMediaStage({
     );
     return (
       <div
-        className="tw-w-full tw-overflow-hidden tw-bg-black"
-        style={mediaStageStyle(presentation.width, presentation.height)}
+        className={museumDirectoryMediaStageClassName(
+          shape,
+          presentation.width,
+          presentation.height
+        )}
+        style={museumDirectoryMediaStageStyle(
+          shape,
+          presentation.width,
+          presentation.height
+        )}
+        data-testid="museum-directory-media-stage"
       >
         <MuseumProposalImage
           src={presentation.mediaUrl}
@@ -96,6 +156,7 @@ function MuseumDirectoryMediaStage({
                   "museum.network.acquisitions.openPresentation"
                 ),
               })}
+          containerClassName="tw-h-full tw-w-full"
           className="tw-block tw-h-full tw-w-full tw-object-contain"
         />
       </div>
@@ -105,7 +166,12 @@ function MuseumDirectoryMediaStage({
   const metadata = record.work.mediaMetadata?.[0];
   if (metadata !== undefined) {
     return (
-      <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
+      <div
+        className={`${
+          shape === "artist" ? "tw-aspect-[4/3]" : "tw-aspect-square"
+        } tw-w-full tw-overflow-hidden tw-bg-black`}
+        data-testid="museum-directory-media-stage"
+      >
         <MuseumMediaMetadataPlaceholder
           title={record.work.title}
           metadata={metadata}
@@ -114,7 +180,7 @@ function MuseumDirectoryMediaStage({
     );
   }
 
-  return <MuseumDirectoryEmptyStage />;
+  return <MuseumDirectoryEmptyStage shape={shape} />;
 }
 
 export function MuseumDirectoryWorkCard({
@@ -182,9 +248,13 @@ export function MuseumDirectoryArtistCard({
   readonly eager?: boolean;
 }) {
   return (
-    <article className="tw-group tw-min-w-0">
-      <MuseumDirectoryMediaStage record={record.representative} eager={eager} />
-      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
+    <article className="tw-group tw-flex tw-h-full tw-min-w-0 tw-flex-col">
+      <MuseumDirectoryMediaStage
+        record={record.representative}
+        eager={eager}
+        shape="artist"
+      />
+      <div className="tw-flex tw-flex-1 tw-flex-col tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
         <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           <Link
             href={museumArtistHref(record.artist.slug)}

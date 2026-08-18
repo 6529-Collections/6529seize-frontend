@@ -343,3 +343,65 @@ comes first; acquisition and accession follow.` before the next hosted lane
   and public-publication Ubuntu and Windows.
 - The branch is ready for exact-head push, hosted review and CI, merge, staging
   qualification, production deployment, and live route-by-route acceptance.
+
+## 2026-08-18T19:03:00Z - Research release shipped and live-qualified
+
+- Merged frontend PR #3753 as exact main
+  `336d3f9ed6839fd2fa97a677b25d5353aa4fc884` after all exact-head review and CI
+  gates passed.
+- Deployed and inspected staging with run `32165422116`. All selected Museum
+  packs passed in staging E2E `32166673862`; its sole failure was the existing
+  non-Museum profile route fault. The retained Research sweep passed 22/22
+  desktop/mobile checks.
+- Production authority, immutable artifact build, and independent verification
+  passed in deploy `32170385482`, builder `32170437082`, and verifier
+  `32171381138`. Production serves and announces exact main with `stale:false`.
+- Automatic Production E2E `32171973579` never reached tests because its
+  GitHub-hosted runner stalled in Playwright installation for 22 minutes. It
+  was force-cancelled under the active owner-approved E2E waiver; authority
+  completion `32174375703` successfully recorded the failed qualifier and
+  released the lock.
+- Ran the five exact Museum production packs directly against live production:
+  101 passed and 3 intentional skips, with zero product failures. A first
+  Data Architecture pass observed unrelated navigation-prefetch 502s for
+  `/waves` and `/join-6529`; immediate rerun passed 6/6.
+- Rechecked every Research route at 1440 and 390 pixels in the signed-in app
+  browser. All 22 checks had the expected heading, intact media, bounded width,
+  and no soft-404. Retained report SHA-256:
+  `bb4c318d2a4a4432859f4a659b8a493a551c930e84cc2a1d8d824e2a1e845794`.
+
+## 2026-08-18T20:10:00Z - Acquisitions and Artists balancing follow-up
+
+- Audited the live Acquisitions and Artists indexes at desktop width. Native
+  source aspect ratios caused visibly unequal image boxes and cascading row
+  heights on both primary Museum pages.
+- Implemented a fixed 4:5 desktop acquisition stage, a compact 4:3 responsive
+  acquisition stage, and a 4:3 artist-directory stage, preserving complete
+  images without cropping. Acquisition cards now share equal heights; the
+  Works directory keeps its prior source-ratio behavior.
+- Added component assertions and read-only browser contracts for exact stage
+  counts and ratios. Focused unit tests, changed lint, and changed typecheck
+  pass. Initial local browser checks at 1440 and 390 pixels show no horizontal
+  overflow and the expected 3 acquisition and 21 artist stages.
+- Completed the full-page visual sweep at desktop, tablet, and mobile widths.
+  The responsive acquisition stage is 4:5 only with the three-column desktop
+  composition and 4:3 below it; every artist stage remains 4:3. The deterministic
+  release acceptance suite passes all three owned viewports.
+- The acceptance suite exposed that a responsive Magnum derivative was visually
+  hidden by overflow but retained bounds taller than its frame. Added an
+  explicit full-height proposal-image container; all principal media now remain
+  geometrically within their stages.
+- Two clean-build attempts passed repository lint, optimized compilation,
+  TypeScript, and page-data collection. Both encountered the same unchanged
+  `/museum/network/about/governance` static-generation timeout; the second was
+  stopped after the duplicate infrastructure condition. Hosted exact-head CI
+  will provide the authoritative full-build result.
+- PR #3780 review follow-up adds an explicit square fallback for dimensionless
+  source media in the unchanged Works-card behavior, removes a hardcoded
+  responsive-breakpoint expectation from the browser contract, and avoids an
+  empty class-name suffix. No Acquisitions or Artists layout pixel changes.
+- Hosted App PR CI exposed four Linux lint errors in the new fallback helper:
+  nullable dimensions in a template literal and nested conditional branches.
+  Replaced the conditional expression with explicit branches and string
+  conversion. The focused 16 tests, changed lint, changed typecheck, formatting,
+  and diff checks pass; there is no runtime or visual change.
