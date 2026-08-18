@@ -81,6 +81,9 @@ export function MuseumProposalImage({
     focusOnRevealRef.current = false;
     node.focus();
   }, []);
+  const containerClasses = containerClassName
+    ? `tw-outline-none ${containerClassName}`
+    : "tw-outline-none";
 
   if (!revealed) {
     let statusMessage: string | null = null;
@@ -139,7 +142,7 @@ export function MuseumProposalImage({
         ref={focusRevealedMedia}
         tabIndex={-1}
         aria-label={statusMessage}
-        className={`tw-outline-none ${containerClassName ?? ""}`}
+        className={containerClasses}
       >
         <span className="tw-sr-only" aria-live="polite">
           {statusMessage}
@@ -175,7 +178,7 @@ export function MuseumProposalImage({
       ref={focusRevealedMedia}
       tabIndex={-1}
       aria-label={statusMessage}
-      className={`tw-outline-none ${containerClassName ?? ""}`}
+      className={containerClasses}
     >
       <span className="tw-sr-only" aria-live="polite">
         {statusMessage}

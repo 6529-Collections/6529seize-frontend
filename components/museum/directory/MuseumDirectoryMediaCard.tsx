@@ -19,23 +19,41 @@ import { museumDirectoryStatusText } from "./MuseumDirectoryData";
 
 type MuseumDirectoryMediaStageShape = "source" | "artist";
 
+function hasMuseumDirectoryMediaDimensions(
+  width: number | null,
+  height: number | null
+): boolean {
+  return width !== null && height !== null && width > 0 && height > 0;
+}
+
 function museumDirectoryMediaStageStyle(
   shape: MuseumDirectoryMediaStageShape,
   width: number | null,
   height: number | null
 ): { readonly aspectRatio: string } | undefined {
   if (shape === "artist") return undefined;
-  return width !== null && height !== null && width > 0 && height > 0
+  return hasMuseumDirectoryMediaDimensions(width, height)
     ? { aspectRatio: `${width} / ${height}` }
     : undefined;
 }
 
 function museumDirectoryMediaStageClassName(
-  shape: MuseumDirectoryMediaStageShape
+  shape: MuseumDirectoryMediaStageShape,
+  width: number | null,
+  height: number | null
 ): string {
-  return `tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black ${
-    shape === "artist" ? "tw-aspect-[4/3]" : ""
-  }`;
+  const aspectClassName =
+    shape === "artist"
+      ? "tw-aspect-[4/3]"
+      : hasMuseumDirectoryMediaDimensions(width, height)
+        ? ""
+        : "tw-aspect-square";
+  return [
+    "tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black",
+    aspectClassName,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function MuseumDirectoryEmptyStage({
@@ -70,7 +88,11 @@ function MuseumDirectoryMediaStage({
   if (retained !== undefined) {
     return (
       <div
-        className={museumDirectoryMediaStageClassName(shape)}
+        className={museumDirectoryMediaStageClassName(
+          shape,
+          retained.width,
+          retained.height
+        )}
         style={museumDirectoryMediaStageStyle(
           shape,
           retained.width,
@@ -105,7 +127,11 @@ function MuseumDirectoryMediaStage({
     );
     return (
       <div
-        className={museumDirectoryMediaStageClassName(shape)}
+        className={museumDirectoryMediaStageClassName(
+          shape,
+          presentation.width,
+          presentation.height
+        )}
         style={museumDirectoryMediaStageStyle(
           shape,
           presentation.width,

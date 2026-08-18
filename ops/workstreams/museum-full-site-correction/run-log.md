@@ -396,3 +396,7 @@ comes first; acquisition and accession follow.` before the next hosted lane
   `/museum/network/about/governance` static-generation timeout; the second was
   stopped after the duplicate infrastructure condition. Hosted exact-head CI
   will provide the authoritative full-build result.
+- PR #3780 review follow-up adds an explicit square fallback for dimensionless
+  source media in the unchanged Works-card behavior, removes a hardcoded
+  responsive-breakpoint expectation from the browser contract, and avoids an
+  empty class-name suffix. No Acquisitions or Artists layout pixel changes.

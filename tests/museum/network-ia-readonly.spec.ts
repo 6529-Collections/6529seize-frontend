@@ -287,10 +287,13 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
           return width / height;
         })
     );
-    const acquisitionRatio =
-      (page.viewportSize()?.width ?? 1440) >= 1024 ? 4 / 5 : 4 / 3;
+    expect(
+      new Set(acquisitionStageRatios.map((ratio) => ratio.toFixed(3))).size
+    ).toBe(1);
     for (const ratio of acquisitionStageRatios) {
-      expect(ratio).toBeCloseTo(acquisitionRatio, 2);
+      expect(
+        [4 / 5, 4 / 3].some((expected) => Math.abs(ratio - expected) < 0.01)
+      ).toBe(true);
     }
     await retainScreenshot(page, testInfo, "museum-network-acquisitions");
 
