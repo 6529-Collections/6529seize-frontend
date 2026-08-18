@@ -5,10 +5,6 @@ artifact construction and verification separate from the environment mutation,
 serialize each environment with GitHub Actions concurrency, and automatically
 run read-only E2E after a successful deployment.
 
-Deploy backend PR [#1923](https://github.com/6529-Collections/6529seize-backend/pull/1923)
-before using either path. It supplies the production release-note and threaded
-validation contract consumed by these frontend workflows.
-
 ## Staging path
 
 `Web Deploy - STAGING` (`.github/workflows/deploy-staging.yml`) is triggered by
@@ -32,9 +28,9 @@ environment lock and accepts only the run ID of a completed, successful,
 canonical staging deploy job whose exact version is still live; arbitrary
 source SHAs and non-`main` workflow refs are not accepted. The staging
 access-code secret is exposed only to the final test step after this source
-authorization succeeds. The CI-wave finalizer runs after build, deployment, and
-automatic E2E: it reports success only when all three succeeded and reports
-failure when any of them failed or was skipped by an upstream failure.
+authorization succeeds. The deploy result is posted to the staging CI wave
+before automatic E2E starts. The E2E workflow then posts its existing
+`WEB E2E passed` or `WEB E2E failed` result as a correlated reply.
 
 ## Production path
 
@@ -68,19 +64,11 @@ recovery also acquires that lock and accepts only a canonical run ID whose
 production deploy job succeeded and whose exact version is still live. Manual
 recovery must run the trusted E2E workflow from `main`. Once the verified
 deployment succeeds, the deployment notifier publishes the production status
-and starts release-note generation without waiting for automatic E2E. A second
-notifier runs after E2E and asks the backend to attach a threaded validation
-reply to those release notes. A failed validation is therefore visible as an
-explicit invalid result and tags `devs6529`; it does not erase or suppress the
-record of what was deployed. Failed automatic validation identifies the user
-who initiated the deployment; failed manual revalidation identifies the user
-who initiated that recovery run. The notifier passes this explicit GitHub
-initiator instead of attributing reusable-workflow execution to
-`github-actions`. A later successful manual recovery run appends a
-new manual-revalidation reply to the same release-note thread, preserving both
-the original failure and the subsequent recovery. Deployments with no previous
-baseline or no newly merged pull requests still receive a minimal parent post,
-so validation always has a thread to update.
+and starts release-note generation before automatic E2E. The E2E workflow then
+posts its existing `WEB E2E passed` or `WEB E2E failed` result to the production
+CI wave, correlated to the deployment by its canonical GitHub run ID. Manual
+recovery posts the same CI-wave result against the selected canonical deploy.
+No validation result is attached to release notes.
 
 The reusable staging and production E2E workflows retain one deliberately
 narrow compatibility entry point for the backend Release Bus while frontend
@@ -98,15 +86,14 @@ same deployment concurrency lock. Manual callers cannot use this entry point.
 - All groups use `cancel-in-progress: false`; queued work is not evidence that
   an earlier running workflow may be cancelled.
 - A failed build or verifier run cannot reach deployment credentials.
-- CI-wave production notifications distinguish deployment from validation:
-  build/verifier/deploy failures produce a deployment failure, a successful
-  deploy publishes release notes, and automatic E2E adds a threaded validated
-  or invalid reply afterward.
+- CI-wave notifications preserve separate deploy and `web_e2e` results for
+  staging and production. Automatic and manual E2E results correlate to the
+  canonical deployment run ID.
 - A production target outside current `main` history or a downgrade rejection
   requires a fresh explicit production decision; do not bypass the guard.
-- A successful deploy with failed E2E is reported as deployed but unvalidated.
-  A later canonical manual E2E run records a separate recovery result rather
-  than rewriting the automatic run's result.
+- A successful deploy with failed E2E remains recorded as deployed, followed by
+  a failed E2E reply in the environment CI wave. A later canonical manual E2E
+  run posts its own result rather than rewriting the automatic run.
 
 The former frontend Release Bus integration is retained for historical and
 restoration reference under

@@ -25,6 +25,7 @@ describe("serialized post-deploy E2E", () => {
       stagingDeploy.workflow,
       "automatic-staging-e2e",
       "deploy-staging",
+      "notify-staging-outcome",
       "./.github/workflows/staging-e2e.yml",
     ],
     [
@@ -32,17 +33,26 @@ describe("serialized post-deploy E2E", () => {
       productionDeploy.workflow,
       "automatic-production-e2e",
       "build-upload-deploy",
+      "notify-production-deployment",
       "./.github/workflows/production-e2e.yml",
     ],
   ])(
     "keeps the %s environment-owning workflow open through automatic E2E",
-    (_environment, deploy, e2eJobName, deployJobName, workflowPath) => {
+    (
+      _environment,
+      deploy,
+      e2eJobName,
+      deployJobName,
+      notificationJobName,
+      workflowPath
+    ) => {
       expect(deploy.jobs[e2eJobName]).toMatchObject({
-        needs: deployJobName,
+        needs: [deployJobName, notificationJobName],
         uses: workflowPath,
         with: {
           trusted_deployed_sha: "${{ github.sha }}",
           canonical_deploy_call: true,
+          parent_deploy_run_id: "${{ github.run_id }}",
         },
       });
     }
@@ -222,37 +232,20 @@ describe("serialized post-deploy E2E", () => {
     }
   );
 
-  it("records manual production revalidation against the original deployment", () => {
-    const job = productionE2e.workflow.jobs.readonly;
-    const notifierCheckout = job.steps.find(
+  it("posts manual production E2E to the CI wave against the original deployment", () => {
+    const notificationJob = productionE2e.workflow.jobs["notify-ci-wave"];
+    const notification = notificationJob.steps.find(
       (step: { name?: string }) =>
-        step.name === "Check out trusted notification script"
-    );
-    const notification = job.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Record manual production revalidation outcome"
+        step.name === "Post production WEB validation outcome"
     );
 
-    expect(notification.if).toContain("inputs.trusted_deployed_sha == ''");
-    expect(notification.env.CI_PIPELINES_NOTIFICATION_TYPE).toBe(
-      "release_validation"
+    expect(notification.env.CI_PIPELINES_ALERT_TYPE).toBe("web_e2e");
+    expect(notification.env.CI_PIPELINES_PARENT_DEPLOY_RUN_ID).toBe(
+      "${{ inputs.parent_deploy_run_id || inputs.automatic_deploy_run_id }}"
     );
-    expect(notification.env.CI_PIPELINES_VALIDATION_MODE).toBe("manual");
-    expect(notification.env.CI_PIPELINES_TRIGGERED_BY_GITHUB_LOGIN).toBe(
-      "${{ github.triggering_actor }}"
-    );
-    expect(notification.env.CI_RELEASE_GROUP_ID).toBe(
-      "${{ github.repository }}:${{ inputs.automatic_deploy_run_id }}"
-    );
-    expect(notification.env.CI_PIPELINES_SHA).toBe(
-      "${{ steps.source.outputs.sha }}"
-    );
-    expect(notifierCheckout.with.ref).toBe("${{ github.workflow_sha }}");
-    expect(notifierCheckout.with["sparse-checkout"]).toBe(
-      "scripts/notify-ci-wave.mjs"
-    );
-    expect(notification.run).toBe(
-      "node .workflow-control/scripts/notify-ci-wave.mjs"
+    expect(notification.env.CI_PIPELINES_VALIDATION_PACK).toBe("all");
+    expect(notification.env).not.toHaveProperty(
+      "CI_PIPELINES_NOTIFICATION_TYPE"
     );
   });
 
@@ -268,10 +261,12 @@ describe("serialized post-deploy E2E", () => {
     );
   });
 
-  it("passes only the staging E2E secrets across the reusable boundary", () => {
+  it("passes only the required E2E and CI-wave secrets across reusable boundaries", () => {
     const call = stagingDeploy.workflow.jobs["automatic-staging-e2e"];
 
     expect(call.secrets).toEqual({
+      CI_PIPELINES_ALERT_API_AUTH: "${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}",
+      CI_PIPELINES_ALERT_SECRET: "${{ secrets.CI_PIPELINES_ALERT_SECRET }}",
       STAGING_AUTH: "${{ secrets.STAGING_AUTH }}",
       PLAYWRIGHT_STAGING_ACCESS_CODE:
         "${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}",
@@ -283,5 +278,14 @@ describe("serialized post-deploy E2E", () => {
     expect(declaredSecrets.PLAYWRIGHT_STAGING_ACCESS_CODE).toEqual(
       expect.objectContaining({ required: true })
     );
+    expect(declaredSecrets.CI_PIPELINES_ALERT_SECRET).toEqual(
+      expect.objectContaining({ required: true })
+    );
+    expect(
+      productionDeploy.workflow.jobs["automatic-production-e2e"].secrets
+    ).toEqual({
+      CI_PIPELINES_ALERT_API_AUTH: "${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}",
+      CI_PIPELINES_ALERT_SECRET: "${{ secrets.CI_PIPELINES_ALERT_SECRET }}",
+    });
   });
 });

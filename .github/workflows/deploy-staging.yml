@@ -558,23 +558,27 @@ jobs:
 
   automatic-staging-e2e:
     name: Automatic staging E2E
-    needs: deploy-staging
+    needs:
+      - deploy-staging
+      - notify-staging-outcome
     uses: ./.github/workflows/staging-e2e.yml
     with:
       trusted_deployed_sha: ${{ github.sha }}
       canonical_deploy_call: true
+      parent_deploy_run_id: ${{ github.run_id }}
       pack: all
     secrets:
+      CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+      CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
       STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
       PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
 
   notify-staging-outcome:
-    name: Notify complete staging pipeline outcome
+    name: Notify staging deployment outcome
     if: always()
     needs:
       - build-staging-artifact
       - deploy-staging
-      - automatic-staging-e2e
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -592,17 +596,17 @@ jobs:
       - name: Notify CI wave about failure
         if: >-
           (needs.build-staging-artifact.result != 'success' ||
-          needs.deploy-staging.result != 'success' ||
-          needs.automatic-staging-e2e.result != 'success') &&
+          needs.deploy-staging.result != 'success') &&
           hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
           CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_ALERT_TYPE: deploy
           CI_PIPELINES_TARGET_ENV: staging
           CI_PIPELINES_STATUS: failure
-          CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline is broken!!!"
+          CI_PIPELINES_TITLE: "WEB deploy failed"
           CI_PIPELINES_ENVIRONMENT: staging
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ github.sha }}
@@ -612,16 +616,16 @@ jobs:
         if: >-
           needs.build-staging-artifact.result == 'success' &&
           needs.deploy-staging.result == 'success' &&
-          needs.automatic-staging-e2e.result == 'success' &&
           hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
           CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_ALERT_TYPE: deploy
           CI_PIPELINES_TARGET_ENV: staging
           CI_PIPELINES_STATUS: success
-          CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline complete"
+          CI_PIPELINES_TITLE: "WEB deploy complete"
           CI_PIPELINES_ENVIRONMENT: staging
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ github.sha }}
