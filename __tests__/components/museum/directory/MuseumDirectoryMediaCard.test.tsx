@@ -119,6 +119,7 @@ describe("MuseumDirectoryMediaStage", () => {
     await user.click(imageGate);
     const image = screen.getByRole("img", { name: presentation.altText });
     expect(image).toHaveAttribute("src", presentation.mediaUrl);
+    expect(image).toHaveClass("tw-h-full", "tw-w-full", "tw-object-contain");
   });
 
   it("shows the governed presentation image on the artist card", async () => {
@@ -155,6 +156,11 @@ describe("MuseumDirectoryMediaStage", () => {
     expect(
       screen.getByRole("img", { name: presentation.altText })
     ).toHaveAttribute("src", presentation.mediaUrl);
+    expect(
+      screen
+        .getByRole("img", { name: presentation.altText })
+        .closest(".tw-aspect-\\[4\\/3\\]")
+    ).toBeInTheDocument();
   });
 
   it("fills and centers metadata-only states in the directory media frame", () => {

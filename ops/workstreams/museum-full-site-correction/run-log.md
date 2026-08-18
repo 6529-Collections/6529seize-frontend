@@ -369,3 +369,30 @@ comes first; acquisition and accession follow.` before the next hosted lane
   browser. All 22 checks had the expected heading, intact media, bounded width,
   and no soft-404. Retained report SHA-256:
   `bb4c318d2a4a4432859f4a659b8a493a551c930e84cc2a1d8d824e2a1e845794`.
+
+## 2026-08-18T20:10:00Z - Acquisitions and Artists balancing follow-up
+
+- Audited the live Acquisitions and Artists indexes at desktop width. Native
+  source aspect ratios caused visibly unequal image boxes and cascading row
+  heights on both primary Museum pages.
+- Implemented a fixed 4:5 desktop acquisition stage, a compact 4:3 responsive
+  acquisition stage, and a 4:3 artist-directory stage, preserving complete
+  images without cropping. Acquisition cards now share equal heights; the
+  Works directory keeps its prior source-ratio behavior.
+- Added component assertions and read-only browser contracts for exact stage
+  counts and ratios. Focused unit tests, changed lint, and changed typecheck
+  pass. Initial local browser checks at 1440 and 390 pixels show no horizontal
+  overflow and the expected 3 acquisition and 21 artist stages.
+- Completed the full-page visual sweep at desktop, tablet, and mobile widths.
+  The responsive acquisition stage is 4:5 only with the three-column desktop
+  composition and 4:3 below it; every artist stage remains 4:3. The deterministic
+  release acceptance suite passes all three owned viewports.
+- The acceptance suite exposed that a responsive Magnum derivative was visually
+  hidden by overflow but retained bounds taller than its frame. Added an
+  explicit full-height proposal-image container; all principal media now remain
+  geometrically within their stages.
+- Two clean-build attempts passed repository lint, optimized compilation,
+  TypeScript, and page-data collection. Both encountered the same unchanged
+  `/museum/network/about/governance` static-generation timeout; the second was
+  stopped after the duplicate infrastructure condition. Hosted exact-head CI
+  will provide the authoritative full-build result.

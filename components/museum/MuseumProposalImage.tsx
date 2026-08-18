@@ -26,6 +26,7 @@ export function MuseumProposalImage({
   eager = false,
   requireIntentForLargeSource = true,
   optimizeSource = false,
+  containerClassName,
   className,
 }: {
   readonly src: string;
@@ -47,6 +48,7 @@ export function MuseumProposalImage({
    * browser delivery and avoids transferring a multi-megabyte original.
    */
   readonly optimizeSource?: boolean;
+  readonly containerClassName?: string;
   readonly className?: string;
 }) {
   const responsiveVariants = [...variants].sort(
@@ -137,7 +139,7 @@ export function MuseumProposalImage({
         ref={focusRevealedMedia}
         tabIndex={-1}
         aria-label={statusMessage}
-        className="tw-outline-none"
+        className={`tw-outline-none ${containerClassName ?? ""}`}
       >
         <span className="tw-sr-only" aria-live="polite">
           {statusMessage}
@@ -173,7 +175,7 @@ export function MuseumProposalImage({
       ref={focusRevealedMedia}
       tabIndex={-1}
       aria-label={statusMessage}
-      className="tw-outline-none"
+      className={`tw-outline-none ${containerClassName ?? ""}`}
     >
       <span className="tw-sr-only" aria-live="polite">
         {statusMessage}

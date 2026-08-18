@@ -212,3 +212,27 @@ AI-training permission.
 
 The Research release is complete on production. No runtime work remains in
 this workstream.
+
+## 2026-08-18 Acquisitions and Artists image-stage balance
+
+- This follow-up starts from frontend main
+  `f3e3032725a87d30aca21cafb554a7a19a541549`; the completed Research release
+  remains unchanged.
+- Production inspection found that both index pages inherited every source
+  image's native aspect ratio. Square, portrait, and landscape works therefore
+  produced uneven image boxes, misaligned titles, and irregular rows.
+- The Acquisitions index now gives all three curated acquisitions a consistent
+  4:5 desktop art stage and a more compact 4:3 stage below the three-column
+  breakpoint. The complete Casey, Magnum, and Keys and Gates images remain
+  visible with `object-fit: contain`.
+- The Artists index now uses a compact 4:3 directory stage for all 21 artists.
+  The source-specific behavior of the separate Works directory is preserved.
+- Initial rendered checks pass at 1440 and 390 pixels: all measured stages
+  have the intended ratio, image and copy baselines are balanced, and neither
+  page has horizontal overflow. Focused component, lint, and changed-TypeScript
+  checks pass. The exact rendered acceptance contract also passes at 1440,
+  820, and 390 pixels. Two local full-build attempts passed lint, compilation,
+  TypeScript, and page-data collection but the unchanged Governance route
+  exceeded the static export's 60-second limit; hosted CI is the authoritative
+  full-build gate. Remaining sequence: ready PR and bots, staging
+  qualification, production deployment, and live desktop/mobile readback.
