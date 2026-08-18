@@ -1,3 +1,4 @@
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -17,6 +18,23 @@ const NAKAMOTO_SECTION_HEADING_CLASS =
 
 const NAKAMOTO_IMAGE_FRAME_CLASS =
   "tw-m-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-2 sm:tw-p-3";
+
+const NAKAMOTO_CALLOUT_CLASS =
+  "tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-5 sm:tw-p-6";
+
+const NAKAMOTO_CHECK_LIST_CLASS = "tw-list-none !tw-pl-0";
+
+function NakamotoCheckListItem({ children }: { readonly children: ReactNode }) {
+  return (
+    <li className="tw-flex tw-items-center tw-gap-3 !tw-pl-0">
+      <CheckCircleIcon
+        aria-hidden="true"
+        className="tw-size-5 tw-flex-none tw-text-emerald-400"
+      />
+      <span className="tw-min-w-0">{children}</span>
+    </li>
+  );
+}
 
 export default function AboutNakamotoThreshold() {
   return (
@@ -188,12 +206,12 @@ export default function AboutNakamotoThreshold() {
         </p>
         <p>It was clear some cards would not hit 300 mints.</p>
         <p>What should we do?</p>
-        <div className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-5 sm:tw-p-6">
+        <div className={NAKAMOTO_CALLOUT_CLASS}>
           <p>
             There was *a lot* of discussion in Discord and basically it boiled
             down to 5 ideas:
           </p>
-          <ul className="tw-list-disc !tw-mt-6">
+          <ul className="!tw-mt-6 tw-list-disc">
             <li>Change the threshold</li>
             <li>Mint fewer times per week</li>
             <li>Airdrop to collectors</li>
@@ -202,12 +220,14 @@ export default function AboutNakamotoThreshold() {
           </ul>
         </div>
         <p>The first one was the easiest.</p>
-        <p>
-          &quot;Sure, I said that, but circumstances change, we have to change
-          with circumstances. Empires rise and fall, major companies go
-          bankrupt, the only sure thing is the heat death of the universe. It
-          can&apos;t be that this is the one immutable&quot;
-        </p>
+        <blockquote className="tw-mx-0 tw-my-6 tw-border-0 !tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-5 tw-italic tw-text-iron-300 sm:tw-pl-6">
+          <p>
+            &quot;Sure, I said that, but circumstances change, we have to change
+            with circumstances. Empires rise and fall, major companies go
+            bankrupt, the only sure thing is the heat death of the universe. It
+            can&apos;t be that this is the one immutable&quot;
+          </p>
+        </blockquote>
         <p>
           I gave this option serious consideration because I do think, in many
           things, people should be flexible and adapt to circumstances.
@@ -356,13 +376,15 @@ export default function AboutNakamotoThreshold() {
           for allocating the airdrops (there is no perfectly fair formula).
         </p>
         <p>I am 100% sure that:</p>
-        <ul>
-          <li>
-            ✅ the happiness of 10-20-30 collectors getting a 0.06529 ETH free
+        <ul className={NAKAMOTO_CHECK_LIST_CLASS}>
+          <NakamotoCheckListItem>
+            the happiness of 10-20-30 collectors getting a 0.06529 ETH free
             airdrop of a card they might have not even wanted
-          </li>
-          <li>...would be much less than...</li>
-          <li>✅ the annoyance of the other 9,500 who did not get it.</li>
+          </NakamotoCheckListItem>
+          <li className="!tw-pl-8">...would be much less than...</li>
+          <NakamotoCheckListItem>
+            the annoyance of the other 9,500 who did not get it.
+          </NakamotoCheckListItem>
         </ul>
         <p>
           And, in practice, what it would mean that several times a week we
@@ -445,15 +467,19 @@ export default function AboutNakamotoThreshold() {
           What if I run out of ETH? What if I am lost on a Nepalese hiking
           expedition?
         </p>
-        <p>
-          What we decided is that in SZN7, at the end of the public phase, any
-          cards needed to push edition size to 310 are airdropped to:
-          research.6529.eth
-        </p>
-        <p>
-          This is an account that will work in the context of the tools we are
-          building to support expertise on topics we need to study.
-        </p>
+        <div className={NAKAMOTO_CALLOUT_CLASS}>
+          <p>
+            What we decided is that in SZN7, at the end of the public phase, any
+            cards needed to push edition size to 310 are airdropped to:
+            <strong className="tw-mt-1 tw-block tw-font-semibold tw-text-iron-100">
+              research.6529.eth
+            </strong>
+          </p>
+          <p>
+            This is an account that will work in the context of the tools we are
+            building to support expertise on topics we need to study.
+          </p>
+        </div>
         <p>
           Specifically this account will accrue some weight within the ecosystem
           but will use that weight only by proxy to bring in experts on various
@@ -477,23 +503,33 @@ export default function AboutNakamotoThreshold() {
         title="Evaluating the Outcome"
       >
         <p>I am very happy with this solution.</p>
-        <ul>
-          <li>
-            ✅ It correctly establishes a hierarchy of priorities, of absolutes.
-          </li>
-          <li>✅ It removes dependency on me.</li>
-          <li>✅ It plants a seed for the future.</li>
-          <li>✅ No real negatives.</li>
-          <li>✅ It is aesthetically extremely pleasing.</li>
+        <ul className={NAKAMOTO_CHECK_LIST_CLASS}>
+          <NakamotoCheckListItem>
+            It correctly establishes a hierarchy of priorities, of absolutes.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            It removes dependency on me.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            It plants a seed for the future.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>No real negatives.</NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            It is aesthetically extremely pleasing.
+          </NakamotoCheckListItem>
         </ul>
         <p>I am also very happy with the process.</p>
-        <ul>
-          <li>✅ it took several months to get here, to figure this out.</li>
-          <li>
-            ✅ In the interim, I had to decide what to do and I took the
-            decision to mint out until we find a good permanent solution.
-          </li>
-          <li>✅ Group discussion was very good faith and civilized.</li>
+        <ul className={NAKAMOTO_CHECK_LIST_CLASS}>
+          <NakamotoCheckListItem>
+            it took several months to get here, to figure this out.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            In the interim, I had to decide what to do and I took the decision
+            to mint out until we find a good permanent solution.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            Group discussion was very good faith and civilized.
+          </NakamotoCheckListItem>
         </ul>
       </NakamotoEditorialSection>
       <NakamotoEditorialSection
@@ -529,15 +565,23 @@ export default function AboutNakamotoThreshold() {
           driven. It goes like this.
         </p>
         <p>This is the cycle:</p>
-        <ul>
-          <li>
-            ✅ Collectors mint incredible art from great artists, beautifully
+        <ul className={NAKAMOTO_CHECK_LIST_CLASS}>
+          <NakamotoCheckListItem>
+            Collectors mint incredible art from great artists, beautifully
             curated.
-          </li>
-          <li>✅ Art enters the public domain.</li>
-          <li>✅ We (voluntarily) build software also in the public domain.</li>
-          <li>✅ Sometimes, the art will support science.</li>
-          <li>✅ [Redacted] A 4th public good we will show soon.</li>
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            Art enters the public domain.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            We (voluntarily) build software also in the public domain.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            Sometimes, the art will support science.
+          </NakamotoCheckListItem>
+          <NakamotoCheckListItem>
+            [Redacted] A 4th public good we will show soon.
+          </NakamotoCheckListItem>
         </ul>
         <p>Was lowering the mint cost an option at all?</p>
         <p>

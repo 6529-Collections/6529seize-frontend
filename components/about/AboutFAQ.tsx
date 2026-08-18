@@ -1,20 +1,31 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import type { ReactNode } from "react";
+
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 
-const FAQ_CONTENT_CLASS = [
-  "tw-max-w-4xl tw-px-1 tw-py-10 tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-px-2 sm:tw-py-12",
+const FAQ_EDITORIAL_GRID_CLASS =
+  "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
+
+const FAQ_CONTENT_CLASS = "tw-text-base tw-leading-7 tw-text-iron-300";
+
+const FAQ_EDITORIAL_BODY_CLASS = [
+  "tw-min-w-0",
   "[&_a]:tw-break-words [&_a]:tw-rounded-sm [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 [&_a:hover]:tw-text-primary-200 [&_a:focus-visible]:tw-outline-none [&_a:focus-visible]:tw-ring-2 [&_a:focus-visible]:tw-ring-primary-400",
   "[&_dd]:tw-m-0 [&_dl]:tw-mb-0 [&_dl]:tw-mt-5 [&_dt]:tw-mb-2 [&_dt]:tw-mt-5 [&_dt]:tw-font-semibold [&_dt]:tw-text-iron-100",
   "[&_em]:tw-text-iron-200 [&_p]:tw-mb-0 [&_p]:tw-mt-4 [&_strong]:tw-font-semibold [&_strong]:tw-text-iron-100",
   "[&_h3]:tw-mb-0 [&_h3]:tw-mt-8 [&_h3]:tw-text-lg [&_h3]:tw-font-semibold [&_h3]:tw-leading-7 [&_h3]:tw-text-iron-100",
+  "[&_ol]:tw-mb-0 [&_ol]:tw-mt-4 [&_ol]:tw-space-y-2 [&_ol]:tw-pl-6 [&_ol>li]:tw-pl-1 [&_ol>li::marker]:tw-font-semibold [&_ol>li::marker]:tw-text-iron-500",
   "[&_ul]:tw-mb-0 [&_ul]:tw-mt-4 [&_ul]:tw-space-y-2 [&_ul]:tw-pl-5 [&_ul>li]:tw-pl-1 [&_ul>li::marker]:tw-text-iron-600",
+  "[&>dl:first-child]:!tw-mt-0 [&>h3:first-child]:!tw-mt-0 [&>ol:first-child]:!tw-mt-0 [&>p:first-child]:!tw-mt-0 [&>ul:first-child]:!tw-mt-0",
 ].join(" ");
 
 const FAQ_QUESTION_HEADING_CLASS =
-  "tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl";
+  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+
+const FAQ_EDITORIAL_SECTION_CLASS = `${FAQ_EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12`;
 
 const FAQ_IMAGE_FRAME_CLASS =
   "tw-mx-0 tw-mb-0 tw-mt-6 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-2 sm:tw-p-3";
@@ -62,11 +73,8 @@ export default function AboutFAQ() {
 
       <div className={FAQ_CONTENT_CLASS}>
         <section>
-          <ul className="tw-m-0 tw-list-none tw-space-y-10 !tw-pl-0 sm:tw-space-y-12">
-            <li className="tw-pl-1 sm:tw-pl-2">
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                How do I get started?
-              </h2>
+          <ul className="tw-m-0 tw-list-none !tw-p-0">
+            <FAQQuestion title="How do I get started?">
               <p>Getting started is simple:</p>
               <ol>
                 <li>
@@ -83,10 +91,9 @@ export default function AboutFAQ() {
                 From there, you can chat in Waves, vote, build reputation, and
                 participate in the network.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>What are Waves?</h2>
+            <FAQQuestion title="What are Waves?">
               <p>
                 Waves are the communication and decision-making channels inside
                 the 6529 coordination layer. They are functionally similar to
@@ -112,12 +119,9 @@ export default function AboutFAQ() {
                   width={2626}
                 />
               </figure>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                What is my profile?
-              </h2>
+            <FAQQuestion title="What is my profile?">
               <p>
                 Your profile is your identity in the network: it shows your user
                 name and your profile picture. Here you can explore the activity
@@ -167,12 +171,9 @@ export default function AboutFAQ() {
                   </ul>
                 </dd>
               </dl>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                How does the system work overall?
-              </h2>
+            <FAQQuestion title="How does the system work overall?">
               <p>6529 runs on a simple flywheel:</p>
               <p>
                 <strong>
@@ -192,12 +193,9 @@ export default function AboutFAQ() {
                 </li>
               </ul>
               <p>As this loop grows, the network becomes more powerful.</p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                Why do Memes matter?
-              </h2>
+            <FAQQuestion title="Why do Memes matter?">
               <p>
                 New systems need new cultures. The Memes exist to spread ideas
                 like:
@@ -211,12 +209,9 @@ export default function AboutFAQ() {
                 The goal is not just funding public goods. The goal is cultural
                 impact at scale.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                What are The Memes?
-              </h2>
+            <FAQQuestion title="What are The Memes?">
               <p>
                 The Memes are a community curated NFT collection focused on
                 decentralization, digital rights, and open systems.
@@ -235,12 +230,9 @@ export default function AboutFAQ() {
                 selected through community TDH voting in &quot;The Memes - Main
                 Stage&quot; wave.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                Why would I collect Meme Cards?
-              </h2>
+            <FAQQuestion title="Why would I collect Meme Cards?">
               <p>Collecting The Memes lets you:</p>
               <ul>
                 <li>Earn TDH over time and build influence in the network.</li>
@@ -251,12 +243,9 @@ export default function AboutFAQ() {
                 Holding longer increases your influence and alignment with the
                 network.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                How do Meme drops work?
-              </h2>
+            <FAQQuestion title="How do Meme drops work?">
               <ul>
                 <li>Drops occur Monday, Wednesday, and Friday.</li>
                 <li>
@@ -267,12 +256,9 @@ export default function AboutFAQ() {
                   You can mint during the drop or buy on secondary markets.
                 </li>
               </ul>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                Do Meme Cards have utility?
-              </h2>
+            <FAQQuestion title="Do Meme Cards have utility?">
               <p>
                 All the Meme Cards generate TDH which is central in the process
                 of curating and deciding which artworks we select to mint among
@@ -284,12 +270,9 @@ export default function AboutFAQ() {
                 can use the art freely but only those who hold the NFT generate
                 TDH.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                How do I participate beyond collecting?
-              </h2>
+            <FAQQuestion title="How do I participate beyond collecting?">
               <p>You don&apos;t need to buy anything to participate.</p>
               <p>You can:</p>
               <ul>
@@ -300,12 +283,9 @@ export default function AboutFAQ() {
                 <li>Coordinate with others on non-TDH votes.</li>
               </ul>
               <p>Over time, participation builds reputation and influence.</p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                What is the long-term vision?
-              </h2>
+            <FAQQuestion title="What is the long-term vision?">
               <p>
                 6529 aims for nation-scale impact. The goal is to build a
                 global, decentralized economy the size of South Korea or NYC,
@@ -320,12 +300,9 @@ export default function AboutFAQ() {
                 This is a new model for organizing society and economic activity
                 globally.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                How does everything fit together?
-              </h2>
+            <FAQQuestion title="How does everything fit together?">
               <ul>
                 <li>Memes create culture and fund the system.</li>
                 <li>TDH measures alignment.</li>
@@ -336,12 +313,9 @@ export default function AboutFAQ() {
               <p>
                 6529 is a new global coordination layer for the modern economy.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                What are Gradients?
-              </h2>
+            <FAQQuestion title="What are Gradients?">
               <p>
                 6529 Gradients is an NFT collection of 101 grayscale variations
                 of the 6529 logo, released in October 2021. No additional NFTs
@@ -368,10 +342,9 @@ export default function AboutFAQ() {
                   Gradients.
                 </a>
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>What is NextGen?</h2>
+            <FAQQuestion title="What is NextGen?">
               <p>
                 NextGen is an on-chain generative art NFT platform on Ethereum.
                 It supports 6529&apos;s goals around art experimentation and
@@ -388,10 +361,9 @@ export default function AboutFAQ() {
                 happen only when the work meets a high bar for quality and
                 originality.
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>What are ReMemes?</h2>
+            <FAQQuestion title="What are ReMemes?">
               <p>
                 ReMemes are community-created derivatives of The Memes. Anyone
                 can make a ReMeme. No approval is needed.
@@ -400,12 +372,9 @@ export default function AboutFAQ() {
                 Submit and explore them on the{" "}
                 <Link href="/rememes">ReMemes platform.</Link>
               </p>
-            </li>
+            </FAQQuestion>
 
-            <li>
-              <h2 className={FAQ_QUESTION_HEADING_CLASS}>
-                What is the Meme Lab?
-              </h2>
+            <FAQQuestion title="What is the Meme Lab?">
               <p>
                 The Meme Lab is an experimental CC0 contract for artists who
                 have already minted a Meme Card. It lets them create and mint
@@ -423,12 +392,14 @@ export default function AboutFAQ() {
                 </a>
               </p>
               <p>The economics of each drop are determined by the artist.</p>
-            </li>
+            </FAQQuestion>
           </ul>
         </section>
 
-        <section className="tw-mt-12 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-10 sm:tw-mt-16 sm:tw-pt-12">
-          <h2 className={FAQ_QUESTION_HEADING_CLASS}>Bonus track</h2>
+        <FAQEditorialSection
+          headingId="faq-bonus-track-heading"
+          title="Bonus track"
+        >
           <p>
             If you want to go deeper into 6529 in book form, your path is{" "}
             <em>Memes Outside: The Book (2nd Edition).</em> It is a living
@@ -450,15 +421,13 @@ export default function AboutFAQ() {
               Memes Outside: The Book (2nd Edition).
             </a>
           </p>
-        </section>
+        </FAQEditorialSection>
 
-        <section
-          className="tw-mt-12 tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-10 sm:tw-mt-16 sm:tw-pt-12"
+        <FAQEditorialSection
+          headingId="what-is-a-wallet-heading"
           id="what-is-a-wallet"
-          tabIndex={-1}
+          title="What is a Wallet?"
         >
-          <h2 className={FAQ_QUESTION_HEADING_CLASS}>What is a Wallet?</h2>
-
           <h3>What is a crypto wallet?</h3>
           <p>
             A crypto wallet is a tool that allows you to store, send, and
@@ -585,8 +554,53 @@ export default function AboutFAQ() {
               wallet.
             </li>
           </ul>
-        </section>
+        </FAQEditorialSection>
       </div>
     </article>
+  );
+}
+
+function FAQQuestion({
+  children,
+  title,
+}: {
+  readonly children: ReactNode;
+  readonly title: string;
+}) {
+  return (
+    <li className={`${FAQ_EDITORIAL_SECTION_CLASS} first:tw-border-t-0`}>
+      <div className="lg:tw-sticky lg:tw-top-28">
+        <h2 className={FAQ_QUESTION_HEADING_CLASS}>{title}</h2>
+      </div>
+      <div className={FAQ_EDITORIAL_BODY_CLASS}>{children}</div>
+    </li>
+  );
+}
+
+function FAQEditorialSection({
+  children,
+  headingId,
+  id,
+  title,
+}: {
+  readonly children: ReactNode;
+  readonly headingId: string;
+  readonly id?: string;
+  readonly title: string;
+}) {
+  return (
+    <section
+      aria-labelledby={headingId}
+      className={`${FAQ_EDITORIAL_SECTION_CLASS} ${id ? "tw-scroll-mt-24 focus:tw-outline-none" : ""}`}
+      id={id}
+      tabIndex={id ? -1 : undefined}
+    >
+      <div className="lg:tw-sticky lg:tw-top-28">
+        <h2 className={FAQ_QUESTION_HEADING_CLASS} id={headingId}>
+          {title}
+        </h2>
+      </div>
+      <div className={FAQ_EDITORIAL_BODY_CLASS}>{children}</div>
+    </section>
   );
 }

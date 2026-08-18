@@ -9,8 +9,8 @@ export default function AboutContactUs() {
     <article
       className={`tw-w-full tw-pb-16 tw-text-iron-100 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
-      <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
-        <div className="tw-max-w-4xl">
+      <div className="tw-mx-auto tw-w-full tw-max-w-3xl">
+        <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
           <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
             Contact Us
           </h1>
@@ -31,103 +31,103 @@ export default function AboutContactUs() {
               support@6529.io
             </a>
           </p>
-        </div>
-      </header>
+        </header>
 
-      <section
-        aria-labelledby="alternative-contact-heading"
-        className="tw-max-w-4xl tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-12"
-      >
-        <h2
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
-          id="alternative-contact-heading"
+        <section
+          aria-labelledby="alternative-contact-heading"
+          className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-12"
         >
-          Alternative, but not as good, methods to contact us are:
-        </h2>
-        <ul className="tw-m-0 tw-mt-6 tw-space-y-4 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
-          <li className="tw-pl-1">
-            Trying to get the attention of &#64;
-            <Link
-              className={CONTACT_LINK_CLASS}
-              href="https://x.com/punk6529"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              punk6529
-            </Link>{" "}
-            or &#64;
-            <Link
-              className={CONTACT_LINK_CLASS}
-              href="https://x.com/6529er"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              6529er
-            </Link>{" "}
-            or &#64;
-            <Link
-              className={CONTACT_LINK_CLASS}
-              href="https://x.com/teexels"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              teexels
-            </Link>{" "}
-            on Twitter
-          </li>
-          <li className="tw-pl-1">
-            Trying to get the attention of &#64;
-            <Link
-              className={CONTACT_LINK_CLASS}
-              href="https://x.com/punk6529"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              punk6529
-            </Link>
-            , &#64;
-            <Link
-              className={CONTACT_LINK_CLASS}
-              href="https://x.com/6529er"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              6529er
-            </Link>{" "}
-            or &#64;
-            <Link
-              className={CONTACT_LINK_CLASS}
-              href="https://x.com/teexels"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              teexels
-            </Link>
-          </li>
-        </ul>
-      </section>
+          <h2
+            className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
+            id="alternative-contact-heading"
+          >
+            Alternative, but not as good, methods to contact us are:
+          </h2>
+          <ul className="tw-m-0 tw-mt-6 tw-space-y-4 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
+            <li className="tw-pl-1">
+              Trying to get the attention of &#64;
+              <Link
+                className={CONTACT_LINK_CLASS}
+                href="https://x.com/punk6529"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                punk6529
+              </Link>{" "}
+              or &#64;
+              <Link
+                className={CONTACT_LINK_CLASS}
+                href="https://x.com/6529er"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                6529er
+              </Link>{" "}
+              or &#64;
+              <Link
+                className={CONTACT_LINK_CLASS}
+                href="https://x.com/teexels"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                teexels
+              </Link>{" "}
+              on Twitter
+            </li>
+            <li className="tw-pl-1">
+              Trying to get the attention of &#64;
+              <Link
+                className={CONTACT_LINK_CLASS}
+                href="https://x.com/punk6529"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                punk6529
+              </Link>
+              , &#64;
+              <Link
+                className={CONTACT_LINK_CLASS}
+                href="https://x.com/6529er"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                6529er
+              </Link>{" "}
+              or &#64;
+              <Link
+                className={CONTACT_LINK_CLASS}
+                href="https://x.com/teexels"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                teexels
+              </Link>
+            </li>
+          </ul>
+        </section>
 
-      <section
-        aria-labelledby="postal-address-intro"
-        className="tw-max-w-4xl tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-12"
-      >
-        <p
-          className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-200"
-          id="postal-address-intro"
+        <section
+          aria-labelledby="postal-address-intro"
+          className="tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-12"
         >
-          If, for some strange reason, you would like to send us a letter or
-          postcard, you can do so here:
-        </p>
-        <address className="tw-mt-6 tw-text-base tw-not-italic tw-leading-7 tw-text-iron-300">
-          6529 Collection LLC
-          <br />
-          2810 N Church St
-          <br />
-          #76435 Wilmington, DE 19802-4447
-          <br />
-          United States of America
-        </address>
-      </section>
+          <p
+            className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-200"
+            id="postal-address-intro"
+          >
+            If, for some strange reason, you would like to send us a letter or
+            postcard, you can do so here:
+          </p>
+          <address className="tw-mt-6 tw-text-base tw-not-italic tw-leading-7 tw-text-iron-300">
+            6529 Collection LLC
+            <br />
+            2810 N Church St
+            <br />
+            #76435 Wilmington, DE 19802-4447
+            <br />
+            United States of America
+          </address>
+        </section>
+      </div>
     </article>
   );
 }
