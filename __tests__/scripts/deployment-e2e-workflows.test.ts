@@ -232,6 +232,16 @@ describe("serialized post-deploy E2E", () => {
     }
   );
 
+  it.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])("keeps %s deployed-source caches restore-only", (_environment, e2e) => {
+    const source = e2e.source;
+
+    expect(source).toContain("uses: actions/cache/restore@");
+    expect(source).not.toMatch(/uses:\s+actions\/cache@/u);
+  });
+
   it("posts manual production E2E to the CI wave against the original deployment", () => {
     const notificationJob = productionE2e.workflow.jobs["notify-ci-wave"];
     const notification = notificationJob.steps.find(
