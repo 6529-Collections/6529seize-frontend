@@ -71,9 +71,17 @@ export default function GroupCardCreator({
           </span>
         )}
         {timeAgo && (
-          <span className="tw-ml-2 tw-text-[11px] tw-font-medium tw-text-iron-500">
-            Created {timeAgo}
-          </span>
+          <>
+            <span
+              aria-hidden="true"
+              className="tw-mx-1.5 tw-text-[11px] tw-font-medium tw-text-iron-600"
+            >
+              ·
+            </span>
+            <span className="tw-text-[11px] tw-font-medium tw-text-iron-500">
+              Created {timeAgo}
+            </span>
+          </>
         )}
       </div>
     </div>

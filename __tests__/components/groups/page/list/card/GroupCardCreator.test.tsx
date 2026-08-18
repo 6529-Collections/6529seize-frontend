@@ -23,6 +23,7 @@ describe("GroupCardCreator", () => {
       "href",
       "/alice"
     );
+    expect(screen.getByText("·")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByText("Created 1d")).toBeInTheDocument();
   });
 
