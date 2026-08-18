@@ -80,7 +80,10 @@ describe("instrumentation-client Urban VPN filter", () => {
 
   it("keeps a nearby application error with an additional source frame", () => {
     const beforeSend = loadBeforeSend();
-    const [value] = urbanVpnEvent.exception.values;
+    const value = urbanVpnEvent.exception.values[0];
+    if (!value) {
+      throw new Error("Missing Urban VPN test exception");
+    }
     const event = {
       exception: {
         values: [
@@ -101,6 +104,6 @@ describe("instrumentation-client Urban VPN filter", () => {
       },
     };
 
-    expect(beforeSend(event)).not.toBeNull();
+    expect(beforeSend(event)).toEqual(event);
   });
 });

@@ -10,11 +10,12 @@ const urbanVpnExecutorPath = "app:///executors/200.js";
 const sentryWrapperPath = "app:///_next/static/chunks/2t0pw9wfgr12w.js";
 
 const createUrbanVpnFrames = (
-  executorFunction: "F" | "Z" = "Z"
+  executorFunction: "F" | "Z" = "Z",
+  wrapperPath = sentryWrapperPath
 ): SentryStackFrame[] => [
   {
-    filename: sentryWrapperPath,
-    abs_path: sentryWrapperPath,
+    filename: wrapperPath,
+    abs_path: wrapperPath,
     function: "XMLHttpRequest.r",
     lineno: 7,
     colno: 6173,
@@ -44,6 +45,8 @@ const createUrbanVpnEvent = ({
   mechanismType = "auto.browser.global_handlers.onunhandledrejection",
   handled = false,
   includeHandled = true,
+  includeMechanism = true,
+  includeStacktrace = true,
   frames = createUrbanVpnFrames(),
   additionalException = false,
   extra,
@@ -53,6 +56,8 @@ const createUrbanVpnEvent = ({
   mechanismType?: string | undefined;
   handled?: boolean | undefined;
   includeHandled?: boolean | undefined;
+  includeMechanism?: boolean | undefined;
+  includeStacktrace?: boolean | undefined;
   frames?: SentryStackFrame[] | undefined;
   additionalException?: boolean | undefined;
   extra?: Record<string, unknown> | undefined;
@@ -63,11 +68,15 @@ const createUrbanVpnEvent = ({
       {
         type,
         value,
-        mechanism: {
-          type: mechanismType,
-          ...(includeHandled ? { handled } : {}),
-        },
-        stacktrace: { frames },
+        ...(includeMechanism
+          ? {
+              mechanism: {
+                type: mechanismType,
+                ...(includeHandled ? { handled } : {}),
+              },
+            }
+          : {}),
+        ...(includeStacktrace ? { stacktrace: { frames } } : {}),
       },
       ...(additionalException
         ? [
@@ -94,11 +103,24 @@ describe("Urban VPN executor M_ID filter", () => {
   );
 
   it.each([
+    "app:///_next/static/chunks/next-build-a_123.js",
+    "app:///_next/static/chunks/next-build-b-456.js",
+  ])("does not depend on the build-specific chunk name %s", (wrapperPath) => {
+    const event = createUrbanVpnEvent({
+      frames: createUrbanVpnFrames("Z", wrapperPath),
+    });
+
+    expect(shouldFilterUrbanVpnExecutorMIdError(event)).toBe(true);
+  });
+
+  it.each([
     ["changed message", { value: `${urbanVpnMIdErrorMessage}.` }],
     ["changed type", { type: "Error" }],
     ["changed mechanism", { mechanismType: "generic" }],
     ["handled rejection", { handled: true }],
     ["missing handled state", { includeHandled: false }],
+    ["missing mechanism", { includeMechanism: false }],
+    ["missing stacktrace", { includeStacktrace: false }],
     ["additional exception", { additionalException: true }],
   ])("keeps an event with a %s", (_caseName, overrides) => {
     const event = createUrbanVpnEvent(overrides);
