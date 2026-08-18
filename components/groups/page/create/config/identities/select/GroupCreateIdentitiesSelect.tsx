@@ -38,8 +38,8 @@ export default function GroupCreateIdentitiesSelect({
           <p
             className={
               isModal
-                ? "tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100"
-                : "tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg"
+                ? "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+                : "tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg"
             }
           >
             Search Identity
