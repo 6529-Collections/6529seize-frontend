@@ -13,12 +13,19 @@ import { museumResearchMediaAspectRatio } from "./museumResearchMediaAspectRatio
 export interface MuseumResearchDocumentCardEntry {
   readonly id: string;
   readonly slug: string;
+  readonly href?: string;
   readonly title: string;
   readonly document?: MuseumPublicDocument;
   readonly media?: MuseumMedia;
   readonly kindLabel?: string;
   readonly subjectLabels?: readonly string[];
   readonly description?: string;
+  readonly statusLabel?: string;
+  readonly actionLabel?: string;
+  readonly mediaQualifier?: string;
+  readonly mediaSrcSet?: string;
+  readonly mediaSourceHref?: string;
+  readonly mediaSourceLabel?: string;
 }
 
 export function MuseumResearchDocumentCard({
@@ -30,7 +37,7 @@ export function MuseumResearchDocumentCard({
   readonly kindLabel?: string;
   readonly headingLevel?: 3 | 4;
 }) {
-  const href = museumResearchHref(entry.slug);
+  const href = entry.href ?? museumResearchHref(entry.slug);
   const label =
     kindLabel ??
     entry.kindLabel ??
@@ -44,10 +51,6 @@ export function MuseumResearchDocumentCard({
   const joinedSubject = entry.subjectLabels?.join(" / ");
   const subject = joinedSubject === "" ? undefined : joinedSubject;
   const byline = [label, subject].filter(Boolean).join(" / ");
-  const mediaStatus: { status?: string } = {};
-  if (entry.description !== undefined) {
-    mediaStatus.status = entry.description;
-  }
   const mediaAspectRatioProps: { aspectRatio?: number } = {};
   if (entry.media !== undefined) {
     const aspectRatio = museumResearchMediaAspectRatio(
@@ -60,6 +63,15 @@ export function MuseumResearchDocumentCard({
   }
 
   const altText = entry.media?.altText?.trim();
+  const qualifier = [entry.mediaQualifier, entry.media?.credit.creditLine]
+    .filter((value): value is string => value !== undefined && value.length > 0)
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .join(" · ");
+  const qualifierProps = qualifier.length === 0 ? {} : { qualifier };
+  const srcSetProps =
+    entry.mediaSrcSet === undefined ? {} : { srcSet: entry.mediaSrcSet };
+  const hasMediaSource =
+    entry.mediaSourceHref !== undefined && entry.mediaSourceLabel !== undefined;
 
   return (
     <article className="tw-min-w-0">
@@ -76,35 +88,61 @@ export function MuseumResearchDocumentCard({
           href={href}
           title={entry.title}
           byline={byline}
-          {...mediaStatus}
+          {...qualifierProps}
+          {...srcSetProps}
           {...mediaAspectRatioProps}
         />
       )}
-      {entry.media === undefined ? (
-        <div>
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300">
-            {label}
+      <div className={entry.media === undefined ? undefined : "tw-mt-4"}>
+        {hasMediaSource ? (
+          <a
+            href={entry.mediaSourceHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:tw-text-primary-200 tw-mb-3 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {entry.mediaSourceLabel}
+          </a>
+        ) : null}
+        {entry.media === undefined ? (
+          <>
+            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300">
+              {label}
+            </p>
+            <Heading className="tw-m-0 tw-mt-2 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-50">
+              <Link
+                href={href}
+                className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                {entry.title}
+              </Link>
+            </Heading>
+          </>
+        ) : null}
+        {entry.statusLabel === undefined ? null : (
+          <p className="tw-m-0 tw-mb-3 tw-inline-flex tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-200">
+            {entry.statusLabel}
           </p>
-          <Heading className="tw-m-0 tw-mt-2 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-50">
-            <Link
-              href={href}
-              className="hover:tw-text-primary-200 tw-text-inherit tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            >
-              {entry.title}
-            </Link>
-          </Heading>
-          {subject === undefined ? null : (
-            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-300">
-              {subject}
-            </p>
-          )}
-          {entry.description === undefined ? null : (
-            <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-300">
-              {entry.description}
-            </p>
-          )}
-        </div>
-      ) : null}
+        )}
+        {subject === undefined ? null : (
+          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-300">
+            {subject}
+          </p>
+        )}
+        {entry.description === undefined ? null : (
+          <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-300">
+            {entry.description}
+          </p>
+        )}
+        {entry.actionLabel === undefined ? null : (
+          <Link
+            href={href}
+            className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {entry.actionLabel}
+          </Link>
+        )}
+      </div>
     </article>
   );
 }
