@@ -426,13 +426,14 @@ comes first; acquisition and accession follow.` before the next hosted lane
   release proceeded under the recorded owner-approved temporary E2E waiver
   because the failure was outside the Museum diff and all scoped acceptance was
   green.
-- Waiver record: the repository owner authorized this one release under the
-  live `STAGING: OFF` / `PRODUCTION: OFF`, `changeable: true` Release Bus manual
-  fallback, identified by immutable main
+- Waiver record: the 6529 Collections repository owner authorized this one
+  release under the live `STAGING: OFF` / `PRODUCTION: OFF`, `changeable: true`
+  Release Bus manual fallback. Its stable identifier is immutable release main
   `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`. The exception covered only the
   unrelated `/the-memes/mint` staging media-pack failure and the pre-existing
   Meme Lab activity-table overflow found on rerun. It covered no Museum check
-  or acceptance finding and expired on successful automatic Production E2E
+  or acceptance finding. Its validity period began at the terminal result of
+  staging E2E `32184698162` and expired on successful automatic Production E2E
   [`32187596393`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32187596393).
   Retained fallback evidence: staging deploy
   [`32183553695`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32183553695),

@@ -256,13 +256,14 @@ this workstream.
   overflow of the Meme Lab activity table. The active owner-approved serialized
   fallback explicitly covered this non-Museum baseline; no Museum finding was
   waived.
-- Waiver traceability: the repository owner authorized a single-release manual
-  fallback under the `STAGING: OFF` / `PRODUCTION: OFF`, `changeable: true`
-  Release Bus control recorded for exact release
-  `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`. Its scope was limited to the
+- Waiver traceability: the 6529 Collections repository owner authorized a
+  single-release manual fallback under the `STAGING: OFF` / `PRODUCTION: OFF`,
+  `changeable: true` Release Bus control. Its stable identifier is immutable
+  release main `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`. Its scope was limited to the
   unrelated staging media-pack observations on `/the-memes/mint` and the Meme
   Lab activity table; it did not waive any Museum test or product finding. The
-  authorization expired when automatic Production E2E
+  validity period began when staging E2E `32184698162` reached its terminal
+  result and expired when automatic Production E2E
   [`32187596393`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32187596393)
   succeeded. Retained fallback evidence is staging deploy
   [`32183553695`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32183553695)
