@@ -13,7 +13,14 @@ import { AuthContext } from "@/components/auth/Auth";
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
-import { useContext, useMemo } from "react";
+import {
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 
 export enum GroupCreateWalletsType {
   INCLUDE = "INCLUDE",
@@ -40,7 +47,7 @@ export default function GroupCreateWallets({
   readonly walletsLimit: number;
   readonly iAmIncluded: boolean;
   readonly sources: GroupCreateWalletSources;
-  readonly setSources: (sources: GroupCreateWalletSources) => void;
+  readonly setSources: Dispatch<SetStateAction<GroupCreateWalletSources>>;
   readonly setWallets: (wallets: string[] | null) => void;
 }) {
   const { connectedProfile } = useContext(AuthContext);
@@ -67,7 +74,16 @@ export default function GroupCreateWallets({
   const toKey = (identity: CommunityMemberMinimal) =>
     identity.wallet.toLowerCase();
 
-  const updateSources = (nextSources: GroupCreateWalletSources) => {
+  const sourcesRef = useRef(sources);
+  useEffect(() => {
+    sourcesRef.current = sources;
+  }, [sources]);
+
+  const updateSources = (
+    update: (previous: GroupCreateWalletSources) => GroupCreateWalletSources
+  ) => {
+    const nextSources = update(sourcesRef.current);
+    sourcesRef.current = nextSources;
     const combined = [
       ...(nextSources.uploadedWallets ?? []),
       ...(nextSources.emmaWallets ?? []),
@@ -84,49 +100,51 @@ export default function GroupCreateWallets({
       combined.push(primaryWallet);
     }
     const nextWallets = dedupeWallets(combined);
-    setSources(nextSources);
+    setSources(() => nextSources);
     setWallets(nextWallets.length ? nextWallets : null);
   };
 
   const onIdentitySelect = (identity: CommunityMemberMinimal) => {
-    const target = toKey(identity);
-    const selectedIdentities = sources.selectedIdentities.some(
-      (selectedIdentity) => toKey(selectedIdentity) === target
-    )
-      ? sources.selectedIdentities.filter(
-          (selectedIdentity) => toKey(selectedIdentity) !== target
-        )
-      : [...sources.selectedIdentities, identity];
-    updateSources({ ...sources, selectedIdentities });
+    updateSources((previous) => {
+      const target = toKey(identity);
+      const selectedIdentities = previous.selectedIdentities.some(
+        (selectedIdentity) => toKey(selectedIdentity) === target
+      )
+        ? previous.selectedIdentities.filter(
+            (selectedIdentity) => toKey(selectedIdentity) !== target
+          )
+        : [...previous.selectedIdentities, identity];
+      return { ...previous, selectedIdentities };
+    });
   };
 
   const onUploadedWalletsChange = (newWallets: string[] | null) =>
-    updateSources({
-      ...sources,
+    updateSources((previous) => ({
+      ...previous,
       uploadedWallets: newWallets ? dedupeWallets(newWallets) : null,
-    });
+    }));
 
   const onEmmaWalletsChange = (newWallets: string[] | null) =>
-    updateSources({
-      ...sources,
+    updateSources((previous) => ({
+      ...previous,
       emmaWallets: newWallets ? dedupeWallets(newWallets) : null,
-    });
+    }));
 
   const removeWallets = () =>
-    updateSources({
+    updateSources(() => ({
       uploadedWallets: null,
       emmaWallets: null,
       selectedIdentities: [],
-    });
+    }));
 
   const onRemove = (wallet: string) => {
     const target = wallet.toLowerCase();
-    updateSources({
-      ...sources,
-      selectedIdentities: sources.selectedIdentities.filter(
+    updateSources((previous) => ({
+      ...previous,
+      selectedIdentities: previous.selectedIdentities.filter(
         (identity) => identity.wallet.toLowerCase() !== target
       ),
-    });
+    }));
   };
 
   const isOverLimit = (wallets?.length ?? 0) > walletsLimit;

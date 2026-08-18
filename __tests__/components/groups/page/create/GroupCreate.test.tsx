@@ -1,5 +1,5 @@
 import React from "react";
-import { render, act, waitFor } from "@testing-library/react";
+import { render, act, waitFor, screen } from "@testing-library/react";
 import GroupCreate from "@/components/groups/page/create/GroupCreate";
 import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
@@ -49,7 +49,6 @@ jest.mock(
 );
 
 const mockedUseQuery = useQuery as jest.Mock;
-mockedUseQuery.mockReturnValue({ isFetching: false, data: null });
 
 function renderComponent(ctx: any) {
   mockedUseQuery
@@ -64,21 +63,67 @@ function renderComponent(ctx: any) {
 
 describe("GroupCreate", () => {
   beforeEach(() => {
+    mockedUseQuery.mockReset();
+    mockedUseQuery.mockReturnValue({
+      isFetching: false,
+      isError: false,
+      data: null,
+      refetch: jest.fn(),
+    });
+    includeProps = null;
+    nameProps = null;
     configProps = null;
     configWalletHistory = [];
   });
 
   it("shows loading indicator until edit data is available", () => {
     mockedUseQuery
-      .mockReturnValueOnce({ isFetching: true, data: undefined })
-      .mockReturnValueOnce({ isFetching: false, data: undefined })
-      .mockReturnValueOnce({ isFetching: false, data: undefined });
-    const { getByText } = render(
+      .mockReturnValueOnce({
+        isFetching: true,
+        isError: false,
+        data: undefined,
+        refetch: jest.fn(),
+      })
+      .mockReturnValueOnce({
+        isFetching: false,
+        isError: false,
+        data: undefined,
+        refetch: jest.fn(),
+      })
+      .mockReturnValueOnce({
+        isFetching: false,
+        isError: false,
+        data: undefined,
+        refetch: jest.fn(),
+      });
+    render(
       <AuthContext.Provider value={{ connectedProfile: null } as any}>
         <GroupCreate edit="group-1" onCompleted={jest.fn()} />
       </AuthContext.Provider>
     );
-    expect(getByText("Loading...", { selector: "div" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading group...");
+  });
+
+  it("shows a retryable error when edit data cannot load", () => {
+    const refetch = jest.fn();
+    mockedUseQuery.mockReturnValueOnce({
+      isFetching: false,
+      isError: true,
+      data: undefined,
+      refetch,
+    });
+
+    render(
+      <AuthContext.Provider value={{ connectedProfile: null } as any}>
+        <GroupCreate edit="group-1" onCompleted={jest.fn()} />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Unable to load this group"
+    );
+    screen.getByRole("button", { name: "Retry" }).click();
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it("allows including primary wallet", () => {
@@ -96,6 +141,20 @@ describe("GroupCreate", () => {
       </AuthContext.Provider>
     );
     expect(includeProps.iAmIncluded).toBe(true);
+  });
+
+  it("tracks a primary wallet even when the profile wallet list is absent", () => {
+    const ctx = {
+      connectedProfile: { primary_wallet: "0xA" },
+    } as any;
+    renderComponent(ctx);
+
+    act(() => includeProps.setIAmIncluded(true));
+    expect(includeProps.iAmIncluded).toBe(true);
+
+    act(() => includeProps.setIAmIncluded(false));
+    expect(includeProps.iAmIncluded).toBe(false);
+    expect(configProps.wallets).toEqual([]);
   });
 
   it("removes every connected wallet and source when Include me is turned off", () => {

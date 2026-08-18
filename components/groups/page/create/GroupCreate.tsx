@@ -19,6 +19,10 @@ import type { GroupCreateWalletSources } from "./config/wallets/GroupCreateWalle
 import GroupCreateHeader from "./GroupCreateHeader";
 import GroupCreateName from "./GroupCreateName";
 import GroupCreateWrapper from "./GroupCreateWrapper";
+import Button from "@/components/utils/button/Button";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 
 function createEmptyGroupConfig(): ApiCreateGroup {
   return {
@@ -108,6 +112,29 @@ function createWalletSources(
   };
 }
 
+function hasGroupInitialLoadError({
+  isEditMode,
+  isOriginalGroupError,
+  hasIdentityGroupId,
+  isOriginalGroupWalletsError,
+  hasExcludedIdentityGroupId,
+  isOriginalGroupExcludedWalletsError,
+}: {
+  readonly isEditMode: boolean;
+  readonly isOriginalGroupError: boolean;
+  readonly hasIdentityGroupId: boolean;
+  readonly isOriginalGroupWalletsError: boolean;
+  readonly hasExcludedIdentityGroupId: boolean;
+  readonly isOriginalGroupExcludedWalletsError: boolean;
+}): boolean {
+  return (
+    isEditMode &&
+    (isOriginalGroupError ||
+      (hasIdentityGroupId && isOriginalGroupWalletsError) ||
+      (hasExcludedIdentityGroupId && isOriginalGroupExcludedWalletsError))
+  );
+}
+
 function removeWalletsFromSources(
   sources: GroupCreateWalletSources,
   walletKeys: ReadonlySet<string>
@@ -148,10 +175,14 @@ function GroupCreateForm({
       createWalletSources(initialGroupConfig.group.excluded_identity_addresses)
     );
 
-  const connectedWalletKeys = new Set(
-    connectedProfile?.wallets?.map((wallet) => wallet.wallet.toLowerCase()) ??
-      []
-  );
+  const connectedWalletKeys = new Set([
+    ...(connectedProfile?.wallets?.map((wallet) =>
+      wallet.wallet.toLowerCase()
+    ) ?? []),
+    ...(connectedProfile?.primary_wallet
+      ? [connectedProfile.primary_wallet.toLowerCase()]
+      : []),
+  ]);
   const iAmIncluded =
     groupConfig.group.identity_addresses?.some((address) =>
       connectedWalletKeys.has(address.toLowerCase())
@@ -329,7 +360,11 @@ export default function GroupCreate({
   readonly onCompleted: () => void;
 }) {
   const isEditMode = !!edit && edit !== "new";
-  const { data: originalGroup } = useQuery<ApiGroupFull>({
+  const {
+    data: originalGroup,
+    isError: isOriginalGroupError,
+    refetch: refetchOriginalGroup,
+  } = useQuery<ApiGroupFull>({
     queryKey: [QueryKey.GROUP, edit],
     queryFn: async () =>
       await commonApiFetch<ApiGroupFull>({
@@ -347,7 +382,11 @@ export default function GroupCreate({
   const hasExcludedIdentityGroupId =
     excludedIdentityGroupId !== null && excludedIdentityGroupId !== undefined;
 
-  const { data: originalGroupWallets } = useQuery<string[]>({
+  const {
+    data: originalGroupWallets,
+    isError: isOriginalGroupWalletsError,
+    refetch: refetchOriginalGroupWallets,
+  } = useQuery<string[]>({
     queryKey: [
       QueryKey.GROUP_WALLET_GROUP_WALLETS,
       {
@@ -370,7 +409,11 @@ export default function GroupCreate({
     enabled: originalGroupId !== undefined && hasIdentityGroupId,
   });
 
-  const { data: originalGroupExcludedWallets } = useQuery<string[]>({
+  const {
+    data: originalGroupExcludedWallets,
+    isError: isOriginalGroupExcludedWalletsError,
+    refetch: refetchOriginalGroupExcludedWallets,
+  } = useQuery<string[]>({
     queryKey: [
       QueryKey.GROUP_WALLET_GROUP_WALLETS,
       {
@@ -395,6 +438,49 @@ export default function GroupCreate({
     enabled: originalGroupId !== undefined && hasExcludedIdentityGroupId,
   });
 
+  const hasInitialLoadError = hasGroupInitialLoadError({
+    isEditMode,
+    isOriginalGroupError,
+    hasIdentityGroupId,
+    isOriginalGroupWalletsError,
+    hasExcludedIdentityGroupId,
+    isOriginalGroupExcludedWalletsError,
+  });
+
+  if (hasInitialLoadError) {
+    return (
+      <GroupCreateWrapper>
+        <div
+          role="alert"
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5"
+        >
+          <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+            Unable to load this group
+          </p>
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
+            Please try loading the group details again.
+          </p>
+          <Button
+            variant="tertiary"
+            size="sm"
+            className="tw-mt-4"
+            onClick={() => {
+              void refetchOriginalGroup();
+              if (hasIdentityGroupId) {
+                void refetchOriginalGroupWallets();
+              }
+              if (hasExcludedIdentityGroupId) {
+                void refetchOriginalGroupExcludedWallets();
+              }
+            }}
+          >
+            Retry
+          </Button>
+        </div>
+      </GroupCreateWrapper>
+    );
+  }
+
   const isLoadingInitialData =
     isEditMode &&
     (originalGroup === undefined ||
@@ -403,7 +489,18 @@ export default function GroupCreate({
         originalGroupExcludedWallets === undefined));
 
   if (isLoadingInitialData) {
-    return <div>Loading...</div>;
+    return (
+      <GroupCreateWrapper>
+        <div
+          role="status"
+          aria-live="polite"
+          className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-text-sm tw-text-iron-300"
+        >
+          <CircleLoader size={CircleLoaderSize.MEDIUM} />
+          <span>Loading group...</span>
+        </div>
+      </GroupCreateWrapper>
+    );
   }
 
   const resolvedOriginalGroup = isEditMode ? (originalGroup ?? null) : null;

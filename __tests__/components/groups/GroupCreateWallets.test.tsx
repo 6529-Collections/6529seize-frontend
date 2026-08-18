@@ -129,12 +129,10 @@ describe("GroupCreateWallets", () => {
   it("combines upload, EMMA, and identity sources without duplicates", async () => {
     const { setWallets } = renderComp({ wallets: null, walletsLimit: 5 });
 
-    act(() => uploadProps.setWallets(["0xA", "0xB"]));
-    await waitFor(() =>
-      expect(setWallets).toHaveBeenLastCalledWith(["0xA", "0xB"])
-    );
-
-    act(() => emmaProps.setWallets(["0xb", "0xC"]));
+    act(() => {
+      uploadProps.setWallets(["0xA", "0xB"]);
+      emmaProps.setWallets(["0xb", "0xC"]);
+    });
     await waitFor(() =>
       expect(setWallets).toHaveBeenLastCalledWith(["0xA", "0xB", "0xC"])
     );
@@ -144,6 +142,13 @@ describe("GroupCreateWallets", () => {
     );
     await waitFor(() =>
       expect(setWallets).toHaveBeenLastCalledWith(["0xA", "0xB", "0xC"])
+    );
+
+    act(() =>
+      identitiesProps.onIdentitySelect({ wallet: "0xD", primary_wallet: "0xD" })
+    );
+    await waitFor(() =>
+      expect(setWallets).toHaveBeenLastCalledWith(["0xA", "0xB", "0xC", "0xD"])
     );
   });
 

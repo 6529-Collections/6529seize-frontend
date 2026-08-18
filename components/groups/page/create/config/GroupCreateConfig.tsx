@@ -1,4 +1,5 @@
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+import type { Dispatch, SetStateAction } from "react";
 import GroupCreateConfigHeader from "../GroupCreateConfigHeader";
 import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
@@ -66,8 +67,12 @@ export default function GroupCreateConfig({
   readonly setBeneficiaryGrantMatchMode: (
     matchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"]
   ) => void;
-  readonly setIncludeWalletSources: (sources: GroupCreateWalletSources) => void;
-  readonly setExcludeWalletSources: (sources: GroupCreateWalletSources) => void;
+  readonly setIncludeWalletSources: Dispatch<
+    SetStateAction<GroupCreateWalletSources>
+  >;
+  readonly setExcludeWalletSources: Dispatch<
+    SetStateAction<GroupCreateWalletSources>
+  >;
 }) {
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 sm:tw-gap-y-8">
