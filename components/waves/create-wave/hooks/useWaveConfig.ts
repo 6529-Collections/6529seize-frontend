@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CreateWaveConfig,
   CreateWaveOutcomeType,
@@ -32,6 +32,28 @@ interface EndDateConfig {
   time: number | null;
   period: Period | null;
 }
+
+type PrivilegeGroupKey = "canDrop" | "canVote" | "canChat";
+
+const getPrivilegeGroupDefaults = ({
+  groupId,
+  waveType,
+  manuallySelected,
+}: {
+  readonly groupId: string;
+  readonly waveType: ApiWaveType;
+  readonly manuallySelected: ReadonlySet<PrivilegeGroupKey>;
+}): Partial<CreateWaveConfig["groups"]> => {
+  return {
+    ...(!manuallySelected.has("canChat") ? { canChat: groupId } : {}),
+    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canDrop")
+      ? { canDrop: groupId }
+      : {}),
+    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canVote")
+      ? { canVote: groupId }
+      : {}),
+  };
+};
 
 export function useWaveConfig() {
   const initialType = ApiWaveType.Chat;
@@ -151,6 +173,9 @@ export function useWaveConfig() {
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
   );
+  const manuallySelectedPrivilegeGroups = useRef<Set<PrivilegeGroupKey>>(
+    new Set()
+  );
 
   const shouldLoadMemeCount =
     config.voting.type === ApiWaveCreditType.CardSetTdh;
@@ -200,6 +225,7 @@ export function useWaveConfig() {
     const isTypeChange = config.overview.type !== overview.type;
     if (isTypeChange) {
       setEndDateConfig({ time: null, period: null });
+      manuallySelectedPrivilegeGroups.current.clear();
     }
     setConfig((prev) => {
       if (prev.overview.type === overview.type) {
@@ -333,10 +359,18 @@ export function useWaveConfig() {
           groups: {
             ...prev.groups,
             canView: group?.id ?? null,
+            ...(group
+              ? getPrivilegeGroupDefaults({
+                  groupId: group.id,
+                  waveType: prev.overview.type,
+                  manuallySelected: manuallySelectedPrivilegeGroups.current,
+                })
+              : {}),
           },
         }));
         break;
       case CreateWaveGroupConfigType.CAN_DROP:
+        manuallySelectedPrivilegeGroups.current.add("canDrop");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -346,6 +380,7 @@ export function useWaveConfig() {
         }));
         break;
       case CreateWaveGroupConfigType.CAN_VOTE:
+        manuallySelectedPrivilegeGroups.current.add("canVote");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -355,6 +390,7 @@ export function useWaveConfig() {
         }));
         break;
       case CreateWaveGroupConfigType.CAN_CHAT:
+        manuallySelectedPrivilegeGroups.current.add("canChat");
         setConfig((prev) => ({
           ...prev,
           groups: {

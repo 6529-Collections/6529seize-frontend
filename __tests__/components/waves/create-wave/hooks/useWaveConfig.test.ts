@@ -498,7 +498,7 @@ describe("useWaveConfig", () => {
       is_private: false,
     } as ApiGroupFull;
 
-    it("should update canView group and cache group", () => {
+    it("defaults a Chat Wave's chat group to its selected View group", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
@@ -509,7 +509,191 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.groups.canView).toBe("group-123");
+      expect(result.current.config.groups.canChat).toBe("group-123");
+      expect(result.current.config.groups.canDrop).toBeNull();
+      expect(result.current.config.groups.canVote).toBeNull();
       expect(result.current.groupsCache["group-123"]).toEqual(mockGroup);
+    });
+
+    it("defaults a ranked Wave's privilege groups to its selected View group", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-123",
+        canDrop: "group-123",
+        canVote: "group-123",
+        canChat: "group-123",
+      });
+    });
+
+    it("keeps privilege groups independently editable after defaulting", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const overrideGroup = {
+        ...mockGroup,
+        id: "group-override",
+      };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: overrideGroup,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+      });
+
+      expect(result.current.config.groups.canView).toBe("group-123");
+      expect(result.current.config.groups.canDrop).toBe("group-123");
+      expect(result.current.config.groups.canVote).toBe("group-123");
+      expect(result.current.config.groups.canChat).toBe("group-override");
+    });
+
+    it("preserves privilege groups selected before the View group", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const chatGroup = { ...mockGroup, id: "chat-group" };
+      const dropGroup = { ...mockGroup, id: "drop-group" };
+      const voteGroup = { ...mockGroup, id: "vote-group" };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: chatGroup,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+        result.current.onGroupSelect({
+          group: dropGroup,
+          groupType: CreateWaveGroupConfigType.CAN_DROP,
+        });
+        result.current.onGroupSelect({
+          group: voteGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VOTE,
+        });
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-123",
+        canDrop: "drop-group",
+        canVote: "vote-group",
+        canChat: "chat-group",
+      });
+    });
+
+    it("preserves a manual override when the View group changes", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const overrideGroup = { ...mockGroup, id: "group-override" };
+      const replacementGroup = { ...mockGroup, id: "group-replacement" };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: overrideGroup,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+        result.current.onGroupSelect({
+          group: replacementGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-replacement",
+        canDrop: "group-replacement",
+        canVote: "group-replacement",
+        canChat: "group-override",
+      });
+    });
+
+    it("preserves a manually selected Anyone privilege", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onGroupSelect({
+          group: null,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups.canView).toBe("group-123");
+      expect(result.current.config.groups.canChat).toBeNull();
+    });
+
+    it("redefaults privilege groups when the View group changes", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const replacementGroup = {
+        ...mockGroup,
+        id: "group-replacement",
+      };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: replacementGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-replacement",
+        canDrop: "group-replacement",
+        canVote: "group-replacement",
+        canChat: "group-replacement",
+      });
     });
 
     it("should update canDrop group", () => {
