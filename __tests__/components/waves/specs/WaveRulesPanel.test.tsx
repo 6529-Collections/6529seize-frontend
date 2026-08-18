@@ -1,11 +1,13 @@
 import WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
 import type { WaveRules } from "@/helpers/waves/wave-rules.helpers";
+import type Link from "next/link";
+import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ children, href, ...props }: any) => (
-    <a href={href} {...props}>
+  default: ({ children, href, ...props }: ComponentProps<typeof Link>) => (
+    <a href={href.toString()} {...props}>
       {children}
     </a>
   ),

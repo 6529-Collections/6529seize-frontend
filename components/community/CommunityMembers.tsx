@@ -408,15 +408,15 @@ export default function CommunityMembers() {
         </div>
       </div>
       {activeGroupId && (
-        <CommunityMembersGroupDetails
-          groupId={activeGroupId}
-          onClose={() => setActiveGroupId(null)}
-        />
-      )}
-      {activeGroupId && (
-        <h2 className="tw-mb-0 tw-mt-5 !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-50">
-          {t(locale, "network.groupInspection.membersTitle")}
-        </h2>
+        <>
+          <CommunityMembersGroupDetails
+            groupId={activeGroupId}
+            onClose={() => setActiveGroupId(null)}
+          />
+          <h2 className="tw-mb-0 tw-mt-5 !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-50">
+            {t(locale, "network.groupInspection.membersTitle")}
+          </h2>
+        </>
       )}
       <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
         {membersContent}

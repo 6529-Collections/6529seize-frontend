@@ -2,12 +2,15 @@
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import GroupCardConfigs from "@/components/groups/page/list/card/GroupCardConfigs";
+import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
+
+type InspectableGroup = ApiGroupFull & Pick<Partial<ApiGroup>, "is_hidden">;
 
 export default function CommunityMembersGroupDetails({
   groupId,
@@ -21,10 +24,10 @@ export default function CommunityMembersGroupDetails({
     data: group,
     isLoading,
     isError,
-  } = useQuery<ApiGroupFull>({
+  } = useQuery<InspectableGroup>({
     queryKey: [QueryKey.GROUP, groupId],
     queryFn: async () =>
-      await commonApiFetch<ApiGroupFull>({
+      await commonApiFetch<InspectableGroup>({
         endpoint: `groups/${encodeURIComponent(groupId)}`,
       }),
   });
@@ -61,7 +64,7 @@ export default function CommunityMembersGroupDetails({
     !group ||
     group.name.trim().length === 0 ||
     group.id.trim().length === 0 ||
-    ("is_hidden" in group && group.is_hidden === true) ||
+    group.is_hidden === true ||
     group.is_private === true ||
     group.is_direct_message === true ||
     group.visible === false

@@ -1,10 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import WaveGroupScope from "@/components/waves/specs/groups/group/WaveGroupScope";
+import type { ApiGroup } from "@/generated/models/ApiGroup";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type Link from "next/link";
+import type { ComponentProps } from "react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, ...props }: any) => (
-    <a href={href} {...props}>
+  default: ({ href, children, ...props }: ComponentProps<typeof Link>) => (
+    <a href={href.toString()} {...props}>
       {children}
     </a>
   ),
@@ -16,7 +20,7 @@ jest.mock("@/helpers/image.helpers", () => ({
 
 describe("WaveGroupScope", () => {
   it("shows a non-interactive private label for hidden groups", () => {
-    const group = { is_hidden: true } as any;
+    const group = { is_hidden: true } satisfies ApiGroup;
     render(<WaveGroupScope group={group} />);
     expect(screen.getByText("Private group")).toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
@@ -28,7 +32,7 @@ describe("WaveGroupScope", () => {
       name: "Private conversation",
       is_hidden: false,
       is_direct_message: true,
-    } as any;
+    } satisfies ApiGroup;
     render(<WaveGroupScope group={group} />);
     expect(screen.getByText("Private group")).toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
@@ -39,8 +43,11 @@ describe("WaveGroupScope", () => {
       id: "1",
       name: "Group",
       is_hidden: false,
-      author: { handle: "alice", pfp: "img.png" },
-    } as any;
+      author: Object.assign(new ApiProfileMin(), {
+        handle: "alice",
+        pfp: "img.png",
+      }),
+    } satisfies ApiGroup;
     const { container } = render(<WaveGroupScope group={group} />);
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/network?page=1&group=1");
@@ -61,7 +68,7 @@ describe("WaveGroupScope", () => {
   it("does not reinterpret an incomplete visible group as public access", () => {
     render(
       <WaveGroupScope
-        group={{ id: "stale-group-id", is_hidden: false } as any}
+        group={{ id: "stale-group-id", is_hidden: false } satisfies ApiGroup}
       />
     );
     expect(screen.getByText("Group unavailable")).toBeInTheDocument();

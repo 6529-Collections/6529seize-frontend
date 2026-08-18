@@ -1,4 +1,5 @@
 import CommunityMembersGroupDetails from "@/components/community/CommunityMembersGroupDetails";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -14,7 +15,9 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock(
   "@/components/groups/page/list/card/GroupCardConfigs",
   () =>
-    ({ group }: any) => <div data-testid="group-criteria">{group.id}</div>
+    ({ group }: { readonly group: Pick<ApiGroupFull, "id"> }) => (
+      <div data-testid="group-criteria">{group.id}</div>
+    )
 );
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
