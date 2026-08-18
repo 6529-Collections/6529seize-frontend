@@ -24,6 +24,7 @@ import {
   shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
+  shouldFilterReactFlightConnectionClosedError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
@@ -174,10 +175,66 @@ type ExpectedWaveReplacementAbortOverrides = {
   breadcrumbs?: SentryClientEvent["breadcrumbs"];
   additionalException?: SentryExceptionValue | undefined;
 };
+type ReactFlightConnectionClosedOverrides = {
+  type?: string | undefined;
+  value?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  transaction?: string | undefined;
+  eventTimestamp?: number | undefined;
+  includeEventTimestamp?: boolean | undefined;
+  frames?: SentryStackFrame[] | undefined;
+  breadcrumbs?: SentryClientEvent["breadcrumbs"];
+  additionalException?: SentryExceptionValue | undefined;
+};
+type ReactFlightTransportBreadcrumbOverrides = {
+  timestamp?: number | undefined;
+  includeTimestamp?: boolean | undefined;
+  statusCode?: number | undefined;
+  url?: string | undefined;
+  firstParty?: boolean | undefined;
+  firstPartyApi?: boolean | undefined;
+};
 
 const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
 const expectedWaveAbortEventTimestamp = 1_785_689_742.621;
 const expectedWaveAbortBreadcrumbTimestamp = 1_785_689_742.5;
+const reactFlightEventTimestamp = 1_000;
+const reactFlightTransportFailureTimestamp = 993.202;
+const reactFlightRawChunkPath =
+  "app:///_next/static/chunks/08qcqj3ricazz.js";
+
+const createReactFlightRawFrame = (
+  overrides: Partial<SentryStackFrame> = {}
+): SentryStackFrame => ({
+  filename: reactFlightRawChunkPath,
+  abs_path: reactFlightRawChunkPath,
+  function: "eo",
+  lineno: 2,
+  colno: 31038,
+  in_app: true,
+  ...overrides,
+});
+
+const createReactFlightTransportBreadcrumb = ({
+  timestamp = reactFlightTransportFailureTimestamp,
+  includeTimestamp = true,
+  statusCode,
+  url = "/api/waves/example-wave",
+  firstParty = true,
+  firstPartyApi = true,
+}: ReactFlightTransportBreadcrumbOverrides = {}): TestSentryBreadcrumb => ({
+  type: "http",
+  category: "fetch",
+  level: "error",
+  ...(includeTimestamp ? { timestamp } : {}),
+  data: {
+    url,
+    ...(statusCode === undefined ? {} : { status_code: statusCode }),
+    "url.is_first_party": firstParty,
+    "url.is_first_party_api": firstPartyApi,
+  },
+});
 
 const createExpectedWaveReplacementAbortEvent = ({
   exception = {},
@@ -216,6 +273,37 @@ const createExpectedWaveReplacementAbortEvent = ({
   tags: includeDomExceptionCode
     ? { "DOMException.code": domExceptionCode }
     : {},
+  breadcrumbs,
+});
+
+const createReactFlightConnectionClosedEvent = ({
+  type = "Error",
+  value = "Connection closed.",
+  mechanismType = "generic",
+  handled = true,
+  transaction = "/waves/:wave",
+  eventTimestamp = reactFlightEventTimestamp,
+  includeEventTimestamp = true,
+  frames = [createReactFlightRawFrame()],
+  breadcrumbs = [createReactFlightTransportBreadcrumb()],
+  additionalException,
+}: ReactFlightConnectionClosedOverrides = {}): TestSentryClientEvent => ({
+  ...(includeEventTimestamp ? { timestamp: eventTimestamp } : {}),
+  transaction,
+  exception: {
+    values: [
+      {
+        type,
+        value,
+        mechanism: {
+          type: mechanismType,
+          handled,
+        },
+        stacktrace: { frames },
+      },
+      ...(additionalException ? [additionalException] : []),
+    ],
+  },
   breadcrumbs,
 });
 
@@ -11029,6 +11117,131 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(false);
   });
+
+  it("filters the exact Waves React Flight connection close after a recent API transport failure", () => {
+    const event = createReactFlightConnectionClosedEvent();
+
+    const result = shouldFilterReactFlightConnectionClosedError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the React Flight connection close at the causal time boundary", () => {
+    const event = createReactFlightConnectionClosedEvent({
+      eventTimestamp: reactFlightTransportFailureTimestamp + 10,
+    });
+
+    const result = shouldFilterReactFlightConnectionClosedError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["a changed message", { value: "Connection lost." }],
+    ["a changed exception type", { type: "TypeError" }],
+    ["a changed mechanism", { mechanismType: "onerror" }],
+    ["an unhandled mechanism", { handled: false }],
+    ["another route", { transaction: "/notifications" }],
+    ["a missing event timestamp", { includeEventTimestamp: false }],
+    ["an invalid event timestamp", { eventTimestamp: Number.NaN }],
+    [
+      "a changed raw frame coordinate",
+      {
+        frames: [createReactFlightRawFrame({ colno: 31039 })],
+      },
+    ],
+    [
+      "an additional application frame",
+      {
+        frames: [
+          createReactFlightRawFrame(),
+          {
+            filename:
+              "webpack-internal:///(app-pages-browser)/./components/waves/WaveLayout.tsx",
+            in_app: true,
+          },
+        ],
+      },
+    ],
+    [
+      "an additional exception",
+      {
+        additionalException: {
+          type: "TypeError",
+          value: "Application state failed.",
+        },
+      },
+    ],
+    ["a missing transport breadcrumb", { breadcrumbs: [] }],
+    [
+      "a stale transport breadcrumb",
+      {
+        breadcrumbs: [
+          createReactFlightTransportBreadcrumb({
+            timestamp: reactFlightEventTimestamp - 10.001,
+          }),
+        ],
+      },
+    ],
+    [
+      "a missing breadcrumb timestamp",
+      {
+        breadcrumbs: [
+          createReactFlightTransportBreadcrumb({ includeTimestamp: false }),
+        ],
+      },
+    ],
+    [
+      "a breadcrumb timestamp after the event",
+      {
+        breadcrumbs: [
+          createReactFlightTransportBreadcrumb({
+            timestamp: reactFlightEventTimestamp + 0.001,
+          }),
+        ],
+      },
+    ],
+    [
+      "an HTTP status failure",
+      {
+        breadcrumbs: [
+          createReactFlightTransportBreadcrumb({ statusCode: 503 }),
+        ],
+      },
+    ],
+    [
+      "a first-party non-API transport failure",
+      {
+        breadcrumbs: [
+          createReactFlightTransportBreadcrumb({
+            url: "/waves/example-wave",
+            firstPartyApi: false,
+          }),
+        ],
+      },
+    ],
+    [
+      "a third-party transport failure",
+      {
+        breadcrumbs: [
+          createReactFlightTransportBreadcrumb({
+            url: "https://example.invalid/telemetry",
+            firstParty: false,
+            firstPartyApi: false,
+          }),
+        ],
+      },
+    ],
+  ] satisfies Array<[string, ReactFlightConnectionClosedOverrides]>)(
+    "keeps the React Flight connection-close near miss with %s",
+    (_, overrides) => {
+      const event = createReactFlightConnectionClosedEvent(overrides);
+
+      const result = shouldFilterReactFlightConnectionClosedError(event);
+
+      expect(result).toBe(false);
+    }
+  );
 
   it("filters the exact expected Wave background-sync replacement abort", () => {
     const event = createExpectedWaveReplacementAbortEvent();

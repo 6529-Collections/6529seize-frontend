@@ -46,6 +46,7 @@ import {
   shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
+  shouldFilterReactFlightConnectionClosedError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyChromeUserRejectedRequest,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
@@ -232,6 +233,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterReactDomRemoveChildNotFoundError(event)) {
+    return true;
+  }
+
+  if (shouldFilterReactFlightConnectionClosedError(event)) {
     return true;
   }
 

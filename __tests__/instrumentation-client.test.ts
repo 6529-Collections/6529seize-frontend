@@ -633,6 +633,48 @@ describe("instrumentation-client", () => {
     ],
   });
 
+  const createReactFlightConnectionClosedEvent = () => ({
+    timestamp: 1_000,
+    transaction: "/waves/:wave",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "Connection closed.",
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///_next/static/chunks/08qcqj3ricazz.js",
+                abs_path: "app:///_next/static/chunks/08qcqj3ricazz.js",
+                function: "eo",
+                lineno: 2,
+                colno: 31038,
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: [
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        timestamp: 993.202,
+        data: {
+          url: "/api/waves/example-wave",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        },
+      },
+    ],
+  });
+
   const createPoperBlockerOrphanFetchRejectionEvent = (
     value = poperBlockerNetworkErrorMessage,
     frames: Array<Record<string, unknown>> = poperBlockerProcessedFrames
@@ -2814,6 +2856,27 @@ describe("instrumentation-client", () => {
 
     expect(result).not.toBeNull();
     expect(result?.tags?.["network_noise_sampled"]).toBe("true");
+  });
+
+  it("drops the exact Waves React Flight connection close with recent API transport evidence", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createReactFlightConnectionClosedEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the React Flight connection close without recent API transport evidence", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createReactFlightConnectionClosedEvent(),
+      breadcrumbs: [],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the exact expected Wave background-sync replacement abort", () => {
