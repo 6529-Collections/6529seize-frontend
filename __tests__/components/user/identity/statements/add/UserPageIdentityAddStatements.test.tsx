@@ -74,9 +74,16 @@ test("changes active view when child triggers", async () => {
 
   expect(contentRef?.current).toContainElement(div);
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
+  expect(div.parentElement).toHaveClass("lg:tw-py-8");
   await userEvent.click(div);
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.CONTACT);
+  expect(div.parentElement).toHaveClass("md:tw-pt-6", "lg:tw-pb-8");
+  expect(div.parentElement).not.toHaveClass("lg:tw-py-8");
 
-  await userEvent.click(screen.getByRole("button", { name: "Back" }));
+  const backButton = screen.getByRole("button", { name: "Back" });
+  const detailHeader = backButton.parentElement?.parentElement?.parentElement;
+  expect(detailHeader).toHaveClass("md:!tw-pb-0");
+
+  await userEvent.click(backButton);
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
 });

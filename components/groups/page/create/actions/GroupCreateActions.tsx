@@ -66,7 +66,7 @@ export default function GroupCreateActions({
   };
 
   return (
-    <div className="tw-mt-6">
+    <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/90 tw-py-3 tw-shadow-[0_-16px_30px_rgba(0,0,0,0.28)] tw-backdrop-blur-xl [.capacitor-native_&]:tw-bottom-20 [.capacitor-native_&]:tw-mb-[max(5px,env(safe-area-inset-bottom,0px))]">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
         <GroupCreateTest
           groupConfig={groupConfig}

@@ -13,6 +13,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import GroupCreateIdentitiesSelect from "../identities/select/GroupCreateIdentitiesSelect";
 import CreateGroupWalletsEmma from "./CreateGroupWalletsEmma";
 import CreateGroupWalletsUpload from "./CreateGroupWalletsUpload";
+import GroupCreateSectionHeader from "../../GroupCreateSectionHeader";
 import {
   useContext,
   useEffect,
@@ -151,18 +152,16 @@ export default function GroupCreateWallets({
 
   return (
     <div className="tw-col-span-full">
-      <div className="tw-inline-flex tw-items-center tw-space-x-3 sm:tw-space-x-4">
-        <span className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 sm:tw-size-11">
+      <GroupCreateSectionHeader
+        title={LABELS[type]}
+        icon={
           <FontAwesomeIcon
             icon={faWallet}
             aria-hidden="true"
-            className="tw-size-5 tw-flex-shrink-0 tw-text-iron-50 sm:tw-size-6"
+            className="tw-size-5 tw-flex-shrink-0 tw-text-iron-50"
           />
-        </span>
-        <p className="tw-m-0 tw-text-xl tw-font-semibold !tw-leading-none tw-text-iron-50 sm:tw-text-2xl">
-          {LABELS[type]}
-        </p>
-      </div>
+        }
+      />
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-gap-6 lg:tw-grid-cols-2">
         <GroupCreateIdentitiesSelect
           onIdentitySelect={onIdentitySelect}
