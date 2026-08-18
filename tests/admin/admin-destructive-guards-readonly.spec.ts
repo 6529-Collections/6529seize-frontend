@@ -161,7 +161,7 @@ async function gotoGroupsReady(page: Page) {
     await expect(
       page
         .locator("main")
-        .getByRole("button", { name: /^Open / })
+        .getByRole("link", { name: /^Open / })
         .first()
     ).toBeVisible({ timeout: 30000 });
   }
