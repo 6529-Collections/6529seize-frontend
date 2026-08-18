@@ -275,59 +275,58 @@ export async function expectAcquisitionsAcceptance(page: Page) {
 
 export async function expectResearchAcceptance(page: Page) {
   await expectNoUnresolvedMuseumMedia(page, "main", "img");
-  const editorialCards = page.locator("main article");
-  const cardSummaries = await editorialCards.evaluateAll((cards) =>
-    cards.map((card) => {
-      const heading = card.querySelector("h2, h3, h4");
-      const title = heading?.textContent?.replace(/\s+/gu, " ").trim() ?? "";
-      const links = [...card.querySelectorAll("a")].map(
-        (link) => link.textContent?.replace(/\s+/gu, " ").trim() ?? ""
-      );
-      const images = [...card.querySelectorAll("img")].map((image) =>
-        image instanceof HTMLImageElement ? image.currentSrc || image.src : ""
-      );
-      return { title, links, images, text: card.textContent ?? "" };
-    })
-  );
-  expect(
-    cardSummaries.length,
-    "Research needs eight editorial entry points"
-  ).toBeGreaterThanOrEqual(8);
-  const firstEight = cardSummaries.slice(0, 8);
-  const firstEightText = firstEight.map((card) => card.text).join(" ");
-  expect(firstEightText).toMatch(/Casey Reas|System in Seven States/iu);
-  expect(firstEightText).toMatch(/Magnum|Conflict at Its Edges/iu);
-  expect(firstEightText).toMatch(/Keys and Gates/iu);
-  expect(firstEightText).toMatch(
-    /Museum practice|institutional|rights|provenance|preservation|data architecture/iu
-  );
-  const imageSources = new Set(firstEight.flatMap((card) => card.images));
-  imageSources.delete("");
-  expect(
-    imageSources.size,
-    "Research needs at least three visual sources in its launch sequence"
-  ).toBeGreaterThanOrEqual(3);
+  const section = (id: string) =>
+    page.locator(`section:has(> header > #museum-research-section-${id})`);
+  const acquisitions = section("acquisition-scholarship");
+  const artists = section("artists");
+  const works = section("works");
+  const contexts = section("contexts");
+  const practice = section("museum-practice");
 
-  const duplicateTitles: string[] = [];
-  const internalIdentifierHeadlines: string[] = [];
-  for (const card of firstEight) {
-    if (card.title.length === 0) continue;
-    const exactTitleLinks = card.links.filter((link) => link === card.title);
-    if (exactTitleLinks.length > 1) duplicateTitles.push(card.title);
-    if (/^6529NM(?:[.-]|$)/u.test(card.title)) {
-      internalIdentifierHeadlines.push(card.title);
-    }
-  }
+  await expect(acquisitions.locator("article")).toHaveCount(3);
+  await expect(acquisitions).toContainText("The System in Seven States");
+  await expect(acquisitions).toContainText("Conflict at Its Edges");
+  await expect(acquisitions).toContainText("Access, Control, and Exit");
+  await expect(
+    acquisitions.getByText("Permanent Collection", { exact: true })
+  ).toHaveCount(2);
+  await expect(
+    acquisitions.getByText("Acquisition in progress", { exact: true })
+  ).toHaveCount(1);
+
+  await expect(artists.locator("article")).toHaveCount(6);
+  await expect(artists).toContainText("Casey Reas");
+  await expect(artists).toContainText("Larry Towell");
+  await expect(artists).toContainText("Moisés Saman");
+  await expect(artists).toContainText("HugoFaz");
+  await expect(works.locator("article")).toHaveCount(6);
+  await expect(contexts.locator("article")).toHaveCount(2);
+  await expect(contexts).toContainText("Magnum Photos");
+  await expect(contexts).toContainText("Keys and Gates");
+  await expect(practice.locator("article")).toHaveCount(4);
+  await expect(practice).toContainText("Museums to learn from");
+  await expect(practice).toContainText("Scholarship and writing");
+  await expect(practice).toContainText("The Open Museum");
+  await expect(practice).toContainText("From repository to chain");
+
+  const imageSources = await page
+    .locator("main article img")
+    .evaluateAll((images) =>
+      images.map((image) =>
+        image instanceof HTMLImageElement ? image.currentSrc || image.src : ""
+      )
+    );
+  const nonEmptySources = imageSources.filter((source) => source.length > 0);
   expect(
-    duplicateTitles,
-    "Research card titles must not be repeated within one card"
-  ).toEqual([]);
-  expect(
-    internalIdentifierHeadlines,
-    "Internal identifiers cannot be Research headlines"
-  ).toEqual([]);
-  await expect(museumMain(page)).not.toContainText(
-    /Start with the art|Then follow the record/iu
+    new Set(nonEmptySources).size,
+    "Research primary images must be unique across the landing page"
+  ).toBe(nonEmptySources.length);
+
+  const publicText = await museumMain(page).innerText();
+  expect(publicText).not.toMatch(/\b6529NM-(?:RP|CA|AP|W|ART|ORG)-/u);
+  expect(publicText).not.toMatch(/(?:records|notes|docs)\/[a-z0-9_./-]+/iu);
+  expect(publicText).not.toMatch(
+    /Start with the art|Then follow the record|connected work/iu
   );
 }
 
