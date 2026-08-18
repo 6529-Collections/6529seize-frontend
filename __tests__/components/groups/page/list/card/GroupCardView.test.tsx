@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 import GroupCardView from "@/components/groups/page/list/card/GroupCardView";
 
 const HeaderMock = jest.fn(() => <div data-testid="header" />);

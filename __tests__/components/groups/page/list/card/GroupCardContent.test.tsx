@@ -1,4 +1,3 @@
-import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AuthContext } from "@/components/auth/Auth";
 import GroupCardContent from "@/components/groups/page/list/card/GroupCardContent";
