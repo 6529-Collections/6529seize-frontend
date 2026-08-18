@@ -61,6 +61,7 @@ export default function CommunityMembersGroupDetails({
     !group ||
     group.name.trim().length === 0 ||
     group.id.trim().length === 0 ||
+    ("is_hidden" in group && group.is_hidden === true) ||
     group.is_private === true ||
     group.is_direct_message === true ||
     group.visible === false

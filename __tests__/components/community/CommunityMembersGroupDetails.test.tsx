@@ -87,6 +87,7 @@ describe("CommunityMembersGroupDetails", () => {
   });
 
   it.each([
+    { is_hidden: true },
     { is_private: true },
     { is_direct_message: true },
     { visible: false },
