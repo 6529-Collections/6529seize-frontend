@@ -9,9 +9,16 @@ jest.mock("@/components/header/share/HeaderQRScanner", () => () => (
 jest.mock("@/components/header/PushNotificationSettings", () => () => (
   <div data-testid="push-settings" />
 ));
-jest.mock("@/components/header/ProfilePreferencesSettings", () => () => (
-  <div data-testid="profile-preferences-settings" />
-));
+jest.mock(
+  "@/components/header/ProfilePreferencesSettings",
+  () =>
+    ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
+      isOpen ? (
+        <div data-testid="profile-preferences-settings">
+          <button onClick={onClose}>Close profile preferences</button>
+        </div>
+      ) : null
+);
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
@@ -126,9 +133,24 @@ describe("AppUserConnect", () => {
     const disconnectBtn = screen.getByRole("button", {
       name: "Disconnect & Logout",
     });
+    const profilePreferencesButton = screen.getByRole("button", {
+      name: "Profile Preferences",
+    });
+    expect(profilePreferencesButton).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Profile Preferences" })
+      screen.queryByTestId("profile-preferences-settings")
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(profilePreferencesButton);
+    expect(
+      screen.getByTestId("profile-preferences-settings")
     ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close profile preferences" })
+    );
+    expect(
+      screen.queryByTestId("profile-preferences-settings")
+    ).not.toBeInTheDocument();
 
     fireEvent.click(disconnectWalletBtn);
     expect(seizeDisconnect).toHaveBeenCalled();

@@ -13,6 +13,11 @@ import {
   ApiProfilePreferencesDirectMessagePolicyEnum as DirectMessagePolicy,
   ApiProfilePreferencesNotificationLevelEnum as NotificationLevel,
 } from "@/generated/models/ApiProfilePreferences";
+import {
+  type ApiUpdateProfilePreferences,
+  ApiUpdateProfilePreferencesDirectMessagePolicyEnum as UpdateDirectMessagePolicy,
+  ApiUpdateProfilePreferencesNotificationLevelEnum as UpdateNotificationLevel,
+} from "@/generated/models/ApiUpdateProfilePreferences";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
@@ -44,6 +49,22 @@ const NOTIFICATION_LEVELS = [
   NotificationLevel.All,
   NotificationLevel.EssentialOnly,
 ] as const;
+
+const UPDATE_DM_POLICY: Record<DirectMessagePolicy, UpdateDirectMessagePolicy> =
+  {
+    [DirectMessagePolicy.Everyone]: UpdateDirectMessagePolicy.Everyone,
+    [DirectMessagePolicy.PeopleIFollow]:
+      UpdateDirectMessagePolicy.PeopleIFollow,
+    [DirectMessagePolicy.Nobody]: UpdateDirectMessagePolicy.Nobody,
+  };
+
+const UPDATE_NOTIFICATION_LEVEL: Record<
+  NotificationLevel,
+  UpdateNotificationLevel
+> = {
+  [NotificationLevel.All]: UpdateNotificationLevel.All,
+  [NotificationLevel.EssentialOnly]: UpdateNotificationLevel.EssentialOnly,
+};
 
 export default function ProfilePreferencesSettings({
   isOpen,
@@ -109,9 +130,15 @@ function ProfilePreferencesForm({
 
   const { mutateAsync: save, isPending: isSaving } = useMutation({
     mutationFn: async () => {
-      return commonApiPut<ApiProfilePreferences, ApiProfilePreferences>({
+      const body: ApiUpdateProfilePreferences = {
+        direct_message_policy: UPDATE_DM_POLICY[current.direct_message_policy],
+        notification_level:
+          UPDATE_NOTIFICATION_LEVEL[current.notification_level],
+        notifications: current.notifications,
+      };
+      return commonApiPut<ApiUpdateProfilePreferences, ApiProfilePreferences>({
         endpoint: "profiles/preferences",
-        body: current,
+        body,
       });
     },
     onSuccess: (savedPreferences) => {

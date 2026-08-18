@@ -1,9 +1,7 @@
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import { useAuth } from "@/components/auth/Auth";
-import {
-  ReactQueryWrapperContext,
-  type ReactQueryWrapperContextType,
-} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ReactQueryWrapperContextType } from "@/components/react-query-wrapper/ReactQueryWrapperContext";
 import {
   ApiProfilePreferencesDirectMessagePolicyEnum as DirectMessagePolicy,
   ApiProfilePreferencesNotificationLevelEnum as NotificationLevel,
