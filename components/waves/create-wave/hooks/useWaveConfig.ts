@@ -173,6 +173,8 @@ export function useWaveConfig() {
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
   );
+  // Manual privilege choices stay sticky while editing the current Wave type,
+  // including an explicit "Anyone" selection represented by null.
   const manuallySelectedPrivilegeGroups = useRef<Set<PrivilegeGroupKey>>(
     new Set()
   );
@@ -225,6 +227,8 @@ export function useWaveConfig() {
     const isTypeChange = config.overview.type !== overview.type;
     if (isTypeChange) {
       setEndDateConfig({ time: null, period: null });
+      // The type change replaces the entire config (including group choices),
+      // so the next type starts a fresh privilege-defaulting session too.
       manuallySelectedPrivilegeGroups.current.clear();
     }
     setConfig((prev) => {

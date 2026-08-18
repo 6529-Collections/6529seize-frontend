@@ -663,6 +663,31 @@ describe("useWaveConfig", () => {
       expect(result.current.config.groups.canChat).toBeNull();
     });
 
+    it("starts a fresh privilege-defaulting session after a Wave type change", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onGroupSelect({
+          group: null,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+      });
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups.canChat).toBe("group-123");
+    });
+
     it("redefaults privilege groups when the View group changes", () => {
       const { result } = renderHook(() => useWaveConfig());
       const replacementGroup = {
