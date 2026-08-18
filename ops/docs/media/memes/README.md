@@ -25,6 +25,9 @@
 - [The Memes Mint Flow](feature-mint-flow.md):
   `/the-memes/mint` recipient selection, phase-aware actions, and transaction
   states.
+- [Minting The Memes Guide](feature-minting-guide.md):
+  `/about/minting` regular and subscription entry points, phase and eligibility
+  guidance, current schedule links, troubleshooting, and dated history.
 - [Standalone The Memes Mint Page](feature-standalone-mint-page.md):
   external latest-mint shell behavior on the standalone deployment hosts.
 - [Now Minting Countdown](feature-now-minting-countdown.md):
