@@ -25,13 +25,7 @@ export default function GroupCreateIdentitiesSelect({
   const isModal = appearance === "modal";
 
   return (
-    <div
-      className={
-        isModal
-          ? "tw-w-full"
-          : GROUP_CREATE_PANEL_STYLES
-      }
-    >
+    <div className={isModal ? "tw-w-full" : GROUP_CREATE_PANEL_STYLES}>
       <div className="tw-flex tw-flex-col">
         <div
           className={isModal ? "tw-space-y-3" : "tw-space-y-2 sm:tw-space-y-3"}
