@@ -42,6 +42,8 @@ describe("instrumentation-client", () => {
     "Attempt to get a record from database without an in-progress transaction";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
+  const walletConnectSessionSettlePublishFailureMessage =
+    "Failed to publish payload, please try again. id:1234567890 tag:1103";
   const braveWalletSelectedAddressMessage =
     "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')";
   const braveWalletEmitMessage =
@@ -448,6 +450,63 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+  });
+
+  const createWalletConnectSessionSettlePublishFailureEvent = (
+    options: {
+      message?: string;
+      frames?: Array<Record<string, unknown>>;
+      breadcrumbs?: Array<Record<string, unknown>>;
+    } = {}
+  ) => ({
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value:
+            options.message ??
+            walletConnectSessionSettlePublishFailureMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames: options.frames ?? [
+              {
+                filename:
+                  "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+                function: "r",
+                in_app: false,
+              },
+              {
+                filename:
+                  "node_modules/.pnpm/@walletconnect+sign-client@2.23.9/node_modules/@walletconnect/sign-client/src/controllers/engine.ts",
+                function: "<anonymous>",
+                in_app: false,
+              },
+            ],
+          },
+        },
+      ],
+    },
+    breadcrumbs: options.breadcrumbs ?? [
+      {
+        type: "default",
+        category: "ui.click",
+        level: "info",
+        message: "body.capacitor-native > w3m-modal.open",
+      },
+      {
+        type: "default",
+        category: "console",
+        level: "error",
+        message: "[object Object]",
+        data: {
+          arguments: [{ context: "core/publisher", level: 50 }],
+          logger: "console",
+        },
+      },
+    ],
   });
 
   const createRabbyChromeUserRejectedEvent = (
@@ -1911,6 +1970,63 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the exact WalletConnect session-settlement publish failure", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createWalletConnectSessionSettlePublishFailureEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it.each([
+    [
+      "another payload tag",
+      createWalletConnectSessionSettlePublishFailureEvent({
+        message:
+          "Failed to publish payload, please try again. id:1234567890 tag:1105",
+      }),
+    ],
+    [
+      "missing publisher evidence",
+      createWalletConnectSessionSettlePublishFailureEvent({
+        breadcrumbs: [
+          {
+            type: "default",
+            category: "ui.click",
+            level: "info",
+            message: "body.capacitor-native > w3m-modal.open",
+          },
+        ],
+      }),
+    ],
+    [
+      "an application-owned frame",
+      createWalletConnectSessionSettlePublishFailureEvent({
+        frames: [
+          {
+            filename:
+              "node_modules/@walletconnect/sign-client/src/controllers/engine.ts",
+            function: "<anonymous>",
+            in_app: false,
+          },
+          {
+            filename:
+              "webpack-internal:///(app-pages-browser)/./services/auth/walletConnectSession.ts",
+            function: "settleWalletConnectSession",
+            in_app: true,
+          },
+        ],
+      }),
+    ],
+  ])("keeps the WalletConnect publish-failure near miss with %s", (_, event) => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops exact Talisman onboarding errors from extension page.js frames", () => {
