@@ -442,7 +442,7 @@
     "__tests__/components/user/identity/statements/social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts.test.tsx": 1,
     "__tests__/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm.test.tsx": 2,
     "__tests__/components/user/identity/statements/utils/UserPageIdentityAddStatementsInput.test.tsx": 1,
-    "__tests__/components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal.test.tsx": 4,
+    "__tests__/components/user/identity/statements/utils/UserPageIdentityDeleteStatementModal.test.tsx": 3,
     "__tests__/components/user/identity/statements/utils/UserPageIdentityStatementsStatementsList.test.tsx": 1,
     "__tests__/components/user/identity/UserPageIdentityAddStatementsNFTAccountItems.test.tsx": 1,
     "__tests__/components/user/proxy/action/utils/credit/ProfileProxyCreditEdit.test.tsx": 2,
