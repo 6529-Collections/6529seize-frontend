@@ -847,6 +847,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     otherPlatform: "Other",
     customLinkLabel: "Display name",
     customLinkLabelPlaceholder: "For example, AOTM",
+    customLinkLabelRequired: "Enter a display name that is not only spaces.",
     customLinkUrl: "Art link URL",
     customLinkUrlPlaceholder: "https://example.art/artist",
     customLinkHint:

@@ -59,10 +59,11 @@ export interface ApiProfileRaterCicState {
 
 export interface CicStatement extends Omit<
   ApiCicStatement,
-  "statement_group" | "statement_type"
+  "statement_group" | "statement_type" | "crated_at"
 > {
   statement_group: STATEMENT_GROUP;
   statement_type: string;
+  crated_at: string | Date;
   updated_at?: Date | null;
 }
 

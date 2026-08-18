@@ -15,39 +15,21 @@ import {
 } from "@/helpers/Types";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import UserPageIdentityAddStatementsCustomLinkFields from "../add/nft-accounts/UserPageIdentityAddStatementsCustomLinkFields";
+import { isHttpsUrl } from "./statement-input.utils";
 
-interface StatementFormValue {
-  readonly comment: string | null;
-  readonly value: string;
-}
+type AddStatementMutation = UseMutationResult<
+  CicStatement,
+  Error,
+  ApiCreateOrUpdateProfileCicStatement
+>;
 
 export default function UserPageIdentityAddStatementsForm({
-  activeType,
-  group,
-  ...props
-}: {
-  readonly profile: ApiIdentity;
-  readonly activeType: STATEMENT_TYPE;
-  readonly group: STATEMENT_GROUP;
-  readonly onClose: () => void;
-}) {
-  return (
-    <UserPageIdentityAddStatementsFormContent
-      key={`${group}-${activeType}`}
-      activeType={activeType}
-      group={group}
-      {...props}
-    />
-  );
-}
-
-function UserPageIdentityAddStatementsFormContent({
   profile,
   activeType,
   group,
@@ -59,27 +41,24 @@ function UserPageIdentityAddStatementsFormContent({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { setToast } = useContext(AuthContext);
   const { onProfileStatementAdd } = useContext(ReactQueryWrapperContext);
-  const [value, setValue] = useState<string>(
-    STATEMENT_META[activeType].inputInitialValue
-  );
-  const [comment, setComment] = useState("");
-  const isCustomArtLink =
-    group === STATEMENT_GROUP.NFT_ACCOUNTS &&
-    activeType === STATEMENT_TYPE.LINK;
-
-  const addStatementMutation = useMutation({
-    mutationFn: (statement: StatementFormValue) =>
-      commonApiPost<ApiCreateOrUpdateProfileCicStatement, CicStatement>({
+  const addStatementMutation = useMutation<
+    CicStatement,
+    Error,
+    ApiCreateOrUpdateProfileCicStatement
+  >({
+    mutationFn: (statement) => {
+      if (!profile.query) {
+        throw new Error(
+          "Cannot add a profile statement without a profile query"
+        );
+      }
+      return commonApiPost<ApiCreateOrUpdateProfileCicStatement, CicStatement>({
         endpoint: `profiles/${profile.query}/cic/statements`,
-        body: {
-          statement_group: group,
-          statement_type: activeType,
-          statement_comment: statement.comment,
-          statement_value: statement.value,
-        },
-      }),
+        body: statement,
+      });
+    },
     onSuccess: () => {
       setToast({
         message: t(locale, "user.profile.identity.statements.addSuccess"),
@@ -102,20 +81,58 @@ function UserPageIdentityAddStatementsFormContent({
     },
   });
 
+  return (
+    <UserPageIdentityAddStatementsFormContent
+      key={`${group}-${activeType}`}
+      activeType={activeType}
+      group={group}
+      addStatementMutation={addStatementMutation}
+      onClose={onClose}
+    />
+  );
+}
+
+function UserPageIdentityAddStatementsFormContent({
+  activeType,
+  group,
+  onClose,
+  addStatementMutation,
+}: {
+  readonly activeType: STATEMENT_TYPE;
+  readonly group: STATEMENT_GROUP;
+  readonly onClose: () => void;
+  readonly addStatementMutation: AddStatementMutation;
+}) {
+  const locale = useBrowserLocale();
+  const { requestAuth } = useContext(AuthContext);
+  const [value, setValue] = useState<string>(
+    STATEMENT_META[activeType].inputInitialValue
+  );
+  const [comment, setComment] = useState("");
+  const [showLabelError, setShowLabelError] = useState(false);
+  const isCustomArtLink =
+    group === STATEMENT_GROUP.NFT_ACCOUNTS &&
+    activeType === STATEMENT_TYPE.LINK;
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!value || (isCustomArtLink && !comment.trim())) return;
+    if (addStatementMutation.isPending || !value) return;
+    if (isCustomArtLink && !comment.trim()) {
+      setShowLabelError(true);
+      return;
+    }
+    if (group === STATEMENT_GROUP.NFT_ACCOUNTS && !isHttpsUrl(value)) return;
     const { success } = await requestAuth();
     if (!success) return;
     addStatementMutation.mutate(
       {
-        comment: isCustomArtLink ? comment.trim() : null,
-        value,
+        statement_group: group,
+        statement_type: activeType,
+        statement_comment: isCustomArtLink ? comment.trim() : null,
+        statement_value: value,
       },
       {
         onSuccess: () => {
-          setValue("");
-          setComment("");
           onClose();
         },
       }
@@ -128,7 +145,11 @@ function UserPageIdentityAddStatementsFormContent({
           <UserPageIdentityAddStatementsCustomLinkFields
             label={comment}
             url={value}
-            onLabelChange={setComment}
+            showLabelError={showLabelError}
+            onLabelChange={(nextLabel) => {
+              setComment(nextLabel);
+              if (nextLabel.trim()) setShowLabelError(false);
+            }}
             onUrlChange={setValue}
           />
         ) : (
@@ -136,6 +157,7 @@ function UserPageIdentityAddStatementsFormContent({
             activeType={activeType}
             value={value}
             onChange={setValue}
+            requireHttps={group === STATEMENT_GROUP.NFT_ACCOUNTS}
           />
         )}
 

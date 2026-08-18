@@ -38,7 +38,7 @@ export default function SocialStatementIcon({
 }: {
   readonly statementType: string;
 }) {
-  switch (statementType as STATEMENT_TYPE) {
+  switch (statementType) {
     case STATEMENT_TYPE.X:
       return <XIcon aria-hidden="true" />;
     case STATEMENT_TYPE.FACEBOOK:
@@ -105,8 +105,6 @@ export default function SocialStatementIcon({
       return <ManifoldIcon />;
     case STATEMENT_TYPE.TRANSIENT:
       return <TransientIcon />;
-    case STATEMENT_TYPE.NINFA:
-      return <LinkIcon aria-hidden="true" />;
     default:
       return <LinkIcon aria-hidden="true" />;
   }

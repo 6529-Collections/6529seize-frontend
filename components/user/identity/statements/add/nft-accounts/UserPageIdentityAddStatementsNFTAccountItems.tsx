@@ -1,6 +1,7 @@
 import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
 import {
   NFT_ACCOUNTS_STATEMENT_TYPES,
+  STATEMENT_META,
   STATEMENT_TYPE,
   type NFT_ACCOUNTS_STATEMENT_TYPE,
 } from "@/helpers/Types";
@@ -26,14 +27,11 @@ export default function UserPageIdentityAddStatementsNFTAccountItems({
           <UserPageIdentityAddStatementsTypeButton
             key={type}
             statementType={type}
-            {...(type === STATEMENT_TYPE.LINK
-              ? {
-                  label: t(
-                    locale,
-                    "user.profile.identity.statements.otherPlatform"
-                  ),
-                }
-              : {})}
+            label={
+              type === STATEMENT_TYPE.LINK
+                ? t(locale, "user.profile.identity.statements.otherPlatform")
+                : STATEMENT_META[type].title
+            }
             isActive={activeType === type}
             onClick={() => setType(type)}
           />

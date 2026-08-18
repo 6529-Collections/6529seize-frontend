@@ -136,6 +136,7 @@ export default function UserPageIdentityStatementsStatement({
         {canOpen ? (
           <a
             href={statement.statement_value}
+            title={statement.statement_value}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${t(

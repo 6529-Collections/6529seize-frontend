@@ -4,15 +4,18 @@ import { useEffect, useRef } from "react";
 import type { STATEMENT_TYPE } from "@/helpers/Types";
 import { STATEMENT_META } from "@/helpers/Types";
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
+import { collapseProtocolPrefix } from "./statement-input.utils";
 
 export default function UserPageIdentityAddStatementsContactInput({
   activeType,
   value,
   onChange,
+  requireHttps = false,
 }: {
   readonly activeType: STATEMENT_TYPE;
   readonly value: string;
   readonly onChange: (value: string) => void;
+  readonly requireHttps?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -53,6 +56,7 @@ export default function UserPageIdentityAddStatementsContactInput({
             STATEMENT_META[activeType].canOpenStatement ? "url" : undefined
           }
           required
+          pattern={requireHttps ? "https://.*" : undefined}
           autoComplete={
             STATEMENT_META[activeType].canOpenStatement ? "url" : "off"
           }
@@ -71,11 +75,3 @@ export default function UserPageIdentityAddStatementsContactInput({
     </>
   );
 }
-
-const COLLAPSE_PROTOCOL_PREFIX = /^(?:(https?):\/\/)+/i;
-
-const collapseProtocolPrefix = (value: string): string =>
-  value.replace(
-    COLLAPSE_PROTOCOL_PREFIX,
-    (_match, scheme: string) => `${scheme.toLowerCase()}://`
-  );

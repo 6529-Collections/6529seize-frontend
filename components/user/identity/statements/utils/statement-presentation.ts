@@ -1,5 +1,9 @@
 import type { CicStatement } from "@/entities/IProfile";
-import { getStatementMeta, STATEMENT_GROUP } from "@/helpers/Types";
+import {
+  getStatementMeta,
+  STATEMENT_GROUP,
+  STATEMENT_TYPE,
+} from "@/helpers/Types";
 
 function getExternalUrl(value: string): URL | null {
   try {
@@ -22,7 +26,12 @@ export function getStatementPresentation(
   const externalUrl = getExternalUrl(statement.statement_value);
   const isCustomArtLink =
     statement.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS &&
-    statement.statement_type === "LINK";
+    statement.statement_type === (STATEMENT_TYPE.LINK as string);
+  const isNftAccount =
+    statement.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS;
+  const hasAllowedProtocol =
+    externalUrl !== null &&
+    (!isNftAccount || externalUrl.protocol === "https:");
   const customLabel = statement.statement_comment?.trim();
   let title = statementMeta?.title ?? fallbackTitle;
   if (isCustomArtLink && customLabel) {
@@ -31,9 +40,8 @@ export function getStatementPresentation(
 
   return {
     canOpen: statementMeta
-      ? statementMeta.canOpenStatement && externalUrl !== null
-      : statement.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS &&
-        externalUrl?.protocol === "https:",
+      ? statementMeta.canOpenStatement && hasAllowedProtocol
+      : isNftAccount && externalUrl?.protocol === "https:",
     displayValue:
       isCustomArtLink && externalUrl
         ? externalUrl.hostname

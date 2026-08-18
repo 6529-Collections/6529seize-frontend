@@ -162,6 +162,25 @@ describe("UserPageIdentityStatementsStatement", () => {
     expect(screen.getByText("javascript:alert(1)")).toBeInTheDocument();
   });
 
+  it("does not open an insecure HTTP NFT platform link", () => {
+    render(
+      <UserPageIdentityStatementsStatement
+        statement={
+          {
+            statement_group: "NFT_ACCOUNTS",
+            statement_type: STATEMENT_TYPE.OPENSEA,
+            statement_value: "http://opensea.io/artist",
+          } as any
+        }
+        profile={{} as any}
+        canEdit={false}
+      />
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByText("http://opensea.io/artist")).toBeInTheDocument();
+  });
+
   it("shows a custom art link label and destination hostname", () => {
     render(
       <UserPageIdentityStatementsStatement

@@ -3,7 +3,7 @@
 import LinkIcon from "@/components/user/utils/icons/LinkIcon";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useEffect, useRef } from "react";
+import { collapseProtocolPrefix } from "../../utils/statement-input.utils";
 
 const INPUT_CLASS_NAME =
   "tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-3 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-400 hover:tw-ring-iron-700 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-iron-700 sm:tw-leading-6";
@@ -11,20 +11,17 @@ const INPUT_CLASS_NAME =
 export default function UserPageIdentityAddStatementsCustomLinkFields({
   label,
   url,
+  showLabelError,
   onLabelChange,
   onUrlChange,
 }: {
   readonly label: string;
   readonly url: string;
+  readonly showLabelError: boolean;
   readonly onLabelChange: (label: string) => void;
   readonly onUrlChange: (url: string) => void;
 }) {
   const locale = useBrowserLocale();
-  const labelRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    labelRef.current?.focus();
-  }, []);
 
   return (
     <div className="tw-space-y-4">
@@ -43,13 +40,16 @@ export default function UserPageIdentityAddStatementsCustomLinkFields({
           </div>
           <input
             id="custom-art-link-label"
-            ref={labelRef}
             type="text"
             required
             maxLength={40}
             autoComplete="off"
             value={label}
             onChange={(event) => onLabelChange(event.target.value)}
+            aria-invalid={showLabelError || undefined}
+            aria-describedby={
+              showLabelError ? "custom-art-link-label-error" : undefined
+            }
             placeholder={t(
               locale,
               "user.profile.identity.statements.customLinkLabelPlaceholder"
@@ -57,6 +57,18 @@ export default function UserPageIdentityAddStatementsCustomLinkFields({
             className={INPUT_CLASS_NAME}
           />
         </div>
+        {showLabelError && (
+          <p
+            id="custom-art-link-label-error"
+            role="alert"
+            className="tw-text-red-400 tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5"
+          >
+            {t(
+              locale,
+              "user.profile.identity.statements.customLinkLabelRequired"
+            )}
+          </p>
+        )}
       </div>
 
       <div>
@@ -84,7 +96,16 @@ export default function UserPageIdentityAddStatementsCustomLinkFields({
             autoCorrect="off"
             spellCheck={false}
             value={url}
-            onChange={(event) => onUrlChange(event.target.value)}
+            onChange={(event) => {
+              const nativeEvent = event.nativeEvent as {
+                isComposing?: boolean | undefined;
+              };
+              onUrlChange(
+                nativeEvent.isComposing
+                  ? event.target.value
+                  : collapseProtocolPrefix(event.target.value)
+              );
+            }}
             placeholder={t(
               locale,
               "user.profile.identity.statements.customLinkUrlPlaceholder"

@@ -4,7 +4,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { STATEMENT_GROUP } from "@/helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -67,8 +67,10 @@ export default function UserPageIdentityStatements({
       nftAccounts: sortedStatements
         .filter((s) => s.statement_group === STATEMENT_GROUP.NFT_ACCOUNTS)
         .sort((first, second) => {
-          const firstIsCustom = first.statement_type === "LINK";
-          const secondIsCustom = second.statement_type === "LINK";
+          const firstIsCustom =
+            first.statement_type === (STATEMENT_TYPE.LINK as string);
+          const secondIsCustom =
+            second.statement_type === (STATEMENT_TYPE.LINK as string);
           return Number(firstIsCustom) - Number(secondIsCustom);
         }),
       socialMediaVerificationPosts: sortedStatements.filter(
