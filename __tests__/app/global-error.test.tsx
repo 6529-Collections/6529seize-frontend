@@ -31,7 +31,7 @@ describe("GlobalError Sentry capture", () => {
     publicEnv.SENTRY_DSN = "https://public@example.invalid/1";
   });
 
-  it.each(["779660776", "4216289156"])(
+  it.each(["0", "779660776", "4216289156", "4294967295"])(
     "tags and fingerprints the redacted RSC error with digest %s",
     (digest) => {
       const error = createError(NEXTJS_RSC_RENDER_ERROR_MESSAGE, digest);
