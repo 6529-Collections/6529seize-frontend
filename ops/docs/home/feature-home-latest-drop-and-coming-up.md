@@ -172,8 +172,9 @@ Use this page for visibility rules, state switches, and route targets.
 - The homepage top-slot grace period is configured by
   `HOME_LATEST_DROP_GRACE_PERIOD_MINUTES` in
   `helpers/mint-visibility.helpers.ts` and defaults to 10 minutes. The
-  transition uses the calendar's scheduled mint-end instant so all visitors
-  switch at the same time.
+  transition uses the calendar's scheduled mint-end instant as its shared
+  deadline. The exact client render time can vary with the viewer's device
+  clock and browser timer scheduling.
 - `Coming up` uses prediction leaderboard ordering, not chronological ordering.
 - Leader count is capped:
   - With `NEXT MINT` card: up to 2 leader cards

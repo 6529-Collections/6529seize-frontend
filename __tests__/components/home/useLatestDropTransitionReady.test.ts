@@ -28,7 +28,7 @@ describe("useLatestDropTransitionReady", () => {
     );
   });
 
-  it("becomes ready at the same scheduled transition time for every visitor", () => {
+  it("becomes ready at the configured scheduled transition time", () => {
     const transitionTime = getLatestDropTransitionTime(MINT_NUMBER)!;
     jest.setSystemTime(transitionTime - 1);
 
@@ -46,6 +46,49 @@ describe("useLatestDropTransitionReady", () => {
     });
 
     expect(result.current).toBe(true);
+  });
+
+  it("rekeys readiness when the mint number changes", () => {
+    const currentTransitionTime = getLatestDropTransitionTime(MINT_NUMBER)!;
+    const nextTransitionTime = getLatestDropTransitionTime(MINT_NUMBER + 1)!;
+    jest.setSystemTime(currentTransitionTime);
+
+    const { result, rerender } = renderHook(
+      ({ mintNumber }) =>
+        useLatestDropTransitionReady({
+          isDropComplete: true,
+          mintNumber,
+        }),
+      { initialProps: { mintNumber: MINT_NUMBER } }
+    );
+
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(result.current).toBe(true);
+
+    rerender({ mintNumber: MINT_NUMBER + 1 });
+    expect(result.current).toBe(false);
+
+    act(() => {
+      jest.advanceTimersByTime(nextTransitionTime - currentTransitionTime);
+    });
+    expect(result.current).toBe(true);
+  });
+
+  it("stays unready when no mint number is available", () => {
+    const { result } = renderHook(() =>
+      useLatestDropTransitionReady({
+        isDropComplete: true,
+        mintNumber: undefined,
+      })
+    );
+
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+
+    expect(result.current).toBe(false);
   });
 
   it("does not transition before the drop is complete", () => {
