@@ -26,6 +26,7 @@ export function MuseumProposalImage({
   eager = false,
   requireIntentForLargeSource = true,
   optimizeSource = false,
+  containerClassName,
   className,
 }: {
   readonly src: string;
@@ -47,6 +48,7 @@ export function MuseumProposalImage({
    * browser delivery and avoids transferring a multi-megabyte original.
    */
   readonly optimizeSource?: boolean;
+  readonly containerClassName?: string;
   readonly className?: string;
 }) {
   const responsiveVariants = [...variants].sort(
@@ -79,6 +81,9 @@ export function MuseumProposalImage({
     focusOnRevealRef.current = false;
     node.focus();
   }, []);
+  const containerClasses = containerClassName
+    ? `tw-outline-none ${containerClassName}`
+    : "tw-outline-none";
 
   if (!revealed) {
     let statusMessage: string | null = null;
@@ -137,7 +142,7 @@ export function MuseumProposalImage({
         ref={focusRevealedMedia}
         tabIndex={-1}
         aria-label={statusMessage}
-        className="tw-outline-none"
+        className={containerClasses}
       >
         <span className="tw-sr-only" aria-live="polite">
           {statusMessage}
@@ -173,7 +178,7 @@ export function MuseumProposalImage({
       ref={focusRevealedMedia}
       tabIndex={-1}
       aria-label={statusMessage}
-      className="tw-outline-none"
+      className={containerClasses}
     >
       <span className="tw-sr-only" aria-live="polite">
         {statusMessage}

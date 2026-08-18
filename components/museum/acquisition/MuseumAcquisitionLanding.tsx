@@ -302,40 +302,6 @@ function workCountLabel(count: number): string {
   );
 }
 
-function mediaAspectRatio(
-  media: MuseumAcquisitionLandingMedia | undefined,
-  metadata: MuseumMediaMetadata | undefined
-): string | undefined {
-  let dimensions: {
-    readonly width: number | null;
-    readonly height: number | null;
-  } | null = null;
-  if (media?.kind === "governed" || media?.kind === "proposal") {
-    dimensions = { width: media.width, height: media.height };
-  } else if (media?.kind === "program") {
-    dimensions = {
-      width: media.media.sourceWidth ?? media.media.variants[0]?.width ?? null,
-      height:
-        media.media.sourceHeight ?? media.media.variants[0]?.height ?? null,
-    };
-  } else if (metadata !== undefined) {
-    dimensions = { width: metadata.width, height: metadata.height };
-  }
-  const width = dimensions?.width;
-  const height = dimensions?.height;
-  if (
-    width === undefined ||
-    width === null ||
-    height === undefined ||
-    height === null ||
-    width <= 0 ||
-    height <= 0
-  ) {
-    return undefined;
-  }
-  return `${width} / ${height}`;
-}
-
 function MuseumAcquisitionMediaFrame({
   media,
   metadata,
@@ -352,7 +318,7 @@ function MuseumAcquisitionMediaFrame({
   }
   if (media === undefined) {
     return (
-      <div className="tw-flex tw-min-h-48 tw-items-end tw-bg-iron-950 tw-p-5">
+      <div className="tw-flex tw-h-full tw-items-end tw-bg-iron-950 tw-p-5">
         <p className="tw-m-0 tw-max-w-xs tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
         </p>
@@ -361,7 +327,7 @@ function MuseumAcquisitionMediaFrame({
   }
 
   const imageClassName =
-    "tw-block tw-h-auto tw-w-full tw-object-contain tw-transition-transform tw-duration-300 group-hover:tw-scale-[1.01] motion-reduce:tw-transition-none";
+    "tw-block tw-h-full tw-w-full tw-object-contain tw-transition-transform tw-duration-300 group-hover:tw-scale-[1.01] motion-reduce:tw-transition-none";
   if (media.kind === "governed") {
     return (
       <MuseumManagedImage
@@ -397,6 +363,7 @@ function MuseumAcquisitionMediaFrame({
       sourceByteSize={media.sourceByteSize}
       variants={media.variants}
       eager={eager}
+      containerClassName="tw-h-full tw-w-full"
       className={imageClassName}
     />
   );
@@ -412,7 +379,6 @@ function MuseumAcquisitionLandingMediaCard({
   const { acquisition } = record;
   const sourceHref =
     record.media?.kind === "proposal" ? record.media.sourceHref : undefined;
-  const aspectRatio = mediaAspectRatio(record.media, record.metadata);
   const displayMediaTitle = /^6529NM[-.]/u.test(record.mediaTitle.trim())
     ? acquisition.title
     : record.mediaTitle;
@@ -423,8 +389,8 @@ function MuseumAcquisitionLandingMediaCard({
       data-testid="museum-acquisition-landing-media-card"
     >
       <div
-        className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950"
-        style={aspectRatio === undefined ? undefined : { aspectRatio }}
+        className="tw-flex tw-aspect-[4/3] tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 lg:tw-aspect-[4/5]"
+        data-testid="museum-acquisition-media-stage"
       >
         <MuseumAcquisitionMediaFrame
           {...(record.media === undefined ? {} : { media: record.media })}
@@ -435,7 +401,7 @@ function MuseumAcquisitionLandingMediaCard({
           eager={eager}
         />
       </div>
-      <figcaption className="tw-pt-4">
+      <figcaption className="tw-pt-4 lg:tw-min-h-44">
         {hasDistinctMediaTitle ? (
           <span className="tw-block tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100">
             {displayMediaTitle}
@@ -505,9 +471,12 @@ function AcquisitionFeature({
   const href = museumAcquisitionHref(acquisition.slug);
   const program = pathwayRelation(acquisition);
   return (
-    <article className="tw-min-w-0" data-testid="museum-acquisition-card">
+    <article
+      className="tw-flex tw-h-full tw-min-w-0 tw-flex-col"
+      data-testid="museum-acquisition-card"
+    >
       <MuseumAcquisitionLandingMediaCard record={record} eager={index < 3} />
-      <div className="tw-mt-5">
+      <div className="tw-mt-5 tw-flex tw-flex-1 tw-flex-col">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.acquisitions.eyebrow")}
         </p>
@@ -549,7 +518,7 @@ function AcquisitionFeature({
             </dd>
           </div>
         </dl>
-        <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
+        <div className="tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2 tw-pt-4">
           <Link
             href={href}
             className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"

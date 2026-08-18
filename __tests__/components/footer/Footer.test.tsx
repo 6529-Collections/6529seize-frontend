@@ -25,6 +25,7 @@ describe("Footer", () => {
     );
     const images = screen.getAllByRole("img");
     expect(images).toHaveLength(3);
+    expect(punk.parentElement?.textContent).not.toContain("||");
   });
 
   it("renders policy and contact links", () => {

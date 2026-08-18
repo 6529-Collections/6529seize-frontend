@@ -17,6 +17,7 @@ export function MuseumPublicMediaFigure({
   sourceLabel,
   eager = false,
   sizes = "(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw",
+  srcSet,
   aspectRatio,
 }: {
   readonly src: string;
@@ -32,6 +33,7 @@ export function MuseumPublicMediaFigure({
   readonly sourceLabel?: string;
   readonly eager?: boolean;
   readonly sizes?: string;
+  readonly srcSet?: string;
   readonly aspectRatio?: number;
 }) {
   const mediaFrameStyle =
@@ -49,6 +51,7 @@ export function MuseumPublicMediaFigure({
         loading={eager ? "eager" : "lazy"}
         fetchPriority={eager ? "high" : "auto"}
         sizes={sizes}
+        {...(srcSet === undefined ? {} : { srcSet })}
         failureMessage={t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
         retryLabel={t(DEFAULT_LOCALE, "museum.network.media.retry")}
         {...(sourceHref === undefined || sourceLabel === undefined

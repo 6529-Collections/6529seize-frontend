@@ -11,6 +11,7 @@ const LABELS = {
   resultCountOne: "{count} record",
   resultCountOther: "{count} records",
   sourceLabel: "Source",
+  opensInNewTab: "Opens in a new tab.",
 };
 
 describe("MuseumResearchBrowse", () => {
@@ -27,6 +28,7 @@ describe("MuseumResearchBrowse", () => {
                 id: "research-1",
                 slug: "a-study",
                 title: "A study",
+                publicationUri: "https://example.com/research-source",
               },
             ],
           },
@@ -43,5 +45,8 @@ describe("MuseumResearchBrowse", () => {
     expect(container.querySelector("[aria-live='polite']")).toHaveTextContent(
       "1 record"
     );
+    expect(
+      container.querySelector("a[href='https://example.com/research-source']")
+    ).toHaveAccessibleName("Source Opens in a new tab.");
   });
 });
