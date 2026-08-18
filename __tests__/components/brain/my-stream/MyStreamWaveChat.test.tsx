@@ -291,10 +291,14 @@ describe("MyStreamWaveChat", () => {
 
   it("uses the canonical DM unread count in the open chat", () => {
     mockDmUnreadConversation = { unread_count: 6 };
+    const dmWave = {
+      ...wave,
+      chat: { scope: { group: { is_direct_message: true } } },
+    } as any;
 
     renderWithProvider(
       <MyStreamWaveChat
-        wave={wave}
+        wave={dmWave}
         firstUnreadSerialNo={null}
         viewMode="chat"
         onDropClick={mockOnDropClick}
@@ -302,6 +306,43 @@ describe("MyStreamWaveChat", () => {
     );
 
     expect(capturedPropsHolder.current.unreadCount).toBe(6);
+  });
+
+  it("does not fall back to the wave API unread count before DM snapshot hydration", () => {
+    const dmWave = {
+      ...wave,
+      chat: { scope: { group: { is_direct_message: true } } },
+      metrics: { ...wave.metrics, your_unread_drops_count: 9 },
+    } as any;
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={dmWave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    expect(capturedPropsHolder.current.unreadCount).toBe(0);
+  });
+
+  it("preserves the wave API unread count for ordinary waves", () => {
+    const ordinaryWave = {
+      ...wave,
+      metrics: { ...wave.metrics, your_unread_drops_count: 5 },
+    } as any;
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={ordinaryWave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    expect(capturedPropsHolder.current.unreadCount).toBe(5);
   });
 
   const wrapWithProvider = (component: React.ReactElement) => {

@@ -27,6 +27,7 @@ import type { WsDropDeleteMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "../create-drop-content/reply-target-unavailable";
@@ -199,8 +200,9 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                     activeDrop={activeDrop}
                     initialDrop={null}
                     unreadCount={
-                      dmUnreadConversation?.unread_count ??
-                      wave.metrics.your_unread_drops_count
+                      isWaveDirectMessage(wave.id, wave)
+                        ? (dmUnreadConversation?.unread_count ?? 0)
+                        : wave.metrics.your_unread_drops_count
                     }
                     dropId={drop.id}
                     isMuted={wave.metrics.muted}

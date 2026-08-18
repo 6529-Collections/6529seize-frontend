@@ -10,10 +10,10 @@ import {
   type WaveNotificationsReadMarkerState,
 } from "@/hooks/useMarkWaveNotificationsRead.helpers";
 import { getAuthJwt } from "@/services/auth/auth.utils";
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { useOptionalDmUnreadActions } from "@/services/dm-unread/DmUnreadStateProvider";
 
-export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
+function useRawWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy, connectedProfile } = useAuth();
@@ -33,11 +33,11 @@ export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMark
   });
 }
 
-export function useMarkWaveNotificationsRead(): (
-  waveId: string,
-  options?: MarkWaveNotificationsReadOptions
-) => Promise<MarkWaveNotificationsReadResult> {
-  const { markWaveNotificationsRead } = useWaveNotificationsReadMarkerState();
+function useCanonicalMarkWaveNotificationsRead(
+  markWaveNotificationsRead: WaveNotificationsReadMarkerState[
+    "markWaveNotificationsRead"
+  ]
+): WaveNotificationsReadMarkerState["markWaveNotificationsRead"] {
   const dmUnreadActions = useOptionalDmUnreadActions();
   const applyDmServerState = dmUnreadActions?.applyServerState;
   const beginDmRead = dmUnreadActions?.beginRead;
@@ -110,4 +110,31 @@ export function useMarkWaveNotificationsRead(): (
       reconcileFailedDmRead,
     ]
   );
+}
+
+export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
+  const rawMarkerState = useRawWaveNotificationsReadMarkerState();
+  const markWaveNotificationsRead = useCanonicalMarkWaveNotificationsRead(
+    rawMarkerState.markWaveNotificationsRead
+  );
+
+  return useMemo(
+    () => ({
+      markWaveNotificationsRead,
+      identityKey: rawMarkerState.identityKey,
+      proxyRoleIdentityKey: rawMarkerState.proxyRoleIdentityKey,
+    }),
+    [
+      markWaveNotificationsRead,
+      rawMarkerState.identityKey,
+      rawMarkerState.proxyRoleIdentityKey,
+    ]
+  );
+}
+
+export function useMarkWaveNotificationsRead(): (
+  waveId: string,
+  options?: MarkWaveNotificationsReadOptions
+) => Promise<MarkWaveNotificationsReadResult> {
+  return useWaveNotificationsReadMarkerState().markWaveNotificationsRead;
 }

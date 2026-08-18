@@ -153,9 +153,43 @@ describe("SingleWaveDropChat", () => {
   it("uses the canonical DM unread count", () => {
     mockDmUnreadConversation = { unread_count: 4 };
 
-    render(<SingleWaveDropChat wave={createWave()} drop={createDrop()} />);
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          chat: { scope: { group: { is_direct_message: true } } },
+        })}
+        drop={createDrop()}
+      />
+    );
 
     expect(capturedProps.unreadCount).toBe(4);
+  });
+
+  it("does not fall back to the wave API unread count before DM snapshot hydration", () => {
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          chat: { scope: { group: { is_direct_message: true } } },
+          metrics: { muted: false, your_unread_drops_count: 7 },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(0);
+  });
+
+  it("preserves the wave API unread count for ordinary waves", () => {
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          metrics: { muted: false, your_unread_drops_count: 8 },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(8);
   });
 
   it("clears the root reply when the root drop is deleted", () => {

@@ -16,6 +16,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -610,8 +611,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           initialDrop={scrollTarget}
           dividerSerialNo={dividerTarget}
           unreadCount={
-            dmUnreadConversation?.unread_count ??
-            wave.metrics.your_unread_drops_count
+            isWaveDirectMessage(wave.id, wave)
+              ? (dmUnreadConversation?.unread_count ?? 0)
+              : wave.metrics.your_unread_drops_count
           }
           dropId={null}
           onDropContentClick={onDropClick}
