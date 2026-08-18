@@ -4580,6 +4580,7 @@
         "On mobile, select the ID Statements score card to open a compact statements card without repeating the profile heading or description; eligible owners see Add at the right of the Consolidated Addresses header.",
         "Statement sections include Consolidated Addresses, Social Media Accounts, NFT Accounts, Contact, and Social Media Verification Posts.",
         "Eligible profile owners use Add to open a bottom sheet on mobile or a dialog on desktop, choose a statement group and platform, and can return with Back to statement types before saving.",
+        "Social Media Accounts, NFT Accounts, and Contact use compact icon rows for platform selection; pointer hover and keyboard focus reveal each platform name, and the selected option has a stronger outline.",
         "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
