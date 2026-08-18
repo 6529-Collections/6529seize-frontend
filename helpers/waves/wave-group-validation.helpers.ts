@@ -53,5 +53,8 @@ export const getWaveUpdateGroupValidationRequest = (
     ...(body.wave.admin_group && includesRole(ApiWaveGroupRole.Admin)
       ? { admin_group_id: body.wave.admin_group.group_id }
       : {}),
+    ...(body.wave.admin_group === null && includesRole(ApiWaveGroupRole.Admin)
+      ? { include_authenticated_user_as_admin: true }
+      : {}),
   };
 };

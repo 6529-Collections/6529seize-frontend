@@ -50,6 +50,7 @@ export default function CreateWaveActions({
       <div>
         {previousStep !== null && (
           <CreateWaveBackStep
+            disabled={submitting}
             onPreviousStep={() => {
               void setStep(previousStep, "backward");
             }}

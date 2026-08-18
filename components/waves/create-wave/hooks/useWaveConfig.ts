@@ -178,6 +178,7 @@ export function useWaveConfig() {
   const manuallySelectedPrivilegeGroups = useRef<Set<PrivilegeGroupKey>>(
     new Set()
   );
+  const navigationRequestId = useRef(0);
 
   const shouldLoadMemeCount =
     config.voting.type === ApiWaveCreditType.CardSetTdh;
@@ -201,6 +202,37 @@ export function useWaveConfig() {
     };
   }, [config, memeCount]);
   const groupValidationQuery = useWaveGroupValidation(effectiveConfig);
+
+  const replaceConfig = (nextConfig: CreateWaveConfig) => {
+    manuallySelectedPrivilegeGroups.current.clear();
+    const { canView } = nextConfig.groups;
+    const privilegeGroups: readonly [
+      PrivilegeGroupKey,
+      string | null,
+      boolean,
+    ][] = [
+      ["canChat", nextConfig.groups.canChat, nextConfig.chat.enabled],
+      [
+        "canDrop",
+        nextConfig.groups.canDrop,
+        nextConfig.overview.type !== ApiWaveType.Chat,
+      ],
+      [
+        "canVote",
+        nextConfig.groups.canVote,
+        nextConfig.overview.type !== ApiWaveType.Chat,
+      ],
+    ];
+    for (const [key, groupId, isActive] of privilegeGroups) {
+      // A loaded privilege scope that differs from View represents an
+      // intentional override. Matching scopes remain linked to future View
+      // changes, which is the defaulting behavior users expect.
+      if (isActive && groupId !== canView) {
+        manuallySelectedPrivilegeGroups.current.add(key);
+      }
+    }
+    setConfig(nextConfig);
+  };
 
   // Update end date config when config changes
   useEffect(() => {
@@ -292,6 +324,7 @@ export function useWaveConfig() {
     readonly step: CreateWaveStep;
     readonly direction: "forward" | "backward";
   }) => {
+    const requestId = ++navigationRequestId.current;
     if (direction === "forward") {
       const newErrors = getCreateWaveValidationErrors({
         config: effectiveConfig,
@@ -312,8 +345,14 @@ export function useWaveConfig() {
           // background query data is still within its stale-time window.
           validationResult = await groupValidationQuery.refetch();
         } catch {
+          if (navigationRequestId.current !== requestId) {
+            return;
+          }
           setGroupValidationErrorVisible(true);
           setErrorFocusRequest((count) => count + 1);
+          return;
+        }
+        if (navigationRequestId.current !== requestId) {
           return;
         }
         if (validationResult.isError || !validationResult.data?.valid) {
@@ -562,7 +601,7 @@ export function useWaveConfig() {
 
   return {
     config: effectiveConfig,
-    setConfig,
+    replaceConfig,
     endDateConfig,
     setEndDateConfig,
     step,

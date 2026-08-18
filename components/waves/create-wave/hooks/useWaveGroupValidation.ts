@@ -19,6 +19,7 @@ export const useWaveGroupValidation = (config: CreateWaveConfig) => {
         },
         waveType: config.overview.type,
         chatEnabled: config.chat.enabled,
+        includeAuthenticatedUserAsAdmin: true,
       }),
     [
       admin,

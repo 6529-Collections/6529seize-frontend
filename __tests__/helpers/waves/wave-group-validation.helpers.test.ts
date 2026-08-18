@@ -95,4 +95,24 @@ describe("wave group validation helpers", () => {
       chat_group_id: null,
     });
   });
+
+  it("checks the implicit authenticated admin when an edit has no admin group", () => {
+    const body = {
+      visibility: { scope: { group_id: "view" } },
+      participation: { scope: { group_id: "drop" } },
+      voting: { scope: { group_id: "vote" } },
+      chat: { enabled: false, scope: { group_id: null } },
+      wave: {
+        type: ApiWaveType.Rank,
+        admin_group: null,
+      },
+    } as never;
+
+    expect(
+      getWaveUpdateGroupValidationRequest(body, [ApiWaveGroupRole.Admin])
+    ).toEqual({
+      visibility_group_id: "view",
+      include_authenticated_user_as_admin: true,
+    });
+  });
 });

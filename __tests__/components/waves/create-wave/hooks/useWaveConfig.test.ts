@@ -245,6 +245,64 @@ describe("useWaveConfig", () => {
     expect(result.current.groupValidation.unavailable).toBe(true);
   });
 
+  it("does not let a stale group check overwrite later navigation", async () => {
+    let resolveValidation:
+      | ((value: {
+          data: { valid: boolean; invalid_roles: never[] };
+          isError: boolean;
+        }) => void)
+      | undefined;
+    const pendingValidation = new Promise<{
+      data: { valid: boolean; invalid_roles: never[] };
+      isError: boolean;
+    }>((resolve) => {
+      resolveValidation = resolve;
+    });
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockReturnValue(pendingValidation),
+    });
+    const { result } = renderHook(() => useWaveConfig());
+
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.GROUPS,
+        direction: "backward",
+      });
+    });
+    act(() => {
+      result.current.onGroupSelect({
+        group: { id: "view-group" } as ApiGroupFull,
+        groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      });
+    });
+
+    let forwardNavigation: Promise<void> | undefined;
+    act(() => {
+      forwardNavigation = result.current.onStep({
+        step: CreateWaveStep.DATES,
+        direction: "forward",
+      });
+    });
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.OVERVIEW,
+        direction: "backward",
+      });
+    });
+    await act(async () => {
+      resolveValidation?.({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      });
+      await forwardNavigation;
+    });
+
+    expect(result.current.step).toBe(CreateWaveStep.OVERVIEW);
+  });
+
   describe("Overview Updates", () => {
     it("should reset config to initial when overview type changes", () => {
       const { result } = renderHook(() => useWaveConfig());
@@ -1390,8 +1448,8 @@ describe("useWaveConfig", () => {
     });
   });
 
-  describe("Direct Config Update", () => {
-    it("should allow direct config updates via setConfig", () => {
+  describe("Config Replacement", () => {
+    it("should replace the complete config", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       const newConfig = {
@@ -1405,11 +1463,45 @@ describe("useWaveConfig", () => {
       };
 
       act(() => {
-        result.current.setConfig(newConfig);
+        result.current.replaceConfig(newConfig);
       });
 
       expect(result.current.config.overview.name).toBe("Direct Update");
       expect(result.current.config.overview.type).toBe(ApiWaveType.Rank);
+    });
+
+    it("rebuilds manual privilege tracking from a loaded draft", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const loadedConfig = {
+        ...result.current.config,
+        overview: {
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        },
+        groups: {
+          admin: null,
+          canView: "draft-view",
+          canDrop: "draft-view",
+          canVote: "draft-view",
+          canChat: "draft-chat-override",
+        },
+      };
+
+      act(() => {
+        result.current.replaceConfig(loadedConfig);
+        result.current.onGroupSelect({
+          group: { id: "replacement-view" } as ApiGroupFull,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "replacement-view",
+        canDrop: "replacement-view",
+        canVote: "replacement-view",
+        canChat: "draft-chat-override",
+      });
     });
   });
 });
