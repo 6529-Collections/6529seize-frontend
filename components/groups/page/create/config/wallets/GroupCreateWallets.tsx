@@ -141,7 +141,7 @@ export default function GroupCreateWallets({
             className="tw-size-5 tw-flex-shrink-0 tw-text-iron-50 sm:tw-size-6"
           />
         </span>
-        <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50 sm:tw-text-2xl">
+        <p className="tw-m-0 tw-text-xl tw-font-semibold !tw-leading-none tw-text-iron-50 sm:tw-text-2xl">
           {LABELS[type]}
         </p>
       </div>

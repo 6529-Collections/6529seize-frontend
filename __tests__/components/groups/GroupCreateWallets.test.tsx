@@ -98,9 +98,25 @@ describe("GroupCreateWallets", () => {
 
   it("shows over limit warning", () => {
     renderComp();
+    expect(screen.getByText("Include Identities")).toHaveClass(
+      "tw-m-0",
+      "!tw-leading-none"
+    );
     expect(
       screen.getByText(/Maximum allowed wallets count/)
     ).toBeInTheDocument();
+  });
+
+  it("uses the same compact heading alignment for excluded identities", () => {
+    renderComp({
+      type: GroupCreateWalletsType.EXCLUDE,
+      walletsLimit: 5,
+    });
+
+    expect(screen.getByText("Exclude Identities")).toHaveClass(
+      "tw-m-0",
+      "!tw-leading-none"
+    );
   });
 
   it("removes wallets when remove button clicked", async () => {
