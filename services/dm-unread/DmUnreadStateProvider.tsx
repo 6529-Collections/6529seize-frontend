@@ -108,6 +108,58 @@ const isDmUnreadSnapshot = (value: unknown): value is ApiDmUnreadSnapshot => {
   );
 };
 
+interface SnapshotSynchronizationRequest {
+  readonly expectedProfileId: string;
+  readonly isCurrentRequest: () => boolean;
+  readonly jwt: string;
+  readonly startedAtSequence: number;
+  readonly store: DmUnreadStore;
+}
+
+const waitForSnapshotRetry = (delay: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
+
+const synchronizeDmUnreadSnapshot = async (
+  request: SnapshotSynchronizationRequest,
+  attempt = 0
+): Promise<boolean> => {
+  try {
+    const response = await commonApiFetch<unknown>({
+      endpoint: "dm-drops/unread/snapshot",
+      headers: { Authorization: `Bearer ${request.jwt}` },
+      errorMode: "structured",
+    });
+    if (!request.isCurrentRequest()) {
+      return false;
+    }
+    if (
+      !isDmUnreadSnapshot(response) ||
+      response.profile_id !== request.expectedProfileId
+    ) {
+      throw new Error("Invalid DM unread snapshot response");
+    }
+    request.store.applySnapshot(response, request.startedAtSequence);
+    return true;
+  } catch (error) {
+    if (!request.isCurrentRequest()) {
+      return false;
+    }
+    const retryDelay = SNAPSHOT_RETRY_DELAYS_MS[attempt];
+    const status = getQueryErrorStatus(error);
+    if (retryDelay === undefined || (status !== null && status < 500)) {
+      console.error("Failed to synchronize DM unread state", error);
+      return false;
+    }
+    await waitForSnapshotRetry(retryDelay);
+    if (!request.isCurrentRequest()) {
+      return false;
+    }
+    return synchronizeDmUnreadSnapshot(request, attempt + 1);
+  }
+};
+
 export function DmUnreadStateProvider({
   children,
 }: {
@@ -195,53 +247,19 @@ export function DmUnreadStateProvider({
         expectedProfileId,
         requestId
       );
-      const requestPromise = (async () => {
-        const isCurrentRequest = () =>
-          isMountedRef.current &&
-          latestSnapshotRequestByProfileRef.current.get(expectedProfileId) ===
-            requestId &&
-          activeActivationRef.current.id === expectedActivationId &&
-          activeActivationRef.current.profileId === expectedProfileId;
-        for (let attempt = 0; ; attempt++) {
-          try {
-            const response = await commonApiFetch<unknown>({
-              endpoint: "dm-drops/unread/snapshot",
-              headers: { Authorization: `Bearer ${jwt}` },
-              errorMode: "structured",
-            });
-            if (!isCurrentRequest()) {
-              return false;
-            }
-            if (
-              !isDmUnreadSnapshot(response) ||
-              response.profile_id !== expectedProfileId
-            ) {
-              throw new Error("Invalid DM unread snapshot response");
-            }
-            store.applySnapshot(response, startedAtSequence);
-            return true;
-          } catch (error) {
-            const status = getQueryErrorStatus(error);
-            const retryDelay = SNAPSHOT_RETRY_DELAYS_MS[attempt];
-            const canRetry =
-              retryDelay !== undefined &&
-              (status === null || status >= 500) &&
-              isCurrentRequest();
-            if (!canRetry) {
-              if (isCurrentRequest()) {
-                console.error("Failed to synchronize DM unread state", error);
-              }
-              return false;
-            }
-            await new Promise<void>((resolve) => {
-              setTimeout(resolve, retryDelay);
-            });
-            if (!isCurrentRequest()) {
-              return false;
-            }
-          }
-        }
-      })().finally(() => {
+      const isCurrentRequest = () =>
+        isMountedRef.current &&
+        latestSnapshotRequestByProfileRef.current.get(expectedProfileId) ===
+          requestId &&
+        activeActivationRef.current.id === expectedActivationId &&
+        activeActivationRef.current.profileId === expectedProfileId;
+      const requestPromise = synchronizeDmUnreadSnapshot({
+        expectedProfileId,
+        isCurrentRequest,
+        jwt,
+        startedAtSequence,
+        store,
+      }).finally(() => {
         const currentRequest =
           inFlightSnapshotByProfileRef.current.get(expectedProfileId);
         if (currentRequest?.requestId === requestId) {
