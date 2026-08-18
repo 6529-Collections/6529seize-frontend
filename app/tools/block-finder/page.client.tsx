@@ -1,5 +1,6 @@
 "use client";
 
+import { CONTENT_PAGE_CONTAINER_CLASS } from "@/components/about/AboutLayout";
 import { useAuth } from "@/components/auth/Auth";
 import BlockPickerBlockNumberIncludes from "@/components/block-picker/BlockPickerBlockNumberIncludes";
 import BlockPickerDateSelect from "@/components/block-picker/BlockPickerDateSelect";
@@ -172,11 +173,13 @@ export default function BlockFinderClient() {
   };
 
   return (
-    <div className="tw-bg-iron-900">
-      <div className="tailwind-scope tw-relative tw-mx-auto tw-min-h-screen tw-overflow-y-auto tw-px-4 tw-pb-12 tw-pt-8 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-        <h1 className="tw-pb-6 tw-text-white">Block Finder</h1>
-        <div className="tw-mb-5 tw-mt-3 tw-flex tw-w-full tw-gap-x-4 tw-gap-y-5">
-          <div className="tw-w-1/2">
+    <div className="tw-min-h-[100dvh] tw-bg-iron-950 tw-text-iron-300">
+      <div
+        className={`tailwind-scope tw-relative tw-min-h-screen tw-overflow-y-auto ${CONTENT_PAGE_CONTAINER_CLASS}`}
+      >
+        <h1 className="tw-pb-6 tw-text-iron-50">Block Finder</h1>
+        <div className="tw-mb-5 tw-mt-3 tw-flex tw-w-full tw-flex-col tw-gap-5 lg:tw-flex-row lg:tw-items-end lg:tw-gap-4">
+          <div className="tw-w-full tw-min-w-0 lg:tw-flex-1">
             <BlockPickerDateSelect
               date={date}
               setDate={setDate}
@@ -184,8 +187,8 @@ export default function BlockFinderClient() {
               setTime={setTime}
             />
           </div>
-          <div className="tw-w-1/2">
-            <div className="tw-flex tw-w-full tw-gap-x-4">
+          <div className="tw-w-full tw-min-w-0 lg:tw-flex-1">
+            <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 sm:tw-flex-row">
               <BlockPickerTimeWindowSelect
                 timeWindow={timeWindow}
                 setTimeWindow={setTimeWindow}
@@ -197,16 +200,14 @@ export default function BlockFinderClient() {
               />
             </div>
           </div>
-          <div className="tw-mt-6">
-            <div className="tw-w-[5.25rem]">
-              <PrimaryButton
-                onClicked={onSubmit}
-                disabled={!date || !time}
-                loading={loading}
-              >
-                Submit
-              </PrimaryButton>
-            </div>
+          <div className="tw-w-fit lg:tw-shrink-0">
+            <PrimaryButton
+              onClicked={onSubmit}
+              disabled={!date || !time}
+              loading={loading}
+            >
+              Submit
+            </PrimaryButton>
           </div>
         </div>
         {!loading && !!predictedBlocks && (

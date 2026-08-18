@@ -1,9 +1,10 @@
-import type {
-  CONTACT_STATEMENT_TYPE} from "@/helpers/Types";
+import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
 import {
   CONTACT_STATEMENT_TYPES,
+  type CONTACT_STATEMENT_TYPE,
 } from "@/helpers/Types";
-import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityAddStatementsContactItems({
   activeType,
@@ -12,20 +13,23 @@ export default function UserPageIdentityAddStatementsContactItems({
   readonly activeType: CONTACT_STATEMENT_TYPE;
   readonly setContactType: (type: CONTACT_STATEMENT_TYPE) => void;
 }) {
+  const locale = useBrowserLocale();
+
   return (
-    <div className="tw-mt-8">
-      <span className="tw-isolate tw-inline-flex tw-rounded-md tw-shadow-sm tw-w-full">
-        {CONTACT_STATEMENT_TYPES.map((type, i) => (
+    <div>
+      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+        {t(locale, "user.profile.identity.statements.selectPlatform")}
+      </p>
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
+        {CONTACT_STATEMENT_TYPES.map((type) => (
           <UserPageIdentityAddStatementsTypeButton
             key={type}
             statementType={type}
             isActive={activeType === type}
-            isFirst={i === 0}
-            isLast={i === CONTACT_STATEMENT_TYPES.length - 1}
             onClick={() => setContactType(type)}
           />
         ))}
-      </span>
+      </div>
     </div>
   );
 }

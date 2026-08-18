@@ -1,6 +1,8 @@
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityStatementsStatementsList";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityStatementsSocialMediaAccounts({
   statements,
@@ -11,15 +13,20 @@ export default function UserPageIdentityStatementsSocialMediaAccounts({
   readonly profile: ApiIdentity;
   readonly loading: boolean;
 }) {
+  const locale = useBrowserLocale();
+
   return (
     <div>
       <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-        Social Media Accounts
+        {t(locale, "user.profile.identity.statements.socialMediaAccounts")}
       </span>
       <UserPageIdentityStatementsStatementsList
         statements={statements}
         profile={profile}
-        noItemsMessage="No Social Media Account added yet"
+        noItemsMessage={t(
+          locale,
+          "user.profile.identity.statements.noSocialMediaAccounts"
+        )}
         loading={loading}
       />
     </div>

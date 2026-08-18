@@ -66,7 +66,7 @@ function RepContributorControl({
       type="button"
       aria-label={`View ${formatNumberWithCommas(overview.contributor_count)} ${contributorLabel}`}
       onClick={onOpenOverviewContributors}
-      className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.04] tw-px-2.5 tw-py-1 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.14] desktop-hover:hover:tw-bg-white/[0.07] motion-reduce:tw-transition-none"
+      className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.14] tw-bg-white/[0.04] tw-px-2.5 tw-py-1 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.2] desktop-hover:hover:tw-bg-white/[0.07] motion-reduce:tw-transition-none"
     >
       {contributorContent}
       <ChevronRightIcon

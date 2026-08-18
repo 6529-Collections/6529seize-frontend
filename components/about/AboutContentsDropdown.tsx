@@ -112,12 +112,12 @@ export function AboutContentsDropdown({
     <div
       style={{ top: spaces.headerSpace }}
       className={clsx(
-        "tw-sticky tw-z-30 tw-mb-4 tw-flex tw-flex-col tw-gap-2 tw-bg-black tw-py-2",
+        "tw-sticky tw-z-30 tw-mb-4 tw-flex tw-flex-col tw-gap-2 tw-bg-[#0D0D0F]/90 tw-py-2 tw-backdrop-blur-xl",
         hasLeadingAction
           ? "sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
           : "tw-items-end sm:tw-flex-row sm:tw-justify-end",
         withDivider &&
-          "tw-h-16 tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] !tw-bg-iron-950 !tw-py-0 sm:tw-items-center",
+          "tw-h-16 tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] !tw-py-0 sm:tw-items-center",
         className
       )}
     >
