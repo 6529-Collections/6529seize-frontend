@@ -235,11 +235,15 @@ describe("serialized post-deploy E2E", () => {
   it.each([
     ["staging", stagingE2e],
     ["production", productionE2e],
-  ])("keeps %s deployed-source caches restore-only", (_environment, e2e) => {
+  ])("keeps %s deployed-source execution cache-free", (_environment, e2e) => {
     const source = e2e.source;
 
-    expect(source).toContain("uses: actions/cache/restore@");
-    expect(source).not.toMatch(/uses:\s+actions\/cache@/u);
+    expect(source).not.toContain("actions/cache");
+    expect(source).not.toContain("cache: pnpm");
+    expect(source).not.toContain("PLAYWRIGHT_CACHE_HIT");
+    expect(source).toContain(
+      "./bin/6529 exec playwright install --with-deps chromium"
+    );
   });
 
   it("posts manual production E2E to the CI wave against the original deployment", () => {

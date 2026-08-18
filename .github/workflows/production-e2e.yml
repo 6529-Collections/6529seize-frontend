@@ -161,17 +161,6 @@ jobs:
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
 
-      - name: Restore pnpm store
-        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node22-pnpm-
-
-      - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
-
       - name: Install Socket Firewall
         id: socket-firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
@@ -183,22 +172,8 @@ jobs:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
 
-      - name: Restore Playwright browser
-        id: playwright-cache
-        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
-
       - name: Install Playwright browser
-        env:
-          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
-        run: |
-          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
-            ./bin/6529 exec playwright install-deps chromium
-          else
-            ./bin/6529 exec playwright install --with-deps chromium
-          fi
+        run: ./bin/6529 exec playwright install --with-deps chromium
 
       - name: Run read-only production packs
         env:
