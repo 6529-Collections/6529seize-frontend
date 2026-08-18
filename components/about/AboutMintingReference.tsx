@@ -17,11 +17,20 @@ import {
 
 type MintingMessageKey = Extract<MessageKey, `about.minting.${string}`>;
 
+const MINTING_GUIDE_LAST_REVIEWED_DATE = "2026-08-18";
+
 const m = (
   locale: SupportedLocale,
   key: MintingMessageKey,
   params: Parameters<typeof t>[2] = {}
 ) => t(locale, key, params);
+
+const formatMintingGuideLastReviewedDate = (locale: SupportedLocale) =>
+  new Intl.DateTimeFormat(locale, {
+    month: "long",
+    timeZone: "UTC",
+    year: "numeric",
+  }).format(new Date(`${MINTING_GUIDE_LAST_REVIEWED_DATE}T00:00:00Z`));
 
 export default function AboutMintingReference({
   locale,
@@ -53,8 +62,13 @@ export default function AboutMintingReference({
 
       <MintingHistory locale={locale} />
 
-      <p className="tw-mb-0 tw-mt-6 tw-text-xs tw-leading-5 tw-text-iron-500">
-        {m(locale, "about.minting.reference.reviewed")}
+      <p
+        className="tw-mb-0 tw-mt-6 tw-text-xs tw-leading-5 tw-text-iron-500"
+        data-reviewed-at={MINTING_GUIDE_LAST_REVIEWED_DATE}
+      >
+        {m(locale, "about.minting.reference.reviewed", {
+          reviewedAt: formatMintingGuideLastReviewedDate(locale),
+        })}
       </p>
     </section>
   );

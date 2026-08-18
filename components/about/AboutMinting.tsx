@@ -26,6 +26,7 @@ type MintingMessageKey = Extract<MessageKey, `about.minting.${string}`>;
 
 type PhaseCard = {
   readonly accentClassName: string;
+  readonly badgeKey: MintingMessageKey;
   readonly descriptionKey: MintingMessageKey;
   readonly id: string;
   readonly titleKey: MintingMessageKey;
@@ -68,24 +69,28 @@ const TOC_ITEMS = [
 const PHASES = [
   {
     accentClassName: "tw-border-orange-500/35 tw-text-orange-300",
+    badgeKey: "about.minting.phases.phase0.badge",
     descriptionKey: "about.minting.phases.phase0.description",
     id: "0",
     titleKey: "about.minting.phases.phase0.title",
   },
   {
     accentClassName: "tw-border-[#00f0ff]/35 tw-text-[#00f0ff]",
+    badgeKey: "about.minting.phases.phase1.badge",
     descriptionKey: "about.minting.phases.phase1.description",
     id: "1",
     titleKey: "about.minting.phases.phase1.title",
   },
   {
     accentClassName: "tw-border-[#8f5cff]/40 tw-text-[#a783ff]",
+    badgeKey: "about.minting.phases.phase2.badge",
     descriptionKey: "about.minting.phases.phase2.description",
     id: "2",
     titleKey: "about.minting.phases.phase2.title",
   },
   {
     accentClassName: "tw-border-emerald-500/35 tw-text-emerald-300",
+    badgeKey: "about.minting.phases.public.badge",
     descriptionKey: "about.minting.phases.public.description",
     id: "public",
     titleKey: "about.minting.phases.public.title",
@@ -305,7 +310,7 @@ function MintingPhases() {
             <div
               className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-black tw-text-xs tw-font-semibold ${phase.accentClassName}`}
             >
-              {phase.id === "public" ? "P" : phase.id}
+              {m(phase.badgeKey)}
             </div>
             <h3 className="tw-mb-0 tw-mt-4 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
               {m(phase.titleKey)}
