@@ -803,7 +803,7 @@
     {
       "id": "about.minting-meme-cards",
       "kind": "route",
-      "title": "Minting Meme Cards",
+      "title": "Minting The Memes",
       "aliases": [
         "minting meme cards",
         "meme card minting",
@@ -819,25 +819,40 @@
         "meme",
         "memes",
         "allowlist",
+        "subscription",
+        "remote minting",
+        "phase 0",
+        "phase 1",
+        "phase 2",
+        "public phase",
         "price",
         "schedule",
         "primary",
         "sale"
       ],
       "facts": [
-        "The Minting Meme Cards page lives at /about/minting.",
-        "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
-        "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
-        "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
-        "The page has horizontal section navigation for its summary, minting philosophy, allowlist background and current practices, provability, improvements, tools, and technical issues.",
-        "Users should follow @6529collections for current mint dates and times."
+        "The Minting The Memes guide lives at /about/minting.",
+        "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
+        "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
+        "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
+        "The live mint page is the source of truth for the current card, active phase, exact mint price and platform fee, remaining supply, and wallet eligibility.",
+        "The guide links to /meme-calendar and @6529collections for current timing because mint dates can change.",
+        "The February 2023 allowlist explanation is preserved only as dated historical context, not as the eligibility policy for the current card."
       ],
       "canonical_path": "/about/minting",
-      "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
+      "related_paths": [
+        "/the-memes/mint",
+        "/about/subscriptions",
+        "/meme-calendar",
+        "/tools/subscriptions-report",
+        "/the-memes",
+        "/about/the-memes"
+      ],
       "tags": ["about", "memes", "minting"],
       "source_refs": [
         "components/about/AboutMinting.tsx",
-        "components/about/AboutMintingReference.tsx"
+        "components/about/AboutMintingReference.tsx",
+        "ops/docs/media/memes/feature-minting-guide.md"
       ]
     },
     {
