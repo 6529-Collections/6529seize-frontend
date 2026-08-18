@@ -10,11 +10,13 @@ export default function CreateWavesMainSteps({
   waveType,
   ongoingRanking = false,
   activeStep,
+  disabled = false,
   onStep,
 }: {
   readonly waveType: ApiWaveType;
   readonly ongoingRanking?: boolean;
   readonly activeStep: CreateWaveStep;
+  readonly disabled?: boolean;
   readonly onStep: (step: CreateWaveStep) => void;
 }) {
   const steps = getCreateWaveMainSteps({ waveType, ongoingRanking });
@@ -31,6 +33,7 @@ export default function CreateWavesMainSteps({
               stepIndex={stepIndex}
               activeStepIndex={activeStepIndex}
               step={step}
+              disabled={disabled}
               onStep={onStep}
             />
           ))}

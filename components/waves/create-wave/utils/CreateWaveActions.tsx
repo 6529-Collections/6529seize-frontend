@@ -21,7 +21,7 @@ export default function CreateWaveActions({
   readonly setStep: (
     step: CreateWaveStep,
     direction: "forward" | "backward"
-  ) => void;
+  ) => Promise<void>;
   readonly onComplete: () => Promise<void>;
 }) {
   const ongoingRanking = config.dates?.ongoingRanking ?? false;
@@ -33,7 +33,7 @@ export default function CreateWaveActions({
       ongoingRanking,
     });
     if (nextStep !== null) {
-      setStep(nextStep, "forward");
+      void setStep(nextStep, "forward");
       return;
     }
     void onComplete();
@@ -50,7 +50,10 @@ export default function CreateWaveActions({
       <div>
         {previousStep !== null && (
           <CreateWaveBackStep
-            onPreviousStep={() => setStep(previousStep, "backward")}
+            disabled={submitting}
+            onPreviousStep={() => {
+              void setStep(previousStep, "backward");
+            }}
           />
         )}
       </div>
