@@ -343,3 +343,29 @@ comes first; acquisition and accession follow.` before the next hosted lane
   and public-publication Ubuntu and Windows.
 - The branch is ready for exact-head push, hosted review and CI, merge, staging
   qualification, production deployment, and live route-by-route acceptance.
+
+## 2026-08-18T19:03:00Z - Research release shipped and live-qualified
+
+- Merged frontend PR #3753 as exact main
+  `336d3f9ed6839fd2fa97a677b25d5353aa4fc884` after all exact-head review and CI
+  gates passed.
+- Deployed and inspected staging with run `32165422116`. All selected Museum
+  packs passed in staging E2E `32166673862`; its sole failure was the existing
+  non-Museum profile route fault. The retained Research sweep passed 22/22
+  desktop/mobile checks.
+- Production authority, immutable artifact build, and independent verification
+  passed in deploy `32170385482`, builder `32170437082`, and verifier
+  `32171381138`. Production serves and announces exact main with `stale:false`.
+- Automatic Production E2E `32171973579` never reached tests because its
+  GitHub-hosted runner stalled in Playwright installation for 22 minutes. It
+  was force-cancelled under the active owner-approved E2E waiver; authority
+  completion `32174375703` successfully recorded the failed qualifier and
+  released the lock.
+- Ran the five exact Museum production packs directly against live production:
+  101 passed and 3 intentional skips, with zero product failures. A first
+  Data Architecture pass observed unrelated navigation-prefetch 502s for
+  `/waves` and `/join-6529`; immediate rerun passed 6/6.
+- Rechecked every Research route at 1440 and 390 pixels in the signed-in app
+  browser. All 22 checks had the expected heading, intact media, bounded width,
+  and no soft-404. Retained report SHA-256:
+  `bb4c318d2a4a4432859f4a659b8a493a551c930e84cc2a1d8d824e2a1e845794`.
