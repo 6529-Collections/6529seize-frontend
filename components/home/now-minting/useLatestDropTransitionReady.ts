@@ -1,7 +1,7 @@
 "use client";
 
 import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
-import { HOME_LATEST_DROP_GRACE_PERIOD_MINUTES } from "@/config/home";
+import { HOME_LATEST_DROP_GRACE_PERIOD_MINUTES } from "@/helpers/mint-visibility.helpers";
 import { useEffect, useMemo, useState } from "react";
 
 const MINUTE_IN_MILLISECONDS = 60_000;
