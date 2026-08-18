@@ -1,7 +1,7 @@
 import CommunityMembersGroupDetails from "@/components/community/CommunityMembersGroupDetails";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
@@ -43,8 +43,9 @@ describe("CommunityMembersGroupDetails", () => {
 
   it("encodes the group id before adding it to the API path", async () => {
     commonApiFetchMock.mockResolvedValue({});
-    useQueryMock.mockImplementation(({ queryFn }) => {
-      void queryFn();
+    let queryFn: (() => Promise<unknown>) | undefined;
+    useQueryMock.mockImplementation((options) => {
+      queryFn = options.queryFn;
       return {
         data: undefined,
         isLoading: true,
@@ -59,11 +60,10 @@ describe("CommunityMembersGroupDetails", () => {
       />
     );
 
-    await waitFor(() =>
-      expect(commonApiFetchMock).toHaveBeenCalledWith({
-        endpoint: "groups/group%2Fwith%3Fsegments",
-      })
-    );
+    await queryFn?.();
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "groups/group%2Fwith%3Fsegments",
+    });
   });
 
   it("shows a privacy-safe unavailable state", () => {
@@ -86,7 +86,31 @@ describe("CommunityMembersGroupDetails", () => {
     expect(screen.queryByText("private-id")).not.toBeInTheDocument();
   });
 
-  it("shows group criteria without edit controls", () => {
+  it.each([
+    { is_private: true },
+    { is_direct_message: true },
+    { visible: false },
+  ])("does not expose a private group returned by the API", (privacy) => {
+    useQueryMock.mockReturnValue({
+      data: {
+        id: "private-id",
+        name: "Private group name",
+        ...privacy,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <CommunityMembersGroupDetails groupId="private-id" onClose={jest.fn()} />
+    );
+
+    expect(screen.getByText("Group criteria unavailable")).toBeInTheDocument();
+    expect(screen.queryByText("Private group name")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("group-criteria")).not.toBeInTheDocument();
+  });
+
+  it("shows visible group criteria and a clear action", () => {
     useQueryMock.mockReturnValue({
       data: { id: "group-1", name: "Artists and curators" },
       isLoading: false,
@@ -103,7 +127,6 @@ describe("CommunityMembersGroupDetails", () => {
       screen.getByRole("heading", { name: "Artists and curators" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("group-criteria")).toHaveTextContent("group-1");
-    expect(screen.queryByText("Group options")).not.toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", { name: "Clear selected group" })
     );

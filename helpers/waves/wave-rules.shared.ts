@@ -201,13 +201,14 @@ export const getScopeRuleValue = ({
 }): Pick<WaveRuleRow, "value" | "valueHref" | "valueLinkLabel"> => {
   const value = getScopeLabel({ scope, fallback });
   const valueHref = getScopeLink(scope);
+  const groupName = scope?.group?.name?.trim();
 
   return {
     value,
     valueHref,
     valueLinkLabel: valueHref
       ? t(DEFAULT_LOCALE, "waves.chatSettings.access.inspectGroup", {
-          groupName: value,
+          groupName: groupName ?? value,
         })
       : undefined,
   };

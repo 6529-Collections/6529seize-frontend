@@ -17,15 +17,15 @@ Users can:
 
 - Wave thread: `/waves/{waveId}`
 - Direct-message thread: `/messages/{waveId}`
-- Rank waves: open the right-sidebar `About` tab
+- Rank waves: open Wave details, then select `Rules` or `Settings`
 - Non-rank waves: same content in default non-tabbed sidebar layout
-- Mobile `About` view reuses the same group-management content
+- Mobile Wave details reuses the same Rules and Settings content
 
 ## Entry Points
 
 - Open a wave thread and open the right sidebar.
-- On rank waves, select `About`.
-- In `General`, open `Group options` on a row.
+- On rank waves, select `Rules` to inspect or `Settings` to manage access.
+- In Settings `Access`, open `Group options` on a row.
 - In `Curation Groups` (non-chat waves), use `Add group` or row options.
 
 ## User Journey

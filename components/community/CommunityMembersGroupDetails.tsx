@@ -56,7 +56,15 @@ export default function CommunityMembersGroupDetails({
     );
   }
 
-  if (isError || !group) {
+  if (
+    isError ||
+    !group ||
+    group.name.trim().length === 0 ||
+    group.id.trim().length === 0 ||
+    group.is_private === true ||
+    group.is_direct_message === true ||
+    group.visible === false
+  ) {
     return (
       <section
         aria-labelledby="group-criteria-unavailable-title"
@@ -78,6 +86,8 @@ export default function CommunityMembersGroupDetails({
     );
   }
 
+  const groupName = group.name.trim();
+
   return (
     <section
       aria-labelledby="selected-group-name"
@@ -92,7 +102,7 @@ export default function CommunityMembersGroupDetails({
             id="selected-group-name"
             className="tw-m-0 tw-break-words !tw-text-base !tw-font-semibold !tw-leading-5 !tw-text-iron-50"
           >
-            {group.name}
+            {groupName}
           </h2>
         </div>
         {closeButton}

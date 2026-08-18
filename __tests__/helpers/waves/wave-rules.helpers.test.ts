@@ -521,6 +521,19 @@ describe("wave-rules.helpers", () => {
     });
   });
 
+  it("uses the fallback for an empty scope group", () => {
+    expect(
+      getScopeRuleValue({
+        scope: { group: null },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Anyone",
+      valueHref: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
   it("keeps direct-message scope groups private and non-interactive", () => {
     expect(
       getScopeRuleValue({
