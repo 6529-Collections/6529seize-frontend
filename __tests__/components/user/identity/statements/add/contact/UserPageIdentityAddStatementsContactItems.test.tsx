@@ -1,15 +1,20 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageIdentityAddStatementsContactItems from "@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems";
+import type UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
 import { CONTACT_STATEMENT_TYPES } from "@/helpers/Types";
+import type { ComponentProps } from "react";
+
+type TypeButtonProps = ComponentProps<
+  typeof UserPageIdentityAddStatementsTypeButton
+>;
 
 jest.mock(
   "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton",
   () => ({
     __esModule: true,
     ADD_STATEMENT_PLATFORM_TOOLTIP_ID: "platform-tooltip",
-    default: ({ statementType, onClick, isActive }: any) => (
+    default: ({ statementType, onClick, isActive }: TypeButtonProps) => (
       <button data-testid="btn" onClick={onClick}>
         {statementType}
         {isActive ? "!" : ""}
