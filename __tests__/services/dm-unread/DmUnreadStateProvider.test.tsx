@@ -3,7 +3,6 @@ import {
   DmUnreadStateProvider,
   useDmUnreadConversation,
   useOptionalDmUnreadActions,
-  useDmUnreadSnapshotReady,
   useDmUnreadSummary,
 } from "@/services/dm-unread/DmUnreadStateProvider";
 
@@ -93,13 +92,11 @@ const snapshot = (
 function Capture() {
   const summary = useDmUnreadSummary();
   const conversation = useDmUnreadConversation("wave-1");
-  const isSnapshotReady = useDmUnreadSnapshotReady();
   return (
     <div>
       <span data-testid="messages">{summary.totalUnreadMessages}</span>
       <span data-testid="conversations">{summary.unreadConversationCount}</span>
       <span data-testid="wave">{conversation?.unread_count ?? 0}</span>
-      <span data-testid="ready">{String(isSnapshotReady)}</span>
     </div>
   );
 }
@@ -147,33 +144,6 @@ describe("DmUnreadStateProvider", () => {
     expect(screen.getByTestId("messages")).toHaveTextContent("3");
     expect(screen.getByTestId("conversations")).toHaveTextContent("1");
     expect(screen.getByTestId("wave")).toHaveTextContent("3");
-    expect(screen.getByTestId("ready")).toHaveTextContent("true");
-  });
-
-  it("keeps canonical state unready until the first valid snapshot arrives", async () => {
-    let resolveSnapshot!: (value: unknown) => void;
-    commonApiFetchMock.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveSnapshot = resolve;
-        })
-    );
-
-    render(
-      <DmUnreadStateProvider>
-        <Capture />
-      </DmUnreadStateProvider>
-    );
-
-    expect(screen.getByTestId("ready")).toHaveTextContent("false");
-
-    await act(async () => {
-      resolveSnapshot(snapshot("profile-1"));
-    });
-
-    await waitFor(() =>
-      expect(screen.getByTestId("ready")).toHaveTextContent("true")
-    );
   });
 
   it("retries a transient initial snapshot failure", async () => {
@@ -293,7 +263,6 @@ describe("DmUnreadStateProvider", () => {
 
     expect(screen.getByTestId("messages")).toHaveTextContent("4");
     expect(screen.getByTestId("wave")).toHaveTextContent("4");
-    expect(screen.getByTestId("ready")).toHaveTextContent("true");
 
     connectedProfileId = "profile-1";
     jwt = "jwt-profile-1";
@@ -304,7 +273,6 @@ describe("DmUnreadStateProvider", () => {
     );
 
     expect(screen.getByTestId("messages")).toHaveTextContent("0");
-    expect(screen.getByTestId("ready")).toHaveTextContent("false");
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(3));
 
     await act(async () => {
@@ -384,9 +352,7 @@ describe("DmUnreadStateProvider", () => {
         <CaptureActions />
       </DmUnreadStateProvider>
     );
-    await waitFor(() =>
-      expect(screen.getByTestId("ready")).toHaveTextContent("true")
-    );
+    await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(2));
 
     connectedProfileId = "profile-1";
     jwt = "jwt-profile-1";
@@ -452,7 +418,6 @@ describe("DmUnreadStateProvider", () => {
     );
 
     expect(screen.getByTestId("messages")).toHaveTextContent("0");
-    expect(screen.getByTestId("ready")).toHaveTextContent("false");
   });
 
   it("takes one snapshot when the native app returns to the foreground", async () => {

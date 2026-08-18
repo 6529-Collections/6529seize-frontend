@@ -35,7 +35,6 @@ import {
   DmUnreadStore,
   getDmUnreadConversation,
   getDmUnreadConversations,
-  getDmUnreadSnapshotReady,
   getDmUnreadSummary,
   type DmUnreadReadOperation,
   type DmUnreadSummary,
@@ -550,16 +549,6 @@ export const useDmUnreadConversations = (): Readonly<
     () => getDmUnreadConversations(snapshot, activeProfileId),
     [activeProfileId, snapshot]
   );
-};
-
-export const useDmUnreadSnapshotReady = (): boolean => {
-  const { activeProfileId, store } = useDmUnreadContext();
-  const snapshot = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot
-  );
-  return getDmUnreadSnapshotReady(snapshot, activeProfileId);
 };
 
 export const useOptionalDmUnreadActions = () => {
