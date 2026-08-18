@@ -112,6 +112,10 @@ const EDIT_MARKDOWN_TRANSFORMERS = [
   WAVE_MENTION_TRANSFORMER,
 ];
 
+const EDIT_MARKDOWN_SHORTCUT_TRANSFORMERS = EDIT_MARKDOWN_TRANSFORMERS.filter(
+  (transformer) => transformer !== GROUP_MENTION_TRANSFORMER
+);
+
 const areMentionedUsersEqual = (
   left: ApiDropMentionedUser[],
   right: ApiDropMentionedUser[]
@@ -561,7 +565,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           <OnChangePlugin onChange={handleEditorChange} />
           <HistoryPlugin />
           <PlainTextPastePlugin />
-          <MarkdownShortcutPlugin transformers={EDIT_MARKDOWN_TRANSFORMERS} />
+          <MarkdownShortcutPlugin
+            transformers={EDIT_MARKDOWN_SHORTCUT_TRANSFORMERS}
+          />
           <ListPlugin />
           <LinkPlugin />
           <NewMentionsPlugin

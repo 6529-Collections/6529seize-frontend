@@ -1522,8 +1522,10 @@ const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
   "access.anyone": "Anyone",
-  "access.anyoneWhenEnabled": "Anyone when enabled",
+  "access.inspectGroup": "Inspect {groupName} group criteria and members",
   "access.label": "Chat access",
+  "access.privateGroup": "Private group",
+  "access.unavailableGroup": "Group unavailable",
   "groups.admin": "Admin",
   "groups.drop": "Drop",
   "groups.view": "View",
@@ -1536,6 +1538,19 @@ const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
   "status.enableLabel": "Enable chat",
   "status.label": "Chat status",
 } as const);
+
+const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
+  "network.groupInspection",
+  {
+    selectedGroup: "Selected group",
+    close: "Clear selected group",
+    membersTitle: "Members",
+    loading: "Loading group criteria",
+    unavailableTitle: "Group criteria unavailable",
+    unavailableDescription:
+      "This group may be private, deleted, or temporarily unavailable.",
+  } as const
+);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
@@ -3139,6 +3154,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
+  ...NETWORK_GROUP_INSPECTION_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
