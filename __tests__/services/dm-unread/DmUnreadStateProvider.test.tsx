@@ -167,6 +167,71 @@ describe("DmUnreadStateProvider", () => {
     expect(consoleError).not.toHaveBeenCalled();
   });
 
+  it("keeps recovering after the initial snapshot retry budget is exhausted", async () => {
+    jest.useFakeTimers();
+    const error = new Error("snapshot failed");
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    commonApiFetchMock
+      .mockRejectedValueOnce(error)
+      .mockRejectedValueOnce(error)
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce(snapshot("profile-1"));
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(1_000);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+      expect(screen.getByTestId("messages")).toHaveTextContent("0");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(5_000);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(4);
+      expect(screen.getByTestId("messages")).toHaveTextContent("1");
+    } finally {
+      rendered.unmount();
+      consoleError.mockRestore();
+      jest.useRealTimers();
+    }
+  });
+
+  it("periodically reconciles state after a missed server event", async () => {
+    jest.useFakeTimers();
+    commonApiFetchMock
+      .mockResolvedValueOnce(snapshot("profile-1"))
+      .mockResolvedValueOnce(snapshot("profile-1", []));
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("messages")).toHaveTextContent("1");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(5 * 60 * 1_000);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId("messages")).toHaveTextContent("0");
+    } finally {
+      rendered.unmount();
+      jest.useRealTimers();
+    }
+  });
+
   it("coalesces reconnect and browser recovery events", async () => {
     const nowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
     const { rerender } = render(

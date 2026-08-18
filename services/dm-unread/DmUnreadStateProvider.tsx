@@ -65,6 +65,12 @@ const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
 const DM_WAVE_LIST_INVALIDATION_DELAY_MS = 250;
 const SNAPSHOT_RETRY_DELAYS_MS = [250, 750] as const;
+const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
+const SNAPSHOT_RECOVERY_RETRY_DELAYS_MS = [
+  5_000,
+  30_000,
+  SNAPSHOT_RECONCILIATION_INTERVAL_MS,
+] as const;
 let nextProfileActivationId = 1;
 
 interface InFlightSnapshotRequest {
@@ -180,6 +186,7 @@ export function DmUnreadStateProvider({
   );
   const activeProfileIdRef = useRef(activeProfileId);
   const activeActivationRef = useRef(profileActivation);
+  const appActivityRef = useRef({ isActive, isCapacitor });
   const isMountedRef = useRef(true);
   const latestSnapshotRequestByProfileRef = useRef(new Map<string, number>());
   const inFlightSnapshotByProfileRef = useRef(
@@ -202,6 +209,10 @@ export function DmUnreadStateProvider({
       store.resetProfile(activeProfileId);
     }
   }, [activeProfileId, profileActivation, store]);
+
+  useLayoutEffect(() => {
+    appActivityRef.current = { isActive, isCapacitor };
+  }, [isActive, isCapacitor]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -303,7 +314,71 @@ export function DmUnreadStateProvider({
     ) {
       return;
     }
-    void requestSnapshot(activeProfileId, authJwt, profileActivation.id);
+    const expectedProfileId = activeProfileId;
+    const expectedJwt = authJwt;
+    const expectedActivationId = profileActivation.id;
+    let cancelled = false;
+    let hasAttemptedSnapshot = false;
+    let recoveryAttempt = 0;
+    let reconciliationTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleSnapshot = (delay: number) => {
+      if (cancelled) {
+        return;
+      }
+      reconciliationTimer = setTimeout(() => {
+        void synchronizeSnapshot();
+      }, delay);
+    };
+
+    const isActiveForReconciliation = () => {
+      const currentActivity = appActivityRef.current;
+      if (currentActivity.isCapacitor) {
+        return currentActivity.isActive;
+      }
+      return document.visibilityState === "visible";
+    };
+
+    async function synchronizeSnapshot(): Promise<void> {
+      if (cancelled) {
+        return;
+      }
+      if (hasAttemptedSnapshot && !isActiveForReconciliation()) {
+        scheduleSnapshot(SNAPSHOT_RECONCILIATION_INTERVAL_MS);
+        return;
+      }
+      hasAttemptedSnapshot = true;
+      const synchronized = await requestSnapshot(
+        expectedProfileId,
+        expectedJwt,
+        expectedActivationId
+      );
+      if (cancelled) {
+        return;
+      }
+      if (synchronized) {
+        recoveryAttempt = 0;
+        scheduleSnapshot(SNAPSHOT_RECONCILIATION_INTERVAL_MS);
+        return;
+      }
+      const retryDelay =
+        SNAPSHOT_RECOVERY_RETRY_DELAYS_MS[
+          Math.min(
+            recoveryAttempt,
+            SNAPSHOT_RECOVERY_RETRY_DELAYS_MS.length - 1
+          )
+        ] ?? SNAPSHOT_RECONCILIATION_INTERVAL_MS;
+      recoveryAttempt += 1;
+      scheduleSnapshot(retryDelay);
+    }
+
+    void synchronizeSnapshot();
+    return () => {
+      cancelled = true;
+      if (reconciliationTimer !== null) {
+        clearTimeout(reconciliationTimer);
+      }
+    };
   }, [
     activeProfileId,
     authFingerprint,
