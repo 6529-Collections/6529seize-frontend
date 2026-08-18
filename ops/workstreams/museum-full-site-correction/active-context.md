@@ -174,3 +174,41 @@ AI-training permission.
   and CI with zero unresolved threads, merge, qualify staging, deploy the exact
   staging-qualified revision to production, and repeat the 11-route
   desktop/mobile live audit.
+
+## 2026-08-18 production release complete
+
+- Frontend PR #3753 merged as exact main
+  `336d3f9ed6839fd2fa97a677b25d5353aa4fc884`. Its runtime tree is identical to
+  reviewed candidate `2e87c0bbfc1f99a24063e5b9397d37b19a575a87` and remains
+  bound to Museum catalog commit
+  `a3977a8f020f58d0c9e79f23bc4f37245be65879` and reviewed publication
+  `f52fe5513423d8049bb557749a9fce1070ace64b`.
+- Staging deploy `32165422116` succeeded. The automatic staging E2E run
+  `32166673862` passed every selected Museum pack and failed only on the
+  pre-existing non-Museum profile Server Components fault. A retained 22-check
+  Research sweep found no heading, media, overflow, fallback, or soft-404
+  failure at desktop or 390-pixel mobile widths.
+- Production deploy `32170385482` succeeded after immutable builder
+  `32170437082` and verifier `32171381138` passed. Three uncached
+  `/api/version` reads returned exact main for both runtime and announced
+  version with `stale:false`.
+- Automatic Production E2E `32171973579` stalled for 22 minutes in the
+  GitHub-hosted Playwright browser installer before executing any pack and was
+  force-cancelled under the recorded temporary production E2E waiver. Isolated
+  completion run `32174375703` released the exact authority as failed; no
+  production byte changed during that infrastructure disposition.
+- The same five fail-closed Museum production packs were run directly against
+  exact live production. About passed 2/2, Rights 6/6, Inside the System 8/8,
+  Data Architecture 6/6 on clean rerun, and Institutional Practice plus the
+  complete public IA contract passed 79 with 3 intentional skips. Aggregate:
+  101 passed, 3 skipped, 0 product failures. The first Data Architecture
+  attempt saw two transient 502 responses from unrelated `Waves` and
+  `Join 6529` navigation prefetches; the immediate exact rerun passed 6/6.
+- Final live Research acceptance covered all 11 routes at 1440 and 390 pixels:
+  22/22 correct H1s, no broken images, no horizontal overflow, and no
+  soft-404s. Evidence report:
+  `C:\Users\Administrator\.codex\artifacts\museum-research-production-336d3f9\report.json`,
+  SHA-256 `bb4c318d2a4a4432859f4a659b8a493a551c930e84cc2a1d8d824e2a1e845794`.
+
+The Research release is complete on production. No runtime work remains in
+this workstream.
