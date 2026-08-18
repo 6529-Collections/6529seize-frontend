@@ -4,10 +4,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { EditingDropProvider } from "@/contexts/EditingDropContext";
-import {
-  WsMessageType,
-  type WsDropDeleteMessage,
-} from "@/helpers/Types";
+import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import {
   act,
@@ -33,6 +30,7 @@ const mockApprovalStatus = jest.fn();
 const mockFetchAroundSerialNo = jest.fn();
 const mockSetToast = jest.fn();
 const mockUseWebSocketMessage = jest.fn();
+let mockDmUnreadConversation: { readonly unread_count: number } | null = null;
 
 let documentVisibilityState: DocumentVisibilityState = "visible";
 
@@ -209,6 +207,11 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: (...args: unknown[]) => mockUseWebSocketMessage(...args),
 }));
 
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useDmUnreadConversation: () => mockDmUnreadConversation,
+  useOptionalDmUnreadActions: () => null,
+}));
+
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0xAAA" }),
 }));
@@ -253,6 +256,7 @@ describe("MyStreamWaveChat", () => {
     mockIsCurationWave = false;
     mockIsQuorumWave = false;
     mockIsApp = false;
+    mockDmUnreadConversation = null;
     mockOnDropClick.mockClear();
     mockSetUnreadDividerSerialNo.mockClear();
     mockRemoveWaveDeliveredNotifications.mockClear();
@@ -284,6 +288,21 @@ describe("MyStreamWaveChat", () => {
   const renderWithProvider = (component: React.ReactElement) => {
     return render(wrapWithProvider(component));
   };
+
+  it("uses the canonical DM unread count in the open chat", () => {
+    mockDmUnreadConversation = { unread_count: 6 };
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    expect(capturedPropsHolder.current.unreadCount).toBe(6);
+  });
 
   const wrapWithProvider = (component: React.ReactElement) => {
     return (

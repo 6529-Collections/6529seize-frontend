@@ -61,7 +61,14 @@ export function useMarkWaveNotificationsRead(): (
         !cancelDmRead ||
         !reconcileFailedDmRead
       ) {
-        return markWaveNotificationsRead(waveId, options);
+        if (options?.readThroughSerialNo === undefined) {
+          return markWaveNotificationsRead(waveId, options);
+        }
+        return markWaveNotificationsRead(waveId, {
+          ...options,
+          readThroughSerialNo: undefined,
+          requestDmUnreadState: undefined,
+        });
       }
 
       const markDmRead = async (): Promise<MarkWaveNotificationsReadResult> => {
@@ -71,6 +78,7 @@ export function useMarkWaveNotificationsRead(): (
             readThroughSerialNo:
               readOperation?.readThroughSerialNo ??
               options?.readThroughSerialNo,
+            requestDmUnreadState: true,
             onReadResponse: (response) => {
               options?.onReadResponse?.(response);
               if (response.dm_unread_state) {

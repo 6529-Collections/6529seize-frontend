@@ -18059,12 +18059,18 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+        dm_unread_state:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDmUnreadConversationState"
     ApiMarkWaveReadRequest:
       type: object
       properties:
         read_through_serial_no:
           type: integer
           minimum: 0
+        request_dm_unread_state:
+          type: boolean
     ApiMarkWaveReadResponse:
       type: object
       required:

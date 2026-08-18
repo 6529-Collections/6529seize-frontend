@@ -284,7 +284,10 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(apiPostWithBodyMock).toHaveBeenCalledWith({
       endpoint: "notifications/wave/wave-1/read",
       headers: { Authorization: "Bearer jwt-a" },
-      body: { read_through_serial_no: 42 },
+      body: {
+        read_through_serial_no: 42,
+        request_dm_unread_state: true,
+      },
     });
     expect(mockApplyDmServerState).toHaveBeenCalledWith(dmUnreadState);
     expect(mockReconcileFailedDmRead).not.toHaveBeenCalled();
@@ -346,9 +349,31 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(apiPostWithBodyMock).toHaveBeenCalledWith({
       endpoint: "notifications/wave/wave-1/read",
       headers: { Authorization: "Bearer jwt-a" },
-      body: {},
+      body: { request_dm_unread_state: true },
     });
     expect(mockApplyDmServerState).toHaveBeenCalledWith(dmUnreadState);
+  });
+
+  it("keeps an ordinary read with a serial on the bodyless fast path", async () => {
+    const invalidateNotifications = jest.fn();
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-a",
+      connectedProfileId: "profile-1",
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(
+      result.current("ordinary-wave", { readThroughSerialNo: 42 })
+    ).resolves.toBe("sent");
+
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/ordinary-wave/read",
+      headers: { Authorization: "Bearer jwt-a" },
+    });
+    expect(apiPostWithBodyMock).not.toHaveBeenCalled();
   });
 
   it("cancels an optimistic DM read without fetching when sending is skipped", async () => {

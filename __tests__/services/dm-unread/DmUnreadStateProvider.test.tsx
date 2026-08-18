@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import {
   DmUnreadStateProvider,
   useDmUnreadConversation,
+  useOptionalDmUnreadActions,
   useDmUnreadSnapshotReady,
   useDmUnreadSummary,
 } from "@/services/dm-unread/DmUnreadStateProvider";
@@ -14,6 +15,8 @@ let isConnected = false;
 let isCapacitor = false;
 let isActive = true;
 let websocketHandler: ((value: unknown) => void) | undefined;
+let capturedDmUnreadActions: ReturnType<typeof useOptionalDmUnreadActions> =
+  null;
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: invalidateQueriesMock }),
@@ -101,6 +104,11 @@ function Capture() {
   );
 }
 
+function CaptureActions() {
+  capturedDmUnreadActions = useOptionalDmUnreadActions();
+  return null;
+}
+
 describe("DmUnreadStateProvider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -110,6 +118,7 @@ describe("DmUnreadStateProvider", () => {
     isCapacitor = false;
     isActive = true;
     websocketHandler = undefined;
+    capturedDmUnreadActions = null;
     commonApiFetchMock.mockResolvedValue(snapshot("profile-1"));
   });
 
@@ -167,10 +176,12 @@ describe("DmUnreadStateProvider", () => {
     );
   });
 
-  it("keeps empty state and reports an initial snapshot failure", async () => {
+  it("retries a transient initial snapshot failure", async () => {
     const error = new Error("snapshot failed");
     const consoleError = jest.spyOn(console, "error").mockImplementation();
-    commonApiFetchMock.mockRejectedValueOnce(error);
+    commonApiFetchMock
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce(snapshot("profile-1"));
 
     render(
       <DmUnreadStateProvider>
@@ -178,15 +189,12 @@ describe("DmUnreadStateProvider", () => {
       </DmUnreadStateProvider>
     );
 
-    await waitFor(() =>
-      expect(consoleError).toHaveBeenCalledWith(
-        "Failed to synchronize DM unread state",
-        error
-      )
+    await waitFor(
+      () => expect(screen.getByTestId("messages")).toHaveTextContent("1"),
+      { timeout: 2_000 }
     );
-    expect(screen.getByTestId("messages")).toHaveTextContent("0");
-    expect(screen.getByTestId("wave")).toHaveTextContent("0");
-    expect(screen.getByTestId("ready")).toHaveTextContent("false");
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    expect(consoleError).not.toHaveBeenCalled();
   });
 
   it("coalesces reconnect and browser recovery events", async () => {
@@ -302,6 +310,103 @@ describe("DmUnreadStateProvider", () => {
     await act(async () => {
       resolveReturnedProfileOne(snapshot("profile-1"));
     });
+  });
+
+  it("does not reuse an old in-flight snapshot after A to B to A", async () => {
+    let resolveOldProfileOne!: (value: unknown) => void;
+    commonApiFetchMock
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveOldProfileOne = resolve;
+          })
+      )
+      .mockResolvedValueOnce(snapshot("profile-2"))
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [
+          state({ profileId: "profile-1", unreadCount: 7, version: 2 }),
+        ])
+      );
+    const { rerender } = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    connectedProfileId = "profile-2";
+    jwt = "jwt-profile-2";
+    rerender(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+    await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(2));
+
+    connectedProfileId = "profile-1";
+    jwt = "jwt-profile-1";
+    rerender(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("messages")).toHaveTextContent("7")
+    );
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+
+    await act(async () => {
+      resolveOldProfileOne(
+        snapshot("profile-1", [
+          state({ profileId: "profile-1", unreadCount: 99, version: 99 }),
+        ])
+      );
+    });
+    expect(screen.getByTestId("messages")).toHaveTextContent("7");
+  });
+
+  it("rejects an HTTP callback captured before A to B to A", async () => {
+    const { rerender } = render(
+      <DmUnreadStateProvider>
+        <Capture />
+        <CaptureActions />
+      </DmUnreadStateProvider>
+    );
+    await waitFor(() => expect(capturedDmUnreadActions).not.toBeNull());
+    const oldProfileOneActions = capturedDmUnreadActions;
+
+    connectedProfileId = "profile-2";
+    jwt = "jwt-profile-2";
+    commonApiFetchMock.mockResolvedValueOnce(snapshot("profile-2"));
+    rerender(
+      <DmUnreadStateProvider>
+        <Capture />
+        <CaptureActions />
+      </DmUnreadStateProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("ready")).toHaveTextContent("true")
+    );
+
+    connectedProfileId = "profile-1";
+    jwt = "jwt-profile-1";
+    commonApiFetchMock.mockResolvedValueOnce(snapshot("profile-1"));
+    rerender(
+      <DmUnreadStateProvider>
+        <Capture />
+        <CaptureActions />
+      </DmUnreadStateProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("messages")).toHaveTextContent("1")
+    );
+
+    act(() => {
+      oldProfileOneActions?.applyServerState(
+        state({ profileId: "profile-1", unreadCount: 99, version: 99 })
+      );
+    });
+    expect(screen.getByTestId("messages")).toHaveTextContent("1");
   });
 
   it("ignores websocket state for an inactive profile", async () => {

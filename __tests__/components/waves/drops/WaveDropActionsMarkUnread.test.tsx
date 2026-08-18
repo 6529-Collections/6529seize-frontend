@@ -1,26 +1,34 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import WaveDropActionsMarkUnread from '@/components/waves/drops/WaveDropActionsMarkUnread';
-import { AuthContext } from '@/components/auth/Auth';
-import type { ApiDrop } from '@/generated/models/ApiDrop';
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import WaveDropActionsMarkUnread from "@/components/waves/drops/WaveDropActionsMarkUnread";
+import { AuthContext } from "@/components/auth/Auth";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
-jest.mock('@/services/api/common-api', () => ({
+const mockApplyDmServerState = jest.fn();
+
+jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useOptionalDmUnreadActions: () => ({
+    applyServerState: mockApplyDmServerState,
+  }),
+}));
+
+jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({
     invalidateQueries: jest.fn(),
   }),
 }));
 
-jest.mock('@/contexts/wave/UnreadDividerContext', () => ({
+jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
   useUnreadDividerOptional: () => ({
     setUnreadDividerSerialNo: jest.fn(),
   }),
 }));
 
-jest.mock('@/contexts/wave/MyStreamContext', () => ({
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     waves: {
       restoreWaveUnreadCount: jest.fn(),
@@ -31,31 +39,31 @@ jest.mock('@/contexts/wave/MyStreamContext', () => ({
   }),
 }));
 
-jest.mock('react-tooltip', () => ({
+jest.mock("react-tooltip", () => ({
   Tooltip: ({ children }: any) => <div>{children}</div>,
 }));
 
 const mockAuthContext = {
   setToast: jest.fn(),
   connectedProfile: {
-    handle: 'test-user',
+    handle: "test-user",
   },
   activeProfileProxy: null,
 };
 
 const mockDrop: ApiDrop = {
-  id: 'drop-123',
+  id: "drop-123",
   serial_no: 42,
   wave: {
-    id: 'wave-456',
-    name: 'Test Wave',
+    id: "wave-456",
+    name: "Test Wave",
   },
   author: {
-    handle: 'other-author',
+    handle: "other-author",
   },
 } as any;
 
-describe('WaveDropActionsMarkUnread', () => {
+describe("WaveDropActionsMarkUnread", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -68,13 +76,13 @@ describe('WaveDropActionsMarkUnread', () => {
     );
   };
 
-  it('renders mark unread button', () => {
+  it("renders mark unread button", () => {
     renderComponent();
-    expect(screen.getByLabelText('Mark as unread')).toBeInTheDocument();
+    expect(screen.getByLabelText("Mark as unread")).toBeInTheDocument();
   });
 
-  it('calls API when clicked', async () => {
-    const { commonApiPost } = require('@/services/api/common-api');
+  it("calls API when clicked", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({
       your_unread_drops_count: 5,
       first_unread_drop_serial_no: 42,
@@ -82,18 +90,43 @@ describe('WaveDropActionsMarkUnread', () => {
 
     renderComponent();
 
-    await userEvent.click(screen.getByLabelText('Mark as unread'));
+    await userEvent.click(screen.getByLabelText("Mark as unread"));
 
     await waitFor(() => {
       expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: 'drops/drop-123/mark-unread',
+        endpoint: "drops/drop-123/mark-unread",
         body: {},
       });
     });
   });
 
-  it('shows success toast on success', async () => {
-    const { commonApiPost } = require('@/services/api/common-api');
+  it("applies the authoritative DM unread state from the response", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const dmUnreadState = {
+      profile_id: "profile-1",
+      wave_id: "wave-456",
+      unread_count: 5,
+      first_unread_drop_serial_no: 42,
+      latest_drop_serial_no: 50,
+      latest_read_serial_no: 41,
+      version: 4,
+    };
+    commonApiPost.mockResolvedValue({
+      your_unread_drops_count: 5,
+      first_unread_drop_serial_no: 42,
+      dm_unread_state: dmUnreadState,
+    });
+
+    renderComponent();
+    await userEvent.click(screen.getByLabelText("Mark as unread"));
+
+    await waitFor(() =>
+      expect(mockApplyDmServerState).toHaveBeenCalledWith(dmUnreadState)
+    );
+  });
+
+  it("shows success toast on success", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({
       your_unread_drops_count: 5,
       first_unread_drop_serial_no: 42,
@@ -101,54 +134,56 @@ describe('WaveDropActionsMarkUnread', () => {
 
     renderComponent();
 
-    await userEvent.click(screen.getByLabelText('Mark as unread'));
+    await userEvent.click(screen.getByLabelText("Mark as unread"));
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        message: 'Marked as unread.',
-        type: 'success',
+        message: "Marked as unread.",
+        type: "success",
       });
     });
   });
 
-  it('shows error toast on failure', async () => {
-    const { commonApiPost } = require('@/services/api/common-api');
-    commonApiPost.mockRejectedValue('API Error');
+  it("shows error toast on failure", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    commonApiPost.mockRejectedValue("API Error");
 
     renderComponent();
 
-    await userEvent.click(screen.getByLabelText('Mark as unread'));
+    await userEvent.click(screen.getByLabelText("Mark as unread"));
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        type: 'error',
+        type: "error",
         title: "Couldn't mark this drop as unread.",
-        description: 'Please try again.',
-        details: 'API Error.',
+        description: "Please try again.",
+        details: "API Error.",
       });
     });
   });
 
-  it('shows loading spinner while marking unread', async () => {
-    const { commonApiPost } = require('@/services/api/common-api');
+  it("shows loading spinner while marking unread", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockImplementation(() => new Promise(() => {}));
 
     renderComponent();
 
-    await userEvent.click(screen.getByLabelText('Mark as unread'));
+    await userEvent.click(screen.getByLabelText("Mark as unread"));
 
     await waitFor(() => {
-      expect(screen.getByLabelText('Mark as unread').querySelector('.spinner')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText("Mark as unread").querySelector(".spinner")
+      ).toBeInTheDocument();
     });
   });
 
-  it('disables button while loading', async () => {
-    const { commonApiPost } = require('@/services/api/common-api');
+  it("disables button while loading", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockImplementation(() => new Promise(() => {}));
 
     renderComponent();
 
-    const button = screen.getByLabelText('Mark as unread');
+    const button = screen.getByLabelText("Mark as unread");
     await userEvent.click(button);
 
     await waitFor(() => {

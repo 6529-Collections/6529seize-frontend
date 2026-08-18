@@ -28,6 +28,7 @@ let capturedProps: any;
 let capturedCreatorProps: any;
 const mockSetToast = jest.fn();
 const mockUseWebSocketMessage = jest.fn();
+let mockDmUnreadConversation: { readonly unread_count: number } | null = null;
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -67,6 +68,10 @@ jest.mock("@/components/auth/Auth", () => ({
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: (...args: unknown[]) => mockUseWebSocketMessage(...args),
+}));
+
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useDmUnreadConversation: () => mockDmUnreadConversation,
 }));
 
 // Mock globalThis.matchMedia for useDeviceInfo hook
@@ -111,6 +116,7 @@ describe("SingleWaveDropChat", () => {
   beforeEach(() => {
     mockKeyboardVisible = false;
     mockKeyboardPhase = "hidden";
+    mockDmUnreadConversation = null;
     capturedProps = undefined;
     capturedCreatorProps = undefined;
     mockSetToast.mockClear();
@@ -142,6 +148,14 @@ describe("SingleWaveDropChat", () => {
 
     fireEvent.click(document.querySelector('[data-testid="creator"]')!);
     expect(document.querySelector('[data-part="1"]')).toBeInTheDocument();
+  });
+
+  it("uses the canonical DM unread count", () => {
+    mockDmUnreadConversation = { unread_count: 4 };
+
+    render(<SingleWaveDropChat wave={createWave()} drop={createDrop()} />);
+
+    expect(capturedProps.unreadCount).toBe(4);
   });
 
   it("clears the root reply when the root drop is deleted", () => {

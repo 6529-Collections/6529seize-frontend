@@ -367,6 +367,10 @@ describe("DmUnreadStore", () => {
     expect(
       store.beginRead("profile-a", "wave-a", 10)?.readThroughSerialNo
     ).toBe(10);
+    expect(
+      getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
+        ?.unread_count
+    ).toBe(2);
   });
 
   it("does not let a snapshot overwrite an in-flight local read", () => {

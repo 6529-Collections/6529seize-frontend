@@ -4,7 +4,7 @@ import type { ApiDmUnreadSnapshot } from "@/generated/models/ApiDmUnreadSnapshot
 interface OptimisticDmRead {
   readonly id: number;
   readonly targetSerialNo: number;
-  readonly baseUnreadCount: number;
+  readonly optimisticallyClearedUnreadCount: number;
   readonly firstUnreadAfterTargetSerialNo: number | null;
 }
 
@@ -86,7 +86,10 @@ const getDisplayedUnreadCount = (
   if (server.latest_drop_serial_no <= optimisticRead.targetSerialNo) {
     return 0;
   }
-  return Math.max(0, server.unread_count - optimisticRead.baseUnreadCount);
+  return Math.max(
+    0,
+    server.unread_count - optimisticRead.optimisticallyClearedUnreadCount
+  );
 };
 
 const getDisplayedConversation = (
@@ -334,7 +337,10 @@ export class DmUnreadStore {
     const optimisticRead: OptimisticDmRead = {
       id: this.nextReadOperationId++,
       targetSerialNo,
-      baseUnreadCount: current.server.unread_count,
+      optimisticallyClearedUnreadCount:
+        targetSerialNo >= current.server.latest_drop_serial_no
+          ? current.server.unread_count
+          : 0,
       firstUnreadAfterTargetSerialNo: null,
     };
     this.publish({
