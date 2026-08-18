@@ -429,6 +429,17 @@ export const EN_GB_MESSAGES = {
     "Choose who can access, participate in, and manage this wave.",
   "waves.create.groups.viewGroupName": "Who can view",
   "waves.create.groups.adminGroupName": "Admin",
+  "waves.create.groups.validation.checking": "Checking group access…",
+  "waves.create.groups.validation.unavailableTitle":
+    "Couldn't verify group access.",
+  "waves.create.groups.validation.unavailable":
+    "Group access could not be verified. Try again before continuing.",
+  "waves.create.groups.validation.outsideView":
+    'The "{groupName}" group includes people who are not in "{viewGroupName}".',
+  "waves.create.groups.validation.invalidTitle":
+    "Some access groups need attention.",
+  "waves.create.groups.validation.invalidDescription":
+    "Every Drop, Vote, Chat, and Admin group member must also belong to the View group.",
   "waves.create.dates.title": "Schedule",
   "waves.create.dates.description":
     "Review when this wave opens, voting begins, and winners are announced.",

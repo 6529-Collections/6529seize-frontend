@@ -29,6 +29,11 @@ import {
   getScopedGroup,
   isGroupAuthor,
 } from "../utils/waveGroupEdit";
+import { getWaveUpdateGroupValidationRequest } from "@/helpers/waves/wave-group-validation.helpers";
+import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 
 const WAVE_GROUP_LABELS = {
   VIEW: "View",
@@ -37,6 +42,15 @@ const WAVE_GROUP_LABELS = {
   CHAT: "Chat",
   ADMIN: "Admin",
 } satisfies Record<WaveGroupType, string>;
+
+const VALIDATION_ROLE_BY_GROUP_TYPE: Partial<
+  Record<WaveGroupType, ApiWaveGroupRole>
+> = {
+  [WaveGroupType.DROP]: ApiWaveGroupRole.Participation,
+  [WaveGroupType.VOTE]: ApiWaveGroupRole.Voting,
+  [WaveGroupType.CHAT]: ApiWaveGroupRole.Chat,
+  [WaveGroupType.ADMIN]: ApiWaveGroupRole.Admin,
+};
 
 const normalizeIdentity = (identity: string): string =>
   identity.trim().toLowerCase();
@@ -473,6 +487,7 @@ export const useWaveGroupEditButtonsController = ({
   setToast,
   onWaveCreated,
 }: UseWaveGroupEditButtonsControllerProps): WaveGroupEditButtonsController => {
+  const locale = useBrowserLocale();
   const [mutating, setMutating] = useState(false);
   const [activeIdentitiesModal, setActiveIdentitiesModal] =
     useState<WaveGroupIdentitiesModal | null>(null);
@@ -598,9 +613,39 @@ export const useWaveGroupEditButtonsController = ({
           return;
         }
       }
+      if (body.visibility.scope.group_id !== null) {
+        try {
+          const validation = await validateWaveGroups(
+            getWaveUpdateGroupValidationRequest(
+              body,
+              type === WaveGroupType.VIEW
+                ? undefined
+                : [VALIDATION_ROLE_BY_GROUP_TYPE[type]!]
+            )
+          );
+          if (!validation.valid) {
+            setToast({
+              type: "error",
+              message: t(
+                locale,
+                "waves.create.groups.validation.invalidDescription"
+              ),
+            });
+            setMutating(false);
+            return;
+          }
+        } catch {
+          setToast({
+            type: "error",
+            message: t(locale, "waves.create.groups.validation.unavailable"),
+          });
+          setMutating(false);
+          return;
+        }
+      }
       await editWaveMutation.mutateAsync(body);
     },
-    [editWaveMutation, requestAuth, setToast]
+    [editWaveMutation, locale, requestAuth, setToast, type]
   );
 
   useEffect(() => {

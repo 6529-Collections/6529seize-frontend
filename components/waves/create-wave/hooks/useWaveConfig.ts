@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   CreateWaveConfig,
   CreateWaveOutcomeType,
@@ -20,15 +20,40 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { useMemeCardCount } from "./useMemeCardCount";
 import { getDefaultFirstDecisionTime } from "../services/waveDecisionService";
 import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
+import { useWaveGroupValidation } from "./useWaveGroupValidation";
+import type { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 
 // Stable empty reference so the derived `errors` keeps identity while there
 // is nothing to show (no surfaced errors), avoiding needless re-renders.
 const EMPTY_VALIDATION_ERRORS: CREATE_WAVE_VALIDATION_ERROR[] = [];
+const EMPTY_INVALID_GROUP_ROLES: ApiWaveGroupRole[] = [];
 
 interface EndDateConfig {
   time: number | null;
   period: Period | null;
 }
+
+type PrivilegeGroupKey = "canDrop" | "canVote" | "canChat";
+
+const getPrivilegeGroupDefaults = ({
+  groupId,
+  waveType,
+  manuallySelected,
+}: {
+  readonly groupId: string;
+  readonly waveType: ApiWaveType;
+  readonly manuallySelected: ReadonlySet<PrivilegeGroupKey>;
+}): Partial<CreateWaveConfig["groups"]> => {
+  return {
+    ...(!manuallySelected.has("canChat") ? { canChat: groupId } : {}),
+    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canDrop")
+      ? { canDrop: groupId }
+      : {}),
+    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canVote")
+      ? { canVote: groupId }
+      : {}),
+  };
+};
 
 export function useWaveConfig() {
   const initialType = ApiWaveType.Chat;
@@ -142,9 +167,16 @@ export function useWaveConfig() {
   // Bumped on every failed forward navigation; CreateWave watches it to
   // focus the first invalid field after the error state has committed.
   const [errorFocusRequest, setErrorFocusRequest] = useState(0);
+  const [groupValidationErrorVisible, setGroupValidationErrorVisible] =
+    useState(false);
 
   const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
     {}
+  );
+  // Manual privilege choices stay sticky while editing the current Wave type,
+  // including an explicit "Anyone" selection represented by null.
+  const manuallySelectedPrivilegeGroups = useRef<Set<PrivilegeGroupKey>>(
+    new Set()
   );
 
   const shouldLoadMemeCount =
@@ -168,6 +200,7 @@ export function useWaveConfig() {
       },
     };
   }, [config, memeCount]);
+  const groupValidationQuery = useWaveGroupValidation(effectiveConfig);
 
   // Update end date config when config changes
   useEffect(() => {
@@ -194,6 +227,9 @@ export function useWaveConfig() {
     const isTypeChange = config.overview.type !== overview.type;
     if (isTypeChange) {
       setEndDateConfig({ time: null, period: null });
+      // The type change replaces the entire config (including group choices),
+      // so the next type starts a fresh privilege-defaulting session too.
+      manuallySelectedPrivilegeGroups.current.clear();
     }
     setConfig((prev) => {
       if (prev.overview.type === overview.type) {
@@ -249,7 +285,7 @@ export function useWaveConfig() {
   };
 
   // Step navigation with validation
-  const onStep = ({
+  const onStep = async ({
     step: newStep,
     direction,
   }: {
@@ -266,8 +302,35 @@ export function useWaveConfig() {
         setErrorFocusRequest((count) => count + 1);
         return;
       }
+      if (
+        step === CreateWaveStep.GROUPS &&
+        effectiveConfig.groups.canView !== null
+      ) {
+        let validationResult;
+        try {
+          // An explicit refetch always goes to the server, even while the
+          // background query data is still within its stale-time window.
+          validationResult = await groupValidationQuery.refetch();
+        } catch {
+          setGroupValidationErrorVisible(true);
+          setErrorFocusRequest((count) => count + 1);
+          return;
+        }
+        if (validationResult.isError || !validationResult.data?.valid) {
+          const hasActionableRoleErrors =
+            (validationResult.data?.invalid_roles.length ?? 0) > 0;
+          setGroupValidationErrorVisible(
+            validationResult.isError ||
+              !validationResult.data ||
+              !hasActionableRoleErrors
+          );
+          setErrorFocusRequest((count) => count + 1);
+          return;
+        }
+      }
     }
     setSurfacedErrors([]);
+    setGroupValidationErrorVisible(false);
     setSelectedOutcomeType(null);
     setStep(newStep);
   };
@@ -286,6 +349,7 @@ export function useWaveConfig() {
     readonly group: ApiGroupFull | null;
     readonly groupType: CreateWaveGroupConfigType;
   }) => {
+    setGroupValidationErrorVisible(false);
     if (group) {
       setGroupsCache((prev) => ({
         ...prev,
@@ -299,10 +363,18 @@ export function useWaveConfig() {
           groups: {
             ...prev.groups,
             canView: group?.id ?? null,
+            ...(group
+              ? getPrivilegeGroupDefaults({
+                  groupId: group.id,
+                  waveType: prev.overview.type,
+                  manuallySelected: manuallySelectedPrivilegeGroups.current,
+                })
+              : {}),
           },
         }));
         break;
       case CreateWaveGroupConfigType.CAN_DROP:
+        manuallySelectedPrivilegeGroups.current.add("canDrop");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -312,6 +384,7 @@ export function useWaveConfig() {
         }));
         break;
       case CreateWaveGroupConfigType.CAN_VOTE:
+        manuallySelectedPrivilegeGroups.current.add("canVote");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -321,6 +394,7 @@ export function useWaveConfig() {
         }));
         break;
       case CreateWaveGroupConfigType.CAN_CHAT:
+        manuallySelectedPrivilegeGroups.current.add("canChat");
         setConfig((prev) => ({
           ...prev,
           groups: {
@@ -495,6 +569,12 @@ export function useWaveConfig() {
     selectedOutcomeType,
     errors,
     errorFocusRequest,
+    groupValidation: {
+      invalidRoles:
+        groupValidationQuery.data?.invalid_roles ?? EMPTY_INVALID_GROUP_ROLES,
+      isFetching: groupValidationQuery.isFetching,
+      unavailable: groupValidationErrorVisible,
+    },
     groupsCache,
     isMemeCountLoading: shouldLoadMemeCount && memeCountQuery.isLoading,
     isMemeCountError: shouldLoadMemeCount && memeCountQuery.isError,
