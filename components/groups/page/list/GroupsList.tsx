@@ -119,8 +119,9 @@ export default function GroupsList({
       />
       <CommonInfiniteScrollWrapper
         loading={isFetching}
-        onBottomIntersection={onBottomIntersection}>
-        <div className="tw-mt-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4 lg:tw-gap-5">
+        onBottomIntersection={onBottomIntersection}
+      >
+        <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-x-4 tw-gap-y-3 md:tw-grid-cols-2 lg:tw-gap-x-5 lg:tw-gap-y-4">
           {groups.map((group) => (
             <GroupCard
               key={group.id}

@@ -226,7 +226,6 @@ export const mobileSafariWebViewContextTokens = [
   "mobile safari ui/wkwebview",
   "wkwebview",
 ];
-export const webViewUserAgentTokens = ["webview", "wkwebview"];
 export const routeParameterizationContextKeys = [
   "app",
   "browser",

@@ -5,9 +5,7 @@ import LatestDropNextMintPanel, {
   LatestDropNextMintPanelSkeleton,
 } from "@/components/home/now-minting/LatestDropNextMintPanel";
 import { isValidMemeCardId } from "@/components/memes/drops/MainStageMemeCardLink";
-import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
-import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import NotFound from "@/components/not-found/NotFound";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { type ReactNode, useSyncExternalStore } from "react";
@@ -54,7 +52,6 @@ function CanonicalUpcomingMemePage({
   readonly id: number;
   readonly locale: SupportedLocale;
 }) {
-  const { isFetching, isDropComplete, isStatusLoading } = useNowMintingStatus();
   const {
     nextMint,
     waveId,
@@ -63,19 +60,14 @@ function CanonicalUpcomingMemePage({
   } = useNextMintDrop();
 
   const isNextMintReady = isSettingsLoaded && (!waveId || !isNextMintFetching);
-  const isDecisionReady = !isFetching && !isStatusLoading && isNextMintReady;
-  const shouldShowNextMint = shouldShowNextMintInLatestDrop({
-    isMintEnded: isDropComplete,
-    nextMintExists: !!nextMint,
-  });
   const mappedMemeCardId = nextMint?.submission_context?.meme_card_id;
   const normalizedMemeCardId = Number(mappedMemeCardId);
   const isMatchingRevealedDrop =
-    shouldShowNextMint &&
+    !!nextMint &&
     isValidMemeCardId(normalizedMemeCardId) &&
     normalizedMemeCardId === id;
 
-  if (!isDecisionReady) {
+  if (!isNextMintReady) {
     return (
       <UpcomingMemeLayout id={id} locale={locale}>
         <LatestDropNextMintPanelSkeleton />

@@ -3,6 +3,8 @@ interface ShouldShowNextMintAfterEndParams {
   readonly nextMintExists: boolean;
 }
 
+export const HOME_LATEST_DROP_GRACE_PERIOD_MINUTES = 10;
+
 export function shouldShowNextMintInLatestDrop({
   isMintEnded,
   nextMintExists,
