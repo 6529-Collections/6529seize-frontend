@@ -64,11 +64,12 @@ export function useMarkWaveNotificationsRead(): (
         if (options?.readThroughSerialNo === undefined) {
           return markWaveNotificationsRead(waveId, options);
         }
-        return markWaveNotificationsRead(waveId, {
-          ...options,
-          readThroughSerialNo: undefined,
-          requestDmUnreadState: undefined,
-        });
+        const {
+          readThroughSerialNo: _readThroughSerialNo,
+          requestDmUnreadState: _requestDmUnreadState,
+          ...ordinaryReadOptions
+        } = options;
+        return markWaveNotificationsRead(waveId, ordinaryReadOptions);
       }
 
       const markDmRead = async (): Promise<MarkWaveNotificationsReadResult> => {
