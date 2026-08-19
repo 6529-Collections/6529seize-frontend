@@ -425,11 +425,13 @@ const sendReactionRequest = async ({
   isRemoving,
   mutation,
   reactionCode,
+  signal,
 }: {
   readonly endpoint: string;
   readonly isRemoving: boolean;
   readonly mutation: ReactionMutation;
   readonly reactionCode: string;
+  readonly signal: AbortSignal;
 }): Promise<void> => {
   if (isRemoving) {
     recordReactionRequestSent(mutation, {
@@ -439,6 +441,7 @@ const sendReactionRequest = async ({
     await commonApiDelete({
       endpoint,
       errorMode: "structured",
+      signal,
     });
     return;
   }
@@ -451,6 +454,7 @@ const sendReactionRequest = async ({
     endpoint,
     body: { reaction: reactionCode },
     errorMode: "structured",
+    signal,
   });
 };
 
@@ -577,12 +581,13 @@ export function useDropReaction(
       let succeeded = false;
 
       try {
-        await enqueueDropReactionRequest(dropId, async () => {
+        await enqueueDropReactionRequest(dropId, async (signal) => {
           await sendReactionRequest({
             endpoint,
             isRemoving,
             mutation,
             reactionCode,
+            signal,
           });
         });
         const result = recordReactionRequestSucceeded(mutation);

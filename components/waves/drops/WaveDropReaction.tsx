@@ -602,7 +602,7 @@ function WaveDropReaction({
     }
 
     try {
-      await enqueueDropReactionRequest(drop.id, async () => {
+      await enqueueDropReactionRequest(drop.id, async (signal) => {
         const body = { reaction: reaction.reaction };
         if (selected) {
           recordReactionRequestSent(mutation, {
@@ -612,6 +612,7 @@ function WaveDropReaction({
           await commonApiDelete({
             endpoint,
             errorMode: "structured",
+            signal,
           });
           return;
         }
@@ -624,6 +625,7 @@ function WaveDropReaction({
           endpoint,
           body,
           errorMode: "structured",
+          signal,
         });
       });
       const result = recordReactionRequestSucceeded(mutation);

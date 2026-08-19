@@ -392,6 +392,7 @@ describe("WaveDropReactions", () => {
       endpoint: "drops/test-drop/reaction",
       body: { reaction: ":gm:" },
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
 
     // Click button again to decrement
@@ -402,6 +403,7 @@ describe("WaveDropReactions", () => {
     expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
   });
 
@@ -501,6 +503,7 @@ describe("WaveDropReactions", () => {
       expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
         endpoint: "drops/test-drop/reaction",
         errorMode: "structured",
+        signal: expect.any(AbortSignal),
       });
     });
     expect(mockSetQueryData).toHaveBeenCalledWith(

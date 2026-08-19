@@ -67,4 +67,37 @@ describe("dropReactionRequestQueue", () => {
     firstDropRequest.resolve();
     await firstDrop;
   });
+
+  it("times out a stalled request and continues the queue", async () => {
+    jest.useFakeTimers();
+    try {
+      let firstSignal: AbortSignal | undefined;
+      const first = enqueueDropReactionRequest(
+        "drop-1",
+        async (signal) => {
+          firstSignal = signal;
+          await new Promise<void>(() => undefined);
+        },
+        { timeoutMs: 100 }
+      );
+      const firstFailure = expect(first).rejects.toMatchObject({
+        message: "Reaction request timed out",
+        name: "TimeoutError",
+      });
+      const secondRequest = jest.fn(async () => undefined);
+      const second = enqueueDropReactionRequest("drop-1", secondRequest);
+
+      await Promise.resolve();
+      expect(secondRequest).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(100);
+      await firstFailure;
+      await second;
+
+      expect(firstSignal?.aborted).toBe(true);
+      expect(secondRequest).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

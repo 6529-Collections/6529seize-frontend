@@ -1,13 +1,56 @@
-type DropReactionRequest = () => Promise<void>;
+type DropReactionRequest = (signal: AbortSignal) => Promise<void>;
+
+interface DropReactionRequestOptions {
+  readonly timeoutMs?: number;
+}
+
+const DROP_REACTION_REQUEST_TIMEOUT_MS = 15_000;
 
 const requestTailByDrop = new Map<string, Promise<void>>();
 
+const runRequestWithTimeout = (
+  request: DropReactionRequest,
+  timeoutMs: number
+): Promise<void> => {
+  const controller = new AbortController();
+  let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeoutId = globalThis.setTimeout(() => {
+      reject(new DOMException("Reaction request timed out", "TimeoutError"));
+      controller.abort();
+    }, timeoutMs);
+  });
+
+  let requestPromise: Promise<void>;
+  try {
+    requestPromise = request(controller.signal);
+  } catch (error) {
+    requestPromise = Promise.reject(error);
+  }
+
+  return Promise.race([requestPromise, timeoutPromise]).finally(() => {
+    if (timeoutId !== undefined) {
+      globalThis.clearTimeout(timeoutId);
+    }
+  });
+};
+
 export const enqueueDropReactionRequest = (
   dropId: string,
-  request: DropReactionRequest
+  request: DropReactionRequest,
+  options: DropReactionRequestOptions = {}
 ): Promise<void> => {
   const previousTail = requestTailByDrop.get(dropId);
-  const requestPromise = previousTail ? previousTail.then(request) : request();
+  const runRequest = () =>
+    runRequestWithTimeout(
+      request,
+      options.timeoutMs ?? DROP_REACTION_REQUEST_TIMEOUT_MS
+    );
+  const requestPromise = previousTail
+    ? previousTail.then(runRequest)
+    : runRequest();
+
+  // Keep the queue tail fulfilled so one failed request cannot block the next.
   const settledTail = requestPromise.then(
     () => undefined,
     () => undefined

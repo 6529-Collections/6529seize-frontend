@@ -332,6 +332,7 @@ describe("useDropReaction", () => {
       endpoint: "drops/drop-1/reaction",
       body: { reaction: ":smile:" },
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
   });
 
@@ -449,6 +450,7 @@ describe("useDropReaction", () => {
       endpoint: "drops/drop-1/reaction",
       body: { reaction: ":smile:" },
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
     expect(setToastMock).toHaveBeenCalledWith({
       message: "Reaction not allowed",
