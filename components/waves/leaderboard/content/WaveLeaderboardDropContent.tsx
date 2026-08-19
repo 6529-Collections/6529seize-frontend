@@ -53,7 +53,11 @@ export const WaveLeaderboardDropContent: React.FC<
   }
 
   return (
-    <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-1">
+    <div
+      className={`${
+        contentPresentation === "quorumCompact" ? "tw-mt-3" : "-tw-mt-0.5"
+      } tw-flex tw-flex-col tw-gap-y-1`}
+    >
       <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}

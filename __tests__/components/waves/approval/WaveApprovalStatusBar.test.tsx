@@ -288,7 +288,7 @@ describe("WaveApprovalStatusBar", () => {
       name: "Approval rules",
     });
     expect(approvalRulesButton).toBeInTheDocument();
-    expect(approvalRulesButton).toHaveAttribute("aria-haspopup", "dialog");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-haspopup");
     expect(approvalRulesButton).not.toHaveAttribute("aria-expanded");
     expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
   });
