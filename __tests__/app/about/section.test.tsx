@@ -62,7 +62,7 @@ describe("AboutPage", () => {
 
     expect(container.querySelector("main")).toHaveClass(
       "tw-border-r",
-      "tw-border-iron-900",
+      "tw-border-iron-800",
       "tw-bg-[#0D0D0F]"
     );
   });
@@ -82,7 +82,7 @@ describe("AboutPage", () => {
 
     expect(container.querySelector("main")).toHaveClass(
       "tw-border-r",
-      "tw-border-iron-900",
+      "tw-border-iron-800",
       "tw-bg-[#0D0D0F]"
     );
   });

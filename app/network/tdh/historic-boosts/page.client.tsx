@@ -3,8 +3,10 @@
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
 import {
+  NETWORK_PAGE_TITLE_CLASSES,
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
+  NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -101,19 +103,18 @@ export default function TDHHistoricBoostsPage() {
   };
 
   return (
-    <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
-    >
+    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       <div className="tw-w-full">
         <AboutContentsDropdown
           className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
           currentHref="/network/tdh/historic-boosts"
+          desktopFlush
           withDivider
         />
 
         <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
           <header className="tw-pb-8 sm:tw-pb-10">
-            <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+            <h1 className={NETWORK_PAGE_TITLE_CLASSES}>
               {m(locale, "network.tdhHistoric.hero.title")}
             </h1>
             <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
@@ -127,7 +128,7 @@ export default function TDHHistoricBoostsPage() {
           >
             <div className="lg:tw-sticky lg:tw-top-28">
               <h2
-                className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
+                className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
                 id="historic-versions-heading"
               >
                 {m(locale, "network.tdhHistoric.versions.title")}
