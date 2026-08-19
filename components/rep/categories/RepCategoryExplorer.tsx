@@ -3,6 +3,7 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import type { ApiGlobalRepCategorySuggestedCategory } from "@/generated/models/ApiGlobalRepCategorySuggestedCategory";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -253,7 +254,7 @@ export default function RepCategoryExplorer() {
       <section className="tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-900 tw-pb-6">
         <label
           htmlFor="global-rep-category-search"
-          className="tw-mb-3 tw-block tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
+          className={`${NETWORK_PAGE_TITLE_CLASSES} tw-mb-3 tw-block`}
         >
           {t(REP_CATEGORY_LOCALE, "rep.categories.search.label")}
         </label>
@@ -262,7 +263,7 @@ export default function RepCategoryExplorer() {
           type="search"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          className="tw-form-input tw-block tw-w-full tw-max-w-2xl tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm [&::-webkit-search-cancel-button]:tw-cursor-pointer [&::-webkit-search-cancel-button]:tw-[filter:brightness(0)_saturate(100%)_invert(60%)_sepia(89%)_saturate(1732%)_hue-rotate(319deg)_brightness(101%)_contrast(96%)]"
+          className="[&::-webkit-search-cancel-button]:tw-[filter:brightness(0)_saturate(100%)_invert(60%)_sepia(89%)_saturate(1732%)_hue-rotate(319deg)_brightness(101%)_contrast(96%)] tw-form-input tw-block tw-w-full tw-max-w-2xl tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 sm:tw-text-sm [&::-webkit-search-cancel-button]:tw-cursor-pointer"
           placeholder={t(
             REP_CATEGORY_LOCALE,
             "rep.categories.search.placeholder"

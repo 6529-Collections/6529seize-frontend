@@ -157,7 +157,7 @@ describe("About contents dropdown", () => {
 
     openContentsMenu();
 
-    expect(screen.getByText("About 6529")).toBeInTheDocument();
+    expect(screen.getByText("Overview")).toBeInTheDocument();
     expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
     expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
     expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();
