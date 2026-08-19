@@ -11,14 +11,12 @@ import {
   unblockProfile,
 } from "@/services/api/content-moderation-api";
 import { setProfileBlockedOverride } from "@/services/content-moderation/content-moderation-state";
-import { invalidateContentModerationPresentation } from "@/services/content-moderation/content-moderation-query";
+import {
+  BLOCKED_PROFILES_QUERY_KEY,
+  invalidateContentModerationPresentation,
+} from "@/services/content-moderation/content-moderation-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
-
-const BLOCKED_PROFILES_QUERY_KEY = [
-  "content-moderation",
-  "blocked-profiles",
-] as const;
 
 function BlockedProfileRow({
   profile,
@@ -77,6 +75,9 @@ function BlockedProfileRow({
       </div>
       <button
         type="button"
+        aria-label={t(locale, "contentModeration.actions.unblockProfile", {
+          profile: profile.handle ?? profile.profile_id,
+        })}
         disabled={mutation.isPending}
         onClick={() => mutation.mutate()}
         className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50"

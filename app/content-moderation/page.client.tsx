@@ -17,11 +17,12 @@ import {
   setModeratedProfileStatus,
 } from "@/services/api/content-moderation-api";
 import { setGlobalDropModerationOverride } from "@/services/content-moderation/content-moderation-state";
-import { invalidateContentModerationPresentation } from "@/services/content-moderation/content-moderation-query";
+import {
+  invalidateContentModerationPresentation,
+  MODERATION_QUEUE_QUERY_KEY,
+} from "@/services/content-moderation/content-moderation-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-
-const MODERATION_QUEUE_QUERY_KEY = ["content-moderation", "reports"] as const;
 
 const formatEnum = (value: string): string =>
   value
@@ -147,8 +148,26 @@ const formatTimestamp = (
   });
 };
 
-const clampConfidence = (value: number | null | undefined): number =>
-  Math.min(1, Math.max(0, value ?? 0));
+const clampConfidence = (value: number): number =>
+  Math.min(1, Math.max(0, value));
+
+const getAiRecommendationLabel = (
+  item: ApiContentModerationQueueItem,
+  locale: SupportedLocale
+): string => {
+  const recommendation = formatEnum(item.ai_recommendation ?? "");
+  if (
+    typeof item.ai_confidence !== "number" ||
+    !Number.isFinite(item.ai_confidence)
+  ) {
+    return recommendation;
+  }
+  return `${recommendation} (${formatPercent(
+    locale,
+    clampConfidence(item.ai_confidence),
+    0
+  )})`;
+};
 
 function ModerationQueueCard({
   item,
@@ -199,6 +218,10 @@ function ModerationQueueCard({
         reason: reason.trim(),
       }),
     onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: MODERATION_QUEUE_QUERY_KEY,
+      });
+      void invalidateContentModerationPresentation(queryClient);
       setToast({
         message: t(locale, "contentModeration.moderator.profileSuccess"),
         type: "success",
@@ -305,7 +328,7 @@ function ModerationQueueCard({
           {item.ai_recommendation !== null &&
           item.ai_recommendation !== undefined
             ? t(locale, "contentModeration.moderator.aiRecommendation", {
-                value: `${formatEnum(item.ai_recommendation)} (${formatPercent(locale, clampConfidence(item.ai_confidence), 0)})`,
+                value: getAiRecommendationLabel(item, locale),
               })
             : t(locale, "contentModeration.moderator.noAiRecommendation")}
         </p>

@@ -31,7 +31,7 @@
       "facts": [
         "Authenticated users can report, hide, or block from a Wave post's More menu on desktop or action sheet on mobile.",
         "Reporting, hiding, and blocking are distinct: the report dialog offers hide and block as optional personal choices.",
-        "A personally hidden or blocked post shows a tombstone with a temporary Show post action.",
+        "A personally hidden post shows a tombstone with a persistent Unhide post action. A post from a blocked author has a temporary Show post action that does not unblock the author.",
         "Blocked profiles can be reviewed and unblocked at /content-preferences, linked as Content preferences from the authenticated profile menu.",
         "New Wave posts receive a narrow server-side safety check; ambiguous content and profanity are not rejected merely for being objectionable.",
         "When a high-confidence safety check rejects a post, the composer explains the rejection and preserves the draft for editing and retrying.",

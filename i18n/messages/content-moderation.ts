@@ -8,6 +8,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.actions.block": "Block author",
   "contentModeration.actions.unhide": "Unhide post",
   "contentModeration.actions.unblock": "Unblock",
+  "contentModeration.actions.unblockProfile": "Unblock {profile}",
   "contentModeration.report.title": "Report this post",
   "contentModeration.report.description":
     "Tell us why this post may violate the rules. Reports are reviewed independently from your personal visibility choices.",

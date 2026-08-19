@@ -474,7 +474,10 @@ const WebSidebarNav = React.forwardRef<
             <WebSidebarNavItem
               href="/content-moderation"
               icon={ShieldExclamationIcon}
-              active={safePathname.startsWith("/content-moderation")}
+              active={
+                safePathname === "/content-moderation" ||
+                safePathname.startsWith("/content-moderation/")
+              }
               collapsed={isCollapsed}
               label={t(DEFAULT_LOCALE, "contentModeration.moderator.menu")}
             />

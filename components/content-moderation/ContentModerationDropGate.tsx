@@ -93,9 +93,9 @@ export default function ContentModerationDropGate({
         aria-hidden="true"
         className={`${compact ? "tw-size-4" : "tw-size-5"} tw-flex-shrink-0 tw-text-iron-500`}
       />
-      <output className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-400">
+      <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-400">
         {message}
-      </output>
+      </p>
       {!isGlobal && (
         <button
           type="button"
