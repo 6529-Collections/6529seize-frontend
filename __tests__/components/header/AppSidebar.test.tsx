@@ -176,7 +176,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         ])
       );
       expect(aboutChildren.slice(0, 3)).toEqual([
-        { label: "About", path: "/about" },
+        { label: "Overview", path: "/about" },
         expect.objectContaining({ label: "About 6529", section: true }),
         expect.objectContaining({
           label: "Collections & Minting",

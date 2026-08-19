@@ -47,9 +47,7 @@ export default function AboutCookiePolicy() {
         </Col>
       </Row>
       <Row>
-        <Col
-          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
-        >
+        <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
           Last Updated: June 04, 2024
         </Col>
       </Row>
@@ -81,10 +79,7 @@ export default function AboutCookiePolicy() {
           <Container fluid horizontalPadding={false}>
             <Row className="tw-pb-3">
               <Col>
-                <h3
-                  id="strictly-necessary-cookies-heading"
-                  className="tw-mb-0"
-                >
+                <h3 id="strictly-necessary-cookies-heading" className="tw-mb-0">
                   Strictly Necessary Cookies
                 </h3>
               </Col>

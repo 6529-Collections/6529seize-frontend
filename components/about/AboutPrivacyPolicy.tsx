@@ -15,9 +15,7 @@ export default function AboutPrivacyPolicy() {
         </Col>
       </Row>
       <Row>
-        <Col
-          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
-        >
+        <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
           Last Updated: February 23, 2023
         </Col>
       </Row>

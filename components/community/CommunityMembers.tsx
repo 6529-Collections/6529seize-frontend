@@ -1,6 +1,12 @@
 "use client";
 
 import type { CommunityMembersQuery } from "@/app/network/page";
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { Page } from "@/helpers/Types";
@@ -16,11 +22,6 @@ import CommunityMembersMobileSortContent from "./members-table/CommunityMembersM
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTableSkeleton";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { useActiveGroup } from "@/contexts/ActiveGroupContext";
-import { useSetTitle } from "@/contexts/TitleContext";
-import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import {
   BarsArrowDownIcon,
   ChevronRightIcon,
@@ -338,7 +339,7 @@ export default function CommunityMembers() {
   } else if (members) {
     membersContent = (
       <>
-        <div className="sm:tw-overflow-x-auto">
+        <div className="sm:tw-max-w-full sm:tw-overflow-x-auto sm:tw-overscroll-x-contain">
           <CommunityMembersTable
             members={members.data}
             activeSort={params.sort}
@@ -367,10 +368,10 @@ export default function CommunityMembers() {
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
-          <h1 className="tw-m-0 tw-flex-shrink-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+          <h1 className={`${NETWORK_PAGE_TITLE_CLASSES} tw-flex-shrink-0`}>
             Network
           </h1>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
             <NetworkHeaderActionButton
               active={!!activeGroupId}
               compact
@@ -396,7 +397,7 @@ export default function CommunityMembers() {
           </div>
         </div>
         <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center">
-          <div className="tw-flex tw-items-center tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
             <NetworkHeaderActionButton
               label="Open Nerd view"
               onClick={goToNerd}

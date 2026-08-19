@@ -97,7 +97,7 @@ describe("useSidebarSections", () => {
     );
 
     expect(aboutSection?.items).toEqual([
-      { name: "About", href: "/about", activePathPrefixes: ["/about/"] },
+      { name: "Overview", href: "/about", activePathPrefixes: ["/about/"] },
     ]);
     expect(
       aboutSection?.subsections.map((subsection) => subsection.name)

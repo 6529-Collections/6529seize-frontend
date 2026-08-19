@@ -10,7 +10,6 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
-  ABOUT_PAGE_SURFACE_CLASS_NAME,
   AboutRow as Row,
 } from "./AboutLayout";
 import AboutApply from "./AboutApply";
@@ -64,12 +63,11 @@ export default function About({ section }: { readonly section: AboutSection }) {
 
   if (section === AboutSection.MEMES) {
     return (
-      <div
-        className={`tw-min-h-[calc(100vh-100px)] ${ABOUT_PAGE_SURFACE_CLASS_NAME}`}
-      >
+      <div className="tw-min-h-[calc(100dvh-100px)]">
         <AboutContentsDropdown
-          className="tw-mx-auto !tw-mb-0 tw-w-full tw-max-w-[1400px] tw-px-4 sm:tw-px-6 lg:tw-px-8"
+          className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 sm:tw-px-6 lg:tw-px-8"
           currentSection={section}
+          flushBottom
           withDivider
         />
         <AboutMemes />
@@ -91,7 +89,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
                 : undefined
             }
             currentSection={section}
-            withDivider={usesFullWidthLayout}
+            withDivider
           />
           <div
             className={
