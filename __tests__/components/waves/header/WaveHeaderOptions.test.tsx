@@ -8,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { AuthContextType } from "@/components/auth/Auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { WaveDeleteFlowProvider } from "@/components/waves/header/options/delete/WaveDeleteFlowContext";
 
 type MobileWrapperMockProps = {
   readonly isOpen: boolean;
@@ -33,8 +34,7 @@ type ProfileWaveActionMockProps = {
 
 let clickAway: (event: Event) => void;
 let escCb: () => void;
-const mockMobileWrapper =
-  jest.fn<void, [MobileWrapperMockProps]>();
+const mockMobileWrapper = jest.fn<void, [MobileWrapperMockProps]>();
 
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
@@ -143,7 +143,9 @@ const createWrapper = (auth: Partial<AuthContextType> = {}) => {
 
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
+      <AuthContext.Provider value={authValue}>
+        <WaveDeleteFlowProvider>{children}</WaveDeleteFlowProvider>
+      </AuthContext.Provider>
     </QueryClientProvider>
   );
 };
@@ -220,7 +222,11 @@ test("opens deletion confirmation if the viewport leaves mobile while deletion i
   const user = userEvent.setup();
 
   const { rerender } = render(
-    <WaveHeaderOptions wave={wave} showOwnerActions={true} />,
+    <WaveHeaderOptions
+      key="mobile-options"
+      wave={wave}
+      showOwnerActions={true}
+    />,
     {
       wrapper: createWrapper(),
     }
@@ -235,7 +241,13 @@ test("opens deletion confirmation if the viewport leaves mobile while deletion i
   }
 
   useIsMobileLayoutViewportMock.mockReturnValue(false);
-  rerender(<WaveHeaderOptions wave={wave} showOwnerActions={true} />);
+  rerender(
+    <WaveHeaderOptions
+      key="desktop-options"
+      wave={wave}
+      showOwnerActions={true}
+    />
+  );
 
   expect(
     screen.getByRole("dialog", { name: "Delete wave confirmation" })

@@ -9,10 +9,8 @@ import { t } from "@/i18n/messages";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import WaveDelete from "./delete/WaveDelete";
-import WaveDeleteModal from "./delete/WaveDeleteModal";
+import { useWaveDeleteFlow } from "./delete/WaveDeleteFlowContext";
 import WaveProfileWaveAction from "./profile-wave/WaveProfileWaveAction";
-
-type DeleteFlowState = "idle" | "waiting-for-mobile-options" | "open";
 
 export default function WaveHeaderOptions({
   wave,
@@ -22,34 +20,18 @@ export default function WaveHeaderOptions({
   readonly showOwnerActions: boolean;
 }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [deleteFlowState, setDeleteFlowState] =
-    useState<DeleteFlowState>("idle");
   const buttonRef = useRef<HTMLButtonElement>(null);
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const { requestDelete, completeMobileOptionsLeave } = useWaveDeleteFlow();
 
   if (!showOwnerActions) {
     return null;
   }
 
-  if (
-    deleteFlowState === "waiting-for-mobile-options" &&
-    !isMobileLayoutViewport
-  ) {
-    setDeleteFlowState("open");
-  }
-
   const handleDeleteRequest = () => {
     setIsOptionsOpen(false);
-    setDeleteFlowState(
-      isMobileLayoutViewport ? "waiting-for-mobile-options" : "open"
-    );
-  };
-
-  const handleMobileOptionsAfterLeave = () => {
-    setDeleteFlowState((state) =>
-      state === "waiting-for-mobile-options" ? "open" : state
-    );
+    requestDelete(wave);
   };
 
   const actions = (
@@ -103,7 +85,7 @@ export default function WaveHeaderOptions({
             setOpen={setIsOptionsOpen}
             label={t(locale, "waves.header.ownerOptionsTitle")}
             hideOnDesktopHover={false}
-            onAfterLeave={handleMobileOptionsAfterLeave}
+            onAfterLeave={completeMobileOptionsLeave}
           >
             {actions}
           </CommonDropdownItemsMobileWrapper>
@@ -119,11 +101,6 @@ export default function WaveHeaderOptions({
           </CommonDropdownItemsDefaultWrapper>
         )}
       </div>
-      <WaveDeleteModal
-        wave={wave}
-        isOpen={deleteFlowState === "open"}
-        closeModal={() => setDeleteFlowState("idle")}
-      />
     </>
   );
 }
