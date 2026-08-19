@@ -38,7 +38,8 @@ describe("UserPageIdentityAddStatementsContactItems", () => {
     );
     const buttons = screen.getAllByTestId("btn");
     expect(buttons).toHaveLength(CONTACT_STATEMENT_TYPES.length);
-    const rows = Array.from(screen.getByRole("group").children);
+    const picker = screen.getByRole("group", { name: "Choose a platform" });
+    const rows = Array.from(picker.querySelectorAll(":scope > span"));
     expect(rows).toHaveLength(1);
     expect(rows[0]?.querySelectorAll("button")).toHaveLength(6);
     await user.click(buttons[1]);
