@@ -132,7 +132,10 @@ const getSnapshotRetryDelay = (attempt: number): number => {
   const jitterMultiplier =
     1 -
     SNAPSHOT_RETRY_JITTER_RATIO +
-    Math.random() * SNAPSHOT_RETRY_JITTER_RATIO * 2;
+    ((globalThis.crypto.getRandomValues(new Uint32Array(1)).at(0) ?? 0) /
+      2 ** 32) *
+      SNAPSHOT_RETRY_JITTER_RATIO *
+      2;
   return Math.round(baseDelay * jitterMultiplier);
 };
 

@@ -144,7 +144,6 @@ describe("DmUnreadStateProvider", () => {
 
   it("retries a transient snapshot failure through the jittered recovery policy", async () => {
     jest.useFakeTimers();
-    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.5);
     const error = new Error("snapshot failed");
     const consoleError = jest.spyOn(console, "error").mockImplementation();
     commonApiFetchMock
@@ -165,7 +164,12 @@ describe("DmUnreadStateProvider", () => {
       expect(screen.getByTestId("messages")).toHaveTextContent("0");
 
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(5_000);
+        await jest.advanceTimersByTimeAsync(3_999);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(2_001);
       });
       expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
       expect(screen.getByTestId("messages")).toHaveTextContent("1");
@@ -173,7 +177,6 @@ describe("DmUnreadStateProvider", () => {
     } finally {
       rendered.unmount();
       consoleError.mockRestore();
-      randomSpy.mockRestore();
       jest.useRealTimers();
     }
   });
