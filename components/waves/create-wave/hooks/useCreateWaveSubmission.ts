@@ -24,6 +24,8 @@ import {
   getAdminGroupId,
   WaveAdminGroupError,
 } from "../services/waveGroupService";
+import { getWaveGroupValidationRequest } from "@/helpers/waves/wave-group-validation.helpers";
+import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 
 interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
@@ -223,8 +225,50 @@ export function useCreateWaveSubmission({
         return;
       }
 
+      const configuredAdminGroupId =
+        config.groups.admin ?? parentAdminGroupId ?? null;
+      if (config.groups.canView !== null) {
+        let groupValidation;
+        try {
+          groupValidation = await validateWaveGroups(
+            getWaveGroupValidationRequest({
+              groups: {
+                ...config.groups,
+                admin: configuredAdminGroupId,
+              },
+              waveType: config.overview.type,
+              chatEnabled: config.chat.enabled,
+              includeAuthenticatedUserAsAdmin: true,
+            })
+          );
+        } catch {
+          setToast({
+            type: "error",
+            title: t(locale, "waves.create.groups.validation.unavailableTitle"),
+            description: t(
+              locale,
+              "waves.create.groups.validation.unavailable"
+            ),
+          });
+          finishSubmitting();
+          return;
+        }
+        if (!groupValidation.valid) {
+          setToast({
+            type: "error",
+            title: t(locale, "waves.create.groups.validation.invalidTitle"),
+            description: t(
+              locale,
+              "waves.create.groups.validation.invalidDescription"
+            ),
+          });
+          finishSubmitting();
+          return;
+        }
+      }
+
       const adminGroupId = await getAdminGroupId({
-        adminGroupId: config.groups.admin ?? parentAdminGroupId ?? null,
+        adminGroupId: configuredAdminGroupId,
         primaryWallet: connectedProfile?.primary_wallet,
         handle: connectedProfile?.handle ?? undefined,
         onError: (error) => {

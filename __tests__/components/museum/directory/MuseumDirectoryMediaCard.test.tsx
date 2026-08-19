@@ -119,6 +119,7 @@ describe("MuseumDirectoryMediaStage", () => {
     await user.click(imageGate);
     const image = screen.getByRole("img", { name: presentation.altText });
     expect(image).toHaveAttribute("src", presentation.mediaUrl);
+    expect(image).toHaveClass("tw-h-full", "tw-w-full", "tw-object-contain");
   });
 
   it("shows the governed presentation image on the artist card", async () => {
@@ -155,6 +156,11 @@ describe("MuseumDirectoryMediaStage", () => {
     expect(
       screen.getByRole("img", { name: presentation.altText })
     ).toHaveAttribute("src", presentation.mediaUrl);
+    expect(
+      screen
+        .getByRole("img", { name: presentation.altText })
+        .closest(".tw-aspect-\\[4\\/3\\]")
+    ).toBeInTheDocument();
   });
 
   it("fills and centers metadata-only states in the directory media frame", () => {
@@ -180,8 +186,8 @@ describe("MuseumDirectoryMediaStage", () => {
               kind: "still",
               role: "source",
               mediaType: "image/jpeg",
-              width: 2400,
-              height: 1600,
+              width: null,
+              height: null,
               altText: "A retained source photograph.",
               credit: metadata.credit,
               sourcePath: "records/media/retained-01.json",
@@ -197,6 +203,9 @@ describe("MuseumDirectoryMediaStage", () => {
     );
 
     fireEvent.error(screen.getByRole("img"));
+    expect(
+      screen.getByRole("alert").closest(".tw-aspect-square")
+    ).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveClass(
       "tw-h-full",
       "tw-items-center",

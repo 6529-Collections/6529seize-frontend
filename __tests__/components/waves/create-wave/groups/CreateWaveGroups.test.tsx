@@ -2,10 +2,15 @@ import { render, screen } from "@testing-library/react";
 import CreateWaveGroups from "@/components/waves/create-wave/groups/CreateWaveGroups";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_GROUPS } from "@/helpers/waves/waves.constants";
+import { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 
 jest.mock(
   "@/components/waves/create-wave/groups/CreateWaveGroup",
-  () => (props: any) => <div data-testid="group">{props.groupType}</div>
+  () => (props: any) => (
+    <div data-error={props.errorMessage ?? ""} data-testid="group">
+      {props.groupType}
+    </div>
+  )
 );
 jest.mock(
   "@/components/waves/create-wave/utils/CreateWaveWarning",
@@ -30,6 +35,9 @@ describe("CreateWaveGroups", () => {
         chatEnabled={true}
         adminCanDeleteDrops={true}
         groupsCache={{}}
+        invalidRoles={[]}
+        isValidating={false}
+        validationUnavailable={false}
         setChatEnabled={jest.fn()}
         setDropsAdminCanDelete={jest.fn()}
       />
@@ -59,6 +67,9 @@ describe("CreateWaveGroups", () => {
         chatEnabled={false}
         adminCanDeleteDrops={false}
         groupsCache={{}}
+        invalidRoles={[]}
+        isValidating={false}
+        validationUnavailable={false}
         setChatEnabled={jest.fn()}
         setDropsAdminCanDelete={jest.fn()}
       />
@@ -67,5 +78,40 @@ describe("CreateWaveGroups", () => {
       CREATE_WAVE_GROUPS[ApiWaveType.Rank].length
     );
     expect(screen.getByTestId("warning")).toBeInTheDocument();
+  });
+
+  it("identifies incompatible roles and announces validation state", () => {
+    render(
+      <CreateWaveGroups
+        waveName="Test Wave"
+        waveType={ApiWaveType.Rank}
+        groups={{
+          admin: "admin-group",
+          canView: "view-group",
+          canDrop: "drop-group",
+          canVote: null,
+          canChat: null,
+        }}
+        onGroupSelect={jest.fn()}
+        onInlineGroupCreate={jest.fn()}
+        chatEnabled={true}
+        adminCanDeleteDrops={true}
+        groupsCache={{}}
+        invalidRoles={[ApiWaveGroupRole.Participation]}
+        isValidating={false}
+        validationUnavailable={true}
+        setChatEnabled={jest.fn()}
+        setDropsAdminCanDelete={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Group access could not be verified"
+    );
+    expect(
+      screen
+        .getAllByTestId("group")
+        .find((row) => row.textContent === "CAN_DROP")
+    ).toHaveAttribute("data-error", expect.stringContaining("Who can drop"));
   });
 });

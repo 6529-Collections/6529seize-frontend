@@ -262,9 +262,39 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
     expect(artistHrefs).toHaveLength(21);
+    const artistMediaStages = page.getByTestId("museum-directory-media-stage");
+    await expect(artistMediaStages).toHaveCount(21);
+    const artistStageRatios = await artistMediaStages.evaluateAll((stages) =>
+      stages.map((stage) => {
+        const { width, height } = stage.getBoundingClientRect();
+        return width / height;
+      })
+    );
+    for (const ratio of artistStageRatios) {
+      expect(ratio).toBeCloseTo(4 / 3, 2);
+    }
 
     await openRoute(page, "/museum/network/acquisitions");
     await expect(page.locator("article")).toHaveCount(3);
+    const acquisitionMediaStages = page.getByTestId(
+      "museum-acquisition-media-stage"
+    );
+    await expect(acquisitionMediaStages).toHaveCount(3);
+    const acquisitionStageRatios = await acquisitionMediaStages.evaluateAll(
+      (stages) =>
+        stages.map((stage) => {
+          const { width, height } = stage.getBoundingClientRect();
+          return width / height;
+        })
+    );
+    expect(
+      new Set(acquisitionStageRatios.map((ratio) => ratio.toFixed(3))).size
+    ).toBe(1);
+    for (const ratio of acquisitionStageRatios) {
+      expect(
+        [4 / 5, 4 / 3].some((expected) => Math.abs(ratio - expected) < 0.01)
+      ).toBe(true);
+    }
     await retainScreenshot(page, testInfo, "museum-network-acquisitions");
 
     for (const [path, status] of [
