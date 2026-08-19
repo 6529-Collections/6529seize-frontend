@@ -484,7 +484,7 @@ export default function WaveApprovalStatusBar({
   retryApprovalStatus = null,
   wave,
 }: WaveApprovalStatusBarProps) {
-  const { hasTouchScreen } = useDeviceInfo();
+  const { hasTouchScreen, isMobileDevice } = useDeviceInfo();
   const isClientHydrated = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -577,7 +577,7 @@ export default function WaveApprovalStatusBar({
       thresholdLabel={thresholdLabel}
     />
   );
-  const useMobileHelp = isClientHydrated && hasTouchScreen;
+  const useMobileHelp = isClientHydrated && hasTouchScreen && isMobileDevice;
   const approvalRulesButton = useMobileHelp ? (
     <ApprovalRulesButton
       aria-controls={isHelpOpen ? approvalRulesHelpId : undefined}
