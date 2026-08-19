@@ -64,6 +64,10 @@ describe("instrumentation-client", () => {
     "undefined is not an object (evaluating 'e.results.map')";
   const instagramPageHideBridgeErrorMessage =
     "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
+  const coinbaseAnalyticsIndexedDbMessage =
+    "undefined is not an object (evaluating 'e.createObjectStore')";
+  const coinbaseAnalyticsBrowserApiMechanism =
+    "auto.browser.browserapierrors.addEventListener";
   const reactDomRemoveChildMessage =
     "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
@@ -794,6 +798,81 @@ describe("instrumentation-client", () => {
               },
             ],
           },
+        },
+      ],
+    },
+  });
+
+  const coinbaseAnalyticsProcessedSentryWrapperFrame = {
+    filename:
+      "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+    abs_path:
+      "turbopack:///[project]/node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+    function: "n",
+    lineno: 111,
+    colno: 58,
+    in_app: false,
+  };
+  const coinbaseAnalyticsRawSentryWrapperFrame = {
+    filename: "app:///_next/static/chunks/coinbase-sentry-wrapper.js",
+    abs_path: "app:///_next/static/chunks/coinbase-sentry-wrapper.js",
+    function: "r",
+    lineno: 7,
+    colno: 6178,
+    in_app: true,
+  };
+
+  const createCoinbaseAnalyticsIndexedDbFrames = (
+    documentPath = "app:///",
+    wrapperFrame: Record<string, unknown> =
+      coinbaseAnalyticsProcessedSentryWrapperFrame
+  ) => [
+    wrapperFrame,
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      function: "?",
+      lineno: 1,
+      colno: 71560,
+      in_app: true,
+    },
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      function: "upgrade",
+      lineno: 1,
+      colno: 71873,
+      in_app: true,
+    },
+  ];
+
+  const createCoinbaseAnalyticsIndexedDbEvent = (
+    browserName = "Mobile Safari",
+    documentPath = "app:///",
+    wrapperFrame: Record<string, unknown> =
+      coinbaseAnalyticsProcessedSentryWrapperFrame,
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: Record<string, unknown> = {},
+    frames: Array<Record<string, unknown>> =
+      createCoinbaseAnalyticsIndexedDbFrames(documentPath, wrapperFrame)
+  ) => ({
+    message: "",
+    contexts: {
+      browser: { name: browserName },
+      os: { name: "iOS" },
+    },
+    ...eventOverrides,
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: coinbaseAnalyticsIndexedDbMessage,
+          mechanism: {
+            type: coinbaseAnalyticsBrowserApiMechanism,
+            handled: false,
+          },
+          stacktrace: { frames },
+          ...valueOverrides,
         },
       ],
     },
@@ -2234,6 +2313,255 @@ describe("instrumentation-client", () => {
                   function: "renderArt",
                   lineno: 1,
                   colno: 1,
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each<[string, string, string, Record<string, unknown>]>([
+    [
+      "Mobile Safari root document",
+      "Mobile Safari",
+      "app:///",
+      coinbaseAnalyticsProcessedSentryWrapperFrame,
+    ],
+    [
+      "Twitter wave document",
+      "Twitter",
+      "app:///waves/11111111-2222-4333-8444-555555555555",
+      coinbaseAnalyticsRawSentryWrapperFrame,
+    ],
+  ])(
+    "drops the exact Coinbase analytics IndexedDB failure from the %s cohort",
+    (_cohort, browserName, documentPath, wrapperFrame) => {
+      const beforeSend = loadBeforeSend();
+      const event = createCoinbaseAnalyticsIndexedDbEvent(
+        browserName,
+        documentPath,
+        wrapperFrame
+      );
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it.each<
+    [
+      string,
+      Record<string, unknown>,
+      Record<string, unknown>,
+      Array<Record<string, unknown>> | undefined,
+    ]
+  >([
+    [
+      "a generic createObjectStore message",
+      {
+        value: "undefined is not an object (evaluating 'db.createObjectStore')",
+      },
+      {},
+      undefined,
+    ],
+    ["a different exception type", { type: "Error" }, {}, undefined],
+    [
+      "a different mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          handled: false,
+        },
+      },
+      {},
+      undefined,
+    ],
+    [
+      "a handled exception",
+      {
+        mechanism: {
+          type: coinbaseAnalyticsBrowserApiMechanism,
+          handled: true,
+        },
+      },
+      {},
+      undefined,
+    ],
+    [
+      "a conflicting event message",
+      {},
+      { message: "IndexedDB failed" },
+      undefined,
+    ],
+    [
+      "a different browser",
+      {},
+      {
+        contexts: {
+          browser: { name: "Chrome Mobile iOS" },
+          os: { name: "iOS" },
+        },
+      },
+      undefined,
+    ],
+    [
+      "a non-iOS context",
+      {},
+      {
+        contexts: {
+          browser: { name: "Mobile Safari" },
+          os: { name: "macOS" },
+        },
+      },
+      undefined,
+    ],
+    [
+      "an application-owned wrapper frame",
+      {},
+      {},
+      [
+        {
+          filename: "app:///_next/static/chunks/application.js",
+          abs_path: "app:///_next/static/chunks/application.js",
+          function: "openDatabase",
+          lineno: 7,
+          colno: 6178,
+          in_app: true,
+        },
+        ...createCoinbaseAnalyticsIndexedDbFrames().slice(1),
+      ],
+    ],
+    [
+      "a changed Sentry wrapper coordinate",
+      {},
+      {},
+      [
+        { ...coinbaseAnalyticsProcessedSentryWrapperFrame, colno: 59 },
+        ...createCoinbaseAnalyticsIndexedDbFrames().slice(1),
+      ],
+    ],
+    [
+      "a different document route",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames("app:///notifications"),
+    ],
+    [
+      "a malformed wave identifier",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames("app:///waves/not-a-uuid"),
+    ],
+    [
+      "a changed first document coordinate",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames().map((frame, index) =>
+        index === 1 ? { ...frame, colno: 71561 } : frame
+      ),
+    ],
+    [
+      "a named first document callback",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames().map((frame, index) =>
+        index === 1 ? { ...frame, function: "openDatabase" } : frame
+      ),
+    ],
+    [
+      "a changed upgrade function",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames().map((frame, index) =>
+        index === 2 ? { ...frame, function: "createStore" } : frame
+      ),
+    ],
+    [
+      "a changed upgrade coordinate",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames().map((frame, index) =>
+        index === 2 ? { ...frame, colno: 71874 } : frame
+      ),
+    ],
+    [
+      "different inline document paths",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames().map((frame, index) =>
+        index === 2
+          ? {
+              ...frame,
+              filename: "app:///waves/11111111-2222-4333-8444-555555555555",
+              abs_path: "app:///waves/11111111-2222-4333-8444-555555555555",
+            }
+          : frame
+      ),
+    ],
+    [
+      "a conflicting absolute path",
+      {},
+      {},
+      createCoinbaseAnalyticsIndexedDbFrames().map((frame, index) =>
+        index === 1 ? { ...frame, abs_path: "app:///application.ts" } : frame
+      ),
+    ],
+    [
+      "an extra frame",
+      {},
+      {},
+      [
+        ...createCoinbaseAnalyticsIndexedDbFrames(),
+        {
+          filename: "app:///services/storage.ts",
+          function: "openDatabase",
+          in_app: true,
+        },
+      ],
+    ],
+  ])(
+    "keeps the Coinbase analytics IndexedDB near miss with %s",
+    (_description, valueOverrides, eventOverrides, frames) => {
+      const beforeSend = loadBeforeSend();
+      const event = createCoinbaseAnalyticsIndexedDbEvent(
+        "Mobile Safari",
+        "app:///",
+        coinbaseAnalyticsProcessedSentryWrapperFrame,
+        valueOverrides,
+        eventOverrides,
+        frames ?? createCoinbaseAnalyticsIndexedDbFrames()
+      );
+
+      const result = beforeSend(event);
+
+      expect(result).not.toBeNull();
+    }
+  );
+
+  it("keeps mixed events containing the Coinbase analytics IndexedDB signature", () => {
+    const beforeSend = loadBeforeSend();
+    const coinbaseEvent = createCoinbaseAnalyticsIndexedDbEvent();
+    const event = {
+      ...coinbaseEvent,
+      exception: {
+        values: [
+          ...coinbaseEvent.exception.values,
+          {
+            type: "TypeError",
+            value: "Application IndexedDB migration failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///services/storage.ts",
+                  function: "migrateDatabase",
                   in_app: true,
                 },
               ],
