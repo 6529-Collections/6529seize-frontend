@@ -56,6 +56,7 @@ describe("WaveGroupScope", () => {
       "Inspect Group group criteria and members"
     );
     expect(link).toHaveClass("tw-min-h-11");
+    expect(link).toHaveClass("tw-inline-flex", "tw-w-fit", "tw-max-w-full");
     expect(link).toHaveClass("desktop-hover:hover:tw-text-primary-300");
     expect(container.querySelector("img")).toHaveAttribute(
       "src",

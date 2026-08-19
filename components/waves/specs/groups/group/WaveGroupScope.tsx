@@ -34,7 +34,7 @@ export default function WaveGroupScope({
         groupName,
       })}
       title={groupName}
-      className="tw-flex tw-min-h-11 tw-min-w-0 tw-cursor-pointer tw-items-center tw-justify-end tw-gap-x-1.5 tw-rounded-md tw-text-iron-50 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
+      className="tw-inline-flex tw-min-h-11 tw-w-fit tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-rounded-md tw-text-iron-50 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
     >
       {group.author?.pfp ? (
         <img
