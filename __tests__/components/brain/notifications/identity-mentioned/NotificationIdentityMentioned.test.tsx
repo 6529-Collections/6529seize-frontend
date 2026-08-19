@@ -66,9 +66,13 @@ describe("NotificationIdentityMentioned", () => {
   });
 
   it("does not render when the related drops field is missing", () => {
+    const {
+      related_drops: _relatedDrops,
+      ...notificationWithoutRelatedDrops
+    } = notification;
     const { container } = render(
       <NotificationIdentityMentioned
-        notification={{ ...notification, related_drops: undefined } as never}
+        notification={notificationWithoutRelatedDrops as never}
         activeDrop={null}
         onReply={jest.fn()}
       />
