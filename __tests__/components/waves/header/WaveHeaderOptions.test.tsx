@@ -34,7 +34,7 @@ type ProfileWaveActionMockProps = {
 let clickAway: (event: Event) => void;
 let escCb: () => void;
 const mockMobileWrapper =
-  jest.fn<(props: MobileWrapperMockProps) => void>();
+  jest.fn<void, [MobileWrapperMockProps]>();
 
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
@@ -129,7 +129,7 @@ const wave = {
   chat: { scope: { group: { is_direct_message: false } } },
   parent_wave: null,
   wave: { authenticated_user_eligible_for_admin: false },
-} as ApiWave;
+} as unknown as ApiWave;
 
 const createWrapper = (auth: Partial<AuthContextType> = {}) => {
   const queryClient = new QueryClient({
@@ -204,9 +204,11 @@ test("uses a bottom sheet on mobile and waits for it to close before deletion co
     screen.queryByRole("dialog", { name: "Delete wave confirmation" })
   ).not.toBeInTheDocument();
 
-  const lastMobileWrapperCall =
-    mockMobileWrapper.mock.calls[mockMobileWrapper.mock.calls.length - 1][0];
-  act(() => lastMobileWrapperCall.onAfterLeave());
+  const onAfterLeave = mockMobileWrapper.mock.calls.at(-1)?.[0].onAfterLeave;
+  if (!onAfterLeave) {
+    throw new Error("Expected the mobile options sheet to expose onAfterLeave");
+  }
+  act(onAfterLeave);
 
   expect(
     screen.getByRole("dialog", { name: "Delete wave confirmation" })
@@ -217,7 +219,7 @@ test("renders nothing when owner actions are hidden", () => {
   useIsMobileLayoutViewportMock.mockReturnValue(false);
   const { container } = render(
     <WaveHeaderOptions wave={wave} showOwnerActions={false} />,
-    { wrapper: createWrapper({ connectedProfile: { handle: "alice" } }) }
+    { wrapper: createWrapper() }
   );
 
   expect(container).toBeEmptyDOMElement();
