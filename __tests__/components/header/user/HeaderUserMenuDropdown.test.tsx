@@ -375,7 +375,7 @@ describe("HeaderUserMenuDropdown", () => {
     expect(screen.getByText("alice")).toBeInTheDocument();
   });
 
-  it("groups Profile Preferences between Profile and Logout", () => {
+  it("renders Profile and Profile Preferences as separate buttons in one row", () => {
     const { onClose } = renderDropdown({
       profile: profileBase,
       address: "0xabc",
@@ -390,13 +390,16 @@ describe("HeaderUserMenuDropdown", () => {
     expect(profileLink).toHaveAttribute("href", "/alice");
     expect(profileLink).not.toHaveAttribute("title");
     expect(profileLink).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
+    expect(profileLink).toHaveClass("tw-flex-1", "tw-border-iron-700");
     expect(logoutButton).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
-    expect(preferencesButton).toHaveClass(
-      "tw-grid-cols-[1.5rem_minmax(0,1fr)]"
+    expect(preferencesButton).toHaveClass("tw-size-11", "tw-border-iron-700");
+    expect(profileLink.parentElement).toBe(preferencesButton.parentElement);
+    expect(profileLink.parentElement).toHaveClass("tw-flex", "tw-gap-2");
+    expect(profileLink.parentElement?.parentElement).toBe(
+      logoutButton.parentElement
     );
-    expect(profileLink.parentElement).toBe(logoutButton.parentElement);
     expect(
-      profileLink.compareDocumentPosition(logoutButton) &
+      profileLink.compareDocumentPosition(preferencesButton) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
