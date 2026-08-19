@@ -172,9 +172,7 @@ test.describe("Museum About proposition @surface @readonly", () => {
       );
       await expect(sourcePanel).toBeVisible();
       await expect(sourcePanel).toContainText(
-        REQUIRED_SOURCE_COMMIT === null
-          ? /Public record at commit [a-f0-9]{12}\./u
-          : `Public record at commit ${REQUIRED_SOURCE_COMMIT.slice(0, 12)}.`
+        "Published from the Museum's public record."
       );
       await expect(
         sourcePanel.getByRole("link", { name: "Read the source", exact: true })

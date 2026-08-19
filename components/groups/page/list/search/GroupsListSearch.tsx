@@ -31,8 +31,8 @@ export default function GroupsListSearch({
   };
 
   return (
-    <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-flex-col lg:tw-flex-row tw-w-full lg:tw-items-center tw-justify-between tw-gap-4">
-      <div className="tw-flex tw-flex-col tw-w-full sm:tw-flex-row sm:tw-items-center tw-gap-4 xl:tw-w-1/2 xl:tw-pr-3">
+    <div className="tw-mt-4 tw-flex tw-w-full tw-flex-col tw-justify-between tw-gap-4 md:tw-mt-6 lg:tw-flex-row lg:tw-items-center">
+      <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center xl:tw-w-1/2 xl:tw-pr-3">
         <div className="tw-flex-1">
           {showIdentitySearch && (
             <IdentitySearch
@@ -43,18 +43,18 @@ export default function GroupsListSearch({
             />
           )}
         </div>
-        <div className="tw-group tw-w-full tw-relative tw-flex-1">
+        <div className="tw-group tw-relative tw-w-full tw-flex-1">
           <input
             type="text"
             value={groupName ?? ""}
             onChange={onGroupNameChange}
             id={randomId}
             autoComplete="off"
-            className="tw-py-3 tw-text-sm tw-ring-iron-700 focus:tw-border-blue-500 tw-caret-primary-400 focus:tw-ring-primary-400 hover:tw-ring-iron-650 tw-form-input tw-block tw-w-full  tw-rounded-lg tw-border-0 tw-appearance-none tw-font-medium tw-border-iron-700 tw-peer tw-pl-10 tw-pr-4 tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out tw-text-white"
+            className="tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-py-3 tw-pl-10 tw-pr-4 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             placeholder=" "
           />
           <svg
-            className={`tw-top-3 tw-pointer-events-none tw-absolute tw-left-3 tw-h-5 tw-w-5 tw-text-iron-300`}
+            className={`tw-pointer-events-none tw-absolute tw-left-3 tw-top-3 tw-h-5 tw-w-5 tw-text-iron-300`}
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -69,7 +69,7 @@ export default function GroupsListSearch({
             <svg
               onClick={() => setGroupName(null)}
               aria-label="Clear group name"
-              className="tw-top-3 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
+              className="tw-absolute tw-right-3 tw-top-3 tw-h-5 tw-w-5 tw-cursor-pointer tw-text-iron-300"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -85,14 +85,13 @@ export default function GroupsListSearch({
           )}
           <label
             htmlFor={randomId}
-            className="tw-text-sm tw-absolute tw-cursor-text tw-font-medium tw-text-iron-500 tw-duration-300 tw-transform -tw-translate-y-4 tw-scale-75 tw-top-2 tw-z-10 tw-origin-[0] tw-bg-iron-900 tw-rounded-lg peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 peer-placeholder-shown:tw-scale-100 
-        peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1"
+            className="tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-text-sm tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 peer-focus:tw-text-primary-400 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4"
           >
             By Group Name
           </label>
         </div>
       </div>
-      <div className="tw-flex tw-gap-3 tw-items-center">
+      <div className="tw-flex tw-items-center tw-gap-3">
         {showMyGroupsButton && (
           <Button onClick={onMyGroups} variant="primary" size="md">
             My groups
@@ -101,7 +100,7 @@ export default function GroupsListSearch({
         {showCreateNewGroupButton && (
           <Button onClick={onCreateNewGroup} variant="action" size="md">
             <svg
-              className="tw-size-5 tw-flex-shrink-0"
+              className="-tw-ml-1 tw-size-5 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

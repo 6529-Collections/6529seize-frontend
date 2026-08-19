@@ -32,6 +32,7 @@ export interface MuseumResearchBrowseLabels {
   readonly resultCountOne: string;
   readonly resultCountOther: string;
   readonly sourceLabel: string;
+  readonly opensInNewTab: string;
 }
 
 function resultCountText(
@@ -69,8 +70,6 @@ export function MuseumResearchBrowse({
               entry.title,
               entry.kindLabel,
               entry.description,
-              entry.sourcePath,
-              entry.id,
               ...(entry.subjectLabels ?? []),
             ]
               .filter((value): value is string => value !== undefined)
@@ -206,11 +205,6 @@ export function MuseumResearchBrowse({
                           {entry.description}
                         </span>
                       )}
-                      {entry.sourcePath === undefined ? null : (
-                        <span className="tw-mt-2 tw-block tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-600">
-                          {entry.id} / {entry.sourcePath}
-                        </span>
-                      )}
                     </Link>
                     {entry.publicationUri === undefined ? null : (
                       <a
@@ -220,6 +214,9 @@ export function MuseumResearchBrowse({
                         className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-self-start tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                       >
                         {labels.sourceLabel}
+                        <span className="tw-sr-only">
+                          {` ${labels.opensInNewTab}`}
+                        </span>
                       </a>
                     )}
                   </li>

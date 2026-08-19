@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Inside the System</title>
+  <desc id="desc">A circular Museum diagram connecting token, code, runtime, display, and care as five conditions of a digital artwork.</desc>
+  <rect width="1600" height="1000" fill="#090A0C"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="86" y="92" fill="#79A9FF" font-size="22" font-weight="700" letter-spacing="5">DIGITAL-ART STEWARDSHIP</text>
+    <text x="86" y="160" fill="#F4F0E7" font-size="58" font-weight="650">Inside the System</text>
+    <text x="86" y="204" fill="#A6A7AE" font-size="25">A digital work is encountered through a chain of conditions.</text>
+
+    <circle cx="800" cy="585" r="328" fill="none" stroke="#252A34" stroke-width="2"/>
+    <circle cx="800" cy="585" r="252" fill="#111419" stroke="#3A4350" stroke-width="2"/>
+    <circle cx="800" cy="585" r="190" fill="none" stroke="#252A34" stroke-width="1" stroke-dasharray="3 16"/>
+
+    <path d="M800 256 C1018 256 1180 394 1180 585 C1180 803 1016 914 800 914 C584 914 420 803 420 585 C420 394 582 256 800 256" fill="none" stroke="#79A9FF" stroke-width="4" stroke-linecap="round" opacity=".82"/>
+    <path d="M800 256 C1018 256 1180 394 1180 585" fill="none" stroke="#F4F0E7" stroke-width="1" stroke-dasharray="2 18" opacity=".75"/>
+    <path d="M1180 585 C1180 803 1016 914 800 914" fill="none" stroke="#F4F0E7" stroke-width="1" stroke-dasharray="2 18" opacity=".75"/>
+
+    <g fill="#090A0C" stroke="#79A9FF" stroke-width="4">
+      <circle cx="800" cy="252" r="92"/>
+      <circle cx="1168" cy="385" r="92"/>
+      <circle cx="1050" cy="796" r="92"/>
+      <circle cx="550" cy="796" r="92"/>
+      <circle cx="432" cy="385" r="92"/>
+    </g>
+    <g fill="#79A9FF">
+      <circle cx="800" cy="252" r="9"/>
+      <circle cx="1168" cy="385" r="9"/>
+      <circle cx="1050" cy="796" r="9"/>
+      <circle cx="550" cy="796" r="9"/>
+      <circle cx="432" cy="385" r="9"/>
+    </g>
+
+    <g text-anchor="middle">
+      <text x="800" y="240" fill="#F4F0E7" font-size="31" font-weight="700">TOKEN</text>
+      <text x="800" y="276" fill="#A6A7AE" font-size="19">identity / provenance</text>
+      <text x="1168" y="373" fill="#F4F0E7" font-size="31" font-weight="700">CODE</text>
+      <text x="1168" y="409" fill="#A6A7AE" font-size="19">instructions / parameters</text>
+      <text x="1050" y="784" fill="#F4F0E7" font-size="31" font-weight="700">RUNTIME</text>
+      <text x="1050" y="820" fill="#A6A7AE" font-size="19">execution / state</text>
+      <text x="550" y="784" fill="#F4F0E7" font-size="31" font-weight="700">DISPLAY</text>
+      <text x="550" y="820" fill="#A6A7AE" font-size="19">encounter / context</text>
+      <text x="432" y="373" fill="#F4F0E7" font-size="31" font-weight="700">CARE</text>
+      <text x="432" y="409" fill="#A6A7AE" font-size="19">preservation / record</text>
+    </g>
+
+    <g text-anchor="middle">
+      <text x="800" y="536" fill="#79A9FF" font-size="20" font-weight="700" letter-spacing="4">A WORK IN MOTION</text>
+      <text x="800" y="590" fill="#F4F0E7" font-size="34" font-weight="600">The system is part of</text>
+      <text x="800" y="636" fill="#F4F0E7" font-size="34" font-weight="600">what the Museum preserves.</text>
+      <line x1="686" y1="677" x2="914" y2="677" stroke="#79A9FF" stroke-width="3"/>
+      <text x="800" y="726" fill="#A6A7AE" font-size="20">Each condition leaves a record.</text>
+    </g>
+
+    <g fill="#A6A7AE" font-size="18" letter-spacing="2">
+      <text x="82" y="918">ENCOUNTER</text>
+      <text x="1518" y="918" text-anchor="end">RECORD</text>
+    </g>
+    <path d="M82 944 H1518" stroke="#252A34" stroke-width="2"/>
+    <circle cx="82" cy="944" r="5" fill="#79A9FF"/>
+    <circle cx="1518" cy="944" r="5" fill="#79A9FF"/>
+  </g>
+</svg>

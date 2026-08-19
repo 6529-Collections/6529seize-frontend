@@ -8,8 +8,10 @@ import GroupCardDeleteModal from "./GroupCardDeleteModal";
 
 export default function GroupCardDelete({
   group,
+  menuItemId,
 }: {
   readonly group: ApiGroupFull;
+  readonly menuItemId?: string;
 }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   return (
@@ -22,7 +24,7 @@ export default function GroupCardDelete({
         className="tw-bg-transparent tw-w-full tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-text-iron-50 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
         role="menuitem"
         tabIndex={-1}
-        id="options-menu-0-item-1">
+        id={menuItemId}>
         Delete
       </button>
       <CommonAnimationWrapper mode="sync" initial={true}>

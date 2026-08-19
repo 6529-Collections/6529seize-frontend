@@ -1,5 +1,6 @@
 "use client";
 
+import { GROUP_CREATE_PANEL_STYLES } from "../../GroupCreate.styles";
 import { useRef, useCallback } from "react";
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
 import type { GroupCreateWalletsType } from "./GroupCreateWallets";
@@ -73,8 +74,8 @@ export default function CreateGroupWalletsUpload({
 
   return (
     <div>
-      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
+      <div className={GROUP_CREATE_PANEL_STYLES}>
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
           Add wallets manually
         </p>
         <label

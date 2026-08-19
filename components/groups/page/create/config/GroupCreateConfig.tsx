@@ -1,4 +1,5 @@
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
+import type { Dispatch, SetStateAction } from "react";
 import GroupCreateConfigHeader from "../GroupCreateConfigHeader";
 import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
@@ -8,6 +9,7 @@ import GroupCreateCollections from "./nfts/GroupCreateCollections";
 import GroupCreateNfts from "./nfts/GroupCreateNfts";
 import GroupCreateXtdhGrant from "./xtdh-grant/GroupCreateXtdhGrant";
 import GroupCreateWallets, {
+  type GroupCreateWalletSources,
   GroupCreateWalletsType,
 } from "./wallets/GroupCreateWallets";
 
@@ -22,6 +24,8 @@ export default function GroupCreateConfig({
   beneficiaryGrantId,
   beneficiaryGrantMatchMode,
   iAmIncluded,
+  includeWalletSources,
+  excludeWalletSources,
   setLevel,
   setTDH,
   setCIC,
@@ -31,6 +35,8 @@ export default function GroupCreateConfig({
   setNfts,
   setBeneficiaryGrantId,
   setBeneficiaryGrantMatchMode,
+  setIncludeWalletSources,
+  setExcludeWalletSources,
 }: {
   readonly level: ApiCreateGroupDescription["level"];
   readonly tdh: ApiCreateGroupDescription["tdh"];
@@ -42,6 +48,8 @@ export default function GroupCreateConfig({
   readonly beneficiaryGrantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"];
   readonly beneficiaryGrantMatchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"];
   readonly iAmIncluded: boolean;
+  readonly includeWalletSources: GroupCreateWalletSources;
+  readonly excludeWalletSources: GroupCreateWalletSources;
   readonly setLevel: (level: ApiCreateGroupDescription["level"]) => void;
   readonly setTDH: (tdh: ApiCreateGroupDescription["tdh"]) => void;
   readonly setCIC: (cic: ApiCreateGroupDescription["cic"]) => void;
@@ -59,6 +67,12 @@ export default function GroupCreateConfig({
   readonly setBeneficiaryGrantMatchMode: (
     matchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"]
   ) => void;
+  readonly setIncludeWalletSources: Dispatch<
+    SetStateAction<GroupCreateWalletSources>
+  >;
+  readonly setExcludeWalletSources: Dispatch<
+    SetStateAction<GroupCreateWalletSources>
+  >;
 }) {
   return (
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 sm:tw-gap-y-8">
@@ -84,6 +98,8 @@ export default function GroupCreateConfig({
         type={GroupCreateWalletsType.INCLUDE}
         iAmIncluded={iAmIncluded}
         wallets={wallets}
+        sources={includeWalletSources}
+        setSources={setIncludeWalletSources}
         setWallets={setWallets}
         walletsLimit={10000}
       />
@@ -91,6 +107,8 @@ export default function GroupCreateConfig({
         type={GroupCreateWalletsType.EXCLUDE}
         wallets={excludeWallets}
         iAmIncluded={iAmIncluded}
+        sources={excludeWalletSources}
+        setSources={setExcludeWalletSources}
         setWallets={setExcludeWallets}
         walletsLimit={1000}
       />

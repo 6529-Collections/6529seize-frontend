@@ -27,6 +27,19 @@ jest.mock(
 );
 
 describe("GroupCreateIdentitiesSelect", () => {
+  it("uses the shared darker panel border in the group form", () => {
+    const { container } = render(
+      <GroupCreateIdentitiesSelect
+        onIdentitySelect={jest.fn()}
+        selectedIdentities={[]}
+        selectedWallets={[]}
+        onRemove={jest.fn()}
+      />
+    );
+
+    expect(container.firstElementChild).toHaveClass("tw-border-iron-900");
+  });
+
   it("passes props to children and handles events", async () => {
     const user = userEvent.setup();
     const onSelect = jest.fn();
@@ -45,6 +58,7 @@ describe("GroupCreateIdentitiesSelect", () => {
       />
     );
     await user.click(screen.getByTestId("search"));
+    expect(screen.getByText("Search Identity")).toHaveClass("tw-m-0");
     expect(onSelect).toHaveBeenCalledWith({ wallet: "w1", handle: "h1" });
     expect(searchProps.selectedWallets).toEqual(["w2"]);
     expect(searchProps.appearance).toBe("modal");

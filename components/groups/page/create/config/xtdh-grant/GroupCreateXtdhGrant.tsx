@@ -1,5 +1,6 @@
 "use client";
 
+import { GROUP_CREATE_PANEL_STYLES } from "../../GroupCreate.styles";
 import { useState } from "react";
 import { useDebounce } from "react-use";
 import Button from "@/components/utils/button/Button";
@@ -81,9 +82,9 @@ export default function GroupCreateXtdhGrant({
   };
 
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
+    <div className={GROUP_CREATE_PANEL_STYLES}>
       <div>
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           xTDH Grant Beneficiary
         </p>
         <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-500">

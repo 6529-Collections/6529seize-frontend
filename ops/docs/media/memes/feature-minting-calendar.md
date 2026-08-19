@@ -54,9 +54,10 @@ distribution routes.
 7. Open mint-day cells to view details, export links, and any override note.
 8. On fallback routes, the compact panel auto-selects the URL id and stays
    local-time read-only (no timezone toggle, no `Next Mint` button, no `Meme #`
-   input, no upcoming table). When an unresolved route is the mapped next Meme
-   while home is in `Next Drop` mode, its revealed artwork panel appears above
-   the compact calendar. On unresolved positive `/the-memes/{id}` pages, use
+   input, no upcoming table). When an unresolved route is the canonical next
+   Meme and the Main Stage winner is mapped to that id, its revealed artwork
+   panel appears above the compact calendar independently of the current mint
+   and homepage mode. On unresolved positive `/the-memes/{id}` pages, use
    the header-row `Distribution Plan` link to open
    `/the-memes/{id}/distribution`.
 

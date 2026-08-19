@@ -41,9 +41,14 @@ This page owns only the scope handoff into network routes and cross-route scope 
 1. Open `/network/groups`.
 2. Open a group card while it is in idle state.
 3. The app opens `/network?page=1&group={groupId}` (or `/network?group={groupId}` from chat links).
-4. `/network` applies scope and shows scoped leaderboard results.
-5. Open `/network/activity` to view activity under the same scope.
-6. Return to `/network`, open `Filter`, then switch or clear scope.
+4. `/network` applies scope and shows the selected group's criteria above its
+   scoped member results.
+5. Inspect both how membership is determined and the current member list in the
+   same view.
+6. Use `Clear selected group` to close the group summary and return to the
+   default Network member view.
+7. Open `/network/activity` to view activity under the same scope.
+8. Return to `/network`, open `Filter`, then switch or clear scope.
 
 ## Common Scenarios
 
@@ -76,6 +81,9 @@ This page owns only the scope handoff into network routes and cross-route scope 
 - Scope persists in current app session/tab state, not as URL-only state.
 - `/network/activity` consumes scope but does not manage scope.
 - Membership counts in `/network` filter can refresh asynchronously after scope changes.
+- If group details are private, deleted, or temporarily unavailable, Network
+  shows a non-identifying criteria-unavailable state while keeping the scoped
+  member request stable.
 
 ## Related Pages
 

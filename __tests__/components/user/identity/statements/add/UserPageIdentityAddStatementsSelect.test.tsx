@@ -27,4 +27,17 @@ describe("UserPageIdentityAddStatementsSelect", () => {
     expect(screen.getByText("About identity statements")).toBeInTheDocument();
     expect(screen.getAllByText("All statements are optional.")).toHaveLength(2);
   });
+
+  it("uses compact mobile typography while preserving desktop sizing", () => {
+    render(<UserPageIdentityAddStatementsSelect onViewChange={jest.fn()} />);
+
+    expect(screen.getByText("Social Media Accounts")).toHaveClass(
+      "tw-text-sm",
+      "tw-leading-4",
+      "tw-tracking-tight",
+      "md:tw-text-[15px]",
+      "md:tw-leading-5",
+      "md:tw-tracking-normal"
+    );
+  });
 });
