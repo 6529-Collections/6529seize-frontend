@@ -15,6 +15,8 @@ import {
   NEXT_STATIC_CHUNK_FRAME_PATTERNS,
   REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS,
   REACT_DOM_RUNTIME_FRAME_PATTERNS,
+  sentryBrowserHelperPathToken,
+  sentryBrowserPackagePathTokens,
   sentryPackagePathTokens,
   sentryRouteParameterizationPathToken,
 } from "./constants";
@@ -456,6 +458,18 @@ export function hasNativeJsonStringifyFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
+}
+
+export function isSentryBrowserHelperFrame(frame: SentryStackFrame): boolean {
+  const framePaths = getFramePaths(frame);
+  return (
+    framePaths.length > 0 &&
+    framePaths.every(
+      (path) =>
+        path.includes(sentryBrowserHelperPathToken) &&
+        sentryBrowserPackagePathTokens.some((token) => path.includes(token))
+    )
+  );
 }
 
 function isSentryRouteParameterizationPath(path: string): boolean {
