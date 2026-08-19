@@ -46,6 +46,26 @@ sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
   exit 1
 }
 
+runtime_env_path="$REPO_DIR/.env"
+[[ -r "$runtime_env_path" ]] || {
+  echo "Staging runtime environment file '$runtime_env_path' is not readable." >&2
+  exit 1
+}
+sudo -H -u "$RUN_AS" node - "$runtime_env_path" <<'NODE'
+const fs = require('node:fs');
+const { parseEnv } = require('node:util');
+
+const runtimeEnvPath = process.argv[2];
+const runtimeEnv = parseEnv(fs.readFileSync(runtimeEnvPath, 'utf8'));
+for (const name of ['SSR_CLIENT_ID', 'SSR_CLIENT_SECRET']) {
+  if (typeof runtimeEnv[name] !== 'string' || !runtimeEnv[name].trim()) {
+    throw new Error(
+      `Required staging runtime value ${name} is missing from ${runtimeEnvPath}.`
+    );
+  }
+}
+NODE
+
 release_root="$REPO_DIR/.release-bus"
 release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
 release_dir="$release_root/releases/$release_id"
@@ -292,8 +312,20 @@ ln -sfn "$release_app" "$current_link"
 cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
 const fs = require('node:fs');
 const path = require('node:path');
+const { parseEnv } = require('node:util');
 
 const currentApp = fs.realpathSync(path.join(__dirname, 'current'));
+const runtimeEnvPath = path.join(__dirname, '..', '.env');
+const runtimeEnv = parseEnv(fs.readFileSync(runtimeEnvPath, 'utf8'));
+const requireRuntimeEnv = (name) => {
+  const value = runtimeEnv[name];
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new Error(
+      `Required staging runtime value ${name} is missing from ${runtimeEnvPath}.`
+    );
+  }
+  return value;
+};
 const destinationsPath = path.join(
   path.dirname(currentApp),
   'public-review-discussion-destinations.json'
@@ -321,6 +353,8 @@ module.exports = {
       PORT: '3001',
       HOSTNAME: '0.0.0.0',
       NODE_ENV: 'production',
+      ['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID'),
+      ['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET'),
       ...(publicReviewDiscussionDestinations
         ? {
             PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:

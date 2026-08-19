@@ -15,6 +15,10 @@ const workflowSource = fs.readFileSync(
   path.join(root, ".github", "workflows", "deploy-staging.yml"),
   "utf8"
 );
+const releaseBusWorkflowSource = fs.readFileSync(
+  path.join(root, ".github", "workflows", "release-bus-deploy-staging.yml"),
+  "utf8"
+);
 const workflow = YAML.parse(workflowSource);
 
 describe("manual staging immutable artifact deployment", () => {
@@ -67,6 +71,26 @@ describe("manual staging immutable artifact deployment", () => {
     ).toBeLessThan(script.indexOf('rm -rf -- "$release_app"'));
     expect(script).not.toContain("curl -k");
     expect(script).not.toMatch(/\beval\b/u);
+  });
+
+  it("loads required SSR credentials from the host runtime environment", () => {
+    for (const source of [script, releaseBusWorkflowSource]) {
+      expect(source).toContain('runtime_env_path="$REPO_DIR/.env"');
+      expect(source).toContain("const { parseEnv } = require('node:util');");
+      expect(source).toContain("['SSR_CLIENT_ID', 'SSR_CLIENT_SECRET']");
+      expect(source).toContain(
+        "['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID')"
+      );
+      expect(source).toContain(
+        "['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET')"
+      );
+    }
+
+    expect(script.indexOf('runtime_env_path="$REPO_DIR/.env"')).toBeLessThan(
+      script.indexOf(
+        'install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root/releases"'
+      )
+    );
   });
 
   it("builds without deployment credentials and deploys only verified exact-SHA bytes", () => {
