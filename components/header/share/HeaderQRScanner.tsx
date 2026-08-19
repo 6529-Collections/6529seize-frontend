@@ -59,12 +59,27 @@ export default function HeaderQRScanner({
   const [scannerAvailable, setScannerAvailable] = useState(false);
 
   useEffect(() => {
-    if (isQRScannerAvailable()) {
-      setScannerAvailable(true);
-    } else {
-      console.warn("CapacitorBarcodeScanner is not available");
+    if (!capacitor.isCapacitor) {
+      return;
     }
-  }, []);
+
+    let active = true;
+    void isQRScannerAvailable().then((available) => {
+      if (!active) {
+        return;
+      }
+
+      if (available) {
+        setScannerAvailable(true);
+      } else {
+        console.warn("CapacitorBarcodeScanner is not available");
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [capacitor.isCapacitor]);
 
   if (!capacitor.isCapacitor || !scannerAvailable) {
     return <></>;
