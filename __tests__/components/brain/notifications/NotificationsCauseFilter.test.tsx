@@ -9,13 +9,6 @@ import userEvent from "@testing-library/user-event";
 import type { NotificationFilter } from "@/components/brain/notifications/NotificationsCauseFilter";
 
 jest.mock("@/hooks/useNotificationsQuery");
-jest.mock("@/components/header/ProfilePreferencesSettings", () => ({
-  __esModule: true,
-  default: ({ isOpen }: { readonly isOpen: boolean }) =>
-    isOpen ? (
-      <div role="dialog" aria-label="Profile Preferences modal" />
-    ) : null,
-}));
 
 const prefetch = jest.fn();
 const connectedProfile = { handle: "tester" } as any;
@@ -114,25 +107,18 @@ describe("NotificationsCauseFilter", () => {
     });
   });
 
-  it("opens Profile Preferences from the notification heading", async () => {
-    const user = userEvent.setup();
+  it("renders the wider type dropdown without a preferences action", () => {
     render(<FilterHarness />, { wrapper: Wrapper });
 
     expect(
       screen.getByRole("heading", { name: "Notifications" })
     ).toBeInTheDocument();
-    const preferencesButton = screen.getByRole("button", {
-      name: "Profile Preferences",
-    });
-    expect(preferencesButton).toHaveClass(
-      "tw-border",
-      "tw-border-iron-800",
-      "tw-bg-iron-950"
-    );
-    await user.click(preferencesButton);
-
     expect(
-      screen.getByRole("dialog", { name: "Profile Preferences modal" })
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Filter notifications: All" })
+        .parentElement
+    ).toHaveClass("tw-w-36", "sm:tw-w-56");
+    expect(
+      screen.queryByRole("button", { name: "Profile Preferences" })
+    ).not.toBeInTheDocument();
   });
 });

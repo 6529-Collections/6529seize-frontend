@@ -1,7 +1,6 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -12,11 +11,7 @@ import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
   type NotificationCause,
 } from "@/types/feed.types";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  Cog6ToothIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useContext, useId, useMemo, useRef, useState } from "react";
 
 export interface NotificationFilter {
@@ -129,7 +124,6 @@ export default function NotificationsCauseFilter({
   readonly setActiveFilter: (filter: NotificationFilter | null) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
   const locale = useBrowserLocale();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuBaseId = useId();
@@ -182,74 +176,58 @@ export default function NotificationsCauseFilter({
   };
 
   return (
-    <>
-      <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-pb-2 tw-pt-2 lg:tw-pt-4">
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
-          <h1 className="tw-m-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
-            {t(locale, "profilePreferences.notifications.heading")}
-          </h1>
-          <button
-            type="button"
-            onClick={() => setIsProfileSettingsOpen(true)}
-            aria-label={t(locale, "profilePreferences.title")}
-            className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-iron-400 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-200"
-          >
-            <Cog6ToothIcon className="tw-size-5" aria-hidden="true" />
-          </button>
-        </div>
+    <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-pb-2 tw-pt-2 lg:tw-pt-4">
+      <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
+        {t(locale, "profilePreferences.notifications.heading")}
+      </h1>
 
-        <div className="tw-relative tw-w-32 tw-flex-shrink-0 sm:tw-w-44">
-          <button
-            id={triggerId}
-            ref={buttonRef}
-            type="button"
-            onClick={() => setIsOpen((open) => !open)}
-            aria-label={t(locale, "notifications.filter.ariaLabel", {
-              selection: triggerLabel,
-            })}
-            aria-expanded={isOpen}
-            aria-haspopup="menu"
-            aria-controls={isOpen ? menuId : undefined}
-            className="tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
-          >
-            <span className="tw-min-w-0 tw-truncate">{triggerLabel}</span>
-            <ChevronDownIcon
-              className={`tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 ${
-                isOpen ? "tw-rotate-180" : ""
-              }`}
-              aria-hidden="true"
-            />
-          </button>
-          <CommonDropdownItemsDefaultWrapper
-            isOpen={isOpen}
-            setOpen={setIsOpen}
-            buttonRef={buttonRef}
-            horizontalAlign="right"
-            minWidth={224}
-            menuId={menuId}
-            menuLabelledBy={triggerId}
-          >
+      <div className="tw-relative tw-w-36 tw-flex-shrink-0 sm:tw-w-56">
+        <button
+          id={triggerId}
+          ref={buttonRef}
+          type="button"
+          onClick={() => setIsOpen((open) => !open)}
+          aria-label={t(locale, "notifications.filter.ariaLabel", {
+            selection: triggerLabel,
+          })}
+          aria-expanded={isOpen}
+          aria-haspopup="menu"
+          aria-controls={isOpen ? menuId : undefined}
+          className="tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
+        >
+          <span className="tw-min-w-0 tw-truncate">{triggerLabel}</span>
+          <ChevronDownIcon
+            className={`tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 ${
+              isOpen ? "tw-rotate-180" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </button>
+        <CommonDropdownItemsDefaultWrapper
+          isOpen={isOpen}
+          setOpen={setIsOpen}
+          buttonRef={buttonRef}
+          horizontalAlign="right"
+          minWidth={224}
+          menuId={menuId}
+          menuLabelledBy={triggerId}
+        >
+          <FilterMenuItem
+            title={t(locale, "profilePreferences.notifications.ALL.label")}
+            selected={selectedFilters.length === 0}
+            onSelect={() => updateSelectedFilters([])}
+          />
+          {NOTIFICATION_FILTERS.map((filter) => (
             <FilterMenuItem
-              title={t(locale, "profilePreferences.notifications.ALL.label")}
-              selected={selectedFilters.length === 0}
-              onSelect={() => updateSelectedFilters([])}
+              key={filter.title}
+              title={filter.title}
+              selected={isFilterSelected(filter, activeCauses)}
+              onSelect={() => toggleFilter(filter)}
+              onMouseEnter={() => prefetchFilter(filter)}
             />
-            {NOTIFICATION_FILTERS.map((filter) => (
-              <FilterMenuItem
-                key={filter.title}
-                title={filter.title}
-                selected={isFilterSelected(filter, activeCauses)}
-                onSelect={() => toggleFilter(filter)}
-                onMouseEnter={() => prefetchFilter(filter)}
-              />
-            ))}
-          </CommonDropdownItemsDefaultWrapper>
-        </div>
+          ))}
+        </CommonDropdownItemsDefaultWrapper>
       </div>
-      <ProfilePreferencesSettings
-        isOpen={isProfileSettingsOpen}
-        onClose={() => setIsProfileSettingsOpen(false)}
-      />
-    </>
+    </div>
   );
 }
