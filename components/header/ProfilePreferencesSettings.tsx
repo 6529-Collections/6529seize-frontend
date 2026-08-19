@@ -202,6 +202,10 @@ function ProfilePreferencesForm({
             {NOTIFICATION_LEVELS.map((level) => (
               <label
                 key={level}
+                aria-label={t(
+                  locale,
+                  `profilePreferences.notifications.${level}.label`
+                )}
                 className="tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.035]"
               >
                 <input
