@@ -5,6 +5,9 @@ import React from "react";
 jest.mock("@/components/header/share/HeaderQRScanner", () => () => (
   <div data-testid="scanner" />
 ));
+jest.mock("@/components/common/icons/BellIcon", () => () => (
+  <svg data-testid="push-notifications-bell" />
+));
 
 jest.mock("@/components/header/PushNotificationSettings", () => () => (
   <div data-testid="push-settings" />
@@ -136,7 +139,13 @@ describe("AppUserConnect", () => {
     const profilePreferencesButton = screen.getByRole("button", {
       name: "Profile Preferences",
     });
+    const pushNotificationsButton = screen.getByRole("button", {
+      name: "Push Notifications",
+    });
     expect(profilePreferencesButton).toBeInTheDocument();
+    expect(pushNotificationsButton).toContainElement(
+      screen.getByTestId("push-notifications-bell")
+    );
     expect(
       screen.queryByTestId("profile-preferences-settings")
     ).not.toBeInTheDocument();
