@@ -48,6 +48,7 @@ import {
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterRabbyChromeUserRejectedRequest,
+  shouldFilterRabbyMobileAndroidJavaBridgePostMessageError,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -168,6 +169,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterRabbyMobileUserRejectedRequest(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterRabbyMobileAndroidJavaBridgePostMessageError(event, hint)) {
     return true;
   }
 
