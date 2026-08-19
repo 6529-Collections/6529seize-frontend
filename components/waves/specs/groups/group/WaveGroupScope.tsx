@@ -34,19 +34,25 @@ export default function WaveGroupScope({
         groupName,
       })}
       title={groupName}
-      className="tw-flex tw-min-h-11 tw-min-w-0 tw-cursor-pointer tw-items-center tw-justify-end tw-gap-x-1.5 tw-rounded-md tw-text-iron-50 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
+      className="tw-inline-flex tw-min-h-11 tw-w-fit tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-end tw-rounded-md tw-text-iron-50 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
     >
-      {group.author?.pfp ? (
-        <img
-          className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800/80 tw-shadow-sm"
-          src={getScaledImageUri(group.author.pfp, ImageScale.W_AUTO_H_50)}
-          alt=""
-        />
-      ) : (
-        <div className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800/80" />
-      )}
-      <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5 tw-underline tw-underline-offset-2 tw-transition tw-duration-300 tw-ease-out">
-        {groupName}
+      <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5">
+        {group.author?.pfp ? (
+          // Profile images can come from arbitrary remote hosts.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="tw-mr-2 tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800/80 tw-align-middle tw-shadow-sm"
+            src={getScaledImageUri(group.author.pfp, ImageScale.W_AUTO_H_50)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span className="tw-mr-2 tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800/80 tw-align-middle" />
+        )}
+        <span className="tw-underline tw-underline-offset-2 tw-transition tw-duration-300 tw-ease-out">
+          {groupName}
+        </span>
       </span>
     </Link>
   );
