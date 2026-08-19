@@ -385,24 +385,24 @@ export default function AppWalletComponent(
               appWallet.private_key,
               pass
             );
-              let decryptedMnemonic = appWallet.mnemonic;
-              if (
-                appWallet.has_mnemonic ??
-                decryptedMnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE
-              ) {
-                decryptedMnemonic = await decryptData(
-                  appWallet.address,
-                  appWallet.mnemonic,
-                  pass
-                );
-              } else {
-                decryptedMnemonic = APP_WALLET_MNEMONIC_UNAVAILABLE;
-              }
-              await doPlaintextDownload(
-                appWallet,
-                decryptedMnemonic,
-                decryptedPrivateKey
+            let decryptedMnemonic = appWallet.mnemonic;
+            if (
+              (appWallet.has_mnemonic ?? true) &&
+              appWallet.mnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE
+            ) {
+              decryptedMnemonic = await decryptData(
+                appWallet.address,
+                appWallet.mnemonic,
+                pass
               );
+            } else {
+              decryptedMnemonic = APP_WALLET_MNEMONIC_UNAVAILABLE;
+            }
+            await doPlaintextDownload(
+              appWallet,
+              decryptedMnemonic,
+              decryptedPrivateKey
+            );
           })().catch(() => {
             setToast({
               message: "Unable to export wallet recovery.",
