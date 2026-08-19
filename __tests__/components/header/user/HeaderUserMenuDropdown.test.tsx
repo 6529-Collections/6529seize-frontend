@@ -63,6 +63,13 @@ jest.mock("@/components/header/share/HeaderShare", () => ({
   HeaderConnectModal: ({ show }: { readonly show: boolean }) =>
     show ? <div role="dialog" aria-label="Connect Device modal" /> : null,
 }));
+jest.mock("@/components/header/ProfilePreferencesSettings", () => ({
+  __esModule: true,
+  default: ({ isOpen }: { readonly isOpen: boolean }) =>
+    isOpen ? (
+      <div role="dialog" aria-label="Profile Preferences modal" />
+    ) : null,
+}));
 jest.mock("@/components/header/user/HeaderUserConnect", () => () => null);
 jest.mock("@/components/user/utils/level/UserLevel", () => () => null);
 jest.mock("@/components/auth/connection-state-indicator", () => ({
@@ -196,6 +203,7 @@ interface RenderOptions {
   readonly switchToNextChain?: (() => boolean) | undefined;
   readonly profile?: ApiIdentity | undefined;
   readonly onOpenConnect?: (() => void) | undefined;
+  readonly onOpenProfilePreferences?: (() => void) | undefined;
 }
 
 function createConnectContext(
@@ -334,6 +342,8 @@ function renderDropdown(options: RenderOptions) {
     switchToNextChain: options.switchToNextChain || jest.fn(() => false),
   });
   const onClose = jest.fn();
+  const onOpenProfilePreferences =
+    options.onOpenProfilePreferences ?? jest.fn();
   render(
     <AuthContext.Provider value={authValue}>
       <HeaderUserMenuDropdown
@@ -341,10 +351,16 @@ function renderDropdown(options: RenderOptions) {
         profile={options.profile ?? profileBase}
         onClose={onClose}
         onOpenConnect={options.onOpenConnect}
+        onOpenProfilePreferences={onOpenProfilePreferences}
       />
     </AuthContext.Provider>
   );
-  return { onClose, ...authValue, ...connectContext };
+  return {
+    onClose,
+    onOpenProfilePreferences,
+    ...authValue,
+    ...connectContext,
+  };
 }
 
 afterEach(() => jest.clearAllMocks());
@@ -359,7 +375,7 @@ describe("HeaderUserMenuDropdown", () => {
     expect(screen.getByText("alice")).toBeInTheDocument();
   });
 
-  it("groups Profile immediately above Logout and closes the menu", () => {
+  it("renders Profile and Profile Preferences as separate buttons in one row", () => {
     const { onClose } = renderDropdown({
       profile: profileBase,
       address: "0xabc",
@@ -367,18 +383,48 @@ describe("HeaderUserMenuDropdown", () => {
     });
 
     const profileLink = screen.getByRole("link", { name: "Profile" });
+    const preferencesButton = screen.getByRole("button", {
+      name: "Profile Preferences",
+    });
     const logoutButton = screen.getByRole("button", { name: "Logout" });
     expect(profileLink).toHaveAttribute("href", "/alice");
     expect(profileLink).not.toHaveAttribute("title");
     expect(profileLink).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
+    expect(profileLink).toHaveClass("tw-flex-1", "tw-border-none");
     expect(logoutButton).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
-    expect(profileLink.parentElement).toBe(logoutButton.parentElement);
+    expect(preferencesButton).toHaveClass("tw-size-11", "tw-border-iron-700");
+    expect(profileLink.parentElement).toBe(preferencesButton.parentElement);
+    expect(profileLink.parentElement).toHaveClass("tw-flex", "tw-gap-2");
+    expect(profileLink.parentElement?.parentElement).toBe(
+      logoutButton.parentElement
+    );
     expect(
-      profileLink.compareDocumentPosition(logoutButton) &
+      profileLink.compareDocumentPosition(preferencesButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      preferencesButton.compareDocumentPosition(logoutButton) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     fireEvent.click(profileLink);
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("opens Profile Preferences from the desktop account menu", () => {
+    renderWebSidebar({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /account.*menu/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Profile Preferences" })
+    );
+
+    expect(
+      screen.getByRole("dialog", { name: "Profile Preferences modal" })
+    ).toBeInTheDocument();
   });
 
   it("uses a full-width divider between Connect Wallet and Connect Device", () => {
