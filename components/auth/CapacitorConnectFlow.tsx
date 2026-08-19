@@ -164,6 +164,28 @@ export default function CapacitorConnectFlow({
     });
   }, [queueHandoff]);
 
+  const handleAppWalletNavigation = useCallback(
+    (href: string): void => {
+      setErrorMessage(null);
+      queueHandoff(() => {
+        try {
+          router.push(href);
+        } finally {
+          finishHandoff();
+        }
+      });
+    },
+    [finishHandoff, queueHandoff, router]
+  );
+
+  const handleImportAppWallet = useCallback((): void => {
+    handleAppWalletNavigation("/tools/app-wallets/import-wallet");
+  }, [handleAppWalletNavigation]);
+
+  const handleViewAppWallets = useCallback((): void => {
+    handleAppWalletNavigation("/tools/app-wallets");
+  }, [handleAppWalletNavigation]);
+
   const handleScanConnectionQr = useCallback((): void => {
     queueHandoff(() => {
       void (async () => {
@@ -266,6 +288,8 @@ export default function CapacitorConnectFlow({
         onOpenExternalWallets={handleOpenExternalWallets}
         onScanConnectionQr={handleScanConnectionQr}
         onCreateAppWallet={handleCreateAppWallet}
+        onImportAppWallet={handleImportAppWallet}
+        onViewAppWallets={handleViewAppWallets}
         onConnectAppWallet={handleConnectAppWallet}
         onAfterLeave={() => {
           const action = afterLeaveActionRef.current;

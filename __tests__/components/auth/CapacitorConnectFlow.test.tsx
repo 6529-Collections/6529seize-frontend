@@ -70,6 +70,8 @@ jest.mock("@/components/auth/CapacitorConnectDialog", () => {
       onOpenExternalWallets,
       onScanConnectionQr,
       onConnectAppWallet,
+      onImportAppWallet,
+      onViewAppWallets,
       errorMessage,
     }: {
       readonly view: CapacitorConnectDialogView;
@@ -77,6 +79,8 @@ jest.mock("@/components/auth/CapacitorConnectDialog", () => {
       readonly onOpenExternalWallets: () => void;
       readonly onScanConnectionQr: () => void;
       readonly onConnectAppWallet: (address: string) => void;
+      readonly onImportAppWallet: () => void;
+      readonly onViewAppWallets: () => void;
       readonly errorMessage: string | null;
     }) => {
       React.useEffect(() => {
@@ -93,6 +97,8 @@ jest.mock("@/components/auth/CapacitorConnectDialog", () => {
         <>
           <button onClick={onOpenExternalWallets}>External Wallets</button>
           <button onClick={onScanConnectionQr}>Scan Connection QR</button>
+          <button onClick={onImportAppWallet}>Import App Wallet</button>
+          <button onClick={onViewAppWallets}>View All App Wallets</button>
           <button onClick={() => onConnectAppWallet(mockAppWalletAddress)}>
             App Wallet
           </button>
@@ -164,6 +170,20 @@ describe("CapacitorConnectFlow", () => {
     expect(mockConnectAsync).toHaveBeenCalledWith({
       connector: { id: mockAppWalletAddress, type: "app-wallet" },
     });
+  });
+
+  it.each([
+    ["Import App Wallet", "/tools/app-wallets/import-wallet"],
+    ["View All App Wallets", "/tools/app-wallets"],
+  ])("routes %s after closing the chooser", async (label, href) => {
+    const onHandoffStateChange = jest.fn();
+    render(<FlowHarness onHandoffStateChange={onHandoffStateChange} />);
+
+    await userEvent.click(screen.getByRole("button", { name: label }));
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith(href));
+    expect(onHandoffStateChange).toHaveBeenNthCalledWith(1, true);
+    expect(onHandoffStateChange).toHaveBeenLastCalledWith(false);
   });
 
   it("routes only a valid connection-share scan", async () => {

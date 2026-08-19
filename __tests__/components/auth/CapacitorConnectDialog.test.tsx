@@ -37,6 +37,8 @@ const defaultProps = {
   onOpenExternalWallets: jest.fn(),
   onScanConnectionQr: jest.fn(),
   onCreateAppWallet: jest.fn(),
+  onImportAppWallet: jest.fn(),
+  onViewAppWallets: jest.fn(),
   onConnectAppWallet: jest.fn(),
   onAfterLeave: jest.fn(),
 };
@@ -66,6 +68,9 @@ describe("CapacitorConnectDialog", () => {
       screen.getByRole("button", { name: "App Wallets" })
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("button", { name: "App Wallets" }).parentElement
+    ).toHaveClass("tw-pt-3");
+    expect(
       screen.getByRole("button", { name: "External Wallets" })
     ).toBeInTheDocument();
     expect(
@@ -91,14 +96,27 @@ describe("CapacitorConnectDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create App Wallet" }));
     expect(defaultProps.onCreateAppWallet).toHaveBeenCalledTimes(1);
 
+    fireEvent.click(screen.getByRole("button", { name: "Import App Wallet" }));
+    expect(defaultProps.onImportAppWallet).toHaveBeenCalledTimes(1);
+
     fireEvent.click(
       screen.getByRole("button", {
         name: "Connect with Phoebe, wallet 0x0000…00AA",
       })
     );
+    expect(
+      screen.getByRole("button", {
+        name: "Connect with Phoebe, wallet 0x0000…00AA",
+      }).parentElement
+    ).toHaveClass("tw-max-h-[40svh]", "tw-overflow-y-auto");
     expect(defaultProps.onConnectAppWallet).toHaveBeenCalledWith(
       "0x00000000000000000000000000000000000000AA"
     );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "View All App Wallets" })
+    );
+    expect(defaultProps.onViewAppWallets).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(defaultProps.onBack).toHaveBeenCalledTimes(1);
