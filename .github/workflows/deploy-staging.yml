@@ -660,6 +660,8 @@ jobs:
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64="$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" \
           REPO_DIR="$REPO_DIR" \
           RUN_AS="$RUN_AS" \
+          SSR_CLIENT_ID_B64="$SSR_CLIENT_ID_B64" \
+          SSR_CLIENT_SECRET_B64="$SSR_CLIENT_SECRET_B64" \
             bash ops/scripts/deploy-staging-artifact.sh
           REMOTE_SCRIPT_BODY
           )"

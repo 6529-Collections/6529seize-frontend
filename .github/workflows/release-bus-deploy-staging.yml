@@ -475,19 +475,6 @@ jobs:
             sudo -H -u "$RUN_AS" pm2 save || return 1
           }
 
-          install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root"
-          runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
-          jq -n \
-            --arg ssr_client_id "$ssr_client_id" \
-            --arg ssr_client_secret "$ssr_client_secret" \
-            '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret}' \
-            > "$runtime_secrets_tmp"
-          chown "$RUN_AS:$RUN_AS" "$runtime_secrets_tmp"
-          chmod 600 "$runtime_secrets_tmp"
-          mv -f "$runtime_secrets_tmp" "$runtime_secrets_file"
-          runtime_secrets_tmp=''
-          unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
-
           install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
           http_status="$(curl --silent --show-error --proto '=https' \
             --output "$release_dir/package.zip" \
@@ -517,6 +504,17 @@ jobs:
             "$release_dir/public-review-discussion-destinations.json"
           chmod 600 "$release_dir/public-review-discussion-destinations.json"
           unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+          runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
+          jq -n \
+            --arg ssr_client_id "$ssr_client_id" \
+            --arg ssr_client_secret "$ssr_client_secret" \
+            '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret}' \
+            > "$runtime_secrets_tmp"
+          chown "$RUN_AS:$RUN_AS" "$runtime_secrets_tmp"
+          chmod 600 "$runtime_secrets_tmp"
+          mv -f "$runtime_secrets_tmp" "$runtime_secrets_file"
+          runtime_secrets_tmp=''
+          unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
           ln -sfn "$release_dir/app" "$current_link"
           cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
           const fs = require('node:fs');
