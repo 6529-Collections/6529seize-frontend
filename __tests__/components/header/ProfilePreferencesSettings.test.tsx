@@ -24,22 +24,16 @@ jest.mock(
       children,
       noPadding,
       tall,
-      tabletModal,
-      maxWidthClass,
     }: {
       title: string;
       children: ReactNode;
       noPadding?: boolean;
       tall?: boolean;
-      tabletModal?: boolean;
-      maxWidthClass?: string;
     }) => (
       <div
         data-testid="profile-preferences-dialog"
         data-no-padding={noPadding}
         data-tall={tall}
-        data-tablet-modal={tabletModal}
-        data-max-width-class={maxWidthClass}
       >
         <h1>{title}</h1>
         {children}
@@ -89,14 +83,6 @@ describe("ProfilePreferencesSettings", () => {
     expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
       "data-tall",
       "true"
-    );
-    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
-      "data-tablet-modal",
-      "true"
-    );
-    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
-      "data-max-width-class",
-      "md:tw-max-w-5xl"
     );
   });
 

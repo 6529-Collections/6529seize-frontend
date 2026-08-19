@@ -96,8 +96,6 @@ export default function ProfilePreferencesSettings({
       noPadding
       tall
       fixedHeight
-      tabletModal
-      maxWidthClass="md:tw-max-w-5xl"
       headerClassName="tw-pt-5 sm:tw-pt-6"
     >
       {preferencesQuery.isLoading && (
