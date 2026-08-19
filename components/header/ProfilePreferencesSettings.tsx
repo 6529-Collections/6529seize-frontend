@@ -82,7 +82,7 @@ export default function ProfilePreferencesSettings({
     queryKey: [QueryKey.PROFILE_PREFERENCES],
     queryFn: () =>
       commonApiFetch<ApiProfilePreferences>({
-        endpoint: "profiles/preferences",
+        endpoint: "profile-preferences",
       }),
     enabled: isOpen,
     staleTime: 0,
@@ -143,7 +143,7 @@ function ProfilePreferencesForm({
         notifications: current.notifications,
       };
       return commonApiPut<ApiUpdateProfilePreferences, ApiProfilePreferences>({
-        endpoint: "profiles/preferences",
+        endpoint: "profile-preferences",
         body,
       });
     },

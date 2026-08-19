@@ -60,7 +60,7 @@ describe("ProfilePreferencesSettings", () => {
       )
     ).toBeInTheDocument();
     expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: "profiles/preferences",
+      endpoint: "profile-preferences",
     });
   });
 
@@ -108,7 +108,7 @@ describe("ProfilePreferencesSettings", () => {
 
     await waitFor(() => {
       expect(commonApiPut).toHaveBeenCalledWith({
-        endpoint: "profiles/preferences",
+        endpoint: "profile-preferences",
         body: expect.objectContaining({
           direct_message_policy: DirectMessagePolicy.PeopleIFollow,
           notifications: expect.objectContaining({
