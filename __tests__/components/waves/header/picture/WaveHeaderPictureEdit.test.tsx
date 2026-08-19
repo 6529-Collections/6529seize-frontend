@@ -21,6 +21,7 @@ describe("WaveHeaderPictureEdit", () => {
     expect(editButton).not.toHaveClass("tw-hidden");
     expect(editButton).toHaveClass(
       "focus-visible:tw-opacity-100",
+      "focus-visible:tw-ring-2",
       "desktop-hover:group-hover:tw-opacity-100",
       "touch-only:tw-opacity-100"
     );
