@@ -555,9 +555,14 @@ jobs:
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
+          STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}
+          STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          test -n "$STAGING_SSR_CLIENT_ID"
+          test -n "$STAGING_SSR_CLIENT_SECRET"
 
           jq -e '
             type == "object" and
@@ -584,6 +589,12 @@ jobs:
             printf '%q' \
               "$(printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0)"
           )"
+          ssr_client_id_b64_q="$(
+            printf '%q' "$(printf '%s' "$STAGING_SSR_CLIENT_ID" | base64 -w0)"
+          )"
+          ssr_client_secret_b64_q="$(
+            printf '%q' "$(printf '%s' "$STAGING_SSR_CLIENT_SECRET" | base64 -w0)"
+          )"
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
@@ -595,6 +606,8 @@ jobs:
           EXPECTED_DIGEST=$expected_digest_q
           EXPECTED_SHA=$expected_sha_q
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
+          SSR_CLIENT_ID_B64=$ssr_client_id_b64_q
+          SSR_CLIENT_SECRET_B64=$ssr_client_secret_b64_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 

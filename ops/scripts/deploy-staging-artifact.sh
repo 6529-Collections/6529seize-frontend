@@ -3,7 +3,8 @@
 set -euo pipefail
 
 for name in ARTIFACT_URL EXPECTED_DIGEST EXPECTED_SHA \
-  PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 REPO_DIR RUN_AS; do
+  PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 REPO_DIR RUN_AS \
+  SSR_CLIENT_ID_B64 SSR_CLIENT_SECRET_B64; do
   if [[ -z "${!name:-}" ]]; then
     echo "Required deployment value $name is missing." >&2
     exit 1
@@ -46,31 +47,19 @@ sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
   exit 1
 }
 
-runtime_env_path="$REPO_DIR/.env"
-[[ -r "$runtime_env_path" ]] || {
-  echo "Staging runtime environment file '$runtime_env_path' is not readable." >&2
+ssr_client_id="$(printf '%s' "$SSR_CLIENT_ID_B64" | base64 -d)"
+ssr_client_secret="$(printf '%s' "$SSR_CLIENT_SECRET_B64" | base64 -d)"
+[[ -n "$ssr_client_id" && -n "$ssr_client_secret" ]] || {
+  echo "Decoded staging SSR credentials must be non-empty." >&2
   exit 1
 }
-sudo -H -u "$RUN_AS" node - "$runtime_env_path" <<'NODE'
-const fs = require('node:fs');
-const { parseEnv } = require('node:util');
-
-const runtimeEnvPath = process.argv[2];
-const runtimeEnv = parseEnv(fs.readFileSync(runtimeEnvPath, 'utf8'));
-for (const name of ['SSR_CLIENT_ID', 'SSR_CLIENT_SECRET']) {
-  if (typeof runtimeEnv[name] !== 'string' || !runtimeEnv[name].trim()) {
-    throw new Error(
-      `Required staging runtime value ${name} is missing from ${runtimeEnvPath}.`
-    );
-  }
-}
-NODE
 
 release_root="$REPO_DIR/.release-bus"
 release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
 release_dir="$release_root/releases/$release_id"
 release_app="$release_dir/app"
 current_link="$release_root/current"
+runtime_secrets_file="$release_root/runtime-secrets.json"
 install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root/releases"
 if [[ -e "$current_link" && ! -L "$current_link" ]]; then
   echo "Refusing to replace a non-symlink staging current path." >&2
@@ -259,14 +248,19 @@ artifact_tmp="$(mktemp "$release_dir/package.XXXXXX.zip")"
 staging_app=""
 destinations_file=""
 retain_destinations_file=false
+runtime_secrets_tmp=""
 cleanup() {
-  unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+  unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 \
+    ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
   rm -f "$artifact_tmp"
   if [[ -n "$staging_app" && -d "$staging_app" ]]; then
     rm -rf -- "$staging_app"
   fi
   if [[ "$retain_destinations_file" != true && -n "$destinations_file" ]]; then
     rm -f -- "$destinations_file"
+  fi
+  if [[ -n "$runtime_secrets_tmp" ]]; then
+    rm -f -- "$runtime_secrets_tmp"
   fi
 }
 trap cleanup EXIT HUP INT TERM
@@ -308,20 +302,31 @@ chown "$RUN_AS:$RUN_AS" "$destinations_file"
 unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
 retain_destinations_file=true
 
+runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
+jq -n \
+  --arg ssr_client_id "$ssr_client_id" \
+  --arg ssr_client_secret "$ssr_client_secret" \
+  '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret}' \
+  > "$runtime_secrets_tmp"
+chown "$RUN_AS:$RUN_AS" "$runtime_secrets_tmp"
+chmod 600 "$runtime_secrets_tmp"
+mv -f "$runtime_secrets_tmp" "$runtime_secrets_file"
+runtime_secrets_tmp=""
+unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
+
 ln -sfn "$release_app" "$current_link"
 cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
 const fs = require('node:fs');
 const path = require('node:path');
-const { parseEnv } = require('node:util');
 
 const currentApp = fs.realpathSync(path.join(__dirname, 'current'));
-const runtimeEnvPath = path.join(__dirname, '..', '.env');
-const runtimeEnv = parseEnv(fs.readFileSync(runtimeEnvPath, 'utf8'));
+const runtimeSecretsPath = path.join(__dirname, 'runtime-secrets.json');
+const runtimeEnv = JSON.parse(fs.readFileSync(runtimeSecretsPath, 'utf8'));
 const requireRuntimeEnv = (name) => {
   const value = runtimeEnv[name];
   if (typeof value !== 'string' || !value.trim()) {
     throw new Error(
-      `Required staging runtime value ${name} is missing from ${runtimeEnvPath}.`
+      `Required staging runtime value ${name} is missing from ${runtimeSecretsPath}.`
     );
   }
   return value;

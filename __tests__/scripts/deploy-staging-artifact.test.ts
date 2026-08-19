@@ -73,11 +73,15 @@ describe("manual staging immutable artifact deployment", () => {
     expect(script).not.toMatch(/\beval\b/u);
   });
 
-  it("loads required SSR credentials from the host runtime environment", () => {
+  it("loads required SSR credentials from deployment secrets", () => {
     for (const source of [script, releaseBusWorkflowSource]) {
-      expect(source).toContain('runtime_env_path="$REPO_DIR/.env"');
-      expect(source).toContain("const { parseEnv } = require('node:util');");
-      expect(source).toContain("['SSR_CLIENT_ID', 'SSR_CLIENT_SECRET']");
+      expect(source).toContain(
+        'runtime_secrets_file="$release_root/runtime-secrets.json"'
+      );
+      expect(source).toContain("chmod 600");
+      expect(source).toContain(
+        "const runtimeSecretsPath = path.join(__dirname, 'runtime-secrets.json');"
+      );
       expect(source).toContain(
         "['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID')"
       );
@@ -85,12 +89,20 @@ describe("manual staging immutable artifact deployment", () => {
         "['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET')"
       );
     }
-
-    expect(script.indexOf('runtime_env_path="$REPO_DIR/.env"')).toBeLessThan(
-      script.indexOf(
-        'install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root/releases"'
-      )
+    expect(workflowSource).toContain(
+      "STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}"
     );
+    expect(workflowSource).toContain(
+      "STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}"
+    );
+    expect(releaseBusWorkflowSource).toContain(
+      "STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}"
+    );
+    expect(releaseBusWorkflowSource).toContain(
+      "STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}"
+    );
+    expect(workflowSource).not.toContain("secrets.SSR_CLIENT_");
+    expect(releaseBusWorkflowSource).not.toContain("secrets.SSR_CLIENT_");
   });
 
   it("builds without deployment credentials and deploys only verified exact-SHA bytes", () => {
