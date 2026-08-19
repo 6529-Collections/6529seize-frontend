@@ -121,8 +121,6 @@ export function MuseumSourceContribution({
           const href = buildImmutableMuseumBlobUrl(commit, path);
           return href === null ? [] : [{ href, label, path }];
         });
-  const copyValues = commit === null ? {} : { commit: commit.slice(0, 12) };
-
   return (
     <aside
       className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800"
@@ -139,8 +137,7 @@ export function MuseumSourceContribution({
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(
               DEFAULT_LOCALE,
-              sourceCopyKey(identity, sourceState, pageSource !== null),
-              copyValues
+              sourceCopyKey(identity, sourceState, pageSource !== null)
             )}
           </p>
         </div>

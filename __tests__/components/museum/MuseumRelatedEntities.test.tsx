@@ -3,7 +3,7 @@ import { MuseumRelatedEntities } from "@/components/museum/MuseumRelatedEntities
 
 describe("MuseumRelatedEntities relation context", () => {
   it("renders human status and date for Casey, Keys and Gates, and Magnum relations", () => {
-    render(
+    const { container } = render(
       <MuseumRelatedEntities
         entities={[
           {
@@ -53,5 +53,11 @@ describe("MuseumRelatedEntities relation context", () => {
     expect(
       screen.queryByText(/selected_(?:by|through)/u)
     ).not.toBeInTheDocument();
+    const list = container.querySelector("ul");
+    expect(list).toHaveClass("tw-grid", "tw-gap-y-10");
+    expect(list).not.toHaveClass("tw-border-y", "tw-divide-y");
+    for (const item of screen.getAllByRole("listitem")) {
+      expect(item).toHaveClass("tw-border-b", "tw-pb-5");
+    }
   });
 });

@@ -66,6 +66,11 @@ test.describe("Museum rights education @surface @readonly", () => {
       await expect(
         page.getByRole("link", { name: "Read the guide" })
       ).toHaveCount(2);
+      await page
+        .locator("details")
+        .filter({ hasText: "Browse rights and license terms" })
+        .locator("summary")
+        .click();
       await expect(
         page.getByRole("link", { name: "Read this rights entry" })
       ).toHaveCount(22);

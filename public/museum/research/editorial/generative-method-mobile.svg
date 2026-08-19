@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="1560" viewBox="0 0 640 1560" role="img" aria-labelledby="title desc">
+  <title id="title">Generative method</title>
+  <desc id="desc">A vertical three-step diagram showing source data, a deterministic script, and a reproducible result.</desc>
+  <rect width="640" height="1560" fill="#090A0C"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="44" y="64" fill="#79A9FF" font-size="18" font-weight="700" letter-spacing="3">DIGITAL-ART STEWARDSHIP</text>
+    <text x="44" y="126" fill="#F4F0E7" font-size="48" font-weight="650">Generative method</text>
+    <text x="44" y="170" fill="#A6A7AE" font-size="24">Read, check, and repeat an edition.</text>
+
+    <g fill="#111419" stroke="#3A4350" stroke-width="3">
+      <rect x="40" y="220" width="560" height="330" rx="4"/>
+      <rect x="40" y="590" width="560" height="330" rx="4"/>
+      <rect x="40" y="960" width="560" height="330" rx="4"/>
+    </g>
+
+    <g fill="#79A9FF" font-size="20" font-weight="800" letter-spacing="4">
+      <text x="76" y="272">01 / SOURCE</text>
+      <text x="76" y="642">02 / SCRIPT</text>
+      <text x="76" y="1012">03 / RESULT</text>
+    </g>
+    <g fill="#F4F0E7" font-size="36" font-weight="700">
+      <text x="76" y="326">The given material</text>
+      <text x="76" y="696">The fixed reading</text>
+      <text x="76" y="1066">The visible account</text>
+    </g>
+    <g fill="#A6A7AE" font-size="26">
+      <text x="76" y="374"><tspan x="76" dy="0">edition sample</tspan><tspan x="76" dy="38">metadata and seed</tspan><tspan x="76" dy="38">source snapshot</tspan></text>
+      <text x="76" y="744"><tspan x="76" dy="0">method and version</tspan><tspan x="76" dy="38">parameters and rules</tspan><tspan x="76" dy="38">descriptor configuration</tspan></text>
+      <text x="76" y="1114"><tspan x="76" dy="0">trait counts</tspan><tspan x="76" dy="38">ranked observations</tspan><tspan x="76" dy="38">deterministic result set</tspan></text>
+    </g>
+
+    <g fill="none" stroke="#79A9FF" stroke-width="5">
+      <path d="M390 390 H548 M390 428 H520 M390 466 H562"/>
+      <circle cx="470" cy="790" r="68"/><circle cx="470" cy="790" r="38"/><path d="M470 722 V858 M402 790 H538"/>
+      <path d="M390 1194 H422 V1162 H454 V1130 H486 V1098 H518 V1066 H550"/>
+    </g>
+    <g fill="#F4F0E7">
+      <circle cx="390" cy="390" r="7"/><circle cx="430" cy="428" r="7"/><circle cx="470" cy="466" r="7"/><circle cx="510" cy="410" r="7"/><circle cx="550" cy="452" r="7"/>
+    </g>
+
+    <path d="M64 1380 H576" stroke="#79A9FF" stroke-width="4"/>
+    <circle cx="64" cy="1380" r="9" fill="#F4F0E7"/><circle cx="320" cy="1380" r="9" fill="#F4F0E7"/><circle cx="576" cy="1380" r="9" fill="#F4F0E7"/>
+    <g fill="#F4F0E7" font-size="22" font-weight="650" text-anchor="middle">
+      <text x="86" y="1440">PUBLISH</text><text x="320" y="1440">SHOW</text><text x="554" y="1440">REPEAT</text>
+      <text x="86" y="1472">THE INPUTS</text><text x="320" y="1472">THE METHOD</text><text x="554" y="1472">THE RESULT</text>
+    </g>
+  </g>
+</svg>

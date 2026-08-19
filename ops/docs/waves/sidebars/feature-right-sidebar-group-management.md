@@ -50,8 +50,10 @@ Users can:
    - identity search modal for include/exclude
    - confirmation modal for remove
 9. Authenticate when prompted.
-10. After success, the row refreshes.
-11. On non-chat waves, use the same actions under `Curation Groups`.
+10. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admin`
+   group is contained in `View` before saving.
+11. After success, the row refreshes.
+12. On non-chat waves, use the same actions under `Curation Groups`.
 
 ## Common Scenarios
 
@@ -95,6 +97,10 @@ Users can:
   and no changes are applied.
 - If a save request fails, an error toast is shown and existing settings stay as-is.
 - If include/exclude limits are hit, validation blocks the change before apply.
+- If an access-group edit would add somebody who cannot view the wave, the
+  publish or save is rejected and the existing group assignment stays active.
+- If the containment check is temporarily unavailable, no Wave access change
+  is saved; retry after the service recovers.
 
 ## Limitations / Notes
 
@@ -104,6 +110,9 @@ Users can:
 - Include/exclude limits are enforced per group:
   - include list max: `10,000`
   - exclude list max: `1,000`
+- These containment rules apply to general access scopes, not `Curation
+  Groups`: every member who can drop, vote, chat, or administer must also be
+  able to view the Wave.
 
 ## Related Pages
 

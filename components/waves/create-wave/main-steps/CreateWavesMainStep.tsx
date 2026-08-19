@@ -10,6 +10,7 @@ export default function CreateWavesMainStep({
   step,
   stepIndex,
   activeStepIndex,
+  disabled = false,
   onStep,
 }: {
   readonly isLast: boolean;
@@ -17,6 +18,7 @@ export default function CreateWavesMainStep({
   readonly step: CreateWaveStep;
   readonly stepIndex: number;
   readonly activeStepIndex: number;
+  readonly disabled?: boolean;
   readonly onStep: (step: CreateWaveStep) => void;
 }) {
   const stepStatus = getCreateWaveStepStatus({
@@ -38,7 +40,7 @@ export default function CreateWavesMainStep({
       {!isLast && <CreateWavesMainStepConnectionLine done={isDone} />}
       <button
         type="button"
-        disabled={!isDone}
+        disabled={!isDone || disabled}
         onClick={() => onStep(step)}
         className="tw-group tw-relative tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
       >
