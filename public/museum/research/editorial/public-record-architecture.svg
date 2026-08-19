@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Public record architecture</title>
+  <desc id="desc">A relational Museum record linking artist, work, project, acquisition, program, rights, custody, and source.</desc>
+  <rect width="1600" height="1000" fill="#090A0C"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="86" y="92" fill="#79A9FF" font-size="22" font-weight="700" letter-spacing="5">DIGITAL-ART STEWARDSHIP</text>
+    <text x="86" y="160" fill="#F4F0E7" font-size="58" font-weight="650">A record is a relationship</text>
+    <text x="86" y="204" fill="#A6A7AE" font-size="25">The public object is held in a network of people, events, rights, and sources.</text>
+
+    <g fill="none" stroke="#3A4350" stroke-width="3">
+      <path d="M286 292 L610 184"/><path d="M610 184 L1016 190"/><path d="M1016 190 L1338 330"/>
+      <path d="M286 292 L306 536"/><path d="M306 536 L572 822"/><path d="M572 822 L1040 834"/><path d="M1040 834 L1342 538"/>
+      <path d="M1342 538 L1338 330"/><path d="M610 184 L800 496"/><path d="M1016 190 L800 496"/><path d="M306 536 L800 496"/><path d="M572 822 L800 496"/><path d="M1040 834 L800 496"/><path d="M1342 538 L800 496"/>
+    </g>
+    <g fill="none" stroke="#79A9FF" stroke-width="4">
+      <path d="M286 292 L800 496"/><path d="M610 184 L800 496"/><path d="M1016 190 L800 496"/><path d="M306 536 L800 496"/><path d="M572 822 L800 496"/><path d="M1040 834 L800 496"/><path d="M1342 538 L800 496"/>
+    </g>
+
+    <g fill="#111419" stroke="#3A4350" stroke-width="3">
+      <rect x="176" y="230" width="220" height="124" rx="62"/><rect x="500" y="120" width="220" height="124" rx="62"/><rect x="906" y="126" width="220" height="124" rx="62"/><rect x="1228" y="266" width="220" height="124" rx="62"/>
+      <rect x="196" y="474" width="220" height="124" rx="62"/><rect x="462" y="760" width="220" height="124" rx="62"/><rect x="930" y="772" width="220" height="124" rx="62"/><rect x="1232" y="476" width="220" height="124" rx="62"/>
+    </g>
+    <g fill="#79A9FF">
+      <circle cx="206" cy="292" r="8"/><circle cx="530" cy="182" r="8"/><circle cx="936" cy="188" r="8"/><circle cx="1258" cy="328" r="8"/>
+      <circle cx="226" cy="536" r="8"/><circle cx="492" cy="822" r="8"/><circle cx="960" cy="834" r="8"/><circle cx="1262" cy="538" r="8"/>
+    </g>
+    <g fill="#F4F0E7" font-size="26" font-weight="700" text-anchor="middle">
+      <text x="286" y="305">ARTIST</text><text x="610" y="195">PROJECT</text><text x="1016" y="201">PROGRAM</text><text x="1338" y="341">SOURCE</text>
+      <text x="306" y="549">ACQUISITION</text><text x="572" y="835">RIGHTS</text><text x="1040" y="847">CUSTODY</text><text x="1342" y="551">WORK</text>
+    </g>
+    <g fill="#A6A7AE" font-size="15" font-weight="700" letter-spacing="2" text-anchor="middle">
+      <text x="286" y="335">MAKER</text><text x="610" y="225">CONTEXT</text><text x="1016" y="231">PATHWAY</text><text x="1338" y="371">EVIDENCE</text>
+      <text x="306" y="579">EVENT</text><text x="572" y="865">USE</text><text x="1040" y="877">HOLDING</text><text x="1342" y="581">OBJECT</text>
+    </g>
+
+    <circle cx="800" cy="496" r="134" fill="#F4F0E7" stroke="#79A9FF" stroke-width="6"/>
+    <circle cx="800" cy="496" r="106" fill="none" stroke="#A6A7AE" stroke-width="2" stroke-dasharray="2 13"/>
+    <g text-anchor="middle">
+      <text x="800" y="480" fill="#090A0C" font-size="19" font-weight="800" letter-spacing="4">THE</text>
+      <text x="800" y="527" fill="#090A0C" font-size="42" font-weight="750">WORK</text>
+    </g>
+
+    <path d="M86 944 H1514" stroke="#252A34" stroke-width="2"/>
+    <text x="86" y="915" fill="#F4F0E7" font-size="26" font-weight="600">The display is one view of the record, not the whole record.</text>
+    <text x="1514" y="915" fill="#79A9FF" font-size="18" font-weight="700" letter-spacing="3" text-anchor="end">RELATION / CONTEXT / PROOF</text>
+  </g>
+</svg>

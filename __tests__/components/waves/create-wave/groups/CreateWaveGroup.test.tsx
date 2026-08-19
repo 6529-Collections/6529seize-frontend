@@ -85,6 +85,7 @@ describe("CreateWaveGroup", () => {
     groupsCache: {},
     groups: defaultGroups,
     setDropsAdminCanDelete: mockSetDropsAdminCanDelete,
+    errorMessage: null,
   };
 
   beforeEach(() => {
@@ -161,5 +162,18 @@ describe("CreateWaveGroup", () => {
     });
 
     expect(inlinePanelProps.disabled).toBe(true);
+  });
+
+  it("exposes a containment error accessibly", () => {
+    renderComponent({
+      errorMessage: "Everyone in this group must also be able to view.",
+    });
+
+    const group = screen.getByRole("group", { name: "Who can drop" });
+    expect(group).toHaveAttribute("data-wave-group-invalid", "true");
+    expect(group).toHaveAttribute("tabindex", "-1");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Everyone in this group must also be able to view."
+    );
   });
 });

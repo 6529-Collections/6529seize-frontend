@@ -101,7 +101,7 @@ const PROFILES = [
 const INDEX_ROUTE: StudyRoute = {
   path: STUDY_PATH,
   sourcePath: "records/institutional-practice/a-field-of-practice.md",
-  title: "A field of practice",
+  title: "Museums to learn from",
 };
 
 const SOURCE_ROUTE: StudyRoute = {
@@ -211,7 +211,7 @@ async function expectFreshExactSource(
   );
   await expect(sourcePanel).toBeVisible();
   await expect(sourcePanel).toContainText(
-    /Public record at commit [a-f0-9]{12}\./u
+    "Published from the Museum's public record."
   );
   await expect(sourcePanel).not.toContainText(
     /latest verified release|temporarily unavailable|Page-level source: unassigned/iu
@@ -317,19 +317,17 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expectStudyRoute(page, INDEX_ROUTE, REQUIRED_SOURCE_COMMIT);
 
     for (const profile of PROFILE_ROUTES) {
-      await expect(
-        page.locator(`a[href="${profile.path}"]`).first()
-      ).toBeVisible();
+      const profileLink = page.locator(`a[href="${profile.path}"]`).first();
+      await revealTieredContent(profileLink);
+      await expect(profileLink).toBeVisible();
     }
-    await expect(
-      page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
-    ).toBeVisible();
-    await expect(
-      page.locator(`a[href="${ADJACENT_ROUTE.path}"]`).first()
-    ).toBeVisible();
-    await expect(
-      page.locator(`a[href="${EDITORIAL_ROUTE.path}"]`).first()
-    ).toBeVisible();
+    const supportingLinks = [SOURCE_ROUTE, ADJACENT_ROUTE, EDITORIAL_ROUTE].map(
+      (route) => page.locator(`a[href="${route.path}"]`).first()
+    );
+    for (const supportingLink of supportingLinks) {
+      await revealTieredContent(supportingLink);
+      await expect(supportingLink).toBeVisible();
+    }
     await expect(page.locator("body")).not.toContainText(
       /For this edition|retains fourteen|adds thirteen/iu
     );

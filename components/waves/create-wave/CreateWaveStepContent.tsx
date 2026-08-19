@@ -44,6 +44,7 @@ export default function CreateWaveStepContent({
     selectedOutcomeType,
     errors,
     groupsCache,
+    groupValidation,
     isMemeCountLoading,
     isMemeCountError,
     setOverview,
@@ -93,6 +94,9 @@ export default function CreateWaveStepContent({
           waveType={config.overview.type}
           groups={config.groups}
           groupsCache={groupsCache}
+          invalidRoles={groupValidation.invalidRoles}
+          isValidating={groupValidation.isFetching}
+          validationUnavailable={groupValidation.unavailable}
           chatEnabled={config.chat.enabled}
           adminCanDeleteDrops={config.drops.adminCanDeleteDrops}
           setChatEnabled={onChatEnabledChange}
