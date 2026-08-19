@@ -34,7 +34,7 @@ export const getWaveDropEligibility = ({
   if (!isLoggedIn) {
     return {
       canCreateDrop: false,
-      restrictionMessage: "Please log in to make submissions",
+      restrictionMessage: "Please log in",
       restrictionLink: null,
     };
   }

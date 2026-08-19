@@ -58,12 +58,13 @@ describe("WaveGroupScope", () => {
     expect(link).toHaveClass("tw-min-h-11");
     expect(link).toHaveClass("tw-inline-flex", "tw-w-fit", "tw-max-w-full");
     expect(link).toHaveClass("desktop-hover:hover:tw-text-primary-300");
-    expect(container.querySelector("img")).toHaveAttribute(
-      "src",
-      "scaled-img.png"
-    );
-    expect(container.querySelector("img")).toHaveAttribute("alt", "");
-    expect(screen.getByText("Group")).toBeInTheDocument();
+    const image = container.querySelector("img");
+    const name = screen.getByText("Group");
+    expect(image).toHaveAttribute("src", "scaled-img.png");
+    expect(image).toHaveAttribute("alt", "");
+    expect(image).toHaveClass("tw-inline-block", "tw-align-middle", "tw-mr-2");
+    expect(image?.nextElementSibling).toBe(name);
+    expect(image?.parentElement).toHaveClass("tw-text-right");
   });
 
   it("does not reinterpret an incomplete visible group as public access", () => {
