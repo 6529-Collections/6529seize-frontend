@@ -5,8 +5,6 @@ import {
   extensionMessagingContentScriptPaths,
   injectedScriptBundlePathToken,
   injectedScriptSendMessageError,
-  sentryBrowserHelperPathToken,
-  sentryBrowserPackagePathTokens,
   webkitExtensionMessagingTabNotFoundMessage,
 } from "./constants";
 import type {
@@ -14,7 +12,10 @@ import type {
   SentryEventHint,
   SentryStackFrame,
 } from "./types";
-import { hasAppOwnedSourceEvidence } from "./app-frame-utils";
+import {
+  hasAppOwnedSourceEvidence,
+  isSentryBrowserHelperFrame,
+} from "./app-frame-utils";
 import {
   getFramePaths,
   getHintExceptionMessage,
@@ -52,18 +53,6 @@ function isExtensionMessagingFrame(frame: SentryStackFrame): boolean {
   const framePaths = getFramePaths(frame);
   return (
     framePaths.length > 0 && framePaths.every(isExtensionMessagingInjectedPath)
-  );
-}
-
-function isSentryBrowserHelperFrame(frame: SentryStackFrame): boolean {
-  const framePaths = getFramePaths(frame);
-  return (
-    framePaths.length > 0 &&
-    framePaths.every(
-      (path) =>
-        path.includes(sentryBrowserHelperPathToken) &&
-        sentryBrowserPackagePathTokens.some((token) => path.includes(token))
-    )
   );
 }
 
