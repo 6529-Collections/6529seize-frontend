@@ -101,10 +101,13 @@ describe("WaveHeader", () => {
     const editPicture = screen.getByLabelText("Edit wave picture");
     expect(editPicture).toBeInTheDocument();
     expect(screen.getAllByLabelText("Edit wave picture")).toHaveLength(1);
+    expect(editPicture).toHaveAttribute("aria-haspopup", "dialog");
     expect(editPicture).toHaveClass(
-      "tw-hidden",
-      "desktop-hover:group-hover:tw-flex",
-      "touch-only:tw-flex"
+      "tw-flex",
+      "tw-opacity-0",
+      "focus-visible:tw-opacity-100",
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-opacity-100"
     );
   });
 
