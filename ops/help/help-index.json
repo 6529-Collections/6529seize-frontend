@@ -4561,7 +4561,9 @@
         "profile nic statements",
         "add statement",
         "profile statement",
-        "statement modal"
+        "statement modal",
+        "ninfa",
+        "custom art link"
       ],
       "keywords": [
         "identity",
@@ -4573,7 +4575,9 @@
         "modal",
         "profile",
         "add",
-        "visibility"
+        "visibility",
+        "ninfa",
+        "art link"
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
@@ -4585,6 +4589,8 @@
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
+        "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
+        "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
         "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state.",
         "If statements fail to load, the page keeps consolidated addresses visible and shows a Retry action; empty statement groups are omitted without an overall placeholder."
       ],

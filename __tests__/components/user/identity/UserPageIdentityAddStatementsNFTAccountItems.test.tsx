@@ -45,7 +45,7 @@ describe("UserPageIdentityAddStatementsNFTAccountItems", () => {
     const rows = Array.from(picker.querySelectorAll(":scope > span"));
     expect(rows).toHaveLength(2);
     expect(rows.map((row) => row.querySelectorAll("button").length)).toEqual([
-      6, 6,
+      7, 7,
     ]);
     const buttonTypes = buttons.map((button) =>
       button.getAttribute("data-type")
