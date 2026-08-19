@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import React from "react";
 
@@ -30,6 +31,10 @@ jest.mock("@/components/waves/drops/WaveDrop", () => {
 const base = {
   id: "1",
   drop_type: ApiDropType.Chat,
+  moderation: {
+    status: ApiDropModerationStatus.Visible,
+    can_view: true,
+  },
 } as any;
 
 beforeEach(() => {
