@@ -118,7 +118,7 @@ export function WaveScoreTransparencyPage({
   };
 
   return (
-    <div className="tw-px-4 tw-pb-16 tw-pt-6 md:tw-px-6 md:tw-pt-8 lg:tw-px-8">
+    <div className="tw-pb-4">
       <div className="tw-mx-auto tw-max-w-7xl tw-space-y-8">
         <section className="tw-grid tw-gap-6 xl:tw-grid-cols-[minmax(0,0.9fr)_minmax(380px,1.1fr)]">
           <div className="tw-rounded-lg tw-bg-iron-950/50 tw-p-5 tw-ring-1 tw-ring-inset tw-ring-white/10 md:tw-p-6">

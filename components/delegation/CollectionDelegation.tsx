@@ -23,6 +23,10 @@ import { useCollectionDelegationReads } from "./collection-delegation/useCollect
 import { useCollectionLocks } from "./collection-delegation/useCollectionLocks";
 import { useDelegationRevocation } from "./collection-delegation/useDelegationRevocation";
 import type { DelegationCollection } from "./delegation-constants";
+import {
+  DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "./delegation-ui";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
@@ -231,10 +235,12 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               />
             </span>
             <div className="tw-min-w-0">
-              <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+              <h1 className={DELEGATION_PAGE_TITLE_CLASS_NAME}>
                 {props.collection.title}
               </h1>
-              <p className="tw-mb-0 tw-mt-1 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300 sm:tw-mt-2">
+              <p
+                className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} tw-mt-1 sm:tw-mt-2`}
+              >
                 {getCollectionScopeDescription(props.collection, locale)}
               </p>
             </div>

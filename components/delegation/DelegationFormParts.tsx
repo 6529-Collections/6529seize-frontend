@@ -1,12 +1,12 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   useEffect,
   useEffectEvent,
@@ -14,7 +14,6 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from "react";
-import { Tooltip } from "react-tooltip";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
@@ -24,15 +23,18 @@ import type {
 } from "./delegation-shared";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import type { DelegationToastState } from "./DelegationToast";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_FIELD_CLASS_NAME,
+  DELEGATION_FIELD_LABEL_CLASS_NAME,
+} from "./delegation-ui";
 
 const FORM_ROW_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 tw-pb-4 sm:tw-grid-cols-12 sm:tw-gap-4";
 const FORM_ROW_COMPACT_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-12 sm:tw-gap-4";
-const INPUT_CLASS =
-  "tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-200 disabled:tw-text-iron-500";
 const RADIO_CLASS =
-  "tw-h-4 tw-w-4 tw-cursor-pointer tw-border-0 tw-bg-white tw-text-black focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
+  "tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-white/20 tw-bg-black/30 tw-text-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
 
 function getLabelSpanClass(span: number) {
   if (span === 4) {
@@ -75,7 +77,7 @@ export function DelegationFormShell(
   }>
 ) {
   return (
-    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
+    <section className={`${DELEGATION_CARD_CLASS_NAME} tw-p-4 sm:tw-p-6`}>
       <header className="tw-flex tw-items-start tw-justify-between tw-gap-4">
         <div>
           <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
@@ -120,7 +122,10 @@ export function DelegationFormField(
 export function DelegationFormInput(props: ComponentPropsWithoutRef<"input">) {
   const { className, ...inputProps } = props;
   return (
-    <input {...inputProps} className={`${INPUT_CLASS} ${className ?? ""}`} />
+    <input
+      {...inputProps}
+      className={`${DELEGATION_FIELD_CLASS_NAME} ${className ?? ""}`}
+    />
   );
 }
 
@@ -129,7 +134,10 @@ export function DelegationFormSelect(
 ) {
   const { className, children, ...selectProps } = props;
   return (
-    <select {...selectProps} className={`${INPUT_CLASS} ${className ?? ""}`}>
+    <select
+      {...selectProps}
+      className={`${DELEGATION_FIELD_CLASS_NAME} ${className ?? ""}`}
+    >
       {children}
     </select>
   );
@@ -189,34 +197,20 @@ function DelegationAddressInput(
 export function DelegationFormLabel(
   props: Readonly<{ title: string; tooltip: string; span?: number | undefined }>
 ) {
-  const tooltipId = `delegation-form-label-${props.title
-    .toLowerCase()
-    .replace(/\s+/g, "-")}`;
-
   return (
-    <label
-      className={`tw-flex tw-items-center tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-min-h-11 ${getLabelSpanClass(
+    <div
+      className={`tw-flex tw-items-center sm:tw-min-h-11 ${DELEGATION_FIELD_LABEL_CLASS_NAME} ${getLabelSpanClass(
         props.span ?? 3
       )}`}
     >
-      {props.title}
-      <FontAwesomeIcon
-        className="tw-ml-2 tw-h-4 tw-w-4 tw-cursor-help tw-text-iron-400"
+      <span>{props.title}</span>
+      <TooltipIconButton
+        className="tw-ml-1 tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
         icon={faInfoCircle}
-        data-tooltip-id={tooltipId}
-      ></FontAwesomeIcon>
-      <Tooltip
-        id={tooltipId}
-        place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        {props.tooltip}
-      </Tooltip>
-    </label>
+        iconClassName="tw-size-3.5 tw-text-current"
+        tooltipText={props.tooltip}
+      />
+    </div>
   );
 }
 
@@ -596,37 +590,16 @@ export function DelegationTokenSelection(
 function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
-  const tooltipId = `delegation-close-button-${props.title
-    .toLowerCase()
-    .replace(/\s+/g, "-")}`;
-
   return (
-    <>
-      <button
-        type="button"
-        aria-label={`Cancel ${props.title}`}
-        className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        onClick={() => props.onHide()}
-        data-tooltip-id={tooltipId}
-      >
-        <FontAwesomeIcon
-          icon={faTimesCircle}
-          className="tw-h-6 tw-w-6"
-          aria-hidden
-        />
-      </button>
-      <Tooltip
-        id={tooltipId}
-        place="top"
-        delayShow={250}
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        {`Cancel ${props.title}`}
-      </Tooltip>
-    </>
+    <TooltipIconButton
+      aria-label={`Cancel ${props.title}`}
+      buttonShapeClassName="tw-rounded-lg"
+      buttonSizeClassName="tw-size-10"
+      className="tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-white"
+      icon={faTimesCircle}
+      iconClassName="tw-size-5 tw-text-current"
+      onClick={props.onHide}
+      tooltipText={`Cancel ${props.title}`}
+    />
   );
 }

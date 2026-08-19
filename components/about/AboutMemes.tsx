@@ -1,15 +1,18 @@
 "use client";
 
-import {
-  ArrowRightIcon,
-  ArrowUpRightIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowRightIcon, ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
+
+import {
+  ABOUT_PAGE_TITLE_CLASS_NAME,
+  ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+} from "./AboutLayout";
 
 type Resource = {
   readonly titleKey: MessageKey;
@@ -90,13 +93,15 @@ function ResourceCard({ resource }: { readonly resource: Resource }) {
 export default function AboutMemes() {
   return (
     <article className="tw-overflow-hidden tw-bg-[#0D0D0F] tw-text-iron-100">
-      <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
+      <header
+        className={`tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
+      >
         <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-14 tw-pt-12 sm:tw-px-6 sm:tw-pb-20 sm:tw-pt-16 lg:tw-px-8 lg:tw-pb-24 lg:tw-pt-20">
           <p className="tw-m-0 tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-primary-300">
             {t(DEFAULT_LOCALE, "about.memes.eyebrow")}
           </p>
           <h1
-            className="tw-m-0 tw-max-w-3xl tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl"
+            className={ABOUT_PAGE_TITLE_CLASS_NAME}
             id="about-memes-title"
           >
             {t(DEFAULT_LOCALE, "about.memes.title")}
@@ -119,7 +124,7 @@ export default function AboutMemes() {
       <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 sm:tw-px-6 lg:tw-px-8">
         <section
           aria-labelledby="about-memes-shared-title"
-          className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-10 sm:tw-gap-8 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
+          className={`tw-grid tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-py-10 sm:tw-gap-8 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <h2
@@ -144,14 +149,14 @@ export default function AboutMemes() {
 
         <section
           aria-labelledby="about-memes-collection-title"
-          className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-10 sm:tw-gap-8 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20"
+          className={`tw-grid tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-py-10 sm:tw-gap-8 sm:tw-py-16 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-py-20 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
         >
           <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <p className="tw-m-0 tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-iron-500">
               {t(DEFAULT_LOCALE, "about.memes.collection.eyebrow")}
             </p>
             <h2
-              className="tw-m-0 tw-max-w-lg tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
+              className={`${ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME} tw-max-w-lg`}
               id="about-memes-collection-title"
             >
               {t(DEFAULT_LOCALE, "about.memes.collection.title")}
@@ -179,7 +184,7 @@ export default function AboutMemes() {
               {t(DEFAULT_LOCALE, "about.memes.resources.eyebrow")}
             </p>
             <h2
-              className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
+              className={ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME}
               id="about-memes-resources-title"
             >
               {t(DEFAULT_LOCALE, "about.memes.resources.title")}

@@ -10,6 +10,7 @@ import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown"
 import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_PAGE_CLASSES,
+  NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -47,8 +48,6 @@ const DAILY_SNAPSHOT_TIME = Date.UTC(2025, 0, 1, 0, 0);
 
 const EDITORIAL_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
-const SECTION_HEADING_CLASS =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
 const PANEL_CLASS =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55";
 const INTERACTIVE_PANEL_CLASS = `${PANEL_CLASS} tw-transform tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-border-iron-700/60 desktop-hover:hover:tw-bg-iron-900/75 motion-reduce:tw-transition-none`;
@@ -144,13 +143,12 @@ export default function TDHMainPage() {
   }, []);
 
   return (
-    <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
-    >
+    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       <div className="tw-w-full">
         <AboutContentsDropdown
           className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
           currentHref="/network/tdh"
+          desktopFlush
           withDivider
         />
 
@@ -172,7 +170,10 @@ function TDHHeader({ locale }: { readonly locale: SupportedLocale }) {
       className={`${EDITORIAL_GRID_CLASS} tw-pb-8 sm:tw-pb-12`}
     >
       <div className="lg:tw-sticky lg:tw-top-28">
-        <h1 className={SECTION_HEADING_CLASS} id="tdh-page-heading">
+        <h1
+          className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
+          id="tdh-page-heading"
+        >
           {m(locale, "network.tdh.hero.title")}
         </h1>
       </div>
@@ -196,7 +197,10 @@ function HowTDHWorks({
       className={`${EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12`}
     >
       <div className="lg:tw-sticky lg:tw-top-28">
-        <h2 className={SECTION_HEADING_CLASS} id="tdh-how-heading">
+        <h2
+          className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
+          id="tdh-how-heading"
+        >
           {m(locale, "network.tdh.how.title")}
         </h2>
       </div>
