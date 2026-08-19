@@ -24,8 +24,8 @@ export default function CreateWaveNextStep({
       variant="primary"
       size="md"
       onClick={onClick}
-      disabled={isCompleteStep ? submitting : disabled}
-      loading={isCompleteStep && submitting}
+      disabled={disabled || submitting}
+      loading={submitting}
     >
       {t(
         locale,

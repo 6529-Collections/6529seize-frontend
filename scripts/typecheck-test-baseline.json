@@ -432,7 +432,7 @@
     "__tests__/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate.test.tsx": 1,
     "__tests__/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRateStats.test.tsx": 1,
     "__tests__/components/user/identity/header/UserPageIdentityHeader.test.tsx": 1,
-    "__tests__/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems.test.tsx": 2,
+    "__tests__/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems.test.tsx": 1,
     "__tests__/components/user/identity/statements/add/social-media/UserPageIdentityAddStatementsSocialMediaAccountItems.test.tsx": 1,
     "__tests__/components/user/identity/statements/add/UserPageIdentityAddStatementsSelect.test.tsx": 1,
     "__tests__/components/user/identity/statements/add/UserPageIdentityAddStatementsViews.test.tsx": 1,

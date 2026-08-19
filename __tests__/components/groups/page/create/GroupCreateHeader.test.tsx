@@ -11,6 +11,10 @@ describe("GroupCreateHeader", () => {
 
     const icon = outer.querySelector("svg");
     expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass("tw-size-5");
+    expect(icon).not.toHaveClass("sm:tw-size-6");
+    expect(icon?.parentElement).toHaveClass("tw-size-9");
+    expect(icon?.parentElement).toHaveClass("tw-rounded-lg");
     expect(screen.getByText("Group configuration")).toHaveClass("tw-m-0");
   });
 });

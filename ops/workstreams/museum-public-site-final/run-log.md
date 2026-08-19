@@ -260,3 +260,121 @@ accession remain pending.` No runtime code, copy, media, layout, or rendered
   disclosure for the immutable legal-text link. The public disclosure is
   intentional; the test now opens it before checking the exact-commit URL. The
   focused 390px Chromium replay passes.
+
+## 2026-08-15 — Research editorial rebuild
+
+- Replaced heuristic, repository-ordered Research presentation with five
+  authored sections: acquisition scholarship, artists, works and projects,
+  organizations and programs, and Museum practice.
+- Assigned distinct governed media to the Casey, Magnum, and Keys and Gates
+  acquisition essays; introduced exact public-domain editorial images and
+  Museum-authored diagrams for Museum-practice research with a checked-in rights
+  manifest.
+- Removed internal record IDs and source paths from browse presentation and made
+  the complete index closed on initial load so the page ends with scholarship
+  instead of an expanded registry.
+- Added editorial figures to Museums to learn from, Scholarship and writing,
+  Data architecture, Rights, and Sources and chronology. Corrected the Magnum
+  acquisition essay to render its governed Negev image and identify itself as
+  an acquisition essay.
+- Local development inspection at 1440 and 390 pixels found no horizontal
+  overflow. Changed typecheck passed across 1,718 files; changed lint passed;
+  three focused Research suites passed with 9 tests.
+- No PR has been opened. The blocking production-build screenshot matrix and
+  three independent adversarial reviews remain in progress.
+
+## 2026-08-15T17:41:26Z - First pre-PR corpus rejected and corrected
+
+- Froze frontend candidate `98c7fbab6c20e42c156fbd109af21b8aac775cf0`
+  and rendered all nine Research routes at 1440 x 1000, 820 x 1000, and
+  390 x 844 from its production build.
+- Three independent reviewers inspected all 27 full-page screenshots and each
+  returned BLOCK. The corpus is superseded. Shared findings were visible Magnum
+  fallback panels, an inaccurate acquisition heading, inconsistent Keys and
+  Gates counts, technical context preceding essays, the Conflict route opening
+  an administrative publication record, and formulaic copy in several source
+  manuscripts.
+- Corrected the runtime to bind Conflict to its catalogue essay, present the
+  visitor manuscript before technical context, and use hash-pinned 640 and
+  1280 pixel display copies for all five accessioned Magnum photographs. The
+  media manifest records each work ID, source, SHA-256, dimensions, rights, and
+  Museum collection-display basis. A deterministic test verifies every retained
+  derivative against its checked-in hash.
+- Corrected public labels and counts, including `Acquisition essays`, two
+  completed gifts, and sixteen selected Keys and Gates photographs with
+  acquisition and accession pending.
+- Canonical Museum source candidate
+  `4fc04577367a6fd650916ea47d7913babd2d0448` supplies the revised visitor copy
+  and direct Conflict essay publication URI. No PR will open until the rebuilt
+  27-image corpus passes fresh independent curatorial, UX, and copy review.
+
+## 2026-08-15T23:11:42Z - Reconciled Research landing inventory
+
+- Corrected the durable release records to match
+  `research-page-final-spec.md` and the current intended Research landing.
+- The landing has six counted content sections and 25 cards: 3 Acquisition
+  research cards, 6 Artist cards, 6 Works and projects cards, 2 Organizations
+  and contexts cards, 4 Digital-art stewardship cards, and 4 Museum practice
+  cards.
+- The three Acquisition research cards are _The System in Seven States_,
+  _Conflict at Its Edges_, and _Access, Control, and Exit_. Casey Reas and
+  Magnum are labelled Permanent Collection; Keys and Gates is labelled
+  Acquisition in progress.
+- The six Artist cards are Casey Reas, Larry Towell, Moisés Saman, HugoFaz,
+  nasimghanizadeh, and shamspranto. They are canonical artist profiles, not
+  acquisition-owned rows or proxy cards.
+- The six Works and projects cards are _Pre-Process #63_, _Phototaxis #308_,
+  _Demonstration, Western Wall, Jerusalem_, _Palmyra, Syria_, _No Key, Only
+  Light_, and _the cost of open_.
+- The two Organizations and contexts cards are Magnum Photos and Keys and
+  Gates. Magnum is an Organization; Keys and Gates is an Acquisition and
+  Program context.
+- The four Digital-art stewardship cards are _Inside the System_, _Rights and
+  licenses_, _Data architecture and the public record_, and the reproducible
+  generative-art descriptor methodology. The four Museum practice cards are
+  _Museums to learn from_, _Scholarship and writing standard_, _The Open
+  Museum_, and _Repository-to-chain transition_.
+- Rights and Data architecture are each represented exactly once on the
+  landing, under Digital-art stewardship. Their supporting detail routes do
+  not create duplicate landing cards. The complete 101-record browse index is
+  a separate searchable surface and is not part of the 25-card landing count.
+
+## 2026-08-18T11:34:00Z - Canonical source merged and frontend rebound
+
+- Museum PR #64 merged as canonical main
+  `53f449dfbee4dc30cf7ccbc18f8a0ed36da65cdd` after all six exact-head jobs
+  passed and the final review-thread count reached zero.
+- The frontend now qualifies that canonical catalog commit while assembling
+  only reviewed publication commit
+  `75171e81587c9da313e4e3967b12cfe0aa6bbf46`.
+- Current frontend main `385771000528b5c5bc41da3f937b29020c1c0cb9`
+  was merged cleanly into the release branch.
+- A final readiness audit found that item-level archival image source links
+  were exposed only on media failure. Research cards now show those links for
+  successfully loaded editorial images as well; the focused regression test
+  passes.
+- The post-merge Museum regression run passes 81 suites and 604 tests, with one
+  suite and 17 tests intentionally skipped. Changed lint, changed typecheck
+  across 1,766 files, and the Windows-safe diff check pass.
+- Remaining pre-push gate: freeze the exact frontend commit, complete its clean
+  production build, render the 33 full-page screenshots, and obtain fresh PASS
+  verdicts from the three independent reviewers.
+
+## 2026-08-18T12:05:00Z - Exact-pixel copy review blocked candidate bbb62eae
+
+- The clean production build of
+  `bbb62eae45548bfab9b7a7d265146fad33c28075` produced 33 unique full-page
+  screenshots across the 11 Research routes and three required widths.
+- Deterministic capture reported zero non-200 responses, overflow, image
+  failures, visible fallbacks, console errors, or page errors.
+- Independent museum/curatorial and visual/UX reviewers passed the complete
+  corpus. Copy review blocked it for two exact visitor-copy defects: a submitted
+  Work-title typo plus process note on the Keys and Gates page, and a raw commit
+  fragment in the site-wide source strip.
+- The visitor layer now corrects the Work title while preserving the submitted
+  form in the governed source. The process note is removed. The source strip
+  now says that the page is published from the Museum's public record; exact
+  commit provenance remains in the immutable source and contributor links.
+- Focused regression tests pass 9/9. Changed lint, changed typecheck, and the
+  Windows-safe diff check pass. The rejected corpus remains negative evidence
+  and cannot be cited as acceptance.

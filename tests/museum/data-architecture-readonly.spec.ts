@@ -176,7 +176,7 @@ test.describe("Museum data architecture @surface @readonly", () => {
     try {
       const exactCommit = await openArchitectureRoute(page, OVERVIEW, null);
       for (const route of STANDARD_ROUTES) {
-        const routeLink = page.locator(`a[href="${route.path}"]`);
+        const routeLink = page.locator(`a[href="${route.path}"]:visible`);
         await expect(routeLink).toHaveCount(1);
         await routeLink.click();
         await expect(page).toHaveURL((url) => url.pathname === route.path);

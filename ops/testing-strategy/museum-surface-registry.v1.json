@@ -378,6 +378,18 @@
       "surface_ids": ["museum.shell"]
     },
     {
+      "file": "app/museum/network/research/cards.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "app/museum/network/research/catalog.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "app/museum/network/research/media.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
       "file": "app/museum/network/acquisitions/loading.tsx",
       "surface_ids": ["museum.acquisition"]
     },
@@ -440,6 +452,10 @@
       "surface_ids": ["museum.research"]
     },
     {
+      "file": "components/museum/research/MuseumResearchEditorialFigure.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
       "file": "components/museum/research/MuseumResearchLanding.tsx",
       "surface_ids": ["museum.research"]
     },
@@ -454,6 +470,10 @@
     {
       "file": "components/museum/research/MuseumResearchProjectsLanding.tsx",
       "surface_ids": ["museum.project", "museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchReading.tsx",
+      "surface_ids": ["museum.research"]
     },
     {
       "file": "components/museum/research/MuseumResearchStoryCard.tsx",

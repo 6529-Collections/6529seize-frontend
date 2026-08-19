@@ -88,6 +88,11 @@ then run `Test` or `Create`.
   mode.
 - Editing your own group creates and publishes a new version with the previous
   version id passed as `old_version_id`.
+- If the old version is assigned to a Wave access scope, publishing the new
+  version also checks that the Wave's active Drop, Vote, Chat, and Admin groups
+  remain contained in its View group. A replacement that would grant a
+  privilege to somebody who cannot view the Wave is rejected, and the old
+  version remains assigned.
 - Cloning another user’s group publishes a new copy and keeps the original
   group unchanged.
 - In edit mode, the selected group values are prefilled (name, privacy,
@@ -114,6 +119,8 @@ then run `Test` or `Create`.
   limits.
 - If `Test` or `Create` fails with API error, retry after confirming auth and
   filter validity.
+- If publishing an edited group reports a Wave View-access conflict, adjust the
+  edited membership or first widen the affected Wave's View group, then retry.
 - If grant lookup fails, either correct the grant ID or continue with the typed
   value intentionally.
 

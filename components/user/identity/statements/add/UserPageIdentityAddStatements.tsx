@@ -33,7 +33,7 @@ const VIEW_TITLE_KEYS: Record<STATEMENT_ADD_VIEW, MessageKey> = {
 const SELECT_HEADER_CLASS_NAME =
   "tw-sticky tw-top-0 tw-z-20 tw-bg-iron-950 tw-pb-3 tw-pt-4 md:!tw-absolute md:tw-right-6 md:tw-top-6 md:!tw-p-0";
 const DETAIL_HEADER_CLASS_NAME =
-  "tw-sticky tw-top-0 tw-z-20 tw-bg-iron-950 tw-pb-4 tw-pt-4 md:tw-pt-6";
+  "tw-sticky tw-top-0 tw-z-20 tw-bg-iron-950 tw-pb-4 tw-pt-4 md:!tw-pb-0 md:tw-pt-6";
 
 export default function UserPageIdentityAddStatements({
   profile,
@@ -78,7 +78,11 @@ export default function UserPageIdentityAddStatements({
     >
       <div
         ref={contentRef}
-        className="tw-px-4 tw-pb-4 sm:tw-px-6 md:tw-py-6 lg:tw-px-8 lg:tw-py-8"
+        className={
+          isSelectView
+            ? "tw-px-4 tw-pb-4 sm:tw-px-6 md:tw-py-6 lg:tw-px-8 lg:tw-py-8"
+            : "tw-px-4 tw-pb-4 sm:tw-px-6 md:tw-pb-6 md:tw-pt-6 lg:tw-px-8 lg:tw-pb-8"
+        }
       >
         <UserPageIdentityAddStatementsViews
           profile={profile}
