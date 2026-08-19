@@ -2055,6 +2055,59 @@ describe("sentry-client-filters", () => {
       ...overrides,
     });
 
+  const observedSentryArFrames: SentryStackFrame[] = [
+    {
+      filename:
+        "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+      abs_path:
+        "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+      function: "n",
+      in_app: true,
+      lineno: 111,
+      colno: 58,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "stringify",
+      in_app: false,
+    },
+  ];
+
+  const createObservedSentryArEvent = (
+    overrides: TestSentryClientEventOverrides = {},
+    frames: SentryStackFrame[] = observedSentryArFrames
+  ): TestSentryClientEvent =>
+    createSentryRouteParameterizationEvent({
+      transaction: "/messages",
+      request: {
+        url: "https://6529.io/messages",
+        headers: {
+          "User-Agent": metaMaskMobileWebViewUserAgent,
+        },
+      },
+      contexts: {
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+      },
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: __testing.sentryRouteParameterizationMessage,
+            mechanism: {
+              type: __testing.sentryRouteParameterizationMechanismType,
+              handled: false,
+            },
+            stacktrace: { frames },
+          },
+        ],
+      },
+      breadcrumbs: [],
+      ...overrides,
+    });
+
   const observedSentryCpNotificationsFrames: SentryStackFrame[] = [
     {
       filename:
@@ -6012,6 +6065,56 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters the observed MetaMask Mobile Sentry helper cyclic JSON timer error", () => {
+    // Arrange
+    const event = createObservedSentryArEvent();
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("does not filter the observed Sentry helper cyclic JSON timer error without MetaMask evidence", () => {
+    // Arrange
+    const event = createObservedSentryArEvent({
+      contexts: {
+        browser: {
+          name: "Mobile Safari UI/WKWebView",
+        },
+      },
+      request: {
+        url: "https://6529.io/waves/fb539d2d-5efd-4cde-b6f0-b639a5659ff9",
+      },
+    });
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the observed Sentry helper cyclic JSON timer error with an app-owned frame", () => {
+    // Arrange
+    const event = createObservedSentryArEvent({}, [
+      ...observedSentryArFrames,
+      {
+        filename: "services/api/common-api.ts",
+        abs_path: "services/api/common-api.ts",
+        function: "fetchUrl",
+        in_app: true,
+      },
+    ]);
+
+    // Act
+    const result = shouldFilterSentryRouteParameterizationError(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("does not filter observed iOS WKWebView cyclic JSON errors without MetaMask evidence", () => {
