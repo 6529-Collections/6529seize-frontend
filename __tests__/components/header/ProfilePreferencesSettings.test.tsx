@@ -97,6 +97,18 @@ describe("ProfilePreferencesSettings", () => {
         .getAllByRole("heading", { level: 2 })
         .map(({ textContent }) => textContent?.trim())
     ).toEqual(["Notifications", "Who can start a direct message with me?"]);
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveClass(
+      "tw-pb-0",
+      "tw-pt-6"
+    );
+    expect(
+      screen.getByRole("region", {
+        name: "Who can start a direct message with me?",
+      })
+    ).toHaveClass("tw-pb-0", "tw-pt-6");
+    expect(
+      screen.getByRole("button", { name: "Save Changes" }).parentElement
+    ).toHaveClass("tw-pt-6");
   });
 
   it("hides optional categories while preserving their saved values", async () => {
