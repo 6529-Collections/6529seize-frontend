@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveHeaderPictureEdit from "@/components/waves/header/picture/WaveHeaderPictureEdit";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 jest.mock(
   "@/components/waves/header/picture/WaveHeaderPictureEditModal",
@@ -12,7 +13,7 @@ jest.mock(
 describe("WaveHeaderPictureEdit", () => {
   it("keeps the edit action keyboard reachable and opens the dialog", async () => {
     const user = userEvent.setup();
-    render(<WaveHeaderPictureEdit wave={{ id: "wave-1" } as any} />);
+    render(<WaveHeaderPictureEdit wave={{ id: "wave-1" } as ApiWave} />);
 
     const editButton = screen.getByRole("button", {
       name: "Edit wave picture",

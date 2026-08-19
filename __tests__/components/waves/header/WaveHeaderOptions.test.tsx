@@ -1,14 +1,40 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderOptions from "@/components/waves/header/options/WaveHeaderOptions";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { AuthContextType } from "@/components/auth/Auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
+type MobileWrapperMockProps = {
+  readonly isOpen: boolean;
+  readonly label?: string | undefined;
+  readonly children: ReactNode;
+  readonly onAfterLeave?: (() => void) | undefined;
+};
+
+type DeleteModalMockProps = {
+  readonly isOpen: boolean;
+  readonly closeModal: () => void;
+};
+
+type DeleteActionMockProps = {
+  readonly isMobile?: boolean | undefined;
+  readonly onDeleteRequest: () => void;
+};
+
+type ProfileWaveActionMockProps = {
+  readonly wave: ApiWave;
+  readonly isMobile?: boolean | undefined;
+};
+
 let clickAway: (event: Event) => void;
 let escCb: () => void;
-const mockMobileWrapper = jest.fn();
+const mockMobileWrapper =
+  jest.fn<(props: MobileWrapperMockProps) => void>();
 
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
@@ -19,7 +45,7 @@ jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => ({
     __esModule: true,
-    default: (props: any) => {
+    default: (props: MobileWrapperMockProps) => {
       mockMobileWrapper(props);
       return props.isOpen ? (
         <div role="dialog" aria-label={props.label}>
@@ -32,7 +58,7 @@ jest.mock(
 
 jest.mock(
   "@/components/waves/header/options/delete/WaveDeleteModal",
-  () => (props: any) =>
+  () => (props: DeleteModalMockProps) =>
     props.isOpen ? (
       <div role="dialog" aria-label="Delete wave confirmation">
         <button type="button" onClick={props.closeModal}>
@@ -43,7 +69,7 @@ jest.mock(
 );
 
 jest.mock("react-use", () => ({
-  useClickAway: (_ref: any, cb: (event: Event) => void) => {
+  useClickAway: (_ref: unknown, cb: (event: Event) => void) => {
     clickAway = cb;
   },
   useKeyPressEvent: (_k: string, cb: () => void) => {
@@ -52,18 +78,24 @@ jest.mock("react-use", () => ({
 }));
 
 jest.mock("framer-motion", () => ({
-  AnimatePresence: ({ children }: any) => (
+  AnimatePresence: ({ children }: { readonly children: ReactNode }) => (
     <div data-animate-presence>{children}</div>
   ),
-  LazyMotion: ({ children }: any) => <>{children}</>,
+  LazyMotion: ({ children }: { readonly children: ReactNode }) => (
+    <>{children}</>
+  ),
   domAnimation: {},
-  m: { div: (props: any) => <div {...props} /> },
-  motion: { div: (props: any) => <div {...props} /> },
+  m: {
+    div: (props: ComponentPropsWithoutRef<"div">) => <div {...props} />,
+  },
+  motion: {
+    div: (props: ComponentPropsWithoutRef<"div">) => <div {...props} />,
+  },
 }));
 
 jest.mock(
   "@/components/waves/header/options/delete/WaveDelete",
-  () => (props: any) => (
+  () => (props: DeleteActionMockProps) => (
     <button
       type="button"
       data-testid="delete"
@@ -77,7 +109,7 @@ jest.mock(
 
 jest.mock(
   "@/components/waves/header/options/profile-wave/WaveProfileWaveAction",
-  () => (props: any) => (
+  () => (props: ProfileWaveActionMockProps) => (
     <div
       data-testid="profile-wave"
       data-wave={props.wave.id}
@@ -97,17 +129,17 @@ const wave = {
   chat: { scope: { group: { is_direct_message: false } } },
   parent_wave: null,
   wave: { authenticated_user_eligible_for_admin: false },
-} as any;
+} as ApiWave;
 
-const createWrapper = (auth: any = {}) => {
+const createWrapper = (auth: Partial<AuthContextType> = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  const authValue = {
+  const authValue = createMockAuthContext({
     connectedProfile: null,
     activeProfileProxy: null,
     ...auth,
-  };
+  });
 
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>

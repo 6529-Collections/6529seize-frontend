@@ -1,6 +1,7 @@
+import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import WaveHeaderPictureEditModal from "@/components/waves/header/picture/WaveHeaderPictureEditModal";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@tanstack/react-query", () => ({
@@ -16,17 +17,16 @@ describe("WaveHeaderPictureEditModal", () => {
   it("uses the shared mobile sheet and tablet modal surface", () => {
     render(
       <AuthContext.Provider
-        value={{ requestAuth: jest.fn(), setToast: jest.fn() } as any}
+        value={createMockAuthContext({
+          requestAuth: jest.fn(),
+          setToast: jest.fn(),
+        })}
       >
-        <ReactQueryWrapperContext.Provider
-          value={{ onWaveCreated: jest.fn() } as any}
-        >
-          <WaveHeaderPictureEditModal
-            isOpen
-            wave={{ id: "wave-1" } as any}
-            onClose={jest.fn()}
-          />
-        </ReactQueryWrapperContext.Provider>
+        <WaveHeaderPictureEditModal
+          isOpen
+          wave={{ id: "wave-1" } as ApiWave}
+          onClose={jest.fn()}
+        />
       </AuthContext.Provider>
     );
 

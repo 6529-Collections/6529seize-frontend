@@ -1,10 +1,13 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import WaveDeleteModal from "@/components/waves/header/options/delete/WaveDeleteModal";
 import { AuthContext } from "@/components/auth/Auth";
 jest.mock("@/services/api/common-api", () => ({ commonApiDelete: jest.fn() }));
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ReactQueryWrapperContextType } from "@/components/react-query-wrapper/ReactQueryWrapperContext";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -15,11 +18,13 @@ const useMutationMock = useMutation as jest.Mock;
 const useRouterMock = useRouter as jest.Mock;
 
 describe("WaveDeleteModal", () => {
-  const auth = {
+  const auth = createMockAuthContext({
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
-  } as any;
-  const rq = { invalidateDrops: jest.fn() } as any;
+  });
+  const rq = {
+    invalidateDrops: jest.fn(),
+  } as unknown as ReactQueryWrapperContextType;
   const push = jest.fn();
   const mutate = jest.fn();
 
@@ -37,7 +42,7 @@ describe("WaveDeleteModal", () => {
 
   it("deletes wave and navigates away", async () => {
     const user = userEvent.setup();
-    const wave = { id: "w1" } as any;
+    const wave = { id: "w1" } as ApiWave;
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
@@ -64,7 +69,7 @@ describe("WaveDeleteModal", () => {
 
   it("contains focus and restores it to the opener", async () => {
     const user = userEvent.setup();
-    const wave = { id: "w1" } as any;
+    const wave = { id: "w1" } as ApiWave;
 
     function Harness() {
       const [isOpen, setIsOpen] = React.useState(false);
