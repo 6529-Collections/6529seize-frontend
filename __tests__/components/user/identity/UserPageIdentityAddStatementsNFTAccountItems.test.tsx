@@ -41,7 +41,8 @@ describe("UserPageIdentityAddStatementsNFTAccountItems", () => {
     );
     const buttons = screen.getAllByTestId("btn");
     expect(buttons).toHaveLength(NFT_ACCOUNTS_STATEMENT_TYPES.length);
-    const rows = Array.from(screen.getByRole("group").children);
+    const picker = screen.getByRole("group", { name: "Choose a platform" });
+    const rows = Array.from(picker.querySelectorAll(":scope > span"));
     expect(rows).toHaveLength(2);
     expect(rows.map((row) => row.querySelectorAll("button").length)).toEqual([
       6, 6,

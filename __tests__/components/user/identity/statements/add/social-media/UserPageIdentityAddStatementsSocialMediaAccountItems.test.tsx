@@ -39,9 +39,9 @@ describe("UserPageIdentityAddStatementsSocialMediaAccountItems", () => {
     expect(buttonProps).toHaveLength(
       SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES.length
     );
-    expect(screen.getByText("Choose a platform")).toHaveClass("tw-mt-0");
-    const picker = screen.getByRole("group");
-    const rows = Array.from(picker.children);
+    expect(screen.getByText("Choose a platform")).toHaveClass("tw-mb-2");
+    const picker = screen.getByRole("group", { name: "Choose a platform" });
+    const rows = Array.from(picker.querySelectorAll(":scope > span"));
     expect(rows).toHaveLength(2);
     expect(rows.map((row) => row.querySelectorAll("button").length)).toEqual([
       7, 6,
