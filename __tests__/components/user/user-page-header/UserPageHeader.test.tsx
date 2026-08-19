@@ -155,11 +155,21 @@ describe("UserPageHeader", () => {
         (subscriptionStatus) => subscriptionStatus.dataset["compact"] === "true"
       )
     ).toHaveLength(1);
-    expect(screen.getByRole("button", { name: "Preferences" })).toHaveClass(
+    const preferencesButton = screen.getByRole("button", {
+      name: "Preferences",
+    });
+    expect(preferencesButton).toHaveClass(
+      "tw-rounded-xl",
+      "!tw-border-none"
+    );
+    expect(preferencesButton.parentElement).toHaveClass(
+      "tw-rounded-xl",
+      "tw-bg-white/10",
+      "tw-p-0.5",
+      "tw-shadow-2xl",
       "tw-ring-1",
-      "tw-ring-inset",
-      "tw-ring-white/15",
-      "tw-shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+      "tw-ring-white/20",
+      "tw-backdrop-blur-md"
     );
   });
 

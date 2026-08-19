@@ -281,13 +281,13 @@ export default function UserPageHeaderClient({
                     />
                   </div>
                   {canManageProfilePreferences ? (
-                    <div className="tw-mt-3">
+                    <div className="tw-mt-3 tw-inline-flex tw-rounded-xl tw-bg-white/10 tw-p-0.5 tw-shadow-2xl tw-ring-1 tw-ring-white/20 tw-backdrop-blur-md">
                       <Button
                         variant="tertiary"
                         size="sm"
                         onClick={() => setIsProfilePreferencesOpen(true)}
                         aria-label={t(locale, "profilePreferences.button")}
-                        className="tw-ring-1 tw-ring-inset tw-ring-white/15 tw-shadow-[0_8px_24px_rgba(0,0,0,0.55)] desktop-hover:hover:tw-ring-white/25"
+                        className="tw-rounded-xl !tw-border-none"
                       >
                         <Cog6ToothIcon
                           className="tw-size-4"
