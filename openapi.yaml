@@ -10647,6 +10647,42 @@ paths:
                 $ref: "#/components/schemas/ApiWave"
         "400":
           description: Invalid request
+  /wave-group-validation:
+    post:
+      tags:
+        - Waves
+      summary: Validate Wave privilege groups against its View group
+      description: >-
+        Returns the active privilege scopes that contain at least one member
+        outside the supplied View group. Omitted privilege properties are not
+        checked. A null Drop, Vote, or Chat property represents Everyone; a null
+        Admin property means there is no explicit Admin group. Private groups
+        are available only to their creator or eligible members; other private
+        group ids are treated as unavailable.
+      operationId: validateWaveGroups
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/wave-group-validation.handler"
+          name: handleValidateWaveGroups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiWaveGroupValidationRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveGroupValidationResponse"
+        "400":
+          description: Invalid request or unavailable group
+        "403":
+          description: Authentication is required when validating the caller as Admin
   /waves/direct-message/new:
     post:
       tags:
@@ -23324,6 +23360,59 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropTraceItem"
+    ApiWaveGroupRole:
+      type: string
+      enum:
+        - PARTICIPATION
+        - VOTING
+        - CHAT
+        - ADMIN
+    ApiWaveGroupValidationRequest:
+      type: object
+      required:
+        - visibility_group_id
+      properties:
+        visibility_group_id:
+          description: Null means everyone can view the Wave.
+          type: string
+          nullable: true
+        participation_group_id:
+          description: Omit when Drop access is inactive; null means Everyone.
+          type: string
+          nullable: true
+        voting_group_id:
+          description: Omit when Vote access is inactive; null means Everyone.
+          type: string
+          nullable: true
+        chat_group_id:
+          description: Omit when Chat is disabled; null means Everyone.
+          type: string
+          nullable: true
+        admin_group_id:
+          description: >-
+            The explicit Admin group to check. Omit or use null when there is no
+            Admin group, including when creation will make only the
+            authenticated profile an Admin.
+          type: string
+          nullable: true
+        include_authenticated_user_as_admin:
+          description: >-
+            Also require the authenticated acting profile to belong to the View
+            group.
+          type: boolean
+          default: false
+    ApiWaveGroupValidationResponse:
+      type: object
+      required:
+        - valid
+        - invalid_roles
+      properties:
+        valid:
+          type: boolean
+        invalid_roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveGroupRole"
     ApiWaveLog:
       type: object
       required:

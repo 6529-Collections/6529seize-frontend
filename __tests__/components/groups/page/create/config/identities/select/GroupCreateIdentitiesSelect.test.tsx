@@ -27,6 +27,19 @@ jest.mock(
 );
 
 describe("GroupCreateIdentitiesSelect", () => {
+  it("uses the shared darker panel border in the group form", () => {
+    const { container } = render(
+      <GroupCreateIdentitiesSelect
+        onIdentitySelect={jest.fn()}
+        selectedIdentities={[]}
+        selectedWallets={[]}
+        onRemove={jest.fn()}
+      />
+    );
+
+    expect(container.firstElementChild).toHaveClass("tw-border-iron-900");
+  });
+
   it("passes props to children and handles events", async () => {
     const user = userEvent.setup();
     const onSelect = jest.fn();

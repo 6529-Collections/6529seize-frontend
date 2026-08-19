@@ -62,10 +62,12 @@ identity statements` when the public-visibility notes are needed.
 - `Contact`: `Discord`, `Telegram`, `WeChat`, `Phone`, `Email`, `Website`
 - `Social Media Verification Posts`: `Link`
 
-The selected platform is visibly highlighted and exposed as the pressed
-option. The value field receives focus when a group opens. Text inputs disable
-automatic capitalization, correction, and spellchecking so handles, URLs, and
-contact details are not rewritten by mobile keyboards.
+Platform choices appear in compact icon rows. Hovering or keyboard-focusing an
+icon reveals its platform name, and assistive technology receives the same
+name. The selected platform has a stronger outline and is exposed as the
+pressed option. The value field receives focus when a group opens. Text inputs
+disable automatic capitalization, correction, and spellchecking so handles,
+URLs, and contact details are not rewritten by mobile keyboards.
 
 ## Visibility and Behavior Rules
 

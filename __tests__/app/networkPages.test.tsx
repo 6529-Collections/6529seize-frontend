@@ -76,8 +76,13 @@ describe("network pages render", () => {
   });
 
   it("renders Groups page", () => {
-    renderWithAuth(<GroupsPage />);
+    const { container } = renderWithAuth(<GroupsPage />);
     expect(screen.getByTestId("groups-component")).toBeInTheDocument();
+    expect(container.querySelector("main")).toHaveClass(
+      "tailwind-scope",
+      "tw-border-r",
+      "tw-border-iron-900"
+    );
   });
 
   it("renders TDH page", () => {

@@ -1,7 +1,6 @@
-import UserPageIdentityAddStatementsTypeButton from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsTypeButton";
+import UserPageIdentityAddStatementsPlatformPicker from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsPlatformPicker";
 import {
   NFT_ACCOUNTS_STATEMENT_TYPES,
-  STATEMENT_META,
   STATEMENT_TYPE,
   type NFT_ACCOUNTS_STATEMENT_TYPE,
 } from "@/helpers/Types";
@@ -18,25 +17,17 @@ export default function UserPageIdentityAddStatementsNFTAccountItems({
   const locale = useBrowserLocale();
 
   return (
-    <div>
-      <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-        {t(locale, "user.profile.identity.statements.selectPlatform")}
-      </p>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
-        {NFT_ACCOUNTS_STATEMENT_TYPES.map((type) => (
-          <UserPageIdentityAddStatementsTypeButton
-            key={type}
-            statementType={type}
-            label={
-              type === STATEMENT_TYPE.LINK
-                ? t(locale, "user.profile.identity.statements.otherPlatform")
-                : STATEMENT_META[type].title
-            }
-            isActive={activeType === type}
-            onClick={() => setType(type)}
-          />
-        ))}
-      </div>
-    </div>
+    <UserPageIdentityAddStatementsPlatformPicker
+      statementTypes={NFT_ACCOUNTS_STATEMENT_TYPES}
+      activeType={activeType}
+      rowCount={2}
+      labelOverrides={{
+        [STATEMENT_TYPE.LINK]: t(
+          locale,
+          "user.profile.identity.statements.otherPlatform"
+        ),
+      }}
+      onSelect={setType}
+    />
   );
 }

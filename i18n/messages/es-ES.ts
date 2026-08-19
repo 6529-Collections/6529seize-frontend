@@ -442,6 +442,17 @@ export const ES_ES_MESSAGES = {
     "Elige quién puede acceder, participar y gestionar esta Wave.",
   "waves.create.groups.viewGroupName": "Quién puede ver",
   "waves.create.groups.adminGroupName": "Administración",
+  "waves.create.groups.validation.checking": "Comprobando el acceso…",
+  "waves.create.groups.validation.unavailableTitle":
+    "No se pudo verificar el acceso.",
+  "waves.create.groups.validation.unavailable":
+    "No se pudo verificar el acceso de los grupos. Inténtalo de nuevo antes de continuar.",
+  "waves.create.groups.validation.outsideView":
+    "El grupo «{groupName}» incluye personas que no están en «{viewGroupName}».",
+  "waves.create.groups.validation.invalidTitle":
+    "Algunos grupos de acceso necesitan atención.",
+  "waves.create.groups.validation.invalidDescription":
+    "Cada miembro de los grupos de envíos, votación, chat y administración también debe pertenecer al grupo de visualización.",
   "waves.create.dates.title": "Calendario",
   "waves.create.dates.description":
     "Revisa cuándo empieza la Wave, comienza la votación y se anuncian los ganadores.",

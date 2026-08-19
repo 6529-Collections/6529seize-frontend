@@ -3,36 +3,57 @@
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import { STATEMENT_META, type STATEMENT_TYPE } from "@/helpers/Types";
 import clsx from "clsx";
+import type { TouchEvent } from "react";
+
+export const ADD_STATEMENT_PLATFORM_TOOLTIP_ID =
+  "add-statement-platform-tooltip";
 
 export default function UserPageIdentityAddStatementsTypeButton({
   statementType,
   label,
   isActive,
+  isFirst,
+  isLast,
   onClick,
 }: {
   readonly statementType: STATEMENT_TYPE;
   readonly label?: string;
   readonly isActive: boolean;
+  readonly isFirst: boolean;
+  readonly isLast: boolean;
   readonly onClick: () => void;
 }) {
+  const title = label ?? STATEMENT_META[statementType].title;
+  const onTouchStart = (event: TouchEvent<HTMLButtonElement>) => {
+    // Platform taps must not start the parent sheet's swipe-to-dismiss
+    // gesture. The picker tooltip handles the same tap independently.
+    event.stopPropagation();
+  };
+
   return (
     <button
       onClick={onClick}
+      onTouchStart={onTouchStart}
       type="button"
       aria-pressed={isActive}
+      data-tooltip-id={ADD_STATEMENT_PLATFORM_TOOLTIP_ID}
+      data-tooltip-content={title}
       className={clsx(
-        "tw-flex tw-min-h-12 tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+        "tw-relative -tw-ml-px tw-flex tw-min-h-11 tw-flex-1 tw-touch-manipulation tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition-colors tw-duration-300 tw-ease-out focus:tw-outline-none focus-visible:tw-z-20 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 motion-reduce:tw-transition-none",
+        isFirst && "tw-rounded-l-md",
+        isLast && "tw-rounded-r-md",
         isActive
-          ? "tw-border-primary-400/50 tw-bg-primary-500/10 tw-text-white"
-          : "tw-border-white/10 tw-bg-white/[0.035] desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07]"
+          ? "tw-z-10 tw-bg-iron-800 tw-ring-2 tw-ring-primary-400"
+          : "desktop-hover:hover:tw-bg-iron-800"
       )}
     >
-      <span className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center">
+      <span
+        aria-hidden="true"
+        className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center"
+      >
         <SocialStatementIcon statementType={statementType} />
       </span>
-      <span className="tw-min-w-0 tw-truncate">
-        {label ?? STATEMENT_META[statementType].title}
-      </span>
+      <span className="tw-sr-only">{title}</span>
     </button>
   );
 }
