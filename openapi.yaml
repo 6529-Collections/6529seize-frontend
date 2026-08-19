@@ -7210,6 +7210,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiProfilePreferences"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - authenticated profile required
     put:
       tags:
         - Profiles
@@ -7237,6 +7243,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiProfilePreferences"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - authenticated profile required
   /profiles:
     post:
       tags:
