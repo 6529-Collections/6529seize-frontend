@@ -25,7 +25,7 @@ export default function CommunityMembersTable({
   return (
     <>
       <div className="tw-hidden sm:tw-block">
-        <table className="tw-min-w-full tw-border-collapse">
+        <table className="tw-w-full tw-min-w-[56rem] tw-border-collapse">
           <CommunityMembersTableHeader
             activeSort={activeSort}
             sortDirection={sortDirection}

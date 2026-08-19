@@ -41,7 +41,7 @@ export default function CommunityMembersTableHeaderSortableContent({
   );
   const showLoader = isLoading && isActive;
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-align-middle">
+    <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-align-middle">
       <span
         className={`${
           isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
