@@ -53,7 +53,9 @@ beforeEach(()=>{
   mockedUseChainId.mockReturnValue(sepolia.id);
   mockedUseAuth.mockReturnValue({ setToast: jest.fn() });
   mockedUseSeize.mockReturnValue({ address: '0xDEF' });
-  Object.assign(navigator, { clipboard: { writeText: jest.fn() } });
+  Object.assign(navigator, {
+    clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
+  });
 });
 
 function renderComponent(ctx:any){
@@ -113,11 +115,10 @@ describe('AppWallet', () => {
   });
 
   it('copies wallet address to clipboard', async () => {
-    const { container } = renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
-    // Find the icon that has the copy address tooltip
-    const copyIcon = container.querySelector('[data-tooltip-id="copy-address-0xABC"]');
-    expect(copyIcon).toBeTruthy();
-    await userEvent.click(copyIcon as HTMLElement);
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Copy address to clipboard' })
+    );
     expect((navigator.clipboard.writeText as jest.Mock)).toHaveBeenCalledWith('0xABC');
   });
 });
