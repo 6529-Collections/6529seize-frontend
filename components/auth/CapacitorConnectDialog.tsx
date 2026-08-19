@@ -67,34 +67,25 @@ function AppWalletRows({
 }>) {
   if (fetchingAppWallets) {
     return (
-      <p
-        role="status"
-        className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500"
-      >
+      <output className="tw-m-0 tw-block tw-py-4 tw-text-center tw-text-sm tw-text-iron-500">
         {t(locale, "capacitorConnect.appWallets.loading")}
-      </p>
+      </output>
     );
   }
 
   if (!appWalletsSupported) {
     return (
-      <p
-        role="status"
-        className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500"
-      >
+      <output className="tw-m-0 tw-block tw-py-4 tw-text-center tw-text-sm tw-text-iron-500">
         {t(locale, "capacitorConnect.appWallets.unavailable")}
-      </p>
+      </output>
     );
   }
 
   if (appWallets.length === 0) {
     return (
-      <p
-        role="status"
-        className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500"
-      >
+      <output className="tw-m-0 tw-block tw-py-4 tw-text-center tw-text-sm tw-text-iron-500">
         {t(locale, "capacitorConnect.appWallets.empty")}
-      </p>
+      </output>
     );
   }
 

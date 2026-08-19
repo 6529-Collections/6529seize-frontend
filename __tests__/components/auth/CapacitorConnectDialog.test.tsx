@@ -103,4 +103,14 @@ describe("CapacitorConnectDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(defaultProps.onBack).toHaveBeenCalledTimes(1);
   });
+
+  it("announces the empty app-wallet state with semantic output", () => {
+    render(
+      <CapacitorConnectDialog {...defaultProps} view="app-wallets" />
+    );
+
+    const status = screen.getByRole("status");
+    expect(status.tagName).toBe("OUTPUT");
+    expect(status).toHaveTextContent("No App Wallets yet.");
+  });
 });

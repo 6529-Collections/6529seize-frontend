@@ -7,8 +7,10 @@ import type { CapacitorConnectDialogView } from "@/components/auth/CapacitorConn
 const mockAppWalletAddress = "0x00000000000000000000000000000000000000AA";
 const mockConnectAsync = jest.fn();
 const mockPush = jest.fn();
-const mockScanQrCode = jest.fn();
-const mockIsQRScannerCancellation = jest.fn(() => false);
+const mockScanQrCode = jest.fn(
+  (_options: unknown): Promise<string | null> => Promise.resolve(null)
+);
+const mockIsQRScannerCancellation = jest.fn((_error: unknown) => false);
 let mockConnectors = [{ id: mockAppWalletAddress, type: "app-wallet" }];
 
 jest.mock("wagmi", () => ({
@@ -49,9 +51,9 @@ jest.mock("@/components/app-wallets/AppWalletModal", () => ({
 
 jest.mock("@/components/header/share/qrScanner.utils", () => ({
   getQRScannerErrorReason: jest.fn(() => null),
-  isQRScannerCancellation: (...args: unknown[]) =>
-    mockIsQRScannerCancellation(...args),
-  scanQrCode: (...args: unknown[]) => mockScanQrCode(...args),
+  isQRScannerCancellation: (error: unknown) =>
+    mockIsQRScannerCancellation(error),
+  scanQrCode: (options: unknown) => mockScanQrCode(options),
 }));
 
 jest.mock("@/utils/security-logger", () => ({
