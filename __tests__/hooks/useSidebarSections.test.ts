@@ -102,7 +102,7 @@ describe("useSidebarSections", () => {
     expect(
       aboutSection?.subsections.map((subsection) => subsection.name)
     ).toEqual([
-      "About 6529",
+      "Overview",
       "Collections & Minting",
       "Network & Reputation",
       "Delegation & Wallets",

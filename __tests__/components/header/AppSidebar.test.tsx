@@ -155,7 +155,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       const aboutChildren = getMenuChildren("About");
       expect(aboutChildren).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: "About 6529", section: true }),
+          expect.objectContaining({ label: "Overview", section: true }),
           expect.objectContaining({
             label: "Collections & Minting",
             section: true,
@@ -177,7 +177,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       );
       expect(aboutChildren.slice(0, 3)).toEqual([
         { label: "Overview", path: "/about" },
-        expect.objectContaining({ label: "About 6529", section: true }),
+        expect.objectContaining({ label: "Overview", section: true }),
         expect.objectContaining({
           label: "Collections & Minting",
           section: true,
