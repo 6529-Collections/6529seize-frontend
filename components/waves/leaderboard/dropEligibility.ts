@@ -1,4 +1,6 @@
 import { SubmissionStatus } from "@/hooks/useWave";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface LeaderboardParticipation {
   readonly isEligible?: boolean | undefined;
@@ -34,7 +36,10 @@ export const getWaveDropEligibility = ({
   if (!isLoggedIn) {
     return {
       canCreateDrop: false,
-      restrictionMessage: "Please log in to make submissions",
+      restrictionMessage: t(
+        DEFAULT_LOCALE,
+        "waves.dropEligibility.loginRequired"
+      ),
       restrictionLink: null,
     };
   }
