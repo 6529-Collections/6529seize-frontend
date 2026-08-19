@@ -6,7 +6,7 @@ Parent: [Notifications Index](README.md)
 
 `/notifications` is the My Stream activity feed for the connected profile.
 It resolves auth/profile prerequisites first, then shows a reverse-scroll list
-with cause filters, grouped reactions, and inline drop previews.
+with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Location in the Site
 
@@ -47,9 +47,10 @@ with cause filters, grouped reactions, and inline drop previews.
 
 ## Feed Filters
 
-- Cause filters are horizontal chips:
-  `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`,
-  `Subscriptions`.
+- A compact dropdown supports selecting multiple notification categories at
+  once. Its default label is `All`; one selected category shows its name, and
+  multiple selected categories show the selected count.
+- The page heading includes a settings action that opens `Profile Preferences`.
 - Filter mapping:
   - `All`: all notification causes, including priority alerts, all-drops rows,
     and unknown causes.
@@ -124,7 +125,7 @@ with cause filters, grouped reactions, and inline drop previews.
   connected-account fallback while realtime coverage is disconnected or
   unconfirmed. Covered profiles use a five-minute REST reconciliation poll to
   recover from any missed event.
-- `PRIORITY_ALERT` and `ALL_DROPS` rows stay under `All` (no dedicated chip).
+- `PRIORITY_ALERT` and `ALL_DROPS` rows stay under `All` (no dedicated filter).
 - Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after
   an unauthorized notifications error.

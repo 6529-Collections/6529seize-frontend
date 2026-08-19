@@ -2201,6 +2201,8 @@ export const EN_US_MESSAGES = {
     "Subscription coverage",
   "profilePreferences.notifications.deviceNote":
     "Push notification settings remain separate for each device.",
+  "notifications.filter.ariaLabel": "Filter notifications: {selection}",
+  "notifications.filter.selected": "{count} selected",
   "linkPreview.twitter.kind.article": "Article",
   "linkPreview.twitter.kind.post": "Post",
   "linkPreview.twitter.article.provider": "Article on X",

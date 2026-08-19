@@ -2,9 +2,10 @@
 
 ## Overview
 
-Authenticated profiles can open `Profile Preferences` from the app sidebar to
-control who may start new direct-message conversations and which in-app
-notifications are created.
+Authenticated profiles can open `Profile Preferences` from the app sidebar,
+the desktop profile menu, or the settings action beside the `/notifications`
+heading to control who may start new direct-message conversations and which
+in-app notifications are created.
 
 ## Direct Messages
 
