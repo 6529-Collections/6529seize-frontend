@@ -2201,10 +2201,10 @@ export const EN_US_MESSAGES = {
     "Choose between All and Essential notifications.",
   "profilePreferences.notifications.ALL.label": "All",
   "profilePreferences.notifications.ALL.description":
-    "Receive essential account notices plus the optional categories selected below.",
+    "Essential security and account notifications, plus the optional categories selected below.",
   "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential",
   "profilePreferences.notifications.ESSENTIAL_ONLY.description":
-    "Receive only essential security and account notifications. Direct messages remain available but won’t generate notifications.",
+    "Security and account notifications only.",
   "profilePreferences.notifications.paused": "Paused",
   "profilePreferences.notifications.category.direct_messages":
     "Direct messages and wave activity",

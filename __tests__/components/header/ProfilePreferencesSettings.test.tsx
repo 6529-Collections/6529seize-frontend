@@ -75,8 +75,11 @@ describe("ProfilePreferencesSettings", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /direct messages remain available but won’t generate notifications/i
+        /essential security and account notifications, plus the optional categories selected below/i
       )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/^Security and account notifications only\.$/i)
     ).toBeInTheDocument();
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "profile-preferences",
