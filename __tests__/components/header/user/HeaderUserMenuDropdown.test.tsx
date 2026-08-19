@@ -392,9 +392,20 @@ describe("HeaderUserMenuDropdown", () => {
     expect(profileLink).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
     expect(profileLink).toHaveClass("tw-flex-1", "tw-border-none");
     expect(logoutButton).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
-    expect(preferencesButton).toHaveClass("tw-size-11", "tw-border-iron-700");
+    expect(preferencesButton).toHaveAttribute("title", "Profile Preferences");
+    expect(preferencesButton).toHaveClass(
+      "tw-size-11",
+      "tw-border-0",
+      "tw-border-l",
+      "tw-border-iron-700"
+    );
     expect(profileLink.parentElement).toBe(preferencesButton.parentElement);
-    expect(profileLink.parentElement).toHaveClass("tw-flex", "tw-gap-2");
+    expect(profileLink.parentElement).toHaveClass(
+      "tw-flex",
+      "tw-overflow-hidden",
+      "tw-rounded-lg"
+    );
+    expect(profileLink.parentElement).not.toHaveClass("tw-gap-2");
     expect(profileLink.parentElement?.parentElement).toBe(
       logoutButton.parentElement
     );

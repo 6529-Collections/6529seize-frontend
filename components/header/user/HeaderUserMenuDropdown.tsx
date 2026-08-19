@@ -400,7 +400,7 @@ export default function HeaderUserMenuDropdown({
                     </li>
                   )}
                   <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
-                    <div className="tw-flex tw-w-full tw-items-stretch tw-justify-end tw-gap-2">
+                    <div className="tw-flex tw-w-full tw-items-stretch tw-justify-end tw-overflow-hidden tw-rounded-lg">
                       {profilePath && (
                         <Link
                           href={profilePath}
@@ -409,7 +409,7 @@ export default function HeaderUserMenuDropdown({
                             HEADER_USER_MENU_LOCALE,
                             "headerUserMenu.profile"
                           )}
-                          className="tw-relative tw-grid tw-h-11 tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-iron-800 tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                          className="tw-relative tw-grid tw-h-11 tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-border-none tw-bg-iron-800 tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400"
                         >
                           <FontAwesomeIcon
                             icon={faUser}
@@ -434,7 +434,11 @@ export default function HeaderUserMenuDropdown({
                           HEADER_USER_MENU_LOCALE,
                           "profilePreferences.title"
                         )}
-                        className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        title={t(
+                          HEADER_USER_MENU_LOCALE,
+                          "profilePreferences.title"
+                        )}
+                        className={`tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-border-0 ${profilePath ? "tw-border-l" : "tw-border-l-0"} tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400`}
                       >
                         <Cog6ToothIcon
                           className="tw-size-5"

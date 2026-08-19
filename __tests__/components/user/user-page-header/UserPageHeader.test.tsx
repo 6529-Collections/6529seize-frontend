@@ -155,9 +155,12 @@ describe("UserPageHeader", () => {
         (subscriptionStatus) => subscriptionStatus.dataset["compact"] === "true"
       )
     ).toHaveLength(1);
-    expect(
-      screen.getByRole("button", { name: "Preferences" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Preferences" })).toHaveClass(
+      "tw-ring-1",
+      "tw-ring-inset",
+      "tw-ring-white/15",
+      "tw-shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+    );
   });
 
   it("opens preferences from your own profile", async () => {

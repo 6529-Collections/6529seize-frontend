@@ -287,6 +287,7 @@ export default function UserPageHeaderClient({
                         size="sm"
                         onClick={() => setIsProfilePreferencesOpen(true)}
                         aria-label={t(locale, "profilePreferences.button")}
+                        className="tw-ring-1 tw-ring-inset tw-ring-white/15 tw-shadow-[0_8px_24px_rgba(0,0,0,0.55)] desktop-hover:hover:tw-ring-white/25"
                       >
                         <Cog6ToothIcon
                           className="tw-size-4"
