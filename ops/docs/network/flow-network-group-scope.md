@@ -41,8 +41,9 @@ This page owns only the scope handoff into network routes and cross-route scope 
 1. Open `/network/groups`.
 2. Open a group card while it is in idle state.
 3. The app opens `/network?page=1&group={groupId}` (or `/network?group={groupId}` from chat links).
-4. `/network` applies scope and shows the selected group's criteria above its
-   scoped member results.
+4. `/network` applies scope. Public groups and private groups available to the
+   current authenticated member or creator show the selected group's name and
+   criteria above its scoped member results.
 5. Inspect both how membership is determined and the current member list in the
    same view.
 6. Use `Clear selected group` to close the group summary and return to the
@@ -67,6 +68,9 @@ This page owns only the scope handoff into network routes and cross-route scope 
 - Group-card open navigation is unavailable while that card is in `Rep all` or `NIC all`.
 - A stale `group` id deep link can load empty or unexpected results.
 - `/network/activity` has no inline control to clear/switch scope.
+- Signing out or switching profiles while a group is selected reloads the
+  group and member results for the new viewer. Results from the previous viewer
+  are not reused.
 
 ## Failure and Recovery
 
@@ -81,9 +85,11 @@ This page owns only the scope handoff into network routes and cross-route scope 
 - Scope persists in current app session/tab state, not as URL-only state.
 - `/network/activity` consumes scope but does not manage scope.
 - Membership counts in `/network` filter can refresh asynchronously after scope changes.
-- If group details are private, deleted, or temporarily unavailable, Network
-  shows a non-identifying criteria-unavailable state while keeping the scoped
-  member request stable.
+- Private group details are inspectable only when the API makes the full group
+  available to the current authenticated member or creator.
+- If a group is hidden from the current viewer, deleted, malformed, or
+  temporarily unavailable, Network shows a non-identifying unavailable state
+  and does not show cached member results from another group or viewer.
 
 ## Related Pages
 
