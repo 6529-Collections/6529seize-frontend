@@ -9,6 +9,7 @@ import { Mode, type SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
 import { WaveContent } from "../right-sidebar/WaveContent";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { WaveDeleteFlowProvider } from "@/components/waves/header/options/delete/WaveDeleteFlowContext";
 
 interface BrainMobileAboutProps {
   readonly activeWaveId: string | null;
@@ -41,14 +42,16 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
       style={mobileAboutViewStyle}
     >
       {wave && (
-        <WaveContent
-          wave={wave}
-          mode={mode}
-          setMode={setMode}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          showTabs={false}
-        />
+        <WaveDeleteFlowProvider>
+          <WaveContent
+            wave={wave}
+            mode={mode}
+            setMode={setMode}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            showTabs={false}
+          />
+        </WaveDeleteFlowProvider>
       )}
     </div>
   );
