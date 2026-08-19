@@ -189,6 +189,28 @@ describe("shouldFilterZerionUserRejectedRequest", () => {
     ).toBe(false);
   });
 
+  it("keeps the rejection with an undefined first exception value", () => {
+    const values = new Array<SentryExceptionValue>(1);
+    const event = createZerionEvent({ exception: { values } });
+
+    expect(shouldFilterZerionUserRejectedRequest(event)).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "undefined breadcrumbs",
+      breadcrumbs: undefined,
+    },
+    {
+      caseName: "a non-array breadcrumb wrapper",
+      breadcrumbs: { values: undefined },
+    },
+  ])("keeps the rejection with $caseName", ({ breadcrumbs }) => {
+    const event = createZerionEvent({ breadcrumbs });
+
+    expect(shouldFilterZerionUserRejectedRequest(event)).toBe(false);
+  });
+
   it.each([
     {
       caseName: "no wallet-selection click",
