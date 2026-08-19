@@ -73,6 +73,11 @@ describe("ProfilePreferencesSettings", () => {
         /existing direct messages and group messages stay available/i
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /direct messages remain available but won’t generate notifications/i
+      )
+    ).toBeInTheDocument();
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "profile-preferences",
     });

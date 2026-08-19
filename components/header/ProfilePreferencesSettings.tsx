@@ -187,7 +187,7 @@ function ProfilePreferencesForm({
       <div className="tw-flex-1 tw-divide-y tw-divide-iron-800 tw-overflow-y-auto tw-px-4 sm:tw-px-6">
         <section
           aria-labelledby="profile-preferences-notifications-heading"
-          className="tw-pb-3 tw-pt-5 sm:tw-pb-4 sm:tw-pt-6"
+          className="tw-pb-0 tw-pt-5 sm:tw-pt-6"
         >
           <h2
             id="profile-preferences-notifications-heading"
@@ -291,7 +291,7 @@ function ProfilePreferencesForm({
 
         <section
           aria-labelledby="profile-preferences-dm-heading"
-          className="tw-pb-5 tw-pt-3 sm:tw-pb-6 sm:tw-pt-4"
+          className="tw-pb-3 tw-pt-3 sm:tw-pb-4 sm:tw-pt-4"
         >
           <h2
             id="profile-preferences-dm-heading"
