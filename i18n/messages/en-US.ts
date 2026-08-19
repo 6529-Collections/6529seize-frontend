@@ -2155,6 +2155,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 
 export const EN_US_MESSAGES = {
   "profilePreferences.title": "Profile Preferences",
+  "profilePreferences.button": "Preferences",
   "profilePreferences.loading": "Loading profile preferences",
   "profilePreferences.loadError":
     "Couldn’t load profile preferences. Please try again.",

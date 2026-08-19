@@ -50,7 +50,6 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 - A compact dropdown supports selecting multiple notification categories at
   once. Its default label is `All`; one selected category shows its name, and
   multiple selected categories show the selected count.
-- The page heading includes a settings action that opens `Profile Preferences`.
 - Filter mapping:
   - `All`: all notification causes, including priority alerts, all-drops rows,
     and unknown causes.
