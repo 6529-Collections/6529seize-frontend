@@ -278,9 +278,15 @@ const tailwindConfig: Config = {
       // that query, so the `desktop-hover` override above cannot fire there
       // either, and `data-fine-pointer` alone would leave hover-revealed
       // controls with no reachable state at all. See touch-first.helpers.ts.
+      //
+      // It is deliberately NOT media-wrapped. The tag is already the precise
+      // condition — set only after real mouse evidence AND denial of the hover
+      // query — and a hybrid can deny that query while still reporting
+      // `any-hover: hover` or `any-pointer: fine`, which is exactly the
+      // reported Surface Pro 8 profile. Wrapping it would re-lose those users.
       addVariant("touch-only", [
         "@media (any-hover: none) and (any-pointer: coarse) { body:not([data-fine-pointer]) & }",
-        "@media (any-hover: none) and (any-pointer: coarse) { body[data-hover-unreliable] & }",
+        "body[data-hover-unreliable] &",
       ]);
     }),
   ],
