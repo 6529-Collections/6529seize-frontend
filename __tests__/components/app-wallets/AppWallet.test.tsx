@@ -20,10 +20,18 @@ jest.mock('@/components/app-wallets/AppWalletAvatar', () => ({__esModule:true,de
 jest.mock('@/components/app-wallets/AppWalletsUnsupported', () => () => <div data-testid="unsupported"/>);
 jest.mock('@/components/dotLoader/DotLoader', () => ({__esModule:true,default: ()=> <span data-testid="dotloader"/>, Spinner: ()=> <span data-testid="spinner"/> }));
 jest.mock('@/components/app-wallets/AppWalletModal', () => ({
-  UnlockAppWalletModal: ({ show, onUnlock, sensitiveAction }: any) =>
+  UnlockAppWalletModal: ({
+    show,
+    onUnlock,
+    sensitiveAction,
+  }: {
+    readonly show: boolean;
+    readonly onUnlock: (pass: string) => void;
+    readonly sensitiveAction?: { readonly label: string } | undefined;
+  }) =>
     show ? (
-      <button onClick={() => onUnlock('pass123')}>
-        {sensitiveAction.label}
+      <button type="button" onClick={() => onUnlock('pass123')}>
+        {sensitiveAction?.label ?? 'Unlock wallet'}
       </button>
     ) : null,
 }));
@@ -145,7 +153,7 @@ describe('AppWallet', () => {
     const walletWithoutMnemonic = {
       ...wallet,
       has_mnemonic: false,
-      mnemonic: 'N/A',
+      mnemonic: 'encrypted-mnemonic',
     };
     renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[walletWithoutMnemonic], deleteAppWallet:jest.fn()});
 
@@ -158,5 +166,53 @@ describe('AppWallet', () => {
 
     await waitFor(() => expect(mockedDecryptData).toHaveBeenCalledTimes(1));
     expect(mockedDecryptData).toHaveBeenCalledWith('0xABC', 'pk', 'pass123');
+  });
+
+  it('reports a recovery phrase clipboard failure', async () => {
+    const toast = jest.fn();
+    mockedUseAuth.mockReturnValue({ setToast: toast });
+    (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(
+      new Error('denied')
+    );
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Reveal' })[0]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: 'secret reveal' })
+    );
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Copy to clipboard' })
+    );
+
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({
+        message: 'Unable to copy recovery phrase.',
+        type: 'error',
+      })
+    );
+  });
+
+  it('reports a private key clipboard failure', async () => {
+    const toast = jest.fn();
+    mockedUseAuth.mockReturnValue({ setToast: toast });
+    (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(
+      new Error('denied')
+    );
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Reveal' })[1]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: 'secret reveal' })
+    );
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Copy to clipboard' })
+    );
+
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({
+        message: 'Unable to copy private key.',
+        type: 'error',
+      })
+    );
   });
 });

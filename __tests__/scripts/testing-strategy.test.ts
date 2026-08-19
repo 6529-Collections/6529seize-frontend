@@ -358,9 +358,11 @@ describe("testing strategy CI plan", () => {
     expect(fileGuardIndex).toBeGreaterThan(guardIndex);
     expect(resolveIndex).toBeGreaterThan(guardIndex);
     expect(resolveIndex).toBeGreaterThan(fileGuardIndex);
-    expect(workflow.slice(guardIndex, resolveIndex)).toContain(
+    const fileGuardBlock = workflow.slice(fileGuardIndex, resolveIndex);
+    expect(fileGuardBlock).toContain(
       "Skipping non-file Jest discovery output"
     );
+    expect(fileGuardBlock).toContain("continue");
   });
 
   it.each([

@@ -385,7 +385,7 @@ export default function AppWalletComponent(
               appWallet.private_key,
               pass
             );
-            let decryptedMnemonic = appWallet.mnemonic;
+            let decryptedMnemonic: string;
             if (
               (appWallet.has_mnemonic ?? true) &&
               appWallet.mnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE
@@ -538,9 +538,17 @@ export default function AppWalletComponent(
                   buttonShapeClassName="tw-rounded-lg"
                   className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
                   iconClassName="tw-size-4 tw-text-current"
-                  onClick={() =>
-                    copySecretToClipboard(phrase.join(" "), setMnemonicCopied)
-                  }
+                  onClick={() => {
+                    void copySecretToClipboard(
+                      phrase.join(" "),
+                      setMnemonicCopied
+                    ).catch(() => {
+                      setToast({
+                        message: "Unable to copy recovery phrase.",
+                        type: "error",
+                      });
+                    });
+                  }}
                 />
               )}
             </div>
@@ -624,9 +632,17 @@ export default function AppWalletComponent(
                 buttonShapeClassName="tw-rounded-lg"
                 className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
                 iconClassName="tw-size-4 tw-text-current"
-                onClick={() =>
-                  copySecretToClipboard(privateKey, setPrivateKeyCopied)
-                }
+                onClick={() => {
+                  void copySecretToClipboard(
+                    privateKey,
+                    setPrivateKeyCopied
+                  ).catch(() => {
+                    setToast({
+                      message: "Unable to copy private key.",
+                      type: "error",
+                    });
+                  });
+                }}
               />
             )}
           </div>

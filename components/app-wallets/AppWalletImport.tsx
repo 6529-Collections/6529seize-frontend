@@ -145,7 +145,8 @@ function AppWalletImportMnemonic() {
               id={MNEMONIC_WORD_FIELD_IDS[i]}
               ref={i === 0 ? inputRef : undefined}
               autoFocus={i === currentFocus}
-              type="text"
+              type="password"
+              autoComplete="off"
               placeholder={`word ${i + 1}`}
               value={w}
               className="tw-h-11 tw-min-w-0 tw-flex-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-text-iron-100 tw-outline-none placeholder:tw-text-iron-600"
@@ -240,7 +241,8 @@ function AppWalletImportPrivateKey() {
         ref={inputRef}
         autoFocus
         disabled={isReadonly}
-        type="text"
+        type="password"
+        autoComplete="off"
         placeholder="private key"
         value={privateKey}
         className={DELEGATION_FIELD_CLASS_NAME}
