@@ -2205,8 +2205,6 @@ export const EN_US_MESSAGES = {
   "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential only",
   "profilePreferences.notifications.ESSENTIAL_ONLY.description":
     "Receive only critical security, account access, and account notices. Direct messages still arrive, but their alerts are paused.",
-  "profilePreferences.notifications.pausedInfo":
-    "Optional notification preferences are paused. Your choices are saved and restored if you switch back to All.",
   "profilePreferences.notifications.paused": "Paused",
   "profilePreferences.notifications.category.direct_messages":
     "Direct messages and wave activity",
