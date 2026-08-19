@@ -140,6 +140,7 @@ export default function AppUserConnect({
         <span>{t(locale, "profilePreferences.title")}</span>
       </button>
       <button
+        type="button"
         onClick={() => setIsPushSettingsOpen(true)}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
         aria-label="Push Notifications"
