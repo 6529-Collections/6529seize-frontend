@@ -1090,6 +1090,13 @@ const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
 
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
+  ownerOptionsOpenLabel: "Open options",
+  ownerOptionsTitle: "Wave options",
+  pictureEditCancel: "Cancel",
+  pictureEditDescription: "Choose a new image up to 10 MB.",
+  pictureEditLabel: "Edit wave picture",
+  pictureEditSave: "Save",
+  pictureEditTitle: "Update wave picture",
   "postLabel.one": "Post",
   "postLabel.other": "Posts",
 } as const);

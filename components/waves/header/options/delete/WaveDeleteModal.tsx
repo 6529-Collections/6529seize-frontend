@@ -67,7 +67,12 @@ export default function WaveDeleteModal({
   };
 
   return createPortal(
-    <div className="tw-relative tw-z-[80] tw-cursor-default">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-wave-title"
+      className="tw-relative tw-z-[1010] tw-cursor-default"
+    >
       <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
@@ -97,7 +102,10 @@ export default function WaveDeleteModal({
                   </span>
                 </div>
                 <div className="tw-mt-3 tw-flex tw-flex-col sm:tw-mt-0 sm:tw-max-w-sm">
-                  <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-50">
+                  <p
+                    id="delete-wave-title"
+                    className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-50"
+                  >
                     Delete Wave
                   </p>
                   <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
