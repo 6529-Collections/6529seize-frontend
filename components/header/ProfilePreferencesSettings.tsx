@@ -187,7 +187,7 @@ function ProfilePreferencesForm({
       <div className="tw-flex-1 tw-divide-y tw-divide-iron-800 tw-overflow-y-auto tw-px-4 sm:tw-px-6">
         <section
           aria-labelledby="profile-preferences-notifications-heading"
-          className="tw-py-5 sm:tw-py-6"
+          className="tw-pb-3 tw-pt-5 sm:tw-pb-4 sm:tw-pt-6"
         >
           <h2
             id="profile-preferences-notifications-heading"
@@ -233,7 +233,7 @@ function ProfilePreferencesForm({
           </div>
 
           {isEssential && (
-            <output className="tw-mt-4 tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-200">
+            <output className="tw-mt-4 tw-block tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-200">
               {t(locale, "profilePreferences.notifications.pausedInfo")}
             </output>
           )}
@@ -297,7 +297,7 @@ function ProfilePreferencesForm({
 
         <section
           aria-labelledby="profile-preferences-dm-heading"
-          className="tw-py-5 sm:tw-py-6"
+          className="tw-pb-5 tw-pt-3 sm:tw-pb-6 sm:tw-pt-4"
         >
           <h2
             id="profile-preferences-dm-heading"

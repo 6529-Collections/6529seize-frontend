@@ -104,9 +104,9 @@ describe("ProfilePreferencesSettings", () => {
       ).not.toBeInTheDocument();
       expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
     });
-    expect(
-      screen.getByText(/choices are saved and restored/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/choices are saved and restored/i)).toHaveClass(
+      "tw-block"
+    );
 
     await user.click(screen.getByRole("radio", { name: /^All/i }));
     await screen.findByText("Subscription coverage");
