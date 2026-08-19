@@ -181,20 +181,26 @@ function ProfilePreferencesForm({
 
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
-      <div className="tw-flex-1 tw-space-y-8 tw-overflow-y-auto tw-px-4 tw-py-5 sm:tw-px-6">
-        <fieldset>
-          <legend className="tw-text-base tw-font-semibold tw-text-iron-100">
+      <div className="tw-flex-1 tw-divide-y tw-divide-iron-800 tw-overflow-y-auto tw-px-4 sm:tw-px-6">
+        <section
+          aria-labelledby="profile-preferences-dm-heading"
+          className="tw-py-5 sm:tw-py-6"
+        >
+          <h2
+            id="profile-preferences-dm-heading"
+            className="tw-text-base tw-font-semibold tw-text-iron-100"
+          >
             {t(locale, "profilePreferences.dm.heading")}
-          </legend>
+          </h2>
           <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.dm.description")}
           </p>
-          <div className="tw-mt-3 tw-space-y-2">
+          <div className="tw-mt-4 tw-divide-y tw-divide-white/5 tw-overflow-hidden tw-rounded-lg tw-bg-white/[0.025] tw-ring-1 tw-ring-white/10">
             {DM_OPTIONS.map((option) => (
               <label
                 key={option}
                 aria-label={t(locale, `profilePreferences.dm.${option}.label`)}
-                className="tw-flex tw-cursor-pointer tw-gap-3 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-3"
+                className="tw-flex tw-cursor-pointer tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.035]"
               >
                 <input
                   type="radio"
@@ -220,20 +226,26 @@ function ProfilePreferencesForm({
               </label>
             ))}
           </div>
-        </fieldset>
+        </section>
 
-        <fieldset>
-          <legend className="tw-text-base tw-font-semibold tw-text-iron-100">
+        <section
+          aria-labelledby="profile-preferences-notifications-heading"
+          className="tw-py-5 sm:tw-py-6"
+        >
+          <h2
+            id="profile-preferences-notifications-heading"
+            className="tw-text-base tw-font-semibold tw-text-iron-100"
+          >
             {t(locale, "profilePreferences.notifications.heading")}
-          </legend>
+          </h2>
           <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.notifications.description")}
           </p>
-          <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-2">
+          <div className="tw-mt-4 tw-divide-y tw-divide-white/5 tw-overflow-hidden tw-rounded-lg tw-bg-white/[0.025] tw-ring-1 tw-ring-white/10">
             {NOTIFICATION_LEVELS.map((level) => (
               <label
                 key={level}
-                className="tw-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900/60 tw-p-3 tw-text-sm tw-font-medium tw-text-iron-100"
+                className="tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.035]"
               >
                 <input
                   type="radio"
@@ -243,18 +255,25 @@ function ProfilePreferencesForm({
                   onChange={() =>
                     setCurrent({ ...current, notification_level: level })
                   }
-                  className="tw-size-4 tw-accent-primary-500"
+                  className="tw-mt-1 tw-size-4 tw-accent-primary-500"
                 />
-                {t(locale, `profilePreferences.notifications.${level}.label`)}
+                <span>
+                  <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
+                    {t(
+                      locale,
+                      `profilePreferences.notifications.${level}.label`
+                    )}
+                  </span>
+                  <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                    {t(
+                      locale,
+                      `profilePreferences.notifications.${level}.description`
+                    )}
+                  </span>
+                </span>
               </label>
             ))}
           </div>
-          <p className="tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(
-              locale,
-              `profilePreferences.notifications.${current.notification_level}.description`
-            )}
-          </p>
 
           {isEssential && (
             <output className="tw-mt-4 tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-200">
@@ -317,9 +336,9 @@ function ProfilePreferencesForm({
           <p className="tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "profilePreferences.notifications.deviceNote")}
           </p>
-        </fieldset>
+        </section>
       </div>
-      <div className="tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-px-6">
+      <div className="tw-flex tw-justify-end tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-px-6">
         <Button
           type="button"
           onClick={() => void save()}
@@ -327,7 +346,7 @@ function ProfilePreferencesForm({
           loading={isSaving}
           variant="action"
           size="md"
-          fullWidth
+          className="tw-w-full sm:tw-w-auto sm:tw-min-w-40"
         >
           {isSaving
             ? t(locale, "profilePreferences.saving")

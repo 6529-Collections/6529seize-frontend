@@ -69,7 +69,7 @@ describe("ProfilePreferencesSettings", () => {
     render(<ProfilePreferencesSettings isOpen onClose={jest.fn()} />);
     await screen.findByText("Subscription coverage");
 
-    await user.click(screen.getByLabelText("Essential only"));
+    await user.click(screen.getByRole("radio", { name: /Essential only/i }));
 
     await waitFor(() => {
       expect(
@@ -81,7 +81,7 @@ describe("ProfilePreferencesSettings", () => {
       screen.getByText(/choices are saved and restored/i)
     ).toBeInTheDocument();
 
-    await user.click(screen.getByLabelText("All"));
+    await user.click(screen.getByRole("radio", { name: /^All/i }));
     await screen.findByText("Subscription coverage");
     expect(screen.getAllByRole("checkbox")).toHaveLength(6);
     expect(screen.getAllByRole("checkbox")[5]).toBeChecked();

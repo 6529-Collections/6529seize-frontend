@@ -38,6 +38,10 @@ import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
 } from "./user-page-header.messages";
+import {
+  USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS,
+  USER_PAGE_HEADER_SURFACE_CLASS,
+} from "./user-page-header-surface";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -281,21 +285,16 @@ export default function UserPageHeaderClient({
                     />
                   </div>
                   {canManageProfilePreferences ? (
-                    <div className="tw-mt-3 tw-inline-flex tw-rounded-xl tw-bg-white/10 tw-p-0.5 tw-shadow-2xl tw-ring-1 tw-ring-white/20 tw-backdrop-blur-md">
-                      <Button
-                        variant="tertiary"
-                        size="sm"
-                        onClick={() => setIsProfilePreferencesOpen(true)}
-                        aria-label={t(locale, "profilePreferences.button")}
-                        className="tw-rounded-xl !tw-border-none"
-                      >
-                        <Cog6ToothIcon
-                          className="tw-size-4"
-                          aria-hidden="true"
-                        />
-                        <span>{t(locale, "profilePreferences.button")}</span>
-                      </Button>
-                    </div>
+                    <Button
+                      variant="tertiary"
+                      size="sm"
+                      onClick={() => setIsProfilePreferencesOpen(true)}
+                      aria-label={t(locale, "profilePreferences.button")}
+                      className={`tw-mt-3 ${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
+                    >
+                      <Cog6ToothIcon className="tw-size-4" aria-hidden="true" />
+                      <span>{t(locale, "profilePreferences.button")}</span>
+                    </Button>
                   ) : null}
                 </div>
 

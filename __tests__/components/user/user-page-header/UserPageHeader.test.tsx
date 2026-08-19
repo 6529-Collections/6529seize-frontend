@@ -159,17 +159,10 @@ describe("UserPageHeader", () => {
       name: "Preferences",
     });
     expect(preferencesButton).toHaveClass(
-      "tw-rounded-xl",
-      "!tw-border-none"
-    );
-    expect(preferencesButton.parentElement).toHaveClass(
-      "tw-rounded-xl",
-      "tw-bg-white/10",
-      "tw-p-0.5",
-      "tw-shadow-2xl",
-      "tw-ring-1",
-      "tw-ring-white/20",
-      "tw-backdrop-blur-md"
+      "!tw-border-white/10",
+      "!tw-bg-iron-950",
+      "tw-shadow-md",
+      "tw-shadow-black/40"
     );
   });
 
