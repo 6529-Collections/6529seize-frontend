@@ -36,6 +36,8 @@ jobs:
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
       app_check_matrix: ${{ steps.plan_outputs.outputs.app_check_matrix }}
+      core_playwright_required: ${{ steps.plan_outputs.outputs.core_playwright_required }}
+      core_playwright_matrix: ${{ steps.plan_outputs.outputs.core_playwright_matrix }}
 
     steps:
       - name: Checkout code
@@ -177,14 +179,15 @@ jobs:
           const appCheckLanes = [
             { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
           ];
+          const corePlaywrightLanes = [];
           if (plan.checks.build.required) {
             appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
           if (plan.checks.playwright_smoke.required) {
-            appCheckLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
+            corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
-            appCheckLanes.push({
+            corePlaywrightLanes.push({
               lane: "playwright-critical-shell",
               label: "Playwright critical shell",
               runner: defaultRunner,
@@ -207,6 +210,8 @@ jobs:
             );
           }
           write("app_check_matrix", JSON.stringify({ include: appCheckLanes }));
+          write("core_playwright_required", String(corePlaywrightLanes.length > 0));
+          write("core_playwright_matrix", JSON.stringify({ include: corePlaywrightLanes }));
           NODE
 
       - name: Summarize CI plan
@@ -261,6 +266,109 @@ jobs:
             test-results/app-pr-ci/ci-plan.json
             test-results/app-pr-ci/secret-scan.json
             test-results/app-pr-ci/workflow-security.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+  core-playwright-checks:
+    name: App check / ${{ matrix.label }}
+    needs: plan
+    if: needs.plan.outputs.core_playwright_required == 'true'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: read
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}
+
+    env:
+      API_ENDPOINT: "https://api.6529.io"
+      WS_ENDPOINT: "wss://ws.6529.io"
+      ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+      BASE_ENDPOINT: "http://localhost:3001"
+      PLAYWRIGHT_BASE_URL: "http://localhost:3001"
+      PLAYWRIGHT_WEB_SERVER_COMMAND: "./bin/6529 run dev"
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3001"
+      NEXTGEN_CHAIN_ID: "1"
+      MOBILE_APP_SCHEME: "mobile6529"
+      CORE_SCHEME: "core6529"
+      IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
+      IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
+      GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
+      ASSETS_FROM_S3: "false"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Run small Playwright smoke pack
+        if: matrix.lane == 'playwright-smoke'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:smoke
+
+      - name: Run critical route-shell Playwright pack
+        if: matrix.lane == 'playwright-critical-shell'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:critical-shell
+
+      - name: Upload app check artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
+          path: |
+            test-results/**
+            playwright-report/**
           if-no-files-found: ignore
           retention-days: 14
 
@@ -883,23 +991,42 @@ jobs:
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
 
       - name: Restore Playwright browser
-        if: startsWith(matrix.lane, 'playwright-')
+        if: startsWith(matrix.lane, 'playwright-museum-')
         id: playwright_browser_cache
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install Playwright browser
-        if: startsWith(matrix.lane, 'playwright-')
+      - name: Install Playwright dependencies
+        id: playwright_dependencies_primary
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Retry Playwright dependencies
+        id: playwright_dependencies_retry
+        if: startsWith(matrix.lane, 'playwright-museum-') && steps.playwright_dependencies_primary.outcome != 'success'
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Verify Playwright dependencies
+        if: startsWith(matrix.lane, 'playwright-museum-')
         env:
-          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright_browser_cache.outputs.cache-hit }}
+          PRIMARY_OUTCOME: ${{ steps.playwright_dependencies_primary.outcome }}
+          RETRY_OUTCOME: ${{ steps.playwright_dependencies_retry.outcome }}
         run: |
-          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
-            ./bin/6529 exec playwright install-deps chromium
-          else
-            ./bin/6529 exec playwright install --with-deps chromium
+          if [ "$PRIMARY_OUTCOME" != success ] && [ "$RETRY_OUTCOME" != success ]; then
+            echo "Playwright system dependency installation failed twice." >&2
+            exit 1
           fi
+
+      - name: Install Playwright browser
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 10
+        run: ./bin/6529 exec playwright install chromium
 
       - name: Resolve exact Museum publication for Playwright
         id: museum_publication
@@ -1061,20 +1188,6 @@ jobs:
             ].join("\n")
           );
           NODE
-
-      - name: Run small Playwright smoke pack
-        if: matrix.lane == 'playwright-smoke'
-        env:
-          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
-          PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:smoke
-
-      - name: Run critical route-shell Playwright pack
-        if: matrix.lane == 'playwright-critical-shell'
-        env:
-          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
-          PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:critical-shell
 
       - name: Run Network Museum Playwright packs
         if: startsWith(matrix.lane, 'playwright-museum-')
@@ -1385,6 +1498,7 @@ jobs:
     needs:
       - plan
       - app-checks
+      - core-playwright-checks
     if: always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -1395,4 +1509,10 @@ jobs:
       - name: Require successful parallel app checks
         env:
           APP_CHECKS_RESULT: ${{ needs.app-checks.result }}
-        run: test "$APP_CHECKS_RESULT" = "success"
+          CORE_PLAYWRIGHT_REQUIRED: ${{ needs.plan.outputs.core_playwright_required }}
+          CORE_PLAYWRIGHT_RESULT: ${{ needs.core-playwright-checks.result }}
+        run: |
+          test "$APP_CHECKS_RESULT" = "success"
+          if [ "$CORE_PLAYWRIGHT_REQUIRED" = true ]; then
+            test "$CORE_PLAYWRIGHT_RESULT" = "success"
+          fi

@@ -517,18 +517,39 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install Playwright browser
+      - name: Install Playwright dependencies
         if: steps.dependencies.outcome == 'success'
-        id: playwright
+        id: playwright_dependencies_primary
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Retry Playwright dependencies
+        if: steps.dependencies.outcome == 'success' && steps.playwright_dependencies_primary.outcome != 'success'
+        id: playwright_dependencies_retry
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Verify Playwright dependencies
+        if: steps.dependencies.outcome == 'success'
+        id: playwright_dependencies
         continue-on-error: true
         env:
-          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+          PRIMARY_OUTCOME: ${{ steps.playwright_dependencies_primary.outcome }}
+          RETRY_OUTCOME: ${{ steps.playwright_dependencies_retry.outcome }}
         run: |
-          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
-            ./bin/6529 exec playwright install-deps chromium
-          else
-            ./bin/6529 exec playwright install --with-deps chromium
+          if [ "$PRIMARY_OUTCOME" != success ] && [ "$RETRY_OUTCOME" != success ]; then
+            echo "Playwright system dependency installation failed twice." >&2
+            exit 1
           fi
+
+      - name: Install Playwright browser
+        if: steps.dependencies.outcome == 'success' && steps.playwright_dependencies.outcome == 'success'
+        id: playwright
+        timeout-minutes: 10
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install chromium
 
       - name: Run staging packs against staging.6529.io
         if: steps.dependencies.outcome == 'success' && steps.museum-publication.outcome == 'success' && steps.playwright.outcome == 'success'
