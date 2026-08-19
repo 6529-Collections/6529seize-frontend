@@ -7,7 +7,6 @@ import {
 } from "@/services/dm-unread/DmUnreadStateProvider";
 
 const commonApiFetchMock = jest.fn();
-const invalidateQueriesMock = jest.fn(() => Promise.resolve());
 let connectedProfileId = "profile-1";
 let jwt = "jwt-profile-1";
 let isConnected = false;
@@ -16,10 +15,6 @@ let isActive = true;
 let websocketHandler: ((value: unknown) => void) | undefined;
 let capturedDmUnreadActions: ReturnType<typeof useOptionalDmUnreadActions> =
   null;
-
-jest.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({ invalidateQueries: invalidateQueriesMock }),
-}));
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
@@ -144,36 +139,15 @@ describe("DmUnreadStateProvider", () => {
     expect(screen.getByTestId("messages")).toHaveTextContent("3");
     expect(screen.getByTestId("conversations")).toHaveTextContent("1");
     expect(screen.getByTestId("wave")).toHaveTextContent("3");
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("retries a transient initial snapshot failure", async () => {
-    const error = new Error("snapshot failed");
-    const consoleError = jest.spyOn(console, "error").mockImplementation();
-    commonApiFetchMock
-      .mockRejectedValueOnce(error)
-      .mockResolvedValueOnce(snapshot("profile-1"));
-
-    render(
-      <DmUnreadStateProvider>
-        <Capture />
-      </DmUnreadStateProvider>
-    );
-
-    await waitFor(
-      () => expect(screen.getByTestId("messages")).toHaveTextContent("1"),
-      { timeout: 2_000 }
-    );
-    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
-    expect(consoleError).not.toHaveBeenCalled();
-  });
-
-  it("keeps recovering after the initial snapshot retry budget is exhausted", async () => {
+  it("retries a transient snapshot failure through the jittered recovery policy", async () => {
     jest.useFakeTimers();
+    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0.5);
     const error = new Error("snapshot failed");
     const consoleError = jest.spyOn(console, "error").mockImplementation();
     commonApiFetchMock
-      .mockRejectedValueOnce(error)
-      .mockRejectedValueOnce(error)
       .mockRejectedValueOnce(error)
       .mockResolvedValueOnce(snapshot("profile-1"));
 
@@ -185,16 +159,49 @@ describe("DmUnreadStateProvider", () => {
 
     try {
       await act(async () => {
-        await jest.advanceTimersByTimeAsync(1_000);
+        await jest.advanceTimersByTimeAsync(0);
       });
-      expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId("messages")).toHaveTextContent("0");
 
       await act(async () => {
         await jest.advanceTimersByTimeAsync(5_000);
       });
-      expect(commonApiFetchMock).toHaveBeenCalledTimes(4);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
       expect(screen.getByTestId("messages")).toHaveTextContent("1");
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      rendered.unmount();
+      consoleError.mockRestore();
+      randomSpy.mockRestore();
+      jest.useRealTimers();
+    }
+  });
+
+  it("stops retrying terminal snapshot failures for the current activation", async () => {
+    jest.useFakeTimers();
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    commonApiFetchMock.mockRejectedValue({ status: 403 });
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      expect(consoleError).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        window.dispatchEvent(new Event("focus"));
+        window.dispatchEvent(new Event("online"));
+        await jest.advanceTimersByTimeAsync(10 * 60 * 1_000);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
     } finally {
       rendered.unmount();
       consoleError.mockRestore();
@@ -260,24 +267,6 @@ describe("DmUnreadStateProvider", () => {
     act(() => window.dispatchEvent(new Event("focus")));
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(3));
     nowSpy.mockRestore();
-  });
-
-  it("coalesces DM wave-list invalidations for websocket bursts", async () => {
-    render(
-      <DmUnreadStateProvider>
-        <Capture />
-      </DmUnreadStateProvider>
-    );
-    await waitFor(() =>
-      expect(screen.getByTestId("messages")).toHaveTextContent("1")
-    );
-
-    act(() => {
-      websocketHandler?.(state({ unreadCount: 2, version: 2 }));
-      websocketHandler?.(state({ unreadCount: 3, version: 3 }));
-    });
-
-    await waitFor(() => expect(invalidateQueriesMock).toHaveBeenCalledTimes(1));
   });
 
   it("does not let a stale profile snapshot bleed into the switched profile", async () => {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getQueryErrorStatus } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnreadConversationState";
 import type { ApiDmUnreadSnapshot } from "@/generated/models/ApiDmUnreadSnapshot";
@@ -18,7 +17,6 @@ import {
 } from "@/services/auth/auth.utils";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
-import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
   createContext,
@@ -63,20 +61,25 @@ interface DmUnreadContextValue {
 
 const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
-const DM_WAVE_LIST_INVALIDATION_DELAY_MS = 250;
-const SNAPSHOT_RETRY_DELAYS_MS = [250, 750] as const;
 const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
-const SNAPSHOT_RECOVERY_RETRY_DELAYS_MS = [
+const SNAPSHOT_RETRY_BASE_DELAYS_MS = [
   5_000,
   30_000,
   SNAPSHOT_RECONCILIATION_INTERVAL_MS,
 ] as const;
+const SNAPSHOT_RETRY_JITTER_RATIO = 0.2;
 let nextProfileActivationId = 1;
+
+type SnapshotSynchronizationResult =
+  | "synchronized"
+  | "retryable-failure"
+  | "terminal-failure"
+  | "stale";
 
 interface InFlightSnapshotRequest {
   readonly activationId: number;
   readonly jwt: string;
-  readonly promise: Promise<boolean>;
+  readonly promise: Promise<SnapshotSynchronizationResult>;
   readonly requestId: number;
 }
 
@@ -121,15 +124,21 @@ interface SnapshotSynchronizationRequest {
   readonly store: DmUnreadStore;
 }
 
-const waitForSnapshotRetry = (delay: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, delay);
-  });
+const getSnapshotRetryDelay = (attempt: number): number => {
+  const baseDelay =
+    SNAPSHOT_RETRY_BASE_DELAYS_MS[
+      Math.min(attempt, SNAPSHOT_RETRY_BASE_DELAYS_MS.length - 1)
+    ] ?? SNAPSHOT_RECONCILIATION_INTERVAL_MS;
+  const jitterMultiplier =
+    1 -
+    SNAPSHOT_RETRY_JITTER_RATIO +
+    Math.random() * SNAPSHOT_RETRY_JITTER_RATIO * 2;
+  return Math.round(baseDelay * jitterMultiplier);
+};
 
 const synchronizeDmUnreadSnapshot = async (
-  request: SnapshotSynchronizationRequest,
-  attempt = 0
-): Promise<boolean> => {
+  request: SnapshotSynchronizationRequest
+): Promise<SnapshotSynchronizationResult> => {
   try {
     const response = await commonApiFetch<unknown>({
       endpoint: "dm-drops/unread/snapshot",
@@ -137,7 +146,7 @@ const synchronizeDmUnreadSnapshot = async (
       errorMode: "structured",
     });
     if (!request.isCurrentRequest()) {
-      return false;
+      return "stale";
     }
     if (
       !isDmUnreadSnapshot(response) ||
@@ -146,22 +155,17 @@ const synchronizeDmUnreadSnapshot = async (
       throw new Error("Invalid DM unread snapshot response");
     }
     request.store.applySnapshot(response, request.startedAtSequence);
-    return true;
+    return "synchronized";
   } catch (error) {
     if (!request.isCurrentRequest()) {
-      return false;
+      return "stale";
     }
-    const retryDelay = SNAPSHOT_RETRY_DELAYS_MS[attempt];
     const status = getQueryErrorStatus(error);
-    if (retryDelay === undefined || (status !== null && status < 500)) {
+    if (status !== null && status >= 400 && status < 500 && status !== 429) {
       console.error("Failed to synchronize DM unread state", error);
-      return false;
+      return "terminal-failure";
     }
-    await waitForSnapshotRetry(retryDelay);
-    if (!request.isCurrentRequest()) {
-      return false;
-    }
-    return synchronizeDmUnreadSnapshot(request, attempt + 1);
+    return "retryable-failure";
   }
 };
 
@@ -170,7 +174,6 @@ export function DmUnreadStateProvider({
 }: {
   readonly children: ReactNode;
 }) {
-  const queryClient = useQueryClient();
   const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
   const { isActive, isCapacitor } = useCapacitor();
   const [authRevision, setAuthRevision] = useState(0);
@@ -194,9 +197,10 @@ export function DmUnreadStateProvider({
   );
   const nextSnapshotRequestIdRef = useRef(1);
   const lastRecoverySnapshotAtRef = useRef(0);
-  const dmWaveListInvalidationTimerRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const terminalSnapshotFailureActivationIdsRef = useRef(new Set<number>());
+  const nextSnapshotAllowedAtByActivationRef = useRef(
+    new Map<number, number>()
+  );
   const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
   const previousMobileActiveRef = useRef(isActive);
   const authJwt = getAuthJwt();
@@ -205,6 +209,8 @@ export function DmUnreadStateProvider({
   useLayoutEffect(() => {
     activeProfileIdRef.current = activeProfileId;
     activeActivationRef.current = profileActivation;
+    terminalSnapshotFailureActivationIdsRef.current.clear();
+    nextSnapshotAllowedAtByActivationRef.current.clear();
     if (activeProfileId) {
       store.resetProfile(activeProfileId);
     }
@@ -242,7 +248,7 @@ export function DmUnreadStateProvider({
       expectedProfileId: string,
       jwt: string,
       expectedActivationId: number
-    ): Promise<boolean> => {
+    ): Promise<SnapshotSynchronizationResult> => {
       const existingRequest =
         inFlightSnapshotByProfileRef.current.get(expectedProfileId);
       if (
@@ -269,13 +275,32 @@ export function DmUnreadStateProvider({
         jwt,
         startedAtSequence,
         store,
-      }).finally(() => {
-        const currentRequest =
-          inFlightSnapshotByProfileRef.current.get(expectedProfileId);
-        if (currentRequest?.requestId === requestId) {
-          inFlightSnapshotByProfileRef.current.delete(expectedProfileId);
-        }
-      });
+      })
+        .then((result) => {
+          if (result === "synchronized") {
+            terminalSnapshotFailureActivationIdsRef.current.delete(
+              expectedActivationId
+            );
+            nextSnapshotAllowedAtByActivationRef.current.delete(
+              expectedActivationId
+            );
+          } else if (result === "terminal-failure") {
+            terminalSnapshotFailureActivationIdsRef.current.add(
+              expectedActivationId
+            );
+            nextSnapshotAllowedAtByActivationRef.current.delete(
+              expectedActivationId
+            );
+          }
+          return result;
+        })
+        .finally(() => {
+          const currentRequest =
+            inFlightSnapshotByProfileRef.current.get(expectedProfileId);
+          if (currentRequest?.requestId === requestId) {
+            inFlightSnapshotByProfileRef.current.delete(expectedProfileId);
+          }
+        });
       inFlightSnapshotByProfileRef.current.set(expectedProfileId, {
         activationId: expectedActivationId,
         jwt,
@@ -287,23 +312,31 @@ export function DmUnreadStateProvider({
     [store]
   );
 
-  const requestActiveSnapshot = useCallback(async (): Promise<boolean> => {
-    const now = Date.now();
-    if (
-      now - lastRecoverySnapshotAtRef.current <
-      RECOVERY_SNAPSHOT_COOLDOWN_MS
-    ) {
-      return false;
-    }
-    const activation = activeActivationRef.current;
-    const profileId = activation.profileId;
-    const jwt = getAuthJwt();
-    if (!profileId || typeof jwt !== "string" || !isAuthJwtUsable(jwt)) {
-      return false;
-    }
-    lastRecoverySnapshotAtRef.current = now;
-    return requestSnapshot(profileId, jwt, activation.id);
-  }, [requestSnapshot]);
+  const requestActiveSnapshot =
+    useCallback(async (): Promise<SnapshotSynchronizationResult> => {
+      const now = Date.now();
+      if (
+        now - lastRecoverySnapshotAtRef.current <
+        RECOVERY_SNAPSHOT_COOLDOWN_MS
+      ) {
+        return "stale";
+      }
+      const activation = activeActivationRef.current;
+      if (
+        terminalSnapshotFailureActivationIdsRef.current.has(activation.id) ||
+        now <
+          (nextSnapshotAllowedAtByActivationRef.current.get(activation.id) ?? 0)
+      ) {
+        return "stale";
+      }
+      const profileId = activation.profileId;
+      const jwt = getAuthJwt();
+      if (!profileId || typeof jwt !== "string" || !isAuthJwtUsable(jwt)) {
+        return "stale";
+      }
+      lastRecoverySnapshotAtRef.current = now;
+      return requestSnapshot(profileId, jwt, activation.id);
+    }, [requestSnapshot]);
 
   useEffect(() => {
     if (
@@ -348,24 +381,28 @@ export function DmUnreadStateProvider({
         return;
       }
       hasAttemptedSnapshot = true;
-      const synchronized = await requestSnapshot(
+      const result = await requestSnapshot(
         expectedProfileId,
         expectedJwt,
         expectedActivationId
       );
-      if (synchronized) {
+      if (result === "stale") {
+        return;
+      }
+      if (result === "synchronized") {
         recoveryAttempt = 0;
         scheduleSnapshot(SNAPSHOT_RECONCILIATION_INTERVAL_MS);
         return;
       }
-      const retryDelay =
-        SNAPSHOT_RECOVERY_RETRY_DELAYS_MS[
-          Math.min(
-            recoveryAttempt,
-            SNAPSHOT_RECOVERY_RETRY_DELAYS_MS.length - 1
-          )
-        ] ?? SNAPSHOT_RECONCILIATION_INTERVAL_MS;
+      if (result === "terminal-failure") {
+        return;
+      }
+      const retryDelay = getSnapshotRetryDelay(recoveryAttempt);
       recoveryAttempt += 1;
+      nextSnapshotAllowedAtByActivationRef.current.set(
+        expectedActivationId,
+        Date.now() + retryDelay
+      );
       scheduleSnapshot(retryDelay);
     }
 
@@ -386,39 +423,6 @@ export function DmUnreadStateProvider({
     profileActivation.id,
   ]);
 
-  const invalidateDmWaveLists = useCallback(() => {
-    if (dmWaveListInvalidationTimerRef.current !== null) {
-      return;
-    }
-    dmWaveListInvalidationTimerRef.current = setTimeout(() => {
-      dmWaveListInvalidationTimerRef.current = null;
-      queryClient
-        .invalidateQueries(
-          {
-            predicate: (query) => {
-              const [key, params] = query.queryKey;
-              return (
-                key === QueryKey.WAVES_V2 &&
-                isRecord(params) &&
-                params["direct_message"] === true
-              );
-            },
-          },
-          { cancelRefetch: false }
-        )
-        .catch(() => undefined);
-    }, DM_WAVE_LIST_INVALIDATION_DELAY_MS);
-  }, [queryClient]);
-
-  useEffect(
-    () => () => {
-      if (dmWaveListInvalidationTimerRef.current !== null) {
-        clearTimeout(dmWaveListInvalidationTimerRef.current);
-      }
-    },
-    []
-  );
-
   const applyServerState = useCallback(
     (
       state: ApiDmUnreadConversationState,
@@ -434,13 +438,9 @@ export function DmUnreadStateProvider({
       ) {
         return false;
       }
-      const changed = store.applyServerState(state);
-      if (changed) {
-        invalidateDmWaveLists();
-      }
-      return changed;
+      return store.applyServerState(state);
     },
-    [invalidateDmWaveLists, store]
+    [store]
   );
 
   const beginRead = useCallback(
