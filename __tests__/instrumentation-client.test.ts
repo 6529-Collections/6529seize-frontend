@@ -338,6 +338,16 @@ describe("instrumentation-client", () => {
     function: "stringify",
     in_app: true,
   };
+  const sentryBrowserHelperFrame = {
+    filename:
+      "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+    abs_path:
+      "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+    function: "n",
+    in_app: true,
+    lineno: 111,
+    colno: 58,
+  };
 
   type BeforeSendResult = {
     level?: string | undefined;
@@ -2469,6 +2479,24 @@ describe("instrumentation-client", () => {
   it("drops exact MetaMask Mobile cyclic JSON timer noise", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops exact MetaMask Mobile cyclic JSON timer noise with a Sentry browser helper frame", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [sentryBrowserHelperFrame, nativeJsonStringifyFrame],
+      {
+        transaction: "/messages",
+        request: {
+          url: "https://6529.io/messages",
+        },
+        breadcrumbs: [],
+      }
+    );
 
     const result = beforeSend(event);
 
