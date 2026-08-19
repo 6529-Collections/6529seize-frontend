@@ -115,8 +115,8 @@ export default function CommunityMembers() {
       return null;
     }
 
-    if (activeProfileProxy) {
-      return `proxy:${activeProfileProxy.id}`;
+    if (activeProfileProxy?.id) {
+      return `proxy:${connectedIdentityKey}:${activeProfileProxy.id}`;
     }
 
     return `profile:${connectedIdentityKey}`;
@@ -366,14 +366,11 @@ export default function CommunityMembers() {
     !hasMemberContent && (isLoading || isFetching || !members);
 
   let membersContent: ReactNode = null;
-  if (isMembersError && activeGroupId) {
+  if (isMembersError && debouncedParams.group_id) {
     membersContent = (
-      <p
-        role="status"
-        className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-text-sm tw-leading-5 tw-text-iron-400"
-      >
+      <output className="tw-m-0 tw-block tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-text-sm tw-leading-5 tw-text-iron-400">
         {t(locale, "network.groupInspection.membersUnavailable")}
-      </p>
+      </output>
     );
   } else if (showMembersSkeleton) {
     membersContent = <CommunityMembersTableSkeleton />;

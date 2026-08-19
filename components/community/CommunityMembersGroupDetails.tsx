@@ -61,6 +61,8 @@ export default function CommunityMembersGroupDetails({
     );
   }
 
+  // The API returns full private-group data only to the creator or an eligible
+  // member, so a successful inspectable response is the authorization signal.
   if (
     isError ||
     !group ||

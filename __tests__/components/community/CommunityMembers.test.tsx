@@ -148,6 +148,7 @@ describe("CommunityMembers", () => {
   });
 
   it("does not render cached members when the scoped request fails", () => {
+    searchParamsMock.set("group", "1");
     (useQuery as jest.Mock).mockReturnValue({
       isError: true,
       isLoading: false,
@@ -159,6 +160,54 @@ describe("CommunityMembers", () => {
 
     expect(screen.queryByTestId("table")).not.toBeInTheDocument();
     expect(screen.getByText("Group members unavailable.")).toBeInTheDocument();
+  });
+
+  it("shows a scoped error while a deep-linked group syncs to context", () => {
+    searchParamsMock.set("group", "deep-linked-group");
+    (useActiveGroup as unknown as jest.Mock).mockReturnValue({
+      activeGroupId: null,
+      setActiveGroupId,
+    });
+    (useQuery as jest.Mock).mockReturnValue({
+      isError: true,
+      isLoading: false,
+      isFetching: false,
+      data: undefined,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByTestId("skeleton")).not.toBeInTheDocument();
+    expect(screen.getByText("Group members unavailable.")).toBeInTheDocument();
+  });
+
+  it("partitions proxy results by the connected profile and proxy", () => {
+    searchParamsMock.set("group", "group-1");
+    (useAuth as jest.Mock).mockReturnValue({
+      activeProfileProxy: { id: "proxy-1" },
+      connectedProfile: { id: "viewer-1", handle: "viewer" },
+      isAuthenticated: true,
+    });
+    let queryKey: readonly unknown[] | undefined;
+    (useQuery as jest.Mock).mockImplementation(
+      (options: { readonly queryKey: readonly unknown[] }) => {
+        queryKey = options.queryKey;
+        return {
+          isError: false,
+          isLoading: true,
+          isFetching: true,
+          data: undefined,
+        };
+      }
+    );
+
+    renderComponent();
+
+    expect(queryKey?.[1]).toEqual(
+      expect.objectContaining({
+        viewerIdentityKey: "proxy:viewer-1:proxy-1",
+      })
+    );
   });
 
   it("only preserves previous results for the same group and viewer", () => {
