@@ -460,9 +460,7 @@ export function hasNativeJsonStringifyFrame(
   return Array.isArray(frames) && frames.some(isNativeJsonStringifyFrame);
 }
 
-export function isSentryBrowserHelperFrame(
-  frame: SentryStackFrame
-): boolean {
+export function isSentryBrowserHelperFrame(frame: SentryStackFrame): boolean {
   const framePaths = getFramePaths(frame);
   return (
     framePaths.length > 0 &&
