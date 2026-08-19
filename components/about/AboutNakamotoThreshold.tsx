@@ -2,31 +2,38 @@ import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_BODY_TEXT_CLASS_NAME,
+  ABOUT_CARD_CLASS_NAME,
+  ABOUT_MEDIA_FRAME_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+  ABOUT_SECTION_HEADING_CLASS_NAME,
+} from "./AboutLayout";
 
 const NAKAMOTO_EDITORIAL_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
 
 const NAKAMOTO_CONTENT_CLASS = [
-  "[&_p]:tw-mb-0 [&_p]:tw-mt-4 [&_p:first-child]:tw-mt-0 [&_p]:tw-text-base [&_p]:tw-leading-7 [&_p]:tw-text-iron-300",
-  "[&_ul]:tw-mb-0 [&_ul]:tw-mt-4 [&_ul]:tw-space-y-2 [&_ul]:tw-pl-5 [&_ul>li]:tw-pl-1 [&_ul>li::marker]:tw-text-iron-600",
-  "[&_ol]:tw-mb-0 [&_ol]:tw-mt-4 [&_ol]:tw-space-y-2 [&_ol]:tw-pl-6 [&_ol>li]:tw-pl-1 [&_ol>li::marker]:tw-font-semibold [&_ol>li::marker]:tw-text-iron-500",
+  ABOUT_BODY_TEXT_CLASS_NAME,
+  "[&_p]:tw-mb-0 [&_p]:tw-mt-4 [&_p:first-child]:tw-mt-0",
+  "[&_ol]:tw-mb-0 [&_ol]:tw-mt-4 [&_ol]:tw-space-y-2 [&_ol]:tw-pl-6 [&_ol>li]:tw-pl-1 [&_ol>li::marker]:tw-font-semibold [&_ol>li::marker]:tw-text-iron-400",
 ].join(" ");
 
-const NAKAMOTO_SECTION_HEADING_CLASS =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+const NAKAMOTO_LIST_CLASS =
+  "tw-mb-0 tw-space-y-2 tw-pl-5 [&>li]:tw-pl-1 marker:tw-text-iron-500";
 
-const NAKAMOTO_IMAGE_FRAME_CLASS =
-  "tw-m-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-2 sm:tw-p-3";
+const NAKAMOTO_IMAGE_FRAME_CLASS = `tw-m-0 tw-overflow-hidden ${ABOUT_MEDIA_FRAME_CLASS_NAME} tw-p-2 sm:tw-p-3`;
 
-const NAKAMOTO_CALLOUT_CLASS =
-  "tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-5 sm:tw-p-6";
+const NAKAMOTO_CALLOUT_CLASS = `tw-mt-4 ${ABOUT_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`;
 
-const NAKAMOTO_CHECK_LIST_CLASS = "tw-list-none !tw-pl-0";
+const NAKAMOTO_CHECK_LIST_CLASS =
+  "tw-mb-0 tw-mt-4 tw-list-none tw-space-y-2 tw-pl-0";
 
 function NakamotoCheckListItem({ children }: { readonly children: ReactNode }) {
   return (
-    <li className="tw-flex tw-items-center tw-gap-3 !tw-pl-0">
+    <li className="tw-flex tw-items-center tw-gap-3 tw-pl-0">
       <CheckCircleIcon
         aria-hidden="true"
         className="tw-size-5 tw-flex-none tw-text-emerald-400"
@@ -42,20 +49,16 @@ export default function AboutNakamotoThreshold() {
       className={`tw-w-full tw-pb-12 tw-text-iron-100 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
       <header className="tw-px-1 tw-pb-8 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
-        <div className={NAKAMOTO_EDITORIAL_GRID_CLASS}>
-          <div className="lg:tw-sticky lg:tw-top-28">
-            <h1 className={NAKAMOTO_SECTION_HEADING_CLASS}>
-              Nakamoto Threshold
-            </h1>
-          </div>
-          <div className="tw-min-w-0">
-            <p className="tw-m-0 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
-              What is the Nakamoto Threshold?
-            </p>
-            <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+        <div className="tw-max-w-4xl">
+          <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME}>Nakamoto Threshold</h1>
+          <h2 className={`tw-mt-6 ${ABOUT_SECTION_HEADING_CLASS_NAME}`}>
+            What is the Nakamoto Threshold?
+          </h2>
+          <div className="tw-mt-4 tw-min-w-0">
+            <p className={`tw-m-0 ${ABOUT_BODY_TEXT_CLASS_NAME}`}>
               This is a bit of Memes inside-baseball but I am{" "}
               <Link
-                className="hover:tw-text-primary-200 tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 href="https://x.com/punk6529/status/1779105411443949809"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -64,21 +67,21 @@ export default function AboutNakamotoThreshold() {
               </Link>{" "}
               it out so we have it available for reference.
             </p>
-            <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+            <p className={`tw-m-0 tw-mt-4 ${ABOUT_BODY_TEXT_CLASS_NAME}`}>
               Meme Card #4 is an homage to the first Rare Pepe which had an
               edition count of 300.
             </p>
-            <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+            <p className={`tw-m-0 tw-mt-4 ${ABOUT_BODY_TEXT_CLASS_NAME}`}>
               So Meme Card #4 had an edition count of 300.
             </p>
-            <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 sm:tw-grid-cols-2 sm:tw-gap-6">
+            <div className="tw-mt-6 tw-grid tw-max-w-3xl tw-grid-cols-1 tw-items-start tw-gap-4 sm:tw-grid-cols-2 sm:tw-gap-6">
               <figure className={NAKAMOTO_IMAGE_FRAME_CLASS}>
                 <Image
                   alt="Meme Card #4"
                   className="tw-h-auto tw-w-full tw-rounded-lg"
                   height={1464}
                   loading="eager"
-                  sizes="(max-width: 639px) calc(100vw - 2rem), 28rem"
+                  sizes="(max-width: 639px) calc(100vw - 2rem), 23rem"
                   src="/the-memes-4.jpeg"
                   width={1000}
                 />
@@ -89,7 +92,7 @@ export default function AboutNakamotoThreshold() {
                   className="tw-h-auto tw-w-full tw-rounded-lg"
                   height={560}
                   loading="eager"
-                  sizes="(max-width: 639px) calc(100vw - 2rem), 28rem"
+                  sizes="(max-width: 639px) calc(100vw - 2rem), 23rem"
                   src="/nakamoto-card-og.png"
                   width={400}
                 />
@@ -211,7 +214,7 @@ export default function AboutNakamotoThreshold() {
             There was *a lot* of discussion in Discord and basically it boiled
             down to 5 ideas:
           </p>
-          <ul className="!tw-mt-6 tw-list-disc">
+          <ul className={`${NAKAMOTO_LIST_CLASS} tw-mt-6 tw-list-disc`}>
             <li>Change the threshold</li>
             <li>Mint fewer times per week</li>
             <li>Airdrop to collectors</li>
@@ -220,7 +223,7 @@ export default function AboutNakamotoThreshold() {
           </ul>
         </div>
         <p>The first one was the easiest.</p>
-        <blockquote className="tw-mx-0 tw-my-6 tw-border-0 !tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-5 tw-italic tw-text-iron-300 sm:tw-pl-6">
+        <blockquote className="tw-mx-0 tw-my-6 tw-border-y-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-iron-700 tw-pl-5 tw-italic tw-text-iron-300 sm:tw-pl-6">
           <p>
             &quot;Sure, I said that, but circumstances change, we have to change
             with circumstances. Empires rise and fall, major companies go
@@ -278,7 +281,7 @@ export default function AboutNakamotoThreshold() {
           statements about The Memes.
         </p>
         <p>I concluded that I had made two:</p>
-        <ul>
+        <ul className={`${NAKAMOTO_LIST_CLASS} tw-mt-4`}>
           <li>that they would be CC0</li>
           <li>that card #4 would be the lowest edition count</li>
         </ul>
@@ -381,7 +384,7 @@ export default function AboutNakamotoThreshold() {
             the happiness of 10-20-30 collectors getting a 0.06529 ETH free
             airdrop of a card they might have not even wanted
           </NakamotoCheckListItem>
-          <li className="!tw-pl-8">...would be much less than...</li>
+          <li className="tw-pl-8">...would be much less than...</li>
           <NakamotoCheckListItem>
             the annoyance of the other 9,500 who did not get it.
           </NakamotoCheckListItem>
@@ -612,10 +615,10 @@ function NakamotoEditorialSection({
   return (
     <section
       aria-labelledby={headingId}
-      className={`${NAKAMOTO_EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12`}
+      className={`${NAKAMOTO_EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12`}
     >
       <div className="lg:tw-sticky lg:tw-top-28">
-        <h2 className={NAKAMOTO_SECTION_HEADING_CLASS} id={headingId}>
+        <h2 className={ABOUT_SECTION_HEADING_CLASS_NAME} id={headingId}>
           {title}
         </h2>
       </div>

@@ -4,28 +4,31 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_BODY_TEXT_CLASS_NAME,
+  ABOUT_CARD_CLASS_NAME,
+  ABOUT_COMPACT_HEADING_CLASS_NAME,
+  ABOUT_INSET_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+  ABOUT_SECTION_HEADING_CLASS_NAME,
+} from "./AboutLayout";
 
-const APPLY_SECTION_CLASS =
-  "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-12";
+const APPLY_SECTION_CLASS = `tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-px-1 tw-py-10 sm:tw-px-2 sm:tw-py-12`;
 
-const APPLY_SECTION_HEADING_CLASS =
-  "tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl";
+const APPLY_SECTION_HEADING_CLASS = ABOUT_SECTION_HEADING_CLASS_NAME;
 
-const APPLY_PANEL_CLASS =
-  "tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-5 sm:tw-p-6";
+const APPLY_PANEL_CLASS = `tw-mt-6 ${ABOUT_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`;
 
-const APPLY_DETAIL_ROW_CLASS =
-  "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-pb-5";
+const APPLY_DETAIL_ROW_CLASS = `tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-pb-5`;
 
-const APPLY_DETAIL_HEADING_CLASS =
-  "tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100";
+const APPLY_DETAIL_HEADING_CLASS = ABOUT_COMPACT_HEADING_CLASS_NAME;
 
-const APPLY_DETAIL_BODY_CLASS =
-  "tw-m-0 tw-mt-2 tw-text-base tw-leading-7 tw-text-iron-300";
+const APPLY_DETAIL_BODY_CLASS = `tw-m-0 tw-mt-2 ${ABOUT_BODY_TEXT_CLASS_NAME}`;
 
 const APPLY_LINK_CLASS =
-  "tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+  "tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
 export default function AboutApply() {
   return (
@@ -33,19 +36,25 @@ export default function AboutApply() {
       className={`tw-w-full tw-pb-12 tw-text-iron-100 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
       <div className="tw-mx-auto tw-w-full tw-max-w-3xl">
-        <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
+        <header
+          className={`tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8`}
+        >
           <div>
-            <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-              Apply
-            </h1>
-            <p className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-8">
+            <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME}>Apply</h1>
+            <p
+              className={`tw-mt-6 tw-text-pretty ${ABOUT_SECTION_HEADING_CLASS_NAME}`}
+            >
               How Does Submission Work?
             </p>
-            <p className="tw-m-0 tw-mt-4 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-300">
+            <p
+              className={`tw-m-0 tw-mt-4 tw-font-semibold ${ABOUT_BODY_TEXT_CLASS_NAME}`}
+            >
               There are two ways you can be eligible to submit:
             </p>
             <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-grid-cols-2">
-              <li className="tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-4 tw-text-base tw-leading-7 tw-text-iron-300">
+              <li
+                className={`tw-flex tw-items-start tw-gap-3 ${ABOUT_CARD_CLASS_NAME} tw-p-4 ${ABOUT_BODY_TEXT_CLASS_NAME}`}
+              >
                 <ApplyCheckIcon />
                 <span>
                   <strong className="tw-font-semibold tw-text-iron-100">
@@ -54,7 +63,9 @@ export default function AboutApply() {
                   You&apos;ve previously dropped a Meme Card.
                 </span>
               </li>
-              <li className="tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.025] tw-p-4 tw-text-base tw-leading-7 tw-text-iron-300">
+              <li
+                className={`tw-flex tw-items-start tw-gap-3 ${ABOUT_CARD_CLASS_NAME} tw-p-4 ${ABOUT_BODY_TEXT_CLASS_NAME}`}
+              >
                 <ApplyCheckIcon />
                 <span>
                   <strong className="tw-font-semibold tw-text-iron-100">
@@ -79,7 +90,7 @@ export default function AboutApply() {
             Seeking a Nomination (New Artists)
           </h2>
           <div className={APPLY_PANEL_CLASS}>
-            <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+            <p className={`tw-m-0 ${ABOUT_BODY_TEXT_CLASS_NAME}`}>
               Visit the{" "}
               <a
                 className={APPLY_LINK_CLASS}
@@ -150,7 +161,9 @@ export default function AboutApply() {
                 based on community support over the past 24 hours (24HV),
                 encouraging sustained engagement over last-minute spikes.
               </p>
-              <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-p-4 sm:tw-p-5">
+              <div
+                className={`tw-mt-5 ${ABOUT_INSET_CLASS_NAME} tw-p-4 sm:tw-p-5`}
+              >
                 <h4 className="tw-m-0 tw-flex tw-items-center tw-gap-2.5 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
                   <CalendarDaysIcon
                     aria-hidden="true"
@@ -179,7 +192,7 @@ export default function AboutApply() {
             Creative Guidelines (Important!)
           </h2>
           <div className={APPLY_PANEL_CLASS}>
-            <div className="tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-300">
+            <div className={`tw-space-y-4 ${ABOUT_BODY_TEXT_CLASS_NAME}`}>
               <p className="tw-m-0">
                 Carefully read the{" "}
                 <a
@@ -206,7 +219,9 @@ export default function AboutApply() {
               </p>
             </div>
 
-            <div className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-6">
+            <div
+              className={`tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-pt-6`}
+            >
               <div className={APPLY_DETAIL_ROW_CLASS}>
                 <h3 className={APPLY_DETAIL_HEADING_CLASS}>
                   Need Artistic Feedback?
@@ -271,8 +286,10 @@ export default function AboutApply() {
               </div>
             </div>
 
-            <div className="tw-mt-6 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-p-4 tw-text-center">
-              <p className="tw-m-0 tw-text-sm tw-italic tw-leading-6 tw-text-iron-500">
+            <div
+              className={`tw-mt-6 ${ABOUT_INSET_CLASS_NAME} tw-p-4 tw-text-center`}
+            >
+              <p className="tw-m-0 tw-text-sm tw-italic tw-leading-6 tw-text-iron-400">
                 We receive many messages; thank you for your patience if
                 responses are delayed.
               </p>
@@ -304,10 +321,10 @@ function ScheduleRow({
     <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-1 sm:tw-grid-cols-[minmax(5.75rem,auto)_minmax(0,1fr)] sm:tw-items-center sm:tw-gap-3">
       <span className="tw-font-semibold tw-text-primary-300">{day}</span>
       <span className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2">
-        <span className="tw-text-iron-500">17:00 GMT</span>
+        <span className="tw-text-iron-400">17:00 GMT</span>
         <ArrowRightIcon
           aria-hidden="true"
-          className="tw-size-4 tw-shrink-0 tw-text-iron-600"
+          className="tw-size-4 tw-shrink-0 tw-text-iron-500"
         />
         <span className="tw-font-medium tw-text-iron-200">
           minted {destination}

@@ -340,20 +340,29 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
   });
 
-  it("ignores blank related Jest test entries before resolving paths", () => {
+  it("filters non-file related Jest discovery output before resolving paths", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
     );
 
     const guardIndex = workflow.indexOf('if [ -z "$related_test" ]; then');
+    const fileGuardIndex = workflow.indexOf(
+      'if [ ! -f "$related_test" ]; then'
+    );
     const resolveIndex = workflow.indexOf(
       'related_path="$(realpath "$related_test")"'
     );
 
     expect(guardIndex).toBeGreaterThanOrEqual(0);
+    expect(fileGuardIndex).toBeGreaterThan(guardIndex);
     expect(resolveIndex).toBeGreaterThan(guardIndex);
-    expect(workflow.slice(guardIndex, resolveIndex)).toContain("continue");
+    expect(resolveIndex).toBeGreaterThan(fileGuardIndex);
+    const fileGuardBlock = workflow.slice(fileGuardIndex, resolveIndex);
+    expect(fileGuardBlock).toContain(
+      "Skipping non-file Jest discovery output"
+    );
+    expect(fileGuardBlock).toContain("continue");
   });
 
   it.each([
