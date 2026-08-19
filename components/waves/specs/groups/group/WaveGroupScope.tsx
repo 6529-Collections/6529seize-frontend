@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -39,13 +38,14 @@ export default function WaveGroupScope({
     >
       <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5">
         {group.author?.pfp ? (
-          <Image
+          // Profile images can come from arbitrary remote hosts.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             className="tw-mr-2 tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800/80 tw-align-middle tw-shadow-sm"
             src={getScaledImageUri(group.author.pfp, ImageScale.W_AUTO_H_50)}
             alt=""
-            width={20}
-            height={20}
-            unoptimized
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <span className="tw-mr-2 tw-inline-block tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800/80 tw-align-middle" />

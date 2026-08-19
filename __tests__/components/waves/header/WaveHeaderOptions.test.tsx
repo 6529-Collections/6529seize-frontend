@@ -30,25 +30,16 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/utils/animation/CommonAnimationWrapper", () => ({
-  __esModule: true,
-  default: ({ children }: any) => <>{children}</>,
-}));
-
-jest.mock("@/components/utils/animation/CommonAnimationOpacity", () => ({
-  __esModule: true,
-  default: ({ children }: any) => <>{children}</>,
-}));
-
 jest.mock(
   "@/components/waves/header/options/delete/WaveDeleteModal",
-  () => (props: any) => (
-    <div role="dialog" aria-label="Delete wave confirmation">
-      <button type="button" onClick={props.closeModal}>
-        Cancel deletion
-      </button>
-    </div>
-  )
+  () => (props: any) =>
+    props.isOpen ? (
+      <div role="dialog" aria-label="Delete wave confirmation">
+        <button type="button" onClick={props.closeModal}>
+          Cancel deletion
+        </button>
+      </div>
+    ) : null
 );
 
 jest.mock("react-use", () => ({

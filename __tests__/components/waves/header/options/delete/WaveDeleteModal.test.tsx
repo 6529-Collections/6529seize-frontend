@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDeleteModal from "@/components/waves/header/options/delete/WaveDeleteModal";
 import { AuthContext } from "@/components/auth/Auth";
@@ -21,16 +21,16 @@ describe("WaveDeleteModal", () => {
   } as any;
   const rq = { invalidateDrops: jest.fn() } as any;
   const push = jest.fn();
-  const mutateAsync = jest.fn();
+  const mutate = jest.fn();
 
   beforeEach(() => {
     useRouterMock.mockReturnValue({ push });
     useMutationMock.mockImplementation((opts) => ({
-      mutateAsync: async () => {
-        await opts.mutationFn();
+      mutate: () => {
+        void opts.mutationFn();
         opts.onSuccess?.();
         opts.onSettled?.();
-        return mutateAsync();
+        mutate();
       },
     }));
   });
@@ -41,24 +41,65 @@ describe("WaveDeleteModal", () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <WaveDeleteModal wave={wave} closeModal={jest.fn()} />
+          <WaveDeleteModal wave={wave} isOpen closeModal={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
 
-    expect(screen.getByRole("dialog", { name: "Delete Wave" })).toHaveAttribute(
+    expect(screen.getByRole("dialog", { name: "Delete wave" })).toHaveAttribute(
       "aria-modal",
       "true"
     );
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
     expect(auth.requestAuth).toHaveBeenCalled();
-    expect(mutateAsync).toHaveBeenCalled();
+    expect(mutate).toHaveBeenCalled();
     expect(auth.setToast).toHaveBeenCalledWith({
       message: "Wave deleted.",
       type: "warning",
     });
     expect(rq.invalidateDrops).toHaveBeenCalled();
     expect(push).toHaveBeenCalledWith("/waves");
+  });
+
+  it("contains focus and restores it to the opener", async () => {
+    const user = userEvent.setup();
+    const wave = { id: "w1" } as any;
+
+    function Harness() {
+      const [isOpen, setIsOpen] = React.useState(false);
+
+      return (
+        <>
+          <button type="button" onClick={() => setIsOpen(true)}>
+            Open confirmation
+          </button>
+          <WaveDeleteModal
+            wave={wave}
+            isOpen={isOpen}
+            closeModal={() => setIsOpen(false)}
+          />
+        </>
+      );
+    }
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <Harness />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const opener = screen.getByRole("button", { name: "Open confirmation" });
+    await user.click(opener);
+
+    const dialog = screen.getByRole("dialog", { name: "Delete wave" });
+    await waitFor(() =>
+      expect(dialog).toContainElement(document.activeElement)
+    );
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(opener).toHaveFocus());
   });
 });

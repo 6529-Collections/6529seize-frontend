@@ -1,7 +1,5 @@
 "use client";
 
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -119,20 +117,11 @@ export default function WaveHeaderOptions({
           </CommonDropdownItemsDefaultWrapper>
         )}
       </div>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isDeleteModalOpen && (
-          <CommonAnimationOpacity
-            key="delete-wave-modal"
-            elementClasses="tw-absolute tw-z-50"
-            onClicked={(e) => e.stopPropagation()}
-          >
-            <WaveDeleteModal
-              wave={wave}
-              closeModal={() => setIsDeleteModalOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      <WaveDeleteModal
+        wave={wave}
+        isOpen={isDeleteModalOpen}
+        closeModal={() => setIsDeleteModalOpen(false)}
+      />
     </>
   );
 }

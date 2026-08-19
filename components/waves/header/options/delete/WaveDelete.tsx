@@ -1,6 +1,8 @@
 "use client";
 
 import clsx from "clsx";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function WaveDelete({
   isMobile = false,
@@ -9,6 +11,8 @@ export default function WaveDelete({
   readonly isMobile?: boolean | undefined;
   readonly onDeleteRequest: () => void;
 }) {
+  const locale = useBrowserLocale();
+
   return (
     <button
       type="button"
@@ -26,7 +30,7 @@ export default function WaveDelete({
       tabIndex={isMobile ? undefined : -1}
       id="options-menu-0-item-0"
     >
-      Delete
+      {t(locale, "waves.header.ownerOptionsDelete")}
     </button>
   );
 }
