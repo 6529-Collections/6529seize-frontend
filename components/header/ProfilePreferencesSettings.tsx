@@ -257,12 +257,9 @@ function ProfilePreferencesForm({
           </p>
 
           {isEssential && (
-            <div
-              role="status"
-              className="tw-mt-4 tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-200"
-            >
+            <output className="tw-mt-4 tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-200">
               {t(locale, "profilePreferences.notifications.pausedInfo")}
-            </div>
+            </output>
           )}
 
           <LazyMotion features={domAnimation}>

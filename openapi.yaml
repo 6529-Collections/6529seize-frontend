@@ -20485,6 +20485,9 @@ components:
       properties:
         direct_messages:
           type: boolean
+          description: >-
+            Direct-message and wave-activity notifications, including new waves,
+            all-drops subscriptions, and priority alerts.
         mentions_replies_quotes:
           type: boolean
         reactions_votes_boosts:
@@ -22558,9 +22561,13 @@ components:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
     ApiUpdateProfileNotificationCategories:
       type: object
+      additionalProperties: false
       properties:
         direct_messages:
           type: boolean
+          description: >-
+            Direct-message and wave-activity notifications, including new waves,
+            all-drops subscriptions, and priority alerts.
         mentions_replies_quotes:
           type: boolean
         reactions_votes_boosts:
@@ -22574,6 +22581,7 @@ components:
     ApiUpdateProfilePreferences:
       type: object
       minProperties: 1
+      additionalProperties: false
       properties:
         direct_message_policy:
           type: string

@@ -14,6 +14,9 @@
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateProfileNotificationCategories {
+    /**
+    * Direct-message and wave-activity notifications, including new waves, all-drops subscriptions, and priority alerts.
+    */
     'direct_messages'?: boolean;
     'mentions_replies_quotes'?: boolean;
     'reactions_votes_boosts'?: boolean;
