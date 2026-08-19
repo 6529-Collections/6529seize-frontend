@@ -51,7 +51,7 @@ export function getConnectionShareRoute({
       addresses.length !== 1 ||
       !shareCode ||
       !address ||
-      !isAddress(address)
+      !isAddress(address, { strict: false })
     ) {
       return null;
     }

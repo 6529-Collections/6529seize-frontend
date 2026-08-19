@@ -41,6 +41,16 @@ const defaultProps = {
   onAfterLeave: jest.fn(),
 };
 
+const appWallet = {
+  name: "Phoebe",
+  address: "0x00000000000000000000000000000000000000AA",
+  address_hashed: "encrypted",
+  mnemonic: "encrypted",
+  private_key: "encrypted",
+  imported: false,
+  created_at: 1,
+};
+
 describe("CapacitorConnectDialog", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,17 +81,7 @@ describe("CapacitorConnectDialog", () => {
       <CapacitorConnectDialog
         {...defaultProps}
         view="app-wallets"
-        appWallets={[
-          {
-            name: "Phoebe",
-            address: "0x00000000000000000000000000000000000000AA",
-            address_hashed: "encrypted",
-            mnemonic: "encrypted",
-            private_key: "encrypted",
-            imported: false,
-            created_at: 1,
-          },
-        ]}
+        appWallets={[appWallet]}
       />
     );
 
@@ -112,5 +112,26 @@ describe("CapacitorConnectDialog", () => {
     const status = screen.getByRole("status");
     expect(status.tagName).toBe("OUTPUT");
     expect(status).toHaveTextContent("No App Wallets yet.");
+  });
+
+  it("keeps errors announced and disables wallets while connecting", () => {
+    render(
+      <CapacitorConnectDialog
+        {...defaultProps}
+        view="app-wallets"
+        appWallets={[appWallet]}
+        busyWalletAddress={appWallet.address}
+        errorMessage="Wallet connection failed. Please try again."
+      />
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Wallet connection failed. Please try again."
+    );
+    expect(
+      screen.getByRole("button", {
+        name: "Connect with Phoebe, wallet 0x0000…00AA",
+      })
+    ).toBeDisabled();
   });
 });

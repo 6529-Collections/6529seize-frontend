@@ -299,6 +299,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     ]
   );
 
+  const openExternalWallets = useCallback(
+    () => openConnectModal("capacitorExternalWallets", "AllWallets"),
+    [openConnectModal]
+  );
+
   const seizeConnectOrThrow = useCallback(
     async (source: string): Promise<void> => {
       if (isSigningOutAllRef.current) {
@@ -770,9 +775,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
             view={capacitorConnectView}
             setView={setCapacitorConnectView}
             disconnectExternalWallet={disconnectExternalWalletBeforeSelection}
-            openExternalWallets={() =>
-              openConnectModal("capacitorExternalWallets", "AllWallets")
-            }
+            openExternalWallets={openExternalWallets}
             onHandoffStateChange={setIsCapacitorHandoffPending}
           />
         )}

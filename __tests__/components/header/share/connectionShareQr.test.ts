@@ -25,6 +25,19 @@ describe("getConnectionShareRoute", () => {
     ).toContain("/accept-connection-sharing?");
   });
 
+  it("accepts and checksums a lowercase address", () => {
+    expect(
+      getConnectionShareRoute({
+        content:
+          "mobile6529://share-connection?connection_share_code=code&address=0x00000000000000000000000000000000000000aa",
+        appScheme: "mobile6529",
+        timestamp: 123,
+      })
+    ).toBe(
+      "/accept-connection-sharing?connection_share_code=code&address=0x00000000000000000000000000000000000000AA&_t=123"
+    );
+  });
+
   it.each([
     "https://6529.io/accept-connection-sharing?connection_share_code=code&address=0x00000000000000000000000000000000000000AA",
     "mobile6529://navigate/profile?connection_share_code=code&address=0x00000000000000000000000000000000000000AA",

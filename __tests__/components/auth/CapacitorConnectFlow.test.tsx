@@ -127,6 +127,9 @@ function FlowHarness({
 describe("CapacitorConnectFlow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPush.mockReset();
+    mockScanQrCode.mockReset();
+    mockScanQrCode.mockResolvedValue(null);
     mockConnectors = [{ id: mockAppWalletAddress, type: "app-wallet" }];
     mockConnectAsync.mockResolvedValue(undefined);
     mockIsQRScannerCancellation.mockReturnValue(false);
