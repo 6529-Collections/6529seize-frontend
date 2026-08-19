@@ -11,6 +11,7 @@ interface EnsAddressInputProps {
   readonly disabled?: boolean;
   readonly autoFocus?: boolean;
   readonly className?: string | undefined;
+  readonly variant?: "default" | "dark" | undefined;
   readonly ariaDescribedBy?: string | undefined;
   readonly chainId?: number;
   readonly onAddressChange: (address: string) => void;
@@ -19,8 +20,11 @@ interface EnsAddressInputProps {
   readonly onError?: (hasError: boolean) => void;
 }
 
-const inputClassName =
+const defaultInputClassName =
   "tw-block tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-bg-clip-padding tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-950 tw-transition-[border-color,box-shadow] placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-bg-white focus:tw-text-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/30 disabled:tw-bg-iron-100 disabled:tw-opacity-100";
+
+const darkInputClassName =
+  "tw-block tw-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25 tw-bg-clip-padding tw-px-4 tw-py-2.5 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-100 tw-shadow-none tw-transition-[border-color,background-color,box-shadow] placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-bg-black/30 focus:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/20 disabled:tw-bg-black/20 disabled:tw-text-iron-500 disabled:tw-opacity-100";
 
 export default function EnsAddressInput({
   id,
@@ -29,6 +33,7 @@ export default function EnsAddressInput({
   disabled = false,
   autoFocus = false,
   className,
+  variant = "default",
   ariaDescribedBy,
   chainId = 1,
   onAddressChange,
@@ -89,7 +94,10 @@ export default function EnsAddressInput({
       autoFocus={autoFocus}
       placeholder={placeholder}
       aria-describedby={ariaDescribedBy}
-      className={clsx(inputClassName, className)}
+      className={clsx(
+        variant === "dark" ? darkInputClassName : defaultInputClassName,
+        className
+      )}
       type="text"
       value={inputValue}
       onChange={(e) => handleInputChange(e.target.value)}
