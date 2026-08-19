@@ -19,8 +19,22 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () =>
-    ({ title, children }: { title: string; children: ReactNode }) => (
-      <div>
+    ({
+      title,
+      children,
+      noPadding,
+      tall,
+    }: {
+      title: string;
+      children: ReactNode;
+      noPadding?: boolean;
+      tall?: boolean;
+    }) => (
+      <div
+        data-testid="profile-preferences-dialog"
+        data-no-padding={noPadding}
+        data-tall={tall}
+      >
         <h1>{title}</h1>
         {children}
       </div>
@@ -59,9 +73,42 @@ describe("ProfilePreferencesSettings", () => {
         /existing direct messages and group messages stay available/i
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /essential security and account notifications, plus the optional categories selected below/i
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/^Security and account notifications only\.$/i)
+    ).toBeInTheDocument();
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "profile-preferences",
     });
+    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
+      "data-no-padding",
+      "true"
+    );
+    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
+      "data-tall",
+      "true"
+    );
+    expect(
+      screen
+        .getAllByRole("heading", { level: 2 })
+        .map(({ textContent }) => textContent?.trim())
+    ).toEqual(["Notifications", "Who can start a direct message with me?"]);
+    expect(screen.getByRole("region", { name: "Notifications" })).toHaveClass(
+      "tw-pb-0",
+      "tw-pt-6"
+    );
+    expect(
+      screen.getByRole("region", {
+        name: "Who can start a direct message with me?",
+      })
+    ).toHaveClass("tw-pb-0", "tw-pt-6");
+    expect(
+      screen.getByRole("button", { name: "Save Changes" }).parentElement
+    ).toHaveClass("tw-pt-6");
   });
 
   it("hides optional categories while preserving their saved values", async () => {
@@ -69,7 +116,7 @@ describe("ProfilePreferencesSettings", () => {
     render(<ProfilePreferencesSettings isOpen onClose={jest.fn()} />);
     await screen.findByText("Subscription coverage");
 
-    await user.click(screen.getByLabelText("Essential only"));
+    await user.click(screen.getByRole("radio", { name: /^Essential\b/i }));
 
     await waitFor(() => {
       expect(
@@ -77,11 +124,7 @@ describe("ProfilePreferencesSettings", () => {
       ).not.toBeInTheDocument();
       expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
     });
-    expect(
-      screen.getByText(/choices are saved and restored/i)
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByLabelText("All"));
+    await user.click(screen.getByRole("radio", { name: /^All/i }));
     await screen.findByText("Subscription coverage");
     expect(screen.getAllByRole("checkbox")).toHaveLength(6);
     expect(screen.getAllByRole("checkbox")[5]).toBeChecked();

@@ -2210,15 +2210,13 @@ export const EN_US_MESSAGES = {
   "profilePreferences.dm.createRetry": "Please try again.",
   "profilePreferences.notifications.heading": "Notifications",
   "profilePreferences.notifications.description":
-    "Choose between all notifications and essential account notices only.",
+    "Choose between All and Essential notifications.",
   "profilePreferences.notifications.ALL.label": "All",
   "profilePreferences.notifications.ALL.description":
-    "Receive essential account notices plus the optional categories selected below.",
-  "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential only",
+    "Essential security and account notifications, plus the optional categories selected below.",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential",
   "profilePreferences.notifications.ESSENTIAL_ONLY.description":
-    "Receive only critical security, account access, and account notices. Direct messages still arrive, but their alerts are paused.",
-  "profilePreferences.notifications.pausedInfo":
-    "Optional notification preferences are paused. Your choices are saved and restored if you switch back to All.",
+    "Security and account notifications only.",
   "profilePreferences.notifications.paused": "Paused",
   "profilePreferences.notifications.category.direct_messages":
     "Direct messages and wave activity",
@@ -2232,7 +2230,7 @@ export const EN_US_MESSAGES = {
   "profilePreferences.notifications.category.subscription_coverage":
     "Subscription coverage",
   "profilePreferences.notifications.deviceNote":
-    "Push notification settings remain separate for each device.",
+    "Push notifications are managed separately on each device.",
   "notifications.filter.ariaLabel": "Filter notifications: {selection}",
   "notifications.filter.selected": "{count} selected",
   "linkPreview.twitter.kind.article": "Article",
