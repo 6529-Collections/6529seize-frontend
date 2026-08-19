@@ -58,6 +58,7 @@ const mockedUseDropLinkPreviewToggleControl = jest.mocked(
 
 const drop = {
   id: "drop-1",
+  author: { id: "author-1" },
   wave: { authenticated_user_admin: false },
   parts: [],
 } as any;
