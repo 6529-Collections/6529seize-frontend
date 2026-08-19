@@ -178,11 +178,11 @@ describe("hover-revealed controls stay reachable without hover", () => {
 });
 
 /**
- * The `touch-only` escape hatch for capability-lying browsers must not itself
- * be gated on the capability queries those browsers get wrong. `<body>` is
- * tagged only after real mouse evidence AND denial of the hover query, so the
- * tag is already the precise condition; a hybrid can meet it while still
- * reporting `any-hover: hover` or `any-pointer: fine`.
+ * `touch-only` must be the exact complement of the query tailwind wraps hover
+ * in. Two independent approximations drift: `(any-hover: none) and
+ * (any-pointer: coarse)` looks like "no hover", but a hybrid can report
+ * `any-hover: hover` from an attached trackpad while its primary pointer is
+ * coarse — matching neither the hover reveal nor the touch fallback.
  */
 /** The guard is only worth its green if it separates these cases. */
 describe("gate detection", () => {
@@ -223,10 +223,10 @@ describe("gate detection", () => {
   });
 });
 
-describe("the hover-unreliable escape hatch resolves without media support", () => {
+describe("touch-only complements the hover reveal exactly", () => {
   type VariantValue = string | readonly string[];
 
-  /** Just the slice of the PostCSS node chain this walk reads. */
+  /** Just the slice of the PostCSS node chain these assertions read. */
   type PostcssAncestor =
     | {
         readonly type: string;
@@ -235,6 +235,9 @@ describe("the hover-unreliable escape hatch resolves without media support", () 
         readonly parent?: PostcssAncestor;
       }
     | undefined;
+
+  const HOVER_QUERY = "(hover: hover) and (pointer: fine)";
+  const COMPLEMENT_QUERY = `not all and ${HOVER_QUERY}`;
 
   const collectVariants = (): Record<string, VariantValue> => {
     const variants: Record<string, VariantValue> = {};
@@ -268,18 +271,10 @@ describe("the hover-unreliable escape hatch resolves without media support", () 
     return variants;
   };
 
-  it("registers the tag branch unwrapped", () => {
-    const touchOnly = collectVariants()["touch-only"];
-    const branches = Array.isArray(touchOnly) ? touchOnly : [touchOnly];
-    const tagBranches = branches.filter((branch) =>
-      String(branch).includes("data-hover-unreliable")
-    );
-
-    expect(tagBranches).toEqual(["body[data-hover-unreliable] &"]);
-  });
-
-  it("emits a rule that applies with no hover or pointer query matching", async () => {
-    const markup = '<div class="touch-only:tw-pointer-events-auto"></div>';
+  const atRuleParamsFor = async (
+    className: string,
+    markup: string
+  ): Promise<string[][]> => {
     const css = await postcss([
       tailwindcss({
         ...(tailwindConfig as Config),
@@ -287,24 +282,54 @@ describe("the hover-unreliable escape hatch resolves without media support", () 
       }),
     ]).process("@tailwind utilities;", { from: undefined });
 
-    const tagRuleAncestors: string[][] = [];
+    const matches: string[][] = [];
     css.root.walkRules((rule) => {
-      if (!rule.selector.includes("data-hover-unreliable")) {
+      if (!rule.selector.includes(className)) {
         return;
       }
-      const ancestors: string[] = [];
+      const params: string[] = [];
       let node = rule.parent as PostcssAncestor;
       while (node) {
         if (node.type === "atrule") {
-          ancestors.push(`@${node.name ?? ""} ${node.params ?? ""}`.trim());
+          params.push(`${node.name ?? ""} ${node.params ?? ""}`.trim());
         }
         node = node.parent;
       }
-      tagRuleAncestors.push(ancestors);
+      matches.push(params);
     });
+    return matches;
+  };
 
-    // Present at all, and wrapped in no at-rule — a media-gated escape hatch
-    // would never match the browsers it exists for.
-    expect(tagRuleAncestors).toEqual([[]]);
+  it("registers touch-only as the negation, with no capability escape hatch", () => {
+    const touchOnly = collectVariants()["touch-only"];
+
+    expect(touchOnly).toBe(`@media ${COMPLEMENT_QUERY}`);
+    // A body-attribute condition would reintroduce a state that matches
+    // neither side: tagged, yet denied by the hover query.
+    expect(String(touchOnly)).not.toContain("data-fine-pointer");
+    expect(String(touchOnly)).not.toContain("data-hover-unreliable");
+  });
+
+  it("emits reveal and fallback under mutually exclusive queries", async () => {
+    const markup =
+      '<div class="tw-group"><button class="tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-opacity-100"></button></div>';
+
+    const hoverRule = await atRuleParamsFor(
+      "desktop-hover\\:group-hover\\:tw-opacity-100",
+      markup
+    );
+    const touchRule = await atRuleParamsFor(
+      "touch-only\\:tw-opacity-100",
+      markup
+    );
+
+    // Every hover reveal sits inside the hover query...
+    expect(hoverRule.length).toBeGreaterThan(0);
+    for (const params of hoverRule) {
+      expect(params).toContain(`media ${HOVER_QUERY}`);
+    }
+    // ...and the fallback sits inside exactly its negation, so no browser can
+    // land outside both.
+    expect(touchRule).toEqual([[`media ${COMPLEMENT_QUERY}`]]);
   });
 });

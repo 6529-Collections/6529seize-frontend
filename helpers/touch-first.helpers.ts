@@ -72,18 +72,6 @@ const someQueryMatches = (queries: readonly string[]): boolean =>
 // variant selectors.
 const FINE_POINTER_BODY_ATTRIBUTE = "data-fine-pointer";
 
-// Tailwind runs with `hoverOnlyWhenSupported`, so every `hover:`/`group-hover:`
-// utility ships wrapped in exactly this query — including the
-// `body[data-fine-pointer]` branch of `desktop-hover` that exists to override
-// mis-reporting browsers. When a browser denies the query while a real mouse
-// is demonstrably in use, no CSS hover reveal can fire at all, and the latch
-// attribute would additionally suppress the always-visible `touch-only`
-// treatment. A hover-revealed control is then unreachable by mouse, touch, and
-// CSS alike (reported on a Surface Pro 8). Tag the body in that state so
-// `touch-only` stays active and the control keeps its always-visible form.
-const CSS_HOVER_REVEAL_QUERY = "(hover: hover) and (pointer: fine)";
-const HOVER_UNRELIABLE_BODY_ATTRIBUTE = "data-hover-unreliable";
-
 // Once a machine has proven it has a mouse, remember it: without persistence
 // every page load on a capability-lying browser starts in touch mode and
 // visibly flips to desktop on the first cursor glide (mobile buttons flash
@@ -122,38 +110,10 @@ const notifyCapabilityChange = () => {
   }
 };
 
-// `document` is absent during SSR, so read it through a shape that admits
-// that — intersecting with `typeof globalThis` would keep it non-optional and
-// make the guards below look redundant to the type checker.
-type OptionalDocumentGlobal = { readonly document?: Document };
-
-const getBodyElement = (): HTMLElement | undefined =>
-  (globalThis as unknown as OptionalDocumentGlobal).document?.body;
-
 const tagBodyWithFinePointer = () => {
-  getBodyElement()?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
-};
-
-/**
- * The latch has proven a mouse exists, yet the browser still reports no
- * hover-capable primary pointer — so CSS hover reveals cannot fire and
- * touch-style always-visible affordances have to stay on. The <body> tag below
- * is the contract consumers read; this predicate stays module-private.
- */
-const hasUnreliableHoverReporting = (): boolean =>
-  finePointerObserved &&
-  !(getMediaQueryList(CSS_HOVER_REVEAL_QUERY)?.matches ?? false);
-
-const syncHoverReliabilityTag = () => {
-  const body = getBodyElement();
-  if (body === undefined) {
-    return;
-  }
-  if (hasUnreliableHoverReporting()) {
-    body.setAttribute(HOVER_UNRELIABLE_BODY_ATTRIBUTE, "true");
-  } else {
-    body.removeAttribute(HOVER_UNRELIABLE_BODY_ATTRIBUTE);
-  }
+  (
+    globalThis as typeof globalThis & { document?: Document }
+  ).document?.body?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
 };
 
 const readPersistedFinePointer = (): boolean => {
@@ -221,7 +181,6 @@ const handleSentinelPointerEvent = (event: Event) => {
   uninstallPointerSentinel();
   finePointerObserved = true;
   tagBodyWithFinePointer();
-  syncHoverReliabilityTag();
   persistFinePointer();
   notifyCapabilityChange();
 };
@@ -317,7 +276,6 @@ const isMobileUserAgent = (): boolean => {
 if (!isMobileUserAgent() && readPersistedFinePointer()) {
   finePointerObserved = true;
   tagBodyWithFinePointer();
-  syncHoverReliabilityTag();
 }
 
 /**
@@ -362,17 +320,9 @@ export const subscribeToTouchFirstChanges = (
       continue;
     }
 
-    // Posture changes and (un)plugged mice can make the browser start or stop
-    // reporting a hover-capable primary pointer, so the reliability tag has to
-    // move with them, not only at latch time.
-    const handleCapabilityChange = () => {
-      syncHoverReliabilityTag();
-      onChange();
-    };
-
-    mediaQueryList.addEventListener("change", handleCapabilityChange);
+    mediaQueryList.addEventListener("change", onChange);
     unsubscribers.push(() =>
-      mediaQueryList.removeEventListener("change", handleCapabilityChange)
+      mediaQueryList.removeEventListener("change", onChange)
     );
   }
 

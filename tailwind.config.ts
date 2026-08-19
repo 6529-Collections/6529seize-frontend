@@ -272,22 +272,29 @@ const tailwindConfig: Config = {
         "@media (any-hover: hover)",
         "body[data-fine-pointer] &",
       ]);
-      // The second branch is the escape hatch for browsers that deny
-      // `(hover: hover) and (pointer: fine)` while a mouse is demonstrably in
-      // use: `hoverOnlyWhenSupported` wraps every `group-hover:` utility in
-      // that query, so the `desktop-hover` override above cannot fire there
-      // either, and `data-fine-pointer` alone would leave hover-revealed
-      // controls with no reachable state at all. See touch-first.helpers.ts.
+      // `touch-only` is the exact complement of the query above: tailwind runs
+      // with `hoverOnlyWhenSupported`, so every `hover:`/`group-hover:` utility
+      // ships inside `(hover: hover) and (pointer: fine)`. Any browser that
+      // denies it cannot fire a CSS hover reveal at all, and must therefore
+      // keep the always-visible form — phones, tablets, hybrids in tablet
+      // posture, and Windows laptops that mis-report while a trackpad drives
+      // the cursor.
       //
-      // It is deliberately NOT media-wrapped. The tag is already the precise
-      // condition — set only after real mouse evidence AND denial of the hover
-      // query — and a hybrid can deny that query while still reporting
-      // `any-hover: hover` or `any-pointer: fine`, which is exactly the
-      // reported Surface Pro 8 profile. Wrapping it would re-lose those users.
-      addVariant("touch-only", [
-        "@media (any-hover: none) and (any-pointer: coarse) { body:not([data-fine-pointer]) & }",
-        "body[data-hover-unreliable] &",
-      ]);
+      // Deliberately NOT `body:not([data-fine-pointer])`. #3115 suppressed
+      // this on the premise that `data-fine-pointer` turns desktop-hover
+      // styles back on, but that only holds for capability-only
+      // `desktop-hover:tw-*` utilities — the tag cannot reach anything stacked
+      // with `hover:`, because that sits inside the media query the browser is
+      // denying. Suppressing the touch form there left those controls with no
+      // reachable state at all (reported on a Surface Pro 8).
+      //
+      // Fails open by construction: a browser too old to understand these
+      // features evaluates them false, so the negation matches and the
+      // affordance stays visible.
+      addVariant(
+        "touch-only",
+        "@media not all and (hover: hover) and (pointer: fine)"
+      );
     }),
   ],
 };
