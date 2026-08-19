@@ -12,6 +12,8 @@ import WaveDelete from "./delete/WaveDelete";
 import WaveDeleteModal from "./delete/WaveDeleteModal";
 import WaveProfileWaveAction from "./profile-wave/WaveProfileWaveAction";
 
+type DeleteFlowState = "idle" | "waiting-for-mobile-options" | "open";
+
 export default function WaveHeaderOptions({
   wave,
   showOwnerActions,
@@ -20,8 +22,8 @@ export default function WaveHeaderOptions({
   readonly showOwnerActions: boolean;
 }) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const pendingMobileDeleteRef = useRef(false);
+  const [deleteFlowState, setDeleteFlowState] =
+    useState<DeleteFlowState>("idle");
   const buttonRef = useRef<HTMLButtonElement>(null);
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
@@ -30,24 +32,24 @@ export default function WaveHeaderOptions({
     return null;
   }
 
+  if (
+    deleteFlowState === "waiting-for-mobile-options" &&
+    !isMobileLayoutViewport
+  ) {
+    setDeleteFlowState("open");
+  }
+
   const handleDeleteRequest = () => {
     setIsOptionsOpen(false);
-
-    if (isMobileLayoutViewport) {
-      pendingMobileDeleteRef.current = true;
-      return;
-    }
-
-    setIsDeleteModalOpen(true);
+    setDeleteFlowState(
+      isMobileLayoutViewport ? "waiting-for-mobile-options" : "open"
+    );
   };
 
   const handleMobileOptionsAfterLeave = () => {
-    if (!pendingMobileDeleteRef.current) {
-      return;
-    }
-
-    pendingMobileDeleteRef.current = false;
-    setIsDeleteModalOpen(true);
+    setDeleteFlowState((state) =>
+      state === "waiting-for-mobile-options" ? "open" : state
+    );
   };
 
   const actions = (
@@ -119,8 +121,8 @@ export default function WaveHeaderOptions({
       </div>
       <WaveDeleteModal
         wave={wave}
-        isOpen={isDeleteModalOpen}
-        closeModal={() => setIsDeleteModalOpen(false)}
+        isOpen={deleteFlowState === "open"}
+        closeModal={() => setDeleteFlowState("idle")}
       />
     </>
   );

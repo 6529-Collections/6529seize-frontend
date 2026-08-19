@@ -215,6 +215,39 @@ test("uses a bottom sheet on mobile and waits for it to close before deletion co
   ).toBeInTheDocument();
 });
 
+test("opens deletion confirmation if the viewport leaves mobile while deletion is pending", async () => {
+  useIsMobileLayoutViewportMock.mockReturnValue(true);
+  const user = userEvent.setup();
+
+  const { rerender } = render(
+    <WaveHeaderOptions wave={wave} showOwnerActions={true} />,
+    {
+      wrapper: createWrapper(),
+    }
+  );
+
+  await user.click(screen.getByRole("button", { name: "Open options" }));
+  await user.click(screen.getByTestId("delete"));
+
+  const onAfterLeave = mockMobileWrapper.mock.calls.at(-1)?.[0].onAfterLeave;
+  if (!onAfterLeave) {
+    throw new Error("Expected the mobile options sheet to expose onAfterLeave");
+  }
+
+  useIsMobileLayoutViewportMock.mockReturnValue(false);
+  rerender(<WaveHeaderOptions wave={wave} showOwnerActions={true} />);
+
+  expect(
+    screen.getByRole("dialog", { name: "Delete wave confirmation" })
+  ).toBeInTheDocument();
+
+  act(onAfterLeave);
+
+  expect(
+    screen.getAllByRole("dialog", { name: "Delete wave confirmation" })
+  ).toHaveLength(1);
+});
+
 test("renders nothing when owner actions are hidden", () => {
   useIsMobileLayoutViewportMock.mockReturnValue(false);
   const { container } = render(
