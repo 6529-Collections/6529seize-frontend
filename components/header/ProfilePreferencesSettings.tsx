@@ -186,52 +186,6 @@ function ProfilePreferencesForm({
     <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
       <div className="tw-flex-1 tw-divide-y tw-divide-iron-800 tw-overflow-y-auto tw-px-4 sm:tw-px-6">
         <section
-          aria-labelledby="profile-preferences-dm-heading"
-          className="tw-py-5 sm:tw-py-6"
-        >
-          <h2
-            id="profile-preferences-dm-heading"
-            className="tw-text-base tw-font-semibold tw-text-iron-100"
-          >
-            {t(locale, "profilePreferences.dm.heading")}
-          </h2>
-          <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
-            {t(locale, "profilePreferences.dm.description")}
-          </p>
-          <div className="tw-mt-4 tw-divide-y tw-divide-white/5 tw-overflow-hidden tw-rounded-lg tw-bg-white/[0.025] tw-ring-1 tw-ring-white/10">
-            {DM_OPTIONS.map((option) => (
-              <label
-                key={option}
-                aria-label={t(locale, `profilePreferences.dm.${option}.label`)}
-                className="tw-flex tw-cursor-pointer tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.035]"
-              >
-                <input
-                  type="radio"
-                  name="direct-message-policy"
-                  value={option}
-                  checked={current.direct_message_policy === option}
-                  onChange={() =>
-                    setCurrent({
-                      ...current,
-                      direct_message_policy: option,
-                    })
-                  }
-                  className="tw-mt-1 tw-size-4 tw-accent-primary-500"
-                />
-                <span>
-                  <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
-                    {t(locale, `profilePreferences.dm.${option}.label`)}
-                  </span>
-                  <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-                    {t(locale, `profilePreferences.dm.${option}.description`)}
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <section
           aria-labelledby="profile-preferences-notifications-heading"
           className="tw-py-5 sm:tw-py-6"
         >
@@ -339,6 +293,52 @@ function ProfilePreferencesForm({
           <p className="tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "profilePreferences.notifications.deviceNote")}
           </p>
+        </section>
+
+        <section
+          aria-labelledby="profile-preferences-dm-heading"
+          className="tw-py-5 sm:tw-py-6"
+        >
+          <h2
+            id="profile-preferences-dm-heading"
+            className="tw-text-base tw-font-semibold tw-text-iron-100"
+          >
+            {t(locale, "profilePreferences.dm.heading")}
+          </h2>
+          <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+            {t(locale, "profilePreferences.dm.description")}
+          </p>
+          <div className="tw-mt-4 tw-divide-y tw-divide-white/5 tw-overflow-hidden tw-rounded-lg tw-bg-white/[0.025] tw-ring-1 tw-ring-white/10">
+            {DM_OPTIONS.map((option) => (
+              <label
+                key={option}
+                aria-label={t(locale, `profilePreferences.dm.${option}.label`)}
+                className="tw-flex tw-cursor-pointer tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.035]"
+              >
+                <input
+                  type="radio"
+                  name="direct-message-policy"
+                  value={option}
+                  checked={current.direct_message_policy === option}
+                  onChange={() =>
+                    setCurrent({
+                      ...current,
+                      direct_message_policy: option,
+                    })
+                  }
+                  className="tw-mt-1 tw-size-4 tw-accent-primary-500"
+                />
+                <span>
+                  <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
+                    {t(locale, `profilePreferences.dm.${option}.label`)}
+                  </span>
+                  <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                    {t(locale, `profilePreferences.dm.${option}.description`)}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
         </section>
       </div>
       <div className="tw-flex tw-justify-end tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-pb-2 tw-pt-3 sm:tw-px-6 sm:tw-pb-3">

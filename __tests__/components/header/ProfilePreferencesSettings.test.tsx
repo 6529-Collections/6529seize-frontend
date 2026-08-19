@@ -84,6 +84,11 @@ describe("ProfilePreferencesSettings", () => {
       "data-tall",
       "true"
     );
+    expect(
+      screen
+        .getAllByRole("heading", { level: 2 })
+        .map(({ textContent }) => textContent?.trim())
+    ).toEqual(["Notifications", "Who can start a direct message with me?"]);
   });
 
   it("hides optional categories while preserving their saved values", async () => {
