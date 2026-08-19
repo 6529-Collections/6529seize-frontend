@@ -5,6 +5,7 @@ import {
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { CreateWaveGroupSearchResultsLayout } from "@/components/waves/create-wave/groups/CreateWaveGroupSearchResults";
 import CreateWaveInlineGroupDraftSummary from "@/components/waves/create-wave/groups/CreateWaveInlineGroupDraftSummary";
@@ -23,6 +24,9 @@ import {
   type CreateWaveGroupInlinePanelProps,
   useCreateWaveGroupInlinePanel,
 } from "@/components/waves/create-wave/groups/useCreateWaveGroupInlinePanel";
+import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
+import GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
+import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api";
 
 type GroupAssignmentPanelLayout = "inline" | "dialog";
 type GroupAssignmentPanelStartMode = "actions" | "existing";
@@ -123,10 +127,12 @@ function DialogGroupSummary({
   currentGroupLabel,
   unsavedGroupDescription,
   unsavedGroupSummary,
+  membersPreview,
 }: {
   readonly currentGroupLabel: string;
   readonly unsavedGroupDescription: string | null;
   readonly unsavedGroupSummary: string | null;
+  readonly membersPreview?: ReactNode | undefined;
 }) {
   const summaryGridClasses = unsavedGroupSummary
     ? "tw-grid tw-gap-3 sm:tw-grid-cols-2"
@@ -138,9 +144,14 @@ function DialogGroupSummary({
         <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
           Current group
         </p>
-        <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-          {currentGroupLabel}
-        </p>
+        {membersPreview === null || membersPreview === undefined ? (
+          <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+            {currentGroupLabel}
+          </p>
+        ) : null}
+        {membersPreview !== null && membersPreview !== undefined ? (
+          <div className="tw-mt-1.5">{membersPreview}</div>
+        ) : null}
       </div>
 
       {unsavedGroupSummary ? (
@@ -241,16 +252,32 @@ function SearchPanel({
   );
 }
 
-export default function GroupAssignmentPanel({
-  layout = "inline",
-  ...props
-}: GroupAssignmentPanelProps) {
+type GroupAssignmentPanelState = ReturnType<
+  typeof useCreateWaveGroupInlinePanel
+>;
+
+interface GroupAssignmentPanelViewProps {
+  readonly membersDialog: ReactNode;
+  readonly onPreviewDraft: () => void;
+  readonly panelProps: GroupAssignmentPanelProps;
+  readonly panelState: GroupAssignmentPanelState;
+  readonly savedMembersPreview: ReactNode;
+}
+
+function DialogGroupAssignmentPanel({
+  membersDialog,
+  onPreviewDraft,
+  panelProps,
+  panelState,
+  savedMembersPreview,
+}: GroupAssignmentPanelViewProps) {
   const {
     allowGroupClear = true,
     defaultLabel,
     disabled = false,
     selectedGroup,
-  } = props;
+    membersRoleLabel,
+  } = panelProps;
   const {
     addIdentity,
     canCreateDraft,
@@ -277,28 +304,29 @@ export default function GroupAssignmentPanel({
     toggleRule,
     unsavedGroupDescription,
     unsavedGroupSummary,
-  } = useCreateWaveGroupInlinePanel(props);
+  } = panelState;
 
-  if (layout === "dialog") {
-    const openExistingTab = () => {
-      if (!isSearchPanel) {
-        togglePanel("search", false);
-      }
-    };
-    const openNewGroupTab = () => {
-      if (isSearchPanel) {
-        togglePanel("actions", false);
-      }
-    };
-    const identityCount = displayedBuilder.identities.length;
-    const ruleCount = getInlineGroupRuleCount(displayedBuilder.draft);
+  const openExistingTab = () => {
+    if (!isSearchPanel) {
+      togglePanel("search", false);
+    }
+  };
+  const openNewGroupTab = () => {
+    if (isSearchPanel) {
+      togglePanel("actions", false);
+    }
+  };
+  const identityCount = displayedBuilder.identities.length;
+  const ruleCount = getInlineGroupRuleCount(displayedBuilder.draft);
 
-    return (
+  return (
+    <>
       <div ref={panelRef} className="tw-flex tw-flex-col tw-gap-4">
         <DialogGroupSummary
           currentGroupLabel={currentGroupLabel}
           unsavedGroupDescription={unsavedGroupDescription}
           unsavedGroupSummary={unsavedGroupSummary}
+          membersPreview={savedMembersPreview}
         />
 
         <DialogTabs
@@ -387,105 +415,224 @@ export default function GroupAssignmentPanel({
                 canResetDraft={canResetDraft}
                 canCreateDraft={canCreateDraft}
                 isCreating={isCreating}
+                canPreviewDraft={isDraftValid && !disabled && !isCreating}
                 onClearAll={onClearAll}
                 onCreateAndUse={onCreateAndUse}
+                onPreviewDraft={membersRoleLabel ? onPreviewDraft : undefined}
               />
             ) : null}
           </div>
         )}
       </div>
-    );
-  }
+      {membersDialog}
+    </>
+  );
+}
+
+function InlineGroupAssignmentPanel({
+  membersDialog,
+  onPreviewDraft,
+  panelProps,
+  panelState,
+  savedMembersPreview,
+}: GroupAssignmentPanelViewProps) {
+  const {
+    allowGroupClear = true,
+    defaultLabel,
+    disabled = false,
+    selectedGroup,
+    membersRoleLabel,
+  } = panelProps;
+  const {
+    addIdentity,
+    canCreateDraft,
+    canResetDraft,
+    currentGroupLabel,
+    displayedBuilder,
+    draftSummary,
+    hasUnsavedGroup,
+    isCreating,
+    isCriteriaReplacementActive,
+    isDraftValid,
+    isSearchPanel,
+    onCancelPanel,
+    onClearAll,
+    onCreateAndUse,
+    onExistingGroupSelect,
+    onReplaceCriteria,
+    openRule,
+    panelRef,
+    removeIdentity,
+    returnToCriteria,
+    setDraft,
+    showDraftFooter,
+    togglePanel,
+    toggleRule,
+    unsavedGroupDescription,
+    unsavedGroupSummary,
+  } = panelState;
 
   return (
-    <div
-      ref={panelRef}
-      className="tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 tw-shadow-none tw-transition-all tw-duration-300"
-    >
-      <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
-        <CreateWaveInlineGroupHeader
-          currentGroupLabel={currentGroupLabel}
-          unsavedGroupDescription={unsavedGroupDescription}
-          unsavedGroupSummary={unsavedGroupSummary}
-        />
-        <CreateWaveInlineGroupActions
-          disabled={disabled}
-          identityActive={isIdentityPanel}
-          ruleActive={isRulePanel}
-          searchActive={isSearchPanel}
-          onAddIdentity={() => togglePanel("identity", isIdentityPanel)}
-          onAddRule={() => togglePanel("rule-list", isRulePanel)}
-          onUseExistingGroup={() => togglePanel("search", isSearchPanel)}
-        />
-
-        {displayedBuilder.panel === "identity" ? (
-          <CreateWaveInlineGroupExpandedPanel
-            onCancel={onCancelPanel}
-            showCancel={false}
-          >
-            <CreateWaveInlineGroupIdentities
-              identities={displayedBuilder.identities}
-              onIdentitySelect={addIdentity}
-              onRemove={removeIdentity}
-              onCancel={onCancelPanel}
+    <>
+      <div
+        ref={panelRef}
+        className="tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 tw-shadow-none tw-transition-all tw-duration-300"
+      >
+        <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
+            <CreateWaveInlineGroupHeader
+              currentGroupLabel={currentGroupLabel}
+              unsavedGroupDescription={unsavedGroupDescription}
+              unsavedGroupSummary={unsavedGroupSummary}
+              membersPreview={savedMembersPreview}
             />
-          </CreateWaveInlineGroupExpandedPanel>
-        ) : null}
-
-        {displayedBuilder.panel === "rule-list" ? (
-          <CreateWaveInlineGroupExpandedPanel onCancel={onCancelPanel}>
-            <CreateWaveInlineGroupRuleList
+            <CreateWaveInlineGroupActions
               disabled={disabled}
-              onRuleOpen={openRule}
+              criteriaActive={isCriteriaReplacementActive}
+              searchActive={isSearchPanel}
+              onReplaceCriteria={onReplaceCriteria}
+              onUseExistingGroup={() => togglePanel("search", isSearchPanel)}
             />
-          </CreateWaveInlineGroupExpandedPanel>
-        ) : null}
+          </div>
 
-        {displayedBuilder.panel === "rule-editor" &&
-        displayedBuilder.activeRule !== null ? (
-          <CreateWaveInlineGroupExpandedPanel onCancel={onCancelPanel}>
-            <CreateWaveInlineGroupRuleEditorPanel
-              activeRule={displayedBuilder.activeRule}
-              disabled={disabled}
-              onRuleToggle={toggleRule}
+          {displayedBuilder.panel === "identity" ? (
+            <CreateWaveInlineGroupExpandedPanel
+              onCancel={returnToCriteria}
+              showCancel={false}
             >
-              <CreateWaveInlineGroupRuleEditor
-                draft={displayedBuilder.draft}
-                activeRule={displayedBuilder.activeRule}
-                onDraftChange={setDraft}
+              <CreateWaveInlineGroupIdentities
+                identities={displayedBuilder.identities}
+                onIdentitySelect={addIdentity}
+                onRemove={removeIdentity}
+                onCancel={returnToCriteria}
               />
-            </CreateWaveInlineGroupRuleEditorPanel>
-          </CreateWaveInlineGroupExpandedPanel>
-        ) : null}
+            </CreateWaveInlineGroupExpandedPanel>
+          ) : null}
 
-        {displayedBuilder.panel === "search" ? (
-          <CreateWaveInlineGroupExpandedPanel
-            onCancel={onCancelPanel}
-            cancelSize="md"
-          >
-            <SearchPanel
-              allowGroupClear={allowGroupClear}
-              defaultLabel={defaultLabel}
-              disabled={disabled}
-              hasUnsavedGroup={hasUnsavedGroup}
-              onExistingGroupSelect={onExistingGroupSelect}
-              selectedGroup={selectedGroup}
+          {displayedBuilder.panel === "rule-list" ? (
+            <CreateWaveInlineGroupExpandedPanel
+              onCancel={onClearAll}
+              showCancel={false}
+            >
+              <CreateWaveInlineGroupRuleList
+                disabled={disabled}
+                onIdentityOpen={() => togglePanel("identity", false)}
+                onRuleOpen={openRule}
+              />
+            </CreateWaveInlineGroupExpandedPanel>
+          ) : null}
+
+          {displayedBuilder.panel === "rule-editor" &&
+          displayedBuilder.activeRule !== null ? (
+            <CreateWaveInlineGroupExpandedPanel onCancel={returnToCriteria}>
+              <CreateWaveInlineGroupRuleEditorPanel
+                activeRule={displayedBuilder.activeRule}
+                disabled={disabled}
+                onRuleToggle={toggleRule}
+              >
+                <CreateWaveInlineGroupRuleEditor
+                  draft={displayedBuilder.draft}
+                  activeRule={displayedBuilder.activeRule}
+                  onDraftChange={setDraft}
+                />
+              </CreateWaveInlineGroupRuleEditorPanel>
+            </CreateWaveInlineGroupExpandedPanel>
+          ) : null}
+
+          {displayedBuilder.panel === "search" ? (
+            <CreateWaveInlineGroupExpandedPanel
+              onCancel={onCancelPanel}
+              cancelSize="md"
+            >
+              <SearchPanel
+                allowGroupClear={allowGroupClear}
+                defaultLabel={defaultLabel}
+                disabled={disabled}
+                hasUnsavedGroup={hasUnsavedGroup}
+                onExistingGroupSelect={onExistingGroupSelect}
+                selectedGroup={selectedGroup}
+              />
+            </CreateWaveInlineGroupExpandedPanel>
+          ) : null}
+
+          {showDraftFooter ? (
+            <CreateWaveInlineGroupDraftSummary
+              draftSummary={draftSummary}
+              isValid={isDraftValid}
+              canResetDraft={canResetDraft}
+              canCreateDraft={canCreateDraft}
+              isCreating={isCreating}
+              canPreviewDraft={isDraftValid && !disabled && !isCreating}
+              forceVisible={isCriteriaReplacementActive}
+              onClearAll={onClearAll}
+              onCreateAndUse={onCreateAndUse}
+              onPreviewDraft={membersRoleLabel ? onPreviewDraft : undefined}
             />
-          </CreateWaveInlineGroupExpandedPanel>
-        ) : null}
-
-        {showDraftFooter ? (
-          <CreateWaveInlineGroupDraftSummary
-            draftSummary={draftSummary}
-            isValid={isDraftValid}
-            canResetDraft={canResetDraft}
-            canCreateDraft={canCreateDraft}
-            isCreating={isCreating}
-            onClearAll={onClearAll}
-            onCreateAndUse={onCreateAndUse}
-          />
-        ) : null}
+          ) : null}
+        </div>
       </div>
-    </div>
+      {membersDialog}
+    </>
+  );
+}
+
+export default function GroupAssignmentPanel({
+  layout = "inline",
+  ...props
+}: GroupAssignmentPanelProps) {
+  const {
+    defaultMembersPreviewTarget,
+    disabled = false,
+    selectedGroup,
+    membersRoleLabel,
+  } = props;
+  const [previewTarget, setPreviewTarget] =
+    useState<GroupMembersPreviewTarget | null>(null);
+  const panelState = useCreateWaveGroupInlinePanel(props);
+  const { displayedBuilder, draftSummary, isDraftValid } = panelState;
+
+  const currentMembersTarget: GroupMembersPreviewTarget | null = selectedGroup
+    ? { kind: "saved", group: selectedGroup }
+    : (defaultMembersPreviewTarget ?? null);
+  const savedMembersPreview =
+    membersRoleLabel && currentMembersTarget ? (
+      <GroupMembersPreviewTrigger
+        target={currentMembersTarget}
+        disabled={disabled}
+        onOpen={() => setPreviewTarget(currentMembersTarget)}
+      />
+    ) : null;
+  const openDraftPreview = () => {
+    if (draftSummary === null || !isDraftValid) {
+      return;
+    }
+    setPreviewTarget({
+      kind: "draft",
+      group: displayedBuilder.draft.group,
+      name: props.suggestedName.trim() || "Wave Group",
+      summary: draftSummary,
+    });
+  };
+  const membersDialog =
+    membersRoleLabel && previewTarget ? (
+      <GroupMembersPreviewDialog
+        key={previewTarget.kind}
+        target={previewTarget}
+        roleLabel={membersRoleLabel}
+        onClose={() => setPreviewTarget(null)}
+      />
+    ) : null;
+  const viewProps: GroupAssignmentPanelViewProps = {
+    membersDialog,
+    onPreviewDraft: openDraftPreview,
+    panelProps: props,
+    panelState,
+    savedMembersPreview,
+  };
+
+  return layout === "dialog" ? (
+    <DialogGroupAssignmentPanel {...viewProps} />
+  ) : (
+    <InlineGroupAssignmentPanel {...viewProps} />
   );
 }

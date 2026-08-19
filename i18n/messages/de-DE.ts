@@ -7,6 +7,8 @@ import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerDeMessages from "@/i18n/messages/stormComposer.de-DE.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
+const RETRY_LABEL = "Erneut versuchen";
+
 export const DE_DE_MESSAGES = {
   "linkPreview.twitter.kind.article": "Artikel",
   "linkPreview.twitter.kind.post": "Beitrag",
@@ -71,7 +73,7 @@ export const DE_DE_MESSAGES = {
   "linkPreview.etherscan.copy": "{kind} kopieren",
   "linkPreview.etherscan.copied": "{kind} kopiert",
   "linkPreview.etherscan.copyFailed": "{kind} konnte nicht kopiert werden",
-  "linkPreview.etherscan.retry": "Erneut versuchen",
+  "linkPreview.etherscan.retry": RETRY_LABEL,
   "linkPreview.etherscan.loading": "Etherscan-Vorschau wird geladen",
   "linkPreview.etherscan.partial": "Einige Live-Details sind nicht verfügbar",
   "linkPreview.etherscan.liveUnavailable": "Live-Daten nicht verfügbar",
@@ -319,7 +321,7 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.workspaceLabel": "CMS-Builder-Arbeitsbereich",
   "profileCms.error.description":
     "Diese Profil-Website konnte nicht gerendert werden.",
-  "profileCms.error.retry": "Erneut versuchen",
+  "profileCms.error.retry": RETRY_LABEL,
   "profileCms.error.title": "Website nicht verfügbar",
   "profileCms.header.openWebsite": "Website {handle} öffnen",
   "profileCms.header.website": "Website",
@@ -374,7 +376,7 @@ export const DE_DE_MESSAGES = {
   "drop.media.loading": "Bild wird geladen",
   "drop.media.unavailable": "Bild nicht verfuegbar",
   "drop.media.loadFailed": "Bild konnte nicht geladen werden.",
-  "drop.media.retry": "Erneut versuchen",
+  "drop.media.retry": RETRY_LABEL,
   "drop.media.openPreview": "Bildvorschau oeffnen",
   "drop.media.openMedia": "Drop-Medium oeffnen",
   "drop.media.saveDialogTitle": "Bild speichern",
@@ -422,6 +424,7 @@ export const DE_DE_MESSAGES = {
   "waves.create.dialog.subwaveTitle": "Subwave erstellen",
   "waves.create.dialog.waveTitle": "Wave erstellen",
   "waves.create.actions.cancel": "Abbrechen",
+  "waves.create.actions.backToCriteria": "Zurück zu den Kriterien",
   "waves.create.actions.complete": "Abschließen",
   "waves.create.actions.next": "Weiter",
   "waves.create.actions.previous": "Zurück",
@@ -440,6 +443,38 @@ export const DE_DE_MESSAGES = {
     "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
   "waves.create.groups.viewGroupName": "Wer darf ansehen",
   "waves.create.groups.adminGroupName": "Admin",
+  "waves.create.groups.members.currentCount": "{count} derzeit berechtigt",
+  "waves.create.groups.members.countLoading":
+    "Aktuelle Zielgruppe wird geprüft…",
+  "waves.create.groups.members.countUnavailable":
+    "Aktuelle Zielgruppe nicht verfügbar",
+  "waves.create.groups.members.view": "Mitglieder anzeigen",
+  "waves.create.groups.members.previewDraft": "Treffer ansehen",
+  "waves.create.groups.members.dialogTitle": "{role}: {group}",
+  "waves.create.groups.members.dynamicDescription":
+    "Diese Live-Vorschau basiert auf aktuellen Profil-, Reputations- und Besitzdaten. Die Mitgliedschaft kann sich ändern.",
+  "waves.create.groups.members.criteriaSummary":
+    "Warum diese Identitäten berechtigt sind",
+  "waves.create.groups.members.criteriaUnavailable":
+    "Die Gruppenkriterien sind nicht verfügbar. Die aktuellen Mitglieder können unten weiterhin angezeigt werden.",
+  "waves.create.groups.members.searchLabel": "Identität suchen",
+  "waves.create.groups.members.searchPlaceholder":
+    "Nach Handle oder Wallet suchen",
+  "waves.create.groups.members.clearSearch": "Identitätssuche leeren",
+  "waves.create.groups.members.loadingStatus":
+    "Aktuelle Mitglieder werden geladen",
+  "waves.create.groups.members.empty":
+    "Derzeit entspricht keine Identität dieser Gruppe.",
+  "waves.create.groups.members.searchEmpty":
+    "Keine passenden Identitäten gefunden.",
+  "waves.create.groups.members.errorTitle":
+    "Aktuelle Mitglieder konnten nicht geladen werden.",
+  "waves.create.groups.members.errorDescription":
+    "Prüfe deine Verbindung und versuche es erneut.",
+  "waves.create.groups.members.retry": RETRY_LABEL,
+  "waves.create.groups.members.listLabel": "Aktuelle Gruppenmitglieder",
+  "waves.create.groups.members.openProfile":
+    "Profil von {identity} in einem neuen Tab öffnen",
   "waves.create.groups.validation.checking": "Gruppenzugriff wird geprüft…",
   "waves.create.groups.validation.unavailableTitle":
     "Der Gruppenzugriff konnte nicht geprüft werden.",

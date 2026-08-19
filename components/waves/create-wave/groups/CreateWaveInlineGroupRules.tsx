@@ -14,14 +14,24 @@ const CREATE_WAVE_INLINE_GROUP_RULE_OPTIONS = [
 
 export function CreateWaveInlineGroupRuleList({
   disabled,
+  onIdentityOpen,
   onRuleOpen,
 }: {
   readonly disabled: boolean;
+  readonly onIdentityOpen?: (() => void) | undefined;
   readonly onRuleOpen: (rule: CreateWaveInlineGroupRuleType) => void;
 }) {
   return (
     <div className="tw-space-y-3">
       <div className="tw-flex tw-flex-wrap tw-gap-1.5">
+        {onIdentityOpen ? (
+          <DraftChipButton
+            label="Add identity"
+            disabled={disabled}
+            compact={true}
+            onClick={onIdentityOpen}
+          />
+        ) : null}
         {CREATE_WAVE_INLINE_GROUP_RULE_OPTIONS.map((rule) => (
           <DraftChipButton
             key={rule}

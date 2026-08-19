@@ -8,7 +8,8 @@ groups. Editors can also manage them in place from `Settings`.
 Users can:
 
 - review `View`, `Drop`, `Vote`, `Chat access`, and `Admin` scopes
-- follow visible group names to inspect both criteria and current members
+- follow visible eligible-member counts to inspect both criteria and current
+  members
 - add, change, or remove scope groups from row menus
 - include or exclude one identity from a scoped group
 - manage non-chat `Curation Groups` without leaving the thread
@@ -36,7 +37,8 @@ Users can:
    - no group: `Anyone`
    - no chat access group: `Anyone`
    - hidden/private group: `Private group`
-   - visible group: linked name to `/network?page=1&group={groupId}`
+   - visible group: linked live eligible-member count to
+     `/network?page=1&group={groupId}`
 4. Follow a visible group link. Network shows the group criteria above the
    current filtered member list.
 5. Return with normal browser back navigation when finished inspecting.
@@ -73,7 +75,8 @@ Users can:
 - Chat waves do not show `Curation Groups`.
 - General-row edit controls are hidden for direct-message groups.
 - Visible group inspection is available to read-only wave viewers; it does not
-  depend on wave edit permission.
+  depend on wave edit permission. The linked value shows the current eligible
+  member count instead of the generated group name.
 - Hidden/private scope stubs never render a link, group identity, or group
   metadata.
 - `Admin` does not show `Remove group`.

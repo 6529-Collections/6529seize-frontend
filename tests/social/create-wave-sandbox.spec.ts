@@ -17,6 +17,7 @@ import {
 const SANDBOX_WALLET = "0x0000000000000000000000000000000000000529";
 const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
+const SANDBOX_PREVIEW_GROUP_ID = "00000000-0000-4000-8000-000000000542";
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
 const SANDBOX_CREATED_WAVE_DESCRIPTION =
   "Local-only create-wave description for Playwright.";
@@ -155,6 +156,226 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
             name: SANDBOX_CREATED_WAVE_NAME,
             admin_group_id: SANDBOX_ADMIN_GROUP_ID,
             description: SANDBOX_CREATED_WAVE_DESCRIPTION,
+          }),
+        }),
+      ])
+    );
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("creates, attaches, and restores a rule-based access group", async ({
+    baseURL,
+    page,
+  }) => {
+    const waveName = "Sandbox Rule Group Wave";
+    const expectedGroupName = `${waveName} Who can view`;
+
+    await gotoCreateWave(page);
+    await page.getByLabel(/Wave Name/).fill(waveName);
+    await page.getByText("Chat", { exact: true }).click();
+    await nextStepButton(page).press("Enter");
+
+    let accessGroup = page.getByRole("group", { name: "Who can view" });
+    await accessGroup.getByRole("button", { name: "Add rule" }).click();
+    await accessGroup
+      .getByRole("button", { name: "Level", exact: true })
+      .click();
+    await accessGroup.getByLabel("Level at least").fill("3");
+    await accessGroup
+      .getByRole("button", { name: "Create and use new group" })
+      .click();
+
+    await expect(page.getByText("Group created and attached.")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(accessGroup.getByText(expectedGroupName)).toBeVisible();
+
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" &&
+              request.path.startsWith("/api/groups")
+          ),
+        {
+          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          message:
+            "Expected the rule group create and publish calls to reach the sandbox mock API.",
+        }
+      )
+      .toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "/api/groups",
+            kind: "allowed-sandbox-mutation",
+            body: {
+              name: expectedGroupName,
+              identity_addresses: [],
+            },
+          }),
+          expect.objectContaining({
+            path: expect.stringMatching(/^\/api\/groups\/[^/]+\/visible$/),
+            kind: "allowed-sandbox-mutation",
+            body: {
+              visible: true,
+              old_version_id: null,
+            },
+          }),
+        ])
+      );
+
+    const groupPublishRequest = (await fetchSandboxRequests(baseURL)).find(
+      (request) =>
+        request.method === "POST" &&
+        /^\/api\/groups\/[^/]+\/visible$/.test(request.path)
+    );
+    expect(groupPublishRequest).toBeDefined();
+    const createdGroupId = groupPublishRequest!.path.split("/")[3];
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() =>
+            window.localStorage.getItem("create-wave-drafts:v1")
+          ),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      )
+      .toContain(createdGroupId);
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const savedDraftsToggle = page.getByRole("button", {
+      name: "Saved Drafts",
+    });
+    await savedDraftsToggle.click();
+    await page
+      .getByRole("button", { name: new RegExp(`^${waveName}`) })
+      .click();
+    await nextStepButton(page).press("Enter");
+
+    accessGroup = page.getByRole("group", { name: "Who can view" });
+    await expect(accessGroup.getByText(expectedGroupName)).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    expect(await fetchSandboxRequests(baseURL)).toContainEqual(
+      expect.objectContaining({
+        method: "GET",
+        path: `/api/groups/${createdGroupId}`,
+        kind: "api-read",
+      })
+    );
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("restores selected group details when resuming a draft", async ({
+    baseURL,
+    page,
+  }) => {
+    const draftName = "Sandbox Group Resume Wave";
+    const draftDescription = "Resumed draft description.";
+
+    await gotoCreateWave(page);
+    await page.getByLabel(/Wave Name/).fill(draftName);
+    await page.getByText("Chat", { exact: true }).click();
+    await nextStepButton(page).press("Enter");
+
+    let accessGroup = page.getByRole("group", { name: "Who can view" });
+    await accessGroup.getByRole("button", { name: "Choose group" }).click();
+    await accessGroup.getByLabel("Search groups…").fill("Active");
+    await accessGroup
+      .getByRole("option", { name: /Active collectors/ })
+      .click();
+    await expect(accessGroup.getByText("Active collectors")).toBeVisible();
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() =>
+            window.localStorage.getItem("create-wave-drafts:v1")
+          ),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      )
+      .toContain(SANDBOX_PREVIEW_GROUP_ID);
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    const savedDraftsToggle = page.getByRole("button", {
+      name: "Saved Drafts",
+    });
+    await savedDraftsToggle.click();
+    await page
+      .getByRole("button", { name: new RegExp(`^${draftName}`) })
+      .click();
+    await nextStepButton(page).press("Enter");
+
+    accessGroup = page.getByRole("group", { name: "Who can view" });
+    await expect(accessGroup.getByText("Active collectors")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible();
+
+    await accessGroup.getByRole("button", { name: "View members" }).click();
+    const membersDialog = page.getByRole("dialog", {
+      name: "Who can view: Active collectors",
+    });
+    const membersDialogHeading = membersDialog.getByRole("heading", {
+      name: "Who can view: Active collectors",
+    });
+    await expect(membersDialogHeading).toBeVisible();
+    await expect(membersDialog).toHaveCSS("z-index", "10000");
+    expect(
+      await membersDialogHeading.evaluate((heading) => {
+        const rect = heading.getBoundingClientRect();
+        const topmostElement = document.elementFromPoint(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2
+        );
+        return topmostElement !== null && heading.contains(topmostElement);
+      })
+    ).toBe(true);
+    await membersDialog.getByRole("button", { name: "Close" }).click();
+
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Rules", level: 2, exact: true })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", {
+        name: "Description",
+        level: 2,
+        exact: true,
+      })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(
+      page.getByRole("textbox", { name: "Describe your wave" })
+    ).toBeVisible();
+    await fillDescription(page, draftDescription);
+    await page.getByRole("button", { name: "Complete" }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    );
+
+    const requests = await fetchSandboxRequests(baseURL);
+    expect(requests).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          method: "GET",
+          path: `/api/groups/${SANDBOX_PREVIEW_GROUP_ID}`,
+          kind: "api-read",
+        }),
+        expect.objectContaining({
+          method: "POST",
+          path: "/api/waves",
+          kind: "allowed-sandbox-mutation",
+          body: expect.objectContaining({
+            name: draftName,
+            description: draftDescription,
           }),
         }),
       ])

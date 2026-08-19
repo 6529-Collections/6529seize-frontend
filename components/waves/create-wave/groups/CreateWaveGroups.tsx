@@ -34,6 +34,7 @@ export default function CreateWaveGroups({
   waveType,
   groups,
   onGroupSelect,
+  onCriteriaReplacementChange,
   onInlineGroupCreate,
   chatEnabled,
   adminCanDeleteDrops,
@@ -51,6 +52,10 @@ export default function CreateWaveGroups({
     group: ApiGroupFull | null;
     groupType: CreateWaveGroupConfigType;
   }) => void;
+  readonly onCriteriaReplacementChange: (
+    groupType: CreateWaveGroupConfigType,
+    active: boolean
+  ) => void;
   readonly onInlineGroupCreate: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
@@ -117,6 +122,9 @@ export default function CreateWaveGroups({
           adminCanDeleteDrops={adminCanDeleteDrops}
           setChatEnabled={setChatEnabled}
           onGroupSelect={(group) => onGroupSelect({ group, groupType })}
+          onCriteriaReplacementChange={(active) =>
+            onCriteriaReplacementChange(groupType, active)
+          }
           onInlineGroupCreate={onInlineGroupCreate}
           setDropsAdminCanDelete={setDropsAdminCanDelete}
           errorMessage={getErrorMessage(groupType)}

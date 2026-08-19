@@ -97,4 +97,24 @@ describe("CreateWaveActions", () => {
     expect(screen.getByTestId("back")).toBeDisabled();
     expect(screen.getByTestId("next")).toBeDisabled();
   });
+
+  it("disables only Next while a criteria replacement is pending", async () => {
+    const user = userEvent.setup();
+    const setStep = jest.fn();
+    render(
+      <CreateWaveActions
+        config={config}
+        step={CreateWaveStep.GROUPS}
+        submitting={false}
+        nextDisabled={true}
+        setStep={setStep}
+        onComplete={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("back")).toBeEnabled();
+    expect(screen.getByTestId("next")).toBeDisabled();
+    await user.click(screen.getByTestId("next"));
+    expect(setStep).not.toHaveBeenCalled();
+  });
 });

@@ -3,6 +3,7 @@ import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateWaveStep } from "@/types/waves.types";
+import type { CreateWaveGroupConfigType } from "@/types/waves.types";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import CreateWaveDescription from "./description/CreateWaveDescription";
@@ -24,6 +25,7 @@ export default function CreateWaveStepContent({
   showDropError,
   overviewLeading,
   onHaveDropToSubmitChange,
+  onCriteriaReplacementChange,
   onInlineGroupCreate,
 }: {
   readonly controller: WaveConfigController;
@@ -34,6 +36,10 @@ export default function CreateWaveStepContent({
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
+  readonly onCriteriaReplacementChange: (
+    groupType: CreateWaveGroupConfigType,
+    active: boolean
+  ) => void;
   readonly onInlineGroupCreate: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
@@ -101,6 +107,7 @@ export default function CreateWaveStepContent({
           adminCanDeleteDrops={config.drops.adminCanDeleteDrops}
           setChatEnabled={onChatEnabledChange}
           onGroupSelect={onGroupSelect}
+          onCriteriaReplacementChange={onCriteriaReplacementChange}
           onInlineGroupCreate={onInlineGroupCreate}
           setDropsAdminCanDelete={setDropsAdminCanDelete}
         />

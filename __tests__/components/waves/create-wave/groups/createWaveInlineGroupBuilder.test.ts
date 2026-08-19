@@ -1,6 +1,7 @@
 import {
   buildInlineGroupName,
   createEmptyInlineGroupPayload,
+  createInitialInlineGroupBuilderState,
   dedupeInlineIdentities,
   getInlineGroupConfiguredRules,
   getInlineGroupDraftSummary,
@@ -10,6 +11,19 @@ import {
 } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 
 describe("createWaveInlineGroupBuilder", () => {
+  const currentUserIdentity = {
+    profile_id: "profile-me",
+    handle: "me",
+    normalised_handle: "me",
+    primary_wallet: "0xME",
+    display: "Me",
+    tdh: 42,
+    level: 3,
+    cic_rating: 5,
+    wallet: "0xME",
+    pfp: "me.png",
+  };
+
   it("builds a deterministic default group name", () => {
     expect(
       buildInlineGroupName({
@@ -90,5 +104,13 @@ describe("createWaveInlineGroupBuilder", () => {
     expect(
       getInlineIdentityAddresses([firstSelectedWallet, secondSelectedWallet])
     ).toEqual(["0xaaa1", "0xaaa2"]);
+  });
+
+  it("seeds the initial group payload with default identities", () => {
+    const state = createInitialInlineGroupBuilderState([currentUserIdentity]);
+
+    expect(state.identities).toEqual([currentUserIdentity]);
+    expect(state.draft.group.identity_addresses).toEqual(["0xme"]);
+    expect(state.criteriaReplacementActive).toBe(false);
   });
 });

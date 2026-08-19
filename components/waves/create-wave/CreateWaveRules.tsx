@@ -16,6 +16,10 @@ import WaveRulesPanel from "../specs/WaveRulesPanel";
 import CreateWaveStepHeader from "./utils/CreateWaveStepHeader";
 import { CREATE_WAVE_FORM_STYLES } from "./utils/createWaveFormStyles";
 import CreateWaveAdvancedSection from "./utils/CreateWaveAdvancedSection";
+import CreateWaveRulesGroupMembers from "./rules/CreateWaveRulesGroupMembers";
+import type { WaveRuleRow } from "@/helpers/waves/wave-rules.shared";
+import { useAuth } from "@/components/auth/Auth";
+import { getOnlyMeGroupDescription } from "./services/waveGroupService";
 
 interface CreateWaveRulesProps {
   readonly config: CreateWaveConfig;
@@ -31,6 +35,7 @@ export default function CreateWaveRules({
   setDrops,
 }: CreateWaveRulesProps) {
   const locale = useBrowserLocale();
+  const { connectedProfile } = useAuth();
   const rules = useMemo(
     () =>
       buildWaveRules({
@@ -46,6 +51,42 @@ export default function CreateWaveRules({
   const supportsAcceptanceRules = config.overview.type !== ApiWaveType.Chat;
   const hasCustomRules = Boolean(normalizeWaveCustomRules(customRules));
   const hasBindingRules = Boolean(normalizeWaveCustomRules(config.drops.terms));
+  const groupIdsByRuleId: Readonly<Record<string, string | null>> = {
+    "can-view": config.groups.canView,
+    "can-drop": config.groups.canDrop,
+    "can-vote": config.groups.canVote,
+    "chat-access": config.groups.canChat,
+    admin: config.groups.admin,
+  };
+
+  const renderRuleValue = (row: WaveRuleRow) => {
+    const groupId = groupIdsByRuleId[row.id];
+    if (row.id === "admin" && !groupId && connectedProfile?.primary_wallet) {
+      return (
+        <CreateWaveRulesGroupMembers
+          target={{
+            kind: "draft",
+            group: getOnlyMeGroupDescription(connectedProfile.primary_wallet),
+            name: row.value,
+            summary: row.value,
+          }}
+          roleLabel={row.label}
+        />
+      );
+    }
+
+    if (!groupId) {
+      return undefined;
+    }
+
+    return (
+      <CreateWaveRulesGroupMembers
+        groupId={groupId}
+        cachedGroup={groupsCache[groupId]}
+        roleLabel={row.label}
+      />
+    );
+  };
 
   const setDisplayRules = (value: string) => {
     setDisplay({
@@ -75,6 +116,7 @@ export default function CreateWaveRules({
         showCustomRules={false}
         title={t(locale, "waves.create.rules.automaticTitle")}
         variant="form"
+        renderRowValue={renderRuleValue}
       />
 
       <CreateWaveAdvancedSection

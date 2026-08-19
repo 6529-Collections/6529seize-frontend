@@ -4,12 +4,14 @@ import { useClickAway } from "react-use";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api";
 import { validateGroupPayload } from "@/services/groups/groupMutations";
 import {
   createInitialInlineGroupBuilderState,
   dedupeInlineIdentities,
   getInlineGroupDraftSummary,
   getInlineIdentityAddresses,
+  getInlineGroupRuleCount,
 } from "./createWaveInlineGroupBuilder";
 import type {
   CreateWaveInlineGroupBuilderState,
@@ -85,6 +87,17 @@ function openInlineGroupPanel({
   };
 }
 
+function startCriteriaReplacement(
+  current: CreateWaveInlineGroupBuilderState
+): CreateWaveInlineGroupBuilderState {
+  return {
+    ...current,
+    panel: PANEL_RULE_LIST,
+    activeRule: null,
+    criteriaReplacementActive: true,
+  };
+}
+
 function openInlineGroupRule({
   current,
   rule,
@@ -118,18 +131,11 @@ function toggleInlineGroupRule({
 }
 
 function clearInlineGroupDraft(
-  current: CreateWaveInlineGroupBuilderState
+  defaultIncludedIdentity: CommunityMemberMinimal | null
 ): CreateWaveInlineGroupBuilderState {
-  const next = createInitialInlineGroupBuilderState();
-
-  return {
-    ...next,
-    panel:
-      current.panel === PANEL_SEARCH || current.panel === PANEL_ACTIONS
-        ? PANEL_ACTIONS
-        : current.panel,
-    activeRule: current.panel === PANEL_RULE_EDITOR ? current.activeRule : null,
-  };
+  return createInitialInlineGroupBuilderState(
+    defaultIncludedIdentity ? [defaultIncludedIdentity] : []
+  );
 }
 
 export type CreateWaveGroupInlinePanelProps = {
@@ -140,6 +146,12 @@ export type CreateWaveGroupInlinePanelProps = {
   readonly allowGroupClear?: boolean;
   readonly collapseOnClickAway?: boolean;
   readonly startMode?: "actions" | "existing";
+  readonly membersRoleLabel?: string | undefined;
+  readonly defaultMembersPreviewTarget?: GroupMembersPreviewTarget | undefined;
+  readonly defaultIncludedIdentity?: CommunityMemberMinimal | null | undefined;
+  readonly onCriteriaReplacementChange?:
+    | ((active: boolean) => void)
+    | undefined;
   readonly onChange: (group: ApiGroupFull | null) => void | Promise<void>;
   readonly onCreateGroup: (
     payload: ApiCreateGroup
@@ -154,12 +166,14 @@ function useCreateWaveGroupInlinePanelViewState({
   builder,
   defaultLabel,
   disabled,
+  defaultIncludedIdentity,
   isCreating,
   selectedGroup,
 }: {
   readonly builder: CreateWaveInlineGroupBuilderState;
   readonly defaultLabel: string;
   readonly disabled: boolean;
+  readonly defaultIncludedIdentity: CommunityMemberMinimal | null;
   readonly isCreating: boolean;
   readonly selectedGroup: ApiGroupFull | null;
 }) {
@@ -177,13 +191,23 @@ function useCreateWaveGroupInlinePanelViewState({
   );
   const validation = validateGroupPayload(builder.draft);
   const canCreateDraft = validation.valid && !disabled && !isCreating;
-  const canResetDraft = !!draftSummary && !disabled && !isCreating;
+  const ruleCount = getInlineGroupRuleCount(builder.draft);
+  const containsOnlyDefaultIdentity =
+    ruleCount === 0 &&
+    builder.identities.length === 1 &&
+    !!defaultIncludedIdentity &&
+    builder.identities[0]?.wallet.trim().toLowerCase() ===
+      defaultIncludedIdentity.wallet.trim().toLowerCase();
   const isIdentityPanel = displayedBuilder.panel === PANEL_IDENTITY;
   const isRulePanel =
     displayedBuilder.panel === PANEL_RULE_LIST ||
     displayedBuilder.panel === PANEL_RULE_EDITOR;
   const isSearchPanel = displayedBuilder.panel === PANEL_SEARCH;
-  const hasUnsavedGroup = !!draftSummary && !disabled;
+  const hasUnsavedGroup =
+    (builder.criteriaReplacementActive ||
+      (!!draftSummary && !containsOnlyDefaultIdentity)) &&
+    !disabled;
+  const canResetDraft = hasUnsavedGroup && !isCreating;
   const currentGroupLabel = selectedGroup?.name ?? defaultLabel;
 
   return {
@@ -193,6 +217,7 @@ function useCreateWaveGroupInlinePanelViewState({
     displayedBuilder,
     draftSummary,
     hasUnsavedGroup,
+    isCriteriaReplacementActive: builder.criteriaReplacementActive,
     isDraftValid: validation.valid,
     isExpandedPanel: displayedBuilder.panel !== PANEL_ACTIONS,
     isIdentityPanel,
@@ -211,7 +236,9 @@ function useCreateWaveGroupInlinePanelController({
   builder,
   canCreateDraft,
   canResetDraft,
+  defaultIncludedIdentity,
   onChange,
+  onCriteriaReplacementChange,
   onCreateGroup,
   setBuilder,
   setIsCreating,
@@ -221,7 +248,11 @@ function useCreateWaveGroupInlinePanelController({
   readonly builder: CreateWaveInlineGroupBuilderState;
   readonly canCreateDraft: boolean;
   readonly canResetDraft: boolean;
+  readonly defaultIncludedIdentity: CommunityMemberMinimal | null;
   readonly onChange: (group: ApiGroupFull | null) => void | Promise<void>;
+  readonly onCriteriaReplacementChange?:
+    | ((active: boolean) => void)
+    | undefined;
   readonly onCreateGroup: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
@@ -232,7 +263,12 @@ function useCreateWaveGroupInlinePanelController({
   readonly suggestedName: string;
 }) {
   const resetBuilder = () => {
-    setBuilder(createInitialInlineGroupBuilderState());
+    setBuilder(
+      createInitialInlineGroupBuilderState(
+        defaultIncludedIdentity ? [defaultIncludedIdentity] : []
+      )
+    );
+    onCriteriaReplacementChange?.(false);
   };
 
   const collapseBuilderPanel = () => {
@@ -278,6 +314,17 @@ function useCreateWaveGroupInlinePanelController({
 
   const openPanel = (panel: CreateWaveInlineGroupPanel) => {
     setBuilder((current) => openInlineGroupPanel({ current, panel }));
+  };
+
+  const onReplaceCriteria = () => {
+    setBuilder(startCriteriaReplacement);
+    onCriteriaReplacementChange?.(true);
+  };
+
+  const returnToCriteria = () => {
+    setBuilder((current) =>
+      openInlineGroupPanel({ current, panel: PANEL_RULE_LIST })
+    );
   };
 
   const togglePanel = (
@@ -333,7 +380,8 @@ function useCreateWaveGroupInlinePanelController({
       return;
     }
 
-    setBuilder(clearInlineGroupDraft);
+    setBuilder(clearInlineGroupDraft(defaultIncludedIdentity));
+    onCriteriaReplacementChange?.(false);
   };
 
   const selectExistingGroup = async (group: ApiGroupFull | null) => {
@@ -358,8 +406,10 @@ function useCreateWaveGroupInlinePanelController({
     onClearAll,
     onCreateAndUse,
     onExistingGroupSelect,
+    onReplaceCriteria,
     openRule,
     removeIdentity,
+    returnToCriteria,
     setDraft,
     togglePanel,
     toggleRule,
@@ -374,14 +424,18 @@ export function useCreateWaveGroupInlinePanel({
   allowGroupClear = true,
   collapseOnClickAway = true,
   startMode = "actions",
+  defaultIncludedIdentity = null,
   onChange,
+  onCriteriaReplacementChange,
   onCreateGroup,
 }: CreateWaveGroupInlinePanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [builder, setBuilder] = useState<CreateWaveInlineGroupBuilderState>(
     () => ({
-      ...createInitialInlineGroupBuilderState(),
+      ...createInitialInlineGroupBuilderState(
+        defaultIncludedIdentity ? [defaultIncludedIdentity] : []
+      ),
       panel: startMode === "existing" ? PANEL_SEARCH : PANEL_ACTIONS,
     })
   );
@@ -392,6 +446,7 @@ export function useCreateWaveGroupInlinePanel({
     displayedBuilder,
     draftSummary,
     hasUnsavedGroup,
+    isCriteriaReplacementActive,
     isDraftValid,
     isExpandedPanel,
     isIdentityPanel,
@@ -404,6 +459,7 @@ export function useCreateWaveGroupInlinePanel({
     builder,
     defaultLabel,
     disabled,
+    defaultIncludedIdentity,
     isCreating,
     selectedGroup,
   });
@@ -414,8 +470,10 @@ export function useCreateWaveGroupInlinePanel({
     onClearAll,
     onCreateAndUse,
     onExistingGroupSelect,
+    onReplaceCriteria,
     openRule,
     removeIdentity,
+    returnToCriteria,
     setDraft,
     togglePanel,
     toggleRule,
@@ -424,7 +482,9 @@ export function useCreateWaveGroupInlinePanel({
     builder,
     canCreateDraft,
     canResetDraft,
+    defaultIncludedIdentity,
     onChange,
+    onCriteriaReplacementChange,
     onCreateGroup,
     setBuilder,
     setIsCreating,
@@ -446,6 +506,7 @@ export function useCreateWaveGroupInlinePanel({
     draftSummary,
     hasUnsavedGroup,
     isCreating,
+    isCriteriaReplacementActive,
     isDraftValid,
     isExpandedPanel,
     isIdentityPanel,
@@ -455,9 +516,11 @@ export function useCreateWaveGroupInlinePanel({
     onClearAll,
     onCreateAndUse,
     onExistingGroupSelect,
+    onReplaceCriteria,
     openRule,
     panelRef,
     removeIdentity,
+    returnToCriteria,
     setDraft,
     showDraftFooter,
     togglePanel,

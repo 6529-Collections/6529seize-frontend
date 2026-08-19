@@ -1,12 +1,19 @@
 "use client";
 
 /* istanbul ignore file */
-import { useEffect, useRef, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { usePathname } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CreateWaveStep } from "@/types/waves.types";
+import type { CreateWaveGroupConfigType } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
@@ -46,6 +53,9 @@ export default function CreateWave({
   } = waveConfig;
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [criteriaReplacementByGroup, setCriteriaReplacementByGroup] = useState<
+    Partial<Record<CreateWaveGroupConfigType, boolean>>
+  >({});
   useKeyboardFocusScroll(containerRef);
 
   // On the native /waves/create route the create flow has no height-bounding
@@ -105,6 +115,7 @@ export default function CreateWave({
     useCreateWaveDrafts({ config, endDateConfig, step });
 
   const onLoadDraft = (draft: CreateWaveDraft) => {
+    setCriteriaReplacementByGroup({});
     replaceConfig(draft.config);
     setEndDateConfig(draft.endDateConfig);
     loadDraft(draft);
@@ -132,7 +143,27 @@ export default function CreateWave({
   const setStep = (
     targetStep: CreateWaveStep,
     direction: "forward" | "backward"
-  ): Promise<void> => onStep({ step: targetStep, direction });
+  ): Promise<void> => {
+    if (targetStep !== CreateWaveStep.GROUPS) {
+      setCriteriaReplacementByGroup({});
+    }
+    return onStep({ step: targetStep, direction });
+  };
+
+  const onCriteriaReplacementChange = useCallback(
+    (groupType: CreateWaveGroupConfigType, active: boolean) => {
+      setCriteriaReplacementByGroup((current) => {
+        if (!!current[groupType] === active) {
+          return current;
+        }
+        return { ...current, [groupType]: active };
+      });
+    },
+    []
+  );
+  const hasPendingCriteriaReplacement = Object.values(
+    criteriaReplacementByGroup
+  ).some(Boolean);
 
   const actionInProgress =
     submitting ||
@@ -162,6 +193,7 @@ export default function CreateWave({
           step={step}
           showActions={selectedOutcomeType === null}
           submitting={actionInProgress}
+          nextDisabled={hasPendingCriteriaReplacement}
           setStep={setStep}
           onComplete={onComplete}
         >
@@ -179,6 +211,7 @@ export default function CreateWave({
               />
             }
             onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+            onCriteriaReplacementChange={onCriteriaReplacementChange}
             onInlineGroupCreate={onInlineGroupCreate}
           />
         </CreateWaveLayout>

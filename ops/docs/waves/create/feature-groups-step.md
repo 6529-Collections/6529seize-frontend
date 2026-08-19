@@ -50,6 +50,14 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Group Picker Behavior
 
+- Each access row offers `Replace criteria` and `Choose group`. `Replace
+  criteria` opens the criteria editor, where `Add identity` appears alongside
+  the rule choices instead of as a separate row-level action. The identity
+  search uses `Back to criteria` to return to those choices.
+- Opening `Replace criteria` starts a pending replacement for that row. `Next`
+  remains disabled until the user applies it with `Create and use new group`,
+  abandons it with `Discard draft`, or selects a saved group with `Choose
+  group`.
 - Focus `Search groups…` to open suggestions.
 - Empty input fetches default suggestions; typed input filters results.
 - Suggestions are capped at `7`.
@@ -64,9 +72,26 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
   selected until the row is explicitly cleared or a new group is picked.
 - Clear control (`x`) resets the row to its default scope.
 - Helper text under each row shows `Current group: <group-or-scope>`.
+- A selected saved group also shows how many identities are currently eligible.
+  Use `View members` to inspect the current identities without leaving wave
+  creation.
+- The member browser opens as a centered dialog on larger screens and a tall
+  sheet on smaller screens. It shows 20 identities per page, supports search by
+  handle or wallet, links each identity to its profile in a new tab, and keeps
+  the group's criteria available under `Why these identities qualify`.
+- Membership is a live result rather than a frozen list. The member browser
+  notes that profile, reputation, and ownership changes can change who matches
+  the group.
 - Inline identity groups use access-group wording and warn when the connected
   creator is excluded, because excluding yourself from a `Who can view` group
   can prevent you from opening the created wave.
+- New inline groups include the connected creator by default, including groups
+  composed only from rules. `Include me` can be switched off while editing
+  identities. Choosing a saved group preserves that group's own membership
+  instead of adding the creator to it.
+- When an unsaved inline group has a valid identity or rule configuration, use
+  `Preview matches` to evaluate and browse its current matches before creating
+  the group. Previewing does not save the group or apply it to the wave.
 
 ## Warnings and State Changes
 
@@ -83,6 +108,11 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 ## Failure and Recovery
 
 - If search shows no matches, clear or change search text and retry.
+- If the current member list cannot load, the member browser keeps the draft
+  intact and offers `Try again`.
+- If an older saved draft references a group whose criteria are no longer
+  available, the member browser stays open, explains that limitation, and
+  continues showing any current members the group endpoint can resolve.
 - Public waves can leave every scope as `Anyone`. For a restricted wave,
   `Next` stops on `Groups` if an active permission is open to `Anyone` or its
   selected group includes somebody outside `Who can view`.

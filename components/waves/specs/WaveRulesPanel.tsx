@@ -2,8 +2,11 @@ import type {
   WaveCustomRules,
   WaveRules,
 } from "@/helpers/waves/wave-rules.helpers";
+import WaveRulesGroupMembersLink from "@/components/waves/specs/WaveRulesGroupMembersLink";
+import type { WaveRuleRow } from "@/helpers/waves/wave-rules.shared";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 interface WaveRulesPanelProps {
   readonly rules: WaveRules;
@@ -12,6 +15,9 @@ interface WaveRulesPanelProps {
   readonly useRing?: boolean | undefined;
   readonly showTitle?: boolean | undefined;
   readonly variant?: "default" | "form" | undefined;
+  readonly renderRowValue?:
+    | ((row: WaveRuleRow) => ReactNode | undefined)
+    | undefined;
 }
 
 const hasCustomRules = (custom: WaveCustomRules): boolean =>
@@ -102,6 +108,7 @@ export default function WaveRulesPanel({
   useRing = true,
   showTitle = true,
   variant = "default",
+  renderRowValue,
 }: WaveRulesPanelProps) {
   let boundaryClasses = "";
   if (useRing) {
@@ -121,6 +128,38 @@ export default function WaveRulesPanel({
       : "!tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]";
   const backgroundClasses =
     variant === "form" ? "tw-bg-iron-900/60" : "tw-bg-iron-950";
+  const getRenderedRowValue = (row: WaveRuleRow): ReactNode => {
+    const renderedValue = renderRowValue?.(row);
+    if (renderedValue !== undefined) {
+      return renderedValue;
+    }
+
+    if (!row.valueHref) {
+      return row.value;
+    }
+
+    if (row.valueGroupId) {
+      return (
+        <WaveRulesGroupMembersLink
+          groupId={row.valueGroupId}
+          groupName={row.value}
+          href={row.valueHref}
+          linkLabel={row.valueLinkLabel}
+        />
+      );
+    }
+
+    return (
+      <Link
+        href={row.valueHref}
+        aria-label={row.valueLinkLabel}
+        title={row.value}
+        className="tw-inline-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-end tw-break-words tw-rounded-md tw-text-right tw-text-iron-50 tw-underline tw-underline-offset-2 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
+      >
+        {row.value}
+      </Link>
+    );
+  };
 
   return (
     <div
@@ -141,35 +180,26 @@ export default function WaveRulesPanel({
               {section.title}
             </SectionHeading>
             <dl className="tw-mb-0 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5">
-              {section.rows.map((row) => (
-                <div
-                  key={row.id}
-                  className="tw-grid tw-min-h-9 tw-grid-cols-[minmax(6.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-x-3 tw-gap-y-1.5 tw-py-2 tw-text-sm"
-                >
-                  <dt className="tw-min-w-0 tw-break-words tw-font-normal tw-leading-5 tw-text-iron-500">
-                    {row.label}
-                  </dt>
-                  <dd className="tw-mb-0 tw-ml-0 tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5 tw-text-iron-50">
-                    {row.valueHref ? (
-                      <Link
-                        href={row.valueHref}
-                        aria-label={row.valueLinkLabel}
-                        title={row.value}
-                        className="tw-inline-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-end tw-break-words tw-rounded-md tw-text-right tw-text-iron-50 tw-underline tw-underline-offset-2 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
-                      >
-                        {row.value}
-                      </Link>
-                    ) : (
-                      row.value
-                    )}
-                    {row.description && (
-                      <span className="tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
-                        {row.description}
-                      </span>
-                    )}
-                  </dd>
-                </div>
-              ))}
+              {section.rows.map((row) => {
+                return (
+                  <div
+                    key={row.id}
+                    className="tw-grid tw-min-h-9 tw-grid-cols-[minmax(6.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-x-3 tw-gap-y-1.5 tw-py-2 tw-text-sm"
+                  >
+                    <dt className="tw-min-w-0 tw-break-words tw-font-normal tw-leading-5 tw-text-iron-500">
+                      {row.label}
+                    </dt>
+                    <dd className="tw-mb-0 tw-ml-0 tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-5 tw-text-iron-50">
+                      {getRenderedRowValue(row)}
+                      {row.description && (
+                        <span className="tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
+                          {row.description}
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                );
+              })}
             </dl>
           </section>
         ))}

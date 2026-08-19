@@ -31,7 +31,7 @@ jest.mock(
           </button>
           {props.onCancel && (
             <button type="button" onClick={props.onCancel}>
-              Cancel
+              Back to criteria
             </button>
           )}
         </div>
@@ -139,6 +139,19 @@ const createdGroup: ApiGroupFull = {
   created_by: { handle: "builder" },
 } as ApiGroupFull;
 
+const defaultIncludedIdentity = {
+  profile_id: "profile-me",
+  handle: "me",
+  normalised_handle: "me",
+  primary_wallet: "0xME",
+  display: "Me",
+  tdh: 42,
+  level: 3,
+  cic_rating: 5,
+  wallet: "0xME",
+  pfp: "me.png",
+};
+
 function renderInlinePanel({
   suggestedName = "My Wave Who can view",
   onChange = jest.fn(),
@@ -146,6 +159,8 @@ function renderInlinePanel({
   selectedGroup = null,
   disabled = false,
   allowGroupClear = true,
+  includedIdentity = null,
+  onCriteriaReplacementChange = jest.fn(),
 }: {
   readonly suggestedName?: string;
   readonly onChange?: jest.Mock;
@@ -153,6 +168,8 @@ function renderInlinePanel({
   readonly selectedGroup?: ApiGroupFull | null;
   readonly disabled?: boolean;
   readonly allowGroupClear?: boolean;
+  readonly includedIdentity?: typeof defaultIncludedIdentity | null;
+  readonly onCriteriaReplacementChange?: jest.Mock;
 } = {}) {
   const initialSelectedGroup = selectedGroup;
 
@@ -168,6 +185,8 @@ function renderInlinePanel({
         disabled={disabled}
         selectedGroup={currentGroup}
         allowGroupClear={allowGroupClear}
+        defaultIncludedIdentity={includedIdentity}
+        onCriteriaReplacementChange={onCriteriaReplacementChange}
         onChange={(group) => {
           setCurrentGroup(group);
           onChange(group);
@@ -187,6 +206,7 @@ function renderInlinePanelWithDisabledControls({
   selectedGroup = null,
   initialDisabled = false,
   allowGroupClear = true,
+  onCriteriaReplacementChange = jest.fn(),
 }: {
   readonly suggestedName?: string;
   readonly onChange?: jest.Mock;
@@ -194,6 +214,7 @@ function renderInlinePanelWithDisabledControls({
   readonly selectedGroup?: ApiGroupFull | null;
   readonly initialDisabled?: boolean;
   readonly allowGroupClear?: boolean;
+  readonly onCriteriaReplacementChange?: jest.Mock;
 } = {}) {
   const initialSelectedGroup = selectedGroup;
 
@@ -217,6 +238,7 @@ function renderInlinePanelWithDisabledControls({
           disabled={disabled}
           selectedGroup={currentGroup}
           allowGroupClear={allowGroupClear}
+          onCriteriaReplacementChange={onCriteriaReplacementChange}
           onChange={(group) => {
             setCurrentGroup(group);
             onChange(group);
@@ -237,57 +259,76 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getByText("Anyone")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Add identity" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Add identity" })
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Add rule" })
+      screen.getByRole("button", { name: "Replace criteria" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Choose group" })
     ).toBeInTheDocument();
+  });
+
+  it("reports a pending replacement until the draft is discarded", async () => {
+    const user = userEvent.setup();
+    const onCriteriaReplacementChange = jest.fn();
+    renderInlinePanel({ onCriteriaReplacementChange });
+
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
+
+    expect(onCriteriaReplacementChange).toHaveBeenLastCalledWith(true);
+
+    await user.click(screen.getByRole("button", { name: "Discard draft" }));
+
+    expect(onCriteriaReplacementChange).toHaveBeenLastCalledWith(false);
   });
 
   it("opens the identity panel", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Add identity" }));
 
+    expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Add identity" })
+      screen.getByRole("button", { name: "Replace criteria" })
     ).toHaveAttribute("aria-pressed", "true");
     expect(
       screen.queryByRole("button", { name: "Back to options" })
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Back to criteria" })
+    ).toBeInTheDocument();
   });
 
-  it("returns to options when the active identity pill is clicked", async () => {
+  it("returns from identity search to the criteria choices", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Add identity" }));
-    await user.click(screen.getByRole("button", { name: "Add identity" }));
+    await user.click(screen.getByRole("button", { name: "Back to criteria" }));
 
     expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Choose group" })
+      screen.getByRole("button", { name: "Add identity" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "TDH" })).toBeInTheDocument();
   });
 
   it("opens a quick rule editor", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
 
     expect(screen.getByTestId("rule-tdh")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Add rule" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(
+      screen.getByRole("button", { name: "Replace criteria" })
+    ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "TDH" })).toHaveAttribute(
       "aria-pressed",
       "true"
@@ -301,7 +342,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
 
@@ -315,7 +356,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
 
     expect(
       screen.getByRole("button", { name: "Required NFTs" })
@@ -349,14 +390,19 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.queryByTestId("group-search")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Add identity" })
+      screen.getByRole("button", { name: "Replace criteria" })
     ).toBeInTheDocument();
   });
 
   it("returns to the actions view after selecting an existing group", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
-    renderInlinePanel({ onChange });
+    const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
+    renderInlinePanel({
+      onChange,
+      onCreateGroup,
+      includedIdentity: defaultIncludedIdentity,
+    });
 
     await user.click(screen.getByRole("button", { name: "Choose group" }));
     await user.click(screen.getByRole("button", { name: "select group" }));
@@ -364,8 +410,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({ name: "Selected Group" })
     );
+    expect(onCreateGroup).not.toHaveBeenCalled();
+    expect(screen.queryByText("Unsaved group")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Add identity" })
+      screen.getByRole("button", { name: "Replace criteria" })
     ).toBeInTheDocument();
   });
 
@@ -404,9 +452,14 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
-    renderInlinePanel({ onChange, onCreateGroup });
+    const onCriteriaReplacementChange = jest.fn();
+    renderInlinePanel({
+      onChange,
+      onCreateGroup,
+      onCriteriaReplacementChange,
+    });
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
     await user.click(
@@ -421,13 +474,43 @@ describe("CreateWaveGroupInlinePanel", () => {
       );
     });
     expect(onChange).toHaveBeenCalledWith(createdGroup);
+    expect(onCriteriaReplacementChange).toHaveBeenNthCalledWith(1, true);
+    expect(onCriteriaReplacementChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it("includes the creator when creating a rule-only group", async () => {
+    const user = userEvent.setup();
+    const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
+    renderInlinePanel({
+      onCreateGroup,
+      includedIdentity: defaultIncludedIdentity,
+    });
+
+    expect(screen.queryByText("Unsaved group")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(
+      screen.getByRole("button", { name: "Create and use new group" })
+    );
+
+    await waitFor(() => {
+      expect(onCreateGroup).toHaveBeenCalledWith(
+        expect.objectContaining({
+          group: expect.objectContaining({
+            identity_addresses: ["0xme"],
+          }),
+        })
+      );
+    });
   });
 
   it("keeps the draft when clicking outside an open editor", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
 
@@ -453,7 +536,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
 
@@ -473,12 +556,13 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Back to criteria" }));
 
     expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
@@ -494,10 +578,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     expect(screen.getByText("Current group")).toBeInTheDocument();
@@ -521,10 +605,10 @@ describe("CreateWaveGroupInlinePanel", () => {
       } as ApiGroupFull,
     });
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     expect(screen.getByText("Current group")).toBeInTheDocument();
@@ -551,7 +635,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       } as ApiGroupFull,
     });
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
 
@@ -580,7 +664,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
     await user.click(screen.getByRole("button", { name: "Choose group" }));
@@ -608,7 +692,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "TDH" }));
     await user.click(screen.getByRole("button", { name: "set invalid tdh" }));
     expect(
@@ -627,7 +711,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       ).not.toBeInTheDocument();
     });
     expect(
-      screen.getByRole("button", { name: "Add identity" })
+      screen.getByRole("button", { name: "Replace criteria" })
     ).toBeInTheDocument();
   });
 
@@ -640,10 +724,10 @@ describe("CreateWaveGroupInlinePanel", () => {
       } as ApiGroupFull,
     });
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Discard draft" }));
@@ -666,7 +750,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanelWithDisabledControls();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
 
@@ -687,7 +771,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanelWithDisabledControls();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
     await user.click(screen.getByRole("button", { name: "disable panel" }));
@@ -704,11 +788,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
-    await user.click(screen.getByRole("button", { name: "Add rule" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
     await user.click(screen.getByRole("button", { name: "Rep" }));
 
     expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
@@ -718,12 +801,13 @@ describe("CreateWaveGroupInlinePanel", () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
+    await user.click(screen.getByRole("button", { name: "Replace criteria" }));
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
     expect(screen.getAllByText("1 identity").length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("button", { name: "Add rule" })
+      screen.getByRole("button", { name: "Replace criteria" })
     ).toBeInTheDocument();
   });
 });

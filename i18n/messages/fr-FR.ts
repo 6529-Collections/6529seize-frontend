@@ -430,6 +430,7 @@ export const FR_FR_MESSAGES = {
   "waves.create.dialog.subwaveTitle": "Créer une sous-wave",
   "waves.create.dialog.waveTitle": "Créer une wave",
   "waves.create.actions.cancel": "Annuler",
+  "waves.create.actions.backToCriteria": "Retour aux critères",
   "waves.create.actions.complete": "Terminer",
   "waves.create.actions.next": "Suivant",
   "waves.create.actions.previous": "Précédent",
@@ -448,6 +449,36 @@ export const FR_FR_MESSAGES = {
     "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
   "waves.create.groups.viewGroupName": "Qui peut voir",
   "waves.create.groups.adminGroupName": "Administration",
+  "waves.create.groups.members.currentCount": "{count} éligibles actuellement",
+  "waves.create.groups.members.countLoading":
+    "Vérification de l’audience actuelle…",
+  "waves.create.groups.members.countUnavailable":
+    "Audience actuelle indisponible",
+  "waves.create.groups.members.view": "Voir les membres",
+  "waves.create.groups.members.previewDraft": "Prévisualiser les résultats",
+  "waves.create.groups.members.dialogTitle": "{role} : {group}",
+  "waves.create.groups.members.dynamicDescription":
+    "Cet aperçu en direct repose sur les données actuelles de profil, de réputation et de propriété. L’appartenance peut évoluer.",
+  "waves.create.groups.members.criteriaSummary":
+    "Pourquoi ces identités sont éligibles",
+  "waves.create.groups.members.criteriaUnavailable":
+    "Les critères du groupe ne sont pas disponibles, mais vous pouvez toujours consulter les membres actuels ci-dessous.",
+  "waves.create.groups.members.searchLabel": "Rechercher une identité",
+  "waves.create.groups.members.searchPlaceholder":
+    "Rechercher par pseudo ou portefeuille",
+  "waves.create.groups.members.clearSearch": "Effacer la recherche d’identité",
+  "waves.create.groups.members.loadingStatus": "Chargement des membres actuels",
+  "waves.create.groups.members.empty":
+    "Aucune identité ne correspond actuellement à ce groupe.",
+  "waves.create.groups.members.searchEmpty": "Aucune identité trouvée.",
+  "waves.create.groups.members.errorTitle":
+    "Impossible de charger les membres actuels.",
+  "waves.create.groups.members.errorDescription":
+    "Vérifiez votre connexion et réessayez.",
+  "waves.create.groups.members.retry": "Réessayer",
+  "waves.create.groups.members.listLabel": "Membres actuels du groupe",
+  "waves.create.groups.members.openProfile":
+    "Ouvrir le profil de {identity} dans un nouvel onglet",
   "waves.create.groups.validation.checking": "Vérification des accès…",
   "waves.create.groups.validation.unavailableTitle":
     "Impossible de vérifier les accès.",
