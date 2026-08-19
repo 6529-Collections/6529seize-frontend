@@ -31,6 +31,8 @@ describe("instrumentation-client", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const objectCapturedPromiseRejectionWithoutStackMessage =
     "Object captured as promise rejection with keys: code, message";
+  const zerionObjectRejectionMessage =
+    "Object captured as promise rejection with keys: code, message, name";
   const unsupportedWalletRevokePermissionsMessage =
     "the method wallet_revokePermissions does not exist/is not available";
   const backpackWalletCollisionBreadcrumbMessage =
@@ -485,6 +487,39 @@ describe("instrumentation-client", () => {
         stack: serializedStack,
       },
     },
+  });
+
+  const createZerionUserRejectedEvent = (
+    breadcrumbs: Array<Record<string, unknown>> = [
+      {
+        type: "default",
+        category: "ui.click",
+        level: "info",
+        message: ' > wui-flex > w3m-list-wallet[name="Zerion"]',
+      },
+    ]
+  ) => ({
+    event_id: "zerion-user-rejected",
+    exception: {
+      values: [
+        {
+          type: "UnhandledRejection",
+          value: zerionObjectRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+        },
+      ],
+    },
+    extra: {
+      __serialized__: {
+        code: 4001,
+        message: "User Rejected the Request",
+        name: "Error",
+      },
+    },
+    breadcrumbs,
   });
 
   const createBrowserExtensionWalletRejectionEvent = (
@@ -1244,6 +1279,37 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the production-shaped Zerion user rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createZerionUserRejectedEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps a Zerion-shaped rejection after a later non-Zerion UI click", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createZerionUserRejectedEvent([
+      {
+        type: "default",
+        category: "ui.click",
+        level: "info",
+        message: ' > wui-flex > w3m-list-wallet[name="Zerion"]',
+      },
+      {
+        type: "default",
+        category: "ui.click",
+        level: "info",
+        message: "button.connect-wallet",
+      },
+    ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps Rabby Chrome user rejections with app-owned frames", () => {
