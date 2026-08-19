@@ -11,11 +11,6 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
   ),
 }));
 
-jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id }: any) => (
-    <div data-testid={`tooltip-${id}`}>{children}</div>
-  ),
-}));
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: null }) }));
 
 describe("Delegation form helpers", () => {
@@ -75,12 +70,12 @@ describe("Delegation form helpers", () => {
   it("DelegationFormLabel renders tooltip", () => {
     const mod = require("@/components/delegation/DelegationFormParts");
     const { DelegationFormLabel } = mod;
-    const { getByText, getByTestId } = render(
+    const { getByRole, getByText } = render(
       <DelegationFormLabel title="Label" tooltip="info" />
     );
     expect(getByText("Label")).toBeInTheDocument();
-    expect(
-      getByTestId("tooltip-delegation-form-label-label")
-    ).toBeInTheDocument();
+    const tooltipButton = getByRole("button", { name: "info" });
+    fireEvent.mouseEnter(tooltipButton);
+    expect(getByRole("tooltip")).toHaveTextContent("info");
   });
 });

@@ -340,20 +340,29 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
   });
 
-  it("ignores blank related Jest test entries before resolving paths", () => {
+  it("filters non-file related Jest discovery output before resolving paths", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
     );
 
     const guardIndex = workflow.indexOf('if [ -z "$related_test" ]; then');
+    const fileGuardIndex = workflow.indexOf(
+      'if [ ! -f "$related_test" ]; then'
+    );
     const resolveIndex = workflow.indexOf(
       'related_path="$(realpath "$related_test")"'
     );
 
     expect(guardIndex).toBeGreaterThanOrEqual(0);
+    expect(fileGuardIndex).toBeGreaterThan(guardIndex);
     expect(resolveIndex).toBeGreaterThan(guardIndex);
-    expect(workflow.slice(guardIndex, resolveIndex)).toContain("continue");
+    expect(resolveIndex).toBeGreaterThan(fileGuardIndex);
+    const fileGuardBlock = workflow.slice(fileGuardIndex, resolveIndex);
+    expect(fileGuardBlock).toContain(
+      "Skipping non-file Jest discovery output"
+    );
+    expect(fileGuardBlock).toContain("continue");
   });
 
   it.each([
@@ -453,6 +462,10 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
       "utf8"
     );
+    const productionWorkflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/production-e2e.yml"),
+      "utf8"
+    );
     const museumReleaseSelector = fs.readFileSync(
       path.join(process.cwd(), "scripts/museum-release-selection.cjs"),
       "utf8"
@@ -473,7 +486,13 @@ describe("testing strategy CI plan", () => {
       "utf8"
     );
 
-    expect(workflow).toContain("playwright install --with-deps chromium");
+    expect(workflow).not.toContain("playwright install --with-deps chromium");
+    expect(stagingWorkflow).not.toContain(
+      "playwright install --with-deps chromium"
+    );
+    expect(productionWorkflow).not.toContain(
+      "playwright install --with-deps chromium"
+    );
     expect(workflow).toContain("test:e2e:smoke");
     expect(workflow).toContain("test:e2e:critical-shell");
     for (const museumBrowserSpec of [
@@ -576,7 +595,17 @@ describe("testing strategy CI plan", () => {
           needs?: string | string[];
           strategy?: { matrix?: string };
           "runs-on"?: string;
-          steps?: Array<{ name?: string; if?: string; run?: string }>;
+          "timeout-minutes"?: number;
+          container?: { image?: string; options?: string };
+          defaults?: { run?: { shell?: string } };
+          steps?: Array<{
+            name?: string;
+            if?: string;
+            id?: string;
+            run?: string;
+            "timeout-minutes"?: number;
+            "continue-on-error"?: boolean;
+          }>;
         }
       >;
     };
@@ -594,6 +623,36 @@ describe("testing strategy CI plan", () => {
           if: "matrix.lane == 'build'",
         }),
         expect.objectContaining({
+          name: "Run Network Museum Playwright packs",
+          if: "startsWith(matrix.lane, 'playwright-museum-')",
+        }),
+      ])
+    );
+    expect(parsed.jobs["app-checks"]?.steps).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Run small Playwright smoke pack" }),
+        expect.objectContaining({
+          name: "Run critical route-shell Playwright pack",
+        }),
+      ])
+    );
+    expect(parsed.jobs["core-playwright-checks"]).toMatchObject({
+      if: "needs.plan.outputs.core_playwright_required == 'true'",
+      "runs-on": "${{ matrix.runner }}",
+      "timeout-minutes": 20,
+      container: {
+        image:
+          "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
+        options: "--ipc=host",
+      },
+      defaults: { run: { shell: "bash" } },
+      strategy: {
+        matrix: "${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}",
+      },
+    });
+    expect(parsed.jobs["core-playwright-checks"]?.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
           name: "Run small Playwright smoke pack",
           if: "matrix.lane == 'playwright-smoke'",
         }),
@@ -601,10 +660,13 @@ describe("testing strategy CI plan", () => {
           name: "Run critical route-shell Playwright pack",
           if: "matrix.lane == 'playwright-critical-shell'",
         }),
-        expect.objectContaining({
-          name: "Run Network Museum Playwright packs",
-          if: "startsWith(matrix.lane, 'playwright-museum-')",
-        }),
+      ])
+    );
+    expect(parsed.jobs["core-playwright-checks"]?.steps).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Restore Playwright browser" }),
+        expect.objectContaining({ name: "Install Playwright dependencies" }),
+        expect.objectContaining({ name: "Install Playwright browser" }),
       ])
     );
     const museumBrowserStep = parsed.jobs["app-checks"]?.steps?.find(
@@ -699,15 +761,61 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).not.toContain("start:standalone");
     expect(parsed.jobs["installed-checks"]).toMatchObject({
       name: "Installed app checks",
-      needs: ["plan", "app-checks"],
+      needs: ["plan", "app-checks", "core-playwright-checks"],
       if: "always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'",
     });
     expect(workflow).toContain(
       'write("app_check_matrix", JSON.stringify({ include: appCheckLanes }))'
     );
+    expect(workflow).toContain(
+      'write("core_playwright_matrix", JSON.stringify({ include: corePlaywrightLanes }))'
+    );
+    expect(workflow).toContain(
+      'write("core_playwright_required", String(corePlaywrightLanes.length > 0))'
+    );
     expect(workflow).toContain("BUILD_CI_RUNNER");
     expect(workflow).toContain("Restore Playwright browser");
     expect(workflow).toContain("node22-pr-production-nextjs");
+
+    for (const source of [workflow, stagingWorkflow, productionWorkflow]) {
+      const workflowJobs = YAML.parse(source) as {
+        jobs: Record<
+          string,
+          {
+            steps?: Array<{
+              name?: string;
+              run?: string;
+              "timeout-minutes"?: number;
+              "continue-on-error"?: boolean;
+            }>;
+          }
+        >;
+      };
+      const steps = Object.values(workflowJobs.jobs).flatMap(
+        (job) => job.steps ?? []
+      );
+      expect(steps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "Install Playwright dependencies",
+            run: "./bin/6529 exec playwright install-deps chromium",
+            "timeout-minutes": 3,
+            "continue-on-error": true,
+          }),
+          expect.objectContaining({
+            name: "Retry Playwright dependencies",
+            run: "./bin/6529 exec playwright install-deps chromium",
+            "timeout-minutes": 3,
+            "continue-on-error": true,
+          }),
+          expect.objectContaining({
+            name: "Install Playwright browser",
+            run: "./bin/6529 exec playwright install chromium",
+            "timeout-minutes": 10,
+          }),
+        ])
+      );
+    }
   });
 
   it("keeps full-history CI checkouts blobless", () => {

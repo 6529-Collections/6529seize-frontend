@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Pagination from "../pagination/Pagination";
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { Time } from "@/helpers/time";
 import {
   faCheckCircle,
@@ -278,9 +279,7 @@ export default function PrenodesStatus() {
   return (
     <section className="tw-pb-12">
       <header className="tw-pb-8 sm:tw-pb-10">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-          Prenodes Status
-        </h1>
+        <h1 className={NETWORK_PAGE_TITLE_CLASSES}>Prenodes Status</h1>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
           * All times are in UTC
         </p>

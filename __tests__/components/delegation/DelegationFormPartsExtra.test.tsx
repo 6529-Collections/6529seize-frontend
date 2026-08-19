@@ -5,14 +5,6 @@ import {
   DelegationFormDelegateAddressFormGroup,
 } from '@/components/delegation/DelegationFormParts';
 
-jest.mock('react-tooltip', () => ({
-  Tooltip: ({ children, id }: any) => (
-    <div data-testid="react-tooltip" data-tooltip-id={id}>
-      {children}
-    </div>
-  ),
-}));
-
 jest.mock('wagmi', () => ({ useEnsName: () => ({ data: null }), useEnsAddress: () => ({ data: null }) }));
 
 describe('DelegationFormParts extras', () => {
@@ -20,12 +12,10 @@ describe('DelegationFormParts extras', () => {
   it('DelegationFormLabel renders tooltip', () => {
     const { getByText } = render(<DelegationFormLabel title="T" tooltip="tip" />);
     expect(getByText('T')).toBeInTheDocument();
-    
-    // Check that the tooltip is rendered
-    const tooltip = screen.getByTestId('react-tooltip');
-    expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveAttribute('data-tooltip-id', 'delegation-form-label-t');
-    expect(tooltip.textContent).toContain('tip');
+
+    const tooltipButton = screen.getByRole('button', { name: 'tip' });
+    fireEvent.mouseEnter(tooltipButton);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('tip');
   });
 
   it('DelegationFormOptionsFormGroup allows selecting option', () => {
