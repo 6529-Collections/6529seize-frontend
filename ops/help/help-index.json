@@ -4378,7 +4378,7 @@
         "Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, or Nobody can start a new direct-message conversation.",
         "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
         "Every recipient must allow the creator before a new group direct message can be created.",
-        "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation while preserving category choices.",
+        "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation, hides the individual category controls, and preserves their choices.",
         "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
         "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push.",
         "Profile Preferences is available from the app sidebar, the desktop profile menu, and the settings action beside the Notifications heading."

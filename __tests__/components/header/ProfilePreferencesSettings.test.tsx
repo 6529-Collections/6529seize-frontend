@@ -64,22 +64,25 @@ describe("ProfilePreferencesSettings", () => {
     });
   });
 
-  it("shows optional categories as paused while preserving their saved values", async () => {
+  it("hides optional categories while preserving their saved values", async () => {
     const user = userEvent.setup();
     render(<ProfilePreferencesSettings isOpen onClose={jest.fn()} />);
     await screen.findByText("Subscription coverage");
 
     await user.click(screen.getByLabelText("Essential only"));
 
-    expect(screen.getAllByText("Paused")).toHaveLength(6);
-    expect(
-      screen.getByText("Subscription coverage").closest("label")
-    ).toBeNull();
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Subscription coverage")
+      ).not.toBeInTheDocument();
+      expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+    });
     expect(
       screen.getByText(/choices are saved and restored/i)
     ).toBeInTheDocument();
 
     await user.click(screen.getByLabelText("All"));
+    await screen.findByText("Subscription coverage");
     expect(screen.getAllByRole("checkbox")).toHaveLength(6);
     expect(screen.getAllByRole("checkbox")[5]).toBeChecked();
   });

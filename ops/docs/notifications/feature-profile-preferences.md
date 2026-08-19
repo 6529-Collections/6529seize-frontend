@@ -35,9 +35,9 @@ Optional categories cover direct messages and wave activity; mentions, replies,
 and quotes; reactions, votes, and boosts; new followers; REP and NIC updates;
 and subscription coverage.
 
-When `Essential only` is selected, the category rows show `Paused` instead of
-disabled-on switches. Their values are preserved and restored when the profile
-switches back to `All`.
+When `Essential only` is selected, the optional category controls collapse out
+of view. Their values are preserved and restored when the profile switches back
+to `All`.
 
 Device-level push settings remain separate. Push delivery can only happen after
 an in-app notification is created, so a notification suppressed by these

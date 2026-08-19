@@ -22,6 +22,13 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  AnimatePresence,
+  LazyMotion,
+  domAnimation,
+  m,
+  useReducedMotion,
+} from "framer-motion";
 import { useContext, useState } from "react";
 import Toggle from "react-toggle";
 
@@ -123,6 +130,7 @@ function ProfilePreferencesForm({
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const [original, setOriginal] = useState(preferences);
   const [current, setCurrent] = useState(preferences);
+  const prefersReducedMotion = useReducedMotion() ?? false;
 
   const hasChanges = JSON.stringify(original) !== JSON.stringify(current);
 
@@ -249,52 +257,66 @@ function ProfilePreferencesForm({
           </p>
 
           {isEssential && (
-            <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-200">
+            <div
+              role="status"
+              className="tw-mt-4 tw-rounded-lg tw-border tw-border-amber-500/30 tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-200"
+            >
               {t(locale, "profilePreferences.notifications.pausedInfo")}
             </div>
           )}
 
-          <div className="tw-mt-4 tw-divide-y tw-divide-iron-800 tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800">
-            {CATEGORY_KEYS.map((key) => (
-              <div
-                key={key}
-                className="tw-flex tw-min-h-12 tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/40 tw-px-3 tw-py-2.5"
-              >
-                {isEssential ? (
-                  <span className="tw-text-sm tw-text-iron-200">
-                    {t(
-                      locale,
-                      `profilePreferences.notifications.category.${key}`
-                    )}
-                  </span>
-                ) : (
-                  <label
-                    htmlFor={`profile-notification-${key}`}
-                    className="tw-text-sm tw-text-iron-200"
-                  >
-                    {t(
-                      locale,
-                      `profilePreferences.notifications.category.${key}`
-                    )}
-                  </label>
-                )}
-                {isEssential ? (
-                  <span className="tw-rounded-full tw-bg-iron-700 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300">
-                    {t(locale, "profilePreferences.notifications.paused")}
-                  </span>
-                ) : (
-                  <Toggle
-                    id={`profile-notification-${key}`}
-                    checked={current.notifications[key]}
-                    icons={false}
-                    onChange={(event) =>
-                      updateCategory(key, event.target.checked)
-                    }
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          <LazyMotion features={domAnimation}>
+            <AnimatePresence initial={false}>
+              {!isEssential && (
+                <m.div
+                  key="optional-notification-categories"
+                  initial={
+                    prefersReducedMotion
+                      ? false
+                      : { height: 0, opacity: 0, y: -8 }
+                  }
+                  animate={{ height: "auto", opacity: 1, y: 0 }}
+                  exit={
+                    prefersReducedMotion
+                      ? { opacity: 0 }
+                      : { height: 0, opacity: 0, y: -8 }
+                  }
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.18,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                  className="tw-overflow-hidden"
+                >
+                  <div className="tw-mt-4 tw-divide-y tw-divide-iron-800 tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800">
+                    {CATEGORY_KEYS.map((key) => (
+                      <div
+                        key={key}
+                        className="tw-flex tw-min-h-12 tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/40 tw-px-3 tw-py-2.5"
+                      >
+                        <label
+                          htmlFor={`profile-notification-${key}`}
+                          className="tw-text-sm tw-text-iron-200"
+                        >
+                          {t(
+                            locale,
+                            `profilePreferences.notifications.category.${key}`
+                          )}
+                        </label>
+                        <Toggle
+                          id={`profile-notification-${key}`}
+                          checked={current.notifications[key]}
+                          icons={false}
+                          onChange={(event) =>
+                            updateCategory(key, event.target.checked)
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </m.div>
+              )}
+            </AnimatePresence>
+          </LazyMotion>
           <p className="tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "profilePreferences.notifications.deviceNote")}
           </p>
