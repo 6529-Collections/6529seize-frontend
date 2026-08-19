@@ -1118,12 +1118,41 @@ describe("instrumentation-client", () => {
         fingerprint: ["next-server-component-render", "779660776"],
       })
     );
-    expect(repeated?.fingerprint).toEqual(first?.fingerprint);
-    expect(different?.fingerprint).toEqual([
-      "next-server-component-render",
-      "1680982760",
-    ]);
+    expect(repeated).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
+    expect(different).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "1680982760",
+        }),
+        fingerprint: ["next-server-component-render", "1680982760"],
+      })
+    );
     expect(different?.fingerprint).not.toEqual(first?.fingerprint);
+  });
+
+  it("prefers the original Server Component error digest", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("779660776"),
+      syntheticException: createServerComponentRenderError("1680982760"),
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
   });
 
   it("preserves an existing Server Component render error fingerprint", () => {
@@ -1148,6 +1177,24 @@ describe("instrumentation-client", () => {
     );
   });
 
+  it("replaces an empty Server Component error fingerprint", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createServerComponentRenderEvent(serverComponentRenderMessage, {
+        fingerprint: [],
+      }),
+      {
+        originalException: createServerComponentRenderError("779660776"),
+      }
+    );
+
+    expect(result?.fingerprint).toEqual([
+      "next-server-component-render",
+      "779660776",
+    ]);
+  });
+
   it.each([
     {
       description: "changed wrapper message",
@@ -1169,6 +1216,11 @@ describe("instrumentation-client", () => {
       message: serverComponentRenderMessage,
       digest: 779660776,
     },
+    ...[401, 403, 404].map((status) => ({
+      description: `HTTP ${status} access-fallback digest`,
+      message: serverComponentRenderMessage,
+      digest: `NEXT_HTTP_ERROR_FALLBACK;${status}`,
+    })),
   ])(
     "keeps the $description Server Component near miss unchanged",
     ({ message, digest }) => {
@@ -1181,6 +1233,14 @@ describe("instrumentation-client", () => {
       expect(result).not.toBeNull();
       expect(result?.tags).toBeUndefined();
       expect(result?.fingerprint).toBeUndefined();
+      expect(result).toEqual(
+        expect.objectContaining({
+          level: "error",
+          exception: expect.objectContaining({
+            values: [expect.objectContaining({ value: message })],
+          }),
+        })
+      );
     }
   );
 
