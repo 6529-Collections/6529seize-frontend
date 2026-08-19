@@ -10,8 +10,6 @@ import UserPageIdentityAddStatementsTypeButton, {
   ADD_STATEMENT_PLATFORM_TOOLTIP_ID,
 } from "./UserPageIdentityAddStatementsTypeButton";
 
-const PLATFORM_PICKER_LABEL_ID = "add-statement-platform-picker-label";
-
 export default function UserPageIdentityAddStatementsPlatformPicker<
   T extends STATEMENT_TYPE,
 >({
@@ -43,13 +41,10 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
 
   return (
     <div>
-      <p
-        id={PLATFORM_PICKER_LABEL_ID}
-        className="tw-mb-2 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
-      >
-        {t(locale, "user.profile.identity.statements.selectPlatform")}
-      </p>
-      <div role="group" aria-labelledby={PLATFORM_PICKER_LABEL_ID}>
+      <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
+        <legend className="tw-mb-2 tw-block tw-w-full tw-p-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          {t(locale, "user.profile.identity.statements.selectPlatform")}
+        </legend>
         {rows.map((row, rowIndex) => (
           <span
             key={row.join("-")}
@@ -71,7 +66,7 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
             ))}
           </span>
         ))}
-      </div>
+      </fieldset>
       {isTouchScreen ? (
         <Tooltip
           {...tooltipProps}
