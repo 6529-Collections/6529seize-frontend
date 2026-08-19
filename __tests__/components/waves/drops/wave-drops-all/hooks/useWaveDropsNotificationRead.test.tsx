@@ -1,13 +1,31 @@
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWaveDropsNotificationRead } from "@/components/waves/drops/wave-drops-all/hooks/useWaveDropsNotificationRead";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import {
+  commonApiPost,
+  commonApiPostWithoutBodyAndResponse,
+} from "@/services/api/common-api";
 import { act, render, waitFor } from "@testing-library/react";
 import { jwtDecode } from "jwt-decode";
 import React from "react";
 
+const mockApplyDmServerState = jest.fn();
+const mockBeginDmRead = jest.fn();
+const mockCancelDmRead = jest.fn();
+const mockReconcileFailedDmRead = jest.fn();
+
 jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: jest.fn().mockResolvedValue({ dm_unread_state: null }),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useOptionalDmUnreadActions: () => ({
+    applyServerState: mockApplyDmServerState,
+    beginRead: mockBeginDmRead,
+    cancelRead: mockCancelDmRead,
+    reconcileFailedRead: mockReconcileFailedDmRead,
+  }),
 }));
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -46,6 +64,9 @@ const createDeferred = (): Deferred => {
 
 const apiPostMock = commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
   typeof commonApiPostWithoutBodyAndResponse
+>;
+const apiPostWithBodyMock = commonApiPost as jest.MockedFunction<
+  typeof commonApiPost
 >;
 const { getAuthJwt } = jest.requireMock("@/services/auth/auth.utils") as {
   readonly getAuthJwt: jest.Mock;
@@ -108,10 +129,12 @@ const dispatchVisibilityChange = () => {
 
 function TestComponent({
   enabled,
+  isDirectMessage,
   removeWaveDeliveredNotifications,
   waveId,
 }: {
   readonly enabled?: boolean;
+  readonly isDirectMessage?: boolean;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -120,6 +143,7 @@ function TestComponent({
   useWaveDropsNotificationRead({
     waveId,
     enabled,
+    isDirectMessage,
     removeWaveDeliveredNotifications,
   });
 
@@ -138,6 +162,14 @@ describe("useWaveDropsNotificationRead", () => {
     removeWaveDeliveredNotifications.mockClear();
     apiPostMock.mockReset();
     apiPostMock.mockResolvedValue(undefined);
+    apiPostWithBodyMock.mockReset();
+    apiPostWithBodyMock.mockResolvedValue({ dm_unread_state: null });
+    mockApplyDmServerState.mockReset();
+    mockBeginDmRead.mockReset();
+    mockBeginDmRead.mockReturnValue(null);
+    mockCancelDmRead.mockReset();
+    mockReconcileFailedDmRead.mockReset();
+    mockReconcileFailedDmRead.mockResolvedValue(undefined);
     getAuthJwtMock.mockReset();
     getAuthJwtMock.mockReturnValue("test-jwt");
     useAuthMock.mockReset();
@@ -243,6 +275,54 @@ describe("useWaveDropsNotificationRead", () => {
       });
       expect(invalidateNotifications).toHaveBeenCalled();
     });
+  });
+
+  it("uses the canonical optimistic read path when a direct-message chat opens", async () => {
+    const readOperation = {
+      id: 1,
+      profileId: "profile-1",
+      waveId: "wave-1",
+      readThroughSerialNo: 42,
+    };
+    const dmUnreadState = {
+      profile_id: "profile-1",
+      wave_id: "wave-1",
+      unread_count: 0,
+      first_unread_drop_serial_no: null,
+      latest_drop_serial_no: 42,
+      latest_read_serial_no: 42,
+      version: 3,
+    };
+    mockBeginDmRead.mockReturnValue(readOperation);
+    apiPostWithBodyMock.mockResolvedValue({
+      dm_unread_state: dmUnreadState,
+    });
+
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={{ invalidateNotifications } as any}
+      >
+        <TestComponent
+          waveId="wave-1"
+          isDirectMessage
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(mockBeginDmRead).toHaveBeenCalledWith("wave-1", undefined);
+      expect(apiPostWithBodyMock).toHaveBeenCalledWith({
+        endpoint: "notifications/wave/wave-1/read",
+        headers: { Authorization: "Bearer test-jwt" },
+        body: {
+          read_through_serial_no: 42,
+          request_dm_unread_state: true,
+        },
+      });
+      expect(mockApplyDmServerState).toHaveBeenCalledWith(dmUnreadState);
+    });
+    expect(apiPostMock).not.toHaveBeenCalled();
   });
 
   it("uses the latest delivered-notification remover on visibility sync", async () => {

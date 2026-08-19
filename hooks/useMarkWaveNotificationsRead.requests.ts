@@ -258,8 +258,11 @@ const sendWaveReadRequest = async (
       headers: authHeaders,
       body:
         readThroughSerialNo === undefined
-          ? {}
-          : { read_through_serial_no: readThroughSerialNo },
+          ? { request_dm_unread_state: true }
+          : {
+              read_through_serial_no: readThroughSerialNo,
+              request_dm_unread_state: true,
+            },
     });
     sendableIntents.forEach((intent) => intent.onReadResponse?.(response));
   }

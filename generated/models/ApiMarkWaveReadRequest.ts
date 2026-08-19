@@ -15,6 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiMarkWaveReadRequest {
     'read_through_serial_no'?: number;
+    'request_dm_unread_state'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,6 +26,12 @@ export class ApiMarkWaveReadRequest {
             "name": "read_through_serial_no",
             "baseName": "read_through_serial_no",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "request_dm_unread_state",
+            "baseName": "request_dm_unread_state",
+            "type": "boolean",
             "format": ""
         }    ];
 

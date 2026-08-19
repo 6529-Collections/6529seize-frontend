@@ -333,7 +333,6 @@ describe("useEnhancedWavesListCore", () => {
     const { result } = renderHook(() =>
       useEnhancedWavesListCore(null, wavesData, {
         supportsPinning: false,
-        canonicalUnreadReady: true,
         canonicalUnreadByWaveId: {
           "wave-1": {
             profile_id: "profile-1",
@@ -364,7 +363,7 @@ describe("useEnhancedWavesListCore", () => {
     expect(resetWaveNewDropsCount).not.toHaveBeenCalled();
   });
 
-  it("keeps API and websocket unread data until the canonical snapshot is ready", () => {
+  it("uses the canonical unread owner before its first snapshot is ready", () => {
     mockedUseNewDropCounter.mockReturnValue({
       newDropsCounts: {
         "wave-1": {
@@ -391,7 +390,6 @@ describe("useEnhancedWavesListCore", () => {
       useEnhancedWavesListCore(null, wavesData, {
         supportsPinning: false,
         canonicalUnreadByWaveId: {},
-        canonicalUnreadReady: false,
       })
     );
 
@@ -399,12 +397,12 @@ describe("useEnhancedWavesListCore", () => {
       null,
       wavesData.waves,
       wavesData.refetchAllWaves,
-      expect.objectContaining({ enabled: true })
+      expect.objectContaining({ enabled: false })
     );
     expect(result.current.waves[0]).toMatchObject({
-      unreadDropsCount: 6,
-      firstUnreadDropSerialNo: 10,
-      newDropsCount: { count: 2, firstUnreadSerialNo: 12 },
+      unreadDropsCount: 0,
+      firstUnreadDropSerialNo: null,
+      newDropsCount: { count: 0, firstUnreadSerialNo: null },
     });
   });
 });

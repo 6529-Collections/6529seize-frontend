@@ -16,6 +16,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -35,6 +36,7 @@ import {
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
@@ -195,6 +197,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   composerDensity = "default",
 }) => {
   const router = useRouter();
+  const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const { fetchAroundSerialNo } = useMyStream();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
@@ -607,7 +610,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           activeDrop={activeDrop}
           initialDrop={scrollTarget}
           dividerSerialNo={dividerTarget}
-          unreadCount={wave.metrics.your_unread_drops_count}
+          unreadCount={
+            isWaveDirectMessage(wave.id, wave)
+              ? (dmUnreadConversation?.unread_count ?? 0)
+              : wave.metrics.your_unread_drops_count
+          }
           dropId={null}
           onDropContentClick={onDropClick}
           isMuted={wave.metrics.muted}

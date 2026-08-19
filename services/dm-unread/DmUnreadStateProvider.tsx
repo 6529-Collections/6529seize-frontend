@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getQueryErrorStatus } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnreadConversationState";
 import type { ApiDmUnreadSnapshot } from "@/generated/models/ApiDmUnreadSnapshot";
 import { WsMessageType } from "@/helpers/Types";
@@ -17,13 +17,13 @@ import {
 } from "@/services/auth/auth.utils";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
-import { useQueryClient } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -33,7 +33,6 @@ import {
   DmUnreadStore,
   getDmUnreadConversation,
   getDmUnreadConversations,
-  getDmUnreadSnapshotReady,
   getDmUnreadSummary,
   type DmUnreadReadOperation,
   type DmUnreadSummary,
@@ -41,7 +40,19 @@ import {
 
 interface DmUnreadContextValue {
   readonly activeProfileId: string | null;
+  readonly activationId: number;
   readonly store: DmUnreadStore;
+  readonly applyServerState: (
+    state: ApiDmUnreadConversationState,
+    expectedProfileId: string | null,
+    expectedActivationId: number
+  ) => boolean;
+  readonly beginRead: (
+    expectedProfileId: string | null,
+    expectedActivationId: number,
+    waveId: string,
+    readThroughSerialNo?: number
+  ) => DmUnreadReadOperation | null;
   readonly reconcileFailedRead: (
     operation: DmUnreadReadOperation
   ) => Promise<void>;
@@ -49,6 +60,28 @@ interface DmUnreadContextValue {
 }
 
 const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
+const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
+const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
+const SNAPSHOT_RETRY_BASE_DELAYS_MS = [
+  5_000,
+  30_000,
+  SNAPSHOT_RECONCILIATION_INTERVAL_MS,
+] as const;
+const SNAPSHOT_RETRY_JITTER_RATIO = 0.2;
+let nextProfileActivationId = 1;
+
+type SnapshotSynchronizationResult =
+  | "synchronized"
+  | "retryable-failure"
+  | "terminal-failure"
+  | "stale";
+
+interface InFlightSnapshotRequest {
+  readonly activationId: number;
+  readonly jwt: string;
+  readonly promise: Promise<SnapshotSynchronizationResult>;
+  readonly requestId: number;
+}
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -83,29 +116,119 @@ const isDmUnreadSnapshot = (value: unknown): value is ApiDmUnreadSnapshot => {
   );
 };
 
+interface SnapshotSynchronizationRequest {
+  readonly expectedProfileId: string;
+  readonly isCurrentRequest: () => boolean;
+  readonly jwt: string;
+  readonly startedAtSequence: number;
+  readonly store: DmUnreadStore;
+}
+
+const getSnapshotRetryDelay = (attempt: number): number => {
+  const baseDelay =
+    SNAPSHOT_RETRY_BASE_DELAYS_MS[
+      Math.min(attempt, SNAPSHOT_RETRY_BASE_DELAYS_MS.length - 1)
+    ] ?? SNAPSHOT_RECONCILIATION_INTERVAL_MS;
+  const jitterMultiplier =
+    1 -
+    SNAPSHOT_RETRY_JITTER_RATIO +
+    ((globalThis.crypto.getRandomValues(new Uint32Array(1)).at(0) ?? 0) /
+      2 ** 32) *
+      SNAPSHOT_RETRY_JITTER_RATIO *
+      2;
+  return Math.round(baseDelay * jitterMultiplier);
+};
+
+const synchronizeDmUnreadSnapshot = async (
+  request: SnapshotSynchronizationRequest
+): Promise<SnapshotSynchronizationResult> => {
+  try {
+    const response = await commonApiFetch<unknown>({
+      endpoint: "dm-drops/unread/snapshot",
+      headers: { Authorization: `Bearer ${request.jwt}` },
+      errorMode: "structured",
+    });
+    if (!request.isCurrentRequest()) {
+      return "stale";
+    }
+    if (
+      !isDmUnreadSnapshot(response) ||
+      response.profile_id !== request.expectedProfileId
+    ) {
+      throw new Error("Invalid DM unread snapshot response");
+    }
+    request.store.applySnapshot(response, request.startedAtSequence);
+    return "synchronized";
+  } catch (error) {
+    if (!request.isCurrentRequest()) {
+      return "stale";
+    }
+    const status = getQueryErrorStatus(error);
+    if (status !== null && status >= 400 && status < 500 && status !== 429) {
+      console.error("Failed to synchronize DM unread state", error);
+      return "terminal-failure";
+    }
+    return "retryable-failure";
+  }
+};
+
 export function DmUnreadStateProvider({
   children,
 }: {
   readonly children: ReactNode;
 }) {
-  const queryClient = useQueryClient();
   const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
   const { isActive, isCapacitor } = useCapacitor();
   const [authRevision, setAuthRevision] = useState(0);
   const [store] = useState(() => new DmUnreadStore());
   const activeProfileId =
     activeProfileProxy?.created_by.id ?? connectedProfile?.id ?? null;
+  const profileActivation = useMemo(
+    () => ({
+      id: nextProfileActivationId++,
+      profileId: activeProfileId,
+    }),
+    [activeProfileId]
+  );
   const activeProfileIdRef = useRef(activeProfileId);
+  const activeActivationRef = useRef(profileActivation);
+  const appActivityRef = useRef({ isActive, isCapacitor });
+  const isMountedRef = useRef(true);
   const latestSnapshotRequestByProfileRef = useRef(new Map<string, number>());
+  const inFlightSnapshotByProfileRef = useRef(
+    new Map<string, InFlightSnapshotRequest>()
+  );
   const nextSnapshotRequestIdRef = useRef(1);
+  const lastRecoverySnapshotAtRef = useRef(0);
+  const terminalSnapshotFailureActivationIdsRef = useRef(new Set<number>());
+  const nextSnapshotAllowedAtByActivationRef = useRef(
+    new Map<number, number>()
+  );
   const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
   const previousMobileActiveRef = useRef(isActive);
   const authJwt = getAuthJwt();
   const authFingerprint = getAuthTokenFingerprint(authJwt);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     activeProfileIdRef.current = activeProfileId;
-  }, [activeProfileId]);
+    activeActivationRef.current = profileActivation;
+    terminalSnapshotFailureActivationIdsRef.current.clear();
+    nextSnapshotAllowedAtByActivationRef.current.clear();
+    if (activeProfileId) {
+      store.resetProfile(activeProfileId);
+    }
+  }, [activeProfileId, profileActivation, store]);
+
+  useLayoutEffect(() => {
+    appActivityRef.current = { isActive, isCapacitor };
+  }, [isActive, isCapacitor]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const handleAuthChanged = () =>
@@ -124,45 +247,99 @@ export function DmUnreadStateProvider({
   }, []);
 
   const requestSnapshot = useCallback(
-    async (expectedProfileId: string, jwt: string): Promise<boolean> => {
+    async (
+      expectedProfileId: string,
+      jwt: string,
+      expectedActivationId: number
+    ): Promise<SnapshotSynchronizationResult> => {
+      const existingRequest =
+        inFlightSnapshotByProfileRef.current.get(expectedProfileId);
+      if (
+        existingRequest?.jwt === jwt &&
+        existingRequest.activationId === expectedActivationId
+      ) {
+        return existingRequest.promise;
+      }
       const requestId = nextSnapshotRequestIdRef.current++;
+      const startedAtSequence = store.beginSnapshot();
       latestSnapshotRequestByProfileRef.current.set(
         expectedProfileId,
         requestId
       );
-      try {
-        const response = await commonApiFetch<unknown>({
-          endpoint: "dm-drops/unread",
-          headers: { Authorization: `Bearer ${jwt}` },
-          errorMode: "structured",
+      const isCurrentRequest = () =>
+        isMountedRef.current &&
+        latestSnapshotRequestByProfileRef.current.get(expectedProfileId) ===
+          requestId &&
+        activeActivationRef.current.id === expectedActivationId &&
+        activeActivationRef.current.profileId === expectedProfileId;
+      const requestPromise = synchronizeDmUnreadSnapshot({
+        expectedProfileId,
+        isCurrentRequest,
+        jwt,
+        startedAtSequence,
+        store,
+      })
+        .then((result) => {
+          if (result === "synchronized") {
+            terminalSnapshotFailureActivationIdsRef.current.delete(
+              expectedActivationId
+            );
+            nextSnapshotAllowedAtByActivationRef.current.delete(
+              expectedActivationId
+            );
+          } else if (result === "terminal-failure") {
+            terminalSnapshotFailureActivationIdsRef.current.add(
+              expectedActivationId
+            );
+            nextSnapshotAllowedAtByActivationRef.current.delete(
+              expectedActivationId
+            );
+          }
+          return result;
+        })
+        .finally(() => {
+          const currentRequest =
+            inFlightSnapshotByProfileRef.current.get(expectedProfileId);
+          if (currentRequest?.requestId === requestId) {
+            inFlightSnapshotByProfileRef.current.delete(expectedProfileId);
+          }
         });
-        if (
-          latestSnapshotRequestByProfileRef.current.get(expectedProfileId) !==
-            requestId ||
-          activeProfileIdRef.current !== expectedProfileId ||
-          !isDmUnreadSnapshot(response) ||
-          response.profile_id !== expectedProfileId
-        ) {
-          return false;
-        }
-        store.applySnapshot(response);
-        return true;
-      } catch (error) {
-        console.error("Failed to synchronize DM unread state", error);
-        return false;
-      }
+      inFlightSnapshotByProfileRef.current.set(expectedProfileId, {
+        activationId: expectedActivationId,
+        jwt,
+        promise: requestPromise,
+        requestId,
+      });
+      return requestPromise;
     },
     [store]
   );
 
-  const requestActiveSnapshot = useCallback(async (): Promise<boolean> => {
-    const profileId = activeProfileIdRef.current;
-    const jwt = getAuthJwt();
-    if (!profileId || typeof jwt !== "string" || !isAuthJwtUsable(jwt)) {
-      return false;
-    }
-    return requestSnapshot(profileId, jwt);
-  }, [requestSnapshot]);
+  const requestActiveSnapshot =
+    useCallback(async (): Promise<SnapshotSynchronizationResult> => {
+      const now = Date.now();
+      if (
+        now - lastRecoverySnapshotAtRef.current <
+        RECOVERY_SNAPSHOT_COOLDOWN_MS
+      ) {
+        return "stale";
+      }
+      const activation = activeActivationRef.current;
+      if (
+        terminalSnapshotFailureActivationIdsRef.current.has(activation.id) ||
+        now <
+          (nextSnapshotAllowedAtByActivationRef.current.get(activation.id) ?? 0)
+      ) {
+        return "stale";
+      }
+      const profileId = activation.profileId;
+      const jwt = getAuthJwt();
+      if (!profileId || typeof jwt !== "string" || !isAuthJwtUsable(jwt)) {
+        return "stale";
+      }
+      lastRecoverySnapshotAtRef.current = now;
+      return requestSnapshot(profileId, jwt, activation.id);
+    }, [requestSnapshot]);
 
   useEffect(() => {
     if (
@@ -173,7 +350,72 @@ export function DmUnreadStateProvider({
     ) {
       return;
     }
-    void requestSnapshot(activeProfileId, authJwt);
+    const expectedProfileId = activeProfileId;
+    const expectedJwt = authJwt;
+    const expectedActivationId = profileActivation.id;
+    let cancelled = false;
+    let hasAttemptedSnapshot = false;
+    let recoveryAttempt = 0;
+    let reconciliationTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleSnapshot = (delay: number) => {
+      if (cancelled) {
+        return;
+      }
+      reconciliationTimer = setTimeout(() => {
+        void synchronizeSnapshot();
+      }, delay);
+    };
+
+    const isActiveForReconciliation = () => {
+      const currentActivity = appActivityRef.current;
+      if (currentActivity.isCapacitor) {
+        return currentActivity.isActive;
+      }
+      return document.visibilityState === "visible";
+    };
+
+    async function synchronizeSnapshot(): Promise<void> {
+      if (cancelled) {
+        return;
+      }
+      if (hasAttemptedSnapshot && !isActiveForReconciliation()) {
+        scheduleSnapshot(SNAPSHOT_RECONCILIATION_INTERVAL_MS);
+        return;
+      }
+      hasAttemptedSnapshot = true;
+      const result = await requestSnapshot(
+        expectedProfileId,
+        expectedJwt,
+        expectedActivationId
+      );
+      if (result === "stale") {
+        return;
+      }
+      if (result === "synchronized") {
+        recoveryAttempt = 0;
+        scheduleSnapshot(SNAPSHOT_RECONCILIATION_INTERVAL_MS);
+        return;
+      }
+      if (result === "terminal-failure") {
+        return;
+      }
+      const retryDelay = getSnapshotRetryDelay(recoveryAttempt);
+      recoveryAttempt += 1;
+      nextSnapshotAllowedAtByActivationRef.current.set(
+        expectedActivationId,
+        Date.now() + retryDelay
+      );
+      scheduleSnapshot(retryDelay);
+    }
+
+    void synchronizeSnapshot();
+    return () => {
+      cancelled = true;
+      if (reconciliationTimer !== null) {
+        clearTimeout(reconciliationTimer);
+      }
+    };
   }, [
     activeProfileId,
     authFingerprint,
@@ -181,39 +423,58 @@ export function DmUnreadStateProvider({
     authJwt,
     isAuthenticated,
     requestSnapshot,
+    profileActivation.id,
   ]);
 
-  const invalidateDmWaveLists = useCallback(() => {
-    queryClient
-      .invalidateQueries(
-        {
-          predicate: (query) => {
-            const [key, params] = query.queryKey;
-            return (
-              key === QueryKey.WAVES_V2 &&
-              isRecord(params) &&
-              params["direct_message"] === true
-            );
-          },
-        },
-        { cancelRefetch: false }
-      )
-      .catch(() => undefined);
-  }, [queryClient]);
+  const applyServerState = useCallback(
+    (
+      state: ApiDmUnreadConversationState,
+      expectedProfileId: string | null,
+      expectedActivationId: number
+    ): boolean => {
+      const activation = activeActivationRef.current;
+      if (
+        expectedProfileId === null ||
+        state.profile_id !== expectedProfileId ||
+        activation.profileId !== expectedProfileId ||
+        activation.id !== expectedActivationId
+      ) {
+        return false;
+      }
+      return store.applyServerState(state);
+    },
+    [store]
+  );
+
+  const beginRead = useCallback(
+    (
+      expectedProfileId: string | null,
+      expectedActivationId: number,
+      waveId: string,
+      readThroughSerialNo?: number
+    ): DmUnreadReadOperation | null => {
+      const activation = activeActivationRef.current;
+      if (
+        expectedProfileId === null ||
+        activation.profileId !== expectedProfileId ||
+        activation.id !== expectedActivationId
+      ) {
+        return null;
+      }
+      return store.beginRead(expectedProfileId, waveId, readThroughSerialNo);
+    },
+    [store]
+  );
 
   const handleUnreadStateChanged = useCallback(
     (value: unknown) => {
-      if (
-        !isDmUnreadConversationState(value) ||
-        activeProfileIdRef.current !== value.profile_id
-      ) {
+      if (!isDmUnreadConversationState(value)) {
         return;
       }
-      if (store.applyServerState(value)) {
-        invalidateDmWaveLists();
-      }
+      const activation = activeActivationRef.current;
+      applyServerState(value, activation.profileId, activation.id);
     },
-    [invalidateDmWaveLists, store]
+    [applyServerState]
   );
 
   const { isConnected } = useWebSocketMessage<unknown>(
@@ -271,7 +532,11 @@ export function DmUnreadStateProvider({
       if (activeProfileIdRef.current === operation.profileId) {
         const jwt = getAuthJwt();
         if (typeof jwt === "string" && isAuthJwtUsable(jwt)) {
-          await requestSnapshot(operation.profileId, jwt);
+          await requestSnapshot(
+            operation.profileId,
+            jwt,
+            activeActivationRef.current.id
+          );
         }
       }
       store.rollbackRead(operation);
@@ -287,8 +552,24 @@ export function DmUnreadStateProvider({
   );
 
   const contextValue = useMemo<DmUnreadContextValue>(
-    () => ({ activeProfileId, store, reconcileFailedRead, cancelRead }),
-    [activeProfileId, cancelRead, reconcileFailedRead, store]
+    () => ({
+      activeProfileId,
+      activationId: profileActivation.id,
+      store,
+      applyServerState,
+      beginRead,
+      reconcileFailedRead,
+      cancelRead,
+    }),
+    [
+      activeProfileId,
+      applyServerState,
+      beginRead,
+      cancelRead,
+      profileActivation.id,
+      reconcileFailedRead,
+      store,
+    ]
   );
 
   return (
@@ -345,34 +626,41 @@ export const useDmUnreadConversations = (): Readonly<
   );
 };
 
-export const useDmUnreadSnapshotReady = (): boolean => {
-  const { activeProfileId, store } = useDmUnreadContext();
-  const snapshot = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot
-  );
-  return getDmUnreadSnapshotReady(snapshot, activeProfileId);
-};
-
 export const useOptionalDmUnreadActions = () => {
   const context = useContext(DmUnreadContext);
   const activeProfileId = context?.activeProfileId ?? null;
+  const activationId = context?.activationId ?? 0;
+  const applyServerState = context?.applyServerState ?? null;
+  const beginRead = context?.beginRead ?? null;
   const cancelRead = context?.cancelRead ?? null;
   const reconcileFailedRead = context?.reconcileFailedRead ?? null;
   const store = context?.store ?? null;
   return useMemo(() => {
-    if (!store || !cancelRead || !reconcileFailedRead) {
+    if (
+      !store ||
+      !applyServerState ||
+      !beginRead ||
+      !cancelRead ||
+      !reconcileFailedRead
+    ) {
       return null;
     }
     return {
       activeProfileId,
       applyServerState: (state: ApiDmUnreadConversationState) =>
-        store.applyServerState(state),
+        applyServerState(state, activeProfileId, activationId),
       beginRead: (waveId: string, readThroughSerialNo?: number) =>
-        store.beginRead(activeProfileId, waveId, readThroughSerialNo),
+        beginRead(activeProfileId, activationId, waveId, readThroughSerialNo),
       cancelRead,
       reconcileFailedRead,
     };
-  }, [activeProfileId, cancelRead, reconcileFailedRead, store]);
+  }, [
+    activationId,
+    activeProfileId,
+    applyServerState,
+    beginRead,
+    cancelRead,
+    reconcileFailedRead,
+    store,
+  ]);
 };

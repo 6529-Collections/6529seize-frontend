@@ -4,13 +4,14 @@ import type { ApiDmUnreadSnapshot } from "@/generated/models/ApiDmUnreadSnapshot
 interface OptimisticDmRead {
   readonly id: number;
   readonly targetSerialNo: number;
-  readonly baseUnreadCount: number;
+  readonly optimisticallyClearedUnreadCount: number;
   readonly firstUnreadAfterTargetSerialNo: number | null;
 }
 
 interface StoredDmUnreadConversation {
   readonly server: ApiDmUnreadConversationState;
   readonly optimisticRead: OptimisticDmRead | null;
+  readonly lastServerUpdateSequence: number;
 }
 
 interface DmUnreadProfileState {
@@ -85,7 +86,10 @@ const getDisplayedUnreadCount = (
   if (server.latest_drop_serial_no <= optimisticRead.targetSerialNo) {
     return 0;
   }
-  return Math.max(0, server.unread_count - optimisticRead.baseUnreadCount);
+  return Math.max(
+    0,
+    server.unread_count - optimisticRead.optimisticallyClearedUnreadCount
+  );
 };
 
 const getDisplayedConversation = (
@@ -109,15 +113,29 @@ const getDisplayedConversation = (
   };
 };
 
+const serverStatesEqual = (
+  left: ApiDmUnreadConversationState,
+  right: ApiDmUnreadConversationState
+): boolean =>
+  left.profile_id === right.profile_id &&
+  left.wave_id === right.wave_id &&
+  left.unread_count === right.unread_count &&
+  left.first_unread_drop_serial_no === right.first_unread_drop_serial_no &&
+  left.latest_drop_serial_no === right.latest_drop_serial_no &&
+  left.latest_read_serial_no === right.latest_read_serial_no &&
+  left.version === right.version;
+
 const mergeServerState = (
   current: StoredDmUnreadConversation | undefined,
-  incomingValue: ApiDmUnreadConversationState
+  incomingValue: ApiDmUnreadConversationState,
+  updateSequence: number,
+  authoritative = false
 ): StoredDmUnreadConversation | undefined => {
   const incoming = normalizeState(incomingValue);
   if (!incoming) {
     return current;
   }
-  if (current && incoming.version <= current.server.version) {
+  if (current && !authoritative && incoming.version <= current.server.version) {
     return current;
   }
   const currentOptimisticRead = current?.optimisticRead ?? null;
@@ -134,13 +152,25 @@ const mergeServerState = (
               : currentOptimisticRead.firstUnreadAfterTargetSerialNo,
         }
       : null;
-  return { server: incoming, optimisticRead };
+  const isUnchanged = current
+    ? serverStatesEqual(incoming, current.server) &&
+      optimisticRead === current.optimisticRead
+    : false;
+  if (isUnchanged) {
+    return current;
+  }
+  return {
+    server: incoming,
+    optimisticRead,
+    lastServerUpdateSequence: updateSequence,
+  };
 };
 
 export class DmUnreadStore {
   private snapshot: DmUnreadStoreSnapshot = EMPTY_STORE_SNAPSHOT;
   private readonly listeners = new Set<() => void>();
   private nextReadOperationId = 1;
+  private serverUpdateSequence = 0;
 
   readonly getSnapshot = (): DmUnreadStoreSnapshot => this.snapshot;
 
@@ -157,6 +187,25 @@ export class DmUnreadStore {
     this.listeners.forEach((listener) => listener());
   }
 
+  beginSnapshot(): number {
+    return this.serverUpdateSequence;
+  }
+
+  resetProfile(profileId: string): boolean {
+    if (
+      this.snapshot.profiles[profileId] === undefined &&
+      this.snapshot.snapshotReadyProfiles[profileId] !== true
+    ) {
+      return false;
+    }
+    const { [profileId]: _removedProfile, ...profiles } =
+      this.snapshot.profiles;
+    const { [profileId]: _removedReadiness, ...snapshotReadyProfiles } =
+      this.snapshot.snapshotReadyProfiles;
+    this.publish({ profiles, snapshotReadyProfiles });
+    return true;
+  }
+
   applyServerState(incoming: ApiDmUnreadConversationState): boolean {
     const normalized = normalizeState(incoming);
     if (!normalized) {
@@ -164,7 +213,12 @@ export class DmUnreadStore {
     }
     const profile = this.snapshot.profiles[normalized.profile_id];
     const current = profile?.conversations[normalized.wave_id];
-    const nextConversation = mergeServerState(current, normalized);
+    const updateSequence = ++this.serverUpdateSequence;
+    const nextConversation = mergeServerState(
+      current,
+      normalized,
+      updateSequence
+    );
     if (!nextConversation || nextConversation === current) {
       return false;
     }
@@ -183,7 +237,10 @@ export class DmUnreadStore {
     return true;
   }
 
-  applySnapshot(snapshot: ApiDmUnreadSnapshot): boolean {
+  applySnapshot(
+    snapshot: ApiDmUnreadSnapshot,
+    startedAtSequence = this.serverUpdateSequence
+  ): boolean {
     const profileId = snapshot.profile_id;
     if (!profileId) {
       return false;
@@ -191,21 +248,45 @@ export class DmUnreadStore {
     const currentProfile = this.snapshot.profiles[profileId];
     const wasSnapshotReady =
       this.snapshot.snapshotReadyProfiles[profileId] === true;
-    let conversations = currentProfile?.conversations ?? {};
-    let changed = false;
+    const currentConversations = currentProfile?.conversations ?? {};
+    const conversations: Record<string, StoredDmUnreadConversation> = {};
     for (const incoming of snapshot.conversations) {
       if (incoming.profile_id !== profileId) {
         continue;
       }
-      const current = conversations[incoming.wave_id];
-      const next = mergeServerState(current, incoming);
-      if (!next || next === current) {
+      const current = currentConversations[incoming.wave_id];
+      const hasNewerServerUpdate =
+        current !== undefined &&
+        current.lastServerUpdateSequence > startedAtSequence;
+      const next = mergeServerState(
+        current,
+        incoming,
+        hasNewerServerUpdate
+          ? current.lastServerUpdateSequence
+          : startedAtSequence,
+        !hasNewerServerUpdate
+      );
+      if (!next) {
         continue;
       }
-      conversations = { ...conversations, [incoming.wave_id]: next };
-      changed = true;
+      conversations[incoming.wave_id] = next;
     }
-    if (!changed && currentProfile && wasSnapshotReady) {
+    Object.entries(currentConversations).forEach(([waveId, conversation]) => {
+      if (
+        conversations[waveId] === undefined &&
+        conversation.lastServerUpdateSequence > startedAtSequence
+      ) {
+        conversations[waveId] = conversation;
+      }
+    });
+    const currentWaveIds = Object.keys(currentConversations);
+    const nextWaveIds = Object.keys(conversations);
+    const conversationsUnchanged =
+      currentWaveIds.length === nextWaveIds.length &&
+      nextWaveIds.every(
+        (waveId) => currentConversations[waveId] === conversations[waveId]
+      );
+    if (conversationsUnchanged && currentProfile && wasSnapshotReady) {
       return false;
     }
     this.publish({
@@ -231,10 +312,10 @@ export class DmUnreadStore {
     }
     const profile = this.snapshot.profiles[profileId];
     const current = profile?.conversations[waveId];
-    const targetSerialNo = Math.max(
-      current?.server.latest_drop_serial_no ?? 0,
-      toNonNegativeInteger(requestedSerialNo ?? 0)
-    );
+    const targetSerialNo =
+      requestedSerialNo === undefined
+        ? (current?.server.latest_drop_serial_no ?? 0)
+        : toNonNegativeInteger(requestedSerialNo);
     if (!profile || !current || targetSerialNo <= 0) {
       return null;
     }
@@ -256,7 +337,10 @@ export class DmUnreadStore {
     const optimisticRead: OptimisticDmRead = {
       id: this.nextReadOperationId++,
       targetSerialNo,
-      baseUnreadCount: current.server.unread_count,
+      optimisticallyClearedUnreadCount:
+        targetSerialNo >= current.server.latest_drop_serial_no
+          ? current.server.unread_count
+          : 0,
       firstUnreadAfterTargetSerialNo: null,
     };
     this.publish({

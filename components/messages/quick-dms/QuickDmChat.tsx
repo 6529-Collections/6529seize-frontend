@@ -24,7 +24,6 @@ import {
 import {
   getFormattedWaveName,
   getQuickDmAvatarSource,
-  getUnreadCount,
 } from "./QuickDirectMessagesUtils";
 
 interface QuickDmChatProps {
@@ -62,9 +61,7 @@ export const QuickDmChat = ({
     name: wave?.name ?? listWave?.name ?? "",
   });
   const avatar = getQuickDmAvatarSource(title, listWave, wave);
-  const listUnreadCount =
-    unreadConversation?.unread_count ??
-    (listWave ? getUnreadCount(listWave) : 0);
+  const listUnreadCount = unreadConversation?.unread_count ?? 0;
   const hasMarkedInitialReadRef = useRef<string | null>(null);
   let chatContent: React.ReactNode = null;
 
