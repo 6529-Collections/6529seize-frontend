@@ -7,86 +7,16 @@ import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
-import {
-  CapacitorBarcodeScanner,
-  CapacitorBarcodeScannerAndroidScanningLibrary,
-  CapacitorBarcodeScannerCameraDirection,
-  type CapacitorBarcodeScannerOptions,
-  CapacitorBarcodeScannerScanOrientation,
-  CapacitorBarcodeScannerTypeHint,
-} from "@capacitor/barcode-scanner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-
-const SCANNER_CANCELLED_ERROR_CODE = "OS-PLUG-BARC-0006";
-
-function getScannerOptions(
-  isAndroid: boolean,
-  scanInstructions: string
-): CapacitorBarcodeScannerOptions {
-  const scannerOptions: CapacitorBarcodeScannerOptions = {
-    hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
-    scanInstructions,
-    scanButton: false,
-    cameraDirection: CapacitorBarcodeScannerCameraDirection.BACK,
-    scanOrientation: CapacitorBarcodeScannerScanOrientation.ADAPTIVE,
-  };
-
-  if (!isAndroid) {
-    return scannerOptions;
-  }
-
-  return {
-    ...scannerOptions,
-    android: {
-      scanningLibrary: CapacitorBarcodeScannerAndroidScanningLibrary.ZXING,
-    },
-  };
-}
-
-function getQRScannerErrorField(
-  error: unknown,
-  field: "code" | "message"
-): string | null {
-  if (!error || typeof error !== "object" || !(field in error)) {
-    return null;
-  }
-
-  const errorRecord = error as Partial<Record<"code" | "message", unknown>>;
-  const fieldValue = errorRecord[field];
-  if (typeof fieldValue === "string" && fieldValue.trim()) {
-    return fieldValue.trim();
-  }
-
-  return null;
-}
-
-function getQRScannerErrorReason(error: unknown): string | null {
-  if (typeof error === "string" && error.trim()) {
-    return error.trim();
-  }
-
-  if (error instanceof Error && error.message.trim()) {
-    return error.message.trim();
-  }
-
-  return getQRScannerErrorField(error, "message");
-}
-
-function isQRScannerCancellation(error: unknown): boolean {
-  const code = getQRScannerErrorField(error, "code");
-  if (code === SCANNER_CANCELLED_ERROR_CODE) {
-    return true;
-  }
-
-  const reason = getQRScannerErrorReason(error)?.toLowerCase() ?? "";
-  return (
-    reason.includes("process was cancelled") ||
-    reason.includes("process was canceled")
-  );
-}
+import {
+  getQRScannerErrorReason,
+  isQRScannerAvailable,
+  isQRScannerCancellation,
+  scanQrCode,
+} from "./qrScanner.utils";
 
 function getQRScannerErrorToastMessage({
   error,
@@ -129,7 +59,7 @@ export default function HeaderQRScanner({
   const [scannerAvailable, setScannerAvailable] = useState(false);
 
   useEffect(() => {
-    if (typeof CapacitorBarcodeScanner?.scanBarcode === "function") {
+    if (isQRScannerAvailable()) {
       setScannerAvailable(true);
     } else {
       console.warn("CapacitorBarcodeScanner is not available");
@@ -144,17 +74,15 @@ export default function HeaderQRScanner({
     setScanning(true);
 
     try {
-      const result = await CapacitorBarcodeScanner.scanBarcode(
-        getScannerOptions(
-          capacitor.isAndroid,
-          t(locale, "qrScanner.instructions")
-        )
-      );
+      const scanResult = await scanQrCode({
+        isAndroid: capacitor.isAndroid,
+        scanInstructions: t(locale, "qrScanner.instructions"),
+      });
 
       setScanning(false);
 
-      if (result.ScanResult) {
-        handleQRCode(result.ScanResult);
+      if (scanResult) {
+        handleQRCode(scanResult);
       } else {
         setToast({
           message: invalidQRCodeMessage,

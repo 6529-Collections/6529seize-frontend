@@ -1,5 +1,6 @@
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { EN_GB_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { EN_GB_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
@@ -389,6 +390,7 @@ export const EN_GB_MESSAGES = {
   "quickDm.loadingStatus": "Loading direct messages",
   "quickDm.chatLoadError": "Unable to load this conversation.",
   ...EN_GB_QR_SCANNER_MESSAGES,
+  ...EN_GB_CAPACITOR_CONNECT_MESSAGES,
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
   "waves.loadingStatus": "Loading waves",
