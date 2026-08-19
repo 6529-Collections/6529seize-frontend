@@ -339,13 +339,12 @@ describe("behavioral fine-pointer latch", () => {
     const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
     const sentinel = getSentinel();
 
-    expect(helpers.hasUnreliableHoverReporting()).toBe(false);
+    expect(document.body.hasAttribute("data-hover-unreliable")).toBe(false);
 
     sentinel!({ isTrusted: true, pointerType: "mouse" });
     sentinel!({ isTrusted: true, pointerType: "mouse" });
     sentinel!({ isTrusted: true, pointerType: "mouse" });
 
-    expect(helpers.hasUnreliableHoverReporting()).toBe(true);
     expect(document.body.getAttribute("data-fine-pointer")).toBe("true");
     expect(document.body.getAttribute("data-hover-unreliable")).toBe("true");
 
@@ -372,7 +371,6 @@ describe("behavioral fine-pointer latch", () => {
     sentinel!({ isTrusted: true, pointerType: "mouse" });
 
     expect(document.body.getAttribute("data-fine-pointer")).toBe("true");
-    expect(helpers.hasUnreliableHoverReporting()).toBe(false);
     expect(document.body.hasAttribute("data-hover-unreliable")).toBe(false);
 
     unsubscribe();
@@ -382,9 +380,8 @@ describe("behavioral fine-pointer latch", () => {
   it("tags a hydrated latch on a mis-reporting browser without waiting for events", () => {
     localStorage.setItem("6529-fine-pointer", "1");
 
-    const { helpers, restore } = loadHelpersWithSentinel();
+    const { restore } = loadHelpersWithSentinel();
 
-    expect(helpers.hasUnreliableHoverReporting()).toBe(true);
     expect(document.body.getAttribute("data-hover-unreliable")).toBe("true");
 
     restore();

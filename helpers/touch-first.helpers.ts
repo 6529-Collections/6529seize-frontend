@@ -131,9 +131,10 @@ const tagBodyWithFinePointer = () => {
 /**
  * The latch has proven a mouse exists, yet the browser still reports no
  * hover-capable primary pointer — so CSS hover reveals cannot fire and
- * touch-style always-visible affordances have to stay on.
+ * touch-style always-visible affordances have to stay on. The <body> tag below
+ * is the contract consumers read; this predicate stays module-private.
  */
-export const hasUnreliableHoverReporting = (): boolean =>
+const hasUnreliableHoverReporting = (): boolean =>
   finePointerObserved &&
   !(getMediaQueryList(CSS_HOVER_REVEAL_QUERY)?.matches ?? false);
 
