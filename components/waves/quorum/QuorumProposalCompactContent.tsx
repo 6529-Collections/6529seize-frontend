@@ -194,7 +194,7 @@ export default function QuorumProposalCompactContent({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-3">
+    <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">
       <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-500/5 tw-px-4 tw-pb-4 tw-pt-3">
         <ProposalCardContextLabel />
         <h2 className="tw-[overflow-wrap:anywhere] tw-m-0 tw-mb-3 tw-text-pretty tw-break-words tw-text-base tw-font-semibold !tw-leading-[1.3] tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-primary-300 sm:tw-text-lg">
