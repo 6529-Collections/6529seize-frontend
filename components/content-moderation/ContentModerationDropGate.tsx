@@ -65,7 +65,7 @@ export default function ContentModerationDropGate({
   });
 
   if (visibility.kind === "visible") {
-    return children;
+    return <>{children}</>;
   }
 
   const isGlobal = visibility.kind === "global";
@@ -93,12 +93,9 @@ export default function ContentModerationDropGate({
         aria-hidden="true"
         className={`${compact ? "tw-size-4" : "tw-size-5"} tw-flex-shrink-0 tw-text-iron-500`}
       />
-      <p
-        aria-live="polite"
-        className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-400"
-      >
+      <output className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-400">
         {message}
-      </p>
+      </output>
       {!isGlobal && (
         <button
           type="button"

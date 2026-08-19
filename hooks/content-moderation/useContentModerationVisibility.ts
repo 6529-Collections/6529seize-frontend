@@ -21,6 +21,34 @@ type ContentModerationVisibility =
   | { readonly kind: "blocked" }
   | { readonly kind: "hidden" };
 
+const getGlobalVisibility = (
+  moderation: Pick<ApiDrop, "moderation">["moderation"],
+  globalOverride: ApiDropModerationStatus | undefined
+): ContentModerationVisibility | null => {
+  if (moderation === undefined) {
+    return {
+      kind: "global",
+      status: ApiDropModerationStatus.AiQuarantined,
+    };
+  }
+  if (moderation.can_view === false) {
+    return {
+      kind: "global",
+      status:
+        moderation.status === ApiDropModerationStatus.Visible
+          ? ApiDropModerationStatus.AiQuarantined
+          : moderation.status,
+    };
+  }
+  if (moderation.status !== ApiDropModerationStatus.Visible) {
+    return null;
+  }
+  return globalOverride === undefined ||
+    globalOverride === ApiDropModerationStatus.Visible
+    ? null
+    : { kind: "global", status: globalOverride };
+};
+
 export const useContentModerationVisibility = (
   drop: Pick<ApiDrop, "id" | "author" | "viewer_context" | "moderation">
 ): {
@@ -50,17 +78,10 @@ export const useContentModerationVisibility = (
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const isRevealed = revealedKey === revealKey;
   const globalOverride = getGlobalDropModerationOverride(drop.id);
-  const status =
-    globalOverride ??
-    drop.moderation?.status ??
-    ApiDropModerationStatus.Visible;
-
-  if (
-    status !== ApiDropModerationStatus.Visible ||
-    (globalOverride === undefined && drop.moderation?.can_view === false)
-  ) {
+  const globalVisibility = getGlobalVisibility(drop.moderation, globalOverride);
+  if (globalVisibility !== null) {
     return {
-      visibility: { kind: "global", status },
+      visibility: globalVisibility,
       reveal: () => undefined,
       isRevealed: false,
     };

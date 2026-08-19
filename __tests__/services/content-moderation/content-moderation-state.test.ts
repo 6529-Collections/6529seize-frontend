@@ -33,6 +33,16 @@ describe("content moderation presentation overrides", () => {
     );
   });
 
+  it("removes a restrictive override when content is restored", () => {
+    setGlobalDropModerationOverride(
+      "drop-1",
+      ApiDropModerationStatus.ModeratorRemoved
+    );
+    setGlobalDropModerationOverride("drop-1", ApiDropModerationStatus.Visible);
+
+    expect(getGlobalDropModerationOverride("drop-1")).toBeUndefined();
+  });
+
   it("can restore the absence of an optimistic personal override", () => {
     setDropHiddenOverride("viewer-1", "drop-1", true);
     setProfileBlockedOverride("viewer-1", "author-1", true);

@@ -1,4 +1,4 @@
-import type { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 
 type Listener = () => void;
 
@@ -69,7 +69,11 @@ export const setGlobalDropModerationOverride = (
   dropId: string,
   status: ApiDropModerationStatus
 ) => {
-  globalDropOverrides.set(dropId, status);
+  if (status === ApiDropModerationStatus.Visible) {
+    globalDropOverrides.delete(dropId);
+  } else {
+    globalDropOverrides.set(dropId, status);
+  }
   publish();
 };
 

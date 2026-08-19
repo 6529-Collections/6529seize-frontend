@@ -12,7 +12,10 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPost } from "@/services/api/common-api";
+import {
+  commonApiPost,
+  getStructuredApiErrorStatus,
+} from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -38,6 +41,8 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -123,6 +128,7 @@ export default function CreateDrop({
   initialMarkdown = null,
   initialMarkdownKey = null,
 }: CreateDropProps) {
+  const locale = useBrowserLocale();
   const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
@@ -505,13 +511,12 @@ export default function CreateDrop({
       if (!isHandled) {
         const errorDetails = getToastErrorDetails(error);
         const isContentModerationRejection =
-          error instanceof Error &&
-          error.message.startsWith("This post couldn't be submitted because");
+          getStructuredApiErrorStatus(error) === 422;
         setToast({
           type: "error",
           title: "Couldn't submit this drop.",
           description: isContentModerationRejection
-            ? errorDetails
+            ? t(locale, "contentModeration.postRejected")
             : "Please try again.",
           details: isContentModerationRejection ? undefined : errorDetails,
         });

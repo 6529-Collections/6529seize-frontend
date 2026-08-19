@@ -1916,9 +1916,9 @@ paths:
         - name: before
           in: query
           required: false
+          description: Opaque cursor returned by the previous moderation queue item.
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         "200":
           description: Moderation queue
@@ -15431,6 +15431,7 @@ components:
         - status
         - created_at
         - report_count
+        - cursor
         - moderation
         - history
       properties:
@@ -15494,6 +15495,9 @@ components:
         report_count:
           type: integer
           format: int64
+        cursor:
+          type: string
+          description: Opaque cursor for fetching queue items after this item.
         moderation:
           $ref: "#/components/schemas/ApiDropModeration"
         history:

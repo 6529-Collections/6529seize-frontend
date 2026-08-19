@@ -36,6 +36,7 @@ import {
 import {
   getDropApprovalTiming,
   getDropEndpointId,
+  getNormalizedDropId,
   getDropType,
   getWinningContext,
   rethrowAbortFetchError,
@@ -413,14 +414,6 @@ const hydrateDropsWithEmbeddedWavesV2 = async ({
         result.status === "fulfilled"
     )
     .map((result) => result.value);
-};
-
-const getNormalizedDropId = (dropId: string): string => {
-  const normalizedDropId = dropId.trim();
-  if (!normalizedDropId) {
-    throw new Error("Cannot fetch drop without a drop id");
-  }
-  return normalizedDropId;
 };
 
 const fetchDropAndWaveV2 = async (

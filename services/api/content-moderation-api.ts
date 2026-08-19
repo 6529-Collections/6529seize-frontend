@@ -69,7 +69,7 @@ export const fetchContentModerationQueue = ({
   before,
 }: {
   readonly limit?: number | undefined;
-  readonly before?: number | undefined;
+  readonly before?: string | undefined;
 } = {}): Promise<ApiContentModerationQueueItem[]> =>
   commonApiFetch<ApiContentModerationQueueItem[], Record<string, string>>({
     endpoint: "content-moderation/reports",

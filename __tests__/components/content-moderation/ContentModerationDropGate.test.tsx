@@ -79,6 +79,39 @@ describe("ContentModerationDropGate", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("fails closed when a drop has no moderation presentation", () => {
+    renderGate(
+      <ContentModerationDropGate drop={createDrop()}>
+        <p>Unclassified post content</p>
+      </ContentModerationDropGate>
+    );
+
+    expect(
+      screen.queryByText("Unclassified post content")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("This post is unavailable while it is being checked.")
+    ).toBeInTheDocument();
+  });
+
+  it("allows authors to view their own moderated content", () => {
+    mockConnectedProfileId = "author-1";
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          moderation: {
+            status: ApiDropModerationStatus.AiQuarantined,
+            can_view: true,
+          },
+        })}
+      >
+        <p>Author post content</p>
+      </ContentModerationDropGate>
+    );
+
+    expect(screen.getByText("Author post content")).toBeInTheDocument();
+  });
+
   it("persists unhide for personally hidden content", async () => {
     renderGate(
       <ContentModerationDropGate

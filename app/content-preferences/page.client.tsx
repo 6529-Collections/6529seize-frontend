@@ -123,12 +123,9 @@ export default function ContentPreferencesPageClient() {
           </p>
         )}
         {canLoad && query.isLoading && (
-          <p
-            role="status"
-            className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400"
-          >
+          <output className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400">
             {t(locale, "contentModeration.preferences.loading")}
-          </p>
+          </output>
         )}
         {canLoad && query.isError && (
           <p role="alert" className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-red">

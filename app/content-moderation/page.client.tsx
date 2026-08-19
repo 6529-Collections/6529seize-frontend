@@ -147,6 +147,9 @@ const formatTimestamp = (
   });
 };
 
+const clampConfidence = (value: number | null | undefined): number =>
+  Math.min(1, Math.max(0, value ?? 0));
+
 function ModerationQueueCard({
   item,
 }: {
@@ -302,7 +305,7 @@ function ModerationQueueCard({
           {item.ai_recommendation !== null &&
           item.ai_recommendation !== undefined
             ? t(locale, "contentModeration.moderator.aiRecommendation", {
-                value: `${formatEnum(item.ai_recommendation)} (${formatPercent(locale, item.ai_confidence ?? 0, 0)})`,
+                value: `${formatEnum(item.ai_recommendation)} (${formatPercent(locale, clampConfidence(item.ai_confidence), 0)})`,
               })
             : t(locale, "contentModeration.moderator.noAiRecommendation")}
         </p>
@@ -496,12 +499,9 @@ export default function ContentModerationPageClient() {
 
       {hasModeratorIdentity &&
         (accessQuery.isLoading || queueQuery.isLoading) && (
-          <p
-            role="status"
-            className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400"
-          >
+          <output className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
             {t(locale, "contentModeration.moderator.loading")}
-          </p>
+          </output>
         )}
       {(!hasModeratorIdentity || (accessQuery.isSuccess && !canModerate)) && (
         <p

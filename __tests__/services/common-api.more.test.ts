@@ -2,6 +2,7 @@ import {
   commonApiDelete,
   commonApiDeleteWithBody,
   commonApiPut,
+  getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 
@@ -17,6 +18,14 @@ beforeEach(() => {
 });
 
 describe("commonApi utility methods", () => {
+  it("reads status only from a structured API error shape", () => {
+    expect(getStructuredApiErrorStatus({ status: 422 })).toBe(422);
+    expect(getStructuredApiErrorStatus(new Error("422 in message"))).toBe(
+      undefined
+    );
+    expect(getStructuredApiErrorStatus({ status: "422" })).toBeUndefined();
+  });
+
   it("commonApiPut posts JSON body", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
