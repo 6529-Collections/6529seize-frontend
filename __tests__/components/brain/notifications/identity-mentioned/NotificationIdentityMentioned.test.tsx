@@ -66,10 +66,8 @@ describe("NotificationIdentityMentioned", () => {
   });
 
   it("does not render when the related drops field is missing", () => {
-    const {
-      related_drops: _relatedDrops,
-      ...notificationWithoutRelatedDrops
-    } = notification;
+    const { related_drops: _relatedDrops, ...notificationWithoutRelatedDrops } =
+      notification;
     const { container } = render(
       <NotificationIdentityMentioned
         notification={notificationWithoutRelatedDrops as never}
