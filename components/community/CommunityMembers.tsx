@@ -7,7 +7,7 @@ import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,6 +16,7 @@ import CommunityMembersMobileSortContent from "./members-table/CommunityMembersM
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTableSkeleton";
 
+import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
@@ -95,6 +96,7 @@ function NetworkHeaderActionButton({
 export default function CommunityMembers() {
   useSetTitle("Network");
   const locale = useBrowserLocale();
+  const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
 
   const defaultSortBy = ApiCommunityMembersSortOption.Level;
   const defaultSortDirection = SortDirection.DESC;
@@ -106,6 +108,24 @@ export default function CommunityMembers() {
   const searchParams = useSearchParams();
 
   const { activeGroupId, setActiveGroupId } = useActiveGroup();
+  const viewerIdentityKey = useMemo(() => {
+    const connectedIdentityKey =
+      connectedProfile?.id ?? connectedProfile?.handle;
+    if (!isAuthenticated || !connectedIdentityKey) {
+      return null;
+    }
+
+    if (activeProfileProxy) {
+      return `proxy:${activeProfileProxy.id}`;
+    }
+
+    return `profile:${connectedIdentityKey}`;
+  }, [
+    activeProfileProxy,
+    connectedProfile?.handle,
+    connectedProfile?.id,
+    isAuthenticated,
+  ]);
 
   const convertSortBy = useCallback(
     (sort: string | null): ApiCommunityMembersSortOption => {
@@ -205,6 +225,7 @@ export default function CommunityMembers() {
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
   const {
+    isError: isMembersError,
     isLoading,
     isFetching,
     data: members,
@@ -217,6 +238,7 @@ export default function CommunityMembers() {
         sort: debouncedParams.sort,
         sortDirection: debouncedParams.sort_direction,
         groupId: debouncedParams.group_id,
+        viewerIdentityKey,
       },
     ],
     queryFn: async () =>
@@ -227,7 +249,18 @@ export default function CommunityMembers() {
         endpoint: `community-members/top`,
         params: debouncedParams,
       }),
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) => {
+      const previousScope = previousQuery?.queryKey[1] as
+        | {
+            readonly groupId?: unknown;
+            readonly viewerIdentityKey?: unknown;
+          }
+        | undefined;
+      return previousScope?.groupId === debouncedParams.group_id &&
+        previousScope?.viewerIdentityKey === viewerIdentityKey
+        ? previousData
+        : undefined;
+    },
   });
 
   const updateFields = useCallback(
@@ -333,7 +366,16 @@ export default function CommunityMembers() {
     !hasMemberContent && (isLoading || isFetching || !members);
 
   let membersContent: ReactNode = null;
-  if (showMembersSkeleton) {
+  if (isMembersError && activeGroupId) {
+    membersContent = (
+      <p
+        role="status"
+        className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-text-sm tw-leading-5 tw-text-iron-400"
+      >
+        {t(locale, "network.groupInspection.membersUnavailable")}
+      </p>
+    );
+  } else if (showMembersSkeleton) {
     membersContent = <CommunityMembersTableSkeleton />;
   } else if (members) {
     membersContent = (
@@ -412,6 +454,7 @@ export default function CommunityMembers() {
           <CommunityMembersGroupDetails
             groupId={activeGroupId}
             onClose={() => setActiveGroupId(null)}
+            viewerIdentityKey={viewerIdentityKey}
           />
           <h2 className="tw-mb-0 tw-mt-5 !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-50">
             {t(locale, "network.groupInspection.membersTitle")}

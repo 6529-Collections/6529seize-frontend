@@ -1,4 +1,5 @@
 import CommunityMembers from "@/components/community/CommunityMembers";
+import { useAuth } from "@/components/auth/Auth";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -13,10 +14,12 @@ jest.mock("next/navigation", () => ({
 jest.mock("@/contexts/ActiveGroupContext", () => ({
   useActiveGroup: jest.fn(),
 }));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
+}));
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
-  keepPreviousData: jest.fn(),
 }));
 
 jest.mock("react-use", () => ({ useDebounce: () => {} }));
@@ -108,6 +111,11 @@ describe("CommunityMembers", () => {
       activeGroupId: "1",
       setActiveGroupId,
     });
+    (useAuth as jest.Mock).mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: null,
+      isAuthenticated: false,
+    });
   });
 
   it("shows skeleton while no members", () => {
@@ -137,6 +145,89 @@ describe("CommunityMembers", () => {
       screen.getByRole("button", { name: "Clear selected group" })
     );
     expect(setActiveGroupId).toHaveBeenCalledWith(null);
+  });
+
+  it("does not render cached members when the scoped request fails", () => {
+    (useQuery as jest.Mock).mockReturnValue({
+      isError: true,
+      isLoading: false,
+      isFetching: false,
+      data: { page: 1, next: null, count: 1, data: [{ id: 1 }] },
+    });
+
+    renderComponent();
+
+    expect(screen.queryByTestId("table")).not.toBeInTheDocument();
+    expect(screen.getByText("Group members unavailable.")).toBeInTheDocument();
+  });
+
+  it("only preserves previous results for the same group and viewer", () => {
+    searchParamsMock.set("group", "group-1");
+    (useAuth as jest.Mock).mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "viewer-1", handle: "viewer" },
+      isAuthenticated: true,
+    });
+    type CapturedQueryOptions = {
+      readonly queryKey: readonly unknown[];
+      readonly placeholderData: (
+        previousData: unknown,
+        previousQuery: { readonly queryKey: readonly unknown[] }
+      ) => unknown;
+    };
+    let queryOptions: CapturedQueryOptions | undefined;
+    (useQuery as jest.Mock).mockImplementation(
+      (options: CapturedQueryOptions) => {
+        queryOptions = options;
+        return {
+          isError: false,
+          isLoading: true,
+          isFetching: true,
+          data: undefined,
+        };
+      }
+    );
+
+    renderComponent();
+
+    expect(queryOptions).toBeDefined();
+    const capturedOptions = queryOptions!;
+    const previousData = {
+      page: 1,
+      next: null,
+      count: 1,
+      data: [{ id: 1 }],
+    };
+    expect(capturedOptions.queryKey[1]).toEqual(
+      expect.objectContaining({
+        groupId: "group-1",
+        viewerIdentityKey: "profile:viewer-1",
+      })
+    );
+    expect(
+      capturedOptions.placeholderData(previousData, {
+        queryKey: [
+          "COMMUNITY_MEMBERS_TOP",
+          { groupId: "group-1", viewerIdentityKey: "profile:viewer-1" },
+        ],
+      })
+    ).toBe(previousData);
+    expect(
+      capturedOptions.placeholderData(previousData, {
+        queryKey: [
+          "COMMUNITY_MEMBERS_TOP",
+          { groupId: "another-group", viewerIdentityKey: "profile:viewer-1" },
+        ],
+      })
+    ).toBeUndefined();
+    expect(
+      capturedOptions.placeholderData(previousData, {
+        queryKey: [
+          "COMMUNITY_MEMBERS_TOP",
+          { groupId: "group-1", viewerIdentityKey: null },
+        ],
+      })
+    ).toBeUndefined();
   });
 
   it("navigates to nerd view on button click", () => {

@@ -1554,6 +1554,7 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
     selectedGroup: "Selected group",
     close: "Clear selected group",
     membersTitle: "Members",
+    membersUnavailable: "Group members unavailable.",
     loading: "Loading group criteria",
     unavailableTitle: "Group criteria unavailable",
     unavailableDescription:

@@ -15,9 +15,11 @@ type InspectableGroup = ApiGroupFull & Pick<Partial<ApiGroup>, "is_hidden">;
 export default function CommunityMembersGroupDetails({
   groupId,
   onClose,
+  viewerIdentityKey,
 }: {
   readonly groupId: string;
   readonly onClose: () => void;
+  readonly viewerIdentityKey: string | null;
 }) {
   const locale = useBrowserLocale();
   const {
@@ -25,7 +27,7 @@ export default function CommunityMembersGroupDetails({
     isLoading,
     isError,
   } = useQuery<InspectableGroup>({
-    queryKey: [QueryKey.GROUP, groupId],
+    queryKey: [QueryKey.GROUP, groupId, { viewerIdentityKey }],
     queryFn: async () =>
       await commonApiFetch<InspectableGroup>({
         endpoint: `groups/${encodeURIComponent(groupId)}`,
@@ -62,10 +64,11 @@ export default function CommunityMembersGroupDetails({
   if (
     isError ||
     !group ||
+    typeof group.name !== "string" ||
     group.name.trim().length === 0 ||
+    typeof group.id !== "string" ||
     group.id.trim().length === 0 ||
     group.is_hidden === true ||
-    group.is_private === true ||
     group.is_direct_message === true ||
     group.visible === false
   ) {
