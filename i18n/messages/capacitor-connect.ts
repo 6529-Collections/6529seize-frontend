@@ -12,6 +12,7 @@ const CAPACITOR_CONNECT_MESSAGE_KEYS = [
   "capacitorConnect.connectionQr.instructions",
   "capacitorConnect.connectionQr.invalid",
   "capacitorConnect.error.connectionFailed",
+  "capacitorConnect.error.navigationFailed",
 ] as const;
 
 type CapacitorConnectMessageKey =
@@ -38,13 +39,12 @@ export const CAPACITOR_CONNECT_MESSAGES = buildCapacitorConnectMessages([
   "No App Wallets yet.",
   "Loading App Wallets…",
   "App Wallets are unavailable on this device.",
-  "Connect with {walletName}",
+  "Connect with {walletName}, wallet {shortAddress}",
   "Scan a 6529 connection QR code",
   "This isn't a valid 6529 connection QR code.",
   "Wallet connection failed. Please try again.",
+  "Unable to open the shared connection. Please try again.",
 ]);
-
-export const EN_GB_CAPACITOR_CONNECT_MESSAGES = CAPACITOR_CONNECT_MESSAGES;
 
 export const FR_FR_CAPACITOR_CONNECT_MESSAGES = buildCapacitorConnectMessages([
   "Connexion",
@@ -56,10 +56,11 @@ export const FR_FR_CAPACITOR_CONNECT_MESSAGES = buildCapacitorConnectMessages([
   "Aucun portefeuille de l'app.",
   "Chargement des portefeuilles…",
   "Les portefeuilles de l'app ne sont pas disponibles sur cet appareil.",
-  "Se connecter avec {walletName}",
+  "Se connecter avec {walletName}, portefeuille {shortAddress}",
   "Scannez un QR code de connexion 6529",
   "Ce QR code de connexion 6529 n'est pas valide.",
   "La connexion au portefeuille a echoue. Veuillez reessayer.",
+  "Impossible d'ouvrir la connexion partagee. Veuillez reessayer.",
 ]);
 
 export const ES_ES_CAPACITOR_CONNECT_MESSAGES = buildCapacitorConnectMessages([
@@ -72,10 +73,11 @@ export const ES_ES_CAPACITOR_CONNECT_MESSAGES = buildCapacitorConnectMessages([
   "Aun no hay billeteras de la app.",
   "Cargando billeteras…",
   "Las billeteras de la app no estan disponibles en este dispositivo.",
-  "Conectar con {walletName}",
+  "Conectar con {walletName}, billetera {shortAddress}",
   "Escanea un codigo QR de conexion de 6529",
   "Este codigo QR de conexion de 6529 no es valido.",
   "La conexion con la billetera fallo. Intentalo de nuevo.",
+  "No se pudo abrir la conexion compartida. Intentalo de nuevo.",
 ]);
 
 export const DE_DE_CAPACITOR_CONNECT_MESSAGES = buildCapacitorConnectMessages([
@@ -88,8 +90,9 @@ export const DE_DE_CAPACITOR_CONNECT_MESSAGES = buildCapacitorConnectMessages([
   "Noch keine App-Wallets vorhanden.",
   "App-Wallets werden geladen…",
   "App-Wallets sind auf diesem Geraet nicht verfuegbar.",
-  "Mit {walletName} verbinden",
+  "Mit {walletName}, Wallet {shortAddress}, verbinden",
   "Scanne einen 6529-Verbindungs-QR-Code",
   "Dies ist kein gueltiger 6529-Verbindungs-QR-Code.",
   "Die Wallet-Verbindung ist fehlgeschlagen. Bitte versuche es erneut.",
+  "Die geteilte Verbindung konnte nicht geoeffnet werden. Bitte versuche es erneut.",
 ]);

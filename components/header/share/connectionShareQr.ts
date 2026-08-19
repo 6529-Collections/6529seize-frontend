@@ -19,7 +19,8 @@ export function getConnectionShareRoute({
 }): string | null {
   try {
     const url = new URL(content);
-    const expectedProtocol = `${appScheme.replace(/:$/, "")}:`;
+    const normalizedAppScheme = appScheme.trim().replace(/:\/\/$|:$/, "");
+    const expectedProtocol = `${normalizedAppScheme}:`;
 
     if (
       url.protocol.toLowerCase() !== expectedProtocol.toLowerCase() ||

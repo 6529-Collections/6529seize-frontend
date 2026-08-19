@@ -8,11 +8,13 @@ const mockAppWalletAddress = "0x00000000000000000000000000000000000000AA";
 const mockConnectAsync = jest.fn();
 const mockPush = jest.fn();
 const mockScanQrCode = jest.fn();
+const mockIsQRScannerCancellation = jest.fn(() => false);
+let mockConnectors = [{ id: mockAppWalletAddress, type: "app-wallet" }];
 
 jest.mock("wagmi", () => ({
   useConnect: () => ({
     connectAsync: mockConnectAsync,
-    connectors: [{ id: mockAppWalletAddress, type: "app-wallet" }],
+    connectors: mockConnectors,
   }),
 }));
 
@@ -47,7 +49,8 @@ jest.mock("@/components/app-wallets/AppWalletModal", () => ({
 
 jest.mock("@/components/header/share/qrScanner.utils", () => ({
   getQRScannerErrorReason: jest.fn(() => null),
-  isQRScannerCancellation: jest.fn(() => false),
+  isQRScannerCancellation: (...args: unknown[]) =>
+    mockIsQRScannerCancellation(...args),
   scanQrCode: (...args: unknown[]) => mockScanQrCode(...args),
 }));
 
@@ -65,12 +68,14 @@ jest.mock("@/components/auth/CapacitorConnectDialog", () => {
       onOpenExternalWallets,
       onScanConnectionQr,
       onConnectAppWallet,
+      errorMessage,
     }: {
       readonly view: CapacitorConnectDialogView;
       readonly onAfterLeave: () => void;
       readonly onOpenExternalWallets: () => void;
       readonly onScanConnectionQr: () => void;
       readonly onConnectAppWallet: (address: string) => void;
+      readonly errorMessage: string | null;
     }) => {
       React.useEffect(() => {
         if (view === "closed") {
@@ -89,6 +94,7 @@ jest.mock("@/components/auth/CapacitorConnectDialog", () => {
           <button onClick={() => onConnectAppWallet(mockAppWalletAddress)}>
             App Wallet
           </button>
+          {errorMessage && <div role="alert">{errorMessage}</div>}
         </>
       );
     },
@@ -119,7 +125,9 @@ function FlowHarness({
 describe("CapacitorConnectFlow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockConnectors = [{ id: mockAppWalletAddress, type: "app-wallet" }];
     mockConnectAsync.mockResolvedValue(undefined);
+    mockIsQRScannerCancellation.mockReturnValue(false);
   });
 
   it("hands external-wallet selection to the external-only Reown callback", async () => {
@@ -170,5 +178,67 @@ describe("CapacitorConnectFlow", () => {
         )
       )
     );
+  });
+
+  it("restores the chooser with a scoped error for an invalid scan", async () => {
+    const onHandoffStateChange = jest.fn();
+    mockScanQrCode.mockResolvedValue("https://6529.io/profile");
+    render(<FlowHarness onHandoffStateChange={onHandoffStateChange} />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Scan Connection QR" })
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This isn't a valid 6529 connection QR code."
+    );
+    expect(onHandoffStateChange).toHaveBeenNthCalledWith(1, true);
+    expect(onHandoffStateChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it("restores the chooser without an error when scanning is cancelled", async () => {
+    mockScanQrCode.mockRejectedValue(new Error("cancelled"));
+    mockIsQRScannerCancellation.mockReturnValue(true);
+    render(<FlowHarness />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Scan Connection QR" })
+    );
+
+    expect(
+      await screen.findByRole("button", { name: "Scan Connection QR" })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("reports navigation failures separately from scan failures", async () => {
+    mockScanQrCode.mockResolvedValue(
+      `mobile6529://share-connection?connection_share_code=code&address=${mockAppWalletAddress}`
+    );
+    mockPush.mockImplementation(() => {
+      throw new Error("navigation failed");
+    });
+    render(<FlowHarness />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Scan Connection QR" })
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to open the shared connection. Please try again."
+    );
+  });
+
+  it("keeps the app-wallet view open when its connector is unavailable", async () => {
+    mockConnectors = [];
+    const disconnectExternalWallet = jest.fn().mockResolvedValue(undefined);
+    render(<FlowHarness disconnectExternalWallet={disconnectExternalWallet} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "App Wallet" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Wallet connection failed. Please try again."
+    );
+    expect(disconnectExternalWallet).not.toHaveBeenCalled();
   });
 });

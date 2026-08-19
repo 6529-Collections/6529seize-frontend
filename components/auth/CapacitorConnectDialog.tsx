@@ -67,7 +67,10 @@ function AppWalletRows({
 }>) {
   if (fetchingAppWallets) {
     return (
-      <p className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500">
+      <p
+        role="status"
+        className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500"
+      >
         {t(locale, "capacitorConnect.appWallets.loading")}
       </p>
     );
@@ -75,7 +78,10 @@ function AppWalletRows({
 
   if (!appWalletsSupported) {
     return (
-      <p className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500">
+      <p
+        role="status"
+        className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500"
+      >
         {t(locale, "capacitorConnect.appWallets.unavailable")}
       </p>
     );
@@ -83,7 +89,10 @@ function AppWalletRows({
 
   if (appWallets.length === 0) {
     return (
-      <p className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500">
+      <p
+        role="status"
+        className="tw-m-0 tw-py-4 tw-text-center tw-text-sm tw-text-iron-500"
+      >
         {t(locale, "capacitorConnect.appWallets.empty")}
       </p>
     );
@@ -95,6 +104,7 @@ function AppWalletRows({
       label={`${wallet.name} (${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)})`}
       ariaLabel={t(locale, "capacitorConnect.appWallets.connectAriaLabel", {
         walletName: wallet.name,
+        shortAddress: `${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)}`,
       })}
       icon={
         <Image
@@ -176,7 +186,7 @@ export default function CapacitorConnectDialog({
             <PlusIcon aria-hidden="true" className="tw-size-5" />
             {t(locale, "capacitorConnect.appWallets.create")}
           </button>
-          <div className="tw-flex tw-flex-col tw-gap-2" aria-live="polite">
+          <div className="tw-flex tw-flex-col tw-gap-2">
             <AppWalletRows
               locale={locale}
               appWallets={appWallets}
@@ -206,14 +216,13 @@ export default function CapacitorConnectDialog({
           />
         </div>
       )}
-      {errorMessage && (
-        <p
-          role="alert"
-          className="tw-mx-4 tw-mb-0 tw-mt-3 tw-rounded-lg tw-bg-red/10 tw-px-3 tw-py-2 tw-text-sm tw-text-red sm:tw-mx-6"
-        >
-          {errorMessage}
-        </p>
-      )}
+      <div role="alert" aria-live="assertive" aria-atomic="true">
+        {errorMessage && (
+          <p className="tw-mx-4 tw-mb-0 tw-mt-3 tw-rounded-lg tw-bg-red/10 tw-px-3 tw-py-2 tw-text-sm tw-text-red sm:tw-mx-6">
+            {errorMessage}
+          </p>
+        )}
+      </div>
     </MobileWrapperDialog>
   );
 }

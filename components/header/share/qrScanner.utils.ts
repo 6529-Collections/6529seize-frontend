@@ -9,7 +9,7 @@ import {
 
 const SCANNER_CANCELLED_ERROR_CODE = "OS-PLUG-BARC-0006";
 
-export function getScannerOptions(
+function getScannerOptions(
   isAndroid: boolean,
   scanInstructions: string
 ): CapacitorBarcodeScannerOptions {

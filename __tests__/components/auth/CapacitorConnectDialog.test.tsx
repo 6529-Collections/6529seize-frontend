@@ -92,7 +92,9 @@ describe("CapacitorConnectDialog", () => {
     expect(defaultProps.onCreateAppWallet).toHaveBeenCalledTimes(1);
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Connect with Phoebe" })
+      screen.getByRole("button", {
+        name: "Connect with Phoebe, wallet 0x0000…00AA",
+      })
     );
     expect(defaultProps.onConnectAppWallet).toHaveBeenCalledWith(
       "0x00000000000000000000000000000000000000AA"

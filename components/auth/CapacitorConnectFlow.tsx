@@ -195,7 +195,22 @@ export default function CapacitorConnectFlow({
             return;
           }
 
-          router.push(route);
+          try {
+            router.push(route);
+          } catch (error) {
+            logError(
+              "capacitorConnectionShareNavigation",
+              error instanceof Error
+                ? error
+                : new Error("Connection-share navigation failed", {
+                    cause: error,
+                  })
+            );
+            showError(
+              t(locale, "capacitorConnect.error.navigationFailed"),
+              OPTIONS_VIEW
+            );
+          }
         } catch (error) {
           if (isQRScannerCancellation(error)) {
             setView(OPTIONS_VIEW);

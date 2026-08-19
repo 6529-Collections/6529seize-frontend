@@ -15,6 +15,16 @@ describe("getConnectionShareRoute", () => {
     );
   });
 
+  it("normalizes a configured scheme with a URL suffix", () => {
+    expect(
+      getConnectionShareRoute({
+        content: `mobile6529://share-connection?connection_share_code=code&address=${ADDRESS}`,
+        appScheme: "mobile6529://",
+        timestamp: 123,
+      })
+    ).toContain("/accept-connection-sharing?");
+  });
+
   it.each([
     "https://6529.io/accept-connection-sharing?connection_share_code=code&address=0x00000000000000000000000000000000000000AA",
     "mobile6529://navigate/profile?connection_share_code=code&address=0x00000000000000000000000000000000000000AA",
