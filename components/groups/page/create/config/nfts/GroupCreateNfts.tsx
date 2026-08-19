@@ -1,3 +1,4 @@
+import { GROUP_CREATE_PANEL_STYLES } from "../../GroupCreate.styles";
 import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import {
   GRADIENT_CONTRACT,
@@ -101,7 +102,7 @@ export default function GroupCreateNfts({
   };
 
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
+    <div className={GROUP_CREATE_PANEL_STYLES}>
       <div>
         <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           Required NFTs

@@ -57,5 +57,8 @@ describe("MuseumBreadcrumbs", () => {
         "A work title that remains readable when the viewport is 390 pixels wide"
       )
     ).toHaveAttribute("aria-current", "page");
+    expect(
+      navigation.querySelectorAll('span[aria-hidden="true"]')[0]
+    ).toHaveClass("tw-hidden", "sm:tw-inline");
   });
 });

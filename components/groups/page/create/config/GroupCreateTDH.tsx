@@ -1,3 +1,4 @@
+import { GROUP_CREATE_PANEL_STYLES } from "../GroupCreate.styles";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
@@ -25,7 +26,7 @@ export default function GroupCreateTDH({
   ];
 
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
+    <div className={GROUP_CREATE_PANEL_STYLES}>
       <div className="tw-mb-4">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
           <div>

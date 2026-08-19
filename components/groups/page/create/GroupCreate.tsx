@@ -465,7 +465,7 @@ export default function GroupCreate({
       <GroupCreateWrapper>
         <div
           role="alert"
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5"
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-5"
         >
           <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
             Unable to load this group
@@ -507,7 +507,7 @@ export default function GroupCreate({
         <div
           role="status"
           aria-live="polite"
-          className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-text-sm tw-text-iron-300"
+          className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-5 tw-text-sm tw-text-iron-300"
         >
           <CircleLoader size={CircleLoaderSize.MEDIUM} />
           <span>Loading group...</span>

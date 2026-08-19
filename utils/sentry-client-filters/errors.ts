@@ -53,6 +53,7 @@ import {
   hasLikelyAppOwnedFrame,
   hasNativeJsonStringifyFrame,
   hasSentryRouteParameterizationFrame,
+  isSentryBrowserHelperFrame,
   isSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
 
@@ -632,8 +633,8 @@ export function shouldFilterSentryRouteParameterizationError(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  // Sentry SDK route parameterization noise observed in MetaMask Mobile on
-  // iOS WKWebView; keep app-owned and generic WebView cyclic JSON errors.
+  // Sentry SDK cyclic JSON timer noise observed in MetaMask Mobile on iOS
+  // WKWebView; keep app-owned and generic WebView cyclic JSON errors.
   const value = event.exception?.values?.[0];
   if (
     value?.type !== "TypeError" ||
@@ -651,19 +652,24 @@ export function shouldFilterSentryRouteParameterizationError(
   }
 
   const frames = value.stacktrace?.frames;
-  const framesWithoutSentryRouteParameterization = frames?.filter(
-    (frame) => !isSentryRouteParameterizationFrame(frame)
+  const hasSentryInfrastructureFrame =
+    hasSentryRouteParameterizationFrame(frames) ||
+    (Array.isArray(frames) && frames.some(isSentryBrowserHelperFrame));
+  const framesWithoutSentryInfrastructure = frames?.filter(
+    (frame) =>
+      !isSentryRouteParameterizationFrame(frame) &&
+      !isSentryBrowserHelperFrame(frame)
   );
   if (
     hasAppOwnedSourceEvidence(event, value, hint) ||
-    hasLikelyAppOwnedFrame(framesWithoutSentryRouteParameterization) ||
+    hasLikelyAppOwnedFrame(framesWithoutSentryInfrastructure) ||
     !hasNativeJsonStringifyFrame(frames)
   ) {
     return false;
   }
 
   return (
-    (hasSentryRouteParameterizationFrame(frames) ||
+    (hasSentryInfrastructureFrame ||
       hasRouteParameterizationRouteEvidence(event)) &&
     hasMetaMaskMobileWebViewContext(event)
   );

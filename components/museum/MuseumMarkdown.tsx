@@ -20,6 +20,7 @@ interface MuseumMarkdownProps {
   readonly children: string;
   readonly className?: string | undefined;
   readonly documentHeadings?: boolean | undefined;
+  readonly nestedDocumentHeadings?: boolean | undefined;
   readonly embeddedDocument?: boolean | undefined;
   readonly sourceCommit: string | null;
   readonly sourcePath?: string | undefined;
@@ -27,6 +28,50 @@ interface MuseumMarkdownProps {
 }
 
 const EMPTY_WORK_HREFS: Readonly<Record<string, string>> = {};
+
+const INLINE_CODE_SAFE_BREAK_DELIMITER = /^[/:._#?&=\-]$/u;
+const INLINE_CODE_LONG_HEX = /^(?:0x)?[0-9a-f]{24,}$/iu;
+
+/**
+ * Preserve the exact selected value while exposing mobile line-break
+ * opportunities at identifier delimiters and fixed eight-character hash
+ * groups. A word-break element has no text content, so copying the code still
+ * returns the canonical value byte-for-byte.
+ */
+function renderInlineCodeWithSafeBreaks(codeText: string): ReactNode[] {
+  const segments = codeText.split(/((?:0x)?[0-9a-f]{24,}|[/:._#?&=\-])/giu);
+  const rendered: ReactNode[] = [];
+
+  segments.forEach((segment, segmentIndex) => {
+    if (!segment) {
+      return;
+    }
+
+    if (INLINE_CODE_SAFE_BREAK_DELIMITER.test(segment)) {
+      rendered.push(segment, <wbr key={`delimiter-${segmentIndex}`} />);
+      return;
+    }
+
+    if (INLINE_CODE_LONG_HEX.test(segment)) {
+      const hasPrefix = /^0x/iu.test(segment);
+      const prefix = hasPrefix ? segment.slice(0, 2) : "";
+      const hex = hasPrefix ? segment.slice(2) : segment;
+      const groups = hex.match(/.{1,8}/gu) ?? [hex];
+      if (prefix !== "") rendered.push(prefix);
+      groups.forEach((group, groupIndex) => {
+        rendered.push(group);
+        if (groupIndex < groups.length - 1) {
+          rendered.push(<wbr key={`hex-${segmentIndex}-${groupIndex}`} />);
+        }
+      });
+      return;
+    }
+
+    rendered.push(segment);
+  });
+
+  return rendered;
+}
 
 function withoutEmbeddedDocumentTitle(markdown: string): string {
   const lines = markdown.replace(/^\uFEFF/u, "").split(/\r?\n/u);
@@ -397,7 +442,7 @@ function MuseumMarkdownTableHead({
   children,
 }: MuseumMarkdownTableElementProps) {
   return (
-    <thead className="tw-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-text-iron-100 sm:tw-table-header-group">
+    <thead className="tw-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-text-iron-100 lg:tw-table-header-group">
       {children}
     </thead>
   );
@@ -407,7 +452,7 @@ function MuseumMarkdownTableBody({
   children,
 }: MuseumMarkdownTableElementProps) {
   return (
-    <tbody className="tw-block tw-divide-y tw-divide-iron-800 sm:tw-table-row-group">
+    <tbody className="tw-block tw-divide-y tw-divide-iron-800 lg:tw-table-row-group">
       {children}
     </tbody>
   );
@@ -415,7 +460,7 @@ function MuseumMarkdownTableBody({
 
 function MuseumMarkdownTableRow({ children }: MuseumMarkdownTableElementProps) {
   return (
-    <tr className="tw-block tw-border-b tw-border-iron-800 last:tw-border-b-0 sm:tw-table-row">
+    <tr className="tw-block tw-border-b tw-border-iron-800 last:tw-border-b-0 lg:tw-table-row">
       {children}
     </tr>
   );
@@ -436,9 +481,9 @@ function MuseumMarkdownTableCell({
   mobileLabel,
 }: MuseumMarkdownTableCellProps) {
   return (
-    <td className="tw-block tw-whitespace-normal tw-break-words tw-px-3 tw-py-2 tw-align-top sm:tw-table-cell sm:tw-py-3">
+    <td className="tw-block tw-whitespace-normal tw-break-words tw-px-3 tw-py-2 tw-align-top lg:tw-table-cell lg:tw-py-3">
       {mobileLabel ? (
-        <span className="tw-mb-1 tw-block tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500 sm:tw-hidden">
+        <span className="tw-mb-1 tw-block tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500 lg:tw-hidden">
           {mobileLabel}
         </span>
       ) : null}
@@ -535,7 +580,7 @@ function MuseumMarkdownTable({ children }: { readonly children?: ReactNode }) {
         role="region"
         tabIndex={0}
       >
-        <table className="tw-block tw-w-full tw-table-fixed tw-border-collapse tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200 sm:tw-table sm:tw-table-auto">
+        <table className="tw-block tw-w-full tw-table-fixed tw-border-collapse tw-text-left tw-text-sm tw-leading-6 tw-text-iron-200 lg:tw-table lg:tw-table-auto">
           {labelledChildren}
         </table>
       </div>
@@ -579,13 +624,19 @@ const baseComponents: Components = {
       {children}
     </blockquote>
   ),
-  code: ({ children, className }) => (
-    <code
-      className={`tw-rounded-md tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100 ${className ?? ""}`}
-    >
-      {children}
-    </code>
-  ),
+  code: ({ children, className }) => {
+    const codeText = Children.toArray(children)
+      .filter((child): child is string => typeof child === "string")
+      .join("");
+    const isInline = !codeText.includes("\n");
+    return (
+      <code
+        className={`tw-rounded-md tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100 ${isInline ? "tw-inline-block tw-max-w-full tw-whitespace-normal tw-align-bottom sm:tw-overflow-x-auto sm:tw-whitespace-nowrap" : ""} ${className ?? ""}`}
+      >
+        {isInline ? renderInlineCodeWithSafeBreaks(codeText) : children}
+      </code>
+    );
+  },
   pre: ({ children }) => (
     <pre className="tw-max-w-full tw-overflow-x-auto tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-950 tw-p-4 tw-text-sm tw-text-iron-200">
       {children}
@@ -628,10 +679,30 @@ const documentHeadingComponents: Components = {
   ),
 };
 
+const nestedDocumentHeadingComponents: Components = {
+  ...baseComponents,
+  h1: ({ children }) => (
+    <h3 className="tw-mt-10 tw-text-2xl tw-font-semibold tw-text-white">
+      {children}
+    </h3>
+  ),
+  h2: ({ children }) => (
+    <h3 className="tw-mt-10 tw-text-2xl tw-font-semibold tw-text-white">
+      {children}
+    </h3>
+  ),
+  h3: ({ children }) => (
+    <h4 className="tw-mt-8 tw-text-xl tw-font-semibold tw-text-white">
+      {children}
+    </h4>
+  ),
+};
+
 export function MuseumMarkdown({
   children,
   className = "",
   documentHeadings = false,
+  nestedDocumentHeadings = false,
   embeddedDocument = false,
   sourceCommit,
   sourcePath,
@@ -640,9 +711,14 @@ export function MuseumMarkdown({
   const markdown = embeddedDocument
     ? withoutEmbeddedDocumentTitle(children)
     : children;
+  let markdownComponents = baseComponents;
+  if (documentHeadings) markdownComponents = documentHeadingComponents;
+  if (nestedDocumentHeadings) {
+    markdownComponents = nestedDocumentHeadingComponents;
+  }
   const renderedMarkdown = (
     <ReactMarkdown
-      components={documentHeadings ? documentHeadingComponents : baseComponents}
+      components={markdownComponents}
       rehypePlugins={[rehypeSanitize]}
       remarkPlugins={[remarkGfm]}
       urlTransform={(url) =>

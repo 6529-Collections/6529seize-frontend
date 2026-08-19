@@ -62,7 +62,7 @@ function renderActions(
   } as any;
   const queryCtx = { onGroupCreate: jest.fn() } as any;
   const onCompleted = jest.fn();
-  render(
+  const { container } = render(
     <AuthContext.Provider value={auth}>
       <ReactQueryWrapperContext.Provider value={queryCtx}>
         <GroupCreateActions
@@ -74,7 +74,7 @@ function renderActions(
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
   );
-  return { auth, queryCtx, onCompleted };
+  return { auth, queryCtx, onCompleted, container };
 }
 
 beforeEach(() => {
@@ -85,8 +85,15 @@ beforeEach(() => {
 
 it("disables create button when no filters selected", () => {
   mockValidate.mockReturnValue({ valid: false, issues: [] });
-  renderActions();
+  const { container } = renderActions();
   expect(screen.getByRole("button", { name: "Create" })).toBeDisabled();
+  expect(container.firstElementChild).toHaveClass(
+    "tw-sticky",
+    "tw-bottom-0",
+    "tw-z-20",
+    "tw-border-t",
+    "tw-backdrop-blur-xl"
+  );
 });
 
 it("shows save button when editing an existing group", () => {

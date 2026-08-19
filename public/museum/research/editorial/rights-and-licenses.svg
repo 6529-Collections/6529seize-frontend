@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Rights are specific</title>
+  <desc id="desc">Five separate permission records for token title, copyright, display, reproduction, and preservation, shown as independent panels.</desc>
+  <rect width="1600" height="1000" fill="#090A0C"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="86" y="92" fill="#79A9FF" font-size="22" font-weight="700" letter-spacing="5">DIGITAL-ART STEWARDSHIP</text>
+    <text x="86" y="160" fill="#F4F0E7" font-size="58" font-weight="650">Rights are specific</text>
+    <text x="86" y="204" fill="#A6A7AE" font-size="25">A token transfer is one fact. A public display is another.</text>
+    <text x="1514" y="154" fill="#79A9FF" font-size="20" font-weight="700" letter-spacing="3" text-anchor="end">FIVE SEPARATE RECORDS</text>
+
+    <g stroke="#3A4350" stroke-width="2" fill="#111419">
+      <rect x="70" y="282" width="276" height="442" rx="4"/>
+      <rect x="370" y="282" width="276" height="442" rx="4"/>
+      <rect x="670" y="282" width="276" height="442" rx="4"/>
+      <rect x="970" y="282" width="276" height="442" rx="4"/>
+      <rect x="1270" y="282" width="276" height="442" rx="4"/>
+    </g>
+    <g fill="#79A9FF">
+      <rect x="70" y="282" width="276" height="8"/>
+      <rect x="370" y="282" width="276" height="8"/>
+      <rect x="670" y="282" width="276" height="8"/>
+      <rect x="970" y="282" width="276" height="8"/>
+      <rect x="1270" y="282" width="276" height="8"/>
+    </g>
+    <g fill="#F4F0E7" opacity=".92">
+      <circle cx="112" cy="338" r="22"/><circle cx="412" cy="338" r="22"/><circle cx="712" cy="338" r="22"/><circle cx="1012" cy="338" r="22"/><circle cx="1312" cy="338" r="22"/>
+    </g>
+    <g fill="#090A0C" font-size="18" font-weight="800" text-anchor="middle">
+      <text x="112" y="345">01</text><text x="412" y="345">02</text><text x="712" y="345">03</text><text x="1012" y="345">04</text><text x="1312" y="345">05</text>
+    </g>
+
+    <g fill="#F4F0E7" font-size="27" font-weight="700">
+      <text x="102" y="420">TOKEN TITLE</text>
+      <text x="402" y="420">COPYRIGHT</text>
+      <text x="702" y="420">DISPLAY</text>
+      <text x="1002" y="420">REPRODUCTION</text>
+      <text x="1302" y="420">PRESERVATION</text>
+    </g>
+    <g fill="#A6A7AE" font-size="21">
+      <text x="102" y="474"><tspan x="102" dy="0">Who may transfer</tspan><tspan x="102" dy="31">the token?</tspan></text>
+      <text x="402" y="474"><tspan x="402" dy="0">Who owns the</tspan><tspan x="402" dy="31">underlying work?</tspan></text>
+      <text x="702" y="474"><tspan x="702" dy="0">Where may the</tspan><tspan x="702" dy="31">work be shown?</tspan></text>
+      <text x="1002" y="474"><tspan x="1002" dy="0">May copies be</tspan><tspan x="1002" dy="31">made and shared?</tspan></text>
+      <text x="1302" y="474"><tspan x="1302" dy="0">What may be</tspan><tspan x="1302" dy="31">retained or moved?</tspan></text>
+    </g>
+    <g stroke="#252A34" stroke-width="2">
+      <line x1="102" y1="602" x2="314" y2="602"/><line x1="402" y1="602" x2="614" y2="602"/><line x1="702" y1="602" x2="914" y2="602"/><line x1="1002" y1="602" x2="1214" y2="602"/><line x1="1302" y1="602" x2="1514" y2="602"/>
+    </g>
+    <g fill="#79A9FF" font-size="17" font-weight="700" letter-spacing="2">
+      <text x="102" y="656">TITLE RECORD</text>
+      <text x="402" y="656">RIGHTS HOLDER</text>
+      <text x="702" y="656">USE SCOPE</text>
+      <text x="1002" y="656">USE SCOPE</text>
+      <text x="1302" y="656">CARE PLAN</text>
+    </g>
+
+    <path d="M70 820 H1546" stroke="#3A4350" stroke-width="2"/>
+    <g fill="#F4F0E7" font-size="29" font-weight="600">
+      <text x="70" y="868">One permission never silently grants the next.</text>
+    </g>
+    <g fill="#A6A7AE" font-size="20">
+      <text x="70" y="910">Record the holder, scope, basis, and limits for each use.</text>
+      <text x="1530" y="910" text-anchor="end" fill="#79A9FF" font-weight="700" letter-spacing="2">SEPARATE FACTS / CLEAR USE</text>
+    </g>
+  </g>
+</svg>

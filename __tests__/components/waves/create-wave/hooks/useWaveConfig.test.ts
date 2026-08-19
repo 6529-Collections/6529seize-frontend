@@ -12,12 +12,27 @@ import {
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import * as createWaveValidation from "@/helpers/waves/create-wave.validation";
 import { getDefaultFirstDecisionTime } from "@/components/waves/create-wave/services/waveDecisionService";
+import { useWaveGroupValidation } from "@/components/waves/create-wave/hooks/useWaveGroupValidation";
 
 // Mock dependencies
 jest.mock("@/helpers/waves/create-wave.validation");
 jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
   useMemeCardCount: jest.fn(),
 }));
+jest.mock(
+  "@/components/waves/create-wave/hooks/useWaveGroupValidation",
+  () => ({
+    useWaveGroupValidation: jest.fn(() => ({
+      data: { valid: true, invalid_roles: [] },
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      }),
+    })),
+  })
+);
 jest.mock("@/helpers/time", () => ({
   Time: {
     currentMillis: jest.fn(() => 1000000),
@@ -29,6 +44,7 @@ const mockGetCreateWaveValidationErrors =
     typeof createWaveValidation.getCreateWaveValidationErrors
   >;
 const mockedUseMemeCardCount = useMemeCardCount as jest.Mock;
+const mockedUseWaveGroupValidation = useWaveGroupValidation as jest.Mock;
 
 describe("useWaveConfig", () => {
   beforeEach(() => {
@@ -37,6 +53,15 @@ describe("useWaveConfig", () => {
       data: undefined,
       isLoading: false,
       isError: false,
+    });
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: { valid: true, invalid_roles: [] },
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      }),
     });
     mockGetCreateWaveValidationErrors.mockReturnValue([]);
   });
@@ -151,6 +176,131 @@ describe("useWaveConfig", () => {
         period: null,
       });
     });
+  });
+
+  it("surfaces a generic error when a restricted group check has no result", async () => {
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: undefined,
+        isError: false,
+      }),
+    });
+    const { result } = renderHook(() => useWaveConfig());
+
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.GROUPS,
+        direction: "backward",
+      });
+    });
+    act(() => {
+      result.current.onGroupSelect({
+        group: { id: "view-group" } as ApiGroupFull,
+        groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      });
+    });
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.DATES,
+        direction: "forward",
+      });
+    });
+
+    expect(result.current.step).toBe(CreateWaveStep.GROUPS);
+    expect(result.current.groupValidation.unavailable).toBe(true);
+  });
+
+  it("handles a rejected restricted group check without changing steps", async () => {
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockRejectedValue(new Error("network unavailable")),
+    });
+    const { result } = renderHook(() => useWaveConfig());
+
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.GROUPS,
+        direction: "backward",
+      });
+    });
+    act(() => {
+      result.current.onGroupSelect({
+        group: { id: "view-group" } as ApiGroupFull,
+        groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      });
+    });
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.DATES,
+        direction: "forward",
+      });
+    });
+
+    expect(result.current.step).toBe(CreateWaveStep.GROUPS);
+    expect(result.current.groupValidation.unavailable).toBe(true);
+  });
+
+  it("does not let a stale group check overwrite later navigation", async () => {
+    let resolveValidation:
+      | ((value: {
+          data: { valid: boolean; invalid_roles: never[] };
+          isError: boolean;
+        }) => void)
+      | undefined;
+    const pendingValidation = new Promise<{
+      data: { valid: boolean; invalid_roles: never[] };
+      isError: boolean;
+    }>((resolve) => {
+      resolveValidation = resolve;
+    });
+    mockedUseWaveGroupValidation.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockReturnValue(pendingValidation),
+    });
+    const { result } = renderHook(() => useWaveConfig());
+
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.GROUPS,
+        direction: "backward",
+      });
+    });
+    act(() => {
+      result.current.onGroupSelect({
+        group: { id: "view-group" } as ApiGroupFull,
+        groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      });
+    });
+
+    let forwardNavigation: Promise<void> | undefined;
+    act(() => {
+      forwardNavigation = result.current.onStep({
+        step: CreateWaveStep.DATES,
+        direction: "forward",
+      });
+    });
+    await act(async () => {
+      await result.current.onStep({
+        step: CreateWaveStep.OVERVIEW,
+        direction: "backward",
+      });
+    });
+    await act(async () => {
+      resolveValidation?.({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      });
+      await forwardNavigation;
+    });
+
+    expect(result.current.step).toBe(CreateWaveStep.OVERVIEW);
   });
 
   describe("Overview Updates", () => {
@@ -406,7 +556,7 @@ describe("useWaveConfig", () => {
       is_private: false,
     } as ApiGroupFull;
 
-    it("should update canView group and cache group", () => {
+    it("defaults a Chat Wave's chat group to its selected View group", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
@@ -417,7 +567,216 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.groups.canView).toBe("group-123");
+      expect(result.current.config.groups.canChat).toBe("group-123");
+      expect(result.current.config.groups.canDrop).toBeNull();
+      expect(result.current.config.groups.canVote).toBeNull();
       expect(result.current.groupsCache["group-123"]).toEqual(mockGroup);
+    });
+
+    it("defaults a ranked Wave's privilege groups to its selected View group", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-123",
+        canDrop: "group-123",
+        canVote: "group-123",
+        canChat: "group-123",
+      });
+    });
+
+    it("keeps privilege groups independently editable after defaulting", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const overrideGroup = {
+        ...mockGroup,
+        id: "group-override",
+      };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: overrideGroup,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+      });
+
+      expect(result.current.config.groups.canView).toBe("group-123");
+      expect(result.current.config.groups.canDrop).toBe("group-123");
+      expect(result.current.config.groups.canVote).toBe("group-123");
+      expect(result.current.config.groups.canChat).toBe("group-override");
+    });
+
+    it("preserves privilege groups selected before the View group", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const chatGroup = { ...mockGroup, id: "chat-group" };
+      const dropGroup = { ...mockGroup, id: "drop-group" };
+      const voteGroup = { ...mockGroup, id: "vote-group" };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: chatGroup,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+        result.current.onGroupSelect({
+          group: dropGroup,
+          groupType: CreateWaveGroupConfigType.CAN_DROP,
+        });
+        result.current.onGroupSelect({
+          group: voteGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VOTE,
+        });
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-123",
+        canDrop: "drop-group",
+        canVote: "vote-group",
+        canChat: "chat-group",
+      });
+    });
+
+    it("preserves a manual override when the View group changes", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const overrideGroup = { ...mockGroup, id: "group-override" };
+      const replacementGroup = { ...mockGroup, id: "group-replacement" };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: overrideGroup,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+        result.current.onGroupSelect({
+          group: replacementGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-replacement",
+        canDrop: "group-replacement",
+        canVote: "group-replacement",
+        canChat: "group-override",
+      });
+    });
+
+    it("preserves a manually selected Anyone privilege", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onGroupSelect({
+          group: null,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups.canView).toBe("group-123");
+      expect(result.current.config.groups.canChat).toBeNull();
+    });
+
+    it("starts a fresh privilege-defaulting session after a Wave type change", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onGroupSelect({
+          group: null,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+      });
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups.canChat).toBe("group-123");
+    });
+
+    it("redefaults privilege groups when the View group changes", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const replacementGroup = {
+        ...mockGroup,
+        id: "group-replacement",
+      };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: replacementGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "group-replacement",
+        canDrop: "group-replacement",
+        canVote: "group-replacement",
+        canChat: "group-replacement",
+      });
     });
 
     it("should update canDrop group", () => {
@@ -1089,8 +1448,8 @@ describe("useWaveConfig", () => {
     });
   });
 
-  describe("Direct Config Update", () => {
-    it("should allow direct config updates via setConfig", () => {
+  describe("Config Replacement", () => {
+    it("should replace the complete config", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       const newConfig = {
@@ -1104,11 +1463,45 @@ describe("useWaveConfig", () => {
       };
 
       act(() => {
-        result.current.setConfig(newConfig);
+        result.current.replaceConfig(newConfig);
       });
 
       expect(result.current.config.overview.name).toBe("Direct Update");
       expect(result.current.config.overview.type).toBe(ApiWaveType.Rank);
+    });
+
+    it("rebuilds manual privilege tracking from a loaded draft", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const loadedConfig = {
+        ...result.current.config,
+        overview: {
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        },
+        groups: {
+          admin: null,
+          canView: "draft-view",
+          canDrop: "draft-view",
+          canVote: "draft-view",
+          canChat: "draft-chat-override",
+        },
+      };
+
+      act(() => {
+        result.current.replaceConfig(loadedConfig);
+        result.current.onGroupSelect({
+          group: { id: "replacement-view" } as ApiGroupFull,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: "replacement-view",
+        canDrop: "replacement-view",
+        canVote: "replacement-view",
+        canChat: "draft-chat-override",
+      });
     });
   });
 });
