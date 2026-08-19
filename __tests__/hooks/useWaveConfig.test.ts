@@ -10,6 +10,20 @@ jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
     isError: false,
   })),
 }));
+jest.mock(
+  "@/components/waves/create-wave/hooks/useWaveGroupValidation",
+  () => ({
+    useWaveGroupValidation: jest.fn(() => ({
+      data: { valid: true, invalid_roles: [] },
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn().mockResolvedValue({
+        data: { valid: true, invalid_roles: [] },
+        isError: false,
+      }),
+    })),
+  })
+);
 
 describe("useWaveConfig", () => {
   it("prevents step change when validation fails", () => {
@@ -47,6 +61,9 @@ describe("useWaveConfig", () => {
     });
 
     expect(result.current.config.groups.canView).toBe("group-1");
+    expect(result.current.config.groups.canChat).toBe("group-1");
+    expect(result.current.config.groups.canDrop).toBeNull();
+    expect(result.current.config.groups.canVote).toBeNull();
     expect(result.current.groupsCache["group-1"]).toEqual(group);
   });
 });

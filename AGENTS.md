@@ -173,6 +173,14 @@ All project commands must go through the repo-local `6529` wrapper.
   `ops/standards/frontend-design-ui-ux.md` for repo-specific visual
   consistency, Tailwind-first styling migration, responsive layout, interaction
   states, media behavior, and browser evidence.
+- Every Network Museum PR that changes a public route, visible component,
+  layout, copy, or media must also pass the pre-PR full-page adversarial review
+  gate in `ops/standards/museum-visual-release-acceptance.md`. A PR must not be
+  opened until exact production-build screenshots of every changed Museum route
+  have been reviewed independently for museum/curatorial quality, visual/UX
+  quality, and copy/editorial quality, and all blocking findings have been fixed
+  and recaptured. Automated geometry, DOM, and accessibility checks do not
+  substitute for this gate.
 - Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization

@@ -10,6 +10,7 @@ import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhIncl
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const mockSubmitInlineGroup = jest.fn();
+const mockValidateWaveGroups = jest.fn();
 let mockInlinePanelProps: any;
 
 jest.mock("@tanstack/react-query", () => {
@@ -30,6 +31,10 @@ jest.mock("@/hooks/groups/useGroupMutations", () => ({
   useGroupMutations: () => ({
     submit: mockSubmitInlineGroup,
   }),
+}));
+
+jest.mock("@/services/api/wave-group-validation-api", () => ({
+  validateWaveGroups: (...args: any[]) => mockValidateWaveGroups(...args),
 }));
 
 jest.mock("@/helpers/waves/waves.helpers", () => ({
@@ -262,6 +267,10 @@ describe("WaveGroupEditButtons", () => {
         name: "Created Group",
       },
       published: true,
+    });
+    mockValidateWaveGroups.mockResolvedValue({
+      valid: true,
+      invalid_roles: [],
     });
     auth.requestAuth.mockResolvedValue({ success: true });
     mutateAsync.mockReset();

@@ -465,6 +465,9 @@ export * from '../models/ApiWaveDecisionsPageV2';
 export * from '../models/ApiWaveDecisionsStrategy';
 export * from '../models/ApiWaveDropsFeed';
 export * from '../models/ApiWaveDropsFeedV2';
+export * from '../models/ApiWaveGroupRole';
+export * from '../models/ApiWaveGroupValidationRequest';
+export * from '../models/ApiWaveGroupValidationResponse';
 export * from '../models/ApiWaveLog';
 export * from '../models/ApiWaveMentionSearchResult';
 export * from '../models/ApiWaveMetadata';
@@ -1104,6 +1107,9 @@ import { ApiWaveDecisionsPageV2 } from '../models/ApiWaveDecisionsPageV2';
 import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
 import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
 import { ApiWaveDropsFeedV2 } from '../models/ApiWaveDropsFeedV2';
+import { ApiWaveGroupRole } from '../models/ApiWaveGroupRole';
+import { ApiWaveGroupValidationRequest } from '../models/ApiWaveGroupValidationRequest';
+import { ApiWaveGroupValidationResponse } from '../models/ApiWaveGroupValidationResponse';
 import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMentionSearchResult } from '../models/ApiWaveMentionSearchResult';
 import { ApiWaveMetadata } from '../models/ApiWaveMetadata';
@@ -1417,6 +1423,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWalletDistributionAllocationPhaseEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
+    "ApiWaveGroupRole",
     "ApiWaveMetadataType",
     "ApiWaveOutcomeCredit",
     "ApiWaveOutcomeSubType",
@@ -1916,6 +1923,8 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveDecisionsStrategy": ApiWaveDecisionsStrategy,
     "ApiWaveDropsFeed": ApiWaveDropsFeed,
     "ApiWaveDropsFeedV2": ApiWaveDropsFeedV2,
+    "ApiWaveGroupValidationRequest": ApiWaveGroupValidationRequest,
+    "ApiWaveGroupValidationResponse": ApiWaveGroupValidationResponse,
     "ApiWaveLog": ApiWaveLog,
     "ApiWaveMentionSearchResult": ApiWaveMentionSearchResult,
     "ApiWaveMetadata": ApiWaveMetadata,

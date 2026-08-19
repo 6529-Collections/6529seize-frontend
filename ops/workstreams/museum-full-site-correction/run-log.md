@@ -127,10 +127,10 @@ comes first; acquisition and accession follow.` before the next hosted lane
   changed typecheck, and the Windows-safe diff check.
 - Follow-up exact-head run `31670163257` passed build, quality/contracts,
   shell, smoke, and all external checks. Its desktop Museum lane then found
-  one stale browser assertion for the corrected acquisition-program heading:
-  runtime and component tests correctly rendered `Works acquired or selected
-  through this program`, while the institutional-practice E2E still expected
-  `Works selected through this program`. Updated that assertion only; no
+  one stale browser assertion for the corrected acquisition-program heading.
+  Runtime and component tests used the approved heading, while the
+  institutional-practice E2E still expected the previous wording. Updated
+  that assertion only; no
   runtime, source, rights, relation, layout, or public-copy behavior changed.
 - The authenticated whole-site crawler expanded all 57 accepted route patterns
   into 668 concrete Museum URLs. Against the first staging composition, all
@@ -197,3 +197,261 @@ comes first; acquisition and accession follow.` before the next hosted lane
   Keys and Gates as selected and unminted, all five Magnum images, all 16
   Keys and Gates images, canonical Work relations, responsive overflow,
   keyboard/touch navigation, and automated WCAG A/AA checks.
+- Research release pre-PR visual gate: an exact 27-capture corpus from
+  frontend candidate `17d777a0a9675eccd0d7f0007e296b32344a1ce2` and source
+  `e5b9c0e1e39e910baf10f93490b541685ec460fb` received copy PASS but museum
+  and UX BLOCK. The blockers were long unedited manuscript pages, repeated
+  generic diagrams, incomplete hero credit/status context, and insufficient
+  acquisition-work display. No PR was opened.
+- Corrective implementation added exact-heading reading projections, complete
+  manuscript disclosures, separate supporting-record disclosures, all-work
+  acquisition galleries, complete qualifier plus credit rendering, distinct
+  Met Open Access public-domain images with local responsive derivatives and
+  a hash-checked media manifest, focused regressions, and the permanent
+  screenshot/adversarial-review gate in repository instructions.
+- Three pre-capture static Luna audits ran in parallel. Media and progressive-
+  reading audits blocked the first correction on responsive gallery sources,
+  incomplete legacy-asset hash coverage, prefix/fenced/duplicate heading
+  ambiguity, a failed-projection full-manuscript fallback, source-matrix
+  truncation, and heading depth. The corrected candidate carries responsive
+  source sets through related Work cards; verifies every manifest file hash;
+  selects one exact unfenced heading per request; fails required acquisition
+  readings closed; keeps generic long studies collapsed; preserves the full
+  source matrix; and nests manuscript headings beneath the editorial section.
+- Frontend PR #3753 exact-head hosted run `31931078978` failed its desktop
+  Museum gate because the protected Playwright fixture still used superseded
+  reviewed source `9aea66c07d59f890e366dde6552a304580ba789a`; the stricter
+  Research publication contract correctly rendered the fail-closed state.
+  Advanced the immutable CI fixture and its workflow contract test to exact
+  reviewed publication `f9253968389f97f62eaea79ab7880d1daafbc00c`. The same
+  local IA reproduction then exposed two stale assertions from the discarded
+  Research landing: an old prefixed Keys and Gates essay title and a six-card
+  Museum-practice count. The acceptance contract now names the final essay
+  title and all four final Museum-practice entries. Exact desktop IA passed
+  6/6; exact mobile IA passed 3/3 with three desktop-only checks skipped; the
+  fixture/workflow contract suites passed 71/71. Runtime, visual composition,
+  public copy, media, and routes were unchanged.
+
+## 2026-08-16T08:49:00Z - Mobile architecture navigation contract corrected
+
+- Exact-head hosted run `31937137281` reached the mobile Museum browser lane
+  and found two matching DOM links for the first data-architecture standard:
+  one in the selected reading and one inside the complete-record disclosure.
+  The test had asserted one link in the whole document rather than one visible
+  visitor control.
+- Restricted the navigation locator to the visible link. The exact failed test
+  now passes against the optimized local visitor build, and the complete data-
+  architecture suite passes 6/6 across desktop and 390 px mobile. No runtime,
+  copy, media, route, or visual output changed.
+
+## 2026-08-16T09:25:00Z - Smithsonian date roles disambiguated
+
+- Exact-final curatorial review found that the _Museums to learn from_ source
+  image visibly labels the depicted Gallery of Art `ca. 1860`, while the page
+  caption used the Smithsonian object-record date `1857` without explaining
+  the relationship.
+- The Smithsonian Open Access API record for `siris_arc_401640` identifies the
+  object as _Gallery of Art, Smithsonian Institution Building, or Castle_,
+  dates it `1857` and `1857 (copied 1950s)`, and describes it as an engraving
+  interior view. Revised the visible credit to retain the institutional date,
+  identify the later copy, and transcribe the source mount's `ca. 1860` label
+  as a distinct depicted-scene label.
+
+## 2026-08-18T13:28:00Z - Final Research source hierarchy correction
+
+- The exact 33-capture v24 adversarial gate passed deterministic browser and
+  product checks but correctly blocked release because the visitor spelling
+  for Keys and Gates outcome `6529NM-AP-01-OUT-002` had been normalized only
+  in frontend code. The media credit still exposed the submitted typo.
+- Created Museum source PR #65 with append-only display-title authority. The
+  change preserves the submitted outcome, verbatim statement, and Wave
+  evidence while changing only the public Work and Media labels, derived
+  hashes, and amendment references. Lifecycle, rights, accession, Collection
+  membership, source media, and media fixity are unchanged.
+- Reviewed source commit
+  `df409fc28bd29c806887bf8ebe6007f5accfbfaf` passed all local publication,
+  schema, replay, inventory, bundle, manifest, and diff checks plus an
+  independent registrar review. Frontend focused tests pass after removal of
+  the private title override and rebinding the CI source fixture to that exact
+  reviewed publication.
+- Source PR #65 merged with all seven hosted checks green as canonical Museum
+  main `b583c5102faabd908e7a99cdf0343f3866d31c26`. It had no review threads or
+  actionable bot findings; the generated-file volume exceeded the configured
+  AI-review budgets, so the independent registrar review remains the material
+  content review.
+
+## 2026-08-18T14:30:11Z - Public scholarship projection sealed
+
+- The v25 screenshot and editorial gate found that public manuscripts still
+  exposed the archival submitted spelling after Work and Media labels had been
+  corrected. Added a source-level projection across the nine current Keys and
+  Gates visitor manuscripts and a regression test that rejects the archival
+  spelling outside the archival outcome, selected-work record, and amendment.
+- Independent registrar review passed candidate
+  `b639c42ef5a37ac13cdc528434bd10f2c54ecea4` with no findings. Archival source
+  blob identities were unchanged, and no lifecycle, rights, mint, acquisition,
+  accession, Collection, media-locator, or media-byte fact changed.
+- Museum PR #66 merged with all seven hosted PR checks green at canonical main
+  `6fe93bf17f0c30b79889d3d7bfabaebae3369ef7`; reviewed source is
+  `f52fe5513423d8049bb557749a9fce1070ace64b`. Frontend CI fixtures now bind
+  those exact revisions. Post-merge Museum validation is running in parallel
+  with the final frontend build and screenshot gate.
+
+## 2026-08-18T15:30:00Z - Atomic publication and mobile diagrams corrected
+
+- The v26 screenshot corpus exposed that canonical source had merged while the
+  active publication pointer still referenced source
+  `75171e81587c9da313e4e3967b12cfe0aa6bbf46`. Museum PR #67 activated the
+  immutable catalog for reviewed source
+  `f52fe5513423d8049bb557749a9fce1070ace64b` and merged as canonical main
+  `a3977a8f020f58d0c9e79f23bc4f37245be65879` after all six validation jobs and
+  CodeRabbit passed.
+- Independent UX review also blocked the two 1600-by-1000 institutional
+  diagrams at 390 pixels because their labels were unreadable. Both routes now
+  use retained, fixity-recorded 640-pixel portrait diagrams below the `sm`
+  breakpoint while preserving the original desktop compositions.
+
+## 2026-08-18T16:02:00Z - Exact-final Research corpus accepted
+
+- Merged current frontend main
+  `1ded71fa7fe925dcb04956df92acbbd9d57fffb7` into the release branch. The
+  merge was conflict-free and touched no Museum runtime, route, public copy,
+  media, or Museum test file. The signed exact candidate became
+  `2e87c0bbfc1f99a24063e5b9397d37b19a575a87`.
+- Ran the complete optimized production build on that exact merge tree. Full
+  repository lint, compilation, TypeScript, generation of 3,675 pages,
+  sitemap generation, and postbuild passed.
+- Captured all 11 Research routes at 1440 x 1000, 820 x 1000, and 390 x 844
+  from the exact production build. The 33-image v28 report records HTTP 200 for
+  every route and zero overflow, image failures, visible fallbacks, console
+  errors, page errors, or deterministic blockers. Report SHA-256:
+  `6c6bfc4fe7b0971829c62d71ffb73b8ee0758da49f418a93e4482f7ceb6d3ea6`.
+- Compared every final screenshot hash with the preceding reviewed corpus.
+  All 33 match exactly, proving that the unrelated main merge did not alter a
+  Research pixel.
+- Three independent full-corpus reviews passed:
+  - museum/registrar review: PASS after checking the canonical append-only
+    display-title amendment, preserved archival outcome, acquisition states,
+    taxonomy, rights, sources, and Casey/Magnum/Keys and Gates balance;
+  - visual/UX review: PASS across all widths, including mobile diagram
+    legibility, hierarchy, density, spacing, cropping, and overflow;
+  - copy/editorial review: PASS after original-resolution and rendered-HTML
+    verification of all visible Research headings, summaries, labels, and
+    calls to action.
+- Museum canonical post-merge validation run `32154815623` is SUCCESS across
+  Museum validation, deterministic Ubuntu and Windows, focused Stream catalog,
+  and public-publication Ubuntu and Windows.
+- The branch is ready for exact-head push, hosted review and CI, merge, staging
+  qualification, production deployment, and live route-by-route acceptance.
+
+## 2026-08-18T19:03:00Z - Research release shipped and live-qualified
+
+- Merged frontend PR #3753 as exact main
+  `336d3f9ed6839fd2fa97a677b25d5353aa4fc884` after all exact-head review and CI
+  gates passed.
+- Deployed and inspected staging with run `32165422116`. All selected Museum
+  packs passed in staging E2E `32166673862`; its sole failure was the existing
+  non-Museum profile route fault. The retained Research sweep passed 22/22
+  desktop/mobile checks.
+- Production authority, immutable artifact build, and independent verification
+  passed in deploy `32170385482`, builder `32170437082`, and verifier
+  `32171381138`. Production serves and announces exact main with `stale:false`.
+- Automatic Production E2E `32171973579` never reached tests because its
+  GitHub-hosted runner stalled in Playwright installation for 22 minutes. It
+  was force-cancelled under the active owner-approved E2E waiver; authority
+  completion `32174375703` successfully recorded the failed qualifier and
+  released the lock.
+- Ran the five exact Museum production packs directly against live production:
+  101 passed and 3 intentional skips, with zero product failures. A first
+  Data Architecture pass observed unrelated navigation-prefetch 502s for
+  `/waves` and `/join-6529`; immediate rerun passed 6/6.
+- Rechecked every Research route at 1440 and 390 pixels in the signed-in app
+  browser. All 22 checks had the expected heading, intact media, bounded width,
+  and no soft-404. Retained report SHA-256:
+  `bb4c318d2a4a4432859f4a659b8a493a551c930e84cc2a1d8d824e2a1e845794`.
+
+## 2026-08-18T20:10:00Z - Acquisitions and Artists balancing follow-up
+
+- Audited the live Acquisitions and Artists indexes at desktop width. Native
+  source aspect ratios caused visibly unequal image boxes and cascading row
+  heights on both primary Museum pages.
+- Implemented a fixed 4:5 desktop acquisition stage, a compact 4:3 responsive
+  acquisition stage, and a 4:3 artist-directory stage, preserving complete
+  images without cropping. Acquisition cards now share equal heights; the
+  Works directory keeps its prior source-ratio behavior.
+- Added component assertions and read-only browser contracts for exact stage
+  counts and ratios. Focused unit tests, changed lint, and changed typecheck
+  pass. Initial local browser checks at 1440 and 390 pixels show no horizontal
+  overflow and the expected 3 acquisition and 21 artist stages.
+- Completed the full-page visual sweep at desktop, tablet, and mobile widths.
+  The responsive acquisition stage is 4:5 only with the three-column desktop
+  composition and 4:3 below it; every artist stage remains 4:3. The deterministic
+  release acceptance suite passes all three owned viewports.
+- The acceptance suite exposed that a responsive Magnum derivative was visually
+  hidden by overflow but retained bounds taller than its frame. Added an
+  explicit full-height proposal-image container; all principal media now remain
+  geometrically within their stages.
+- Two clean-build attempts passed repository lint, optimized compilation,
+  TypeScript, and page-data collection. Both encountered the same unchanged
+  `/museum/network/about/governance` static-generation timeout; the second was
+  stopped after the duplicate infrastructure condition. Hosted exact-head CI
+  will provide the authoritative full-build result.
+- PR #3780 review follow-up adds an explicit square fallback for dimensionless
+  source media in the unchanged Works-card behavior, removes a hardcoded
+  responsive-breakpoint expectation from the browser contract, and avoids an
+  empty class-name suffix. No Acquisitions or Artists layout pixel changes.
+- Hosted App PR CI exposed four Linux lint errors in the new fallback helper:
+  nullable dimensions in a template literal and nested conditional branches.
+  Replaced the conditional expression with explicit branches and string
+  conversion. The focused 16 tests, changed lint, changed typecheck, formatting,
+  and diff checks pass; there is no runtime or visual change.
+
+## 2026-08-18T21:36:00Z - Acquisitions and Artists release live-qualified
+
+- PR #3780 reached exact signed head
+  `f2f59c1962846598fb2c1e939353f103a0742e35`. App PR CI
+  `32181363168` passed quality, production build, smoke, desktop Museum, mobile
+  Museum, and installed-app checks; all external review, policy, and security
+  lanes were green. The PR merged as exact main
+  `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`.
+- Composed exact main into staging as
+  `80503176dacc334ba8132681486a138d660832c9`. Staging deployment
+  `32183553695` passed artifact build, verification, deployment, and HTTP
+  version checks. A direct desktop and 390-pixel mobile Museum sweep passed.
+- Automatic staging E2E `32184698162` ran 17 read-only packs. The core pack and
+  all selected Museum packs passed, as did publication provenance and immutable
+  evidence validation. The aggregate failed solely in the unrelated media pack
+  on `/the-memes/mint`; a direct rerun proved that failure transient and then
+  exposed an existing mobile overflow in the Meme Lab activity table. The
+  release proceeded under the recorded owner-approved temporary E2E waiver
+  because the failure was outside the Museum diff and all scoped acceptance was
+  green.
+- Waiver record: the 6529 Collections repository owner authorized this one
+  release under the live `STAGING: OFF` / `PRODUCTION: OFF`, `changeable: true`
+  Release Bus manual fallback. Its stable identifier is immutable release main
+  `40a293406b6c04ca8057b02ccb8fbd5e05d192c7`. The exception covered only the
+  unrelated `/the-memes/mint` staging media-pack failure and the pre-existing
+  Meme Lab activity-table overflow found on rerun. It covered no Museum check
+  or acceptance finding. Its validity period began at the terminal result of
+  staging E2E `32184698162` and expired on successful automatic Production E2E
+  [`32187596393`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32187596393).
+  Retained fallback evidence: staging deploy
+  [`32183553695`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32183553695),
+  staging E2E
+  [`32184698162`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32184698162),
+  and the manual-fallback procedure in `ops/skills/deploy-6529/SKILL.md`.
+- Production deployment `32186095060` passed exact production authority,
+  immutable artifact selection and verification, Elastic Beanstalk readiness,
+  HTTP version verification, announced-version publication, terminal status,
+  and durable release-report upload. Exact artifact build `32186126216` passed
+  in 10m03s.
+- Production returned exact main on three uncached `/api/version` reads with
+  `stale:false`. Direct live Museum acceptance passed 2/2 viewport projects in
+  20.2 seconds, including all hub routes, 21 artist stages at 4:3, three
+  acquisition stages at the intended responsive ratio, no dead links, and no
+  horizontal overflow.
+- Automatic Production E2E `32187596393` passed the full production-safe
+  read-only pack set, Museum selection, publication provenance, immutable
+  evidence validation, authority evidence, and the isolated evidence verifier.
+
+The exact production release is qualified and the follow-up is closed.

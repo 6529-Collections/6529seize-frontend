@@ -22,7 +22,7 @@ export default function CreateWaveLayout({
   readonly setStep: (
     step: CreateWaveStep,
     direction: "forward" | "backward"
-  ) => void;
+  ) => Promise<void>;
   readonly onComplete: () => Promise<void>;
 }) {
   const { canScrollDown } = useCreateWaveScrollHint();
@@ -34,7 +34,10 @@ export default function CreateWaveLayout({
           activeStep={step}
           waveType={config.overview.type}
           ongoingRanking={config.dates?.ongoingRanking ?? false}
-          onStep={(targetStep) => setStep(targetStep, "backward")}
+          disabled={submitting}
+          onStep={(targetStep) => {
+            void setStep(targetStep, "backward");
+          }}
         />
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-bg-iron-950">

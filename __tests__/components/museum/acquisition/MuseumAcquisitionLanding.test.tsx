@@ -230,6 +230,10 @@ describe("Museum acquisitions landing", () => {
     expect(screen.queryByText(/connected work/u)).not.toBeInTheDocument();
     expect(screen.getAllByTestId("museum-acquisition-card")).toHaveLength(3);
     expect(screen.getAllByRole("img")).toHaveLength(3);
+    for (const card of screen.getAllByTestId("museum-acquisition-card")) {
+      expect(card.querySelector(".tw-aspect-\\[4\\/3\\]")).not.toBeNull();
+      expect(card.querySelector(".lg\\:tw-aspect-\\[4\\/5\\]")).not.toBeNull();
+    }
   });
 
   it("keeps proposal disclosure controls outside navigation links", () => {
