@@ -72,6 +72,18 @@ describe("NotificationDropQuoted", () => {
     created_at: Date.now(),
   } as never;
 
+  it("does not render when the related drop is missing", () => {
+    const { container } = render(
+      <NotificationDropQuoted
+        notification={{ related_drops: [], created_at: Date.now() } as never}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("navigates on reply click", async () => {
     const user = userEvent.setup();
     render(
