@@ -8,7 +8,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 
 import {
-  ABOUT_EDITORIAL_PAGE_TITLE_CLASS_NAME,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
   ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME,
   ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME,
   ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
@@ -49,7 +49,7 @@ function GradientHeader({ locale }: { readonly locale: SupportedLocale }) {
       <div
         className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-10 tw-pt-4 sm:tw-pb-12 sm:tw-pt-8`}
       >
-        <h1 className={ABOUT_EDITORIAL_PAGE_TITLE_CLASS_NAME}>
+        <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME}>
           {m(locale, "about.gradient.hero.title")}
         </h1>
 

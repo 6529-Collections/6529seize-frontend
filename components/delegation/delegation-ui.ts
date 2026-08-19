@@ -16,8 +16,6 @@ export const DELEGATION_SECTION_TITLE_CLASS_NAME =
 export const DELEGATION_CARD_CLASS_NAME =
   "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/70";
 
-export const DELEGATION_INSET_CLASS_NAME = "tw-rounded-lg tw-bg-white/[0.035]";
-
 export const DELEGATION_FIELD_CLASS_NAME =
   "tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/25 tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-iron-50 tw-shadow-none tw-outline-none tw-transition-colors placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-bg-black/30 focus:tw-ring-2 focus:tw-ring-primary-400/20 disabled:tw-cursor-not-allowed disabled:tw-bg-black/20 disabled:tw-text-iron-500";
 

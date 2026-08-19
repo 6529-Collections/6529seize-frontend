@@ -12,8 +12,6 @@ export const ABOUT_PAGE_TITLE_CLASS_NAME =
   "tw-m-0 tw-max-w-3xl tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl";
 export const ABOUT_SECTION_HEADING_CLASS_NAME =
   "tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50";
-export const ABOUT_NESTED_HEADING_CLASS_NAME =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50";
 export const ABOUT_COMPACT_HEADING_CLASS_NAME =
   "tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100";
 export const ABOUT_LEAD_TEXT_CLASS_NAME =
@@ -34,25 +32,15 @@ export const ABOUT_COMPACT_FRAMED_ICON_WRAPPER_CLASS_NAME =
   "tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid";
 export const ABOUT_FRAMED_ICON_CLASS_NAME = "tw-text-base";
 
-export const ABOUT_EDITORIAL_PAGE_TITLE_CLASS_NAME =
-  ABOUT_PAGE_TITLE_CLASS_NAME;
 export const ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME =
   "tw-m-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-tracking-tight tw-text-iron-50";
-export const ABOUT_EDITORIAL_BODY_CLASS_NAME = ABOUT_LEAD_TEXT_CLASS_NAME;
 
 export const ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME =
   "tw-m-0 tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-tight tw-text-iron-50";
-export const ABOUT_DOCUMENTATION_SECTION_HEADING_CLASS_NAME =
-  ABOUT_SECTION_HEADING_CLASS_NAME;
-export const ABOUT_DOCUMENTATION_BODY_CLASS_NAME = ABOUT_BODY_TEXT_CLASS_NAME;
 export const ABOUT_DOCUMENTATION_NESTED_HEADING_CLASS_NAME =
-  ABOUT_NESTED_HEADING_CLASS_NAME;
+  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50";
 
 export const CONTENT_PAGE_MAIN_CLASS = `tailwind-scope tw-min-h-[100dvh] tw-border-0 tw-border-solid tw-border-iron-700 ${ABOUT_CONTENT_SURFACE_CLASS_NAME} tw-text-iron-300 md:tw-border-l`;
-export const CONTENT_PAGE_TITLE_CLASS =
-  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME;
-export const CONTENT_PAGE_SECTION_HEADING_CLASS =
-  ABOUT_DOCUMENTATION_SECTION_HEADING_CLASS_NAME;
 export const CONTENT_PAGE_CONTAINER_CLASS =
   "tw-px-5 tw-pb-20 tw-pt-5 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
 

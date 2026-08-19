@@ -6,7 +6,7 @@ const NETWORK_PAGE_FRAME_CLASSES =
 
 export const NETWORK_PAGE_SURFACE_CLASSES = `${NETWORK_PAGE_FRAME_CLASSES} tw-bg-[#0D0D0F]`;
 
-export const NETWORK_PAGE_BLACK_SURFACE_CLASSES = `${NETWORK_PAGE_FRAME_CLASSES} tw-bg-black`;
+const NETWORK_PAGE_BLACK_SURFACE_CLASSES = `${NETWORK_PAGE_FRAME_CLASSES} tw-bg-black`;
 
 export const NETWORK_PAGE_TITLE_CLASSES =
   "tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]";

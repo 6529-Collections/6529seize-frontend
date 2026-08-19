@@ -9,7 +9,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
 
 import {
-  ABOUT_EDITORIAL_PAGE_TITLE_CLASS_NAME,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
   ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME,
   ABOUT_SECTION_DIVIDER_CLASS_NAME,
 } from "./AboutLayout";
@@ -101,7 +101,7 @@ export default function AboutMemes() {
             {t(DEFAULT_LOCALE, "about.memes.eyebrow")}
           </p>
           <h1
-            className={ABOUT_EDITORIAL_PAGE_TITLE_CLASS_NAME}
+            className={ABOUT_PAGE_TITLE_CLASS_NAME}
             id="about-memes-title"
           >
             {t(DEFAULT_LOCALE, "about.memes.title")}

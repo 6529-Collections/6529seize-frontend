@@ -11,10 +11,10 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SECTION_HEADING_CLASS_NAME,
   CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_MAIN_CLASS,
-  CONTENT_PAGE_SECTION_HEADING_CLASS,
-  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
@@ -23,7 +23,7 @@ const API_LINK_CLASS_NAME =
   "hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 const API_SECTION_CLASS_NAME =
   "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300 [&_b]:tw-font-semibold [&_b]:tw-text-iron-100 [&_li]:tw-mb-3 [&_li::marker]:tw-text-iron-600 [&_ol]:tw-mb-0 [&_ol]:tw-mt-5 [&_ol]:tw-pl-6 [&>p]:tw-mb-5 [&_ul]:tw-mb-0 [&_ul]:tw-mt-5 [&_ul]:tw-pl-6";
-const API_SECTION_HEADING_CLASS_NAME = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-mb-3`;
+const API_SECTION_HEADING_CLASS_NAME = `${ABOUT_SECTION_HEADING_CLASS_NAME} tw-mb-3`;
 
 const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
@@ -208,7 +208,9 @@ export default function AboutApi() {
       >
         <Row>
           <Col>
-            <h1 className={CONTENT_PAGE_TITLE_CLASS}>6529.io API</h1>
+            <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
+              6529.io API
+            </h1>
           </Col>
         </Row>
         <Row className="tw-pt-5">

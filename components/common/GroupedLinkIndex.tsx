@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   ABOUT_CARD_SURFACE_CLASS_NAME,
   ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
-  ABOUT_EDITORIAL_PAGE_TITLE_CLASS_NAME,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
   ABOUT_SUPPORTING_TEXT_CLASS_NAME,
 } from "@/components/about/AboutLayout";
 
@@ -51,7 +51,7 @@ export default function GroupedLinkIndex({
           className={clsx(
             "tw-mb-4",
             variant === "editorial"
-              ? ABOUT_EDITORIAL_PAGE_TITLE_CLASS_NAME
+              ? ABOUT_PAGE_TITLE_CLASS_NAME
               : ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME
           )}
         >
