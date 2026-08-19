@@ -19,8 +19,28 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () =>
-    ({ title, children }: { title: string; children: ReactNode }) => (
-      <div>
+    ({
+      title,
+      children,
+      noPadding,
+      tall,
+      tabletModal,
+      maxWidthClass,
+    }: {
+      title: string;
+      children: ReactNode;
+      noPadding?: boolean;
+      tall?: boolean;
+      tabletModal?: boolean;
+      maxWidthClass?: string;
+    }) => (
+      <div
+        data-testid="profile-preferences-dialog"
+        data-no-padding={noPadding}
+        data-tall={tall}
+        data-tablet-modal={tabletModal}
+        data-max-width-class={maxWidthClass}
+      >
         <h1>{title}</h1>
         {children}
       </div>
@@ -62,6 +82,22 @@ describe("ProfilePreferencesSettings", () => {
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "profile-preferences",
     });
+    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
+      "data-no-padding",
+      "true"
+    );
+    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
+      "data-tall",
+      "true"
+    );
+    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
+      "data-tablet-modal",
+      "true"
+    );
+    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
+      "data-max-width-class",
+      "md:tw-max-w-5xl"
+    );
   });
 
   it("hides optional categories while preserving their saved values", async () => {

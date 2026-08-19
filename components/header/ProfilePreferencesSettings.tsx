@@ -93,7 +93,12 @@ export default function ProfilePreferencesSettings({
       title={t(locale, "profilePreferences.title")}
       isOpen={isOpen}
       onClose={onClose}
+      noPadding
+      tall
       fixedHeight
+      tabletModal
+      maxWidthClass="md:tw-max-w-5xl"
+      headerClassName="tw-pt-5 sm:tw-pt-6"
     >
       {preferencesQuery.isLoading && (
         <output
@@ -338,7 +343,7 @@ function ProfilePreferencesForm({
           </p>
         </section>
       </div>
-      <div className="tw-flex tw-justify-end tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-px-6">
+      <div className="tw-flex tw-justify-end tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-pb-2 tw-pt-3 sm:tw-px-6 sm:tw-pb-3">
         <Button
           type="button"
           onClick={() => void save()}
