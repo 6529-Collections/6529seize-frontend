@@ -13,6 +13,7 @@ import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createDeferredPromise as createDeferred } from "@/__tests__/utils/deferredPromise";
+import { __resetDropReactionRequestQueueForTests } from "@/helpers/reactions/dropReactionRequestQueue";
 
 const setToastMock = jest.fn();
 const rollbackMock = jest.fn();
@@ -205,6 +206,7 @@ const createNotificationQuery = ({
 describe("useDropReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    __resetDropReactionRequestQueueForTests();
     __resetDropReactionAuthRecoveryForTests();
     mockGetAuthJwt.mockReturnValue("auth-token-before-recovery");
     mockGetWalletAddress.mockReturnValue(
@@ -1105,6 +1107,7 @@ describe("useDropReaction", () => {
       secondReaction = result.current.react(":wave:");
     });
 
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
     expect(firstRollback).not.toHaveBeenCalled();
     expect(secondRollback).not.toHaveBeenCalled();
 
@@ -1174,6 +1177,9 @@ describe("useDropReaction", () => {
       await firstReaction;
     });
 
+    await waitFor(() =>
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2)
+    );
     expect(onSuccess).not.toHaveBeenCalled();
     expect(secondRollback).not.toHaveBeenCalled();
 

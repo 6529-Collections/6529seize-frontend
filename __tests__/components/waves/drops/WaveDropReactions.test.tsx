@@ -7,6 +7,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import * as commonApi from "@/services/api/common-api";
 import { __resetDropReactionMonitoringForTests } from "@/utils/monitoring/dropReactionMonitoring";
 import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
+import { __resetDropReactionRequestQueueForTests } from "@/helpers/reactions/dropReactionRequestQueue";
 import {
   act,
   fireEvent,
@@ -214,6 +215,7 @@ describe("WaveDropReactions", () => {
     jest.clearAllMocks();
     __resetDropReactionMonitoringForTests();
     __resetDropReactionAuthRecoveryForTests();
+    __resetDropReactionRequestQueueForTests();
     requestAuthMock.mockResolvedValue({ success: true });
     mockQueryCacheFindAll.mockReset();
     mockQueryCacheFindAll.mockReturnValue([]);
@@ -749,6 +751,7 @@ describe("WaveDropReactions", () => {
     await waitFor(() => {
       expect(button).toHaveTextContent("1");
     });
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
     expect(firstRollback).not.toHaveBeenCalled();
     expect(secondRollback).not.toHaveBeenCalled();
 
@@ -757,6 +760,9 @@ describe("WaveDropReactions", () => {
       await Promise.resolve();
     });
 
+    await waitFor(() =>
+      expect(commonApi.commonApiDelete).toHaveBeenCalledTimes(1)
+    );
     expect(button).toHaveTextContent("1");
     expect(setToastMock).not.toHaveBeenCalled();
     expect(firstRollback).not.toHaveBeenCalled();
@@ -954,6 +960,19 @@ describe("WaveDropReactions", () => {
     expect(
       waveReaction.profiles.some((profile: any) => profile.id === "profile-1")
     ).toBe(true);
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      firstRequest.resolve({});
+      await firstRequest.promise;
+    });
+    await waitFor(() =>
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2)
+    );
+    await act(async () => {
+      secondRequest.resolve({});
+      await secondRequest.promise;
+    });
   });
 
   it("shows the safe status-text message when a chip reaction gets an empty structured response", async () => {

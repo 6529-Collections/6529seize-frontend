@@ -12,6 +12,7 @@ import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -601,17 +602,20 @@ function WaveDropReaction({
     }
 
     try {
-      const body = { reaction: reaction.reaction };
-      if (selected) {
-        recordReactionRequestSent(mutation, {
-          endpoint,
-          method: "DELETE",
-        });
-        await commonApiDelete({
-          endpoint,
-          errorMode: "structured",
-        });
-      } else {
+      await enqueueDropReactionRequest(drop.id, async () => {
+        const body = { reaction: reaction.reaction };
+        if (selected) {
+          recordReactionRequestSent(mutation, {
+            endpoint,
+            method: "DELETE",
+          });
+          await commonApiDelete({
+            endpoint,
+            errorMode: "structured",
+          });
+          return;
+        }
+
         recordReactionRequestSent(mutation, {
           endpoint,
           method: "POST",
@@ -621,7 +625,7 @@ function WaveDropReaction({
           body,
           errorMode: "structured",
         });
-      }
+      });
       const result = recordReactionRequestSucceeded(mutation);
       if (result.isLatestMutation) {
         clearRollbackForMutation(rollbackRef, mutation.mutationId);

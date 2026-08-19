@@ -11,6 +11,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
@@ -576,11 +577,13 @@ export function useDropReaction(
       let succeeded = false;
 
       try {
-        await sendReactionRequest({
-          endpoint,
-          isRemoving,
-          mutation,
-          reactionCode,
+        await enqueueDropReactionRequest(dropId, async () => {
+          await sendReactionRequest({
+            endpoint,
+            isRemoving,
+            mutation,
+            reactionCode,
+          });
         });
         const result = recordReactionRequestSucceeded(mutation);
         if (result.isLatestMutation) {
