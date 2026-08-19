@@ -13,14 +13,13 @@ const wavesDocumentPathPattern =
 const rawSentryWrapperPathPattern =
   /^app:\/\/\/_next\/static\/chunks\/[A-Za-z0-9_-]+\.js$/;
 
-// The Sentry API exposes the remapped helper frame, while beforeSend sees the
-// same wrapper in its raw static chunk. Keep both observed shapes exact.
-function hasOnlyExpectedFramePaths(
-  frame: SentryStackFrame,
-  predicate: (path: string) => boolean
-): boolean {
+function hasStableRawSentryWrapperPath(frame: SentryStackFrame): boolean {
   const paths = getFramePaths(frame);
-  return paths.length > 0 && paths.every(predicate);
+  return (
+    paths.length > 0 &&
+    new Set(paths).size === 1 &&
+    paths.every((path) => rawSentryWrapperPathPattern.test(path))
+  );
 }
 
 function isProcessedSentryWrapperFrame(frame: SentryStackFrame): boolean {
@@ -35,14 +34,15 @@ function isProcessedSentryWrapperFrame(frame: SentryStackFrame): boolean {
 }
 
 function isRawSentryWrapperFrame(frame: SentryStackFrame): boolean {
+  // beforeSend sees this minified wrapper before source-map processing. The
+  // chunk name changed across the two affected releases, while this exact
+  // wrapper function and coordinate remained stable.
   return (
     frame.function === "r" &&
     frame.lineno === 7 &&
     frame.colno === 6178 &&
     frame.in_app === true &&
-    hasOnlyExpectedFramePaths(frame, (path) =>
-      rawSentryWrapperPathPattern.test(path)
-    )
+    hasStableRawSentryWrapperPath(frame)
   );
 }
 
@@ -63,6 +63,7 @@ function hasExactDocumentPath(
   frame: SentryStackFrame | undefined,
   documentPath: string
 ): frame is SentryStackFrame {
+  // Raw client events may omit abs_path, so require it to agree when present.
   return (
     frame?.filename === documentPath &&
     (frame.abs_path === undefined || frame.abs_path === documentPath)

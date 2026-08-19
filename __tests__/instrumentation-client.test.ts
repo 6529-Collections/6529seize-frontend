@@ -813,14 +813,33 @@ describe("instrumentation-client", () => {
     colno: 58,
     in_app: false,
   };
-  const coinbaseAnalyticsRawSentryWrapperFrame = {
-    filename: "app:///_next/static/chunks/coinbase-sentry-wrapper.js",
-    abs_path: "app:///_next/static/chunks/coinbase-sentry-wrapper.js",
+  const coinbaseAnalyticsAlternateProcessedSentryWrapperFrame = {
+    ...coinbaseAnalyticsProcessedSentryWrapperFrame,
+    function: "r",
+    lineno: 117,
+    colno: 14,
+  };
+
+  const createCoinbaseAnalyticsRawSentryWrapperFrame = (chunkPath: string) => ({
+    filename: chunkPath,
+    abs_path: chunkPath,
     function: "r",
     lineno: 7,
     colno: 6178,
     in_app: true,
-  };
+  });
+  const coinbaseAnalyticsLatestRawSentryWrapperFrame =
+    createCoinbaseAnalyticsRawSentryWrapperFrame(
+      "app:///_next/static/chunks/08wl1nkjt-dab.js"
+    );
+  const coinbaseAnalyticsFirstRawSentryWrapperFrame =
+    createCoinbaseAnalyticsRawSentryWrapperFrame(
+      "app:///_next/static/chunks/2-y9i18ryo0t1.js"
+    );
+  const coinbaseAnalyticsFutureRawSentryWrapperFrame =
+    createCoinbaseAnalyticsRawSentryWrapperFrame(
+      "app:///_next/static/chunks/future-build-3ad9.js"
+    );
 
   const createCoinbaseAnalyticsIndexedDbFrames = (
     documentPath = "app:///",
@@ -2329,16 +2348,34 @@ describe("instrumentation-client", () => {
 
   it.each<[string, string, string, Record<string, unknown>]>([
     [
-      "Mobile Safari root document",
+      "processed Mobile Safari root document",
       "Mobile Safari",
       "app:///",
+      coinbaseAnalyticsAlternateProcessedSentryWrapperFrame,
+    ],
+    [
+      "processed Twitter wave document",
+      "Twitter",
+      "app:///waves/11111111-2222-4333-8444-555555555555",
       coinbaseAnalyticsProcessedSentryWrapperFrame,
     ],
     [
-      "Twitter wave document",
+      "raw Mobile Safari root document",
+      "Mobile Safari",
+      "app:///",
+      coinbaseAnalyticsFirstRawSentryWrapperFrame,
+    ],
+    [
+      "raw Twitter wave document",
       "Twitter",
       "app:///waves/11111111-2222-4333-8444-555555555555",
-      coinbaseAnalyticsRawSentryWrapperFrame,
+      coinbaseAnalyticsLatestRawSentryWrapperFrame,
+    ],
+    [
+      "raw future-build root document",
+      "Mobile Safari",
+      "app:///",
+      coinbaseAnalyticsFutureRawSentryWrapperFrame,
     ],
   ])(
     "drops the exact Coinbase analytics IndexedDB failure from the %s cohort",
@@ -2445,6 +2482,48 @@ describe("instrumentation-client", () => {
       {},
       [
         { ...coinbaseAnalyticsProcessedSentryWrapperFrame, colno: 59 },
+        ...createCoinbaseAnalyticsIndexedDbFrames().slice(1),
+      ],
+    ],
+    [
+      "a changed alternate processed Sentry wrapper coordinate",
+      {},
+      {},
+      [
+        {
+          ...coinbaseAnalyticsAlternateProcessedSentryWrapperFrame,
+          colno: 15,
+        },
+        ...createCoinbaseAnalyticsIndexedDbFrames().slice(1),
+      ],
+    ],
+    [
+      "a changed raw Sentry wrapper coordinate",
+      {},
+      {},
+      [
+        { ...coinbaseAnalyticsFutureRawSentryWrapperFrame, colno: 6179 },
+        ...createCoinbaseAnalyticsIndexedDbFrames().slice(1),
+      ],
+    ],
+    [
+      "a raw Sentry wrapper outside Next static chunks",
+      {},
+      {},
+      [
+        createCoinbaseAnalyticsRawSentryWrapperFrame("app:///application.js"),
+        ...createCoinbaseAnalyticsIndexedDbFrames().slice(1),
+      ],
+    ],
+    [
+      "conflicting raw Sentry wrapper paths",
+      {},
+      {},
+      [
+        {
+          ...coinbaseAnalyticsFutureRawSentryWrapperFrame,
+          abs_path: "app:///_next/static/chunks/other-build.js",
+        },
         ...createCoinbaseAnalyticsIndexedDbFrames().slice(1),
       ],
     ],
