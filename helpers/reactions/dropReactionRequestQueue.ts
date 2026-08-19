@@ -8,6 +8,13 @@ const DROP_REACTION_REQUEST_TIMEOUT_MS = 15_000;
 
 const requestTailByDrop = new Map<string, Promise<void>>();
 
+const invokeRequest = async (
+  request: DropReactionRequest,
+  signal: AbortSignal
+): Promise<void> => {
+  await request(signal);
+};
+
 const runRequestWithTimeout = (
   request: DropReactionRequest,
   timeoutMs: number
@@ -21,12 +28,7 @@ const runRequestWithTimeout = (
     }, timeoutMs);
   });
 
-  let requestPromise: Promise<void>;
-  try {
-    requestPromise = request(controller.signal);
-  } catch (error) {
-    requestPromise = Promise.reject(error);
-  }
+  const requestPromise = invokeRequest(request, controller.signal);
 
   return Promise.race([requestPromise, timeoutPromise]).finally(() => {
     if (timeoutId !== undefined) {

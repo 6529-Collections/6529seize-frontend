@@ -49,6 +49,20 @@ describe("dropReactionRequestQueue", () => {
     expect(secondRequest).toHaveBeenCalledTimes(1);
   });
 
+  it("continues the queue after a request throws synchronously", async () => {
+    const firstError = new Error("first request threw");
+    const first = enqueueDropReactionRequest("drop-1", () => {
+      throw firstError;
+    });
+    const secondRequest = jest.fn(async () => undefined);
+    const second = enqueueDropReactionRequest("drop-1", secondRequest);
+
+    await expect(first).rejects.toBe(firstError);
+    await second;
+
+    expect(secondRequest).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps different drops independent", async () => {
     const firstDropRequest = createDeferredPromise<void>();
     const order: string[] = [];
