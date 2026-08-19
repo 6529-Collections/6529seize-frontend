@@ -2220,7 +2220,7 @@ export const EN_US_MESSAGES = {
   "profilePreferences.notifications.category.subscription_coverage":
     "Subscription coverage",
   "profilePreferences.notifications.deviceNote":
-    "Push notification settings remain separate for each device.",
+    "Push notifications are managed separately on each device.",
   "notifications.filter.ariaLabel": "Filter notifications: {selection}",
   "notifications.filter.selected": "{count} selected",
   "linkPreview.twitter.kind.article": "Article",
