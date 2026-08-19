@@ -12,7 +12,10 @@ import type { ReactNode } from "react";
 
 import OpenSeaIcon from "@/components/user/utils/icons/OpenseaIcon";
 
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+} from "./AboutLayout";
 
 const DATA_SOURCE_SECTION_CLASS =
   "tw-relative tw-grid tw-grid-cols-1 tw-gap-5 md:tw-grid-cols-[minmax(12rem,0.36fr)_minmax(0,1fr)] md:tw-gap-16 lg:tw-gap-24";
@@ -79,9 +82,7 @@ function DataSourceSection({
           aria-hidden="true"
           className={clsx(
             "tw-flex tw-shrink-0 tw-items-center tw-justify-center",
-            iconIsUnframed
-              ? "tw-size-6"
-              : "tw-size-10 tw-rounded-full tw-border tw-border-solid sm:tw-size-11",
+            iconIsUnframed ? "tw-size-6" : ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME,
             iconWrapperClassName
           )}
         >

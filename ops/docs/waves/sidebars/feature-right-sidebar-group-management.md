@@ -36,9 +36,10 @@ Users can:
 3. Check current scope value:
    - no group: `Anyone`
    - no chat access group: `Anyone`
-   - hidden/private group: `Private group`
-   - visible group: linked live eligible-member count to
-     `/network?page=1&group={groupId}`
+   - group hidden from the current viewer: `Private group`
+   - public or authorized private group available to the current viewer: Rules
+     show a linked live eligible-member count, while Settings shows a linked
+     name; both use `/network?page=1&group={groupId}`
 4. Follow a visible group link. Network shows the group criteria above the
    current filtered member list.
 5. Return with normal browser back navigation when finished inspecting.
@@ -74,11 +75,12 @@ Users can:
   `Chat status` separately from `Chat access`.
 - Chat waves do not show `Curation Groups`.
 - General-row edit controls are hidden for direct-message groups.
-- Visible group inspection is available to read-only wave viewers; it does not
-  depend on wave edit permission. The linked value shows the current eligible
-  member count instead of the generated group name.
-- Hidden/private scope stubs never render a link, group identity, or group
-  metadata.
+- Available group inspection is accessible to read-only wave viewers; it does
+  not depend on wave edit permission. An authenticated private-group member or
+  creator can inspect that group's criteria and members. Rules show the current
+  eligible-member count instead of the generated group name.
+- Scope stubs hidden from the current viewer never render a link, group
+  identity, or group metadata.
 - `Admin` does not show `Remove group`.
 - In `General`, `Include identity` and `Exclude identity` show only when the
   user can edit the wave and is either wave admin or the scope-group author.
@@ -96,6 +98,8 @@ Users can:
 - If curation-group fetch fails, the section shows `Unavailable`.
 - If Network cannot load a linked group's criteria, it shows `Group criteria
   unavailable` without exposing the group id or treating the scope as public.
+- If Network cannot load scoped members, it shows a non-identifying members
+  unavailable state instead of retaining results from another group or viewer.
 - If authentication fails or is canceled, users see `Failed to authenticate`
   and no changes are applied.
 - If a save request fails, an error toast is shown and existing settings stay as-is.

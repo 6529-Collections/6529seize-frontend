@@ -364,6 +364,7 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.dms": "DMs",
   "primary.join6529": "Join 6529",
   "primary.about": "About",
+  "about.overview": "Overview",
   "primary.home": "Home",
   "sidebar.submenuLabel": "{section} sub-navigation",
   "sidebar.panelLabel": "{section} items",
@@ -1090,8 +1091,26 @@ const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
 
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
+  deleteCancel: "Cancel",
+  deleteDescription: "Are you sure you want to delete this wave?",
+  deleteErrorDescription: "Please try again.",
+  deleteErrorTitle: "Couldn't delete this wave.",
+  deleteSuccess: "Wave deleted.",
+  deleteTitle: "Delete wave",
+  ownerOptionsDelete: "Delete",
+  ownerOptionsOpenLabel: "Open options",
+  ownerOptionsTitle: "Wave options",
+  pictureEditCancel: "Cancel",
+  pictureEditDescription: "Choose a new image up to 10 MB.",
+  pictureEditLabel: "Edit wave picture",
+  pictureEditSave: "Save",
+  pictureEditTitle: "Update wave picture",
   "postLabel.one": "Post",
   "postLabel.other": "Posts",
+} as const);
+
+const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
+  loginRequired: "Please log in",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
@@ -1577,6 +1596,7 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
     selectedGroup: "Selected group",
     close: "Clear selected group",
     membersTitle: "Members",
+    membersUnavailable: "Group members unavailable.",
     loading: "Loading group criteria",
     unavailableTitle: "Group criteria unavailable",
     unavailableDescription:
@@ -3145,6 +3165,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_DROP_ELIGIBILITY_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
   ...WAVE_CREATE_ACTIONS_MESSAGES,
   ...WAVE_CREATE_DIALOG_MESSAGES,

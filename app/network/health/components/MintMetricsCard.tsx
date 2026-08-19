@@ -49,7 +49,7 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
                       {formatNumberWithCommas(item.subscriptions)}
                     </span>
                   </div>
-                  <div className="tw-mt-1 tw-border-t tw-border-neutral-600 tw-pt-1">
+                  <div className="tw-mt-1 tw-border-t tw-border-iron-600 tw-pt-1">
                     Total: {formatNumberWithCommas(total)}
                   </div>
                 </div>
@@ -82,14 +82,14 @@ function MintBarChart({ data }: { readonly data: ApiMintMetrics[] }) {
           {data.map((item) => (
             <div
               key={item.card}
-              className="tw-flex-1 tw-text-center tw-text-[10px] tw-text-neutral-500"
+              className="tw-flex-1 tw-text-center tw-text-[10px] tw-text-iron-500"
             >
               #{item.card}
             </div>
           ))}
         </div>
       )}
-      <div className="tw-flex tw-items-center tw-justify-center tw-gap-4 tw-text-xs tw-text-neutral-400">
+      <div className="tw-flex tw-items-center tw-justify-center tw-gap-4 tw-text-xs tw-text-iron-400">
         <div className="tw-flex tw-items-center tw-gap-1.5">
           <span className="tw-size-2 tw-rounded-full tw-bg-emerald-500" />
           <span>Mints</span>
@@ -108,14 +108,14 @@ export default function MintMetricsCard({ data, icon }: MintMetricsCardProps) {
 
   if (data.length === 0) {
     return (
-      <div className="tw-col-span-full tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5">
-        <p className="tw-text-sm tw-text-neutral-400">No mint data available</p>
+      <div className="tw-col-span-full tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900/55 tw-p-5">
+        <p className="tw-text-sm tw-text-iron-400">No mint data available</p>
       </div>
     );
   }
 
   return (
-    <div className="tw-col-span-full tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5">
+    <div className="tw-col-span-full tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900/55 tw-p-5">
       <div className="tw-mb-5 tw-flex tw-items-start tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-3">
           <h3 className="tw-text-base tw-font-semibold tw-text-white">
@@ -123,7 +123,7 @@ export default function MintMetricsCard({ data, icon }: MintMetricsCardProps) {
           </h3>
           <div className="tw-flex tw-gap-1"></div>
         </div>
-        <div className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-emerald-500">
+        <div className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-emerald-400/20 tw-bg-emerald-500/10 tw-text-emerald-300 [&_svg]:tw-text-current">
           {icon}
         </div>
       </div>
@@ -136,20 +136,18 @@ export default function MintMetricsCard({ data, icon }: MintMetricsCardProps) {
           </p>
           {latestMint && (
             <>
-              <p className="tw-mb-3 tw-text-sm tw-text-neutral-400">
+              <p className="tw-mb-3 tw-text-sm tw-text-iron-400">
                 Card #{latestMint.card}
               </p>
               <div className="tw-flex tw-gap-6">
                 <div>
-                  <p className="tw-mb-0.5 tw-text-xs tw-text-neutral-500">
-                    Mints
-                  </p>
+                  <p className="tw-mb-0.5 tw-text-xs tw-text-iron-500">Mints</p>
                   <p className="tw-text-2xl tw-font-bold tw-text-white">
                     {formatNumberWithCommas(latestMint.mints)}
                   </p>
                 </div>
                 <div>
-                  <p className="tw-mb-0.5 tw-text-xs tw-text-neutral-500">
+                  <p className="tw-mb-0.5 tw-text-xs tw-text-iron-500">
                     Subscriptions
                   </p>
                   <p className="tw-text-2xl tw-font-bold tw-text-white">

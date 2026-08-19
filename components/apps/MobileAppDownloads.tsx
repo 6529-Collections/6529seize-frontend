@@ -34,7 +34,7 @@ const MOBILE_APPS = {
 
 export function MobileAppDownloads() {
   return (
-    <div className="tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-center tw-gap-4 lg:tw-flex-col lg:tw-gap-12">
+    <div className="tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-center tw-gap-3 lg:tw-flex-col lg:tw-gap-5">
       {Object.values(MOBILE_APPS).map((app) => (
         <MobileAppDownload
           key={app.name}
@@ -75,7 +75,7 @@ export function MobileAppDownload({
       aria-label={t(APPS_LOCALE, app.ariaLabelKey)}
       onClick={handleClick}
       className={clsx(
-        "tw-inline-flex tw-min-h-14 tw-items-center tw-justify-center tw-rounded-lg tw-transition tw-duration-200 tw-ease-out hover:tw-opacity-90 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
+        "tw-inline-flex tw-min-h-14 tw-items-center tw-justify-center tw-rounded-lg tw-transition tw-duration-200 tw-ease-out hover:tw-opacity-90 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]",
         className
       )}
     >
