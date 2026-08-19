@@ -8,8 +8,8 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
   CONTENT_PAGE_MAIN_CLASS,
-  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 export default function BuidlPage() {
@@ -29,7 +29,7 @@ export default function BuidlPage() {
                 alt="SummerGlasses"
               />
               <div className="tw-mt-6">
-                <h1 className={CONTENT_PAGE_TITLE_CLASS}>
+                <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
                   We are going to BUIDL together to spread the word about a
                   decentralized metaverse.
                 </h1>

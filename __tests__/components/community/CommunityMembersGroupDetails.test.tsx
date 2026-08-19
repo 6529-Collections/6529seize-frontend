@@ -38,7 +38,11 @@ describe("CommunityMembersGroupDetails", () => {
     });
 
     render(
-      <CommunityMembersGroupDetails groupId="group-1" onClose={jest.fn()} />
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={jest.fn()}
+        viewerIdentityKey={null}
+      />
     );
 
     expect(screen.getByText("Loading group criteria")).toBeInTheDocument();
@@ -60,10 +64,20 @@ describe("CommunityMembersGroupDetails", () => {
       <CommunityMembersGroupDetails
         groupId="group/with?segments"
         onClose={jest.fn()}
+        viewerIdentityKey="profile:viewer-1"
       />
     );
 
     await queryFn?.();
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: [
+          "GROUP",
+          "group/with?segments",
+          { viewerIdentityKey: "profile:viewer-1" },
+        ],
+      })
+    );
     expect(commonApiFetchMock).toHaveBeenCalledWith({
       endpoint: "groups/group%2Fwith%3Fsegments",
     });
@@ -77,7 +91,11 @@ describe("CommunityMembersGroupDetails", () => {
     });
 
     render(
-      <CommunityMembersGroupDetails groupId="private-id" onClose={jest.fn()} />
+      <CommunityMembersGroupDetails
+        groupId="private-id"
+        onClose={jest.fn()}
+        viewerIdentityKey={null}
+      />
     );
 
     expect(screen.getByText("Group criteria unavailable")).toBeInTheDocument();
@@ -91,39 +109,59 @@ describe("CommunityMembersGroupDetails", () => {
 
   it.each([
     { is_hidden: true },
-    { is_private: true },
     { is_direct_message: true },
     { visible: false },
-  ])("does not expose a private group returned by the API", (privacy) => {
+  ])(
+    "does not expose a non-inspectable group returned by the API",
+    (privacy) => {
+      useQueryMock.mockReturnValue({
+        data: {
+          id: "private-id",
+          name: "Private group name",
+          ...privacy,
+        },
+        isLoading: false,
+        isError: false,
+      });
+
+      render(
+        <CommunityMembersGroupDetails
+          groupId="private-id"
+          onClose={jest.fn()}
+          viewerIdentityKey={null}
+        />
+      );
+
+      expect(
+        screen.getByText("Group criteria unavailable")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Private group name")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("group-criteria")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    { label: "public", isPrivate: false },
+    { label: "authorized private", isPrivate: true },
+  ])("shows $label group criteria and a clear action", ({ isPrivate }) => {
     useQueryMock.mockReturnValue({
       data: {
-        id: "private-id",
-        name: "Private group name",
-        ...privacy,
+        id: "group-1",
+        name: "Artists and curators",
+        is_private: isPrivate,
+        visible: true,
       },
-      isLoading: false,
-      isError: false,
-    });
-
-    render(
-      <CommunityMembersGroupDetails groupId="private-id" onClose={jest.fn()} />
-    );
-
-    expect(screen.getByText("Group criteria unavailable")).toBeInTheDocument();
-    expect(screen.queryByText("Private group name")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("group-criteria")).not.toBeInTheDocument();
-  });
-
-  it("shows visible group criteria and a clear action", () => {
-    useQueryMock.mockReturnValue({
-      data: { id: "group-1", name: "Artists and curators" },
       isLoading: false,
       isError: false,
     });
 
     const onClose = jest.fn();
     render(
-      <CommunityMembersGroupDetails groupId="group-1" onClose={onClose} />
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={onClose}
+        viewerIdentityKey={isPrivate ? "profile:viewer-1" : null}
+      />
     );
 
     expect(screen.getByText("Selected group")).toBeInTheDocument();
@@ -135,5 +173,24 @@ describe("CommunityMembersGroupDetails", () => {
       screen.getByRole("button", { name: "Clear selected group" })
     );
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("treats malformed group identity data as unavailable", () => {
+    useQueryMock.mockReturnValue({
+      data: { id: "group-1", name: null },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={jest.fn()}
+        viewerIdentityKey={null}
+      />
+    );
+
+    expect(screen.getByText("Group criteria unavailable")).toBeInTheDocument();
+    expect(screen.queryByTestId("group-criteria")).not.toBeInTheDocument();
   });
 });

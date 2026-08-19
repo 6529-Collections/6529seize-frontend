@@ -14,10 +14,19 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 import AboutMintingReference from "./AboutMintingReference";
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_COMPACT_FRAMED_ICON_WRAPPER_CLASS_NAME,
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
+  ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME,
+  ABOUT_FRAMED_ICON_CLASS_NAME,
+  ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+} from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import {
   SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
+  SUBSCRIPTIONS_NESTED_HEADING_CLASS,
   SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
@@ -35,7 +44,7 @@ type PhaseCard = {
 type MintMethodHeaderProps = {
   readonly headingId: string;
   readonly icon: IconDefinition;
-  readonly iconClassName: string;
+  readonly iconWrapperClassName: string;
   readonly title: string;
 };
 
@@ -113,9 +122,11 @@ export default function AboutMinting() {
 
 function MintingHeader() {
   return (
-    <header className="tw-px-1 tw-pb-8 tw-pt-4 sm:tw-px-2 sm:tw-pb-10 sm:tw-pt-8">
+    <header
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-8 tw-pt-4 sm:tw-pb-10 sm:tw-pt-8`}
+    >
       <div className="tw-max-w-3xl">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+        <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
           {m("about.minting.hero.title")}
         </h1>
         <p className="tw-mb-0 tw-mt-3 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
@@ -125,7 +136,7 @@ function MintingHeader() {
 
       <nav
         aria-label={m("about.minting.nav.ariaLabel")}
-        className="tw-mt-7 tw-border-0 tw-border-y tw-border-solid tw-border-white/[0.07] tw-py-3 sm:tw-mt-8"
+        className={`tw-mt-7 tw-border-0 tw-border-y tw-border-solid tw-py-3 sm:tw-mt-8 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
       >
         <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-1 tw-p-0">
           {TOC_ITEMS.map((item) => (
@@ -148,7 +159,7 @@ function MintingStart() {
   return (
     <section
       aria-labelledby="minting-start-heading"
-      className="tw-scroll-mt-24 tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-12"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-scroll-mt-24 tw-pb-8 sm:tw-pb-12`}
       id="minting-start"
     >
       <div className="tw-max-w-3xl">
@@ -171,7 +182,7 @@ function MintingStart() {
           <MintMethodHeader
             headingId="regular-mint-heading"
             icon={faGlobe}
-            iconClassName="tw-bg-[#00f0ff]/10 tw-text-[#00f0ff]"
+            iconWrapperClassName="tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10 tw-text-[#00f0ff]"
             title={m("about.minting.start.regular.title")}
           />
           <p className="tw-mb-0 tw-mt-4 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -204,7 +215,7 @@ function MintingStart() {
           <MintMethodHeader
             headingId="subscription-mint-heading"
             icon={faRepeat}
-            iconClassName="tw-bg-[#7000ff]/20 tw-text-[#a783ff]"
+            iconWrapperClassName="tw-border-[#8f5cff]/20 tw-bg-[#8f5cff]/10 tw-text-[#a783ff]"
             title={m("about.minting.start.subscription.title")}
           />
           <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -229,8 +240,14 @@ function MintingStart() {
         className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-mt-4 tw-flex tw-flex-col tw-gap-4 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-p-5`}
       >
         <div className="tw-flex tw-min-w-0 tw-gap-3">
-          <span className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-orange-500/10 tw-text-orange-300">
-            <FontAwesomeIcon aria-hidden="true" icon={faCalendarDays} />
+          <span
+            className={`${ABOUT_COMPACT_FRAMED_ICON_WRAPPER_CLASS_NAME} tw-border-orange-500/20 tw-bg-orange-500/10 tw-text-orange-300`}
+          >
+            <FontAwesomeIcon
+              aria-hidden="true"
+              className={ABOUT_FRAMED_ICON_CLASS_NAME}
+              icon={faCalendarDays}
+            />
           </span>
           <div>
             <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
@@ -245,14 +262,14 @@ function MintingStart() {
           <ButtonLink href="/meme-calendar" variant="secondary">
             {m("about.minting.start.schedule.calendarAction")}
           </ButtonLink>
-          <a
-            className="tw-inline-flex tw-min-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-shadow-sm tw-shadow-black/20 hover:tw-border-iron-700 hover:tw-bg-iron-900 hover:tw-text-white hover:tw-no-underline focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          <ButtonLink
             href="https://x.com/6529collections"
             rel="noopener noreferrer"
             target="_blank"
+            variant="secondary"
           >
             {m("about.minting.start.schedule.announcementsAction")}
-          </a>
+          </ButtonLink>
         </div>
       </div>
     </section>
@@ -262,20 +279,21 @@ function MintingStart() {
 function MintMethodHeader({
   headingId,
   icon,
-  iconClassName,
+  iconWrapperClassName,
   title,
 }: MintMethodHeaderProps) {
   return (
     <div className="tw-flex tw-items-center tw-gap-3">
       <span
-        className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full ${iconClassName}`}
+        className={`${ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME} ${iconWrapperClassName}`}
       >
-        <FontAwesomeIcon aria-hidden="true" icon={icon} />
+        <FontAwesomeIcon
+          aria-hidden="true"
+          className={ABOUT_FRAMED_ICON_CLASS_NAME}
+          icon={icon}
+        />
       </span>
-      <h3
-        className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
-        id={headingId}
-      >
+      <h3 className={SUBSCRIPTIONS_NESTED_HEADING_CLASS} id={headingId}>
         {title}
       </h3>
     </div>
@@ -286,7 +304,7 @@ function MintingPhases() {
   return (
     <section
       aria-labelledby="minting-phases-heading"
-      className="tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-py-8 sm:tw-py-12 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
       id="minting-phases"
     >
       <div className="tw-max-w-3xl">
@@ -322,7 +340,7 @@ function MintingPhases() {
         ))}
       </ol>
 
-      <aside className="tw-mt-4 tw-flex tw-max-w-5xl tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/[0.05] tw-p-4 sm:tw-p-5">
+      <aside className="tw-mt-4 tw-flex tw-w-full tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/[0.05] tw-p-4 sm:tw-p-5">
         <FontAwesomeIcon
           aria-hidden="true"
           className="tw-mt-1 tw-shrink-0 tw-text-[#00f0ff]"
@@ -345,7 +363,7 @@ function MintingEligibility() {
   return (
     <section
       aria-labelledby="minting-eligibility-heading"
-      className="tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-py-8 sm:tw-py-12 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
       id="minting-eligibility"
     >
       <div className="tw-max-w-3xl">

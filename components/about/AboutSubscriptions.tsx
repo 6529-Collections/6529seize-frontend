@@ -16,11 +16,18 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
+  ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME,
+  ABOUT_FRAMED_ICON_CLASS_NAME,
+  ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+} from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
 import {
   SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
+  SUBSCRIPTIONS_NESTED_HEADING_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
 
@@ -46,7 +53,7 @@ const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
   {
     icon: faEarthAmericas,
     iconClassName: "tw-text-[#8f5cff]",
-    iconWrapperClassName: "tw-border-[#8f5cff]/25 tw-bg-[#7000ff]/20",
+    iconWrapperClassName: "tw-border-[#8f5cff]/20 tw-bg-[#8f5cff]/10",
     messageKey: "about.subscriptions.overview.awayFromComputer",
   },
   {
@@ -79,10 +86,12 @@ export default function AboutSubscriptions() {
 
 function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
+    <header
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-10 tw-pt-4 sm:tw-pb-12 sm:tw-pt-8`}
+    >
       <div className="tw-max-w-4xl">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+          <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
             {m(locale, "about.subscriptions.hero.title")}
           </h1>
           <div className="tw-flex tw-justify-start empty:tw-hidden">
@@ -121,7 +130,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-overview-heading"
-      className="tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-12"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-8 sm:tw-pb-12`}
     >
       <div className="tw-max-w-3xl">
         <h2
@@ -143,11 +152,11 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
               key={benefit.messageKey}
             >
               <span
-                className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid sm:tw-size-11 ${benefit.iconWrapperClassName}`}
+                className={`${ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME} ${benefit.iconWrapperClassName}`}
               >
                 <FontAwesomeIcon
                   aria-hidden="true"
-                  className={`tw-text-xl ${benefit.iconClassName}`}
+                  className={`${ABOUT_FRAMED_ICON_CLASS_NAME} ${benefit.iconClassName}`}
                   icon={benefit.icon}
                 />
               </span>
@@ -217,9 +226,7 @@ function OverviewRule({
 }) {
   return (
     <section>
-      <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-xl">
-        {title}
-      </h3>
+      <h3 className={SUBSCRIPTIONS_NESTED_HEADING_CLASS}>{title}</h3>
       <div className="tw-mt-4">{children}</div>
     </section>
   );

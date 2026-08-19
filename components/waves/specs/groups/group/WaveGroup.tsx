@@ -28,11 +28,11 @@ export default function WaveGroup({
   const emptyScopeLabel = t(DEFAULT_LOCALE, "waves.chatSettings.access.anyone");
 
   return (
-    <div className="tw-group tw-relative tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-x-2 tw-px-2 tw-py-1.5 tw-text-sm">
+    <div className="tw-group tw-relative tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-x-2 tw-px-2 tw-py-1.5 tw-text-sm">
       <div className="tw-flex tw-min-w-0 tw-gap-x-4 tw-py-0.5 tw-leading-5">
         <WaveGroupTitle type={type} />
       </div>
-      <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-end tw-gap-x-2 tw-text-right">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-end tw-gap-x-2 tw-text-right">
         {scope.group ? (
           <WaveGroupScope group={scope.group} />
         ) : (

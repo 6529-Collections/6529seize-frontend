@@ -11,6 +11,13 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 import {
+  ABOUT_COMPACT_FRAMED_ICON_WRAPPER_CLASS_NAME,
+  ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME,
+  ABOUT_FRAMED_ICON_CLASS_NAME,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+} from "./AboutLayout";
+import {
+  SUBSCRIPTIONS_NESTED_HEADING_CLASS,
   SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
@@ -40,7 +47,7 @@ export default function AboutMintingReference({
   return (
     <section
       aria-labelledby="minting-reference-heading"
-      className="tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-py-8 sm:tw-py-12 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
       id="minting-reference"
     >
       <div className="tw-max-w-3xl">
@@ -81,11 +88,17 @@ function MintingHelp({ locale }: { readonly locale: SupportedLocale }) {
       className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-6`}
     >
       <div className="tw-flex tw-items-center tw-gap-3">
-        <span className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-orange-500/10 tw-text-orange-300">
-          <FontAwesomeIcon aria-hidden="true" icon={faTriangleExclamation} />
+        <span
+          className={`${ABOUT_COMPACT_FRAMED_ICON_WRAPPER_CLASS_NAME} tw-border-orange-500/20 tw-bg-orange-500/10 tw-text-orange-300`}
+        >
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className={ABOUT_FRAMED_ICON_CLASS_NAME}
+            icon={faTriangleExclamation}
+          />
         </span>
         <h3
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+          className={SUBSCRIPTIONS_NESTED_HEADING_CLASS}
           id="minting-help-heading"
         >
           {m(locale, "about.minting.reference.help.title")}
@@ -108,11 +121,17 @@ function MintingResources({ locale }: { readonly locale: SupportedLocale }) {
       className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-6`}
     >
       <div className="tw-flex tw-items-center tw-gap-3">
-        <span className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#00f0ff]/10 tw-text-[#00f0ff]">
-          <FontAwesomeIcon aria-hidden="true" icon={faCircleInfo} />
+        <span
+          className={`${ABOUT_COMPACT_FRAMED_ICON_WRAPPER_CLASS_NAME} tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10 tw-text-[#00f0ff]`}
+        >
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className={ABOUT_FRAMED_ICON_CLASS_NAME}
+            icon={faCircleInfo}
+          />
         </span>
         <h3
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+          className={SUBSCRIPTIONS_NESTED_HEADING_CLASS}
           id="minting-resources-heading"
         >
           {m(locale, "about.minting.reference.resources.title")}
@@ -180,12 +199,18 @@ function MintingHistory({ locale }: { readonly locale: SupportedLocale }) {
       className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/20 tw-p-4 sm:tw-p-6"
     >
       <div className="tw-flex tw-items-start tw-gap-3">
-        <span className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-text-iron-300">
-          <FontAwesomeIcon aria-hidden="true" icon={faClockRotateLeft} />
+        <span
+          className={`${ABOUT_COMPACT_FRAMED_ICON_WRAPPER_CLASS_NAME} tw-border-white/10 tw-bg-white/[0.05] tw-text-iron-300`}
+        >
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className={ABOUT_FRAMED_ICON_CLASS_NAME}
+            icon={faClockRotateLeft}
+          />
         </span>
         <div className="tw-min-w-0">
           <h3
-            className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+            className={SUBSCRIPTIONS_NESTED_HEADING_CLASS}
             id="minting-history-heading"
           >
             {m(locale, "about.minting.reference.history.title")}
