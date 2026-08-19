@@ -122,10 +122,16 @@ const notifyCapabilityChange = () => {
   }
 };
 
+// `document` is absent during SSR, so read it through a shape that admits
+// that — intersecting with `typeof globalThis` would keep it non-optional and
+// make the guards below look redundant to the type checker.
+type OptionalDocumentGlobal = { readonly document?: Document };
+
+const getBodyElement = (): HTMLElement | undefined =>
+  (globalThis as unknown as OptionalDocumentGlobal).document?.body;
+
 const tagBodyWithFinePointer = () => {
-  (
-    globalThis as typeof globalThis & { document?: Document }
-  ).document?.body?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
+  getBodyElement()?.setAttribute(FINE_POINTER_BODY_ATTRIBUTE, "true");
 };
 
 /**
@@ -139,9 +145,8 @@ const hasUnreliableHoverReporting = (): boolean =>
   !(getMediaQueryList(CSS_HOVER_REVEAL_QUERY)?.matches ?? false);
 
 const syncHoverReliabilityTag = () => {
-  const body = (globalThis as typeof globalThis & { document?: Document })
-    .document?.body;
-  if (!body) {
+  const body = getBodyElement();
+  if (body === undefined) {
     return;
   }
   if (hasUnreliableHoverReporting()) {
