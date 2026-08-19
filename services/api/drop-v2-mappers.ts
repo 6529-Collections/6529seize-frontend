@@ -253,6 +253,10 @@ const mapReplyToDropPreview = (
   top_raters: [],
   raters_count: 0,
   context_profile_context: null,
+  ...(replyToDrop.viewer_context
+    ? { viewer_context: replyToDrop.viewer_context }
+    : {}),
+  ...(replyToDrop.moderation ? { moderation: replyToDrop.moderation } : {}),
   subscribed_actions: [],
   is_signed: false,
   reactions: [],

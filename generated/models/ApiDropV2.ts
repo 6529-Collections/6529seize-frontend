@@ -17,11 +17,13 @@ import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadataV2 } from '../models/ApiDropMetadataV2';
+import { ApiDropModeration } from '../models/ApiDropModeration';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPoll } from '../models/ApiDropPoll';
 import { ApiDropReactionCounter } from '../models/ApiDropReactionCounter';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
+import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiIdentityOverview } from '../models/ApiIdentityOverview';
 import { ApiMentionedWaveV2 } from '../models/ApiMentionedWaveV2';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
@@ -54,6 +56,8 @@ export class ApiDropV2 {
     'reply_to_drop'?: ApiReplyToDropV2;
     'submission_context'?: ApiSubmissionDropContext;
     'context_profile_context'?: ApiDropV2ContextProfileContext;
+    'viewer_context'?: ApiDropViewerModerationContext;
+    'moderation'?: ApiDropModeration;
     'poll'?: ApiDropPoll;
     'wave'?: ApiWaveOverview;
 
@@ -204,6 +208,18 @@ export class ApiDropV2 {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "ApiDropV2ContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "viewer_context",
+            "baseName": "viewer_context",
+            "type": "ApiDropViewerModerationContext",
+            "format": ""
+        },
+        {
+            "name": "moderation",
+            "baseName": "moderation",
+            "type": "ApiDropModeration",
             "format": ""
         },
         {
