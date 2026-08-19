@@ -1,5 +1,7 @@
 export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.error.retry": "Please try again.",
+  "contentModeration.dropSubmitErrorTitle":
+    "Couldn't submit this drop.",
   "contentModeration.preferences.metaTitle": "Content preferences",
   "contentModeration.preferences.metaDescription":
     "Manage your personal content visibility preferences.",

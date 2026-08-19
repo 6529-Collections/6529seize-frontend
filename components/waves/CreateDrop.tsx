@@ -514,10 +514,10 @@ export default function CreateDrop({
           getStructuredApiErrorStatus(error) === 422;
         setToast({
           type: "error",
-          title: "Couldn't submit this drop.",
+          title: t(locale, "contentModeration.dropSubmitErrorTitle"),
           description: isContentModerationRejection
             ? t(locale, "contentModeration.postRejected")
-            : "Please try again.",
+            : t(locale, "contentModeration.error.retry"),
           details: isContentModerationRejection ? undefined : errorDetails,
         });
       }
@@ -713,7 +713,7 @@ export default function CreateDrop({
         {!isQuorumProposalModalOpen && (
           <div className="tw-flex tw-w-full tw-justify-end">
             <Button onClick={onOpenQuorumProposal} variant="tertiary" size="sm">
-              Create Proposal
+              {t(locale, "waves.submissionButtonLabel.defaultCreateProposal")}
             </Button>
           </div>
         )}

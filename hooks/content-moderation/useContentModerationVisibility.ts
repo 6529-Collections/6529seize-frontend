@@ -74,6 +74,8 @@ export const useContentModerationVisibility = (
       : undefined) ??
     drop.viewer_context?.drop_hidden ??
     false;
+  // A personal reveal belongs to the current hidden/block state and resets
+  // when that authoritative viewer state changes.
   const revealKey = `${connectedProfile?.id ?? "anonymous"}:${drop.id}:${authorBlocked}:${dropHidden}`;
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const isRevealed = revealedKey === revealKey;
