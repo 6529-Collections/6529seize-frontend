@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, type ReactElement } from "react";
 
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { XtdhStats } from "@/components/xtdh/stats";
 import { buildGlobalXtdhStatsContent } from "@/components/xtdh/stats/buildGlobalXtdhStatsContent";
 import { useGlobalTdhStats } from "@/hooks/useGlobalTdhStats";
@@ -43,7 +44,7 @@ export default function XtdhPage(): ReactElement {
       <section className="tw-space-y-4">
         <header className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
           <div>
-            <h1 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+            <h1 className={NETWORK_PAGE_TITLE_CLASSES}>
               xTDH Network Overview
             </h1>
             <p className="tw-mt-1 tw-text-sm tw-text-iron-400">

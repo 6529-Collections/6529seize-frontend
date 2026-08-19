@@ -2,8 +2,9 @@
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import {
+  NETWORK_REFERENCE_BLACK_PAGE_CLASSES,
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
-  NETWORK_REFERENCE_PAGE_CLASSES,
+  NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
@@ -16,8 +17,6 @@ const REFERENCE_CONTENT_CLASSES =
   "tw-min-w-0 tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300";
 const INTRO_CONTENT_CLASSES =
   "tw-min-w-0 tw-max-w-3xl tw-space-y-5 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300";
-const SECTION_HEADING_CLASSES =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
 const FORMULA_CLASSES =
   "tw-m-0 tw-w-full tw-overflow-x-auto tw-whitespace-pre tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-4 tw-font-mono tw-text-sm tw-font-medium tw-leading-6 tw-text-[#00f0ff]";
 const ORDERED_LIST_CLASSES =
@@ -27,13 +26,12 @@ export default function XTDHMainPage() {
   useSetTitle("xTDH Overview | Network");
 
   return (
-    <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
-    >
+    <main className={NETWORK_REFERENCE_BLACK_PAGE_CLASSES}>
       <div className="tw-w-full">
         <AboutContentsDropdown
           className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
           currentHref="/network/xtdh"
+          desktopFlush
           withDivider
         />
 
@@ -45,7 +43,7 @@ export default function XTDHMainPage() {
             <div className="lg:tw-sticky lg:tw-top-28">
               <h1
                 id="xtdh-overview-heading"
-                className={SECTION_HEADING_CLASSES}
+                className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
               >
                 xTDH Overview
               </h1>
@@ -121,7 +119,7 @@ export default function XTDHMainPage() {
             </p>
 
             <div className="tw-space-y-3 tw-pt-2">
-              <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 sm:tw-text-lg">
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 sm:tw-text-lg">
                 How much do you receive?
               </h3>
               <p className="tw-m-0">Each grant has:</p>
@@ -221,7 +219,7 @@ export default function XTDHMainPage() {
             </pre>
 
             <div className="tw-space-y-3 tw-pt-2">
-              <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 sm:tw-text-lg">
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 sm:tw-text-lg">
                 Example:
               </h3>
               <p className="tw-m-0">If today you:</p>
@@ -264,7 +262,10 @@ function XtdhReferenceSection({
   return (
     <section aria-labelledby={headingId} className={REFERENCE_SECTION_CLASSES}>
       <div className="lg:tw-sticky lg:tw-top-28">
-        <h2 id={headingId} className={SECTION_HEADING_CLASSES}>
+        <h2
+          id={headingId}
+          className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
+        >
           {title}
         </h2>
       </div>

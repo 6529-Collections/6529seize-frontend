@@ -97,12 +97,12 @@ describe("useSidebarSections", () => {
     );
 
     expect(aboutSection?.items).toEqual([
-      { name: "About", href: "/about", activePathPrefixes: ["/about/"] },
+      { name: "Overview", href: "/about", activePathPrefixes: ["/about/"] },
     ]);
     expect(
       aboutSection?.subsections.map((subsection) => subsection.name)
     ).toEqual([
-      "About 6529",
+      "Overview",
       "Collections & Minting",
       "Network & Reputation",
       "Delegation & Wallets",

@@ -3,6 +3,7 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
@@ -97,7 +98,6 @@ const PRESENTATION_CLASSNAME = `
   [&_.rep-category-state]:!tw-rounded-xl [&_.rep-category-state]:!tw-border-iron-800/50 [&_.rep-category-state]:!tw-bg-iron-900/20
   [&_.rep-category-table-frame]:!tw-rounded-xl [&_.rep-category-table-frame]:!tw-border-0 [&_.rep-category-table-frame]:!tw-bg-iron-950 [&_.rep-category-table-frame]:tw-ring-1 [&_.rep-category-table-frame]:tw-ring-inset [&_.rep-category-table-frame]:tw-ring-iron-900
   [&_.rep-category-table-head]:!tw-bg-iron-900 [&_.rep-category-table-head]:!tw-text-[0.6875rem] [&_.rep-category-table-head]:!tw-font-medium [&_.rep-category-table-head]:!tw-tracking-wide [&_.rep-category-table-row]:tw-transition-colors hover:[&_.rep-category-table-row]:tw-bg-iron-900 [&_.rep-category-table]:!tw-bg-transparent
-  [&_.rep-category-title]:!tw-mt-0 [&_.rep-category-title]:!tw-text-xl [&_.rep-category-title]:!tw-font-medium [&_.rep-category-title]:!tw-leading-tight [&_.rep-category-title]:!tw-tracking-tight [&_.rep-category-title]:!tw-text-iron-50 sm:[&_.rep-category-title]:!tw-text-2xl
   [&_.rep-category-wave-content]:!tw-gap-6 [&_.rep-category-wave-controls]:!tw-border-0 [&_.rep-category-wave-link]:!tw-text-iron-200
 `;
 
@@ -597,9 +597,7 @@ export default function GlobalRepCategoryDetail({
 
   return (
     <div
-      className={`rep-category-dialog-content tailwind-scope tw-text-iron-100 ${PRESENTATION_CLASSNAME} ${
-        mode === "page" ? "tw-py-8" : ""
-      } ${className}`}
+      className={`rep-category-dialog-content tailwind-scope tw-text-iron-100 ${PRESENTATION_CLASSNAME} ${className}`}
     >
       <div className="rep-category-layout tw-flex tw-flex-col tw-gap-5">
         <div className="rep-category-header tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
@@ -608,8 +606,10 @@ export default function GlobalRepCategoryDetail({
               REP Category
             </p>
             <h1
-              className={`rep-category-title tw-mb-0 tw-break-words tw-font-semibold tw-text-white ${
-                mode === "page" ? "tw-text-3xl" : "tw-text-2xl"
+              className={`rep-category-title tw-break-words ${
+                mode === "page"
+                  ? NETWORK_PAGE_TITLE_CLASSES
+                  : "tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
               }`}
             >
               {category}
@@ -617,11 +617,7 @@ export default function GlobalRepCategoryDetail({
           </div>
           {showSearchLink && (
             <div className="rep-category-header-actions tw-flex tw-flex-wrap tw-gap-2">
-              <ButtonLink
-                href="/rep/categories"
-                variant="tertiary"
-                size="sm"
-              >
+              <ButtonLink href="/rep/categories" variant="tertiary" size="sm">
                 <ArrowLeftIcon
                   aria-hidden="true"
                   className="tw-size-3.5 tw-flex-shrink-0"
