@@ -226,6 +226,16 @@ describe("gate detection", () => {
 describe("the hover-unreliable escape hatch resolves without media support", () => {
   type VariantValue = string | readonly string[];
 
+  /** Just the slice of the PostCSS node chain this walk reads. */
+  type PostcssAncestor =
+    | {
+        readonly type: string;
+        readonly name?: string | undefined;
+        readonly params?: string | undefined;
+        readonly parent?: PostcssAncestor;
+      }
+    | undefined;
+
   const collectVariants = (): Record<string, VariantValue> => {
     const variants: Record<string, VariantValue> = {};
     const noop = () => undefined;
@@ -283,10 +293,12 @@ describe("the hover-unreliable escape hatch resolves without media support", () 
         return;
       }
       const ancestors: string[] = [];
-      for (let node = rule.parent; node; node = node.parent) {
+      let node = rule.parent as PostcssAncestor;
+      while (node) {
         if (node.type === "atrule") {
-          ancestors.push(`@${node.name} ${node.params}`);
+          ancestors.push(`@${node.name ?? ""} ${node.params ?? ""}`.trim());
         }
+        node = node.parent;
       }
       tagRuleAncestors.push(ancestors);
     });
