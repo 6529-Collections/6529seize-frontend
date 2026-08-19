@@ -1,18 +1,22 @@
-import {
-  CapacitorBarcodeScanner,
-  CapacitorBarcodeScannerAndroidScanningLibrary,
-  CapacitorBarcodeScannerCameraDirection,
-  type CapacitorBarcodeScannerOptions,
-  CapacitorBarcodeScannerScanOrientation,
-  CapacitorBarcodeScannerTypeHint,
-} from "@capacitor/barcode-scanner";
+import type { CapacitorBarcodeScannerOptions } from "@capacitor/barcode-scanner";
+
+const loadBarcodeScanner = () => import("@capacitor/barcode-scanner");
+
+type BarcodeScannerModule = Awaited<ReturnType<typeof loadBarcodeScanner>>;
 
 const SCANNER_CANCELLED_ERROR_CODE = "OS-PLUG-BARC-0006";
 
 function getScannerOptions(
+  scannerModule: BarcodeScannerModule,
   isAndroid: boolean,
   scanInstructions: string
 ): CapacitorBarcodeScannerOptions {
+  const {
+    CapacitorBarcodeScannerAndroidScanningLibrary,
+    CapacitorBarcodeScannerCameraDirection,
+    CapacitorBarcodeScannerScanOrientation,
+    CapacitorBarcodeScannerTypeHint,
+  } = scannerModule;
   const scannerOptions: CapacitorBarcodeScannerOptions = {
     hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
     scanInstructions,
@@ -81,8 +85,13 @@ export function isQRScannerCancellation(error: unknown): boolean {
   );
 }
 
-export function isQRScannerAvailable(): boolean {
-  return typeof CapacitorBarcodeScanner.scanBarcode === "function";
+export async function isQRScannerAvailable(): Promise<boolean> {
+  try {
+    const { CapacitorBarcodeScanner } = await loadBarcodeScanner();
+    return typeof CapacitorBarcodeScanner.scanBarcode === "function";
+  } catch {
+    return false;
+  }
 }
 
 export async function scanQrCode({
@@ -92,8 +101,10 @@ export async function scanQrCode({
   readonly isAndroid: boolean;
   readonly scanInstructions: string;
 }): Promise<string | null> {
+  const scannerModule = await loadBarcodeScanner();
+  const { CapacitorBarcodeScanner } = scannerModule;
   const result = await CapacitorBarcodeScanner.scanBarcode(
-    getScannerOptions(isAndroid, scanInstructions)
+    getScannerOptions(scannerModule, isAndroid, scanInstructions)
   );
   return result.ScanResult || null;
 }
