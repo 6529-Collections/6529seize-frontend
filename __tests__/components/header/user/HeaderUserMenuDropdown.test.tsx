@@ -390,7 +390,7 @@ describe("HeaderUserMenuDropdown", () => {
     expect(profileLink).toHaveAttribute("href", "/alice");
     expect(profileLink).not.toHaveAttribute("title");
     expect(profileLink).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
-    expect(profileLink).toHaveClass("tw-flex-1", "tw-border-iron-700");
+    expect(profileLink).toHaveClass("tw-flex-1", "tw-border-none");
     expect(logoutButton).toHaveClass("tw-grid-cols-[1.5rem_minmax(0,1fr)]");
     expect(preferencesButton).toHaveClass("tw-size-11", "tw-border-iron-700");
     expect(profileLink.parentElement).toBe(preferencesButton.parentElement);

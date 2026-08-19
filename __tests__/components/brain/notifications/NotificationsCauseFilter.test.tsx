@@ -121,9 +121,15 @@ describe("NotificationsCauseFilter", () => {
     expect(
       screen.getByRole("heading", { name: "Notifications" })
     ).toBeInTheDocument();
-    await user.click(
-      screen.getByRole("button", { name: "Profile Preferences" })
+    const preferencesButton = screen.getByRole("button", {
+      name: "Profile Preferences",
+    });
+    expect(preferencesButton).toHaveClass(
+      "tw-border",
+      "tw-border-iron-800",
+      "tw-bg-iron-950"
     );
+    await user.click(preferencesButton);
 
     expect(
       screen.getByRole("dialog", { name: "Profile Preferences modal" })
