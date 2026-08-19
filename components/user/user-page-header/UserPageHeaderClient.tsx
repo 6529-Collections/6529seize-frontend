@@ -5,8 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
+import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -21,6 +23,7 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import WebsiteIcon from "../utils/icons/WebsiteIcon";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
@@ -99,6 +102,8 @@ export default function UserPageHeaderClient({
 
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
+  const [isProfilePreferencesOpen, setIsProfilePreferencesOpen] =
+    useState(false);
 
   const isMyProfile = useMemo(
     () =>
@@ -155,7 +160,8 @@ export default function UserPageHeaderClient({
     !isMyProfile && profile.handle && connectedProfile?.handle
       ? profile.handle
       : null;
-  const showSubscriptionStatus = isMyProfile && !activeProfileProxy;
+  const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
+  const showSubscriptionStatus = canManageProfilePreferences;
   let subscriptionStatusVisibilityClass = "";
   if (canEdit) {
     subscriptionStatusVisibilityClass = hasTouchScreen
@@ -179,15 +185,17 @@ export default function UserPageHeaderClient({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
+      const errorMessage = getToastErrorDetails(error);
       setToast({
         type: "error",
         title: getUserProfileHeaderMessage(
           "user.profileHeader.dm.createFailed.title"
         ),
-        description: getUserProfileHeaderMessage(
-          "user.profileHeader.dm.createFailed.description"
-        ),
-        details: getToastErrorDetails(error),
+        description:
+          errorMessage ??
+          getUserProfileHeaderMessage(
+            "user.profileHeader.dm.createFailed.description"
+          ),
       });
     } finally {
       setDirectMessageLoading(false);
@@ -272,6 +280,23 @@ export default function UserPageHeaderClient({
                       variant="meta"
                     />
                   </div>
+                  {canManageProfilePreferences ? (
+                    <div className="tw-mt-3 tw-inline-flex tw-rounded-xl tw-bg-white/10 tw-p-0.5 tw-shadow-2xl tw-ring-1 tw-ring-white/20 tw-backdrop-blur-md">
+                      <Button
+                        variant="tertiary"
+                        size="sm"
+                        onClick={() => setIsProfilePreferencesOpen(true)}
+                        aria-label={t(locale, "profilePreferences.button")}
+                        className="tw-rounded-xl !tw-border-none"
+                      >
+                        <Cog6ToothIcon
+                          className="tw-size-4"
+                          aria-hidden="true"
+                        />
+                        <span>{t(locale, "profilePreferences.button")}</span>
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
 
                 {websiteAction || followHandle || showSubscriptionStatus ? (
@@ -348,6 +373,12 @@ export default function UserPageHeaderClient({
           </div>
         </div>
       </section>
+      {canManageProfilePreferences ? (
+        <ProfilePreferencesSettings
+          isOpen={isProfilePreferencesOpen}
+          onClose={() => setIsProfilePreferencesOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

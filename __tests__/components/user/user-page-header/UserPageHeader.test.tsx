@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,13 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
 
 jest.mock("next/dynamic", () => () => () => <div />);
+jest.mock("@/components/header/ProfilePreferencesSettings", () => ({
+  __esModule: true,
+  default: ({ isOpen }: { readonly isOpen: boolean }) =>
+    isOpen ? (
+      <div role="dialog" aria-label="Profile Preferences modal" />
+    ) : null,
+}));
 jest.mock(
   "@/components/user/user-page-header/banner/UserPageHeaderBanner",
   () => () => <div data-testid="banner" />
@@ -78,6 +86,10 @@ const ownProfileAuth = {
   activeProfileProxy: null,
   setToast: jest.fn(),
 } as any;
+const proxiedOwnProfileAuth = {
+  ...ownProfileAuth,
+  activeProfileProxy: { handle: "proxy" },
+} as any;
 
 describe("UserPageHeader", () => {
   beforeEach(() => {
@@ -143,6 +155,91 @@ describe("UserPageHeader", () => {
         (subscriptionStatus) => subscriptionStatus.dataset["compact"] === "true"
       )
     ).toHaveLength(1);
+    const preferencesButton = screen.getByRole("button", {
+      name: "Preferences",
+    });
+    expect(preferencesButton).toHaveClass(
+      "tw-rounded-xl",
+      "!tw-border-none"
+    );
+    expect(preferencesButton.parentElement).toHaveClass(
+      "tw-rounded-xl",
+      "tw-bg-white/10",
+      "tw-p-0.5",
+      "tw-shadow-2xl",
+      "tw-ring-1",
+      "tw-ring-white/20",
+      "tw-backdrop-blur-md"
+    );
+  });
+
+  it("opens preferences from your own profile", async () => {
+    const user = userEvent.setup();
+    render(
+      <AuthContext.Provider value={ownProfileAuth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+
+    expect(
+      screen.getByRole("dialog", { name: "Profile Preferences modal" })
+    ).toBeInTheDocument();
+  });
+
+  it("does not show preferences when viewing another profile", () => {
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Preferences" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not show preferences while using a profile proxy", () => {
+    render(
+      <AuthContext.Provider value={proxiedOwnProfileAuth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Preferences" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders profile website link when a primary CMS site exists", () => {
