@@ -17,7 +17,7 @@ export default function UserPageIdentityAddStatementsTypeButton({
   onClick,
 }: {
   readonly statementType: STATEMENT_TYPE;
-  readonly label?: string;
+  readonly label?: string | undefined;
   readonly isActive: boolean;
   readonly isFirst: boolean;
   readonly isLast: boolean;
