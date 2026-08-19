@@ -223,11 +223,11 @@ export default function QuorumProposalCompactContent({
                 setDetailsVisible(!resolvedAreDetailsVisible);
               }}
               onKeyDown={stopPropagation}
-              className="tw-inline-flex tw-min-h-8 tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-5 tw-text-primary-400 tw-transition-colors hover:tw-border-primary-400/40 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              className="tw-inline-flex tw-min-h-8 tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-5 tw-text-primary-300 tw-transition-colors hover:tw-border-primary-400/40 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
             >
               <span>{detailsToggleLabel}</span>
               <ChevronRightIcon
-                className={`tw-size-4 tw-flex-shrink-0 tw-text-primary-400 tw-transition-transform ${
+                className={`tw-size-4 tw-flex-shrink-0 tw-transition-transform ${
                   resolvedAreDetailsVisible ? "tw-rotate-90" : ""
                 }`}
               />
