@@ -1,6 +1,7 @@
 "use client";
 
 import NetworkPageLayout from "@/components/network/NetworkPageLayout";
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -30,7 +31,9 @@ export default function CommunityActivityPageClient({
         initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
         withFilters={true}
       >
-        <h1 className="tw-float-none tw-block tw-whitespace-nowrap">
+        <h1
+          className={`${NETWORK_PAGE_TITLE_CLASSES} tw-float-none tw-block tw-whitespace-nowrap`}
+        >
           Network Activity
         </h1>
       </ProfileActivityLogs>

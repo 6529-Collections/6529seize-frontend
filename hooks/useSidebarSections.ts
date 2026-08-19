@@ -150,7 +150,7 @@ function getAboutSection(
     icon: DocumentTextIcon,
     items: [
       {
-        name: t(DEFAULT_LOCALE, "navigation.primary.about"),
+        name: t(DEFAULT_LOCALE, "navigation.about.overview"),
         href: "/about",
         activePathPrefixes: ["/about/"],
       },

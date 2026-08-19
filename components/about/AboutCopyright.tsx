@@ -6,16 +6,14 @@ import {
 
 export default function AboutCopyright() {
   return (
-    <Container className="!tw-px-0">
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>Copyright</h1>
         </Col>
       </Row>
       <Row>
-        <Col
-          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
-        >
+        <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
           Last Updated: April 23, 2024
         </Col>
       </Row>
@@ -33,9 +31,7 @@ export default function AboutCopyright() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <h2>
-            Copyright Infringement Notification
-          </h2>
+          <h2>Copyright Infringement Notification</h2>
           <p>
             If you believe that your copyrighted work has been copied in a way
             that constitutes copyright infringement and is accessible through

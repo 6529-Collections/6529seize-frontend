@@ -1,6 +1,5 @@
 "use client";
 
-import styles from "./AppWallet.module.css";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import {
   faCircleArrowLeft,
@@ -11,7 +10,6 @@ import {
   faFileDownload,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -39,6 +37,13 @@ import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 import { Share } from "@capacitor/share";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_PAGE_CONTAINER_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+  DELEGATION_SECTION_TITLE_CLASS_NAME,
+} from "@/components/delegation/delegation-ui";
 
 const SECRET_REVEAL_TIMEOUT_MS = 60000;
 const SECRET_CLIPBOARD_TTL_MS = 30000;
@@ -280,12 +285,12 @@ export default function AppWalletComponent(
 
   if (fetchingAppWallets) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-gap-2 tw-px-3">
-            <span>Fetching wallet</span>
-            <Spinner />
-          </div>
+      <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
+        <div
+          className={`${DELEGATION_CARD_CLASS_NAME} tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-gap-2 tw-p-5 tw-text-sm tw-text-iron-400`}
+        >
+          <span>Fetching wallet</span>
+          <Spinner />
         </div>
       </div>
     );
@@ -293,7 +298,7 @@ export default function AppWalletComponent(
 
   if (!appWalletsSupported) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+      <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
         <AppWalletsUnsupported />
       </div>
     );
@@ -301,11 +306,9 @@ export default function AppWalletComponent(
 
   if (!appWallet) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
-            Wallet with address <b>{props.address}</b> not found.
-          </div>
+      <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
+        <div className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}>
+          Wallet with address <b>{props.address}</b> not found.
         </div>
       </div>
     );
@@ -329,190 +332,174 @@ export default function AppWalletComponent(
       balanceContent = <span>Error</span>;
     }
 
-    return <span>Balance: {balanceContent}</span>;
+    return (
+      <span className="tw-text-sm tw-leading-6 tw-text-iron-400">
+        Balance: {balanceContent}
+      </span>
+    );
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
-          <Link
-            className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-no-underline"
-            href="/tools/app-wallets"
-          >
-            <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
-            Back to App Wallets
-          </Link>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
-          <h3 className="tw-mb-0 tw-flex tw-items-center tw-gap-2">
-            <AppWalletAvatar address={appWallet.address} size={50} />
-            {appWallet.name}
-            {appWallet.imported ? (
-              <span className="tw-text-iron-400"> (imported)</span>
-            ) : (
-              <></>
+    <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
+      <Link
+        className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors"
+        href="/tools/app-wallets"
+      >
+        <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
+        Back to App Wallets
+      </Link>
+
+      <header className="tw-mt-5 tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+          <AppWalletAvatar address={appWallet.address} size={50} />
+          <div className="tw-min-w-0">
+            <h1 className={DELEGATION_PAGE_TITLE_CLASS_NAME}>
+              {appWallet.name}
+            </h1>
+            {appWallet.imported && (
+              <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-500">
+                (imported)
+              </p>
             )}
-          </h3>
-          {printBalance()}
+          </div>
         </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3">
-          <span>
-            Wallet Address:{" "}
-            <span className="tw-text-lg tw-font-bold">
-              {appWallet.address.toLowerCase()}
-            </span>
-          </span>
-          <span className="tw-flex tw-items-center tw-gap-2">
-            <>
-              <FontAwesomeIcon
-                className="tw-cursor-pointer tw-select-none"
-                icon={faExternalLink}
-                height={22}
-                data-tooltip-id={`etherscan-${appWallet.address}`}
-                onClick={() =>
-                  window.open(
-                    getAddressEtherscanLink(chainId, appWallet.address),
-                    "_blank"
-                  )
-                }
-              />
-              <Tooltip
-                id={`etherscan-${appWallet.address}`}
-                place="top"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
-              >
-                View on Etherscan
-              </Tooltip>
-            </>
-            <>
-              <FontAwesomeIcon
-                className="tw-cursor-pointer tw-select-none"
-                icon={faFileDownload}
-                height={22}
-                data-tooltip-id={`download-${appWallet.address}`}
-                onClick={() => doEncryptedDownload(appWallet)}
-              />
-              <Tooltip
-                id={`download-${appWallet.address}`}
-                place="top"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
-              >
-                Download encrypted recovery file
-              </Tooltip>
-            </>
-            <UnlockAppWalletModal
-              address={appWallet.address}
-              address_hashed={appWallet.address_hashed}
-              show={isExportingPlaintext}
-              onHide={() => setIsExportingPlaintext(false)}
-              onVerifiedUnlock={migrateAppWallet}
-              sensitiveAction={{
-                label: "plaintext export",
-                warning:
-                  "Plaintext recovery files expose the mnemonic and private key without encryption.",
-                confirmationText: "EXPORT",
-              }}
-              onUnlock={(pass: string) => {
-                decryptData(
-                  appWallet.address,
-                  appWallet.private_key,
-                  pass
-                ).then(async (decryptedPrivateKey) => {
-                  let decryptedMnemonic = appWallet.mnemonic;
-                  if (
-                    appWallet.has_mnemonic ??
-                    decryptedMnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE
-                  ) {
-                    decryptedMnemonic = await decryptData(
-                      appWallet.address,
-                      appWallet.mnemonic,
-                      pass
-                    );
-                  } else {
-                    decryptedMnemonic = APP_WALLET_MNEMONIC_UNAVAILABLE;
-                  }
-                  doPlaintextDownload(
-                    appWallet,
-                    decryptedMnemonic,
-                    decryptedPrivateKey
-                  );
-                });
-              }}
-            />
-            <>
-              <FontAwesomeIcon
-                className="tw-cursor-pointer tw-select-none"
-                icon={faCopy}
-                height={22}
-                data-tooltip-id={`copy-address-${appWallet.address}`}
-                onClick={() => {
-                  navigator.clipboard.writeText(appWallet.address);
+        {printBalance()}
+      </header>
+
+      <UnlockAppWalletModal
+        address={appWallet.address}
+        address_hashed={appWallet.address_hashed}
+        show={isExportingPlaintext}
+        onHide={() => setIsExportingPlaintext(false)}
+        onVerifiedUnlock={migrateAppWallet}
+        sensitiveAction={{
+          label: "plaintext export",
+          warning:
+            "Plaintext recovery files expose the mnemonic and private key without encryption.",
+          confirmationText: "EXPORT",
+        }}
+        onUnlock={(pass: string) => {
+          void (async () => {
+            const decryptedPrivateKey = await decryptData(
+              appWallet.address,
+              appWallet.private_key,
+              pass
+            );
+            let decryptedMnemonic: string;
+            if (
+              (appWallet.has_mnemonic ?? true) &&
+              appWallet.mnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE
+            ) {
+              decryptedMnemonic = await decryptData(
+                appWallet.address,
+                appWallet.mnemonic,
+                pass
+              );
+            } else {
+              decryptedMnemonic = APP_WALLET_MNEMONIC_UNAVAILABLE;
+            }
+            await doPlaintextDownload(
+              appWallet,
+              decryptedMnemonic,
+              decryptedPrivateKey
+            );
+          })().catch(() => {
+            setToast({
+              message: "Unable to export wallet recovery.",
+              type: "error",
+            });
+          });
+        }}
+      />
+
+      <section
+        className={`${DELEGATION_CARD_CLASS_NAME} tw-mt-8 tw-flex tw-flex-col tw-gap-4 tw-p-5 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-p-6`}
+      >
+        <div className="tw-min-w-0">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-widest tw-text-iron-500">
+            Wallet Address:
+          </p>
+          <p className="tw-m-0 tw-mt-1 tw-break-all tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
+            {appWallet.address.toLowerCase()}
+          </p>
+        </div>
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <TooltipIconButton
+            icon={faExternalLink}
+            tooltipText="View on Etherscan"
+            buttonSizeClassName="tw-size-9"
+            buttonShapeClassName="tw-rounded-lg"
+            className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+            iconClassName="tw-size-4 tw-text-current"
+            onClick={() =>
+              window.open(
+                getAddressEtherscanLink(chainId, appWallet.address),
+                "_blank",
+                "noopener,noreferrer"
+              )
+            }
+          />
+          <TooltipIconButton
+            icon={faFileDownload}
+            tooltipText="Download encrypted recovery file"
+            buttonSizeClassName="tw-size-9"
+            buttonShapeClassName="tw-rounded-lg"
+            className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+            iconClassName="tw-size-4 tw-text-current"
+            onClick={() => doEncryptedDownload(appWallet)}
+          />
+          <TooltipIconButton
+            icon={faCopy}
+            tooltipText={
+              addressCopied ? "Copied!" : "Copy address to clipboard"
+            }
+            buttonSizeClassName="tw-size-9"
+            buttonShapeClassName="tw-rounded-lg"
+            className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+            iconClassName="tw-size-4 tw-text-current"
+            onClick={() => {
+              void navigator.clipboard
+                .writeText(appWallet.address)
+                .then(() => {
                   setAddressCopied(true);
-                  setTimeout(() => {
-                    setAddressCopied(false);
-                  }, 1500);
+                  setTimeout(() => setAddressCopied(false), 1500);
+                })
+                .catch(() => {
+                  setToast({
+                    message: "Unable to copy wallet address.",
+                    type: "error",
+                  });
+                });
+            }}
+          />
+        </div>
+      </section>
+
+      <section
+        className={`${DELEGATION_CARD_CLASS_NAME} tw-mt-4 tw-p-5 sm:tw-p-6`}
+      >
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+          <h2 className={DELEGATION_SECTION_TITLE_CLASS_NAME}>
+            Mnemonic Phrase
+          </h2>
+          {mnemonicAvailable && (
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <TooltipIconButton
+                icon={revealPhrase ? faEye : faEyeSlash}
+                tooltipText={revealPhrase ? "Hide" : "Reveal"}
+                buttonSizeClassName="tw-size-9"
+                buttonShapeClassName="tw-rounded-lg"
+                className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+                iconClassName="tw-size-4 tw-text-current"
+                onClick={() => {
+                  if (revealPhrase) {
+                    setRevealPhrase(false);
+                    setEncryptedPhrase();
+                  } else {
+                    setIsRevealingPhrase(true);
+                  }
                 }}
               />
-              <Tooltip
-                id={`copy-address-${appWallet.address}`}
-                place="top"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
-              >
-                {addressCopied ? "Copied!" : "Copy address to clipboard"}
-              </Tooltip>
-            </>
-          </span>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-5">
-        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
-          <span>Mnemonic Phrase</span>
-          {mnemonicAvailable && (
-            <span className="tw-flex tw-items-center tw-gap-3">
-              <>
-                <FontAwesomeIcon
-                  className="tw-cursor-pointer tw-select-none"
-                  icon={revealPhrase ? faEye : faEyeSlash}
-                  height={22}
-                  data-tooltip-id={`reveal-phrase-${appWallet.address}`}
-                  onClick={() => {
-                    if (revealPhrase) {
-                      setRevealPhrase(false);
-                      setEncryptedPhrase();
-                    } else {
-                      setIsRevealingPhrase(true);
-                    }
-                  }}
-                />
-                <Tooltip
-                  id={`reveal-phrase-${appWallet.address}`}
-                  place="top"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  {revealPhrase ? "Hide" : "Reveal"}
-                </Tooltip>
-              </>
               <UnlockAppWalletModal
                 address={appWallet.address}
                 address_hashed={appWallet.address_hashed}
@@ -526,92 +513,87 @@ export default function AppWalletComponent(
                   confirmationText: "REVEAL",
                 }}
                 onUnlock={(pass: string) => {
-                  decryptData(appWallet.address, appWallet.mnemonic, pass).then(
-                    (decryptedPhrase) => {
+                  void decryptData(
+                    appWallet.address,
+                    appWallet.mnemonic,
+                    pass
+                  )
+                    .then((decryptedPhrase) => {
                       setPhrase(decryptedPhrase.split(" "));
                       setRevealPhrase(true);
-                    }
-                  );
+                    })
+                    .catch(() => {
+                      setToast({
+                        message: "Unable to reveal recovery phrase.",
+                        type: "error",
+                      });
+                    });
                 }}
               />
               {revealPhrase && (
-                <>
-                  <FontAwesomeIcon
-                    className="tw-cursor-pointer tw-select-none"
-                    icon={faCopy}
-                    height={22}
-                    data-tooltip-id={`copy-mnemonic-${appWallet.address}`}
-                    onClick={() => {
-                      copySecretToClipboard(
-                        phrase.join(" "),
-                        setMnemonicCopied
-                      );
-                    }}
-                  />
-                  <Tooltip
-                    id={`copy-mnemonic-${appWallet.address}`}
-                    place="top"
-                    style={{
-                      backgroundColor: "#1F2937",
-                      color: "white",
-                      padding: "4px 8px",
-                    }}
-                  >
-                    {mnemonicCopied ? "Copied!" : "Copy to clipboard"}
-                  </Tooltip>
-                </>
+                <TooltipIconButton
+                  icon={faCopy}
+                  tooltipText={mnemonicCopied ? "Copied!" : "Copy to clipboard"}
+                  buttonSizeClassName="tw-size-9"
+                  buttonShapeClassName="tw-rounded-lg"
+                  className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+                  iconClassName="tw-size-4 tw-text-current"
+                  onClick={() => {
+                    void copySecretToClipboard(
+                      phrase.join(" "),
+                      setMnemonicCopied
+                    ).catch(() => {
+                      setToast({
+                        message: "Unable to copy recovery phrase.",
+                        type: "error",
+                      });
+                    });
+                  }}
+                />
               )}
-            </span>
+            </div>
           )}
         </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
-        {mnemonicAvailable ? (
-          phrase.map((w, i) => (
-            <AppWalletPhraseWord
-              index={i + 1}
-              word={w}
-              hidden={!revealPhrase}
-              key={`${appWallet.address}-mnemonic-${i}`}
-            />
-          ))
-        ) : (
-          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3 tw-text-iron-400">
-            Mnemonic phrase not available for this wallet
-          </div>
-        )}
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
-          <span>Private Key</span>
-          <span className="tw-flex tw-items-center tw-gap-3">
-            <>
-              <FontAwesomeIcon
-                className="tw-cursor-pointer tw-select-none"
-                icon={revealPrivateKey ? faEye : faEyeSlash}
-                height={22}
-                data-tooltip-id={`reveal-private-key-${appWallet.address}`}
-                onClick={() => {
-                  if (revealPrivateKey) {
-                    setRevealPrivateKey(false);
-                    setEncryptedPrivateKey();
-                  } else {
-                    setIsRevealingPrivateKey(true);
-                  }
-                }}
+        <div className="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-3 md:tw-grid-cols-4">
+          {mnemonicAvailable ? (
+            phrase.map((w, i) => (
+              <AppWalletPhraseWord
+                index={i + 1}
+                word={w}
+                hidden={!revealPhrase}
+                key={`${appWallet.address}-mnemonic-${i}`}
               />
-              <Tooltip
-                id={`reveal-private-key-${appWallet.address}`}
-                place="top"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
-              >
-                {revealPrivateKey ? "Hide" : "Reveal"}
-              </Tooltip>
-            </>
+            ))
+          ) : (
+            <p className="tw-col-span-full tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+              Mnemonic phrase not available for this wallet
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section
+        className={`${DELEGATION_CARD_CLASS_NAME} tw-mt-4 tw-p-5 sm:tw-p-6`}
+      >
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+          <h2 className={DELEGATION_SECTION_TITLE_CLASS_NAME}>Private Key</h2>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <TooltipIconButton
+              icon={revealPrivateKey ? faEye : faEyeSlash}
+              tooltipText={revealPrivateKey ? "Hide" : "Reveal"}
+              buttonSizeClassName="tw-size-9"
+              buttonShapeClassName="tw-rounded-lg"
+              className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+              iconClassName="tw-size-4 tw-text-current"
+              onClick={() => {
+                if (revealPrivateKey) {
+                  setRevealPrivateKey(false);
+                  setEncryptedPrivateKey();
+                } else {
+                  setIsRevealingPrivateKey(true);
+                }
+              }}
+            />
             <UnlockAppWalletModal
               address={appWallet.address}
               address_hashed={appWallet.address_hashed}
@@ -625,52 +607,60 @@ export default function AppWalletComponent(
                 confirmationText: "REVEAL",
               }}
               onUnlock={(pass: string) => {
-                decryptData(
+                void decryptData(
                   appWallet.address,
                   appWallet.private_key,
                   pass
-                ).then((decryptedPrivateKey) => {
-                  setPrivateKey(decryptedPrivateKey);
-                  setRevealPrivateKey(true);
-                });
+                )
+                  .then((decryptedPrivateKey) => {
+                    setPrivateKey(decryptedPrivateKey);
+                    setRevealPrivateKey(true);
+                  })
+                  .catch(() => {
+                    setToast({
+                      message: "Unable to reveal private key.",
+                      type: "error",
+                    });
+                  });
               }}
             />
             {revealPrivateKey && (
-              <>
-                <FontAwesomeIcon
-                  className="tw-cursor-pointer tw-select-none"
-                  icon={faCopy}
-                  height={22}
-                  data-tooltip-id={`copy-private-key-${appWallet.address}`}
-                  onClick={() => {
-                    copySecretToClipboard(privateKey, setPrivateKeyCopied);
-                  }}
-                />
-                <Tooltip
-                  id={`copy-private-key-${appWallet.address}`}
-                  place="top"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  {privateKeyCopied ? "Copied!" : "Copy to clipboard"}
-                </Tooltip>
-              </>
+              <TooltipIconButton
+                icon={faCopy}
+                tooltipText={privateKeyCopied ? "Copied!" : "Copy to clipboard"}
+                buttonSizeClassName="tw-size-9"
+                buttonShapeClassName="tw-rounded-lg"
+                className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+                iconClassName="tw-size-4 tw-text-current"
+                onClick={() => {
+                  void copySecretToClipboard(
+                    privateKey,
+                    setPrivateKeyCopied
+                  ).catch(() => {
+                    setToast({
+                      message: "Unable to copy private key.",
+                      type: "error",
+                    });
+                  });
+                }}
+              />
             )}
-          </span>
+          </div>
         </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
-        <AppWalletPhraseWord
-          word={privateKey}
-          hidden={!revealPrivateKey}
-          full_width={true}
-        />
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-5">
-        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-gap-2 tw-px-3">
+        <div className="tw-mt-4 tw-grid tw-grid-cols-1">
+          <AppWalletPhraseWord
+            word={privateKey}
+            hidden={!revealPrivateKey}
+            full_width
+          />
+        </div>
+      </section>
+
+      <section
+        className={`${DELEGATION_CARD_CLASS_NAME} tw-mt-4 tw-p-5 sm:tw-p-6`}
+      >
+        <h2 className={DELEGATION_SECTION_TITLE_CLASS_NAME}>Wallet Actions</h2>
+        <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
           <Button
             type="button"
             onClick={() => doDelete(appWallet.name, appWallet.address)}
@@ -679,15 +669,16 @@ export default function AppWalletComponent(
           >
             Delete
           </Button>
-          <button
+          <Button
             type="button"
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#dc3545] tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-[#dc3545] tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-[#dc3545] enabled:hover:tw-text-white disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+            variant="secondary"
+            size="md"
             onClick={() => setIsExportingPlaintext(true)}
           >
             Export Plaintext Recovery
-          </button>
+          </Button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -702,29 +693,21 @@ function AppWalletPhraseWord(
 ) {
   return (
     <div
-      className={`${
-        props.full_width
-          ? "tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3"
-          : "tw-relative tw-w-1/2 tw-max-w-full tw-flex-none tw-px-3 min-[576px]:tw-w-1/3 min-[768px]:tw-w-1/4"
-      } tw-pb-2 tw-pt-2`}
+      className={`tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-black/25 tw-p-3 ${
+        props.full_width ? "tw-col-span-full" : ""
+      }`}
     >
-      <div className={styles["phrase"]}>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-select-none tw-gap-2 tw-px-3">
-            {props.index && (
-              <span className="tw-font-extralight tw-text-iron-400">
-                {props.index}
-              </span>
-            )}
-            <span
-              className={`tw-break-words ${
-                props.hidden ? styles["blurry"] : ""
-              }`}
-            >
-              {props.word}
-            </span>
-          </div>
-        </div>
+      <div className="tw-flex tw-select-none tw-gap-2 tw-text-sm tw-leading-6">
+        {props.index !== undefined && (
+          <span className="tw-shrink-0 tw-text-iron-500">{props.index}</span>
+        )}
+        <span
+          className={`tw-min-w-0 tw-break-all tw-text-iron-200 ${
+            props.hidden ? "tw-text-iron-500 tw-blur-sm" : ""
+          }`}
+        >
+          {props.word}
+        </span>
       </div>
     </div>
   );

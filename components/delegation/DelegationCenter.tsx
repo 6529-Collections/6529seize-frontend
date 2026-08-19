@@ -21,6 +21,11 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useEffectEvent, useState } from "react";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "./delegation-ui";
 
 interface Props {
   setSection(section: DelegationCenterSection): void;
@@ -101,7 +106,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             <button
               key={c.contract}
               type="button"
-              className="tw-group tw-flex tw-min-h-20 tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/70 tw-p-4 tw-text-iron-100 tw-transition-colors hover:tw-border-white/10 hover:tw-bg-iron-900 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-flex-row sm:tw-justify-start"
+              className={`tw-group tw-flex tw-min-h-20 tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-overflow-hidden ${DELEGATION_CARD_CLASS_NAME} tw-p-4 tw-text-iron-100 tw-transition-colors hover:tw-border-white/10 hover:tw-bg-iron-900 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-flex-row sm:tw-justify-start`}
               onClick={() => {
                 const newSection = getCollectionSection(c.contract);
                 if (newSection !== undefined) {
@@ -168,10 +173,8 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   return (
     <div className="tw-w-full">
       <header className="tw-mb-12">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-          Delegation Center
-        </h1>
-        <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
+        <h1 className={DELEGATION_PAGE_TITLE_CLASS_NAME}>Delegation Center</h1>
+        <p className={DELEGATION_PAGE_DESCRIPTION_CLASS_NAME}>
           Register wallet relationships for NFT utility and 6529 collection
           metrics. These actions do not transfer NFTs.
         </p>
@@ -181,7 +184,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         {actionCards.map((card) => (
           <article
             key={card.title}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/70 tw-p-5 tw-transition-colors hover:tw-border-white/[0.08] hover:tw-bg-iron-900 sm:tw-p-6"
+            className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 tw-transition-colors hover:tw-border-white/[0.08] hover:tw-bg-iron-900 sm:tw-p-6`}
           >
             <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
               {card.title}

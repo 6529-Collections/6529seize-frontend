@@ -1,11 +1,12 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState, type JSX } from "react";
 import GroupCreate from "./create/GroupCreate";
-import { AuthContext } from "@/components/auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useSetTitle } from "@/contexts/TitleContext";
 
 enum GroupsViewMode {
   CREATE = "CREATE",
@@ -72,26 +73,29 @@ export default function Groups() {
           <button
             onClick={() => onViewModeChange(GroupsViewMode.VIEW)}
             type="button"
-            className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50">
+            className="-tw-ml-2 tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
+          >
             <svg
-              className="tw-flex-shrink-0 tw-w-5 tw-h-5"
+              className="tw-h-5 tw-w-5 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M20 12H4M4 12L10 18M4 12L10 6"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
-                strokeLinejoin="round"></path>
+                strokeLinejoin="round"
+              ></path>
             </svg>
             <span>Back</span>
           </button>
         )}
       </div>
 
-      <h1>Groups</h1>
+      <h1 className={NETWORK_PAGE_TITLE_CLASSES}>Groups</h1>
 
       {components[viewMode]}
     </div>

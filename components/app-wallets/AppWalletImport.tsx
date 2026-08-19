@@ -1,7 +1,6 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import styles from "./AppWallet.module.css";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +18,12 @@ import {
   useAppWallets,
 } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_FIELD_CLASS_NAME,
+  DELEGATION_PAGE_CONTAINER_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "@/components/delegation/delegation-ui";
 
 const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
 const MNEMONIC_WORD_FIELD_IDS = Array.from(
@@ -37,62 +42,52 @@ export default function AppWalletImport() {
 
   if (!appWalletsSupported) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
+      <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
         <AppWalletsUnsupported />
       </div>
     );
   }
 
   return (
-    <>
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-5 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
-            <Link
-              className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-no-underline"
-              href="/tools/app-wallets"
-            >
-              <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
-              Back to App Wallets
-            </Link>
-          </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
-            <h1>Import App Wallet</h1>
-          </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
-            <button
-              type="button"
-              onClick={() => setIsMnemonic(true)}
-              className={`tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65] ${
-                isMnemonic
-                  ? "tw-border-[#0dcaf0] tw-bg-[#0dcaf0] tw-text-black enabled:hover:tw-border-[#25cff2] enabled:hover:tw-bg-[#31d2f2]"
-                  : "tw-border-[#0dcaf0] tw-bg-transparent tw-text-[#0dcaf0] enabled:hover:tw-bg-[#0dcaf0] enabled:hover:tw-text-black"
-              }`}
-            >
-              Mnemonic
-            </button>
-          </div>
-          <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
-            <button
-              type="button"
-              onClick={() => setIsMnemonic(false)}
-              className={`tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65] ${
-                isMnemonic
-                  ? "tw-border-[#0dcaf0] tw-bg-transparent tw-text-[#0dcaf0] enabled:hover:tw-bg-[#0dcaf0] enabled:hover:tw-text-black"
-                  : "tw-border-[#0dcaf0] tw-bg-[#0dcaf0] tw-text-black enabled:hover:tw-border-[#25cff2] enabled:hover:tw-bg-[#31d2f2]"
-              }`}
-            >
-              Private Key
-            </button>
-          </div>
-        </div>
+    <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
+      <Link
+        className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors"
+        href="/tools/app-wallets"
+      >
+        <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
+        Back to App Wallets
+      </Link>
+      <h1 className={`${DELEGATION_PAGE_TITLE_CLASS_NAME} tw-mt-5`}>
+        Import App Wallet
+      </h1>
+      <div className="tw-mt-6 tw-grid tw-grid-cols-2 tw-gap-3">
+        <Button
+          type="button"
+          onClick={() => setIsMnemonic(true)}
+          variant={isMnemonic ? "action" : "secondary"}
+          size="lg"
+          fullWidth
+        >
+          Mnemonic
+        </Button>
+        <Button
+          type="button"
+          onClick={() => setIsMnemonic(false)}
+          variant={isMnemonic ? "secondary" : "action"}
+          size="lg"
+          fullWidth
+        >
+          Private Key
+        </Button>
       </div>
-      {isMnemonic ? <AppWalletImportMnemonic /> : <AppWalletImportPrivateKey />}
-    </>
+      <div className="tw-mt-4">
+        {isMnemonic ? (
+          <AppWalletImportMnemonic />
+        ) : (
+          <AppWalletImportPrivateKey />
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -135,78 +130,71 @@ function AppWalletImportMnemonic() {
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-5 tw-pt-3 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
+    <section className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}>
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-3 md:tw-grid-cols-4">
         {phrase.map((w, i) => (
-          <div
-            className="tw-relative tw-w-1/2 tw-max-w-full tw-flex-none tw-px-3 tw-pb-2 tw-pt-2 min-[576px]:tw-w-1/3 min-[768px]:tw-w-1/4"
+          <label
+            className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25 tw-px-3 tw-transition-colors focus-within:tw-border-primary-400/70 focus-within:tw-ring-2 focus-within:tw-ring-primary-400/20"
             key={MNEMONIC_WORD_FIELD_IDS[i]}
+            htmlFor={MNEMONIC_WORD_FIELD_IDS[i]}
           >
-            <div className={styles["phrase"]}>
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-gap-2 tw-px-3">
-                  <span className="tw-font-extralight tw-text-iron-400">
-                    {i + 1}
-                  </span>
-                  <span>
-                    <input
-                      autoFocus={i === currentFocus}
-                      type="text"
-                      placeholder={`word ${i + 1}`}
-                      value={w}
-                      className={styles["importWalletWordInput"]}
-                      onChange={(e) => {
-                        const newPhrase = e.target.value;
-                        if (/^[a-z]*$/.test(newPhrase)) {
-                          setPhrase((prev) => {
-                            const currentPhrase = [...prev];
-                            currentPhrase[i] = newPhrase;
-                            return currentPhrase;
-                          });
-                        } else {
-                          setToast({
-                            message:
-                              "Mnemonic words can only use lowercase letters.",
-                            type: "error",
-                          });
-                        }
-                      }}
-                      onFocus={() => setCurrentFocus(i)}
-                    />
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+            <span className="tw-shrink-0 tw-text-xs tw-text-iron-500">
+              {i + 1}
+            </span>
+            <input
+              id={MNEMONIC_WORD_FIELD_IDS[i]}
+              ref={i === 0 ? inputRef : undefined}
+              autoFocus={i === currentFocus}
+              type="password"
+              autoComplete="off"
+              placeholder={`word ${i + 1}`}
+              value={w}
+              className="tw-h-11 tw-min-w-0 tw-flex-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-text-iron-100 tw-outline-none placeholder:tw-text-iron-600"
+              onChange={(e) => {
+                const newPhrase = e.target.value;
+                if (/^[a-z]*$/.test(newPhrase)) {
+                  setPhrase((prev) => {
+                    const currentPhrase = [...prev];
+                    currentPhrase[i] = newPhrase;
+                    return currentPhrase;
+                  });
+                } else {
+                  setToast({
+                    message: "Mnemonic words can only use lowercase letters.",
+                    type: "error",
+                  });
+                }
+              }}
+              onFocus={() => setCurrentFocus(i)}
+            />
+          </label>
         ))}
       </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
-          <Button
-            type="button"
-            onClick={clear}
-            disabled={!phrase.some(Boolean) && !isCompletePhrase()}
-            variant="secondary"
-            size="md"
-          >
-            Clear
-          </Button>
-          <Button
-            type="button"
-            disabled={!isCompletePhrase() || isReadonly}
-            onClick={validate}
-            variant="action"
-            size="md"
-          >
-            Validate
-          </Button>
-        </div>
+      <div className="tw-mt-5 tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <Button
+          type="button"
+          onClick={clear}
+          disabled={!phrase.some(Boolean) && !isCompletePhrase()}
+          variant="secondary"
+          size="md"
+        >
+          Clear
+        </Button>
+        <Button
+          type="button"
+          disabled={!isCompletePhrase() || isReadonly}
+          onClick={validate}
+          variant="action"
+          size="md"
+        >
+          Validate
+        </Button>
       </div>
       {error && <ValidationError error={error} />}
       {validatedWallet && (
         <ValidatedWallet wallet={validatedWallet} mnemonic={phrase.join(" ")} />
       )}
-    </div>
+    </section>
   );
 }
 
@@ -241,48 +229,44 @@ function AppWalletImportPrivateKey() {
   };
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-5 tw-pt-3 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3 tw-pb-2 tw-pt-2">
-          <div className={styles["phrase"]}>
-            <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-              <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-gap-2 tw-px-3">
-                <input
-                  ref={inputRef}
-                  autoFocus
-                  disabled={isReadonly}
-                  type="text"
-                  placeholder="private key"
-                  value={privateKey}
-                  className={styles["importWalletWordInput"]}
-                  onChange={(e) => setPrivateKey(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-        <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
-          <Button
-            type="button"
-            onClick={clear}
-            disabled={!privateKey}
-            variant="secondary"
-            size="md"
-          >
-            Clear
-          </Button>
-          <Button
-            type="button"
-            disabled={!privateKey || isReadonly}
-            onClick={validate}
-            variant="action"
-            size="md"
-          >
-            Validate
-          </Button>
-        </div>
+    <section className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}>
+      <label
+        htmlFor="app-wallet-private-key"
+        className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200"
+      >
+        Private Key
+      </label>
+      <input
+        id="app-wallet-private-key"
+        ref={inputRef}
+        autoFocus
+        disabled={isReadonly}
+        type="password"
+        autoComplete="off"
+        placeholder="private key"
+        value={privateKey}
+        className={DELEGATION_FIELD_CLASS_NAME}
+        onChange={(e) => setPrivateKey(e.target.value)}
+      />
+      <div className="tw-mt-5 tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <Button
+          type="button"
+          onClick={clear}
+          disabled={!privateKey}
+          variant="secondary"
+          size="md"
+        >
+          Clear
+        </Button>
+        <Button
+          type="button"
+          disabled={!privateKey || isReadonly}
+          onClick={validate}
+          variant="action"
+          size="md"
+        >
+          Validate
+        </Button>
       </div>
       {error && <ValidationError error={error} />}
       {validatedWallet && (
@@ -291,19 +275,18 @@ function AppWalletImportPrivateKey() {
           mnemonic={MNEMONIC_UNAVAILABLE}
         />
       )}
-    </div>
+    </section>
   );
 }
 
 function ValidationError(props: Readonly<{ error: string }>) {
   return (
-    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
-      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3">
-        {props.error}
-      </div>
-      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3">
-        - Clear the form and try again
-      </div>
+    <div
+      className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/10 tw-p-4 tw-text-sm tw-leading-6 tw-text-red"
+      role="alert"
+    >
+      <div>{props.error}</div>
+      <div>- Clear the form and try again</div>
     </div>
   );
 }
@@ -315,15 +298,15 @@ function ValidatedWallet(
   }>
 ) {
   return (
-    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-      <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-none tw-items-center tw-gap-2 tw-px-3">
-        <FontAwesomeIcon icon={faCheckCircle} height={22} color="#00ff00" />
+    <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-500/25 tw-bg-emerald-500/10 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-200">
+      <div className="tw-flex tw-items-center tw-gap-2 tw-font-semibold tw-text-emerald-300">
+        <FontAwesomeIcon icon={faCheckCircle} height={20} />
         Private Key is Valid!
       </div>
-      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3 tw-pt-2">
+      <div className="tw-mt-2 tw-break-all">
         - Address: {props.wallet.address}
       </div>
-      <div className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3 tw-pt-3">
+      <div className="tw-mt-3">
         <ImportWallet wallet={props.wallet} mnemonic={props.mnemonic} />
       </div>
     </div>
