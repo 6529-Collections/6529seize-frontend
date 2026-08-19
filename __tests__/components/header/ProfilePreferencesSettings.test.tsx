@@ -101,7 +101,7 @@ describe("ProfilePreferencesSettings", () => {
     render(<ProfilePreferencesSettings isOpen onClose={jest.fn()} />);
     await screen.findByText("Subscription coverage");
 
-    await user.click(screen.getByRole("radio", { name: /Essential only/i }));
+    await user.click(screen.getByRole("radio", { name: /^Essential\b/i }));
 
     await waitFor(() => {
       expect(

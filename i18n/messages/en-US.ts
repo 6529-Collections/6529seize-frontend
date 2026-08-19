@@ -2198,11 +2198,11 @@ export const EN_US_MESSAGES = {
   "profilePreferences.dm.createRetry": "Please try again.",
   "profilePreferences.notifications.heading": "Notifications",
   "profilePreferences.notifications.description":
-    "Choose between all notifications and essential account notices only.",
+    "Choose between All and Essential notifications.",
   "profilePreferences.notifications.ALL.label": "All",
   "profilePreferences.notifications.ALL.description":
     "Receive essential account notices plus the optional categories selected below.",
-  "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential only",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential",
   "profilePreferences.notifications.ESSENTIAL_ONLY.description":
     "Receive only essential security and account notifications. Direct messages remain available but won’t generate notifications.",
   "profilePreferences.notifications.paused": "Paused",
