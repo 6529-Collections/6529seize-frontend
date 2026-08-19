@@ -61,7 +61,6 @@ export default function Footer() {
           "@6529Collections"
         )}
         {printSeparator()}
-        {printSeparator()}
         {printLinkWithImage(
           "https://github.com/6529-Collections",
           "/github_w.png",
