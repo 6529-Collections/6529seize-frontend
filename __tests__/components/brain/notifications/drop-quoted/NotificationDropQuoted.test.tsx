@@ -84,6 +84,18 @@ describe("NotificationDropQuoted", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it("does not render when the related drops field is missing", () => {
+    const { container } = render(
+      <NotificationDropQuoted
+        notification={{ created_at: Date.now() } as never}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("navigates on reply click", async () => {
     const user = userEvent.setup();
     render(
@@ -91,7 +103,6 @@ describe("NotificationDropQuoted", () => {
         notification={notification}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     await user.click(screen.getByText("reply"));
@@ -105,7 +116,6 @@ describe("NotificationDropQuoted", () => {
         notification={notification}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     await user.click(screen.getByText("quote"));

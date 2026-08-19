@@ -17,7 +17,9 @@ export default function NotificationIdentityMentioned({
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
-  const drop = notification.related_drops[0];
+  const drop = Array.isArray(notification.related_drops)
+    ? notification.related_drops[0]
+    : undefined;
 
   if (!drop) {
     return null;

@@ -65,6 +65,18 @@ describe("NotificationIdentityMentioned", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it("does not render when the related drops field is missing", () => {
+    const { container } = render(
+      <NotificationIdentityMentioned
+        notification={{ ...notification, related_drops: undefined } as never}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("calls navigation on drop actions", () => {
     const push = jest.fn();
     (mockUseRouter as jest.Mock).mockReturnValue({ push });
@@ -73,7 +85,6 @@ describe("NotificationIdentityMentioned", () => {
         notification={notification as any}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     expect(push).toHaveBeenCalledWith("/waves/wave?serialNo=1");
