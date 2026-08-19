@@ -272,10 +272,16 @@ const tailwindConfig: Config = {
         "@media (any-hover: hover)",
         "body[data-fine-pointer] &",
       ]);
-      addVariant(
-        "touch-only",
-        "@media (any-hover: none) and (any-pointer: coarse) { body:not([data-fine-pointer]) & }"
-      );
+      // The second branch is the escape hatch for browsers that deny
+      // `(hover: hover) and (pointer: fine)` while a mouse is demonstrably in
+      // use: `hoverOnlyWhenSupported` wraps every `group-hover:` utility in
+      // that query, so the `desktop-hover` override above cannot fire there
+      // either, and `data-fine-pointer` alone would leave hover-revealed
+      // controls with no reachable state at all. See touch-first.helpers.ts.
+      addVariant("touch-only", [
+        "@media (any-hover: none) and (any-pointer: coarse) { body:not([data-fine-pointer]) & }",
+        "@media (any-hover: none) and (any-pointer: coarse) { body[data-hover-unreliable] & }",
+      ]);
     }),
   ],
 };

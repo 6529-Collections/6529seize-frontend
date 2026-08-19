@@ -71,6 +71,7 @@ describe("behavioral fine-pointer latch", () => {
   afterEach(() => {
     defineMaxTouchPoints(0);
     document.body.removeAttribute("data-fine-pointer");
+    document.body.removeAttribute("data-hover-unreliable");
     localStorage.removeItem("6529-fine-pointer");
   });
 
@@ -324,6 +325,69 @@ describe("behavioral fine-pointer latch", () => {
     } finally {
       nowSpy.mockRestore();
     }
+  });
+
+  /**
+   * Tailwind ships every `group-hover:` utility inside
+   * `(hover: hover) and (pointer: fine)`, so on a browser that denies that
+   * query the `desktop-hover` override cannot fire — and `data-fine-pointer`
+   * alone would also switch off the always-visible `touch-only` treatment,
+   * leaving hover-revealed controls unreachable by any input.
+   */
+  it("tags the body hover-unreliable when the browser denies the CSS hover query", () => {
+    const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+    const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+    const sentinel = getSentinel();
+
+    expect(helpers.hasUnreliableHoverReporting()).toBe(false);
+
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+
+    expect(helpers.hasUnreliableHoverReporting()).toBe(true);
+    expect(document.body.getAttribute("data-fine-pointer")).toBe("true");
+    expect(document.body.getAttribute("data-hover-unreliable")).toBe("true");
+
+    unsubscribe();
+    restore();
+  });
+
+  it("leaves the hover-unreliable tag off when the browser reports hover honestly", () => {
+    defineMatchMedia({
+      "(any-pointer: coarse)": true,
+      "(any-pointer: fine)": true,
+      "(any-hover: hover)": true,
+      "(hover: hover)": true,
+      "(pointer: fine)": true,
+      "(hover: hover) and (pointer: fine)": true,
+    });
+
+    const { helpers, getSentinel, restore } = loadHelpersWithSentinel();
+    const unsubscribe = helpers.subscribeToTouchFirstChanges(jest.fn());
+    const sentinel = getSentinel();
+
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+    sentinel!({ isTrusted: true, pointerType: "mouse" });
+
+    expect(document.body.getAttribute("data-fine-pointer")).toBe("true");
+    expect(helpers.hasUnreliableHoverReporting()).toBe(false);
+    expect(document.body.hasAttribute("data-hover-unreliable")).toBe(false);
+
+    unsubscribe();
+    restore();
+  });
+
+  it("tags a hydrated latch on a mis-reporting browser without waiting for events", () => {
+    localStorage.setItem("6529-fine-pointer", "1");
+
+    const { helpers, restore } = loadHelpersWithSentinel();
+
+    expect(helpers.hasUnreliableHoverReporting()).toBe(true);
+    expect(document.body.getAttribute("data-hover-unreliable")).toBe("true");
+
+    restore();
   });
 
   it("uninstalls the sentinel when the last subscriber leaves", () => {

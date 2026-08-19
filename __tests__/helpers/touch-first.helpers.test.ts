@@ -250,17 +250,30 @@ describe("touch-first helpers", () => {
 
       const unsubscribe = subscribeToTouchFirstChanges(onChange);
       expect(createdMqls.length).toBeGreaterThan(0);
-      for (const mql of createdMqls) {
-        expect(mql.addEventListener).toHaveBeenCalledWith("change", onChange);
+      // The registered handler also refreshes the hover-reliability tag, so
+      // assert it forwards to the subscriber rather than that it IS the
+      // subscriber.
+      const registered = createdMqls.map((mql) => {
+        const call = (mql.addEventListener as jest.Mock).mock.calls.find(
+          ([type]) => type === "change"
+        );
+        expect(call).toBeDefined();
+        return call![1] as () => void;
+      });
+
+      for (const handler of registered) {
+        onChange.mockClear();
+        handler();
+        expect(onChange).toHaveBeenCalledTimes(1);
       }
 
       unsubscribe();
-      for (const mql of createdMqls) {
+      createdMqls.forEach((mql, index) => {
         expect(mql.removeEventListener).toHaveBeenCalledWith(
           "change",
-          onChange
+          registered[index]
         );
-      }
+      });
     });
 
     it("is a no-op without matchMedia", () => {
