@@ -533,6 +533,19 @@ jobs:
             mapfile -t related_jest_tests < "${related_tests_file}"
             rm -f "${related_tests_file}"
 
+            valid_related_tests=()
+            for related_test in "${related_jest_tests[@]}"; do
+              if [ -z "$related_test" ]; then
+                continue
+              fi
+              if [ ! -f "$related_test" ]; then
+                echo "Skipping non-file Jest discovery output: $related_test"
+                continue
+              fi
+              valid_related_tests+=("$related_test")
+            done
+            related_jest_tests=("${valid_related_tests[@]}")
+
             if [ "${#jest_test_files[@]}" -gt 0 ]; then
               declare -A direct_jest_paths=()
               for test_file in "${jest_test_files[@]}"; do
@@ -540,9 +553,6 @@ jobs:
               done
               filtered_related_tests=()
               for related_test in "${related_jest_tests[@]}"; do
-                if [ -z "$related_test" ]; then
-                  continue
-                fi
                 related_path="$(realpath "$related_test")"
                 if [ -n "${direct_jest_paths[$related_path]:-}" ]; then
                   echo "Skipping related Jest duplicate already selected directly: $related_test"
