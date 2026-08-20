@@ -151,22 +151,30 @@ const formatTimestamp = (
 const clampConfidence = (value: number): number =>
   Math.min(1, Math.max(0, value));
 
-const getAiRecommendationLabel = (
+export const getAiRecommendationText = (
   item: ApiContentModerationQueueItem,
   locale: SupportedLocale
 ): string => {
-  const recommendation = formatEnum(item.ai_recommendation ?? "");
+  const rawRecommendation = item.ai_recommendation?.trim();
+  if (!rawRecommendation) {
+    return t(locale, "contentModeration.moderator.noAiRecommendation");
+  }
+  const recommendation = formatEnum(rawRecommendation);
   if (
     typeof item.ai_confidence !== "number" ||
     !Number.isFinite(item.ai_confidence)
   ) {
-    return recommendation;
+    return t(locale, "contentModeration.moderator.aiRecommendation", {
+      value: recommendation,
+    });
   }
-  return `${recommendation} (${formatPercent(
-    locale,
-    clampConfidence(item.ai_confidence),
-    0
-  )})`;
+  return t(locale, "contentModeration.moderator.aiRecommendation", {
+    value: `${recommendation} (${formatPercent(
+      locale,
+      clampConfidence(item.ai_confidence),
+      0
+    )})`,
+  });
 };
 
 function ModerationQueueCard({
@@ -325,12 +333,7 @@ function ModerationQueueCard({
           {t(locale, "contentModeration.moderator.aiAssessment")}
         </p>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">
-          {item.ai_recommendation !== null &&
-          item.ai_recommendation !== undefined
-            ? t(locale, "contentModeration.moderator.aiRecommendation", {
-                value: getAiRecommendationLabel(item, locale),
-              })
-            : t(locale, "contentModeration.moderator.noAiRecommendation")}
+          {getAiRecommendationText(item, locale)}
         </p>
         {typeof item.ai_category === "string" &&
           item.ai_category.length > 0 && (
