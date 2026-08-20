@@ -1,12 +1,10 @@
 "use client";
 
-import Button from "@/components/utils/button/Button";
 import DotLoader from "../dotLoader/DotLoader";
 import AppWalletCard from "./AppWalletCard";
+import AppWalletActionButton from "./AppWalletActionButton";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
@@ -56,27 +54,25 @@ export default function AppWallets() {
 
     return (
       <>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-flex sm:tw-items-center sm:tw-gap-3">
           <CreateAppWalletModal
             show={showCreateModal}
             onHide={() => setShowCreateModal(false)}
           />
-          <Button
-            type="button"
+          <AppWalletActionButton
+            action="create"
             onClick={() => setShowCreateModal(true)}
-            variant="action"
-            size="md"
+            className="sm:tw-w-auto"
           >
-            <FontAwesomeIcon icon={faPlusCircle} height={16} /> Create Wallet
-          </Button>
-          <Button
-            type="button"
+            Create Wallet
+          </AppWalletActionButton>
+          <AppWalletActionButton
+            action="import"
             onClick={() => router.push("/tools/app-wallets/import-wallet")}
-            variant="secondary"
-            size="md"
+            className="sm:tw-w-auto"
           >
-            <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
-          </Button>
+            Import Wallet
+          </AppWalletActionButton>
         </div>
         <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           {printWallets()}
