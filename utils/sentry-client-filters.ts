@@ -50,6 +50,7 @@ export {
   shouldFilterInjectedWalletCollision,
   shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterTalismanExtensionOnboardingError,
+  shouldFilterWalletConnectSessionSettlePublishFailure,
   shouldFilterWalletConnectStaleSessionTopic,
 } from "./sentry-client-filters/wallets";
 export {

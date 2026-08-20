@@ -36,6 +36,7 @@ import {
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
+  shouldFilterWalletConnectSessionSettlePublishFailure,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryClientEvent,
@@ -338,6 +339,8 @@ describe("sentry-client-filters", () => {
     "t?.startsWith is not a function";
   const walletConnectStaleSessionTopicMessage =
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
+  const walletConnectSessionSettlePublishFailureMessage =
+    "Failed to publish payload, please try again. id:1234567890 tag:1103";
   const extensionMessagingConnectionFailureMessage =
     "Could not establish connection. Receiving end does not exist.";
   const browserExtensionWalletRejectionMessage = "User rejected the request.";
@@ -2442,6 +2445,65 @@ describe("sentry-client-filters", () => {
         },
       ],
     },
+    ...overrides,
+  });
+
+  const walletConnectSessionSettleSymbolicatedFrames: SentryStackFrame[] = [
+    {
+      filename:
+        "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+      abs_path:
+        "turbopack:///[project]/node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+      function: "r",
+      in_app: false,
+    },
+    {
+      filename:
+        "node_modules/.pnpm/@walletconnect+sign-client@2.23.9/node_modules/@walletconnect/sign-client/src/controllers/engine.ts",
+      abs_path:
+        "turbopack:///[project]/node_modules/.pnpm/@walletconnect+sign-client@2.23.9/node_modules/@walletconnect/sign-client/src/controllers/engine.ts",
+      function: "<anonymous>",
+      in_app: false,
+    },
+  ];
+  const walletConnectSessionSettleBreadcrumbs: TestSentryBreadcrumb[] = [
+    {
+      type: "default",
+      category: "ui.click",
+      level: "info",
+      message: "body.capacitor-native > w3m-modal.open",
+    },
+    {
+      type: "default",
+      category: "console",
+      level: "error",
+      message: "[object Object]",
+      data: {
+        arguments: [{ context: "core/publisher", level: 50 }],
+        logger: "console",
+      },
+    },
+  ];
+  const createWalletConnectSessionSettlePublishFailureEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    transaction: "/",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: walletConnectSessionSettlePublishFailureMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: walletConnectSessionSettleSymbolicatedFrames,
+          },
+        },
+      ],
+    },
+    breadcrumbs: walletConnectSessionSettleBreadcrumbs,
     ...overrides,
   });
 
@@ -7673,6 +7735,113 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterWalletConnectStaleSessionTopic(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters the exact WalletConnect session-settlement publish failure", () => {
+    // Arrange
+    const event = createWalletConnectSessionSettlePublishFailureEvent();
+
+    // Act
+    const result = shouldFilterWalletConnectSessionSettlePublishFailure(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the pre-symbolication WalletConnect session-settlement publish failure", () => {
+    // Arrange
+    const event = createWalletConnectSessionSettlePublishFailureEvent();
+    event.exception!.values![0]!.stacktrace = {
+      frames: [
+        {
+          filename:
+            "app:///_next/static/chunks/runtime-a.js",
+          abs_path:
+            "app:///_next/static/chunks/runtime-a.js",
+          function: "r",
+          in_app: true,
+        },
+        {
+          filename: "app:///_next/static/chunks/app-b.js",
+          abs_path: "app:///_next/static/chunks/app-b.js",
+          in_app: true,
+        },
+      ],
+    };
+
+    // Act
+    const result = shouldFilterWalletConnectSessionSettlePublishFailure(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each<
+    [string, (event: TestSentryClientEvent) => void]
+  >([
+    [
+      "another WalletConnect payload tag",
+      (event) => {
+        event.exception!.values![0]!.value =
+          "Failed to publish payload, please try again. id:1234567890 tag:1105";
+      },
+    ],
+    [
+      "a message suffix",
+      (event) => {
+        event.exception!.values![0]!.value =
+          `${walletConnectSessionSettlePublishFailureMessage} retrying`;
+      },
+    ],
+    [
+      "a handled rejection",
+      (event) => {
+        event.exception!.values![0]!.mechanism!.handled = true;
+      },
+    ],
+    [
+      "another mechanism",
+      (event) => {
+        event.exception!.values![0]!.mechanism!.type =
+          "auto.browser.global_handlers.onerror";
+      },
+    ],
+    [
+      "missing publisher evidence",
+      (event) => {
+        event.breadcrumbs = [walletConnectSessionSettleBreadcrumbs[0]!];
+      },
+    ],
+    [
+      "an extra exception",
+      (event) => {
+        event.exception!.values!.push({
+          type: "Error",
+          value: "Application wallet state failed.",
+        });
+      },
+    ],
+    [
+      "an application-owned frame",
+      (event) => {
+        event.exception!.values![0]!.stacktrace!.frames!.push({
+          filename:
+            "webpack-internal:///(app-pages-browser)/./services/auth/walletConnectSession.ts",
+          function: "settleWalletConnectSession",
+          in_app: true,
+        });
+      },
+    ],
+  ])("keeps the publish-failure near miss with %s", (_, mutateEvent) => {
+    // Arrange
+    const event = createWalletConnectSessionSettlePublishFailureEvent();
+    mutateEvent(event);
+
+    // Act
+    const result = shouldFilterWalletConnectSessionSettlePublishFailure(event);
 
     // Assert
     expect(result).toBe(false);

@@ -28,12 +28,14 @@ import {
   getBreadcrumbMessages,
   getBreadcrumbValues,
   getEventMessage,
+  getFramePaths,
   getHintExceptionMessage,
   getHintExceptionStack,
   getNumericValue,
   getSerializedExceptionStack,
   getSerializedObjectRejection,
   getStringValue,
+  isRecord,
   isObjectCapturedPromiseRejectionMessage,
   normalizeErrorPrefix,
 } from "./value-utils";
@@ -60,6 +62,21 @@ import {
   hasWalletLinkWebSocketUnhandledRejectionSignature,
   isCoinbaseWalletLinkWebSocket1006Message,
 } from "./walletlink-websocket";
+
+const walletConnectSessionSettlePublishFailurePattern =
+  /^Failed to publish payload, please try again\. id:[0-9]+ tag:1103$/;
+const walletConnectPublisherBreadcrumbContext = "core/publisher";
+const walletConnectModalBreadcrumbMessage =
+  "body.capacitor-native > w3m-modal.open";
+const nextStaticChunkPathToken = "/_next/static/chunks/";
+const walletConnectEnginePathTokens = [
+  "@walletconnect/sign-client/src/controllers/engine.ts",
+  "@walletconnect+sign-client",
+];
+const sentryBrowserHelperPathTokens = [
+  "@sentry/browser/src/helpers.ts",
+  "@sentry+browser",
+];
 
 function isWalletConnectStaleSessionTopicMessage(value: string): boolean {
   const normalized = normalizeErrorPrefix(value);
@@ -96,6 +113,108 @@ function hasWalletConnectStaleSessionFrame(
       );
     })
   );
+}
+
+function isWalletConnectEnginePath(path: string): boolean {
+  return (
+    path.includes("/src/controllers/engine.ts") &&
+    walletConnectEnginePathTokens.some((token) => path.includes(token))
+  );
+}
+
+function isSentryBrowserHelperPath(path: string): boolean {
+  return (
+    path.includes("/src/helpers.ts") &&
+    sentryBrowserHelperPathTokens.some((token) => path.includes(token))
+  );
+}
+
+function isWalletConnectPublishVendorFrame(frame: SentryStackFrame): boolean {
+  const paths = getFramePaths(frame);
+  return (
+    paths.length > 0 &&
+    paths.every(
+      (path) =>
+        isWalletConnectEnginePath(path) || isSentryBrowserHelperPath(path)
+    )
+  );
+}
+
+function isRawNextStaticChunkFrame(frame: SentryStackFrame): boolean {
+  const paths = getFramePaths(frame);
+  return (
+    paths.length > 0 &&
+    paths.every((path) => path.includes(nextStaticChunkPathToken))
+  );
+}
+
+function hasWalletConnectSessionSettlePublishStack(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!Array.isArray(frames) || frames.length === 0) {
+    return false;
+  }
+
+  if (frames.every(isRawNextStaticChunkFrame)) {
+    return true;
+  }
+
+  return (
+    frames.some((frame) => getFramePaths(frame).some(isWalletConnectEnginePath)) &&
+    frames.every(isWalletConnectPublishVendorFrame)
+  );
+}
+
+function isWalletConnectPublisherBreadcrumb(
+  breadcrumb: SentryBreadcrumb
+): boolean {
+  if (
+    breadcrumb.type !== "default" ||
+    breadcrumb.category !== "console" ||
+    breadcrumb.level !== "error" ||
+    breadcrumb.message !== "[object Object]" ||
+    breadcrumb.data?.["logger"] !== "console"
+  ) {
+    return false;
+  }
+
+  const args = breadcrumb.data["arguments"];
+  return (
+    Array.isArray(args) &&
+    args.some(
+      (argument) =>
+        isRecord(argument) &&
+        argument["context"] === walletConnectPublisherBreadcrumbContext
+    )
+  );
+}
+
+function isWalletConnectModalBreadcrumb(breadcrumb: SentryBreadcrumb): boolean {
+  return (
+    breadcrumb.type === "default" &&
+    breadcrumb.category === "ui.click" &&
+    breadcrumb.level === "info" &&
+    breadcrumb.message === walletConnectModalBreadcrumbMessage
+  );
+}
+
+function hasWalletConnectSessionSettlePublishBreadcrumbs(
+  event: SentryClientEvent
+): boolean {
+  let hasSeenModal = false;
+
+  for (const breadcrumb of getBreadcrumbValues(event)) {
+    if (isWalletConnectModalBreadcrumb(breadcrumb)) {
+      hasSeenModal = true;
+      continue;
+    }
+
+    if (hasSeenModal && isWalletConnectPublisherBreadcrumb(breadcrumb)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function matchesWalletCollisionPattern(value: string): boolean {
@@ -572,6 +691,36 @@ export function shouldFilterWalletConnectStaleSessionTopic(
   }
 
   return !hasAppOwnedSourceEvidence(event, value, hint);
+}
+
+export function shouldFilterWalletConnectSessionSettlePublishFailure(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const values = event.exception?.values;
+  if (values?.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
+  if (
+    value?.type !== "Error" ||
+    typeof value.value !== "string" ||
+    !walletConnectSessionSettlePublishFailurePattern.test(value.value) ||
+    !hasBrowserUnhandledRejectionMechanism(value)
+  ) {
+    return false;
+  }
+
+  if (!hasWalletConnectSessionSettlePublishStack(value.stacktrace?.frames)) {
+    return false;
+  }
+
+  if (hasAppOwnedSourceEvidence(event, value, hint)) {
+    return false;
+  }
+
+  return hasWalletConnectSessionSettlePublishBreadcrumbs(event);
 }
 
 export function shouldFilterInjectedProviderProxyStartsWithError(

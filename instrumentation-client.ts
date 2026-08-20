@@ -56,6 +56,7 @@ import {
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
+  shouldFilterWalletConnectSessionSettlePublishFailure,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
@@ -208,6 +209,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterWalletConnectStaleSessionTopic(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterWalletConnectSessionSettlePublishFailure(event, hint)) {
     return true;
   }
 
