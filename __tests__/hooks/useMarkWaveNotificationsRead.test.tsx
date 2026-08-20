@@ -403,6 +403,75 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(apiPostWithBodyMock).not.toHaveBeenCalled();
   });
 
+  it("cancels a guarded optimistic DM read skipped behind a sent coalesced read", async () => {
+    const firstRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+    const firstOperation = {
+      id: 9,
+      profileId: "profile-1",
+      waveId: "wave-1",
+      readThroughSerialNo: 40,
+    };
+    const guardedOperation = {
+      id: 10,
+      profileId: "profile-1",
+      waveId: "wave-1",
+      readThroughSerialNo: 41,
+    };
+    const firstReadState = {
+      profile_id: "profile-1",
+      wave_id: "wave-1",
+      unread_count: 1,
+      first_unread_drop_serial_no: 41,
+      latest_drop_serial_no: 41,
+      latest_read_serial_no: 40,
+      version: 3,
+    };
+    let shouldSendGuardedRead = true;
+
+    mockBeginDmRead
+      .mockReturnValueOnce(firstOperation)
+      .mockReturnValueOnce(guardedOperation);
+    apiPostWithBodyMock.mockImplementationOnce(async () => {
+      await firstRequest.promise;
+      return { dm_unread_state: firstReadState };
+    });
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-a",
+      connectedProfileId: "profile-1",
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    const firstPromise = result.current("wave-1", {
+      readThroughSerialNo: 40,
+    });
+    const guardedPromise = result.current("wave-1", {
+      readThroughSerialNo: 41,
+      shouldSend: () => shouldSendGuardedRead,
+    });
+    shouldSendGuardedRead = false;
+    firstRequest.resolve();
+
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(guardedPromise).resolves.toBe("sent");
+
+    expect(apiPostWithBodyMock).toHaveBeenCalledTimes(1);
+    expect(apiPostWithBodyMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-a" },
+      body: {
+        read_through_serial_no: 40,
+        request_dm_unread_state: true,
+      },
+    });
+    expect(mockApplyDmServerState).toHaveBeenCalledWith(firstReadState);
+    expect(mockCancelDmRead).toHaveBeenCalledTimes(1);
+    expect(mockCancelDmRead).toHaveBeenCalledWith(guardedOperation);
+  });
+
   it("treats a missing active profile proxy as no proxy", async () => {
     const invalidateNotifications = jest.fn();
 
