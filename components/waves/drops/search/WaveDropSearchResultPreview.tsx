@@ -9,7 +9,7 @@ const TOKEN_PATTERN = /(@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])/g;
 const TOKEN_PART_PATTERN = /^(?:@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])$/;
 
 const getTokenDisplayValue = (token: string): string =>
-  `${token[0]}${token.slice(2, -1)}`;
+  `${token.charAt(0)}${token.slice(2, -1)}`;
 
 const highlightMatches = (
   text: string,
