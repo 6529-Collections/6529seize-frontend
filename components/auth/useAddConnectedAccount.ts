@@ -29,6 +29,7 @@ interface UseAddConnectedAccountParams {
   readonly appKitModalOpen: boolean;
   readonly canAddConnectedAccount: boolean;
   readonly disconnect: () => Promise<unknown>;
+  readonly deferDisconnectUntilSelection: boolean;
   readonly getSignOutAllGeneration: () => number;
   readonly hasSignOutAllGenerationChanged: (generation: number) => boolean;
   readonly isActiveAppWalletConnector: boolean;
@@ -48,6 +49,7 @@ export function useAddConnectedAccount({
   appKitModalOpen,
   canAddConnectedAccount,
   disconnect,
+  deferDisconnectUntilSelection,
   getSignOutAllGeneration,
   hasSignOutAllGenerationChanged,
   isActiveAppWalletConnector,
@@ -163,7 +165,11 @@ export function useAddConnectedAccount({
       );
     };
 
-    if (!liveConnectedWallet || isActiveAppWalletConnector) {
+    if (
+      deferDisconnectUntilSelection ||
+      !liveConnectedWallet ||
+      isActiveAppWalletConnector
+    ) {
       openAddConnectedAccountModal();
       return;
     }
@@ -224,6 +230,7 @@ export function useAddConnectedAccount({
     cancelAddConnectedAccount,
     canAddConnectedAccount,
     disconnect,
+    deferDisconnectUntilSelection,
     getSignOutAllGeneration,
     hasSignOutAllGenerationChanged,
     isActiveAppWalletConnector,
