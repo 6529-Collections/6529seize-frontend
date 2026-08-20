@@ -545,11 +545,11 @@ export function DmUnreadStateProvider({
       if (!conversation || conversation.latest_drop_serial_no >= serialNo) {
         return;
       }
-      const pendingSerialNo =
+      const previousPendingSerialNo =
         pendingDropRecoveryByWaveRef.current.get(waveId) ?? 0;
       pendingDropRecoveryByWaveRef.current.set(
         waveId,
-        Math.max(pendingSerialNo, Math.floor(serialNo))
+        Math.max(previousPendingSerialNo, Math.floor(serialNo))
       );
       if (dropRecoveryTimerRef.current !== null) {
         return;
