@@ -268,6 +268,7 @@ function useCreateWaveGroupInlinePanelController({
   readonly setIsCreating: Dispatch<SetStateAction<boolean>>;
   readonly suggestedName: string;
 }) {
+  const locale = useBrowserLocale();
   const resetBuilder = () => {
     setBuilder(
       createInitialInlineGroupBuilderState(
@@ -362,7 +363,9 @@ function useCreateWaveGroupInlinePanelController({
     try {
       const nextPayload: ApiCreateGroup = {
         ...builder.draft,
-        name: suggestedName.trim() || "Wave Group",
+        name:
+          suggestedName.trim() ||
+          t(locale, "waves.create.groups.defaultGroupName"),
       };
 
       const createdGroup = await onCreateGroup(nextPayload);

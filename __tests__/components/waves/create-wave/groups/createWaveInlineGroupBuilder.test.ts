@@ -29,8 +29,19 @@ describe("createWaveInlineGroupBuilder", () => {
       buildInlineGroupName({
         waveName: "My Wave",
         groupLabel: "Who can view",
+        fallbackName: "Wave Group",
       })
     ).toBe("My Wave Who can view");
+  });
+
+  it("uses the localized fallback when the name inputs are empty", () => {
+    expect(
+      buildInlineGroupName({
+        waveName: " ",
+        groupLabel: null,
+        fallbackName: "Localized group",
+      })
+    ).toBe("Localized group");
   });
 
   it("counts configured rule types once per rule family", () => {

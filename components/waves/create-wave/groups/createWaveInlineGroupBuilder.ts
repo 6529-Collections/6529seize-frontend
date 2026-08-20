@@ -242,15 +242,17 @@ export const getInlineGroupDraftSummary = ({
 export const buildInlineGroupName = ({
   waveName,
   groupLabel,
+  fallbackName,
 }: {
   readonly waveName: string | null | undefined;
   readonly groupLabel: string | null | undefined;
+  readonly fallbackName: string;
 }): string => {
   const normalizedWaveName = waveName?.trim() ?? "";
   const normalizedGroupLabel = groupLabel?.trim() ?? "";
 
   if (!normalizedWaveName.length) {
-    return normalizedGroupLabel || "Wave Group";
+    return normalizedGroupLabel || fallbackName;
   }
 
   if (!normalizedGroupLabel.length) {

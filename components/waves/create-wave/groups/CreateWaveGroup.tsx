@@ -143,7 +143,11 @@ export default function CreateWaveGroup({
           summary: defaultLabel,
         }
       : undefined;
-  const suggestedName = buildInlineGroupName({ waveName, groupLabel });
+  const suggestedName = buildInlineGroupName({
+    waveName,
+    groupLabel,
+    fallbackName: t(locale, "waves.create.groups.defaultGroupName"),
+  });
   const labelId = `wave-group-${groupType.toLowerCase()}-label`;
   const errorId = `wave-group-${groupType.toLowerCase()}-error`;
   const restoreErrorId = `wave-group-${groupType.toLowerCase()}-restore-error`;
@@ -178,7 +182,7 @@ export default function CreateWaveGroup({
           <CreateWaveToggle
             enabled={chatEnabled}
             onChange={onChatEnabledChange}
-            label="Enable chat"
+            label={t(locale, "waves.create.groups.enableChat")}
             displayLabel={true}
           />
         )}
@@ -186,7 +190,7 @@ export default function CreateWaveGroup({
           <CreateWaveToggle
             enabled={adminCanDeleteDrops}
             onChange={setDropsAdminCanDelete}
-            label="Allow admins to delete posts"
+            label={t(locale, "waves.create.groups.allowAdminsToDeletePosts")}
             displayLabel={true}
           />
         )}
