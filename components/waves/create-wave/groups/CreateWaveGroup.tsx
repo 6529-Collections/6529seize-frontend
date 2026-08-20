@@ -120,8 +120,13 @@ export default function CreateWaveGroup({
   const onChatEnabledChange = (enabled: boolean) => {
     if (!enabled) {
       onCriteriaReplacementChange(false);
+      onGroupResolutionChange(false);
     }
     setChatEnabled(enabled);
+  };
+  const onSelectedGroupChange = (group: ApiGroupFull | null) => {
+    onGroupResolutionChange(false);
+    onGroupSelect(group);
   };
   const defaultLabel = selectedGroupId
     ? t(locale, "waves.create.groups.selectedGroup")
@@ -197,7 +202,7 @@ export default function CreateWaveGroup({
         defaultMembersPreviewTarget={defaultMembersPreviewTarget}
         defaultIncludedIdentity={defaultIncludedIdentity}
         onCriteriaReplacementChange={onCriteriaReplacementChange}
-        onChange={onGroupSelect}
+        onChange={onSelectedGroupChange}
         onCreateGroup={onInlineGroupCreate}
       />
       {isRestoring ? (

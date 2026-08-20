@@ -186,7 +186,9 @@ describe("CreateWaveGroup", () => {
     renderComponent();
 
     expect(inlinePanelProps?.suggestedName).toBe("Test Wave Who can drop");
-    expect(inlinePanelProps?.onChange).toBe(mockOnGroupSelect);
+    inlinePanelProps?.onChange(exampleGroup);
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
+    expect(mockOnGroupSelect).toHaveBeenCalledWith(exampleGroup);
     expect(inlinePanelProps?.onCriteriaReplacementChange).toBe(
       mockOnCriteriaReplacementChange
     );
@@ -267,6 +269,23 @@ describe("CreateWaveGroup", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Retry group" }));
     await waitFor(() => expect(mockedCommonApiFetch).toHaveBeenCalledTimes(2));
+  });
+
+  it("clears failed draft restoration state after the selected group is removed", async () => {
+    mockedCommonApiFetch.mockRejectedValue(new Error("not found"));
+    renderComponent({
+      groups: { ...defaultGroups, canDrop: exampleGroup.id },
+    });
+
+    expect(
+      await screen.findByText(/selected group could not be loaded/i)
+    ).toBeVisible();
+    expect(mockOnGroupResolutionChange).toHaveBeenLastCalledWith(true);
+
+    inlinePanelProps?.onChange(null);
+
+    expect(mockOnGroupResolutionChange).toHaveBeenLastCalledWith(false);
+    expect(mockOnGroupSelect).toHaveBeenCalledWith(null);
   });
 
   it("exposes a containment error accessibly", () => {

@@ -1,7 +1,10 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getOnlyMeGroupDescription } from "@/components/waves/create-wave/services/waveGroupService";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { fetchGroupMembersPage } from "@/services/api/group-members-api";
+import {
+  fetchGroupMembersPage,
+  GROUP_MEMBERS_SEARCH_MAX_LENGTH,
+} from "@/services/api/group-members-api";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -59,5 +62,43 @@ describe("group members API", () => {
       })
     );
     expect(commonApiFetch).not.toHaveBeenCalled();
+  });
+
+  it("accepts a 200-character search parameter", async () => {
+    const param = "a".repeat(GROUP_MEMBERS_SEARCH_MAX_LENGTH);
+
+    await fetchGroupMembersPage({
+      target: {
+        kind: "saved",
+        group: { id: "group-1", name: "Collectors" } as ApiGroupFull,
+      },
+      params: { page: 1, pageSize: 20, param },
+    });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ param }),
+      })
+    );
+  });
+
+  it("truncates a 201-character search parameter before sending it", async () => {
+    const param = "a".repeat(GROUP_MEMBERS_SEARCH_MAX_LENGTH + 1);
+
+    await fetchGroupMembersPage({
+      target: {
+        kind: "saved",
+        group: { id: "group-1", name: "Collectors" } as ApiGroupFull,
+      },
+      params: { page: 1, pageSize: 20, param },
+    });
+
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          param: "a".repeat(GROUP_MEMBERS_SEARCH_MAX_LENGTH),
+        }),
+      })
+    );
   });
 });

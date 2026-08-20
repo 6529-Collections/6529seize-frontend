@@ -6,6 +6,8 @@ import type { ApiGroupMembersPreviewRequest } from "@/generated/models/ApiGroupM
 import { SortDirection } from "@/entities/ISort";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
+export const GROUP_MEMBERS_SEARCH_MAX_LENGTH = 200;
+
 export type GroupMembersPreviewTarget =
   | {
       readonly kind: "saved";
@@ -37,13 +39,14 @@ function buildGroupMembersQuery(
   params: GroupMembersPageParams,
   groupId?: string
 ): GroupMembersApiQuery {
+  const searchParam = params.param?.slice(0, GROUP_MEMBERS_SEARCH_MAX_LENGTH);
   return {
     page: params.page,
     page_size: params.pageSize,
     sort: ApiCommunityMembersSortOption.Display,
     sort_direction: SortDirection.ASC,
     ...(groupId ? { group_id: groupId } : {}),
-    ...(params.param ? { param: params.param } : {}),
+    ...(searchParam ? { param: searchParam } : {}),
   };
 }
 

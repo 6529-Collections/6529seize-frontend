@@ -26,6 +26,7 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import {
   fetchGroupMembersPage,
+  GROUP_MEMBERS_SEARCH_MAX_LENGTH,
   getGroupMembersTargetKey,
   getGroupMembersTargetName,
   type GroupMembersPreviewTarget,
@@ -345,6 +346,7 @@ export default function GroupMembersPreviewDialog({
             <input
               id={searchInputId}
               type="search"
+              maxLength={GROUP_MEMBERS_SEARCH_MAX_LENGTH}
               value={search}
               onChange={(event) => {
                 const value = event.target.value;

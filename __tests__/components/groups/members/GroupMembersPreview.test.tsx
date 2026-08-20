@@ -185,6 +185,10 @@ describe("group member preview", () => {
     });
     expect(dialog).toBeInTheDocument();
     expect(dialog).toHaveAttribute("data-z-index-class", "tw-z-[10000]");
+    expect(screen.getByLabelText("Find an identity")).toHaveAttribute(
+      "maxlength",
+      "200"
+    );
     expect(await screen.findByText("alpha")).toBeInTheDocument();
     const membersList = screen.getByRole("list", {
       name: "Current group members",
