@@ -217,6 +217,97 @@ describe("DmUnreadStateProvider", () => {
     }
   });
 
+  it("recovers an incoming DM when the conversation is absent from the snapshot", async () => {
+    jest.useFakeTimers();
+    commonApiFetchMock
+      .mockResolvedValueOnce(snapshot("profile-1", []))
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [
+          state({ unreadCount: 1, version: 1, latestDropSerialNo: 11 }),
+        ])
+      );
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        websocketHandlers.get("DROP_UPDATE")?.(dropUpdate());
+      });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(1_500);
+      });
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId("messages")).toHaveTextContent("1");
+    } finally {
+      rendered.unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("does not satisfy drop recovery with a snapshot started before the drop", async () => {
+    jest.useFakeTimers();
+    let resolvePreDropSnapshot!: (value: unknown) => void;
+    commonApiFetchMock
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [state({ unreadCount: 0, version: 1 })])
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolvePreDropSnapshot = resolve;
+          })
+      )
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [
+          state({ unreadCount: 1, version: 2, latestDropSerialNo: 11 }),
+        ])
+      );
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      act(() => window.dispatchEvent(new Event("focus")));
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+
+      act(() => {
+        websocketHandlers.get("DROP_UPDATE")?.(dropUpdate());
+      });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(1_500);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        resolvePreDropSnapshot(
+          snapshot("profile-1", [state({ unreadCount: 0, version: 1 })])
+        );
+      });
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+      expect(screen.getByTestId("messages")).toHaveTextContent("1");
+    } finally {
+      rendered.unmount();
+      jest.useRealTimers();
+    }
+  });
+
   it("recovers a missed unread event after a compact DM drop reference", async () => {
     jest.useFakeTimers();
     commonApiFetchMock
