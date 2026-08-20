@@ -145,6 +145,26 @@ describe("instrumentation-client", () => {
       in_app: true,
     },
   ];
+  const exodusProviderAccountTimeoutMessage =
+    "JSON-RPC: method call timeout calling 0x1_eth_accounts";
+  const exodusSentryWrapperChunkPath =
+    "app:///_next/static/chunks/44mdj46vrfcef.js";
+  const exodusProviderPath = "app:///ethereum-provider.js";
+  const createExodusProviderTimeoutFrames = (wrapperLine = 7) => [
+    {
+      filename: exodusSentryWrapperChunkPath,
+      function: "n",
+      lineno: wrapperLine,
+      colno: 4853,
+      in_app: true,
+    },
+    {
+      filename: exodusProviderPath,
+      lineno: 1,
+      colno: 2244,
+      in_app: true,
+    },
+  ];
   const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
@@ -496,6 +516,28 @@ describe("instrumentation-client", () => {
         {
           type: "Error",
           value: browserExtensionWalletRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: { frames },
+        },
+      ],
+    },
+  });
+
+  const createExodusProviderAccountTimeoutEvent = (
+    frames: Array<
+      Record<string, unknown>
+    > = createExodusProviderTimeoutFrames(),
+    value = exodusProviderAccountTimeoutMessage
+  ) => ({
+    ...createUnhandledRejectionEvent(value),
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value,
           mechanism: {
             type: browserUnhandledRejectionMechanismType,
             handled: false,
@@ -2702,6 +2744,47 @@ describe("instrumentation-client", () => {
     const result = beforeSend(
       createBrowserExtensionWalletRejectionEvent(frames)
     );
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each([3, 7])(
+    "drops the exact Exodus provider account timeout without absolute paths and wrapper line %i",
+    (wrapperLine) => {
+      const beforeSend = loadBeforeSend();
+      const event = createExodusProviderAccountTimeoutEvent(
+        createExodusProviderTimeoutFrames(wrapperLine)
+      );
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps an Exodus provider account timeout with changed provider coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const frames = createExodusProviderTimeoutFrames().map((frame, index) =>
+      index === 1 ? { ...frame, colno: 2245 } : frame
+    );
+
+    const result = beforeSend(createExodusProviderAccountTimeoutEvent(frames));
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps an Exodus provider account timeout with an app-owned original stack", () => {
+    const beforeSend = loadBeforeSend();
+    const error = new Error(exodusProviderAccountTimeoutMessage);
+    error.stack = [
+      `Error: ${exodusProviderAccountTimeoutMessage}`,
+      `    at n (${exodusSentryWrapperChunkPath}:7:4853)`,
+      "    at connectWallet (app:///services/wallet/connection.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(createExodusProviderAccountTimeoutEvent(), {
+      originalException: error,
+    });
 
     expect(result).not.toBeNull();
   });
