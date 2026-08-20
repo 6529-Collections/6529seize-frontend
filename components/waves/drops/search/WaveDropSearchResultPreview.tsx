@@ -8,6 +8,9 @@ import remarkGfm from "remark-gfm";
 const TOKEN_PATTERN = /(@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])/g;
 const TOKEN_PART_PATTERN = /^(?:@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])$/;
 
+const getTokenDisplayValue = (token: string): string =>
+  `${token.charAt(0)}${token.slice(2, -1)}`;
+
 const highlightMatches = (
   text: string,
   query: string,
@@ -46,9 +49,10 @@ const highlightText = (text: string, query: string): ReactNode => {
     const partKey = `${isToken ? "token" : "text"}-${precedingText}`;
     precedingText += tokenPart;
     if (isToken) {
+      const displayValue = getTokenDisplayValue(tokenPart);
       return (
         <span key={partKey} className="tw-font-medium tw-text-primary-300">
-          {highlightMatches(tokenPart, query, `${partKey}-match`)}
+          {highlightMatches(displayValue, query, `${partKey}-match`)}
         </span>
       );
     }

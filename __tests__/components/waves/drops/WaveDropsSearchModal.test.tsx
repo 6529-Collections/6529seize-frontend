@@ -1,5 +1,5 @@
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 
 const useWaveDropsSearch = jest.fn();
@@ -33,7 +33,7 @@ const result = {
   parts: [
     {
       content:
-        "A **modern** search result\n\n[Documentation](https://example.com) for @[bob]",
+        "A **modern** search result\n\n[Documentation](https://example.com) for @[bob] in #[team] with $[token]",
     },
   ],
   author: {
@@ -63,7 +63,13 @@ describe("WaveDropsSearchModal", () => {
     jest.clearAllMocks();
     setHookResult();
     useWaveSearchAuthors.mockReturnValue({
-      data: [{ id: "author-1", handle: "alice", pfp: null }],
+      data: [
+        {
+          id: "author-1",
+          handle: "alice",
+          pfp: "https://example.com/author.png",
+        },
+      ],
       isFetching: false,
     });
   });
@@ -103,7 +109,11 @@ describe("WaveDropsSearchModal", () => {
     expect(screen.getByText("Documentation")).toHaveClass(
       "tw-text-primary-300"
     );
-    expect(screen.getByText("@[bob]")).toHaveClass("tw-text-primary-300");
+    expect(screen.getByText("@bob")).toHaveClass("tw-text-primary-300");
+    expect(screen.getByText("#team")).toHaveClass("tw-text-primary-300");
+    expect(screen.getByText("$token")).toHaveClass("tw-text-primary-300");
+    expect(resultButton).not.toHaveTextContent("@[bob]");
+    expect(resultButton).not.toHaveTextContent("#[team]");
     expect(resultButton.querySelector("img")).toHaveAttribute(
       "src",
       expect.stringContaining("alice.png")
@@ -116,9 +126,7 @@ describe("WaveDropsSearchModal", () => {
       { target: { value: "bob" } }
     );
     expect(screen.getByText("bob").tagName).toBe("MARK");
-    fireEvent.click(
-      screen.getByRole("button", { name: "Open message 42 by alice" })
-    );
+    fireEvent.click(screen.getByText("Documentation"));
     expect(onSelectSerialNo).toHaveBeenCalledWith(42);
   });
 
@@ -162,15 +170,40 @@ describe("WaveDropsSearchModal", () => {
     );
     const filtersButton = screen.getByRole("button", { name: "Filters" });
     fireEvent.click(filtersButton);
+    const filtersDialog = screen.getByRole("dialog", {
+      name: "Search filters",
+    });
+    expect(filtersDialog).not.toHaveAttribute("aria-modal");
     expect(
-      screen.getByRole("dialog", { name: "Search filters" })
-    ).not.toHaveAttribute("aria-modal");
-    expect(screen.getByRole("textbox", { name: "From" })).toHaveFocus();
-    const authorButton = screen.getByRole("button", { name: "alice" });
+      within(filtersDialog).getByRole("textbox", { name: "From" })
+    ).toHaveFocus();
+    const authorButton = within(filtersDialog).getByRole("button", {
+      name: "alice",
+    });
     authorButton.focus();
     fireEvent.click(authorButton);
-    expect(authorButton).toHaveFocus();
-    fireEvent.click(screen.getByRole("button", { name: "Close filters" }));
+    expect(
+      within(filtersDialog).queryByRole("textbox", { name: "From" })
+    ).not.toBeInTheDocument();
+    expect(
+      within(filtersDialog).queryByRole("group", { name: "Wave authors" })
+    ).not.toBeInTheDocument();
+    const clearAuthorButton = within(filtersDialog).getByRole("button", {
+      name: "Clear author",
+    });
+    expect(filtersDialog.querySelector("img")).toHaveAttribute(
+      "src",
+      expect.stringContaining("author.png")
+    );
+    expect(clearAuthorButton).toHaveFocus();
+    expect(useWaveSearchAuthors.mock.calls.at(-1)?.[0].enabled).toBe(false);
+    fireEvent.click(clearAuthorButton);
+    expect(
+      within(filtersDialog).getByRole("textbox", { name: "From" })
+    ).toHaveFocus();
+    fireEvent.click(
+      within(filtersDialog).getByRole("button", { name: "Close filters" })
+    );
     expect(filtersButton).toHaveFocus();
   });
 
@@ -185,6 +218,8 @@ describe("WaveDropsSearchModal", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Filters" }));
     const dateInputs = document.querySelectorAll('input[type="date"]');
+    expect(dateInputs[0]).toHaveClass("tw-[color-scheme:dark]");
+    expect(dateInputs[1]).toHaveClass("tw-[color-scheme:dark]");
     fireEvent.change(dateInputs[0]!, { target: { value: "2026-08-20" } });
     fireEvent.change(dateInputs[1]!, { target: { value: "2026-08-19" } });
     expect(
