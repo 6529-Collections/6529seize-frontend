@@ -178,4 +178,26 @@ describe("WaveDropActionsMore", () => {
 
     expect(screen.queryByText("Download media")).toBeNull();
   });
+
+  it("shows one Report action as the final desktop menu entry", async () => {
+    mockedUseDropInteractionRules.mockReturnValue({
+      canShowVote: true,
+      canVote: true,
+      voteState: "CAN_VOTE" as any,
+      canDelete: true,
+      canSetPinnedDrop: true,
+      isAuthor: false,
+      isWinner: false,
+      isVotingEnded: false,
+    });
+
+    render(<WaveDropActionsMore drop={drop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    const reportAction = screen.getByRole("button", { name: "Report" });
+    expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
+    expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();
+  });
 });

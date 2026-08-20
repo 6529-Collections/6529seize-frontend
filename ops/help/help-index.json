@@ -29,12 +29,12 @@
         "moderator"
       ],
       "facts": [
-        "Authenticated users can report, hide, or block from a Wave post's More menu on desktop or action sheet on mobile.",
-        "Reporting, hiding, and blocking are distinct: the report dialog offers hide and block as optional personal choices.",
-        "A personally hidden post shows a tombstone with a persistent Unhide post action. A post from a blocked author has a temporary Show post action that does not unblock the author.",
+        "Authenticated users can use the final Report entry in a Wave post's More menu on desktop or action sheet on mobile to report, hide, block, or combine those actions.",
+        "Reporting, hiding, and blocking are independent: the report option can be deselected to hide or block without submitting a report.",
+        "A personally hidden post keeps a non-interactive faded preview with a small persistent Unhide action. A post from a blocked author has a temporary Show post action that does not unblock the author.",
         "Blocked profiles can be reviewed and unblocked at /content-preferences, linked as Content preferences from the authenticated profile menu.",
         "New Wave posts receive a narrow server-side safety check; ambiguous content and profanity are not rejected merely for being objectionable.",
-        "When a high-confidence safety check rejects a post, the composer explains the rejection and preserves the draft for editing and retrying.",
+        "A locally created post stays visible in its normal layout while submission is pending; when a high-confidence safety check rejects it, the composer removes the optimistic post, explains the rejection, and preserves the draft for editing and retrying.",
         "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
         "Only server-authorized moderators see and can use the Moderation queue at /content-moderation, and every decision requires a reason."
       ],

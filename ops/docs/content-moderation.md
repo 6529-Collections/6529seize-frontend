@@ -11,22 +11,29 @@ the user's draft and explains why it could not be submitted so the user can
 edit and retry. File attachments such as PDF and CSV continue through their
 separate asynchronous validation pipeline.
 
+A locally created optimistic post remains visible in its normal post layout
+while the request is in flight. The backend response remains authoritative: a
+successful response replaces the optimistic post, while a rejected request
+removes it and preserves the draft for correction.
+
 ## Personal controls
 
-Authenticated users can open a post's More menu on desktop or action sheet on
-mobile to:
+Authenticated users can open the final **Report** entry in a post's More menu
+on desktop or action sheet on mobile, then choose one or more independent
+actions:
 
-- report the post with a reason and optional context;
+- report the post with a reason and optional context (selected by default);
 - hide that individual post for themselves; or
 - block the author for themselves.
 
-Submitting a report does not automatically hide the post or block its author.
-The report dialog offers those as separate, explicit personal choices. A
-personally hidden post is replaced by a tombstone with a persistent **Unhide
-post** action. A post from a blocked author uses a temporary **Show post**
-action that does not unblock the author. Blocked profiles can be reviewed and unblocked at
-`/content-preferences`, linked as **Content preferences** from the authenticated
-profile menu.
+The report option can be deselected, so a user can hide or block without
+submitting a report. Submitting a report does not automatically hide the post
+or block its author. A personally hidden post keeps a soft faded preview whose
+original content is non-interactive, with a small persistent **Unhide** action.
+A post from a blocked author uses a temporary **Show post** action that does not
+unblock the author. Blocked profiles can be reviewed and unblocked at
+`/content-preferences`, linked as **Content preferences** from the
+authenticated profile menu.
 
 ## Global moderation
 
