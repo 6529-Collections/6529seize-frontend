@@ -223,6 +223,45 @@ describe("DmUnreadStore", () => {
     ).toBe(1);
   });
 
+  it("shows an immediate reply after the server has reset the unread window", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(
+      state({
+        unreadCount: 1,
+        firstUnreadSerialNo: 9,
+        latestDropSerialNo: 10,
+        latestReadSerialNo: 8,
+        version: 1,
+      })
+    );
+    const operation = store.beginRead("profile-a", "wave-a");
+    expect(operation?.readThroughSerialNo).toBe(10);
+
+    store.applyServerState(
+      state({
+        unreadCount: 1,
+        firstUnreadSerialNo: 11,
+        latestDropSerialNo: 11,
+        latestReadSerialNo: 9,
+        version: 2,
+      })
+    );
+
+    expect(
+      getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
+    ).toMatchObject({
+      unread_count: 1,
+      first_unread_drop_serial_no: 11,
+    });
+    expect(getDmUnreadSummary(store.getSnapshot(), "profile-a")).toMatchObject(
+      {
+        totalUnreadMessages: 1,
+        unreadConversationCount: 1,
+        hasUnread: true,
+      }
+    );
+  });
+
   it("reads an open visible conversation through the incoming serial", () => {
     const store = new DmUnreadStore();
     store.applyServerState(
