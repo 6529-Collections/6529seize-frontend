@@ -59,6 +59,11 @@ interface InFlightSnapshotRequest {
   readonly requestId: number;
 }
 
+interface PendingDropRecovery {
+  readonly minimumSnapshotRequestId: number;
+  readonly serialNo: number;
+}
+
 interface IncomingDropUpdate {
   readonly author: { readonly id: string };
   readonly serial_no: number;
@@ -221,7 +226,9 @@ export function DmUnreadStateProvider({
   );
   const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
   const previousMobileActiveRef = useRef(isActive);
-  const pendingDropRecoveryByWaveRef = useRef(new Map<string, number>());
+  const pendingDropRecoveryByWaveRef = useRef(
+    new Map<string, PendingDropRecovery>()
+  );
   const dropRecoveryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
@@ -277,15 +284,39 @@ export function DmUnreadStateProvider({
     async (
       expectedProfileId: string,
       jwt: string,
-      expectedActivationId: number
+      expectedActivationId: number,
+      minimumRequestId = 0
     ): Promise<SnapshotSynchronizationResult> => {
-      const existingRequest =
+      let existingRequest =
         inFlightSnapshotByProfileRef.current.get(expectedProfileId);
+      if (
+        existingRequest?.jwt === jwt &&
+        existingRequest.activationId === expectedActivationId &&
+        existingRequest.requestId >= minimumRequestId
+      ) {
+        return existingRequest.promise;
+      }
       if (
         existingRequest?.jwt === jwt &&
         existingRequest.activationId === expectedActivationId
       ) {
-        return existingRequest.promise;
+        await existingRequest.promise;
+        if (
+          !isMountedRef.current ||
+          activeActivationRef.current.id !== expectedActivationId ||
+          activeActivationRef.current.profileId !== expectedProfileId
+        ) {
+          return "stale";
+        }
+        existingRequest =
+          inFlightSnapshotByProfileRef.current.get(expectedProfileId);
+        if (
+          existingRequest?.jwt === jwt &&
+          existingRequest.activationId === expectedActivationId &&
+          existingRequest.requestId >= minimumRequestId
+        ) {
+          return existingRequest.promise;
+        }
       }
       const requestId = nextSnapshotRequestIdRef.current++;
       const startedAtSequence = store.beginSnapshot();
@@ -368,26 +399,34 @@ export function DmUnreadStateProvider({
       return requestSnapshot(profileId, jwt, activation.id);
     }, [requestSnapshot]);
 
-  const requestDropRecoverySnapshot = useCallback(async () => {
-    const activation = activeActivationRef.current;
-    if (
-      terminalSnapshotFailureActivationIdsRef.current.has(activation.id) ||
-      Date.now() <
-        (nextSnapshotAllowedAtByActivationRef.current.get(activation.id) ?? 0)
-    ) {
-      return;
-    }
-    const profileId = activation.profileId;
-    const currentJwt = getAuthJwt();
-    if (
-      !profileId ||
-      typeof currentJwt !== "string" ||
-      !isAuthJwtUsable(currentJwt)
-    ) {
-      return;
-    }
-    await requestSnapshot(profileId, currentJwt, activation.id);
-  }, [requestSnapshot]);
+  const requestDropRecoverySnapshot = useCallback(
+    async (minimumRequestId: number) => {
+      const activation = activeActivationRef.current;
+      if (
+        terminalSnapshotFailureActivationIdsRef.current.has(activation.id) ||
+        Date.now() <
+          (nextSnapshotAllowedAtByActivationRef.current.get(activation.id) ?? 0)
+      ) {
+        return;
+      }
+      const profileId = activation.profileId;
+      const currentJwt = getAuthJwt();
+      if (
+        !profileId ||
+        typeof currentJwt !== "string" ||
+        !isAuthJwtUsable(currentJwt)
+      ) {
+        return;
+      }
+      await requestSnapshot(
+        profileId,
+        currentJwt,
+        activation.id,
+        minimumRequestId
+      );
+    },
+    [requestSnapshot]
+  );
 
   useEffect(() => {
     if (
@@ -542,15 +581,23 @@ export function DmUnreadStateProvider({
         profileId,
         waveId
       );
-      if (!conversation || conversation.latest_drop_serial_no >= serialNo) {
+      if (
+        conversation !== null &&
+        conversation.latest_drop_serial_no >= serialNo
+      ) {
         return;
       }
-      const previousPendingSerialNo =
-        pendingDropRecoveryByWaveRef.current.get(waveId) ?? 0;
-      pendingDropRecoveryByWaveRef.current.set(
-        waveId,
-        Math.max(previousPendingSerialNo, Math.floor(serialNo))
-      );
+      const previousPending = pendingDropRecoveryByWaveRef.current.get(waveId);
+      pendingDropRecoveryByWaveRef.current.set(waveId, {
+        minimumSnapshotRequestId: Math.max(
+          previousPending?.minimumSnapshotRequestId ?? 0,
+          nextSnapshotRequestIdRef.current
+        ),
+        serialNo: Math.max(
+          previousPending?.serialNo ?? 0,
+          Math.floor(serialNo)
+        ),
+      });
       if (dropRecoveryTimerRef.current !== null) {
         return;
       }
@@ -569,20 +616,25 @@ export function DmUnreadStateProvider({
           return;
         }
         const hasLaggingConversation = pendingDrops.some(
-          ([pendingWaveId, pendingSerialNo]) => {
+          ([pendingWaveId, pending]) => {
             const currentConversation = getDmUnreadConversation(
               store.getSnapshot(),
               profileId,
               pendingWaveId
             );
             return (
-              currentConversation !== null &&
-              currentConversation.latest_drop_serial_no < pendingSerialNo
+              currentConversation === null ||
+              currentConversation.latest_drop_serial_no < pending.serialNo
             );
           }
         );
         if (hasLaggingConversation) {
-          void requestDropRecoverySnapshot();
+          const minimumRequestId = Math.max(
+            ...pendingDrops.map(
+              ([, pending]) => pending.minimumSnapshotRequestId
+            )
+          );
+          void requestDropRecoverySnapshot(minimumRequestId);
         }
       }, DROP_UPDATE_RECOVERY_GRACE_MS);
     },
