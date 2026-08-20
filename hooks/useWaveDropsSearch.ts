@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { MIN_WAVE_SEARCH_QUERY_LENGTH } from "@/components/waves/drops/search/waveDropsSearch.utils";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
@@ -30,6 +31,9 @@ export function useWaveDropsSearch({
   readonly size?: number | undefined;
 }) {
   const trimmedTerm = term.trim();
+  const isTermValid =
+    trimmedTerm.length === 0 ||
+    trimmedTerm.length >= MIN_WAVE_SEARCH_QUERY_LENGTH;
   const waveMin = useMemo(() => (wave ? toApiWaveMin(wave) : null), [wave]);
 
   const query = useInfiniteQuery({
@@ -48,7 +52,8 @@ export function useWaveDropsSearch({
     enabled:
       enabled &&
       wave !== null &&
-      (trimmedTerm.length > 0 ||
+      isTermValid &&
+      (trimmedTerm.length >= MIN_WAVE_SEARCH_QUERY_LENGTH ||
         authorId !== undefined ||
         after !== undefined ||
         before !== undefined),

@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { fetchWaveSearchAuthors } from "@/services/api/wave-drops-v2-api";
+import { fetchWaveSearchAuthors } from "@/services/api/wave-search-authors-api";
 import { useQuery } from "@tanstack/react-query";
 
 export function useWaveSearchAuthors({

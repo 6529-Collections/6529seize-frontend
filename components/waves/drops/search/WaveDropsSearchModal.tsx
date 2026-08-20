@@ -59,8 +59,10 @@ const formatOptionalFilterDate = (
 const getSearchCriteriaLabel = (
   locale: SupportedLocale,
   query: string
-): string =>
-  query ? query : t(locale, "waves.drops.searchModal.results.filtersApplied");
+): string => {
+  if (query) return query;
+  return t(locale, "waves.drops.searchModal.results.filtersApplied");
+};
 
 function WaveDropsSearchState({
   description,
@@ -160,6 +162,7 @@ export default function WaveDropsSearchModal({
   const [authorFilter, setAuthorFilter] = useState<WaveSearchAuthor | null>(
     null
   );
+  const [authorQuery, setAuthorQuery] = useState("");
   const [afterDate, setAfterDate] = useState("");
   const [beforeDate, setBeforeDate] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -223,6 +226,10 @@ export default function WaveDropsSearchModal({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const filtersButtonRef = useRef<HTMLButtonElement>(null);
+  const clearAuthorFilter = () => {
+    setAuthorFilter(null);
+    setAuthorQuery("");
+  };
   useEffect(() => {
     if (!isOpen) return;
     const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
@@ -380,7 +387,7 @@ export default function WaveDropsSearchModal({
                     {authorFilter && (
                       <button
                         type="button"
-                        onClick={() => setAuthorFilter(null)}
+                        onClick={clearAuthorFilter}
                         aria-label={t(
                           locale,
                           "waves.drops.searchModal.filters.removeAuthor",
@@ -428,7 +435,7 @@ export default function WaveDropsSearchModal({
                     <button
                       type="button"
                       onClick={() => {
-                        setAuthorFilter(null);
+                        clearAuthorFilter();
                         setAfterDate("");
                         setBeforeDate("");
                       }}
@@ -442,13 +449,14 @@ export default function WaveDropsSearchModal({
 
               {filtersOpen && (
                 <WaveDropsSearchFilters
-                  key={authorFilter?.id ?? "no-author"}
                   waveId={wave.id}
                   author={authorFilter}
+                  authorQuery={authorQuery}
                   after={afterDate}
                   before={beforeDate}
                   invalidDateRange={!validDateRange}
                   onAuthorChange={setAuthorFilter}
+                  onAuthorQueryChange={setAuthorQuery}
                   onAfterChange={setAfterDate}
                   onBeforeChange={setBeforeDate}
                   onClose={() => setFiltersOpen(false)}

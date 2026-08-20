@@ -8,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWavePoll } from "@/generated/models/ApiWavePoll";
+import type { ApiWaveSearchAuthor } from "@/generated/models/ApiWaveSearchAuthor";
 
 export interface FetchWaveDropsV2Props {
   readonly waveId: string;
@@ -65,11 +66,7 @@ export interface FetchWaveDropsSearchV2Props {
   readonly signal?: AbortSignal | undefined;
 }
 
-export interface WaveSearchAuthor {
-  readonly id: string;
-  readonly handle: string;
-  readonly pfp: string | null;
-}
+export type WaveSearchAuthor = ApiWaveSearchAuthor;
 
 export interface FetchWaveCompetitionDropsV2Props {
   readonly wave: ApiWave | ApiWaveMin;

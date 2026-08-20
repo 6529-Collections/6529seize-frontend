@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { fetchWaveDropsSearchV2 } from "@/services/api/wave-drops-v2-api";
 
@@ -19,6 +20,7 @@ jest.mock("@/helpers/waves/wave.helpers", () => ({
 
 const useInfiniteQueryMock = useInfiniteQuery as jest.Mock;
 const fetchWaveDropsSearchV2Mock = fetchWaveDropsSearchV2 as jest.Mock;
+const wave = { id: "wave-1" } as ApiWave;
 
 describe("useWaveDropsSearch", () => {
   beforeEach(() => {
@@ -34,7 +36,6 @@ describe("useWaveDropsSearch", () => {
   });
 
   it("uses the v2 wave search adapter with trimmed terms", async () => {
-    const wave = { id: "wave-1" } as any;
     fetchWaveDropsSearchV2Mock.mockResolvedValue({
       data: [],
       page: 2,
@@ -84,7 +85,6 @@ describe("useWaveDropsSearch", () => {
   });
 
   it("supports a filter-only search", async () => {
-    const wave = { id: "wave-1" } as any;
     renderHook(() =>
       useWaveDropsSearch({
         wave,
@@ -108,5 +108,20 @@ describe("useWaveDropsSearch", () => {
       page: 1,
       size: 50,
     });
+  });
+
+  it("does not enable one- or two-character terms, even with filters", () => {
+    renderHook(() => useWaveDropsSearch({ wave, term: "lo", enabled: true }));
+    expect(useInfiniteQueryMock.mock.calls.at(-1)?.[0].enabled).toBe(false);
+
+    renderHook(() =>
+      useWaveDropsSearch({
+        wave,
+        term: "lo",
+        authorId: "author-1",
+        enabled: true,
+      })
+    );
+    expect(useInfiniteQueryMock.mock.calls.at(-1)?.[0].enabled).toBe(false);
   });
 });

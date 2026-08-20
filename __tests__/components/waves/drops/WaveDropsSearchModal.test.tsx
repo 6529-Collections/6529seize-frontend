@@ -163,6 +163,10 @@ describe("WaveDropsSearchModal", () => {
     const filtersButton = screen.getByRole("button", { name: "Filters" });
     fireEvent.click(filtersButton);
     expect(screen.getByRole("textbox", { name: "From" })).toHaveFocus();
+    const authorButton = screen.getByRole("button", { name: "alice" });
+    authorButton.focus();
+    fireEvent.click(authorButton);
+    expect(authorButton).toHaveFocus();
     fireEvent.click(screen.getByRole("button", { name: "Close filters" }));
     expect(filtersButton).toHaveFocus();
   });
@@ -181,7 +185,7 @@ describe("WaveDropsSearchModal", () => {
     fireEvent.change(dateInputs[0]!, { target: { value: "2026-08-20" } });
     fireEvent.change(dateInputs[1]!, { target: { value: "2026-08-19" } });
     expect(
-      screen.getByText("After must be earlier than before.")
+      screen.getByText('"After" must be earlier than "Before".')
     ).toBeInTheDocument();
     expect(useWaveDropsSearch.mock.calls.at(-1)?.[0].enabled).toBe(false);
   });

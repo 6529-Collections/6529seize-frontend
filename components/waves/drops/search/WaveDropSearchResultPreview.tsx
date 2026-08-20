@@ -25,7 +25,7 @@ const highlightMatches = (
     const matchEnd = matchIndex + queryValue.length;
     nodes.push(
       <mark
-        key={`${keyPrefix}-${lowerText.slice(0, matchEnd)}`}
+        key={`${keyPrefix}-${matchEnd}`}
         className="tw-rounded-sm tw-bg-primary-400/20 tw-px-0.5 tw-text-inherit"
       >
         {text.slice(matchIndex, matchEnd)}

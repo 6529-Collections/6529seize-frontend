@@ -4,22 +4,24 @@ import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveSearchAuthors } from "@/hooks/useWaveSearchAuthors";
 import { t } from "@/i18n/messages";
 import type { WaveSearchAuthor } from "@/services/api/wave-drops-v2.types";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState, type RefObject } from "react";
-import { useDebounce } from "react-use";
+import { useEffect, useRef, type RefObject } from "react";
 
 const AUTHOR_LIST_ID = "wave-drops-search-author-list";
 
 export default function WaveDropsSearchFilters({
   waveId,
   author,
+  authorQuery,
   after,
   before,
   invalidDateRange,
   onAuthorChange,
+  onAuthorQueryChange,
   onAfterChange,
   onBeforeChange,
   onClose,
@@ -27,10 +29,12 @@ export default function WaveDropsSearchFilters({
 }: {
   readonly waveId: string;
   readonly author: WaveSearchAuthor | null;
+  readonly authorQuery: string;
   readonly after: string;
   readonly before: string;
   readonly invalidDateRange: boolean;
   readonly onAuthorChange: (author: WaveSearchAuthor | null) => void;
+  readonly onAuthorQueryChange: (value: string) => void;
   readonly onAfterChange: (value: string) => void;
   readonly onBeforeChange: (value: string) => void;
   readonly onClose: () => void;
@@ -38,9 +42,7 @@ export default function WaveDropsSearchFilters({
 }) {
   const locale = useBrowserLocale();
   const authorInputRef = useRef<HTMLInputElement>(null);
-  const [authorQuery, setAuthorQuery] = useState(author?.handle ?? "");
-  const [debouncedAuthorQuery, setDebouncedAuthorQuery] = useState(authorQuery);
-  useDebounce(() => setDebouncedAuthorQuery(authorQuery), 200, [authorQuery]);
+  const debouncedAuthorQuery = useDebouncedValue(authorQuery, 200);
   const { data: authors = [], isFetching } = useWaveSearchAuthors({
     waveId,
     handle: debouncedAuthorQuery,
@@ -98,7 +100,7 @@ export default function WaveDropsSearchFilters({
               ref={authorInputRef}
               autoComplete="off"
               value={authorQuery}
-              onChange={(event) => setAuthorQuery(event.target.value)}
+              onChange={(event) => onAuthorQueryChange(event.target.value)}
               placeholder={t(
                 locale,
                 "waves.drops.searchModal.filters.authorPlaceholder"
@@ -110,7 +112,7 @@ export default function WaveDropsSearchFilters({
                 type="button"
                 onClick={() => {
                   onAuthorChange(null);
-                  setAuthorQuery("");
+                  onAuthorQueryChange("");
                 }}
                 aria-label={t(
                   locale,
@@ -156,7 +158,7 @@ export default function WaveDropsSearchFilters({
                   aria-label={candidate.handle}
                   aria-pressed={author?.id === candidate.id}
                   onClick={() => {
-                    setAuthorQuery(candidate.handle);
+                    onAuthorQueryChange(candidate.handle);
                     onAuthorChange(candidate);
                   }}
                   className="tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-2 tw-text-left tw-text-sm tw-text-iron-200 hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"

@@ -1632,7 +1632,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "filters.clearAuthor": "Clear author",
     "filters.close": "Close filters",
     "filters.from": "From",
-    "filters.invalidRange": "After must be earlier than before.",
+    "filters.invalidRange": '"After" must be earlier than "Before".',
     "filters.loadingAuthors": "Loading authors...",
     "filters.noAuthors": "No matching authors in this wave.",
     "filters.open": "Filters",
