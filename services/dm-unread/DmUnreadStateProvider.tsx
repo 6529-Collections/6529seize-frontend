@@ -61,6 +61,7 @@ interface DmUnreadContextValue {
 
 const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
+const DROP_UPDATE_RECOVERY_GRACE_MS = 1_500;
 const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
 const SNAPSHOT_RETRY_BASE_DELAYS_MS = [
   5_000,
@@ -81,6 +82,12 @@ interface InFlightSnapshotRequest {
   readonly jwt: string;
   readonly promise: Promise<SnapshotSynchronizationResult>;
   readonly requestId: number;
+}
+
+interface IncomingDropUpdate {
+  readonly author: { readonly id: string };
+  readonly serial_no: number;
+  readonly wave: { readonly id: string };
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -113,6 +120,22 @@ const isDmUnreadSnapshot = (value: unknown): value is ApiDmUnreadSnapshot => {
     typeof value["count"] === "number" &&
     Array.isArray(value["conversations"]) &&
     value["conversations"].every(isDmUnreadConversationState)
+  );
+};
+
+const isIncomingDropUpdate = (value: unknown): value is IncomingDropUpdate => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  const author = value["author"];
+  const wave = value["wave"];
+  return (
+    typeof value["serial_no"] === "number" &&
+    Number.isFinite(value["serial_no"]) &&
+    isRecord(author) &&
+    typeof author["id"] === "string" &&
+    isRecord(wave) &&
+    typeof wave["id"] === "string"
   );
 };
 
@@ -206,6 +229,10 @@ export function DmUnreadStateProvider({
   );
   const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
   const previousMobileActiveRef = useRef(isActive);
+  const pendingDropRecoveryByWaveRef = useRef(new Map<string, number>());
+  const dropRecoveryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const authJwt = getAuthJwt();
   const authFingerprint = getAuthTokenFingerprint(authJwt);
 
@@ -214,6 +241,11 @@ export function DmUnreadStateProvider({
     activeActivationRef.current = profileActivation;
     terminalSnapshotFailureActivationIdsRef.current.clear();
     nextSnapshotAllowedAtByActivationRef.current.clear();
+    pendingDropRecoveryByWaveRef.current.clear();
+    if (dropRecoveryTimerRef.current !== null) {
+      clearTimeout(dropRecoveryTimerRef.current);
+      dropRecoveryTimerRef.current = null;
+    }
     if (activeProfileId) {
       store.resetProfile(activeProfileId);
     }
@@ -227,6 +259,9 @@ export function DmUnreadStateProvider({
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      if (dropRecoveryTimerRef.current !== null) {
+        clearTimeout(dropRecoveryTimerRef.current);
+      }
     };
   }, []);
 
@@ -340,6 +375,27 @@ export function DmUnreadStateProvider({
       lastRecoverySnapshotAtRef.current = now;
       return requestSnapshot(profileId, jwt, activation.id);
     }, [requestSnapshot]);
+
+  const requestDropRecoverySnapshot = useCallback(async () => {
+    const activation = activeActivationRef.current;
+    if (
+      terminalSnapshotFailureActivationIdsRef.current.has(activation.id) ||
+      Date.now() <
+        (nextSnapshotAllowedAtByActivationRef.current.get(activation.id) ?? 0)
+    ) {
+      return;
+    }
+    const profileId = activation.profileId;
+    const currentJwt = getAuthJwt();
+    if (
+      !profileId ||
+      typeof currentJwt !== "string" ||
+      !isAuthJwtUsable(currentJwt)
+    ) {
+      return;
+    }
+    await requestSnapshot(profileId, currentJwt, activation.id);
+  }, [requestSnapshot]);
 
   useEffect(() => {
     if (
@@ -481,6 +537,74 @@ export function DmUnreadStateProvider({
     WsMessageType.DM_UNREAD_STATE_CHANGED,
     handleUnreadStateChanged
   );
+
+  const handleDropUpdate = useCallback(
+    (value: unknown) => {
+      if (!isIncomingDropUpdate(value)) {
+        return;
+      }
+      const activation = activeActivationRef.current;
+      const profileId = activation.profileId;
+      const waveId = value.wave.id;
+      if (!profileId || value.author.id === profileId) {
+        return;
+      }
+      const conversation = getDmUnreadConversation(
+        store.getSnapshot(),
+        profileId,
+        waveId
+      );
+      if (
+        !conversation ||
+        conversation.latest_drop_serial_no >= value.serial_no
+      ) {
+        return;
+      }
+      const pendingSerialNo =
+        pendingDropRecoveryByWaveRef.current.get(waveId) ?? 0;
+      pendingDropRecoveryByWaveRef.current.set(
+        waveId,
+        Math.max(pendingSerialNo, Math.floor(value.serial_no))
+      );
+      if (dropRecoveryTimerRef.current !== null) {
+        return;
+      }
+      const expectedActivationId = activation.id;
+      dropRecoveryTimerRef.current = setTimeout(() => {
+        dropRecoveryTimerRef.current = null;
+        const pendingDrops = Array.from(
+          pendingDropRecoveryByWaveRef.current.entries()
+        );
+        pendingDropRecoveryByWaveRef.current.clear();
+        const currentActivation = activeActivationRef.current;
+        if (
+          currentActivation.id !== expectedActivationId ||
+          currentActivation.profileId !== profileId
+        ) {
+          return;
+        }
+        const hasLaggingConversation = pendingDrops.some(
+          ([pendingWaveId, serialNo]) => {
+            const currentConversation = getDmUnreadConversation(
+              store.getSnapshot(),
+              profileId,
+              pendingWaveId
+            );
+            return (
+              currentConversation !== null &&
+              currentConversation.latest_drop_serial_no < serialNo
+            );
+          }
+        );
+        if (hasLaggingConversation) {
+          void requestDropRecoverySnapshot();
+        }
+      }, DROP_UPDATE_RECOVERY_GRACE_MS);
+    },
+    [requestDropRecoverySnapshot, store]
+  );
+
+  useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE, handleDropUpdate);
 
   useEffect(() => {
     const previousStatus = previousWebSocketStatusRef.current;

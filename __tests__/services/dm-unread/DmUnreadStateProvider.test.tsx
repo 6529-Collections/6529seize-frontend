@@ -12,7 +12,7 @@ let jwt = "jwt-profile-1";
 let isConnected = false;
 let isCapacitor = false;
 let isActive = true;
-let websocketHandler: ((value: unknown) => void) | undefined;
+const websocketHandlers = new Map<string, (value: unknown) => void>();
 let capturedDmUnreadActions: ReturnType<typeof useOptionalDmUnreadActions> =
   null;
 
@@ -46,8 +46,8 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
-  useWebSocketMessage: (_type: string, handler: (value: unknown) => void) => {
-    websocketHandler = handler;
+  useWebSocketMessage: (type: string, handler: (value: unknown) => void) => {
+    websocketHandlers.set(type, handler);
     return { isConnected };
   },
 }));
@@ -57,18 +57,21 @@ const state = ({
   waveId = "wave-1",
   unreadCount = 1,
   version = 1,
+  latestDropSerialNo = 10,
 }: {
   profileId?: string;
   waveId?: string;
   unreadCount?: number;
   version?: number;
+  latestDropSerialNo?: number;
 } = {}) => ({
   profile_id: profileId,
   wave_id: waveId,
   unread_count: unreadCount,
-  first_unread_drop_serial_no: unreadCount > 0 ? 10 : null,
-  latest_drop_serial_no: 10,
-  latest_read_serial_no: unreadCount > 0 ? 9 : 10,
+  first_unread_drop_serial_no: unreadCount > 0 ? latestDropSerialNo : null,
+  latest_drop_serial_no: latestDropSerialNo,
+  latest_read_serial_no:
+    unreadCount > 0 ? latestDropSerialNo - 1 : latestDropSerialNo,
   version,
 });
 
@@ -82,6 +85,20 @@ const snapshot = (
     0
   ),
   conversations,
+});
+
+const dropUpdate = ({
+  authorId = "profile-2",
+  serialNo = 11,
+  waveId = "wave-1",
+}: {
+  authorId?: string;
+  serialNo?: number;
+  waveId?: string;
+} = {}) => ({
+  author: { id: authorId },
+  serial_no: serialNo,
+  wave: { id: waveId },
 });
 
 function Capture() {
@@ -109,7 +126,7 @@ describe("DmUnreadStateProvider", () => {
     isConnected = false;
     isCapacitor = false;
     isActive = true;
-    websocketHandler = undefined;
+    websocketHandlers.clear();
     capturedDmUnreadActions = null;
     commonApiFetchMock.mockResolvedValue(snapshot("profile-1"));
   });
@@ -131,7 +148,7 @@ describe("DmUnreadStateProvider", () => {
     });
 
     act(() => {
-      websocketHandler?.(
+      websocketHandlers.get("DM_UNREAD_STATE_CHANGED")?.(
         state({ profileId: "profile-1", unreadCount: 3, version: 2 })
       );
     });
@@ -140,6 +157,83 @@ describe("DmUnreadStateProvider", () => {
     expect(screen.getByTestId("conversations")).toHaveTextContent("1");
     expect(screen.getByTestId("wave")).toHaveTextContent("3");
     expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("recovers a missed unread event after an incoming DM drop update", async () => {
+    jest.useFakeTimers();
+    commonApiFetchMock
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [state({ unreadCount: 0, version: 1 })])
+      )
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [
+          state({ unreadCount: 1, version: 2, latestDropSerialNo: 11 }),
+        ])
+      );
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        websocketHandlers.get("DROP_UPDATE")?.(dropUpdate());
+      });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(1_499);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(1);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId("messages")).toHaveTextContent("1");
+    } finally {
+      rendered.unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("does not fetch when canonical unread state catches up in the grace period", async () => {
+    jest.useFakeTimers();
+    commonApiFetchMock.mockResolvedValueOnce(
+      snapshot("profile-1", [state({ unreadCount: 0, version: 1 })])
+    );
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      act(() => {
+        websocketHandlers.get("DROP_UPDATE")?.(dropUpdate());
+        websocketHandlers.get("DM_UNREAD_STATE_CHANGED")?.(
+          state({ unreadCount: 1, version: 2, latestDropSerialNo: 11 })
+        );
+      });
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(1_500);
+      });
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("messages")).toHaveTextContent("1");
+    } finally {
+      rendered.unmount();
+      jest.useRealTimers();
+    }
   });
 
   it("retries a transient snapshot failure through the jittered recovery policy", async () => {
@@ -461,7 +555,7 @@ describe("DmUnreadStateProvider", () => {
     );
 
     act(() => {
-      websocketHandler?.(
+      websocketHandlers.get("DM_UNREAD_STATE_CHANGED")?.(
         state({ profileId: "profile-1", unreadCount: 99, version: 99 })
       );
     });
