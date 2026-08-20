@@ -94,7 +94,6 @@
     "__tests__/components/brain/notifications/identity-mentioned/NotificationIdentityMentioned.test.tsx": 2,
     "__tests__/components/brain/notifications/item/NotificationItem.test.tsx": 6,
     "__tests__/components/brain/notifications/NotificationItems.test.tsx": 1,
-    "__tests__/components/brain/notifications/NotificationsCauseFilter.test.tsx": 2,
     "__tests__/components/brain/notifications/NotificationsFollowBtn.test.tsx": 2,
     "__tests__/components/brain/notifications/priority-alert/NotificationPriorityAlert.test.tsx": 3,
     "__tests__/components/brain/NotificationsWrapper.test.tsx": 1,
