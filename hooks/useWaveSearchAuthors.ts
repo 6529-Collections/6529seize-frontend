@@ -16,8 +16,8 @@ export function useWaveSearchAuthors({
   const normalizedHandle = handle.trim();
   return useQuery({
     queryKey: [
-      QueryKey.PROFILE_SEARCH,
-      { waveId, handle: normalizedHandle, context: "wave-search-authors" },
+      QueryKey.WAVE_SEARCH_AUTHORS,
+      { waveId, handle: normalizedHandle },
     ],
     queryFn: ({ signal }) =>
       fetchWaveSearchAuthors({ waveId, handle: normalizedHandle, signal }),

@@ -109,7 +109,16 @@ describe("WaveDropsSearchModal", () => {
       expect.stringContaining("alice.png")
     );
     expect(screen.getByText("modern").tagName).toBe("MARK");
-    fireEvent.click(resultButton);
+    fireEvent.change(
+      screen.getByRole("textbox", {
+        name: "Search messages in Design Wave",
+      }),
+      { target: { value: "bob" } }
+    );
+    expect(screen.getByText("bob").tagName).toBe("MARK");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open message 42 by alice" })
+    );
     expect(onSelectSerialNo).toHaveBeenCalledWith(42);
   });
 
@@ -132,7 +141,7 @@ describe("WaveDropsSearchModal", () => {
 
     fireEvent.change(input, { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Filters" }));
-    fireEvent.click(screen.getByRole("option", { name: "alice" }));
+    fireEvent.click(screen.getByRole("button", { name: "alice" }));
     expect(useWaveDropsSearch.mock.calls.at(-1)?.[0]).toEqual(
       expect.objectContaining({
         term: "",
@@ -140,6 +149,22 @@ describe("WaveDropsSearchModal", () => {
         enabled: true,
       })
     );
+  });
+
+  it("moves focus into filters and restores it when filters close", () => {
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+      />
+    );
+    const filtersButton = screen.getByRole("button", { name: "Filters" });
+    fireEvent.click(filtersButton);
+    expect(screen.getByRole("textbox", { name: "From" })).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Close filters" }));
+    expect(filtersButton).toHaveFocus();
   });
 
   it("rejects an inverted date range before requesting results", () => {

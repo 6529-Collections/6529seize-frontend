@@ -125,10 +125,12 @@ export default function WaveDropsSearchModal({
   useLayoutViewportLock(isOpen);
   const modalRef = useRef<HTMLDivElement>(null);
   const locale = useBrowserLocale();
-  useClickAway(modalRef, () => {
-    if (isOpen) onClose();
-  });
   const [filtersOpen, setFiltersOpen] = useState(false);
+  useClickAway(modalRef, () => {
+    if (!isOpen) return;
+    if (filtersOpen) setFiltersOpen(false);
+    else onClose();
+  });
   useKeyPressEvent("Escape", () => {
     if (!isOpen) return;
     if (filtersOpen) setFiltersOpen(false);
@@ -163,6 +165,22 @@ export default function WaveDropsSearchModal({
   const beforeTimestamp = beforeDate
     ? parseLocalDateStart(beforeDate)
     : undefined;
+  const formattedAfterDate =
+    afterTimestamp === undefined
+      ? ""
+      : formatDate(locale, afterTimestamp, {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+  const formattedBeforeDate =
+    beforeTimestamp === undefined
+      ? ""
+      : formatDate(locale, beforeTimestamp, {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
 
   const {
     drops: results,
@@ -195,6 +213,7 @@ export default function WaveDropsSearchModal({
     Number(Boolean(beforeDate));
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const filtersButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!isOpen) return;
     const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
@@ -329,6 +348,7 @@ export default function WaveDropsSearchModal({
                     )}
                   </div>
                   <button
+                    ref={filtersButtonRef}
                     type="button"
                     onClick={() => setFiltersOpen((open) => !open)}
                     aria-expanded={filtersOpen}
@@ -352,33 +372,48 @@ export default function WaveDropsSearchModal({
                       <button
                         type="button"
                         onClick={() => setAuthorFilter(null)}
+                        aria-label={t(
+                          locale,
+                          "waves.drops.searchModal.filters.removeAuthor",
+                          { author: authorFilter.handle }
+                        )}
                         className="tw-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200"
                       >
                         {t(locale, "waves.drops.searchModal.filters.from")}:{" "}
                         {authorFilter.handle}
-                        <XMarkIcon className="tw-size-3.5" />
+                        <XMarkIcon className="tw-size-3.5" aria-hidden="true" />
                       </button>
                     )}
                     {afterDate && (
                       <button
                         type="button"
                         onClick={() => setAfterDate("")}
+                        aria-label={t(
+                          locale,
+                          "waves.drops.searchModal.filters.removeAfter",
+                          { date: formattedAfterDate }
+                        )}
                         className="tw-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200"
                       >
                         {t(locale, "waves.drops.searchModal.filters.after")}:{" "}
-                        {afterDate}
-                        <XMarkIcon className="tw-size-3.5" />
+                        {formattedAfterDate}
+                        <XMarkIcon className="tw-size-3.5" aria-hidden="true" />
                       </button>
                     )}
                     {beforeDate && (
                       <button
                         type="button"
                         onClick={() => setBeforeDate("")}
+                        aria-label={t(
+                          locale,
+                          "waves.drops.searchModal.filters.removeBefore",
+                          { date: formattedBeforeDate }
+                        )}
                         className="tw-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200"
                       >
                         {t(locale, "waves.drops.searchModal.filters.before")}:{" "}
-                        {beforeDate}
-                        <XMarkIcon className="tw-size-3.5" />
+                        {formattedBeforeDate}
+                        <XMarkIcon className="tw-size-3.5" aria-hidden="true" />
                       </button>
                     )}
                     <button
@@ -398,6 +433,7 @@ export default function WaveDropsSearchModal({
 
               {filtersOpen && (
                 <WaveDropsSearchFilters
+                  key={authorFilter?.id ?? "no-author"}
                   waveId={wave.id}
                   author={authorFilter}
                   after={afterDate}
@@ -407,6 +443,7 @@ export default function WaveDropsSearchModal({
                   onAfterChange={setAfterDate}
                   onBeforeChange={setBeforeDate}
                   onClose={() => setFiltersOpen(false)}
+                  returnFocusRef={filtersButtonRef}
                 />
               )}
 
@@ -574,9 +611,9 @@ export default function WaveDropsSearchModal({
                                 alt=""
                                 fallbackContent={
                                   <span className="tw-text-primary-200 tw-text-sm tw-font-semibold">
-                                    {author
-                                      .slice(0, 1)
-                                      .toLocaleUpperCase(locale)}
+                                    {([...author][0] ?? "").toLocaleUpperCase(
+                                      locale
+                                    )}
                                   </span>
                                 }
                               />
@@ -603,6 +640,18 @@ export default function WaveDropsSearchModal({
                                     fallback={t(
                                       locale,
                                       "waves.drops.searchModal.result.mediaOnly"
+                                    )}
+                                    checkedLabel={t(
+                                      locale,
+                                      "waves.drops.searchModal.result.checked"
+                                    )}
+                                    imageFallback={t(
+                                      locale,
+                                      "waves.drops.searchModal.result.imageFallback"
+                                    )}
+                                    uncheckedLabel={t(
+                                      locale,
+                                      "waves.drops.searchModal.result.unchecked"
                                     )}
                                   />
                                 </span>

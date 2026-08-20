@@ -34,6 +34,7 @@ import {
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
 import {
+  DEFAULT_WAVE_DROPS_RETRY_OPTIONS,
   getDropApprovalTiming,
   getDropEndpointId,
   getDropType,
@@ -57,10 +58,10 @@ import type {
   FetchWaveLeaderboardV2Props,
   FetchWavePollsV2Props,
   WaveCompetitionDropsPage,
-  WaveSearchAuthor,
 } from "./wave-drops-v2.types";
 
 export { fetchDropReactionDetailsV2 } from "./wave-drop-reactions-v2-api";
+export { fetchWaveSearchAuthors } from "./wave-search-authors-api";
 
 export type {
   ApiWaveDropsV2PageFeed,
@@ -68,13 +69,6 @@ export type {
   WavePollsSort,
   WavePollsState,
 } from "./wave-drops-v2.types";
-
-const DEFAULT_RETRY_OPTIONS = {
-  maxRetries: 2,
-  initialDelayMs: 300,
-  backoffFactor: 1.5,
-  jitter: 0.1,
-} as const;
 
 const fetchDropPartV2 = async ({
   dropId,
@@ -467,7 +461,7 @@ export async function fetchWaveDropsFeedV2({
   const data = withRetry
     ? await commonApiFetchWithRetry<ApiWaveDropsFeedV2>({
         ...request,
-        retryOptions: DEFAULT_RETRY_OPTIONS,
+        retryOptions: DEFAULT_WAVE_DROPS_RETRY_OPTIONS,
       })
     : await commonApiFetch<ApiWaveDropsFeedV2>(request);
 
@@ -540,27 +534,6 @@ export async function fetchWaveDropsSearchV2({
     page: response.page,
     next: response.next,
   };
-}
-
-export async function fetchWaveSearchAuthors({
-  waveId,
-  handle,
-  limit = 10,
-  signal,
-}: {
-  readonly waveId: string;
-  readonly handle: string;
-  readonly limit?: number | undefined;
-  readonly signal?: AbortSignal | undefined;
-}): Promise<WaveSearchAuthor[]> {
-  return commonApiFetch<WaveSearchAuthor[]>({
-    endpoint: `v2/waves/${encodeURIComponent(waveId)}/search-authors`,
-    params: {
-      handle: handle.trim(),
-      limit: limit.toString(),
-    },
-    signal,
-  });
 }
 
 export async function fetchWaveCompetitionDropsV2({

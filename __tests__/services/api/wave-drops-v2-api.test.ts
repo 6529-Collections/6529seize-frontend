@@ -53,6 +53,20 @@ describe("fetchWaveSearchAuthors", () => {
       signal: undefined,
     });
   });
+
+  it("clamps author result limits to the server contract", async () => {
+    commonApiFetchMock.mockResolvedValueOnce([]);
+
+    await fetchWaveSearchAuthors({
+      waveId: "wave-1",
+      handle: "",
+      limit: 200,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ params: { handle: "", limit: "20" } })
+    );
+  });
 });
 
 describe("fetchDropReactionDetailsV2", () => {

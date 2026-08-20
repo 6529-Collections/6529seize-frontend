@@ -8,7 +8,7 @@ import { useWaveSearchAuthors } from "@/hooks/useWaveSearchAuthors";
 import { t } from "@/i18n/messages";
 import type { WaveSearchAuthor } from "@/services/api/wave-drops-v2.types";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useDebounce } from "react-use";
 
 const AUTHOR_LIST_ID = "wave-drops-search-author-list";
@@ -23,6 +23,7 @@ export default function WaveDropsSearchFilters({
   onAfterChange,
   onBeforeChange,
   onClose,
+  returnFocusRef,
 }: {
   readonly waveId: string;
   readonly author: WaveSearchAuthor | null;
@@ -33,8 +34,10 @@ export default function WaveDropsSearchFilters({
   readonly onAfterChange: (value: string) => void;
   readonly onBeforeChange: (value: string) => void;
   readonly onClose: () => void;
+  readonly returnFocusRef: RefObject<HTMLButtonElement | null>;
 }) {
   const locale = useBrowserLocale();
+  const authorInputRef = useRef<HTMLInputElement>(null);
   const [authorQuery, setAuthorQuery] = useState(author?.handle ?? "");
   const [debouncedAuthorQuery, setDebouncedAuthorQuery] = useState(authorQuery);
   useDebounce(() => setDebouncedAuthorQuery(authorQuery), 200, [authorQuery]);
@@ -44,15 +47,24 @@ export default function WaveDropsSearchFilters({
     enabled: true,
   });
 
+  useEffect(() => {
+    const returnFocusElement = returnFocusRef.current;
+    authorInputRef.current?.focus();
+    return () => returnFocusElement?.focus();
+  }, [returnFocusRef]);
+
   return (
     <>
       <button
         type="button"
-        aria-label={t(locale, "waves.drops.searchModal.filters.close")}
+        aria-hidden="true"
+        tabIndex={-1}
         onClick={onClose}
         className="tw-fixed tw-inset-0 tw-z-10 tw-border-0 tw-bg-black/35 sm:tw-absolute sm:tw-bg-transparent"
       />
       <section
+        role="dialog"
+        aria-modal="true"
         aria-labelledby="wave-drops-search-filters-title"
         className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-20 tw-rounded-t-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-shadow-2xl sm:tw-absolute sm:tw-inset-auto sm:tw-right-5 sm:tw-top-[7.75rem] sm:tw-w-80 sm:tw-rounded-xl"
       >
@@ -69,7 +81,7 @@ export default function WaveDropsSearchFilters({
             aria-label={t(locale, "waves.drops.searchModal.filters.close")}
             className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
           >
-            <XMarkIcon className="tw-size-5" />
+            <XMarkIcon className="tw-size-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -83,10 +95,7 @@ export default function WaveDropsSearchFilters({
           <div className="tw-relative tw-mt-1.5">
             <input
               id="wave-drops-search-author"
-              role="combobox"
-              aria-autocomplete="list"
-              aria-controls={AUTHOR_LIST_ID}
-              aria-expanded="true"
+              ref={authorInputRef}
               autoComplete="off"
               value={authorQuery}
               onChange={(event) => setAuthorQuery(event.target.value)}
@@ -109,13 +118,13 @@ export default function WaveDropsSearchFilters({
                 )}
                 className="tw-absolute tw-right-2 tw-top-1/2 tw-flex tw-size-6 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-300"
               >
-                <XMarkIcon className="tw-size-4" />
+                <XMarkIcon className="tw-size-4" aria-hidden="true" />
               </button>
             )}
           </div>
           <div
             id={AUTHOR_LIST_ID}
-            role="listbox"
+            role="group"
             aria-label={t(
               locale,
               "waves.drops.searchModal.filters.authorResults"
@@ -123,12 +132,20 @@ export default function WaveDropsSearchFilters({
             className="tw-mt-1.5 tw-max-h-36 tw-overflow-y-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1"
           >
             {isFetching && (
-              <p className="tw-m-0 tw-px-2 tw-py-2 tw-text-xs tw-text-iron-400">
+              <p
+                role="status"
+                aria-live="polite"
+                className="tw-m-0 tw-px-2 tw-py-2 tw-text-xs tw-text-iron-400"
+              >
                 {t(locale, "waves.drops.searchModal.filters.loadingAuthors")}
               </p>
             )}
             {!isFetching && authors.length === 0 && (
-              <p className="tw-m-0 tw-px-2 tw-py-2 tw-text-xs tw-text-iron-400">
+              <p
+                role="status"
+                aria-live="polite"
+                className="tw-m-0 tw-px-2 tw-py-2 tw-text-xs tw-text-iron-400"
+              >
                 {t(locale, "waves.drops.searchModal.filters.noAuthors")}
               </p>
             )}
@@ -137,9 +154,8 @@ export default function WaveDropsSearchFilters({
                 <button
                   key={candidate.id}
                   type="button"
-                  role="option"
-                  aria-selected={author?.id === candidate.id}
                   aria-label={candidate.handle}
+                  aria-pressed={author?.id === candidate.id}
                   onClick={() => {
                     setAuthorQuery(candidate.handle);
                     onAuthorChange(candidate);
@@ -150,9 +166,9 @@ export default function WaveDropsSearchFilters({
                     pfpUrl={candidate.pfp}
                     size={ProfileBadgeSize.COMPACT}
                     alt=""
-                    fallbackContent={candidate.handle
-                      .slice(0, 1)
-                      .toLocaleUpperCase(locale)}
+                    fallbackContent={(
+                      [...candidate.handle][0] ?? ""
+                    ).toLocaleUpperCase(locale)}
                   />
                   <span className="tw-truncate">{candidate.handle}</span>
                 </button>

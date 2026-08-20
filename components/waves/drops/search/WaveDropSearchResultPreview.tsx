@@ -1,61 +1,82 @@
 "use client";
 
-import { Children, Fragment, isValidElement, type ReactNode } from "react";
+import { Children, Fragment, type ReactNode } from "react";
 import Markdown, { type Components } from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 
 const TOKEN_PATTERN = /(@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])/g;
 
-const highlightText = (text: string, query: string): ReactNode => {
+const highlightMatches = (
+  text: string,
+  query: string,
+  keyPrefix: string
+): ReactNode => {
   const queryValue = query.trim();
+  if (!queryValue) return text;
+  const nodes: ReactNode[] = [];
+  const lowerText = text.toLocaleLowerCase();
+  const lowerQuery = queryValue.toLocaleLowerCase();
+  let cursor = 0;
+  let matchIndex = lowerText.indexOf(lowerQuery);
+  while (matchIndex !== -1) {
+    if (matchIndex > cursor) nodes.push(text.slice(cursor, matchIndex));
+    const matchEnd = matchIndex + queryValue.length;
+    nodes.push(
+      <mark
+        key={`${keyPrefix}-${matchIndex}`}
+        className="tw-rounded-sm tw-bg-primary-400/20 tw-px-0.5 tw-text-inherit"
+      >
+        {text.slice(matchIndex, matchEnd)}
+      </mark>
+    );
+    cursor = matchEnd;
+    matchIndex = lowerText.indexOf(lowerQuery, cursor);
+  }
+  if (cursor < text.length) nodes.push(text.slice(cursor));
+  return nodes;
+};
+
+const highlightText = (text: string, query: string): ReactNode => {
   const tokenParts = text.split(TOKEN_PATTERN);
   return tokenParts.map((tokenPart, tokenIndex) => {
-    if (TOKEN_PATTERN.test(tokenPart)) {
-      TOKEN_PATTERN.lastIndex = 0;
+    if (tokenIndex % 2 === 1) {
       return (
         <span
           key={`token-${tokenIndex}`}
           className="tw-font-medium tw-text-primary-300"
         >
-          {tokenPart}
+          {highlightMatches(tokenPart, query, `token-match-${tokenIndex}`)}
         </span>
       );
     }
-    TOKEN_PATTERN.lastIndex = 0;
-    if (!queryValue) return tokenPart;
-    const nodes: ReactNode[] = [];
-    const lowerText = tokenPart.toLocaleLowerCase();
-    const lowerQuery = queryValue.toLocaleLowerCase();
-    let cursor = 0;
-    let matchIndex = lowerText.indexOf(lowerQuery);
-    while (matchIndex !== -1) {
-      if (matchIndex > cursor) nodes.push(tokenPart.slice(cursor, matchIndex));
-      const matchEnd = matchIndex + queryValue.length;
-      nodes.push(
-        <mark
-          key={`match-${tokenIndex}-${matchIndex}`}
-          className="tw-rounded-sm tw-bg-primary-400/20 tw-px-0.5 tw-text-inherit"
-        >
-          {tokenPart.slice(matchIndex, matchEnd)}
-        </mark>
-      );
-      cursor = matchEnd;
-      matchIndex = lowerText.indexOf(lowerQuery, cursor);
-    }
-    if (cursor < tokenPart.length) nodes.push(tokenPart.slice(cursor));
-    return <Fragment key={`text-${tokenIndex}`}>{nodes}</Fragment>;
+    return (
+      <Fragment key={`text-${tokenIndex}`}>
+        {highlightMatches(tokenPart, query, `match-${tokenIndex}`)}
+      </Fragment>
+    );
   });
 };
 
+// Every inline Markdown renderer below decorates its own string children. We
+// intentionally leave already-rendered elements alone to avoid double marks.
 const decorateChildren = (children: ReactNode, query: string): ReactNode =>
   Children.map(children, (child) => {
     if (typeof child === "string") return highlightText(child, query);
-    if (isValidElement(child)) return child;
     return child;
   });
 
-const createComponents = (query: string): Components => ({
+const createComponents = ({
+  checkedLabel,
+  imageFallback,
+  query,
+  uncheckedLabel,
+}: {
+  readonly checkedLabel: string;
+  readonly imageFallback: string;
+  readonly query: string;
+  readonly uncheckedLabel: string;
+}): Components => ({
   a: ({ children }) => (
     <span className="tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-2">
       {decorateChildren(children, query)}
@@ -90,9 +111,15 @@ const createComponents = (query: string): Components => ({
     </strong>
   ),
   img: ({ alt }) => (
-    <span className="tw-italic tw-text-iron-400">[{alt ?? "image"}]</span>
+    <span className="tw-italic tw-text-iron-400">
+      [{alt?.trim() ? alt.trim() : imageFallback}]
+    </span>
   ),
-  input: ({ checked }) => <span>{checked ? "☑" : "☐"} </span>,
+  input: ({ checked }) => (
+    <span role="img" aria-label={checked ? checkedLabel : uncheckedLabel}>
+      {checked ? "☑" : "☐"}{" "}
+    </span>
+  ),
   li: ({ children }) => <li>{children}</li>,
   ol: ({ children }) => (
     <ol className="tw-my-1 tw-list-decimal tw-pl-5">{children}</ol>
@@ -138,17 +165,28 @@ export default function WaveDropSearchResultPreview({
   parts,
   query,
   fallback,
+  checkedLabel,
+  imageFallback,
+  uncheckedLabel,
 }: {
   readonly title: string | null;
   readonly parts: readonly { readonly content: string | null }[];
   readonly query: string;
   readonly fallback: string;
+  readonly checkedLabel: string;
+  readonly imageFallback: string;
+  readonly uncheckedLabel: string;
 }) {
   const contentParts = parts
     .map((part) => part.content?.trim() ?? "")
     .filter(Boolean);
   if (!title?.trim() && contentParts.length === 0) return fallback;
-  const components = createComponents(query);
+  const components = createComponents({
+    checkedLabel,
+    imageFallback,
+    query,
+    uncheckedLabel,
+  });
   return (
     <span className="tw-block tw-space-y-1">
       {title?.trim() && (
