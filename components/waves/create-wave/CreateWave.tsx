@@ -1,17 +1,25 @@
 "use client";
 
 /* istanbul ignore file */
-import { useEffect, useRef, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { usePathname } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CreateWaveStep } from "@/types/waves.types";
+import type { CreateWaveGroupConfigType } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
+import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { useCreateWaveDrafts } from "./hooks/useCreateWaveDrafts";
 import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
@@ -46,6 +54,12 @@ export default function CreateWave({
   } = waveConfig;
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [criteriaReplacementByGroup, setCriteriaReplacementByGroup] = useState<
+    Partial<Record<CreateWaveGroupConfigType, boolean>>
+  >({});
+  const [groupResolutionByGroup, setGroupResolutionByGroup] = useState<
+    Partial<Record<CreateWaveGroupConfigType, boolean>>
+  >({});
   useKeyboardFocusScroll(containerRef);
 
   // On the native /waves/create route the create flow has no height-bounding
@@ -67,7 +81,7 @@ export default function CreateWave({
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { contentContainerStyle } = useLayout();
-  const isNativeRoute = isApp && pathname === "/waves/create";
+  const isNativeRoute = isApp && isCreateWavePathname(pathname);
   const measuredOrFallbackStyle: CSSProperties =
     contentContainerStyle.height !== undefined
       ? contentContainerStyle
@@ -104,7 +118,13 @@ export default function CreateWave({
   const { drafts, loadDraft, deleteDraft, clearActiveDraft } =
     useCreateWaveDrafts({ config, endDateConfig, step });
 
+  const resetTransientGroupState = useCallback(() => {
+    setCriteriaReplacementByGroup({});
+    setGroupResolutionByGroup({});
+  }, []);
+
   const onLoadDraft = (draft: CreateWaveDraft) => {
+    resetTransientGroupState();
     replaceConfig(draft.config);
     setEndDateConfig(draft.endDateConfig);
     loadDraft(draft);
@@ -132,7 +152,41 @@ export default function CreateWave({
   const setStep = (
     targetStep: CreateWaveStep,
     direction: "forward" | "backward"
-  ): Promise<void> => onStep({ step: targetStep, direction });
+  ): Promise<void> => {
+    if (targetStep !== CreateWaveStep.GROUPS) {
+      resetTransientGroupState();
+    }
+    return onStep({ step: targetStep, direction });
+  };
+
+  const onCriteriaReplacementChange = useCallback(
+    (groupType: CreateWaveGroupConfigType, active: boolean) => {
+      setCriteriaReplacementByGroup((current) => {
+        if (!!current[groupType] === active) {
+          return current;
+        }
+        return { ...current, [groupType]: active };
+      });
+    },
+    []
+  );
+  const onGroupResolutionChange = useCallback(
+    (groupType: CreateWaveGroupConfigType, active: boolean) => {
+      setGroupResolutionByGroup((current) => {
+        if (!!current[groupType] === active) {
+          return current;
+        }
+        return { ...current, [groupType]: active };
+      });
+    },
+    []
+  );
+  const hasPendingCriteriaReplacement = Object.values(
+    criteriaReplacementByGroup
+  ).some(Boolean);
+  const hasUnresolvedSelectedGroup = Object.values(groupResolutionByGroup).some(
+    Boolean
+  );
 
   const actionInProgress =
     submitting ||
@@ -162,6 +216,9 @@ export default function CreateWave({
           step={step}
           showActions={selectedOutcomeType === null}
           submitting={actionInProgress}
+          nextDisabled={
+            hasPendingCriteriaReplacement || hasUnresolvedSelectedGroup
+          }
           setStep={setStep}
           onComplete={onComplete}
         >
@@ -179,6 +236,8 @@ export default function CreateWave({
               />
             }
             onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+            onCriteriaReplacementChange={onCriteriaReplacementChange}
+            onGroupResolutionChange={onGroupResolutionChange}
             onInlineGroupCreate={onInlineGroupCreate}
           />
         </CreateWaveLayout>

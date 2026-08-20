@@ -411,6 +411,7 @@ export const EN_GB_MESSAGES = {
   "waves.create.dialog.subwaveTitle": "Create subwave",
   "waves.create.dialog.waveTitle": "Create Wave",
   "waves.create.actions.cancel": "Cancel",
+  "waves.create.actions.backToCriteria": "Back to criteria",
   "waves.create.actions.complete": "Complete",
   "waves.create.actions.next": "Next",
   "waves.create.actions.previous": "Previous",
@@ -429,6 +430,32 @@ export const EN_GB_MESSAGES = {
     "Choose who can access, participate in, and manage this wave.",
   "waves.create.groups.viewGroupName": "Who can view",
   "waves.create.groups.adminGroupName": "Admin",
+  "waves.create.groups.members.currentCount": "{count} currently eligible",
+  "waves.create.groups.members.countLoading": "Checking current audience…",
+  "waves.create.groups.members.countUnavailable":
+    "Current audience unavailable",
+  "waves.create.groups.members.view": "View members",
+  "waves.create.groups.members.previewDraft": "Preview matches",
+  "waves.create.groups.members.dialogTitle": "{role}: {group}",
+  "waves.create.groups.members.dynamicDescription":
+    "This is a live preview based on current profile, reputation, and ownership data. Membership can change over time.",
+  "waves.create.groups.members.criteriaSummary": "Why these identities qualify",
+  "waves.create.groups.members.criteriaUnavailable":
+    "Group criteria aren't available, but you can still inspect the current members below.",
+  "waves.create.groups.members.searchLabel": "Find an identity",
+  "waves.create.groups.members.searchPlaceholder": "Search by handle or wallet",
+  "waves.create.groups.members.clearSearch": "Clear identity search",
+  "waves.create.groups.members.loadingStatus": "Loading current members",
+  "waves.create.groups.members.empty":
+    "No identities currently match this group.",
+  "waves.create.groups.members.searchEmpty": "No matching identities found.",
+  "waves.create.groups.members.errorTitle": "Couldn't load current members.",
+  "waves.create.groups.members.errorDescription":
+    "Check your connection and try again.",
+  "waves.create.groups.members.retry": "Try again",
+  "waves.create.groups.members.listLabel": "Current group members",
+  "waves.create.groups.members.openProfile":
+    "Open {identity}'s profile in a new tab",
   "waves.create.groups.validation.checking": "Checking group access…",
   "waves.create.groups.validation.unavailableTitle":
     "Couldn't verify group access.",

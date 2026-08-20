@@ -11,6 +11,7 @@ export default function CreateWaveLayout({
   step,
   showActions,
   submitting,
+  nextDisabled = false,
   setStep,
   onComplete,
 }: {
@@ -19,6 +20,7 @@ export default function CreateWaveLayout({
   readonly step: CreateWaveStep;
   readonly showActions: boolean;
   readonly submitting: boolean;
+  readonly nextDisabled?: boolean | undefined;
   readonly setStep: (
     step: CreateWaveStep,
     direction: "forward" | "backward"
@@ -78,6 +80,7 @@ export default function CreateWaveLayout({
                 step={step}
                 config={config}
                 submitting={submitting}
+                nextDisabled={nextDisabled}
                 onComplete={onComplete}
               />
             </div>
