@@ -2201,13 +2201,17 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   }
 
   if (pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`) {
-    // A perpetual rank wave submits its outcomes tab as hidden right after
-    // creation; nothing else is allowed to write wave metadata here.
+    // A perpetual rank wave submits its outcomes tab as hidden and persists
+    // the default proposal-card recipe right after creation. Nothing else is
+    // allowed to write wave metadata here.
     return (
       isPlainObject(body) &&
       hasOnlyKeys(body, ["data_key", "data_value"]) &&
-      body.data_key === "wave_display.outcomes.visible" &&
-      body.data_value === "false"
+      ((body.data_key === "wave_display.outcomes.visible" &&
+        body.data_value === "false") ||
+        (body.data_key === "wave_display.proposals.card_recipe" &&
+          body.data_value ===
+            '{"version":1,"layout":"summary","excerpt_max_characters":360,"show_media_thumbnail":true}'))
     );
   }
 
@@ -2297,6 +2301,14 @@ function loggedRequestBody(pathname, body) {
     return {
       visible: body.visible,
       old_version_id: body.old_version_id,
+    };
+  }
+
+  if (pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`) {
+    return {
+      data_key: typeof body.data_key === "string" ? body.data_key : null,
+      data_value: typeof body.data_value === "string" ? body.data_value : null,
+      keys: sortedKeys(body),
     };
   }
 
@@ -2651,11 +2663,11 @@ const mockApiKnownPostRoutes = [
   {
     matches: (pathname) =>
       pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`,
-    respond: (res) =>
+    respond: (res, body) =>
       writeJsonResponse(res, {
         id: 1,
-        data_key: "wave_display.outcomes.visible",
-        data_value: "false",
+        data_key: body.data_key,
+        data_value: body.data_value,
       }),
   },
   {

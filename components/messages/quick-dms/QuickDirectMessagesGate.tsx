@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useIsTransferModeActive } from "@/components/nft-transfer/TransferState";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 
 const LazyQuickDirectMessages = dynamic(() => import("./QuickDirectMessages"), {
@@ -42,6 +43,7 @@ const useCanMountQuickDirectMessages = (): boolean => {
   const { connectedProfile, showWaves } = useAuth();
   const { isApp, isMobileDevice } = useDeviceInfo();
   const isTransferModeActive = useIsTransferModeActive();
+  const pathname = usePathname();
   const isDesktopViewport = useSyncExternalStore(
     subscribeDesktopViewport,
     getDesktopViewportSnapshot,
@@ -52,6 +54,7 @@ const useCanMountQuickDirectMessages = (): boolean => {
     !isApp &&
     !isMobileDevice &&
     !isTransferModeActive &&
+    pathname !== "/waves/create" &&
     isDesktopViewport &&
     connectedProfile?.handle &&
     showWaves
