@@ -15,6 +15,7 @@ interface WaveRulesPanelProps {
   readonly useRing?: boolean | undefined;
   readonly showTitle?: boolean | undefined;
   readonly variant?: "default" | "form" | undefined;
+  /** Return `undefined` for the default renderer or `null` to render nothing. */
   readonly renderRowValue?:
     | ((row: WaveRuleRow) => ReactNode | undefined)
     | undefined;

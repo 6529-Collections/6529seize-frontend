@@ -19,6 +19,7 @@ import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
+import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { useCreateWaveDrafts } from "./hooks/useCreateWaveDrafts";
 import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
@@ -80,7 +81,7 @@ export default function CreateWave({
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { contentContainerStyle } = useLayout();
-  const isNativeRoute = isApp && pathname === "/waves/create";
+  const isNativeRoute = isApp && isCreateWavePathname(pathname);
   const measuredOrFallbackStyle: CSSProperties =
     contentContainerStyle.height !== undefined
       ? contentContainerStyle
