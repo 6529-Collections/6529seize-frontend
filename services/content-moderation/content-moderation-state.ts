@@ -81,9 +81,24 @@ export const getGlobalDropModerationOverride = (
   dropId: string
 ): ApiDropModerationStatus | undefined => globalDropOverrides.get(dropId);
 
-export const resetContentModerationStateForTests = () => {
+const clearContentModerationOverrides = (): boolean => {
+  const hadOverrides =
+    hiddenDropOverrides.size > 0 ||
+    blockedProfileOverrides.size > 0 ||
+    globalDropOverrides.size > 0;
   hiddenDropOverrides.clear();
   blockedProfileOverrides.clear();
   globalDropOverrides.clear();
+  return hadOverrides;
+};
+
+export const clearContentModerationState = () => {
+  if (clearContentModerationOverrides()) {
+    publish();
+  }
+};
+
+export const resetContentModerationStateForTests = () => {
+  clearContentModerationOverrides();
   publish();
 };

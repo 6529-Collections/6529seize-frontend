@@ -1,5 +1,6 @@
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import {
+  clearContentModerationState,
   getDropHiddenOverride,
   getGlobalDropModerationOverride,
   getProfileBlockedOverride,
@@ -52,5 +53,20 @@ describe("content moderation presentation overrides", () => {
 
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
     expect(getProfileBlockedOverride("viewer-1", "author-1")).toBeUndefined();
+  });
+
+  it("clears personal and global overrides when the authenticated profile changes", () => {
+    setDropHiddenOverride("viewer-1", "drop-1", true);
+    setProfileBlockedOverride("viewer-1", "author-1", true);
+    setGlobalDropModerationOverride(
+      "drop-2",
+      ApiDropModerationStatus.ModeratorRemoved
+    );
+
+    clearContentModerationState();
+
+    expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
+    expect(getProfileBlockedOverride("viewer-1", "author-1")).toBeUndefined();
+    expect(getGlobalDropModerationOverride("drop-2")).toBeUndefined();
   });
 });

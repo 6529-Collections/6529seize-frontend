@@ -22,6 +22,7 @@ import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
 import { commonApiFetch } from "@/services/api/common-api";
+import { clearContentModerationState } from "@/services/content-moderation/content-moderation-state";
 import {
   getAuthJwt,
   getWalletAddress,
@@ -314,6 +315,10 @@ export default function Auth({
   useEffect(() => {
     resetTrackedAuthImpactKeys();
   }, [address, resetTrackedAuthImpactKeys]);
+
+  useEffect(() => {
+    clearContentModerationState();
+  }, [connectedProfile?.id]);
 
   useEffect(() => {
     signModalReasonRef.current = signModalReason;

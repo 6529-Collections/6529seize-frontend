@@ -89,9 +89,11 @@ describe("ContentModerationDropGate", () => {
     expect(
       screen.queryByText("Unclassified post content")
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByText("This post is unavailable while it is being checked.")
-    ).toBeInTheDocument();
+    const tombstoneMessage = screen.getByText(
+      "This post is unavailable while it is being checked."
+    );
+    expect(tombstoneMessage).toBeInTheDocument();
+    expect(tombstoneMessage).not.toHaveAttribute("role", "status");
   });
 
   it("allows authors to view their own moderated content", () => {
