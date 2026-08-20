@@ -1108,6 +1108,7 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   deleteErrorTitle: "Couldn't delete this wave.",
   deleteSuccess: "Wave deleted.",
   deleteTitle: "Delete wave",
+  nameEditLabel: "Edit wave name",
   ownerOptionsDelete: "Delete",
   ownerOptionsOpenLabel: "Open options",
   ownerOptionsTitle: "Wave options",
