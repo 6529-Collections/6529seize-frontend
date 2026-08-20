@@ -4483,6 +4483,47 @@ describe("instrumentation-client", () => {
     expect(payload).not.toContain("#private");
   });
 
+  it("removes only misleading response body sizes from standalone HEAD spans", () => {
+    const beforeSendSpan = loadBeforeSendSpan();
+    const span = {
+      op: "http.client",
+      description: "HEAD https://media.example.invalid/renditions/video.mp4",
+      start_timestamp: 10,
+      timestamp: 10.25,
+      data: {
+        "http.method": "HEAD",
+        "http.response_content_length": 3_569_517,
+        "http.response.body.size": 3_569_517,
+        "http.response.status_code": 200,
+        "http.response_transfer_size": 512,
+        "http.url": "https://media.example.invalid/renditions/video.mp4",
+      },
+    };
+
+    const result = beforeSendSpan(span);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        op: "http.client",
+        description: "HEAD /renditions/video.mp4",
+        start_timestamp: 10,
+        timestamp: 10.25,
+        data: {
+          "http.method": "HEAD",
+          "http.response.status_code": 200,
+          "http.response_transfer_size": 512,
+          "http.url": "/renditions/video.mp4",
+        },
+      })
+    );
+    expect(span.data).toEqual(
+      expect.objectContaining({
+        "http.response_content_length": 3_569_517,
+        "http.response.body.size": 3_569_517,
+      })
+    );
+  });
+
   it("does not add audit metadata when no spans were filtered", () => {
     const beforeSendTransaction = loadBeforeSendTransaction();
     const event = {
