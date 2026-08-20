@@ -1,13 +1,12 @@
 "use client";
 
 import {
-  ArrowDownTrayIcon,
   ChevronRightIcon,
   GlobeAltIcon,
-  PlusIcon,
   QrCodeIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
+import AppWalletActionButton from "@/components/app-wallets/AppWalletActionButton";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { t } from "@/i18n/messages";
@@ -174,27 +173,20 @@ export default function CapacitorConnectDialog({
             {t(locale, "capacitorConnect.appWallets.description")}
           </p>
           <div className="tw-grid tw-grid-cols-2 tw-gap-2">
-            <button
-              type="button"
+            <AppWalletActionButton
+              action="create"
               onClick={onCreateAppWallet}
               disabled={!appWalletsSupported}
-              className="tw-inline-flex tw-min-h-12 tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-primary-500/50 tw-bg-primary-500/10 tw-px-3 tw-py-2.5 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-primary-500/20 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-primary-500/20"
             >
-              <PlusIcon aria-hidden="true" className="tw-size-5 tw-flex-none" />
               {t(locale, "capacitorConnect.appWallets.create")}
-            </button>
-            <button
-              type="button"
+            </AppWalletActionButton>
+            <AppWalletActionButton
+              action="import"
               onClick={onImportAppWallet}
               disabled={!appWalletsSupported}
-              className="tw-inline-flex tw-min-h-12 tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800"
             >
-              <ArrowDownTrayIcon
-                aria-hidden="true"
-                className="tw-size-5 tw-flex-none"
-              />
               {t(locale, "capacitorConnect.appWallets.import")}
-            </button>
+            </AppWalletActionButton>
           </div>
           <div className="tw-flex tw-max-h-[40svh] tw-flex-col tw-gap-2 tw-overflow-y-auto tw-pr-1 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
             <AppWalletRows

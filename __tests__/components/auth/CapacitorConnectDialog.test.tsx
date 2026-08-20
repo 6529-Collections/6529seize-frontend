@@ -77,7 +77,7 @@ describe("CapacitorConnectDialog", () => {
       screen.getByRole("button", { name: "Scan Connection QR" })
     ).toBeInTheDocument();
     expect(
-      screen.queryByText(/encrypted wallets stored securely/i)
+      screen.queryByText(/encrypted and stored securely/i)
     ).not.toBeInTheDocument();
   });
 
@@ -91,12 +91,12 @@ describe("CapacitorConnectDialog", () => {
     );
 
     expect(
-      screen.getByText(/encrypted wallets stored securely on this device/i)
+      screen.getByText(/encrypted and stored securely on this device/i)
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Create App Wallet" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create Wallet" }));
     expect(defaultProps.onCreateAppWallet).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Import App Wallet" }));
+    fireEvent.click(screen.getByRole("button", { name: "Import Wallet" }));
     expect(defaultProps.onImportAppWallet).toHaveBeenCalledTimes(1);
 
     fireEvent.click(
@@ -123,9 +123,7 @@ describe("CapacitorConnectDialog", () => {
   });
 
   it("announces the empty app-wallet state with semantic output", () => {
-    render(
-      <CapacitorConnectDialog {...defaultProps} view="app-wallets" />
-    );
+    render(<CapacitorConnectDialog {...defaultProps} view="app-wallets" />);
 
     const status = screen.getByRole("status");
     expect(status.tagName).toBe("OUTPUT");
