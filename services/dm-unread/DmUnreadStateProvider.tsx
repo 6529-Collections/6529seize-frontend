@@ -19,47 +19,22 @@ import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import type { ReactNode } from "react";
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
+import {
+  DmUnreadContext,
+  type DmUnreadContextValue,
+} from "./dm-unread-context";
 import {
   DmUnreadStore,
   getDmUnreadConversation,
-  getDmUnreadConversations,
-  getDmUnreadSummary,
   type DmUnreadReadOperation,
-  type DmUnreadSummary,
 } from "./dm-unread-store";
-
-interface DmUnreadContextValue {
-  readonly activeProfileId: string | null;
-  readonly activationId: number;
-  readonly store: DmUnreadStore;
-  readonly applyServerState: (
-    state: ApiDmUnreadConversationState,
-    expectedProfileId: string | null,
-    expectedActivationId: number
-  ) => boolean;
-  readonly beginRead: (
-    expectedProfileId: string | null,
-    expectedActivationId: number,
-    waveId: string,
-    readThroughSerialNo?: number
-  ) => DmUnreadReadOperation | null;
-  readonly reconcileFailedRead: (
-    operation: DmUnreadReadOperation
-  ) => Promise<void>;
-  readonly cancelRead: (operation: DmUnreadReadOperation) => void;
-}
-
-const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
 const DROP_UPDATE_RECOVERY_GRACE_MS = 1_500;
 const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
@@ -88,6 +63,13 @@ interface IncomingDropUpdate {
   readonly author: { readonly id: string };
   readonly serial_no: number;
   readonly wave: { readonly id: string };
+}
+
+interface IncomingDropUpdateRef {
+  readonly author_id: string;
+  readonly serial_no: number;
+  readonly update_type: string;
+  readonly wave_id: string;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -138,6 +120,16 @@ const isIncomingDropUpdate = (value: unknown): value is IncomingDropUpdate => {
     typeof wave["id"] === "string"
   );
 };
+
+const isIncomingDropUpdateRef = (
+  value: unknown
+): value is IncomingDropUpdateRef =>
+  isRecord(value) &&
+  typeof value["author_id"] === "string" &&
+  typeof value["serial_no"] === "number" &&
+  Number.isFinite(value["serial_no"]) &&
+  value["update_type"] === WsMessageType.DROP_UPDATE &&
+  typeof value["wave_id"] === "string";
 
 interface SnapshotSynchronizationRequest {
   readonly expectedProfileId: string;
@@ -538,15 +530,11 @@ export function DmUnreadStateProvider({
     handleUnreadStateChanged
   );
 
-  const handleDropUpdate = useCallback(
-    (value: unknown) => {
-      if (!isIncomingDropUpdate(value)) {
-        return;
-      }
+  const scheduleDropRecovery = useCallback(
+    (authorId: string, serialNo: number, waveId: string) => {
       const activation = activeActivationRef.current;
       const profileId = activation.profileId;
-      const waveId = value.wave.id;
-      if (!profileId || value.author.id === profileId) {
+      if (!profileId || authorId === profileId) {
         return;
       }
       const conversation = getDmUnreadConversation(
@@ -554,17 +542,14 @@ export function DmUnreadStateProvider({
         profileId,
         waveId
       );
-      if (
-        !conversation ||
-        conversation.latest_drop_serial_no >= value.serial_no
-      ) {
+      if (!conversation || conversation.latest_drop_serial_no >= serialNo) {
         return;
       }
-      const pendingSerialNo =
+      const previousPendingSerialNo =
         pendingDropRecoveryByWaveRef.current.get(waveId) ?? 0;
       pendingDropRecoveryByWaveRef.current.set(
         waveId,
-        Math.max(pendingSerialNo, Math.floor(value.serial_no))
+        Math.max(previousPendingSerialNo, Math.floor(serialNo))
       );
       if (dropRecoveryTimerRef.current !== null) {
         return;
@@ -584,7 +569,7 @@ export function DmUnreadStateProvider({
           return;
         }
         const hasLaggingConversation = pendingDrops.some(
-          ([pendingWaveId, serialNo]) => {
+          ([pendingWaveId, pendingSerialNo]) => {
             const currentConversation = getDmUnreadConversation(
               store.getSnapshot(),
               profileId,
@@ -592,7 +577,7 @@ export function DmUnreadStateProvider({
             );
             return (
               currentConversation !== null &&
-              currentConversation.latest_drop_serial_no < serialNo
+              currentConversation.latest_drop_serial_no < pendingSerialNo
             );
           }
         );
@@ -604,7 +589,29 @@ export function DmUnreadStateProvider({
     [requestDropRecoverySnapshot, store]
   );
 
+  const handleDropUpdate = useCallback(
+    (value: unknown) => {
+      if (isIncomingDropUpdate(value)) {
+        scheduleDropRecovery(value.author.id, value.serial_no, value.wave.id);
+      }
+    },
+    [scheduleDropRecovery]
+  );
+
+  const handleDropUpdateRef = useCallback(
+    (value: unknown) => {
+      if (isIncomingDropUpdateRef(value)) {
+        scheduleDropRecovery(value.author_id, value.serial_no, value.wave_id);
+      }
+    },
+    [scheduleDropRecovery]
+  );
+
   useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE, handleDropUpdate);
+  useWebSocketMessage<unknown>(
+    WsMessageType.DROP_UPDATE_REF,
+    handleDropUpdateRef
+  );
 
   useEffect(() => {
     const previousStatus = previousWebSocketStatusRef.current;
@@ -703,88 +710,9 @@ export function DmUnreadStateProvider({
   );
 }
 
-const useDmUnreadContext = (): DmUnreadContextValue => {
-  const context = useContext(DmUnreadContext);
-  if (!context) {
-    throw new Error(
-      "DM unread selectors must be used within DmUnreadStateProvider"
-    );
-  }
-  return context;
-};
-
-export const useDmUnreadConversation = (
-  waveId: string
-): ApiDmUnreadConversationState | null => {
-  const { activeProfileId, store } = useDmUnreadContext();
-  const snapshot = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot
-  );
-  return getDmUnreadConversation(snapshot, activeProfileId, waveId);
-};
-
-export const useDmUnreadSummary = (): DmUnreadSummary => {
-  const { activeProfileId, store } = useDmUnreadContext();
-  const snapshot = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot
-  );
-  return getDmUnreadSummary(snapshot, activeProfileId);
-};
-
-export const useDmUnreadConversations = (): Readonly<
-  Record<string, ApiDmUnreadConversationState>
-> => {
-  const { activeProfileId, store } = useDmUnreadContext();
-  const snapshot = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot
-  );
-  return useMemo(
-    () => getDmUnreadConversations(snapshot, activeProfileId),
-    [activeProfileId, snapshot]
-  );
-};
-
-export const useOptionalDmUnreadActions = () => {
-  const context = useContext(DmUnreadContext);
-  const activeProfileId = context?.activeProfileId ?? null;
-  const activationId = context?.activationId ?? 0;
-  const applyServerState = context?.applyServerState ?? null;
-  const beginRead = context?.beginRead ?? null;
-  const cancelRead = context?.cancelRead ?? null;
-  const reconcileFailedRead = context?.reconcileFailedRead ?? null;
-  const store = context?.store ?? null;
-  return useMemo(() => {
-    if (
-      !store ||
-      !applyServerState ||
-      !beginRead ||
-      !cancelRead ||
-      !reconcileFailedRead
-    ) {
-      return null;
-    }
-    return {
-      activeProfileId,
-      applyServerState: (state: ApiDmUnreadConversationState) =>
-        applyServerState(state, activeProfileId, activationId),
-      beginRead: (waveId: string, readThroughSerialNo?: number) =>
-        beginRead(activeProfileId, activationId, waveId, readThroughSerialNo),
-      cancelRead,
-      reconcileFailedRead,
-    };
-  }, [
-    activationId,
-    activeProfileId,
-    applyServerState,
-    beginRead,
-    cancelRead,
-    reconcileFailedRead,
-    store,
-  ]);
-};
+export {
+  useDmUnreadConversation,
+  useDmUnreadConversations,
+  useDmUnreadSummary,
+  useOptionalDmUnreadActions,
+} from "./dm-unread-hooks";
