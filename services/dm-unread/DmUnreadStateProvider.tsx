@@ -90,6 +90,13 @@ interface IncomingDropUpdate {
   readonly wave: { readonly id: string };
 }
 
+interface IncomingDropUpdateRef {
+  readonly author_id: string;
+  readonly serial_no: number;
+  readonly update_type: string;
+  readonly wave_id: string;
+}
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -138,6 +145,16 @@ const isIncomingDropUpdate = (value: unknown): value is IncomingDropUpdate => {
     typeof wave["id"] === "string"
   );
 };
+
+const isIncomingDropUpdateRef = (
+  value: unknown
+): value is IncomingDropUpdateRef =>
+  isRecord(value) &&
+  typeof value["author_id"] === "string" &&
+  typeof value["serial_no"] === "number" &&
+  Number.isFinite(value["serial_no"]) &&
+  value["update_type"] === WsMessageType.DROP_UPDATE &&
+  typeof value["wave_id"] === "string";
 
 interface SnapshotSynchronizationRequest {
   readonly expectedProfileId: string;
@@ -538,15 +555,11 @@ export function DmUnreadStateProvider({
     handleUnreadStateChanged
   );
 
-  const handleDropUpdate = useCallback(
-    (value: unknown) => {
-      if (!isIncomingDropUpdate(value)) {
-        return;
-      }
+  const scheduleDropRecovery = useCallback(
+    (authorId: string, serialNo: number, waveId: string) => {
       const activation = activeActivationRef.current;
       const profileId = activation.profileId;
-      const waveId = value.wave.id;
-      if (!profileId || value.author.id === profileId) {
+      if (!profileId || authorId === profileId) {
         return;
       }
       const conversation = getDmUnreadConversation(
@@ -556,7 +569,7 @@ export function DmUnreadStateProvider({
       );
       if (
         !conversation ||
-        conversation.latest_drop_serial_no >= value.serial_no
+        conversation.latest_drop_serial_no >= serialNo
       ) {
         return;
       }
@@ -564,7 +577,7 @@ export function DmUnreadStateProvider({
         pendingDropRecoveryByWaveRef.current.get(waveId) ?? 0;
       pendingDropRecoveryByWaveRef.current.set(
         waveId,
-        Math.max(pendingSerialNo, Math.floor(value.serial_no))
+        Math.max(pendingSerialNo, Math.floor(serialNo))
       );
       if (dropRecoveryTimerRef.current !== null) {
         return;
@@ -604,7 +617,29 @@ export function DmUnreadStateProvider({
     [requestDropRecoverySnapshot, store]
   );
 
+  const handleDropUpdate = useCallback(
+    (value: unknown) => {
+      if (isIncomingDropUpdate(value)) {
+        scheduleDropRecovery(value.author.id, value.serial_no, value.wave.id);
+      }
+    },
+    [scheduleDropRecovery]
+  );
+
+  const handleDropUpdateRef = useCallback(
+    (value: unknown) => {
+      if (isIncomingDropUpdateRef(value)) {
+        scheduleDropRecovery(value.author_id, value.serial_no, value.wave_id);
+      }
+    },
+    [scheduleDropRecovery]
+  );
+
   useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE, handleDropUpdate);
+  useWebSocketMessage<unknown>(
+    WsMessageType.DROP_UPDATE_REF,
+    handleDropUpdateRef
+  );
 
   useEffect(() => {
     const previousStatus = previousWebSocketStatusRef.current;
