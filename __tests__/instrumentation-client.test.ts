@@ -101,6 +101,8 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const stylesheetLoadRejectionValue =
+    "Event `Event` (type=error) captured as promise rejection";
   const browserExtensionWalletRejectionMessage = "User rejected the request.";
   const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
   const browserExtensionWalletBridgeFrames = [
@@ -377,6 +379,7 @@ describe("instrumentation-client", () => {
           >;
         }
       | undefined;
+    contexts?: Record<string, Record<string, unknown> | undefined> | undefined;
     message?: string | undefined;
   } | null;
 
@@ -459,6 +462,38 @@ describe("instrumentation-client", () => {
       ],
     },
   });
+
+  const createStylesheetLoadRejectionEvent = (
+    valueOverrides: Record<string, unknown> = {}
+  ) => ({
+    level: "error",
+    exception: {
+      values: [
+        {
+          type: "Event",
+          value: stylesheetLoadRejectionValue,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            synthetic: true,
+            handled: false,
+          },
+          ...valueOverrides,
+        },
+      ],
+    },
+  });
+
+  const createResourceErrorEvent = (
+    target: EventTarget | null,
+    isTrusted = true
+  ): Event =>
+    new Proxy(new Event("error"), {
+      get(source, property) {
+        if (property === "target") return target;
+        if (property === "isTrusted") return isTrusted;
+        return Reflect.get(source, property, source);
+      },
+    });
 
   const createRabbyChromeUserRejectedEvent = (
     exceptionValueOverrides: Record<string, unknown> = {},
@@ -1071,6 +1106,103 @@ describe("instrumentation-client", () => {
       filterKeys: ["6529-frontend"],
       behaviour: "drop-error-if-exclusively-contains-third-party-frames",
     });
+  });
+
+  it("keeps stylesheet load rejections and adds only the sanitized failed path", () => {
+    const beforeSend = loadBeforeSend();
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://synthetic-user:synthetic-password@example.invalid/_next/static/css/app.css?token=synthetic-token#section";
+    const event = createStylesheetLoadRejectionEvent();
+
+    const result = beforeSend(event, {
+      originalException: createResourceErrorEvent(link),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.level).toBe("error");
+    expect(result?.exception?.values?.[0]?.mechanism).toEqual({
+      type: browserUnhandledRejectionMechanismType,
+      synthetic: true,
+      handled: false,
+    });
+    expect(result?.contexts?.["resource_load"]).toEqual({
+      type: "resource_load",
+      resource_type: "stylesheet",
+      url: "/_next/static/css/app.css",
+    });
+  });
+
+  it.each([
+    ["icon links", "link", "icon", true, {}],
+    ["script targets", "script", "", true, {}],
+    ["missing targets", "missing", "", true, {}],
+    ["untrusted events", "link", "stylesheet", false, {}],
+    [
+      "handled events",
+      "link",
+      "stylesheet",
+      true,
+      {
+        mechanism: {
+          type: browserUnhandledRejectionMechanismType,
+          synthetic: true,
+          handled: true,
+        },
+      },
+    ],
+    [
+      "other mechanisms",
+      "link",
+      "stylesheet",
+      true,
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          synthetic: true,
+          handled: false,
+        },
+      },
+    ],
+    ["non-Event exception types", "link", "stylesheet", true, { type: "Error" }],
+  ])(
+    "keeps %s reportable without stylesheet diagnostics",
+    (_, targetType, rel, isTrusted, valueOverrides) => {
+      const beforeSend = loadBeforeSend();
+      let target: EventTarget | null = null;
+      if (targetType === "link") {
+        const link = document.createElement("link");
+        link.rel = rel;
+        link.href = "https://example.invalid/_next/static/css/app.css";
+        target = link;
+      } else if (targetType === "script") {
+        target = document.createElement("script");
+      }
+
+      const result = beforeSend(
+        createStylesheetLoadRejectionEvent(valueOverrides),
+        {
+          originalException: createResourceErrorEvent(target, isTrusted),
+        }
+      );
+
+      expect(result).not.toBeNull();
+      expect(result?.contexts?.["resource_load"]).toBeUndefined();
+    }
+  );
+
+  it("keeps ordinary application errors without resource diagnostics", () => {
+    const beforeSend = loadBeforeSend();
+    const error = new Error("Application stylesheet state failed");
+
+    const result = beforeSend(
+      createUnhandledRejectionEvent(error.message),
+      { originalException: error }
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.contexts?.["resource_load"]).toBeUndefined();
   });
 
   it.each([

@@ -95,6 +95,10 @@ const RAW_BROWSER_NETWORK_ERROR_PATTERNS = [
   /\bnetwork connection was lost\b/i,
   /\bnetwork request failed\b/i,
 ];
+const STYLESHEET_LOAD_REJECTION_VALUE =
+  "Event `Event` (type=error) captured as promise rejection";
+const UNHANDLED_REJECTION_MECHANISM =
+  "auto.browser.global_handlers.onunhandledrejection";
 type SentryTransactionEvent = Sentry.Event & {
   spans?: SentryTransactionSpan[] | undefined;
   tags?: Record<string, unknown> | undefined;
@@ -114,6 +118,57 @@ function getFallbackMessage(hint?: Sentry.EventHint): string {
     return hint.originalException.message;
   }
   return "";
+}
+
+function enrichStylesheetLoadError(
+  event: Sentry.Event,
+  hint?: Sentry.EventHint
+): void {
+  try {
+    const values = event.exception?.values;
+    const value = values?.[0];
+    const originalException = hint?.originalException;
+    if (
+      values?.length !== 1 ||
+      value?.type !== "Event" ||
+      value.value !== STYLESHEET_LOAD_REJECTION_VALUE ||
+      value.mechanism?.type !== UNHANDLED_REJECTION_MECHANISM ||
+      value.mechanism.handled !== false ||
+      value.mechanism.synthetic !== true ||
+      typeof Event === "undefined" ||
+      typeof HTMLLinkElement === "undefined" ||
+      !(originalException instanceof Event) ||
+      originalException.type !== "error" ||
+      originalException.isTrusted !== true ||
+      !(originalException.target instanceof HTMLLinkElement)
+    ) {
+      return;
+    }
+
+    const link = originalException.target;
+    if (
+      link.rel.trim().toLowerCase() !== "stylesheet" ||
+      !link.hasAttribute("href")
+    ) {
+      return;
+    }
+
+    const url = sanitizeUrlString(link.href);
+    if (typeof url !== "string" || !url) {
+      return;
+    }
+
+    event.contexts = {
+      ...event.contexts,
+      resource_load: {
+        type: "resource_load",
+        resource_type: "stylesheet",
+        url,
+      },
+    };
+  } catch {
+    // Diagnostics must never interfere with reporting the original failure.
+  }
 }
 
 function shouldFilterNoisyPatterns(message: string): boolean {
@@ -571,6 +626,8 @@ Sentry.init({
       tagSampledLowValueNetworkError(event);
       redactDropReactionFailureIdentifiers(event);
     }
+
+    enrichStylesheetLoadError(event, hint);
 
     return sanitizeSentryEvent(event);
   },
