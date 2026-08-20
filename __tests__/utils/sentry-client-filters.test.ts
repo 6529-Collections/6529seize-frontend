@@ -15,6 +15,7 @@ import {
   shouldFilterBrowserExtensionWalletRejection,
   shouldFilterBraveWalletPageEvaluationError,
   shouldFilterChromeMobileIosInjectedGaError,
+  shouldFilterCoinbaseAnalyticsIndexedDBAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
@@ -175,9 +176,27 @@ type ExpectedWaveReplacementAbortOverrides = {
   additionalException?: SentryExceptionValue | undefined;
 };
 
+type CoinbaseAnalyticsIndexedDBAbortOverrides = {
+  exception?: Partial<SentryExceptionValue> | undefined;
+  domExceptionCode?: unknown;
+  includeDomExceptionCode?: boolean | undefined;
+  osName?: unknown;
+  includeOsName?: boolean | undefined;
+  eventTimestamp?: number | undefined;
+  includeEventTimestamp?: boolean | undefined;
+  breadcrumbs?: SentryClientEvent["breadcrumbs"];
+  additionalException?: SentryExceptionValue | undefined;
+};
+
 const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
 const expectedWaveAbortEventTimestamp = 1_785_689_742.621;
 const expectedWaveAbortBreadcrumbTimestamp = 1_785_689_742.5;
+const coinbaseAnalyticsAbortEventTimestamp = 1_786_147_714.163;
+const coinbaseAnalyticsBreadcrumbTimestamp = 1_786_147_714.162;
+const coinbaseAnalyticsIndexedDbGetErrorMessage =
+  "Analytics SDK: Error: IndexedDB:Get:InternalError undefined";
+const coinbaseAnalyticsIndexedDbSetErrorMessage =
+  "Analytics SDK: Error: IndexedDB:Set:InternalError undefined";
 
 const createExpectedWaveReplacementAbortEvent = ({
   exception = {},
@@ -216,6 +235,48 @@ const createExpectedWaveReplacementAbortEvent = ({
   tags: includeDomExceptionCode
     ? { "DOMException.code": domExceptionCode }
     : {},
+  breadcrumbs,
+});
+
+const createCoinbaseAnalyticsIndexedDBAbortEvent = ({
+  exception = {},
+  domExceptionCode = "20",
+  includeDomExceptionCode = true,
+  osName = "iOS",
+  includeOsName = true,
+  eventTimestamp = coinbaseAnalyticsAbortEventTimestamp,
+  includeEventTimestamp = true,
+  breadcrumbs = [
+    {
+      category: "console",
+      level: "error",
+      message: coinbaseAnalyticsIndexedDbGetErrorMessage,
+      timestamp: coinbaseAnalyticsBreadcrumbTimestamp,
+    },
+  ],
+  additionalException,
+}: CoinbaseAnalyticsIndexedDBAbortOverrides = {}): TestSentryClientEvent => ({
+  ...(includeEventTimestamp ? { timestamp: eventTimestamp } : {}),
+  exception: {
+    values: [
+      {
+        type: "Error",
+        value: "AbortError: AbortError",
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: false,
+        },
+        ...exception,
+      },
+      ...(additionalException ? [additionalException] : []),
+    ],
+  },
+  tags: {
+    ...(includeDomExceptionCode
+      ? { "DOMException.code": domExceptionCode }
+      : {}),
+    ...(includeOsName ? { "os.name": osName } : {}),
+  },
   breadcrumbs,
 });
 
@@ -11132,6 +11193,194 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(false);
   });
+
+  it.each([
+    ["Get-only", [coinbaseAnalyticsIndexedDbGetErrorMessage]],
+    [
+      "Get-and-Set",
+      [
+        coinbaseAnalyticsIndexedDbGetErrorMessage,
+        coinbaseAnalyticsIndexedDbSetErrorMessage,
+      ],
+    ],
+  ])(
+    "filters the exact Coinbase analytics IndexedDB abort with %s evidence",
+    (_, messages) => {
+      const event = createCoinbaseAnalyticsIndexedDBAbortEvent({
+        breadcrumbs: messages.map((message) => ({
+          category: "console",
+          level: "error",
+          message,
+          timestamp: coinbaseAnalyticsBreadcrumbTimestamp,
+        })),
+      });
+
+      const result = shouldFilterCoinbaseAnalyticsIndexedDBAbort(event);
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it("filters the exact Coinbase analytics abort using the client user agent", () => {
+    const event = {
+      ...createCoinbaseAnalyticsIndexedDBAbortEvent({ includeOsName: false }),
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+        },
+      },
+    };
+
+    const result = shouldFilterCoinbaseAnalyticsIndexedDBAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the Coinbase analytics abort at the causal time boundary", () => {
+    const event = createCoinbaseAnalyticsIndexedDBAbortEvent({
+      eventTimestamp: coinbaseAnalyticsBreadcrumbTimestamp + 1,
+    });
+
+    const result = shouldFilterCoinbaseAnalyticsIndexedDBAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps the Coinbase-shaped abort when the exact breadcrumb is count-stale", () => {
+    const event = createCoinbaseAnalyticsIndexedDBAbortEvent({
+      breadcrumbs: [
+        {
+          category: "console",
+          level: "error",
+          message: coinbaseAnalyticsIndexedDbGetErrorMessage,
+          timestamp: coinbaseAnalyticsBreadcrumbTimestamp,
+        },
+        ...Array.from({ length: 15 }, (_, index) => ({
+          type: "http",
+          category: "fetch",
+          level: "info",
+          message: `later request ${index}`,
+        })),
+      ],
+    });
+
+    const result = shouldFilterCoinbaseAnalyticsIndexedDBAbort(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    [
+      "an altered exception message",
+      { exception: { value: "AbortError: The operation was aborted" } },
+    ],
+    ["a different exception type", { exception: { type: "AbortError" } }],
+    ["a different DOMException code", { domExceptionCode: "19" }],
+    ["a numeric DOMException code", { domExceptionCode: 20 }],
+    ["a missing DOMException code", { includeDomExceptionCode: false }],
+    ["a non-iOS operating system", { osName: "Android" }],
+    ["missing platform evidence", { includeOsName: false }],
+    ["a missing event timestamp", { includeEventTimestamp: false }],
+    [
+      "a stale vendor breadcrumb",
+      { eventTimestamp: coinbaseAnalyticsBreadcrumbTimestamp + 1.001 },
+    ],
+    [
+      "a vendor breadcrumb after the event",
+      { eventTimestamp: coinbaseAnalyticsBreadcrumbTimestamp - 0.001 },
+    ],
+    [
+      "a different mechanism",
+      {
+        exception: {
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+        },
+      },
+    ],
+    [
+      "a handled mechanism",
+      {
+        exception: {
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: true,
+          },
+        },
+      },
+    ],
+    [
+      "an application-owned frame",
+      {
+        exception: {
+          stacktrace: {
+            frames: [{ filename: "app:///services/api/common-api.ts" }],
+          },
+        },
+      },
+    ],
+    [
+      "an altered console message",
+      {
+        breadcrumbs: [
+          {
+            category: "console",
+            level: "error",
+            message: "Analytics SDK: Error: IndexedDB:Get:InternalError",
+            timestamp: coinbaseAnalyticsBreadcrumbTimestamp,
+          },
+        ],
+      },
+    ],
+    [
+      "altered console metadata",
+      {
+        breadcrumbs: [
+          {
+            category: "console",
+            level: "warning",
+            message: coinbaseAnalyticsIndexedDbGetErrorMessage,
+            timestamp: coinbaseAnalyticsBreadcrumbTimestamp,
+          },
+        ],
+      },
+    ],
+    ["a missing vendor breadcrumb", { breadcrumbs: [] }],
+    [
+      "a Set-only vendor breadcrumb",
+      {
+        breadcrumbs: [
+          {
+            category: "console",
+            level: "error",
+            message: coinbaseAnalyticsIndexedDbSetErrorMessage,
+            timestamp: coinbaseAnalyticsBreadcrumbTimestamp,
+          },
+        ],
+      },
+    ],
+    [
+      "an additional exception",
+      {
+        additionalException: {
+          type: "TypeError",
+          value: "A nearby application failure",
+        },
+      },
+    ],
+  ] satisfies Array<[string, CoinbaseAnalyticsIndexedDBAbortOverrides]>)(
+    "keeps the Coinbase analytics abort near miss with %s",
+    (_, overrides) => {
+      const event = createCoinbaseAnalyticsIndexedDBAbortEvent(overrides);
+
+      const result = shouldFilterCoinbaseAnalyticsIndexedDBAbort(event);
+
+      expect(result).toBe(false);
+    }
+  );
 
   it("filters the exact expected Wave background-sync replacement abort", () => {
     const event = createExpectedWaveReplacementAbortEvent();
