@@ -12631,7 +12631,7 @@ paths:
     get:
       tags:
         - WavesV2
-      summary: Search for V2 drops in wave by content
+      summary: Search for V2 drops in a wave
       operationId: searchDropsInWaveV2
       x-6529-router:
         enabled: true
@@ -12647,9 +12647,31 @@ paths:
             type: string
         - name: term
           in: query
-          required: true
+          required: false
           schema:
             type: string
+            minLength: 3
+        - name: author_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: after
+          in: query
+          description: Inclusive lower created-at timestamp in milliseconds
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: before
+          in: query
+          description: Exclusive upper created-at timestamp in milliseconds
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
         - name: page
           in: query
           required: false
@@ -12674,8 +12696,58 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        "400":
+          description: Invalid search criteria
         "404":
           description: Wave not found
+  /v2/waves/{waveId}/search-authors:
+    get:
+      tags:
+        - WavesV2
+      summary: Search profiles that authored a drop in a wave
+      operationId: searchWaveAuthorsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleSearchWaveAuthorsV2
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: handle
+          in: query
+          description: >-
+            Case-insensitive handle prefix. Empty returns the first authors in
+            the readable wave.
+          required: false
+          schema:
+            type: string
+            maxLength: 15
+            pattern: ^\w{0,15}$
+            default: ""
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveSearchAuthor"
+        "404":
+          description: Wave not found or not visible to the caller
   /xtdh/stats:
     get:
       tags:
@@ -25127,6 +25199,20 @@ components:
         gated_hotness_score:
           type: number
           format: double
+    ApiWaveSearchAuthor:
+      type: object
+      required:
+        - id
+        - handle
+        - pfp
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiWavesOverviewType:
       type: string
       enum:
