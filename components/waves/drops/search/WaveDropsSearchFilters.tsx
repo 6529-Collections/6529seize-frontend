@@ -62,11 +62,11 @@ export default function WaveDropsSearchFilters({
         onClick={onClose}
         className="tw-fixed tw-inset-0 tw-z-10 tw-border-0 tw-bg-black/35 sm:tw-absolute sm:tw-bg-transparent"
       />
-      <section
-        role="dialog"
+      <dialog
+        open
         aria-modal="true"
         aria-labelledby="wave-drops-search-filters-title"
-        className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-20 tw-rounded-t-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-shadow-2xl sm:tw-absolute sm:tw-inset-auto sm:tw-right-5 sm:tw-top-[7.75rem] sm:tw-w-80 sm:tw-rounded-xl"
+        className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-20 tw-m-0 tw-rounded-t-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-text-iron-100 tw-shadow-2xl sm:tw-absolute sm:tw-inset-auto sm:tw-right-5 sm:tw-top-[7.75rem] sm:tw-w-80 sm:tw-rounded-xl"
       >
         <div className="tw-flex tw-items-center tw-justify-between">
           <h3
@@ -122,14 +122,13 @@ export default function WaveDropsSearchFilters({
               </button>
             )}
           </div>
-          <div
+          <fieldset
             id={AUTHOR_LIST_ID}
-            role="group"
             aria-label={t(
               locale,
               "waves.drops.searchModal.filters.authorResults"
             )}
-            className="tw-mt-1.5 tw-max-h-36 tw-overflow-y-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1"
+            className="tw-mt-1.5 tw-max-h-36 tw-min-w-0 tw-overflow-y-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1"
           >
             {isFetching && (
               <p
@@ -173,7 +172,7 @@ export default function WaveDropsSearchFilters({
                   <span className="tw-truncate">{candidate.handle}</span>
                 </button>
               ))}
-          </div>
+          </fieldset>
         </div>
 
         <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-3">
@@ -201,7 +200,7 @@ export default function WaveDropsSearchFilters({
             {t(locale, "waves.drops.searchModal.filters.invalidRange")}
           </p>
         )}
-      </section>
+      </dialog>
     </>
   );
 }

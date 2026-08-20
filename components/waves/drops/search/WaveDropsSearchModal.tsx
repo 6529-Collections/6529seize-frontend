@@ -8,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { formatDate, formatInteger, formatTime } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   ChevronLeftIcon,
@@ -42,6 +43,24 @@ const SEARCH_LOADING_STATUS_ID = "wave-drops-search-loading-status";
 const SEARCH_RESULTS_STATUS_ID = "wave-drops-search-results-status";
 
 const normalize = (value: string) => value.trim();
+
+const formatOptionalFilterDate = (
+  locale: SupportedLocale,
+  timestamp: number | undefined
+): string =>
+  timestamp === undefined
+    ? ""
+    : formatDate(locale, timestamp, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+const getSearchCriteriaLabel = (
+  locale: SupportedLocale,
+  query: string
+): string =>
+  query ? query : t(locale, "waves.drops.searchModal.results.filtersApplied");
 
 function WaveDropsSearchState({
   description,
@@ -165,22 +184,8 @@ export default function WaveDropsSearchModal({
   const beforeTimestamp = beforeDate
     ? parseLocalDateStart(beforeDate)
     : undefined;
-  const formattedAfterDate =
-    afterTimestamp === undefined
-      ? ""
-      : formatDate(locale, afterTimestamp, {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        });
-  const formattedBeforeDate =
-    beforeTimestamp === undefined
-      ? ""
-      : formatDate(locale, beforeTimestamp, {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        });
+  const formattedAfterDate = formatOptionalFilterDate(locale, afterTimestamp);
+  const formattedBeforeDate = formatOptionalFilterDate(locale, beforeTimestamp);
 
   const {
     drops: results,
@@ -207,6 +212,10 @@ export default function WaveDropsSearchModal({
   const showLoading =
     isLoading || isUpdating || (isFetching && visibleResults.length === 0);
   const formattedResultCount = formatInteger(locale, visibleResults.length);
+  const searchCriteriaLabel = getSearchCriteriaLabel(
+    locale,
+    liveNormalizedQuery
+  );
   const activeFilterCount =
     Number(Boolean(authorFilter)) +
     Number(Boolean(afterDate)) +
@@ -535,12 +544,7 @@ export default function WaveDropsSearchModal({
                             : "waves.drops.searchModal.results.status.other",
                           {
                             count: formattedResultCount,
-                            query: liveNormalizedQuery
-                              ? liveNormalizedQuery
-                              : t(
-                                  locale,
-                                  "waves.drops.searchModal.results.filtersApplied"
-                                ),
+                            query: searchCriteriaLabel,
                           }
                         )}
                         className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-1"

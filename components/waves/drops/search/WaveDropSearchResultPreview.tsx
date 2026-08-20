@@ -6,6 +6,7 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 
 const TOKEN_PATTERN = /(@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])/g;
+const TOKEN_PART_PATTERN = /^(?:@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])$/;
 
 const highlightMatches = (
   text: string,
@@ -24,7 +25,7 @@ const highlightMatches = (
     const matchEnd = matchIndex + queryValue.length;
     nodes.push(
       <mark
-        key={`${keyPrefix}-${matchIndex}`}
+        key={`${keyPrefix}-${lowerText.slice(0, matchEnd)}`}
         className="tw-rounded-sm tw-bg-primary-400/20 tw-px-0.5 tw-text-inherit"
       >
         {text.slice(matchIndex, matchEnd)}
@@ -39,20 +40,21 @@ const highlightMatches = (
 
 const highlightText = (text: string, query: string): ReactNode => {
   const tokenParts = text.split(TOKEN_PATTERN);
-  return tokenParts.map((tokenPart, tokenIndex) => {
-    if (tokenIndex % 2 === 1) {
+  let precedingText = "";
+  return tokenParts.map((tokenPart) => {
+    const isToken = TOKEN_PART_PATTERN.test(tokenPart);
+    const partKey = `${isToken ? "token" : "text"}-${precedingText}`;
+    precedingText += tokenPart;
+    if (isToken) {
       return (
-        <span
-          key={`token-${tokenIndex}`}
-          className="tw-font-medium tw-text-primary-300"
-        >
-          {highlightMatches(tokenPart, query, `token-match-${tokenIndex}`)}
+        <span key={partKey} className="tw-font-medium tw-text-primary-300">
+          {highlightMatches(tokenPart, query, `${partKey}-match`)}
         </span>
       );
     }
     return (
-      <Fragment key={`text-${tokenIndex}`}>
-        {highlightMatches(tokenPart, query, `match-${tokenIndex}`)}
+      <Fragment key={partKey}>
+        {highlightMatches(tokenPart, query, `${partKey}-match`)}
       </Fragment>
     );
   });
@@ -180,6 +182,12 @@ export default function WaveDropSearchResultPreview({
   const contentParts = parts
     .map((part) => part.content?.trim() ?? "")
     .filter(Boolean);
+  const contentOccurrences = new Map<string, number>();
+  const keyedContentParts = contentParts.map((content) => {
+    const occurrence = (contentOccurrences.get(content) ?? 0) + 1;
+    contentOccurrences.set(content, occurrence);
+    return { content, key: `${content}-${occurrence}` };
+  });
   if (!title?.trim() && contentParts.length === 0) return fallback;
   const components = createComponents({
     checkedLabel,
@@ -194,8 +202,8 @@ export default function WaveDropSearchResultPreview({
           {highlightText(title.trim(), query)}
         </strong>
       )}
-      {contentParts.map((content, index) => (
-        <span key={index} className="tw-block">
+      {keyedContentParts.map(({ content, key }) => (
+        <span key={key} className="tw-block">
           <Markdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeSanitize]}
