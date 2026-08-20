@@ -86,6 +86,12 @@ const getDisplayedUnreadCount = (
   if (server.latest_drop_serial_no <= optimisticRead.targetSerialNo) {
     return 0;
   }
+  if (
+    server.first_unread_drop_serial_no !== null &&
+    server.first_unread_drop_serial_no > optimisticRead.targetSerialNo
+  ) {
+    return server.unread_count;
+  }
   return Math.max(
     0,
     server.unread_count - optimisticRead.optimisticallyClearedUnreadCount
