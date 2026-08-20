@@ -15,6 +15,8 @@ import { AuthContext } from '@/components/auth/Auth';
 import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
 import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
+import { createMockApiWave } from '@/__tests__/utils/mockFactories';
+import { createMockAuthContext } from '@/__tests__/utils/testContexts';
 
 jest.mock('@/helpers/waves/waves.helpers', () => ({ convertWaveToUpdateWave: jest.fn(() => ({ id: '1' })) }));
 jest.mock('@tanstack/react-query');
@@ -30,14 +32,19 @@ const mutateAsync = jest.fn();
 }));
 
 describe('WaveHeaderNameEditModal', () => {
-  const auth = { requestAuth: jest.fn().mockResolvedValue({ success: true }), setToast: jest.fn() } as any;
-  const rq = { onWaveCreated: jest.fn() } as any;
+  const auth = createMockAuthContext({
+    requestAuth: jest.fn().mockResolvedValue({ success: true }),
+    setToast: jest.fn(),
+  });
+  const rq = {
+    onWaveCreated: jest.fn(),
+  } as React.ContextType<typeof ReactQueryWrapperContext>;
 
   it('renders on the shared dialog surface above the wave sidebar', () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <WaveHeaderNameEditModal isOpen wave={{ id: '1', name: 'Old' } as any} onClose={jest.fn()} />
+          <WaveHeaderNameEditModal isOpen wave={createMockApiWave({ id: '1', name: 'Old' })} onClose={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
@@ -61,7 +68,7 @@ describe('WaveHeaderNameEditModal', () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <WaveHeaderNameEditModal isOpen wave={{ id: '1', name: 'Old' } as any} onClose={jest.fn()} />
+          <WaveHeaderNameEditModal isOpen wave={createMockApiWave({ id: '1', name: 'Old' })} onClose={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );

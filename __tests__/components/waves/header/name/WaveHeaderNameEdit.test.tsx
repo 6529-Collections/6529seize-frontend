@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveHeaderNameEdit from '@/components/waves/header/name/WaveHeaderNameEdit';
+import { createMockApiWave } from '@/__tests__/utils/mockFactories';
 
 jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
 jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
@@ -17,7 +18,7 @@ jest.mock('@/components/waves/header/name/WaveHeaderNameEditModal', () => (props
 
 test('opens and closes modal', async () => {
   const user = userEvent.setup();
-  render(<WaveHeaderNameEdit wave={{ id: 'w1' } as any} />);
+  render(<WaveHeaderNameEdit wave={createMockApiWave({ id: 'w1' })} />);
   expect(screen.queryByTestId('modal')).toBeNull();
   await user.click(screen.getByRole('button'));
   expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -26,7 +27,7 @@ test('opens and closes modal', async () => {
 });
 
 test('exposes an accessible name and a non-hover reveal path', () => {
-  render(<WaveHeaderNameEdit wave={{ id: 'w1' } as any} />);
+  render(<WaveHeaderNameEdit wave={createMockApiWave({ id: 'w1' })} />);
 
   const trigger = screen.getByRole('button', { name: 'Edit wave name' });
   // Renaming a wave has no other entry point, so the control must never be
