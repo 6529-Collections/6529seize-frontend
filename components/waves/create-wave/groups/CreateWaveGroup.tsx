@@ -206,9 +206,9 @@ export default function CreateWaveGroup({
         onCreateGroup={onInlineGroupCreate}
       />
       {isRestoring ? (
-        <p className="tw-m-0 tw-text-sm tw-text-iron-400" role="status">
+        <output className="tw-m-0 tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "waves.create.groups.restore.loading")}
-        </p>
+        </output>
       ) : null}
       {isRestoreError ? (
         <div

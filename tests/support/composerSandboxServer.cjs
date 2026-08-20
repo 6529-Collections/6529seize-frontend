@@ -2566,12 +2566,12 @@ function handleGroupRead(pathname, res) {
     return false;
   }
 
-  const group =
-    groupId === SANDBOX_ADMIN_GROUP_ID
-      ? sandboxAdminGroup
-      : groupId === sandboxPreviewGroup.id
-        ? sandboxPreviewGroup
-        : getSandboxRuleGroup(groupId);
+  let group = getSandboxRuleGroup(groupId);
+  if (groupId === SANDBOX_ADMIN_GROUP_ID) {
+    group = sandboxAdminGroup;
+  } else if (groupId === sandboxPreviewGroup.id) {
+    group = sandboxPreviewGroup;
+  }
   if (group) {
     return writeJsonResponse(res, group);
   }

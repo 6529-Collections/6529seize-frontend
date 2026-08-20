@@ -131,18 +131,17 @@ function MemberRow({
 function MembersSkeleton() {
   const locale = useBrowserLocale();
   return (
-    <div
-      role="status"
+    <output
       className="tw-flex tw-flex-col tw-gap-2"
       aria-label={t(locale, "waves.create.groups.members.loadingStatus")}
     >
       {[0, 1, 2, 3].map((item) => (
-        <div
+        <span
           key={item}
-          className="tw-h-[5.75rem] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none"
+          className="tw-block tw-h-[5.75rem] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none"
         />
       ))}
-    </div>
+    </output>
   );
 }
 

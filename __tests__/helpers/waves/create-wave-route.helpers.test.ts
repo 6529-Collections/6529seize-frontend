@@ -7,6 +7,7 @@ describe("create-wave route helpers", () => {
   it.each([
     ["/waves/create", null],
     ["/waves/create/", null],
+    ["/waves/create///", null],
     ["/en/waves/create", null],
     ["/en/waves/create/advanced", null],
     ["/waves", CREATE_WAVE_QUERY_VALUE],

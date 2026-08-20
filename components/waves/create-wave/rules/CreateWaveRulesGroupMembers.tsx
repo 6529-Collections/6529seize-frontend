@@ -30,11 +30,7 @@ export default function CreateWaveRulesGroupMembers(
   const groupId = "groupId" in props ? props.groupId : null;
   const savedGroupId = groupId ?? "";
   const cachedGroup = "groupId" in props ? props.cachedGroup : undefined;
-  const {
-    data: restoredGroup,
-    isError,
-    isFetching,
-  } = useQuery<ApiGroupFull>({
+  const { data: restoredGroup, isError } = useQuery<ApiGroupFull>({
     queryKey: [QueryKey.GROUPS, "create-wave-selected-group", savedGroupId],
     queryFn: async () =>
       await commonApiFetch<ApiGroupFull>({
@@ -56,12 +52,9 @@ export default function CreateWaveRulesGroupMembers(
       ? t(locale, "waves.create.groups.members.countUnavailable")
       : t(locale, "waves.create.groups.members.countLoading");
     return (
-      <span
-        role={isFetching ? "status" : undefined}
-        className="tw-text-sm tw-font-medium tw-text-iron-400"
-      >
+      <output className="tw-text-sm tw-font-medium tw-text-iron-400">
         {statusLabel}
-      </span>
+      </output>
     );
   }
 
