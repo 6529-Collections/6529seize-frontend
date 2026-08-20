@@ -73,6 +73,8 @@ interface MyStreamWaveChatProps {
 
 interface WaveChatLeaveHandlerProps {
   readonly enabled: boolean;
+  readonly isDirectMessage: boolean;
+  readonly readThroughSerialNo?: number | undefined;
   readonly waveId: string;
 }
 
@@ -168,6 +170,8 @@ const WaveLeaderboardCurationDropModal =
 
 const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   enabled,
+  isDirectMessage,
+  readThroughSerialNo,
   waveId,
 }) => {
   const { setUnreadDividerSerialNo } = useUnreadDivider();
@@ -176,6 +180,8 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
 
   useWaveChatLeaveCleanup({
     enabled,
+    isDirectMessage,
+    readThroughSerialNo,
     waveId,
     setUnreadDividerSerialNo,
     removeWaveDeliveredNotifications,
@@ -198,6 +204,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
 }) => {
   const router = useRouter();
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
+  const isDirectMessage = isWaveDirectMessage(wave.id, wave);
   const { fetchAroundSerialNo } = useMyStream();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
@@ -579,6 +586,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     >
       <WaveChatLeaveHandler
         enabled={Boolean(connectedProfile?.handle)}
+        isDirectMessage={isDirectMessage}
+        readThroughSerialNo={
+          isDirectMessage
+            ? dmUnreadConversation?.latest_drop_serial_no
+            : undefined
+        }
         waveId={wave.id}
       />
       <section
@@ -611,7 +624,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           initialDrop={scrollTarget}
           dividerSerialNo={dividerTarget}
           unreadCount={
-            isWaveDirectMessage(wave.id, wave)
+            isDirectMessage
               ? (dmUnreadConversation?.unread_count ?? 0)
               : wave.metrics.your_unread_drops_count
           }

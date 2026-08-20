@@ -73,6 +73,7 @@ function useCanonicalMarkWaveNotificationsRead(
       }
 
       const markDmRead = async (): Promise<MarkWaveNotificationsReadResult> => {
+        let didReceiveDmServerState = false;
         try {
           const result = await markWaveNotificationsRead(waveId, {
             ...options,
@@ -83,11 +84,15 @@ function useCanonicalMarkWaveNotificationsRead(
             onReadResponse: (response) => {
               options?.onReadResponse?.(response);
               if (response.dm_unread_state) {
+                didReceiveDmServerState = true;
                 applyDmServerState(response.dm_unread_state);
               }
             },
           });
-          if (readOperation && result === "skipped") {
+          if (
+            readOperation &&
+            (result === "skipped" || !didReceiveDmServerState)
+          ) {
             cancelDmRead(readOperation);
           }
           return result;
