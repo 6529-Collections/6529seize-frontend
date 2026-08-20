@@ -48,6 +48,12 @@ describe('WaveHeaderNameEditModal', () => {
     const dialog = screen.getByRole('dialog', { name: 'Rename wave' });
     expect(dialog).toHaveClass('tw-z-[9999]');
     expect(dialog.querySelector('.mobile-wrapper-dialog')).not.toBeNull();
+
+    // Opens straight into the field, which headless-ui resolves via
+    // data-autofocus.
+    expect(screen.getByPlaceholderText('Please select a name')).toHaveAttribute(
+      'data-autofocus'
+    );
   });
 
   it('submits new name', async () => {

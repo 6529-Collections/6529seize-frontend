@@ -22,6 +22,11 @@ export default function WaveHeaderNameEditInput({
           name="name"
           required
           autoComplete="off"
+          // headless-ui picks initial focus from data-autofocus; the dialog now
+          // keeps the field clear of the keyboard, so opening straight into it
+          // saves a tap.
+          autoFocus
+          data-autofocus
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Please select a name"
