@@ -7,7 +7,13 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_PAGE_TITLE_CLASS_NAME,
+  ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME,
+  ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+} from "./AboutLayout";
 
 type GradientMessageKey = Extract<MessageKey, `about.gradient.${string}`>;
 
@@ -37,9 +43,13 @@ export default function AboutGradients() {
 
 function GradientHeader({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
-      <div className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-0 sm:tw-pb-12 sm:tw-pt-8 lg:tw-px-2">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+    <header
+      className={`tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
+    >
+      <div
+        className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-10 tw-pt-4 sm:tw-pb-12 sm:tw-pt-8`}
+      >
+        <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME}>
           {m(locale, "about.gradient.hero.title")}
         </h1>
 
@@ -67,7 +77,9 @@ function GradientHeader({ locale }: { readonly locale: SupportedLocale }) {
 
 function GradientOverview({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <div className="tw-max-w-3xl tw-px-1 tw-py-8 sm:tw-px-0 sm:tw-py-12 lg:tw-px-2">
+    <div
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-max-w-3xl tw-py-8 sm:tw-py-12`}
+    >
       <p className={BODY_CLASS}>{m(locale, "about.gradient.overview.intro")}</p>
       <p className={`${BODY_CLASS} tw-mt-6`}>
         {m(locale, "about.gradient.museum.permanent")}
@@ -83,11 +95,11 @@ function GradientDesign({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="gradient-design-heading"
-      className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-8 sm:tw-gap-8 sm:tw-px-0 sm:tw-py-12 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-px-2"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-py-8 sm:tw-gap-8 sm:tw-py-12 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
     >
       <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
         <h2
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
+          className={ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME}
           id="gradient-design-heading"
         >
           {m(locale, "about.gradient.design.title")}
@@ -103,7 +115,7 @@ function GradientDesign({ locale }: { readonly locale: SupportedLocale }) {
             artistLink: (
               <Link
                 key="artist-link"
-                className="hover:tw-text-primary-200 tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-500/50 tw-underline-offset-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-500/50 tw-underline-offset-4 hover:tw-text-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 href="https://x.com/6529er"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -128,11 +140,11 @@ function GradientPurpose({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="gradient-purpose-heading"
-      className="tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-8 sm:tw-gap-8 sm:tw-px-0 sm:tw-py-12 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 lg:tw-px-2"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-py-8 sm:tw-gap-8 sm:tw-py-12 lg:tw-grid-cols-[minmax(14rem,0.72fr)_minmax(0,1.28fr)] lg:tw-gap-16 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
     >
       <header className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
         <h2
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
+          className={ABOUT_EDITORIAL_SECTION_HEADING_CLASS_NAME}
           id="gradient-purpose-heading"
         >
           {m(locale, "about.gradient.purpose.title")}

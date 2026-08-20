@@ -241,9 +241,12 @@ describe("serialized post-deploy E2E", () => {
     expect(source).not.toContain("actions/cache");
     expect(source).not.toContain("cache: pnpm");
     expect(source).not.toContain("PLAYWRIGHT_CACHE_HIT");
+    expect(source).not.toContain("playwright install --with-deps chromium");
     expect(source).toContain(
-      "./bin/6529 exec playwright install --with-deps chromium"
+      "./bin/6529 exec playwright install-deps chromium"
     );
+    expect(source).toContain("Retry Playwright dependencies");
+    expect(source).toContain("./bin/6529 exec playwright install chromium");
   });
 
   it("posts manual production E2E to the CI wave against the original deployment", () => {

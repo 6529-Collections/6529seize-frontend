@@ -81,7 +81,7 @@ describe("network pages render", () => {
     expect(container.querySelector("main")).toHaveClass(
       "tailwind-scope",
       "tw-border-r",
-      "tw-border-iron-900"
+      "tw-border-iron-800"
     );
   });
 

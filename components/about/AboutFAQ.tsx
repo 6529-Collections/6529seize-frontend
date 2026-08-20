@@ -4,31 +4,37 @@ import type { ReactNode } from "react";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_BODY_TEXT_CLASS_NAME,
+  ABOUT_MEDIA_FRAME_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+  ABOUT_SECTION_HEADING_CLASS_NAME,
+} from "./AboutLayout";
 
 const FAQ_EDITORIAL_GRID_CLASS =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
 
-const FAQ_CONTENT_CLASS = "tw-text-base tw-leading-7 tw-text-iron-300";
+const FAQ_CONTENT_CLASS = ABOUT_BODY_TEXT_CLASS_NAME;
 
 const FAQ_EDITORIAL_BODY_CLASS = [
   "tw-min-w-0",
-  "[&_a]:tw-break-words [&_a]:tw-rounded-sm [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 [&_a:hover]:tw-text-primary-200 [&_a:focus-visible]:tw-outline-none [&_a:focus-visible]:tw-ring-2 [&_a:focus-visible]:tw-ring-primary-400",
+  ABOUT_BODY_TEXT_CLASS_NAME,
+  "[&_a]:tw-break-words [&_a]:tw-rounded-sm [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 [&_a:hover]:tw-text-primary-400 [&_a:focus-visible]:tw-outline-none [&_a:focus-visible]:tw-ring-2 [&_a:focus-visible]:tw-ring-primary-400",
   "[&_dd]:tw-m-0 [&_dl]:tw-mb-0 [&_dl]:tw-mt-5 [&_dt]:tw-mb-2 [&_dt]:tw-mt-5 [&_dt]:tw-font-semibold [&_dt]:tw-text-iron-100",
   "[&_em]:tw-text-iron-200 [&_p]:tw-mb-0 [&_p]:tw-mt-4 [&_strong]:tw-font-semibold [&_strong]:tw-text-iron-100",
   "[&_h3]:tw-mb-0 [&_h3]:tw-mt-8 [&_h3]:tw-text-lg [&_h3]:tw-font-semibold [&_h3]:tw-leading-7 [&_h3]:tw-text-iron-100",
-  "[&_ol]:tw-mb-0 [&_ol]:tw-mt-4 [&_ol]:tw-space-y-2 [&_ol]:tw-pl-6 [&_ol>li]:tw-pl-1 [&_ol>li::marker]:tw-font-semibold [&_ol>li::marker]:tw-text-iron-500",
-  "[&_ul]:tw-mb-0 [&_ul]:tw-mt-4 [&_ul]:tw-space-y-2 [&_ul]:tw-pl-5 [&_ul>li]:tw-pl-1 [&_ul>li::marker]:tw-text-iron-600",
-  "[&>dl:first-child]:!tw-mt-0 [&>h3:first-child]:!tw-mt-0 [&>ol:first-child]:!tw-mt-0 [&>p:first-child]:!tw-mt-0 [&>ul:first-child]:!tw-mt-0",
+  "[&_ol]:tw-mb-0 [&_ol]:tw-mt-4 [&_ol]:tw-space-y-2 [&_ol]:tw-pl-6 [&_ol>li]:tw-pl-1 [&_ol>li::marker]:tw-font-semibold [&_ol>li::marker]:tw-text-iron-400",
+  "[&_ul]:tw-mb-0 [&_ul]:tw-mt-4 [&_ul]:tw-space-y-2 [&_ul]:tw-pl-5 [&_ul>li]:tw-pl-1 [&_ul>li::marker]:tw-text-iron-500",
+  "[&>dl:first-child]:tw-mt-0 [&>h3:first-child]:tw-mt-0 [&>ol:first-child]:tw-mt-0 [&>p:first-child]:tw-mt-0 [&>ul:first-child]:tw-mt-0",
 ].join(" ");
 
-const FAQ_QUESTION_HEADING_CLASS =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+const FAQ_QUESTION_HEADING_CLASS = ABOUT_SECTION_HEADING_CLASS_NAME;
 
-const FAQ_EDITORIAL_SECTION_CLASS = `${FAQ_EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12`;
+const FAQ_EDITORIAL_SECTION_CLASS = `${FAQ_EDITORIAL_GRID_CLASS} tw-border-0 tw-border-t tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-px-1 tw-py-8 sm:tw-px-2 sm:tw-py-12`;
 
-const FAQ_IMAGE_FRAME_CLASS =
-  "tw-mx-0 tw-mb-0 tw-mt-6 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-2 sm:tw-p-3";
+const FAQ_IMAGE_FRAME_CLASS = `tw-mx-0 tw-mb-0 tw-mt-6 tw-overflow-hidden ${ABOUT_MEDIA_FRAME_CLASS_NAME} tw-p-2 sm:tw-p-3`;
 
 export default function AboutFAQ() {
   const locale = DEFAULT_LOCALE;
@@ -37,15 +43,17 @@ export default function AboutFAQ() {
     <article
       className={`tw-w-full tw-pb-12 tw-text-iron-100 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
     >
-      <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
+      <header
+        className={`tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8`}
+      >
         <div className="tw-max-w-4xl">
-          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-            6529 FAQ
-          </h1>
-          <h2 className="tw-m-0 tw-mt-6 tw-text-pretty tw-text-lg tw-font-normal tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-8">
+          <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME}>6529 FAQ</h1>
+          <h2
+            className={`tw-mt-6 tw-text-pretty ${ABOUT_SECTION_HEADING_CLASS_NAME}`}
+          >
             What is 6529?
           </h2>
-          <div className="tw-mt-4 tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-400">
+          <div className={`tw-mt-4 tw-space-y-4 ${ABOUT_BODY_TEXT_CLASS_NAME}`}>
             <p className="tw-m-0">
               6529 is a decentralized Network State open to anyone with an
               internet connection.
@@ -73,7 +81,7 @@ export default function AboutFAQ() {
 
       <div className={FAQ_CONTENT_CLASS}>
         <section>
-          <ul className="tw-m-0 tw-list-none !tw-p-0">
+          <ul className="tw-m-0 tw-list-none tw-p-0">
             <FAQQuestion title="How do I get started?">
               <p>Getting started is simple:</p>
               <ol>

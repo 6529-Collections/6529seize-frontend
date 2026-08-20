@@ -172,8 +172,32 @@ jobs:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
 
+      - name: Install Playwright dependencies
+        id: playwright_dependencies_primary
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Retry Playwright dependencies
+        if: steps.playwright_dependencies_primary.outcome != 'success'
+        id: playwright_dependencies_retry
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Verify Playwright dependencies
+        env:
+          PRIMARY_OUTCOME: ${{ steps.playwright_dependencies_primary.outcome }}
+          RETRY_OUTCOME: ${{ steps.playwright_dependencies_retry.outcome }}
+        run: |
+          if [ "$PRIMARY_OUTCOME" != success ] && [ "$RETRY_OUTCOME" != success ]; then
+            echo "Playwright system dependency installation failed twice." >&2
+            exit 1
+          fi
+
       - name: Install Playwright browser
-        run: ./bin/6529 exec playwright install --with-deps chromium
+        timeout-minutes: 10
+        run: ./bin/6529 exec playwright install chromium
 
       - name: Run read-only production packs
         env:
