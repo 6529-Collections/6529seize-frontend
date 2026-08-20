@@ -28,19 +28,36 @@
 - Raw mode and `ALL` are internal emergency fences, not normal routing or UI
   controls. Never bypass them. Use the backend fast-off helper only for an
   emergency hard stop.
-- In manual fallback, dispatch backend `Deploy a service` workflows one at a
-  time and wait for exact success before starting the next. Shared concurrency
-  can cancel sibling service runs, including independent DAG-frontier units.
-- Immediately before pushing frontend `1a-staging`, and immediately before
-  dispatching each backend staging service, take one fresh bounded read-only
-  staging-drain snapshot across both repositories. Require the authoritative
-  staging gate and environment lock to be clear and no frontend/backend staging
-  deployment or staging E2E to be queued or in progress. Ignore production
-  deploy/E2E, PR CI, and unrelated workflows. If blocked or uncertain, stop
-  before mutation, report the exact blocking runs, and never wait, poll, cancel,
-  or retry automatically. Never reuse one snapshot for multiple mutations.
-  Existing workflow authorization and rejection/failure alerts remain the final
-  race protection and must not be changed or suppressed.
+- In manual fallback, dispatch exactly one backend `Deploy a service` workflow
+  and stop. A later continuation may dispatch another service only after the
+  prior run's exact success is already established and a new staging-drain
+  snapshot is clear. Shared concurrency can cancel sibling service runs,
+  including independent DAG-frontier units.
+- Immediately before pushing frontend `1a-staging`, and separately immediately
+  before dispatching each backend staging service, take one fresh bounded
+  read-only staging-drain snapshot across both repositories. Finish preparatory
+  work first, including the final shared-ref fetch and any recomputation. Then
+  read each existing source once: the repo-local Release Bus status helper for
+  the effective staging lane, `/deploy/ui/bus` or its versioned read API for the
+  `staging-environment` lock plus active trains and operations, and GitHub
+  Actions for `queued` and `in_progress` runs in both repositories. Bound the
+  Actions scan to ten pages of 100 runs per status and repository; fail closed
+  if that bound or any source cannot prove current state. The status helper
+  alone is not a staging-drain snapshot.
+- A clear snapshot requires staging `OFF` with `changeable: true`, an unowned
+  staging lock, no active `STAGING` or `PRODUCTION_QUALIFICATION` train or
+  nonterminal operation, and no queued/running staging mutation or staging E2E.
+  Staging mutations include frontend/backend staging deploys and both staging-
+  ref advance workflows. Production deploy/E2E, PR CI, and unrelated workflows
+  do not block staging.
+- Snapshot collection is the final read-only sequence before one mutation; do
+  not reuse it for another service, a batch, or a later push. If blocked,
+  unavailable, incomplete, or ambiguous, stop and return control without
+  waiting, polling, cancelling, retrying, or mutating. For a workflow blocker,
+  report repository, workflow, status, run ID, and link. Otherwise report the
+  gate/lock/train/operation/source, exact state or error, observation time, and
+  available owner, identity, or link. Existing workflow authorization and all
+  rejection/failure alerts remain unchanged as final race protection.
 - For coupled work, declare backend dependencies and preserve backend-before-
   frontend ordering. Within v2, only independent backend DAG frontier units run
   together.

@@ -86,25 +86,43 @@ manifest-bound E2E. V2 never publishes release notes.
    are authorized. Then prove the target environment lock is free, no target
    mutation/E2E workflow is active, and every already-dispatched exact operation
    is terminal. Fetch the exact remote target head.
-2. Re-fetch immediately before pushing. If a shared ref moved, recompute from
-   the new head. Never force-push.
-3. As the final read-only action immediately before pushing frontend
-   `1a-staging`, and separately immediately before dispatching each backend
-   staging service, take a fresh bounded staging-drain snapshot across both
-   repositories. Require the authoritative staging gate and environment lock to
-   be clear and no frontend/backend staging deployment or staging E2E to be
-   queued or in progress. Production deploy/E2E, PR CI, and unrelated workflows
-   are not staging blockers. If the snapshot is blocked, unavailable, or
-   ambiguous, stop before mutation and report each exact blocking repository,
-   workflow, status, run ID, and link. Never wait, poll, cancel, or retry
-   automatically, and never reuse one snapshot for a later mutation or backend
-   batch. The existing workflow authorization guard and all rejection/failure
-   alerts remain unchanged as final race protection.
+2. Finish every preparatory action before the staging-drain snapshot. In
+   particular, re-fetch the shared ref and, if it moved, recompute from its new
+   head. Never force-push or fetch again after the snapshot.
+3. Immediately before pushing frontend `1a-staging`, and separately immediately
+   before dispatching each backend staging service, take one fresh bounded
+   read-only staging-drain snapshot across both repositories:
+   - Run `./bin/6529 exec node ops/scripts/release-bus-status.mjs` once and
+     require the effective staging lane to be `OFF` with `changeable: true`.
+     This helper alone is not a staging-drain snapshot.
+   - Read `/deploy/ui/bus` or its versioned read API once. Require the
+     `staging-environment` lock to be unowned, with no active `STAGING` or
+     `PRODUCTION_QUALIFICATION` train and no nonterminal operation in either
+     lane.
+   - Make one bounded GitHub Actions pass for `queued` and `in_progress` runs in
+     both repositories, examining at most ten pages of 100 runs for each status
+     and repository. Block on backend `Deploy a service` runs whose display
+     title targets `staging`; frontend `deploy-staging.yml`,
+     `release-bus-deploy-staging.yml`, and `staging-e2e.yml`; and either repo's
+     `release-bus-v2-advance-staging-ref.yml`. Match by workflow path, using the
+     current workflow name only as a legacy fallback.
+   Production deploy/E2E, PR CI, and unrelated workflows are not staging
+   blockers. Fail closed if any source is unavailable, malformed, incomplete,
+   ambiguous, or exceeds its bound. Snapshot collection is the final read-only
+   sequence before one mutation; do not reuse it for another backend service, a
+   batch, or a later frontend push. On a blocker, stop and return control without
+   waiting, polling, cancelling, retrying, or mutating. For a workflow blocker,
+   report repository, workflow, status, run ID, and link. Otherwise report the
+   gate/lock/train/operation/source, exact state or error, observation time, and
+   available owner, identity, or link. The existing workflow authorization
+   guard and all rejection/failure alerts remain unchanged as final race
+   protection.
 4. Deploy required backend units in DAG order before merging/deploying dependent
    frontend work to `1a-staging`. Dispatch exactly one backend service workflow
-   (`Deploy a service`) at a time and wait for exact success before starting the
-   next; shared workflow concurrency can cancel sibling runs, even for
-   independent DAG-frontier units.
+   (`Deploy a service`) and stop. A later continuation may dispatch the next
+   service only after the prior run's exact success is already established and
+   step 3 produces a new clear snapshot. Shared workflow concurrency can cancel
+   sibling runs, even for independent DAG-frontier units.
 5. Record exact deployed frontend/backend SHAs before E2E and freeze staging
    until E2E is terminal.
 6. With the production lane `OFF`, production requires explicit owner
