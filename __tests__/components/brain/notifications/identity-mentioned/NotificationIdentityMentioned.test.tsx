@@ -53,6 +53,18 @@ const notification = {
 };
 
 describe("NotificationIdentityMentioned", () => {
+  it("renders nothing when the related drop is missing", () => {
+    const { container } = render(
+      <NotificationIdentityMentioned
+        notification={{ related_drops: [] } as never}
+        activeDrop={null}
+        onReply={jest.fn()}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it("calls navigation on drop actions", () => {
     const push = jest.fn();
     (mockUseRouter as jest.Mock).mockReturnValue({ push });

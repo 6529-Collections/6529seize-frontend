@@ -17,9 +17,14 @@ export default function NotificationDropQuoted({
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
+  const drop = notification.related_drops[0];
+  if (!drop) {
+    return null;
+  }
+
   return (
     <NotificationWithDrop
-      drop={notification.related_drops[0]!}
+      drop={drop}
       actionText="quoted you"
       createdAt={notification.created_at}
       activeDrop={activeDrop}
