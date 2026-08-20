@@ -66,7 +66,6 @@ export default function WaveDropsSearchFilters({
       />
       <dialog
         open
-        aria-modal="true"
         aria-labelledby="wave-drops-search-filters-title"
         className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-20 tw-m-0 tw-rounded-t-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 tw-text-left tw-text-iron-100 tw-shadow-2xl sm:tw-absolute sm:tw-inset-auto sm:tw-right-5 sm:tw-top-[7.75rem] sm:tw-w-80 sm:tw-rounded-xl"
       >

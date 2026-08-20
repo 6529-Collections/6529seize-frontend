@@ -162,6 +162,9 @@ describe("WaveDropsSearchModal", () => {
     );
     const filtersButton = screen.getByRole("button", { name: "Filters" });
     fireEvent.click(filtersButton);
+    expect(
+      screen.getByRole("dialog", { name: "Search filters" })
+    ).not.toHaveAttribute("aria-modal");
     expect(screen.getByRole("textbox", { name: "From" })).toHaveFocus();
     const authorButton = screen.getByRole("button", { name: "alice" });
     authorButton.focus();
