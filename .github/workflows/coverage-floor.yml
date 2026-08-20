@@ -80,6 +80,7 @@ jobs:
             --coverage --coverageReporters=json-summary
 
       - name: Check coverage against baseline
+        if: always() && hashFiles('coverage/coverage-summary.json') != ''
         run: node scripts/coverage-floor.cjs
 
       - name: Upload coverage summary
