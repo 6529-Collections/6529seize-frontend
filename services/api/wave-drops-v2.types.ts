@@ -56,10 +56,19 @@ export interface FetchWaveLeaderboardV2Props {
 
 export interface FetchWaveDropsSearchV2Props {
   readonly wave: ApiWave | ApiWaveMin;
-  readonly term: string;
+  readonly term?: string | undefined;
+  readonly authorId?: string | undefined;
+  readonly after?: number | undefined;
+  readonly before?: number | undefined;
   readonly page: number;
   readonly size: number;
   readonly signal?: AbortSignal | undefined;
+}
+
+export interface WaveSearchAuthor {
+  readonly id: string;
+  readonly handle: string;
+  readonly pfp: string | null;
 }
 
 export interface FetchWaveCompetitionDropsV2Props {

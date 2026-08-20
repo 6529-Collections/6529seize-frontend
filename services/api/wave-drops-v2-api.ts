@@ -57,6 +57,7 @@ import type {
   FetchWaveLeaderboardV2Props,
   FetchWavePollsV2Props,
   WaveCompetitionDropsPage,
+  WaveSearchAuthor,
 } from "./wave-drops-v2.types";
 
 export { fetchDropReactionDetailsV2 } from "./wave-drop-reactions-v2-api";
@@ -511,6 +512,9 @@ export async function fetchWaveLeaderboardV2({
 export async function fetchWaveDropsSearchV2({
   wave,
   term,
+  authorId,
+  after,
+  before,
   page,
   size,
   signal,
@@ -519,7 +523,10 @@ export async function fetchWaveDropsSearchV2({
   const response = await commonApiFetch<ApiDropV2PageWithoutCount>({
     endpoint: `v2/waves/${waveMin.id}/search`,
     params: {
-      term,
+      ...(term ? { term } : {}),
+      ...(authorId ? { author_id: authorId } : {}),
+      ...(after !== undefined ? { after: after.toString() } : {}),
+      ...(before !== undefined ? { before: before.toString() } : {}),
       page: page.toString(),
       size: size.toString(),
     },
@@ -533,6 +540,27 @@ export async function fetchWaveDropsSearchV2({
     page: response.page,
     next: response.next,
   };
+}
+
+export async function fetchWaveSearchAuthors({
+  waveId,
+  handle,
+  limit = 10,
+  signal,
+}: {
+  readonly waveId: string;
+  readonly handle: string;
+  readonly limit?: number | undefined;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<WaveSearchAuthor[]> {
+  return commonApiFetch<WaveSearchAuthor[]>({
+    endpoint: `v2/waves/${encodeURIComponent(waveId)}/search-authors`,
+    params: {
+      handle: handle.trim(),
+      limit: limit.toString(),
+    },
+    signal,
+  });
 }
 
 export async function fetchWaveCompetitionDropsV2({

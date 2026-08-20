@@ -1601,10 +1601,10 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "error.retry": "Try again",
     "error.retrying": "Trying again...",
     "idle.description":
-      "Type at least {minLength} characters to search this wave.",
+      "Type at least {minLength} characters or add a filter to search this wave.",
     "idle.title": "Ready to search",
     inputDescription:
-      "Type at least {minLength} characters to search messages in {waveName}.",
+      "Type at least {minLength} characters or add a filter to search messages in {waveName}.",
     inputLabel: "Search messages in {waveName}",
     loadMore: "Load more",
     loadingMore: "Loading...",
@@ -1621,6 +1621,20 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "results.status.one": '{count} result for "{query}"',
     "results.status.other": '{count} results for "{query}"',
     searchAll: "Search all 6529",
+    "filters.after": "After",
+    "filters.authorPlaceholder": "Search wave authors",
+    "filters.authorResults": "Wave authors",
+    "filters.before": "Before",
+    "filters.clear": "Clear filters",
+    "filters.clearAuthor": "Clear author",
+    "filters.close": "Close filters",
+    "filters.from": "From",
+    "filters.invalidRange": "After must be earlier than before.",
+    "filters.loadingAuthors": "Loading authors...",
+    "filters.noAuthors": "No matching authors in this wave.",
+    "filters.open": "Filters",
+    "filters.title": "Search filters",
+    "results.filtersApplied": "Filters applied",
     title: "Search messages",
   } as const
 );
