@@ -6,6 +6,8 @@ import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersP
 import GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api";
 
@@ -23,28 +25,45 @@ type CreateWaveRulesGroupMembersProps =
 export default function CreateWaveRulesGroupMembers(
   props: CreateWaveRulesGroupMembersProps
 ) {
+  const locale = useBrowserLocale();
   const [isOpen, setIsOpen] = useState(false);
   const groupId = "groupId" in props ? props.groupId : null;
+  const savedGroupId = groupId ?? "";
   const cachedGroup = "groupId" in props ? props.cachedGroup : undefined;
-  const { data: restoredGroup } = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUPS, "create-wave-selected-group", groupId],
-    queryFn: async () => {
-      if (!groupId) {
-        throw new Error("A selected group id is required");
-      }
-      return await commonApiFetch<ApiGroupFull>({
-        endpoint: `groups/${encodeURIComponent(groupId)}`,
-      });
-    },
+  const {
+    data: restoredGroup,
+    isError,
+    isFetching,
+  } = useQuery<ApiGroupFull>({
+    queryKey: [QueryKey.GROUPS, "create-wave-selected-group", savedGroupId],
+    queryFn: async () =>
+      await commonApiFetch<ApiGroupFull>({
+        endpoint: `groups/${encodeURIComponent(savedGroupId)}`,
+      }),
     enabled: groupId !== null && cachedGroup === undefined,
     staleTime: 60_000,
   });
-  const group =
-    cachedGroup ??
-    restoredGroup ??
-    ({ id: groupId, name: "Selected group" } as ApiGroupFull);
-  const target: GroupMembersPreviewTarget =
-    "target" in props ? props.target : { kind: "saved", group };
+  const group = cachedGroup ?? restoredGroup;
+  let target: GroupMembersPreviewTarget | null = null;
+  if ("target" in props) {
+    target = props.target;
+  } else if (group) {
+    target = { kind: "saved", group };
+  }
+
+  if (target === null) {
+    const statusLabel = isError
+      ? t(locale, "waves.create.groups.members.countUnavailable")
+      : t(locale, "waves.create.groups.members.countLoading");
+    return (
+      <span
+        role={isFetching ? "status" : undefined}
+        className="tw-text-sm tw-font-medium tw-text-iron-400"
+      >
+        {statusLabel}
+      </span>
+    );
+  }
 
   return (
     <>

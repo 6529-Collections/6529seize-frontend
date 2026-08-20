@@ -1,11 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import CreateWaveActions from "@/components/waves/create-wave/utils/CreateWaveActions";
+import type CreateWaveBackStep from "@/components/waves/create-wave/utils/CreateWaveBackStep";
+import type CreateWaveNextStep from "@/components/waves/create-wave/utils/CreateWaveNextStep";
 import { CreateWaveStep } from "@/types/waves.types";
 
 jest.mock(
   "@/components/waves/create-wave/utils/CreateWaveBackStep",
-  () => (props: any) => (
+  () => (props: ComponentProps<typeof CreateWaveBackStep>) => (
     <button
       data-testid="back"
       onClick={props.onPreviousStep}
@@ -17,14 +20,19 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/create-wave/utils/CreateWaveNextStep",
-  () => (props: any) => (
-    <button
-      data-testid="next"
-      onClick={props.onClick}
-      disabled={props.disabled || props.submitting}
-    >
-      next
-    </button>
+  () => (props: ComponentProps<typeof CreateWaveNextStep>) => (
+    <>
+      <button
+        data-testid="next"
+        onClick={props.onClick}
+        disabled={props.disabled || props.submitting}
+      >
+        next
+      </button>
+      <button data-testid="force-next" onClick={props.onClick}>
+        force next callback
+      </button>
+    </>
   )
 );
 
@@ -115,6 +123,9 @@ describe("CreateWaveActions", () => {
     expect(screen.getByTestId("back")).toBeEnabled();
     expect(screen.getByTestId("next")).toBeDisabled();
     await user.click(screen.getByTestId("next"));
+    expect(setStep).not.toHaveBeenCalled();
+
+    await user.click(screen.getByTestId("force-next"));
     expect(setStep).not.toHaveBeenCalled();
   });
 });

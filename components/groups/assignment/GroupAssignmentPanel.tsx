@@ -6,6 +6,8 @@ import {
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { CreateWaveGroupSearchResultsLayout } from "@/components/waves/create-wave/groups/CreateWaveGroupSearchResults";
 import CreateWaveInlineGroupDraftSummary from "@/components/waves/create-wave/groups/CreateWaveInlineGroupDraftSummary";
@@ -86,6 +88,7 @@ function DialogTabs({
   readonly onExistingClick: () => void;
   readonly onNewClick: () => void;
 }) {
+  const locale = useBrowserLocale();
   const getTabClasses = (active: boolean) =>
     active
       ? "tw-bg-iron-800 tw-text-iron-50 tw-shadow-sm"
@@ -94,7 +97,7 @@ function DialogTabs({
   return (
     <div
       role="tablist"
-      aria-label="Group source"
+      aria-label={t(locale, "waves.create.groups.groupSource")}
       className="tw-grid tw-grid-cols-2 tw-rounded-lg tw-bg-iron-900 tw-p-1"
     >
       <button
@@ -106,7 +109,7 @@ function DialogTabs({
           isExistingActive
         )}`}
       >
-        Existing group
+        {t(locale, "waves.create.groups.existingGroup")}
       </button>
       <button
         type="button"
@@ -117,7 +120,7 @@ function DialogTabs({
           !isExistingActive
         )}`}
       >
-        New group
+        {t(locale, "waves.create.groups.newGroup")}
       </button>
     </div>
   );
@@ -134,6 +137,7 @@ function DialogGroupSummary({
   readonly unsavedGroupSummary: string | null;
   readonly membersPreview?: ReactNode | undefined;
 }) {
+  const locale = useBrowserLocale();
   const summaryGridClasses = unsavedGroupSummary
     ? "tw-grid tw-gap-3 sm:tw-grid-cols-2"
     : "tw-grid tw-gap-3";
@@ -142,22 +146,21 @@ function DialogGroupSummary({
     <div className={summaryGridClasses}>
       <div className="tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/70 tw-p-3">
         <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-          Current group
+          {t(locale, "waves.create.groups.currentGroup")}
         </p>
         {membersPreview === null || membersPreview === undefined ? (
           <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
             {currentGroupLabel}
           </p>
-        ) : null}
-        {membersPreview !== null && membersPreview !== undefined ? (
+        ) : (
           <div className="tw-mt-1.5">{membersPreview}</div>
-        ) : null}
+        )}
       </div>
 
       {unsavedGroupSummary ? (
         <div className="tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/20 tw-bg-primary-500/5 tw-p-3">
           <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-primary-300">
-            Unsaved group
+            {t(locale, "waves.create.groups.unsavedGroup")}
           </p>
           <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
             {unsavedGroupSummary}
@@ -190,6 +193,7 @@ function DialogNewGroupActions({
   readonly onAddIdentity: () => void;
   readonly onAddRule: () => void;
 }) {
+  const locale = useBrowserLocale();
   return (
     <div className="tw-grid tw-gap-2 sm:tw-grid-cols-2">
       <DialogActionButton
@@ -199,7 +203,7 @@ function DialogNewGroupActions({
             className="tw-size-4 tw-flex-shrink-0"
           />
         }
-        label="Add identity"
+        label={t(locale, "waves.create.groups.addIdentity")}
         count={identityCount}
         disabled={disabled}
         active={identityActive}
@@ -212,7 +216,7 @@ function DialogNewGroupActions({
             className="tw-size-4 tw-flex-shrink-0"
           />
         }
-        label="Add rule"
+        label={t(locale, "waves.create.groups.addRule")}
         count={ruleCount}
         disabled={disabled}
         active={ruleActive}
@@ -271,6 +275,7 @@ function DialogGroupAssignmentPanel({
   panelState,
   savedMembersPreview,
 }: GroupAssignmentPanelViewProps) {
+  const locale = useBrowserLocale();
   const {
     allowGroupClear = true,
     defaultLabel,
@@ -365,7 +370,7 @@ function DialogGroupAssignmentPanel({
               <CreateWaveInlineGroupExpandedPanel
                 onCancel={onCancelPanel}
                 cancelClassName="tw-mt-3"
-                cancelLabel="Done"
+                cancelLabel={t(locale, "waves.create.groups.done")}
               >
                 <CreateWaveInlineGroupIdentities
                   identities={displayedBuilder.identities}
@@ -379,7 +384,7 @@ function DialogGroupAssignmentPanel({
             {displayedBuilder.panel === "rule-list" ? (
               <CreateWaveInlineGroupExpandedPanel
                 onCancel={onCancelPanel}
-                cancelLabel="Done"
+                cancelLabel={t(locale, "waves.create.groups.done")}
               >
                 <CreateWaveInlineGroupRuleList
                   disabled={disabled}
@@ -392,7 +397,7 @@ function DialogGroupAssignmentPanel({
             displayedBuilder.activeRule !== null ? (
               <CreateWaveInlineGroupExpandedPanel
                 onCancel={onCancelPanel}
-                cancelLabel="Done"
+                cancelLabel={t(locale, "waves.create.groups.done")}
               >
                 <CreateWaveInlineGroupRuleEditorPanel
                   activeRule={displayedBuilder.activeRule}

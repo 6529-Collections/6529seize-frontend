@@ -15,6 +15,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useAuth } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import CreateWaveToggle from "../utils/CreateWaveToggle";
 import { getOnlyMeGroupDescription } from "../services/waveGroupService";
 import {
@@ -32,6 +33,7 @@ export default function CreateWaveGroup({
   setChatEnabled,
   onGroupSelect,
   onCriteriaReplacementChange,
+  onGroupResolutionChange,
   onInlineGroupCreate,
   groupsCache,
   groups,
@@ -46,6 +48,7 @@ export default function CreateWaveGroup({
   readonly setChatEnabled: (enabled: boolean) => void;
   readonly onGroupSelect: (group: ApiGroupFull | null) => void;
   readonly onCriteriaReplacementChange: (active: boolean) => void;
+  readonly onGroupResolutionChange: (active: boolean) => void;
   readonly onInlineGroupCreate: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
@@ -80,21 +83,35 @@ export default function CreateWaveGroup({
     selectedGroupId && groupsCache[selectedGroupId]
       ? groupsCache[selectedGroupId]
       : null;
-  const { data: restoredSelectedGroup } = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUPS, "create-wave-selected-group", selectedGroupId],
-    queryFn: async () => {
-      if (!selectedGroupId) {
-        throw new Error("A selected group id is required");
+  const savedGroupId = selectedGroupId ?? "";
+  const shouldRestoreSelectedGroup =
+    selectedGroupId !== null && cachedSelectedGroup === null;
+  const {
+    data: restoredSelectedGroup,
+    isError: isRestoreError,
+    isFetching: isRestoring,
+    refetch: retryRestore,
+  } = useQuery<ApiGroupFull>({
+    queryKey: [QueryKey.GROUPS, "create-wave-selected-group", savedGroupId],
+    queryFn: async ({ signal }) => {
+      await Promise.resolve();
+      onGroupResolutionChange(true);
+      try {
+        const restoredGroup = await commonApiFetch<ApiGroupFull>({
+          endpoint: `groups/${encodeURIComponent(savedGroupId)}`,
+          signal,
+        });
+        onGroupResolutionChange(false);
+        return restoredGroup;
+      } catch (error) {
+        onGroupResolutionChange(true);
+        throw error;
       }
-      return await commonApiFetch<ApiGroupFull>({
-        endpoint: `groups/${encodeURIComponent(selectedGroupId)}`,
-      });
     },
-    enabled: selectedGroupId !== null && cachedSelectedGroup === null,
+    enabled: shouldRestoreSelectedGroup,
     staleTime: 60_000,
   });
   const selectedGroup = cachedSelectedGroup ?? restoredSelectedGroup ?? null;
-
   const isNotChatWave = waveType !== ApiWaveType.Chat;
   const inputDisabled =
     isNotChatWave &&
@@ -124,18 +141,26 @@ export default function CreateWaveGroup({
   const suggestedName = buildInlineGroupName({ waveName, groupLabel });
   const labelId = `wave-group-${groupType.toLowerCase()}-label`;
   const errorId = `wave-group-${groupType.toLowerCase()}-error`;
+  const restoreErrorId = `wave-group-${groupType.toLowerCase()}-restore-error`;
+  const hasError = Boolean(errorMessage) || isRestoreError;
+  const describedBy = [
+    errorMessage ? errorId : null,
+    isRestoreError ? restoreErrorId : null,
+  ]
+    .filter((value): value is string => value !== null)
+    .join(" ");
 
   return (
     <fieldset
       className={`tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 tw-rounded-lg ${
-        errorMessage
+        hasError
           ? "tw-scroll-mb-32 tw-border tw-border-solid tw-border-error/70 tw-p-3"
           : "tw-border-0 tw-p-0"
       }`}
       aria-labelledby={labelId}
-      aria-describedby={errorMessage ? errorId : undefined}
-      data-wave-group-invalid={errorMessage ? true : undefined}
-      tabIndex={errorMessage ? -1 : undefined}
+      aria-describedby={describedBy || undefined}
+      data-wave-group-invalid={hasError ? true : undefined}
+      tabIndex={hasError ? -1 : undefined}
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h3
@@ -175,6 +200,29 @@ export default function CreateWaveGroup({
         onChange={onGroupSelect}
         onCreateGroup={onInlineGroupCreate}
       />
+      {isRestoring ? (
+        <p className="tw-m-0 tw-text-sm tw-text-iron-400" role="status">
+          {t(locale, "waves.create.groups.restore.loading")}
+        </p>
+      ) : null}
+      {isRestoreError ? (
+        <div
+          id={restoreErrorId}
+          className="tw-flex tw-flex-wrap tw-items-center tw-gap-3"
+          role="alert"
+        >
+          <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-text-error">
+            {t(locale, "waves.create.groups.restore.error")}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => void retryRestore()}
+          >
+            {t(locale, "waves.create.groups.restore.retry")}
+          </Button>
+        </div>
+      ) : null}
       {errorMessage && (
         <p
           id={errorId}

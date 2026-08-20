@@ -35,6 +35,7 @@ export default function CreateWaveGroups({
   groups,
   onGroupSelect,
   onCriteriaReplacementChange,
+  onGroupResolutionChange,
   onInlineGroupCreate,
   chatEnabled,
   adminCanDeleteDrops,
@@ -53,6 +54,10 @@ export default function CreateWaveGroups({
     groupType: CreateWaveGroupConfigType;
   }) => void;
   readonly onCriteriaReplacementChange: (
+    groupType: CreateWaveGroupConfigType,
+    active: boolean
+  ) => void;
+  readonly onGroupResolutionChange: (
     groupType: CreateWaveGroupConfigType,
     active: boolean
   ) => void;
@@ -124,6 +129,9 @@ export default function CreateWaveGroups({
           onGroupSelect={(group) => onGroupSelect({ group, groupType })}
           onCriteriaReplacementChange={(active) =>
             onCriteriaReplacementChange(groupType, active)
+          }
+          onGroupResolutionChange={(active) =>
+            onGroupResolutionChange(groupType, active)
           }
           onInlineGroupCreate={onInlineGroupCreate}
           setDropsAdminCanDelete={setDropsAdminCanDelete}

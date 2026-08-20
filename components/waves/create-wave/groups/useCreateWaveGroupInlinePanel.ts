@@ -2,8 +2,11 @@ import type { Dispatch, SetStateAction } from "react";
 import { useMemo, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api";
 import { validateGroupPayload } from "@/services/groups/groupMutations";
 import {
@@ -158,10 +161,6 @@ export type CreateWaveGroupInlinePanelProps = {
   ) => Promise<ApiGroupFull | null>;
 };
 
-function buildUnsavedGroupDescription(): string {
-  return "Not applied yet.";
-}
-
 function useCreateWaveGroupInlinePanelViewState({
   builder,
   defaultLabel,
@@ -177,6 +176,7 @@ function useCreateWaveGroupInlinePanelViewState({
   readonly isCreating: boolean;
   readonly selectedGroup: ApiGroupFull | null;
 }) {
+  const locale = useBrowserLocale();
   const displayedBuilder = getDisplayedBuilder({
     builder,
     disabled,
@@ -192,12 +192,18 @@ function useCreateWaveGroupInlinePanelViewState({
   const validation = validateGroupPayload(builder.draft);
   const canCreateDraft = validation.valid && !disabled && !isCreating;
   const ruleCount = getInlineGroupRuleCount(builder.draft);
+  const defaultWallet = defaultIncludedIdentity?.wallet ?? "";
+  const selectedWallet = builder.identities[0]?.wallet ?? "";
+  const walletsAreComparable =
+    defaultWallet.length > 0 &&
+    selectedWallet.length > 0 &&
+    !/\s/.test(defaultWallet) &&
+    !/\s/.test(selectedWallet);
   const containsOnlyDefaultIdentity =
     ruleCount === 0 &&
     builder.identities.length === 1 &&
-    !!defaultIncludedIdentity &&
-    builder.identities[0]?.wallet.trim().toLowerCase() ===
-      defaultIncludedIdentity.wallet.trim().toLowerCase();
+    walletsAreComparable &&
+    areEqualAddresses(selectedWallet, defaultWallet);
   const isIdentityPanel = displayedBuilder.panel === PANEL_IDENTITY;
   const isRulePanel =
     displayedBuilder.panel === PANEL_RULE_LIST ||
@@ -225,7 +231,7 @@ function useCreateWaveGroupInlinePanelViewState({
     isSearchPanel,
     showDraftFooter: hasUnsavedGroup && !isSearchPanel,
     unsavedGroupDescription: hasUnsavedGroup
-      ? buildUnsavedGroupDescription()
+      ? t(locale, "waves.create.groups.notAppliedYet")
       : null,
     unsavedGroupSummary: hasUnsavedGroup ? draftSummary : null,
   };

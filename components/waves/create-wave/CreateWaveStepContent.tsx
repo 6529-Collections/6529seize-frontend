@@ -26,6 +26,7 @@ export default function CreateWaveStepContent({
   overviewLeading,
   onHaveDropToSubmitChange,
   onCriteriaReplacementChange,
+  onGroupResolutionChange,
   onInlineGroupCreate,
 }: {
   readonly controller: WaveConfigController;
@@ -37,6 +38,10 @@ export default function CreateWaveStepContent({
   readonly overviewLeading?: ReactNode;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
   readonly onCriteriaReplacementChange: (
+    groupType: CreateWaveGroupConfigType,
+    active: boolean
+  ) => void;
+  readonly onGroupResolutionChange: (
     groupType: CreateWaveGroupConfigType,
     active: boolean
   ) => void;
@@ -108,6 +113,7 @@ export default function CreateWaveStepContent({
           setChatEnabled={onChatEnabledChange}
           onGroupSelect={onGroupSelect}
           onCriteriaReplacementChange={onCriteriaReplacementChange}
+          onGroupResolutionChange={onGroupResolutionChange}
           onInlineGroupCreate={onInlineGroupCreate}
           setDropsAdminCanDelete={setDropsAdminCanDelete}
         />

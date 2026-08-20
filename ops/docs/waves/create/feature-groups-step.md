@@ -51,13 +51,14 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 ## Group Picker Behavior
 
 - Each access row offers `Replace criteria` and `Choose group`. `Replace
-  criteria` opens the criteria editor, where `Add identity` appears alongside
+criteria` opens the criteria editor, where `Add identity` appears alongside
   the rule choices instead of as a separate row-level action. The identity
   search uses `Back to criteria` to return to those choices.
 - Opening `Replace criteria` starts a pending replacement for that row. `Next`
   remains disabled until the user applies it with `Create and use new group`,
   abandons it with `Discard draft`, or selects a saved group with `Choose
-  group`.
+group`. Navigating away from `Groups`, including moving backward from the
+  step rail, also clears the pending replacement.
 - Focus `Search groups…` to open suggestions.
 - Empty input fetches default suggestions; typed input filters results.
 - Suggestions are capped at `7`.

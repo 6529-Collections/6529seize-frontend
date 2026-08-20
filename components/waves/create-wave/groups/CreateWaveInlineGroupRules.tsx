@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   CREATE_WAVE_INLINE_GROUP_MORE_RULES,
   CREATE_WAVE_INLINE_GROUP_QUICK_RULES,
@@ -21,12 +23,13 @@ export function CreateWaveInlineGroupRuleList({
   readonly onIdentityOpen?: (() => void) | undefined;
   readonly onRuleOpen: (rule: CreateWaveInlineGroupRuleType) => void;
 }) {
+  const locale = useBrowserLocale();
   return (
     <div className="tw-space-y-3">
       <div className="tw-flex tw-flex-wrap tw-gap-1.5">
         {onIdentityOpen ? (
           <DraftChipButton
-            label="Add identity"
+            label={t(locale, "waves.create.groups.addIdentity")}
             disabled={disabled}
             compact={true}
             onClick={onIdentityOpen}

@@ -35,6 +35,7 @@ describe("CreateWaveGroups", () => {
         }}
         onGroupSelect={jest.fn()}
         onCriteriaReplacementChange={jest.fn()}
+        onGroupResolutionChange={jest.fn()}
         onInlineGroupCreate={jest.fn()}
         chatEnabled={true}
         adminCanDeleteDrops={true}
@@ -68,6 +69,7 @@ describe("CreateWaveGroups", () => {
         groups={groups}
         onGroupSelect={jest.fn()}
         onCriteriaReplacementChange={jest.fn()}
+        onGroupResolutionChange={jest.fn()}
         onInlineGroupCreate={jest.fn()}
         chatEnabled={false}
         adminCanDeleteDrops={false}
@@ -99,6 +101,7 @@ describe("CreateWaveGroups", () => {
         }}
         onGroupSelect={jest.fn()}
         onCriteriaReplacementChange={jest.fn()}
+        onGroupResolutionChange={jest.fn()}
         onInlineGroupCreate={jest.fn()}
         chatEnabled={true}
         adminCanDeleteDrops={true}
@@ -136,6 +139,7 @@ describe("CreateWaveGroups", () => {
         }}
         onGroupSelect={jest.fn()}
         onCriteriaReplacementChange={onCriteriaReplacementChange}
+        onGroupResolutionChange={jest.fn()}
         onInlineGroupCreate={jest.fn()}
         chatEnabled={true}
         adminCanDeleteDrops={true}

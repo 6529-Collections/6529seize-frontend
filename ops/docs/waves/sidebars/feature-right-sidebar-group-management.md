@@ -54,7 +54,7 @@ Users can:
    - confirmation modal for remove
 9. Authenticate when prompted.
 10. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admin`
-   group is contained in `View` before saving.
+    group is contained in `View` before saving.
 11. After success, the row refreshes.
 12. On non-chat waves, use the same actions under `Curation Groups`.
 
@@ -97,7 +97,7 @@ Users can:
 - While curation groups load, the section shows `Loading groups`.
 - If curation-group fetch fails, the section shows `Unavailable`.
 - If Network cannot load a linked group's criteria, it shows `Group criteria
-  unavailable` without exposing the group id or treating the scope as public.
+unavailable` without exposing the group id or treating the scope as public.
 - If Network cannot load scoped members, it shows a non-identifying members
   unavailable state instead of retaining results from another group or viewer.
 - If authentication fails or is canceled, users see `Failed to authenticate`
@@ -118,7 +118,7 @@ Users can:
   - include list max: `10,000`
   - exclude list max: `1,000`
 - These containment rules apply to general access scopes, not `Curation
-  Groups`: every member who can drop, vote, chat, or administer must also be
+Groups`: every member who can drop, vote, chat, or administer must also be
   able to view the Wave.
 
 ## Related Pages

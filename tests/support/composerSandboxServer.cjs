@@ -1,6 +1,7 @@
 const http = require("http");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
+const composerSandboxConstants = require("./composerSandboxConstants.json");
 
 require("dotenv").config();
 require("dotenv").config({ path: ".env.test" });
@@ -189,7 +190,7 @@ const sandboxAdminGroup = {
 };
 
 const sandboxPreviewGroup = {
-  id: "00000000-0000-4000-8000-000000000542",
+  id: composerSandboxConstants.previewGroupId,
   name: "Active collectors",
   created_at: CREATED_AT,
   created_by: localIdentityOverview,
@@ -1555,6 +1556,9 @@ function isPersistedPlatformGroupId(value) {
 }
 
 function isRecoverableSandboxRuleGroupId(value) {
+  // Browser drafts can outlive the sandbox process that created their group.
+  // Rebuild a harmless visible placeholder so those local-only drafts remain
+  // testable without granting the recovered group any criteria.
   return (
     isGeneratedSandboxRuleGroupId(value) || isPersistedPlatformGroupId(value)
   );
@@ -1828,7 +1832,7 @@ function isExpectedResumedDraftChatWaveBody(body) {
       "name",
     ]) ||
     typeof body.name !== "string" ||
-    body.name.trim().length === 0 ||
+    !body.name.startsWith("Sandbox ") ||
     body.name.length > 255
   ) {
     return false;
@@ -2536,7 +2540,7 @@ function handleCommunityMemberRead(pathname, url, res) {
   return writeJsonResponse(res, members);
 }
 
-function handleGroupMembersRead(pathname, url, res) {
+function handleTopCommunityMembersRead(pathname, url, res) {
   if (pathname !== "/api/community-members/top") {
     return false;
   }
@@ -2556,7 +2560,12 @@ function handleGroupRead(pathname, res) {
       : groupId === sandboxPreviewGroup.id
         ? sandboxPreviewGroup
         : getSandboxRuleGroup(groupId);
-  return group ? writeJsonResponse(res, group) : false;
+  if (group) {
+    return writeJsonResponse(res, group);
+  }
+
+  writeJson(res, 404, { error: "Sandbox group not found." });
+  return true;
 }
 
 function handleNotificationRead(pathname, url, res) {
@@ -2594,7 +2603,7 @@ function handleMockApiRead(method, pathname, url, res) {
 
   return (
     handleCommunityMemberRead(pathname, url, res) ||
-    handleGroupMembersRead(pathname, url, res) ||
+    handleTopCommunityMembersRead(pathname, url, res) ||
     handleGroupRead(pathname, res) ||
     handleNotificationRead(pathname, url, res) ||
     handleExactMockApiRead(pathname, res) ||

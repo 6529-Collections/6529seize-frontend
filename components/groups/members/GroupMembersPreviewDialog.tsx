@@ -7,7 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import ProfileAvatar, {
@@ -249,6 +249,7 @@ export default function GroupMembersPreviewDialog({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const searchInputId = useId();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -331,7 +332,7 @@ export default function GroupMembersPreviewDialog({
             </div>
           </details>
           <label
-            htmlFor="group-members-search"
+            htmlFor={searchInputId}
             className="tw-mb-1.5 tw-mt-4 tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
           >
             {t(locale, "waves.create.groups.members.searchLabel")}
@@ -342,7 +343,7 @@ export default function GroupMembersPreviewDialog({
               className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-500"
             />
             <input
-              id="group-members-search"
+              id={searchInputId}
               type="search"
               value={search}
               onChange={(event) => {

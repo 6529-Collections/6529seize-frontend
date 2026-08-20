@@ -22,6 +22,7 @@ import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
@@ -1164,6 +1165,24 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   selectedGroup: "Selected group",
+  currentGroup: "Current group",
+  unsavedGroup: "Unsaved group",
+  groupSource: "Group source",
+  existingGroup: "Existing group",
+  newGroup: "New group",
+  addIdentity: "Add identity",
+  addRule: "Add rule",
+  done: "Done",
+  notAppliedYet: "Not applied yet.",
+  "actions.replaceCriteria": "Replace criteria",
+  "actions.chooseGroup": "Choose group",
+  "draft.notReadyTitle": "Not ready yet.",
+  "draft.notReadyDescription":
+    "Finish the missing group rules before you create this group.",
+  "draft.createTitle": "Create this new group",
+  "draft.discard": "Discard draft",
+  "draft.creating": "Creating group...",
+  "draft.createAndUse": "Create and use new group",
   limitedAccessTitle: "Warning: Limited Access",
   limitedAccessDescription:
     'This wave is restricted to the "{viewGroupName}" group. Every Drop, Vote, Chat, and "{adminGroupName}" group member must also belong to that group.',
@@ -1202,6 +1221,11 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "members.retry": "Try again",
   "members.listLabel": "Current group members",
   "members.openProfile": "Open {identity}'s profile in a new tab",
+  "members.noCriteria": "No criteria selected",
+  "restore.loading": "Restoring the selected group…",
+  "restore.error":
+    "This selected group could not be loaded. Retry, replace its criteria, or choose another group before continuing.",
+  "restore.retry": "Retry group",
   "error.missingWallet.title": "Add a primary wallet first.",
   "error.missingWallet.description":
     "A primary wallet is required to create this wave's admin group.",
@@ -2197,6 +2221,54 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  "profilePreferences.title": "Profile Preferences",
+  "profilePreferences.button": "Preferences",
+  "profilePreferences.loading": "Loading profile preferences",
+  "profilePreferences.loadError":
+    "Couldn’t load profile preferences. Please try again.",
+  "profilePreferences.save": "Save Changes",
+  "profilePreferences.saving": "Saving…",
+  "profilePreferences.saveSuccess": "Profile preferences saved.",
+  "profilePreferences.saveError":
+    "Couldn’t save profile preferences. Please try again.",
+  "profilePreferences.dm.heading": "Who can start a direct message with me?",
+  "profilePreferences.dm.description":
+    "This only affects new conversations. Existing direct messages and group messages stay available.",
+  "profilePreferences.dm.EVERYONE.label": "Everyone",
+  "profilePreferences.dm.EVERYONE.description":
+    "Any profile can start a new conversation with you.",
+  "profilePreferences.dm.PEOPLE_I_FOLLOW.label": "People I follow",
+  "profilePreferences.dm.PEOPLE_I_FOLLOW.description":
+    "Only profiles you follow can start a new conversation with you.",
+  "profilePreferences.dm.NOBODY.label": "Nobody",
+  "profilePreferences.dm.NOBODY.description":
+    "No one can start a new conversation with you.",
+  "profilePreferences.dm.createRetry": "Please try again.",
+  "profilePreferences.notifications.heading": "Notifications",
+  "profilePreferences.notifications.description":
+    "Choose between All and Essential notifications.",
+  "profilePreferences.notifications.ALL.label": "All",
+  "profilePreferences.notifications.ALL.description":
+    "Essential security and account notifications, plus the optional categories selected below.",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.description":
+    "Security and account notifications only.",
+  "profilePreferences.notifications.paused": "Paused",
+  "profilePreferences.notifications.category.direct_messages":
+    "Direct messages and wave activity",
+  "profilePreferences.notifications.category.mentions_replies_quotes":
+    "Mentions, replies, and quotes",
+  "profilePreferences.notifications.category.reactions_votes_boosts":
+    "Reactions, votes, and boosts",
+  "profilePreferences.notifications.category.new_followers": "New followers",
+  "profilePreferences.notifications.category.rep_and_nic":
+    "REP and NIC updates",
+  "profilePreferences.notifications.category.subscription_coverage":
+    "Subscription coverage",
+  "profilePreferences.notifications.deviceNote":
+    "Push notifications are managed separately on each device.",
+  "notifications.filter.ariaLabel": "Filter notifications: {selection}",
+  "notifications.filter.selected": "{count} selected",
   "linkPreview.twitter.kind.article": "Article",
   "linkPreview.twitter.kind.post": "Post",
   "linkPreview.twitter.article.provider": "Article on X",
@@ -3138,6 +3210,7 @@ export const EN_US_MESSAGES = {
   "walletAddress.copy.tooltip": "Copy",
   "walletAddress.copy.copiedTooltip": "Copied",
   ...QR_SCANNER_MESSAGES,
+  ...CAPACITOR_CONNECT_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",

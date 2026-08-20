@@ -56,6 +56,9 @@ export default function CreateWave({
   const [criteriaReplacementByGroup, setCriteriaReplacementByGroup] = useState<
     Partial<Record<CreateWaveGroupConfigType, boolean>>
   >({});
+  const [groupResolutionByGroup, setGroupResolutionByGroup] = useState<
+    Partial<Record<CreateWaveGroupConfigType, boolean>>
+  >({});
   useKeyboardFocusScroll(containerRef);
 
   // On the native /waves/create route the create flow has no height-bounding
@@ -114,8 +117,13 @@ export default function CreateWave({
   const { drafts, loadDraft, deleteDraft, clearActiveDraft } =
     useCreateWaveDrafts({ config, endDateConfig, step });
 
-  const onLoadDraft = (draft: CreateWaveDraft) => {
+  const resetTransientGroupState = useCallback(() => {
     setCriteriaReplacementByGroup({});
+    setGroupResolutionByGroup({});
+  }, []);
+
+  const onLoadDraft = (draft: CreateWaveDraft) => {
+    resetTransientGroupState();
     replaceConfig(draft.config);
     setEndDateConfig(draft.endDateConfig);
     loadDraft(draft);
@@ -145,7 +153,7 @@ export default function CreateWave({
     direction: "forward" | "backward"
   ): Promise<void> => {
     if (targetStep !== CreateWaveStep.GROUPS) {
-      setCriteriaReplacementByGroup({});
+      resetTransientGroupState();
     }
     return onStep({ step: targetStep, direction });
   };
@@ -161,9 +169,23 @@ export default function CreateWave({
     },
     []
   );
+  const onGroupResolutionChange = useCallback(
+    (groupType: CreateWaveGroupConfigType, active: boolean) => {
+      setGroupResolutionByGroup((current) => {
+        if (!!current[groupType] === active) {
+          return current;
+        }
+        return { ...current, [groupType]: active };
+      });
+    },
+    []
+  );
   const hasPendingCriteriaReplacement = Object.values(
     criteriaReplacementByGroup
   ).some(Boolean);
+  const hasUnresolvedSelectedGroup = Object.values(groupResolutionByGroup).some(
+    Boolean
+  );
 
   const actionInProgress =
     submitting ||
@@ -193,7 +215,9 @@ export default function CreateWave({
           step={step}
           showActions={selectedOutcomeType === null}
           submitting={actionInProgress}
-          nextDisabled={hasPendingCriteriaReplacement}
+          nextDisabled={
+            hasPendingCriteriaReplacement || hasUnresolvedSelectedGroup
+          }
           setStep={setStep}
           onComplete={onComplete}
         >
@@ -212,6 +236,7 @@ export default function CreateWave({
             }
             onHaveDropToSubmitChange={onHaveDropToSubmitChange}
             onCriteriaReplacementChange={onCriteriaReplacementChange}
+            onGroupResolutionChange={onGroupResolutionChange}
             onInlineGroupCreate={onInlineGroupCreate}
           />
         </CreateWaveLayout>

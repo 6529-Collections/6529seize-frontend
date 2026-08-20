@@ -33,6 +33,20 @@ interface GroupMembersApiQuery {
   readonly param?: string | undefined;
 }
 
+function buildGroupMembersQuery(
+  params: GroupMembersPageParams,
+  groupId?: string
+): GroupMembersApiQuery {
+  return {
+    page: params.page,
+    page_size: params.pageSize,
+    sort: ApiCommunityMembersSortOption.Display,
+    sort_direction: SortDirection.ASC,
+    ...(groupId ? { group_id: groupId } : {}),
+    ...(params.param ? { param: params.param } : {}),
+  };
+}
+
 export async function fetchSavedGroupMembersPage({
   groupId,
   params,
@@ -44,14 +58,7 @@ export async function fetchSavedGroupMembersPage({
 }): Promise<ApiCommunityMembersPage> {
   return await commonApiFetch<ApiCommunityMembersPage, GroupMembersApiQuery>({
     endpoint: "community-members/top",
-    params: {
-      page: params.page,
-      page_size: params.pageSize,
-      sort: ApiCommunityMembersSortOption.Display,
-      sort_direction: SortDirection.ASC,
-      group_id: groupId,
-      ...(params.param ? { param: params.param } : {}),
-    },
+    params: buildGroupMembersQuery(params, groupId),
     signal,
   });
 }
@@ -79,14 +86,6 @@ export async function fetchGroupMembersPage({
   readonly params: GroupMembersPageParams;
   readonly signal?: AbortSignal | undefined;
 }): Promise<ApiCommunityMembersPage> {
-  const query: GroupMembersApiQuery = {
-    page: params.page,
-    page_size: params.pageSize,
-    sort: ApiCommunityMembersSortOption.Display,
-    sort_direction: SortDirection.ASC,
-    ...(params.param ? { param: params.param } : {}),
-  };
-
   if (target.kind === "saved") {
     return await fetchSavedGroupMembersPage({
       groupId: target.group.id,
@@ -102,7 +101,7 @@ export async function fetchGroupMembersPage({
   >({
     endpoint: "groups/preview-members",
     body: { group: target.group },
-    params: query,
+    params: buildGroupMembersQuery(params),
     signal,
   });
 }

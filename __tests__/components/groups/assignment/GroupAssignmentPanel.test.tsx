@@ -4,24 +4,43 @@ import userEvent from "@testing-library/user-event";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import GroupAssignmentPanel from "@/components/groups/assignment/GroupAssignmentPanel";
+import type GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
+import type GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
 import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api";
+
+type PreviewTriggerProps = React.ComponentProps<
+  typeof GroupMembersPreviewTrigger
+>;
+type PreviewDialogProps = React.ComponentProps<
+  typeof GroupMembersPreviewDialog
+>;
+
+let mockPreviewTriggerProps: PreviewTriggerProps | null = null;
+let mockPreviewDialogProps: PreviewDialogProps | null = null;
 
 jest.mock("@/components/groups/members/GroupMembersPreviewTrigger", () => ({
   __esModule: true,
-  default: ({ onOpen }: { onOpen: () => void }) => (
-    <button type="button" onClick={onOpen}>
-      View members
-    </button>
-  ),
+  default: (props: PreviewTriggerProps) => {
+    mockPreviewTriggerProps = props;
+    return (
+      <button type="button" onClick={props.onOpen}>
+        View members
+      </button>
+    );
+  },
 }));
 
 jest.mock("@/components/groups/members/GroupMembersPreviewDialog", () => ({
   __esModule: true,
-  default: ({ target }: { target: { kind: string; summary?: string } }) => (
-    <div data-testid="members-preview-dialog">
-      {target.kind}:{target.summary}
-    </div>
-  ),
+  default: (props: PreviewDialogProps) => {
+    mockPreviewDialogProps = props;
+    return (
+      <div data-testid="members-preview-dialog">
+        {props.target.kind}:
+        {props.target.kind === "draft" ? props.target.summary : ""}
+      </div>
+    );
+  },
 }));
 
 jest.mock(
@@ -185,6 +204,11 @@ function renderDialogPanel({
 }
 
 describe("GroupAssignmentPanel dialog layout", () => {
+  beforeEach(() => {
+    mockPreviewTriggerProps = null;
+    mockPreviewDialogProps = null;
+  });
+
   it("starts on existing group search", () => {
     renderDialogPanel();
 
@@ -347,10 +371,17 @@ describe("GroupAssignmentPanel dialog layout", () => {
     const currentGroup = screen.getByText("Current group").parentElement;
     expect(currentGroup).not.toBeNull();
     expect(within(currentGroup!).queryByText("Existing Group")).toBeNull();
+    expect(mockPreviewTriggerProps?.target).toMatchObject({
+      kind: "saved",
+      group: { id: "group-1", name: "Existing Group" },
+    });
 
     await user.click(screen.getByRole("button", { name: "View members" }));
     expect(screen.getByTestId("members-preview-dialog")).toHaveTextContent(
       "saved:"
+    );
+    expect(mockPreviewDialogProps?.target).toEqual(
+      mockPreviewTriggerProps?.target
     );
   });
 

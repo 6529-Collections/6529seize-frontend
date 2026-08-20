@@ -51,4 +51,17 @@ describe("mention aliases API", () => {
       ])
     ).toEqual([validAlias]);
   });
+
+  it("drops aliases containing malformed member records", () => {
+    expect(
+      normalizeMentionAliases([
+        validAlias,
+        {
+          id: "alias-2",
+          alias: "broken-member",
+          members: [{ profile_id: "profile-2", handle: "bob" }],
+        },
+      ])
+    ).toEqual([validAlias]);
+  });
 });

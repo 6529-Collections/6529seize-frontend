@@ -1,5 +1,5 @@
-import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { getOnlyMeGroupDescription } from "@/components/waves/create-wave/services/waveGroupService";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { fetchGroupMembersPage } from "@/services/api/group-members-api";
 
@@ -41,16 +41,21 @@ describe("group members API", () => {
   });
 
   it("posts draft criteria to the read-only preview endpoint", async () => {
-    const group = { owns_nfts: [] } as ApiCreateGroupDescription;
+    const group = getOnlyMeGroupDescription("0xcreator");
     await fetchGroupMembersPage({
       target: { kind: "draft", group, name: "Draft", summary: "1 rule" },
-      params: { page: 1, pageSize: 20 },
+      params: { page: 1, pageSize: 20, param: "alice" },
     });
 
     expect(commonApiPost).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: "groups/preview-members",
         body: { group },
+        params: expect.objectContaining({
+          page: 1,
+          page_size: 20,
+          param: "alice",
+        }),
       })
     );
     expect(commonApiFetch).not.toHaveBeenCalled();

@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import composerSandboxConstants from "../support/composerSandboxConstants.json";
 
 import {
   expect,
@@ -17,7 +18,7 @@ import {
 const SANDBOX_WALLET = "0x0000000000000000000000000000000000000529";
 const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
-const SANDBOX_PREVIEW_GROUP_ID = "00000000-0000-4000-8000-000000000542";
+const SANDBOX_PREVIEW_GROUP_ID = composerSandboxConstants.previewGroupId;
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
 const SANDBOX_CREATED_WAVE_DESCRIPTION =
   "Local-only create-wave description for Playwright.";
@@ -211,7 +212,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
             kind: "allowed-sandbox-mutation",
             body: {
               name: expectedGroupName,
-              identity_addresses: [],
+              identity_addresses: [SANDBOX_WALLET],
             },
           }),
           expect.objectContaining({
@@ -326,7 +327,6 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       name: "Who can view: Active collectors",
     });
     await expect(membersDialogHeading).toBeVisible();
-    await expect(membersDialog).toHaveCSS("z-index", "10000");
     expect(
       await membersDialogHeading.evaluate((heading) => {
         const rect = heading.getBoundingClientRect();

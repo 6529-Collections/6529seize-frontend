@@ -41,7 +41,7 @@ describe("WaveRulesGroupMembersLink", () => {
 
     await screen.findByText("365 currently eligible");
     const link = screen.getByRole("link", {
-      name: "Inspect Generated group name group criteria and members",
+      name: "Inspect Generated group name group criteria and members: 365 currently eligible",
     });
     expect(link).toHaveTextContent("365 currently eligible");
     expect(link).toHaveAttribute("href", "/network?page=1&group=group-1");

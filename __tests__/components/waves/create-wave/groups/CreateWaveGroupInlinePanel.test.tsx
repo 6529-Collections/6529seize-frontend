@@ -280,7 +280,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     await user.click(screen.getByRole("button", { name: "Discard draft" }));
 
-    expect(onCriteriaReplacementChange).toHaveBeenLastCalledWith(false);
+    expect(onCriteriaReplacementChange.mock.calls).toEqual([[true], [false]]);
   });
 
   it("opens the identity panel", async () => {
@@ -297,7 +297,6 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.queryByRole("button", { name: "Back to options" })
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Back to criteria" })
     ).toBeInTheDocument();

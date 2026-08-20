@@ -31,6 +31,9 @@
 - Open `App Wallets` from Tools navigation when visible.
 - Open `/tools/app-wallets` directly.
 - On list route, select `Create Wallet`, `Import Wallet`, or any wallet card.
+- In Capacitor, open the shared `Connect` sheet and select `App Wallets` to
+  connect an existing app-local wallet or open `Create App Wallet` without
+  visiting the tools route.
 
 ## User Journey
 
@@ -81,6 +84,9 @@
 - On Sepolia, balance adds a `(sepolia)` suffix.
 - Importing the same address again replaces the existing stored entry for that
   address.
+- The native `Connect -> App Wallets` list uses the same stored wallets and
+  existing unlock/connect flow. The `External Wallets` destination omits these
+  app-local connectors.
 
 ## Edge Cases
 
