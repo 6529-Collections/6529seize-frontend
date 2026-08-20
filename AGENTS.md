@@ -31,6 +31,16 @@
 - In manual fallback, dispatch backend `Deploy a service` workflows one at a
   time and wait for exact success before starting the next. Shared concurrency
   can cancel sibling service runs, including independent DAG-frontier units.
+- Immediately before pushing frontend `1a-staging`, and immediately before
+  dispatching each backend staging service, take one fresh bounded read-only
+  staging-drain snapshot across both repositories. Require the authoritative
+  staging gate and environment lock to be clear and no frontend/backend staging
+  deployment or staging E2E to be queued or in progress. Ignore production
+  deploy/E2E, PR CI, and unrelated workflows. If blocked or uncertain, stop
+  before mutation, report the exact blocking runs, and never wait, poll, cancel,
+  or retry automatically. Never reuse one snapshot for multiple mutations.
+  Existing workflow authorization and rejection/failure alerts remain the final
+  race protection and must not be changed or suppressed.
 - For coupled work, declare backend dependencies and preserve backend-before-
   frontend ordering. Within v2, only independent backend DAG frontier units run
   together.

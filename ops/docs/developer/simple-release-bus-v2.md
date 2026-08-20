@@ -27,6 +27,20 @@ operation to be terminal. Both lanes `OFF` means full manual fallback after both
 drain gates. Raw `RELEASE_BUS_V2_MODE` and `ALL` remain internal emergency
 fences; they are not normal routing or UI controls and must never be bypassed.
 
+For manual shared-staging work, take one fresh bounded read-only drain snapshot
+across both repositories as the final action immediately before pushing
+frontend `1a-staging`, and take a new snapshot immediately before every backend
+staging-service dispatch. The snapshot must confirm that the authoritative
+staging gate and environment lock are clear and that no frontend staging
+deployment, backend staging deployment, or staging E2E is queued or in
+progress. Production deploy/E2E activity, PR CI, and unrelated workflows are
+independent and do not block staging. A blocked, unavailable, or ambiguous
+snapshot stops the operation before mutation: report the exact blocking
+repository, workflow, status, run ID, and link, and do not wait, poll, cancel,
+or retry automatically. Never reuse a snapshot for more than one mutation. The
+workflow-side authorization guard and all existing rejection/failure alerts
+remain unchanged as the final race protection.
+
 There is no inferred control-plane or self-upgrade exception. While a target
 lane is `ON`, every deploy for that environment—including API, `releaseBus`,
 cleaner/reconciler, and other control-plane changes—must be an authenticated

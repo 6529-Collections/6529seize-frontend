@@ -85,18 +85,29 @@ manifest-bound E2E. V2 never publishes release notes.
    credential, or deployment mutation unless the exact run and drain state
    are authorized. Then prove the target environment lock is free, no target
    mutation/E2E workflow is active, and every already-dispatched exact operation
-   is terminal. Fetch the exact remote target head. Wait; never cancel another
-   actor.
+   is terminal. Fetch the exact remote target head.
 2. Re-fetch immediately before pushing. If a shared ref moved, recompute from
    the new head. Never force-push.
-3. Deploy required backend units in DAG order before merging/deploying dependent
+3. As the final read-only action immediately before pushing frontend
+   `1a-staging`, and separately immediately before dispatching each backend
+   staging service, take a fresh bounded staging-drain snapshot across both
+   repositories. Require the authoritative staging gate and environment lock to
+   be clear and no frontend/backend staging deployment or staging E2E to be
+   queued or in progress. Production deploy/E2E, PR CI, and unrelated workflows
+   are not staging blockers. If the snapshot is blocked, unavailable, or
+   ambiguous, stop before mutation and report each exact blocking repository,
+   workflow, status, run ID, and link. Never wait, poll, cancel, or retry
+   automatically, and never reuse one snapshot for a later mutation or backend
+   batch. The existing workflow authorization guard and all rejection/failure
+   alerts remain unchanged as final race protection.
+4. Deploy required backend units in DAG order before merging/deploying dependent
    frontend work to `1a-staging`. Dispatch exactly one backend service workflow
    (`Deploy a service`) at a time and wait for exact success before starting the
    next; shared workflow concurrency can cancel sibling runs, even for
    independent DAG-frontier units.
-4. Record exact deployed frontend/backend SHAs before E2E and freeze staging
+5. Record exact deployed frontend/backend SHAs before E2E and freeze staging
    until E2E is terminal.
-5. With the production lane `OFF`, production requires explicit owner
+6. With the production lane `OFF`, production requires explicit owner
    authorization but not prior staging deployment or validation. Re-fetch
    `main` and preserve dependency
    order. For backend services, pass the same merged PR number and full
