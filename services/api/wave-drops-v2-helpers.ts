@@ -10,6 +10,14 @@ type DropApprovalTiming = {
 export const getDropEndpointId = (dropId: string): string =>
   encodeURIComponent(dropId);
 
+export const getNormalizedDropId = (dropId: string): string => {
+  const normalizedDropId = dropId.trim();
+  if (!normalizedDropId) {
+    throw new Error("Cannot fetch drop without a drop id");
+  }
+  return normalizedDropId;
+};
+
 const isAbortFetchError = (error: unknown): boolean => {
   if (error instanceof DOMException && error.name === "AbortError") {
     return true;

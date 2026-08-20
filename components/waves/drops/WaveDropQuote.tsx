@@ -22,6 +22,7 @@ import {
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import ProposalCardContent from "./proposal/ProposalCardContent";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -139,7 +140,16 @@ function WaveDropQuoteBody({
   );
 }
 
-const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
+const WaveDropQuote: React.FC<WaveDropQuoteProps> = (props) =>
+  props.drop ? (
+    <ContentModerationDropGate drop={props.drop} compact>
+      <WaveDropQuoteContent {...props} />
+    </ContentModerationDropGate>
+  ) : (
+    <WaveDropQuoteContent {...props} />
+  );
+
+const WaveDropQuoteContent: React.FC<WaveDropQuoteProps> = ({
   drop,
   partId,
   onQuoteClick,
@@ -157,10 +167,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     drop?.wave.id
   );
   const quotedPart = useMemo<ApiDropPart | null>(() => {
-    if (!drop) {
-      return null;
-    }
-
+    if (!drop) return null;
     return drop.parts.find((part) => part.part_id === partId) ?? null;
   }, [drop, partId]);
 
@@ -186,7 +193,6 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
           }
         | undefined;
     };
-
     const isDirectMessage =
       waveDetails.chat?.scope?.group?.is_direct_message ?? false;
 
@@ -205,7 +211,6 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
         path.push(currentQuoteKey);
       }
     }
-
     return path;
   }, [drop, quotePath]);
 
@@ -223,7 +228,6 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     event: React.MouseEvent<HTMLDivElement>
   ) => {
     event.stopPropagation();
-
     if (isInteractive) {
       goToQuoteDrop();
     }

@@ -20,6 +20,7 @@ import type {
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 export type { DropInteractionParams } from "./drop.types";
 export { DropLocation } from "./drop.types";
 
@@ -196,7 +197,9 @@ export default function Drop({
 
   return (
     <DropContext.Provider value={memoizedValue}>
-      {components[drop.drop_type]}
+      <ContentModerationDropGate drop={drop}>
+        {components[drop.drop_type]}
+      </ContentModerationDropGate>
     </DropContext.Provider>
   );
 }

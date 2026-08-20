@@ -33,6 +33,8 @@ import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -97,6 +99,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   canDelete,
   closeMenu,
   showVoting,
+  onReport,
 }: {
   readonly extendedDrop: ExtendedDrop;
   readonly drop: ApiDrop;
@@ -117,6 +120,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly canDelete: boolean;
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
+  readonly onReport: () => void;
 }) {
   const handledTouchReplyRef = useRef(false);
   const handledTouchReplyResetTimeoutRef = useRef<ReturnType<
@@ -247,6 +251,12 @@ function WaveDropMobileMenuAuthenticatedActions({
         isMobile={true}
         onMarkUnread={closeMenu}
       />
+      <ContentModerationDropActions
+        drop={drop}
+        mobile
+        onAction={closeMenu}
+        onReport={onReport}
+      />
       {showVoting && !isAuthor && (
         <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
       )}
@@ -303,6 +313,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     [drop]
   );
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -388,6 +399,10 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                 canDelete={canDelete}
                 closeMenu={closeMenu}
                 showVoting={showVoting}
+                onReport={() => {
+                  closeMenu();
+                  setIsReportOpen(true);
+                }}
               />
             )}
           </div>
@@ -402,6 +417,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           onClose={() => setIsCurationsDialogOpen(false)}
         />
       )}
+      <ReportDropModal
+        drop={drop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </>
   );
 };

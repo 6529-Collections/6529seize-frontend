@@ -2,9 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 
 let markdownProps: any;
 let mockProposalCardPresentation = "default";
+const visibleModeration = {
+  status: ApiDropModerationStatus.Visible,
+  can_view: true,
+};
 
 jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
   useWaveProposalCardPresentation: () => mockProposalCardPresentation,
@@ -120,6 +125,7 @@ test("calls onQuoteClick on interaction", async () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   const onQuoteClick = jest.fn();
   const onParentClick = jest.fn();
@@ -143,6 +149,7 @@ test("displays quoted part content", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   render(<WaveDropQuote drop={drop} partId={5} onQuoteClick={jest.fn()} />);
   expect(screen.getByTestId("markdown")).toHaveTextContent("text");
@@ -161,6 +168,7 @@ test("uses the reusable compact card for a quoted proposal in an opted-in wave",
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
@@ -183,6 +191,7 @@ test("keeps quoted chat messages normal in an opted-in proposal wave", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
@@ -206,6 +215,7 @@ test("updates quoted part when partId changes on rerender", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   const { rerender } = render(
@@ -227,6 +237,7 @@ test("clears quoted part content when drop becomes null", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   const { rerender } = render(
@@ -248,6 +259,7 @@ test("passes explicit link-card suppression callback into nested markdown", () =
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   const onLinkCardActionsActiveChange = jest.fn();
 
@@ -275,6 +287,7 @@ test("passes hidden link preview setting into nested markdown", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   render(
@@ -299,6 +312,7 @@ test("falls back to link preview context for nested markdown suppression", () =>
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   const onCardActionsActiveChange = jest.fn();
 
