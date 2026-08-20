@@ -1,4 +1,5 @@
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { createGroup, publishGroup } from "@/services/groups/groupMutations";
@@ -26,6 +27,33 @@ export class WaveAdminGroupError extends Error {
   }
 }
 
+export const getOnlyMeGroupDescription = (
+  primaryWallet: string
+): ApiCreateGroupDescription => ({
+  tdh: {
+    min: null,
+    max: null,
+    inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
+  },
+  rep: {
+    min: null,
+    max: null,
+    direction: ApiGroupFilterDirection.Received,
+    user_identity: null,
+    category: null,
+  },
+  cic: {
+    min: null,
+    max: null,
+    direction: ApiGroupFilterDirection.Received,
+    user_identity: null,
+  },
+  level: { min: null, max: null },
+  owns_nfts: [],
+  identity_addresses: [primaryWallet],
+  excluded_identity_addresses: null,
+});
+
 /**
  * Creates a group that only includes the specified wallet
  * @param primaryWallet The primary wallet address to include
@@ -43,30 +71,7 @@ const createOnlyMeGroup = async ({
 }): Promise<string | null> => {
   const groupConfig: ApiCreateGroup = {
     name: `Only ${handle ?? "Me"}`,
-    group: {
-      tdh: {
-        min: null,
-        max: null,
-        inclusion_strategy: ApiGroupTdhInclusionStrategy.Tdh,
-      },
-      rep: {
-        min: null,
-        max: null,
-        direction: ApiGroupFilterDirection.Received,
-        user_identity: null,
-        category: null,
-      },
-      cic: {
-        min: null,
-        max: null,
-        direction: ApiGroupFilterDirection.Received,
-        user_identity: null,
-      },
-      level: { min: null, max: null },
-      owns_nfts: [],
-      identity_addresses: [primaryWallet],
-      excluded_identity_addresses: null,
-    },
+    group: getOnlyMeGroupDescription(primaryWallet),
   };
 
   let group: Awaited<ReturnType<typeof createGroup>>;

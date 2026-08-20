@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import CreateWaveGroups from "@/components/waves/create-wave/groups/CreateWaveGroups";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_GROUPS } from "@/helpers/waves/waves.constants";
@@ -9,6 +9,9 @@ jest.mock(
   () => (props: any) => (
     <div data-error={props.errorMessage ?? ""} data-testid="group">
       {props.groupType}
+      <button onClick={() => props.onCriteriaReplacementChange(true)}>
+        edit {props.groupType}
+      </button>
     </div>
   )
 );
@@ -31,6 +34,8 @@ describe("CreateWaveGroups", () => {
           canChat: null,
         }}
         onGroupSelect={jest.fn()}
+        onCriteriaReplacementChange={jest.fn()}
+        onGroupResolutionChange={jest.fn()}
         onInlineGroupCreate={jest.fn()}
         chatEnabled={true}
         adminCanDeleteDrops={true}
@@ -63,6 +68,8 @@ describe("CreateWaveGroups", () => {
         waveType={ApiWaveType.Rank}
         groups={groups}
         onGroupSelect={jest.fn()}
+        onCriteriaReplacementChange={jest.fn()}
+        onGroupResolutionChange={jest.fn()}
         onInlineGroupCreate={jest.fn()}
         chatEnabled={false}
         adminCanDeleteDrops={false}
@@ -93,6 +100,8 @@ describe("CreateWaveGroups", () => {
           canChat: null,
         }}
         onGroupSelect={jest.fn()}
+        onCriteriaReplacementChange={jest.fn()}
+        onGroupResolutionChange={jest.fn()}
         onInlineGroupCreate={jest.fn()}
         chatEnabled={true}
         adminCanDeleteDrops={true}
@@ -111,7 +120,40 @@ describe("CreateWaveGroups", () => {
     expect(
       screen
         .getAllByTestId("group")
-        .find((row) => row.textContent === "CAN_DROP")
+        .find((row) => row.textContent?.startsWith("CAN_DROP"))
     ).toHaveAttribute("data-error", expect.stringContaining("Who can drop"));
+  });
+
+  it("reports which access role has an open criteria replacement", () => {
+    const onCriteriaReplacementChange = jest.fn();
+    render(
+      <CreateWaveGroups
+        waveName="Test Wave"
+        waveType={ApiWaveType.Chat}
+        groups={{
+          admin: null,
+          canView: null,
+          canDrop: null,
+          canVote: null,
+          canChat: null,
+        }}
+        onGroupSelect={jest.fn()}
+        onCriteriaReplacementChange={onCriteriaReplacementChange}
+        onGroupResolutionChange={jest.fn()}
+        onInlineGroupCreate={jest.fn()}
+        chatEnabled={true}
+        adminCanDeleteDrops={true}
+        groupsCache={{}}
+        invalidRoles={[]}
+        isValidating={false}
+        validationUnavailable={false}
+        setChatEnabled={jest.fn()}
+        setDropsAdminCanDelete={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "edit CAN_VIEW" }));
+
+    expect(onCriteriaReplacementChange).toHaveBeenCalledWith("CAN_VIEW", true);
   });
 });

@@ -16,6 +16,8 @@ import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhIncl
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { WaveGroupType } from "../WaveGroup.types";
 
@@ -117,6 +119,7 @@ export default function WaveGroupChangeDialog({
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
 }) {
+  const locale = useBrowserLocale();
   const selectedGroup = useMemo(
     () => getSelectedGroup(currentGroup),
     [currentGroup]
@@ -128,6 +131,7 @@ export default function WaveGroupChangeDialog({
   const suggestedName = buildInlineGroupName({
     waveName: wave.name,
     groupLabel,
+    fallbackName: t(locale, "waves.create.groups.defaultGroupName"),
   });
   const title = selectedGroup ? "Change group" : "Add group";
   const description = selectedGroup
