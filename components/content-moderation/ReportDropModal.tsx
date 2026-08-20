@@ -4,10 +4,15 @@ import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
+import type { ApiContentModerationReportResponse } from "@/generated/models/ApiContentModerationReportResponse";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { reportDrop } from "@/services/api/content-moderation-api";
+import {
+  blockProfile,
+  hideDrop,
+  reportDrop,
+} from "@/services/api/content-moderation-api";
 import {
   getDropHiddenOverride,
   getProfileBlockedOverride,
@@ -25,6 +30,64 @@ import {
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
+
+type PostAction = "report" | "hide" | "block";
+
+type PostActionResult =
+  | {
+      readonly action: PostAction;
+      readonly success: true;
+      readonly reportResponse?: ApiContentModerationReportResponse | undefined;
+    }
+  | {
+      readonly action: PostAction;
+      readonly success: false;
+      readonly error: unknown;
+    };
+
+type FailedPostActionResult = Extract<
+  PostActionResult,
+  { readonly success: false }
+>;
+
+const getSuccessMessageKey = (
+  results: ReadonlyArray<PostActionResult>
+): MessageKey => {
+  if (results.length !== 1) {
+    return "contentModeration.report.actionsSuccess";
+  }
+  const [result] = results;
+  if (!result) {
+    return "contentModeration.report.actionsSuccess";
+  }
+  switch (result.action) {
+    case "hide":
+      return "contentModeration.hide.success";
+    case "block":
+      return "contentModeration.block.success";
+    case "report":
+      return "contentModeration.report.success";
+  }
+};
+
+const runPostAction = async ({
+  action,
+  request,
+}: {
+  readonly action: PostAction;
+  readonly request: () => Promise<ApiContentModerationReportResponse | void>;
+}): Promise<PostActionResult> => {
+  try {
+    const response = await request();
+    return {
+      action,
+      success: true,
+      ...(action === "report" && response ? { reportResponse: response } : {}),
+    };
+  } catch (error) {
+    return { action, error, success: false };
+  }
+};
 
 const REASONS: ReadonlyArray<{
   readonly value: ApiContentModerationReportReason;
@@ -77,12 +140,15 @@ export default function ReportDropModal({
     ApiContentModerationReportReason.ScamOrPhishing
   );
   const [notes, setNotes] = useState("");
+  const [reportPost, setReportPost] = useState(true);
   const [hidePost, setHidePost] = useState(false);
   const [blockAuthor, setBlockAuthor] = useState(false);
+  const hasSelection = reportPost || hidePost || blockAuthor;
 
   const closeModal = () => {
     setReason(ApiContentModerationReportReason.ScamOrPhishing);
     setNotes("");
+    setReportPost(true);
     setHidePost(false);
     setBlockAuthor(false);
     onClose();
@@ -94,12 +160,39 @@ export default function ReportDropModal({
       if (!success) {
         throw new Error("Authentication was cancelled");
       }
-      return reportDrop(drop.id, {
-        reason,
-        notes: notes.trim() || null,
-        hide_drop: hidePost,
-        block_author: blockAuthor,
-      });
+      const actions: Array<Promise<PostActionResult>> = [];
+      if (reportPost) {
+        actions.push(
+          runPostAction({
+            action: "report",
+            request: () =>
+              reportDrop(drop.id, {
+                reason,
+                notes: notes.trim() || null,
+                hide_drop: hidePost,
+                block_author: blockAuthor,
+              }),
+          })
+        );
+      } else {
+        if (hidePost) {
+          actions.push(
+            runPostAction({
+              action: "hide",
+              request: () => hideDrop(drop.id),
+            })
+          );
+        }
+        if (blockAuthor) {
+          actions.push(
+            runPostAction({
+              action: "block",
+              request: () => blockProfile(drop.author.id),
+            })
+          );
+        }
+      }
+      return Promise.all(actions);
     },
     onMutate: () => {
       const viewerProfileId = connectedProfile?.id;
@@ -124,10 +217,59 @@ export default function ReportDropModal({
         viewerProfileId,
       };
     },
-    onSuccess: (response) => {
-      setGlobalDropModerationOverride(drop.id, response.drop_status);
+    onSuccess: (results, _variables, context) => {
+      const failures = results.filter(
+        (result): result is FailedPostActionResult => !result.success
+      );
+      const failedActions = new Set(failures.map(({ action }) => action));
+      const reportResult = results.find(
+        (result) => result.action === "report" && result.success
+      );
+      const reportFailed = failedActions.has("report");
+      const hideFailed =
+        failedActions.has("hide") || (reportFailed && context?.hidePost);
+      const blockFailed =
+        failedActions.has("block") || (reportFailed && context?.blockAuthor);
+      if (reportResult?.success && reportResult.reportResponse) {
+        setGlobalDropModerationOverride(
+          drop.id,
+          reportResult.reportResponse.drop_status
+        );
+      }
+      if (hideFailed && context?.hidePost) {
+        setDropHiddenOverride(
+          context.viewerProfileId,
+          drop.id,
+          context.previousHidden
+        );
+      }
+      if (blockFailed && context?.blockAuthor) {
+        setProfileBlockedOverride(
+          context.viewerProfileId,
+          drop.author.id,
+          context.previousBlocked
+        );
+      }
+      const [firstFailure] = failures;
+      if (firstFailure) {
+        setReportPost(failedActions.has("report"));
+        setHidePost(Boolean(hideFailed));
+        setBlockAuthor(Boolean(blockFailed));
+        setToast({
+          type: "error",
+          title: t(locale, "contentModeration.report.partialError"),
+          description: t(locale, "contentModeration.error.retry"),
+          details: getToastErrorDetails(firstFailure.error),
+        });
+        return;
+      }
       setToast({
-        message: t(locale, "contentModeration.report.success"),
+        message: t(
+          locale,
+          Number(reportPost) + Number(hidePost) + Number(blockAuthor) > 1
+            ? "contentModeration.report.actionsSuccess"
+            : getSuccessMessageKey(results)
+        ),
         type: "success",
       });
       closeModal();
@@ -208,45 +350,66 @@ export default function ReportDropModal({
                 mutation.mutate();
               }}
             >
-              <label className="tw-block">
-                <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                  {t(locale, "contentModeration.report.reasonLabel")}
-                </span>
-                <select
-                  value={reason}
-                  onChange={(event) =>
-                    setReason(
-                      event.target.value as ApiContentModerationReportReason
-                    )
-                  }
-                  className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                >
-                  {REASONS.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {t(locale, item.label)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <fieldset
+                disabled={mutation.isPending}
+                className="tw-m-0 tw-space-y-4 tw-rounded-xl tw-border-0 tw-bg-iron-900/60 tw-p-4"
+              >
+                <legend className="tw-sr-only">
+                  {t(locale, "contentModeration.report.actionsLegend")}
+                </legend>
+                <label className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
+                  <input
+                    type="checkbox"
+                    checked={reportPost}
+                    onChange={(event) => setReportPost(event.target.checked)}
+                    className="tw-size-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400"
+                  />
+                  {t(locale, "contentModeration.report.reportLabel")}
+                </label>
 
-              <label className="tw-block">
-                <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                  {t(locale, "contentModeration.report.notesLabel")}
-                </span>
-                <textarea
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  maxLength={1000}
-                  rows={4}
-                  placeholder={t(
-                    locale,
-                    "contentModeration.report.notesPlaceholder"
-                  )}
-                  className="tw-mt-2 tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                />
-              </label>
+                {reportPost && (
+                  <div className="tw-space-y-4 tw-border-0 tw-border-l tw-border-solid tw-border-iron-700 tw-pl-7">
+                    <label className="tw-block">
+                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                        {t(locale, "contentModeration.report.reasonLabel")}
+                      </span>
+                      <select
+                        value={reason}
+                        onChange={(event) =>
+                          setReason(
+                            event.target
+                              .value as ApiContentModerationReportReason
+                          )
+                        }
+                        className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        {REASONS.map((item) => (
+                          <option key={item.value} value={item.value}>
+                            {t(locale, item.label)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
 
-              <div className="tw-space-y-3 tw-rounded-xl tw-bg-iron-900/60 tw-p-4">
+                    <label className="tw-block">
+                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                        {t(locale, "contentModeration.report.notesLabel")}
+                      </span>
+                      <textarea
+                        value={notes}
+                        onChange={(event) => setNotes(event.target.value)}
+                        maxLength={1000}
+                        rows={4}
+                        placeholder={t(
+                          locale,
+                          "contentModeration.report.notesPlaceholder"
+                        )}
+                        className="tw-mt-2 tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      />
+                    </label>
+                  </div>
+                )}
+
                 <label className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
                   <input
                     type="checkbox"
@@ -265,7 +428,7 @@ export default function ReportDropModal({
                   />
                   {t(locale, "contentModeration.report.blockLabel")}
                 </label>
-              </div>
+              </fieldset>
 
               <div className="tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
                 <Button
@@ -280,6 +443,7 @@ export default function ReportDropModal({
                   type="submit"
                   size="lg"
                   loading={mutation.isPending}
+                  disabled={!hasSelection}
                   hideChildrenWhenLoading
                 >
                   {t(locale, "contentModeration.report.submit")}

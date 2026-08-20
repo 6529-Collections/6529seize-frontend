@@ -251,12 +251,6 @@ function WaveDropMobileMenuAuthenticatedActions({
         isMobile={true}
         onMarkUnread={closeMenu}
       />
-      <ContentModerationDropActions
-        drop={drop}
-        mobile
-        onAction={closeMenu}
-        onReport={onReport}
-      />
       {showVoting && !isAuthor && (
         <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
       )}
@@ -278,6 +272,7 @@ function WaveDropMobileMenuAuthenticatedActions({
       {canDelete && (
         <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
       )}
+      <ContentModerationDropActions drop={drop} mobile onReport={onReport} />
     </>
   );
 }

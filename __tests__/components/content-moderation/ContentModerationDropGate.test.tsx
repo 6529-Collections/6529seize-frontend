@@ -129,10 +129,16 @@ describe("ContentModerationDropGate", () => {
       </ContentModerationDropGate>
     );
 
+    const hiddenContent = screen.getByTestId(
+      "content-moderation-hidden-content"
+    );
+    expect(hiddenContent).toHaveAttribute("aria-hidden", "true");
+    expect(hiddenContent).toHaveAttribute("inert");
+    expect(screen.getByText("Personally hidden post")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Unhide" }));
     expect(
-      screen.queryByText("Personally hidden post")
+      screen.queryByTestId("content-moderation-tombstone-hidden")
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Unhide post" }));
     await waitFor(() => expect(unhideDrop).toHaveBeenCalledWith("drop-1"));
     expect(
       await screen.findByText("Personally hidden post")

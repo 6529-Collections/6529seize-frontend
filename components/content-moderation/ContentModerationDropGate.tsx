@@ -38,17 +38,23 @@ export default function ContentModerationDropGate({
       if (!success) throw new Error("Authentication was cancelled");
       await unhideDrop(drop.id);
     },
+    onMutate: () => {
+      const viewerProfileId = connectedProfile?.id;
+      if (!viewerProfileId) return undefined;
+      setDropHiddenOverride(viewerProfileId, drop.id, false);
+      return { viewerProfileId };
+    },
     onSuccess: () => {
-      if (connectedProfile?.id) {
-        setDropHiddenOverride(connectedProfile.id, drop.id, false);
-      }
       void invalidateContentModerationPresentation(queryClient);
       setToast({
         message: t(locale, "contentModeration.unhide.success"),
         type: "success",
       });
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      if (context) {
+        setDropHiddenOverride(context.viewerProfileId, drop.id, true);
+      }
       if (
         error instanceof Error &&
         error.message === "Authentication was cancelled"
@@ -68,13 +74,55 @@ export default function ContentModerationDropGate({
     return <>{children}</>;
   }
 
+  if (visibility.kind === "hidden") {
+    return (
+      <div
+        className={`tw-relative tw-w-full tw-overflow-hidden tw-rounded-xl ${
+          compact ? "tw-max-h-20" : "tw-my-1 tw-max-h-36 tw-min-h-16"
+        }`}
+        data-testid="content-moderation-tombstone-hidden"
+      >
+        <div
+          aria-hidden="true"
+          inert
+          className="tw-pointer-events-none tw-select-none tw-opacity-25 tw-blur-[2px]"
+          data-testid="content-moderation-hidden-content"
+        >
+          {children}
+        </div>
+        <div
+          className={`tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/65 ${
+            compact ? "tw-p-0" : "tw-p-2"
+          }`}
+        >
+          <div
+            className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/55 tw-text-xs tw-text-iron-400 tw-shadow-sm tw-backdrop-blur-[1px] ${
+              compact ? "tw-px-2 tw-py-0.5" : "tw-px-2.5 tw-py-1"
+            }`}
+          >
+            <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
+            <span aria-hidden="true">·</span>
+            <button
+              type="button"
+              disabled={unhideMutation.isPending}
+              onClick={(event) => {
+                event.stopPropagation();
+                unhideMutation.mutate();
+              }}
+              className="tw-cursor-pointer tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50 desktop-hover:hover:tw-text-white"
+            >
+              {t(locale, "contentModeration.actions.unhide")}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isGlobal = visibility.kind === "global";
   const message = (() => {
     if (visibility.kind === "blocked") {
       return t(locale, "contentModeration.tombstone.blocked");
-    }
-    if (visibility.kind === "hidden") {
-      return t(locale, "contentModeration.tombstone.hidden");
     }
     if (visibility.status === ApiDropModerationStatus.ModeratorRemoved) {
       return t(locale, "contentModeration.tombstone.removed");
@@ -104,21 +152,12 @@ export default function ContentModerationDropGate({
           disabled={unhideMutation.isPending}
           onClick={(event) => {
             event.stopPropagation();
-            if (visibility.kind === "hidden") {
-              unhideMutation.mutate();
-            } else {
-              reveal();
-            }
+            reveal();
           }}
           className="tw-inline-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-800"
         >
           <EyeIcon aria-hidden="true" className="tw-size-4" />
-          {t(
-            locale,
-            visibility.kind === "hidden"
-              ? "contentModeration.actions.unhide"
-              : "contentModeration.tombstone.show"
-          )}
+          {t(locale, "contentModeration.tombstone.show")}
         </button>
       )}
     </div>

@@ -113,7 +113,7 @@ describe("WaveDropReply", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("does not clip a personally hidden tombstone action", () => {
+  it("keeps a personally hidden preview faded with a compact unhide action", () => {
     hookData.drop = {
       id: "d",
       author: { id: "author", handle: "alice", pfp: null },
@@ -130,9 +130,12 @@ describe("WaveDropReply", () => {
 
     render(<WaveDropReply {...baseProps} />);
 
-    expect(screen.getByRole("button", { name: "Unhide post" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Unhide" })).toBeVisible();
     expect(
-      screen.queryByTestId("wave-drop-reply-fixed-container")
-    ).not.toBeInTheDocument();
+      screen.getByTestId("content-moderation-hidden-content")
+    ).toHaveAttribute("inert");
+    expect(
+      screen.getByTestId("wave-drop-reply-fixed-container")
+    ).toBeInTheDocument();
   });
 });

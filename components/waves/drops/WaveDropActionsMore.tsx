@@ -134,14 +134,6 @@ export default function WaveDropActionsMore({
               isDropdownItem={true}
               onOpen={closeDropdown}
             />
-            <ContentModerationDropActions
-              drop={drop}
-              onAction={closeDropdown}
-              onReport={() => {
-                closeDropdown();
-                setIsReportOpen(true);
-              }}
-            />
             {canSetPinnedDrop && (
               <WaveDropActionsSetPinnedDrop
                 drop={drop}
@@ -155,6 +147,13 @@ export default function WaveDropActionsMore({
                 onDelete={handleDeleteClick}
               />
             )}
+            <ContentModerationDropActions
+              drop={drop}
+              onReport={() => {
+                closeDropdown();
+                setIsReportOpen(true);
+              }}
+            />
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>
