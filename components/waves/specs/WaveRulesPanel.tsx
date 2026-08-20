@@ -144,7 +144,7 @@ export default function WaveRulesPanel({
               {section.rows.map((row) => (
                 <div
                   key={row.id}
-                  className="tw-grid tw-min-h-9 tw-grid-cols-[minmax(6.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-start tw-gap-x-3 tw-gap-y-1.5 tw-py-2 tw-text-sm"
+                  className="tw-grid tw-min-h-9 tw-grid-cols-[minmax(6.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-x-3 tw-gap-y-1.5 tw-py-2 tw-text-sm"
                 >
                   <dt className="tw-min-w-0 tw-break-words tw-font-normal tw-leading-5 tw-text-iron-500">
                     {row.label}

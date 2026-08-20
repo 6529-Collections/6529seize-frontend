@@ -42,8 +42,8 @@ import {
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import {
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
   CONTENT_PAGE_CONTAINER_CLASS,
-  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 import {
   SUBSCRIPTIONS_PANEL_CLASS,
@@ -448,7 +448,9 @@ export default function SubscriptionsReportComponent() {
     <div className={CONTENT_PAGE_CONTAINER_CLASS}>
       <div>
         <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <h1 className={CONTENT_PAGE_TITLE_CLASS}>Subscriptions Report</h1>
+          <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
+            Subscriptions Report
+          </h1>
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
             <AboutSubscriptionsProfileButton />
             <Link

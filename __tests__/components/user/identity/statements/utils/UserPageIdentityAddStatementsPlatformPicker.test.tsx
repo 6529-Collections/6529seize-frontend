@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import UserPageIdentityAddStatementsPlatformPicker from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsPlatformPicker";
 import { STATEMENT_TYPE } from "@/helpers/Types";
 
@@ -46,6 +46,9 @@ describe("UserPageIdentityAddStatementsPlatformPicker", () => {
   it("keeps hover and focus tooltip behavior for pointer devices", () => {
     renderPicker();
 
+    expect(
+      screen.getByRole("group", { name: "Choose a platform" })
+    ).toHaveProperty("tagName", "FIELDSET");
     expect(tooltipProps).toMatchObject({
       delayShow: 250,
       clickable: false,

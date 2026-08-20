@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import React from "react";
 import { ContentTabProvider } from "../brain/ContentTabContext";
 import WavesMessagesWrapper from "../shared/WavesMessagesWrapper";
+import { WaveDeleteFlowProvider } from "./header/options/delete/WaveDeleteFlowContext";
 
 interface Props {
   readonly children: ReactNode;
@@ -26,7 +27,9 @@ const WavesDesktop: React.FC<Props> = ({
 
 const WavesDesktopWithProvider: React.FC<Props> = (props) => (
   <ContentTabProvider>
-    <WavesDesktop {...props} />
+    <WaveDeleteFlowProvider>
+      <WavesDesktop {...props} />
+    </WaveDeleteFlowProvider>
   </ContentTabProvider>
 );
 
