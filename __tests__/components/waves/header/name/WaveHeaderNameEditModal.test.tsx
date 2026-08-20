@@ -8,12 +8,6 @@ global.fetch = jest.fn(() =>
   })
 ) as jest.Mock;
 
-// Mock react-dom first 
-jest.mock('react-dom', () => ({
-  ...jest.requireActual('react-dom'),
-  createPortal: (node: any) => node
-}));
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WaveHeaderNameEditModal from '@/components/waves/header/name/WaveHeaderNameEditModal';
@@ -39,12 +33,29 @@ describe('WaveHeaderNameEditModal', () => {
   const auth = { requestAuth: jest.fn().mockResolvedValue({ success: true }), setToast: jest.fn() } as any;
   const rq = { onWaveCreated: jest.fn() } as any;
 
+  it('renders on the shared dialog surface above the wave sidebar', () => {
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <WaveHeaderNameEditModal isOpen wave={{ id: '1', name: 'Old' } as any} onClose={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    // The hand-rolled portal this replaced sat at tw-z-50, which rendered the
+    // rename form underneath the wave sidebar, and had no keyboard handling,
+    // so the native keyboard covered the input and Save.
+    const dialog = screen.getByRole('dialog', { name: 'Rename wave' });
+    expect(dialog).toHaveClass('tw-z-[9999]');
+    expect(dialog.querySelector('.mobile-wrapper-dialog')).not.toBeNull();
+  });
+
   it('submits new name', async () => {
     const user = userEvent.setup();
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <WaveHeaderNameEditModal wave={{ id: '1', name: 'Old' } as any} onClose={jest.fn()} />
+          <WaveHeaderNameEditModal isOpen wave={{ id: '1', name: 'Old' } as any} onClose={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );

@@ -9,6 +9,9 @@ jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ __esMo
 let closeFn: () => void;
 jest.mock('@/components/waves/header/name/WaveHeaderNameEditModal', () => (props: any) => {
   closeFn = props.onClose;
+  if (!props.isOpen) {
+    return null;
+  }
   return <div data-testid="modal"><button onClick={props.onClose}>close</button></div>;
 });
 
