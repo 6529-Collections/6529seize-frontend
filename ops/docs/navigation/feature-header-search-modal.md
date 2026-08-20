@@ -57,9 +57,12 @@ The search control opens one of two clearly scoped experiences:
   - Results use compact message previews showing the author's profile picture,
     message number, date, time, and visually formatted message content.
   - Links, mentions, tags, and Markdown remain visual-only inside a result; the
-    result card is the single action that jumps to the message.
+    result card is the single action that jumps to the message. Mention and tag
+    labels are shown without their internal serialization brackets.
   - Filters support one author from the Wave's actual message authors plus
     inclusive `After` and exclusive `Before` local-date boundaries.
+  - Selecting an author replaces the author picker with a compact profile row;
+    clearing that row restores the picker.
   - Selecting a message result jumps to that drop in the current thread.
   - `Load more` appears when more matches are available.
 
