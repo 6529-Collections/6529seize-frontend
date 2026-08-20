@@ -28,6 +28,10 @@ import {
 import clsx from "clsx";
 import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
+import {
+  USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS,
+  USER_PAGE_HEADER_SURFACE_CLASS,
+} from "./user-page-header-surface";
 
 type StatusIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -45,14 +49,6 @@ const STATUS_ICONS: Record<SubscriptionCoverageTone, StatusIcon> = {
   danger: XCircleIcon,
   neutral: SubscriptionEthIcon,
 };
-
-const STATUS_CONTAINER_RING_CLASSES: Record<SubscriptionCoverageTone, string> =
-  {
-    positive: "tw-ring-emerald-400/25",
-    caution: "tw-ring-amber-300/30",
-    danger: "tw-ring-red-300/35",
-    neutral: "tw-ring-white/10",
-  };
 
 const STATUS_ICON_CLASSES: Record<SubscriptionCoverageTone, string> = {
   positive: "tw-bg-emerald-400/10 tw-text-emerald-300 tw-ring-emerald-400/25",
@@ -95,6 +91,7 @@ export default function UserPageHeaderSubscriptionStatus({
         variant="tertiary"
         size="sm"
         aria-label={t(locale, SUBSCRIPTIONS_TITLE_KEY)}
+        className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
       >
         <span>{t(locale, SUBSCRIPTIONS_TITLE_KEY)}</span>
         <ArrowRightIcon className="tw-size-3.5" aria-hidden="true" />
@@ -106,7 +103,10 @@ export default function UserPageHeaderSubscriptionStatus({
     return (
       <div
         aria-label={t(locale, "subscriptions.coverage.loading")}
-        className="tw-min-h-14 tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm sm:tw-w-[22rem]"
+        className={clsx(
+          "tw-min-h-14 tw-w-full tw-animate-pulse tw-rounded-xl tw-p-2.5 sm:tw-w-[22rem]",
+          USER_PAGE_HEADER_SURFACE_CLASS
+        )}
       >
         <div className="tw-h-3.5 tw-w-40 tw-rounded tw-bg-iron-700/80" />
         <div className="tw-mt-1.5 tw-h-3 tw-w-48 tw-rounded tw-bg-iron-800/90" />
@@ -119,7 +119,11 @@ export default function UserPageHeaderSubscriptionStatus({
     return (
       <Link
         href={profileHref}
-        className="tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-text-left tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 desktop-hover:hover:tw-bg-white/[0.06] sm:tw-w-[22rem]"
+        className={clsx(
+          "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-p-2.5 tw-text-left tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-[22rem]",
+          USER_PAGE_HEADER_SURFACE_CLASS,
+          USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS
+        )}
       >
         <span className="tw-min-w-0">
           <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-100">
@@ -169,8 +173,8 @@ export default function UserPageHeaderSubscriptionStatus({
   return (
     <div
       className={clsx(
-        "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-backdrop-blur-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-300 sm:tw-w-[22rem]",
-        STATUS_CONTAINER_RING_CLASSES[presentation.tone]
+        "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-p-2.5 focus-within:tw-outline focus-within:tw-outline-2 focus-within:tw-outline-offset-2 focus-within:tw-outline-primary-400 sm:tw-w-[22rem]",
+        USER_PAGE_HEADER_SURFACE_CLASS
       )}
     >
       <span
