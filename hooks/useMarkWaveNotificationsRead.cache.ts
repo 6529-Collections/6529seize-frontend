@@ -350,12 +350,18 @@ export const useClearWaveReadStateOnLastUnmount = (
 const createWaveReadSendIntent = ({
   shouldSend,
   retryContext,
+  readThroughSerialNo,
+  onReadResponse,
 }: {
   readonly shouldSend: MarkWaveNotificationsReadOptions["shouldSend"];
   readonly retryContext: WaveReadSendRetryContext | undefined;
+  readonly readThroughSerialNo: MarkWaveNotificationsReadOptions["readThroughSerialNo"];
+  readonly onReadResponse: MarkWaveNotificationsReadOptions["onReadResponse"];
 }): WaveReadSendIntent => ({
   shouldSend,
   retryContext,
+  readThroughSerialNo,
+  onReadResponse,
 });
 
 const getWaveReadSendRetryContext = ({
@@ -434,6 +440,8 @@ const markTemporaryProxyRoleWaveRead = ({
       sendIntents: [
         createWaveReadSendIntent({
           shouldSend: options?.shouldSend,
+          readThroughSerialNo: options?.readThroughSerialNo,
+          onReadResponse: options?.onReadResponse,
           retryContext: getWaveReadSendRetryContext({
             addressKey: latestVerifiedProxyRoleIdentity.addressKey,
             activeProfileProxyId:
@@ -467,6 +475,8 @@ const markTemporaryProxyRoleWaveRead = ({
     addressEpoch,
     latestAddressEpochRef: cacheRefs.latestAddressEpochRef,
     shouldSend: options?.shouldSend,
+    readThroughSerialNo: options?.readThroughSerialNo,
+    onReadResponse: options?.onReadResponse,
     queueIfBlocked: options?.queueIfBlocked ?? true,
   });
 };
@@ -522,6 +532,8 @@ export const markWaveReadFromCache = ({
       sendIntents: [
         createWaveReadSendIntent({
           shouldSend: options?.shouldSend,
+          readThroughSerialNo: options?.readThroughSerialNo,
+          onReadResponse: options?.onReadResponse,
           retryContext: getWaveReadSendRetryContext({
             addressKey: verifiedCachedIdentity.addressKey,
             activeProfileProxyId,
@@ -554,6 +566,8 @@ export const markWaveReadFromCache = ({
       sendIntents: [
         createWaveReadSendIntent({
           shouldSend: options?.shouldSend,
+          readThroughSerialNo: options?.readThroughSerialNo,
+          onReadResponse: options?.onReadResponse,
           retryContext: getWaveReadSendRetryContext({
             addressKey: latestVerifiedIdentity.addressKey,
             activeProfileProxyId,
@@ -593,6 +607,8 @@ export const markWaveReadFromCache = ({
     addressEpoch,
     latestAddressEpochRef: cacheRefs.latestAddressEpochRef,
     shouldSend: options?.shouldSend,
+    readThroughSerialNo: options?.readThroughSerialNo,
+    onReadResponse: options?.onReadResponse,
     queueIfBlocked,
   });
 };

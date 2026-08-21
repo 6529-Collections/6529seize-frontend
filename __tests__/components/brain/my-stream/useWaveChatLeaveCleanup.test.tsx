@@ -9,6 +9,8 @@ type CleanupCallbacks = {
 
 type HookProps = CleanupCallbacks & {
   readonly enabled: boolean;
+  readonly isDirectMessage?: boolean | undefined;
+  readonly readThroughSerialNo?: number | undefined;
   readonly waveId: string;
 };
 
@@ -154,6 +156,56 @@ describe("useWaveChatLeaveCleanup", () => {
       expect(callbacks.markWaveNotificationsRead).toHaveBeenCalledWith(
         "wave-1",
         { queueIfBlocked: false }
+      );
+    });
+  });
+
+  it("bounds a delayed DM leave read to the latest serial known before leaving", async () => {
+    let resolveDeliveredNotifications: () => void = () => {};
+    const deliveredNotificationsPromise = new Promise<void>((resolve) => {
+      resolveDeliveredNotifications = resolve;
+    });
+    const callbacks = createCallbacks();
+    callbacks.removeWaveDeliveredNotifications.mockReturnValue(
+      deliveredNotificationsPromise
+    );
+    const { rerender, unmount } = renderLeaveCleanupHook({
+      enabled: true,
+      isDirectMessage: true,
+      readThroughSerialNo: 40,
+      waveId: "wave-1",
+      ...callbacks,
+    });
+
+    await act(async () => {
+      rerender({
+        enabled: true,
+        isDirectMessage: true,
+        readThroughSerialNo: 41,
+        waveId: "wave-1",
+        ...callbacks,
+      });
+    });
+
+    await act(async () => {
+      unmount();
+    });
+
+    expect(callbacks.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave-1"
+    );
+    expect(callbacks.markWaveNotificationsRead).not.toHaveBeenCalled();
+
+    resolveDeliveredNotifications();
+
+    await waitFor(() => {
+      expect(callbacks.markWaveNotificationsRead).toHaveBeenCalledWith(
+        "wave-1",
+        {
+          queueIfBlocked: false,
+          readThroughSerialNo: 41,
+          requestDmUnreadState: true,
+        }
       );
     });
   });
