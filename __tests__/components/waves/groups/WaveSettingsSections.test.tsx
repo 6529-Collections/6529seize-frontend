@@ -686,7 +686,7 @@ describe("WaveSettingsSections", () => {
       await screen.findByRole("button", { name: "Edit guidelines" })
     );
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "Keep submissions original."
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -725,7 +725,7 @@ describe("WaveSettingsSections", () => {
 
     expect(await screen.findByText("Added")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Edit guidelines" }));
-    await user.clear(screen.getByLabelText("Display-only rules"));
+    await user.clear(screen.getByLabelText("Wave guidelines"));
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
@@ -771,9 +771,9 @@ describe("WaveSettingsSections", () => {
 
     expect(await screen.findByText("Added")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Edit guidelines" }));
-    await user.clear(screen.getByLabelText("Display-only rules"));
+    await user.clear(screen.getByLabelText("Wave guidelines"));
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "New custom rule"
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -818,7 +818,7 @@ describe("WaveSettingsSections", () => {
       await screen.findByRole("button", { name: "Edit guidelines" })
     );
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "Keep submissions original."
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -841,7 +841,7 @@ describe("WaveSettingsSections", () => {
         queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
       });
     });
-    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+    expect(screen.getByLabelText("Wave guidelines")).toBeInTheDocument();
   });
 
   it("keeps custom rules editor open when metadata save fails", async () => {
@@ -859,7 +859,7 @@ describe("WaveSettingsSections", () => {
       await screen.findByRole("button", { name: "Edit guidelines" })
     );
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "Keep submissions original."
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -867,20 +867,20 @@ describe("WaveSettingsSections", () => {
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({
         type: "error",
-        title: "Couldn't save these custom rules.",
+        title: "Couldn't save these guidelines.",
         description: "Please try again.",
         details: "metadata failed.",
       });
     });
     expect(
-      screen.getByText("Couldn't save these custom rules. Please try again.")
+      screen.getByText("Couldn't save these guidelines. Please try again.")
     ).toHaveAttribute("role", "alert");
     await waitFor(() => {
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
       });
     });
-    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+    expect(screen.getByLabelText("Wave guidelines")).toBeInTheDocument();
   });
 
   it("saves acceptance rules through participation terms", async () => {
