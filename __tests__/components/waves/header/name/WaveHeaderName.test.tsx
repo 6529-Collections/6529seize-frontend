@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import WaveHeaderName from "@/components/waves/header/name/WaveHeaderName";
+import { createMockApiWave } from "@/__tests__/utils/mockFactories";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -24,13 +26,14 @@ jest.mock("@/helpers/waves/waves.helpers", () => ({
 const { canEditWave } = require("@/helpers/waves/waves.helpers");
 
 describe("WaveHeaderName", () => {
-  const wave = {
+  const wave = createMockApiWave({
     id: "w1",
     name: "Wave",
-    author: { handle: "bob" },
-    chat: { scope: { group: { is_direct_message: false } } },
-    wave: {},
-  } as any;
+    author: { handle: "bob" } as ApiWave["author"],
+    chat: {
+      scope: { group: { is_direct_message: false } },
+    } as ApiWave["chat"],
+  });
 
   it("shows edit button when user can edit", () => {
     (canEditWave as jest.Mock).mockReturnValue(true);
@@ -54,7 +57,9 @@ describe("WaveHeaderName", () => {
       <WaveHeaderName
         wave={{
           ...wave,
-          chat: { scope: { group: { is_direct_message: true } } },
+          chat: {
+            scope: { group: { is_direct_message: true, is_hidden: false } },
+          } as ApiWave["chat"],
         }}
       />
     );
@@ -68,7 +73,10 @@ describe("WaveHeaderName", () => {
         wave={{
           ...wave,
           name: "Child Wave",
-          parent_wave: { id: "parent-wave", name: "Parent Wave" },
+          parent_wave: {
+            id: "parent-wave",
+            name: "Parent Wave",
+          } as NonNullable<ApiWave["parent_wave"]>,
         }}
       />
     );
