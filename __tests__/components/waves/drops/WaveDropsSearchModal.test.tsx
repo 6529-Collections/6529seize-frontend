@@ -218,8 +218,8 @@ describe("WaveDropsSearchModal", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Filters" }));
     const dateInputs = document.querySelectorAll('input[type="date"]');
-    expect(dateInputs[0]).toHaveClass("tw-[color-scheme:dark]");
-    expect(dateInputs[1]).toHaveClass("tw-[color-scheme:dark]");
+    expect(dateInputs[0]).toHaveClass("[color-scheme:dark]");
+    expect(dateInputs[1]).toHaveClass("[color-scheme:dark]");
     fireEvent.change(dateInputs[0]!, { target: { value: "2026-08-20" } });
     fireEvent.change(dateInputs[1]!, { target: { value: "2026-08-19" } });
     expect(
