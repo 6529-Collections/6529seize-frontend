@@ -34,6 +34,15 @@ export default function WaveHeaderNameEditModal({
   const [isDisabled, setIsDisabled] = useState(getIsDisabled());
   useEffect(() => setIsDisabled(getIsDisabled()), [wave, mutating, name]);
 
+  // The dialog now stays mounted while closed, so useState only seeds the draft
+  // on first mount. Without this, a rename landing from elsewhere would leave a
+  // stale draft that Save could submit back over the newer name.
+  useEffect(() => {
+    if (!isOpen) {
+      setName(wave.name);
+    }
+  }, [isOpen, wave.name]);
+
   const editNameMutation = useMutation({
     mutationFn: async (body: ApiUpdateWaveRequest) =>
       await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
@@ -85,7 +94,6 @@ export default function WaveHeaderNameEditModal({
       title={t(locale, "waves.header.nameEditTitle")}
       isOpen={isOpen}
       onClose={onClose}
-      onAfterLeave={() => setName(wave.name)}
       tabletModal
       showHeaderCloseButton
       maxWidthClass="md:tw-max-w-xl"

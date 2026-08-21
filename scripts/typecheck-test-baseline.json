@@ -667,7 +667,7 @@
     "__tests__/components/waves/GithubPreviewStatusBadge.test.tsx": 1,
     "__tests__/components/waves/GoogleWorkspacePreview.test.tsx": 1,
     "__tests__/components/waves/header/name/WaveHeaderName.test.tsx": 2,
-    "__tests__/components/waves/header/name/WaveHeaderNameEdit.test.tsx": 2,
+    "__tests__/components/waves/header/name/WaveHeaderNameEdit.test.tsx": 1,
     "__tests__/components/waves/header/name/WaveHeaderNameEditInput.test.tsx": 1,
     "__tests__/components/waves/header/name/WaveHeaderNameEditModal.test.tsx": 1,
     "__tests__/components/waves/header/options/delete/WaveDeleteModal.test.tsx": 1,

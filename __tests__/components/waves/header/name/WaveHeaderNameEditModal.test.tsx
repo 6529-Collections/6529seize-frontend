@@ -40,6 +40,44 @@ describe('WaveHeaderNameEditModal', () => {
     onWaveCreated: jest.fn(),
   } as React.ContextType<typeof ReactQueryWrapperContext>;
 
+  it('picks up a rename that landed while the dialog was closed', () => {
+    const { rerender } = render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <WaveHeaderNameEditModal
+            isOpen={false}
+            wave={createMockApiWave({ id: '1', name: 'Old' })}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    // The rename lands first (a query refetch while the dialog is closed), then
+    // the user opens it — two separate commits, as in the app. The dialog stays
+    // mounted throughout, so the draft has to follow the wave rather than keep
+    // the name captured at first mount.
+    const renderWith = (name: string, isOpen: boolean) =>
+      rerender(
+        <AuthContext.Provider value={auth}>
+          <ReactQueryWrapperContext.Provider value={rq}>
+            <WaveHeaderNameEditModal
+              isOpen={isOpen}
+              wave={createMockApiWave({ id: '1', name })}
+              onClose={jest.fn()}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+    renderWith('Renamed elsewhere', false);
+    renderWith('Renamed elsewhere', true);
+
+    expect(screen.getByPlaceholderText('Please select a name')).toHaveValue(
+      'Renamed elsewhere'
+    );
+  });
+
   it('renders on the shared dialog surface above the wave sidebar', () => {
     render(
       <AuthContext.Provider value={auth}>

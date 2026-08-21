@@ -4,17 +4,26 @@ import userEvent from '@testing-library/user-event';
 import WaveHeaderNameEdit from '@/components/waves/header/name/WaveHeaderNameEdit';
 import { createMockApiWave } from '@/__tests__/utils/mockFactories';
 
-jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
-jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
+// The component no longer renders the animation wrappers, so those mocks are gone.
+type ModalMockProps = {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+};
 
-let closeFn: () => void;
-jest.mock('@/components/waves/header/name/WaveHeaderNameEditModal', () => (props: any) => {
-  closeFn = props.onClose;
-  if (!props.isOpen) {
-    return null;
-  }
-  return <div data-testid="modal"><button onClick={props.onClose}>close</button></div>;
-});
+jest.mock(
+  '@/components/waves/header/name/WaveHeaderNameEditModal',
+  () =>
+    function WaveHeaderNameEditModalMock({ isOpen, onClose }: ModalMockProps) {
+      if (!isOpen) {
+        return null;
+      }
+      return (
+        <div data-testid="modal">
+          <button onClick={onClose}>close</button>
+        </div>
+      );
+    }
+);
 
 test('opens and closes modal', async () => {
   const user = userEvent.setup();
