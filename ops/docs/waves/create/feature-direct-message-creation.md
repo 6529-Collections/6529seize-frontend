@@ -29,6 +29,12 @@ identities.
 - DM-create UI needs an authenticated connected profile.
 - If profile context is missing, create controls are hidden and create content
   does not render.
+- Recipient profile preferences can allow new conversations from everyone,
+  only people the recipient follows, or nobody.
+- A new group direct message must be allowed by every recipient.
+- Existing direct-message conversations are unaffected by later preference
+  changes, including existing groups whose participants would not pass the
+  current creation policy.
 
 ## User Journey
 
@@ -71,7 +77,10 @@ identities.
 ## Failure and Recovery
 
 - If search returns no rows, refine the query and keep typing.
-- If DM creation fails, the UI shows `Failed to create Direct Message: ...`;
+- If a recipient does not accept a new direct message from the creator, the UI
+  explains that recipient's policy. Change the participant set or use an
+  existing conversation.
+- For other creation failures, the UI shows the server error when available;
   retry from the same flow.
 - If stale `create=dm` opens unexpectedly, close the flow to clear `create`
   from the URL.

@@ -1082,6 +1082,9 @@
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
         "In the app sidebar, selecting another connected profile switches to it and closes the drawer; the add-profile button closes the drawer as the wallet connection flow opens.",
+        "In Capacitor, Connect and add-profile open a shared Connect sheet with App Wallets, External Wallets, and Scan Connection QR options.",
+        "The Capacitor App Wallets view supports Back, Create App Wallet, and direct app-wallet unlock/connect; app wallets are omitted from the Reown external-wallet browser.",
+        "Scan Connection QR accepts only canonical 6529 connection-share links; the separate app-sidebar scanner remains general-purpose.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
@@ -2271,8 +2274,14 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Groups step shows all access and moderation rows immediately, organized from Who can view through Admin without an Advanced settings disclosure.",
         "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "Each Groups access row offers Replace criteria and Choose group; Replace criteria contains Add identity and the rule choices, Back to criteria returns from identity search, and Next stays disabled until the pending replacement is created, discarded, or replaced by a saved group.",
+        "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
+        "A valid unsaved inline group offers Preview matches, which evaluates current membership without saving the group or applying it to the Wave.",
+        "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",
+        "If an older saved draft references a group whose criteria are unavailable, the member browser explains that limitation and continues showing any current members it can resolve instead of closing wave creation.",
         "When Who can view is restricted, every active Drop, Vote, Chat, and Admin group member must also belong to the View group; incompatible rows are highlighted and block progress.",
         "Wave creation verifies the final access groups again after authentication and before creating a personal Admin group or the Wave.",
+        "New inline groups include the connected creator by default, even when the group otherwise contains only rules; choosing a saved group preserves the saved group's membership instead.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include Rules; Rank and Approve also include Dates, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
         "Dates keeps core start, voting, and applicable first-announcement controls visible. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Dates optional section.",
@@ -2690,7 +2699,7 @@
         "Rank and Approve wave Settings show Chat status as Enabled or Disabled, and wave admins can edit that row to enable or disable chat.",
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "The Rank and Approve Rules panels also show Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
-        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Rules and Settings to a filtered Network view that shows both the group criteria and current members.",
+        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Rules and Settings to a filtered Network view that shows both the group criteria and current members; Rules display a live eligible-member count instead of the generated group name.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
@@ -4331,8 +4340,9 @@
       "facts": [
         "The notifications feed lives at /notifications.",
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
-        "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
-        "Cause filters include Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
+        "It supports a compact multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
+        "The notification filter defaults to All and can combine Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
+        "The settings action beside the Notifications heading opens Profile Preferences.",
         "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
@@ -4346,6 +4356,46 @@
         "app/notifications/page.tsx",
         "ops/docs/notifications/feature-notifications-feed.md",
         "ops/docs/notifications/flow-notifications-feed-browsing.md"
+      ]
+    },
+    {
+      "id": "profile.preferences",
+      "kind": "ui_affordance",
+      "title": "Profile privacy and notification preferences",
+      "aliases": [
+        "profile preferences",
+        "who can DM me",
+        "people I follow can DM me",
+        "disable notifications",
+        "essential notifications",
+        "subscription coverage notifications"
+      ],
+      "keywords": [
+        "profile",
+        "privacy",
+        "direct messages",
+        "group DM",
+        "notifications",
+        "essential",
+        "paused",
+        "subscription coverage"
+      ],
+      "facts": [
+        "Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, or Nobody can start a new direct-message conversation.",
+        "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
+        "Every recipient must allow the creator before a new group direct message can be created.",
+        "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation, hides the individual category controls, and preserves their choices.",
+        "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
+        "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push.",
+        "Profile Preferences is available from the app sidebar, the desktop profile menu, and the settings action beside the Notifications heading."
+      ],
+      "canonical_path": "/notifications",
+      "related_paths": ["/messages", "/notifications"],
+      "tags": ["profile", "privacy", "direct messages", "notifications"],
+      "source_refs": [
+        "components/header/ProfilePreferencesSettings.tsx",
+        "ops/docs/notifications/feature-profile-preferences.md",
+        "ops/docs/waves/create/feature-direct-message-creation.md"
       ]
     },
     {
@@ -6578,6 +6628,7 @@
       "keywords": ["tools", "app", "wallets", "import", "detail", "management"],
       "facts": [
         "App wallets management lives at /tools/app-wallets.",
+        "In Capacitor, Connect -> App Wallets lists app-local wallets, opens the existing create flow, and connects through the existing unlock flow.",
         "Wallet import lives at /tools/app-wallets/import-wallet and detail pages use /tools/app-wallets/{app-wallet-address}.",
         "Input rules, result states, detail actions, and recovery are documented in the API tool docs."
       ],
