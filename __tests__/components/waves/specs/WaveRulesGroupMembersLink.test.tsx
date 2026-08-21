@@ -1,4 +1,5 @@
 import WaveRulesGroupMembersLink from "@/components/waves/specs/WaveRulesGroupMembersLink";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import { renderWithQueryClient } from "@/__tests__/utils/reactQuery";
 import { fetchSavedGroupMembersPage } from "@/services/api/group-members-api";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -90,5 +91,45 @@ describe("WaveRulesGroupMembersLink", () => {
         params: { page: 1, pageSize: 1 },
       })
     );
+  });
+
+  it("does not show the previous group count while a new group loads", async () => {
+    const nextMembers = createDeferredPromise<{
+      count: number;
+      page: number;
+      next: boolean;
+      data: never[];
+    }>();
+    jest
+      .mocked(fetchSavedGroupMembersPage)
+      .mockResolvedValueOnce({ count: 365, page: 1, next: false, data: [] })
+      .mockReturnValueOnce(nextMembers.promise);
+
+    const { rerender } = renderWithQueryClient(
+      <WaveRulesGroupMembersLink
+        groupId="group-1"
+        groupName="First group"
+        href="/network?page=1&group=group-1"
+      />
+    );
+    await screen.findByText("365 users");
+
+    rerender(
+      <WaveRulesGroupMembersLink
+        groupId="group-2"
+        groupName="Second group"
+        href="/network?page=1&group=group-2"
+      />
+    );
+
+    expect(screen.queryByText("365 users")).not.toBeInTheDocument();
+
+    nextMembers.resolve({
+      count: 7,
+      page: 1,
+      next: false,
+      data: [],
+    });
+    await screen.findByText("7 users");
   });
 });

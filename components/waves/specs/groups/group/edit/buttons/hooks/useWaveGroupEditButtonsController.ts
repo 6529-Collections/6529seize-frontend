@@ -64,6 +64,38 @@ const getValidationRoles = (
   return role !== undefined ? [role] : undefined;
 };
 
+const waveReferencesGroup = (wave: ApiWave, groupId: string): boolean =>
+  [
+    wave.visibility.scope.group?.id,
+    wave.participation.scope.group?.id,
+    wave.voting.scope.group?.id,
+    wave.chat.scope.group?.id,
+    wave.wave.admin_group.group?.id,
+  ].includes(groupId);
+
+const getCloneReferenceState = async ({
+  waveId,
+  groupId,
+}: {
+  readonly waveId: string;
+  readonly groupId: string;
+}): Promise<"attached" | "unattached" | "unknown"> => {
+  try {
+    const currentWave = await commonApiFetch<ApiWave>({
+      endpoint: `waves/${waveId}`,
+    });
+    return waveReferencesGroup(currentWave, groupId)
+      ? "attached"
+      : "unattached";
+  } catch (error) {
+    console.warn(
+      "[WaveGroupEditButtons] Unable to verify cloned group attachment",
+      { waveId, groupId, error }
+    );
+    return "unknown";
+  }
+};
+
 const normalizeIdentity = (identity: string): string =>
   identity.trim().toLowerCase();
 
@@ -614,7 +646,8 @@ export const useWaveGroupEditButtonsController = ({
           return false;
         }
       }
-      if (body.visibility.scope.group_id !== null) {
+      const scopedGroupId = getGroupIdFromUpdateBody(body, type);
+      if (body.visibility.scope.group_id !== null || scopedGroupId !== null) {
         try {
           const validation = await validateWaveGroups(
             getWaveUpdateGroupValidationRequest(body, getValidationRoles(type))
@@ -724,25 +757,39 @@ export const useWaveGroupEditButtonsController = ({
 
         const updateBody = buildWaveUpdateBody(wave, type, newGroupId);
         waveMutationTriggered = true;
+        const notifySuccess = () => {
+          const successMessage =
+            mode === WaveGroupIdentitiesModal.INCLUDE
+              ? "Identity successfully included in the group."
+              : "Identity successfully excluded from the group.";
+
+          setActiveIdentitiesModal(null);
+          setToast({
+            message: successMessage,
+            type: "success",
+          });
+        };
         try {
           const waveUpdated = await tryUpdateWave(updateBody, {
             skipAuth: true,
           });
           if (waveUpdated) {
-            const successMessage =
-              mode === WaveGroupIdentitiesModal.INCLUDE
-                ? "Identity successfully included in the group."
-                : "Identity successfully excluded from the group.";
-
-            setActiveIdentitiesModal(null);
-            setToast({
-              message: successMessage,
-              type: "success",
-            });
+            notifySuccess();
             return;
           }
         } catch (error) {
-          await hideGroup({ id: newGroupId }).catch(() => undefined);
+          const referenceState = await getCloneReferenceState({
+            waveId: wave.id,
+            groupId: newGroupId,
+          });
+          if (referenceState === "attached") {
+            onWaveCreated();
+            notifySuccess();
+            return;
+          }
+          if (referenceState === "unattached") {
+            await hideGroup({ id: newGroupId }).catch(() => undefined);
+          }
           throw error;
         }
         await hideGroup({ id: newGroupId }).catch(() => undefined);
@@ -765,6 +812,7 @@ export const useWaveGroupEditButtonsController = ({
     },
     [
       identityModalPermissions,
+      onWaveCreated,
       requestAuth,
       scopedGroup,
       setToast,

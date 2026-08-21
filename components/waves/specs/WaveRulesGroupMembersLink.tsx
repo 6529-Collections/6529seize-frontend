@@ -8,7 +8,7 @@ import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary
 import { formatGroupMembersCount } from "@/helpers/groups/group-members-count";
 import { commonApiFetch } from "@/services/api/common-api";
 import { fetchSavedGroupMembersPage } from "@/services/api/group-members-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
 export default function WaveRulesGroupMembersLink({
@@ -41,7 +41,6 @@ export default function WaveRulesGroupMembersLink({
         signal,
       }),
     enabled: groupId.length > 0,
-    placeholderData: keepPreviousData,
   });
   const {
     data: group,
