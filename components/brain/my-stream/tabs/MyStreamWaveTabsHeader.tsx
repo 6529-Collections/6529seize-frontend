@@ -6,12 +6,11 @@ import {
   CheckIcon,
   ChevronDoubleLeftIcon,
   ChevronDownIcon,
-  EllipsisHorizontalIcon,
   LinkIcon,
   MagnifyingGlassIcon,
   ShareIcon,
 } from "@heroicons/react/24/outline";
-import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import type { CompactMenuItem } from "@/components/compact-menu";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
@@ -32,6 +31,7 @@ import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
+import CompactWaveActions from "./CompactWaveActions";
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
@@ -144,9 +144,7 @@ function MyStreamWaveHeaderIdentity({
         mode="summary"
         learnMoreHref={waveScoreLearnMoreHref}
       />
-      {showWaveRepAction && (
-        <WaveRepButton wave={wave} variant="compact" />
-      )}
+      {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
     </span>
   ) : null;
 
@@ -506,19 +504,7 @@ export default function MyStreamWaveTabsHeader({
             </button>
           )}
           {isCompact && compactMenuItems.length > 0 && (
-            <CompactMenu
-              aria-label="More wave actions"
-              unstyledTrigger
-              triggerClassName="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
-              trigger={
-                <>
-                  <span className="tw-sr-only">More wave actions</span>
-                  <EllipsisHorizontalIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                </>
-              }
-              items={compactMenuItems}
-              menuWidthClassName="tw-w-52"
-            />
+            <CompactWaveActions items={compactMenuItems} />
           )}
         </div>
       </div>
