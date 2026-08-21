@@ -5,7 +5,7 @@ interface HeroContentSpec {
   readonly eyebrowKey: Join6529MessageKey;
   readonly titleKey: Join6529MessageKey;
   readonly subtitleKey?: Join6529MessageKey;
-  readonly subtitleHighlightKey?: Join6529MessageKey;
+  readonly hasHighlightedSubtitle?: boolean;
 }
 
 interface HeroPointSpec {
@@ -18,7 +18,7 @@ export const HERO_CONTENT: Readonly<Record<JoinPageState, HeroContentSpec>> = {
     eyebrowKey: "join6529.hero.loggedOut.eyebrow",
     titleKey: "join6529.hero.loggedOut.title",
     subtitleKey: "join6529.hero.loggedOut.subtitle",
-    subtitleHighlightKey: "join6529.hero.loggedOut.subtitleHighlight",
+    hasHighlightedSubtitle: true,
   },
   inProgress: {
     eyebrowKey: "join6529.hero.inProgress.eyebrow",

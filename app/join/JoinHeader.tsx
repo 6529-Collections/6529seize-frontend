@@ -45,6 +45,9 @@ const HERO_MAGNETIC_STRENGTH = {
   y: 6,
 } as const;
 
+const HERO_SUBTITLE_HIGHLIGHT_OPEN = "<highlight>";
+const HERO_SUBTITLE_HIGHLIGHT_CLOSE = "</highlight>";
+
 const heroMagneticFrames = new WeakMap<HTMLElement, number>();
 const heroMagneticPoints = new WeakMap<
   HTMLElement,
@@ -117,7 +120,7 @@ export function JoinHeader({
   readonly secondaryAction: CurrentPanelAction;
 }) {
   const heroContent = HERO_CONTENT[pageState];
-  const { subtitleHighlightKey, subtitleKey } = heroContent;
+  const { hasHighlightedSubtitle, subtitleKey } = heroContent;
 
   return (
     <header
@@ -142,7 +145,7 @@ export function JoinHeader({
         <div
           className={cx(
             "tw-flex tw-w-full tw-flex-col tw-items-center",
-            subtitleHighlightKey ? "tw-max-w-5xl" : "tw-max-w-2xl"
+            hasHighlightedSubtitle ? "tw-max-w-5xl" : "tw-max-w-2xl"
           )}
         >
           <h1 className="tw-m-0 tw-mb-5 tw-text-balance tw-text-4xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.035em] tw-text-iron-50 sm:tw-text-[2.5rem] md:tw-text-5xl">
@@ -150,15 +153,11 @@ export function JoinHeader({
           </h1>
           {subtitleKey !== undefined && (
             <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-normal tw-leading-7 tw-text-iron-400 lg:tw-text-xl">
-              {m(locale, subtitleKey)}
-              {subtitleHighlightKey !== undefined && (
-                <>
-                  {" "}
-                  <span className="tw-inline tw-text-iron-50 md:tw-block">
-                    {m(locale, subtitleHighlightKey)}
-                  </span>
-                </>
-              )}
+              <HeroSubtitle
+                hasHighlight={hasHighlightedSubtitle === true}
+                locale={locale}
+                subtitleKey={subtitleKey}
+              />
             </p>
           )}
         </div>
@@ -169,6 +168,42 @@ export function JoinHeader({
         <HeroPoints locale={locale} />
       </div>
     </header>
+  );
+}
+
+function HeroSubtitle({
+  hasHighlight,
+  locale,
+  subtitleKey,
+}: {
+  readonly hasHighlight: boolean;
+  readonly locale: SupportedLocale;
+  readonly subtitleKey: Parameters<typeof m>[1];
+}) {
+  const subtitle = m(locale, subtitleKey);
+  if (!hasHighlight) {
+    return subtitle;
+  }
+
+  const highlightStart = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_OPEN);
+  const highlightEnd = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_CLOSE);
+  if (highlightStart < 0 || highlightEnd < highlightStart) {
+    return subtitle;
+  }
+
+  const highlightedText = subtitle.slice(
+    highlightStart + HERO_SUBTITLE_HIGHLIGHT_OPEN.length,
+    highlightEnd
+  );
+
+  return (
+    <>
+      {subtitle.slice(0, highlightStart)}
+      <span className="tw-inline tw-text-iron-50 md:tw-block">
+        {highlightedText}
+      </span>
+      {subtitle.slice(highlightEnd + HERO_SUBTITLE_HIGHLIGHT_CLOSE.length)}
+    </>
   );
 }
 

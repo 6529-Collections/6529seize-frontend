@@ -16,6 +16,28 @@ jest.mock("@/app/join/MemeArtifactCard", () => ({
 }));
 
 describe("JoinHeader", () => {
+  it("renders the localized subtitle as one sentence with styled emphasis", () => {
+    render(
+      <JoinHeader
+        locale="en-US"
+        pageState="loggedOut"
+        primaryAction={{ kind: "button", label: "Connect wallet" }}
+        secondaryAction={{
+          kind: "link",
+          label: "See how it works",
+          href: "#journey",
+        }}
+      />
+    );
+
+    const highlight = screen.getByText("chat, vote, and collect together.");
+    expect(highlight).toHaveClass("tw-text-iron-50", "md:tw-block");
+    expect(highlight.parentElement).toHaveTextContent(
+      "A community that decides what to build next chat, vote, and collect together."
+    );
+    expect(highlight.parentElement).not.toHaveTextContent("<highlight>");
+  });
+
   it("uses the shared primary and secondary actions", () => {
     render(
       <JoinHeader
