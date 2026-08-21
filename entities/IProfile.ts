@@ -5,9 +5,11 @@ import {
   NEXTGEN_CONTRACT,
 } from "@/constants/constants";
 import type { AcceptActionRequestActionEnum } from "@/generated/models/AcceptActionRequest";
+import type { ApiCicStatement } from "@/generated/models/ApiCicStatement";
+import type { ApiCreateProfileCicStatement } from "@/generated/models/ApiCreateProfileCicStatement";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import type { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
+import type { STATEMENT_GROUP } from "@/helpers/Types";
 import type { RateMatter } from "@/types/enums";
 import { ContractType, ProfileActivityLogType } from "@/types/enums";
 
@@ -55,15 +57,14 @@ export interface ApiProfileRaterCicState {
   readonly cic_ratings_left_to_give_by_rater: number | null;
 }
 
-export interface CicStatement {
-  id: string;
-  profile_id: string;
+export interface CicStatement extends Omit<
+  ApiCicStatement,
+  "statement_group" | "statement_type" | "crated_at"
+> {
   statement_group: STATEMENT_GROUP;
-  statement_type: STATEMENT_TYPE;
-  statement_comment: string | null;
-  statement_value: string;
-  crated_at: Date;
-  updated_at: Date | null;
+  statement_type: string;
+  crated_at: string | Date;
+  updated_at?: Date | null;
 }
 
 export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
@@ -355,10 +356,12 @@ export interface WalletConsolidationState {
   readonly wallet2_display: string | null;
 }
 
-export type ApiCreateOrUpdateProfileCicStatement = Omit<
-  CicStatement,
-  "id" | "crated_at" | "updated_at" | "profile_id"
->;
+export interface ApiCreateOrUpdateProfileCicStatement extends Omit<
+  ApiCreateProfileCicStatement,
+  "statement_group"
+> {
+  statement_group: STATEMENT_GROUP;
+}
 
 export enum CollectedCollectionType {
   MEMES = "MEMES",
