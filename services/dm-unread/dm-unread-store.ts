@@ -197,6 +197,28 @@ export class DmUnreadStore {
     return this.serverUpdateSequence;
   }
 
+  needsIncomingDropRecovery(
+    profileId: string,
+    waveId: string,
+    serialNo: number
+  ): boolean {
+    const incomingSerialNo = toNonNegativeInteger(serialNo);
+    if (incomingSerialNo === 0) {
+      return false;
+    }
+    const conversation =
+      this.snapshot.profiles[profileId]?.conversations[waveId];
+    if (
+      !conversation ||
+      conversation.server.latest_drop_serial_no < incomingSerialNo
+    ) {
+      return true;
+    }
+    return (
+      conversation.server.unread_count > getDisplayedUnreadCount(conversation)
+    );
+  }
+
   resetProfile(profileId: string): boolean {
     if (
       this.snapshot.profiles[profileId] === undefined &&

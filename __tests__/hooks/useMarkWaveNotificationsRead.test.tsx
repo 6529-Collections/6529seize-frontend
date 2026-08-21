@@ -290,6 +290,7 @@ describe("useMarkWaveNotificationsRead", () => {
       },
     });
     expect(mockApplyDmServerState).toHaveBeenCalledWith(dmUnreadState);
+    expect(mockCancelDmRead).toHaveBeenCalledWith(operation);
     expect(mockReconcileFailedDmRead).not.toHaveBeenCalled();
   });
 
@@ -403,7 +404,7 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(apiPostWithBodyMock).not.toHaveBeenCalled();
   });
 
-  it("cancels a guarded optimistic DM read skipped behind a sent coalesced read", async () => {
+  it("retires completed optimistic reads after a coalesced read", async () => {
     const firstRequest = createDeferred();
     const invalidateNotifications = jest.fn();
     const firstOperation = {
@@ -468,8 +469,8 @@ describe("useMarkWaveNotificationsRead", () => {
       },
     });
     expect(mockApplyDmServerState).toHaveBeenCalledWith(firstReadState);
-    expect(mockCancelDmRead).toHaveBeenCalledTimes(1);
-    expect(mockCancelDmRead).toHaveBeenCalledWith(guardedOperation);
+    expect(mockCancelDmRead).toHaveBeenNthCalledWith(1, firstOperation);
+    expect(mockCancelDmRead).toHaveBeenNthCalledWith(2, guardedOperation);
   });
 
   it("treats a missing active profile proxy as no proxy", async () => {
