@@ -35,6 +35,7 @@ const FILE_PATHS = Object.freeze([
   ".github/workflows/staging-e2e.yml",
   "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
   "__tests__/scripts/artifact-portability-and-readiness.test.ts",
+  "__tests__/scripts/ci-wave-web-validation.test.ts",
   "__tests__/scripts/dependency-risk-gate.test.ts",
   "__tests__/scripts/dependency-governance-workflow.test.ts",
   "__tests__/scripts/deploy-staging-artifact.test.ts",

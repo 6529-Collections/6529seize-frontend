@@ -520,6 +520,7 @@ jobs:
           set -euo pipefail
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
             __tests__/scripts/app-pr-ci-effective-plan.test.ts \
+            __tests__/scripts/ci-wave-web-validation.test.ts \
             __tests__/scripts/pr-ci-policy-bundle.test.ts \
             __tests__/scripts/deploy-staging-artifact.test.ts \
             __tests__/scripts/e2e-packs.test.ts \

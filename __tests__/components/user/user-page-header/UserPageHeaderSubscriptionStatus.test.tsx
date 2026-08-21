@@ -54,6 +54,12 @@ describe("UserPageHeaderSubscriptionStatus", () => {
     );
     expect(status).toBeInTheDocument();
     expect(status).not.toHaveClass("tw-truncate");
+    expect(screen.getByText("Subscriptions").closest("div")).toHaveClass(
+      "!tw-border-white/10",
+      "!tw-bg-iron-950",
+      "tw-shadow-md",
+      "tw-shadow-black/40"
+    );
     expect(screen.getByRole("link", { name: "Top up" })).toHaveAttribute(
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"

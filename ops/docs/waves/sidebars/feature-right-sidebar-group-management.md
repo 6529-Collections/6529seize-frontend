@@ -8,7 +8,8 @@ groups. Editors can also manage them in place from `Settings`.
 Users can:
 
 - review `View`, `Drop`, `Vote`, `Chat access`, and `Admin` scopes
-- follow visible group names to inspect both criteria and current members
+- follow visible eligible-member counts to inspect both criteria and current
+  members
 - add, change, or remove scope groups from row menus
 - include or exclude one identity from a scoped group
 - manage non-chat `Curation Groups` without leaving the thread
@@ -36,8 +37,9 @@ Users can:
    - no group: `Anyone`
    - no chat access group: `Anyone`
    - group hidden from the current viewer: `Private group`
-   - public or authorized private group available to the current viewer: linked
-     name to `/network?page=1&group={groupId}`
+   - public or authorized private group available to the current viewer: Rules
+     show a linked live eligible-member count, while Settings shows a linked
+     name; both use `/network?page=1&group={groupId}`
 4. Follow a visible group link. Network shows the group criteria above the
    current filtered member list.
 5. Return with normal browser back navigation when finished inspecting.
@@ -52,7 +54,7 @@ Users can:
    - confirmation modal for remove
 9. Authenticate when prompted.
 10. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admin`
-   group is contained in `View` before saving.
+    group is contained in `View` before saving.
 11. After success, the row refreshes.
 12. On non-chat waves, use the same actions under `Curation Groups`.
 
@@ -75,7 +77,8 @@ Users can:
 - General-row edit controls are hidden for direct-message groups.
 - Available group inspection is accessible to read-only wave viewers; it does
   not depend on wave edit permission. An authenticated private-group member or
-  creator can inspect that group's criteria and members.
+  creator can inspect that group's criteria and members. Rules show the current
+  eligible-member count instead of the generated group name.
 - Scope stubs hidden from the current viewer never render a link, group
   identity, or group metadata.
 - `Admin` does not show `Remove group`.
@@ -94,7 +97,7 @@ Users can:
 - While curation groups load, the section shows `Loading groups`.
 - If curation-group fetch fails, the section shows `Unavailable`.
 - If Network cannot load a linked group's criteria, it shows `Group criteria
-  unavailable` without exposing the group id or treating the scope as public.
+unavailable` without exposing the group id or treating the scope as public.
 - If Network cannot load scoped members, it shows a non-identifying members
   unavailable state instead of retaining results from another group or viewer.
 - If authentication fails or is canceled, users see `Failed to authenticate`
@@ -115,7 +118,7 @@ Users can:
   - include list max: `10,000`
   - exclude list max: `1,000`
 - These containment rules apply to general access scopes, not `Curation
-  Groups`: every member who can drop, vote, chat, or administer must also be
+Groups`: every member who can drop, vote, chat, or administer must also be
   able to view the Wave.
 
 ## Related Pages

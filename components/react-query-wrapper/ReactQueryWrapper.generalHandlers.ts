@@ -3,6 +3,7 @@ import { QueryKey } from "./query-keys";
 
 const AUTH_SENSITIVE_QUERY_KEYS = [
   QueryKey.PROFILE,
+  QueryKey.PROFILE_PREFERENCES,
   QueryKey.PROFILE_PROFILE_PROXIES,
   QueryKey.PROFILE_PROXY,
   QueryKey.IDENTITY_AVAILABLE_CREDIT,

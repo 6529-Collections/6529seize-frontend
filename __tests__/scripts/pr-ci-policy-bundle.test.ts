@@ -259,7 +259,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         .createHash("sha256")
         .update(JSON.stringify(completeFilePathInventory))
         .digest("hex")
-    ).toBe("07db7fb7ba6505d6b549006897f3305ce07f4f8cd74d3217869e3258d0da8b2c");
+    ).toBe("9c2505645027ac1937297279ee208af7d8e379c72dcd3ae79f6d3b8a04b2cb43");
     for (const filePath of completeFilePathInventory) {
       expect(fs.existsSync(path.join(process.cwd(), filePath))).toBe(true);
     }

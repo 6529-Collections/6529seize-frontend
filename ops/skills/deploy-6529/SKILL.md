@@ -36,6 +36,22 @@ Do not manually dispatch the staging workflow after pushing. A manual dispatch
 is a recovery/rerun entry point only and still rejects any ref other than
 `1a-staging`.
 
+Immediately before pushing `1a-staging`, finish all preparation and fetch the
+latest shared ref. Then take one fresh bounded staging-drain snapshot across
+both repositories: require the effective staging lane to be `OFF` with
+`changeable: true`; require the `staging-environment` lock to be unowned with no
+active `STAGING` or `PRODUCTION_QUALIFICATION` train or nonterminal operation;
+and inspect at most ten pages of 100 queued and in-progress Actions runs per
+status and repository. Block on staging deployment, staging-ref advance, or
+staging E2E workflows. Production deploy/E2E, PR CI, and unrelated workflows do
+not block staging. The status helper alone is not a complete snapshot.
+
+The snapshot is the final read-only sequence before one push and cannot be
+reused. If any source is unavailable, ambiguous, over its bound, or reports a
+blocker, stop without waiting, polling, cancellation, retry, or mutation and
+report the exact source and state. Existing workflow authorization remains the
+final race protection.
+
 ## Production
 
 The canonical entry point is the manual `Web Deploy - PROD` workflow on
