@@ -2,9 +2,31 @@
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { createContext, useContext, type ReactNode } from "react";
+
+const ProposalCardContextLabelVisibilityContext = createContext(true);
+
+export function ProposalCardContextLabelVisibilityProvider({
+  children,
+  visible,
+}: {
+  readonly children: ReactNode;
+  readonly visible: boolean;
+}) {
+  return (
+    <ProposalCardContextLabelVisibilityContext.Provider value={visible}>
+      {children}
+    </ProposalCardContextLabelVisibilityContext.Provider>
+  );
+}
 
 export default function ProposalCardContextLabel() {
   const locale = useBrowserLocale();
+  const isVisible = useContext(ProposalCardContextLabelVisibilityContext);
+
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <div
