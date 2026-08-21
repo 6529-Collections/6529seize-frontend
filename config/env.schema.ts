@@ -116,6 +116,16 @@ export const publicEnvSchema = z.object({
     .url("STANDALONE_MAIN_SITE_BASE must be a valid URL")
     .optional(),
   FEATURE_AB_CARD: z.string().optional(),
+  EMMA_MIN_TDH: z
+    .union([
+      z.number(),
+      z
+        .string()
+        .regex(/^\d+$/, "EMMA_MIN_TDH must be a non-negative integer")
+        .transform(Number),
+    ])
+    .pipe(z.number().int().nonnegative().safe())
+    .default(1),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),

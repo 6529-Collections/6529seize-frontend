@@ -6,6 +6,7 @@ import AllowlistToolCommonModalWrapper, {
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useContext, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import BuildPhaseFormConfigModal from "./BuildPhaseFormConfigModal";
@@ -50,17 +51,25 @@ export default function BuildPhaseForm({
   };
   return (
     <>
-      <form onSubmit={handleSubmit} className="tw-flex tw-items-end tw-gap-x-4">
-        <div className="tw-w-80">
-          <label className="tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100 tw-inline-flex">
-            Group Name
-            <div className="tw-pl-2">
+      <form
+        onSubmit={handleSubmit}
+        className="tw-grid tw-w-full tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:tw-items-end"
+      >
+        <div className="tw-min-w-0">
+          <div className="tw-flex tw-min-h-8 tw-items-center tw-gap-1 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+            <label htmlFor="build-phase-group-name">Group Name</label>
+            <button
+              type="button"
+              aria-label="Show a group name example"
+              data-tooltip-id="build-phase-form-group-name-tooltip"
+              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
               <svg
-                className="tw-h-5 tw-w-5 tw-text-iron-500 tw-cursor-pointer"
+                aria-hidden="true"
+                className="tw-h-5 tw-w-5"
                 viewBox="0 0 24 24"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                data-tooltip-id="build-phase-form-group-name-tooltip">
+                xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                   stroke="currentColor"
@@ -69,10 +78,11 @@ export default function BuildPhaseForm({
                   strokeLinejoin="round"
                 />
               </svg>
-            </div>
-          </label>
+            </button>
+          </div>
           <div className="tw-mt-2">
             <input
+              id="build-phase-group-name"
               type="text"
               name="name"
               value={formValues.name}
@@ -83,16 +93,21 @@ export default function BuildPhaseForm({
             />
           </div>
         </div>
-        <div className="tw-w-80">
-          <label className="tw-inline-flex tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-            Description
-            <div className="tw-pl-2">
+        <div className="tw-min-w-0">
+          <div className="tw-flex tw-min-h-8 tw-items-center tw-gap-1 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+            <label htmlFor="build-phase-description">Description</label>
+            <button
+              type="button"
+              aria-label="Show a group description example"
+              data-tooltip-id="build-phase-form-description-tooltip"
+              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
               <svg
-                className="tw-h-5 tw-w-5 tw-text-iron-500 tw-cursor-pointer"
+                aria-hidden="true"
+                className="tw-h-5 tw-w-5"
                 viewBox="0 0 24 24"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                data-tooltip-id="build-phase-form-description-tooltip">
+                xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                   stroke="currentColor"
@@ -101,10 +116,11 @@ export default function BuildPhaseForm({
                   strokeLinejoin="round"
                 />
               </svg>
-            </div>
-          </label>
+            </button>
+          </div>
           <div className="tw-mt-2">
             <input
+              id="build-phase-description"
               type="text"
               name="description"
               required
@@ -115,7 +131,7 @@ export default function BuildPhaseForm({
             />
           </div>
         </div>
-        <div>
+        <div className="tw-w-full md:tw-w-auto">
           <DistributionPlanAddOperationBtn loading={false}>
             Configure group
           </DistributionPlanAddOperationBtn>
@@ -125,21 +141,13 @@ export default function BuildPhaseForm({
         id="build-phase-form-group-name-tooltip"
         content="Example: Memes"
         place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
+        style={TOOLTIP_STYLES}
       />
       <Tooltip
         id="build-phase-form-description-tooltip"
         content="Example: Top 250 Memes collectors (ranked by Set Size)"
         place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
+        style={TOOLTIP_STYLES}
       />
       <AllowlistToolCommonModalWrapper
         showModal={isConfigModalOpen}

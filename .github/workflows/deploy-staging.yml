@@ -141,6 +141,7 @@ jobs:
       ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
       BASE_ENDPOINT: https://staging.6529.io
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
+      EMMA_MIN_TDH: "0"
       ASSETS_FROM_S3: "false"
 
     steps:
