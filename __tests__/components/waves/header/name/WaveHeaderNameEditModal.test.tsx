@@ -40,6 +40,39 @@ describe('WaveHeaderNameEditModal', () => {
     onWaveCreated: jest.fn(),
   } as React.ContextType<typeof ReactQueryWrapperContext>;
 
+  it('picks up a rename that landed while the dialog was closed', () => {
+    const { rerender } = render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <WaveHeaderNameEditModal
+            isOpen={false}
+            wave={createMockApiWave({ id: '1', name: 'Old' })}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    // The name derives from the wave whenever the user has not typed, so a
+    // rename landing while the dialog was closed shows up on the next open
+    // regardless of whether it arrives before or with the open.
+    rerender(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <WaveHeaderNameEditModal
+            isOpen
+            wave={createMockApiWave({ id: '1', name: 'Renamed elsewhere' })}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByPlaceholderText('Please select a name')).toHaveValue(
+      'Renamed elsewhere'
+    );
+  });
+
   it('renders on the shared dialog surface above the wave sidebar', () => {
     render(
       <AuthContext.Provider value={auth}>
