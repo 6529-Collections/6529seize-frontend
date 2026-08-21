@@ -34,6 +34,8 @@ export * from '../models/ApiChangeWaveRepRating';
 export * from '../models/ApiCicContributor';
 export * from '../models/ApiCicContributorsPage';
 export * from '../models/ApiCicOverview';
+export * from '../models/ApiCicStatement';
+export * from '../models/ApiCicStatementGroup';
 export * from '../models/ApiCmsAgentPatch';
 export * from '../models/ApiCmsAgentPatchOperation';
 export * from '../models/ApiCmsAgentPatchProvenance';
@@ -133,6 +135,7 @@ export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
 export * from '../models/ApiCreateNewWaveVotingConfigBase';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
+export * from '../models/ApiCreateProfileCicStatement';
 export * from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
@@ -678,6 +681,8 @@ import { ApiChangeWaveRepRating } from '../models/ApiChangeWaveRepRating';
 import { ApiCicContributor } from '../models/ApiCicContributor';
 import { ApiCicContributorsPage } from '../models/ApiCicContributorsPage';
 import { ApiCicOverview } from '../models/ApiCicOverview';
+import { ApiCicStatement        } from '../models/ApiCicStatement';
+import { ApiCicStatementGroup } from '../models/ApiCicStatementGroup';
 import { ApiCmsAgentPatch, ApiCmsAgentPatchSchemaEnum       } from '../models/ApiCmsAgentPatch';
 import { ApiCmsAgentPatchOperation, ApiCmsAgentPatchOperationOpEnum       } from '../models/ApiCmsAgentPatchOperation';
 import { ApiCmsAgentPatchProvenance , ApiCmsAgentPatchProvenanceAuthorTypeEnum      } from '../models/ApiCmsAgentPatchProvenance';
@@ -777,6 +782,7 @@ import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisi
 import { ApiCreateNewWaveVotingConfigClass } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateNewWaveVotingConfigBase          } from '../models/ApiCreateNewWaveVotingConfigBase';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
+import { ApiCreateProfileCicStatement     } from '../models/ApiCreateProfileCicStatement';
 import { ApiCreateProfileCmsWalletGallerySnapshotRequest } from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 import { ApiCreateWaveConfig          } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
@@ -1307,6 +1313,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiAttachmentSafetyValidation",
     "ApiAttachmentStatus",
     "ApiAttachmentUploadMimeType",
+    "ApiCicStatementGroup",
     "ApiCmsAgentPatchSchemaEnum",
     "ApiCmsAgentPatchOperationOpEnum",
     "ApiCmsAgentPatchProvenanceAuthorTypeEnum",
@@ -1542,6 +1549,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCicContributor": ApiCicContributor,
     "ApiCicContributorsPage": ApiCicContributorsPage,
     "ApiCicOverview": ApiCicOverview,
+    "ApiCicStatement": ApiCicStatement,
     "ApiCmsAgentPatch": ApiCmsAgentPatch,
     "ApiCmsAgentPatchOperation": ApiCmsAgentPatchOperation,
     "ApiCmsAgentPatchProvenance": ApiCmsAgentPatchProvenance,
@@ -1629,6 +1637,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfigClass,
     "ApiCreateNewWaveVotingConfigBase": ApiCreateNewWaveVotingConfigBase,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
+    "ApiCreateProfileCicStatement": ApiCreateProfileCicStatement,
     "ApiCreateProfileCmsWalletGallerySnapshotRequest": ApiCreateProfileCmsWalletGallerySnapshotRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,

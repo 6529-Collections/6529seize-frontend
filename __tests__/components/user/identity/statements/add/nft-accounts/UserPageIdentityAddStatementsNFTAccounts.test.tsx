@@ -66,4 +66,20 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.FOUNDATION);
     expect(formProps.activeType).toBe(STATEMENT_TYPE.FOUNDATION);
   });
+
+  it("supports the custom Other link type", () => {
+    render(
+      <UserPageIdentityAddStatementsNFTAccounts
+        onClose={onClose}
+        profile={profile}
+      />
+    );
+
+    act(() => {
+      itemsProps.setType(STATEMENT_TYPE.LINK);
+    });
+
+    expect(formProps.activeType).toBe(STATEMENT_TYPE.LINK);
+    expect(formProps.group).toBe(STATEMENT_GROUP.NFT_ACCOUNTS);
+  });
 });

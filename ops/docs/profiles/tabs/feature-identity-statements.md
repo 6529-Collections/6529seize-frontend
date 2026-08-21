@@ -39,8 +39,10 @@ combined Identity layout.
 3. If `Add` is visible, open the add-statements sheet on mobile or dialog on
    desktop.
 4. Choose one of the four compact statement groups. On mobile, expand `About
-   identity statements` when the public-visibility notes are needed.
+identity statements` when the public-visibility notes are needed.
 5. Choose a platform or statement type, enter a value, then select `Save`.
+   For `Other` NFT accounts, enter both a short display name and a secure HTTPS
+   URL.
    Use the sheet or dialog header's back button to choose a different group
    without closing the flow.
 6. Close with the header button, backdrop, Escape key, or a swipe-down gesture
@@ -56,7 +58,7 @@ combined Identity layout.
   `Linktree`
 - `NFT Accounts`: `SuperRare`, `Foundation`, `MakersPlace`, `KnownOrigin`,
   `Pepe.wtf`, `OpenSea`, `Art Blocks`, `Deca Art`, `OnCyber`, `The Line`,
-  `Manifold`, `Transient`
+  `Manifold`, `Transient`, `Ninfa`, `Other`
 - `Contact`: `Discord`, `Telegram`, `WeChat`, `Phone`, `Email`, `Website`
 - `Social Media Verification Posts`: `Link`
 
@@ -83,12 +85,20 @@ URLs, and contact details are not rewritten by mobile keyboards.
   dark value field is itself a copy control, and only one wallet row stays
   expanded at a time.
 - On mobile, expanded wallet rows show labeled `Open on Etherscan` and `Open on
-  OpenSea` actions. Desktop retains compact external-link actions.
+OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` link is always shown.
 - `Delegation Center` link is shown only when the connected wallet appears in
   at least one consolidation relationship for that profile.
 - Statement rows are grouped by section and sorted newest first in each section.
+- Built-in NFT platforms appear before custom `Other` links. Newest links remain
+  first within each of those groups.
+- `Other` NFT links show the user's display name and destination hostname. The
+  copy action still copies the full URL.
+- New NFT account links must use HTTPS, cannot contain URL credentials, and are
+  limited to 20 per profile. Ninfa links must use `ninfa.io` or one of its
+  subdomains. Custom display names are trimmed, limited to 40 characters, and
+  cannot copy a built-in platform name.
 - URL-capable statement rows are links with a right-aligned external-link cue.
   Non-URL types (for example `Discord`, `Telegram`, `WeChat`, `Phone`, and
   `Email`) are not links and omit that cue.
@@ -142,10 +152,12 @@ URLs, and contact details are not rewritten by mobile keyboards.
 - Save success: success toast, sheet or dialog closes and returns to the group
   choices for its next opening.
 - Save failure: error toast, sheet or dialog stays open with the entered value.
+- Duplicate NFT account URLs, unsafe URLs, invalid custom display names, and
+  attempts above the 20-link limit are rejected without closing the form.
 - Delete success: warning toast, statement is removed after the profile update.
 - Delete failure: error toast, statement stays visible.
 - `Set Primary` starts a wallet transaction and shows progress text (`Confirm
-  in your wallet...`, then confirmation or error). On success, a success toast
+in your wallet...`, then confirmation or error). On success, a success toast
   is shown.
 
 ## Limitations / Notes
