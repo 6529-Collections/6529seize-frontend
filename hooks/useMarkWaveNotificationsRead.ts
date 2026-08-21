@@ -73,7 +73,6 @@ function useCanonicalMarkWaveNotificationsRead(
       }
 
       const markDmRead = async (): Promise<MarkWaveNotificationsReadResult> => {
-        const dmServerStateReceipt = { received: false };
         try {
           const result = await markWaveNotificationsRead(waveId, {
             ...options,
@@ -84,15 +83,14 @@ function useCanonicalMarkWaveNotificationsRead(
             onReadResponse: (response) => {
               options?.onReadResponse?.(response);
               if (response.dm_unread_state) {
-                dmServerStateReceipt.received = true;
                 applyDmServerState(response.dm_unread_state);
               }
             },
           });
-          if (
-            readOperation &&
-            (result === "skipped" || !dmServerStateReceipt.received)
-          ) {
+          if (readOperation) {
+            // The response callback has already applied any authoritative
+            // server state. Retire only this exact optimistic operation so a
+            // newer unread event cannot remain hidden behind the old read.
             cancelDmRead(readOperation);
           }
           return result;

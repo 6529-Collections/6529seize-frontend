@@ -262,6 +262,48 @@ describe("DmUnreadStore", () => {
     );
   });
 
+  it("flags an incoming drop that is still suppressed by an optimistic read", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(
+      state({
+        unreadCount: 1,
+        firstUnreadSerialNo: 10,
+        latestDropSerialNo: 10,
+        latestReadSerialNo: 9,
+        version: 1,
+      })
+    );
+    store.beginRead("profile-a", "wave-a", 10);
+    store.applyServerState(
+      state({
+        unreadCount: 1,
+        firstUnreadSerialNo: 10,
+        latestDropSerialNo: 11,
+        latestReadSerialNo: 9,
+        version: 2,
+      })
+    );
+
+    expect(
+      getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
+        ?.unread_count
+    ).toBe(0);
+    expect(
+      store.needsIncomingDropRecovery("profile-a", "wave-a", 11)
+    ).toBe(true);
+  });
+
+  it("does not recover an incoming drop whose unread count is already visible", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(
+      state({ unreadCount: 1, latestDropSerialNo: 11, version: 2 })
+    );
+
+    expect(
+      store.needsIncomingDropRecovery("profile-a", "wave-a", 11)
+    ).toBe(false);
+  });
+
   it("reads an open visible conversation through the incoming serial", () => {
     const store = new DmUnreadStore();
     store.applyServerState(

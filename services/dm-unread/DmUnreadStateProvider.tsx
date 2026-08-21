@@ -32,7 +32,6 @@ import {
 } from "./dm-unread-context";
 import {
   DmUnreadStore,
-  getDmUnreadConversation,
   type DmUnreadReadOperation,
 } from "./dm-unread-store";
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
@@ -576,15 +575,7 @@ export function DmUnreadStateProvider({
       if (!profileId || authorId === profileId) {
         return;
       }
-      const conversation = getDmUnreadConversation(
-        store.getSnapshot(),
-        profileId,
-        waveId
-      );
-      if (
-        conversation !== null &&
-        conversation.latest_drop_serial_no >= serialNo
-      ) {
+      if (!store.needsIncomingDropRecovery(profileId, waveId, serialNo)) {
         return;
       }
       const previousPending = pendingDropRecoveryByWaveRef.current.get(waveId);
@@ -616,17 +607,12 @@ export function DmUnreadStateProvider({
           return;
         }
         const hasLaggingConversation = pendingDrops.some(
-          ([pendingWaveId, pending]) => {
-            const currentConversation = getDmUnreadConversation(
-              store.getSnapshot(),
+          ([pendingWaveId, pending]) =>
+            store.needsIncomingDropRecovery(
               profileId,
-              pendingWaveId
-            );
-            return (
-              currentConversation === null ||
-              currentConversation.latest_drop_serial_no < pending.serialNo
-            );
-          }
+              pendingWaveId,
+              pending.serialNo
+            )
         );
         if (hasLaggingConversation) {
           const minimumRequestId = Math.max(

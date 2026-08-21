@@ -58,20 +58,25 @@ const state = ({
   unreadCount = 1,
   version = 1,
   latestDropSerialNo = 10,
+  firstUnreadDropSerialNo =
+    unreadCount > 0 ? latestDropSerialNo : null,
+  latestReadSerialNo =
+    unreadCount > 0 ? latestDropSerialNo - 1 : latestDropSerialNo,
 }: {
   profileId?: string;
   waveId?: string;
   unreadCount?: number;
   version?: number;
   latestDropSerialNo?: number;
+  firstUnreadDropSerialNo?: number | null;
+  latestReadSerialNo?: number;
 } = {}) => ({
   profile_id: profileId,
   wave_id: waveId,
   unread_count: unreadCount,
-  first_unread_drop_serial_no: unreadCount > 0 ? latestDropSerialNo : null,
+  first_unread_drop_serial_no: firstUnreadDropSerialNo,
   latest_drop_serial_no: latestDropSerialNo,
-  latest_read_serial_no:
-    unreadCount > 0 ? latestDropSerialNo - 1 : latestDropSerialNo,
+  latest_read_serial_no: latestReadSerialNo,
   version,
 });
 
@@ -372,6 +377,74 @@ describe("DmUnreadStateProvider", () => {
         await jest.advanceTimersByTimeAsync(1_500);
       });
       expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("messages")).toHaveTextContent("1");
+    } finally {
+      rendered.unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("recovers when an optimistic read still suppresses the incoming DM", async () => {
+    jest.useFakeTimers();
+    commonApiFetchMock
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [
+          state({
+            unreadCount: 1,
+            firstUnreadDropSerialNo: 10,
+            latestDropSerialNo: 10,
+            latestReadSerialNo: 9,
+            version: 1,
+          }),
+        ])
+      )
+      .mockResolvedValueOnce(
+        snapshot("profile-1", [
+          state({
+            unreadCount: 1,
+            firstUnreadDropSerialNo: 11,
+            latestDropSerialNo: 11,
+            latestReadSerialNo: 10,
+            version: 3,
+          }),
+        ])
+      );
+
+    const rendered = render(
+      <DmUnreadStateProvider>
+        <Capture />
+        <CaptureActions />
+      </DmUnreadStateProvider>
+    );
+
+    try {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      act(() => {
+        capturedDmUnreadActions?.beginRead("wave-1", 10);
+      });
+      expect(screen.getByTestId("messages")).toHaveTextContent("0");
+
+      act(() => {
+        websocketHandlers.get("DROP_UPDATE")?.(dropUpdate());
+        websocketHandlers.get("DM_UNREAD_STATE_CHANGED")?.(
+          state({
+            unreadCount: 1,
+            firstUnreadDropSerialNo: 10,
+            latestDropSerialNo: 11,
+            latestReadSerialNo: 9,
+            version: 2,
+          })
+        );
+      });
+      expect(screen.getByTestId("messages")).toHaveTextContent("0");
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(1_500);
+      });
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
       expect(screen.getByTestId("messages")).toHaveTextContent("1");
     } finally {
       rendered.unmount();
