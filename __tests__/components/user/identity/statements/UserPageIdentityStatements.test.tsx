@@ -1,5 +1,5 @@
 import UserPageIdentityStatements from "@/components/user/identity/statements/UserPageIdentityStatements";
-import { STATEMENT_GROUP } from "@/helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useQuery } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import { useParams } from "next/navigation";
@@ -71,7 +71,20 @@ describe("UserPageIdentityStatements", () => {
     {
       id: "4",
       statement_group: STATEMENT_GROUP.NFT_ACCOUNTS,
+      statement_type: STATEMENT_TYPE.OPENSEA,
       crated_at: new Date("2022-01-01").toISOString(),
+    },
+    {
+      id: "6",
+      statement_group: STATEMENT_GROUP.NFT_ACCOUNTS,
+      statement_type: STATEMENT_TYPE.LINK,
+      crated_at: new Date("2025-01-01").toISOString(),
+    },
+    {
+      id: "7",
+      statement_group: STATEMENT_GROUP.NFT_ACCOUNTS,
+      statement_type: STATEMENT_TYPE.NINFA,
+      crated_at: new Date("2024-01-01").toISOString(),
     },
     {
       id: "5",
@@ -88,7 +101,7 @@ describe("UserPageIdentityStatements", () => {
     render(<UserPageIdentityStatements profile={profile} />);
     expect(socialProps.statements.map((s: any) => s.id)).toEqual(["2", "1"]);
     expect(contactProps.statements[0].id).toBe("3");
-    expect(nftProps.statements[0].id).toBe("4");
+    expect(nftProps.statements.map((s: any) => s.id)).toEqual(["7", "4", "6"]);
     expect(verifyProps.statements[0].id).toBe("5");
   });
 });

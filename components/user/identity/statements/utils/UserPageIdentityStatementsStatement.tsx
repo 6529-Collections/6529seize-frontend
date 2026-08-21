@@ -6,7 +6,6 @@ import OutsideLinkIcon from "@/components/utils/icons/OutsideLinkIcon";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { STATEMENT_META } from "@/helpers/Types";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -20,6 +19,7 @@ import {
 import { Tooltip } from "react-tooltip";
 import { useCopyToClipboard } from "react-use";
 import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteStatementButton";
+import { getStatementPresentation } from "./statement-presentation";
 
 const COPIED_FEEDBACK_DURATION_MS = 1800;
 const COPY_ICON_FEEDBACK_DURATION_MS = 900;
@@ -99,7 +99,11 @@ export default function UserPageIdentityStatementsStatement({
     []
   );
 
-  const canOpen = STATEMENT_META[statement.statement_type].canOpenStatement;
+  const presentation = getStatementPresentation(
+    statement,
+    t(locale, "user.profile.identity.statements.externalArtLink")
+  );
+  const canOpen = presentation.canOpen;
   const isTouchScreen = useIsTouchDevice();
   const statementContent = (
     <>
@@ -108,7 +112,7 @@ export default function UserPageIdentityStatementsStatement({
       </div>
       <div className="tw-min-w-0 tw-flex-1">
         <div className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-500">
-          {STATEMENT_META[statement.statement_type].title}
+          {presentation.title}
         </div>
         <div className="tw-mt-1.5 tw-truncate tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
           {isTouchScreen && copied ? (
@@ -119,7 +123,7 @@ export default function UserPageIdentityStatementsStatement({
               {t(locale, "user.profile.identity.statements.copied")}
             </span>
           ) : (
-            statement.statement_value
+            presentation.displayValue
           )}
         </div>
       </div>
@@ -132,12 +136,13 @@ export default function UserPageIdentityStatementsStatement({
         {canOpen ? (
           <a
             href={statement.statement_value}
+            title={statement.statement_value}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${t(
               locale,
               "user.profile.identity.statements.openStatement"
-            )} ${STATEMENT_META[statement.statement_type].title}`}
+            )} ${presentation.title}`}
             className="tw-flex tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-items-center tw-gap-3.5 tw-py-3 tw-text-inherit tw-no-underline focus-visible:tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 lg:tw-py-2"
           >
             {statementContent}
@@ -160,7 +165,7 @@ export default function UserPageIdentityStatementsStatement({
             aria-label={`${t(
               locale,
               "user.profile.identity.statements.copyStatement"
-            )} ${STATEMENT_META[statement.statement_type].title}`}
+            )} ${presentation.title}`}
             className={`tw-inline-flex tw-h-9 tw-w-9 tw-cursor-pointer tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${
               isCopyIconActive
                 ? "tw-bg-primary-500/15 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-400/25"

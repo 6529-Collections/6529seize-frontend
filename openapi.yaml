@@ -6514,6 +6514,119 @@ paths:
           description: successful operation
         "400":
           description: Invalid request
+  /profiles/{identity}/cic/statements:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get profile identity statements
+      operationId: getProfileCicStatements
+      security: []
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: >-
+            Profile identity statements, or an empty list when the profile is
+            not found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiCicStatement"
+    post:
+      tags:
+        - ProfileCIC
+      summary: Add a profile identity statement
+      description: >-
+        Requires a wallet-authenticated owner of the target profile. NFT account
+        links must use HTTPS. NINFA links use statement_type NINFA. Custom art
+        links use statement_type LINK and carry their required display label in
+        statement_comment.
+      operationId: createProfileCicStatement
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateProfileCicStatement"
+      responses:
+        "201":
+          description: Profile identity statement created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCicStatement"
+        "400":
+          description: Invalid or duplicate statement, or profile statement limit reached
+        "401":
+          description: Authentication required
+        "403":
+          description: Authenticated wallet does not own the profile
+        "404":
+          description: Profile not found
+  /profiles/{identity}/cic/statements/{statement_id}:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get a profile identity statement
+      operationId: getProfileCicStatement
+      security: []
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: statement_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profile identity statement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCicStatement"
+        "404":
+          description: Profile or statement not found
+    delete:
+      tags:
+        - ProfileCIC
+      summary: Delete a profile identity statement
+      operationId: deleteProfileCicStatement
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: statement_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Profile identity statement deleted
+        "401":
+          description: Authentication required
+        "403":
+          description: Authenticated wallet does not own the profile
+        "404":
+          description: Profile or statement not found
   /profiles/{identity}/cic/ratings/by-rater:
     get:
       tags:
@@ -13561,6 +13674,48 @@ components:
           format: int64
         contributors:
           $ref: "#/components/schemas/ApiCicContributorsPage"
+    ApiCicStatement:
+      type: object
+      required:
+        - id
+        - profile_id
+        - statement_group
+        - statement_type
+        - statement_comment
+        - statement_value
+        - crated_at
+      properties:
+        id:
+          type: string
+        profile_id:
+          type: string
+        statement_group:
+          $ref: "#/components/schemas/ApiCicStatementGroup"
+        statement_type:
+          type: string
+          description: >-
+            Statement kind. NFT account links include NINFA for Ninfa and LINK
+            for a custom-labelled art link. Clients must tolerate unknown
+            values.
+        statement_comment:
+          type: string
+          nullable: true
+          description: >-
+            Display label for custom NFT account LINK statements; null
+            otherwise.
+        statement_value:
+          type: string
+        crated_at:
+          type: string
+          format: date-time
+    ApiCicStatementGroup:
+      type: string
+      enum:
+        - GENERAL
+        - CONTACT
+        - SOCIAL_MEDIA_ACCOUNT
+        - NFT_ACCOUNTS
+        - SOCIAL_MEDIA_VERIFICATION_POST
     ApiCmsAgentPatch:
       type: object
       required:
@@ -15902,6 +16057,30 @@ components:
         pfp_url:
           type: string
           nullable: true
+    ApiCreateProfileCicStatement:
+      type: object
+      required:
+        - statement_group
+        - statement_type
+        - statement_comment
+        - statement_value
+      properties:
+        statement_group:
+          $ref: "#/components/schemas/ApiCicStatementGroup"
+        statement_type:
+          type: string
+          minLength: 1
+          maxLength: 250
+        statement_comment:
+          type: string
+          nullable: true
+          description: >-
+            Required 1-40 character display label when statement_group is
+            NFT_ACCOUNTS and statement_type is LINK; null for NINFA.
+        statement_value:
+          type: string
+          minLength: 1
+          maxLength: 2048
     ApiCreateProfileCmsWalletGallerySnapshotRequest:
       type: object
       required:
