@@ -69,7 +69,7 @@ export default function DropListItemContentNft({
           {nft?.imageUrl && (
             <img
               src={nft.imageUrl}
-              alt="NFT token"
+              alt=""
               className="tw-h-full tw-w-full tw-object-contain tw-object-center"
             />
           )}

@@ -33,13 +33,14 @@ describe('DropListItemContentNft', () => {
       useTokenMetadataQuery,
     } = require('@/hooks/useAlchemyNftQueries');
 
-    render(<DropListItemContentNft nft={baseNft} />);
+    const { container } = render(<DropListItemContentNft nft={baseNft} />);
 
     expect(useTokenMetadataQuery).toHaveBeenCalledWith({
       tokens: [{ contract: '0x1', tokenId: '5' }],
       enabled: true,
     });
-    expect(screen.getByAltText('NFT token')).toHaveAttribute('src', 'img');
+    expect(container.querySelector('img')).toHaveAttribute('src', 'img');
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 
   it('defaults to external link for other contracts', async () => {

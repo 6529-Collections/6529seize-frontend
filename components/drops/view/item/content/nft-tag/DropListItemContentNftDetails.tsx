@@ -14,7 +14,7 @@ export default function DropListItemContentNftDetails({
     <span className="tw-gap-x-2 tw-flex tw-items-center">
       {image && (
         <img
-          alt="Seize"
+          alt=""
           src={getScaledImageUri(image, ImageScale.W_AUTO_H_50)}
           className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-object-contain"
         />
