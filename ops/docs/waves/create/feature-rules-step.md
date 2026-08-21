@@ -55,8 +55,8 @@ The generated rules preview summarizes configured wave behavior, including:
 - outcomes visibility and configured outcome count
 
 Restricted access rows show both the live `1 user` or `X users` count and a
-concise criteria summary. The count opens the same searchable member browser
-used on the `Groups` step.
+concise criteria summary. The count links to the searchable member browser at
+`/network?page=1&group={groupId}`, matching the `Groups` step explorer.
 
 ## Wave Guidelines
 

@@ -64,7 +64,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       adminGroup.getByRole("heading", { name: "Admins" })
     ).toBeVisible();
-    await expect(page.getByText("Public").first()).toBeVisible();
+    const chatAccessGroup = page.getByRole("group", { name: "Who can chat" });
+    await expect(chatAccessGroup.getByText("Public")).toBeVisible();
     await expect(adminGroup.getByText("25 users")).toBeVisible();
     await expect(
       adminGroup.getByRole("button", { name: "View members" })
