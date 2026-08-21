@@ -27,7 +27,7 @@ import { BentoWatermark } from "./BentoWatermark";
 import { AmbientArtifacts, MemeFan } from "./JoinVisualArtifacts";
 
 const BENTO_PANEL_CLASS =
-  "tw-transform tw-rounded-3xl tw-border tw-border-solid tw-border-white/5 tw-border-t-white/10 tw-bg-[linear-gradient(145deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.01)_100%)] tw-shadow-[0_30px_60px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)] tw-backdrop-blur-[20px] tw-transition-all tw-duration-500 tw-ease-[cubic-bezier(0.16,1,0.3,1)] desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_40px_80px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)] motion-reduce:tw-transition-none";
+  "tw-transform tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-border-t-white/10 tw-bg-[linear-gradient(145deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.01)_100%)] tw-shadow-[0_30px_60px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)] tw-backdrop-blur-[20px] tw-transition-all tw-duration-500 tw-ease-[cubic-bezier(0.16,1,0.3,1)] desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_40px_80px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)] motion-reduce:tw-transition-none";
 
 const BENTO_HEADING_CLASS =
   "tw-m-0 tw-text-balance tw-text-[17px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[19px] lg:tw-text-[22px]";
@@ -122,6 +122,12 @@ function FeatureCard({
         className
       )}
     >
+      {hasFanMedia && (
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-0 tw-bg-[linear-gradient(90deg,transparent_0%,rgba(72,117,255,0.06)_52%,transparent_100%)] tw-opacity-0 tw-transition-opacity tw-duration-500 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 motion-reduce:tw-transition-none"
+        />
+      )}
       {hasFanMedia ? (
         <>
           <div className="tw-relative tw-z-10 tw-min-w-0 lg:tw-max-w-[42%]">
