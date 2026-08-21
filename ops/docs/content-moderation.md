@@ -18,24 +18,31 @@ removes it and preserves the draft for correction.
 
 ## Personal controls
 
-Authenticated users can open the final **Report** entry in a post's More menu
+Authenticated users can open the final **Flag Content** entry in a post's More menu
 on desktop or action sheet on mobile, then choose one or more independent
 actions:
 
-- report the post with a reason and optional context (selected by default);
+- report the post with a reason and optional context;
 - hide that individual post for themselves; or
 - block the author for themselves.
 
-The report option can be deselected, so a user can hide or block without
-submitting a report. Submitting a report does not automatically hide the post
-or block its author. A personally hidden post keeps its original layout under
-a strong non-interactive blur, with a compact **Hidden · Unhide** control at
-the top. Hiding and unhiding update the mounted post immediately while the
-server request completes, and roll back if that request fails.
-A post from a blocked author uses a temporary **Show post** action that does not
-unblock the author. Blocked profiles can be reviewed and unblocked at
-`/content-preferences`, linked as **Content preferences** from the
-authenticated profile menu.
+No action is selected by default. A user can hide or block without submitting
+a report, and submitting a report does not automatically hide the post or
+block its author. Personally hidden posts keep their original layout under a
+strong non-interactive blur with a centered **Hidden · Reveal · Unhide**
+control. Reveal is local and temporary; Unhide persists through the API.
+
+Posts from blocked authors use the same blurred layout with a compact author
+identity and **Blocked · Reveal · Unblock** controls. Blocking or unblocking an
+author updates all mounted posts by that author immediately. Personal hide,
+unhide, block, and unblock actions roll back if the API request fails and do
+not show success toasts. Reporting still confirms with **Report submitted.**
+
+Notification, direct-message, and blocked-profile preferences are combined at
+`/preferences`. The **Content** tab is deep-linked at
+`/preferences?tab=content`; the former `/content-preferences` path redirects
+there. The page is linked from the authenticated profile menu and from the
+current user's profile.
 
 ## Global moderation
 

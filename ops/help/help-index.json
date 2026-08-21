@@ -29,22 +29,26 @@
         "moderator"
       ],
       "facts": [
-        "Authenticated users can use the final Report entry in a Wave post's More menu on desktop or action sheet on mobile to report, hide, block, or combine those actions.",
-        "Reporting, hiding, and blocking are independent: the report option can be deselected to hide or block without submitting a report.",
-        "A personally hidden post keeps a non-interactive faded preview with a small persistent Unhide action. A post from a blocked author has a temporary Show post action that does not unblock the author.",
-        "Blocked profiles can be reviewed and unblocked at /content-preferences, linked as Content preferences from the authenticated profile menu.",
+        "Authenticated users can use the final Flag Content entry in a Wave post's More menu on desktop or action sheet on mobile to report, hide, block, or combine those actions.",
+        "Reporting, hiding, and blocking are independent, and no action is selected by default.",
+        "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
+        "Notification, messaging, and blocked-profile settings are combined at /preferences. The Content tab is available at /preferences?tab=content, and /content-preferences redirects there.",
         "New Wave posts receive a narrow server-side safety check; ambiguous content and profanity are not rejected merely for being objectionable.",
         "A locally created post stays visible in its normal layout while submission is pending; when a high-confidence safety check rejects it, the composer removes the optimistic post, explains the rejection, and preserves the draft for editing and retrying.",
         "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
         "Only server-authorized moderators see and can use the Moderation queue at /content-moderation, and every decision requires a reason."
       ],
-      "canonical_path": "/content-preferences",
-      "link_label": "Content preferences",
-      "related_paths": ["/content-moderation", "/waves"],
+      "canonical_path": "/preferences",
+      "link_label": "Preferences",
+      "related_paths": [
+        "/preferences?tab=content",
+        "/content-moderation",
+        "/waves"
+      ],
       "tags": ["waves", "safety", "moderation", "privacy"],
       "source_refs": [
         "ops/docs/content-moderation.md",
-        "app/content-preferences/page.client.tsx",
+        "app/preferences/page.client.tsx",
         "app/content-moderation/page.client.tsx",
         "components/content-moderation/ContentModerationDropActions.tsx",
         "components/content-moderation/ContentModerationDropGate.tsx"

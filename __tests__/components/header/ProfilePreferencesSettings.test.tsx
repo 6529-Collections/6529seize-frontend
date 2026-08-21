@@ -9,38 +9,12 @@ import {
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   commonApiPut: jest.fn(),
 }));
-jest.mock(
-  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
-  () =>
-    ({
-      title,
-      children,
-      noPadding,
-      tall,
-    }: {
-      title: string;
-      children: ReactNode;
-      noPadding?: boolean;
-      tall?: boolean;
-    }) => (
-      <div
-        data-testid="profile-preferences-dialog"
-        data-no-padding={noPadding}
-        data-tall={tall}
-      >
-        <h1>{title}</h1>
-        {children}
-      </div>
-    )
-);
-
 const preferences = {
   direct_message_policy: DirectMessagePolicy.Everyone,
   notification_level: NotificationLevel.All,
@@ -56,7 +30,10 @@ const preferences = {
 
 describe("ProfilePreferencesSettings", () => {
   beforeEach(() => {
-    (useAuth as jest.Mock).mockReturnValue({ setToast: jest.fn() });
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { id: "profile-1" },
+      setToast: jest.fn(),
+    });
     (commonApiFetch as jest.Mock).mockResolvedValue(preferences);
     (commonApiPut as jest.Mock).mockImplementation(({ body }) =>
       Promise.resolve(body)
@@ -66,7 +43,7 @@ describe("ProfilePreferencesSettings", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("explains that DM policy only applies to new conversations", async () => {
-    render(<ProfilePreferencesSettings isOpen onClose={jest.fn()} />);
+    render(<ProfilePreferencesSettings />);
 
     expect(
       await screen.findByText(
@@ -84,14 +61,9 @@ describe("ProfilePreferencesSettings", () => {
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "profile-preferences",
     });
-    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
-      "data-no-padding",
-      "true"
-    );
-    expect(screen.getByTestId("profile-preferences-dialog")).toHaveAttribute(
-      "data-tall",
-      "true"
-    );
+    expect(
+      screen.getByRole("region", { name: "Notifications & messages" })
+    ).toBeInTheDocument();
     expect(
       screen
         .getAllByRole("heading", { level: 2 })
@@ -113,7 +85,7 @@ describe("ProfilePreferencesSettings", () => {
 
   it("hides optional categories while preserving their saved values", async () => {
     const user = userEvent.setup();
-    render(<ProfilePreferencesSettings isOpen onClose={jest.fn()} />);
+    render(<ProfilePreferencesSettings />);
     await screen.findByText("Subscription coverage");
 
     await user.click(screen.getByRole("radio", { name: /^Essential\b/i }));
@@ -132,7 +104,6 @@ describe("ProfilePreferencesSettings", () => {
 
   it("saves DM and notification preference changes together", async () => {
     const user = userEvent.setup();
-    const onClose = jest.fn();
     const invalidateNotifications = jest.fn();
     render(
       <ReactQueryWrapperContext.Provider
@@ -140,7 +111,7 @@ describe("ProfilePreferencesSettings", () => {
           { invalidateNotifications } as unknown as ReactQueryWrapperContextType
         }
       >
-        <ProfilePreferencesSettings isOpen onClose={onClose} />
+        <ProfilePreferencesSettings />
       </ReactQueryWrapperContext.Provider>
     );
     await screen.findByText("Subscription coverage");
@@ -160,7 +131,6 @@ describe("ProfilePreferencesSettings", () => {
         }),
       });
       expect(invalidateNotifications).toHaveBeenCalledTimes(1);
-      expect(onClose).toHaveBeenCalled();
     });
   });
 });

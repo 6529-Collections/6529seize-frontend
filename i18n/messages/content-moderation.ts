@@ -1,12 +1,10 @@
 export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.error.retry": "Please try again.",
   "contentModeration.dropSubmitErrorTitle": "Couldn't submit this drop.",
-  "contentModeration.preferences.metaTitle": "Content preferences",
-  "contentModeration.preferences.metaDescription":
-    "Manage your personal content visibility preferences.",
   "contentModeration.actions.report": "Flag Content",
   "contentModeration.actions.hide": "Hide post",
   "contentModeration.actions.block": "Block author",
+  "contentModeration.actions.reveal": "Reveal",
   "contentModeration.actions.unhide": "Unhide",
   "contentModeration.actions.unblock": "Unblock",
   "contentModeration.actions.unblockProfile": "Unblock {profile}",
@@ -34,30 +32,25 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.reason.spam": "Spam",
   "contentModeration.report.reason.other": "Other",
   "contentModeration.report.success": "Report submitted.",
-  "contentModeration.report.actionsSuccess": "Your choices were applied.",
   "contentModeration.report.partialError":
     "Couldn't complete every selected action.",
   "contentModeration.report.error": "Couldn't complete these actions.",
-  "contentModeration.hide.success": "Post hidden for you.",
   "contentModeration.hide.error": "Couldn't hide this post.",
-  "contentModeration.block.success": "Author blocked for you.",
   "contentModeration.block.error": "Couldn't block this author.",
-  "contentModeration.unhide.success": "Post is visible again.",
   "contentModeration.unhide.error": "Couldn't unhide this post.",
-  "contentModeration.unblock.success": "Profile unblocked.",
   "contentModeration.unblock.error": "Couldn't unblock this profile.",
   "contentModeration.tombstone.quarantined":
     "This post is unavailable while it is being checked.",
   "contentModeration.tombstone.removed":
     "This post was removed by a moderator.",
-  "contentModeration.tombstone.blocked":
-    "This post is hidden because you blocked its author.",
+  "contentModeration.tombstone.blockedShort": "Blocked",
   "contentModeration.tombstone.hidden": "Hidden",
-  "contentModeration.tombstone.show": "Show post",
-  "contentModeration.preferences.menu": "Content preferences",
-  "contentModeration.preferences.title": "Content preferences",
+  "contentModeration.tooltips.revealHidden": "Show temporarily",
+  "contentModeration.tooltips.revealBlocked": "Show this post temporarily",
+  "contentModeration.tooltips.unhide": "Remove from hidden posts",
+  "contentModeration.tooltips.unblock": "Show posts from {profile} again",
   "contentModeration.preferences.description":
-    "Manage profiles you have blocked. Blocking only changes what you see.",
+    "Manage profiles you have blocked.",
   "contentModeration.preferences.blockedTitle": "Blocked profiles",
   "contentModeration.preferences.empty": "You haven't blocked any profiles.",
   "contentModeration.preferences.loading": "Loading blocked profiles…",
@@ -109,4 +102,15 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.stateChanged": "State changed",
   "contentModeration.postRejected":
     "This post couldn't be submitted because it was flagged by the safety check. Please review it and try again.",
+  "preferences.title": "Preferences",
+  "preferences.metaDescription":
+    "Manage notification, messaging, and content preferences.",
+  "preferences.description":
+    "Manage notifications, messages, and the content you see.",
+  "preferences.activeProfile": "Preferences for {profile}",
+  "preferences.signIn":
+    "Connect an authenticated profile to manage preferences.",
+  "preferences.tabs.ariaLabel": "Preference sections",
+  "preferences.tabs.notifications": "Notifications & messages",
+  "preferences.tabs.content": "Content",
 } as const;

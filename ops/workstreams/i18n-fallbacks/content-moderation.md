@@ -2,7 +2,7 @@
 
 ## Scope
 
-- Routes/components: content moderation actions and tombstones, `/content-preferences`, `/content-moderation`, and the drop-composer safety-check rejection.
+- Routes/components: content moderation actions and tombstones, `/preferences`, `/content-moderation`, and the drop-composer safety-check rejection.
 - Untranslated surface: the complete `contentModeration.*` message namespace, including visible labels, feedback, errors, and accessible status text.
 - Current fallback: these surfaces resolve the browser locale through `t()`, but supported non-source locale dictionaries currently fall back to the reviewed `en-US` content-moderation messages.
 - User impact: moderation controls remain complete and accessible in English while users of other supported locales see source-locale copy for this feature.
