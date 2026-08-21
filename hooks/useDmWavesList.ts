@@ -4,10 +4,7 @@ import { useCallback, useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useWavesV2 } from "./useWavesV2";
-import {
-  SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
-  WAVE_FOLLOWING_WAVES_PARAMS,
-} from "@/components/react-query-wrapper/utils/query-utils";
+import { WAVE_FOLLOWING_WAVES_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
 const noopWaveAction = () => {};
@@ -71,8 +68,6 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     directMessage: true,
     viewerIdentityKey,
     enabled: shouldFetchDmWaves,
-    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
-    refetchIntervalInBackground: false,
   });
 
   // sort by latest drop
