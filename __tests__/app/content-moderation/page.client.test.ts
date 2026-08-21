@@ -31,4 +31,18 @@ describe("content moderation AI recommendation formatting", () => {
       )
     ).toBe("AI recommendation: Needs Human Review");
   });
+
+  it.each([
+    [0.82, "AI recommendation: Needs Human Review (82%)"],
+    [-0.2, "AI recommendation: Needs Human Review (0%)"],
+    [1.4, "AI recommendation: Needs Human Review (100%)"],
+    [Number.NaN, "AI recommendation: Needs Human Review"],
+  ])("formats and clamps confidence %p", (confidence, expected) => {
+    expect(
+      getAiRecommendationText(
+        createQueueItem("NEEDS_HUMAN_REVIEW", confidence),
+        "en-US"
+      )
+    ).toBe(expected);
+  });
 });

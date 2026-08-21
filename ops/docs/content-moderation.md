@@ -28,8 +28,10 @@ actions:
 
 The report option can be deselected, so a user can hide or block without
 submitting a report. Submitting a report does not automatically hide the post
-or block its author. A personally hidden post keeps a soft faded preview whose
-original content is non-interactive, with a small persistent **Unhide** action.
+or block its author. A personally hidden post keeps its original layout under
+a strong non-interactive blur, with a compact **Hidden · Unhide** control at
+the top. Hiding and unhiding update the mounted post immediately while the
+server request completes, and roll back if that request fails.
 A post from a blocked author uses a temporary **Show post** action that does not
 unblock the author. Blocked profiles can be reviewed and unblocked at
 `/content-preferences`, linked as **Content preferences** from the

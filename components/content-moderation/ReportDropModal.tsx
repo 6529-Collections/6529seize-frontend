@@ -30,6 +30,7 @@ import {
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
+import { useContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 
 type PostAction = "report" | "hide" | "block";
 
@@ -135,6 +136,7 @@ export default function ReportDropModal({
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const queryClient = useQueryClient();
+  const dropGateContext = useContentModerationDropGateContext();
   const descriptionId = useId();
   const [reason, setReason] = useState<ApiContentModerationReportReason>(
     ApiContentModerationReportReason.ScamOrPhishing
@@ -195,18 +197,23 @@ export default function ReportDropModal({
       return Promise.all(actions);
     },
     onMutate: () => {
+      const rollbackLocalHidden = hidePost
+        ? dropGateContext?.setOptimisticHidden(true)
+        : undefined;
       const viewerProfileId = connectedProfile?.id;
-      if (!viewerProfileId || (!hidePost && !blockAuthor)) return undefined;
-      const previousHidden = hidePost
+      if (!hidePost && !blockAuthor) {
+        return undefined;
+      }
+      const previousHidden = hidePost && viewerProfileId
         ? getDropHiddenOverride(viewerProfileId, drop.id)
         : undefined;
-      const previousBlocked = blockAuthor
+      const previousBlocked = blockAuthor && viewerProfileId
         ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
         : undefined;
-      if (hidePost) {
+      if (hidePost && viewerProfileId) {
         setDropHiddenOverride(viewerProfileId, drop.id, true);
       }
-      if (blockAuthor) {
+      if (blockAuthor && viewerProfileId) {
         setProfileBlockedOverride(viewerProfileId, drop.author.id, true);
       }
       return {
@@ -214,6 +221,7 @@ export default function ReportDropModal({
         hidePost,
         previousBlocked,
         previousHidden,
+        rollbackLocalHidden,
         viewerProfileId,
       };
     },
@@ -237,13 +245,16 @@ export default function ReportDropModal({
         );
       }
       if (hideFailed && context?.hidePost) {
-        setDropHiddenOverride(
-          context.viewerProfileId,
-          drop.id,
-          context.previousHidden
-        );
+        context.rollbackLocalHidden?.();
+        if (context.viewerProfileId) {
+          setDropHiddenOverride(
+            context.viewerProfileId,
+            drop.id,
+            context.previousHidden
+          );
+        }
       }
-      if (blockFailed && context?.blockAuthor) {
+      if (blockFailed && context?.blockAuthor && context.viewerProfileId) {
         setProfileBlockedOverride(
           context.viewerProfileId,
           drop.author.id,
@@ -275,14 +286,15 @@ export default function ReportDropModal({
       closeModal();
     },
     onError: (error, _variables, context) => {
-      if (context?.hidePost) {
+      context?.rollbackLocalHidden?.();
+      if (context?.hidePost && context.viewerProfileId) {
         setDropHiddenOverride(
           context.viewerProfileId,
           drop.id,
           context.previousHidden
         );
       }
-      if (context?.blockAuthor) {
+      if (context?.blockAuthor && context.viewerProfileId) {
         setProfileBlockedOverride(
           context.viewerProfileId,
           drop.author.id,
