@@ -174,7 +174,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
       page.getByRole("link", { name: "Back to wave" })
     ).toHaveAttribute("href", "/waves/test-wave");
     await page.locator("#wave-score-calculator-input").fill("x");
-    await page.getByRole("button", { name: "Score" }).click();
+    await page.getByRole("button", { name: "Score", exact: true }).click();
 
     await expect(page.locator("#wave-score-calculator-error")).toContainText(
       "Enter a wave name, wave id, or wave URL."

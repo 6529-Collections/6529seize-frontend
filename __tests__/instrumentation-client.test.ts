@@ -23,6 +23,8 @@ describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const dropReactionRequestFailedMessage = "Drop reaction request failed";
+  const serverComponentRenderMessage =
+    "An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.";
   const privateBareWaveId = "2c5e0761-6de2-4e1f-9c23-a8c93ff1158f";
   const privateNonRfcUuid = "00000000-0000-0000-0000-000000000000";
   const privateRelativeDropId = "5651cd9a-1852-42fc-b213-5f8d871f96bf";
@@ -458,6 +460,37 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+  });
+
+  const createServerComponentRenderError = (
+    digest?: unknown,
+    message = serverComponentRenderMessage
+  ) => {
+    const error = new Error(message) as Error & { digest?: unknown };
+    if (digest !== undefined) {
+      error.digest = digest;
+    }
+    return error;
+  };
+
+  const createServerComponentRenderEvent = (
+    message = serverComponentRenderMessage,
+    overrides: Record<string, unknown> = {}
+  ) => ({
+    level: "error",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: message,
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    ...overrides,
   });
 
   const createRabbyChromeUserRejectedEvent = (
@@ -1085,6 +1118,154 @@ describe("instrumentation-client", () => {
       behaviour: "drop-error-if-exclusively-contains-third-party-frames",
     });
   });
+
+  it("keeps exact Server Component render errors and groups them by digest", () => {
+    const beforeSend = loadBeforeSend();
+
+    const first = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("779660776"),
+    });
+    const repeated = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("779660776"),
+    });
+    const different = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("1680982760"),
+    });
+
+    expect(first).toEqual(
+      expect.objectContaining({
+        level: "error",
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
+    expect(repeated).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
+    expect(different).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "1680982760",
+        }),
+        fingerprint: ["next-server-component-render", "1680982760"],
+      })
+    );
+    expect(different?.fingerprint).not.toEqual(first?.fingerprint);
+  });
+
+  it("prefers the original Server Component error digest", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("779660776"),
+      syntheticException: createServerComponentRenderError("1680982760"),
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
+  });
+
+  it("preserves an existing Server Component render error fingerprint", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createServerComponentRenderEvent(serverComponentRenderMessage, {
+        fingerprint: ["existing-fingerprint"],
+      }),
+      {
+        syntheticException: createServerComponentRenderError("779660776"),
+      }
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["existing-fingerprint"],
+      })
+    );
+  });
+
+  it("replaces an empty Server Component error fingerprint", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createServerComponentRenderEvent(serverComponentRenderMessage, {
+        fingerprint: [],
+      }),
+      {
+        originalException: createServerComponentRenderError("779660776"),
+      }
+    );
+
+    expect(result?.fingerprint).toEqual([
+      "next-server-component-render",
+      "779660776",
+    ]);
+  });
+
+  it.each([
+    {
+      description: "changed wrapper message",
+      message: `${serverComponentRenderMessage} Extra detail.`,
+      digest: "779660776",
+    },
+    {
+      description: "missing digest",
+      message: serverComponentRenderMessage,
+      digest: undefined,
+    },
+    {
+      description: "digest containing whitespace",
+      message: serverComponentRenderMessage,
+      digest: "779 660 776",
+    },
+    {
+      description: "non-string digest",
+      message: serverComponentRenderMessage,
+      digest: 779660776,
+    },
+    ...[401, 403, 404].map((status) => ({
+      description: `HTTP ${status} access-fallback digest`,
+      message: serverComponentRenderMessage,
+      digest: `NEXT_HTTP_ERROR_FALLBACK;${status}`,
+    })),
+  ])(
+    "keeps the $description Server Component near miss unchanged",
+    ({ message, digest }) => {
+      const beforeSend = loadBeforeSend();
+
+      const result = beforeSend(createServerComponentRenderEvent(message), {
+        originalException: createServerComponentRenderError(digest, message),
+      });
+
+      expect(result).not.toBeNull();
+      expect(result?.tags).toBeUndefined();
+      expect(result?.fingerprint).toBeUndefined();
+      expect(result).toEqual(
+        expect.objectContaining({
+          level: "error",
+          exception: expect.objectContaining({
+            values: [expect.objectContaining({ value: message })],
+          }),
+        })
+      );
+    }
+  );
 
   it.each([
     {
