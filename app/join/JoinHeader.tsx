@@ -187,7 +187,12 @@ function HeroSubtitle({
 
   const highlightStart = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_OPEN);
   const highlightEnd = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_CLOSE);
-  if (highlightStart < 0 || highlightEnd < highlightStart) {
+  const hasSingleHighlightPair =
+    highlightStart >= 0 &&
+    highlightStart === subtitle.lastIndexOf(HERO_SUBTITLE_HIGHLIGHT_OPEN) &&
+    highlightEnd > highlightStart &&
+    highlightEnd === subtitle.lastIndexOf(HERO_SUBTITLE_HIGHLIGHT_CLOSE);
+  if (!hasSingleHighlightPair) {
     return subtitle
       .replaceAll(HERO_SUBTITLE_HIGHLIGHT_OPEN, "")
       .replaceAll(HERO_SUBTITLE_HIGHLIGHT_CLOSE, "");

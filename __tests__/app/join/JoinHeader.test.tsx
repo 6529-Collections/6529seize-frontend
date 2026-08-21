@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 
 import { JoinHeader } from "@/app/join/JoinHeader";
+import * as pageUtils from "@/app/join/page.utils";
+
+const originalMessage = pageUtils.m;
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -16,6 +19,10 @@ jest.mock("@/app/join/MemeArtifactCard", () => ({
 }));
 
 describe("JoinHeader", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("renders the localized subtitle as one sentence with styled emphasis", () => {
     render(
       <JoinHeader
@@ -63,6 +70,40 @@ describe("JoinHeader", () => {
       "tw-rounded-lg",
       "tw-bg-white/[0.07]"
     );
+  });
+
+  it.each([
+    [
+      "Before <highlight>duplicate <highlight>opening</highlight> after.",
+      "Before duplicate opening after.",
+    ],
+    [
+      "Before <highlight>duplicate</highlight> closing</highlight> after.",
+      "Before duplicate closing after.",
+    ],
+  ])("strips duplicate subtitle markers from %s", (subtitle, renderedText) => {
+    jest.spyOn(pageUtils, "m").mockImplementation((locale, key, params) => {
+      if (key === "join6529.hero.loggedOut.subtitle") {
+        return subtitle;
+      }
+      return originalMessage(locale, key, params);
+    });
+
+    render(
+      <JoinHeader
+        locale="en-US"
+        pageState="loggedOut"
+        primaryAction={{ kind: "button", label: "Connect wallet" }}
+        secondaryAction={{
+          kind: "link",
+          label: "See how it works",
+          href: "#journey",
+        }}
+      />
+    );
+
+    expect(screen.queryByText(/<\/?highlight>/)).not.toBeInTheDocument();
+    expect(screen.getByText(renderedText)).toBeVisible();
   });
 
   it("exposes the primary action's loading state", () => {
