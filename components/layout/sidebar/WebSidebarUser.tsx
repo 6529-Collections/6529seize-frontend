@@ -11,6 +11,7 @@ import { HeaderConnectModal } from "@/components/header/share/HeaderShare";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
+import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import UserLevel from "@/components/user/utils/level/UserLevel";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
@@ -37,6 +38,7 @@ function WebSidebarUser({
 }: WebSidebarUserProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showProfilePreferences, setShowProfilePreferences] = useState(false);
   const capacitor = useCapacitor();
   const { isMobileDevice, isDeviceDetectionResolved } =
     useIsMobileDeviceStatus();
@@ -312,12 +314,17 @@ function WebSidebarUser({
             isOpen={showUserMenu}
             onClose={() => setShowUserMenu(false)}
             onOpenConnect={canUseDesktopConnect ? onOpenConnect : undefined}
+            onOpenProfilePreferences={() => setShowProfilePreferences(true)}
           />
         </div>
       )}
       <HeaderConnectModal
         show={canUseDesktopConnect && showConnectModal}
         onClose={() => setShowConnectModal(false)}
+      />
+      <ProfilePreferencesSettings
+        isOpen={showProfilePreferences}
+        onClose={() => setShowProfilePreferences(false)}
       />
     </div>
   );

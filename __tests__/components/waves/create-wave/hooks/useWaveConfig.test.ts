@@ -71,6 +71,7 @@ describe("useWaveConfig", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       expect(result.current.config.overview.type).toBe(ApiWaveType.Chat);
+      expect(result.current.config.overview.typeSelected).toBe(true);
       expect(result.current.config.overview.name).toBe("");
       expect(result.current.config.overview.image).toBeNull();
       expect(result.current.step).toBe(CreateWaveStep.OVERVIEW);

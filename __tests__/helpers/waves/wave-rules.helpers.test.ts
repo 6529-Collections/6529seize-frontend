@@ -517,6 +517,7 @@ describe("wave-rules.helpers", () => {
     ).toEqual({
       value: "Private group",
       valueHref: undefined,
+      valueGroupId: undefined,
       valueLinkLabel: undefined,
     });
   });
@@ -530,6 +531,7 @@ describe("wave-rules.helpers", () => {
     ).toEqual({
       value: "Anyone",
       valueHref: undefined,
+      valueGroupId: undefined,
       valueLinkLabel: undefined,
     });
   });
@@ -550,6 +552,7 @@ describe("wave-rules.helpers", () => {
     ).toEqual({
       value: "Private group",
       valueHref: undefined,
+      valueGroupId: undefined,
       valueLinkLabel: undefined,
     });
   });
@@ -568,6 +571,7 @@ describe("wave-rules.helpers", () => {
     ).toEqual({
       value: "Group unavailable",
       valueHref: undefined,
+      valueGroupId: undefined,
       valueLinkLabel: undefined,
     });
   });
@@ -587,6 +591,7 @@ describe("wave-rules.helpers", () => {
     ).toEqual({
       value: "Artists and curators",
       valueHref: "/network?page=1&group=artists%20%26%20curators",
+      valueGroupId: "artists & curators",
       valueLinkLabel: "Inspect Artists and curators group criteria and members",
     });
   });
