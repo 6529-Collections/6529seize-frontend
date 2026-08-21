@@ -36,6 +36,7 @@ describe("JoinHeader", () => {
       "A community that decides what to build next chat, vote, and collect together."
     );
     expect(highlight.parentElement).not.toHaveTextContent("<highlight>");
+    expect(highlight.parentElement).not.toHaveTextContent("</highlight>");
   });
 
   it("uses the shared primary and secondary actions", () => {

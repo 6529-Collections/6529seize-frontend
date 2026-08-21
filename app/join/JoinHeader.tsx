@@ -188,7 +188,9 @@ function HeroSubtitle({
   const highlightStart = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_OPEN);
   const highlightEnd = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_CLOSE);
   if (highlightStart < 0 || highlightEnd < highlightStart) {
-    return subtitle;
+    return subtitle
+      .replaceAll(HERO_SUBTITLE_HIGHLIGHT_OPEN, "")
+      .replaceAll(HERO_SUBTITLE_HIGHLIGHT_CLOSE, "");
   }
 
   const highlightedText = subtitle.slice(
