@@ -150,6 +150,8 @@ export * from '../models/ApiDecentralizedMediaResolution';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDmDropsUnreadCount';
+export * from '../models/ApiDmUnreadConversationState';
+export * from '../models/ApiDmUnreadSnapshot';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropAndWave';
@@ -252,6 +254,8 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMarkWaveReadRequest';
+export * from '../models/ApiMarkWaveReadResponse';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
@@ -796,6 +800,8 @@ import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentral
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDmDropsUnreadCount } from '../models/ApiDmDropsUnreadCount';
+import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
+import { ApiDmUnreadSnapshot } from '../models/ApiDmUnreadSnapshot';
 import { ApiDrop                                 } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropAndWave } from '../models/ApiDropAndWave';
@@ -898,6 +904,8 @@ import { ApiLightDrop             } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMarkWaveReadRequest } from '../models/ApiMarkWaveReadRequest';
+import { ApiMarkWaveReadResponse } from '../models/ApiMarkWaveReadResponse';
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
@@ -1649,6 +1657,8 @@ let typeMap: {[index: string]: any} = {
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDmDropsUnreadCount": ApiDmDropsUnreadCount,
+    "ApiDmUnreadConversationState": ApiDmUnreadConversationState,
+    "ApiDmUnreadSnapshot": ApiDmUnreadSnapshot,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropAndWave": ApiDropAndWave,
@@ -1738,6 +1748,8 @@ let typeMap: {[index: string]: any} = {
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
+    "ApiMarkWaveReadRequest": ApiMarkWaveReadRequest,
+    "ApiMarkWaveReadResponse": ApiMarkWaveReadResponse,
     "ApiMediaResolveRequest": ApiMediaResolveRequest,
     "ApiMediaResolveResponse": ApiMediaResolveResponse,
     "ApiMemeCardDropMapping": ApiMemeCardDropMapping,

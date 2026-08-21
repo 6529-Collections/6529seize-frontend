@@ -14,10 +14,10 @@
 import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
 import { HttpFile } from '../http/http';
 
-export class ApiMarkDropUnreadResponse {
-    'your_unread_drops_count': number;
-    'first_unread_drop_serial_no'?: number | null;
-    'dm_unread_state'?: ApiDmUnreadConversationState | null;
+export class ApiDmUnreadSnapshot {
+    'profile_id': string;
+    'count': number;
+    'conversations': Array<ApiDmUnreadConversationState>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,26 +25,26 @@ export class ApiMarkDropUnreadResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "your_unread_drops_count",
-            "baseName": "your_unread_drops_count",
+            "name": "profile_id",
+            "baseName": "profile_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": ""
         },
         {
-            "name": "first_unread_drop_serial_no",
-            "baseName": "first_unread_drop_serial_no",
-            "type": "number",
-            "format": ""
-        },
-        {
-            "name": "dm_unread_state",
-            "baseName": "dm_unread_state",
-            "type": "ApiDmUnreadConversationState",
+            "name": "conversations",
+            "baseName": "conversations",
+            "type": "Array<ApiDmUnreadConversationState>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarkDropUnreadResponse.attributeTypeMap;
+        return ApiDmUnreadSnapshot.attributeTypeMap;
     }
 
     public constructor() {
