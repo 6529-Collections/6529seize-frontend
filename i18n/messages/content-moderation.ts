@@ -107,7 +107,6 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Manage notification, messaging, and content preferences.",
   "preferences.description":
     "Manage notifications, messages, and the content you see.",
-  "preferences.activeProfile": "Preferences for {profile}",
   "preferences.signIn":
     "Connect an authenticated profile to manage preferences.",
   "preferences.tabs.ariaLabel": "Preference sections",

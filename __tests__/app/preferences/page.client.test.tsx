@@ -6,7 +6,6 @@ jest.mock("@/components/auth/Auth", () => ({
     connectedProfile: {
       id: "profile-1",
       handle: "alice",
-      pfp: null,
     },
   }),
 }));
@@ -16,10 +15,6 @@ jest.mock("@/components/header/ProfilePreferencesSettings", () => () => (
 jest.mock("@/components/preferences/ContentPreferencesSettings", () => () => (
   <div>Content settings panel</div>
 ));
-jest.mock("@/components/ipfs/IPFSContext", () => ({
-  resolveIpfsUrlSync: (value: string) => value,
-}));
-
 describe("PreferencesPageClient", () => {
   it("renders the full-height default notifications view", () => {
     const { container } = render(
@@ -27,7 +22,7 @@ describe("PreferencesPageClient", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Preferences" })).toBeVisible();
-    expect(screen.getByLabelText("Preferences for @alice")).toBeVisible();
+    expect(screen.queryByText("@alice")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Notifications & messages" })
     ).toHaveAttribute("aria-current", "page");
