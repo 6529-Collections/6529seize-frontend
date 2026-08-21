@@ -8,7 +8,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -29,19 +29,19 @@ export default function WaveHeaderNameEditModal({
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState(false);
 
-  const [name, setName] = useState(wave.name);
-  const getIsDisabled = () => mutating || wave.name === name;
-  const [isDisabled, setIsDisabled] = useState(getIsDisabled());
-  useEffect(() => setIsDisabled(getIsDisabled()), [wave, mutating, name]);
+  // The dialog stays mounted while closed, so the edit is held as a draft that
+  // is null until the user types: the displayed name then derives from the wave
+  // whenever there is no draft. A rename landing from elsewhere is picked up on
+  // the next open, and Save can never submit a stale name back over it. Both
+  // values are computed during render rather than mirrored in an effect.
+  const [draft, setDraft] = useState<string | null>(null);
+  const name = draft ?? wave.name;
+  const isDisabled = mutating || name === wave.name;
 
-  // The dialog now stays mounted while closed, so useState only seeds the draft
-  // on first mount. Without this, a rename landing from elsewhere would leave a
-  // stale draft that Save could submit back over the newer name.
-  useEffect(() => {
-    if (!isOpen) {
-      setName(wave.name);
-    }
-  }, [isOpen, wave.name]);
+  const handleClose = () => {
+    setDraft(null);
+    onClose();
+  };
 
   const editNameMutation = useMutation({
     mutationFn: async (body: ApiUpdateWaveRequest) =>
@@ -51,7 +51,7 @@ export default function WaveHeaderNameEditModal({
       }),
     onSuccess: () => {
       onWaveCreated();
-      onClose();
+      handleClose();
     },
     onError: (error) => {
       setToast({
@@ -93,7 +93,7 @@ export default function WaveHeaderNameEditModal({
     <MobileWrapperDialog
       title={t(locale, "waves.header.nameEditTitle")}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       tabletModal
       showHeaderCloseButton
       maxWidthClass="md:tw-max-w-xl"
@@ -104,7 +104,7 @@ export default function WaveHeaderNameEditModal({
         onSubmit={onSubmit}
         className="tw-flex tw-flex-col tw-px-4 sm:tw-px-6"
       >
-        <WaveHeaderNameEditInput name={name} setName={setName} />
+        <WaveHeaderNameEditInput name={name} setName={setDraft} />
 
         <div className="tw-mt-4 tw-flex tw-justify-end">
           <Button
