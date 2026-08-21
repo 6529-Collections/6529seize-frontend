@@ -11,13 +11,11 @@
  * Do not edit the class manually.
  */
 
-import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
 import { HttpFile } from '../http/http';
 
-export class ApiMarkDropUnreadResponse {
-    'your_unread_drops_count': number;
-    'first_unread_drop_serial_no'?: number | null;
-    'dm_unread_state'?: ApiDmUnreadConversationState | null;
+export class ApiMarkWaveReadRequest {
+    'read_through_serial_no'?: number;
+    'request_dm_unread_state'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,26 +23,20 @@ export class ApiMarkDropUnreadResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "your_unread_drops_count",
-            "baseName": "your_unread_drops_count",
+            "name": "read_through_serial_no",
+            "baseName": "read_through_serial_no",
             "type": "number",
             "format": ""
         },
         {
-            "name": "first_unread_drop_serial_no",
-            "baseName": "first_unread_drop_serial_no",
-            "type": "number",
-            "format": ""
-        },
-        {
-            "name": "dm_unread_state",
-            "baseName": "dm_unread_state",
-            "type": "ApiDmUnreadConversationState",
+            "name": "request_dm_unread_state",
+            "baseName": "request_dm_unread_state",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarkDropUnreadResponse.attributeTypeMap;
+        return ApiMarkWaveReadRequest.attributeTypeMap;
     }
 
     public constructor() {

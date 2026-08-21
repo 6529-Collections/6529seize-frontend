@@ -11,13 +11,16 @@
  * Do not edit the class manually.
  */
 
-import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
 import { HttpFile } from '../http/http';
 
-export class ApiMarkDropUnreadResponse {
-    'your_unread_drops_count': number;
-    'first_unread_drop_serial_no'?: number | null;
-    'dm_unread_state'?: ApiDmUnreadConversationState | null;
+export class ApiDmUnreadConversationState {
+    'profile_id': string;
+    'wave_id': string;
+    'unread_count': number;
+    'first_unread_drop_serial_no': number | null;
+    'latest_drop_serial_no': number;
+    'latest_read_serial_no': number;
+    'version': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,8 +28,20 @@ export class ApiMarkDropUnreadResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "your_unread_drops_count",
-            "baseName": "your_unread_drops_count",
+            "name": "profile_id",
+            "baseName": "profile_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wave_id",
+            "baseName": "wave_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "unread_count",
+            "baseName": "unread_count",
             "type": "number",
             "format": ""
         },
@@ -37,14 +52,26 @@ export class ApiMarkDropUnreadResponse {
             "format": ""
         },
         {
-            "name": "dm_unread_state",
-            "baseName": "dm_unread_state",
-            "type": "ApiDmUnreadConversationState",
+            "name": "latest_drop_serial_no",
+            "baseName": "latest_drop_serial_no",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "latest_read_serial_no",
+            "baseName": "latest_read_serial_no",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "version",
+            "baseName": "version",
+            "type": "number",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarkDropUnreadResponse.attributeTypeMap;
+        return ApiDmUnreadConversationState.attributeTypeMap;
     }
 
     public constructor() {
