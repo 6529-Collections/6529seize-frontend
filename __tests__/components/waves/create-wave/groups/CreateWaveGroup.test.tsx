@@ -1,13 +1,38 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
+import type CreateWaveGroupInlinePanel from "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel";
 import type { WaveGroupsConfig } from "@/types/waves.types";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { commonApiFetch } from "@/services/api/common-api";
 
-let inlinePanelProps: any;
+type InlinePanelProps = React.ComponentProps<typeof CreateWaveGroupInlinePanel>;
+
+let inlinePanelProps: InlinePanelProps | null;
+
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+}));
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    connectedProfile: {
+      id: "creator-profile",
+      handle: "creator",
+      normalised_handle: "creator",
+      primary_wallet: "0xcreator",
+      display: "Creator",
+      tdh: 42,
+      level: 3,
+      cic: 5,
+      pfp: "creator.png",
+    },
+  }),
+}));
 
 jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
   return function CreateWaveToggle({
@@ -38,7 +63,7 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
 jest.mock(
   "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel",
   () =>
-    function MockCreateWaveGroupInlinePanel(props: any) {
+    function MockCreateWaveGroupInlinePanel(props: InlinePanelProps) {
       inlinePanelProps = props;
       return (
         <div data-testid="inline-panel">
@@ -50,9 +75,14 @@ jest.mock(
 
 describe("CreateWaveGroup", () => {
   const mockOnGroupSelect = jest.fn();
+  const mockOnCriteriaReplacementChange = jest.fn();
+  const mockOnGroupResolutionChange = jest.fn();
   const mockSetChatEnabled = jest.fn();
   const mockSetDropsAdminCanDelete = jest.fn();
   const mockOnInlineGroupCreate = jest.fn();
+  const mockedCommonApiFetch = commonApiFetch as jest.MockedFunction<
+    typeof commonApiFetch
+  >;
 
   const exampleGroup: ApiGroupFull = {
     id: "group-1",
@@ -63,7 +93,7 @@ describe("CreateWaveGroup", () => {
       handle: "alpha",
       wallet: "0xalpha",
     },
-  } as ApiGroupFull;
+  } as unknown as ApiGroupFull;
 
   const defaultGroups: WaveGroupsConfig = {
     admin: null,
@@ -81,6 +111,8 @@ describe("CreateWaveGroup", () => {
     adminCanDeleteDrops: false,
     setChatEnabled: mockSetChatEnabled,
     onGroupSelect: mockOnGroupSelect,
+    onCriteriaReplacementChange: mockOnCriteriaReplacementChange,
+    onGroupResolutionChange: mockOnGroupResolutionChange,
     onInlineGroupCreate: mockOnInlineGroupCreate,
     groupsCache: {},
     groups: defaultGroups,
@@ -90,11 +122,20 @@ describe("CreateWaveGroup", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedCommonApiFetch.mockReset();
     inlinePanelProps = null;
   });
 
-  const renderComponent = (props = {}) =>
-    render(<CreateWaveGroup {...defaultProps} {...props} />);
+  const renderComponent = (props = {}) => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <CreateWaveGroup {...defaultProps} {...props} />
+      </QueryClientProvider>
+    );
+  };
 
   it("shows the scope title", () => {
     renderComponent();
@@ -113,16 +154,50 @@ describe("CreateWaveGroup", () => {
     });
 
     expect(screen.getByTestId("inline-panel")).toHaveTextContent("Alpha Group");
-    expect(inlinePanelProps.selectedGroup).toEqual(exampleGroup);
+    expect(inlinePanelProps?.selectedGroup).toEqual(exampleGroup);
+    expect(mockedCommonApiFetch).not.toHaveBeenCalled();
+  });
+
+  it("fetches a selected group's details when a resumed draft has only its id", async () => {
+    mockedCommonApiFetch.mockResolvedValue(exampleGroup);
+
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: exampleGroup.id,
+      },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("inline-panel")).toHaveTextContent(
+        "Alpha Group"
+      )
+    );
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1",
+      })
+    );
+    expect(mockOnGroupResolutionChange.mock.calls).toEqual([[true], [false]]);
+    expect(inlinePanelProps?.selectedGroup).toEqual(exampleGroup);
   });
 
   it("passes the suggested group name and simplified callbacks to the inline panel", () => {
     renderComponent();
 
-    expect(inlinePanelProps.suggestedName).toBe("Test Wave Who can drop");
-    expect(inlinePanelProps.onChange).toBe(mockOnGroupSelect);
-    expect(inlinePanelProps.onCreateGroup).toBe(mockOnInlineGroupCreate);
-    expect(inlinePanelProps.groupBuilder).toBeUndefined();
+    expect(inlinePanelProps?.suggestedName).toBe("Test Wave Who can drop");
+    inlinePanelProps?.onChange(exampleGroup);
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
+    expect(mockOnGroupSelect).toHaveBeenCalledWith(exampleGroup);
+    expect(inlinePanelProps?.onCriteriaReplacementChange).toBe(
+      mockOnCriteriaReplacementChange
+    );
+    expect(inlinePanelProps?.onCreateGroup).toBe(mockOnInlineGroupCreate);
+    expect(inlinePanelProps?.membersRoleLabel).toBe("Who can drop");
+    expect(inlinePanelProps?.defaultIncludedIdentity).toMatchObject({
+      profile_id: "creator-profile",
+      wallet: "0xcreator",
+    });
   });
 
   it("shows the chat toggle for non-chat waves when editing chat scope", async () => {
@@ -134,6 +209,7 @@ describe("CreateWaveGroup", () => {
     const chatToggle = screen.getByLabelText("Enable chat");
     await user.click(chatToggle);
     expect(mockSetChatEnabled).toHaveBeenCalledWith(false);
+    expect(mockOnCriteriaReplacementChange).toHaveBeenCalledWith(false);
   });
 
   it("hides the chat toggle for chat waves", () => {
@@ -153,6 +229,14 @@ describe("CreateWaveGroup", () => {
 
     await user.click(screen.getByLabelText("Allow admins to delete posts"));
     expect(mockSetDropsAdminCanDelete).toHaveBeenCalledWith(true);
+    expect(inlinePanelProps?.defaultMembersPreviewTarget).toMatchObject({
+      kind: "draft",
+      name: "Only me",
+      summary: "Only me",
+      group: {
+        identity_addresses: ["0xcreator"],
+      },
+    });
   });
 
   it("passes disabled to the inline panel when chat is disabled", () => {
@@ -161,7 +245,47 @@ describe("CreateWaveGroup", () => {
       chatEnabled: false,
     });
 
-    expect(inlinePanelProps.disabled).toBe(true);
+    expect(inlinePanelProps?.disabled).toBe(true);
+  });
+
+  it("blocks continuation and offers retry when a draft group cannot be restored", async () => {
+    mockedCommonApiFetch.mockRejectedValue(new Error("not found"));
+
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: exampleGroup.id,
+      },
+    });
+
+    expect(
+      await screen.findByText(/selected group could not be loaded/i)
+    ).toBeVisible();
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(true);
+    expect(screen.getByRole("group", { name: "Who can drop" })).toHaveAttribute(
+      "data-wave-group-invalid",
+      "true"
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Retry group" }));
+    await waitFor(() => expect(mockedCommonApiFetch).toHaveBeenCalledTimes(2));
+  });
+
+  it("clears failed draft restoration state after the selected group is removed", async () => {
+    mockedCommonApiFetch.mockRejectedValue(new Error("not found"));
+    renderComponent({
+      groups: { ...defaultGroups, canDrop: exampleGroup.id },
+    });
+
+    expect(
+      await screen.findByText(/selected group could not be loaded/i)
+    ).toBeVisible();
+    expect(mockOnGroupResolutionChange).toHaveBeenLastCalledWith(true);
+
+    inlinePanelProps?.onChange(null);
+
+    expect(mockOnGroupResolutionChange).toHaveBeenLastCalledWith(false);
+    expect(mockOnGroupSelect).toHaveBeenCalledWith(null);
   });
 
   it("exposes a containment error accessibly", () => {

@@ -1,42 +1,27 @@
 import {
   ShieldExclamationIcon,
   UserGroupIcon,
-  UserPlusIcon,
 } from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { ActionButton } from "./CreateWaveInlineGroupButtons";
 
 export default function CreateWaveInlineGroupActions({
   disabled,
-  identityActive,
-  ruleActive,
+  criteriaActive,
   searchActive,
-  onAddIdentity,
-  onAddRule,
+  onReplaceCriteria,
   onUseExistingGroup,
 }: {
   readonly disabled: boolean;
-  readonly identityActive: boolean;
-  readonly ruleActive: boolean;
+  readonly criteriaActive: boolean;
   readonly searchActive: boolean;
-  readonly onAddIdentity: () => void;
-  readonly onAddRule: () => void;
+  readonly onReplaceCriteria: () => void;
   readonly onUseExistingGroup: () => void;
 }) {
+  const locale = useBrowserLocale();
   return (
-    <div className="tw-flex tw-flex-wrap tw-gap-1.5 md:tw-absolute md:tw-right-0 md:tw-top-0 md:tw-justify-end">
-      <ActionButton
-        icon={
-          <UserPlusIcon
-            aria-hidden="true"
-            className="tw-size-3.5 tw-flex-shrink-0"
-          />
-        }
-        label="Add identity"
-        disabled={disabled}
-        active={identityActive}
-        isToggle={true}
-        onClick={onAddIdentity}
-      />
+    <div className="tw-flex tw-flex-wrap tw-gap-1.5 lg:tw-justify-end">
       <ActionButton
         icon={
           <ShieldExclamationIcon
@@ -44,11 +29,11 @@ export default function CreateWaveInlineGroupActions({
             className="tw-size-3.5 tw-flex-shrink-0"
           />
         }
-        label="Add rule"
+        label={t(locale, "waves.create.groups.actions.replaceCriteria")}
         disabled={disabled}
-        active={ruleActive}
+        active={criteriaActive}
         isToggle={true}
-        onClick={onAddRule}
+        onClick={onReplaceCriteria}
       />
       <ActionButton
         icon={
@@ -57,7 +42,7 @@ export default function CreateWaveInlineGroupActions({
             className="tw-size-3.5 tw-flex-shrink-0"
           />
         }
-        label="Choose group"
+        label={t(locale, "waves.create.groups.actions.chooseGroup")}
         disabled={disabled}
         active={searchActive}
         isToggle={true}
