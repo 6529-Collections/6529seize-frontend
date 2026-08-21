@@ -90,7 +90,10 @@ function ProfileCurationPicker({
   const wrapperClassName = isMobileSheet
     ? "tw-px-4 sm:tw-px-6"
     : "tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl";
-  const rowPadding = isMobileSheet ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2.5";
+  const contentInset = isMobileSheet ? "tw-px-0" : "tw-px-1.5";
+  const rowPadding = isMobileSheet ? "tw-px-0 tw-py-3" : "tw-px-3 tw-py-2.5";
+  const messagePadding = isMobileSheet ? "tw-px-0" : "tw-px-3";
+  const footerPadding = isMobileSheet ? "tw-px-0" : "tw-px-3";
   const isAnySubmitting = submittingCurationId !== null;
 
   const renderRow = ({
@@ -123,7 +126,7 @@ function ProfileCurationPicker({
         disabled={isAnySubmitting || isSelected}
         className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-xl tw-border-0 tw-text-left tw-font-medium tw-text-white tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-default ${rowPadding} ${
           isSelected
-            ? "tw-bg-white/10"
+            ? "tw-bg-transparent"
             : "tw-bg-transparent desktop-hover:hover:tw-bg-white/5"
         }`}
       >
@@ -138,21 +141,27 @@ function ProfileCurationPicker({
   let content: ReactNode;
   if (isLoading) {
     content = (
-      <div className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-3 tw-text-sm tw-text-iron-500">
+      <div
+        className={`tw-flex tw-items-center tw-gap-2 tw-py-3 tw-text-sm tw-text-iron-500 ${messagePadding}`}
+      >
         <CircleLoader />
         <span>Loading curations...</span>
       </div>
     );
   } else if (isError) {
     content = (
-      <div className="tw-flex tw-flex-col tw-items-start tw-gap-3 tw-px-3 tw-py-3 tw-text-sm tw-text-iron-500">
+      <div
+        className={`tw-flex tw-flex-col tw-items-start tw-gap-3 tw-py-3 tw-text-sm tw-text-iron-500 ${messagePadding}`}
+      >
         <span>Unable to load curations.</span>
         <RetryButton isLoading={isFetching} onClick={onRetry} />
       </div>
     );
   } else if (curations.length === 0) {
     content = (
-      <p className="tw-mb-0 tw-px-3 tw-py-3 tw-text-sm tw-text-iron-500">
+      <p
+        className={`tw-mb-0 tw-py-3 tw-text-sm tw-text-iron-500 ${messagePadding}`}
+      >
         This wave has no curations yet.
       </p>
     );
@@ -174,14 +183,16 @@ function ProfileCurationPicker({
 
   return (
     <section className={wrapperClassName}>
-      <div className="tw-flex tw-flex-col tw-gap-1 tw-px-1.5">
+      <div className={`tw-flex tw-flex-col tw-gap-1 ${contentInset}`}>
         {!isMobileSheet && (
           <p className="tw-mb-0 tw-px-3 tw-pb-1 tw-pt-2 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
             Profile curation
           </p>
         )}
         {content}
-        <div className="tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-3 tw-pt-3">
+        <div
+          className={`tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3 ${footerPadding}`}
+        >
           <Button variant="secondary" size="xs" onClick={onCreateCuration}>
             {t(locale, "profileCuration.header.createAnother")}
           </Button>
@@ -206,6 +217,7 @@ function ProfileCurationPickerDialog({
       onClose={onClose}
       tabletModal
       maxWidthClass="md:tw-max-w-lg"
+      headerClassName="tw-pb-4"
     >
       <ProfileCurationPicker {...pickerProps} variant="mobile-sheet" />
     </MobileWrapperDialog>
