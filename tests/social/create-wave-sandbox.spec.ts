@@ -55,17 +55,17 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Who can view" })
+      page.getByRole("heading", { name: "Visibility" })
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Who can chat" })
     ).toBeVisible();
-    const adminGroup = page.getByRole("group", { name: "Admin" });
+    const adminGroup = page.getByRole("group", { name: "Admins" });
     await expect(
-      adminGroup.getByRole("heading", { name: "Admin" })
+      adminGroup.getByRole("heading", { name: "Admins" })
     ).toBeVisible();
-    await expect(page.getByText("Anyone").first()).toBeVisible();
-    await expect(adminGroup.getByText("25 currently eligible")).toBeVisible();
+    await expect(page.getByText("Public").first()).toBeVisible();
+    await expect(adminGroup.getByText("25 users")).toBeVisible();
     await expect(
       adminGroup.getByRole("button", { name: "View members" })
     ).toBeVisible();
@@ -164,14 +164,14 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     page,
   }) => {
     const waveName = "Sandbox Rule Group Wave";
-    const expectedGroupName = `${waveName} Who can view`;
+    const expectedGroupName = `${waveName} Visibility`;
 
     await gotoCreateWave(page);
     await page.getByLabel(/Wave Name/).fill(waveName);
     await page.getByText("Chat", { exact: true }).click();
     await nextStepButton(page).press("Enter");
 
-    let accessGroup = page.getByRole("group", { name: "Who can view" });
+    let accessGroup = page.getByRole("group", { name: "Visibility" });
     await accessGroup.getByRole("button", { name: "Replace criteria" }).click();
     await accessGroup
       .getByRole("button", { name: "Level", exact: true })
@@ -184,7 +184,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(page.getByText("Group created and attached.")).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
-    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible();
+    await expect(accessGroup.getByText("25 users")).toBeVisible();
     await expect(
       accessGroup.getByRole("button", { name: "View members" })
     ).toBeVisible();
@@ -254,8 +254,8 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       .click();
     await nextStepButton(page).press("Enter");
 
-    accessGroup = page.getByRole("group", { name: "Who can view" });
-    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible({
+    accessGroup = page.getByRole("group", { name: "Visibility" });
+    await expect(accessGroup.getByText("25 users")).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     expect(await fetchSandboxRequests(baseURL)).toContainEqual(
@@ -280,13 +280,13 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await page.getByText("Chat", { exact: true }).click();
     await nextStepButton(page).press("Enter");
 
-    let accessGroup = page.getByRole("group", { name: "Who can view" });
+    let accessGroup = page.getByRole("group", { name: "Visibility" });
     await accessGroup.getByRole("button", { name: "Choose group" }).click();
     await accessGroup.getByLabel("Search groups…").fill("Active");
     await accessGroup
       .getByRole("option", { name: /Active collectors/ })
       .click();
-    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible();
+    await expect(accessGroup.getByText("25 users")).toBeVisible();
 
     await expect
       .poll(
@@ -311,17 +311,17 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       .click();
     await nextStepButton(page).press("Enter");
 
-    accessGroup = page.getByRole("group", { name: "Who can view" });
-    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible({
+    accessGroup = page.getByRole("group", { name: "Visibility" });
+    await expect(accessGroup.getByText("25 users")).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
 
     await accessGroup.getByRole("button", { name: "View members" }).click();
     const membersDialog = page.getByRole("dialog", {
-      name: "Who can view: Active collectors",
+      name: "Visibility: Active collectors",
     });
     const membersDialogHeading = membersDialog.getByRole("heading", {
-      name: "Who can view: Active collectors",
+      name: "Visibility: Active collectors",
     });
     await expect(membersDialogHeading).toBeVisible();
     expect(
@@ -393,7 +393,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Who can view" })
+      page.getByRole("heading", { name: "Visibility" })
     ).toBeVisible();
 
     const adminDeleteToggle = page.getByRole("switch", {
@@ -427,11 +427,17 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Schedule", level: 2 })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    const waveTimeline = page.getByRole("button", { name: "Wave Timeline" });
+    const waveTimeline = page.getByRole("button", { name: "Opening dates" });
     const winnersAnnouncements = page.getByRole("button", {
       name: "Winners Announcements",
     });
     await expect(waveTimeline).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      page.getByRole("heading", { name: "Submissions Open" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Voting Opens" })
+    ).toBeVisible();
     await expect(winnersAnnouncements).toBeVisible();
     await waveTimeline.click();
     await expect(waveTimeline).toHaveAttribute("aria-expanded", "false");
@@ -479,7 +485,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Wave Timeline" })
+      page.getByRole("button", { name: "Opening dates" })
     ).toBeVisible();
     await expect(
       page.getByText("First Winners Announcement").first()
@@ -516,7 +522,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: "Wave Timeline" })
+      page.getByRole("button", { name: "Opening dates" })
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
@@ -1025,10 +1031,10 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await nextStepButton(page).click();
 
-    // Dates: interacting inside the announcements section must not
-    // auto-collapse the Wave Timeline section above it — that collapse
+    // Schedule: interacting inside the announcements section must not
+    // auto-collapse the Opening dates section above it — that collapse
     // shifted the whole page mid-tap ("calendar jumping around").
-    const timelineToggle = page.getByRole("button", { name: /Wave Timeline/ });
+    const timelineToggle = page.getByRole("button", { name: /Opening dates/ });
     await expect(timelineToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });

@@ -26,10 +26,10 @@ Wave creators and admins can also use `@all`.
 ## Common Scenarios
 
 - `@contributors` notifies profiles with Chat access to the current Wave.
-- If Chat access is **Anyone**, there is no finite Chat-access group to expand.
+- If Chat access is **Public**, there is no finite Chat-access group to expand.
   In that case, Wave followers are the bounded `@contributors` audience;
   muted followers and the author are still excluded from notifications.
-- `@admins` notifies the Wave creator and profiles with Admin access.
+- `@admins` notifies the Wave creator and profiles in the `Admins` scope.
 - `@devs6529` notifies the platform-configured 6529 developer profiles that
   can view the Wave.
 - `@all` keeps its existing follower-broadcast behavior and notification

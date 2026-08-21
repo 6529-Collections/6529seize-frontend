@@ -451,7 +451,8 @@ export const FR_FR_MESSAGES = {
     "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
   "waves.create.groups.viewGroupName": "Qui peut voir",
   "waves.create.groups.adminGroupName": "Administration",
-  "waves.create.groups.members.currentCount": "{count} éligibles actuellement",
+  "waves.create.groups.members.currentCount.one": "{count} utilisateur",
+  "waves.create.groups.members.currentCount.other": "{count} utilisateurs",
   "waves.create.groups.members.countLoading":
     "Vérification de l’audience actuelle…",
   "waves.create.groups.members.countUnavailable":
@@ -507,8 +508,8 @@ export const FR_FR_MESSAGES = {
     "Les soumissions débutent le {submission}. Le vote débute le {voting}. Premiers gagnants : {announcement}.",
   "waves.create.dates.rank.advancedSummary": "Calendrier des gagnants",
   "waves.create.drops.requirementsTitle": "Exigences de soumission",
-  "waves.create.rules.advancedSummary": "Règles du créateur et acceptation",
-  "waves.create.rules.chatAdvancedSummary": "Règles du créateur",
+  "waves.create.rules.advancedSummary": "Directives de la Wave et acceptation",
+  "waves.create.rules.chatAdvancedSummary": "Directives de la Wave",
   "waves.create.voting.rankAdvancedSummary": "Limites et comportement du vote",
   "waves.create.voting.approveAdvancedSummary":
     "Limites, comportement et calendrier du vote",

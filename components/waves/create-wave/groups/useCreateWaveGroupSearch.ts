@@ -371,7 +371,9 @@ export function useCreateWaveGroupSearch({
   });
 
   const hasValue = inputValue.trim().length > 0;
-  const helperText = `Current group: ${selectedGroup?.name ?? defaultLabel}`;
+  const helperText = selectedGroup
+    ? `Current group: ${selectedGroup.name}`
+    : defaultLabel;
   const showClearButton =
     allowClear && (hasValue || !!selectedGroup) && !disabled;
   const showNoResults = !isFetching && isOpen && suggestions.length === 0;

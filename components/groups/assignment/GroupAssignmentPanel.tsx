@@ -128,11 +128,13 @@ function DialogTabs({
 
 function DialogGroupSummary({
   currentGroupLabel,
+  showCurrentGroupTitle,
   unsavedGroupDescription,
   unsavedGroupSummary,
   membersPreview,
 }: {
   readonly currentGroupLabel: string;
+  readonly showCurrentGroupTitle: boolean;
   readonly unsavedGroupDescription: string | null;
   readonly unsavedGroupSummary: string | null;
   readonly membersPreview?: ReactNode | undefined;
@@ -145,9 +147,11 @@ function DialogGroupSummary({
   return (
     <div className={summaryGridClasses}>
       <div className="tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/70 tw-p-3">
-        <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-          {t(locale, "waves.create.groups.currentGroup")}
-        </p>
+        {showCurrentGroupTitle ? (
+          <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            {t(locale, "waves.create.groups.currentGroup")}
+          </p>
+        ) : null}
         {membersPreview === null || membersPreview === undefined ? (
           <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
             {currentGroupLabel}
@@ -329,6 +333,7 @@ function DialogGroupAssignmentPanel({
       <div ref={panelRef} className="tw-flex tw-flex-col tw-gap-4">
         <DialogGroupSummary
           currentGroupLabel={currentGroupLabel}
+          showCurrentGroupTitle={selectedGroup !== null}
           unsavedGroupDescription={unsavedGroupDescription}
           unsavedGroupSummary={unsavedGroupSummary}
           membersPreview={savedMembersPreview}
@@ -487,6 +492,7 @@ function InlineGroupAssignmentPanel({
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
             <CreateWaveInlineGroupHeader
               currentGroupLabel={currentGroupLabel}
+              showCurrentGroupTitle={selectedGroup !== null}
               unsavedGroupDescription={unsavedGroupDescription}
               unsavedGroupSummary={unsavedGroupSummary}
               membersPreview={savedMembersPreview}
@@ -591,6 +597,7 @@ export default function GroupAssignmentPanel({
     disabled = false,
     selectedGroup,
     membersRoleLabel,
+    selectedGroupCriteriaStatus,
   } = props;
   const [previewTarget, setPreviewTarget] =
     useState<GroupMembersPreviewTarget | null>(null);
@@ -605,6 +612,7 @@ export default function GroupAssignmentPanel({
       <GroupMembersPreviewTrigger
         target={currentMembersTarget}
         disabled={disabled}
+        criteriaStatus={selectedGroupCriteriaStatus}
         onOpen={() => setPreviewTarget(currentMembersTarget)}
       />
     ) : null;

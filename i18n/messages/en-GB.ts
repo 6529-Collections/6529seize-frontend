@@ -428,9 +428,10 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.title": "Access",
   "waves.create.groups.description":
     "Choose who can access, participate in, and manage this wave.",
-  "waves.create.groups.viewGroupName": "Who can view",
-  "waves.create.groups.adminGroupName": "Admin",
-  "waves.create.groups.members.currentCount": "{count} currently eligible",
+  "waves.create.groups.viewGroupName": "Visibility",
+  "waves.create.groups.adminGroupName": "Admins",
+  "waves.create.groups.members.currentCount.one": "{count} user",
+  "waves.create.groups.members.currentCount.other": "{count} users",
   "waves.create.groups.members.countLoading": "Checking current audience…",
   "waves.create.groups.members.countUnavailable":
     "Current audience unavailable",
@@ -466,7 +467,7 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.validation.invalidTitle":
     "Some access groups need attention.",
   "waves.create.groups.validation.invalidDescription":
-    "Every Drop, Vote, Chat, and Admin group member must also belong to the View group.",
+    "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
   "waves.create.dates.title": "Schedule",
   "waves.create.dates.description":
     "Review when this wave opens, voting begins, and winners are announced.",
@@ -480,8 +481,8 @@ export const EN_GB_MESSAGES = {
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
   "waves.create.dates.rank.advancedSummary": "Winner schedule",
   "waves.create.drops.requirementsTitle": "Submission requirements",
-  "waves.create.rules.advancedSummary": "Creator rules and acceptance",
-  "waves.create.rules.chatAdvancedSummary": "Creator rules",
+  "waves.create.rules.advancedSummary": "Wave guidelines and acceptance",
+  "waves.create.rules.chatAdvancedSummary": "Wave guidelines",
   "waves.create.voting.rankAdvancedSummary": "Vote limits and behaviour",
   "waves.create.voting.approveAdvancedSummary":
     "Vote limits, behaviour, and timing",

@@ -6,11 +6,11 @@ import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.t
 describe("WaveGroupTitle", () => {
   it("renders label for each type", () => {
     const expectedLabels: Record<WaveGroupType, string> = {
-      [WaveGroupType.VIEW]: "View",
+      [WaveGroupType.VIEW]: "Visibility",
       [WaveGroupType.DROP]: "Drop",
       [WaveGroupType.VOTE]: "Vote",
       [WaveGroupType.CHAT]: "Chat access",
-      [WaveGroupType.ADMIN]: "Admin",
+      [WaveGroupType.ADMIN]: "Admins",
     };
 
     Object.values(WaveGroupType).forEach((type) => {

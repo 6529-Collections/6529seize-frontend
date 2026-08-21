@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import GroupAssignmentDialog from "@/components/groups/assignment/GroupAssignmentDialog";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { buildInlineGroupName } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
@@ -18,6 +20,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { commonApiFetch } from "@/services/api/common-api";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { WaveGroupType } from "../WaveGroup.types";
 
@@ -124,6 +127,22 @@ export default function WaveGroupChangeDialog({
     () => getSelectedGroup(currentGroup),
     [currentGroup]
   );
+  const currentGroupId = currentGroup?.id ?? "";
+  const {
+    data: restoredGroup,
+    isError: isGroupError,
+    isLoading: isGroupLoading,
+  } = useQuery<ApiGroupFull>({
+    queryKey: [QueryKey.GROUP, currentGroupId],
+    queryFn: async ({ signal }) =>
+      await commonApiFetch<ApiGroupFull>({
+        endpoint: `groups/${encodeURIComponent(currentGroupId)}`,
+        signal,
+      }),
+    enabled: currentGroupId.length > 0,
+    staleTime: 60_000,
+  });
+  const resolvedSelectedGroup = restoredGroup ?? selectedGroup;
   const groupConfigType = WAVE_GROUP_TO_CREATE_GROUP_TYPE[type];
   const groupLabel =
     CREATE_WAVE_SELECT_GROUP_LABELS[wave.wave.type][groupConfigType];
@@ -133,10 +152,16 @@ export default function WaveGroupChangeDialog({
     groupLabel,
     fallbackName: t(locale, "waves.create.groups.defaultGroupName"),
   });
-  const title = selectedGroup ? "Change group" : "Add group";
-  const description = selectedGroup
+  const title = resolvedSelectedGroup ? "Change group" : "Add group";
+  const description = resolvedSelectedGroup
     ? "Create a new group or choose a different existing group."
     : "Create a new group or choose an existing group.";
+  let selectedGroupCriteriaStatus: "loading" | "unavailable" | undefined;
+  if (isGroupLoading) {
+    selectedGroupCriteriaStatus = "loading";
+  } else if (isGroupError) {
+    selectedGroupCriteriaStatus = "unavailable";
+  }
 
   return (
     <GroupAssignmentDialog
@@ -144,7 +169,9 @@ export default function WaveGroupChangeDialog({
       description={description}
       suggestedName={suggestedName}
       defaultLabel={defaultLabel}
-      selectedGroup={selectedGroup}
+      selectedGroup={resolvedSelectedGroup}
+      membersRoleLabel={groupLabel}
+      selectedGroupCriteriaStatus={selectedGroupCriteriaStatus}
       allowGroupClear={false}
       onClose={onClose}
       onChange={onGroupChange}

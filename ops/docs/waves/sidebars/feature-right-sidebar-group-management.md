@@ -7,9 +7,9 @@ groups. Editors can also manage them in place from `Settings`.
 
 Users can:
 
-- review `View`, `Drop`, `Vote`, `Chat access`, and `Admin` scopes
-- follow visible eligible-member counts to inspect both criteria and current
-  members
+- review `Visibility`, `Drop`, `Vote`, `Chat access`, and `Admins` scopes
+- follow visible `1 user` or `X users` counts to inspect both criteria and
+  current members
 - add, change, or remove scope groups from row menus
 - include or exclude one identity from a scoped group
 - manage non-chat `Curation Groups` without leaving the thread
@@ -34,40 +34,48 @@ Users can:
 1. Open Wave details from the right sidebar or mobile wave-actions menu.
 2. Select `Rules` or `Settings`, then review the access rows.
 3. Check current scope value:
-   - no group: `Anyone`
-   - no chat access group: `Anyone`
+   - no group: `Public`
+   - no chat access group: `Public`
    - group hidden from the current viewer: `Private group`
    - public or authorized private group available to the current viewer: Rules
-     show a linked live eligible-member count, while Settings shows a linked
-     name; both use `/network?page=1&group={groupId}`
-4. Follow a visible group link. Network shows the group criteria above the
-   current filtered member list.
+     show a linked live `1 user` or `X users` count with a concise criteria
+     summary, while Settings shows a linked name; both use
+     `/network?page=1&group={groupId}`
+4. Follow a visible group link. Network shows the complete group criteria
+   above the current filtered member list.
 5. Return with normal browser back navigation when finished inspecting.
 6. Editors can open `Group options` on the Settings row to update it.
 7. Choose an available action:
    - `Add group` or `Change group`
-   - `Remove group` (not shown for `Admin`)
+   - `Remove group` (not shown for `Admins`)
    - `Include identity` or `Exclude identity` (permission-gated)
 8. Complete the modal:
-   - group picker for add/change
+   - group picker for add/change; the current-group card omits the generated
+     group name and shows the live `1 user` or `X users` total, readable
+     criteria, and `View members` explorer
    - identity search modal for include/exclude
    - confirmation modal for remove
 9. Authenticate when prompted.
-10. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admin`
-    group is contained in `View` before saving.
-11. After success, the row refreshes.
-12. On non-chat waves, use the same actions under `Curation Groups`.
+10. When an identity is included or excluded, the app clones the current group
+    and assigns the clone only to the access row whose menu was opened. Other
+    access rows and waves that use the original group stay unchanged.
+11. Creating replacement criteria also creates a separate group, and choosing
+    an existing group changes only the selected access row.
+12. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admins`
+    group is contained in `Visibility` before saving.
+13. After success, the row refreshes.
+14. On non-chat waves, use the same actions under `Curation Groups`.
 
 ## Common Scenarios
 
 - Restrict `Drop` or `Vote` to a specific group.
-- Remove a scope group to return that scope to `Anyone`.
+- Remove a scope group to return that scope to `Public`.
 - Include or exclude a specific identity from a scope group.
 - Add or replace curation groups on non-chat waves.
 
 ## Edge Cases
 
-- Chat waves show only `View`, `Chat access`, and `Admin`.
+- Chat waves show only `Visibility`, `Chat access`, and `Admins`.
 - `Chat access` controls who can chat only when chat is enabled; it does not
   show whether chat is currently enabled or disabled.
 - Chat waves require chat to stay enabled, so their Settings and Rules panels
@@ -78,10 +86,12 @@ Users can:
 - Available group inspection is accessible to read-only wave viewers; it does
   not depend on wave edit permission. An authenticated private-group member or
   creator can inspect that group's criteria and members. Rules show the current
-  eligible-member count instead of the generated group name.
+  `1 user` or `X users` count instead of the generated group name.
 - Scope stubs hidden from the current viewer never render a link, group
   identity, or group metadata.
-- `Admin` does not show `Remove group`.
+- If multiple access rows currently share a group, changing identities or
+  criteria from one row does not modify the group assigned to the other rows.
+- `Admins` does not show `Remove group`.
 - In `General`, `Include identity` and `Exclude identity` show only when the
   user can edit the wave and is either wave admin or the scope-group author.
 - In `Curation Groups`, edit controls show only when the user can edit the wave.
@@ -112,8 +122,8 @@ unavailable` without exposing the group id or treating the scope as public.
 ## Limitations / Notes
 
 - Editing controls require a non-proxy profile with wave edit permission.
-- Curation-group actions are separate from `View`/`Drop`/`Vote`/`Chat access`/
-  `Admin` access scope rows.
+- Curation-group actions are separate from `Visibility`/`Drop`/`Vote`/
+  `Chat access`/`Admins` access scope rows.
 - Include/exclude limits are enforced per group:
   - include list max: `10,000`
   - exclude list max: `1,000`

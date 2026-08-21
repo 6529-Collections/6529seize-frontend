@@ -17,8 +17,8 @@ The optional Approve winner limit is in the named `Winner limits` expandable.
 
 ## Step Path
 
-- Scheduled `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
-- `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 `Perpetual Ranking` skips this step because its live leaderboard is the outcome
 and it never announces winners.

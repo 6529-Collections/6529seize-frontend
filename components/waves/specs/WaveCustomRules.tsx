@@ -210,8 +210,8 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
   return (
     <WaveSettingRow
       canEdit={canEdit}
-      editLabel="Edit custom rules"
-      label="Custom rules"
+      editLabel="Edit guidelines"
+      label="Guidelines"
       onOpen={resetEditor}
       renderEditor={({ closeEditor }) => (
         <WaveCustomRulesEditor

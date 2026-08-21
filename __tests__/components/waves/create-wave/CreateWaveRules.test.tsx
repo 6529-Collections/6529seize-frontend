@@ -40,13 +40,15 @@ jest.mock("@/components/waves/specs/WaveRulesPanel", () => ({
   __esModule: true,
   default: ({
     title,
+    showTitle,
     renderRowValue,
   }: ComponentProps<typeof WaveRulesPanel>) => (
     <>
-      <h3>{title}</h3>
+      {showTitle !== false && <h3>{title}</h3>}
+      <div data-testid="rules-panel" data-show-title={String(showTitle)} />
       {renderRowValue?.({
         id: "admin",
-        label: "Who can admin",
+        label: "Admins",
         value: "Only me",
       })}
     </>
@@ -145,11 +147,11 @@ describe("CreateWaveRules", () => {
     );
 
     expect(screen.getByTestId("rules-group-members")).toHaveTextContent(
-      "Who can admin:draft:0xcreator"
+      "Admins:draft:0xcreator"
     );
   });
 
-  it("keeps automatic rules visible and Chat creator rules in Advanced", () => {
+  it("shows generated rules and Chat wave guidelines without redundant copy", () => {
     render(
       <CreateWaveRules
         config={getConfig(ApiWaveType.Chat)}
@@ -162,23 +164,42 @@ describe("CreateWaveRules", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "Rules" })
     ).toBeVisible();
+    expect(screen.getByTestId("rules-panel")).toHaveAttribute(
+      "data-show-title",
+      "false"
+    );
+    expect(screen.queryByText("Automatic rules")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 3, name: "Automatic rules" })
-    ).toBeVisible();
+      screen.queryByText(
+        "Automatic rules are generated from the wave setup. Add creator rules only for wave-specific requirements that are not already covered."
+      )
+    ).not.toBeInTheDocument();
     const advancedButton = screen.getByRole("button", {
-      name: "Creator rules",
+      name: "Wave guidelines",
     });
     expect(advancedButton).toHaveAttribute("aria-expanded", "false");
-    expect(
-      screen.getByLabelText("Display-only creator rules")
-    ).not.toBeVisible();
+    expect(screen.getByLabelText("Wave guidelines")).not.toBeVisible();
     expect(
       screen.queryByRole("button", { name: "Rules that require acceptance" })
     ).toBeNull();
 
     fireEvent.click(advancedButton);
 
-    expect(screen.getByLabelText("Display-only creator rules")).toBeVisible();
+    expect(screen.getByLabelText("Wave guidelines")).toBeVisible();
+    expect(
+      screen.getByText("These guidelines are shown in wave rules panel")
+    ).toBeVisible();
+    expect(
+      screen.getByPlaceholderText("Add optional wave guidelines...")
+    ).toBeVisible();
+    expect(
+      screen.queryByText("Display-only creator rules")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "Leave blank when automatic rules already cover the wave."
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("includes acceptance rules for Rank waves and preserves their handler", () => {
@@ -194,7 +215,7 @@ describe("CreateWaveRules", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Creator rules and acceptance",
+        name: "Wave guidelines and acceptance",
       })
     );
     fireEvent.click(
@@ -209,7 +230,7 @@ describe("CreateWaveRules", () => {
     );
   });
 
-  it("marks restored creator rules as Customized while collapsed", () => {
+  it("marks restored wave guidelines as Customized while collapsed", () => {
     render(
       <CreateWaveRules
         config={getConfig(ApiWaveType.Rank, "Restored rule")}
@@ -221,7 +242,7 @@ describe("CreateWaveRules", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /Creator rules and acceptance Customized/,
+        name: /Wave guidelines and acceptance Customized/,
       })
     ).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByDisplayValue("Restored rule")).not.toBeVisible();
