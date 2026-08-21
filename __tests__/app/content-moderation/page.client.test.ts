@@ -1,4 +1,4 @@
-import { getAiRecommendationText } from "@/app/content-moderation/page.client";
+import { getAiRecommendationText } from "@/services/content-moderation/content-moderation-formatters";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 
 const createQueueItem = (
@@ -25,10 +25,21 @@ describe("content moderation AI recommendation formatting", () => {
 
   it("formats a present recommendation", () => {
     expect(
+      getAiRecommendationText(createQueueItem("NEEDS_HUMAN_REVIEW"), "en-US")
+    ).toBe("AI recommendation: Needs Human Review");
+  });
+
+  it.each([
+    [0.82, "AI recommendation: Needs Human Review (82%)"],
+    [-0.2, "AI recommendation: Needs Human Review (0%)"],
+    [1.4, "AI recommendation: Needs Human Review (100%)"],
+    [Number.NaN, "AI recommendation: Needs Human Review"],
+  ])("formats and clamps confidence %p", (confidence, expected) => {
+    expect(
       getAiRecommendationText(
-        createQueueItem("NEEDS_HUMAN_REVIEW"),
+        createQueueItem("NEEDS_HUMAN_REVIEW", confidence),
         "en-US"
       )
-    ).toBe("AI recommendation: Needs Human Review");
+    ).toBe(expected);
   });
 });

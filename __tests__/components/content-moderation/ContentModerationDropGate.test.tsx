@@ -3,6 +3,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { unhideDrop } from "@/services/api/content-moderation-api";
 import {
+  getDropHiddenOverride,
   resetContentModerationStateForTests,
   setDropHiddenOverride,
   setProfileBlockedOverride,
@@ -17,11 +18,13 @@ import {
 } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 
-let mockConnectedProfileId = "viewer-1";
+let mockConnectedProfileId: string | null = "viewer-1";
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile: { id: mockConnectedProfileId },
+    connectedProfile: mockConnectedProfileId
+      ? { id: mockConnectedProfileId }
+      : null,
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
   }),
@@ -115,6 +118,7 @@ describe("ContentModerationDropGate", () => {
   });
 
   it("persists unhide for personally hidden content", async () => {
+    mockConnectedProfileId = null;
     renderGate(
       <ContentModerationDropGate
         drop={createDrop({
@@ -134,6 +138,7 @@ describe("ContentModerationDropGate", () => {
     );
     expect(hiddenContent).toHaveAttribute("aria-hidden", "true");
     expect(hiddenContent).toHaveAttribute("inert");
+    expect(hiddenContent).toHaveClass("tw-blur-[6px]");
     expect(screen.getByText("Personally hidden post")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Unhide" }));
     expect(
@@ -143,6 +148,35 @@ describe("ContentModerationDropGate", () => {
     expect(
       await screen.findByText("Personally hidden post")
     ).toBeInTheDocument();
+  });
+
+  it("restores the exact hidden override when unhide fails", async () => {
+    jest.mocked(unhideDrop).mockRejectedValueOnce(new Error("request failed"));
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          viewer_context: { author_blocked: false, drop_hidden: true },
+          moderation: {
+            status: ApiDropModerationStatus.Visible,
+            can_view: true,
+          },
+        })}
+      >
+        <p>Hidden after failed unhide</p>
+      </ContentModerationDropGate>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Unhide" }));
+    expect(
+      screen.queryByTestId("content-moderation-tombstone-hidden")
+    ).not.toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("content-moderation-tombstone-hidden")
+      ).toBeInTheDocument()
+    );
+    expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
   });
 
   it("does not carry a temporary reveal across profile switches", () => {

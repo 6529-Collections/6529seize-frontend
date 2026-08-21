@@ -9,6 +9,7 @@ import {
 } from "@/services/api/content-moderation-api";
 import {
   getDropHiddenOverride,
+  getProfileBlockedOverride,
   resetContentModerationStateForTests,
 } from "@/services/content-moderation/content-moderation-state";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,10 +19,13 @@ import userEvent from "@testing-library/user-event";
 
 const mockRequestAuth = jest.fn();
 const mockSetToast = jest.fn();
+let mockConnectedProfileId: string | null = "viewer-1";
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile: { id: "viewer-1" },
+    connectedProfile: mockConnectedProfileId
+      ? { id: mockConnectedProfileId }
+      : null,
     requestAuth: mockRequestAuth,
     setToast: mockSetToast,
   }),
@@ -96,6 +100,7 @@ const renderModal = ({
 describe("ReportDropModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockConnectedProfileId = "viewer-1";
     resetContentModerationStateForTests();
     mockRequestAuth.mockResolvedValue({ success: true });
     jest.mocked(reportDrop).mockResolvedValue({
@@ -107,12 +112,23 @@ describe("ReportDropModal", () => {
     jest.mocked(blockProfile).mockResolvedValue(undefined);
   });
 
-  it("submits a report by default without changing personal visibility", async () => {
+  it("starts with no action selected and submits a report when selected", async () => {
     const { onClose } = renderModal();
 
     expect(
+      screen.getByRole("heading", { name: "Flag Content" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Report this post or change what you see.")
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("checkbox", { name: "Report this post" })
-    ).toBeChecked();
+    ).not.toBeChecked();
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Report this post" })
+    );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() =>
@@ -134,9 +150,6 @@ describe("ReportDropModal", () => {
     const { onClose } = renderModal();
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
-    );
-    await userEvent.click(
       screen.getByRole("checkbox", { name: "Hide this post for me" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
@@ -151,9 +164,46 @@ describe("ReportDropModal", () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
+  it("immediately hides the mounted post even before viewer state is available", async () => {
+    mockConnectedProfileId = null;
+    const deferred = createDeferred<void>();
+    jest.mocked(hideDrop).mockReturnValue(deferred.promise);
+    const drop = createDrop("drop-1");
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const onClose = jest.fn();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ContentModerationDropGate drop={drop}>
+          <p>Post to hide immediately</p>
+          <ReportDropModal drop={drop} isOpen onClose={onClose} />
+        </ContentModerationDropGate>
+      </QueryClientProvider>
+    );
+
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Hide this post for me" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect(
+      screen.getByTestId("content-moderation-tombstone-hidden")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Post to hide immediately")).toBeInTheDocument();
+    await waitFor(() => expect(hideDrop).toHaveBeenCalledWith("drop-1"));
+
+    deferred.resolve(undefined);
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
   it("combines reporting and personal choices in the report request", async () => {
     renderModal();
 
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Report this post" })
+    );
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Hide this post for me" })
     );
@@ -191,9 +241,6 @@ describe("ReportDropModal", () => {
     });
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
-    );
-    await userEvent.click(
       screen.getByRole("checkbox", { name: "Block this author" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
@@ -216,12 +263,40 @@ describe("ReportDropModal", () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
-  it("requires at least one selected action", async () => {
-    renderModal();
+  it("rolls back only the failed action after a partial failure", async () => {
+    jest.mocked(hideDrop).mockRejectedValue(new Error("hide failed"));
+    jest.mocked(blockProfile).mockResolvedValue(undefined);
+    const { onClose } = renderModal();
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
+      screen.getByRole("checkbox", { name: "Hide this post for me" })
     );
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Block this author" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    await waitFor(() =>
+      expect(mockSetToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Couldn't complete every selected action.",
+          type: "error",
+        })
+      )
+    );
+    expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
+    expect(getProfileBlockedOverride("viewer-1", "author-1")).toBe(true);
+    expect(
+      screen.getByRole("checkbox", { name: "Hide this post for me" })
+    ).toBeChecked();
+    expect(
+      screen.getByRole("checkbox", { name: "Block this author" })
+    ).not.toBeChecked();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("requires at least one selected action", async () => {
+    renderModal();
 
     expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
   });

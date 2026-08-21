@@ -28,4 +28,23 @@ describe("useContentModerationStateScope", () => {
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
     expect(getGlobalDropModerationOverride("drop-2")).toBeUndefined();
   });
+
+  it("keeps moderation overrides when the connected profile is unchanged", () => {
+    const { rerender } = renderHook(
+      ({ profileId }) => useContentModerationStateScope(profileId),
+      { initialProps: { profileId: "viewer-1" } }
+    );
+    setDropHiddenOverride("viewer-1", "drop-1", true);
+    setGlobalDropModerationOverride(
+      "drop-2",
+      ApiDropModerationStatus.ModeratorRemoved
+    );
+
+    rerender({ profileId: "viewer-1" });
+
+    expect(getDropHiddenOverride("viewer-1", "drop-1")).toBe(true);
+    expect(getGlobalDropModerationOverride("drop-2")).toBe(
+      ApiDropModerationStatus.ModeratorRemoved
+    );
+  });
 });

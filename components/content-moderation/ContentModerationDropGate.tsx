@@ -8,11 +8,22 @@ import { useContentModerationVisibility } from "@/hooks/content-moderation/useCo
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { unhideDrop } from "@/services/api/content-moderation-api";
-import { setDropHiddenOverride } from "@/services/content-moderation/content-moderation-state";
+import {
+  getDropHiddenOverride,
+  setDropHiddenOverride,
+} from "@/services/content-moderation/content-moderation-state";
 import { invalidateContentModerationPresentation } from "@/services/content-moderation/content-moderation-query";
 import { EyeIcon, ShieldExclamationIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { ContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 
 interface ContentModerationDropGateProps {
   readonly drop: Pick<
@@ -32,6 +43,50 @@ export default function ContentModerationDropGate({
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const queryClient = useQueryClient();
   const { visibility, reveal } = useContentModerationVisibility(drop);
+  const [optimisticHidden, setOptimisticHiddenState] = useState<
+    boolean | undefined
+  >(undefined);
+  const optimisticHiddenRef = useRef<boolean | undefined>(undefined);
+  const scopedViewerProfileIdRef = useRef<string | null>(
+    connectedProfile?.id ?? null
+  );
+  useEffect(() => {
+    const nextViewerProfileId = connectedProfile?.id ?? null;
+    const previousViewerProfileId = scopedViewerProfileIdRef.current;
+    scopedViewerProfileIdRef.current = nextViewerProfileId;
+    if (
+      previousViewerProfileId !== null &&
+      previousViewerProfileId !== nextViewerProfileId
+    ) {
+      optimisticHiddenRef.current = undefined;
+      setOptimisticHiddenState(undefined);
+    }
+  }, [connectedProfile?.id]);
+  const setOptimisticHidden = useCallback((hidden: boolean) => {
+    const previous = optimisticHiddenRef.current;
+    optimisticHiddenRef.current = hidden;
+    setOptimisticHiddenState(hidden);
+    return () => {
+      optimisticHiddenRef.current = previous;
+      setOptimisticHiddenState(previous);
+    };
+  }, []);
+  const gateContext = useMemo(
+    () => ({ setOptimisticHidden }),
+    [setOptimisticHidden]
+  );
+  const effectiveVisibility = (() => {
+    if (visibility.kind === "global" || visibility.kind === "blocked") {
+      return visibility;
+    }
+    if (optimisticHidden === true) {
+      return { kind: "hidden" } as const;
+    }
+    if (optimisticHidden === false && visibility.kind === "hidden") {
+      return { kind: "visible" } as const;
+    }
+    return visibility;
+  })();
   const unhideMutation = useMutation({
     mutationFn: async () => {
       const { success } = await requestAuth();
@@ -39,10 +94,15 @@ export default function ContentModerationDropGate({
       await unhideDrop(drop.id);
     },
     onMutate: () => {
+      const rollbackLocalHidden = setOptimisticHidden(false);
       const viewerProfileId = connectedProfile?.id;
-      if (!viewerProfileId) return undefined;
-      setDropHiddenOverride(viewerProfileId, drop.id, false);
-      return { viewerProfileId };
+      const previousHidden = viewerProfileId
+        ? getDropHiddenOverride(viewerProfileId, drop.id)
+        : undefined;
+      if (viewerProfileId) {
+        setDropHiddenOverride(viewerProfileId, drop.id, false);
+      }
+      return { previousHidden, rollbackLocalHidden, viewerProfileId };
     },
     onSuccess: () => {
       void invalidateContentModerationPresentation(queryClient);
@@ -52,8 +112,13 @@ export default function ContentModerationDropGate({
       });
     },
     onError: (error, _variables, context) => {
-      if (context) {
-        setDropHiddenOverride(context.viewerProfileId, drop.id, true);
+      context?.rollbackLocalHidden();
+      if (context?.viewerProfileId) {
+        setDropHiddenOverride(
+          context.viewerProfileId,
+          drop.id,
+          context.previousHidden
+        );
       }
       if (
         error instanceof Error &&
@@ -70,29 +135,35 @@ export default function ContentModerationDropGate({
     },
   });
 
-  if (visibility.kind === "visible") {
-    return <>{children}</>;
+  if (effectiveVisibility.kind === "visible") {
+    return (
+      <ContentModerationDropGateContext.Provider value={gateContext}>
+        {children}
+      </ContentModerationDropGateContext.Provider>
+    );
   }
 
-  if (visibility.kind === "hidden") {
+  if (effectiveVisibility.kind === "hidden") {
     return (
       <div
-        className={`tw-relative tw-w-full tw-overflow-hidden tw-rounded-xl ${
-          compact ? "tw-max-h-20" : "tw-my-1 tw-max-h-36 tw-min-h-16"
+        className={`tw-relative tw-w-full tw-overflow-hidden ${
+          compact ? "tw-max-h-20 tw-rounded-xl" : "tw-my-1"
         }`}
         data-testid="content-moderation-tombstone-hidden"
       >
+        <ContentModerationDropGateContext.Provider value={gateContext}>
+          <div
+            aria-hidden="true"
+            inert
+            className="tw-pointer-events-none tw-select-none tw-opacity-40 tw-blur-[6px]"
+            data-testid="content-moderation-hidden-content"
+          >
+            {children}
+          </div>
+        </ContentModerationDropGateContext.Provider>
         <div
-          aria-hidden="true"
-          inert
-          className="tw-pointer-events-none tw-select-none tw-opacity-25 tw-blur-[2px]"
-          data-testid="content-moderation-hidden-content"
-        >
-          {children}
-        </div>
-        <div
-          className={`tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-950/65 ${
-            compact ? "tw-p-0" : "tw-p-2"
+          className={`tw-absolute tw-inset-x-0 tw-top-0 tw-flex tw-justify-center ${
+            compact ? "tw-p-0.5" : "tw-p-2"
           }`}
         >
           <div
@@ -119,12 +190,12 @@ export default function ContentModerationDropGate({
     );
   }
 
-  const isGlobal = visibility.kind === "global";
+  const isGlobal = effectiveVisibility.kind === "global";
   const message = (() => {
-    if (visibility.kind === "blocked") {
+    if (effectiveVisibility.kind === "blocked") {
       return t(locale, "contentModeration.tombstone.blocked");
     }
-    if (visibility.status === ApiDropModerationStatus.ModeratorRemoved) {
+    if (effectiveVisibility.status === ApiDropModerationStatus.ModeratorRemoved) {
       return t(locale, "contentModeration.tombstone.removed");
     }
     return t(locale, "contentModeration.tombstone.quarantined");
@@ -135,7 +206,7 @@ export default function ContentModerationDropGate({
       className={`tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/80 ${
         compact ? "tw-px-3 tw-py-2" : "tw-my-1 tw-px-4 tw-py-4"
       }`}
-      data-testid={`content-moderation-tombstone-${visibility.kind}`}
+      data-testid={`content-moderation-tombstone-${effectiveVisibility.kind}`}
     >
       <ShieldExclamationIcon
         aria-hidden="true"

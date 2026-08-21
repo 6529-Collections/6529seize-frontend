@@ -27,9 +27,10 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { FlagIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
+import { useContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 
 type PostAction = "report" | "hide" | "block";
 
@@ -135,12 +136,13 @@ export default function ReportDropModal({
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const queryClient = useQueryClient();
+  const dropGateContext = useContentModerationDropGateContext();
   const descriptionId = useId();
   const [reason, setReason] = useState<ApiContentModerationReportReason>(
     ApiContentModerationReportReason.ScamOrPhishing
   );
   const [notes, setNotes] = useState("");
-  const [reportPost, setReportPost] = useState(true);
+  const [reportPost, setReportPost] = useState(false);
   const [hidePost, setHidePost] = useState(false);
   const [blockAuthor, setBlockAuthor] = useState(false);
   const hasSelection = reportPost || hidePost || blockAuthor;
@@ -148,7 +150,7 @@ export default function ReportDropModal({
   const closeModal = () => {
     setReason(ApiContentModerationReportReason.ScamOrPhishing);
     setNotes("");
-    setReportPost(true);
+    setReportPost(false);
     setHidePost(false);
     setBlockAuthor(false);
     onClose();
@@ -195,18 +197,25 @@ export default function ReportDropModal({
       return Promise.all(actions);
     },
     onMutate: () => {
+      const rollbackLocalHidden = hidePost
+        ? dropGateContext?.setOptimisticHidden(true)
+        : undefined;
       const viewerProfileId = connectedProfile?.id;
-      if (!viewerProfileId || (!hidePost && !blockAuthor)) return undefined;
-      const previousHidden = hidePost
-        ? getDropHiddenOverride(viewerProfileId, drop.id)
-        : undefined;
-      const previousBlocked = blockAuthor
-        ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
-        : undefined;
-      if (hidePost) {
+      if (!hidePost && !blockAuthor) {
+        return undefined;
+      }
+      const previousHidden =
+        hidePost && viewerProfileId
+          ? getDropHiddenOverride(viewerProfileId, drop.id)
+          : undefined;
+      const previousBlocked =
+        blockAuthor && viewerProfileId
+          ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
+          : undefined;
+      if (hidePost && viewerProfileId) {
         setDropHiddenOverride(viewerProfileId, drop.id, true);
       }
-      if (blockAuthor) {
+      if (blockAuthor && viewerProfileId) {
         setProfileBlockedOverride(viewerProfileId, drop.author.id, true);
       }
       return {
@@ -214,6 +223,7 @@ export default function ReportDropModal({
         hidePost,
         previousBlocked,
         previousHidden,
+        rollbackLocalHidden,
         viewerProfileId,
       };
     },
@@ -237,13 +247,16 @@ export default function ReportDropModal({
         );
       }
       if (hideFailed && context?.hidePost) {
-        setDropHiddenOverride(
-          context.viewerProfileId,
-          drop.id,
-          context.previousHidden
-        );
+        context.rollbackLocalHidden?.();
+        if (context.viewerProfileId) {
+          setDropHiddenOverride(
+            context.viewerProfileId,
+            drop.id,
+            context.previousHidden
+          );
+        }
       }
-      if (blockFailed && context?.blockAuthor) {
+      if (blockFailed && context?.blockAuthor && context.viewerProfileId) {
         setProfileBlockedOverride(
           context.viewerProfileId,
           drop.author.id,
@@ -275,14 +288,15 @@ export default function ReportDropModal({
       closeModal();
     },
     onError: (error, _variables, context) => {
-      if (context?.hidePost) {
+      context?.rollbackLocalHidden?.();
+      if (context?.hidePost && context.viewerProfileId) {
         setDropHiddenOverride(
           context.viewerProfileId,
           drop.id,
           context.previousHidden
         );
       }
-      if (context?.blockAuthor) {
+      if (context?.blockAuthor && context.viewerProfileId) {
         setProfileBlockedOverride(
           context.viewerProfileId,
           drop.author.id,
@@ -322,8 +336,9 @@ export default function ReportDropModal({
           <DialogPanel className="tw-w-full tw-max-w-xl tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-shadow-2xl">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
               <div>
-                <DialogTitle className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-                  {t(locale, "contentModeration.report.title")}
+                <DialogTitle className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-xl tw-font-semibold tw-text-iron-50">
+                  <FlagIcon aria-hidden="true" className="tw-size-5" />
+                  <span>{t(locale, "contentModeration.report.title")}</span>
                 </DialogTitle>
                 <p
                   id={descriptionId}

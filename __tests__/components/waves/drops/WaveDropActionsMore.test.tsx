@@ -179,7 +179,7 @@ describe("WaveDropActionsMore", () => {
     expect(screen.queryByText("Download media")).toBeNull();
   });
 
-  it("shows one Report action as the final desktop menu entry", async () => {
+  it("shows one Flag Content action as the final desktop menu entry", async () => {
     mockedUseDropInteractionRules.mockReturnValue({
       canShowVote: true,
       canVote: true,
@@ -195,7 +195,9 @@ describe("WaveDropActionsMore", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
-    const reportAction = screen.getByRole("button", { name: "Report" });
+    const reportAction = screen.getByRole("button", {
+      name: "Flag Content",
+    });
     expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
     expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();
