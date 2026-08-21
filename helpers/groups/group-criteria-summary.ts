@@ -240,9 +240,12 @@ const getExplicitIdentityCounts = ({
     };
   }
 
+  const normalizeCount = (value: unknown): number =>
+    typeof value === "number" && Number.isFinite(value) ? value : 0;
+
   return {
-    included: group.identity_group_identities_count,
-    excluded: group.excluded_identity_group_identities_count,
+    included: normalizeCount(group.identity_group_identities_count),
+    excluded: normalizeCount(group.excluded_identity_group_identities_count),
   };
 };
 

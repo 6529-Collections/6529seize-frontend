@@ -48,6 +48,43 @@ describe("getGroupCriteriaSummary", () => {
     ).toEqual({ status: "unavailable", text: null });
   });
 
+  it("treats missing saved-group identity counts as zero", () => {
+    const summary = getGroupCriteriaSummary({
+      locale: "en-US",
+      group: {
+        tdh: {
+          min: null,
+          max: null,
+          inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
+        },
+        rep: {
+          min: 12,
+          max: null,
+          direction: ApiGroupFilterDirection.Received,
+          user_identity: null,
+          category: null,
+        },
+        cic: {
+          min: null,
+          max: null,
+          direction: ApiGroupFilterDirection.Received,
+          user_identity: null,
+        },
+        level: { min: null, max: null },
+        owns_nfts: [],
+        identity_group_id: null,
+        identity_group_identities_count: undefined,
+        excluded_identity_group_id: null,
+        excluded_identity_group_identities_count: undefined,
+        is_beneficiary_of_grant_id: null,
+        is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+        is_beneficiary_of_grant: null,
+      } as never,
+    });
+
+    expect(summary).toEqual({ status: "available", text: "REP at least 12" });
+  });
+
   it.each([
     ["en-US", "Level between 1 and 3"],
     ["en-GB", "Level between 1 and 3"],

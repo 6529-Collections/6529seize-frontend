@@ -48,7 +48,7 @@ export default function WaveRulesGroupMembersLink({
     isError: isGroupError,
     isLoading: isGroupLoading,
   } = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUPS, "create-wave-selected-group", groupId],
+    queryKey: [QueryKey.GROUP, groupId],
     queryFn: async ({ signal }) =>
       await commonApiFetch<ApiGroupFull>({
         endpoint: `groups/${encodeURIComponent(groupId)}`,
