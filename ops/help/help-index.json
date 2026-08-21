@@ -1050,6 +1050,7 @@
       "facts": [
         "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
+        "In Search messages, open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
         "Arrow keys move through site results and Enter opens the selected result.",
         "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
