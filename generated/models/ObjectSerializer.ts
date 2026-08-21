@@ -522,6 +522,7 @@ export * from '../models/ApiWaveScoreQualityComponentWeights';
 export * from '../models/ApiWaveScoreQualityGate';
 export * from '../models/ApiWaveScoreSort';
 export * from '../models/ApiWaveScoreVisibilityComponentWeights';
+export * from '../models/ApiWaveSearchAuthor';
 export * from '../models/ApiWaveSubscriptionActions';
 export * from '../models/ApiWaveSubscriptionTargetAction';
 export * from '../models/ApiWaveType';
@@ -1172,6 +1173,7 @@ import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQuali
 import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
 import { ApiWaveScoreSort } from '../models/ApiWaveScoreSort';
 import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
+import { ApiWaveSearchAuthor } from '../models/ApiWaveSearchAuthor';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
@@ -1986,6 +1988,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveScoreQualityComponentWeights": ApiWaveScoreQualityComponentWeights,
     "ApiWaveScoreQualityGate": ApiWaveScoreQualityGate,
     "ApiWaveScoreVisibilityComponentWeights": ApiWaveScoreVisibilityComponentWeights,
+    "ApiWaveSearchAuthor": ApiWaveSearchAuthor,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
     "ApiWaveV3": ApiWaveV3,
     "ApiWaveV3Capabilities": ApiWaveV3Capabilities,

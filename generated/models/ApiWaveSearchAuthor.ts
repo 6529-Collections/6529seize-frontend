@@ -11,11 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
 import { HttpFile } from '../http/http';
 
-export class ApiGroupMembersPreviewRequest {
-    'group': ApiCreateGroupDescription;
+export class ApiWaveSearchAuthor {
+    'id': string;
+    'handle': string;
+    'pfp': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,14 +24,26 @@ export class ApiGroupMembersPreviewRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "group",
-            "baseName": "group",
-            "type": "ApiCreateGroupDescription",
+            "name": "id",
+            "baseName": "id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "handle",
+            "baseName": "handle",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "pfp",
+            "baseName": "pfp",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiGroupMembersPreviewRequest.attributeTypeMap;
+        return ApiWaveSearchAuthor.attributeTypeMap;
     }
 
     public constructor() {
