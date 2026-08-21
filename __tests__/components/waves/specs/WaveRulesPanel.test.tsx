@@ -75,4 +75,31 @@ describe("WaveRulesPanel", () => {
     expect(screen.queryByText("Artists")).not.toBeInTheDocument();
     expect(screen.getByText("Private group")).toBeInTheDocument();
   });
+
+  it("shows creator rules before automatic rules when creator rules exist", () => {
+    render(
+      <WaveRulesPanel
+        rules={{
+          ...rules,
+          custom: {
+            binding: null,
+            display: "Keep submissions focused on the weekly theme.",
+            signatureRequired: false,
+          },
+        }}
+      />
+    );
+
+    expect(
+      screen.getAllByRole("heading").map((heading) => heading.textContent)
+    ).toEqual(["Rules", "Creator rules", "Access"]);
+  });
+
+  it("keeps the empty creator-rules state after automatic rules", () => {
+    render(<WaveRulesPanel rules={rules} />);
+
+    expect(
+      screen.getAllByRole("heading").map((heading) => heading.textContent)
+    ).toEqual(["Rules", "Access", "Creator rules"]);
+  });
 });

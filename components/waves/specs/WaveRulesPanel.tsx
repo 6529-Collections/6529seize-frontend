@@ -129,6 +129,13 @@ export default function WaveRulesPanel({
       : "!tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]";
   const backgroundClasses =
     variant === "form" ? "tw-bg-iron-900/60" : "tw-bg-iron-950";
+  const creatorRulesFirst = hasCustomRules(rules.custom);
+  const customRulesSection = showCustomRules ? (
+    <WaveRulesCustomSection
+      custom={rules.custom}
+      headingLevel={SectionHeading}
+    />
+  ) : null;
   // `undefined` keeps the standard row value; `null` intentionally renders an
   // empty value so a caller can suppress the fallback without changing it.
   const getRenderedRowValue = (row: WaveRuleRow): ReactNode => {
@@ -177,6 +184,7 @@ export default function WaveRulesPanel({
       )}
 
       <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+        {creatorRulesFirst && customRulesSection}
         {rules.automatic.map((section) => (
           <section key={section.id} className="tw-px-4 tw-py-4">
             <SectionHeading className="tw-mb-2.5 tw-mt-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
@@ -206,12 +214,7 @@ export default function WaveRulesPanel({
             </dl>
           </section>
         ))}
-        {showCustomRules && (
-          <WaveRulesCustomSection
-            custom={rules.custom}
-            headingLevel={SectionHeading}
-          />
-        )}
+        {!creatorRulesFirst && customRulesSection}
       </div>
     </div>
   );
