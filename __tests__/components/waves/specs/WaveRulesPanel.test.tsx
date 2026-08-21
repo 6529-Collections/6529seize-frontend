@@ -2,7 +2,7 @@ import WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
 import type { WaveRules } from "@/helpers/waves/wave-rules.helpers";
 import type Link from "next/link";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -77,13 +77,15 @@ describe("WaveRulesPanel", () => {
   });
 
   it("shows creator rules before automatic rules when creator rules exist", () => {
+    const creatorRule = "Keep submissions focused on the weekly theme.";
+
     render(
       <WaveRulesPanel
         rules={{
           ...rules,
           custom: {
             binding: null,
-            display: "Keep submissions focused on the weekly theme.",
+            display: creatorRule,
             signatureRequired: false,
           },
         }}
@@ -93,6 +95,45 @@ describe("WaveRulesPanel", () => {
     expect(
       screen.getAllByRole("heading").map((heading) => heading.textContent)
     ).toEqual(["Rules", "Creator rules", "Access"]);
+    expect(screen.queryByText(creatorRule)).not.toBeInTheDocument();
+  });
+
+  it("keeps creator-rule status visible and reveals the full text on demand", () => {
+    const acceptanceRule =
+      "I agree to keep my submission available through the voting period.";
+
+    render(
+      <WaveRulesPanel
+        rules={{
+          ...rules,
+          custom: {
+            binding: acceptanceRule,
+            display: null,
+            signatureRequired: true,
+          },
+        }}
+      />
+    );
+
+    expect(screen.getByText("Requires acceptance")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Participants sign these rules with their wallet before submitting."
+      )
+    ).toBeVisible();
+    expect(screen.queryByText(acceptanceRule)).not.toBeInTheDocument();
+
+    const showButton = screen.getByRole("button", {
+      name: "Show full creator rules",
+    });
+    expect(showButton).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(showButton);
+
+    expect(screen.getByText(acceptanceRule)).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Hide full creator rules" })
+    ).toHaveAttribute("aria-expanded", "true");
   });
 
   it("keeps the empty creator-rules state after automatic rules", () => {

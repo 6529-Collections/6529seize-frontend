@@ -144,9 +144,7 @@ function MyStreamWaveHeaderIdentity({
         mode="summary"
         learnMoreHref={waveScoreLearnMoreHref}
       />
-      {showWaveRepAction && (
-        <WaveRepButton wave={wave} variant="compact" />
-      )}
+      {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
     </span>
   ) : null;
 
@@ -357,18 +355,8 @@ export default function MyStreamWaveTabsHeader({
   const externalOverflowMenuItems = isCompact
     ? (renderOverflowMenuItems?.(actionContext) ?? [])
     : [];
-  const headerOverflowMenuItems: CompactMenuItem[] = isCompact
+  const compactMenuItems: CompactMenuItem[] = isCompact
     ? [
-        ...(showShareAction
-          ? [
-              {
-                id: "wave-link",
-                label: waveLinkActionLabel,
-                icon: renderWaveLinkActionIcon(),
-                onSelect: handleWaveLinkActionClick,
-              },
-            ]
-          : []),
         {
           id: "wave-details",
           label: rightSidebarCompactLabel,
@@ -382,12 +370,19 @@ export default function MyStreamWaveTabsHeader({
           ),
           onSelect: toggleRightSidebar,
         },
+        ...externalOverflowMenuItems,
+        ...(showShareAction
+          ? [
+              {
+                id: "wave-link",
+                label: waveLinkActionLabel,
+                icon: renderWaveLinkActionIcon(),
+                onSelect: handleWaveLinkActionClick,
+              },
+            ]
+          : []),
       ]
     : [];
-  const compactMenuItems = [
-    ...externalOverflowMenuItems,
-    ...headerOverflowMenuItems,
-  ];
 
   useLayoutEffect(() => {
     if (!showDescriptionPreview || isCompact) {

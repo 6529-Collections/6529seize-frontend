@@ -38,6 +38,8 @@
   "waves.sidebar.rightPanel.rules.displayOnly": "Display only",
   "waves.sidebar.rightPanel.rules.requiresAcceptance": "Requires acceptance",
   "waves.sidebar.rightPanel.rules.signatureRequired": "Participants sign these rules with their wallet before submitting.",
+  "waves.sidebar.rightPanel.rules.showFullCreatorRules": "Show full creator rules",
+  "waves.sidebar.rightPanel.rules.hideFullCreatorRules": "Hide full creator rules",
   "waves.sidebar.rightPanel.settings.rules": "Rules",
   "waves.sidebar.rightPanel.settings.display": "Display",
   "waves.sidebar.rightPanel.settings.approvalTabs": "Approval tabs",
