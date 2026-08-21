@@ -12,7 +12,7 @@ export default function DistributionPlanStepCurrent({
   const isLastStep =
     step.order === Object.values(DISTRIBUTION_PLAN_STEPS).at(-1)!.order;
   return (
-    <li className="tw-relative tw-pb-10">
+    <li className="tw-relative tw-pb-10 last:tw-pb-0">
       {!isLastStep && (
         <div
           className="tw-absolute tw-left-[13.25px] tw-top-4 -tw-ml-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-iron-600"

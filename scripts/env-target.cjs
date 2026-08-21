@@ -10,14 +10,17 @@ const targets = {
   local: {
     API_ENDPOINT: "http://localhost:3000",
     WS_ENDPOINT: "ws://localhost:3000",
+    EMMA_MIN_TDH: "0",
   },
   staging: {
     API_ENDPOINT: "https://api.staging.6529.io",
     WS_ENDPOINT: "wss://ws.staging.6529.io",
+    EMMA_MIN_TDH: "0",
   },
   prod: {
     API_ENDPOINT: "https://api.6529.io",
     WS_ENDPOINT: "wss://ws.6529.io",
+    EMMA_MIN_TDH: "1",
   },
 };
 
@@ -130,6 +133,7 @@ function printStatus(contents) {
   console.log(`env target: ${name}`);
   console.log(`API_ENDPOINT: ${active.API_ENDPOINT || "(not set)"}`);
   console.log(`WS_ENDPOINT: ${active.WS_ENDPOINT || "(not set)"}`);
+  console.log(`EMMA_MIN_TDH: ${active.EMMA_MIN_TDH || "(not set)"}`);
 }
 
 const command = process.argv[2] || "status";

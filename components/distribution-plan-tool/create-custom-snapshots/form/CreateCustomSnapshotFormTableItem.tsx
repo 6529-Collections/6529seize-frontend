@@ -20,12 +20,14 @@ export default function CreateCustomSnapshotFormTableItem({
       <td className="tw-whitespace-nowrap tw-py-3.5 tw-pl-3 tw-pr-4 tw-text-right tw-text-sm tw-font-medium sm:tw-pr-6">
         <button
           type="button"
-          title="Delete"
+          title="Remove wallet"
+          aria-label={`Remove wallet ${token.owner}`}
           onClick={() => onRemoveToken(index)}
-          className="tw-rounded-full tw-group tw-p-2 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-iron-400 tw-bg-iron-400/10 tw-ring-iron-400/20"
+          className="tw-group tw-inline-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-400/10 tw-p-0 tw-leading-none tw-text-iron-400 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-error/40 desktop-hover:hover:tw-text-error"
         >
           <svg
-            className="tw-h-4 tw-w-4 group-hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
+            aria-hidden="true"
+            className="tw-size-4"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

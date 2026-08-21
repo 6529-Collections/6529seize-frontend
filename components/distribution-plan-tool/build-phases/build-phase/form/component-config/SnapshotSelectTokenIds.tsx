@@ -1,6 +1,7 @@
 "use client";
 
 import DistributionPlanSecondaryText from "@/components/distribution-plan-tool/common/DistributionPlanSecondaryText";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { PhaseConfigStep } from "../BuildPhaseFormConfigModal";
@@ -56,14 +57,11 @@ export default function SnapshotSelectTokenIds({
                   strokeLinejoin="round"
                 />
               </svg>
-              <Tooltip 
-                id="token-ids-tooltip" 
+              <Tooltip
+                id="token-ids-tooltip"
                 place="top"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white", 
-                  padding: "4px 8px",
-                }}>
+                style={TOOLTIP_STYLES}
+              >
                 Example: 1,3,54-78
               </Tooltip>
             </label>
