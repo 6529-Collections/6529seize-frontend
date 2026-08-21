@@ -15,11 +15,6 @@ jest.mock(
     </div>
   )
 );
-jest.mock(
-  "@/components/waves/create-wave/utils/CreateWaveWarning",
-  () => (props: any) => <div data-testid="warning">{props.title}</div>
-);
-
 describe("CreateWaveGroups", () => {
   it("shows the default access controls without an extra disclosure", () => {
     render(
@@ -60,7 +55,7 @@ describe("CreateWaveGroups", () => {
     }
   });
 
-  it("renders the restricted warning alongside the access controls", () => {
+  it("does not render the limited access warning for restricted groups", () => {
     const groups = { admin: "1", canView: "2" } as any;
     render(
       <CreateWaveGroups
@@ -84,7 +79,9 @@ describe("CreateWaveGroups", () => {
     expect(screen.getAllByTestId("group")).toHaveLength(
       CREATE_WAVE_GROUPS[ApiWaveType.Rank].length
     );
-    expect(screen.getByTestId("warning")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Warning: Limited Access")
+    ).not.toBeInTheDocument();
   });
 
   it("identifies incompatible roles and announces validation state", () => {

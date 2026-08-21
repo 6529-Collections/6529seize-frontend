@@ -31,7 +31,9 @@ linked section pages.
 
 - Base section order for all waves: `About`, `Rules`, `REP`, `Settings`.
 - `Rank` and `Approve` waves add `Voters` and `Activity` after `Settings`.
-- `Rules` shows automatic wave rules plus optional creator rules.
+- `Rules` shows generated wave rules, optional guidelines, and any
+  acceptance-required rules. For `Rank` and `Approve` waves, participants review
+  and sign acceptance-required rules in the submit terms modal.
 - Desktop labels the first section `About` because it is a standalone sidebar
   tab.
 - Native app labels the same first section `Overview` because it is nested

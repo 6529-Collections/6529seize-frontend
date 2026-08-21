@@ -52,7 +52,7 @@ describe("CreateWaveRulesGroupMembers", () => {
       <CreateWaveRulesGroupMembers
         groupId={group.id}
         cachedGroup={undefined}
-        roleLabel="Who can view"
+        roleLabel="Visibility"
       />
     );
 
@@ -74,7 +74,7 @@ describe("CreateWaveRulesGroupMembers", () => {
       <CreateWaveRulesGroupMembers
         groupId={group.id}
         cachedGroup={undefined}
-        roleLabel="Who can view"
+        roleLabel="Visibility"
       />
     );
 
@@ -91,7 +91,7 @@ describe("CreateWaveRulesGroupMembers", () => {
       <CreateWaveRulesGroupMembers
         groupId={group.id}
         cachedGroup={group}
-        roleLabel="Who can view"
+        roleLabel="Visibility"
       />
     );
 

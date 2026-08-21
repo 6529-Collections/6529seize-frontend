@@ -6,6 +6,8 @@ import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirect
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 
 export type CreateWaveInlineGroupPanel =
   | "actions"
@@ -220,23 +222,18 @@ export const getInlineGroupConfiguredRules = (
 export const getInlineGroupDraftSummary = ({
   draft,
   identityCount,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly draft: ApiCreateGroup;
   readonly identityCount: number;
+  readonly locale?: SupportedLocale | undefined;
 }): string | null => {
-  const ruleCount = getInlineGroupRuleCount(draft);
-  const parts: string[] = [];
-
-  if (identityCount > 0) {
-    parts.push(
-      `${identityCount} ${identityCount === 1 ? "identity" : "identities"}`
-    );
-  }
-  if (ruleCount > 0) {
-    parts.push(`${ruleCount} ${ruleCount === 1 ? "rule" : "rules"}`);
-  }
-
-  return parts.length ? parts.join(" · ") : null;
+  const summary = getGroupCriteriaSummary({
+    group: draft.group,
+    locale,
+    includedCountOverride: identityCount,
+  });
+  return summary.text;
 };
 
 export const buildInlineGroupName = ({

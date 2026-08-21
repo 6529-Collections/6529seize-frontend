@@ -704,7 +704,7 @@ describe("useWaveConfig", () => {
       });
     });
 
-    it("preserves a manually selected Anyone privilege", () => {
+    it("preserves a manually selected Public privilege", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
