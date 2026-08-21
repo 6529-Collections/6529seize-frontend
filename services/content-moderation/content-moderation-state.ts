@@ -6,10 +6,8 @@ const listeners = new Set<Listener>();
 const hiddenDropOverrides = new Map<string, boolean>();
 const blockedProfileOverrides = new Map<string, boolean>();
 const globalDropOverrides = new Map<string, ApiDropModerationStatus>();
-let version = 0;
 
 const publish = () => {
-  version += 1;
   listeners.forEach((listener) => listener());
 };
 
@@ -19,8 +17,6 @@ export const subscribeToContentModerationState = (
   listeners.add(listener);
   return () => listeners.delete(listener);
 };
-
-export const getContentModerationStateVersion = (): number => version;
 
 const viewerKey = (viewerProfileId: string, targetId: string): string =>
   `${viewerProfileId}:${targetId}`;
