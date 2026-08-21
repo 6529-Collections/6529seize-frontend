@@ -1172,7 +1172,7 @@
       ],
       "facts": [
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
-        "Profile pages organize identity, collected NFTs, waves, groups, subscriptions, proxy, Brain, and xTDH surfaces through tabs.",
+        "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
         "Editable profile surfaces require the owner or an authorized proxy."
       ],
       "canonical_path": "/network",
@@ -1198,27 +1198,66 @@
         "tabs",
         "identity",
         "collected",
-        "groups",
-        "waves",
+        "curation",
         "proxy",
         "subscriptions",
         "brain",
         "xtdh"
       ],
       "facts": [
-        "Profile tabs split profile content into sections such as Identity, Collected, Groups, Waves, Subscriptions, Proxy, Brain, and xTDH.",
+        "Profile tabs split profile content into sections such as Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH.",
         "The default Identity tab opens at /{user}; legacy /{user}/identity redirects there.",
-        "Other profile tabs can be opened directly through routes such as /{user}/groups or /{user}/collected.",
+        "Other profile tabs can be opened directly through routes such as /{user}/curations or /{user}/collected.",
         "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
       ],
       "canonical_path": "/{user}",
       "related_paths": [
-        "/{user}/identity",
+        "/{user}/curations",
         "/{user}/collected",
-        "/{user}/groups"
+        "/{user}/brain"
       ],
       "tags": ["profiles", "navigation"],
       "source_refs": ["ops/docs/profiles/navigation/feature-tabs.md"]
+    },
+    {
+      "id": "profiles.curation-tab",
+      "kind": "route",
+      "title": "Profile Curation tab",
+      "link_label": "Profile Curation",
+      "aliases": [
+        "profile curation",
+        "my curation",
+        "curation tab",
+        "featured posts",
+        "create profile curation",
+        "add profile post"
+      ],
+      "keywords": [
+        "profile",
+        "curation",
+        "posts",
+        "manage",
+        "source wave",
+        "create"
+      ],
+      "facts": [
+        "The Profile Curation tab lives at /{user}/curations and presents the profile's selected named Curation.",
+        "On an owner's empty Curation tab, Create Curation asks for a name and prepares the required access, public source Wave, Curation, and profile connection.",
+        "If the owner has no profile handle, Go to Identity opens /{user} so profile setup can be completed first.",
+        "After guided setup succeeds, Add post opens automatically; if post creation succeeds but Curation membership fails, Retry add reuses the created post.",
+        "Owners see Add post as the primary action. Manage separates profile display actions from Curation actions: Hide from profile keeps the Curation, source Wave, and posts, while Delete Curation deletes the Curation but keeps its source Wave and posts.",
+        "Profile post actions open the original Wave, edit an eligible author-owned post, or remove it from the Curation after confirmation.",
+        "Public viewers and proxy sessions do not receive owner management controls."
+      ],
+      "canonical_path": "/{user}/curations",
+      "related_paths": ["/{user}", "/waves"],
+      "tags": ["profiles", "curation", "waves", "posts"],
+      "source_refs": [
+        "app/[user]/curations/page.tsx",
+        "components/user/waves/UserPageProfileWave.tsx",
+        "components/user/waves/UserPageProfileCurationSetupDialog.tsx",
+        "ops/docs/profiles/tabs/feature-curation-tab.md"
+      ]
     },
     {
       "id": "profiles.subscriptions-tab",
@@ -2236,7 +2275,8 @@
       ],
       "facts": [
         "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
-        "On web, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
+        "If the connected identity has no profile handle, Create Wave opens a Create your profile first dialog with Go to Identity and Not now instead of opening the multi-step form.",
+        "With a profile handle, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
         "The app full-page create route remains /waves/create where app mode uses it.",
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],
@@ -2538,6 +2578,34 @@
       "source_refs": [
         "ops/docs/waves/composer/README.md",
         "ops/docs/waves/chat/feature-chat-composer-availability.md"
+      ]
+    },
+    {
+      "id": "waves.drop.manage-curations",
+      "kind": "workflow",
+      "title": "Manage a post's Curations",
+      "aliases": [
+        "manage curations",
+        "add post to curation",
+        "remove post from curation",
+        "curate existing post"
+      ],
+      "keywords": ["waves", "post", "curation", "add", "remove", "mobile"],
+      "facts": [
+        "Use Manage curations from a standard post's desktop action menu or mobile touch action sheet.",
+        "The dialog lists named Curations in the source Wave that the current account is allowed to manage, with existing memberships first.",
+        "Add and Remove update only Curation membership; removing a post does not delete its original Wave post.",
+        "If there is no manageable Curation, eligible users can create one and continue adding the same post.",
+        "If Curation creation succeeds but adding the post fails, the created Curation remains and the dialog reports the partial success."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/{user}/curations"],
+      "tags": ["waves", "posts", "curation", "mobile"],
+      "source_refs": [
+        "components/waves/drops/WaveDropCurationsDialog.tsx",
+        "components/waves/drops/WaveDropActionsMore.tsx",
+        "components/waves/drops/WaveDropMobileMenu.tsx",
+        "ops/docs/waves/drop-actions/feature-drop-curation.md"
       ]
     },
     {

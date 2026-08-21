@@ -2,19 +2,22 @@
 
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { type ReactNode, useMemo, useRef, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
+import MyStreamWaveCurationTabMenu from "@/components/brain/my-stream/tabs/MyStreamWaveCurationTabMenu";
+import Button from "@/components/utils/button/Button";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useProfileWave } from "@/hooks/useProfileWave";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
-import { useClickAway, useKeyPressEvent } from "react-use";
+import { t } from "@/i18n/messages";
 import UserPageProfileWaveContent from "./UserPageProfileWaveContent";
 import UserPageProfileWavePicker from "./UserPageProfileWavePicker";
 import {
@@ -52,6 +55,11 @@ const UserPageProfileWaveQuickPostDialog = dynamic(
   { loading: () => null }
 );
 
+const UserPageProfileCurationSetupDialog = dynamic(
+  () => import("./UserPageProfileCurationSetupDialog"),
+  { loading: () => null }
+);
+
 type ProfileCurationPickerProps = {
   readonly curations: readonly ApiWaveCuration[];
   readonly selectedCurationId: string | null;
@@ -61,6 +69,7 @@ type ProfileCurationPickerProps = {
   readonly isFetching: boolean;
   readonly onRetry: () => void;
   readonly onSelectCuration: (curationId: string) => void;
+  readonly onCreateCuration: () => void;
   readonly variant: CurationPickerVariant;
 };
 
@@ -73,8 +82,10 @@ function ProfileCurationPicker({
   isFetching,
   onRetry,
   onSelectCuration,
+  onCreateCuration,
   variant,
 }: ProfileCurationPickerProps) {
+  const locale = useBrowserLocale();
   const isMobileSheet = variant === "mobile-sheet";
   const wrapperClassName = isMobileSheet
     ? "tw-px-4 sm:tw-px-6"
@@ -170,67 +181,36 @@ function ProfileCurationPicker({
           </p>
         )}
         {content}
+        <div className="tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-3 tw-pt-3">
+          <Button variant="secondary" size="xs" onClick={onCreateCuration}>
+            {t(locale, "profileCuration.header.createAnother")}
+          </Button>
+        </div>
       </div>
     </section>
   );
 }
 
-function ProfileCurationPickerPanel({
-  show,
-  ...pickerProps
-}: ProfileCurationPickerProps & {
-  readonly show: boolean;
-}) {
-  if (!show) {
-    return null;
-  }
-
-  return <ProfileCurationPicker {...pickerProps} />;
-}
-
-function ProfileCurationMobileDialog({
-  show,
+function ProfileCurationPickerDialog({
   isOpen,
   onClose,
   ...pickerProps
 }: Omit<ProfileCurationPickerProps, "variant"> & {
-  readonly show: boolean;
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
-  if (!show) {
-    return null;
-  }
-
   return (
     <MobileWrapperDialog
-      title="Switch curation"
+      title="Choose another Curation"
       isOpen={isOpen}
       onClose={onClose}
+      tabletModal
+      maxWidthClass="md:tw-max-w-lg"
     >
       <ProfileCurationPicker {...pickerProps} variant="mobile-sheet" />
     </MobileWrapperDialog>
   );
 }
-
-const isDesktopCurationPickerOpen = ({
-  canSwitchOfficialCuration,
-  isDesktopChangeWaveMenu,
-  isChangeCurationOpen,
-}: {
-  readonly canSwitchOfficialCuration: boolean;
-  readonly isDesktopChangeWaveMenu: boolean;
-  readonly isChangeCurationOpen: boolean;
-}): boolean =>
-  canSwitchOfficialCuration && isDesktopChangeWaveMenu && isChangeCurationOpen;
-
-const shouldRenderMobileCurationPicker = ({
-  canSwitchOfficialCuration,
-  isDesktopChangeWaveMenu,
-}: {
-  readonly canSwitchOfficialCuration: boolean;
-  readonly isDesktopChangeWaveMenu: boolean;
-}): boolean => canSwitchOfficialCuration && !isDesktopChangeWaveMenu;
 
 const getProfileCurationAddPostHandler = ({
   profileCuration,
@@ -248,6 +228,7 @@ export default function UserPageProfileWave({
 }) {
   const params = useParams();
   const router = useRouter();
+  const locale = useBrowserLocale();
   const handleOrWallet = params["user"]?.toString() ?? "";
   const { containerRef, containerWidth } = useProfileMasonryContainerWidth();
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -255,19 +236,16 @@ export default function UserPageProfileWave({
     handleOrWallet,
     initialProfile,
   });
-  const changeWaveDropdownRef = useRef<HTMLDivElement | null>(null);
-  const changeCurationDropdownRef = useRef<HTMLDivElement | null>(null);
-  const changeWaveButtonRef = useRef<HTMLButtonElement | null>(null);
-  const changeCurationButtonRef = useRef<HTMLButtonElement | null>(null);
   const [isChangeWaveOpen, setIsChangeWaveOpen] = useState(false);
   const [isChangeCurationOpen, setIsChangeCurationOpen] = useState(false);
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const [isQuickPostOpen, setIsQuickPostOpen] = useState(false);
+  const [isSetupOpen, setIsSetupOpen] = useState(false);
+  const [isDisconnectOpen, setIsDisconnectOpen] = useState(false);
   const [submittingWaveId, setSubmittingWaveId] = useState<string | null>(null);
   const [submittingCurationId, setSubmittingCurationId] = useState<
     string | null
   >(null);
-  const isDesktopChangeWaveMenu = useMediaQuery("(min-width: 1024px)");
 
   const resolvedProfile = profile ?? initialProfile;
   const profileIdentityKey =
@@ -296,6 +274,7 @@ export default function UserPageProfileWave({
     handle: resolvedProfile.handle,
     primary_address: resolvedProfile.primary_wallet,
   };
+  const profileHref = `/${encodeURIComponent(handleOrWallet)}`;
 
   const {
     updateProfileWave,
@@ -324,40 +303,10 @@ export default function UserPageProfileWave({
   const hasLoadedCurations = curations !== undefined;
   const canSwitchOfficialCuration =
     canManageOwnOfficialWave && (curations?.length ?? 0) > 0;
-  const showDesktopCurationPicker = isDesktopCurationPickerOpen({
-    canSwitchOfficialCuration,
-    isDesktopChangeWaveMenu,
-    isChangeCurationOpen,
-  });
-  const showMobileCurationPicker = shouldRenderMobileCurationPicker({
-    canSwitchOfficialCuration,
-    isDesktopChangeWaveMenu,
-  });
   const openQuickPost = () => setIsQuickPostOpen(true);
   const addPostHandler = getProfileCurationAddPostHandler({
     profileCuration,
     onAddPost: openQuickPost,
-  });
-
-  useClickAway(changeWaveDropdownRef, () => {
-    if (isDesktopChangeWaveMenu && isChangeWaveOpen) {
-      setIsChangeWaveOpen(false);
-    }
-  });
-
-  useClickAway(changeCurationDropdownRef, () => {
-    if (isDesktopChangeWaveMenu && isChangeCurationOpen) {
-      setIsChangeCurationOpen(false);
-    }
-  });
-
-  useKeyPressEvent("Escape", () => {
-    if (isChangeWaveOpen) {
-      setIsChangeWaveOpen(false);
-    }
-    if (isChangeCurationOpen) {
-      setIsChangeCurationOpen(false);
-    }
   });
 
   const openWave = () => {
@@ -394,11 +343,14 @@ export default function UserPageProfileWave({
   };
 
   const handleRemoveOfficialWave = async () => {
-    await removeOfficialWave();
+    setIsDisconnectOpen(true);
   };
 
   const removeOfficialWave = async () => {
-    await clearSelectedProfileWave();
+    const updatedProfile = await clearSelectedProfileWave();
+    if (updatedProfile) {
+      setIsDisconnectOpen(false);
+    }
   };
 
   const selectOfficialWave = async (waveId: string) => {
@@ -417,44 +369,69 @@ export default function UserPageProfileWave({
 
   if (!profileWaveId) {
     return (
-      <UserPageProfileWavePicker
-        title="Choose your featured wave"
-        identity={profileIdentityKey}
-        isOwnProfile={isOwnProfile}
-        hasCreatedProfile={hasCreatedProfile}
-        hasActiveProfileProxy={Boolean(activeProfileProxy)}
-        selectedWaveId={null}
-        submittingWaveId={submittingWaveId}
-        onSelectWave={selectOfficialWave}
-      />
+      <>
+        <UserPageProfileWavePicker
+          title={t(locale, "profileCuration.entry.startTitle")}
+          identity={profileIdentityKey}
+          isOwnProfile={isOwnProfile}
+          hasCreatedProfile={hasCreatedProfile}
+          hasActiveProfileProxy={Boolean(activeProfileProxy)}
+          selectedWaveId={null}
+          submittingWaveId={submittingWaveId}
+          profileHref={profileHref}
+          onCreateProfileCuration={() => setIsSetupOpen(true)}
+          onSelectWave={selectOfficialWave}
+        />
+        {isSetupOpen && canManageOwnOfficialWave && (
+          <UserPageProfileCurationSetupDialog
+            profile={resolvedProfile}
+            isOpen={isSetupOpen}
+            onClose={() => setIsSetupOpen(false)}
+            onReady={() => {
+              setIsSetupOpen(false);
+              setIsQuickPostOpen(true);
+            }}
+          />
+        )}
+      </>
     );
   }
 
   if (isUnavailableWaveError(error)) {
     return (
-      <InfoPanel
-        title="Featured wave unavailable"
-        message="The featured wave behind this tab could not be loaded. It may have been removed or is no longer accessible."
-        actions={
-          canManageOwnOfficialWave ? (
-            <button
-              type="button"
-              onClick={handleRemoveOfficialWave}
-              disabled={isPending}
-              aria-label="Unset featured wave"
-              title="Unset featured wave"
-              className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-zinc-500 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400"
-            >
-              {isPending ? (
-                <CircleLoader />
-              ) : (
-                <XMarkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              )}
-              <span className="tw-hidden sm:tw-inline">Unset</span>
-            </button>
-          ) : undefined
-        }
-      />
+      <>
+        <InfoPanel
+          title={t(locale, "profileCuration.unavailable.title")}
+          message={t(locale, "profileCuration.unavailable.message")}
+          actions={
+            canManageOwnOfficialWave ? (
+              <Button
+                type="button"
+                onClick={handleRemoveOfficialWave}
+                disabled={isPending}
+                variant="secondary"
+                size="sm"
+              >
+                {isPending ? (
+                  <CircleLoader />
+                ) : (
+                  <XMarkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                )}
+                {t(locale, "profileCuration.header.disconnect")}
+              </Button>
+            ) : undefined
+          }
+        />
+        <MobileWrapperConfirmationDialog
+          isOpen={isDisconnectOpen}
+          onClose={() => setIsDisconnectOpen(false)}
+          onConfirm={() => void removeOfficialWave()}
+          title={t(locale, "profileCuration.unavailable.disconnectTitle")}
+          message={t(locale, "profileCuration.unavailable.disconnectMessage")}
+          confirmText={t(locale, "profileCuration.header.disconnect")}
+          isConfirming={isPending && pendingAction === "clear"}
+        />
+      </>
     );
   }
 
@@ -484,66 +461,40 @@ export default function UserPageProfileWave({
             profileCuration ? getProfileCurationTitle(profileCuration) : null
           }
           canManageOwnOfficialWave={canManageOwnOfficialWave}
-          changeWaveDropdown={
-            canManageOwnOfficialWave &&
-            isDesktopChangeWaveMenu &&
-            isChangeWaveOpen ? (
-              <UserPageProfileWavePicker
-                identity={profileIdentityKey}
-                isOwnProfile={true}
-                hasCreatedProfile={hasCreatedProfile}
-                hasActiveProfileProxy={false}
-                selectedWaveId={profileWaveId}
-                submittingWaveId={submittingWaveId}
-                onSelectWave={selectOfficialWave}
-                variant="dropdown"
+          manageCurationControl={
+            canManageOwnOfficialWave && profileCuration ? (
+              <MyStreamWaveCurationTabMenu
+                wave={wave}
+                curation={profileCuration}
+                triggerLabel={t(locale, "profileCuration.header.manage")}
+                permissionMode="profile"
+                canChooseAnotherCuration={canSwitchOfficialCuration}
+                onChooseAnotherCuration={() =>
+                  setIsChangeCurationOpen(true)
+                }
+                onChooseAnotherSourceWave={() => setIsChangeWaveOpen(true)}
+                onHideFromProfile={handleRemoveOfficialWave}
+                isProfileActionPending={
+                  isPending || submittingCurationId !== null
+                }
+                onDeleted={() => {
+                  void clearSelectedProfileWave({ suppressSuccessToast: true });
+                }}
               />
             ) : undefined
           }
-          changeCurationDropdown={
-            <ProfileCurationPickerPanel
-              show={showDesktopCurationPicker}
-              curations={curations ?? []}
-              selectedCurationId={profileCuration?.id ?? null}
-              submittingCurationId={submittingCurationId}
-              isLoading={areCurationsLoading}
-              isError={areCurationsError}
-              isFetching={areCurationsFetching}
-              onRetry={retryCurationsLoad}
-              onSelectCuration={(curationId) =>
-                selectOfficialCuration(curationId)
-              }
-              variant="dropdown"
-            />
-          }
-          changeWaveDropdownRef={changeWaveDropdownRef}
-          changeCurationDropdownRef={changeCurationDropdownRef}
-          changeWaveButtonRef={changeWaveButtonRef}
-          changeCurationButtonRef={changeCurationButtonRef}
-          isChangeWaveOpen={isChangeWaveOpen}
-          isChangeCurationOpen={isChangeCurationOpen}
-          isRemoving={isPending && pendingAction === "clear"}
-          isChangingCuration={submittingCurationId !== null}
-          showChangeCuration={canSwitchOfficialCuration}
           onOpenWave={openWave}
           onAddPost={addPostHandler}
-          onOpenChangeWave={() => {
-            setIsChangeCurationOpen(false);
-            setIsChangeWaveOpen((open) => !open);
-          }}
-          onOpenChangeCuration={() => {
-            setIsChangeWaveOpen(false);
-            setIsChangeCurationOpen((open) => !open);
-          }}
-          onRemoveWave={handleRemoveOfficialWave}
         />
       </div>
 
-      {!isDesktopChangeWaveMenu && canManageOwnOfficialWave && (
+      {canManageOwnOfficialWave && (
         <MobileWrapperDialog
-          title="Switch wave"
+          title="Use another source Wave"
           isOpen={isChangeWaveOpen}
           onClose={() => setIsChangeWaveOpen(false)}
+          tabletModal
+          maxWidthClass="md:tw-max-w-lg"
         >
           <UserPageProfileWavePicker
             identity={profileIdentityKey}
@@ -552,32 +503,43 @@ export default function UserPageProfileWave({
             hasActiveProfileProxy={false}
             selectedWaveId={profileWaveId}
             submittingWaveId={submittingWaveId}
+            profileHref={profileHref}
+            onCreateProfileCuration={() => setIsSetupOpen(true)}
             onSelectWave={selectOfficialWave}
             variant="mobile-sheet"
           />
         </MobileWrapperDialog>
       )}
 
-      <ProfileCurationMobileDialog
-        show={showMobileCurationPicker}
-        isOpen={isChangeCurationOpen}
-        onClose={() => setIsChangeCurationOpen(false)}
-        curations={curations ?? []}
-        selectedCurationId={profileCuration?.id ?? null}
-        submittingCurationId={submittingCurationId}
-        isLoading={areCurationsLoading}
-        isError={areCurationsError}
-        isFetching={areCurationsFetching}
-        onRetry={retryCurationsLoad}
-        onSelectCuration={(curationId) => selectOfficialCuration(curationId)}
-      />
+      {canSwitchOfficialCuration && (
+        <ProfileCurationPickerDialog
+          isOpen={isChangeCurationOpen}
+          onClose={() => setIsChangeCurationOpen(false)}
+          curations={curations ?? []}
+          selectedCurationId={profileCuration?.id ?? null}
+          submittingCurationId={submittingCurationId}
+          isLoading={areCurationsLoading}
+          isError={areCurationsError}
+          isFetching={areCurationsFetching}
+          onRetry={retryCurationsLoad}
+          onSelectCuration={(curationId) => selectOfficialCuration(curationId)}
+          onCreateCuration={() => {
+            setIsChangeCurationOpen(false);
+            setIsCreateCurationOpen(true);
+          }}
+        />
+      )}
 
       {isCreateCurationOpen && canManageOwnOfficialWave && (
         <MyStreamWaveCurationCreateDialog
           wave={wave}
           isOpen={isCreateCurationOpen}
           onClose={() => setIsCreateCurationOpen(false)}
-          onSaved={(curation) => selectOfficialCuration(curation.id)}
+          onSaved={async (curation) => {
+            await selectOfficialCuration(curation.id);
+            setIsQuickPostOpen(true);
+          }}
+          permissionMode="profile"
         />
       )}
 
@@ -590,11 +552,34 @@ export default function UserPageProfileWave({
         />
       )}
 
+      {isSetupOpen && canManageOwnOfficialWave && (
+        <UserPageProfileCurationSetupDialog
+          profile={resolvedProfile}
+          isOpen={isSetupOpen}
+          onClose={() => setIsSetupOpen(false)}
+          onReady={() => {
+            setIsSetupOpen(false);
+            setIsQuickPostOpen(true);
+          }}
+        />
+      )}
+
+      <MobileWrapperConfirmationDialog
+        isOpen={isDisconnectOpen}
+        onClose={() => setIsDisconnectOpen(false)}
+        onConfirm={() => void removeOfficialWave()}
+        title={t(locale, "profileCuration.disconnect.title")}
+        message={t(locale, "profileCuration.disconnect.message")}
+        confirmText={t(locale, "profileCuration.header.disconnect")}
+        isConfirming={isPending && pendingAction === "clear"}
+      />
+
       <div ref={containerRef} className="tw-min-w-0 tw-flex-1">
         <UserPageProfileWaveContent
           canManageOwnOfficialWave={canManageOwnOfficialWave}
           containerWidth={containerWidth}
           onCreateCuration={() => setIsCreateCurationOpen(true)}
+          onAddPost={openQuickPost}
           profileIdentity={profileIdentityForMasonry}
           areCurationsError={areCurationsError}
           areCurationsFetching={areCurationsFetching}

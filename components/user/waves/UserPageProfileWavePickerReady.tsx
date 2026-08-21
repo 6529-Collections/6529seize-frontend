@@ -4,6 +4,8 @@ import WavesIcon from "@/components/common/icons/WavesIcon";
 import Button from "@/components/utils/button/Button";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   ArrowTopRightOnSquareIcon,
@@ -99,7 +101,7 @@ function PanelCandidateWaveRow({
 
   return (
     <div
-      className={`tw-transition tw-duration-300 tw-ease-out tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-px-3 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-4 sm:tw-px-4 sm:tw-py-4 ${
+      className={`tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-px-3 tw-py-3 tw-transition tw-duration-300 tw-ease-out sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-4 sm:tw-px-4 sm:tw-py-4 ${
         isSelected
           ? "tw-bg-emerald-500/5"
           : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900"
@@ -205,6 +207,7 @@ export default function UserPageProfileWavePickerReady({
   title,
   selectedWaveId,
   submittingWaveId,
+  onCreateProfileCuration,
   onSelectWave,
   variant,
 }: {
@@ -212,9 +215,11 @@ export default function UserPageProfileWavePickerReady({
   readonly title: string | undefined;
   readonly selectedWaveId: string | null;
   readonly submittingWaveId: string | null;
+  readonly onCreateProfileCuration: () => void;
   readonly onSelectWave: (waveId: string) => void;
   readonly variant: WavePickerVariant;
 }) {
+  const locale = useBrowserLocale();
   const renderCandidateWaveRow = (candidateWave: ApiWave) => (
     <CandidateWaveRow
       key={candidateWave.id}
@@ -259,9 +264,22 @@ export default function UserPageProfileWavePickerReady({
             {title}
           </h2>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2">
-            Choose the wave you want to use as your featured wave.
+            {t(locale, "profileCuration.entry.noEligibleNone")}
           </p>
         </div>
+
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/5 tw-p-4">
+          <Button variant="primary" size="sm" onClick={onCreateProfileCuration}>
+            {t(locale, "profileCuration.entry.create")}
+          </Button>
+          <span className="tw-text-xs tw-leading-5 tw-text-iron-500">
+            {t(locale, "profileCuration.entry.recommended")}
+          </span>
+        </div>
+
+        <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+          {t(locale, "profileCuration.entry.existingWave")}
+        </p>
 
         <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-gap-3">
           {state.waves.map(renderCandidateWaveRow)}

@@ -5,6 +5,7 @@ import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import WaveDeleteModal from "@/components/waves/header/options/delete/WaveDeleteModal";
 import { AuthContext } from "@/components/auth/Auth";
 jest.mock("@/services/api/common-api", () => ({ commonApiDelete: jest.fn() }));
+import { commonApiDelete } from "@/services/api/common-api";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ReactQueryWrapperContextType } from "@/components/react-query-wrapper/ReactQueryWrapperContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -16,6 +17,7 @@ jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
 
 const useMutationMock = useMutation as jest.Mock;
 const useRouterMock = useRouter as jest.Mock;
+const commonApiDeleteMock = commonApiDelete as jest.Mock;
 
 describe("WaveDeleteModal", () => {
   const auth = createMockAuthContext({
@@ -29,13 +31,16 @@ describe("WaveDeleteModal", () => {
   const mutate = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    commonApiDeleteMock.mockResolvedValue(undefined);
     useRouterMock.mockReturnValue({ push });
     useMutationMock.mockImplementation((opts) => ({
       mutate: () => {
-        void opts.mutationFn();
-        opts.onSuccess?.();
-        opts.onSettled?.();
         mutate();
+        void Promise.resolve(opts.mutationFn())
+          .then(() => opts.onSuccess?.())
+          .catch((error) => opts.onError?.(error))
+          .finally(() => opts.onSettled?.());
       },
     }));
   });
@@ -59,12 +64,42 @@ describe("WaveDeleteModal", () => {
     await user.click(screen.getByRole("button", { name: "Delete" }));
     expect(auth.requestAuth).toHaveBeenCalled();
     expect(mutate).toHaveBeenCalled();
-    expect(auth.setToast).toHaveBeenCalledWith({
-      message: "Wave deleted.",
-      type: "warning",
+    await waitFor(() => {
+      expect(auth.setToast).toHaveBeenCalledWith({
+        message: "Wave deleted.",
+        type: "warning",
+      });
+      expect(rq.invalidateDrops).toHaveBeenCalled();
+      expect(push).toHaveBeenCalledWith("/waves");
     });
-    expect(rq.invalidateDrops).toHaveBeenCalled();
-    expect(push).toHaveBeenCalledWith("/waves");
+    expect(commonApiDeleteMock).toHaveBeenCalledWith({
+      endpoint: "waves/w1",
+      errorMode: "structured",
+    });
+  });
+
+  it("treats an already deleted wave as a successful deletion", async () => {
+    const user = userEvent.setup();
+    const wave = { id: "w1" } as ApiWave;
+    commonApiDeleteMock.mockRejectedValue({ status: 404 });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <WaveDeleteModal wave={wave} isOpen closeModal={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => {
+      expect(auth.setToast).toHaveBeenCalledWith({
+        message: "Wave deleted.",
+        type: "warning",
+      });
+      expect(push).toHaveBeenCalledWith("/waves");
+    });
   });
 
   it("contains focus and restores it to the opener", async () => {

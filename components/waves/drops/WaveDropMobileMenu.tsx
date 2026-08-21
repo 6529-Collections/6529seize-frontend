@@ -8,6 +8,8 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import type { FC, PointerEvent } from "react";
 import {
@@ -118,6 +120,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
 }) {
+  const locale = useBrowserLocale();
   const handledTouchReplyRef = useRef(false);
   const handledTouchReplyResetTimeoutRef = useRef<ReturnType<
     typeof setTimeout
@@ -237,7 +240,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         >
           <WaveDropCurationsActionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300" />
           <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-            Curate
+            {t(locale, "profileCuration.actions.manage")}
           </span>
         </button>
       )}

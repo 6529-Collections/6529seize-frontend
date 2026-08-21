@@ -51,6 +51,8 @@ actions` in the drop header.
 - `Mark as unread`
 - vote controls (when voting is available)
 - `Edit Message` / `Delete` (when allowed)
+- `Manage curations` for adding or removing the post from named Curations the
+  current account can manage
 
 ## Availability Rules
 
@@ -100,6 +102,8 @@ actions` in the drop header.
   hold, so vertical swipes continue scrolling the thread instead of freezing it.
 - Some menu rows stay hidden when ownership, wallet, or voting requirements are
   not met.
+- `Manage curations` can open a second sheet. Its add/remove buttons remain
+  explicit and destructive profile-card removal uses a separate confirmation.
 
 ## Failure and Recovery
 
@@ -127,5 +131,6 @@ actions` in the drop header.
 - [Wave Drop Reactions and Rating Actions](feature-reactions-and-ratings.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
 - [Wave Drop Boosting](feature-drop-boosting.md)
+- [Wave Drop Curation Actions](feature-drop-curation.md)
 - [Wave Drop Actions Index](README.md)
 - [Docs Home](../../README.md)
