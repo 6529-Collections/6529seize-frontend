@@ -9,7 +9,7 @@ import { t } from "@/i18n/messages";
 
 type GroupCriteria = ApiCreateGroupDescription | ApiGroupDescription;
 
-export type GroupCriteriaSummary =
+type GroupCriteriaSummary =
   | {
       readonly status: "available";
       readonly text: string | null;
