@@ -1092,6 +1092,7 @@
       "facts": [
         "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
+        "In Search messages, open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
         "Arrow keys move through site results and Enter opens the selected result.",
         "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
@@ -4388,7 +4389,7 @@
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports a compact multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
         "The notification filter defaults to All and can combine Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
-        "The settings action beside the Notifications heading opens Profile Preferences.",
+        "An authenticated user can open Profile Preferences from the Preferences action in their own profile header.",
         "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
@@ -4433,13 +4434,14 @@
         "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation, hides the individual category controls, and preserves their choices.",
         "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
         "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push.",
-        "Profile Preferences is available from the app sidebar, the desktop profile menu, and the settings action beside the Notifications heading."
+        "Profile Preferences is available from the app sidebar, the desktop profile menu, and the Preferences action in the authenticated user's own profile header."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/messages", "/notifications"],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
         "components/header/ProfilePreferencesSettings.tsx",
+        "components/user/user-page-header/UserPageHeaderClient.tsx",
         "ops/docs/notifications/feature-profile-preferences.md",
         "ops/docs/waves/create/feature-direct-message-creation.md"
       ]

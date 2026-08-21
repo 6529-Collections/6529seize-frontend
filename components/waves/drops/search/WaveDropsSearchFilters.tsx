@@ -200,7 +200,7 @@ export default function WaveDropsSearchFilters({
               type="date"
               value={after}
               onChange={(event) => onAfterChange(event.target.value)}
-              className="tw-[color-scheme:dark] tw-form-input tw-mt-1.5 tw-block tw-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-2 tw-text-sm tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-primary-300/90"
+              className="tw-form-input tw-mt-1.5 tw-block tw-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-2 tw-text-sm tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 [color-scheme:dark] focus:tw-outline-none focus:tw-ring-primary-300/90"
             />
           </label>
           <label className="tw-text-xs tw-font-medium tw-text-iron-300">
@@ -209,7 +209,7 @@ export default function WaveDropsSearchFilters({
               type="date"
               value={before}
               onChange={(event) => onBeforeChange(event.target.value)}
-              className="tw-[color-scheme:dark] tw-form-input tw-mt-1.5 tw-block tw-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-2 tw-text-sm tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-primary-300/90"
+              className="tw-form-input tw-mt-1.5 tw-block tw-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-2 tw-text-sm tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-700 [color-scheme:dark] focus:tw-outline-none focus:tw-ring-primary-300/90"
             />
           </label>
         </div>

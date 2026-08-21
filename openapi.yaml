@@ -12729,6 +12729,7 @@ paths:
           schema:
             type: string
             minLength: 3
+            maxLength: 200
         - name: author_id
           in: query
           required: false
@@ -12775,7 +12776,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
         "400":
-          description: Invalid search criteria
+          description: >-
+            Invalid search criteria: at least one of term, author_id, after, or
+            before is required; term must contain 3 to 200 characters; and when
+            both dates are provided, after must be less than before
         "404":
           description: Wave not found
   /v2/waves/{waveId}/search-authors:
