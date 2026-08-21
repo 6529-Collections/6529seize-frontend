@@ -112,12 +112,23 @@ describe("ReportDropModal", () => {
     jest.mocked(blockProfile).mockResolvedValue(undefined);
   });
 
-  it("submits a report by default without changing personal visibility", async () => {
+  it("starts with no action selected and submits a report when selected", async () => {
     const { onClose } = renderModal();
 
     expect(
+      screen.getByRole("heading", { name: "Flag Content" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Report this post or change what you see.")
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("checkbox", { name: "Report this post" })
-    ).toBeChecked();
+    ).not.toBeChecked();
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Report this post" })
+    );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() =>
@@ -138,9 +149,6 @@ describe("ReportDropModal", () => {
     jest.mocked(hideDrop).mockReturnValue(deferred.promise);
     const { onClose } = renderModal();
 
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
-    );
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Hide this post for me" })
     );
@@ -176,9 +184,6 @@ describe("ReportDropModal", () => {
     );
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
-    );
-    await userEvent.click(
       screen.getByRole("checkbox", { name: "Hide this post for me" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
@@ -196,6 +201,9 @@ describe("ReportDropModal", () => {
   it("combines reporting and personal choices in the report request", async () => {
     renderModal();
 
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Report this post" })
+    );
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Hide this post for me" })
     );
@@ -233,9 +241,6 @@ describe("ReportDropModal", () => {
     });
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
-    );
-    await userEvent.click(
       screen.getByRole("checkbox", { name: "Block this author" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
@@ -263,9 +268,6 @@ describe("ReportDropModal", () => {
     jest.mocked(blockProfile).mockResolvedValue(undefined);
     const { onClose } = renderModal();
 
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
-    );
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Hide this post for me" })
     );
@@ -295,10 +297,6 @@ describe("ReportDropModal", () => {
 
   it("requires at least one selected action", async () => {
     renderModal();
-
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
-    );
 
     expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
   });

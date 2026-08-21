@@ -601,7 +601,7 @@ test("shows clap by default for non-author profiles", () => {
   expect(screen.getByTestId("clap")).toBeInTheDocument();
 });
 
-test("shows one Report action as the final authenticated mobile menu entry", () => {
+test("shows one Flag Content action as the final authenticated mobile menu entry", () => {
   render(
     <AuthContext.Provider
       value={
@@ -623,7 +623,7 @@ test("shows one Report action as the final authenticated mobile menu entry", () 
     </AuthContext.Provider>
   );
 
-  const reportAction = screen.getByRole("button", { name: "Report" });
+  const reportAction = screen.getByRole("button", { name: "Flag Content" });
   expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
   expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
   expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();

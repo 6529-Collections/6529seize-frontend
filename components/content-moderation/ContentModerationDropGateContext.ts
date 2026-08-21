@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-export interface ContentModerationDropGateContextValue {
+interface ContentModerationDropGateContextValue {
   readonly setOptimisticHidden: (hidden: boolean) => () => void;
 }
 

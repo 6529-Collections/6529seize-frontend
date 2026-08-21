@@ -2,6 +2,7 @@ import {
   commonApiDelete,
   commonApiDeleteWithBody,
   commonApiPut,
+  getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
@@ -24,6 +25,25 @@ describe("commonApi utility methods", () => {
       undefined
     );
     expect(getStructuredApiErrorStatus({ status: "422" })).toBeUndefined();
+  });
+
+  it("reads a code only from a structured API error response body", () => {
+    expect(
+      getStructuredApiErrorCode({
+        response: {
+          body: JSON.stringify({ code: "CONTENT_MODERATION_REJECTED" }),
+        },
+      })
+    ).toBe("CONTENT_MODERATION_REJECTED");
+    expect(
+      getStructuredApiErrorCode({
+        response: { body: { code: "CONTENT_MODERATION_REJECTED" } },
+      })
+    ).toBe("CONTENT_MODERATION_REJECTED");
+    expect(
+      getStructuredApiErrorCode({ response: { body: "not-json" } })
+    ).toBeUndefined();
+    expect(getStructuredApiErrorCode({ status: 422 })).toBeUndefined();
   });
 
   it("commonApiPut posts JSON body", async () => {

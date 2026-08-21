@@ -27,7 +27,7 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { FlagIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 import { useContentModerationDropGateContext } from "./ContentModerationDropGateContext";
@@ -142,7 +142,7 @@ export default function ReportDropModal({
     ApiContentModerationReportReason.ScamOrPhishing
   );
   const [notes, setNotes] = useState("");
-  const [reportPost, setReportPost] = useState(true);
+  const [reportPost, setReportPost] = useState(false);
   const [hidePost, setHidePost] = useState(false);
   const [blockAuthor, setBlockAuthor] = useState(false);
   const hasSelection = reportPost || hidePost || blockAuthor;
@@ -150,7 +150,7 @@ export default function ReportDropModal({
   const closeModal = () => {
     setReason(ApiContentModerationReportReason.ScamOrPhishing);
     setNotes("");
-    setReportPost(true);
+    setReportPost(false);
     setHidePost(false);
     setBlockAuthor(false);
     onClose();
@@ -204,12 +204,14 @@ export default function ReportDropModal({
       if (!hidePost && !blockAuthor) {
         return undefined;
       }
-      const previousHidden = hidePost && viewerProfileId
-        ? getDropHiddenOverride(viewerProfileId, drop.id)
-        : undefined;
-      const previousBlocked = blockAuthor && viewerProfileId
-        ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
-        : undefined;
+      const previousHidden =
+        hidePost && viewerProfileId
+          ? getDropHiddenOverride(viewerProfileId, drop.id)
+          : undefined;
+      const previousBlocked =
+        blockAuthor && viewerProfileId
+          ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
+          : undefined;
       if (hidePost && viewerProfileId) {
         setDropHiddenOverride(viewerProfileId, drop.id, true);
       }
@@ -334,8 +336,9 @@ export default function ReportDropModal({
           <DialogPanel className="tw-w-full tw-max-w-xl tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-shadow-2xl">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
               <div>
-                <DialogTitle className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-                  {t(locale, "contentModeration.report.title")}
+                <DialogTitle className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-xl tw-font-semibold tw-text-iron-50">
+                  <FlagIcon aria-hidden="true" className="tw-size-5" />
+                  <span>{t(locale, "contentModeration.report.title")}</span>
                 </DialogTitle>
                 <p
                   id={descriptionId}

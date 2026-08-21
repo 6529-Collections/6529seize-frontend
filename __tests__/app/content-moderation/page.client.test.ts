@@ -1,4 +1,4 @@
-import { getAiRecommendationText } from "@/app/content-moderation/page.client";
+import { getAiRecommendationText } from "@/services/content-moderation/content-moderation-formatters";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 
 const createQueueItem = (
@@ -25,10 +25,7 @@ describe("content moderation AI recommendation formatting", () => {
 
   it("formats a present recommendation", () => {
     expect(
-      getAiRecommendationText(
-        createQueueItem("NEEDS_HUMAN_REVIEW"),
-        "en-US"
-      )
+      getAiRecommendationText(createQueueItem("NEEDS_HUMAN_REVIEW"), "en-US")
     ).toBe("AI recommendation: Needs Human Review");
   });
 

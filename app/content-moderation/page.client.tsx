@@ -8,7 +8,7 @@ import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfil
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate, formatInteger, formatPercent } from "@/i18n/format";
+import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -18,18 +18,15 @@ import {
 } from "@/services/api/content-moderation-api";
 import { setGlobalDropModerationOverride } from "@/services/content-moderation/content-moderation-state";
 import {
+  formatContentModerationEnum,
+  getAiRecommendationText,
+} from "@/services/content-moderation/content-moderation-formatters";
+import {
   invalidateContentModerationPresentation,
   MODERATION_QUEUE_QUERY_KEY,
 } from "@/services/content-moderation/content-moderation-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-
-const formatEnum = (value: string): string =>
-  value
-    .toLowerCase()
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 
 const getSnapshotContent = (snapshot: Record<string, unknown>): string => {
   const title = snapshot["title"];
@@ -94,7 +91,7 @@ const getSnapshotAssets = (
         if (!item || typeof item["original_file_name"] !== "string") return [];
         const status =
           typeof item["status"] === "string"
-            ? ` (${formatEnum(item["status"])})`
+            ? ` (${formatContentModerationEnum(item["status"])})`
             : "";
         return [
           {
@@ -145,35 +142,6 @@ const formatTimestamp = (
   return formatDate(locale, timestamp, {
     dateStyle: "medium",
     timeStyle: "short",
-  });
-};
-
-const clampConfidence = (value: number): number =>
-  Math.min(1, Math.max(0, value));
-
-export const getAiRecommendationText = (
-  item: ApiContentModerationQueueItem,
-  locale: SupportedLocale
-): string => {
-  const rawRecommendation = item.ai_recommendation?.trim();
-  if (!rawRecommendation) {
-    return t(locale, "contentModeration.moderator.noAiRecommendation");
-  }
-  const recommendation = formatEnum(rawRecommendation);
-  if (
-    typeof item.ai_confidence !== "number" ||
-    !Number.isFinite(item.ai_confidence)
-  ) {
-    return t(locale, "contentModeration.moderator.aiRecommendation", {
-      value: recommendation,
-    });
-  }
-  return t(locale, "contentModeration.moderator.aiRecommendation", {
-    value: `${recommendation} (${formatPercent(
-      locale,
-      clampConfidence(item.ai_confidence),
-      0
-    )})`,
   });
 };
 
@@ -265,7 +233,7 @@ function ModerationQueueCard({
         <span aria-hidden="true">·</span>
         <span>
           {t(locale, "contentModeration.moderator.reportedFor", {
-            reason: formatEnum(item.reason),
+            reason: formatContentModerationEnum(item.reason),
           })}
         </span>
         <span aria-hidden="true">·</span>
@@ -277,7 +245,7 @@ function ModerationQueueCard({
         <span aria-hidden="true">·</span>
         <span>
           {t(locale, "contentModeration.moderator.currentState", {
-            state: formatEnum(item.moderation.status),
+            state: formatContentModerationEnum(item.moderation.status),
           })}
         </span>
       </div>
@@ -339,7 +307,7 @@ function ModerationQueueCard({
           item.ai_category.length > 0 && (
             <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
               {t(locale, "contentModeration.moderator.aiCategory", {
-                value: formatEnum(item.ai_category),
+                value: formatContentModerationEnum(item.ai_category),
               })}
             </p>
           )}
@@ -393,10 +361,10 @@ function ModerationQueueCard({
                   className="tw-text-sm tw-text-iron-400"
                 >
                   <span className="tw-font-semibold tw-text-iron-300">
-                    {formatEnum(action)}
+                    {formatContentModerationEnum(action)}
                   </span>
                   {typeof previous === "string" && typeof next === "string" && (
-                    <span>{` — ${formatEnum(previous)} → ${formatEnum(next)}`}</span>
+                    <span>{` — ${formatContentModerationEnum(previous)} → ${formatContentModerationEnum(next)}`}</span>
                   )}
                   {typeof entryReason === "string" && entryReason && (
                     <p className="tw-mb-0 tw-mt-1 tw-text-iron-500">

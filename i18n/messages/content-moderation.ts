@@ -4,15 +4,15 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.metaTitle": "Content preferences",
   "contentModeration.preferences.metaDescription":
     "Manage your personal content visibility preferences.",
-  "contentModeration.actions.report": "Report",
+  "contentModeration.actions.report": "Flag Content",
   "contentModeration.actions.hide": "Hide post",
   "contentModeration.actions.block": "Block author",
   "contentModeration.actions.unhide": "Unhide",
   "contentModeration.actions.unblock": "Unblock",
   "contentModeration.actions.unblockProfile": "Unblock {profile}",
-  "contentModeration.report.title": "Report",
+  "contentModeration.report.title": "Flag Content",
   "contentModeration.report.description":
-    "Report this post, change what you see, or do both.",
+    "Report this post or change what you see.",
   "contentModeration.report.actionsLegend": "Choose one or more actions",
   "contentModeration.report.reportLabel": "Report this post",
   "contentModeration.report.reasonLabel": "Reason",

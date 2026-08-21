@@ -26,6 +26,36 @@ export const getStructuredApiErrorStatus = (
   return typeof status === "number" ? status : undefined;
 };
 
+export const getStructuredApiErrorCode = (
+  error: unknown
+): string | undefined => {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return undefined;
+  }
+  const response = (error as { readonly response?: unknown }).response;
+  if (
+    typeof response !== "object" ||
+    response === null ||
+    !("body" in response)
+  ) {
+    return undefined;
+  }
+  const rawBody = (response as { readonly body?: unknown }).body;
+  let body: unknown = rawBody;
+  if (typeof rawBody === "string") {
+    try {
+      body = JSON.parse(rawBody) as unknown;
+    } catch {
+      return undefined;
+    }
+  }
+  if (typeof body !== "object" || body === null || !("code" in body)) {
+    return undefined;
+  }
+  const code = (body as { readonly code?: unknown }).code;
+  return typeof code === "string" && code.trim().length > 0 ? code : undefined;
+};
+
 const getHeaders = (
   headers?: Record<string, string>,
   contentType: boolean = true,

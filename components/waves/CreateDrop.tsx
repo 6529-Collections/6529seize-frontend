@@ -14,6 +14,7 @@ import {
 } from "../react-query-wrapper/ReactQueryWrapper";
 import {
   commonApiPost,
+  getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
@@ -511,7 +512,8 @@ export default function CreateDrop({
       if (!isHandled) {
         const errorDetails = getToastErrorDetails(error);
         const isContentModerationRejection =
-          getStructuredApiErrorStatus(error) === 422;
+          getStructuredApiErrorStatus(error) === 422 &&
+          getStructuredApiErrorCode(error) === "CONTENT_MODERATION_REJECTED";
         setToast({
           type: "error",
           title: t(locale, "contentModeration.dropSubmitErrorTitle"),
