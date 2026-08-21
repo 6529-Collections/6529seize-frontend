@@ -28,7 +28,7 @@ import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 const DISMISS_DRAG_DISTANCE_PX = 44;
 const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
 const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
-const DISMISS_DRAG_SETTLE_MS = 180;
+const DISMISS_DRAG_SETTLE_MS = 150;
 const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
 const TABLET_MODAL_DESKTOP_QUERY = "(min-width: 768px)";
@@ -101,7 +101,7 @@ function getSlideTransition(tabletModal?: boolean) {
     ),
     enterTo: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
     leave:
-      "tw-transform tw-transition-[transform,opacity] tw-duration-200 tw-ease-in motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
+      "tw-transform tw-transition-[transform,opacity] tw-duration-150 tw-ease-in motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
     leaveFrom: clsx("tw-translate-y-0", tabletModal && "md:tw-opacity-100"),
     leaveTo: clsx(
       "tw-translate-y-full motion-reduce:tw-translate-y-0 motion-reduce:tw-opacity-100",
@@ -117,7 +117,7 @@ function getOverlayTransition() {
     enterFrom: "tw-opacity-0",
     enterTo: "tw-opacity-100",
     leave:
-      "tw-transition-opacity tw-duration-200 tw-ease-in motion-reduce:tw-transition-none",
+      "tw-transition-opacity tw-duration-150 tw-ease-in motion-reduce:tw-transition-none",
     leaveFrom: "tw-opacity-100",
     leaveTo: "tw-opacity-0",
   };
@@ -238,7 +238,7 @@ function getContentClassNames({
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-content tw-overflow-visible"
       : "tw-overflow-y-auto",
-    noPadding ? "tw-py-0" : "tw-py-6",
+    noPadding ? "tw-py-0" : "tw-pb-6 tw-pt-4",
     showScrollbar &&
       !allowOverflow &&
       "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
@@ -263,7 +263,7 @@ function getPanelStyle({
     transform: `translate3d(0, ${dragOffset}px, 0)`,
     transition: isDragging
       ? "none"
-      : "transform 180ms cubic-bezier(0.22, 1, 0.36, 1)",
+      : "transform 150ms cubic-bezier(0.22, 1, 0.36, 1)",
   };
 }
 
@@ -308,7 +308,7 @@ function FloatingCloseButton({
       enter="tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
       enterFrom="tw-opacity-0"
       enterTo="tw-opacity-100"
-      leave="tw-duration-200 tw-ease-in motion-reduce:tw-transition-none"
+      leave="tw-duration-150 tw-ease-in motion-reduce:tw-transition-none"
       leaveFrom="tw-opacity-100"
       leaveTo="tw-opacity-0"
     >

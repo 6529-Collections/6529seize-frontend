@@ -45,7 +45,10 @@ describe("MobileWrapperDialog", () => {
     it("renders children when open", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
-      expect(screen.getByTestId("child-content")).toBeInTheDocument();
+      const content = screen.getByTestId("child-content").parentElement;
+
+      expect(content).toHaveClass("tw-pt-4", "tw-pb-6");
+      expect(content).not.toHaveClass("tw-py-6");
     });
 
     it("renders title when provided", () => {
@@ -119,7 +122,9 @@ describe("MobileWrapperDialog", () => {
         <MobileWrapperDialog {...defaultProps} isOpen={true} noPadding={true} />
       );
 
-      expect(screen.getByTestId("child-content")).toBeInTheDocument();
+      expect(screen.getByTestId("child-content").parentElement).toHaveClass(
+        "tw-py-0"
+      );
     });
 
     it("allows content overflow when allowOverflow is true", () => {

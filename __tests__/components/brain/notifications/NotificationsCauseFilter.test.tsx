@@ -1,74 +1,124 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { AuthContext } from "@/components/auth/Auth";
 import NotificationsCauseFilter from "@/components/brain/notifications/NotificationsCauseFilter";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
-import { AuthContext } from "@/components/auth/Auth";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
+import type { ReactNode } from "react";
+import { useState } from "react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import type { NotificationFilter } from "@/components/brain/notifications/NotificationsCauseFilter";
 
 jest.mock("@/hooks/useNotificationsQuery");
+
 const prefetch = jest.fn();
-(usePrefetchNotifications as jest.Mock).mockReturnValue(prefetch);
-
 const connectedProfile = { handle: "tester" } as any;
-const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AuthContext.Provider value={{ connectedProfile } as any}>
-    {children}
-  </AuthContext.Provider>
-);
 
-beforeAll(() => {
-  HTMLElement.prototype.scrollTo = jest.fn();
-});
+function Wrapper({ children }: { readonly children: ReactNode }) {
+  return (
+    <AuthContext.Provider value={{ connectedProfile } as any}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+function FilterHarness({
+  onChange = () => undefined,
+}: {
+  readonly onChange?: (filter: NotificationFilter | null) => void;
+}) {
+  const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
+    null
+  );
+  return (
+    <NotificationsCauseFilter
+      activeFilter={activeFilter}
+      setActiveFilter={(filter) => {
+        setActiveFilter(filter);
+        onChange(filter);
+      }}
+    />
+  );
+}
 
 describe("NotificationsCauseFilter", () => {
-  it("calls setActiveFilter on click and prefetch on hover", async () => {
-    const setActive = jest.fn();
-    render(
-      <NotificationsCauseFilter
-        activeFilter={null}
-        setActiveFilter={setActive}
-      />,
-      { wrapper: Wrapper }
-    );
+  beforeEach(() => {
+    (usePrefetchNotifications as jest.Mock).mockReturnValue(prefetch);
+    prefetch.mockClear();
+  });
 
-    const buttons = screen.getAllByRole("button");
-    await userEvent.hover(buttons[1]);
-    expect(prefetch).toHaveBeenCalledWith({
-      identity: "tester",
+  it("combines multiple selected categories and resets them with All", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    render(<FilterHarness onChange={onChange} />, { wrapper: Wrapper });
+
+    await user.click(
+      screen.getByRole("button", { name: "Filter notifications: All" })
+    );
+    await user.click(
+      screen.getByRole("menuitemcheckbox", { name: "Mentions" })
+    );
+    expect(
+      screen.getByRole("button", { name: "Filter notifications: Mentions" })
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("menuitemcheckbox", { name: "Replies" }));
+    expect(
+      screen.getByRole("button", {
+        name: "Filter notifications: 2 selected",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("menuitemcheckbox", { name: "Mentions" })
+    ).toHaveAttribute("aria-checked", "true");
+    expect(
+      screen.getByRole("menuitemcheckbox", { name: "Replies" })
+    ).toHaveAttribute("aria-checked", "true");
+    expect(onChange).toHaveBeenLastCalledWith({
+      title: "2 selected",
       cause: [
         ApiNotificationCause.IdentityMentioned,
         ApiNotificationCause.DropQuoted,
+        ApiNotificationCause.DropReplied,
       ],
-      pages: 1,
     });
 
-    await userEvent.click(buttons[2]);
-    expect(setActive).toHaveBeenCalled();
+    await user.click(screen.getByRole("menuitemcheckbox", { name: "All" }));
+    expect(
+      screen.getByRole("button", { name: "Filter notifications: All" })
+    ).toBeInTheDocument();
+    expect(onChange).toHaveBeenLastCalledWith(null);
   });
 
-  it("filters subscription coverage notifications", async () => {
-    const setActive = jest.fn();
-    render(
-      <NotificationsCauseFilter
-        activeFilter={null}
-        setActiveFilter={setActive}
-      />,
-      { wrapper: Wrapper }
+  it("prefetches a category on hover", async () => {
+    const user = userEvent.setup();
+    render(<FilterHarness />, { wrapper: Wrapper });
+
+    await user.click(
+      screen.getByRole("button", { name: "Filter notifications: All" })
+    );
+    await user.hover(
+      screen.getByRole("menuitemcheckbox", { name: "Subscriptions" })
     );
 
-    const subscriptions = screen.getByRole("button", { name: "Subscriptions" });
-    await userEvent.hover(subscriptions);
     expect(prefetch).toHaveBeenCalledWith({
       identity: "tester",
       cause: [ApiNotificationCause.SubscriptionCoverage],
       pages: 1,
     });
+  });
 
-    await userEvent.click(subscriptions);
-    expect(setActive).toHaveBeenCalledWith({
-      title: "Subscriptions",
-      cause: [ApiNotificationCause.SubscriptionCoverage],
-    });
+  it("renders the wider type dropdown without a preferences action", () => {
+    render(<FilterHarness />, { wrapper: Wrapper });
+
+    expect(
+      screen.getByRole("heading", { name: "Notifications" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Filter notifications: All" })
+        .parentElement
+    ).toHaveClass("tw-w-36", "sm:tw-w-56");
+    expect(
+      screen.queryByRole("button", { name: "Profile Preferences" })
+    ).not.toBeInTheDocument();
   });
 });
