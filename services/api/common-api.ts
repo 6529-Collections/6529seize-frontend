@@ -564,6 +564,7 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string> | undefined;
+  signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
@@ -572,6 +573,7 @@ export const commonApiDelete = async (param: {
     url,
     method: "DELETE",
     headers: getHeaders(param.headers),
+    signal: param.signal,
     parseJson: false,
     errorMode: param.errorMode ?? "legacy-string",
   });
