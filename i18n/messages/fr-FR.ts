@@ -449,8 +449,15 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.title": "Accès",
   "waves.create.groups.description":
     "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
-  "waves.create.groups.viewGroupName": "Qui peut voir",
-  "waves.create.groups.adminGroupName": "Administration",
+  "waves.create.groups.viewGroupName": "Visibilité",
+  "waves.create.groups.adminGroupName": "Administrateurs",
+  "waves.create.groups.currentGroupWithName": "Groupe actuel : {name}",
+  "waves.create.groups.dialog.addTitle": "Ajouter un groupe",
+  "waves.create.groups.dialog.changeTitle": "Changer de groupe",
+  "waves.create.groups.dialog.addDescription":
+    "Créez un groupe ou choisissez un groupe existant.",
+  "waves.create.groups.dialog.changeDescription":
+    "Créez un groupe ou choisissez un autre groupe existant.",
   "waves.create.groups.members.currentCount.one": "{count} utilisateur",
   "waves.create.groups.members.currentCount.other": "{count} utilisateurs",
   "waves.create.groups.members.countLoading":
@@ -482,6 +489,51 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.members.listLabel": "Membres actuels du groupe",
   "waves.create.groups.members.openProfile":
     "Ouvrir le profil de {identity} dans un nouvel onglet",
+  "waves.create.groups.members.criteria.metric.tdh": "TDH",
+  "waves.create.groups.members.criteria.metric.xtdh": "xTDH",
+  "waves.create.groups.members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "waves.create.groups.members.criteria.metric.rep": "REP",
+  "waves.create.groups.members.criteria.metric.nic": "NIC",
+  "waves.create.groups.members.criteria.metric.level": "Niveau",
+  "waves.create.groups.members.criteria.range.atMost": "{metric} au plus {max}",
+  "waves.create.groups.members.criteria.range.atLeast":
+    "{metric} au moins {min}",
+  "waves.create.groups.members.criteria.range.between":
+    "{metric} entre {min} et {max}",
+  "waves.create.groups.members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} au plus {max}",
+  "waves.create.groups.members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} au moins {min}",
+  "waves.create.groups.members.criteria.identityRange.between":
+    "{metric} {direction} {identity} entre {min} et {max}",
+  "waves.create.groups.members.criteria.identity":
+    "{metric} {direction} {identity}",
+  "waves.create.groups.members.criteria.categoryRange.atMost":
+    "{metric} dans {category} au plus {max}",
+  "waves.create.groups.members.criteria.categoryRange.atLeast":
+    "{metric} dans {category} au moins {min}",
+  "waves.create.groups.members.criteria.categoryRange.between":
+    "{metric} dans {category} entre {min} et {max}",
+  "waves.create.groups.members.criteria.category": "{metric} dans {category}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atMost":
+    "{metric} dans {category} {direction} {identity} au plus {max}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atLeast":
+    "{metric} dans {category} {direction} {identity} au moins {min}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.between":
+    "{metric} dans {category} {direction} {identity} entre {min} et {max}",
+  "waves.create.groups.members.criteria.categoryIdentity":
+    "{metric} dans {category} {direction} {identity}",
+  "waves.create.groups.members.criteria.from": "de",
+  "waves.create.groups.members.criteria.to": "à",
+  "waves.create.groups.members.criteria.included.one":
+    "{count} utilisateur explicitement inclus",
+  "waves.create.groups.members.criteria.included.other":
+    "{count} utilisateurs explicitement inclus",
+  "waves.create.groups.members.criteria.excluded.one":
+    "{count} utilisateur explicitement exclu",
+  "waves.create.groups.members.criteria.excluded.other":
+    "{count} utilisateurs explicitement exclus",
+  "waves.create.groups.members.criteria.grant": "Subvention xTDH {grantId}",
   "waves.create.groups.validation.checking": "Vérification des accès…",
   "waves.create.groups.validation.unavailableTitle":
     "Impossible de vérifier les accès.",
@@ -510,6 +562,17 @@ export const FR_FR_MESSAGES = {
   "waves.create.drops.requirementsTitle": "Exigences de soumission",
   "waves.create.rules.advancedSummary": "Directives de la Wave et acceptation",
   "waves.create.rules.chatAdvancedSummary": "Directives de la Wave",
+  "waves.create.rules.guidelinesSettingsLabel": "Directives",
+  "waves.create.rules.guidelinesSettingsEditLabel": "Modifier les directives",
+  "waves.create.rules.guidelinesSettingsAdded": "Ajoutées",
+  "waves.create.rules.guidelinesSettingsNone": "Aucune",
+  "waves.create.rules.guidelinesAuthError":
+    "Impossible de vous authentifier. Reconnectez votre portefeuille et réessayez.",
+  "waves.create.rules.guidelinesSaveError":
+    "Impossible d’enregistrer ces directives. Réessayez.",
+  "waves.create.rules.guidelinesSaveErrorTitle":
+    "Impossible d’enregistrer ces directives.",
+  "waves.create.rules.guidelinesSaveErrorDescription": "Réessayez.",
   "waves.create.voting.rankAdvancedSummary": "Limites et comportement du vote",
   "waves.create.voting.approveAdvancedSummary":
     "Limites, comportement et calendrier du vote",

@@ -152,10 +152,15 @@ export default function WaveGroupChangeDialog({
     groupLabel,
     fallbackName: t(locale, "waves.create.groups.defaultGroupName"),
   });
-  const title = resolvedSelectedGroup ? "Change group" : "Add group";
+  const title = t(
+    locale,
+    resolvedSelectedGroup
+      ? "waves.create.groups.dialog.changeTitle"
+      : "waves.create.groups.dialog.addTitle"
+  );
   const description = resolvedSelectedGroup
-    ? "Create a new group or choose a different existing group."
-    : "Create a new group or choose an existing group.";
+    ? t(locale, "waves.create.groups.dialog.changeDescription")
+    : t(locale, "waves.create.groups.dialog.addDescription");
   let selectedGroupCriteriaStatus: "loading" | "unavailable" | undefined;
   if (isGroupLoading) {
     selectedGroupCriteriaStatus = "loading";

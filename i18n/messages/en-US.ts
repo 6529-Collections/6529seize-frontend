@@ -1179,10 +1179,16 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   selectedGroup: "Selected group",
   currentGroup: "Current group",
+  currentGroupWithName: "Current group: {name}",
   unsavedGroup: "Unsaved group",
   groupSource: "Group source",
   existingGroup: "Existing group",
   newGroup: "New group",
+  "dialog.addTitle": "Add group",
+  "dialog.changeTitle": "Change group",
+  "dialog.addDescription": "Create a new group or choose an existing group.",
+  "dialog.changeDescription":
+    "Create a new group or choose a different existing group.",
   addIdentity: "Add identity",
   addRule: "Add rule",
   done: "Done",
@@ -1238,13 +1244,35 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "members.noCriteria": "No criteria selected",
   "members.criteria.loading": "Loading group criteria…",
   "members.criteria.unavailable": "Group criteria unavailable",
-  "members.criteria.range": "{metric} {range}",
-  "members.criteria.identityRange": "{metric} {direction} {identity} {range}",
+  "members.criteria.metric.tdh": "TDH",
+  "members.criteria.metric.xtdh": "xTDH",
+  "members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "members.criteria.metric.rep": "REP",
+  "members.criteria.metric.nic": "NIC",
+  "members.criteria.metric.level": "Level",
+  "members.criteria.range.atMost": "{metric} at most {max}",
+  "members.criteria.range.atLeast": "{metric} at least {min}",
+  "members.criteria.range.between": "{metric} between {min} and {max}",
+  "members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} at most {max}",
+  "members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} at least {min}",
+  "members.criteria.identityRange.between":
+    "{metric} {direction} {identity} between {min} and {max}",
   "members.criteria.identity": "{metric} {direction} {identity}",
-  "members.criteria.categoryRange": "{metric} in {category} {range}",
+  "members.criteria.categoryRange.atMost":
+    "{metric} in {category} at most {max}",
+  "members.criteria.categoryRange.atLeast":
+    "{metric} in {category} at least {min}",
+  "members.criteria.categoryRange.between":
+    "{metric} in {category} between {min} and {max}",
   "members.criteria.category": "{metric} in {category}",
-  "members.criteria.categoryIdentityRange":
-    "{metric} in {category} {direction} {identity} {range}",
+  "members.criteria.categoryIdentityRange.atMost":
+    "{metric} in {category} {direction} {identity} at most {max}",
+  "members.criteria.categoryIdentityRange.atLeast":
+    "{metric} in {category} {direction} {identity} at least {min}",
+  "members.criteria.categoryIdentityRange.between":
+    "{metric} in {category} {direction} {identity} between {min} and {max}",
   "members.criteria.categoryIdentity":
     "{metric} in {category} {direction} {identity}",
   "members.criteria.from": "from",
@@ -1471,6 +1499,15 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   guidelinesFieldLabel: "Wave guidelines",
   guidelinesDescription: "These guidelines are shown in wave rules panel",
   guidelinesPlaceholder: "Add optional wave guidelines...",
+  guidelinesSettingsLabel: "Guidelines",
+  guidelinesSettingsEditLabel: "Edit guidelines",
+  guidelinesSettingsAdded: "Added",
+  guidelinesSettingsNone: "None",
+  guidelinesAuthError:
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  guidelinesSaveError: "Couldn't save these guidelines. Please try again.",
+  guidelinesSaveErrorTitle: "Couldn't save these guidelines.",
+  guidelinesSaveErrorDescription: PLEASE_TRY_AGAIN,
   acceptanceTitle: "Rules that require acceptance",
   acceptanceToggle: "Require acceptance",
   acceptanceDescription:

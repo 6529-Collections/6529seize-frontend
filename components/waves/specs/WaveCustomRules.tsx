@@ -105,6 +105,7 @@ function WaveCustomRulesEditor({
 }
 
 export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
+  const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
     useAuth();
@@ -165,8 +166,7 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
       try {
         const { success } = await requestAuth();
         if (!success) {
-          const message =
-            "Couldn't authenticate. Reconnect your wallet and try again.";
+          const message = t(locale, "waves.create.rules.guidelinesAuthError");
           setSaveError(message);
           setToast({
             type: "error",
@@ -187,11 +187,14 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
         );
         closeEditor();
       } catch (error) {
-        setSaveError("Couldn't save these guidelines. Please try again.");
+        setSaveError(t(locale, "waves.create.rules.guidelinesSaveError"));
         setToast({
           type: "error",
-          title: "Couldn't save these guidelines.",
-          description: "Please try again.",
+          title: t(locale, "waves.create.rules.guidelinesSaveErrorTitle"),
+          description: t(
+            locale,
+            "waves.create.rules.guidelinesSaveErrorDescription"
+          ),
           details: getToastErrorDetails(error, getErrorMessage(error)),
         });
       } finally {
@@ -208,8 +211,8 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
   return (
     <WaveSettingRow
       canEdit={canEdit}
-      editLabel="Edit guidelines"
-      label="Guidelines"
+      editLabel={t(locale, "waves.create.rules.guidelinesSettingsEditLabel")}
+      label={t(locale, "waves.create.rules.guidelinesSettingsLabel")}
       onOpen={resetEditor}
       renderEditor={({ closeEditor }) => (
         <WaveCustomRulesEditor
@@ -225,7 +228,12 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
           onSubmit={() => saveCustomRules(closeEditor, metadata, draft)}
         />
       )}
-      valueLabel={customRules ? "Added" : "None"}
+      valueLabel={t(
+        locale,
+        customRules
+          ? "waves.create.rules.guidelinesSettingsAdded"
+          : "waves.create.rules.guidelinesSettingsNone"
+      )}
     />
   );
 }

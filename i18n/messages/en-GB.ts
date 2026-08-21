@@ -430,6 +430,13 @@ export const EN_GB_MESSAGES = {
     "Choose who can access, participate in, and manage this wave.",
   "waves.create.groups.viewGroupName": "Visibility",
   "waves.create.groups.adminGroupName": "Admins",
+  "waves.create.groups.currentGroupWithName": "Current group: {name}",
+  "waves.create.groups.dialog.addTitle": "Add group",
+  "waves.create.groups.dialog.changeTitle": "Change group",
+  "waves.create.groups.dialog.addDescription":
+    "Create a new group or choose an existing group.",
+  "waves.create.groups.dialog.changeDescription":
+    "Create a new group or choose a different existing group.",
   "waves.create.groups.members.currentCount.one": "{count} user",
   "waves.create.groups.members.currentCount.other": "{count} users",
   "waves.create.groups.members.countLoading": "Checking current audience…",
@@ -457,6 +464,51 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.members.listLabel": "Current group members",
   "waves.create.groups.members.openProfile":
     "Open {identity}'s profile in a new tab",
+  "waves.create.groups.members.criteria.metric.tdh": "TDH",
+  "waves.create.groups.members.criteria.metric.xtdh": "xTDH",
+  "waves.create.groups.members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "waves.create.groups.members.criteria.metric.rep": "REP",
+  "waves.create.groups.members.criteria.metric.nic": "NIC",
+  "waves.create.groups.members.criteria.metric.level": "Level",
+  "waves.create.groups.members.criteria.range.atMost": "{metric} at most {max}",
+  "waves.create.groups.members.criteria.range.atLeast":
+    "{metric} at least {min}",
+  "waves.create.groups.members.criteria.range.between":
+    "{metric} between {min} and {max}",
+  "waves.create.groups.members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} at most {max}",
+  "waves.create.groups.members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} at least {min}",
+  "waves.create.groups.members.criteria.identityRange.between":
+    "{metric} {direction} {identity} between {min} and {max}",
+  "waves.create.groups.members.criteria.identity":
+    "{metric} {direction} {identity}",
+  "waves.create.groups.members.criteria.categoryRange.atMost":
+    "{metric} in {category} at most {max}",
+  "waves.create.groups.members.criteria.categoryRange.atLeast":
+    "{metric} in {category} at least {min}",
+  "waves.create.groups.members.criteria.categoryRange.between":
+    "{metric} in {category} between {min} and {max}",
+  "waves.create.groups.members.criteria.category": "{metric} in {category}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atMost":
+    "{metric} in {category} {direction} {identity} at most {max}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atLeast":
+    "{metric} in {category} {direction} {identity} at least {min}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.between":
+    "{metric} in {category} {direction} {identity} between {min} and {max}",
+  "waves.create.groups.members.criteria.categoryIdentity":
+    "{metric} in {category} {direction} {identity}",
+  "waves.create.groups.members.criteria.from": "from",
+  "waves.create.groups.members.criteria.to": "to",
+  "waves.create.groups.members.criteria.included.one":
+    "{count} explicitly included user",
+  "waves.create.groups.members.criteria.included.other":
+    "{count} explicitly included users",
+  "waves.create.groups.members.criteria.excluded.one":
+    "{count} explicitly excluded user",
+  "waves.create.groups.members.criteria.excluded.other":
+    "{count} explicitly excluded users",
+  "waves.create.groups.members.criteria.grant": "xTDH grant {grantId}",
   "waves.create.groups.validation.checking": "Checking group access…",
   "waves.create.groups.validation.unavailableTitle":
     "Couldn't verify group access.",
@@ -483,6 +535,17 @@ export const EN_GB_MESSAGES = {
   "waves.create.drops.requirementsTitle": "Submission requirements",
   "waves.create.rules.advancedSummary": "Wave guidelines and acceptance",
   "waves.create.rules.chatAdvancedSummary": "Wave guidelines",
+  "waves.create.rules.guidelinesSettingsLabel": "Guidelines",
+  "waves.create.rules.guidelinesSettingsEditLabel": "Edit guidelines",
+  "waves.create.rules.guidelinesSettingsAdded": "Added",
+  "waves.create.rules.guidelinesSettingsNone": "None",
+  "waves.create.rules.guidelinesAuthError":
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  "waves.create.rules.guidelinesSaveError":
+    "Couldn't save these guidelines. Please try again.",
+  "waves.create.rules.guidelinesSaveErrorTitle":
+    "Couldn't save these guidelines.",
+  "waves.create.rules.guidelinesSaveErrorDescription": "Please try again.",
   "waves.create.voting.rankAdvancedSummary": "Vote limits and behaviour",
   "waves.create.voting.approveAdvancedSummary":
     "Vote limits, behaviour, and timing",

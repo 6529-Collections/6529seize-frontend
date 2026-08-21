@@ -130,11 +130,10 @@ describe("group member preview", () => {
     );
 
     expect(await screen.findByText("21 users")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "TDH + xTDH ≥ 10, 4 explicitly included users, and 1 explicitly excluded user"
-      )
-    ).toBeInTheDocument();
+    const criteria = screen.getByText(
+      "TDH + xTDH at least 10, 4 explicitly included users, and 1 explicitly excluded user"
+    );
+    expect(criteria).toHaveAttribute("aria-live", "polite");
     await user.click(screen.getByRole("button", { name: "View members" }));
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
@@ -172,7 +171,7 @@ describe("group member preview", () => {
     expect(countButton).toHaveTextContent("21 users");
     expect(
       screen.getByText(
-        "TDH + xTDH ≥ 10, 4 explicitly included users, and 1 explicitly excluded user"
+        "TDH + xTDH at least 10, 4 explicitly included users, and 1 explicitly excluded user"
       )
     ).toBeInTheDocument();
     expect(screen.queryByText("View members")).not.toBeInTheDocument();

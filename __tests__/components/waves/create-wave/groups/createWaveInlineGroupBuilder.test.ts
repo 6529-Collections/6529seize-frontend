@@ -86,7 +86,7 @@ describe("createWaveInlineGroupBuilder", () => {
         draft,
         identityCount: 2,
       })
-    ).toBe("REP ≥ 5 and 2 explicitly included users");
+    ).toBe("REP at least 5 and 2 explicitly included users");
   });
 
   it("dedupes and serializes inline identities by selected wallet", () => {

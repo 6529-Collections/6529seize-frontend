@@ -523,7 +523,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.queryByText("Current group")).not.toBeInTheDocument();
     expect(screen.getByText("Public")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("REP ≥ 5").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(screen.getByText("Create this new group")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
@@ -546,7 +546,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("REP ≥ 5").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("button", { name: "Create and use new group" })
     ).toBeEnabled();
@@ -589,7 +589,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.queryByText("Current group")).not.toBeInTheDocument();
     expect(screen.getByText("Public")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("REP ≥ 5").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(screen.getByText("Create this new group")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
@@ -616,7 +616,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getByText("Existing Group")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("REP ≥ 5").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(
       screen.queryByText("Based on Existing Group. Not applied yet.")
@@ -650,7 +650,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getAllByText("Existing Group").length).toBeGreaterThan(0);
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("REP ≥ 5").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(
       screen.queryByText("Based on Existing Group. Not applied yet.")
@@ -675,7 +675,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.queryByText("Current group")).not.toBeInTheDocument();
     expect(screen.getByText("Public")).toBeInTheDocument();
     expect(screen.getAllByText("Unsaved group")).toHaveLength(2);
-    expect(screen.getByText("REP ≥ 5")).toBeInTheDocument();
+    expect(screen.getByText("REP at least 5")).toBeInTheDocument();
     expect(
       screen.getByText(
         "Choosing another group will discard this unsaved group."

@@ -11,6 +11,6 @@ export const formatGroupMembersCount = ({
 }): string =>
   t(
     locale,
-    `waves.create.groups.members.currentCount.${count === 1 ? "one" : "other"}`,
+    `waves.create.groups.members.currentCount.${new Intl.PluralRules(locale).select(count) === "one" ? "one" : "other"}`,
     { count: formatInteger(locale, count) }
   );

@@ -74,11 +74,10 @@ describe("WaveRulesGroupMembersLink", () => {
     );
 
     await screen.findByText("365 users");
-    expect(
-      await screen.findByText(
-        "REP ≥ 12, NIC from punk6529 ≥ 3, 4 explicitly included users, and 1 explicitly excluded user"
-      )
-    ).toBeInTheDocument();
+    const criteria = await screen.findByText(
+      "REP at least 12, NIC from punk6529 at least 3, 4 explicitly included users, and 1 explicitly excluded user"
+    );
+    expect(criteria).toHaveAttribute("aria-live", "polite");
     const link = screen.getByRole("link", {
       name: "Inspect Generated group name group criteria and members: 365 users",
     });

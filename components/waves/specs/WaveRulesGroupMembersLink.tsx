@@ -40,6 +40,7 @@ export default function WaveRulesGroupMembersLink({
         params: { page: 1, pageSize: 1 },
         signal,
       }),
+    enabled: groupId.length > 0,
     placeholderData: keepPreviousData,
   });
   const {
@@ -53,6 +54,7 @@ export default function WaveRulesGroupMembersLink({
         endpoint: `groups/${encodeURIComponent(groupId)}`,
         signal,
       }),
+    enabled: groupId.length > 0,
     staleTime: 60_000,
   });
 
@@ -91,7 +93,10 @@ export default function WaveRulesGroupMembersLink({
           countLabel
         )}
       </Link>
-      <p className="tw-mb-0 tw-max-w-xl tw-break-words tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
+      <p
+        aria-live="polite"
+        className="tw-mb-0 tw-max-w-xl tw-break-words tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500"
+      >
         {criteriaLabel}
       </p>
     </div>

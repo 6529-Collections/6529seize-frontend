@@ -17,6 +17,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { normalizeGroupNftOwnerships } from "@/helpers/groups/group-nft-ownership";
 import {
   createGroup,
+  hideGroup,
   publishGroup,
   validateGroupPayload,
   type ValidationIssue,
@@ -723,21 +724,28 @@ export const useWaveGroupEditButtonsController = ({
 
         const updateBody = buildWaveUpdateBody(wave, type, newGroupId);
         waveMutationTriggered = true;
-        const waveUpdated = await tryUpdateWave(updateBody, { skipAuth: true });
-        if (!waveUpdated) {
-          return;
+        try {
+          const waveUpdated = await tryUpdateWave(updateBody, {
+            skipAuth: true,
+          });
+          if (waveUpdated) {
+            const successMessage =
+              mode === WaveGroupIdentitiesModal.INCLUDE
+                ? "Identity successfully included in the group."
+                : "Identity successfully excluded from the group.";
+
+            setActiveIdentitiesModal(null);
+            setToast({
+              message: successMessage,
+              type: "success",
+            });
+            return;
+          }
+        } catch (error) {
+          await hideGroup({ id: newGroupId }).catch(() => undefined);
+          throw error;
         }
-
-        const successMessage =
-          mode === WaveGroupIdentitiesModal.INCLUDE
-            ? "Identity successfully included in the group."
-            : "Identity successfully excluded from the group.";
-
-        setActiveIdentitiesModal(null);
-        setToast({
-          message: successMessage,
-          type: "success",
-        });
+        await hideGroup({ id: newGroupId }).catch(() => undefined);
       } catch (error) {
         if (!waveMutationTriggered) {
           if (error instanceof DOMException && error.name === "AbortError") {

@@ -375,7 +375,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
     await user.click(screen.getByRole("button", { name: "Preview matches" }));
 
     expect(screen.getByTestId("members-preview-dialog")).toHaveTextContent(
-      "draft:REP ≥ 5"
+      "draft:REP at least 5"
     );
   });
 

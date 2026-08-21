@@ -89,7 +89,10 @@ export default function GroupMembersPreviewTrigger({
             countLabel
           )}
         </button>
-        <p className="tw-mb-0 tw-max-w-xl tw-break-words tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
+        <p
+          aria-live="polite"
+          className="tw-mb-0 tw-max-w-xl tw-break-words tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500"
+        >
           {criteriaLabel}
         </p>
       </div>
@@ -121,7 +124,10 @@ export default function GroupMembersPreviewTrigger({
           {t(locale, "waves.create.groups.members.view")}
         </button>
       </div>
-      <p className="tw-mb-0 tw-max-w-xl tw-break-words tw-text-left tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
+      <p
+        aria-live="polite"
+        className="tw-mb-0 tw-max-w-xl tw-break-words tw-text-left tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500"
+      >
         {criteriaLabel}
       </p>
     </div>

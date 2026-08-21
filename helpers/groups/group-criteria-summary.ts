@@ -5,9 +5,52 @@ import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhIncl
 import { getGroupNftOwnershipCardSummary } from "@/helpers/groups/group-nft-ownership";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 
 type GroupCriteria = ApiCreateGroupDescription | ApiGroupDescription;
+
+type FormattedRange =
+  | { readonly kind: "atMost"; readonly max: string }
+  | { readonly kind: "atLeast"; readonly min: string }
+  | {
+      readonly kind: "between";
+      readonly min: string;
+      readonly max: string;
+    };
+
+type RangeContext =
+  | "range"
+  | "identityRange"
+  | "categoryRange"
+  | "categoryIdentityRange";
+
+const RANGE_MESSAGE_KEYS = {
+  range: {
+    atMost: "waves.create.groups.members.criteria.range.atMost",
+    atLeast: "waves.create.groups.members.criteria.range.atLeast",
+    between: "waves.create.groups.members.criteria.range.between",
+  },
+  identityRange: {
+    atMost: "waves.create.groups.members.criteria.identityRange.atMost",
+    atLeast: "waves.create.groups.members.criteria.identityRange.atLeast",
+    between: "waves.create.groups.members.criteria.identityRange.between",
+  },
+  categoryRange: {
+    atMost: "waves.create.groups.members.criteria.categoryRange.atMost",
+    atLeast: "waves.create.groups.members.criteria.categoryRange.atLeast",
+    between: "waves.create.groups.members.criteria.categoryRange.between",
+  },
+  categoryIdentityRange: {
+    atMost: "waves.create.groups.members.criteria.categoryIdentityRange.atMost",
+    atLeast:
+      "waves.create.groups.members.criteria.categoryIdentityRange.atLeast",
+    between:
+      "waves.create.groups.members.criteria.categoryIdentityRange.between",
+  },
+} as const satisfies Record<
+  RangeContext,
+  Record<FormattedRange["kind"], MessageKey>
+>;
 
 type GroupCriteriaSummary =
   | {
@@ -40,18 +83,40 @@ const formatRange = ({
   readonly locale: SupportedLocale;
   readonly min: number | null;
   readonly max: number | null;
-}): string | null => {
+}): FormattedRange | null => {
   if (min === null && max === null) {
     return null;
   }
   if (min === null) {
-    return `≤ ${formatInteger(locale, max)}`;
+    return { kind: "atMost", max: formatInteger(locale, max) };
   }
   if (max === null) {
-    return `≥ ${formatInteger(locale, min)}`;
+    return { kind: "atLeast", min: formatInteger(locale, min) };
   }
-  return `${formatInteger(locale, min)}–${formatInteger(locale, max)}`;
+  return {
+    kind: "between",
+    min: formatInteger(locale, min),
+    max: formatInteger(locale, max),
+  };
 };
+
+const formatRangedCriterion = ({
+  locale,
+  context,
+  range,
+  params,
+}: {
+  readonly locale: SupportedLocale;
+  readonly context: RangeContext;
+  readonly range: FormattedRange;
+  readonly params: Readonly<Record<string, string | number>>;
+}): string =>
+  t(locale, RANGE_MESSAGE_KEYS[context][range.kind], {
+    ...params,
+    ...(range.kind === "atMost" ? { max: range.max } : {}),
+    ...(range.kind === "atLeast" ? { min: range.min } : {}),
+    ...(range.kind === "between" ? { min: range.min, max: range.max } : {}),
+  });
 
 const formatIdentityRule = ({
   locale,
@@ -84,17 +149,17 @@ const formatIdentityRule = ({
       : t(locale, "waves.create.groups.members.criteria.from");
 
   if (normalizedCategory && normalizedIdentity && range) {
-    return t(
+    return formatRangedCriterion({
       locale,
-      "waves.create.groups.members.criteria.categoryIdentityRange",
-      {
+      context: "categoryIdentityRange",
+      range,
+      params: {
         metric,
         category: normalizedCategory,
         direction: directionLabel,
         identity: normalizedIdentity,
-        range,
-      }
-    );
+      },
+    });
   }
   if (normalizedCategory && normalizedIdentity) {
     return t(locale, "waves.create.groups.members.criteria.categoryIdentity", {
@@ -105,11 +170,15 @@ const formatIdentityRule = ({
     });
   }
   if (normalizedIdentity && range) {
-    return t(locale, "waves.create.groups.members.criteria.identityRange", {
-      metric,
-      direction: directionLabel,
-      identity: normalizedIdentity,
+    return formatRangedCriterion({
+      locale,
+      context: "identityRange",
       range,
+      params: {
+        metric,
+        direction: directionLabel,
+        identity: normalizedIdentity,
+      },
     });
   }
   if (normalizedIdentity) {
@@ -120,10 +189,11 @@ const formatIdentityRule = ({
     });
   }
   if (normalizedCategory && range) {
-    return t(locale, "waves.create.groups.members.criteria.categoryRange", {
-      metric,
-      category: normalizedCategory,
+    return formatRangedCriterion({
+      locale,
+      context: "categoryRange",
       range,
+      params: { metric, category: normalizedCategory },
     });
   }
   if (normalizedCategory) {
@@ -133,22 +203,27 @@ const formatIdentityRule = ({
     });
   }
 
-  return t(locale, "waves.create.groups.members.criteria.range", {
-    metric,
-    range: range ?? "",
-  });
+  return range
+    ? formatRangedCriterion({
+        locale,
+        context: "range",
+        range,
+        params: { metric },
+      })
+    : null;
 };
 
 const getTdhMetric = (
-  inclusionStrategy: ApiGroupTdhInclusionStrategy
+  inclusionStrategy: ApiGroupTdhInclusionStrategy,
+  locale: SupportedLocale
 ): string => {
   if (inclusionStrategy === ApiGroupTdhInclusionStrategy.Tdh) {
-    return "TDH";
+    return t(locale, "waves.create.groups.members.criteria.metric.tdh");
   }
   if (inclusionStrategy === ApiGroupTdhInclusionStrategy.Xtdh) {
-    return "xTDH";
+    return t(locale, "waves.create.groups.members.criteria.metric.xtdh");
   }
-  return "TDH + xTDH";
+  return t(locale, "waves.create.groups.members.criteria.metric.tdhAndXtdh");
 };
 
 const getExplicitIdentityCounts = ({
@@ -207,16 +282,20 @@ export const getGroupCriteriaSummary = ({
   });
   if (tdhRange) {
     parts.push(
-      t(locale, "waves.create.groups.members.criteria.range", {
-        metric: getTdhMetric(group.tdh.inclusion_strategy),
+      formatRangedCriterion({
+        locale,
+        context: "range",
         range: tdhRange,
+        params: {
+          metric: getTdhMetric(group.tdh.inclusion_strategy, locale),
+        },
       })
     );
   }
 
   const rep = formatIdentityRule({
     locale,
-    metric: "REP",
+    metric: t(locale, "waves.create.groups.members.criteria.metric.rep"),
     min: group.rep.min,
     max: group.rep.max,
     direction: group.rep.direction,
@@ -229,7 +308,7 @@ export const getGroupCriteriaSummary = ({
 
   const nic = formatIdentityRule({
     locale,
-    metric: "NIC",
+    metric: t(locale, "waves.create.groups.members.criteria.metric.nic"),
     min: group.cic.min,
     max: group.cic.max,
     direction: group.cic.direction,
@@ -246,9 +325,16 @@ export const getGroupCriteriaSummary = ({
   });
   if (levelRange) {
     parts.push(
-      t(locale, "waves.create.groups.members.criteria.range", {
-        metric: "Level",
+      formatRangedCriterion({
+        locale,
+        context: "range",
         range: levelRange,
+        params: {
+          metric: t(
+            locale,
+            "waves.create.groups.members.criteria.metric.level"
+          ),
+        },
       })
     );
   }
