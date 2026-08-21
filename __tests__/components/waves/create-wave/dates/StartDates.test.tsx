@@ -47,6 +47,13 @@ describe("StartDates", () => {
     // Two mocked calendar buttons, one per date (the header info tooltip that
     // used to add a third button has been removed).
     expect(container.querySelectorAll("button").length).toBe(2);
+    expect(screen.getByText("Opening dates")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Submissions Open" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Voting Opens" })
+    ).toBeInTheDocument();
   });
 
   it("calls setDates when calendar clicked", () => {

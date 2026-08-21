@@ -317,7 +317,10 @@ describe("MyStreamWaveTabsMeme", () => {
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     expect(
-      screen.getByRole("menuitem", { name: "Share wave" })
+      screen.getByRole("dialog", { name: "More wave actions" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Share wave" })
     ).toBeInTheDocument();
   });
 });

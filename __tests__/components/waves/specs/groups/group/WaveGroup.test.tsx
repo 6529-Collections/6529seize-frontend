@@ -15,7 +15,7 @@ jest.mock(
   "@/components/waves/specs/groups/group/WaveGroupScope",
   () =>
     ({ group }: any) =>
-      group ? <div data-testid="scope" /> : <span>Anyone</span>
+      group ? <div data-testid="scope" /> : <span>Public</span>
 );
 
 jest.mock("@/helpers/waves/waves.helpers", () => ({ canEditWave: jest.fn() }));
@@ -71,17 +71,17 @@ describe("WaveGroup", () => {
     expect(screen.queryByTestId("edit")).toBeNull();
   });
 
-  it('shows "Anyone" when no group provided', () => {
+  it('shows "Public" when no group provided', () => {
     render(<WaveGroup {...baseProps} scope={{} as any} />, { wrapper });
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
   });
 
-  it('shows "Anyone" for an empty chat scope', () => {
+  it('shows "Public" for an empty chat scope', () => {
     render(
       <WaveGroup {...baseProps} type={WaveGroupType.CHAT} scope={{} as any} />,
       { wrapper }
     );
 
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
   });
 });

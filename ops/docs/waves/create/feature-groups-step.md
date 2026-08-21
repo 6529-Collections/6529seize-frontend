@@ -16,9 +16,9 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 ## Step Paths
 
 - `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+- `Rank`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+- `Approve`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
 
 ## Entry Points
@@ -31,19 +31,19 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 - All access and moderation rows are visible when the step opens. Each row
   groups its permission name, current scope, and related actions so the page can
-  be scanned from `Who can view` through `Admin` without opening a disclosure.
-- Helper copy clarifies that `Who can view` controls who can access the wave,
+  be scanned from `Visibility` through `Admins` without opening a disclosure.
+- Helper copy clarifies that `Visibility` controls who can access the wave,
   and that followers who can view the wave may get a notification when it is
   created.
-- `Chat` rows: `Who can view`, `Who can chat`, `Admin`
-- `Rank` and `Approve` rows: `Who can view`, `Who can drop`, `Who can vote`,
-  `Who can chat`, `Admin`
+- `Chat` rows: `Visibility`, `Who can chat`, `Admins`
+- `Rank` and `Approve` rows: `Visibility`, `Who can drop`, `Who can vote`,
+  `Who can chat`, `Admins`
 - `Rank` and `Approve` only:
   - `Enable chat` toggle controls whether `Who can chat` is editable
 - All wave types:
   - `Allow admins to delete posts` toggle sets admin delete permission
 - Defaults:
-  - `Anyone` for view/drop/vote/chat
+  - `Public` for view/drop/vote/chat
   - `Only me` for admin when creating a top-level wave
   - the parent wave's admin group when creating a subwave
   - `Allow admins to delete posts` is enabled by default
@@ -72,10 +72,12 @@ group`. Navigating away from `Groups`, including moving backward from the
 - Typing in a row that already has a selected group keeps that current group
   selected until the row is explicitly cleared or a new group is picked.
 - Clear control (`x`) resets the row to its default scope.
-- Helper text under each row shows `Current group: <group-or-scope>`.
-- A selected saved group also shows how many identities are currently eligible.
-  Use `View members` to inspect the current identities without leaving wave
-  creation.
+- A public row shows `Public` without a `Current group` heading. A selected
+  saved group shows the `Current group` heading, its current member total as
+  `1 user` or `X users`, and a readable summary of the active criteria,
+  including thresholds and explicit include or exclude counts. Its generated
+  group name is not shown in this summary. Use `View members` to inspect the
+  matches without leaving wave creation.
 - The member browser opens as a centered dialog on larger screens and a tall
   sheet on smaller screens. It shows 20 identities per page, supports search by
   handle or wallet, links each identity to its profile in a new tab, and keeps
@@ -84,7 +86,7 @@ group`. Navigating away from `Groups`, including moving backward from the
   notes that profile, reputation, and ownership changes can change who matches
   the group.
 - Inline identity groups use access-group wording and warn when the connected
-  creator is excluded, because excluding yourself from a `Who can view` group
+  creator is excluded, because excluding yourself from a `Visibility` group
   can prevent you from opening the created wave.
 - New inline groups include the connected creator by default, including groups
   composed only from rules. `Include me` can be switched off while editing
@@ -92,16 +94,17 @@ group`. Navigating away from `Groups`, including moving backward from the
   instead of adding the creator to it.
 - When an unsaved inline group has a valid identity or rule configuration, use
   `Preview matches` to evaluate and browse its current matches before creating
-  the group. Previewing does not save the group or apply it to the wave.
+  the group. The pending-group card spells out the configured criteria rather
+  than showing only a rule count. Previewing does not save the group or apply
+  it to the wave.
 
 ## Warnings and State Changes
 
-- When `Who can view` is restricted, every active `Drop`, `Vote`, `Chat`, and
-  `Admin` group must contain only people who also belong to the view group.
+- When `Visibility` is restricted, every active `Drop`, `Vote`, `Chat`, and
+  `Admins` group must contain only people who also belong to the visibility
+  group.
 - The app checks the active groups together, highlights each incompatible row,
   and keeps `Next` unavailable while the check is running.
-- `Warning: Limited Access` explains that all privilege-group members must also
-  be members of `Who can view`.
 - On `Rank` and `Approve`, turning `Enable chat` off disables editing for
   `Who can chat`.
 - `Allow admins to delete posts` does not show extra helper text when enabled.
@@ -114,9 +117,9 @@ group`. Navigating away from `Groups`, including moving backward from the
 - If an older saved draft references a group whose criteria are no longer
   available, the member browser stays open, explains that limitation, and
   continues showing any current members the group endpoint can resolve.
-- Public waves can leave every scope as `Anyone`. For a restricted wave,
-  `Next` stops on `Groups` if an active permission is open to `Anyone` or its
-  selected group includes somebody outside `Who can view`.
+- Public waves can leave every scope as `Public`. For a restricted wave,
+  `Next` stops on `Groups` if an active permission is `Public` or its selected
+  group includes somebody outside `Visibility`.
 - If access cannot be checked, the step stays open and offers a retry through
   `Next`; changing a group also starts a fresh check.
 - If no explicit admin group is selected, submit tries to create and publish a
@@ -140,7 +143,7 @@ group`. Navigating away from `Groups`, including moving backward from the
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
-- [Wave Creation Dates and Timeline](feature-dates-step.md)
+- [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)

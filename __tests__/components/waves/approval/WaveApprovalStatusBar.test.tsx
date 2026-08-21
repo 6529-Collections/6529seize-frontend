@@ -288,7 +288,7 @@ describe("WaveApprovalStatusBar", () => {
       name: "Approval rules",
     });
     expect(approvalRulesButton).toBeInTheDocument();
-    expect(approvalRulesButton).toHaveAttribute("aria-haspopup", "dialog");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-haspopup");
     expect(approvalRulesButton).not.toHaveAttribute("aria-expanded");
     expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
   });
@@ -331,6 +331,30 @@ describe("WaveApprovalStatusBar", () => {
     expect(
       screen.getByText("Votes count immediately in the approval score.")
     ).toBeInTheDocument();
+  });
+
+  it("uses the reusable tooltip on touch-capable desktop devices", () => {
+    useDeviceInfoMock.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
+      isAppleMobile: false,
+      isMobileDevice: false,
+    });
+
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave()}
+      />
+    );
+
+    const approvalRulesButton = screen.getByRole("button", {
+      name: "Approval rules",
+    });
+    expect(approvalRulesButton).not.toHaveAttribute("aria-haspopup");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-expanded");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
   });
 
   it("explains weighted approval with hold time", () => {

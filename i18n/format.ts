@@ -16,6 +16,10 @@ const DEFAULT_COLLATOR_OPTIONS = {
   sensitivity: "base",
   numeric: true,
 } satisfies Intl.CollatorOptions;
+const DEFAULT_LIST_FORMAT_OPTIONS = {
+  style: "long",
+  type: "conjunction",
+} satisfies Intl.ListFormatOptions;
 
 function toFiniteNumber(value: number | null | undefined): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -105,6 +109,14 @@ export function compareLocalized(
   options: Intl.CollatorOptions = DEFAULT_COLLATOR_OPTIONS
 ): number {
   return new Intl.Collator(locale, options).compare(left, right);
+}
+
+export function formatList(
+  locale: SupportedLocale,
+  values: readonly string[],
+  options: Intl.ListFormatOptions = DEFAULT_LIST_FORMAT_OPTIONS
+): string {
+  return new Intl.ListFormat(locale, options).format(values);
 }
 
 export function roundTo(value: number, fractionDigits: number): number {
