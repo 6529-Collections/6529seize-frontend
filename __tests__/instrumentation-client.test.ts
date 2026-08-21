@@ -608,14 +608,16 @@ describe("instrumentation-client", () => {
         },
       },
       {
-        type: "http",
-        category: "fetch",
-        level: "error",
+        category: "reactions",
+        level: "info",
+        message: "reaction.request_sent",
         data: {
+          action: "add",
+          endpoint_family: "drop_reaction",
           method: "POST",
-          url: "/api/drops/private-drop-id/reaction",
-          "url.is_first_party": true,
-          "url.is_first_party_api": true,
+          mutation_sequence: 1,
+          route_family: "/waves/[wave]",
+          source: "chip",
         },
       },
       {
@@ -638,6 +640,17 @@ describe("instrumentation-client", () => {
           url: "/private-profile-id",
           "url.is_first_party": true,
           "url.is_first_party_api": false,
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "POST",
+          url: "/api/drops/private-drop-id/reaction",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
         },
       },
       {
@@ -4094,7 +4107,7 @@ describe("instrumentation-client", () => {
     expect(event.message).not.toContain("#hash");
   });
 
-  it("drops a sampled-out synthetic drop-reaction transport warning", () => {
+  it("drops a sampled-out concurrent synthetic drop-reaction transport warning", () => {
     const beforeSend = loadBeforeSend();
     const event = createDropReactionNetworkEvent("network-drop-event");
 
@@ -4105,7 +4118,7 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
-  it("keeps and tags a sampled-in synthetic drop-reaction transport warning", () => {
+  it("keeps and tags a sampled-in concurrent synthetic drop-reaction transport warning", () => {
     const beforeSend = loadBeforeSend();
     const event = createDropReactionNetworkEvent("event-200");
 
@@ -4188,7 +4201,7 @@ describe("instrumentation-client", () => {
       result?.breadcrumbs
         ?.filter((breadcrumb) => breadcrumb.category === "reactions")
         .map((breadcrumb) => breadcrumb.data?.["route_family"])
-    ).toEqual(["/waves/[wave]", "/waves/[wave]"]);
+    ).toEqual(["/waves/[wave]", "/waves/[wave]", "/waves/[wave]"]);
   });
 
   it("keeps and tags sampled-in app-wrapped absolute API network errors using the original target", () => {
