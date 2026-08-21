@@ -1,5 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import CreateWaveRules from "@/components/waves/create-wave/CreateWaveRules";
+import type CreateWaveRulesGroupMembers from "@/components/waves/create-wave/rules/CreateWaveRulesGroupMembers";
+import type WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveConfig } from "@/types/waves.types";
@@ -8,9 +11,46 @@ jest.mock("@/helpers/waves/wave-rules.helpers", () => ({
   buildWaveRules: jest.fn(() => []),
 }));
 
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    connectedProfile: { primary_wallet: "0xcreator" },
+  }),
+}));
+
+jest.mock(
+  "@/components/waves/create-wave/rules/CreateWaveRulesGroupMembers",
+  () => ({
+    __esModule: true,
+    default: (props: ComponentProps<typeof CreateWaveRulesGroupMembers>) => {
+      const target = "target" in props ? props.target : null;
+      const includedWallet =
+        target?.kind === "draft"
+          ? target.group.identity_addresses?.[0]
+          : undefined;
+      return (
+        <div data-testid="rules-group-members">
+          {props.roleLabel}:{target?.kind}:{includedWallet}
+        </div>
+      );
+    },
+  })
+);
+
 jest.mock("@/components/waves/specs/WaveRulesPanel", () => ({
   __esModule: true,
-  default: ({ title }: { title: string }) => <h3>{title}</h3>,
+  default: ({
+    title,
+    renderRowValue,
+  }: ComponentProps<typeof WaveRulesPanel>) => (
+    <>
+      <h3>{title}</h3>
+      {renderRowValue?.({
+        id: "admin",
+        label: "Who can admin",
+        value: "Only me",
+      })}
+    </>
+  ),
 }));
 
 jest.mock(
@@ -94,6 +134,21 @@ const getConfig = (
 });
 
 describe("CreateWaveRules", () => {
+  it("shows the creator-only admin audience as an explorable member value", () => {
+    render(
+      <CreateWaveRules
+        config={getConfig(ApiWaveType.Chat)}
+        groupsCache={{}}
+        setDisplay={jest.fn()}
+        setDrops={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("rules-group-members")).toHaveTextContent(
+      "Who can admin:draft:0xcreator"
+    );
+  });
+
   it("keeps automatic rules visible and Chat creator rules in Advanced", () => {
     render(
       <CreateWaveRules

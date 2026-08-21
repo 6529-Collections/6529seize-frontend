@@ -1,13 +1,25 @@
 import PrenodesStatus from "@/components/prenodes/PrenodesStatus";
-import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import {
+  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
+  NETWORK_REFERENCE_PAGE_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
 import { getAppMetadata } from "@/components/providers/metadata";
 
 export default function PrenodesPage() {
   return (
-    <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
-    >
-      <PrenodesStatus />
+    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
+      <div className="tw-w-full">
+        <AboutContentsDropdown
+          className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+          currentHref="/network/prenodes"
+          desktopFlush
+          withDivider
+        />
+        <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
+          <PrenodesStatus />
+        </article>
+      </div>
     </main>
   );
 }

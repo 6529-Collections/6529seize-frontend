@@ -23,6 +23,8 @@ describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const dropReactionRequestFailedMessage = "Drop reaction request failed";
+  const serverComponentRenderMessage =
+    "An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.";
   const privateBareWaveId = "2c5e0761-6de2-4e1f-9c23-a8c93ff1158f";
   const privateNonRfcUuid = "00000000-0000-0000-0000-000000000000";
   const privateRelativeDropId = "5651cd9a-1852-42fc-b213-5f8d871f96bf";
@@ -338,6 +340,16 @@ describe("instrumentation-client", () => {
     function: "stringify",
     in_app: true,
   };
+  const sentryBrowserHelperFrame = {
+    filename:
+      "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+    abs_path:
+      "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+    function: "n",
+    in_app: true,
+    lineno: 111,
+    colno: 58,
+  };
 
   type BeforeSendResult = {
     level?: string | undefined;
@@ -448,6 +460,37 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+  });
+
+  const createServerComponentRenderError = (
+    digest?: unknown,
+    message = serverComponentRenderMessage
+  ) => {
+    const error = new Error(message) as Error & { digest?: unknown };
+    if (digest !== undefined) {
+      error.digest = digest;
+    }
+    return error;
+  };
+
+  const createServerComponentRenderEvent = (
+    message = serverComponentRenderMessage,
+    overrides: Record<string, unknown> = {}
+  ) => ({
+    level: "error",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: message,
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    ...overrides,
   });
 
   const createRabbyChromeUserRejectedEvent = (
@@ -565,14 +608,16 @@ describe("instrumentation-client", () => {
         },
       },
       {
-        type: "http",
-        category: "fetch",
-        level: "error",
+        category: "reactions",
+        level: "info",
+        message: "reaction.request_sent",
         data: {
+          action: "add",
+          endpoint_family: "drop_reaction",
           method: "POST",
-          url: "/api/drops/private-drop-id/reaction",
-          "url.is_first_party": true,
-          "url.is_first_party_api": true,
+          mutation_sequence: 1,
+          route_family: "/waves/[wave]",
+          source: "chip",
         },
       },
       {
@@ -595,6 +640,17 @@ describe("instrumentation-client", () => {
           url: "/private-profile-id",
           "url.is_first_party": true,
           "url.is_first_party_api": false,
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "POST",
+          url: "/api/drops/private-drop-id/reaction",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
         },
       },
       {
@@ -1062,6 +1118,154 @@ describe("instrumentation-client", () => {
       behaviour: "drop-error-if-exclusively-contains-third-party-frames",
     });
   });
+
+  it("keeps exact Server Component render errors and groups them by digest", () => {
+    const beforeSend = loadBeforeSend();
+
+    const first = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("779660776"),
+    });
+    const repeated = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("779660776"),
+    });
+    const different = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("1680982760"),
+    });
+
+    expect(first).toEqual(
+      expect.objectContaining({
+        level: "error",
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
+    expect(repeated).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
+    expect(different).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "1680982760",
+        }),
+        fingerprint: ["next-server-component-render", "1680982760"],
+      })
+    );
+    expect(different?.fingerprint).not.toEqual(first?.fingerprint);
+  });
+
+  it("prefers the original Server Component error digest", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createServerComponentRenderEvent(), {
+      originalException: createServerComponentRenderError("779660776"),
+      syntheticException: createServerComponentRenderError("1680982760"),
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["next-server-component-render", "779660776"],
+      })
+    );
+  });
+
+  it("preserves an existing Server Component render error fingerprint", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createServerComponentRenderEvent(serverComponentRenderMessage, {
+        fingerprint: ["existing-fingerprint"],
+      }),
+      {
+        syntheticException: createServerComponentRenderError("779660776"),
+      }
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          next_error_digest: "779660776",
+        }),
+        fingerprint: ["existing-fingerprint"],
+      })
+    );
+  });
+
+  it("replaces an empty Server Component error fingerprint", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createServerComponentRenderEvent(serverComponentRenderMessage, {
+        fingerprint: [],
+      }),
+      {
+        originalException: createServerComponentRenderError("779660776"),
+      }
+    );
+
+    expect(result?.fingerprint).toEqual([
+      "next-server-component-render",
+      "779660776",
+    ]);
+  });
+
+  it.each([
+    {
+      description: "changed wrapper message",
+      message: `${serverComponentRenderMessage} Extra detail.`,
+      digest: "779660776",
+    },
+    {
+      description: "missing digest",
+      message: serverComponentRenderMessage,
+      digest: undefined,
+    },
+    {
+      description: "digest containing whitespace",
+      message: serverComponentRenderMessage,
+      digest: "779 660 776",
+    },
+    {
+      description: "non-string digest",
+      message: serverComponentRenderMessage,
+      digest: 779660776,
+    },
+    ...[401, 403, 404].map((status) => ({
+      description: `HTTP ${status} access-fallback digest`,
+      message: serverComponentRenderMessage,
+      digest: `NEXT_HTTP_ERROR_FALLBACK;${status}`,
+    })),
+  ])(
+    "keeps the $description Server Component near miss unchanged",
+    ({ message, digest }) => {
+      const beforeSend = loadBeforeSend();
+
+      const result = beforeSend(createServerComponentRenderEvent(message), {
+        originalException: createServerComponentRenderError(digest, message),
+      });
+
+      expect(result).not.toBeNull();
+      expect(result?.tags).toBeUndefined();
+      expect(result?.fingerprint).toBeUndefined();
+      expect(result).toEqual(
+        expect.objectContaining({
+          level: "error",
+          exception: expect.objectContaining({
+            values: [expect.objectContaining({ value: message })],
+          }),
+        })
+      );
+    }
+  );
 
   it.each([
     {
@@ -2469,6 +2673,24 @@ describe("instrumentation-client", () => {
   it("drops exact MetaMask Mobile cyclic JSON timer noise", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops exact MetaMask Mobile cyclic JSON timer noise with a Sentry browser helper frame", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent(
+      [sentryBrowserHelperFrame, nativeJsonStringifyFrame],
+      {
+        transaction: "/messages",
+        request: {
+          url: "https://6529.io/messages",
+        },
+        breadcrumbs: [],
+      }
+    );
 
     const result = beforeSend(event);
 
@@ -3885,7 +4107,7 @@ describe("instrumentation-client", () => {
     expect(event.message).not.toContain("#hash");
   });
 
-  it("drops a sampled-out synthetic drop-reaction transport warning", () => {
+  it("drops a sampled-out concurrent synthetic drop-reaction transport warning", () => {
     const beforeSend = loadBeforeSend();
     const event = createDropReactionNetworkEvent("network-drop-event");
 
@@ -3896,7 +4118,7 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
-  it("keeps and tags a sampled-in synthetic drop-reaction transport warning", () => {
+  it("keeps and tags a sampled-in concurrent synthetic drop-reaction transport warning", () => {
     const beforeSend = loadBeforeSend();
     const event = createDropReactionNetworkEvent("event-200");
 
@@ -3979,7 +4201,7 @@ describe("instrumentation-client", () => {
       result?.breadcrumbs
         ?.filter((breadcrumb) => breadcrumb.category === "reactions")
         .map((breadcrumb) => breadcrumb.data?.["route_family"])
-    ).toEqual(["/waves/[wave]", "/waves/[wave]"]);
+    ).toEqual(["/waves/[wave]", "/waves/[wave]", "/waves/[wave]"]);
   });
 
   it("keeps and tags sampled-in app-wrapped absolute API network errors using the original target", () => {

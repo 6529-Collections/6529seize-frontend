@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import YAML from "yaml";
 
 const SCRIPT_PATH = path.join(process.cwd(), "scripts", "coverage-floor.cjs");
 
@@ -117,5 +118,29 @@ describe("coverage-floor check mode", () => {
     const check = runFloor(root);
     expect(check.status).toBe(1);
     expect(check.stderr).toContain("Baseline not found");
+  });
+});
+
+describe("coverage-floor workflow", () => {
+  it("reports the coverage result when a failing suite still writes a summary", () => {
+    const workflow = YAML.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), ".github/workflows/coverage-floor.yml"),
+        "utf8"
+      )
+    ) as {
+      jobs: {
+        "coverage-floor": {
+          steps: Array<{ name?: string; if?: string }>;
+        };
+      };
+    };
+    const step = workflow.jobs["coverage-floor"].steps.find(
+      ({ name }) => name === "Check coverage against baseline"
+    );
+
+    expect(step?.if).toBe(
+      "always() && hashFiles('coverage/coverage-summary.json') != ''"
+    );
   });
 });

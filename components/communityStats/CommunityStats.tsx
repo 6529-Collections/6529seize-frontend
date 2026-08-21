@@ -1,6 +1,10 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import {
+  NETWORK_PAGE_TITLE_CLASSES,
+  NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { GlobalTDHHistory } from "@/entities/ITDH";
@@ -34,8 +38,6 @@ ChartJS.register(
 
 type NetworkStatsMessageKey = Extract<MessageKey, `network.stats.${string}`>;
 
-const SECTION_HEADING_CLASS =
-  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
 const SUMMARY_PANEL_CLASS =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-3 sm:tw-p-4";
 
@@ -320,7 +322,7 @@ export default function CommunityStats() {
   return (
     <section className="tw-w-full">
       <header className="tw-pb-6 sm:tw-pb-8">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+        <h1 className={NETWORK_PAGE_TITLE_CLASSES}>
           {m(locale, "network.stats.hero.title")}
         </h1>
       </header>
@@ -391,7 +393,7 @@ export default function CommunityStats() {
           >
             <h2
               id="network-stats-total-tdh-heading"
-              className={SECTION_HEADING_CLASS}
+              className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
             >
               {m(locale, "network.stats.charts.total")}
             </h2>
@@ -405,7 +407,7 @@ export default function CommunityStats() {
           >
             <h2
               id="network-stats-net-tdh-heading"
-              className={SECTION_HEADING_CLASS}
+              className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
             >
               {m(locale, "network.stats.charts.netDailyChange")}
             </h2>
@@ -419,7 +421,7 @@ export default function CommunityStats() {
           >
             <h2
               id="network-stats-created-tdh-heading"
-              className={SECTION_HEADING_CLASS}
+              className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
             >
               {m(locale, "network.stats.charts.createdDailyChange")}
             </h2>
@@ -433,7 +435,7 @@ export default function CommunityStats() {
           >
             <h2
               id="network-stats-destroyed-tdh-heading"
-              className={SECTION_HEADING_CLASS}
+              className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
             >
               {m(locale, "network.stats.charts.destroyedChange")}
             </h2>
