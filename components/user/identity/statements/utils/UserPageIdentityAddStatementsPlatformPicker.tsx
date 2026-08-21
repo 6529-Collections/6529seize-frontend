@@ -16,11 +16,15 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
   statementTypes,
   activeType,
   rowCount,
+  labelOverrides,
   onSelect,
 }: {
   readonly statementTypes: readonly T[];
   readonly activeType: T;
   readonly rowCount: number;
+  readonly labelOverrides?: Readonly<
+    Partial<Record<STATEMENT_TYPE, string>>
+  >;
   readonly onSelect: (type: T) => void;
 }) {
   const locale = useBrowserLocale();
@@ -58,6 +62,7 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
               <UserPageIdentityAddStatementsTypeButton
                 key={type}
                 statementType={type}
+                label={labelOverrides?.[type]}
                 isActive={activeType === type}
                 isFirst={index === 0}
                 isLast={index === row.length - 1}

@@ -10,18 +10,20 @@ export const ADD_STATEMENT_PLATFORM_TOOLTIP_ID =
 
 export default function UserPageIdentityAddStatementsTypeButton({
   statementType,
+  label,
   isActive,
   isFirst,
   isLast,
   onClick,
 }: {
   readonly statementType: STATEMENT_TYPE;
+  readonly label?: string | undefined;
   readonly isActive: boolean;
   readonly isFirst: boolean;
   readonly isLast: boolean;
   readonly onClick: () => void;
 }) {
-  const title = STATEMENT_META[statementType].title;
+  const title = label ?? STATEMENT_META[statementType].title;
   const onTouchStart = (event: TouchEvent<HTMLButtonElement>) => {
     // Platform taps must not start the parent sheet's swipe-to-dismiss
     // gesture. The picker tooltip handles the same tap independently.
