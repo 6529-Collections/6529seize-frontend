@@ -34,6 +34,8 @@ export * from '../models/ApiChangeWaveRepRating';
 export * from '../models/ApiCicContributor';
 export * from '../models/ApiCicContributorsPage';
 export * from '../models/ApiCicOverview';
+export * from '../models/ApiCicStatement';
+export * from '../models/ApiCicStatementGroup';
 export * from '../models/ApiCmsAgentPatch';
 export * from '../models/ApiCmsAgentPatchOperation';
 export * from '../models/ApiCmsAgentPatchProvenance';
@@ -133,6 +135,7 @@ export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
 export * from '../models/ApiCreateNewWaveVotingConfigBase';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
+export * from '../models/ApiCreateProfileCicStatement';
 export * from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
@@ -147,6 +150,8 @@ export * from '../models/ApiDecentralizedMediaResolution';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDmDropsUnreadCount';
+export * from '../models/ApiDmUnreadConversationState';
+export * from '../models/ApiDmUnreadSnapshot';
 export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropAndWave';
@@ -226,6 +231,7 @@ export * from '../models/ApiGroupDescription';
 export * from '../models/ApiGroupFilterDirection';
 export * from '../models/ApiGroupFull';
 export * from '../models/ApiGroupLevelFilter';
+export * from '../models/ApiGroupMembersPreviewRequest';
 export * from '../models/ApiGroupNftOwnershipMatchMode';
 export * from '../models/ApiGroupOwnsNft';
 export * from '../models/ApiGroupRepFilter';
@@ -248,6 +254,8 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMarkWaveReadRequest';
+export * from '../models/ApiMarkWaveReadResponse';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
@@ -333,6 +341,8 @@ export * from '../models/ApiProfileCmsWalletGalleryTotals';
 export * from '../models/ApiProfileCmsWalletGalleryWallet';
 export * from '../models/ApiProfileMin';
 export * from '../models/ApiProfileMinsPage';
+export * from '../models/ApiProfileNotificationCategories';
+export * from '../models/ApiProfilePreferences';
 export * from '../models/ApiProfileProxy';
 export * from '../models/ApiProfileProxyAction';
 export * from '../models/ApiProfileProxyActionType';
@@ -427,6 +437,8 @@ export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUndiscoveredDrop';
 export * from '../models/ApiUpcomingMemeSubscriptionStatus';
 export * from '../models/ApiUpdateDropRequest';
+export * from '../models/ApiUpdateProfileNotificationCategories';
+export * from '../models/ApiUpdateProfilePreferences';
 export * from '../models/ApiUpdateProxyActionRequest';
 export * from '../models/ApiUpdateWaveDecisionPause';
 export * from '../models/ApiUpdateWaveNotificationPreferencesRequest';
@@ -510,6 +522,7 @@ export * from '../models/ApiWaveScoreQualityComponentWeights';
 export * from '../models/ApiWaveScoreQualityGate';
 export * from '../models/ApiWaveScoreSort';
 export * from '../models/ApiWaveScoreVisibilityComponentWeights';
+export * from '../models/ApiWaveSearchAuthor';
 export * from '../models/ApiWaveSubscriptionActions';
 export * from '../models/ApiWaveSubscriptionTargetAction';
 export * from '../models/ApiWaveType';
@@ -672,6 +685,8 @@ import { ApiChangeWaveRepRating } from '../models/ApiChangeWaveRepRating';
 import { ApiCicContributor } from '../models/ApiCicContributor';
 import { ApiCicContributorsPage } from '../models/ApiCicContributorsPage';
 import { ApiCicOverview } from '../models/ApiCicOverview';
+import { ApiCicStatement        } from '../models/ApiCicStatement';
+import { ApiCicStatementGroup } from '../models/ApiCicStatementGroup';
 import { ApiCmsAgentPatch, ApiCmsAgentPatchSchemaEnum       } from '../models/ApiCmsAgentPatch';
 import { ApiCmsAgentPatchOperation, ApiCmsAgentPatchOperationOpEnum       } from '../models/ApiCmsAgentPatchOperation';
 import { ApiCmsAgentPatchProvenance , ApiCmsAgentPatchProvenanceAuthorTypeEnum      } from '../models/ApiCmsAgentPatchProvenance';
@@ -771,6 +786,7 @@ import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisi
 import { ApiCreateNewWaveVotingConfigClass } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateNewWaveVotingConfigBase          } from '../models/ApiCreateNewWaveVotingConfigBase';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
+import { ApiCreateProfileCicStatement     } from '../models/ApiCreateProfileCicStatement';
 import { ApiCreateProfileCmsWalletGallerySnapshotRequest } from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 import { ApiCreateWaveConfig          } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
@@ -785,6 +801,8 @@ import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentral
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDmDropsUnreadCount } from '../models/ApiDmDropsUnreadCount';
+import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
+import { ApiDmUnreadSnapshot } from '../models/ApiDmUnreadSnapshot';
 import { ApiDrop                                 } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropAndWave } from '../models/ApiDropAndWave';
@@ -864,6 +882,7 @@ import { ApiGroupDescription             } from '../models/ApiGroupDescription';
 import { ApiGroupFilterDirection } from '../models/ApiGroupFilterDirection';
 import { ApiGroupFull } from '../models/ApiGroupFull';
 import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
+import { ApiGroupMembersPreviewRequest } from '../models/ApiGroupMembersPreviewRequest';
 import { ApiGroupNftOwnershipMatchMode } from '../models/ApiGroupNftOwnershipMatchMode';
 import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum     } from '../models/ApiGroupOwnsNft';
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
@@ -886,6 +905,8 @@ import { ApiLightDrop             } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMarkWaveReadRequest } from '../models/ApiMarkWaveReadRequest';
+import { ApiMarkWaveReadResponse } from '../models/ApiMarkWaveReadResponse';
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
@@ -971,6 +992,8 @@ import { ApiProfileCmsWalletGalleryTotals } from '../models/ApiProfileCmsWalletG
 import { ApiProfileCmsWalletGalleryWallet    , ApiProfileCmsWalletGalleryWalletStatusEnum    } from '../models/ApiProfileCmsWalletGalleryWallet';
 import { ApiProfileMin                       } from '../models/ApiProfileMin';
 import { ApiProfileMinsPage } from '../models/ApiProfileMinsPage';
+import { ApiProfileNotificationCategories } from '../models/ApiProfileNotificationCategories';
+import { ApiProfilePreferences, ApiProfilePreferencesDirectMessagePolicyEnum  , ApiProfilePreferencesNotificationLevelEnum    } from '../models/ApiProfilePreferences';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
 import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
@@ -1065,6 +1088,8 @@ import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUndiscoveredDrop } from '../models/ApiUndiscoveredDrop';
 import { ApiUpcomingMemeSubscriptionStatus   , ApiUpcomingMemeSubscriptionStatusSourceEnum   } from '../models/ApiUpcomingMemeSubscriptionStatus';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
+import { ApiUpdateProfileNotificationCategories } from '../models/ApiUpdateProfileNotificationCategories';
+import { ApiUpdateProfilePreferences, ApiUpdateProfilePreferencesDirectMessagePolicyEnum  , ApiUpdateProfilePreferencesNotificationLevelEnum    } from '../models/ApiUpdateProfilePreferences';
 import { ApiUpdateProxyActionRequest } from '../models/ApiUpdateProxyActionRequest';
 import { ApiUpdateWaveDecisionPause } from '../models/ApiUpdateWaveDecisionPause';
 import { ApiUpdateWaveNotificationPreferencesRequest } from '../models/ApiUpdateWaveNotificationPreferencesRequest';
@@ -1148,6 +1173,7 @@ import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQuali
 import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
 import { ApiWaveScoreSort } from '../models/ApiWaveScoreSort';
 import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
+import { ApiWaveSearchAuthor } from '../models/ApiWaveSearchAuthor';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
@@ -1295,6 +1321,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiAttachmentSafetyValidation",
     "ApiAttachmentStatus",
     "ApiAttachmentUploadMimeType",
+    "ApiCicStatementGroup",
     "ApiCmsAgentPatchSchemaEnum",
     "ApiCmsAgentPatchOperationOpEnum",
     "ApiCmsAgentPatchProvenanceAuthorTypeEnum",
@@ -1358,6 +1385,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiProfileCmsWalletGalleryExcludedAssetReasonEnum",
     "ApiProfileCmsWalletGallerySnapshotSourceEnum",
     "ApiProfileCmsWalletGalleryWalletStatusEnum",
+    "ApiProfilePreferencesDirectMessagePolicyEnum",
+    "ApiProfilePreferencesNotificationLevelEnum",
     "ApiProfileProxyActionType",
     "ApiRateMatter",
     "ApiRedeemConnectionShareRequestTargetClientTypeEnum",
@@ -1408,6 +1437,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiSubscriptionCoverageUnknownReason",
     "ApiSubwavesSort",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
+    "ApiUpdateProfilePreferencesDirectMessagePolicyEnum",
+    "ApiUpdateProfilePreferencesNotificationLevelEnum",
     "ApiWalletDistributionAllocationPhaseEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
@@ -1526,6 +1557,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCicContributor": ApiCicContributor,
     "ApiCicContributorsPage": ApiCicContributorsPage,
     "ApiCicOverview": ApiCicOverview,
+    "ApiCicStatement": ApiCicStatement,
     "ApiCmsAgentPatch": ApiCmsAgentPatch,
     "ApiCmsAgentPatchOperation": ApiCmsAgentPatchOperation,
     "ApiCmsAgentPatchProvenance": ApiCmsAgentPatchProvenance,
@@ -1613,6 +1645,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfigClass,
     "ApiCreateNewWaveVotingConfigBase": ApiCreateNewWaveVotingConfigBase,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
+    "ApiCreateProfileCicStatement": ApiCreateProfileCicStatement,
     "ApiCreateProfileCmsWalletGallerySnapshotRequest": ApiCreateProfileCmsWalletGallerySnapshotRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
@@ -1626,6 +1659,8 @@ let typeMap: {[index: string]: any} = {
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDmDropsUnreadCount": ApiDmDropsUnreadCount,
+    "ApiDmUnreadConversationState": ApiDmUnreadConversationState,
+    "ApiDmUnreadSnapshot": ApiDmUnreadSnapshot,
     "ApiDrop": ApiDrop,
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropAndWave": ApiDropAndWave,
@@ -1696,6 +1731,7 @@ let typeMap: {[index: string]: any} = {
     "ApiGroupDescription": ApiGroupDescription,
     "ApiGroupFull": ApiGroupFull,
     "ApiGroupLevelFilter": ApiGroupLevelFilter,
+    "ApiGroupMembersPreviewRequest": ApiGroupMembersPreviewRequest,
     "ApiGroupOwnsNft": ApiGroupOwnsNft,
     "ApiGroupRepFilter": ApiGroupRepFilter,
     "ApiGroupTdhFilter": ApiGroupTdhFilter,
@@ -1714,6 +1750,8 @@ let typeMap: {[index: string]: any} = {
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
+    "ApiMarkWaveReadRequest": ApiMarkWaveReadRequest,
+    "ApiMarkWaveReadResponse": ApiMarkWaveReadResponse,
     "ApiMediaResolveRequest": ApiMediaResolveRequest,
     "ApiMediaResolveResponse": ApiMediaResolveResponse,
     "ApiMemeCardDropMapping": ApiMemeCardDropMapping,
@@ -1793,6 +1831,8 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileCmsWalletGalleryWallet": ApiProfileCmsWalletGalleryWallet,
     "ApiProfileMin": ApiProfileMin,
     "ApiProfileMinsPage": ApiProfileMinsPage,
+    "ApiProfileNotificationCategories": ApiProfileNotificationCategories,
+    "ApiProfilePreferences": ApiProfilePreferences,
     "ApiProfileProxy": ApiProfileProxy,
     "ApiProfileProxyAction": ApiProfileProxyAction,
     "ApiProfileRepCategorySummary": ApiProfileRepCategorySummary,
@@ -1875,6 +1915,8 @@ let typeMap: {[index: string]: any} = {
     "ApiUndiscoveredDrop": ApiUndiscoveredDrop,
     "ApiUpcomingMemeSubscriptionStatus": ApiUpcomingMemeSubscriptionStatus,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
+    "ApiUpdateProfileNotificationCategories": ApiUpdateProfileNotificationCategories,
+    "ApiUpdateProfilePreferences": ApiUpdateProfilePreferences,
     "ApiUpdateProxyActionRequest": ApiUpdateProxyActionRequest,
     "ApiUpdateWaveDecisionPause": ApiUpdateWaveDecisionPause,
     "ApiUpdateWaveNotificationPreferencesRequest": ApiUpdateWaveNotificationPreferencesRequest,
@@ -1946,6 +1988,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveScoreQualityComponentWeights": ApiWaveScoreQualityComponentWeights,
     "ApiWaveScoreQualityGate": ApiWaveScoreQualityGate,
     "ApiWaveScoreVisibilityComponentWeights": ApiWaveScoreVisibilityComponentWeights,
+    "ApiWaveSearchAuthor": ApiWaveSearchAuthor,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
     "ApiWaveV3": ApiWaveV3,
     "ApiWaveV3Capabilities": ApiWaveV3Capabilities,

@@ -44,7 +44,7 @@ function ChangeRow({
 
   return (
     <div className="tw-grid tw-grid-cols-[36px_1fr_auto] tw-items-center tw-gap-2">
-      <span className="tw-text-xs tw-font-medium tw-uppercase tw-leading-none tw-tracking-wider tw-text-neutral-500">
+      <span className="tw-text-xs tw-font-medium tw-uppercase tw-leading-none tw-tracking-wider tw-text-iron-500">
         {label}
       </span>
       <div className="tw-flex tw-min-w-0 tw-justify-end">
@@ -89,17 +89,17 @@ export default function CumulativeMetricCard({
 
   const content = (
     <div
-      className={`tw-group tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-neutral-800 tw-bg-[#0f1318] tw-p-5 tw-transition-all tw-duration-300 ${sparklineData && sparklineColor ? "tw-pb-0" : ""} ${href ? "hover:-tw-translate-y-1 hover:tw-border-neutral-700 hover:tw-shadow-xl hover:tw-shadow-neutral-900/50" : ""}`}
+      className={`tw-group tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900/55 tw-p-5 tw-transition-all tw-duration-300 ${sparklineData && sparklineColor ? "tw-pb-0" : ""} ${href ? "hover:-tw-translate-y-0.5 hover:tw-border-white/15 hover:tw-bg-iron-900/75 hover:tw-shadow-xl hover:tw-shadow-black/30" : ""}`}
     >
       <div className="tw-mb-5 tw-flex tw-items-start tw-justify-between">
         <h3 className="tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-white">
           {title}
           {href && (
-            <ArrowTopRightOnSquareIcon className="tw-size-4 tw-text-neutral-500" />
+            <ArrowTopRightOnSquareIcon className="tw-size-4 tw-text-iron-500" />
           )}
         </h3>
         <div
-          className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg ${iconBgColor}`}
+          className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid [&_svg]:tw-text-current ${iconBgColor}`}
         >
           {icon}
         </div>
@@ -125,7 +125,7 @@ export default function CumulativeMetricCard({
               {formatCompactNumber(total)}
             </p>
           </CustomTooltip>
-          {unit && <p className="tw-text-xs tw-text-neutral-500">{unit}</p>}
+          {unit && <p className="tw-text-xs tw-text-iron-500">{unit}</p>}
         </div>
 
         {/* Divider */}

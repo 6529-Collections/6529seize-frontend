@@ -9,9 +9,9 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
   CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_MAIN_CLASS,
-  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 export default function DisputeResolutionPage() {
@@ -22,7 +22,9 @@ export default function DisputeResolutionPage() {
       <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col className="tw-max-w-4xl">
-            <h1 className={CONTENT_PAGE_TITLE_CLASS}>Dispute Resolution</h1>
+            <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
+              Dispute Resolution
+            </h1>
           </Col>
         </Row>
         <Row className="tw-pt-5">

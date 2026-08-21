@@ -51,7 +51,28 @@ describe("WaveRulesPanel", () => {
     expect(link).toHaveAttribute("href", "/network?page=1&group=artists");
     expect(link).toHaveClass("tw-min-h-11");
     expect(link).toHaveClass("desktop-hover:hover:tw-text-primary-300");
+    expect(link.closest("dd")?.parentElement).toHaveClass("tw-items-center");
     expect(screen.getByText("Private group")).toBeInTheDocument();
     expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+
+  it("supports an interactive value for a create-wave rule row", () => {
+    render(
+      <WaveRulesPanel
+        rules={rules}
+        showCustomRules={false}
+        renderRowValue={(row) =>
+          row.id === "chat-access" ? (
+            <button type="button">21 currently eligible</button>
+          ) : undefined
+        }
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "21 currently eligible" })
+    ).toBeVisible();
+    expect(screen.queryByText("Artists")).not.toBeInTheDocument();
+    expect(screen.getByText("Private group")).toBeInTheDocument();
   });
 });

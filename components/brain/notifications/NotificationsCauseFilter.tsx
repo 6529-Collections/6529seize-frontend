@@ -1,33 +1,25 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
   type NotificationCause,
 } from "@/types/feed.types";
-import {
-  faChevronLeft,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { useContext, useId, useMemo, useRef, useState } from "react";
 
 export interface NotificationFilter {
-  cause: NotificationCause[];
-  title: string;
+  readonly cause: NotificationCause[];
+  readonly title: string;
 }
 
-const NotificationFilters: NotificationFilter[] = [
-  { cause: [], title: "All" },
+const NOTIFICATION_FILTERS: readonly NotificationFilter[] = [
   {
     cause: [
       ApiNotificationCause.IdentityMentioned,
@@ -60,6 +52,70 @@ const NotificationFilters: NotificationFilter[] = [
   },
 ];
 
+function isFilterSelected(
+  filter: NotificationFilter,
+  activeCauses: ReadonlySet<NotificationCause>
+): boolean {
+  return filter.cause.every((cause) => activeCauses.has(cause));
+}
+
+function getTriggerLabel(
+  selectedFilters: readonly NotificationFilter[],
+  locale: SupportedLocale
+) {
+  if (selectedFilters.length === 0) {
+    return t(locale, "profilePreferences.notifications.ALL.label");
+  }
+  if (selectedFilters.length === 1) {
+    return selectedFilters[0]!.title;
+  }
+  return t(locale, "notifications.filter.selected", {
+    count: selectedFilters.length,
+  });
+}
+
+function FilterMenuItem({
+  title,
+  selected,
+  onSelect,
+  onMouseEnter,
+}: {
+  readonly title: string;
+  readonly selected: boolean;
+  readonly onSelect: () => void;
+  readonly onMouseEnter?: (() => void) | undefined;
+}) {
+  return (
+    <li role="none" className="tw-list-none">
+      <button
+        type="button"
+        role="menuitemcheckbox"
+        aria-checked={selected}
+        onClick={(event) => {
+          event.stopPropagation();
+          onSelect();
+        }}
+        onMouseEnter={onMouseEnter}
+        className={`tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 ${
+          selected
+            ? "tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/10"
+            : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800"
+        }`}
+      >
+        <span className="tw-min-w-0 tw-flex-1 tw-truncate">{title}</span>
+        {selected ? (
+          <CheckIcon
+            className="tw-size-4 tw-flex-shrink-0"
+            aria-hidden="true"
+          />
+        ) : (
+          <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+        )}
+      </button>
+    </li>
+  );
+}
+
 export default function NotificationsCauseFilter({
   activeFilter,
   setActiveFilter,
@@ -67,229 +123,111 @@ export default function NotificationsCauseFilter({
   readonly activeFilter: NotificationFilter | null;
   readonly setActiveFilter: (filter: NotificationFilter | null) => void;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const buttonRefs = useRef<HTMLButtonElement[]>([]);
-  const highlightRef = useRef<HTMLDivElement>(null);
-  const activeIndexRef = useRef<number>(0);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
+  const [isOpen, setIsOpen] = useState(false);
+  const locale = useBrowserLocale();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuBaseId = useId();
+  const triggerId = `${menuBaseId}-trigger`;
+  const menuId = `${menuBaseId}-menu`;
   const { connectedProfile } = useContext(AuthContext);
   const prefetchNotifications = usePrefetchNotifications();
 
-  const checkScroll = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  const activeCauses = useMemo(
+    () => new Set<NotificationCause>(activeFilter?.cause ?? []),
+    [activeFilter]
+  );
+  const selectedFilters = useMemo(
+    () =>
+      NOTIFICATION_FILTERS.filter((filter) =>
+        isFilterSelected(filter, activeCauses)
+      ),
+    [activeCauses]
+  );
+  const triggerLabel = getTriggerLabel(selectedFilters, locale);
 
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-  }, []);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    checkScroll();
-    container.addEventListener("scroll", checkScroll, { passive: true });
-    window.addEventListener("resize", checkScroll);
-
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(() => {
-        checkScroll();
-      });
-      resizeObserver.observe(container);
+  const updateSelectedFilters = (
+    nextSelectedFilters: readonly NotificationFilter[]
+  ) => {
+    if (nextSelectedFilters.length === 0) {
+      setActiveFilter(null);
+      return;
     }
 
-    return () => {
-      container.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
-      resizeObserver?.disconnect();
-    };
-  }, [checkScroll]);
-
-  const scrollLeft = () => {
-    const container = containerRef.current;
-    if (!container) return;
-    container.scrollBy({ left: -150, behavior: "smooth" });
+    setActiveFilter({
+      title: getTriggerLabel(nextSelectedFilters, locale),
+      cause: nextSelectedFilters.flatMap((filter) => filter.cause),
+    });
   };
 
-  const scrollRight = () => {
-    const container = containerRef.current;
-    if (!container) return;
-    container.scrollBy({ left: 150, behavior: "smooth" });
+  const toggleFilter = (filter: NotificationFilter) => {
+    const nextSelectedFilters = isFilterSelected(filter, activeCauses)
+      ? selectedFilters.filter((selected) => selected.title !== filter.title)
+      : [...selectedFilters, filter];
+    updateSelectedFilters(nextSelectedFilters);
   };
 
-  const handleHover = (filter: NotificationFilter) => {
+  const prefetchFilter = (filter: NotificationFilter) => {
     if (!connectedProfile) return;
     prefetchNotifications({
       identity: connectedProfile.handle,
-      cause: filter.cause.length > 0 ? filter.cause : null,
+      cause: filter.cause,
       pages: 1,
     });
   };
 
-  const updateHighlightPosition = (filterIndex: number) => {
-    const button = buttonRefs.current[filterIndex];
-    const highlight = highlightRef.current;
-    if (button && highlight) {
-      let l = button.offsetLeft;
-      let w = button.offsetWidth;
-
-      if (filterIndex === 0) {
-        l += 2;
-        w -= 2;
-      }
-      if (filterIndex === NotificationFilters.length - 1) {
-        w -= 2;
-      }
-
-      // Direct DOM manipulation - no React state needed
-      highlight.style.left = `${l}px`;
-      highlight.style.width = `${w}px`;
-    }
-  };
-
-  // Sync highlight position with activeFilter prop + handle layout shifts
-  useLayoutEffect(() => {
-    const idx =
-      activeFilter == null
-        ? 0
-        : Math.max(
-            0,
-            NotificationFilters.findIndex((f) => f.title === activeFilter.title)
-          );
-    activeIndexRef.current = idx;
-    updateHighlightPosition(idx);
-
-    // Handle layout shifts (resize, font load, etc.)
-    const container = containerRef.current;
-    if (!container) return;
-    const ro = new ResizeObserver(() =>
-      updateHighlightPosition(activeIndexRef.current)
-    );
-    ro.observe(container);
-    return () => ro.disconnect();
-  }, [activeFilter]);
-
-  const handleChange = (filter: NotificationFilter, filterIndex: number) => {
-    setActiveFilter(filter);
-    activeIndexRef.current = filterIndex;
-    updateHighlightPosition(filterIndex);
-
-    const button = buttonRefs.current[filterIndex];
-    const container = containerRef.current;
-    if (button && container) {
-      const containerWidth = container.clientWidth;
-      const scrollWidth = container.scrollWidth;
-
-      const buttonLeft = button.offsetLeft;
-      const buttonWidth = button.offsetWidth;
-
-      let scrollLeft = buttonLeft - containerWidth / 2 + buttonWidth / 2;
-
-      if (scrollLeft < 0) scrollLeft = 0;
-      if (scrollLeft > scrollWidth - containerWidth) {
-        scrollLeft = scrollWidth - containerWidth;
-      }
-
-      container.scrollTo({
-        left: scrollLeft,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const isActive = (filter: NotificationFilter) => activeFilter === filter;
-
   return (
-    <div className="tw-relative tw-w-full tw-pb-2 tw-pt-2 lg:tw-pt-4">
-      <div
-        ref={containerRef}
-        className="tw-nowrap tw-relative tw-flex tw-h-10 tw-items-center tw-gap-1 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
-      >
-        <div
-          ref={highlightRef}
-          className="tw-absolute tw-h-8 tw-rounded-lg tw-bg-iron-800 tw-transition-all tw-duration-300 tw-ease-in-out"
-        />
-        {NotificationFilters.map((filter, index) => (
-          <NotificationCauseFilterButton
-            key={`notification-cause-filter-${filter.title}`}
-            title={filter.title}
-            isActive={isActive(filter)}
-            onClick={() => handleChange(filter, index)}
-            onMouseEnter={() => handleHover(filter)}
-            buttonRef={(el) => (buttonRefs.current[index] = el!)}
+    <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-pb-2 tw-pt-2 lg:tw-pt-4">
+      <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
+        {t(locale, "profilePreferences.notifications.heading")}
+      </h1>
+
+      <div className="tw-relative tw-w-36 tw-flex-shrink-0 sm:tw-w-56">
+        <button
+          id={triggerId}
+          ref={buttonRef}
+          type="button"
+          onClick={() => setIsOpen((open) => !open)}
+          aria-label={t(locale, "notifications.filter.ariaLabel", {
+            selection: triggerLabel,
+          })}
+          aria-expanded={isOpen}
+          aria-haspopup="menu"
+          aria-controls={isOpen ? menuId : undefined}
+          className="tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
+        >
+          <span className="tw-min-w-0 tw-truncate">{triggerLabel}</span>
+          <ChevronDownIcon
+            className={`tw-size-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 ${
+              isOpen ? "tw-rotate-180" : ""
+            }`}
+            aria-hidden="true"
           />
-        ))}
+        </button>
+        <CommonDropdownItemsDefaultWrapper
+          isOpen={isOpen}
+          setOpen={setIsOpen}
+          buttonRef={buttonRef}
+          horizontalAlign="right"
+          minWidth={224}
+          menuId={menuId}
+          menuLabelledBy={triggerId}
+        >
+          <FilterMenuItem
+            title={t(locale, "profilePreferences.notifications.ALL.label")}
+            selected={selectedFilters.length === 0}
+            onSelect={() => updateSelectedFilters([])}
+          />
+          {NOTIFICATION_FILTERS.map((filter) => (
+            <FilterMenuItem
+              key={filter.title}
+              title={filter.title}
+              selected={isFilterSelected(filter, activeCauses)}
+              onSelect={() => toggleFilter(filter)}
+              onMouseEnter={() => prefetchFilter(filter)}
+            />
+          ))}
+        </CommonDropdownItemsDefaultWrapper>
       </div>
-      {canScrollLeft && (
-        <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-2 tw-left-0 tw-top-2 tw-z-10 tw-w-16 tw-rounded-l-lg tw-bg-gradient-to-r tw-from-iron-950 tw-via-iron-950/40 tw-to-iron-950/0 lg:tw-top-4" />
-          <button
-            type="button"
-            onClick={scrollLeft}
-            aria-label="Scroll filters left"
-            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
-          >
-            <FontAwesomeIcon
-              icon={faChevronLeft}
-              className="tw-ml-1 tw-h-4 tw-w-4 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
-            />
-          </button>
-        </>
-      )}
-      {canScrollRight && (
-        <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-2 tw-right-0 tw-top-2 tw-z-10 tw-w-16 tw-rounded-r-lg tw-bg-gradient-to-l tw-from-iron-950 tw-via-iron-950/40 tw-to-iron-950/0 lg:tw-top-4" />
-          <button
-            type="button"
-            onClick={scrollRight}
-            aria-label="Scroll filters right"
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
-          >
-            <FontAwesomeIcon
-              icon={faChevronRight}
-              className="tw-mr-1 tw-h-4 tw-w-4 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
-            />
-          </button>
-        </>
-      )}
     </div>
-  );
-}
-
-function NotificationCauseFilterButton({
-  title,
-  isActive,
-  onClick,
-  onMouseEnter,
-  buttonRef,
-}: {
-  readonly title: string;
-  readonly isActive: boolean;
-  readonly onClick: () => void;
-  readonly onMouseEnter: () => void;
-  readonly buttonRef: (el: HTMLButtonElement | null) => void;
-}) {
-  const getLinkClasses = () =>
-    `tw-border-none tw-bg-transparent tw-no-underline tw-flex tw-justify-center tw-items-center
-     tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-8 tw-rounded-lg tw-transition-colors tw-duration-300
-     tw-ease-in-out tw-relative z-10 ${
-       isActive
-         ? "tw-text-iron-300"
-         : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300"
-     }`;
-
-  return (
-    <button
-      className={getLinkClasses()}
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      ref={buttonRef}
-    >
-      <span className="tw-text-sm tw-font-semibold">{title}</span>
-    </button>
   );
 }

@@ -7,6 +7,13 @@ type DropApprovalTiming = {
   readonly over_threshold_since_ms?: number | null;
 };
 
+export const DEFAULT_WAVE_DROPS_RETRY_OPTIONS = {
+  maxRetries: 2,
+  initialDelayMs: 300,
+  backoffFactor: 1.5,
+  jitter: 0.1,
+} as const;
+
 export const getDropEndpointId = (dropId: string): string =>
   encodeURIComponent(dropId);
 

@@ -9,6 +9,7 @@ import type { GroupCreateIdentitiesSearchResultsLayout } from "@/components/grou
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { getInlineGroupIdentityFromProfile } from "./createWaveInlineGroupBuilder";
 
 export default function CreateWaveInlineGroupIdentities({
   identities,
@@ -26,21 +27,8 @@ export default function CreateWaveInlineGroupIdentities({
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
   const selectedWallets = identities.map((identity) => identity.wallet);
-  const currentUserIdentity: CommunityMemberMinimal | null =
-    connectedProfile?.primary_wallet
-      ? {
-          profile_id: connectedProfile.id,
-          handle: connectedProfile.handle,
-          normalised_handle: connectedProfile.normalised_handle,
-          primary_wallet: connectedProfile.primary_wallet,
-          display: connectedProfile.display,
-          tdh: connectedProfile.tdh,
-          level: connectedProfile.level,
-          cic_rating: connectedProfile.cic,
-          wallet: connectedProfile.primary_wallet,
-          pfp: connectedProfile.pfp,
-        }
-      : null;
+  const currentUserIdentity =
+    getInlineGroupIdentityFromProfile(connectedProfile);
   const isCurrentUserSelected =
     !!currentUserIdentity &&
     selectedWallets.some((wallet) =>
@@ -88,12 +76,8 @@ export default function CreateWaveInlineGroupIdentities({
             />
           </div>
           {onCancel && (
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={onCancel}
-            >
-              {t(locale, "waves.create.actions.cancel")}
+            <Button variant="secondary" size="md" onClick={onCancel}>
+              {t(locale, "waves.create.actions.backToCriteria")}
             </Button>
           )}
         </div>

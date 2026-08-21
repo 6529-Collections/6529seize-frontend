@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import composerSandboxConstants from "../support/composerSandboxConstants.json";
 
 import {
   expect,
@@ -17,6 +18,7 @@ import {
 const SANDBOX_WALLET = "0x0000000000000000000000000000000000000529";
 const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
+const SANDBOX_PREVIEW_GROUP_ID = composerSandboxConstants.previewGroupId;
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
 const SANDBOX_CREATED_WAVE_DESCRIPTION =
   "Local-only create-wave description for Playwright.";
@@ -52,26 +54,21 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
-    const accessAdvancedSettings = page.getByRole("button", {
-      name: /Advanced settings/,
-    });
-    await expect(accessAdvancedSettings).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
-    await expect(accessAdvancedSettings).toContainText(
-      "Anyone can view and participate"
-    );
     await expect(
       page.getByRole("heading", { name: "Who can view" })
-    ).toBeHidden();
-    await accessAdvancedSettings.click();
+    ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Who can chat" })
     ).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Admin" })).toBeVisible();
+    const adminGroup = page.getByRole("group", { name: "Admin" });
+    await expect(
+      adminGroup.getByRole("heading", { name: "Admin" })
+    ).toBeVisible();
     await expect(page.getByText("Anyone").first()).toBeVisible();
-    await expect(page.getByText("Only me").first()).toBeVisible();
+    await expect(adminGroup.getByText("25 currently eligible")).toBeVisible();
+    await expect(
+      adminGroup.getByRole("button", { name: "View members" })
+    ).toBeVisible();
     await nextStepButton(page).click();
 
     await expect(
@@ -162,7 +159,228 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("keeps access simple by default and preserves advanced choices", async ({
+  test("creates, attaches, and restores a rule-based access group", async ({
+    baseURL,
+    page,
+  }) => {
+    const waveName = "Sandbox Rule Group Wave";
+    const expectedGroupName = `${waveName} Who can view`;
+
+    await gotoCreateWave(page);
+    await page.getByLabel(/Wave Name/).fill(waveName);
+    await page.getByText("Chat", { exact: true }).click();
+    await nextStepButton(page).press("Enter");
+
+    let accessGroup = page.getByRole("group", { name: "Who can view" });
+    await accessGroup.getByRole("button", { name: "Replace criteria" }).click();
+    await accessGroup
+      .getByRole("button", { name: "Level", exact: true })
+      .click();
+    await accessGroup.getByLabel("Level at least").fill("3");
+    await accessGroup
+      .getByRole("button", { name: "Create and use new group" })
+      .click();
+
+    await expect(page.getByText("Group created and attached.")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible();
+    await expect(
+      accessGroup.getByRole("button", { name: "View members" })
+    ).toBeVisible();
+
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" &&
+              request.path.startsWith("/api/groups")
+          ),
+        {
+          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          message:
+            "Expected the rule group create and publish calls to reach the sandbox mock API.",
+        }
+      )
+      .toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "/api/groups",
+            kind: "allowed-sandbox-mutation",
+            body: {
+              name: expectedGroupName,
+              identity_addresses: [SANDBOX_WALLET],
+            },
+          }),
+          expect.objectContaining({
+            path: expect.stringMatching(/^\/api\/groups\/[^/]+\/visible$/),
+            kind: "allowed-sandbox-mutation",
+            body: {
+              visible: true,
+              old_version_id: null,
+            },
+          }),
+        ])
+      );
+
+    const groupPublishRequest = (await fetchSandboxRequests(baseURL)).find(
+      (request) =>
+        request.method === "POST" &&
+        /^\/api\/groups\/[^/]+\/visible$/.test(request.path)
+    );
+    expect(groupPublishRequest).toBeDefined();
+    const createdGroupId = groupPublishRequest!.path.split("/")[3];
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() =>
+            window.localStorage.getItem("create-wave-drafts:v1")
+          ),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      )
+      .toContain(createdGroupId);
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const savedDraftsToggle = page.getByRole("button", {
+      name: "Saved Drafts",
+    });
+    await savedDraftsToggle.click();
+    await page
+      .getByRole("button", { name: new RegExp(`^${waveName}`) })
+      .click();
+    await nextStepButton(page).press("Enter");
+
+    accessGroup = page.getByRole("group", { name: "Who can view" });
+    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    expect(await fetchSandboxRequests(baseURL)).toContainEqual(
+      expect.objectContaining({
+        method: "GET",
+        path: `/api/groups/${createdGroupId}`,
+        kind: "api-read",
+      })
+    );
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("restores selected group details when resuming a draft", async ({
+    baseURL,
+    page,
+  }) => {
+    const draftName = "Sandbox Group Resume Wave";
+    const draftDescription = "Resumed draft description.";
+
+    await gotoCreateWave(page);
+    await page.getByLabel(/Wave Name/).fill(draftName);
+    await page.getByText("Chat", { exact: true }).click();
+    await nextStepButton(page).press("Enter");
+
+    let accessGroup = page.getByRole("group", { name: "Who can view" });
+    await accessGroup.getByRole("button", { name: "Choose group" }).click();
+    await accessGroup.getByLabel("Search groups…").fill("Active");
+    await accessGroup
+      .getByRole("option", { name: /Active collectors/ })
+      .click();
+    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible();
+
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(() =>
+            window.localStorage.getItem("create-wave-drafts:v1")
+          ),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      )
+      .toContain(SANDBOX_PREVIEW_GROUP_ID);
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    const savedDraftsToggle = page.getByRole("button", {
+      name: "Saved Drafts",
+    });
+    await savedDraftsToggle.click();
+    await page
+      .getByRole("button", { name: new RegExp(`^${draftName}`) })
+      .click();
+    await nextStepButton(page).press("Enter");
+
+    accessGroup = page.getByRole("group", { name: "Who can view" });
+    await expect(accessGroup.getByText("25 currently eligible")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+
+    await accessGroup.getByRole("button", { name: "View members" }).click();
+    const membersDialog = page.getByRole("dialog", {
+      name: "Who can view: Active collectors",
+    });
+    const membersDialogHeading = membersDialog.getByRole("heading", {
+      name: "Who can view: Active collectors",
+    });
+    await expect(membersDialogHeading).toBeVisible();
+    expect(
+      await membersDialogHeading.evaluate((heading) => {
+        const rect = heading.getBoundingClientRect();
+        const topmostElement = document.elementFromPoint(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2
+        );
+        return topmostElement !== null && heading.contains(topmostElement);
+      })
+    ).toBe(true);
+    await membersDialog.getByRole("button", { name: "Close" }).click();
+
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Rules", level: 2, exact: true })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", {
+        name: "Description",
+        level: 2,
+        exact: true,
+      })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(
+      page.getByRole("textbox", { name: "Describe your wave" })
+    ).toBeVisible();
+    await fillDescription(page, draftDescription);
+    await page.getByRole("button", { name: "Complete" }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    );
+
+    const requests = await fetchSandboxRequests(baseURL);
+    expect(requests).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          method: "GET",
+          path: `/api/groups/${SANDBOX_PREVIEW_GROUP_ID}`,
+          kind: "api-read",
+        }),
+        expect.objectContaining({
+          method: "POST",
+          path: "/api/waves",
+          kind: "allowed-sandbox-mutation",
+          body: expect.objectContaining({
+            name: draftName,
+            description: draftDescription,
+          }),
+        }),
+      ])
+    );
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("keeps access controls visible and preserves choices", async ({
     baseURL,
     page,
   }) => {
@@ -174,19 +392,11 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Access", level: 2 })
     ).toBeVisible();
-    const advancedSettings = page.getByRole("button", {
-      name: /Advanced settings/,
-    });
-    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
-    await expect(advancedSettings).toContainText(
-      "Anyone can view and participate"
-    );
     await expect(
       page.getByRole("heading", { name: "Who can view" })
-    ).toBeHidden();
+    ).toBeVisible();
 
-    await advancedSettings.click();
-    const adminDeleteToggle = page.getByRole("checkbox", {
+    const adminDeleteToggle = page.getByRole("switch", {
       name: "Allow admins to delete posts",
     });
     await expect(adminDeleteToggle).toBeChecked();
@@ -194,17 +404,14 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       .getByText("Allow admins to delete posts", { exact: true })
       .click();
     await expect(adminDeleteToggle).not.toBeChecked();
-    await advancedSettings.click();
-
-    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
-    await expect(advancedSettings).toContainText("Customized");
-    await advancedSettings.click();
+    await page.getByRole("button", { name: "Previous" }).click();
+    await nextStepButton(page).click();
     await expect(adminDeleteToggle).not.toBeChecked();
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("summarizes the default rank schedule before detailed calendars", async ({
+  test("shows the default rank schedule controls", async ({
     baseURL,
     page,
   }) => {
@@ -220,23 +427,20 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Schedule", level: 2 })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    const advancedSettings = page.getByRole("button", {
-      name: /Advanced settings/,
+    const waveTimeline = page.getByRole("button", { name: "Wave Timeline" });
+    const winnersAnnouncements = page.getByRole("button", {
+      name: "Winners Announcements",
     });
-    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
-    await expect(advancedSettings).toContainText("First winners");
-    await expect(
-      page.getByRole("button", { name: "Winners Announcements" })
-    ).toBeHidden();
-
-    await advancedSettings.click();
-    await expect(page.getByText("Wave Timeline")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Winners Announcements" })
-    ).toBeVisible();
-    await advancedSettings.click();
+    await expect(waveTimeline).toHaveAttribute("aria-expanded", "true");
+    await expect(winnersAnnouncements).toBeVisible();
+    await waveTimeline.click();
+    await expect(waveTimeline).toHaveAttribute("aria-expanded", "false");
+    await expect(winnersAnnouncements).toBeVisible();
+    await waveTimeline.click();
+    await expect(winnersAnnouncements).toBeVisible();
     await nextStepButton(page).click();
 
+    await page.getByRole("button", { name: "Submission requirements" }).click();
     await expect(
       page.locator("#no-of-applications-allowed-per-participant")
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
@@ -268,29 +472,20 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await nextStepButton(page).click();
 
-    // Dates starts with a readable summary; the full timeline remains
-    // available without making the default path require any interaction.
+    // The schedule exposes its timeline and first announcement directly.
     await expect(
       page.getByRole("heading", { name: "Schedule", level: 2 })
     ).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
-    const scheduleAdvancedSettings = page.getByRole("button", {
-      name: /Advanced settings/,
-    });
-    await expect(scheduleAdvancedSettings).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
-    await expect(scheduleAdvancedSettings).toContainText("First winners");
     await expect(
-      page.getByRole("button", { name: "Winners Announcements" })
-    ).toBeHidden();
-    await scheduleAdvancedSettings.click();
+      page.getByRole("button", { name: "Wave Timeline" })
+    ).toBeVisible();
     await expect(
       page.getByText("First Winners Announcement").first()
     ).toBeVisible();
     await nextStepButton(page).click();
+    await page.getByRole("button", { name: "Submission requirements" }).click();
     await expect(
       page.locator("#no-of-applications-allowed-per-participant")
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
@@ -314,16 +509,15 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await nextStepButton(page).click();
 
-    // The schedule summary reflects that perpetual ranking stays open and has
-    // no winner-announcement controls.
+    // Perpetual ranking keeps the timeline but has no winner controls.
     await expect(
       page.getByRole("heading", { name: "Schedule", level: 2 })
     ).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: /Advanced settings/ })
-    ).toContainText("Ranking stays open");
+      page.getByRole("button", { name: "Wave Timeline" })
+    ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
     ).toBeHidden();
@@ -334,6 +528,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeHidden();
 
     await nextStepButton(page).click();
+    await page.getByRole("button", { name: "Submission requirements" }).click();
     await expect(
       page.locator("#no-of-applications-allowed-per-participant")
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
@@ -400,9 +595,6 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     page,
   }) => {
     await gotoCreateWave(page);
-    // The compact progress header is a small-screen stand-in; the desktop
-    // step rail owns progress here.
-    await expect(page.getByText(/Step 1 of \d+/)).toBeHidden();
 
     await page.getByLabel(/Wave Name/).fill("Sandbox Rank Defaults Wave");
     await page.getByText("Rank", { exact: true }).click();
@@ -421,16 +613,23 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     });
     const expectedDefault = new Date();
     expectedDefault.setDate(expectedDefault.getDate() + 7);
-    const expectedDateText = expectedDefault.toLocaleDateString("en-US", {
-      month: "short",
+    const expectedDateLabel = expectedDefault.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
       day: "numeric",
       year: "numeric",
     });
     await expect(
-      page.getByText(`${expectedDateText}, 11:59 PM`).first()
+      page.locator(
+        `button[aria-label="${expectedDateLabel}"][aria-pressed="true"]`
+      )
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "11:59 PM", exact: true })
     ).toBeVisible();
     await nextStepButton(page).click();
 
+    await page.getByRole("button", { name: "Submission requirements" }).click();
     await expect(
       page.locator("#no-of-applications-allowed-per-participant")
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
@@ -459,7 +658,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expect(outcomesAlert).toBeVisible();
 
     // Configuring an outcome clears the announcement and unblocks Next.
-    await page.getByRole("button", { name: "Manual" }).click();
+    await page.getByText("Manual", { exact: true }).click();
     await page.getByLabel("Manual action").fill("Coverage outcome");
     await page.getByLabel(/Winning Positions/).fill("1");
     await page.getByRole("button", { name: "Save" }).click();
@@ -496,8 +695,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await nextStepButton(page).click();
 
-    // The valid default schedule is summarized without requiring the detailed
-    // timeline to be opened.
+    // The valid default schedule exposes its winner controls directly.
     await expect(
       page.getByRole("heading", { name: "Schedule", level: 2 })
     ).toBeVisible({
@@ -505,9 +703,10 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     });
     await expect(
       page.getByRole("button", { name: "Winners Announcements" })
-    ).toBeHidden();
+    ).toBeVisible();
     await nextStepButton(page).click();
 
+    await page.getByRole("button", { name: "Submission requirements" }).click();
     await expect(
       page.locator("#no-of-applications-allowed-per-participant")
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
@@ -519,13 +718,13 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).click();
 
     // Voting keeps its defaults; a scheduled rank wave then configures an
-    // outcome on the Outcomes step (present in the stepper, unlike perpetual).
-    await expect(
-      page.getByRole("navigation", { name: "Progress" }).getByText("Outcomes")
-    ).toBeVisible();
+    // outcome on the Outcomes step (unlike perpetual).
     await nextStepButton(page).click();
+    await expect(
+      page.getByRole("heading", { name: "Outcomes", level: 2 })
+    ).toBeVisible();
 
-    await page.getByRole("button", { name: "Manual" }).click();
+    await page.getByText("Manual", { exact: true }).click();
     await page
       .getByLabel("Manual action")
       .fill(SANDBOX_SCHEDULED_OUTCOME_TITLE);
@@ -625,11 +824,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(
-      page.getByRole("button", { name: /Advanced settings/ })
-    ).toContainText("No end date");
-    await page.getByRole("button", { name: /Advanced settings/ }).click();
-    await expect(
-      page.getByRole("heading", { name: "Wave End", level: 3 })
+      page.getByRole("button", { name: "Wave end", exact: true })
     ).toBeVisible();
     await expect(page.getByText("Perpetual Ranking")).toBeHidden();
     await expect(
@@ -748,31 +943,31 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     page,
   }) => {
     await gotoCreateWave(page);
-
-    const advancedSettings = page.getByRole("button", {
-      name: /Advanced settings/,
-    });
-    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
-    await expect(page.locator("#pfp-upload-input")).toBeHidden();
+    await expect(page.getByText("Click to upload")).toBeVisible();
 
     await page.getByLabel(/Wave Name/).fill("Advanced Overview Wave");
     await page.getByText("Approve", { exact: true }).click();
+
+    const advancedSettings = page.getByRole("button", {
+      name: /Appearance and labels/,
+    });
+    await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
 
     // The disclosure is operable without a pointer and exposes its state.
     await advancedSettings.focus();
     await page.keyboard.press("Enter");
     await expect(advancedSettings).toHaveAttribute("aria-expanded", "true");
 
-    const compactProposalCards = page.getByLabel("Compact proposal cards");
+    const fullProposal = page.getByRole("radio", { name: "Full proposal" });
     const submissionLabel = page.getByLabel("Submission button label");
-    await expect(compactProposalCards).toBeVisible();
-    await compactProposalCards.check();
+    await page.getByText("Full proposal", { exact: true }).click();
+    await expect(fullProposal).toBeChecked();
     await submissionLabel.fill("Submit idea");
 
     await advancedSettings.click();
     await expect(advancedSettings).toHaveAttribute("aria-expanded", "false");
     await expect(advancedSettings).toContainText("Customized");
-    await expect(compactProposalCards).toBeHidden();
+    await expect(fullProposal).toBeHidden();
 
     // Programmatic draft hydration can contain a value longer than the input's
     // maxLength. Model that old/nonconforming state and make sure validation
@@ -830,18 +1025,9 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await nextStepButton(page).click();
 
-    // Dates: open the optional timeline, then interacting inside the
-    // announcements section must not
+    // Dates: interacting inside the announcements section must not
     // auto-collapse the Wave Timeline section above it — that collapse
     // shifted the whole page mid-tap ("calendar jumping around").
-    const scheduleAdvancedSettings = page.getByRole("button", {
-      name: /Advanced settings/,
-    });
-    await expect(scheduleAdvancedSettings).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
-    await scheduleAdvancedSettings.click();
     const timelineToggle = page.getByRole("button", { name: /Wave Timeline/ });
     await expect(timelineToggle).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -854,6 +1040,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expect(timelineToggle).toHaveAttribute("aria-expanded", "true");
 
     // The Add to Timeline button used to overflow its card on 390px screens.
+    await page.getByRole("button", { name: "Winner schedule" }).click();
     const addToTimeline = page.getByRole("button", { name: "Add to Timeline" });
     await addToTimeline.scrollIntoViewIfNeeded();
     const addToTimelineBox = await addToTimeline.boundingBox();
@@ -874,6 +1061,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
 
     // Drops: the submissions-per-participant label used to wrap over the
     // input and hide the typed value at phone width.
+    await page.getByRole("button", { name: "Submission requirements" }).click();
     const submissions = page.locator(
       "#no-of-applications-allowed-per-participant"
     );
@@ -900,7 +1088,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
 
     // Outcomes: the saved row's type label and entered name used to overlap
     // at phone width, hiding what was entered.
-    const manualOption = page.getByRole("button", { name: "Manual" });
+    const manualOption = page.getByText("Manual", { exact: true });
     await expect(manualOption).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -944,10 +1132,10 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await page.locator("#create-wave-name").fill(draftName);
     await page.getByText("Rank", { exact: true }).click();
     const overviewAdvancedSettings = page.getByRole("button", {
-      name: /Advanced settings/,
+      name: /Appearance and labels/,
     });
     await overviewAdvancedSettings.click();
-    await page.getByLabel("Compact proposal cards").check();
+    await page.getByText("Full proposal", { exact: true }).click();
     await overviewAdvancedSettings.click();
     await expect(overviewAdvancedSettings).toContainText("Customized");
     // Leaving Overview is what arms autosave.
@@ -996,7 +1184,9 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     );
     await expect(overviewAdvancedSettings).toContainText("Customized");
     await overviewAdvancedSettings.click();
-    await expect(page.getByLabel("Compact proposal cards")).toBeChecked();
+    await expect(
+      page.getByRole("radio", { name: "Full proposal" })
+    ).toBeChecked();
 
     // Deleting the only draft removes the whole Saved Drafts card.
     await page.reload({ waitUntil: "domcontentloaded" });

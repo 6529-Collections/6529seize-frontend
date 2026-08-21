@@ -28,6 +28,12 @@ import {
 } from "./delegation-constants";
 import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_PAGE_CONTAINER_CLASS_NAME,
+  DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "./delegation-ui";
 
 const DELEGATION_MENU_ITEMS: ReadonlyArray<{
   section: DelegationCenterSection;
@@ -290,7 +296,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         className={`tw-h-full tw-min-h-11 tw-w-full tw-whitespace-normal tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
           active
             ? "tw-border-primary-400 tw-bg-primary-500 tw-text-white"
-            : "hover:tw-border-white/12 tw-border-white/[0.06] tw-bg-iron-900 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-200"
+            : "tw-border-white/[0.06] tw-bg-iron-900 tw-text-iron-400 hover:tw-border-white/[0.12] hover:tw-bg-iron-800 hover:tw-text-iron-200"
         }`}
         aria-current={active ? "page" : undefined}
       >
@@ -310,7 +316,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8">
+    <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
       {showNavigation && (
         <nav aria-label="Delegation center" className="tw-mb-7 sm:tw-mb-8">
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
@@ -398,16 +404,16 @@ function DelegationConnectWalletState(
 ) {
   return (
     <section
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6"
+      className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}
       aria-labelledby="connect-wallet-heading"
     >
       <h1
         id="connect-wallet-heading"
-        className="tw-mb-2 tw-mt-0 tw-text-3xl tw-font-bold tw-text-white"
+        className={DELEGATION_PAGE_TITLE_CLASS_NAME}
       >
         {props.title}
       </h1>
-      <p className="tw-mb-4 tw-text-base tw-leading-6 tw-text-iron-300">
+      <p className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} tw-mb-5`}>
         {props.body}
       </p>
       <Button

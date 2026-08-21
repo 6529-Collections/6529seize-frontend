@@ -1,6 +1,7 @@
 import { ES_ES_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { ES_ES_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { ES_ES_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { ES_ES_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
@@ -403,6 +404,7 @@ export const ES_ES_MESSAGES = {
   "quickDm.loadingStatus": "Cargando mensajes directos",
   "quickDm.chatLoadError": "No se pudo cargar esta conversación.",
   ...ES_ES_QR_SCANNER_MESSAGES,
+  ...ES_ES_CAPACITOR_CONNECT_MESSAGES,
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
@@ -424,6 +426,7 @@ export const ES_ES_MESSAGES = {
   "waves.create.dialog.subwaveTitle": "Crear subwave",
   "waves.create.dialog.waveTitle": "Crear wave",
   "waves.create.actions.cancel": "Cancelar",
+  "waves.create.actions.backToCriteria": "Volver a los criterios",
   "waves.create.actions.complete": "Completar",
   "waves.create.actions.next": "Siguiente",
   "waves.create.actions.previous": "Anterior",
@@ -442,6 +445,37 @@ export const ES_ES_MESSAGES = {
     "Elige quién puede acceder, participar y gestionar esta Wave.",
   "waves.create.groups.viewGroupName": "Quién puede ver",
   "waves.create.groups.adminGroupName": "Administración",
+  "waves.create.groups.members.currentCount": "{count} elegibles actualmente",
+  "waves.create.groups.members.countLoading":
+    "Comprobando la audiencia actual…",
+  "waves.create.groups.members.countUnavailable":
+    "Audiencia actual no disponible",
+  "waves.create.groups.members.view": "Ver miembros",
+  "waves.create.groups.members.previewDraft": "Previsualizar coincidencias",
+  "waves.create.groups.members.dialogTitle": "{role}: {group}",
+  "waves.create.groups.members.dynamicDescription":
+    "Esta vista previa en directo se basa en los datos actuales de perfil, reputación y propiedad. La pertenencia puede cambiar.",
+  "waves.create.groups.members.criteriaSummary":
+    "Por qué cumplen los requisitos estas identidades",
+  "waves.create.groups.members.criteriaUnavailable":
+    "Los criterios del grupo no están disponibles, pero aún puedes consultar los miembros actuales abajo.",
+  "waves.create.groups.members.searchLabel": "Buscar una identidad",
+  "waves.create.groups.members.searchPlaceholder":
+    "Buscar por nombre o cartera",
+  "waves.create.groups.members.clearSearch": "Borrar la búsqueda de identidad",
+  "waves.create.groups.members.loadingStatus": "Cargando miembros actuales",
+  "waves.create.groups.members.empty":
+    "Ninguna identidad coincide actualmente con este grupo.",
+  "waves.create.groups.members.searchEmpty":
+    "No se encontraron identidades coincidentes.",
+  "waves.create.groups.members.errorTitle":
+    "No se pudieron cargar los miembros actuales.",
+  "waves.create.groups.members.errorDescription":
+    "Comprueba tu conexión e inténtalo de nuevo.",
+  "waves.create.groups.members.retry": "Intentar de nuevo",
+  "waves.create.groups.members.listLabel": "Miembros actuales del grupo",
+  "waves.create.groups.members.openProfile":
+    "Abrir el perfil de {identity} en una pestaña nueva",
   "waves.create.groups.validation.checking": "Comprobando el acceso…",
   "waves.create.groups.validation.unavailableTitle":
     "No se pudo verificar el acceso.",
