@@ -69,7 +69,7 @@ export function useWaveConfig() {
     return {
       overview: {
         type,
-        typeSelected: false,
+        typeSelected: true,
         name: "",
         image: null,
       },

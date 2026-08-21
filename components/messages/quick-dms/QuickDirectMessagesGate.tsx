@@ -5,7 +5,12 @@ import { useAuth } from "@/components/auth/Auth";
 import { useIsTransferModeActive } from "@/components/nft-transfer/TransferState";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import dynamic from "next/dynamic";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSyncExternalStore } from "react";
+import {
+  CREATE_WAVE_QUERY_PARAM,
+  isCreateWaveSurface,
+} from "@/helpers/waves/create-wave-route.helpers";
 
 const LazyQuickDirectMessages = dynamic(() => import("./QuickDirectMessages"), {
   loading: () => null,
@@ -42,16 +47,23 @@ const useCanMountQuickDirectMessages = (): boolean => {
   const { connectedProfile, showWaves } = useAuth();
   const { isApp, isMobileDevice } = useDeviceInfo();
   const isTransferModeActive = useIsTransferModeActive();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isDesktopViewport = useSyncExternalStore(
     subscribeDesktopViewport,
     getDesktopViewportSnapshot,
     () => false
   );
+  const isCreatingWave = isCreateWaveSurface({
+    pathname,
+    createParam: searchParams.get(CREATE_WAVE_QUERY_PARAM),
+  });
 
   return Boolean(
     !isApp &&
     !isMobileDevice &&
     !isTransferModeActive &&
+    !isCreatingWave &&
     isDesktopViewport &&
     connectedProfile?.handle &&
     showWaves

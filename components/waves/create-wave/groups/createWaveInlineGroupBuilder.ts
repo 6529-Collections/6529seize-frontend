@@ -5,6 +5,7 @@ import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBe
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export type CreateWaveInlineGroupPanel =
   | "actions"
@@ -28,6 +29,7 @@ export interface CreateWaveInlineGroupBuilderState {
   readonly identities: readonly CommunityMemberMinimal[];
   readonly panel: CreateWaveInlineGroupPanel;
   readonly activeRule: CreateWaveInlineGroupRuleType | null;
+  readonly criteriaReplacementActive: boolean;
 }
 
 const QUICK_RULES = [
@@ -91,14 +93,6 @@ export const createEmptyInlineGroupPayload = (): ApiCreateGroup => ({
   is_private: false,
 });
 
-export const createInitialInlineGroupBuilderState =
-  (): CreateWaveInlineGroupBuilderState => ({
-    draft: createEmptyInlineGroupPayload(),
-    identities: [],
-    panel: "actions",
-    activeRule: null,
-  });
-
 const normalizeAddress = (address: string): string =>
   address.trim().toLowerCase();
 
@@ -128,6 +122,45 @@ export const getInlineIdentityAddresses = (
     .filter((address) => address.length > 0);
 
   return addresses.length ? addresses : null;
+};
+
+export const getInlineGroupIdentityFromProfile = (
+  profile: ApiIdentity | null | undefined
+): CommunityMemberMinimal | null =>
+  profile?.primary_wallet
+    ? {
+        profile_id: profile.id,
+        handle: profile.handle,
+        normalised_handle: profile.normalised_handle,
+        primary_wallet: profile.primary_wallet,
+        display: profile.display,
+        tdh: profile.tdh,
+        level: profile.level,
+        cic_rating: profile.cic,
+        wallet: profile.primary_wallet,
+        pfp: profile.pfp,
+      }
+    : null;
+
+export const createInitialInlineGroupBuilderState = (
+  identities: readonly CommunityMemberMinimal[] = []
+): CreateWaveInlineGroupBuilderState => {
+  const initialIdentities = dedupeInlineIdentities(identities);
+  const draft = createEmptyInlineGroupPayload();
+
+  return {
+    draft: {
+      ...draft,
+      group: {
+        ...draft.group,
+        identity_addresses: getInlineIdentityAddresses(initialIdentities),
+      },
+    },
+    identities: initialIdentities,
+    panel: "actions",
+    activeRule: null,
+    criteriaReplacementActive: false,
+  };
 };
 
 const hasRepRule = (draft: ApiCreateGroup): boolean =>
@@ -209,15 +242,17 @@ export const getInlineGroupDraftSummary = ({
 export const buildInlineGroupName = ({
   waveName,
   groupLabel,
+  fallbackName,
 }: {
   readonly waveName: string | null | undefined;
   readonly groupLabel: string | null | undefined;
+  readonly fallbackName: string;
 }): string => {
   const normalizedWaveName = waveName?.trim() ?? "";
   const normalizedGroupLabel = groupLabel?.trim() ?? "";
 
   if (!normalizedWaveName.length) {
-    return normalizedGroupLabel || "Wave Group";
+    return normalizedGroupLabel || fallbackName;
   }
 
   if (!normalizedGroupLabel.length) {

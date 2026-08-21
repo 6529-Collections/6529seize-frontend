@@ -61,11 +61,13 @@ function renderWithProfile({
   identities = [],
   onIdentitySelect = jest.fn(),
   onRemove = jest.fn(),
+  onCancel,
   profile = connectedProfile,
 }: {
   readonly identities?: readonly CommunityMemberMinimal[];
   readonly onIdentitySelect?: jest.Mock;
   readonly onRemove?: jest.Mock;
+  readonly onCancel?: jest.Mock;
   readonly profile?: ApiIdentity | null;
 } = {}) {
   render(
@@ -86,6 +88,7 @@ function renderWithProfile({
         identities={identities}
         onIdentitySelect={onIdentitySelect}
         onRemove={onRemove}
+        onCancel={onCancel}
         resultsLayout="popover"
       />
     </AuthContext.Provider>
@@ -152,6 +155,16 @@ describe("CreateWaveInlineGroupIdentities", () => {
       "data-results-layout",
       "inline"
     );
+  });
+
+  it("provides an explicit route back to the criteria choices", async () => {
+    const user = userEvent.setup();
+    const onCancel = jest.fn();
+    renderWithProfile({ onCancel });
+
+    await user.click(screen.getByRole("button", { name: "Back to criteria" }));
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it("adds the connected profile when Include me is switched on", async () => {

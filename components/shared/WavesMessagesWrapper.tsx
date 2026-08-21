@@ -18,6 +18,7 @@ import BrainRightSidebar, {
   SidebarTab,
 } from "../brain/right-sidebar/BrainRightSidebar";
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
+import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import {
@@ -115,7 +116,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   // is unreachable on mobile (the wave list renders instead of the form).
   // Trailing slashes are tolerated so a normalization change upstream cannot
   // silently re-break mobile reachability.
-  const isCreateRoute = pathname.replace(/\/+$/, "") === "/waves/create";
+  const isCreateRoute = isCreateWavePathname(pathname);
   const canShowMainContent = !isMobile || hasWave || isCreateRoute;
   const showProfileFeedShortcut = !isMobile;
   const shouldShowLeftSidebar =
