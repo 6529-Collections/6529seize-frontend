@@ -17,9 +17,17 @@ export default function NotificationIdentityMentioned({
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }) {
+  const drop = Array.isArray(notification.related_drops)
+    ? notification.related_drops[0]
+    : undefined;
+
+  if (!drop) {
+    return null;
+  }
+
   return (
     <NotificationWithDrop
-      drop={notification.related_drops[0]!}
+      drop={drop}
       actionText="mentioned you"
       createdAt={notification.created_at}
       activeDrop={activeDrop}

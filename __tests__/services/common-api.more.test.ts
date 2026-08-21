@@ -86,6 +86,22 @@ describe("commonApi utility methods", () => {
     );
   });
 
+  it("commonApiDelete forwards an abort signal", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+    });
+    const controller = new AbortController();
+
+    await commonApiDelete({ endpoint: "x", signal: controller.signal });
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/x",
+      expect.objectContaining({ signal: controller.signal })
+    );
+  });
+
   it("commonApiPostForm posts form data without content-type", async () => {
     const form = new FormData();
     (global.fetch as jest.Mock).mockResolvedValue({
