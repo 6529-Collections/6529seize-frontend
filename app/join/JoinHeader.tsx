@@ -45,6 +45,9 @@ const HERO_MAGNETIC_STRENGTH = {
   y: 6,
 } as const;
 
+const HERO_SUBTITLE_HIGHLIGHT_OPEN = "<highlight>";
+const HERO_SUBTITLE_HIGHLIGHT_CLOSE = "</highlight>";
+
 const heroMagneticFrames = new WeakMap<HTMLElement, number>();
 const heroMagneticPoints = new WeakMap<
   HTMLElement,
@@ -117,11 +120,11 @@ export function JoinHeader({
   readonly secondaryAction: CurrentPanelAction;
 }) {
   const heroContent = HERO_CONTENT[pageState];
-  const { subtitleKey } = heroContent;
+  const { hasHighlightedSubtitle, subtitleKey } = heroContent;
 
   return (
     <header
-      className="tw-relative tw-isolate tw-mx-auto tw-flex tw-min-h-[620px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-4 tw-py-20 md:tw-min-h-[700px] md:tw-px-6 md:tw-py-24 lg:tw-px-8"
+      className="tw-relative tw-isolate tw-z-10 tw-mx-auto tw-flex tw-min-h-[620px] tw-w-full tw-max-w-7xl tw-flex-col tw-items-center tw-justify-center tw-overflow-visible tw-px-4 tw-py-20 md:tw-min-h-[700px] md:tw-px-6 md:tw-py-24 lg:tw-px-8"
       onPointerLeave={handleHeroPointerLeave}
       onPointerMove={handleHeroPointerMove}
       style={HERO_MAGNETIC_REST_STYLE}
@@ -132,20 +135,29 @@ export function JoinHeader({
         className="tw-pointer-events-none tw-absolute tw-inset-x-8 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/10 tw-to-transparent"
       />
       <div className="tw-relative tw-z-10 tw-mx-auto tw-mt-4 tw-flex tw-w-full tw-max-w-5xl tw-flex-col tw-items-center tw-text-center">
-        <div className="tw-mb-6 tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3.5 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-400 sm:tw-gap-3 sm:tw-px-4">
+        <div className="tw-mb-6 tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3.5 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-leading-5 tw-tracking-[0.14em] tw-text-iron-400 sm:tw-gap-3 sm:tw-px-4">
           <span
             aria-hidden="true"
             className="tw-h-1.5 tw-w-1.5 tw-animate-pulse tw-rounded-full tw-bg-iron-400"
           />
           {m(locale, heroContent.eyebrowKey)}
         </div>
-        <div className="tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center">
-          <h1 className="tw-m-0 tw-mb-4 tw-text-[2.25rem] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-[2.5rem]">
+        <div
+          className={cx(
+            "tw-flex tw-w-full tw-flex-col tw-items-center",
+            hasHighlightedSubtitle ? "tw-max-w-5xl" : "tw-max-w-2xl"
+          )}
+        >
+          <h1 className="tw-m-0 tw-mb-5 tw-text-balance tw-text-4xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.035em] tw-text-iron-50 sm:tw-text-[2.5rem] md:tw-text-5xl">
             {m(locale, heroContent.titleKey)}
           </h1>
           {subtitleKey !== undefined && (
-            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-normal tw-leading-7 tw-text-iron-300 lg:tw-text-xl">
-              {m(locale, subtitleKey)}
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-normal tw-leading-7 tw-text-iron-400 lg:tw-text-xl">
+              <HeroSubtitle
+                hasHighlight={hasHighlightedSubtitle === true}
+                locale={locale}
+                subtitleKey={subtitleKey}
+              />
             </p>
           )}
         </div>
@@ -159,9 +171,52 @@ export function JoinHeader({
   );
 }
 
+function HeroSubtitle({
+  hasHighlight,
+  locale,
+  subtitleKey,
+}: {
+  readonly hasHighlight: boolean;
+  readonly locale: SupportedLocale;
+  readonly subtitleKey: Parameters<typeof m>[1];
+}) {
+  const subtitle = m(locale, subtitleKey);
+  if (!hasHighlight) {
+    return subtitle;
+  }
+
+  const highlightStart = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_OPEN);
+  const highlightEnd = subtitle.indexOf(HERO_SUBTITLE_HIGHLIGHT_CLOSE);
+  const hasSingleHighlightPair =
+    highlightStart >= 0 &&
+    highlightStart === subtitle.lastIndexOf(HERO_SUBTITLE_HIGHLIGHT_OPEN) &&
+    highlightEnd > highlightStart &&
+    highlightEnd === subtitle.lastIndexOf(HERO_SUBTITLE_HIGHLIGHT_CLOSE);
+  if (!hasSingleHighlightPair) {
+    return subtitle
+      .replaceAll(HERO_SUBTITLE_HIGHLIGHT_OPEN, "")
+      .replaceAll(HERO_SUBTITLE_HIGHLIGHT_CLOSE, "");
+  }
+
+  const highlightedText = subtitle.slice(
+    highlightStart + HERO_SUBTITLE_HIGHLIGHT_OPEN.length,
+    highlightEnd
+  );
+
+  return (
+    <>
+      {subtitle.slice(0, highlightStart)}
+      <span className="tw-inline tw-text-iron-50 md:tw-block">
+        {highlightedText}
+      </span>
+      {subtitle.slice(highlightEnd + HERO_SUBTITLE_HIGHLIGHT_CLOSE.length)}
+    </>
+  );
+}
+
 function HeroPoints({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <div className="tw-mt-16 tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-1 tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-7 sm:tw-grid-cols-3 sm:tw-gap-0 lg:tw-mb-12 xl:tw-mb-14">
+    <div className="tw-relative tw-z-20 tw-mt-20 tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-1 tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#030303] tw-pt-8 sm:tw-mt-24 sm:tw-grid-cols-3 sm:tw-gap-0 md:tw-pt-10 lg:tw-mb-12 xl:tw-mb-14">
       {HERO_POINTS.map((point, index) => (
         <div
           className={cx(
@@ -171,7 +226,7 @@ function HeroPoints({ locale }: { readonly locale: SupportedLocale }) {
           )}
           key={point.titleKey}
         >
-          <p className="tw-mb-1 tw-text-[15px] tw-font-medium tw-leading-6 tw-text-iron-100">
+          <p className="tw-mb-1.5 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
             {m(locale, point.titleKey)}
           </p>
           <p className="tw-mb-0 tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-400">
@@ -194,7 +249,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
       className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-1/2 tw-z-0 tw-w-screen -tw-translate-x-1/2 tw-overflow-visible tw-opacity-45 sm:tw-opacity-55 lg:tw-opacity-70"
     >
       <div
-        className="tw-absolute tw-right-[calc(50%+180px)] tw-top-[7%] tw-w-16 tw-opacity-[0.24] tw-blur-[1px] tw-saturate-[0.7] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+240px)] sm:tw-w-20 md:tw-right-[calc(50%+320px)] md:tw-top-[6%] md:tw-w-28 lg:tw-right-[calc(50%+380px)] lg:tw-w-32 lg:tw-opacity-25 xl:tw-right-[calc(50%+420px)]"
+        className="tw-absolute tw-hidden tw-opacity-[0.24] tw-blur-[1px] tw-saturate-[0.7] motion-safe:tw-animate-hero-float md:tw-left-[clamp(6rem,12vw,9rem)] md:tw-top-[10%] md:tw-block md:tw-w-28 lg:tw-left-[clamp(10rem,15vw,17rem)] lg:tw-w-32 lg:tw-opacity-25 xl:tw-left-[clamp(13rem,17vw,19rem)] xl:tw-top-[8%]"
         style={heroFloatStyle("8deg", "-2s")}
       >
         <div
@@ -213,7 +268,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-right-[calc(50%+160px)] tw-top-[62%] tw-hidden tw-w-16 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-right-[calc(50%+220px)] sm:tw-top-[44%] sm:tw-block sm:tw-w-24 md:tw-right-[calc(50%+300px)] md:tw-top-[39%] md:tw-w-32 lg:tw-right-[calc(50%+360px)] lg:tw-top-[44%] lg:tw-w-40 lg:tw-opacity-35 xl:tw-right-[calc(50%+390px)]"
+        className="tw-absolute tw-hidden tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float md:tw-right-[calc(50%+13rem)] md:tw-top-[46%] md:tw-block md:tw-w-24 lg:tw-right-[calc(50%+15rem)] lg:tw-top-[40%] lg:tw-w-32 xl:tw-right-[calc(50%+17rem)] xl:tw-top-[32%] xl:tw-w-40 xl:tw-opacity-35"
         style={heroFloatStyle("-6deg", "-4s")}
       >
         <div
@@ -232,7 +287,7 @@ function HeroFloatPanels({ locale }: { readonly locale: SupportedLocale }) {
         </div>
       </div>
       <div
-        className="tw-absolute tw-left-[calc(50%+102px)] tw-top-[58%] tw-hidden tw-w-20 tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float sm:tw-left-[calc(50%+230px)] sm:tw-top-[40%] sm:tw-block sm:tw-w-28 md:tw-left-[calc(50%+320px)] md:tw-top-[24%] md:tw-w-36 lg:tw-left-[calc(50%+370px)] lg:tw-top-[30%] lg:tw-w-48 lg:tw-opacity-35 xl:tw-left-[calc(50%+380px)] xl:tw-w-52"
+        className="tw-absolute tw-hidden tw-opacity-30 tw-saturate-[0.68] motion-safe:tw-animate-hero-float md:tw-left-[calc(50%+200px)] md:tw-top-[15%] md:tw-block md:tw-w-36 lg:tw-left-[calc(50%+260px)] lg:tw-w-48 lg:tw-opacity-35 xl:tw-left-[calc(50%+clamp(18rem,22vw,22rem))] xl:tw-top-[13%] xl:tw-w-52"
         style={heroFloatStyle("5deg", "-5s")}
       >
         <div
