@@ -463,6 +463,12 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
     expect(mockHideGroup).toHaveBeenCalledWith({ id: "new-group-id" });
     expect(mutateAsyncSpy).not.toHaveBeenCalled();
     expect(onWaveCreated).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledTimes(1);
+    expect(setToast).toHaveBeenCalledWith({
+      type: "error",
+      message:
+        "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
+    });
   });
 
   it("keeps a cloned group when the wave update committed before response loss", async () => {

@@ -17,7 +17,6 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { normalizeGroupNftOwnerships } from "@/helpers/groups/group-nft-ownership";
 import {
   createGroup,
-  hideGroup,
   publishGroup,
   validateGroupPayload,
   type ValidationIssue,
@@ -34,7 +33,10 @@ import { getWaveUpdateGroupValidationRequest } from "@/helpers/waves/wave-group-
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { getCloneReferenceState } from "../utils/waveGroupCloneRecovery";
+import {
+  getCloneReferenceState,
+  hideUnattachedClone,
+} from "../utils/waveGroupCloneRecovery";
 import { getValidationRoles } from "../utils/waveGroupValidation";
 
 const WAVE_GROUP_LABELS = {
@@ -737,11 +739,11 @@ export const useWaveGroupEditButtonsController = ({
             return;
           }
           if (referenceState === "unattached") {
-            await hideGroup({ id: newGroupId }).catch(() => undefined);
+            await hideUnattachedClone({ waveId: wave.id, groupId: newGroupId });
           }
           throw error;
         }
-        await hideGroup({ id: newGroupId }).catch(() => undefined);
+        await hideUnattachedClone({ waveId: wave.id, groupId: newGroupId });
       } catch (error) {
         if (!waveMutationTriggered) {
           if (error instanceof DOMException && error.name === "AbortError") {

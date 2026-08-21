@@ -1,5 +1,6 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
+import { hideGroup } from "@/services/groups/groupMutations";
 
 const waveReferencesGroup = (wave: ApiWave, groupId: string): boolean =>
   [
@@ -30,5 +31,22 @@ export const getCloneReferenceState = async ({
       { waveId, groupId, error }
     );
     return "unknown";
+  }
+};
+
+export const hideUnattachedClone = async ({
+  waveId,
+  groupId,
+}: {
+  readonly waveId: string;
+  readonly groupId: string;
+}): Promise<void> => {
+  try {
+    await hideGroup({ id: groupId });
+  } catch (error) {
+    console.error(
+      "[WaveGroupEditButtons] Unable to hide unattached cloned group",
+      { waveId, groupId, error }
+    );
   }
 };
