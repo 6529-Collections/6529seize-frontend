@@ -507,6 +507,7 @@ export default function UserPageProfileWave({
           onClose={() => setIsChangeWaveOpen(false)}
           tabletModal
           maxWidthClass="md:tw-max-w-lg"
+          headerClassName="tw-pb-4"
         >
           <UserPageProfileWavePicker
             identity={profileIdentityKey}

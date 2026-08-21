@@ -53,17 +53,17 @@ function CompactCandidateWaveRow({
       type="button"
       onClick={() => onSelect(wave.id)}
       disabled={isSubmitting || isSelected}
-      className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-xl tw-border-0 tw-text-left tw-font-medium tw-text-white tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-default ${
-        isMobileSheet ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2.5"
+      className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-xl tw-border-0 tw-text-left tw-font-medium tw-text-iron-100 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-default ${
+        isMobileSheet ? "tw-px-0 tw-py-3" : "tw-px-3 tw-py-2.5"
       } ${
         isSelected
-          ? "tw-bg-white/10"
+          ? "tw-bg-transparent"
           : "tw-bg-transparent desktop-hover:hover:tw-bg-white/5"
       }`}
     >
       <div className="tw-min-w-0 tw-flex-1 tw-space-y-0.5">
         <h3
-          className={`tw-mb-0 tw-truncate tw-font-semibold tw-tracking-tight ${
+          className={`tw-m-0 tw-truncate tw-font-semibold tw-tracking-tight ${
             isMobileSheet ? "tw-text-base" : "tw-text-sm"
           }`}
         >
