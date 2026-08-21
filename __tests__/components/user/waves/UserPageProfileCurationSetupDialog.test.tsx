@@ -1,4 +1,3 @@
-import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";

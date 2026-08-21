@@ -13,7 +13,7 @@ describe("profile Curation helpers", () => {
     });
 
     expect(request.name).toBe("alice Curation");
-    expect(request.wave.admin_group.group_id).toBe("group-1");
+    expect(request.wave.admin_group?.group_id).toBe("group-1");
     expect(request.visibility.scope.group_id).toBeNull();
     expect(request.participation.scope.group_id).toBeNull();
     expect(request.chat.scope.group_id).toBeNull();
