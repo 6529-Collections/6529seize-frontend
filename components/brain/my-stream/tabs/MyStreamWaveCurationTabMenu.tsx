@@ -4,14 +4,17 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import { useAuth } from "@/components/auth/Auth";
-import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmationModal";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
+import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { DropCurationMembership } from "@/hooks/drops/useDropCurations";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { invalidateProfileWaveQueries } from "@/hooks/useProfileWave";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { commonApiDelete } from "@/services/api/common-api";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
@@ -22,6 +25,13 @@ interface MyStreamWaveCurationTabMenuProps {
   readonly onDeleted?: (() => void) | undefined;
   readonly canSetAsProfileCuration?: boolean | undefined;
   readonly isSetAsProfileCurationPending?: boolean | undefined;
+  readonly triggerLabel?: string | undefined;
+  readonly permissionMode?: "standard" | "profile" | undefined;
+  readonly canChooseAnotherCuration?: boolean | undefined;
+  readonly onChooseAnotherCuration?: (() => void) | undefined;
+  readonly onChooseAnotherSourceWave?: (() => void) | undefined;
+  readonly onHideFromProfile?: (() => void) | undefined;
+  readonly isProfileActionPending?: boolean | undefined;
 }
 
 const getErrorMessage = (error: unknown): string =>
@@ -33,6 +43,13 @@ export default function MyStreamWaveCurationTabMenu({
   onDeleted,
   canSetAsProfileCuration = false,
   isSetAsProfileCurationPending = false,
+  triggerLabel,
+  permissionMode = "standard",
+  canChooseAnotherCuration = false,
+  onChooseAnotherCuration,
+  onChooseAnotherSourceWave,
+  onHideFromProfile,
+  isProfileActionPending = false,
 }: MyStreamWaveCurationTabMenuProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, requestAuth, setToast } = useAuth();
@@ -40,6 +57,7 @@ export default function MyStreamWaveCurationTabMenu({
     useProfileWaveMutation(connectedProfile);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isSettingProfileCuration =
     isSetAsProfileCurationPending || isProfileWavePending;
 
@@ -75,7 +93,7 @@ export default function MyStreamWaveCurationTabMenu({
       ]);
       setToast({
         type: "success",
-        message: "Curation deleted.",
+        message: "Curation deleted. The source Wave remains.",
       });
       setIsDeleteOpen(false);
       onDeleted?.();
@@ -90,17 +108,66 @@ export default function MyStreamWaveCurationTabMenu({
     },
   });
 
+  const hasProfileActions =
+    onChooseAnotherCuration !== undefined ||
+    onChooseAnotherSourceWave !== undefined ||
+    onHideFromProfile !== undefined;
   const menuItems: CompactMenuItem[] = [
+    ...(hasProfileActions
+      ? [
+          {
+            id: "profile-actions",
+            kind: "section" as const,
+            label: "Shown on profile",
+          },
+          ...(canChooseAnotherCuration &&
+          onChooseAnotherCuration !== undefined
+            ? [
+                {
+                  id: "choose-curation",
+                  label: "Choose another Curation",
+                  onSelect: onChooseAnotherCuration,
+                  disabled: isProfileActionPending,
+                },
+              ]
+            : []),
+          ...(onChooseAnotherSourceWave !== undefined
+            ? [
+                {
+                  id: "choose-source-wave",
+                  label: "Use another source Wave",
+                  onSelect: onChooseAnotherSourceWave,
+                  disabled: isProfileActionPending,
+                },
+              ]
+            : []),
+          ...(onHideFromProfile !== undefined
+            ? [
+                {
+                  id: "hide-from-profile",
+                  label: "Hide from profile",
+                  onSelect: onHideFromProfile,
+                  disabled: isProfileActionPending,
+                },
+              ]
+            : []),
+          {
+            id: "curation-actions",
+            kind: "section" as const,
+            label: "This Curation",
+          },
+        ]
+      : []),
     {
       id: "edit",
-      label: "Edit curation",
+      label: "Edit Curation",
       onSelect: () => setIsEditOpen(true),
     },
     ...(canSetAsProfileCuration
       ? [
           {
             id: "set-profile-curation",
-            label: "Set as profile curation",
+            label: "Show on profile",
             onSelect: () => {
               void updateProfileWave(wave.id, curation.id);
             },
@@ -110,24 +177,76 @@ export default function MyStreamWaveCurationTabMenu({
       : []),
     {
       id: "delete",
-      label: "Delete curation",
+      label: "Delete Curation",
       onSelect: () => setIsDeleteOpen(true),
       className: "tw-text-red desktop-hover:hover:tw-text-red",
     },
   ];
+  const shouldUseMobileBottomSheet =
+    hasProfileActions && isMobileLayoutViewport;
+  const isMenuDisabled =
+    deleteMutation.isPending ||
+    isSettingProfileCuration ||
+    isProfileActionPending;
+  const triggerContent = (
+    <>
+      <EllipsisVerticalIcon className="-tw-ml-1 tw-block tw-size-4 tw-flex-shrink-0" />
+      {triggerLabel && <span>{triggerLabel}</span>}
+    </>
+  );
 
   return (
     <>
-      <CompactMenu
-        triggerClassName="tw-inline-flex tw-h-8 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
-        trigger={
-          <EllipsisVerticalIcon className="tw-mt-0.5 tw-block tw-size-4 tw-flex-shrink-0" />
-        }
-        aria-label="Curation options"
-        items={menuItems}
-        menuWidthClassName="tw-w-52"
-        disabled={deleteMutation.isPending || isSettingProfileCuration}
-      />
+      {shouldUseMobileBottomSheet ? (
+        <CompactMenuMobileBottomSheet
+          title={triggerLabel ?? "Manage"}
+          ariaLabel="Curation options"
+          items={menuItems}
+          trigger={triggerContent}
+          renderTriggerButton={({
+            ariaLabel,
+            ariaExpanded,
+            disabled,
+            onClick,
+          }) => (
+            <Button
+              variant="tertiary"
+              size="sm"
+              aria-label={ariaLabel}
+              aria-haspopup="dialog"
+              aria-expanded={ariaExpanded}
+              disabled={disabled}
+              onClick={onClick}
+            >
+              {triggerContent}
+            </Button>
+          )}
+          disabled={isMenuDisabled}
+        />
+      ) : (
+        <CompactMenu
+          triggerClassName={
+            triggerLabel
+              ? undefined
+              : "tw-inline-flex tw-h-8 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+          }
+          trigger={
+            triggerLabel ? (
+              <Button variant="tertiary" size="sm">
+                {triggerContent}
+              </Button>
+            ) : (
+              triggerContent
+            )
+          }
+          triggerAsChild={!!triggerLabel}
+          aria-label="Curation options"
+          items={menuItems}
+          itemsWrapperClassName={hasProfileActions ? "tw-pt-2" : undefined}
+          menuWidthClassName="tw-w-64"
+          disabled={isMenuDisabled}
+        />
+      )}
 
       {isEditOpen && (
         <MyStreamWaveCurationCreateDialog
@@ -136,16 +255,18 @@ export default function MyStreamWaveCurationTabMenu({
           onClose={() => setIsEditOpen(false)}
           onSaved={() => undefined}
           curation={curation}
+          permissionMode={permissionMode}
         />
       )}
 
-      <CommonConfirmationModal
+      <MobileWrapperConfirmationDialog
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}
-        title="Delete curation"
-        message={`Delete "${curation.name}" from this wave?`}
-        confirmText="Delete"
+        title="Delete Curation?"
+        message={`Delete “${curation.name}”? The Curation will be deleted and removed from your profile. Its source Wave and posts will remain.`}
+        confirmText="Delete Curation"
+        confirmVariant="destructive"
         isConfirming={deleteMutation.isPending}
       />
     </>

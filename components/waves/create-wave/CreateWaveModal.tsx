@@ -5,6 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import CreateWave from "./CreateWave";
+import CreateWaveProfileRequiredModal from "./CreateWaveProfileRequiredModal";
 
 interface CreateWaveModalProps {
   readonly isOpen: boolean;
@@ -22,6 +23,17 @@ export default function CreateWaveModal({
   parentAdminGroupId,
 }: CreateWaveModalProps) {
   const locale = useBrowserLocale();
+
+  if (!profile.handle?.trim()) {
+    return (
+      <CreateWaveProfileRequiredModal
+        isOpen={isOpen}
+        onClose={onClose}
+        profile={profile}
+      />
+    );
+  }
+
   const title = t(
     locale,
     parentWaveId

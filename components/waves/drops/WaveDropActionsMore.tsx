@@ -8,6 +8,8 @@ import { useAuth } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -31,6 +33,7 @@ export default function WaveDropActionsMore({
   onOpenChange,
 }: WaveDropActionsMoreProps) {
   const { connectedProfile } = useAuth();
+  const locale = useBrowserLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
@@ -119,7 +122,9 @@ export default function WaveDropActionsMore({
                 className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
               >
                 <WaveDropCurationsActionIcon className="tw-size-4 tw-flex-shrink-0" />
-                <span className="tw-text-sm tw-font-medium">Curate</span>
+                <span className="tw-text-sm tw-font-medium">
+                  {t(locale, "profileCuration.actions.manage")}
+                </span>
               </button>
             )}
             <WaveDropActionsRestoreLinkPreviews

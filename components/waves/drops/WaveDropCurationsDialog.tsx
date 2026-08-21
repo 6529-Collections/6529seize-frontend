@@ -13,6 +13,9 @@ import {
   useDropCurations,
 } from "@/hooks/drops/useDropCurations";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 
@@ -42,25 +45,29 @@ const isPermissionErrorMessage = (message: string): boolean => {
   );
 };
 
-const CREATE_AND_ADD_PERMISSION_MESSAGE =
-  "Curation created, but you can't add drops with that group.";
-const CREATE_AND_ADD_FALLBACK_MESSAGE =
-  "Curation created, but the drop could not be added. Please try again.";
 const AUTO_CLOSE_DELAY_MS = 350;
 
-const getCreateAndAddErrorMessage = (error: unknown): string => {
-  const fallbackErrorMessage = "Failed to add drop to curation.";
+const getCreateAndAddErrorMessage = (
+  locale: SupportedLocale,
+  error: unknown
+): string => {
+  const fallbackErrorMessage = t(
+    locale,
+    "profileCuration.membership.addFailed"
+  );
   const errorMessage = getErrorMessage(error, fallbackErrorMessage);
 
   if (isPermissionErrorMessage(errorMessage)) {
-    return CREATE_AND_ADD_PERMISSION_MESSAGE;
+    return t(locale, "profileCuration.membership.permissionPartial");
   }
 
   if (errorMessage === fallbackErrorMessage) {
-    return CREATE_AND_ADD_FALLBACK_MESSAGE;
+    return t(locale, "profileCuration.membership.fallbackPartial");
   }
 
-  return `Curation created, but the drop could not be added: ${errorMessage}`;
+  return t(locale, "profileCuration.membership.partialWithDetails", {
+    errorMessage,
+  });
 };
 
 const sortCurationsForDialog = (
@@ -129,7 +136,7 @@ function CurationMembershipRow({
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2.5">
         <p
           className={clsx(
-            "tw-mb-0 tw-min-w-0 tw-flex-shrink tw-truncate tw-text-md tw-font-semibold tw-leading-tight tw-transition-colors",
+            "tw-m-0 tw-min-w-0 tw-flex-shrink tw-truncate tw-text-md tw-font-semibold tw-leading-tight tw-transition-colors",
             curation.drop_included
               ? "tw-text-iron-50"
               : "tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-50"
@@ -180,6 +187,7 @@ export default function WaveDropCurationsDialog({
   readonly onClose: () => void;
 }) {
   const router = useRouter();
+  const locale = useBrowserLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { setToast } = useAuth();
@@ -216,8 +224,8 @@ export default function WaveDropCurationsDialog({
     ? "No curations you can manage"
     : "No curations yet";
   const emptyStateDescription = hasHiddenCurations
-    ? "Create a new curation for this wave and add this drop to it."
-    : "Create the first curation for this wave and add this drop to it.";
+    ? t(locale, "profileCuration.membership.emptySome")
+    : t(locale, "profileCuration.membership.emptyNone");
   const handleRetry = async () => {
     await refetch();
   };
@@ -280,7 +288,7 @@ export default function WaveDropCurationsDialog({
     if (createdCuration?.authenticated_user_can_curate === false) {
       setToast({
         type: "warning",
-        message: CREATE_AND_ADD_PERMISSION_MESSAGE,
+        message: t(locale, "profileCuration.membership.permissionPartial"),
       });
       return;
     }
@@ -291,21 +299,21 @@ export default function WaveDropCurationsDialog({
       });
       setToast({
         type: "success",
-        message: "Curation created and drop added.",
+        message: t(locale, "profileCuration.membership.createdAndAdded"),
       });
       handleClose();
       navigateToCuration(curation.id);
     } catch (error) {
       setToast({
         type: "error",
-        message: getCreateAndAddErrorMessage(error),
+        message: getCreateAndAddErrorMessage(locale, error),
       });
     }
   };
 
   return (
     <MobileWrapperDialog
-      title="Curate"
+      title={t(locale, "profileCuration.actions.manage")}
       isOpen={isOpen}
       onClose={handleClose}
       noPadding
@@ -320,7 +328,7 @@ export default function WaveDropCurationsDialog({
             {!isFirstCurationEmptyState && (
               <div className="tw-flex tw-flex-col tw-gap-4 tw-pt-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
                 <p className="tw-mb-0 tw-text-sm tw-text-iron-400 sm:tw-flex-1 sm:tw-pr-4">
-                  Add or remove this drop from curations in this wave.
+                  {t(locale, "profileCuration.membership.description")}
                 </p>
                 {hasVisibleCurations && (
                   <div className="tw-flex tw-flex-shrink-0">
@@ -348,7 +356,7 @@ export default function WaveDropCurationsDialog({
             {!isLoading && isError && (
               <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-6 tw-text-center tw-shadow-sm">
                 <p className="tw-mb-4 tw-text-sm tw-font-medium tw-text-iron-300">
-                  Unable to load curations for this drop.
+                  {t(locale, "profileCuration.membership.loadFailed")}
                 </p>
                 <div className="tw-flex tw-justify-center">
                   <Button onClick={handleRetry} variant="tertiary" size="xs">
