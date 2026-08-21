@@ -136,7 +136,7 @@ function CurationMembershipRow({
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2.5">
         <p
           className={clsx(
-            "tw-mb-0 tw-min-w-0 tw-flex-shrink tw-truncate tw-text-md tw-font-semibold tw-leading-tight tw-transition-colors",
+            "tw-m-0 tw-min-w-0 tw-flex-shrink tw-truncate tw-text-md tw-font-semibold tw-leading-tight tw-transition-colors",
             curation.drop_included
               ? "tw-text-iron-50"
               : "tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-50"
