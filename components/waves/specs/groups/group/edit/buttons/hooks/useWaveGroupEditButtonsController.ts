@@ -34,7 +34,8 @@ import { getWaveUpdateGroupValidationRequest } from "@/helpers/waves/wave-group-
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
+import { getCloneReferenceState } from "../utils/waveGroupCloneRecovery";
+import { getValidationRoles } from "../utils/waveGroupValidation";
 
 const WAVE_GROUP_LABELS = {
   VIEW: "Visibility",
@@ -43,58 +44,6 @@ const WAVE_GROUP_LABELS = {
   CHAT: "Chat",
   ADMIN: "Admins",
 } satisfies Record<WaveGroupType, string>;
-
-const VALIDATION_ROLE_BY_GROUP_TYPE: Partial<
-  Record<WaveGroupType, ApiWaveGroupRole>
-> = {
-  [WaveGroupType.DROP]: ApiWaveGroupRole.Participation,
-  [WaveGroupType.VOTE]: ApiWaveGroupRole.Voting,
-  [WaveGroupType.CHAT]: ApiWaveGroupRole.Chat,
-  [WaveGroupType.ADMIN]: ApiWaveGroupRole.Admin,
-};
-
-const getValidationRoles = (
-  type: WaveGroupType
-): readonly ApiWaveGroupRole[] | undefined => {
-  if (type === WaveGroupType.VIEW) {
-    return undefined;
-  }
-  const role = VALIDATION_ROLE_BY_GROUP_TYPE[type];
-  // Validate every active role if a future group type is not mapped yet.
-  return role !== undefined ? [role] : undefined;
-};
-
-const waveReferencesGroup = (wave: ApiWave, groupId: string): boolean =>
-  [
-    wave.visibility.scope.group?.id,
-    wave.participation.scope.group?.id,
-    wave.voting.scope.group?.id,
-    wave.chat.scope.group?.id,
-    wave.wave.admin_group.group?.id,
-  ].includes(groupId);
-
-const getCloneReferenceState = async ({
-  waveId,
-  groupId,
-}: {
-  readonly waveId: string;
-  readonly groupId: string;
-}): Promise<"attached" | "unattached" | "unknown"> => {
-  try {
-    const currentWave = await commonApiFetch<ApiWave>({
-      endpoint: `waves/${waveId}`,
-    });
-    return waveReferencesGroup(currentWave, groupId)
-      ? "attached"
-      : "unattached";
-  } catch (error) {
-    console.warn(
-      "[WaveGroupEditButtons] Unable to verify cloned group attachment",
-      { waveId, groupId, error }
-    );
-    return "unknown";
-  }
-};
 
 const normalizeIdentity = (identity: string): string =>
   identity.trim().toLowerCase();
