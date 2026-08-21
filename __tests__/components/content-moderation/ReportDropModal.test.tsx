@@ -6,6 +6,7 @@ import {
   blockProfile,
   hideDrop,
   reportDrop,
+  unhideDrop,
 } from "@/services/api/content-moderation-api";
 import {
   getDropHiddenOverride,
@@ -201,6 +202,42 @@ describe("ReportDropModal", () => {
 
     deferred.resolve(undefined);
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it("temporarily reveals a post immediately after hiding it", async () => {
+    const drop = createDrop("drop-1");
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const onClose = jest.fn();
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ContentModerationDropGate drop={drop}>
+          <p>Post hidden from the modal</p>
+          <ReportDropModal drop={drop} isOpen onClose={onClose} />
+        </ContentModerationDropGate>
+      </QueryClientProvider>
+    );
+
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "Hide this post for me" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(
+      screen.getByTestId("content-moderation-tombstone-hidden")
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Reveal" }));
+
+    expect(
+      screen.queryByTestId("content-moderation-tombstone-hidden")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Post hidden from the modal")).toBeVisible();
+    expect(getDropHiddenOverride("viewer-1", "drop-1")).toBe(true);
+    expect(unhideDrop).not.toHaveBeenCalled();
   });
 
   it("combines reporting and personal choices in the report request", async () => {
