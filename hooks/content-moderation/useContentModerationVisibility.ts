@@ -3,13 +3,12 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import {
-  getContentModerationStateVersion,
   getDropHiddenOverride,
   getGlobalDropModerationOverride,
   getProfileBlockedOverride,
   subscribeToContentModerationState,
 } from "@/services/content-moderation/content-moderation-state";
-import { useState, useSyncExternalStore } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/components/auth/Auth";
 
 type ContentModerationVisibility =
@@ -56,30 +55,52 @@ export const useContentModerationVisibility = (
   readonly reveal: () => void;
   readonly isRevealed: boolean;
 } => {
-  useSyncExternalStore(
-    subscribeToContentModerationState,
-    getContentModerationStateVersion,
-    () => 0
-  );
   const { connectedProfile } = useAuth();
+  const viewerProfileId = connectedProfile?.id ?? null;
+  const getAuthorBlockedOverride = useCallback(
+    () =>
+      viewerProfileId
+        ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
+        : undefined,
+    [drop.author.id, viewerProfileId]
+  );
+  const getHiddenOverride = useCallback(
+    () =>
+      viewerProfileId
+        ? getDropHiddenOverride(viewerProfileId, drop.id)
+        : undefined,
+    [drop.id, viewerProfileId]
+  );
+  const getGlobalOverride = useCallback(
+    () => getGlobalDropModerationOverride(drop.id),
+    [drop.id]
+  );
+  const authorBlockedOverride = useSyncExternalStore(
+    subscribeToContentModerationState,
+    getAuthorBlockedOverride,
+    () => undefined
+  );
+  const dropHiddenOverride = useSyncExternalStore(
+    subscribeToContentModerationState,
+    getHiddenOverride,
+    () => undefined
+  );
+  const globalOverride = useSyncExternalStore(
+    subscribeToContentModerationState,
+    getGlobalOverride,
+    () => undefined
+  );
   const authorBlocked =
-    (connectedProfile?.id
-      ? getProfileBlockedOverride(connectedProfile.id, drop.author.id)
-      : undefined) ??
+    authorBlockedOverride ??
     drop.viewer_context?.author_blocked ??
     false;
   const dropHidden =
-    (connectedProfile?.id
-      ? getDropHiddenOverride(connectedProfile.id, drop.id)
-      : undefined) ??
-    drop.viewer_context?.drop_hidden ??
-    false;
+    dropHiddenOverride ?? drop.viewer_context?.drop_hidden ?? false;
   // A personal reveal belongs to the current hidden/block state and resets
   // when that authoritative viewer state changes.
-  const revealKey = `${connectedProfile?.id ?? "anonymous"}:${drop.id}:${authorBlocked}:${dropHidden}`;
+  const revealKey = `${viewerProfileId ?? "anonymous"}:${drop.id}:${authorBlocked}:${dropHidden}`;
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const isRevealed = revealedKey === revealKey;
-  const globalOverride = getGlobalDropModerationOverride(drop.id);
   const globalVisibility = getGlobalVisibility(drop.moderation, globalOverride);
   if (globalVisibility !== null) {
     return {

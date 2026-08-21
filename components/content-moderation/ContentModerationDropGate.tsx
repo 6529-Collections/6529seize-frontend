@@ -124,7 +124,8 @@ export default function ContentModerationDropGate({
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const queryClient = useQueryClient();
-  const { visibility, reveal } = useContentModerationVisibility(drop);
+  const { visibility, reveal, isRevealed } =
+    useContentModerationVisibility(drop);
   const [optimisticHiddenState, setOptimisticHiddenState] = useState<
     boolean | undefined
   >(undefined);
@@ -158,7 +159,13 @@ export default function ContentModerationDropGate({
     [setOptimisticHidden]
   );
   const effectiveVisibility = (() => {
-    if (visibility.kind === "global" || visibility.kind === "blocked") {
+    if (visibility.kind === "global") {
+      return visibility;
+    }
+    if (isRevealed) {
+      return { kind: "visible" } as const;
+    }
+    if (visibility.kind === "blocked") {
       return visibility;
     }
     if (optimisticHiddenState === true) {
