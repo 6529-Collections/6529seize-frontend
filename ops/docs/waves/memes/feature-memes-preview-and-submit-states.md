@@ -38,10 +38,15 @@ On `success`, the modal auto-closes after a short delay.
    - click `Submit Artwork` directly
 3. If you open preview, review both card layouts and use `Back to Edit` if
    needed.
-4. Click `Submit Artwork`.
-5. While submit is running, action buttons show loading and block repeated
+4. Click `Submit Artwork`. For resubmissions, the equivalent action is `Submit
+   New Version`.
+5. The app resolves or uploads the media, then opens the wallet request. The
+   signature covers the complete submission and the rules acknowledged in the
+   first step.
+6. After signing, the app sends the signed submission.
+7. While submit is running, action buttons show loading and block repeated
    clicks.
-6. On `success`, the modal closes after a short delay.
+8. On `success`, the modal closes after a short delay.
 
 ## Common Scenarios
 
@@ -61,6 +66,8 @@ On `success`, the modal auto-closes after a short delay.
 
 - Interactive URL submissions skip upload and start at `signing`.
 - File submissions include `uploading` before signing/processing.
+- The earlier agreement checkbox is only an acknowledgement. It never opens the
+  wallet and is not itself a signature.
 - Preview image requirements for `Video`/`HTML`/`GLB` must pass before preview
   or submit actions enable.
 - `Back` (`Additional Information`) and `Back to Edit` (`Preview`) are disabled
@@ -77,6 +84,11 @@ On `success`, the modal auto-closes after a short delay.
   submitting.
 - If upload, auth, signing, or API submission fails, the modal keeps current
   draft state and supports retry from the current screen.
+- If the wallet request is canceled or rejected, no submission is sent. The
+  app shows a signing error and keeps the completed draft available for retry.
+- If upload fails, the wallet request has not happened yet. If the API request
+  fails after signing, retry the final submit action and complete any new wallet
+  request.
 - If submission is attempted with an over-limit metadata payload, the app stops
   before upload/signing and can show a toast naming the offending metadata
   sections.

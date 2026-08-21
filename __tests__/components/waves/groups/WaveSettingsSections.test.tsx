@@ -62,6 +62,8 @@ const makeWave = (
     readonly winningThreshold?: number | null | undefined;
     readonly winningThresholdMinDurationMs?: number | null | undefined;
     readonly decisionsStrategy?: any;
+    readonly participationTerms?: string | null | undefined;
+    readonly participationSignatureRequired?: boolean | undefined;
   } = {}
 ): any => ({
   id: "wave-1",
@@ -92,9 +94,9 @@ const makeWave = (
     no_of_applications_allowed_per_participant: null,
     required_media: null,
     required_metadata: [],
-    signature_required: false,
+    signature_required: overrides.participationSignatureRequired ?? false,
     period: null,
-    terms: null,
+    terms: overrides.participationTerms ?? null,
     submission_strategy: null,
   },
   wave: {
@@ -906,6 +908,58 @@ describe("WaveSettingsSections", () => {
       {
         terms: "Must be original.",
         signature_required: true,
+      }
+    );
+  });
+
+  it("shows and repairs legacy terms without a signature requirement", async () => {
+    const user = userEvent.setup();
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+        participationTerms: "Legacy rules",
+        participationSignatureRequired: false,
+      }),
+    });
+
+    expect(screen.getByText("Not required")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit acceptance rules" })
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+    expect(commonApiPostMock.mock.calls[0][0].body.participation).toMatchObject(
+      {
+        terms: "Legacy rules",
+        signature_required: true,
+      }
+    );
+  });
+
+  it("shows and clears a legacy signature requirement without terms", async () => {
+    const user = userEvent.setup();
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+        participationTerms: null,
+        participationSignatureRequired: true,
+      }),
+    });
+
+    expect(screen.getByText("Signature only")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit acceptance rules" })
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+    expect(commonApiPostMock.mock.calls[0][0].body.participation).toMatchObject(
+      {
+        terms: null,
+        signature_required: false,
       }
     );
   });

@@ -80,8 +80,12 @@ editor.
 
 ## Failure and Recovery
 
-- If wallet auth/signature/terms is canceled, submission stops and current
-  draft state stays.
+- If acceptance rules apply, `Submission rules` opens after the user starts
+  submission. Checking the box acknowledges the rules; `Agree & Sign
+  Submission` opens the wallet and signs the prepared submission together with
+  those rules.
+- Closing the rules dialog or canceling the wallet request stops submission and
+  keeps the current draft state.
 - If upload or signing preparation fails, the composer shows an error and keeps
   draft state for retry.
 - Upload progress is clamped to `0%`-`100%`.

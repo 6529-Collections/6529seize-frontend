@@ -2468,6 +2468,8 @@
         "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators can add display-only custom rules that are saved as wave metadata.",
         "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
+        "For The Memes, acceptance-required rules are the first submission step. Other participatory waves show them in a separate Submission rules dialog after the participant uses the wave's submit action.",
+        "Acknowledging acceptance rules does not sign anything. The Memes opens the wallet from the final submit action; other waves open it from Agree & Sign Submission, and the signature covers both the completed submission and the rules.",
         "Wave admins can edit display-only custom rules later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
         "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
       ],
@@ -2831,6 +2833,8 @@
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
         "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
+        "The Memes agreement checkbox only acknowledges the displayed rules. I Agree & Continue does not open a wallet; the wallet request happens later from Submit Artwork or Submit New Version and covers the completed submission plus those rules.",
+        "If The Memes upload, signing, or API submission fails, the completed draft remains available for retry; canceling the wallet request sends no submission.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",

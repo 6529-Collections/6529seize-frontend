@@ -1461,11 +1461,46 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   acceptanceTitle: "Rules that require acceptance",
   acceptanceToggle: "Require acceptance",
   acceptanceDescription:
-    "Use this only for custom creator rules that participants must accept and sign before submitting.",
+    "Participants see these rules during submission: as the first step for The Memes, or in a confirmation dialog after they use the wave's submit action in other waves.",
   acceptancePlaceholder:
     "Enter rules participants must accept before submitting...",
-  acceptanceHelper: "Participants will sign these rules with their wallet",
+  acceptanceHelper:
+    "Acknowledging the rules does not sign anything. In The Memes, the wallet prompt opens only after the final submit action; in other waves, it opens after Agree & Sign Submission. The signature covers both the submission and these rules.",
 } as const);
+
+const WAVE_ACCEPTANCE_RULES_SETTINGS_MESSAGES = objectMessages(
+  "waves.settings.acceptanceRules",
+  {
+    editLabel: "Edit acceptance rules",
+    rowLabel: "Acceptance rules",
+    editorLabel: "Rules that require acceptance",
+    placeholder: "Add rules participants must accept before submitting...",
+    helper:
+      "Saving non-empty rules shows them during submission: as the first step for The Memes, or in a confirmation dialog after participants use the wave's submit action in other waves. Acknowledging the rules does not sign anything. In The Memes, the wallet prompt opens only after the final submit action; in other waves, it opens after Agree & Sign Submission. The signature covers both the submission and these rules. Clear the field to remove both requirements.",
+    statusRequired: "Required",
+    statusNotRequired: "Not required",
+    statusSignatureOnly: "Signature only",
+    statusNone: "None",
+  } as const
+);
+
+const WAVE_SUBMISSION_ACCEPTANCE_RULES_MESSAGES = objectMessages(
+  "waves.submission.acceptanceRules",
+  {
+    memesIntro:
+      "Before you submit your work to The Memes, please read the rules below and confirm that you understand and agree. If you have questions, contact a team member before continuing.",
+    memesSigningTiming:
+      "Continuing confirms your agreement; it does not open your wallet. Your wallet will ask for a signature when you submit your completed work.",
+    memesCheckboxLabel: "I have read and agree to the rules above.",
+    memesContinue: "I Agree & Continue",
+    modalTitle: "Submission rules",
+    modalGuidance:
+      "Checking the box only confirms that you have read and agree to the rules. Select Agree & Sign Submission to open your wallet and sign both this submission and the rules.",
+    modalCheckboxLabel: "I have read and agree to the rules above.",
+    modalSubmit: "Agree & Sign Submission",
+    modalEmpty: "No submission rules found.",
+  } as const
+);
 
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
   title: "How Drops are Voted",
@@ -3263,6 +3298,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
   ...WAVE_CREATE_RULES_MESSAGES,
+  ...WAVE_ACCEPTANCE_RULES_SETTINGS_MESSAGES,
+  ...WAVE_SUBMISSION_ACCEPTANCE_RULES_MESSAGES,
   ...WAVE_CREATE_VOTING_MESSAGES,
   ...WAVE_CREATE_DROPDOWN_MESSAGES,
   ...WAVE_CREATE_PROGRESS_MESSAGES,

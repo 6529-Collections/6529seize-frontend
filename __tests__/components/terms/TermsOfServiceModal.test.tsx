@@ -48,7 +48,7 @@ describe("TermsOfServiceModal", () => {
         termsContent="terms"
       />
     );
-    const dialog = screen.getByRole("dialog", { name: "Terms of Service" });
+    const dialog = screen.getByRole("dialog", { name: "Submission rules" });
     expect(dialog).toHaveClass("tailwind-scope", "tw-z-[1100]");
     expect(container).not.toContainElement(dialog);
     const checkbox = screen.getByRole("checkbox");
@@ -69,7 +69,7 @@ describe("TermsOfServiceModal", () => {
         termsContent={null}
       />
     );
-    expect(screen.getByText("No terms of service found.")).toBeInTheDocument();
+    expect(screen.getByText("No submission rules found.")).toBeInTheDocument();
   });
 
   it("closes on Escape", async () => {
@@ -86,7 +86,7 @@ describe("TermsOfServiceModal", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("toggles via Enter key", async () => {
+  it("toggles via Space key", async () => {
     render(
       <TermsOfServiceModal
         isOpen
@@ -96,10 +96,27 @@ describe("TermsOfServiceModal", () => {
       />
     );
     const checkbox = screen.getByRole("checkbox");
-    expect(checkbox).toHaveAttribute("aria-checked", "false");
+    expect(checkbox).not.toBeChecked();
     checkbox.focus();
-    await userEvent.keyboard("{Enter}");
-    expect(checkbox).toHaveAttribute("aria-checked", "true");
+    await userEvent.keyboard(" ");
+    expect(checkbox).toBeChecked();
+  });
+
+  it("keeps the dialog open while signing", async () => {
+    const onClose = jest.fn();
+    render(
+      <TermsOfServiceModal
+        isOpen
+        onClose={onClose}
+        onAccept={jest.fn()}
+        termsContent="t"
+        isLoading
+      />
+    );
+
+    expect(screen.getByRole("checkbox")).toBeDisabled();
+    await userEvent.keyboard("{Escape}");
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("resets acknowledgement when reopened", async () => {
@@ -134,10 +151,7 @@ describe("TermsOfServiceModal", () => {
       />
     );
 
-    expect(screen.getByRole("checkbox")).toHaveAttribute(
-      "aria-checked",
-      "false"
-    );
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
     expect(screen.getByTestId("primary")).toBeDisabled();
   });
 });

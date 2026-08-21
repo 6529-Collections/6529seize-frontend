@@ -2,6 +2,8 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useCallback, useMemo, useState } from "react";
 import WaveSettingEditorActions from "./WaveSettingEditorActions";
 import WaveSettingRow from "./WaveSettingRow";
@@ -28,6 +30,7 @@ function WaveBindingRulesEditor({
   onDraftChange,
   onSubmit,
 }: WaveBindingRulesEditorProps) {
+  const locale = useBrowserLocale();
   const helperId = "wave-binding-rules-helper";
 
   return (
@@ -42,7 +45,7 @@ function WaveBindingRulesEditor({
         htmlFor="wave-binding-rules"
         className="tw-text-sm tw-font-medium tw-text-iron-100"
       >
-        Rules that require acceptance
+        {t(locale, "waves.settings.acceptanceRules.editorLabel")}
       </label>
       <textarea
         id="wave-binding-rules"
@@ -53,14 +56,13 @@ function WaveBindingRulesEditor({
         value={draft}
         onChange={(event) => onDraftChange(event.target.value)}
         className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-650 placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-        placeholder="Add rules participants must accept before submitting..."
+        placeholder={t(locale, "waves.settings.acceptanceRules.placeholder")}
       />
       <p
         id={helperId}
         className="tw-mb-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500"
       >
-        Participants sign these rules with their wallet before submitting. Clear
-        the field to remove the acceptance requirement.
+        {t(locale, "waves.settings.acceptanceRules.helper")}
       </p>
       <WaveSettingEditorActions
         disabled={mutating}
@@ -72,6 +74,7 @@ function WaveBindingRulesEditor({
 }
 
 export default function WaveBindingRules({ wave }: WaveBindingRulesProps) {
+  const locale = useBrowserLocale();
   const { canEdit, mutating, saveParticipationUpdate } =
     useWaveSettingUpdater(wave);
   const bindingRules = useMemo(
@@ -85,7 +88,28 @@ export default function WaveBindingRules({ wave }: WaveBindingRulesProps) {
   }, [bindingRules]);
 
   const normalizedDraft = normalizeWaveCustomRules(draft);
-  const saveDisabled = normalizedDraft === bindingRules;
+  const configurationIsConsistent =
+    Boolean(bindingRules) === wave.participation.signature_required;
+  const saveDisabled =
+    normalizedDraft === bindingRules && configurationIsConsistent;
+
+  const valueLabel = (() => {
+    if (bindingRules) {
+      return t(
+        locale,
+        wave.participation.signature_required
+          ? "waves.settings.acceptanceRules.statusRequired"
+          : "waves.settings.acceptanceRules.statusNotRequired"
+      );
+    }
+
+    return t(
+      locale,
+      wave.participation.signature_required
+        ? "waves.settings.acceptanceRules.statusSignatureOnly"
+        : "waves.settings.acceptanceRules.statusNone"
+    );
+  })();
 
   const saveBindingRules = (closeEditor: () => void) => {
     saveParticipationUpdate(closeEditor, (participation) => ({
@@ -98,8 +122,8 @@ export default function WaveBindingRules({ wave }: WaveBindingRulesProps) {
   return (
     <WaveSettingRow
       canEdit={canEdit}
-      editLabel="Edit acceptance rules"
-      label="Acceptance rules"
+      editLabel={t(locale, "waves.settings.acceptanceRules.editLabel")}
+      label={t(locale, "waves.settings.acceptanceRules.rowLabel")}
       onOpen={resetEditor}
       renderEditor={({ closeEditor }) => (
         <WaveBindingRulesEditor
@@ -111,7 +135,7 @@ export default function WaveBindingRules({ wave }: WaveBindingRulesProps) {
           onSubmit={() => saveBindingRules(closeEditor)}
         />
       )}
-      valueLabel={bindingRules ? "Added" : "None"}
+      valueLabel={valueLabel}
     />
   );
 }

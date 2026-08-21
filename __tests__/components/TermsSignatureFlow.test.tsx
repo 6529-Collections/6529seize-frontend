@@ -26,11 +26,13 @@ describe("TermsSignatureFlow", () => {
       document.dispatchEvent(event);
     });
 
-    expect(await screen.findByText("Terms of Service")).toBeInTheDocument();
+    expect(await screen.findByText("Submission rules")).toBeInTheDocument();
 
     const checkbox = screen.getByRole("checkbox");
     await userEvent.click(checkbox);
-    const button = screen.getByRole("button", { name: /agree & continue/i });
+    const button = screen.getByRole("button", {
+      name: /agree & sign submission/i,
+    });
     await userEvent.click(button);
 
     await waitFor(() => {
@@ -54,7 +56,7 @@ describe("TermsSignatureFlow", () => {
       document.dispatchEvent(event);
     });
 
-    expect(await screen.findByText("Terms of Service")).toBeInTheDocument();
+    expect(await screen.findByText("Submission rules")).toBeInTheDocument();
     const close = screen.getByLabelText("Close modal");
     await userEvent.click(close);
 
@@ -74,7 +76,7 @@ describe("TermsSignatureFlow", () => {
       document.dispatchEvent(event);
     });
 
-    expect(screen.queryByText("Terms of Service")).not.toBeInTheDocument();
+    expect(screen.queryByText("Submission rules")).not.toBeInTheDocument();
     expect(onComplete).not.toHaveBeenCalled();
   });
 });

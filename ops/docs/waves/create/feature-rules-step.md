@@ -24,6 +24,13 @@ preview.
 - Step label: `Rules`
 - User-reachable in `Chat`, `Rank`, and `Approve` creation
 
+## Entry Points
+
+- Start a wave from an available create-wave control, then continue to `Rules`.
+- For an existing Rank or Approve wave, open its right sidebar, select
+  `Settings`, and edit `Acceptance rules` when the connected profile can
+  administer the wave.
+
 ## Step Path
 
 - `Chat`: `Overview -> Groups -> Rules -> Description`
@@ -60,8 +67,11 @@ Use display-only creator rules for wave-specific guidance that participants
 should see but do not need to sign.
 
 For `Rank` and `Approve` waves, use rules that require acceptance when
-participants must explicitly accept and sign those rules before submitting.
-These rules use the existing participation terms and wallet-signature flow.
+participants must explicitly agree to creator-written rules. Participants first
+acknowledge the displayed rules, then sign their completed submission and those
+rules together. Acknowledging the rules does not open a wallet or create a
+signature.
+
 `Chat` waves do not show acceptance-required rules because they do not have a
 submission step.
 
@@ -74,7 +84,8 @@ submission step.
    and Approve, only when creator-written rules are needed.
 5. Optionally enter display-only creator rules.
 6. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
-   rules participants must accept before submitting.
+   rules participants must accept before submitting. The guidance explains
+   where participants see the rules and which later action opens their wallet.
 7. Collapse the section if desired; entered rules remain in the draft
    and the disclosure shows `Customized`.
 8. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
@@ -86,8 +97,15 @@ submission step.
 - Mobile participants see the rules panel from the wave `About` information
   path.
 - Display-only custom rules appear in the rules panel.
-- For `Rank` and `Approve`, rules that require acceptance appear in the rules
-  panel and are enforced by the existing submit terms/signature modal.
+- For The Memes, rules that require acceptance are the first step inside the
+  artwork-submission flow. `I Agree & Continue` records the acknowledgement but
+  does not open the participant's wallet.
+- For other participatory waves, the rules appear in a separate `Submission
+  rules` dialog after the participant uses the wave's submit action.
+- In The Memes, the wallet prompt opens only from the final artwork submit
+  action. In other waves, it opens from `Agree & Sign Submission`.
+- The resulting wallet signature covers both the completed submission and the
+  displayed rules.
 
 ## Settings
 
@@ -111,6 +129,31 @@ use the existing submit acceptance flow.
   acceptance-required rules text.
 - For `Rank` and `Approve`, acceptance-required rules require a wallet
   signature only when rules text is present.
+- Older waves can contain rules without a signature requirement, or a signature
+  requirement without rules. Settings label those states `Not required` or
+  `Signature only` instead of implying that both are active. Saving the
+  acceptance-rules editor restores the normal pairing: non-empty rules require
+  acceptance and signing, while an empty field removes both requirements.
+
+## Failure and Recovery
+
+- If acceptance-rule settings fail to save, the editor stays open so the
+  creator can retry without re-entering the rules.
+- If a participant closes the generic rules dialog, cancels the wallet request,
+  or signing fails, the submission stops and the current draft remains
+  available for another attempt.
+- Upload failures in The Memes happen before the wallet request. Submission API
+  failures happen after signing; retrying starts the final submit sequence
+  again.
+
+## Limitations / Notes
+
+- Acceptance rules are creator-authored text. The app displays them as entered
+  and does not evaluate whether the wording is complete or suitable.
+- A successful wallet signature does not by itself confirm submission success;
+  the app must still accept and save the submission.
+- The wallet prompt signs a message for the submission. It does not request a
+  payment or blockchain transaction.
 
 ## Related Pages
 

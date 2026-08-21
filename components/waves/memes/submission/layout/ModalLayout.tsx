@@ -5,6 +5,7 @@ import React from "react";
 interface ModalLayoutProps {
   readonly title: string;
   readonly onCancel: () => void;
+  readonly closeDisabled?: boolean | undefined;
   readonly children: React.ReactNode;
   readonly titleId?: string | undefined;
   readonly contentClassName?: string | undefined;
@@ -24,13 +25,14 @@ interface ModalLayoutProps {
 const ModalLayout: React.FC<ModalLayoutProps> = ({
   title,
   onCancel,
+  closeDisabled = false,
   children,
   titleId,
   contentClassName = "tw-relative tw-z-10 tw-px-6 tw-py-6",
   surfaceClassName = "tw-w-full tw-bg-iron-950 tw-rounded-t-xl md:tw-rounded-xl tw-relative tw-border tw-border-solid tw-border-white/10 tw-border-b-0 md:tw-border-b tw-overflow-hidden",
   headerClassName = "tw-relative tw-z-10 tw-px-6 tw-py-4 tw-border-b tw-border-solid tw-border-white/5 tw-border-t-0 tw-border-x-0 tw-flex tw-justify-between tw-items-center",
   titleClassName = "tw-text-lg tw-font-bold tw-text-white tw-mb-0",
-  closeButtonClassName = "tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-white/40 desktop-hover:hover:tw-text-white tw-transition-colors",
+  closeButtonClassName = "tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-white/40 tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-text-white",
   closeIconClassName = "tw-size-6 tw-flex-shrink-0",
   headerActions,
   showAmbientBackground = true,
@@ -60,7 +62,9 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
               )}
             </div>
             <motion.button
+              type="button"
               onClick={onCancel}
+              disabled={closeDisabled}
               className={closeButtonClassName}
               aria-label="Close modal"
             >

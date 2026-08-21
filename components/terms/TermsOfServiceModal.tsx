@@ -4,6 +4,8 @@ import type { FC } from "react";
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { FocusTrap } from "focus-trap-react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 
 import PrimaryButton from "../utils/button/PrimaryButton";
@@ -24,15 +26,14 @@ const OpenTermsOfServiceModal: FC<OpenTermsOfServiceModalProps> = ({
   termsContent,
   isLoading = false,
 }) => {
+  const locale = useBrowserLocale();
   const titleId = useId();
+  const guidanceId = useId();
   const [hasAcknowledged, setHasAcknowledged] = useState(false);
-  const toggleAcknowledgement = () => {
-    setHasAcknowledged((current) => !current);
-  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !isLoading) {
         onClose();
       }
     };
@@ -42,7 +43,7 @@ const OpenTermsOfServiceModal: FC<OpenTermsOfServiceModalProps> = ({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  }, [isLoading, onClose]);
 
   return (
     <FocusTrap active>
@@ -54,8 +55,9 @@ const OpenTermsOfServiceModal: FC<OpenTermsOfServiceModalProps> = ({
       >
         <div className="tw-max-h-[calc(100dvh-2rem)] tw-w-full tw-max-w-4xl tw-overflow-y-auto tw-px-0 sm:tw-px-2">
           <ModalLayout
-            title="Terms of Service"
+            title={t(locale, "waves.submission.acceptanceRules.modalTitle")}
             onCancel={onClose}
+            closeDisabled={isLoading}
             titleId={titleId}
           >
             <div className="tw-p-4">
@@ -69,27 +71,35 @@ const OpenTermsOfServiceModal: FC<OpenTermsOfServiceModalProps> = ({
                   </div>
                 ) : (
                   <div className="tw-py-8 tw-text-center tw-text-iron-300">
-                    No terms of service found.
+                    {t(locale, "waves.submission.acceptanceRules.modalEmpty")}
                   </div>
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={toggleAcknowledgement}
-                className="tw-mb-4 tw-flex tw-items-start tw-gap-3 tw-border-0 tw-bg-transparent tw-p-0 tw-pt-4 tw-text-left tw-transition-opacity hover:tw-opacity-80"
-                aria-label="Agree to terms of service checkbox"
-                aria-checked={hasAcknowledged}
-                role="checkbox"
-                disabled={isLoading}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    toggleAcknowledgement();
-                  }
-                }}
+              <p
+                id={guidanceId}
+                className="tw-mb-0 tw-text-sm tw-leading-5 tw-text-iron-400"
               >
-                <div
+                {t(locale, "waves.submission.acceptanceRules.modalGuidance")}
+              </p>
+
+              <label
+                className={`tw-mb-4 tw-flex tw-items-start tw-gap-3 tw-rounded-lg tw-py-3 tw-text-left tw-transition-opacity focus-within:tw-ring-2 focus-within:tw-ring-primary-400 focus-within:tw-ring-offset-2 focus-within:tw-ring-offset-iron-950 ${
+                  isLoading
+                    ? "tw-cursor-not-allowed tw-opacity-60"
+                    : "tw-cursor-pointer desktop-hover:hover:tw-opacity-80"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={hasAcknowledged}
+                  onChange={(event) => setHasAcknowledged(event.target.checked)}
+                  aria-describedby={guidanceId}
+                  disabled={isLoading}
+                  className="tw-sr-only"
+                />
+                <span
+                  aria-hidden="true"
                   className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid ${
                     hasAcknowledged
                       ? "tw-border-primary-600 tw-bg-primary-500"
@@ -111,11 +121,14 @@ const OpenTermsOfServiceModal: FC<OpenTermsOfServiceModalProps> = ({
                       />
                     </svg>
                   )}
-                </div>
-                <span className="tw-text-sm tw-font-bold tw-text-iron-300">
-                  I have read and agree to the terms of service
                 </span>
-              </button>
+                <span className="tw-text-sm tw-font-bold tw-text-iron-300">
+                  {t(
+                    locale,
+                    "waves.submission.acceptanceRules.modalCheckboxLabel"
+                  )}
+                </span>
+              </label>
             </div>
 
             <div className="tw-flex tw-justify-end tw-gap-3 tw-border-t tw-border-iron-700 tw-p-4">
@@ -124,7 +137,7 @@ const OpenTermsOfServiceModal: FC<OpenTermsOfServiceModalProps> = ({
                 disabled={!hasAcknowledged}
                 loading={isLoading}
               >
-                Agree & Continue
+                {t(locale, "waves.submission.acceptanceRules.modalSubmit")}
               </PrimaryButton>
             </div>
           </ModalLayout>

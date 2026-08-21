@@ -374,7 +374,7 @@ export function useArtworkSubmissionMutation() {
   return {
     submitArtwork,
     isSubmitting:
-      uploadMutation.isPending ?? isSigningDrop ?? submissionMutation.isPending,
+      uploadMutation.isPending || isSigningDrop || submissionMutation.isPending,
     isUploading: uploadMutation.isPending,
     isSigning: isSigningDrop,
     isProcessing: submissionMutation.isPending,
@@ -382,7 +382,7 @@ export function useArtworkSubmissionMutation() {
     submissionPhase,
     submissionError,
     isSuccess: submissionMutation.isSuccess,
-    isError: uploadMutation.isError ?? submissionMutation.isError,
+    isError: uploadMutation.isError || submissionMutation.isError,
     error: uploadMutation.error ?? submissionMutation.error,
     reset: () => {
       uploadMutation.reset();

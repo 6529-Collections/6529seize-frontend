@@ -74,10 +74,17 @@ same context.
 - If no wave is selected on desktop list routes, the UI shows selection
   placeholders (`Select a Wave` or `Select a Conversation`).
 - `Rank` and `Approve` rules show two layers: automatic rules generated from
-  wave settings and optional creator rules. Creator rules that require
-  acceptance are enforced by the existing submit terms/signature modal.
+  wave settings and optional creator rules. Creator rules can be display-only
+  or require acknowledgement plus a wallet signature during submission.
 - `Chat` rules show automatic chat/access rules and optional display-only
   creator rules.
+- In The Memes, acceptance-required rules appear as the first submission step;
+  continuing acknowledges them without opening the wallet. The wallet prompt
+  opens only when the participant submits the completed artwork.
+- In other participatory waves, acceptance-required rules appear in a separate
+  `Submission rules` dialog after the participant starts submission. Checking
+  the acknowledgement does not sign anything; `Agree & Sign Submission` opens
+  the wallet and signs the submission together with the rules.
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example
   `Connect your wallet to participate in this wave`,
@@ -105,6 +112,13 @@ same context.
   shows `Start the conversation`.
 - Temporary drops (`temp-*`) keep some actions limited; link copy is disabled
   until the drop is persisted.
+- Closing a `Submission rules` dialog stops that attempt and keeps the current
+  draft.
+- Canceling or rejecting a wallet request stops submission and shows an error;
+  use the submit action again when ready to retry.
+- If signing succeeds but the submission request fails, the draft or current
+  submission screen remains available for recovery. A retry can require a new
+  wallet signature.
 
 ## Limitations / Notes
 

@@ -57,8 +57,11 @@ This flow appears in two places:
 2. Validation appears after blur or submit attempt.
 3. Submit with `Enter` or composer submit button (`Drop` in thread composer,
    `Submit to Curation` in leaderboard modal).
-4. If auth/signature/terms are required, complete that step.
-5. If auth/signature/terms is canceled, the typed URL remains in the input.
+4. If acceptance rules apply, review them in `Submission rules`, check the
+   acknowledgement, then use `Agree & Sign Submission` to open the wallet. The
+   signature covers the URL submission and the displayed rules.
+5. If the rules dialog is closed or the wallet request is canceled, the typed
+   URL remains in the input.
 6. When submission is queued, the input clears.
 7. In leaderboard variant only, success toast appears after server success:
    `Drop submitted successfully`.
@@ -109,8 +112,9 @@ rejected.
 
 ## Failure and Recovery
 
-- If authentication/signature is canceled, submission stops and the typed URL
-  stays available to retry.
+- If authentication is canceled, the rules dialog is closed, or the wallet
+  request is canceled, submission stops and the typed URL stays available to
+  retry.
 - If server submission fails after queueing, users get an error toast and can
   retry by re-entering the URL.
 - If validation fails, users can correct the URL and resubmit immediately.

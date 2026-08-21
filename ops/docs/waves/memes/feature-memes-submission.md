@@ -49,24 +49,27 @@ reached), select the header restriction control to see the reason, then use
 ## User Journey
 
 1. Open the memes submit modal from an available submit control.
-3. In `Agreement`, review terms, check the certification box, and click
-   `I Agree & Continue`.
-4. In `Artwork`, complete the required metadata fields:
+2. In `Agreement`, review the creator's rules, check `I have read and agree to
+   the rules above`, and click `I Agree & Continue`.
+   This acknowledges the rules but does not open the wallet or sign anything.
+3. In `Artwork`, complete the required metadata fields:
    - `Artwork Details` (`Artwork Title`, `Description`)
    - all required trait fields grouped under sections such as
      `Basic Information`, `Card Points`, and `Card Attributes`
-5. Choose one media source:
+4. Choose one media source:
    - `Upload File`: drag/drop or use the file picker, review the grouped format
      badges in the drop zone, then preview the selected artwork.
    - `Interactive HTML`: switch to `Interactive HTML`, pick `IPFS` or
      `Arweave` from the `Hosting Network` tabs, enter the root
      CID/transaction ID in `Content Hash or Path` (or paste an approved
      gateway URL), review the resulting URL, and wait for validation.
-6. Click `Continue` to open `Additional Information`.
+5. Click `Continue` to open `Additional Information`.
 
 ## Common Scenarios
 
 - `I Agree & Continue` stays disabled until the agreement checkbox is checked.
+- The Agreement guidance states that the wallet prompt opens later, when the
+  participant submits the completed work.
 - Required fields in `Artwork` show visible `*` markers.
 - Filled text and select fields show success styling, including a green ring and
   checkmark, until a validation error replaces that state.
@@ -120,6 +123,9 @@ reached), select the header restriction control to see the reason, then use
 - `Close` icon, backdrop click, `Cancel`, or `Escape` closes the modal from any
   step.
 - Closing the modal discards the draft. Reopening starts a new draft.
+- A resubmission shows its separate replacement acknowledgement first, then the
+  same rules acknowledgement. The final `Submit New Version` action requests
+  the wallet signature for the replacement submission and the current rules.
 
 ## Limitations / Notes
 
