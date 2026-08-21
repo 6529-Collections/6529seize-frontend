@@ -36,6 +36,7 @@
   "waves.sidebar.rightPanel.rules.creatorTitle": "Creator rules",
   "waves.sidebar.rightPanel.rules.emptyCreator": "No custom creator rules added.",
   "waves.sidebar.rightPanel.rules.displayOnly": "Display only",
+  "waves.sidebar.rightPanel.rules.displayOnlySummary": "Includes a display-only creator rule.",
   "waves.sidebar.rightPanel.rules.requiresAcceptance": "Requires acceptance",
   "waves.sidebar.rightPanel.rules.signatureRequired": "Participants sign these rules with their wallet before submitting.",
   "waves.sidebar.rightPanel.rules.showFullCreatorRules": "Show full creator rules",

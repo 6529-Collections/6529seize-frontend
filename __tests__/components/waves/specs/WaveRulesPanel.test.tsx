@@ -95,7 +95,10 @@ describe("WaveRulesPanel", () => {
     expect(
       screen.getAllByRole("heading").map((heading) => heading.textContent)
     ).toEqual(["Rules", "Creator rules", "Access"]);
-    expect(screen.queryByText(creatorRule)).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Includes a display-only creator rule.")
+    ).toBeVisible();
+    expect(screen.getByText(creatorRule)).not.toBeVisible();
   });
 
   it("keeps creator-rule status visible and reveals the full text on demand", () => {
@@ -115,25 +118,33 @@ describe("WaveRulesPanel", () => {
       />
     );
 
-    expect(screen.getByText("Requires acceptance")).toBeVisible();
+    expect(screen.getAllByText("Requires acceptance")[0]).toBeVisible();
     expect(
-      screen.getByText(
+      screen.getAllByText(
         "Participants sign these rules with their wallet before submitting."
-      )
+      )[0]
     ).toBeVisible();
-    expect(screen.queryByText(acceptanceRule)).not.toBeInTheDocument();
+    expect(screen.getByText(acceptanceRule)).not.toBeVisible();
 
     const showButton = screen.getByRole("button", {
       name: "Show full creator rules",
     });
     expect(showButton).toHaveAttribute("aria-expanded", "false");
+    expect(showButton).toHaveAttribute("aria-controls");
+    expect(
+      document.getElementById(showButton.getAttribute("aria-controls")!)
+    ).not.toBeVisible();
 
     fireEvent.click(showButton);
 
     expect(screen.getByText(acceptanceRule)).toBeVisible();
+    const hideButton = screen.getByRole("button", {
+      name: "Hide full creator rules",
+    });
+    expect(hideButton).toHaveAttribute("aria-expanded", "true");
     expect(
-      screen.getByRole("button", { name: "Hide full creator rules" })
-    ).toHaveAttribute("aria-expanded", "true");
+      document.getElementById(hideButton.getAttribute("aria-controls")!)
+    ).toBeVisible();
   });
 
   it("keeps the empty creator-rules state after automatic rules", () => {

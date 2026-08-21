@@ -79,9 +79,9 @@ function WaveRulesCustomSection({
         {!isExpanded && (
           <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3">
             {custom.display && (
-              <p className="tw-mb-0 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.08em]">
+              <p className="tw-mb-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
                 {waveRightPanelText(
-                  "waves.sidebar.rightPanel.rules.displayOnly"
+                  "waves.sidebar.rightPanel.rules.displayOnlySummary"
                 )}
               </p>
             )}
@@ -104,47 +104,49 @@ function WaveRulesCustomSection({
           </div>
         )}
 
-        {isExpanded && (
-          <div id={contentId} className="tw-flex tw-flex-col tw-gap-3">
-            {custom.display && (
-              <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3">
-                <p className="tw-mb-2 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.08em]">
-                  {waveRightPanelText(
-                    "waves.sidebar.rightPanel.rules.displayOnly"
-                  )}
-                </p>
-                <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
-                  {custom.display}
-                </p>
-              </div>
-            )}
-            {custom.binding && (
-              <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-primary-400/15 tw-pt-3">
-                <p className="tw-mb-2 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-primary-300 sm:tw-tracking-[0.08em]">
-                  {waveRightPanelText(
-                    "waves.sidebar.rightPanel.rules.requiresAcceptance"
-                  )}
-                </p>
-                <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
-                  {custom.binding}
-                </p>
-                {custom.signatureRequired && (
-                  <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
-                    {waveRightPanelText(
-                      "waves.sidebar.rightPanel.rules.signatureRequired"
-                    )}
-                  </p>
+        <div
+          id={contentId}
+          hidden={!isExpanded}
+          className={isExpanded ? "tw-flex tw-flex-col tw-gap-3" : undefined}
+        >
+          {custom.display && (
+            <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3">
+              <p className="tw-mb-2 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.08em]">
+                {waveRightPanelText(
+                  "waves.sidebar.rightPanel.rules.displayOnly"
                 )}
-              </div>
-            )}
-          </div>
-        )}
+              </p>
+              <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+                {custom.display}
+              </p>
+            </div>
+          )}
+          {custom.binding && (
+            <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-primary-400/15 tw-pt-3">
+              <p className="tw-mb-2 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-primary-300 sm:tw-tracking-[0.08em]">
+                {waveRightPanelText(
+                  "waves.sidebar.rightPanel.rules.requiresAcceptance"
+                )}
+              </p>
+              <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+                {custom.binding}
+              </p>
+              {custom.signatureRequired && (
+                <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
+                  {waveRightPanelText(
+                    "waves.sidebar.rightPanel.rules.signatureRequired"
+                  )}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
         {collapsible && (
           <button
             type="button"
             aria-expanded={isExpanded}
-            aria-controls={isExpanded ? contentId : undefined}
+            aria-controls={contentId}
             onClick={() => setIsCreatorRulesExpanded((current) => !current)}
             className="tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-50"
           >

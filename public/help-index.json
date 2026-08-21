@@ -2471,7 +2471,7 @@
         "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
         "Wave admins can edit display-only custom rules later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
         "Participants can review rules in the desktop wave right sidebar or from the mobile About information path.",
-        "When creator rules exist, the Rules view shows their acceptance and wallet-signature status first while keeping the full creator-authored text collapsed until requested; automatic rules follow immediately. When none exist, automatic rules remain first and the creator-rules empty state follows."
+        "When creator rules exist, the Rules view shows which creator-rule types are present plus any acceptance and wallet-signature requirements, while keeping the full creator-authored text collapsed until requested; automatic rules follow immediately. When none exist, automatic rules remain first and the creator-rules empty state follows."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
