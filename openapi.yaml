@@ -1773,6 +1773,228 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /content-moderation/blocked-profiles:
+    get:
+      tags:
+        - ContentModeration
+      summary: List profiles blocked by the authenticated profile.
+      operationId: getBlockedProfiles
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Blocked profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiBlockedProfile"
+        "401":
+          description: Unauthorized
+  /content-moderation/profiles/{profile_id}/block:
+    parameters:
+      - name: profile_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags:
+        - ContentModeration
+      summary: Block a profile for the authenticated viewer.
+      operationId: blockProfile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Block state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileBlockState"
+    delete:
+      tags:
+        - ContentModeration
+      summary: Unblock a profile for the authenticated viewer.
+      operationId: unblockProfile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Block state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileBlockState"
+  /content-moderation/drops/{drop_id}/hide:
+    parameters:
+      - name: drop_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags:
+        - ContentModeration
+      summary: Hide one drop for the authenticated viewer.
+      operationId: hideDrop
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Hidden state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropHiddenState"
+    delete:
+      tags:
+        - ContentModeration
+      summary: Unhide one drop for the authenticated viewer.
+      operationId: unhideDrop
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Hidden state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropHiddenState"
+  /content-moderation/drops/{drop_id}/reports:
+    post:
+      tags:
+        - ContentModeration
+      summary: Report a drop and optionally apply personal visibility actions.
+      operationId: reportDrop
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: drop_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiContentModerationReportRequest"
+      responses:
+        "201":
+          description: Persisted report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiContentModerationReportResponse"
+  /content-moderation/moderator-access:
+    get:
+      tags:
+        - ContentModeration
+      summary: Get moderation access for the authenticated profile.
+      operationId: getContentModeratorAccess
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Moderator access state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiContentModeratorAccess"
+  /content-moderation/reports:
+    get:
+      tags:
+        - ContentModeration
+      summary: Get the authorized content moderation queue.
+      operationId: getContentModerationReports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: before
+          in: query
+          required: false
+          description: Opaque cursor returned by the previous moderation queue item.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Moderation queue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiContentModerationQueueItem"
+        "403":
+          description: Moderator access required
+  /content-moderation/drops/{drop_id}/decision:
+    post:
+      tags:
+        - ContentModeration
+      summary: Apply an authorized moderation decision to a drop.
+      operationId: decideModeratedDrop
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: drop_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiContentModerationDropDecisionRequest"
+      responses:
+        "200":
+          description: Current moderation state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiContentModerationDropDecisionResponse"
+        "403":
+          description: Moderator access required
+  /content-moderation/profiles/{profile_id}/status:
+    post:
+      tags:
+        - ContentModeration
+      summary: Suspend or reinstate a profile as an authorized moderator.
+      operationId: setModeratedProfileStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiContentModerationProfileStatusRequest"
+      responses:
+        "200":
+          description: Current profile status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiContentModerationProfileStatusResponse"
+        "403":
+          description: Moderator access required
   /distribution_phases/{contract}/{nft_id}:
     get:
       tags:
@@ -13593,6 +13815,23 @@ components:
         wave_rep_credit:
           type: number
           format: int64
+    ApiBlockedProfile:
+      type: object
+      required:
+        - profile_id
+        - blocked_at
+      properties:
+        profile_id:
+          type: string
+        handle:
+          type: string
+          nullable: true
+        pfp:
+          type: string
+          nullable: true
+        blocked_at:
+          type: integer
+          format: int64
     ApiBlockItem:
       type: object
       required:
@@ -15539,6 +15778,200 @@ components:
       enum:
         - boosted
         - unboosted
+    ApiContentModerationDropDecisionRequest:
+      type: object
+      required:
+        - decision
+        - reason
+      properties:
+        decision:
+          type: string
+          enum:
+            - ALLOW
+            - QUARANTINE
+            - REMOVE
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    ApiContentModerationDropDecisionResponse:
+      type: object
+      required:
+        - drop_id
+        - status
+      properties:
+        drop_id:
+          type: string
+        status:
+          $ref: "#/components/schemas/ApiDropModerationStatus"
+    ApiContentModerationProfileStatusRequest:
+      type: object
+      required:
+        - status
+        - reason
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiModeratedProfileStatus"
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    ApiContentModerationProfileStatusResponse:
+      type: object
+      required:
+        - profile_id
+        - status
+      properties:
+        profile_id:
+          type: string
+        status:
+          $ref: "#/components/schemas/ApiModeratedProfileStatus"
+    ApiContentModerationQueueItem:
+      type: object
+      required:
+        - id
+        - drop_id
+        - reporter_profile_id
+        - author_profile_id
+        - reason
+        - content_snapshot
+        - status
+        - created_at
+        - report_count
+        - cursor
+        - moderation
+        - history
+      properties:
+        id:
+          type: string
+          format: uuid
+        drop_id:
+          type: string
+        reporter_profile_id:
+          type: string
+        author_profile_id:
+          type: string
+        reason:
+          $ref: "#/components/schemas/ApiContentModerationReportReason"
+        notes:
+          type: string
+          nullable: true
+        content_snapshot:
+          type: object
+          additionalProperties: true
+        status:
+          $ref: "#/components/schemas/ApiContentModerationReportStatus"
+        ai_recommendation:
+          allOf:
+            - $ref: "#/components/schemas/ApiContentModerationRecommendation"
+          nullable: true
+        ai_category:
+          type: string
+          nullable: true
+        ai_confidence:
+          type: number
+          format: double
+          nullable: true
+        ai_rationale:
+          type: string
+          nullable: true
+        ai_evidence:
+          type: array
+          nullable: true
+          items: {}
+        ai_policy_version:
+          type: string
+          nullable: true
+        ai_assessed_at:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+        resolved_by_profile_id:
+          type: string
+          nullable: true
+        resolution_reason:
+          type: string
+          nullable: true
+        resolved_at:
+          type: integer
+          format: int64
+          nullable: true
+        report_count:
+          type: integer
+          format: int64
+        cursor:
+          type: string
+          description: Opaque cursor for fetching queue items after this item.
+        moderation:
+          $ref: "#/components/schemas/ApiDropModeration"
+        history:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ApiContentModerationRecommendation:
+      type: string
+      enum:
+        - NO_VIOLATION_DETECTED
+        - NEEDS_HUMAN_REVIEW
+        - URGENT_QUARANTINE
+    ApiContentModerationReportReason:
+      type: string
+      enum:
+        - SCAM_OR_PHISHING
+        - PRIVATE_INFORMATION_OR_DOXXING
+        - THREATS_OR_TARGETED_HARASSMENT
+        - HATE_OR_DISCRIMINATION
+        - SEXUAL_EXPLOITATION_OR_ILLEGAL_CONTENT
+        - SPAM
+        - OTHER
+    ApiContentModerationReportRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          $ref: "#/components/schemas/ApiContentModerationReportReason"
+        notes:
+          type: string
+          nullable: true
+          maxLength: 1000
+        hide_drop:
+          type: boolean
+          default: false
+        block_author:
+          type: boolean
+          default: false
+    ApiContentModerationReportResponse:
+      type: object
+      required:
+        - id
+        - status
+        - drop_status
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/ApiContentModerationReportStatus"
+        drop_status:
+          $ref: "#/components/schemas/ApiDropModerationStatus"
+    ApiContentModerationReportStatus:
+      type: string
+      enum:
+        - OPEN
+        - RESOLVED_ALLOWED
+        - RESOLVED_REMOVED
+    ApiContentModeratorAccess:
+      type: object
+      required:
+        - moderator
+      properties:
+        moderator:
+          type: boolean
     ApiCreateAttachmentMultipartUploadRequest:
       type: object
       required:
@@ -16664,6 +17097,10 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiDropContextProfileContext"
+        viewer_context:
+          $ref: "#/components/schemas/ApiDropViewerModerationContext"
+        moderation:
+          $ref: "#/components/schemas/ApiDropModeration"
         subscribed_actions:
           type: array
           items:
@@ -16818,6 +17255,13 @@ components:
         - CONTRIBUTORS
         - ADMINS
         - DEVS_6529
+    ApiDropHiddenState:
+      type: object
+      required:
+        - hidden
+      properties:
+        hidden:
+          type: boolean
     ApiDropId:
       type: object
       required:
@@ -16930,6 +17374,22 @@ components:
           maxLength: 8000
         resolved_profile:
           $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
+    ApiDropModeration:
+      type: object
+      required:
+        - status
+        - can_view
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiDropModerationStatus"
+        can_view:
+          type: boolean
+    ApiDropModerationStatus:
+      type: string
+      enum:
+        - VISIBLE
+        - AI_QUARANTINED
+        - MODERATOR_REMOVED
     ApiDropNftLink:
       type: object
       required:
@@ -16991,6 +17451,10 @@ components:
           type: integer
           format: int64
           minimum: 1
+        viewer_context:
+          $ref: "#/components/schemas/ApiDropViewerModerationContext"
+        moderation:
+          $ref: "#/components/schemas/ApiDropModeration"
         content:
           type: string
         media:
@@ -17355,6 +17819,10 @@ components:
           $ref: "#/components/schemas/ApiSubmissionDropContext"
         context_profile_context:
           $ref: "#/components/schemas/ApiDropV2ContextProfileContext"
+        viewer_context:
+          $ref: "#/components/schemas/ApiDropViewerModerationContext"
+        moderation:
+          $ref: "#/components/schemas/ApiDropModeration"
         poll:
           $ref: "#/components/schemas/ApiDropPoll"
         wave:
@@ -17396,6 +17864,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropV2"
+    ApiDropViewerModerationContext:
+      type: object
+      required:
+        - author_blocked
+        - drop_hidden
+      properties:
+        author_blocked:
+          type: boolean
+        drop_hidden:
+          type: boolean
     ApiDropVote:
       type: object
       required:
@@ -17548,6 +18026,10 @@ components:
           type: string
           maxLength: 250
           nullable: true
+        viewer_context:
+          $ref: "#/components/schemas/ApiDropViewerModerationContext"
+        moderation:
+          $ref: "#/components/schemas/ApiDropModeration"
         parts:
           type: array
           items:
@@ -18449,6 +18931,10 @@ components:
           type: string
           maxLength: 250
           nullable: true
+        viewer_context:
+          $ref: "#/components/schemas/ApiDropViewerModerationContext"
+        moderation:
+          $ref: "#/components/schemas/ApiDropModeration"
         part_1_text:
           type: string
           nullable: true
@@ -19042,6 +19528,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiMintMetrics"
+    ApiModeratedProfileStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - SUSPENDED
     ApiNft:
       type: object
       required:
@@ -20049,6 +20540,13 @@ components:
           type: boolean
         designated_payee_name:
           type: string
+    ApiProfileBlockState:
+      type: object
+      required:
+        - blocked
+      properties:
+        blocked:
+          type: boolean
     ApiProfileClassification:
       type: string
       enum:
@@ -22066,6 +22564,10 @@ components:
           type: string
         author:
           $ref: "#/components/schemas/ApiReplyToDropAuthor"
+        viewer_context:
+          $ref: "#/components/schemas/ApiDropViewerModerationContext"
+        moderation:
+          $ref: "#/components/schemas/ApiDropModeration"
     ApiRepOverview:
       type: object
       required:

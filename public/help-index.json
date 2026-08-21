@@ -5,6 +5,56 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "content-moderation.controls",
+      "kind": "workflow",
+      "title": "Content moderation and personal visibility controls",
+      "aliases": [
+        "report a post",
+        "hide a post",
+        "block an author",
+        "unblock a profile",
+        "content preferences",
+        "moderation queue",
+        "post rejected by safety check"
+      ],
+      "keywords": [
+        "content moderation",
+        "report",
+        "hide",
+        "block",
+        "unblock",
+        "safety",
+        "quarantine",
+        "removed",
+        "moderator"
+      ],
+      "facts": [
+        "Authenticated users can use the final Flag Content entry in a Wave post's More menu on desktop or action sheet on mobile to report, hide, block, or combine those actions.",
+        "Reporting, hiding, and blocking are independent, and no action is selected by default.",
+        "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
+        "Notification, messaging, and blocked-profile settings are combined at /preferences. The Content tab is available at /preferences?tab=content, and /content-preferences redirects there.",
+        "New Wave posts receive a narrow server-side safety check; ambiguous content and profanity are not rejected merely for being objectionable.",
+        "A locally created post stays visible in its normal layout while submission is pending; when a high-confidence safety check rejects it, the composer removes the optimistic post, explains the rejection, and preserves the draft for editing and retrying.",
+        "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
+        "Only server-authorized moderators see and can use the Moderation queue at /content-moderation, and every decision requires a reason."
+      ],
+      "canonical_path": "/preferences",
+      "link_label": "Preferences",
+      "related_paths": [
+        "/preferences?tab=content",
+        "/content-moderation",
+        "/waves"
+      ],
+      "tags": ["waves", "safety", "moderation", "privacy"],
+      "source_refs": [
+        "ops/docs/content-moderation.md",
+        "app/preferences/page.client.tsx",
+        "app/content-moderation/page.client.tsx",
+        "components/content-moderation/ContentModerationDropActions.tsx",
+        "components/content-moderation/ContentModerationDropGate.tsx"
+      ]
+    },
+    {
       "id": "home.overview",
       "kind": "route",
       "title": "6529.io home",

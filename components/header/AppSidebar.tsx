@@ -6,13 +6,17 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
-import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
+import {
+  BuildingLibraryIcon,
+  ShieldExclamationIcon,
+} from "@heroicons/react/24/outline";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 import type { SidebarSection } from "@/components/navigation/navTypes";
@@ -66,6 +70,8 @@ export default function AppSidebar({
 }) {
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
+  const moderatorAccess = useContentModeratorAccess();
+  const showModeration = moderatorAccess.data?.moderator === true;
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
   const sections = useSidebarSections(
@@ -105,6 +111,15 @@ export default function AppSidebar({
       },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),
+      ...(showModeration
+        ? [
+            {
+              label: t(DEFAULT_LOCALE, "contentModeration.moderator.menu"),
+              path: "/content-moderation",
+              icon: ShieldExclamationIcon,
+            },
+          ]
+        : []),
     ].flatMap((item): SidebarMenu => {
       if (item === undefined) {
         return [];
@@ -116,7 +131,7 @@ export default function AppSidebar({
 
       return [item];
     });
-  }, [sections, showDropForge]);
+  }, [sections, showDropForge, showModeration]);
 
   // Close on right-to-left swipe
   useEffect(() => {

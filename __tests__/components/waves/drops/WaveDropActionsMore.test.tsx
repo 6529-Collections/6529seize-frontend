@@ -58,6 +58,7 @@ const mockedUseDropLinkPreviewToggleControl = jest.mocked(
 
 const drop = {
   id: "drop-1",
+  author: { id: "author-1" },
   wave: { authenticated_user_admin: false },
   parts: [],
 } as any;
@@ -176,5 +177,29 @@ describe("WaveDropActionsMore", () => {
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
     expect(screen.queryByText("Download media")).toBeNull();
+  });
+
+  it("shows one Flag Content action as the final desktop menu entry", async () => {
+    mockedUseDropInteractionRules.mockReturnValue({
+      canShowVote: true,
+      canVote: true,
+      voteState: "CAN_VOTE" as any,
+      canDelete: true,
+      canSetPinnedDrop: true,
+      isAuthor: false,
+      isWinner: false,
+      isVotingEnded: false,
+    });
+
+    render(<WaveDropActionsMore drop={drop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    const reportAction = screen.getByRole("button", {
+      name: "Flag Content",
+    });
+    expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
+    expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();
   });
 });

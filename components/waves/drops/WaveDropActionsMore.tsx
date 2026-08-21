@@ -20,6 +20,8 @@ import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
 import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPreviews";
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -34,6 +36,7 @@ export default function WaveDropActionsMore({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
   const showCurationsAction = useCanShowDropCurationsAction({
@@ -144,6 +147,13 @@ export default function WaveDropActionsMore({
                 onDelete={handleDeleteClick}
               />
             )}
+            <ContentModerationDropActions
+              drop={drop}
+              onReport={() => {
+                closeDropdown();
+                setIsReportOpen(true);
+              }}
+            />
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>
@@ -170,6 +180,11 @@ export default function WaveDropActionsMore({
           onClose={() => setIsCurationsDialogOpen(false)}
         />
       )}
+      <ReportDropModal
+        drop={drop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </>
   );
 }

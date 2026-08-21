@@ -19,6 +19,7 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
+import { useContentModerationStateScope } from "@/hooks/content-moderation/useContentModerationStateScope";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -125,7 +126,6 @@ export default function Auth({
   const [sessionUpgradeRequired, setSessionUpgradeRequired] = useState(false);
   const [authStorageRevision, setAuthStorageRevision] = useState(0);
   const signModalReasonRef = useRef<SignModalReason>(signModalReason);
-
   const { profile: loadedProfile, isLoading: fetchingProfile } = useIdentity({
     handleOrWallet: address,
     initialProfile: null,
@@ -136,6 +136,7 @@ export default function Auth({
   });
   const connectedProfile =
     !isSigningOutAll && isConnectedProfileForAddress ? loadedProfile : null;
+  useContentModerationStateScope(connectedProfile?.id);
   const isConnectedProfileSettling = Boolean(
     !isSigningOutAll &&
     address &&
@@ -144,7 +145,6 @@ export default function Auth({
   );
   const isFetchingConnectedProfile =
     !isSigningOutAll && (fetchingProfile || isConnectedProfileSettling);
-
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);

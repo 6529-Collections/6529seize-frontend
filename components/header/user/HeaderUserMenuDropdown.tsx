@@ -6,10 +6,10 @@ import {
   faRightFromBracket,
   faShuffle,
   faShieldHalved,
+  faSliders,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
@@ -23,6 +23,7 @@ import { t } from "@/i18n/messages";
 import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
@@ -31,13 +32,11 @@ export default function HeaderUserMenuDropdown({
   profile,
   onClose,
   onOpenConnect,
-  onOpenProfilePreferences,
 }: {
   readonly isOpen: boolean;
   readonly profile: ApiIdentity;
   readonly onClose: () => void;
   readonly onOpenConnect?: (() => void) | undefined;
-  readonly onOpenProfilePreferences: () => void;
 }) {
   const {
     address,
@@ -69,6 +68,7 @@ export default function HeaderUserMenuDropdown({
     sessionUpgradeRequired && requestSessionUpgrade !== undefined;
   const hasConnectionActions =
     hasConnectDeviceAction || hasSessionUpgradeAction;
+  const moderatorAccess = useContentModeratorAccess();
 
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
@@ -424,24 +424,41 @@ export default function HeaderUserMenuDropdown({
                           </span>
                         </Link>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onOpenProfilePreferences();
-                          onClose();
-                        }}
+                      <Link
+                        href="/preferences"
+                        onClick={onClose}
                         aria-label={t(
                           HEADER_USER_MENU_LOCALE,
-                          "profilePreferences.title"
+                          "profilePreferences.button"
                         )}
                         className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
-                        <Cog6ToothIcon
-                          className="tw-size-5"
-                          aria-hidden="true"
+                        <FontAwesomeIcon
+                          icon={faSliders}
+                          height={20}
+                          width={20}
                         />
-                      </button>
+                      </Link>
                     </div>
+                    {moderatorAccess.data?.moderator === true && (
+                      <Link
+                        href="/content-moderation"
+                        onClick={onClose}
+                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      >
+                        <FontAwesomeIcon
+                          icon={faShieldHalved}
+                          height={20}
+                          width={20}
+                        />
+                        <span>
+                          {t(
+                            HEADER_USER_MENU_LOCALE,
+                            "contentModeration.moderator.menu"
+                          )}
+                        </span>
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         void runMenuAction({

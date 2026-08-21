@@ -39,7 +39,24 @@ jest.mock("@tanstack/react-query", () => ({
   }),
 }));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
-jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: jest.fn(),
+  getStructuredApiErrorCode: (error: unknown) => {
+    const code = (
+      error as {
+        readonly response?: { readonly body?: { readonly code?: unknown } };
+      }
+    ).response?.body?.code;
+    return typeof code === "string" ? code : undefined;
+  },
+  getStructuredApiErrorStatus: (error: unknown) =>
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof error.status === "number"
+      ? error.status
+      : undefined,
+}));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     processDropRemoved: jest.fn(),
