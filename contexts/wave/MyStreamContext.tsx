@@ -36,6 +36,8 @@ import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
 import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
+import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -49,7 +51,7 @@ interface WavesContextData {
   readonly loadSubwavesForParent: (parentWaveId: string) => void;
   readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
   readonly loadingSubwaveParentIds: readonly string[];
-  readonly markWaveRead: (waveId: string) => void;
+  readonly markWaveRead: (waveId: string, readThroughSerialNo?: number) => void;
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
@@ -221,6 +223,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const dmWavesData = useDmWavesList({
     enabled: isDirectMessagesListEnabled,
   });
+  const dmUnreadByWaveId = useDmUnreadConversations();
+  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const mainWaveIds = useMemo<ReadonlySet<string>>(
     () => new Set(mainWavesData.waves.map((wave) => wave.id)),
     [mainWavesData.waves]
@@ -240,12 +244,22 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     supportsPinning: false,
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
+    canonicalUnreadByWaveId: dmUnreadByWaveId,
   });
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
   const lastBrowserResumeSyncAtRef = useRef(0);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
+  const markDirectMessageRead = useCallback(
+    (waveId: string, readThroughSerialNo?: number) => {
+      void markWaveNotificationsRead(waveId, {
+        readThroughSerialNo,
+        requestDmUnreadState: true,
+      }).catch(() => undefined);
+    },
+    [markWaveNotificationsRead]
+  );
 
   // Instantiate the data manager, passing the updater function from the store
   const waveDataManager = useWaveDataManager({
@@ -507,7 +521,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       loadSubwavesForParent: dmWavesHookData.loadSubwavesForParent,
       prefetchSubwavesForParent: dmWavesHookData.prefetchSubwavesForParent,
       loadingSubwaveParentIds: dmWavesHookData.loadingSubwaveParentIds,
-      markWaveRead: dmWavesHookData.markWaveRead,
+      markWaveRead: markDirectMessageRead,
       restoreWaveUnreadCount: dmWavesHookData.restoreWaveUnreadCount,
     };
 
@@ -570,8 +584,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.loadSubwavesForParent,
     dmWavesHookData.prefetchSubwavesForParent,
     dmWavesHookData.loadingSubwaveParentIds,
-    dmWavesHookData.markWaveRead,
     dmWavesHookData.restoreWaveUnreadCount,
+    markDirectMessageRead,
     activeWaveId,
     activeWaveData,
     setActiveWaveAndRegister,

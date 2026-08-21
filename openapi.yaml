@@ -3385,7 +3385,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get authenticated user's unread direct-message drop count.
+      summary: Get authenticated user's direct-message unread count.
       operationId: getDmDropsUnread
       x-6529-router:
         enabled: true
@@ -3400,6 +3400,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDmDropsUnreadCount"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
+  /dm-drops/unread/snapshot:
+    get:
+      tags:
+        - Drops
+      summary: Get authenticated user's direct-message unread snapshot.
+      operationId: getDmUnreadSnapshot
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/dm-drops/dm-drops.handlers"
+          name: handleGetDmUnreadSnapshot
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDmUnreadSnapshot"
         "400":
           description: Bad request
         "401":
@@ -5773,9 +5798,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarkWaveReadRequest"
       responses:
         "200":
           description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarkWaveReadResponse"
   /notifications/wave-subscription/{wave_id}:
     get:
       tags:
@@ -16820,6 +16855,53 @@ components:
         count:
           type: integer
           minimum: 0
+    ApiDmUnreadConversationState:
+      type: object
+      required:
+        - profile_id
+        - wave_id
+        - unread_count
+        - first_unread_drop_serial_no
+        - latest_drop_serial_no
+        - latest_read_serial_no
+        - version
+      properties:
+        profile_id:
+          type: string
+        wave_id:
+          type: string
+        unread_count:
+          type: integer
+          minimum: 0
+        first_unread_drop_serial_no:
+          type: integer
+          nullable: true
+          minimum: 1
+        latest_drop_serial_no:
+          type: integer
+          minimum: 0
+        latest_read_serial_no:
+          type: integer
+          minimum: 0
+        version:
+          type: integer
+          minimum: 0
+    ApiDmUnreadSnapshot:
+      type: object
+      required:
+        - profile_id
+        - count
+        - conversations
+      properties:
+        profile_id:
+          type: string
+        count:
+          type: integer
+          minimum: 0
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDmUnreadConversationState"
     ApiDrop:
       type: object
       required:
@@ -18824,6 +18906,27 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+        dm_unread_state:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDmUnreadConversationState"
+    ApiMarkWaveReadRequest:
+      type: object
+      properties:
+        read_through_serial_no:
+          type: integer
+          minimum: 0
+        request_dm_unread_state:
+          type: boolean
+    ApiMarkWaveReadResponse:
+      type: object
+      required:
+        - dm_unread_state
+      properties:
+        dm_unread_state:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDmUnreadConversationState"
     ApiMediaResolveRequest:
       type: object
       required:
