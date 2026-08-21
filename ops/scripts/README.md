@@ -14,9 +14,12 @@ wrapper expects that location.
   `ops/docs`.
 - `deployment-bus.cjs`: deployment bus manifest, validation, heartbeat,
   production-preflight, and GitHub Deployment status helper.
-- `deploy-hub-shadow.cjs`: validates exact frontend PR manifests, partitions
-  adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
-  status phases for the Deploy Hub pilot.
+- `deploy-hub-shadow.cjs`: performs the manual, permission-limited Deploy Hub
+  dry run. It validates exact frontend PRs, production checks, latest-main
+  staging composition, and merge conflicts without changing a branch,
+  dispatching a workflow, or touching an environment. The dry run trusts
+  composition metadata already committed to the protected `1a-staging` ref;
+  this trust does not replace retained-PR validation in any live mutation path.
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.
