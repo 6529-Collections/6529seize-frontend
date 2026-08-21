@@ -12735,6 +12735,8 @@ paths:
           required: false
           schema:
             type: string
+            minLength: 1
+            maxLength: 100
         - name: after
           in: query
           description: Inclusive lower created-at timestamp in milliseconds
