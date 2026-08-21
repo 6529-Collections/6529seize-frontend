@@ -106,19 +106,46 @@ jest.mock("@/components/waves/create-wave/overview/CreateWaveOverview", () => {
 });
 
 jest.mock("@/components/waves/create-wave/groups/CreateWaveGroups", () => {
-  return function MockCreateWaveGroups() {
-    return <div data-testid="create-wave-groups">Groups Step</div>;
+  return function MockCreateWaveGroups({
+    onCriteriaReplacementChange,
+    onGroupResolutionChange,
+  }: {
+    onCriteriaReplacementChange: (groupType: string, active: boolean) => void;
+    onGroupResolutionChange: (groupType: string, active: boolean) => void;
+  }) {
+    return (
+      <div data-testid="create-wave-groups">
+        Groups Step
+        <button onClick={() => onCriteriaReplacementChange("CAN_VIEW", true)}>
+          Start criteria replacement
+        </button>
+        <button onClick={() => onCriteriaReplacementChange("CAN_VIEW", false)}>
+          Discard criteria replacement
+        </button>
+        <button onClick={() => onGroupResolutionChange("CAN_VIEW", true)}>
+          Fail group restoration
+        </button>
+        <button onClick={() => onGroupResolutionChange("CAN_VIEW", false)}>
+          Resolve group restoration
+        </button>
+      </div>
+    );
   };
 });
 
 jest.mock("@/components/waves/create-wave/utils/CreateWaveActions", () => {
   return function MockCreateWaveActions({
     onComplete,
+    nextDisabled,
   }: {
     onComplete: () => void;
+    nextDisabled: boolean;
   }) {
     return (
       <div data-testid="create-wave-actions">
+        <button data-testid="mock-next" disabled={nextDisabled}>
+          Next
+        </button>
         <button onClick={onComplete}>Complete</button>
       </div>
     );
@@ -421,6 +448,43 @@ describe("CreateWave", () => {
     renderCreateWave();
 
     expect(screen.getByTestId("create-wave-groups")).toBeInTheDocument();
+  });
+
+  it("keeps Next disabled until an open criteria replacement is discarded", () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.GROUPS,
+    });
+
+    renderCreateWave();
+
+    expect(screen.getByTestId("mock-next")).toBeEnabled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Start criteria replacement" })
+    );
+    expect(screen.getByTestId("mock-next")).toBeDisabled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Discard criteria replacement" })
+    );
+    expect(screen.getByTestId("mock-next")).toBeEnabled();
+  });
+
+  it("keeps Next disabled until a selected draft group is restored", () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.GROUPS,
+    });
+
+    renderCreateWave();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Fail group restoration" })
+    );
+    expect(screen.getByTestId("mock-next")).toBeDisabled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Resolve group restoration" })
+    );
+    expect(screen.getByTestId("mock-next")).toBeEnabled();
   });
 
   it("hides acceptance rules on the chat rules step", () => {

@@ -12,12 +12,14 @@ export default function CreateWaveActions({
   config,
   step,
   submitting,
+  nextDisabled = false,
   setStep,
   onComplete,
 }: {
   readonly config: CreateWaveConfig;
   readonly step: CreateWaveStep;
   readonly submitting: boolean;
+  readonly nextDisabled?: boolean | undefined;
   readonly setStep: (
     step: CreateWaveStep,
     direction: "forward" | "backward"
@@ -27,6 +29,9 @@ export default function CreateWaveActions({
   const ongoingRanking = config.dates?.ongoingRanking ?? false;
 
   const onNextStep = (): void => {
+    if (nextDisabled) {
+      return;
+    }
     const nextStep = getCreateWaveNextStep({
       step,
       waveType: config.overview.type,
@@ -60,7 +65,7 @@ export default function CreateWaveActions({
       <div className="tw-ml-auto">
         <CreateWaveNextStep
           onClick={onNextStep}
-          disabled={false}
+          disabled={nextDisabled}
           step={step}
           submitting={submitting}
         />
