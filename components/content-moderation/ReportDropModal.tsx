@@ -51,26 +51,6 @@ type FailedPostActionResult = Extract<
   { readonly success: false }
 >;
 
-const getSuccessMessageKey = (
-  results: ReadonlyArray<PostActionResult>
-): MessageKey => {
-  if (results.length !== 1) {
-    return "contentModeration.report.actionsSuccess";
-  }
-  const [result] = results;
-  if (!result) {
-    return "contentModeration.report.actionsSuccess";
-  }
-  switch (result.action) {
-    case "hide":
-      return "contentModeration.hide.success";
-    case "block":
-      return "contentModeration.block.success";
-    case "report":
-      return "contentModeration.report.success";
-  }
-};
-
 const runPostAction = async ({
   action,
   request,
@@ -276,15 +256,12 @@ export default function ReportDropModal({
         });
         return;
       }
-      setToast({
-        message: t(
-          locale,
-          Number(reportPost) + Number(hidePost) + Number(blockAuthor) > 1
-            ? "contentModeration.report.actionsSuccess"
-            : getSuccessMessageKey(results)
-        ),
-        type: "success",
-      });
+      if (reportResult?.success) {
+        setToast({
+          message: t(locale, "contentModeration.report.success"),
+          type: "success",
+        });
+      }
       closeModal();
     },
     onError: (error, _variables, context) => {

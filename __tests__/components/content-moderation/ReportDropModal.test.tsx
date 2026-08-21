@@ -142,6 +142,10 @@ describe("ReportDropModal", () => {
     expect(hideDrop).not.toHaveBeenCalled();
     expect(blockProfile).not.toHaveBeenCalled();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: "Report submitted.",
+      type: "success",
+    });
   });
 
   it("allows hide-only and updates presentation before the request settles", async () => {
@@ -162,6 +166,7 @@ describe("ReportDropModal", () => {
 
     deferred.resolve(undefined);
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mockSetToast).not.toHaveBeenCalled();
   });
 
   it("immediately hides the mounted post even before viewer state is available", async () => {
@@ -247,13 +252,11 @@ describe("ReportDropModal", () => {
 
     await waitFor(() =>
       expect(
-        screen.getAllByText(
-          "This post is hidden because you blocked its author."
-        )
+        screen.getAllByTestId("content-moderation-tombstone-blocked")
       ).toHaveLength(2)
     );
-    expect(screen.queryByText("First author post")).not.toBeInTheDocument();
-    expect(screen.queryByText("Second author post")).not.toBeInTheDocument();
+    expect(screen.getByText("First author post")).toBeInTheDocument();
+    expect(screen.getByText("Second author post")).toBeInTheDocument();
     expect(reportDrop).not.toHaveBeenCalled();
     expect(hideDrop).not.toHaveBeenCalled();
     await waitFor(() => expect(blockProfile).toHaveBeenCalledWith("author-1"));
@@ -261,6 +264,7 @@ describe("ReportDropModal", () => {
 
     deferred.resolve(undefined);
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mockSetToast).not.toHaveBeenCalled();
   });
 
   it("rolls back only the failed action after a partial failure", async () => {

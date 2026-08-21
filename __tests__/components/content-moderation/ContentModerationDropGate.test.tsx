@@ -1,7 +1,10 @@
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
-import { unhideDrop } from "@/services/api/content-moderation-api";
+import {
+  unblockProfile,
+  unhideDrop,
+} from "@/services/api/content-moderation-api";
 import {
   getDropHiddenOverride,
   resetContentModerationStateForTests,
@@ -31,6 +34,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/services/api/content-moderation-api", () => ({
+  unblockProfile: jest.fn().mockResolvedValue(undefined),
   unhideDrop: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -48,7 +52,11 @@ const createDrop = (
   overrides: Partial<Pick<ApiDrop, "viewer_context" | "moderation">> = {}
 ): Pick<ApiDrop, "id" | "author" | "viewer_context" | "moderation"> => ({
   id: "drop-1",
-  author: { id: "author-1" } as ApiDrop["author"],
+  author: {
+    id: "author-1",
+    handle: "alice",
+    pfp: null,
+  } as ApiDrop["author"],
   ...overrides,
 });
 
@@ -140,6 +148,10 @@ describe("ContentModerationDropGate", () => {
     expect(hiddenContent).toHaveAttribute("inert");
     expect(hiddenContent).toHaveClass("tw-blur-[6px]");
     expect(screen.getByText("Personally hidden post")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reveal" })).toHaveAttribute(
+      "title",
+      "Show temporarily"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Unhide" }));
     expect(
       screen.queryByTestId("content-moderation-tombstone-hidden")
@@ -148,6 +160,30 @@ describe("ContentModerationDropGate", () => {
     expect(
       await screen.findByText("Personally hidden post")
     ).toBeInTheDocument();
+  });
+
+  it("reveals a hidden post locally without changing its saved state", () => {
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          viewer_context: { author_blocked: false, drop_hidden: true },
+          moderation: {
+            status: ApiDropModerationStatus.Visible,
+            can_view: true,
+          },
+        })}
+      >
+        <p>Temporarily revealed hidden post</p>
+      </ContentModerationDropGate>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+
+    expect(
+      screen.queryByTestId("content-moderation-tombstone-hidden")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Temporarily revealed hidden post")).toBeVisible();
+    expect(unhideDrop).not.toHaveBeenCalled();
   });
 
   it("restores the exact hidden override when unhide fails", async () => {
@@ -194,7 +230,7 @@ describe("ContentModerationDropGate", () => {
       </ContentModerationDropGate>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Show post" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(screen.getByText("Blocked author post")).toBeInTheDocument();
 
     mockConnectedProfileId = "viewer-2";
@@ -204,10 +240,11 @@ describe("ContentModerationDropGate", () => {
       </ContentModerationDropGate>
     );
 
-    expect(screen.queryByText("Blocked author post")).not.toBeInTheDocument();
     expect(
-      screen.getByText("This post is hidden because you blocked its author.")
+      screen.getByTestId("content-moderation-tombstone-blocked")
     ).toBeInTheDocument();
+    expect(screen.getByText("Blocked author post")).toBeInTheDocument();
+    expect(screen.getByText("@alice")).toBeInTheDocument();
   });
 
   it("ends a blocked-post reveal when the viewer hides that post", () => {
@@ -225,16 +262,46 @@ describe("ContentModerationDropGate", () => {
       </ContentModerationDropGate>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Show post" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
     expect(screen.getByText("Temporarily revealed post")).toBeInTheDocument();
 
     act(() => setDropHiddenOverride("viewer-1", "drop-1", true));
 
+    expect(screen.getByText("Temporarily revealed post")).toBeInTheDocument();
     expect(
-      screen.queryByText("Temporarily revealed post")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByText("This post is hidden because you blocked its author.")
+      screen.getByTestId("content-moderation-tombstone-blocked")
     ).toBeInTheDocument();
+  });
+
+  it("unblocks every mounted post by an author immediately", async () => {
+    setProfileBlockedOverride("viewer-1", "author-1", true);
+    const firstDrop = createDrop({
+      moderation: {
+        status: ApiDropModerationStatus.Visible,
+        can_view: true,
+      },
+    });
+    const secondDrop = { ...firstDrop, id: "drop-2" };
+    renderGate(
+      <>
+        <ContentModerationDropGate drop={firstDrop}>
+          <p>First blocked post</p>
+        </ContentModerationDropGate>
+        <ContentModerationDropGate drop={secondDrop}>
+          <p>Second blocked post</p>
+        </ContentModerationDropGate>
+      </>
+    );
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Unblock" })[0]!);
+
+    expect(
+      screen.queryByTestId("content-moderation-tombstone-blocked")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("First blocked post")).toBeVisible();
+    expect(screen.getByText("Second blocked post")).toBeVisible();
+    await waitFor(() =>
+      expect(unblockProfile).toHaveBeenCalledWith("author-1")
+    );
   });
 });

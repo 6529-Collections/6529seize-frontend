@@ -1,6 +1,5 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
@@ -9,13 +8,6 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
 
 jest.mock("next/dynamic", () => () => () => <div />);
-jest.mock("@/components/header/ProfilePreferencesSettings", () => ({
-  __esModule: true,
-  default: ({ isOpen }: { readonly isOpen: boolean }) =>
-    isOpen ? (
-      <div role="dialog" aria-label="Profile Preferences modal" />
-    ) : null,
-}));
 jest.mock(
   "@/components/user/user-page-header/banner/UserPageHeaderBanner",
   () => () => <div data-testid="banner" />
@@ -155,7 +147,7 @@ describe("UserPageHeader", () => {
         (subscriptionStatus) => subscriptionStatus.dataset["compact"] === "true"
       )
     ).toHaveLength(1);
-    const preferencesButton = screen.getByRole("button", {
+    const preferencesButton = screen.getByRole("link", {
       name: "Preferences",
     });
     expect(preferencesButton).toHaveClass(
@@ -166,8 +158,7 @@ describe("UserPageHeader", () => {
     );
   });
 
-  it("opens preferences from your own profile", async () => {
-    const user = userEvent.setup();
+  it("links to preferences from your own profile", () => {
     render(
       <AuthContext.Provider value={ownProfileAuth}>
         <UserPageHeaderClient
@@ -184,11 +175,10 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
-
-    expect(
-      screen.getByRole("dialog", { name: "Profile Preferences modal" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Preferences" })).toHaveAttribute(
+      "href",
+      "/preferences"
+    );
   });
 
   it("does not show preferences when viewing another profile", () => {
@@ -209,7 +199,7 @@ describe("UserPageHeader", () => {
     );
 
     expect(
-      screen.queryByRole("button", { name: "Preferences" })
+      screen.queryByRole("link", { name: "Preferences" })
     ).not.toBeInTheDocument();
   });
 
@@ -231,7 +221,7 @@ describe("UserPageHeader", () => {
     );
 
     expect(
-      screen.queryByRole("button", { name: "Preferences" })
+      screen.queryByRole("link", { name: "Preferences" })
     ).not.toBeInTheDocument();
   });
 

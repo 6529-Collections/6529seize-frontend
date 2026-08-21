@@ -12,17 +12,6 @@ jest.mock("@/components/common/icons/BellIcon", () => () => (
 jest.mock("@/components/header/PushNotificationSettings", () => () => (
   <div data-testid="push-settings" />
 ));
-jest.mock(
-  "@/components/header/ProfilePreferencesSettings",
-  () =>
-    ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
-      isOpen ? (
-        <div data-testid="profile-preferences-settings">
-          <button onClick={onClose}>Close profile preferences</button>
-        </div>
-      ) : null
-);
-
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
@@ -136,30 +125,18 @@ describe("AppUserConnect", () => {
     const disconnectBtn = screen.getByRole("button", {
       name: "Disconnect & Logout",
     });
-    const profilePreferencesButton = screen.getByRole("button", {
-      name: "Profile Preferences",
+    const preferencesLink = screen.getByRole("link", {
+      name: "Preferences",
     });
     const pushNotificationsButton = screen.getByRole("button", {
       name: "Push Notifications",
     });
-    expect(profilePreferencesButton).toBeInTheDocument();
+    expect(preferencesLink).toHaveAttribute("href", "/preferences");
     expect(pushNotificationsButton).toContainElement(
       screen.getByTestId("push-notifications-bell")
     );
-    expect(
-      screen.queryByTestId("profile-preferences-settings")
-    ).not.toBeInTheDocument();
-
-    fireEvent.click(profilePreferencesButton);
-    expect(
-      screen.getByTestId("profile-preferences-settings")
-    ).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Close profile preferences" })
-    );
-    expect(
-      screen.queryByTestId("profile-preferences-settings")
-    ).not.toBeInTheDocument();
+    fireEvent.click(preferencesLink);
+    expect(onNavigate).toHaveBeenCalledTimes(1);
 
     fireEvent.click(disconnectWalletBtn);
     expect(seizeDisconnect).toHaveBeenCalled();
@@ -170,7 +147,7 @@ describe("AppUserConnect", () => {
     fireEvent.click(disconnectBtn);
     await waitFor(() => {
       expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
-      expect(onNavigate).toHaveBeenCalledTimes(2);
+      expect(onNavigate).toHaveBeenCalledTimes(3);
     });
   });
 
