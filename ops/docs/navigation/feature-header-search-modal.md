@@ -54,8 +54,15 @@ The search control opens one of two clearly scoped experiences:
   - The last site query is kept for the current browser tab session.
   - Queries that opened a result appear as recent-search shortcuts after clear.
 - In-wave jump:
-  - Results use compact message previews showing the author, message number,
-    date, time, and matching context.
+  - Results use compact message previews showing the author's profile picture,
+    message number, date, time, and visually formatted message content.
+  - Links, mentions, tags, and Markdown remain visual-only inside a result; the
+    result card is the single action that jumps to the message. Mention and tag
+    labels are shown without their internal serialization brackets.
+  - Filters support one author from the Wave's actual message authors plus
+    inclusive `After` and exclusive `Before` local-date boundaries.
+  - Selecting an author replaces the author picker with a compact profile row;
+    clearing that row restores the picker.
   - Selecting a message result jumps to that drop in the current thread.
   - `Load more` appears when more matches are available.
 
@@ -67,7 +74,11 @@ The search control opens one of two clearly scoped experiences:
   - `NFTs` uses the same debounce and starts at 3 characters, or shorter numeric input.
 - In-wave query rules:
   - Available only when search opens with active wave context.
-  - Starts at 2 characters with ~250ms debounce.
+  - Text search starts at 3 characters with ~250ms debounce and matches word
+    prefixes, so `loo` can match `looks`.
+  - A valid author or date filter can be searched without text.
+  - `After` must precede `Before`; impossible dates and inverted ranges are not
+    searched.
 - Result-type controls keep the same space before, during, and after search so
   the result panel does not shift horizontally.
 - A selected result type remains selected even when it has no matches, making
@@ -93,7 +104,7 @@ The search control opens one of two clearly scoped experiences:
   - `Pages`: no retry request (local catalog search).
 - In-wave states:
   - Loading: `Loading…`
-  - Threshold hint: `Type at least 2 characters to search in <wave name>.`
+  - Threshold hint: type at least 3 characters or add a filter.
   - Empty: `No matches found.`
   - Error: `Couldn't load results` with a `Try again` action.
 

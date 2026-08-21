@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { MIN_WAVE_SEARCH_QUERY_LENGTH } from "@/components/waves/drops/search/waveDropsSearch.utils";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
@@ -15,15 +16,24 @@ import { useMemo } from "react";
 export function useWaveDropsSearch({
   wave,
   term,
+  authorId,
+  after,
+  before,
   enabled,
   size = 50,
 }: {
   readonly wave: ApiWave | null;
   readonly term: string;
+  readonly authorId?: string | undefined;
+  readonly after?: number | undefined;
+  readonly before?: number | undefined;
   readonly enabled: boolean;
   readonly size?: number | undefined;
 }) {
   const trimmedTerm = term.trim();
+  const isTermValid =
+    trimmedTerm.length === 0 ||
+    trimmedTerm.length >= MIN_WAVE_SEARCH_QUERY_LENGTH;
   const waveMin = useMemo(() => (wave ? toApiWaveMin(wave) : null), [wave]);
 
   const query = useInfiniteQuery({
@@ -32,11 +42,21 @@ export function useWaveDropsSearch({
       {
         waveId: wave?.id ?? null,
         term: trimmedTerm,
+        authorId: authorId ?? null,
+        after: after ?? null,
+        before: before ?? null,
         size,
         context: "wave-search",
       },
     ],
-    enabled: enabled && wave !== null && trimmedTerm.length > 0,
+    enabled:
+      enabled &&
+      wave !== null &&
+      isTermValid &&
+      (trimmedTerm.length >= MIN_WAVE_SEARCH_QUERY_LENGTH ||
+        authorId !== undefined ||
+        after !== undefined ||
+        before !== undefined),
     initialPageParam: 1,
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       if (!wave) {
@@ -46,6 +66,9 @@ export function useWaveDropsSearch({
       return await fetchWaveDropsSearchV2({
         wave,
         term: trimmedTerm,
+        authorId,
+        after,
+        before,
         page: pageParam,
         size,
       });
