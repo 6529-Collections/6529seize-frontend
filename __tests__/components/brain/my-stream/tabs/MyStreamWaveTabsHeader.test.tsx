@@ -158,4 +158,37 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(screen.queryByTestId("wave-score")).toBeNull();
     expect(screen.queryByText("Add REP")).toBeNull();
   });
+
+  it("puts wave details first in the compact overflow menu", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={true}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+        renderOverflowMenuItems={() => [
+          {
+            id: "boosted-drops-display-section",
+            kind: "section",
+            label: "Boosted drops: Compact",
+          },
+          {
+            id: "boosted-drops-display-compact",
+            label: "Compact",
+          },
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+
+    expect(
+      screen.getAllByRole("menuitem").map((item) => item.textContent?.trim())
+    ).toEqual(["Wave details", "Compact", "Copy wave link"]);
+  });
 });

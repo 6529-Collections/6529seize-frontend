@@ -23,6 +23,8 @@ linked section pages.
 ## Entry Points
 
 - Desktop: open a wave thread, open the right sidebar, and select a tab.
+- Compact layouts: open `More wave actions` and select `Wave details`, which is
+  the first menu action.
 - Native app: open an active wave, select the main `About` tab, and select an
   information pill. The information pills replace the subwave pills while
   `About` is active; selecting another main tab restores the subwave pills.
@@ -31,7 +33,13 @@ linked section pages.
 
 - Base section order for all waves: `About`, `Rules`, `REP`, `Settings`.
 - `Rank` and `Approve` waves add `Voters` and `Activity` after `Settings`.
-- `Rules` shows automatic wave rules plus optional creator rules.
+- `Rules` shows a compact creator-rules summary first when creator rules exist,
+  including whether display-only or acceptance-required rules are present and
+  whether a wallet signature is required. Full creator-authored text is
+  collapsed by default and can be expanded on demand, so the automatic rules
+  generated from wave setup remain immediately reachable. When no creator
+  rules exist, the automatic rules remain first and the creator-rules empty
+  state follows them.
 - Desktop labels the first section `About` because it is a standalone sidebar
   tab.
 - Native app labels the same first section `Overview` because it is nested

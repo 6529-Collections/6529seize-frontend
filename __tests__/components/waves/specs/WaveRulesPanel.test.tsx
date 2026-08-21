@@ -2,7 +2,7 @@ import WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
 import type { WaveRules } from "@/helpers/waves/wave-rules.helpers";
 import type Link from "next/link";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -74,5 +74,84 @@ describe("WaveRulesPanel", () => {
     ).toBeVisible();
     expect(screen.queryByText("Artists")).not.toBeInTheDocument();
     expect(screen.getByText("Private group")).toBeInTheDocument();
+  });
+
+  it("shows creator rules before automatic rules when creator rules exist", () => {
+    const creatorRule = "Keep submissions focused on the weekly theme.";
+
+    render(
+      <WaveRulesPanel
+        rules={{
+          ...rules,
+          custom: {
+            binding: null,
+            display: creatorRule,
+            signatureRequired: false,
+          },
+        }}
+      />
+    );
+
+    expect(
+      screen.getAllByRole("heading").map((heading) => heading.textContent)
+    ).toEqual(["Rules", "Creator rules", "Access"]);
+    expect(
+      screen.getByText("Includes a display-only creator rule.")
+    ).toBeVisible();
+    expect(screen.getByText(creatorRule)).not.toBeVisible();
+  });
+
+  it("keeps creator-rule status visible and reveals the full text on demand", () => {
+    const acceptanceRule =
+      "I agree to keep my submission available through the voting period.";
+
+    render(
+      <WaveRulesPanel
+        rules={{
+          ...rules,
+          custom: {
+            binding: acceptanceRule,
+            display: null,
+            signatureRequired: true,
+          },
+        }}
+      />
+    );
+
+    expect(screen.getAllByText("Requires acceptance")[0]).toBeVisible();
+    expect(
+      screen.getAllByText(
+        "Participants sign these rules with their wallet before submitting."
+      )[0]
+    ).toBeVisible();
+    expect(screen.getByText(acceptanceRule)).not.toBeVisible();
+
+    const showButton = screen.getByRole("button", {
+      name: "Show full creator rules",
+    });
+    expect(showButton).toHaveAttribute("aria-expanded", "false");
+    expect(showButton).toHaveAttribute("aria-controls");
+    expect(
+      document.getElementById(showButton.getAttribute("aria-controls")!)
+    ).not.toBeVisible();
+
+    fireEvent.click(showButton);
+
+    expect(screen.getByText(acceptanceRule)).toBeVisible();
+    const hideButton = screen.getByRole("button", {
+      name: "Hide full creator rules",
+    });
+    expect(hideButton).toHaveAttribute("aria-expanded", "true");
+    expect(
+      document.getElementById(hideButton.getAttribute("aria-controls")!)
+    ).toBeVisible();
+  });
+
+  it("keeps the empty creator-rules state after automatic rules", () => {
+    render(<WaveRulesPanel rules={rules} />);
+
+    expect(
+      screen.getAllByRole("heading").map((heading) => heading.textContent)
+    ).toEqual(["Rules", "Access", "Creator rules"]);
   });
 });
