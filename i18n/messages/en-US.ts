@@ -1165,6 +1165,27 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   selectedGroup: "Selected group",
+  currentGroup: "Current group",
+  unsavedGroup: "Unsaved group",
+  groupSource: "Group source",
+  existingGroup: "Existing group",
+  newGroup: "New group",
+  addIdentity: "Add identity",
+  addRule: "Add rule",
+  done: "Done",
+  enableChat: "Enable chat",
+  allowAdminsToDeletePosts: "Allow admins to delete posts",
+  defaultGroupName: "Wave Group",
+  notAppliedYet: "Not applied yet.",
+  "actions.replaceCriteria": "Replace criteria",
+  "actions.chooseGroup": "Choose group",
+  "draft.notReadyTitle": "Not ready yet.",
+  "draft.notReadyDescription":
+    "Finish the missing group rules before you create this group.",
+  "draft.createTitle": "Create this new group",
+  "draft.discard": "Discard draft",
+  "draft.creating": "Creating group...",
+  "draft.createAndUse": "Create and use new group",
   limitedAccessTitle: "Warning: Limited Access",
   limitedAccessDescription:
     'This wave is restricted to the "{viewGroupName}" group. Every Drop, Vote, Chat, and "{adminGroupName}" group member must also belong to that group.',
@@ -1181,6 +1202,33 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Add identities one by one to build this access group.",
   "inlineIdentities.creatorExcludedWarning":
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
+  "members.currentCount": "{count} currently eligible",
+  "members.countLoading": "Checking current audience…",
+  "members.countUnavailable": "Current audience unavailable",
+  "members.view": "View members",
+  "members.previewDraft": "Preview matches",
+  "members.dialogTitle": "{role}: {group}",
+  "members.dynamicDescription":
+    "This is a live preview based on current profile, reputation, and ownership data. Membership can change over time.",
+  "members.criteriaSummary": "Why these identities qualify",
+  "members.criteriaUnavailable":
+    "Group criteria aren't available, but you can still inspect the current members below.",
+  "members.searchLabel": "Find an identity",
+  "members.searchPlaceholder": "Search by handle or wallet",
+  "members.clearSearch": "Clear identity search",
+  "members.loadingStatus": "Loading current members",
+  "members.empty": "No identities currently match this group.",
+  "members.searchEmpty": "No matching identities found.",
+  "members.errorTitle": "Couldn't load current members.",
+  "members.errorDescription": "Check your connection and try again.",
+  "members.retry": "Try again",
+  "members.listLabel": "Current group members",
+  "members.openProfile": "Open {identity}'s profile in a new tab",
+  "members.noCriteria": "No criteria selected",
+  "restore.loading": "Restoring the selected group…",
+  "restore.error":
+    "This selected group could not be loaded. Retry, replace its criteria, or choose another group before continuing.",
+  "restore.retry": "Retry group",
   "error.missingWallet.title": "Add a primary wallet first.",
   "error.missingWallet.description":
     "A primary wallet is required to create this wave's admin group.",
@@ -1301,6 +1349,7 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
 } as const);
 
 const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
+  backToCriteria: "Back to criteria",
   cancel: "Cancel",
   complete: "Complete",
   create: "Create",
