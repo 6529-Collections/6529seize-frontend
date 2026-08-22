@@ -228,7 +228,6 @@ const webE2EFields =
         validation_pack: CI_PIPELINES_VALIDATION_PACK,
       }
     : {};
-
 const payload = {
   alert_type: alertType,
   repo: repository.split("/").pop() ?? repository,

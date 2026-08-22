@@ -27,44 +27,6 @@ operation to be terminal. Both lanes `OFF` means full manual fallback after both
 drain gates. Raw `RELEASE_BUS_V2_MODE` and `ALL` remain internal emergency
 fences; they are not normal routing or UI controls and must never be bypassed.
 
-For manual shared-staging work, finish all preparation first, including the
-final shared-ref fetch and any recomputation. Then take one fresh bounded
-read-only staging-drain snapshot as the final sequence immediately before
-pushing frontend `1a-staging`, and take a completely new snapshot immediately
-before every individual backend staging-service dispatch.
-
-The snapshot consists of all three existing read-only sources:
-
-1. Run `./bin/6529 exec node ops/scripts/release-bus-status.mjs` once. Require
-   the effective staging lane to be `OFF` with `changeable: true`. This helper
-   does not inspect locks or workflows and is not sufficient by itself.
-2. Read `/deploy/ui/bus` or its versioned read API once. Require the
-   `staging-environment` lock to be unowned, no active `STAGING` or
-   `PRODUCTION_QUALIFICATION` train, and no nonterminal operation in either
-   lane.
-3. Make one bounded GitHub Actions pass over both repositories for `queued` and
-   `in_progress` runs, examining at most ten pages of 100 runs for each status
-   and repository. Treat these workflow paths as staging blockers:
-   - backend `deploy.yml` only when the `Deploy a service` display title targets
-     `staging`;
-   - frontend `deploy-staging.yml`, `release-bus-deploy-staging.yml`, and
-     `staging-e2e.yml`;
-   - `release-bus-v2-advance-staging-ref.yml` in either repository.
-   Match by workflow path; use the current workflow name only as a legacy
-   fallback.
-
-Production deploy/E2E activity, PR CI, and unrelated workflows are independent
-and do not block staging. Fail closed if any source is unavailable, malformed,
-incomplete, ambiguous, or exceeds its bound. A clear snapshot applies only to
-the immediately following single mutation; never reuse it for another backend
-service, a batch, or a later frontend push. If blocked, stop and return control
-without waiting, polling, cancelling, retrying, or mutating. For a workflow
-blocker, report repository, workflow, status, run ID, and link. For a gate,
-lock, train, operation, or source failure, report the source, exact state or
-error, observation time, and any available owner, identity, or link. The
-workflow-side authorization guard and all existing rejection/failure alerts
-remain unchanged as the final race protection.
-
 There is no inferred control-plane or self-upgrade exception. While a target
 lane is `ON`, every deploy for that environment—including API, `releaseBus`,
 cleaner/reconciler, and other control-plane changes—must be an authenticated
@@ -251,14 +213,6 @@ then the trusted decision client makes one authenticated lookup:
   recorded idempotently, and the expensive packs are skipped;
 - unavailable, stale, moved, expired, malformed, ambiguous or
   identity-mismatched evidence fails closed and cannot validate or adopt.
-
-The terminal WEB E2E notification carries that deploy run ID, or the Release
-Bus train ID, back to the CI alert receiver. The receiver correlates it to the
-original deploy drop and posts the result as a reply; workflows do not handle
-drop IDs. Reruns preserve the parent identity and expose attempts greater than
-one in the linked run label. See
-[CI wave deploy and WEB E2E notifications](ci-wave-deploy-validation-notifications.md)
-for standalone fallback, message, activation, and rollout behavior.
 
 The manual production fallback follows the same build-once principle. An
 authorized production operation explicitly invokes `production-build-artifact.yml`

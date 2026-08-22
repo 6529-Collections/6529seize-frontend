@@ -1,9 +1,10 @@
 # Frontend artifact portability: implementation boundary
 
-The frontend currently produces environment-bound artifacts. The `environment-bound-v3`
-manifest is accurate about source and package identity, but it does not describe a
-portable package. Each environment is built separately because environment-specific
-values are written into Next.js output and into the standalone server bundle.
+The frontend currently produces environment-bound artifacts. The
+`staging-deployment-v1` and `production-deployment-v1` manifests are accurate
+about source and package identity, but they do not describe a portable package.
+Each environment is built separately because environment-specific values are
+written into Next.js output and into the standalone server bundle.
 
 The checked-in `artifact-portability.v1` inventory records the distinction explicitly:
 
@@ -22,23 +23,18 @@ file/byte totals, match counts, a digest of all matching paths, and at most twen
 sample paths per input. Raw runtime values are never written to the inventory.
 Unknown keys remain explicit fail-closed blockers.
 
-The inventory is report-only. Current `environment-bound-v3` and legacy dual-profile
-artifacts are `NOT_PORTABLE`; neither reuse nor promotion is authorized by this
-contract. A comparison may explain why staging and production differ, but it cannot
-approve moving bytes between them and it cannot mutate an environment.
+The inventory is report-only. Current `staging-deployment-v1` and
+`production-deployment-v1` artifacts, along with legacy dual-profile artifacts,
+are `NOT_PORTABLE`; neither reuse nor promotion is authorized by this contract. A
+comparison may explain why staging and production differ, but it cannot approve
+moving bytes between them and it cannot mutate an environment.
 
-Pre-PR6 `legacy-v2` artifacts may lack this inventory. The existing immutable
-artifact remains deployable through its legacy contract, but the missing inventory
-is recorded as `not-portable-pre-pr6-legacy`; it never authorizes reuse or
-promotion. New `environment-bound-v3` artifacts must include a valid inventory.
 The report workflow separately verifies each source run's repository, workflow
 path, event, successful conclusion, run head SHA, artifact name, source SHA,
 environment, manifest digest, and exact producer-bound artifact contract before
 comparison. It also obtains the named artifact's independent GitHub Actions API
 digest and recomputes the complete downloaded-file membership and digest set
 against `SHA256SUMS`; the checksum file is a claim to verify, not an authority.
-Legacy deployment summaries retain the actual environment and use their single
-`portability_status` field for the `NOT_PORTABLE` authorization boundary.
 
 ## What must move out of package bytes
 
@@ -76,10 +72,10 @@ copied into the client bundle or the portability inventory.
    manifest contract. Keep exact source, content, toolchain, package, and runtime
    digests in the release evidence.
 5. Run staging and production read-only qualification against the same package
-   digest. Only after those proofs are durable may Release Bus accept a portable
-   artifact input.
+   digest. Only after those proofs are durable may a separately reviewed change
+   authorize cross-environment artifact reuse.
 
-Until every gate passes in a separately reviewed change, the Release Bus must keep
-building environment-bound artifacts per environment. The adaptive Elastic
-Beanstalk poller in this release improves readiness observation latency; it does not
-change the artifact boundary.
+Until every gate passes in a separately reviewed change, the deployment
+workflows must keep building environment-bound artifacts per environment. The
+adaptive Elastic Beanstalk poller improves readiness observation latency; it
+does not change the artifact boundary.

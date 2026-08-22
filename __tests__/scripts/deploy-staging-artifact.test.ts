@@ -15,13 +15,9 @@ const workflowSource = fs.readFileSync(
   path.join(root, ".github", "workflows", "deploy-staging.yml"),
   "utf8"
 );
-const releaseBusWorkflowSource = fs.readFileSync(
-  path.join(root, ".github", "workflows", "release-bus-deploy-staging.yml"),
-  "utf8"
-);
 const workflow = YAML.parse(workflowSource);
 
-describe("manual staging immutable artifact deployment", () => {
+describe("staging immutable artifact deployment", () => {
   it("keeps the remote activation script syntactically valid and fail-closed", () => {
     expect(childProcess.spawnSync("bash", ["-n", scriptPath]).status).toBe(0);
     expect(script).toContain('[[ "$ARTIFACT_URL" == https://* ]]');
@@ -74,35 +70,26 @@ describe("manual staging immutable artifact deployment", () => {
   });
 
   it("loads required SSR credentials from deployment secrets", () => {
-    for (const source of [script, releaseBusWorkflowSource]) {
-      expect(source).toContain(
-        'runtime_secrets_file="$release_root/runtime-secrets.json"'
-      );
-      expect(source).toContain("chmod 600");
-      expect(source).toContain(
-        "const runtimeSecretsPath = path.join(__dirname, 'runtime-secrets.json');"
-      );
-      expect(source).toContain(
-        "['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID')"
-      );
-      expect(source).toContain(
-        "['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET')"
-      );
-    }
+    expect(script).toContain(
+      'runtime_secrets_file="$release_root/runtime-secrets.json"'
+    );
+    expect(script).toContain("chmod 600");
+    expect(script).toContain(
+      "const runtimeSecretsPath = path.join(__dirname, 'runtime-secrets.json');"
+    );
+    expect(script).toContain(
+      "['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID')"
+    );
+    expect(script).toContain(
+      "['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET')"
+    );
     expect(workflowSource).toContain(
       "STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}"
     );
     expect(workflowSource).toContain(
-      "STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}"
-    );
-    expect(releaseBusWorkflowSource).toContain(
-      "STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}"
-    );
-    expect(releaseBusWorkflowSource).toContain(
       "STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}"
     );
     expect(workflowSource).not.toContain("secrets.SSR_CLIENT_");
-    expect(releaseBusWorkflowSource).not.toContain("secrets.SSR_CLIENT_");
     expect(workflowSource).toContain(
       'SSR_CLIENT_ID_B64="$SSR_CLIENT_ID_B64" \\'
     );
@@ -117,18 +104,11 @@ describe("manual staging immutable artifact deployment", () => {
       workflowSource.indexOf("bash ops/scripts/deploy-staging-artifact.sh")
     );
     expect(
-      releaseBusWorkflowSource.indexOf('test -n "$ssr_client_secret"')
-    ).toBeLessThan(
-      releaseBusWorkflowSource.indexOf(
-        'install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"'
-      )
-    );
-    expect(
-      releaseBusWorkflowSource.indexOf(
+      script.indexOf(
         'echo "$EXPECTED_DIGEST  $release_dir/package.zip" | sha256sum -c -'
       )
     ).toBeLessThan(
-      releaseBusWorkflowSource.indexOf(
+      script.indexOf(
         'runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"'
       )
     );
@@ -149,7 +129,7 @@ describe("manual staging immutable artifact deployment", () => {
       (step: { name?: string }) => step.name === "Send staging deploy command"
     );
 
-    expect(build.needs).toBe("manual-deployment-guard");
+    expect(build.needs).toBeUndefined();
     expect(build.permissions).toEqual({ contents: "read" });
     expect(build.env.NEXTGEN_CHAIN_ID).toBe(
       "${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}"
@@ -158,11 +138,10 @@ describe("manual staging immutable artifact deployment", () => {
     expect(buildSource).not.toContain("11155111");
     expect(buildStep.run).toContain("./bin/6529 run base-build");
     expect(buildStep.run).not.toContain("./bin/6529 run build\n");
-    expect(buildStep.run).toContain('artifact_contract:"manual-staging-v1"');
-    expect(deploy.needs).toEqual([
-      "manual-deployment-guard",
-      "build-staging-artifact",
-    ]);
+    expect(buildStep.run).toContain(
+      'artifact_contract:"staging-deployment-v1"'
+    );
+    expect(deploy.needs).toBe("build-staging-artifact");
     expect(verifyStep.run).toContain("sha256sum -c SHA256SUMS");
     expect(verifyStep.run).toContain(".source_sha == $source_sha");
     expect(sendStep.run).toContain(
@@ -183,20 +162,14 @@ describe("manual staging immutable artifact deployment", () => {
     expect(workflowSource).toContain("public/help-index.json");
   });
 
-  it("rechecks manual readiness after the build and before cloud mutation", () => {
-    const steps = workflow.jobs["deploy-staging"].steps;
-    const readinessIndex = steps.findIndex(
-      (step: { name?: string }) =>
-        step.name === "Reconfirm manual fallback readiness before deployment"
+  it("has only canonical staging triggers and no external deployment authority", () => {
+    expect(workflow.on.push.branches).toEqual(["1a-staging"]);
+    expect(workflow.on.workflow_dispatch).toBeDefined();
+    expect(workflowSource).toContain(
+      'test "$GITHUB_REF" = refs/heads/1a-staging'
     );
-    const awsIndex = steps.findIndex(
-      (step: { name?: string }) => step.name === "Configure AWS credentials"
-    );
-
-    expect(readinessIndex).toBeGreaterThanOrEqual(0);
-    expect(readinessIndex).toBeLessThan(awsIndex);
-    expect(steps[readinessIndex].run).toContain(
-      "/deploy/release-bus-v2/manual-deployment-readiness"
-    );
+    expect(workflowSource).not.toMatch(/release[ -]?bus/iu);
+    expect(workflowSource).not.toContain("operation_id");
+    expect(workflowSource).not.toContain("deployment-bus-manifest");
   });
 });

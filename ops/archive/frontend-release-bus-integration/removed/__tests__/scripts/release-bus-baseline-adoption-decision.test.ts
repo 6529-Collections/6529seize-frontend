@@ -359,7 +359,6 @@ describe("baseline-adoption automatic E2E decision client", () => {
     expect(Object.keys(parsed.jobs)).toEqual([
       "baseline-adoption-decision",
       "staging-packs",
-      "notify-ci-wave",
     ]);
     expect(parsed.jobs["staging-packs"].needs).toBe(
       "baseline-adoption-decision"

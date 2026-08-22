@@ -461,7 +461,8 @@ export const baseRules = deepFreezeRuleConfig({
 export const baseGlobalIgnores = Object.freeze([
   "**/node_modules",
   "**/.next",
-  "**/.release-bus/**",
+  "**/.deployment-artifact/**",
+  "ops/archive/frontend-release-bus-integration/**",
   "**/dist",
   "**/out",
   "**/public",

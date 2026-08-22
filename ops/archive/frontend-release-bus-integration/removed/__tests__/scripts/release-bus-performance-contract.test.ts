@@ -84,13 +84,7 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).not.toContain('"dependency-analysis-or-plan-not-required"');
     expect(appPrCi).toContain("Run related Jest tests");
     expect(appPrCi).toContain("./bin/6529 run build:ci");
-    expect(appPrCi).not.toContain("playwright install --with-deps chromium");
-    expect(appPrCi).toContain(
-      "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48"
-    );
-    expect(appPrCi).toContain("core-playwright-checks:");
-    expect(appPrCi).toContain("playwright install-deps chromium");
-    expect(appPrCi).toContain("playwright install chromium");
+    expect(appPrCi).toContain("playwright install --with-deps chromium");
     expect(appPrCi).toContain("test:e2e:smoke");
     expect(appPrCi).toContain("test:e2e:critical-shell");
     expect(appPrCi).toContain("./bin/6529 exec playwright test");
@@ -101,7 +95,7 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("tests/museum/inside-system-readonly.spec.ts");
     expect(appPrCi).toContain("tests/museum/rights-readonly.spec.ts");
     expect(appPrCi).not.toContain("./bin/6529 run test:e2e:museum-");
-    expect(appPrCi).toContain("startsWith(matrix.lane, 'playwright-museum-')");
+    expect(appPrCi).toContain("matrix.lane == 'playwright-museum'");
     expect(appPrCi).toContain("Restore Playwright browser");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
       expect(appPrCi).toContain(

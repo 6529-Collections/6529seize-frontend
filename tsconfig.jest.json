@@ -26,6 +26,7 @@
     ".next/**",
     ".next-*/**",
     ".claude/**",
-    ".codex/**"
+    ".codex/**",
+    "ops/archive/frontend-release-bus-integration/**"
   ]
 }

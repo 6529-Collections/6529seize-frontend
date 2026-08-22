@@ -281,13 +281,9 @@ jobs:
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
-          STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}
-          STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}
         run: |
           set -euo pipefail
           test -n "$INSTANCE_ID"
-          test -n "$STAGING_SSR_CLIENT_ID"
-          test -n "$STAGING_SSR_CLIENT_SECRET"
           jq -e '
             type == "object" and
             has("staging") and
@@ -303,29 +299,11 @@ jobs:
               "$(printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0)"
             printf 'REPO_DIR=%q\n' "$REPO_DIR"
             printf 'RUN_AS=%q\n' "$RUN_AS"
-            printf 'SSR_CLIENT_ID_B64=%q\n' \
-              "$(printf '%s' "$STAGING_SSR_CLIENT_ID" | base64 -w0)"
-            printf 'SSR_CLIENT_SECRET_B64=%q\n' \
-              "$(printf '%s' "$STAGING_SSR_CLIENT_SECRET" | base64 -w0)"
             cat <<'REMOTE'
           set -euo pipefail
           release_root="$REPO_DIR/.release-bus"
           release_dir="$release_root/releases/$EXPECTED_SHA"
           current_link="$release_root/current"
-          runtime_secrets_file="$release_root/runtime-secrets.json"
-          ssr_client_id="$(printf '%s' "$SSR_CLIENT_ID_B64" | base64 -d)"
-          ssr_client_secret="$(printf '%s' "$SSR_CLIENT_SECRET_B64" | base64 -d)"
-          test -n "$ssr_client_id"
-          test -n "$ssr_client_secret"
-          runtime_secrets_tmp=''
-          cleanup_runtime_secrets() {
-            unset ssr_client_id SSR_CLIENT_ID_B64 \
-              ssr_client_secret SSR_CLIENT_SECRET_B64
-            if [ -n "$runtime_secrets_tmp" ]; then
-              rm -f -- "$runtime_secrets_tmp"
-            fi
-          }
-          trap cleanup_runtime_secrets EXIT HUP INT TERM
           previous_target="$(readlink -f "$current_link" 2>/dev/null || true)"
           pm2_json="$(sudo -H -u "$RUN_AS" pm2 jlist)"
           process_count="$(jq '[.[] | select(.name == "6529seize")] | length' <<<"$pm2_json")"
@@ -504,36 +482,12 @@ jobs:
             "$release_dir/public-review-discussion-destinations.json"
           chmod 600 "$release_dir/public-review-discussion-destinations.json"
           unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
-          runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
-          jq -n \
-            --arg ssr_client_id "$ssr_client_id" \
-            --arg ssr_client_secret "$ssr_client_secret" \
-            '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret}' \
-            > "$runtime_secrets_tmp"
-          chown "$RUN_AS:$RUN_AS" "$runtime_secrets_tmp"
-          chmod 600 "$runtime_secrets_tmp"
-          mv -f "$runtime_secrets_tmp" "$runtime_secrets_file"
-          runtime_secrets_tmp=''
-          unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
           ln -sfn "$release_dir/app" "$current_link"
           cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
           const fs = require('node:fs');
           const path = require('node:path');
 
           const currentApp = fs.realpathSync(path.join(__dirname, 'current'));
-          const runtimeSecretsPath = path.join(__dirname, 'runtime-secrets.json');
-          const runtimeEnv = JSON.parse(
-            fs.readFileSync(runtimeSecretsPath, 'utf8')
-          );
-          const requireRuntimeEnv = (name) => {
-            const value = runtimeEnv[name];
-            if (typeof value !== 'string' || !value.trim()) {
-              throw new Error(
-                `Required staging runtime value ${name} is missing from ${runtimeSecretsPath}.`
-              );
-            }
-            return value;
-          };
           const destinationsPath = path.join(
             path.dirname(currentApp),
             'public-review-discussion-destinations.json'
@@ -564,8 +518,6 @@ jobs:
                 PORT: '3001',
                 HOSTNAME: '0.0.0.0',
                 NODE_ENV: 'production',
-                ['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID'),
-                ['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET'),
                 ...(publicReviewDiscussionDestinations
                   ? {
                       PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:
@@ -796,10 +748,9 @@ jobs:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
           CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
-          CI_PIPELINES_ALERT_TYPE: deploy
           CI_PIPELINES_TARGET_ENV: staging
           CI_PIPELINES_STATUS: failure
-          CI_PIPELINES_TITLE: WEB deploy failed
+          CI_PIPELINES_TITLE: Seize-Frontend staging DEPLOY CI pipeline is broken!!!
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
           CI_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
@@ -812,10 +763,9 @@ jobs:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
           CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
-          CI_PIPELINES_ALERT_TYPE: deploy
           CI_PIPELINES_TARGET_ENV: staging
           CI_PIPELINES_STATUS: success
-          CI_PIPELINES_TITLE: WEB deploy complete
+          CI_PIPELINES_TITLE: Seize-Frontend staging DEPLOY CI pipeline complete
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
           CI_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
