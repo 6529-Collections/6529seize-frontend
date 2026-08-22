@@ -251,6 +251,11 @@ describe("sentry-client-filters", () => {
   ].join("\n");
   const rabbyMobileUserRejectedStack =
     "Error: Not Allowed\n    at userRejectedRequest (RabbyMobile://native-bundle/background.js:1:1)";
+  const rabbyMobileIosUserRejectedStack = [
+    "Error: Not Allowed",
+    "    at EthereumProviderError (address at /vendor/container/RabbyMobile.app/main.jsbundle:1:100)",
+    "    at userRejectedRequest (address at /vendor/container/RabbyMobile.app/main.jsbundle:1:200)",
+  ].join("\n");
   const rabbyMobileAndroidUserRejectedStack = [
     "EthereumProviderError: Not Allowed",
     "    at getEthProviderError (inpage.js:1:1)",
@@ -2184,21 +2189,24 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createRabbyMobileUserRejectedExceptionValue = (
+    overrides: Partial<SentryExceptionValue> = {}
+  ): SentryExceptionValue => ({
+    type: "UnhandledRejection",
+    value: objectCapturedPromiseRejectionMessage,
+    mechanism: {
+      type: "auto.browser.global_handlers.onunhandledrejection",
+      handled: false,
+    },
+    ...overrides,
+  });
+
   const createRabbyMobileUserRejectedRequestEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent =>
     ({
       exception: {
-        values: [
-          {
-            type: "UnhandledRejection",
-            value: objectCapturedPromiseRejectionMessage,
-            mechanism: {
-              type: "auto.browser.global_handlers.onunhandledrejection",
-              handled: false,
-            },
-          },
-        ],
+        values: [createRabbyMobileUserRejectedExceptionValue()],
       },
       extra: {
         __serialized__: {
@@ -2209,6 +2217,25 @@ describe("sentry-client-filters", () => {
       },
       ...overrides,
     }) as TestSentryClientEvent;
+
+  const createRabbyMobileIosUserRejectedRequestEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent =>
+    createRabbyMobileUserRejectedRequestEvent({
+      request: {
+        headers: {
+          "User-Agent": rabbyMobileUserAgent,
+        },
+      },
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: rabbyMobileIosUserRejectedStack,
+        },
+      },
+      ...overrides,
+    });
 
   const createRabbyChromeUserRejectedExceptionValue = (
     overrides: Partial<SentryExceptionValue> = {}
@@ -8765,6 +8792,17 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the production-shaped RabbyMobile iOS user rejection", () => {
+    // Arrange
+    const event = createRabbyMobileIosUserRejectedRequestEvent();
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("filters the exact Rabby Chrome user-rejected object rejection", () => {
     // Arrange
     const event = createRabbyChromeUserRejectedRequestEvent();
@@ -10188,12 +10226,10 @@ describe("sentry-client-filters", () => {
 
   it("does not filter RabbyMobile user-rejected object rejections with app-owned frames", () => {
     // Arrange
-    const event = createRabbyMobileUserRejectedRequestEvent({
+    const event = createRabbyMobileIosUserRejectedRequestEvent({
       exception: {
         values: [
-          {
-            type: "UnhandledRejection",
-            value: objectCapturedPromiseRejectionMessage,
+          createRabbyMobileUserRejectedExceptionValue({
             stacktrace: {
               frames: [
                 {
@@ -10202,7 +10238,7 @@ describe("sentry-client-filters", () => {
                 },
               ],
             },
-          },
+          }),
         ],
       },
     });
@@ -10398,6 +10434,44 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the RabbyMobile iOS rejection with a later app-owned serialized frame", () => {
+    // Arrange
+    const event = createRabbyMobileIosUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack: [
+            rabbyMobileIosUserRejectedStack,
+            "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the RabbyMobile iOS rejection with an app-owned hint stack", () => {
+    // Arrange
+    const event = createRabbyMobileIosUserRejectedRequestEvent();
+    const appError = new Error("Application failure");
+    appError.stack =
+      "Error: Application failure\n    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)";
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event, {
+      originalException: appError,
+    });
 
     // Assert
     expect(result).toBe(false);
@@ -11094,6 +11168,102 @@ describe("sentry-client-filters", () => {
           code: 4100,
           message: "Not Allowed",
           stack: rabbyMobileUserRejectedStack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "a different mechanism",
+      values: [
+        createRabbyMobileUserRejectedExceptionValue({
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+        }),
+      ],
+    },
+    {
+      caseName: "a handled mechanism",
+      values: [
+        createRabbyMobileUserRejectedExceptionValue({
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: true,
+          },
+        }),
+      ],
+    },
+    {
+      caseName: "an additional exception",
+      values: [
+        createRabbyMobileUserRejectedExceptionValue(),
+        { type: "Error", value: "Application failure" },
+      ],
+    },
+  ])("does not filter the RabbyMobile iOS rejection with $caseName", ({ values }) => {
+    // Arrange
+    const event = createRabbyMobileIosUserRejectedRequestEvent({
+      exception: { values },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "another native app bundle",
+      stack: rabbyMobileIosUserRejectedStack.replace(
+        "RabbyMobile.app",
+        "OtherWallet.app"
+      ),
+    },
+    {
+      caseName: "no userRejectedRequest frame",
+      stack: rabbyMobileIosUserRejectedStack.replace(
+        "userRejectedRequest",
+        "requestRejected"
+      ),
+    },
+  ])("does not filter the RabbyMobile iOS near-miss with $caseName", ({ stack }) => {
+    // Arrange
+    const event = createRabbyMobileIosUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Not Allowed",
+          stack,
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter the RabbyMobile iOS rejection with another message", () => {
+    // Arrange
+    const event = createRabbyMobileIosUserRejectedRequestEvent({
+      extra: {
+        __serialized__: {
+          code: 4001,
+          message: "Permission denied",
+          stack: rabbyMobileIosUserRejectedStack,
         },
       },
     });
