@@ -21,7 +21,7 @@ interface NotificationsContentProps {
   readonly loadingOlder: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (activeDrop: ActiveDropState | null) => void;
-  readonly markNotificationIdsAsRead?: (ids: number[]) => Promise<void>;
+  readonly markNotificationIdsAsRead?: (ids: number[]) => void;
 }
 
 export default function NotificationsContent({

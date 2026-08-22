@@ -57,7 +57,7 @@ interface UseNotificationsControllerResult {
   readonly pagination: NotificationsPagination;
   readonly contentState: NotificationsContentState;
   readonly handlers: NotificationsHandlers;
-  readonly markNotificationIdsAsRead: (ids: number[]) => Promise<void>;
+  readonly markNotificationIdsAsRead: (ids: number[]) => void;
 }
 
 export const useNotificationsController =
@@ -164,7 +164,7 @@ export const useNotificationsController =
     });
     const rawItems = rawItemsFromQuery ?? items;
 
-    const { mutateAsync: markNotificationIdsAsRead } = useMutation({
+    const { mutate: markNotificationIdsAsRead } = useMutation({
       mutationFn: async (ids: number[]) => {
         await Promise.all(
           ids.map((id) =>

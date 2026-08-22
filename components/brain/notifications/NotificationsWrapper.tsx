@@ -38,7 +38,7 @@ interface NotificationsWrapperProps {
   readonly loadingOlder: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (drop: ActiveDropState | null) => void;
-  readonly markNotificationIdsAsRead?: (ids: number[]) => Promise<void>;
+  readonly markNotificationIdsAsRead?: (ids: number[]) => void;
 }
 
 export default function NotificationsWrapper({
