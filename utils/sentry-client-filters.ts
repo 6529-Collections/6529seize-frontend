@@ -9,6 +9,9 @@ export { LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE } from "./sentry-client-filters/con
 export { redactDropReactionFailureIdentifiers } from "./sentry-client-filters/drop-reaction";
 export { shouldFilterChromeMobileIosInjectedGaError } from "./sentry-client-filters/chrome-ios";
 export {
+  shouldFilterCoinbaseAnalyticsIndexedDbUpgradeError,
+} from "./sentry-client-filters/coinbase-analytics";
+export {
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
   getNetworkErrorMessageTargetUrl,
