@@ -173,6 +173,7 @@ export const appOwnedStackPatterns = [
 ];
 export const LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE = 0.1;
 export const RABBY_MOBILE_USER_AGENT_TOKEN = "rabbymobile";
+export const RABBY_MOBILE_ANDROID_USER_AGENT_TOKEN = "rabbymobileandroid/";
 export const RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE = "not found rainbowkit";
 
 export const REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE =
