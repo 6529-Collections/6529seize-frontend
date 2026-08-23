@@ -1,6 +1,7 @@
 # Museum homepage consolidation
 
-Status: implementation and pre-PR validation in progress
+Status: exact production build, deterministic captures, and three-lane visual
+acceptance complete; ready for PR and release
 
 ## Release intent
 

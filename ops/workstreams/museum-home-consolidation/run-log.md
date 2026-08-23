@@ -19,3 +19,27 @@
   present in that file's lint scope, so ESLint treated the suppression itself
   as an unknown-rule error. Removed the comment only; runtime behavior is
   unchanged.
+- Rebuilt successfully with the production API and WebSocket endpoints: full
+  repository lint, optimized Next.js build, TypeScript, 3,675 generated pages,
+  and sitemap publication all passed.
+- Captured the exact production build at 1440 x 1000, 820 x 1000, and
+  390 x 844. The deterministic report records one `Acquisitions` heading, all
+  four acquisition titles, no superseded homepage headings, no broken images,
+  no console errors, and no horizontal overflow.
+- Accepted screenshot SHA-256 values:
+  - desktop: `4692cba94b4bb4e2a04b627be4f4abc6cde6d2526e275bb9d37d0843ee6fd65b`
+  - tablet: `a74c739158967d90315627e9fc49671d8a349410a46af8a06f4eb7aa24ff19e9`
+  - mobile: `1e695d4f7620e1beec5c24d07eeeb587820e616aea1143de8dedb5b79d23a57b`
+- Reconciled the public status copy against canonical Museum main
+  `3926d78faacf67a62b8d9b48e15d26c43b52eae9`: Keys and Gates comprises
+  sixteen selected outcomes awaiting minting and accession; A Gift of Themes
+  and Variations #210 has completed formal acceptance, transfer, custody, and
+  accession.
+- Independent museum/curatorial, visual/UX, and copy/editorial reviewers each
+  re-read the exact final screenshot hashes above. All three returned PASS
+  with no release blockers. Nonblocking observations concern future rhythm,
+  mobile density, and minor nomenclature polish; none contradicts the factual
+  or product acceptance boundary.
+- Re-ran the focused homepage contract suite (7/7), changed lint, changed
+  typecheck, and the Windows-safe diff check after the final copy corrections;
+  all passed.
