@@ -1,8 +1,6 @@
 import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-// This release-evidence utility runs only in the development/test toolchain.
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { chromium } from "playwright";
 
 const baseUrl = process.env.MUSEUM_CAPTURE_BASE_URL ?? "http://localhost:3001";

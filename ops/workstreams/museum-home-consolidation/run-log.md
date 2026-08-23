@@ -57,3 +57,7 @@
   formatting. Applied the repository's pinned Prettier output and re-ran the
   direct Prettier check, changed lint, and diff check successfully. This is a
   tooling-only formatting correction; public output and evidence are unchanged.
+- Hosted Linux lint then identified the capture utility's Windows-only
+  dependency suppression as unnecessary. Removed that suppression and verified
+  the file with the exact lint configuration on the current platform; the
+  utility's behavior and retained visual evidence are unchanged.
