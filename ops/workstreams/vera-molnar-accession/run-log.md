@@ -163,3 +163,10 @@
   regex-style issue. The accession path grammar now uses the concise ASCII
   digit class for year, accession sequence, and Work sequence; behavior and
   the exact allowed path boundary are unchanged.
+- Corrective exact-head CI run 32665361257 rendered the Vera Work and its image
+  successfully in the mobile browser, but the Network IA test queried the
+  retired `canonical-work-presentation-title` section ID. The live DOM and
+  retained Playwright snapshot place canonical media under
+  `canonical-work-media-title`; both stale Work-image selectors now use that
+  public semantic boundary. This is test-only and does not alter runtime code,
+  copy, media, or pixels.

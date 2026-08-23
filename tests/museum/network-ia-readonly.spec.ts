@@ -330,7 +330,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
 
     await openRoute(page, "/museum/network/works/6529NM-W-0029");
     const veraWorkImage = page.locator(
-      '[aria-labelledby="canonical-work-presentation-title"] img'
+      '[aria-labelledby="canonical-work-media-title"] img'
     );
     await expect(veraWorkImage).toHaveCount(1);
     await veraWorkImage.scrollIntoViewIfNeeded();
@@ -396,7 +396,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       })
     ).toHaveCount(1);
     await expect(
-      page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
+      page.locator('[aria-labelledby="canonical-work-media-title"] img')
     ).toHaveCount(1);
     await expect(
       page.getByRole("button", { name: /loads 16\.9 MB/u })
