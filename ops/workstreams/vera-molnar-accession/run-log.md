@@ -167,6 +167,10 @@
   successfully in the mobile browser, but the Network IA test queried the
   retired `canonical-work-presentation-title` section ID. The live DOM and
   retained Playwright snapshot place canonical media under
-  `canonical-work-media-title`; both stale Work-image selectors now use that
-  public semantic boundary. This is test-only and does not alter runtime code,
-  copy, media, or pixels.
+  `canonical-work-media-title`, so the Vera image assertion now uses that
+  public semantic boundary. Exact-head rerun 32665959639 passed the Vera check
+  and reached the existing Magnum Work assertion. Its retained DOM confirms
+  that the historical Wave image remains, correctly, in the distinct
+  `canonical-work-presentation-title` section. That Magnum selector therefore
+  remains presentation-specific. These are test-only corrections and do not
+  alter runtime code, copy, media, or pixels.

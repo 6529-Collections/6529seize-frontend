@@ -396,7 +396,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       })
     ).toHaveCount(1);
     await expect(
-      page.locator('[aria-labelledby="canonical-work-media-title"] img')
+      page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
     ).toHaveCount(1);
     await expect(
       page.getByRole("button", { name: /loads 16\.9 MB/u })
