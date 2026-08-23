@@ -53,3 +53,7 @@
   The harness now reads only `article h3` titles inside the acquisition
   section. A fresh production-build capture retained all three accepted image
   hashes and passed the stricter four-card assertion.
+- Hosted App PR CI run `32674774904` then rejected only the stricter harness's
+  formatting. Applied the repository's pinned Prettier output and re-ran the
+  direct Prettier check, changed lint, and diff check successfully. This is a
+  tooling-only formatting correction; public output and evidence are unchanged.

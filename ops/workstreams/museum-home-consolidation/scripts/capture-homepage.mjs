@@ -82,9 +82,8 @@ try {
         scrollHeight: document.documentElement.scrollHeight,
         acquisitionHeadingCount: [
           ...document.querySelectorAll("h1, h2, h3"),
-        ].filter(
-          (heading) => heading.textContent?.trim() === "Acquisitions"
-        ).length,
+        ].filter((heading) => heading.textContent?.trim() === "Acquisitions")
+          .length,
         supersededSectionHeadingCount: [
           ...document.querySelectorAll("h1, h2, h3"),
         ].filter((heading) =>
