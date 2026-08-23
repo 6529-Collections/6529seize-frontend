@@ -2,7 +2,10 @@ import Link from "next/link";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  museumMediaResponsiveImage,
+  selectMuseumStillMedia,
+} from "@/lib/museum/publication/mediaSelection";
 import {
   museumArtistHref,
   museumWorkHref,
@@ -49,7 +52,10 @@ function museumDirectoryMediaStageClassName(
     aspectClassName = "tw-aspect-square";
   }
   return [
-    "tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black",
+    "tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950",
+    shape === "artist"
+      ? "tw-border tw-border-solid tw-border-iron-800 tw-p-3 sm:tw-p-4"
+      : "",
     aspectClassName,
   ]
     .filter(Boolean)
@@ -86,6 +92,7 @@ function MuseumDirectoryMediaStage({
 
   const retained = selectMuseumStillMedia(record.work.media);
   if (retained !== undefined) {
+    const responsive = museumMediaResponsiveImage(retained);
     return (
       <div
         className={museumDirectoryMediaStageClassName(
@@ -101,7 +108,10 @@ function MuseumDirectoryMediaStage({
         data-testid="museum-directory-media-stage"
       >
         <MuseumManagedImage
-          src={retained.url}
+          src={responsive.src}
+          {...(responsive.srcSet === undefined
+            ? {}
+            : { srcSet: responsive.srcSet })}
           {...(retained.width === null ? {} : { width: retained.width })}
           {...(retained.height === null ? {} : { height: retained.height })}
           alt={retained.altText ?? record.work.title}

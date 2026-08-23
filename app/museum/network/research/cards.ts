@@ -22,6 +22,7 @@ import type {
   MuseumMedia,
   MuseumPublication,
 } from "@/lib/museum/publication/types";
+import { VERA_MOLNAR_PUBLIC_PATHS } from "@/lib/museum/publication/veraMolnarPublication";
 
 const MUSEUM_PRACTICE_STUDY_KEY =
   "museum.network.research.museumPracticeStudy" satisfies MessageKey;
@@ -73,10 +74,7 @@ function acquisitionResearchCard({
   const workMedia = resolveExactWorkMediaById(publication, assignment.workId);
   const mediaQualifier =
     researchId === "6529NM-RP-0003"
-      ? t(
-          DEFAULT_LOCALE,
-          "museum.network.research.magnumDisplayCaptionSuffix"
-        )
+      ? t(DEFAULT_LOCALE, "museum.network.research.magnumDisplayCaptionSuffix")
       : undefined;
   return {
     ...entry,
@@ -87,6 +85,37 @@ function acquisitionResearchCard({
     description: t(DEFAULT_LOCALE, assignment.descriptionKey),
     actionLabel: t(DEFAULT_LOCALE, "museum.network.research.readEssay"),
     ...(mediaQualifier === undefined ? {} : { mediaQualifier }),
+    ...(workMedia.media === undefined ? {} : { media: workMedia.media }),
+    ...(workMedia.mediaSrcSet === undefined
+      ? {}
+      : { mediaSrcSet: workMedia.mediaSrcSet }),
+  };
+}
+
+function veraAcquisitionResearchCard(
+  publication: MuseumPublication,
+  entries: readonly MuseumResearchIndexEntry[]
+): MuseumResearchDocumentCardEntry | undefined {
+  const entry = entries.find(
+    (candidate) =>
+      candidate.sourcePath === VERA_MOLNAR_PUBLIC_PATHS.acquisitionEssay
+  );
+  if (entry === undefined) return undefined;
+  const workMedia = resolveExactWorkMediaById(publication, "6529NM-W-0029");
+  return {
+    ...entry,
+    title: "A Gift of Themes and Variations #210",
+    kindLabel: t(DEFAULT_LOCALE, "museum.network.research.acquisitionEssay"),
+    subjectLabels: ["Vera Molnár", "Martin Grasser"],
+    statusLabel: t(
+      DEFAULT_LOCALE,
+      "museum.network.research.permanentCollection"
+    ),
+    description: t(
+      DEFAULT_LOCALE,
+      "museum.network.research.veraGiftDescription"
+    ),
+    actionLabel: t(DEFAULT_LOCALE, "museum.network.research.readEssay"),
     ...(workMedia.media === undefined ? {} : { media: workMedia.media }),
     ...(workMedia.mediaSrcSet === undefined
       ? {}
@@ -132,6 +161,9 @@ function exactArtistCard(
   );
   if (artist === undefined) return undefined;
   const workMedia = resolveExactWorkMediaById(publication, workId);
+  const editorialMedia = researchArtistEditorialMedia(artistId);
+  const media = editorialMedia?.media ?? workMedia.media;
+  const mediaSrcSet = editorialMedia?.mediaSrcSet ?? workMedia.mediaSrcSet;
   return {
     id: `research-artist:${artist.id}`,
     slug: artist.slug,
@@ -140,11 +172,66 @@ function exactArtistCard(
     kindLabel: t(DEFAULT_LOCALE, "museum.network.research.artistStudy"),
     description,
     actionLabel: t(DEFAULT_LOCALE, "museum.network.research.readArtistProfile"),
-    ...(workMedia.media === undefined ? {} : { media: workMedia.media }),
-    ...(workMedia.mediaSrcSet === undefined
+    ...(media === undefined ? {} : { media }),
+    ...(mediaSrcSet === undefined ? {} : { mediaSrcSet }),
+    ...(editorialMedia === undefined
       ? {}
-      : { mediaSrcSet: workMedia.mediaSrcSet }),
+      : {
+          mediaQualifier: t(
+            DEFAULT_LOCALE,
+            "museum.network.research.editorialIllustration"
+          ),
+          mediaSourceHref: editorialMedia.sourceHref,
+          mediaSourceLabel: t(
+            DEFAULT_LOCALE,
+            "museum.network.research.viewImageSource"
+          ),
+        }),
   };
+}
+
+function researchArtistEditorialMedia(artistId: string):
+  | {
+      readonly media: MuseumMedia;
+      readonly mediaSrcSet: string;
+      readonly sourceHref: string;
+    }
+  | undefined {
+  if (artistId === "6529NM-ART-0022") {
+    return {
+      media: museumResearchEditorialMedia({
+        id: "museum-research-data-architecture-groundplan",
+        file: "data-architecture-1600.webp",
+        altText:
+          "Pieter Jansz. Saenredam's measured groundplan of the Church of Saint John in 's-Hertogenbosch, 1632.",
+        creditLine:
+          "Pieter Jansz. Saenredam, Groundplan of the Church of Saint John in 's-Hertogenbosch, 1632. The Metropolitan Museum of Art. Public Domain.",
+        licenseLabel: "Public Domain Mark 1.0",
+        licenseUrl: "https://creativecommons.org/publicdomain/mark/1.0/",
+      }),
+      mediaSrcSet:
+        "/museum/research/editorial/data-architecture-800.webp 800w, /museum/research/editorial/data-architecture-1600.webp 1600w",
+      sourceHref: "https://www.metmuseum.org/art/collection/search/419541",
+    };
+  }
+  if (artistId === "6529NM-ART-0023") {
+    return {
+      media: museumResearchEditorialMedia({
+        id: "museum-research-rights-printmaking-workshop",
+        file: "rights-1600.webp",
+        altText:
+          "Pellegrino dal Colle's eighteenth-century print after Francesco Maggiotto showing a printmaking workshop.",
+        creditLine:
+          "Pellegrino dal Colle, after Francesco Maggiotto, The Printmaking Workshop, 1750–1800. The Metropolitan Museum of Art. Public Domain.",
+        licenseLabel: "Public Domain Mark 1.0",
+        licenseUrl: "https://creativecommons.org/publicdomain/mark/1.0/",
+      }),
+      mediaSrcSet:
+        "/museum/research/editorial/rights-800.webp 800w, /museum/research/editorial/rights-1600.webp 1600w",
+      sourceHref: "https://www.metmuseum.org/art/collection/search/415528",
+    };
+  }
+  return undefined;
 }
 
 function researchStewardshipCards(): readonly MuseumResearchDocumentCardEntry[] {
@@ -381,6 +468,7 @@ export function buildMuseumResearchLandingCards(
   entries: readonly MuseumResearchIndexEntry[]
 ): MuseumResearchLandingCards | undefined {
   const acquisitionCards = [
+    veraAcquisitionResearchCard(publication, entries),
     acquisitionResearchCard({
       entries,
       publication,
@@ -407,7 +495,7 @@ export function buildMuseumResearchLandingCards(
   );
   if (
     Object.keys(MUSEUM_RESEARCH_ACQUISITION_ASSIGNMENTS).length !== 3 ||
-    acquisitionCards.length !== 3
+    acquisitionCards.length !== 4
   ) {
     return undefined;
   }

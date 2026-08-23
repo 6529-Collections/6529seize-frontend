@@ -17,6 +17,7 @@ import { MuseumSourceMatrixLink } from "@/components/museum/MuseumSourceMatrixLi
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatDate } from "@/i18n/format";
 import {
   CASEY_ARTIST_NAME,
   tryCaseyArtworksFromPublication,
@@ -24,14 +25,20 @@ import {
 import { getGenerativeStudyByProjectSlug } from "@/lib/museum/generative-studies";
 import { getMintedProjectIndex } from "@/lib/museum/generative-studies/minted";
 import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
-import { displayMuseumPublicAcquisitionStatus } from "@/lib/museum/presentation";
+import {
+  displayMuseumPublicAcquisitionStatus,
+  museumCreatorSeparator,
+} from "@/lib/museum/presentation";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import {
   applyMuseumCollectionSemantics,
   MUSEUM_MAGNUM_ACQUISITION_ID,
   museumProjectWorks,
 } from "@/lib/museum/publication/collectionSemantics";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  museumMediaResponsiveImage,
+  selectMuseumStillMedia,
+} from "@/lib/museum/publication/mediaSelection";
 import {
   buildMuseumEntityContext,
   buildMuseumProjectRelations,
@@ -209,6 +216,11 @@ function ProjectWorkCard({
 }) {
   const media = selectMuseumStillMedia(work.media);
   const status = displayMuseumPublicAcquisitionStatus(work.status);
+  const statusRecorded = t(
+    DEFAULT_LOCALE,
+    "museum.network.projects.statusRecorded",
+    { date: formatDate(DEFAULT_LOCALE, work.statusAsOf) }
+  );
   const programMediaMatch =
     media === undefined
       ? findReviewedProgramMediaMatch(view, [
@@ -218,20 +230,24 @@ function ProjectWorkCard({
       : null;
 
   if (media !== undefined) {
+    const responsive = museumMediaResponsiveImage(media);
     if (media.altText === null || media.altText.trim() === "") {
       throw new Error("museum_project_work_alt_text_missing");
     }
     return (
       <MuseumPublicMediaFigure
         key={work.id}
-        src={media.url}
+        src={responsive.src}
+        {...(responsive.srcSet === undefined
+          ? {}
+          : { srcSet: responsive.srcSet })}
         width={media.width}
         height={media.height}
         alt={media.altText}
         href={museumWorkHref(work.id)}
         title={work.title}
         status={status}
-        qualifier={work.statusAsOf}
+        qualifier={statusRecorded}
         eager={index === 0}
       />
     );
@@ -259,7 +275,7 @@ function ProjectWorkCard({
           {status}
         </span>
         <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
-          {work.statusAsOf}
+          {statusRecorded}
         </span>
       </MuseumReviewedProgramMediaFigure>
     );
@@ -310,7 +326,7 @@ function ProjectWorkCard({
             {status}
           </span>
           <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
-            {work.statusAsOf}
+            {statusRecorded}
           </span>
           <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
             {presentation.credit.creditLine} ·{" "}
@@ -342,7 +358,7 @@ function ProjectWorkCard({
         {status}
       </span>
       <span className="tw-mt-1 tw-block tw-text-xs tw-leading-5 tw-text-iron-500">
-        {work.statusAsOf}
+        {statusRecorded}
       </span>
     </p>
   );
@@ -429,7 +445,7 @@ function TypedProjectPage({
         <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
           {artists.map((artist, index) => (
             <span key={artist.id}>
-              {index > 0 ? ", " : null}
+              {museumCreatorSeparator(index, artists.length)}
               <Link
                 href={museumArtistHref(artist.slug)}
                 className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4"
@@ -447,7 +463,13 @@ function TypedProjectPage({
         >
           {t(DEFAULT_LOCALE, "museum.network.projects.works")}
         </h2>
-        <div className="tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+        <div
+          className={`tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-10 ${
+            works.length === 1
+              ? "tw-max-w-6xl tw-grid-cols-1"
+              : "sm:tw-grid-cols-2 xl:tw-grid-cols-3"
+          }`}
+        >
           {works.map((work, index) => (
             <ProjectWorkCard
               key={work.id}

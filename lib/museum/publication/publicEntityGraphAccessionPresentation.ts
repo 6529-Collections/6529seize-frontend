@@ -2,13 +2,12 @@ import type { MuseumExternalProposalPresentationVariant } from "./entities";
 import type { MuseumSourceDocument } from "./types";
 import { isRecord } from "./publicEntityGraphPrimitives";
 
-const ACCESSION_PRESENTATION_PATH =
-  "records/accessions/6529NM.2026.002/public/presentation-manifest.json";
-const ACCESSION_ID = "6529NM.2026.002";
 const CDN_BASE = "https://d3lqz0a4bldqgf.cloudfront.net";
 const TRANSFORM_PATH = "webp-v2-q82-m6-fixed-icc";
 const WIDTHS = [640, 1280, 2400] as const;
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
+const LEGACY_MAGNUM_PRESENTATION_PATH =
+  "records/accessions/6529NM.2026.002/public/presentation-manifest.json";
 
 export function accessionPresentationVariants(input: {
   readonly workId: string;
@@ -22,10 +21,22 @@ export function accessionPresentationVariants(input: {
   readonly sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>;
   readonly catalogMediaAssetPaths: ReadonlySet<string>;
 }): readonly MuseumExternalProposalPresentationVariant[] {
-  const document = input.sourceDocuments.get(ACCESSION_PRESENTATION_PATH);
-  // Compatibility with the immediately preceding reviewed publication. Once
-  // the accession manifest is catalogued, malformed or partial state fails.
-  if (document === undefined) return [];
+  const candidates = [...input.sourceDocuments.values()].filter((document) =>
+    /^records\/accessions\/6529NM\.[0-9]{4}\.[0-9]{3}\/public\/presentation-manifest\.json$/u.test(
+      document.path
+    )
+  );
+  for (const document of candidates) {
+    const variants = variantsFromManifest(document, input);
+    if (variants !== null) return variants;
+  }
+  return [];
+}
+
+function variantsFromManifest(
+  document: MuseumSourceDocument,
+  input: Parameters<typeof accessionPresentationVariants>[0]
+): readonly MuseumExternalProposalPresentationVariant[] | null {
   if (document.mediaType !== "application/json") {
     throw new Error("public_entity_graph_accession_presentation_manifest");
   }
@@ -35,18 +46,7 @@ export function accessionPresentationVariants(input: {
   } catch {
     throw new Error("public_entity_graph_accession_presentation_manifest");
   }
-  if (
-    !isRecord(root) ||
-    root["record_type"] !== "ACCESSION_MEDIA_PRESENTATION" ||
-    root["schema_profile"] !== "6529NM_ACCESSION_MEDIA_PRESENTATION_V1" ||
-    root["accession_lot_id"] !== ACCESSION_ID ||
-    !isRecord(root["delivery"]) ||
-    root["delivery"]["status"] !==
-      "approved_for_contextual_museum_display" ||
-    root["delivery"]["cdn_base_url"] !== CDN_BASE ||
-    root["delivery"]["cache_control"] !== CACHE_CONTROL ||
-    !Array.isArray(root["items"])
-  ) {
+  if (!isRecord(root) || !Array.isArray(root["items"])) {
     throw new Error("public_entity_graph_accession_presentation_manifest");
   }
   const matches = root["items"].filter(
@@ -55,8 +55,38 @@ export function accessionPresentationVariants(input: {
       candidate["work_entity_id"] === input.workId &&
       candidate["media_reference_entity_id"] === input.mediaId
   );
+  if (matches.length === 0) return null;
   if (matches.length !== 1) {
     throw new Error("public_entity_graph_accession_presentation_join");
+  }
+  const accessionPathMatch =
+    /^records\/accessions\/([^/]+)\/public\/presentation-manifest\.json$/u.exec(
+      document.path
+    );
+  const accessionId = root["accession_lot_id"];
+  if (
+    root["record_type"] !== "ACCESSION_MEDIA_PRESENTATION" ||
+    (root["schema_profile"] !== "6529NM_ACCESSION_MEDIA_PRESENTATION_V1" &&
+      root["schema_profile"] !== "6529NM_ACCESSION_MEDIA_PRESENTATION_V2") ||
+    typeof accessionId !== "string" ||
+    !/^6529NM\.[0-9]{4}\.[0-9]{3}$/u.test(accessionId) ||
+    accessionPathMatch?.[1] !== accessionId ||
+    !isRecord(root["delivery"]) ||
+    root["delivery"]["status"] !== "approved_for_contextual_museum_display" ||
+    root["delivery"]["cdn_base_url"] !== CDN_BASE ||
+    root["delivery"]["cache_control"] !== CACHE_CONTROL ||
+    (root["schema_profile"] === "6529NM_ACCESSION_MEDIA_PRESENTATION_V1" &&
+      document.path !== LEGACY_MAGNUM_PRESENTATION_PATH) ||
+    (root["schema_profile"] === "6529NM_ACCESSION_MEDIA_PRESENTATION_V2" &&
+      (!isRecord(root["record_control"]) ||
+        root["record_control"]["record_status"] !== "reviewed" ||
+        !isRecord(root["record_control"]["review"]) ||
+        root["record_control"]["review"]["role"] !== "reviewer" ||
+        root["record_control"]["review"]["outcome"] !== "approved" ||
+        typeof root["record_control"]["review"]["reviewed_commit"] !==
+          "string"))
+  ) {
+    throw new Error("public_entity_graph_accession_presentation_manifest");
   }
   const item = matches[0]!;
   const source = item["source"];
@@ -82,8 +112,8 @@ export function accessionPresentationVariants(input: {
     if (!isRecord(derivative)) {
       throw new Error("public_entity_graph_accession_presentation_variant");
     }
-    const repositoryPath = `media/accessions/${ACCESSION_ID}/${input.workId}/${sourceDigest}/${TRANSFORM_PATH}/${width}.webp`;
-    const url = `${CDN_BASE}/museum/accessions/${ACCESSION_ID}/${input.workId}/${sourceDigest}/${TRANSFORM_PATH}/${width}.webp`;
+    const repositoryPath = `media/accessions/${accessionId}/${input.workId}/${sourceDigest}/${TRANSFORM_PATH}/${width}.webp`;
+    const url = `${CDN_BASE}/museum/accessions/${accessionId}/${input.workId}/${sourceDigest}/${TRANSFORM_PATH}/${width}.webp`;
     const height = derivative["height"];
     const byteSize = derivative["byte_size"];
     const sha256 = derivative["sha256"];

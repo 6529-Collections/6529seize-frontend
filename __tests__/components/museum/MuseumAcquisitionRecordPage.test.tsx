@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { MuseumAcquisitionRecordPage } from "@/components/museum/MuseumAcquisitionRecordPage";
+import { MuseumAcquisitionRecordContext } from "@/components/museum/acquisition/MuseumAcquisitionRecordHeader";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import type {
   MuseumArtist,
@@ -314,6 +315,35 @@ function expectEditorialOrder(workTitle: string, artistName: string): void {
 }
 
 describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
+  it("links an art-first acquisition to its immutable source record", () => {
+    const sourceCommit = "d".repeat(40);
+    const sourcePath =
+      "records/accessions/6529NM.2026.003/accession-statement.json";
+    const base = acquisition(
+      "acquisition-vera-molnar",
+      "a-gift-of-themes-and-variations-210",
+      "A Gift of Themes and Variations #210",
+      "accessioned_into_permanent_collection",
+      "6529NM-W-0029"
+    );
+
+    render(
+      <MuseumAcquisitionRecordContext
+        context={{ ...base, sourceCommit, sourcePath }}
+        artFirst={true}
+        curatorialDocumentCount={1}
+        workCount={1}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Open source record" })
+    ).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${sourceCommit}/${sourcePath}`
+    );
+  });
+
   it("joins Keys and Gates Work IDs to selected program media and tiers the record", () => {
     const workTitle = "A Door Opens";
     const artistName = "Anni Artist";

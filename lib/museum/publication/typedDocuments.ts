@@ -8,6 +8,12 @@ import type {
   MuseumPublication,
   MuseumSourceDocument,
 } from "./types";
+import {
+  MARTIN_GRASSER_ARTIST_SLUG,
+  VERA_MOLNAR_ARTIST_SLUG,
+  VERA_MOLNAR_OBJECT_ID,
+  VERA_MOLNAR_PUBLIC_PATHS,
+} from "./veraMolnarPublication";
 
 interface MuseumTypedDocumentProjectionInput {
   readonly graph: MuseumPublicEntityGraph;
@@ -161,14 +167,24 @@ function candidatePaths(
   graph: MuseumPublicEntityGraph,
   sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
 ): readonly string[] {
+  const veraPaths = veraMolnarCandidatePaths(entity, graph);
   if (entity.entityType === "WORK") {
-    return workCandidatePaths(entity, sourceDocuments);
+    return uniquePaths([
+      ...workCandidatePaths(entity, sourceDocuments),
+      ...veraPaths,
+    ]).filter((path) => sourceDocuments.has(path));
   }
   if (entity.entityType === "ARTIST") {
-    return artistCandidatePaths(entity, sourceDocuments);
+    return uniquePaths([
+      ...artistCandidatePaths(entity, sourceDocuments),
+      ...veraPaths,
+    ]).filter((path) => sourceDocuments.has(path));
   }
   if (entity.entityType === "PROJECT_OR_SERIES") {
-    return projectCandidatePaths(entity, sourceDocuments);
+    return uniquePaths([
+      ...projectCandidatePaths(entity, sourceDocuments),
+      ...veraPaths,
+    ]).filter((path) => sourceDocuments.has(path));
   }
   const paths = new Set<string>();
   collectRepositoryPaths(entity.profile, paths);
@@ -181,9 +197,63 @@ function candidatePaths(
   compatibilityDocumentPaths(entity, sourceDocuments).forEach((path) =>
     paths.add(path)
   );
-  return [...paths]
+  return uniquePaths([...paths, ...veraPaths])
     .filter((path) => sourceDocuments.has(path))
     .sort((left, right) => left.localeCompare(right));
+}
+
+function uniquePaths(paths: readonly string[]): readonly string[] {
+  return [...new Set(paths)];
+}
+
+function veraMolnarCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  graph: MuseumPublicEntityGraph
+): readonly string[] {
+  const veraWork = graph.entities.find(
+    (candidate) =>
+      candidate.entityType === "WORK" &&
+      candidate.sourceRecordIds.includes(VERA_MOLNAR_OBJECT_ID)
+  );
+  if (veraWork === undefined) return [];
+  if (entity.id === veraWork.id) {
+    return [
+      VERA_MOLNAR_PUBLIC_PATHS.objectEntry,
+      VERA_MOLNAR_PUBLIC_PATHS.sourceChronology,
+    ];
+  }
+  const related = graph.relations.some((relation) => {
+    if (
+      relation.targetEntityId !== veraWork.id ||
+      relation.sourceEntityId !== entity.id
+    ) {
+      return false;
+    }
+    return (
+      (entity.entityType === "ARTIST" &&
+        relation.relationType === "ARTIST_CREATES_WORK") ||
+      (entity.entityType === "PROJECT_OR_SERIES" &&
+        relation.relationType === "PROJECT_CONTEXTUALIZES_WORK") ||
+      (entity.entityType === "CURATED_ACQUISITION" &&
+        relation.relationType === "CURATED_ACQUISITION_BRINGS_TOGETHER_WORK")
+    );
+  });
+  if (!related) return [];
+  if (entity.entityType === "ARTIST") {
+    if (entity.slug === MARTIN_GRASSER_ARTIST_SLUG) {
+      return [VERA_MOLNAR_PUBLIC_PATHS.collaboratorPractice];
+    }
+    return entity.slug === VERA_MOLNAR_ARTIST_SLUG
+      ? [VERA_MOLNAR_PUBLIC_PATHS.artistPractice]
+      : [];
+  }
+  if (entity.entityType === "PROJECT_OR_SERIES") {
+    return [VERA_MOLNAR_PUBLIC_PATHS.projectEssay];
+  }
+  if (entity.entityType === "CURATED_ACQUISITION") {
+    return [VERA_MOLNAR_PUBLIC_PATHS.acquisitionEssay];
+  }
+  return [];
 }
 
 function entityScopedCandidatePaths(
@@ -394,6 +464,21 @@ function documentKind(
   entityType: MuseumPublicEntityType
 ): MuseumPublicDocument["kind"] {
   if (path.endsWith(".json")) return "source_record";
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.artistPractice) {
+    return "artist_practice";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.collaboratorPractice) {
+    return "artist_practice";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.projectEssay) {
+    return "project_essay";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.acquisitionEssay) {
+    return "acquisition_essay";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.sourceChronology) {
+    return "source_chronology_matrix";
+  }
   if (/\/public\/\d{4}NM\.\d{4}\.\d{3}\.\d{2}\.md$/u.test(path)) {
     return "object_entry";
   }
