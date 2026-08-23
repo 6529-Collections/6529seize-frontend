@@ -174,3 +174,25 @@
   `canonical-work-presentation-title` section. That Magnum selector therefore
   remains presentation-specific. These are test-only corrections and do not
   alter runtime code, copy, media, or pixels.
+- Corrective PR #3813 passed exact-head App PR CI run 32666363626, CodeQL,
+  Sonar, Snyk, secret scan, DCO, trust, debt, and review-thread reconciliation,
+  then merged as `d8646201aec183a569b18efe0f061223ed3185ee`.
+- Staging composition `76590cafa3cdefeb73519f53e33b687e1f0f3c21`
+  passed deploy run 32667636938 and automatic Staging E2E 32668149067. A
+  separate credentialed Chromium run exercised the complete Museum hub,
+  lifecycle, link, overflow, and media-intent contract on desktop and mobile;
+  both projects passed, including decoded Vera media and absence of fallback.
+- Production deploy 32669010834 acquired exact authority, built the immutable
+  artifact in 32669023260, verified it independently in 32669550952, and
+  published exact main `d8646201aec183a569b18efe0f061223ed3185ee`.
+  `/api/version` matched that SHA in three consecutive reads. Automatic
+  Production E2E 32669902960 passed its complete read-only pack and isolated
+  evidence verifier.
+- Final public browser readback covered Vera Molnár's artist record,
+  *Themes and Variations*, the gift acquisition, and Work 6529NM-W-0029 at
+  1440 x 1000 and 390 x 844. Every primary Museum image decoded through the
+  strict same-origin endpoint, the pages showed no temporary-unavailable
+  fallback, all mobile documents reported equal client and scroll widths, and
+  the browser reported no warnings or errors. Representative viewport and
+  full-page captures are retained under the local release evidence directory
+  `vera-molnar-production-d864`.

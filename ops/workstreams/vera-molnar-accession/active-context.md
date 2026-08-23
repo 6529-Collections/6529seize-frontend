@@ -55,5 +55,14 @@ Museum delivery copies, live generator, rights, provenance, and source links.
   the governed source URI and exact bytes while delivering approved accession
   derivatives through a strict same-origin Museum endpoint. Local Chrome
   decodes all 640, 1280, and 2400 variants, and their SHA-256 values match the
-  reviewed presentation manifest. Corrective PR, staging, and production
-  qualification remain to be completed.
+  reviewed presentation manifest. Corrective PR #3813 merged as
+  `d8646201aec183a569b18efe0f061223ed3185ee`. Staging composition
+  `76590cafa3cdefeb73519f53e33b687e1f0f3c21` passed deployment
+  32667636938, automatic Staging E2E 32668149067, and an independent exact-
+  source desktop/mobile Museum route test. Production deployment 32669010834,
+  artifact builder 32669023260, artifact verifier 32669550952, automatic
+  Production E2E 32669902960, and its isolated evidence verifier all passed.
+  Public readback resolved the exact production version three times and found
+  decoded governed media, no fallback, no browser warnings or errors, and no
+  horizontal overflow on the artist, project, acquisition, and Work routes at
+  1440 x 1000 and 390 x 844. The corrected accession is live and qualified.
