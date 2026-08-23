@@ -48,10 +48,11 @@ export function getMuseumMediaDeliverySrcSet(
     .split(",")
     .map((candidate) => {
       const trimmed = candidate.trim();
-      const separator = trimmed.lastIndexOf(" ");
+      const separator = trimmed.search(/[\t\n\f\r ]/u);
       if (separator < 1) return trimmed;
       const url = trimmed.slice(0, separator);
-      const descriptor = trimmed.slice(separator + 1);
+      const descriptor = trimmed.slice(separator).trim();
+      if (descriptor.length === 0) return trimmed;
       return `${getMuseumMediaDeliveryUrl(url)} ${descriptor}`;
     })
     .join(", ");

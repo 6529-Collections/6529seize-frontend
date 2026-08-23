@@ -155,3 +155,7 @@
   failures, declared and streamed overage, malformed lengths, timeout, and
   fetch-failure mapping. The focused corrective set passes 16 tests; changed
   lint, changed typecheck, and the Windows-safe diff check pass.
+- CodeRabbit identified that HTML `srcset` also permits a tab between a URL and
+  its descriptor. The parser now recognizes every permitted ASCII whitespace
+  separator and a regression test proves a tab-delimited accession derivative
+  still traverses the same-origin delivery route.

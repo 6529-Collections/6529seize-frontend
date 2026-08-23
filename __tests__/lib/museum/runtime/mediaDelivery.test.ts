@@ -40,5 +40,8 @@ describe("Museum media delivery", () => {
     ).toBe(
       `/api/museum/media?url=${encodeURIComponent(SOURCE)} 640w, /api/museum/media?url=${encodeURIComponent(source1280)} 1280w`
     );
+    expect(getMuseumMediaDeliverySrcSet(`${SOURCE}\t640w`)).toBe(
+      `/api/museum/media?url=${encodeURIComponent(SOURCE)} 640w`
+    );
   });
 });
