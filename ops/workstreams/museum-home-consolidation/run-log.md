@@ -48,3 +48,8 @@
   point. Moved the unchanged utility beneath the workstream's registered
   `scripts/` boundary. Full non-mutating Knip and changed lint now pass; no
   runtime code, copy, pixels, or accepted screenshot hash changed.
+- CodeRabbit correctly observed that the first capture assertion could find an
+  acquisition title in the section introduction even if its card were absent.
+  The harness now reads only `article h3` titles inside the acquisition
+  section. A fresh production-build capture retained all three accepted image
+  hashes and passed the stricter four-card assertion.

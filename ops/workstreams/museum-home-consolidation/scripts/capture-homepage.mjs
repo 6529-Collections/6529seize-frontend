@@ -63,7 +63,11 @@ try {
     });
 
     const pageEvidence = await page.evaluate((titles) => {
-      const bodyText = document.body.innerText;
+      const acquisitionTitles = [
+        ...document.querySelectorAll(
+          'section[aria-labelledby="museum-acquisition-stories-title"] article h3'
+        ),
+      ].map((heading) => heading.textContent?.trim() ?? "");
       const imageState = [...document.images].map((image) => ({
         alt: image.alt,
         complete: image.complete,
@@ -89,7 +93,7 @@ try {
           )
         ).length,
         expectedAcquisitions: Object.fromEntries(
-          titles.map((title) => [title, bodyText.includes(title)])
+          titles.map((title) => [title, acquisitionTitles.includes(title)])
         ),
         decodedImageCount: imageState.filter(
           (image) => image.complete && image.naturalWidth > 0
