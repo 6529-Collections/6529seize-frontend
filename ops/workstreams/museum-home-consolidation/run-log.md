@@ -14,3 +14,8 @@
 - Added a source-contract regression test that requires one acquisition
   section in the typed homepage and forbids restoration of the removed
   presentation component.
+- The exact production build found a stale inline ESLint suppression in
+  `services/dm-unread/DmUnreadStateProvider.tsx`. The referenced plugin was not
+  present in that file's lint scope, so ESLint treated the suppression itself
+  as an unknown-rule error. Removed the comment only; runtime behavior is
+  unchanged.

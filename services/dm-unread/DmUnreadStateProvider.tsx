@@ -30,10 +30,7 @@ import {
   DmUnreadContext,
   type DmUnreadContextValue,
 } from "./dm-unread-context";
-import {
-  DmUnreadStore,
-  type DmUnreadReadOperation,
-} from "./dm-unread-store";
+import { DmUnreadStore, type DmUnreadReadOperation } from "./dm-unread-store";
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
 const DROP_UPDATE_RECOVERY_GRACE_MS = 1_500;
 const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
@@ -659,7 +656,6 @@ export function DmUnreadStateProvider({
     previousWebSocketStatusRef.current = currentStatus;
     if (
       // The websocket hook exposes connection state, not a reconnect callback.
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler
       currentStatus === WebSocketStatus.CONNECTED &&
       previousStatus !== WebSocketStatus.CONNECTED
     ) {
