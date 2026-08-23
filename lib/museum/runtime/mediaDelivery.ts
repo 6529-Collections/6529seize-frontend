@@ -42,6 +42,8 @@ export function getMuseumMediaDeliverySrcSet(
   value: string | undefined
 ): string | undefined {
   if (value === undefined) return undefined;
+  // Governed derivative URLs cannot contain commas or query parameters, so
+  // each comma is an unambiguous candidate boundary here.
   return value
     .split(",")
     .map((candidate) => {

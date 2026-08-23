@@ -50,7 +50,7 @@ function isOversizedResponse(headers: Headers): boolean {
   const contentLength = headers.get("content-length");
   if (contentLength === null) return false;
   const bytes = Number(contentLength);
-  return !Number.isFinite(bytes) || bytes < 0 || bytes > MAX_ASSET_BYTES;
+  return Number.isFinite(bytes) && bytes > MAX_ASSET_BYTES;
 }
 
 async function readBodyWithLimit(

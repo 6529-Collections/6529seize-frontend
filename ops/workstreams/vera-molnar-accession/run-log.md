@@ -147,3 +147,11 @@
   decodes 640, 1280, and 2400 pixels with no request failure. Their SHA-256
   values exactly match reviewed manifest B: `a53b0dbd...bcbc1`,
   `3e9a68c8...42555`, and `0ec810b0...dc436`.
+- Corrective PR #3813 review required direct route coverage before merge. The
+  route now distinguishes a genuinely oversized declared response from a
+  malformed `content-length` and relies on the streaming ceiling for the
+  latter. Six route tests cover the immutable WebP success path, URL and
+  redirect rejection, content-type rejection, upstream and missing-body
+  failures, declared and streamed overage, malformed lengths, timeout, and
+  fetch-failure mapping. The focused corrective set passes 16 tests; changed
+  lint, changed typecheck, and the Windows-safe diff check pass.
