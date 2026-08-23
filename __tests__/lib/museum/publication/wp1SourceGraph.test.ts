@@ -28,32 +28,33 @@ import type {
 // fixture. Production resolves the canonical C pointer/catalog and consumes
 // only this immutable reviewed B corpus.
 const SOURCE_COMMIT = [
-  "9aea66c0",
-  "7d59f890",
-  "e366dde6",
-  "552a3045",
-  "80ba789a",
+  "92966f28",
+  "36ebf2af",
+  "06edfe0f",
+  "e2cff250",
+  "41307c92",
 ].join("");
-const CATALOG_COMMIT = "975f041aed7e2f402ab26d4fb2bb266e07db4974";
+const CATALOG_COMMIT = "858d3ebc049b59219d6fa639dbd325b6adc7345a";
 const CATALOG_ID = `6529NM-PUBCAT-${SOURCE_COMMIT}`;
 const CATALOG_PATH = `release-artifacts/catalog/${CATALOG_ID}.json` as const;
 const POINTER_PATH =
   "release-artifacts/latest/publication-catalog-pointer.json" as const;
 const POINTER_SHA256 =
-  "sha256:935aa76ed1159e7ef22ec9a75d8afea112c5f41f2038cd43db6086739fb85b8e";
+  "sha256:eb7d6a9199e0d7f884e87c280afab27f12d6f2c7fa7858c32c362e9790394f40";
 const CATALOG_SHA256 =
-  "sha256:bd488ac43ee423b1390a50bf02addb71716daddf45f7897d7afa86787e9df49f";
+  "sha256:283deb7a3ce4b0d01bc96cd88713c705bba2ec4b37cfe08b4a4c92a0fbd08144";
 const CATALOG_ENVELOPE =
-  "0xf782673a74d437ab6fb5a0017e54024f62c84a2d311f5bb5fddad81e407a26a2";
+  "0x7d6d1077cf865b863655038bf79c3f1416457a9fe291b862980e9828a7b24e4c";
 const INVENTORY_SELF_SHA256 =
-  "sha256:8700dffecad31591901dfb9d93df07542603701899ef5efb46bda048f301a925";
+  "sha256:128d4e0795a71057c5d58a1d634fc81663dc41ccc7d8a58e8527e827fc784b5b";
 const INVENTORY_SELF_KECCAK =
-  "0x919fe993d2db227927937b2888512e6d7098cf0ad68d61bcd66d50a71b9ce271";
+  "0x076d53eba9c53fd6043e50a1db86fab69889ee8650cc34a566720c2089b619e7";
 const COMPLETE_INVENTORY_SHA256 =
-  "sha256:facd7ba6d8d83dc34e77e6f246e792cd834d08b56962f3ff07cc49a8f33cb999";
+  "sha256:d073387e28479377589d381314ece877cb36b68ede090be9c56689868d89c32f";
 const COMPLETE_INVENTORY_KECCAK =
-  "0x1a9e98306367a283e958e70a007fd49cda5e12447b553e0c651905a8b8aad5a2";
+  "0x18094768f19c087ce0310218998c4ccc713767c4b7e835d81f5f3668bf372417";
 const SOURCE_ROOT = process.env["MUSEUM_WP1_SOURCE_ROOT"];
+const CATALOG_ROOT = process.env["MUSEUM_WP1_CATALOG_ROOT"] ?? SOURCE_ROOT;
 const LOCAL_FIXTURE_SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_LOCAL_FIXTURE_COMMIT"] ??
   process.env["MUSEUM_WP1_SOURCE_COMMIT"] ??
@@ -85,6 +86,7 @@ function sha256(bytes: Uint8Array): `sha256:${string}` {
 
 function createCanonicalCatalogFetch(
   sourceRoot: string,
+  catalogRoot: string,
   calls: string[]
 ): typeof fetch {
   const allowedPathsByCommit = new Map<string, ReadonlySet<string>>([
@@ -125,8 +127,9 @@ function createCanonicalCatalogFetch(
     ) {
       throw new Error(`unexpected_catalog_transport:${requestUrl}`);
     }
+    const fixtureRoot = commit === CATALOG_COMMIT ? catalogRoot : sourceRoot;
     const bytes = new Uint8Array(
-      readFileSync(join(sourceRoot, ...sourcePath.split("/")))
+      readFileSync(join(fixtureRoot, ...sourcePath.split("/")))
     );
     return {
       ok: true,
@@ -158,11 +161,11 @@ function readSourceFixture(): SourceFixture | null {
   const sourceCommit = process.env["MUSEUM_WP1_SOURCE_COMMIT"] ?? SOURCE_COMMIT;
   if (sourceCommit === SOURCE_COMMIT) {
     if (
-      manifest.entries.length !== 888 ||
+      manifest.entries.length !== 975 ||
       manifest.manifest_sha256 !==
-        "sha256:546e183b31de7ec725db9700989b0026dce3bcbc2dd7f4fdc771161d4bb038c8" ||
+        "sha256:3ce9acb89b6673d769d1317603c76d433b7f207473b7638def4848ee127670e7" ||
       manifest.manifest_commitment?.digest !==
-        "0x8d02eb26ed0c9420eb1b7b735aaa33235f3bf1b3be0dd3935065e926f32a271e"
+        "0x6a5bd5206c4ce9868e7f4bbe8116565cb25302843de84809c6c0137ae2817164"
     ) {
       throw new Error("wp1_source_manifest_commitment_mismatch");
     }
@@ -388,26 +391,27 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       graph,
       fixture.documents,
       readMuseumLocalFixtureMediaAssetPaths(
-        SOURCE_ROOT!,
+        CATALOG_ROOT!,
         LOCAL_FIXTURE_SOURCE_COMMIT
       )
     );
-    expect(publication.works).toHaveLength(28);
-    expect(publication.artists).toHaveLength(21);
-    expect(publication.projects).toHaveLength(6);
-    expect(publication.curatedAcquisitions).toHaveLength(3);
+    expect(publication.works).toHaveLength(29);
+    expect(publication.artists).toHaveLength(23);
+    expect(publication.projects).toHaveLength(7);
+    expect(publication.curatedAcquisitions).toHaveLength(4);
     expect(publication.acquisitionPrograms).toHaveLength(2);
     expect(publication.researchPublications).toHaveLength(3);
     expect(
       publication.works?.filter(
         (work) => work.status === "accessioned_into_permanent_collection"
       )
-    ).toHaveLength(12);
+    ).toHaveLength(13);
     expect(
       publication.curatedAcquisitions?.map((acquisition) => acquisition.status)
     ).toEqual([
       "accessioned_into_permanent_collection",
       "selected_through_acquisition_program_acquisition_pending",
+      "accessioned_into_permanent_collection",
       "accessioned_into_permanent_collection",
     ]);
     expect(
@@ -514,6 +518,26 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
         )
       )
     ).toEqual(new Set());
+    const veraWork = publication.works?.find(
+      (work) => work.id === "6529NM-W-0029"
+    );
+    expect(veraWork?.media).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "6529NM-MED-0052",
+          kind: "still",
+          role: "source",
+          credit: expect.objectContaining({ licenseLabel: "CC BY-NC 4.0" }),
+        }),
+        expect.objectContaining({
+          id: "6529NM-MED-0053",
+          kind: "live",
+          role: "source",
+          url: "https://generator.artblocks.io/1/0xe034bb2b1b9471e11cf1a0a9199a156fb227aa5d/210",
+          credit: expect.objectContaining({ licenseLabel: "CC BY-NC 4.0" }),
+        }),
+      ])
+    );
     expect(
       publication.workAliases?.every((alias) =>
         museumWorkHrefForSourceId(
@@ -615,6 +639,19 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       ).toThrow(errorCode);
     }
   );
+
+  it("accepts the additive 1.7 identity inventory used by the Vera accession release", () => {
+    if (fixture === null) throw new Error("wp1_source_fixture_required");
+    const mutated = mutateIdentityInventory(fixture, (inventory) => {
+      inventory["inventory_version"] = "1.7.0";
+    });
+    const graph = parseMuseumPublicEntityGraph(
+      mutated.documents,
+      mutated.declaredPaths,
+      mutated.sourceCommit
+    );
+    expect(graph?.identityInventory.inventoryVersion).toBe("1.7.0");
+  });
 
   it("rejects a Work whose governed manifestation identity drifts from the 1.5 registry", () => {
     if (fixture === null) throw new Error("wp1_source_fixture_required");
@@ -738,7 +775,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       localFixtureAcceptedPaths:
         readMuseumLocalFixtureVisitorPaths(SOURCE_ROOT),
       localFixtureMediaAssetPaths: readMuseumLocalFixtureMediaAssetPaths(
-        SOURCE_ROOT,
+        CATALOG_ROOT!,
         LOCAL_FIXTURE_SOURCE_COMMIT
       ),
     });
@@ -804,11 +841,14 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
     if (SOURCE_ROOT === undefined || SOURCE_ROOT.trim().length === 0) {
       throw new Error("wp1_source_root_required");
     }
+    if (CATALOG_ROOT === undefined || CATALOG_ROOT.trim().length === 0) {
+      throw new Error("wp1_catalog_root_required");
+    }
     const pointerBytes = new Uint8Array(
-      readFileSync(join(SOURCE_ROOT, ...POINTER_PATH.split("/")))
+      readFileSync(join(CATALOG_ROOT, ...POINTER_PATH.split("/")))
     );
     const catalogBytes = new Uint8Array(
-      readFileSync(join(SOURCE_ROOT, ...CATALOG_PATH.split("/")))
+      readFileSync(join(CATALOG_ROOT, ...CATALOG_PATH.split("/")))
     );
     expect(sha256(pointerBytes)).toBe(POINTER_SHA256);
     expect(sha256(catalogBytes)).toBe(CATALOG_SHA256);
@@ -844,7 +884,7 @@ wp1Suite("WP-1 released PUBLIC_ENTITY/PUBLIC_RELATION source shape", () => {
       ref: CATALOG_COMMIT,
       assembler: legacyCaseyPublicationAssembler,
       catalogResolver: museumPublicationCatalogResolver,
-      fetch: createCanonicalCatalogFetch(SOURCE_ROOT, calls),
+      fetch: createCanonicalCatalogFetch(SOURCE_ROOT, CATALOG_ROOT, calls),
       now: () => new Date("2026-08-09T20:05:00.000Z"),
     });
     const result = await source.load();

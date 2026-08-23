@@ -19,15 +19,17 @@ import type {
 } from "./types";
 import { buildMuseumTypedDocumentProjection } from "./typedDocuments";
 import {
-  aliasesForWorks,
-  immutableDocumentSource,
-  mapAcquisitionMethod,
   mapAcquisitionStatus,
   mapWorkStatus,
-  mergeWorkAliases,
   projectMediaRelations,
   type MuseumProjectedMedia,
 } from "./publicEntityGraphMedia";
+import {
+  aliasesForWorks,
+  immutableDocumentSource,
+  mapAcquisitionMethod,
+  mergeWorkAliases,
+} from "./publicEntityGraphAliases";
 import {
   profileStringArray,
   requireEntity,
@@ -209,6 +211,7 @@ function projectWork(
       "public_entity_graph_work_medium"
     ),
     artistId,
+    artistIds: creatorIds,
     projectId:
       profileStringArray(entity, "project_or_series_entity_ids")[0] ?? null,
     status: mapWorkStatus(lifecycle),
