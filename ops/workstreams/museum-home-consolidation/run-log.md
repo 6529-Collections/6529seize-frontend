@@ -43,3 +43,8 @@
 - Re-ran the focused homepage contract suite (7/7), changed lint, changed
   typecheck, and the Windows-safe diff check after the final copy corrections;
   all passed.
+- Hosted App PR CI run `32674363154` correctly rejected the initial location
+  of the retained capture utility because Knip could not infer it as an entry
+  point. Moved the unchanged utility beneath the workstream's registered
+  `scripts/` boundary. Full non-mutating Knip and changed lint now pass; no
+  runtime code, copy, pixels, or accepted screenshot hash changed.

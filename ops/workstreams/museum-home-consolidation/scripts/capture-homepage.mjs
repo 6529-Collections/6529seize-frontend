@@ -76,7 +76,9 @@ try {
         clientWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
         scrollHeight: document.documentElement.scrollHeight,
-        acquisitionHeadingCount: [...document.querySelectorAll("h1, h2, h3")].filter(
+        acquisitionHeadingCount: [
+          ...document.querySelectorAll("h1, h2, h3"),
+        ].filter(
           (heading) => heading.textContent?.trim() === "Acquisitions"
         ).length,
         supersededSectionHeadingCount: [
@@ -99,7 +101,9 @@ try {
     }, expectedAcquisitions);
     results.push({
       viewport,
-      screenshot: path.relative(process.cwd(), screenshotPath).replaceAll("\\", "/"),
+      screenshot: path
+        .relative(process.cwd(), screenshotPath)
+        .replaceAll("\\", "/"),
       sha256: createHash("sha256").update(screenshotBytes).digest("hex"),
       consoleErrors,
       ...pageEvidence,
@@ -121,16 +125,22 @@ const failures = results.flatMap((result) => {
     );
   }
   if (result.supersededSectionHeadingCount > 0) {
-    messages.push(`${result.viewport.name}: superseded homepage section remains visible`);
+    messages.push(
+      `${result.viewport.name}: superseded homepage section remains visible`
+    );
   }
   for (const [title, present] of Object.entries(result.expectedAcquisitions)) {
     if (!present) messages.push(`${result.viewport.name}: missing ${title}`);
   }
   if (result.brokenImages.length > 0) {
-    messages.push(`${result.viewport.name}: ${result.brokenImages.length} broken images`);
+    messages.push(
+      `${result.viewport.name}: ${result.brokenImages.length} broken images`
+    );
   }
   if (result.consoleErrors.length > 0) {
-    messages.push(`${result.viewport.name}: ${result.consoleErrors.length} console errors`);
+    messages.push(
+      `${result.viewport.name}: ${result.consoleErrors.length} console errors`
+    );
   }
   return messages;
 });
