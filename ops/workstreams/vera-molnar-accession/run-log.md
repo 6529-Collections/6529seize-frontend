@@ -130,3 +130,47 @@
   scroll widths (820/820), and no console or page error was observed. Direct
   visual readback found no clipped boxes, collapsed columns, stranded labels,
   or artwork distortion.
+- Frontend PR #3812 merged as
+  `59ccd83442c3dca207b06701395b11878906f804`. Staging composition
+  `1a083eceaf0e3865312f72470f3f9d9ac1236f3b` passed deploy run 32660459394,
+  automatic dispatch 32660997762, and Staging E2E 32661001514. Production
+  deploy 32662032108, authority completion 32662902084, automatic Production
+  E2E 32662908738, and its isolated verifier all passed on exact main.
+- The mandatory installed-Chrome production readback then caught a defect the
+  hosted pack had missed: direct browser requests for approved CloudFront
+  accession derivatives were rejected with `ERR_BLOCKED_BY_ORB`, and the Vera
+  image component displayed its fallback. The corrective implementation maps
+  only exact `6529NM` WebP derivative paths on the approved host to
+  `/api/museum/media`, uses the existing DNS-pinned public URL guard, rejects
+  redirects outside the exact path grammar, limits responses to 16 MiB, and
+  serves the unchanged bytes from the site origin. Local installed Chrome
+  decodes 640, 1280, and 2400 pixels with no request failure. Their SHA-256
+  values exactly match reviewed manifest B: `a53b0dbd...bcbc1`,
+  `3e9a68c8...42555`, and `0ec810b0...dc436`.
+- Corrective PR #3813 review required direct route coverage before merge. The
+  route now distinguishes a genuinely oversized declared response from a
+  malformed `content-length` and relies on the streaming ceiling for the
+  latter. Six route tests cover the immutable WebP success path, URL and
+  redirect rejection, content-type rejection, upstream and missing-body
+  failures, declared and streamed overage, malformed lengths, timeout, and
+  fetch-failure mapping. The focused corrective set passes 16 tests; changed
+  lint, changed typecheck, and the Windows-safe diff check pass.
+- CodeRabbit identified that HTML `srcset` also permits a tab between a URL and
+  its descriptor. The parser now recognizes every permitted ASCII whitespace
+  separator and a regression test proves a tab-delimited accession derivative
+  still traverses the same-origin delivery route.
+- Sonar's passing quality gate reported three instances of the same minor
+  regex-style issue. The accession path grammar now uses the concise ASCII
+  digit class for year, accession sequence, and Work sequence; behavior and
+  the exact allowed path boundary are unchanged.
+- Corrective exact-head CI run 32665361257 rendered the Vera Work and its image
+  successfully in the mobile browser, but the Network IA test queried the
+  retired `canonical-work-presentation-title` section ID. The live DOM and
+  retained Playwright snapshot place canonical media under
+  `canonical-work-media-title`, so the Vera image assertion now uses that
+  public semantic boundary. Exact-head rerun 32665959639 passed the Vera check
+  and reached the existing Magnum Work assertion. Its retained DOM confirms
+  that the historical Wave image remains, correctly, in the distinct
+  `canonical-work-presentation-title` section. That Magnum selector therefore
+  remains presentation-specific. These are test-only corrections and do not
+  alter runtime code, copy, media, or pixels.
