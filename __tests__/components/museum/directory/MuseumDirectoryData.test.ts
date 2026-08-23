@@ -239,6 +239,40 @@ describe("Museum directory state and copy", () => {
     );
   });
 
+  it("credits every artist on a collaborative Collection work", () => {
+    const collaborativeWork = {
+      ...work(
+        "6529NM-W-0029",
+        "artist-casey",
+        "accessioned_into_permanent_collection",
+        { collectionMembership: true }
+      ),
+      artistIds: ["artist-casey", "artist-martin"],
+    };
+    const base = publication([collaborativeWork]);
+    const model = buildMuseumDirectoryModel({
+      ...base,
+      artists: [
+        ...base.artists,
+        {
+          id: "artist-martin",
+          slug: "martin-grasser",
+          preferredName: "Martin Grasser",
+          projectIds: [],
+          artworkIds: [],
+          workIds: [collaborativeWork.id],
+          documentIds: [],
+          sourcePaths: ["records/artists/martin-grasser.json"],
+        },
+      ],
+    });
+
+    expect(
+      model?.artists.find((record) => record.artist.id === "artist-martin")
+        ?.relationship
+    ).toContain("1 in the permanent Collection");
+  });
+
   it("describes Keys and Gates as selected and unminted rather than in accession processing", () => {
     const selectedWork = work(
       "6529NM-W-0008",

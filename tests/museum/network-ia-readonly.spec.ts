@@ -144,7 +144,12 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
 
     await openRoute(page, "/museum/network");
     await expect(
-      page.getByText("Seven works by Casey Reas", { exact: true })
+      page
+        .getByText(
+          "Vera Molnár, in collaboration with Martin Grasser · Themes and Variations",
+          { exact: true }
+        )
+        .first()
     ).toBeVisible();
     const acquisitionStories = page.locator(
       '[aria-labelledby="museum-acquisition-stories-title"]'
@@ -153,6 +158,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       "The System in Seven States",
       "Keys and Gates",
       "Conflict at Its Edges",
+      "A Gift of Themes and Variations #210",
     ]) {
       await expect(
         acquisitionStories.getByRole("link", { name: title, exact: true })
@@ -167,7 +173,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
-    expect(collectionWorkHrefs).toHaveLength(12);
+    expect(collectionWorkHrefs).toHaveLength(13);
     expect(
       collectionWorkHrefs.every(
         (href): href is string =>
@@ -261,9 +267,9 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
-    expect(artistHrefs).toHaveLength(21);
+    expect(artistHrefs).toHaveLength(23);
     const artistMediaStages = page.getByTestId("museum-directory-media-stage");
-    await expect(artistMediaStages).toHaveCount(21);
+    await expect(artistMediaStages).toHaveCount(23);
     const artistStageRatios = await artistMediaStages.evaluateAll((stages) =>
       stages.map((stage) => {
         const { width, height } = stage.getBoundingClientRect();
@@ -275,11 +281,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     }
 
     await openRoute(page, "/museum/network/acquisitions");
-    await expect(page.locator("article")).toHaveCount(3);
+    await expect(page.locator("article")).toHaveCount(4);
     const acquisitionMediaStages = page.getByTestId(
       "museum-acquisition-media-stage"
     );
-    await expect(acquisitionMediaStages).toHaveCount(3);
+    await expect(acquisitionMediaStages).toHaveCount(4);
     const acquisitionStageRatios = await acquisitionMediaStages.evaluateAll(
       (stages) =>
         stages.map((stage) => {
@@ -308,6 +314,10 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       ],
       [
         "/museum/network/works/6529NM-W-0024",
+        "Accessioned into the permanent Collection",
+      ],
+      [
+        "/museum/network/works/6529NM-W-0029",
         "Accessioned into the permanent Collection",
       ],
     ] as const) {

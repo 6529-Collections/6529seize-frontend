@@ -530,10 +530,10 @@ describe("testing strategy CI plan", () => {
       "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "a3977a8f020f58d0c9e79f23bc4f37245be65879"'
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "858d3ebc049b59219d6fa639dbd325b6adc7345a"'
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "f52fe5513423d8049bb557749a9fce1070ace64b"'
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "92966f2836ebf2af06edfe0fe2cff25041307c92"'
     );
     expect(workflow).toContain('case "$selected_pack"');
     expect(workflow).toContain(
@@ -740,14 +740,14 @@ describe("testing strategy CI plan", () => {
       'echo "Museum server did not become ready for $MUSEUM_PROJECT."'
     );
     expect(museumBrowserRun).toContain(
-      "timeout --signal=TERM --kill-after=30s 15m"
+      "timeout --signal=TERM --kill-after=30s 20m"
     );
     expect(museumBrowserRun).toContain(
       '| sed -u "s/^/[museum $MUSEUM_PROJECT remaining] /"'
     );
     expect(museumBrowserRun).toContain('| tee "$museum_remaining_log"');
     expect(museumBrowserRun).toContain(
-      "Museum $MUSEUM_PROJECT remaining coverage exceeded its 15-minute timeout."
+      "Museum $MUSEUM_PROJECT remaining coverage exceeded its 20-minute timeout."
     );
     expect(museumBrowserRun).toContain(
       "Museum $MUSEUM_PROJECT remaining coverage failed with exit ${museum_remaining_exit}."
