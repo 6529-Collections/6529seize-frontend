@@ -2,7 +2,7 @@
 
 ## Objective
 
-Publish the accepted and delivered gift of *Themes and Variations* #210 as a
+Publish the accepted and delivered gift of _Themes and Variations_ #210 as a
 complete Museum accession: Collection, acquisition, artist/collaborator,
 project, Work, and Research surfaces, with the official still, responsive
 Museum delivery copies, live generator, rights, provenance, and source links.
@@ -44,7 +44,16 @@ Museum delivery copies, live generator, rights, provenance, and source links.
   compatibility suite passes a further 18 tests, including 29 works, 23
   artists, seven projects, four acquisitions, all catalog commitments, and the
   complete Vera media boundary. Changed lint, changed typecheck, and the
-  optimized 3,675-route production build pass. Frontend PR #3812 is open; its
-  amended exact head includes the final review fixes, debt-ratchet split,
-  Museum surface-registry entry, and DCO sign-off. No staging or production
-  mutation has occurred.
+  optimized 3,675-route production build pass. Frontend PR #3812 merged as
+  `59ccd83442c3dca207b06701395b11878906f804`; staging deployment and automatic
+  E2E passed, production deployment and automatic isolated E2E passed, and the
+  exact commit is live.
+- Final installed-Chrome readback found that the Museum CloudFront origin
+  returned browser subresource requests as blocked responses, despite serving
+  the exact derivative bytes to server-side clients. This affected the new
+  Vera still and older accession derivatives. The corrective branch preserves
+  the governed source URI and exact bytes while delivering approved accession
+  derivatives through a strict same-origin Museum endpoint. Local Chrome
+  decodes all 640, 1280, and 2400 variants, and their SHA-256 values match the
+  reviewed presentation manifest. Corrective PR, staging, and production
+  qualification remain to be completed.

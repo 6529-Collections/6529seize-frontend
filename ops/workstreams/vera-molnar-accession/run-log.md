@@ -130,3 +130,20 @@
   scroll widths (820/820), and no console or page error was observed. Direct
   visual readback found no clipped boxes, collapsed columns, stranded labels,
   or artwork distortion.
+- Frontend PR #3812 merged as
+  `59ccd83442c3dca207b06701395b11878906f804`. Staging composition
+  `1a083eceaf0e3865312f72470f3f9d9ac1236f3b` passed deploy run 32660459394,
+  automatic dispatch 32660997762, and Staging E2E 32661001514. Production
+  deploy 32662032108, authority completion 32662902084, automatic Production
+  E2E 32662908738, and its isolated verifier all passed on exact main.
+- The mandatory installed-Chrome production readback then caught a defect the
+  hosted pack had missed: direct browser requests for approved CloudFront
+  accession derivatives were rejected with `ERR_BLOCKED_BY_ORB`, and the Vera
+  image component displayed its fallback. The corrective implementation maps
+  only exact `6529NM` WebP derivative paths on the approved host to
+  `/api/museum/media`, uses the existing DNS-pinned public URL guard, rejects
+  redirects outside the exact path grammar, limits responses to 16 MiB, and
+  serves the unchanged bytes from the site origin. Local installed Chrome
+  decodes 640, 1280, and 2400 pixels with no request failure. Their SHA-256
+  values exactly match reviewed manifest B: `a53b0dbd...bcbc1`,
+  `3e9a68c8...42555`, and `0ec810b0...dc436`.

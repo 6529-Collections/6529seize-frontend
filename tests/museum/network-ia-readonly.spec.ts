@@ -328,6 +328,28 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       await expectNoDeadLinks(page);
     }
 
+    await openRoute(page, "/museum/network/works/6529NM-W-0029");
+    const veraWorkImage = page.locator(
+      '[aria-labelledby="canonical-work-presentation-title"] img'
+    );
+    await expect(veraWorkImage).toHaveCount(1);
+    await veraWorkImage.scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        () =>
+          veraWorkImage.evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          ),
+        { timeout: 20_000 }
+      )
+      .toBe(true);
+    await expect(
+      page.getByText("This image is temporarily unavailable.", { exact: true })
+    ).toHaveCount(0);
+
     await openRoute(page, "/museum/network/works/6529NM-W-0001");
     await expect(page.getByText("By", { exact: true })).toBeVisible();
     await expect(page.getByText("Part of", { exact: true })).toBeVisible();
