@@ -159,3 +159,7 @@
   its descriptor. The parser now recognizes every permitted ASCII whitespace
   separator and a regression test proves a tab-delimited accession derivative
   still traverses the same-origin delivery route.
+- Sonar's passing quality gate reported three instances of the same minor
+  regex-style issue. The accession path grammar now uses the concise ASCII
+  digit class for year, accession sequence, and Work sequence; behavior and
+  the exact allowed path boundary are unchanged.

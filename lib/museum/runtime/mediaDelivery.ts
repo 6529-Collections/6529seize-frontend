@@ -5,7 +5,7 @@ export const MUSEUM_MEDIA_PROXY_ALLOWED_HOSTS = [
 ] as const;
 
 const ACCESSION_DERIVATIVE_PATH =
-  /^\/museum\/accessions\/6529NM\.[0-9]{4}\.[0-9]{3}\/6529NM-W-[0-9]{4}\/[0-9a-f]{64}\/webp-v2-q82-m6-fixed-icc\/(?:640|1280|2400)\.webp$/u;
+  /^\/museum\/accessions\/6529NM\.\d{4}\.\d{3}\/6529NM-W-\d{4}\/[0-9a-f]{64}\/webp-v2-q82-m6-fixed-icc\/(?:640|1280|2400)\.webp$/u;
 
 export function isMuseumMediaProxyAllowedUrl(value: string): boolean {
   let parsed: URL;
