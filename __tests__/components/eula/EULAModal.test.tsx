@@ -1,6 +1,5 @@
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 
 const mockConsent = jest.fn();
@@ -46,7 +45,7 @@ describe("EULAModal", () => {
     jest.restoreAllMocks();
   });
 
-  it("is an accessible, labelled modal with initial focus in the agreement", async () => {
+  it("is an accessible, labelled modal with initial focus on the scroll control", async () => {
     render(<EULAModal />);
 
     const dialog = screen.getByRole("dialog", {
@@ -58,13 +57,12 @@ describe("EULAModal", () => {
     ).toBeVisible();
     await waitFor(() =>
       expect(
-        screen.getByLabelText("End User License Agreement text")
+        screen.getByRole("button", { name: "Scroll to end of agreement" })
       ).toHaveFocus()
     );
   });
 
   it("traps focus inside the modal", async () => {
-    const user = userEvent.setup();
     render(
       <>
         <button type="button">Outside</button>
@@ -76,10 +74,11 @@ describe("EULAModal", () => {
       expect(dialog.contains(document.activeElement)).toBe(true)
     );
 
-    await user.tab();
-    expect(dialog.contains(document.activeElement)).toBe(true);
-    await user.tab({ shift: true });
-    expect(dialog.contains(document.activeElement)).toBe(true);
+    screen.getByText("Outside").focus();
+
+    await waitFor(() =>
+      expect(dialog.contains(document.activeElement)).toBe(true)
+    );
   });
 
   it("makes the underlying application inert and restores it on unmount", () => {

@@ -147,6 +147,8 @@ export * from '../models/ApiCurationDrop';
 export * from '../models/ApiCurationDropsPage';
 export * from '../models/ApiDecentralizedMediaProtocol';
 export * from '../models/ApiDecentralizedMediaResolution';
+export * from '../models/ApiDeleteEulaConsentRequest';
+export * from '../models/ApiDeleteEulaConsentResponse';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDmDropsUnreadCount';
@@ -208,6 +210,8 @@ export * from '../models/ApiDropsLeaderboardPage';
 export * from '../models/ApiDropsLeaderboardPageV2';
 export * from '../models/ApiDropsPage';
 export * from '../models/ApiErrorResponse';
+export * from '../models/ApiEulaConsent';
+export * from '../models/ApiEulaVersion';
 export * from '../models/ApiFeedItem';
 export * from '../models/ApiFeedItemType';
 export * from '../models/ApiGlobalRepCategoryGiver';
@@ -393,6 +397,8 @@ export * from '../models/ApiReplyToDropAuthor';
 export * from '../models/ApiReplyToDropResponse';
 export * from '../models/ApiReplyToDropV2';
 export * from '../models/ApiRollbackProfileCmsPackageRequest';
+export * from '../models/ApiSaveEulaConsentRequest';
+export * from '../models/ApiSaveEulaConsentResponse';
 export * from '../models/ApiSaveProfileCmsPackageDraftRequest';
 export * from '../models/ApiSeizeSettings';
 export * from '../models/ApiSessionLoginRequest';
@@ -798,6 +804,8 @@ import { ApiCurationDrop                                 } from '../models/ApiCu
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
 import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
 import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
+import { ApiDeleteEulaConsentRequest } from '../models/ApiDeleteEulaConsentRequest';
+import { ApiDeleteEulaConsentResponse } from '../models/ApiDeleteEulaConsentResponse';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDmDropsUnreadCount } from '../models/ApiDmDropsUnreadCount';
@@ -859,6 +867,8 @@ import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiErrorResponse } from '../models/ApiErrorResponse';
+import { ApiEulaConsent     } from '../models/ApiEulaConsent';
+import { ApiEulaVersion } from '../models/ApiEulaVersion';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
 import { ApiFeedItemType } from '../models/ApiFeedItemType';
 import { ApiGlobalRepCategoryGiver } from '../models/ApiGlobalRepCategoryGiver';
@@ -1044,6 +1054,8 @@ import { ApiReplyToDropAuthor } from '../models/ApiReplyToDropAuthor';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
 import { ApiRollbackProfileCmsPackageRequest } from '../models/ApiRollbackProfileCmsPackageRequest';
+import { ApiSaveEulaConsentRequest    } from '../models/ApiSaveEulaConsentRequest';
+import { ApiSaveEulaConsentResponse   } from '../models/ApiSaveEulaConsentResponse';
 import { ApiSaveProfileCmsPackageDraftRequest } from '../models/ApiSaveProfileCmsPackageDraftRequest';
 import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
 import { ApiSessionLoginRequest, ApiSessionLoginRequestClientTypeEnum      , ApiSessionLoginRequestWalletKindHintEnum  , ApiSessionLoginRequestSignatureVersionEnum   } from '../models/ApiSessionLoginRequest';
@@ -1349,6 +1361,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
+    "ApiEulaVersion",
     "ApiFeedItemType",
     "ApiGroupBeneficiaryGrantMatchMode",
     "ApiGroupFilterDirection",
@@ -1656,6 +1669,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCurationDrop": ApiCurationDrop,
     "ApiCurationDropsPage": ApiCurationDropsPage,
     "ApiDecentralizedMediaResolution": ApiDecentralizedMediaResolution,
+    "ApiDeleteEulaConsentRequest": ApiDeleteEulaConsentRequest,
+    "ApiDeleteEulaConsentResponse": ApiDeleteEulaConsentResponse,
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDmDropsUnreadCount": ApiDmDropsUnreadCount,
@@ -1711,6 +1726,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropsLeaderboardPageV2": ApiDropsLeaderboardPageV2,
     "ApiDropsPage": ApiDropsPage,
     "ApiErrorResponse": ApiErrorResponse,
+    "ApiEulaConsent": ApiEulaConsent,
     "ApiFeedItem": ApiFeedItem,
     "ApiGlobalRepCategoryGiver": ApiGlobalRepCategoryGiver,
     "ApiGlobalRepCategoryGiversPage": ApiGlobalRepCategoryGiversPage,
@@ -1880,6 +1896,8 @@ let typeMap: {[index: string]: any} = {
     "ApiReplyToDropResponse": ApiReplyToDropResponse,
     "ApiReplyToDropV2": ApiReplyToDropV2,
     "ApiRollbackProfileCmsPackageRequest": ApiRollbackProfileCmsPackageRequest,
+    "ApiSaveEulaConsentRequest": ApiSaveEulaConsentRequest,
+    "ApiSaveEulaConsentResponse": ApiSaveEulaConsentResponse,
     "ApiSaveProfileCmsPackageDraftRequest": ApiSaveProfileCmsPackageDraftRequest,
     "ApiSeizeSettings": ApiSeizeSettings,
     "ApiSessionLoginRequest": ApiSessionLoginRequest,

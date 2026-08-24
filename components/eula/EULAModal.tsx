@@ -32,7 +32,8 @@ export default function EULAModal() {
     () => true,
     () => false
   );
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLElement>(null);
+  const scrollButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -56,7 +57,7 @@ export default function EULAModal() {
       return;
     }
 
-    scrollContainerRef.current?.focus();
+    scrollButtonRef.current?.focus();
     updateScrolledToBottom();
 
     const ariaHiddenAttribute = "aria-hidden";
@@ -85,8 +86,20 @@ export default function EULAModal() {
       element.inert = true;
       element.setAttribute(ariaHiddenAttribute, "true");
     });
+    const keepFocusInDialog = (event: FocusEvent) => {
+      const dialog = dialogRef.current;
+      if (
+        dialog &&
+        event.target instanceof Node &&
+        !dialog.contains(event.target)
+      ) {
+        (scrollButtonRef.current ?? dialog).focus();
+      }
+    };
+    document.addEventListener("focusin", keepFocusInDialog);
 
     return () => {
+      document.removeEventListener("focusin", keepFocusInDialog);
       document.body.style.overflow = previousOverflow;
       backgroundElements.forEach(({ element, inert, ariaHidden }) => {
         element.inert = inert;
@@ -124,8 +137,8 @@ export default function EULAModal() {
           clickOutsideDeactivates: false,
           escapeDeactivates: false,
           fallbackFocus: () => dialogRef.current ?? document.body,
-          initialFocus: () => scrollContainerRef.current ?? dialogRef.current,
-          onPostActivate: () => scrollContainerRef.current?.focus(),
+          initialFocus: () => scrollButtonRef.current ?? dialogRef.current,
+          onPostActivate: () => scrollButtonRef.current?.focus(),
           returnFocusOnDeactivate: false,
           tabbableOptions: { displayCheck: "none" },
         }}
@@ -134,7 +147,6 @@ export default function EULAModal() {
           <dialog
             ref={dialogRef}
             open
-            role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
@@ -152,13 +164,11 @@ export default function EULAModal() {
             <div className="tw-mb-10">
               <p id={descriptionId}>{t(locale, "eula.modal.introduction")}</p>
               <div className="tw-relative">
-                <div
+                <section
                   ref={scrollContainerRef}
                   onScroll={handleScroll}
-                  tabIndex={0}
-                  role="region"
                   aria-label={t(locale, "eula.modal.agreementLabel")}
-                  className="tw-max-h-[50vh] tw-overflow-y-auto tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-900 tw-p-4 tw-shadow focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                  className="tw-max-h-[50vh] tw-overflow-y-auto tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-900 tw-p-4 tw-shadow"
                 >
                   <ol className="tw-list-decimal tw-space-y-2 tw-pl-6 tw-text-sm">
                     <EULAIntroSections />
@@ -695,9 +705,10 @@ export default function EULAModal() {
                     </li>
                     <EULALegalClosingSections />
                   </ol>
-                </div>
+                </section>
                 {!scrolledToBottom && (
                   <button
+                    ref={scrollButtonRef}
                     type="button"
                     onClick={scrollToBottom}
                     aria-label={t(locale, "eula.modal.scrollToEnd")}

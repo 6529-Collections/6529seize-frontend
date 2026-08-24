@@ -10,6 +10,8 @@ import {
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import type { ApiEulaConsent } from "@/generated/models/ApiEulaConsent";
+import type { ApiSaveEulaConsentRequest } from "@/generated/models/ApiSaveEulaConsentRequest";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { Device } from "@capacitor/device";
 import Cookies from "js-cookie";
@@ -37,11 +39,6 @@ type EULAConsentContextType = {
   readonly saveError: string | null;
 };
 
-type BackendEULAConsent = {
-  readonly accepted_at?: number | undefined;
-  readonly eula_version?: string | null | undefined;
-};
-
 const EULAConsentContext = createContext<EULAConsentContextType | undefined>(
   undefined
 );
@@ -54,7 +51,7 @@ export const useEULAConsent = () => {
 };
 
 const getBackendConsentExpiration = (
-  consent: BackendEULAConsent,
+  consent: ApiEulaConsent,
   now = Date.now()
 ): Date | null => {
   if (
@@ -150,7 +147,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       const deviceId = await Device.getId();
       if (consentCheckId !== consentCheckIdRef.current) return;
 
-      const response = await commonApiFetch<BackendEULAConsent>({
+      const response = await commonApiFetch<ApiEulaConsent>({
         endpoint: `policies/eula-consent/${deviceId.identifier}`,
       });
       if (consentCheckId !== consentCheckIdRef.current) return;
@@ -175,13 +172,14 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
     setSaveError(null);
     try {
       const deviceId = await Device.getId();
+      const body: ApiSaveEulaConsentRequest = {
+        device_id: deviceId.identifier,
+        platform: "ios",
+        eula_version: CURRENT_EULA_VERSION,
+      };
       await commonApiPost({
         endpoint: "policies/eula-consent",
-        body: {
-          device_id: deviceId.identifier,
-          platform: "ios",
-          eula_version: CURRENT_EULA_VERSION,
-        },
+        body,
       });
       Cookies.set(CONSENT_EULA_COOKIE, CURRENT_EULA_VERSION, {
         expires: EULA_VALIDITY_DAYS,
