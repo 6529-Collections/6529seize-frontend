@@ -17,8 +17,10 @@ import {
   type WaveGroupManageIdentitiesConfirmEvent,
 } from "./WaveGroupManageIdentitiesModal";
 import WaveGroupChangeDialog from "./WaveGroupChangeDialog";
+import WaveGroupRemove from "./WaveGroupRemove";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import {
   buildWaveUpdateBody,
@@ -39,6 +41,7 @@ export default function WaveGroupEditButtons({
   const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
   const { onWaveCreated, onGroupCreate } = useContext(ReactQueryWrapperContext);
   const [isGroupChangeOpen, setIsGroupChangeOpen] = useState(false);
+  const [isGroupRemoveOpen, setIsGroupRemoveOpen] = useState(false);
   const skipNextGroupChangeAuthRef = useRef(false);
   const scopedGroup = useMemo(() => getScopedGroup(wave, type), [wave, type]);
   const { submit: submitInlineGroup } = useGroupMutations({
@@ -96,6 +99,10 @@ export default function WaveGroupEditButtons({
     setIsGroupChangeOpen(false);
   }, []);
 
+  const handleGroupRemoveOpen = useCallback(() => {
+    setIsGroupRemoveOpen(true);
+  }, []);
+
   const handleGroupChange = useCallback(
     async (group: ApiGroupFull | null) => {
       if (!group) {
@@ -115,6 +122,18 @@ export default function WaveGroupEditButtons({
       }
     },
     [type, updateWave, wave]
+  );
+
+  const handleGroupRemoveUpdate = useCallback(
+    async (body: ApiUpdateWaveRequest) => {
+      try {
+        await updateWave(body);
+        setIsGroupRemoveOpen(false);
+      } catch {
+        // updateWave already surfaces mutation failures through the shared toast.
+      }
+    },
+    [updateWave]
   );
 
   const handleInlineGroupCreate = useCallback(
@@ -162,9 +181,6 @@ export default function WaveGroupEditButtons({
   return (
     <>
       <WaveGroupEditMenu
-        wave={wave}
-        type={type}
-        onWaveUpdate={updateWave}
         hasGroup={haveGroup}
         canIncludeIdentity={canIncludeIdentity}
         canExcludeIdentity={canExcludeIdentity}
@@ -172,6 +188,7 @@ export default function WaveGroupEditButtons({
         onIncludeIdentity={handleIncludeIdentity}
         onExcludeIdentity={handleExcludeIdentity}
         onChangeGroup={handleChangeGroupOpen}
+        onRemoveGroup={handleGroupRemoveOpen}
       />
       {isGroupChangeOpen && (
         <WaveGroupChangeDialog
@@ -181,6 +198,15 @@ export default function WaveGroupEditButtons({
           onClose={handleChangeGroupClose}
           onGroupChange={handleGroupChange}
           onCreateGroup={handleInlineGroupCreate}
+        />
+      )}
+      {canRemoveGroup && (
+        <WaveGroupRemove
+          wave={wave}
+          isEditOpen={isGroupRemoveOpen}
+          type={type}
+          setIsEditOpen={setIsGroupRemoveOpen}
+          onWaveUpdate={handleGroupRemoveUpdate}
         />
       )}
       <WaveGroupManageIdentitiesModals

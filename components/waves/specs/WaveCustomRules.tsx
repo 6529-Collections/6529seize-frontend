@@ -21,12 +21,14 @@ import {
   deleteWaveMetadata,
 } from "@/services/api/waves-v2-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import WaveSettingEditorActions from "./WaveSettingEditorActions";
 import WaveSettingRow from "./WaveSettingRow";
 
 interface WaveCustomRulesProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings";
 }
 
 interface WaveCustomRulesEditorProps {
@@ -104,7 +106,10 @@ function WaveCustomRulesEditor({
   );
 }
 
-export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
+export default function WaveCustomRules({
+  wave,
+  display = "settings",
+}: WaveCustomRulesProps) {
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -120,6 +125,7 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
   const [draft, setDraft] = useState("");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const isConfiguration = display === "configuration";
   const canEdit =
     !metadataQuery.isLoading &&
     !metadataQuery.isError &&
@@ -208,11 +214,36 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
     })();
   };
 
+  let valueLabel: ReactNode;
+  if (isConfiguration) {
+    valueLabel = customRules ? (
+      <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words">
+        {customRules}
+      </p>
+    ) : (
+      <p className="tw-mb-0 tw-font-light tw-italic tw-text-iron-500">
+        {waveRightPanelText("waves.sidebar.rightPanel.rules.emptyGuidelines")}
+      </p>
+    );
+  } else {
+    valueLabel = t(
+      locale,
+      customRules
+        ? "waves.create.rules.guidelinesSettingsAdded"
+        : "waves.create.rules.guidelinesSettingsNone"
+    );
+  }
+
   return (
     <WaveSettingRow
       canEdit={canEdit}
+      editIcon={isConfiguration ? "gear" : "pencil"}
       editLabel={t(locale, "waves.create.rules.guidelinesSettingsEditLabel")}
-      label={t(locale, "waves.create.rules.guidelinesSettingsLabel")}
+      label={
+        isConfiguration
+          ? waveRightPanelText("waves.sidebar.rightPanel.rules.guidelinesTitle")
+          : t(locale, "waves.create.rules.guidelinesSettingsLabel")
+      }
       onOpen={resetEditor}
       renderEditor={({ closeEditor }) => (
         <WaveCustomRulesEditor
@@ -228,12 +259,8 @@ export default function WaveCustomRules({ wave }: WaveCustomRulesProps) {
           onSubmit={() => saveCustomRules(closeEditor, metadata, draft)}
         />
       )}
-      valueLabel={t(
-        locale,
-        customRules
-          ? "waves.create.rules.guidelinesSettingsAdded"
-          : "waves.create.rules.guidelinesSettingsNone"
-      )}
+      valueLabel={valueLabel}
+      variant={isConfiguration ? "content" : "row"}
     />
   );
 }

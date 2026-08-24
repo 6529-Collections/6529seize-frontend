@@ -31,6 +31,7 @@ import WaveSettingRow from "./WaveSettingRow";
 
 interface WaveSubmissionButtonLabelProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings";
 }
 
 const isSubmissionButtonLabelWave = (wave: ApiWave): boolean =>
@@ -71,12 +72,13 @@ function WaveSubmissionButtonLabelEditor({
     : counterId;
 
   return (
+    // react-doctor-disable-next-line react-doctor/no-prevent-default -- This client-authenticated editor needs native Enter-key submission without navigation.
     <form
-      className="tw-flex tw-flex-col tw-gap-3"
       onSubmit={(event) => {
         event.preventDefault();
         onSave();
       }}
+      className="tw-flex tw-flex-col tw-gap-3"
     >
       <label
         htmlFor="wave-submission-button-label"
@@ -134,6 +136,7 @@ function WaveSubmissionButtonLabelEditor({
 
 export default function WaveSubmissionButtonLabel({
   wave,
+  display = "settings",
 }: WaveSubmissionButtonLabelProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -349,6 +352,7 @@ export default function WaveSubmissionButtonLabel({
   return (
     <WaveSettingRow
       canEdit={canEdit}
+      editIcon={display === "configuration" ? "gear" : "pencil"}
       editLabel={t(DEFAULT_LOCALE, "waves.submissionButtonLabel.editLabel")}
       label={t(DEFAULT_LOCALE, "waves.submissionButtonLabel.rowLabel")}
       onOpen={resetEditor}

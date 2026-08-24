@@ -11,12 +11,11 @@ import {
 import WaveHeader from "@/components/waves/header/WaveHeader";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
-import BrainRightSidebarSettings from "./BrainRightSidebarSettings";
+import BrainRightSidebarConfiguration from "./BrainRightSidebarConfiguration";
 import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 import WaveRepDetails from "./WaveRepDetails";
 import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
-import WaveRules from "@/components/waves/specs/WaveRules";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveContentProps {
@@ -64,16 +63,12 @@ export const WaveContentTabs: React.FC<WaveContentTabsProps> = ({
         waveRightPanelText("waves.sidebar.rightPanel.tabs.about"),
     },
     {
-      key: SidebarTab.RULES,
-      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.rules"),
-    },
-    {
       key: SidebarTab.REP,
       label: waveRightPanelText("waves.sidebar.rightPanel.tabs.rep"),
     },
     {
-      key: SidebarTab.SETTINGS,
-      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.settings"),
+      key: SidebarTab.CONFIGURATION,
+      label: waveRightPanelText("waves.sidebar.rightPanel.tabs.configuration"),
     },
     ...(isCompetitionWave
       ? [
@@ -148,12 +143,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
       </div>
     ),
     [SidebarTab.REP]: <WaveRepDetails wave={wave} />,
-    [SidebarTab.RULES]: (
-      <div className="tw-px-0">
-        <WaveRules wave={wave} useRing={false} showTitle={false} />
-      </div>
-    ),
-    [SidebarTab.SETTINGS]: <BrainRightSidebarSettings wave={wave} />,
+    [SidebarTab.CONFIGURATION]: <BrainRightSidebarConfiguration wave={wave} />,
     ...(isCompetitionWave
       ? {
           [SidebarTab.TOP_VOTERS]: (

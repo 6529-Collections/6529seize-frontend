@@ -17,6 +17,10 @@ jest.mock(
     ({ group }: any) =>
       group ? <div data-testid="scope" /> : <span>Public</span>
 );
+jest.mock(
+  "@/components/waves/specs/groups/group/WaveGroupMembersScope",
+  () => () => <div data-testid="members-scope" />
+);
 
 jest.mock("@/helpers/waves/waves.helpers", () => ({ canEditWave: jest.fn() }));
 jest.mock("@/hooks/isMobileDevice", () => ({
@@ -51,20 +55,22 @@ describe("WaveGroup", () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it("shows edit buttons when editable", () => {
+  it("shows the gear menu and member summary when the viewer can administer the wave", () => {
     const scope = { group: { is_direct_message: false } } as any;
-    const { container } = render(<WaveGroup {...baseProps} scope={scope} />, {
-      wrapper,
-    });
+    const { container } = render(
+      <WaveGroup {...baseProps} scope={scope} showMembersSummary />,
+      { wrapper }
+    );
 
     expect(screen.getByTestId("edit")).toBeInTheDocument();
+    expect(screen.getByTestId("members-scope")).toBeInTheDocument();
     expect(container.firstChild).toHaveClass("tw-items-center");
-    expect(screen.getByTestId("scope").parentElement).toHaveClass(
+    expect(screen.getByTestId("members-scope").parentElement).toHaveClass(
       "tw-items-center"
     );
   });
 
-  it("hides edit buttons when cannot edit", () => {
+  it("hides the gear menu when the viewer cannot administer the wave", () => {
     canEditWave.mockReturnValue(false);
     const scope = { group: { is_direct_message: false } } as any;
     render(<WaveGroup {...baseProps} scope={scope} />, { wrapper });
