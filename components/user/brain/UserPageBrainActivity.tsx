@@ -18,7 +18,7 @@ function ActivityCardFrame({
 }>) {
   return (
     <section
-      className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-py-4 tw-shadow-2xl md:tw-py-5"
+      className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-py-3 tw-shadow-2xl"
       aria-labelledby="brain-activity-heading"
       data-testid="brain-activity-card"
     >
@@ -37,11 +37,11 @@ function ActivityCardHeader({
   const totalDropsLabel = totalDrops === 0 ? "0" : numberWithCommas(totalDrops);
 
   return (
-    <div className="gap-x-4 tw-mb-4 tw-flex tw-flex-col tw-gap-y-2 tw-px-4 sm:tw-mb-6 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between md:tw-px-5">
+    <div className="gap-x-4 tw-mb-2 tw-flex tw-flex-col tw-gap-y-2 tw-px-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between md:tw-px-5">
       <div className="tw-min-w-0">
         <h3
           id="brain-activity-heading"
-          className="tw-mb-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50"
+          className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50"
         >
           Activity
         </h3>
@@ -83,7 +83,7 @@ export default function UserPageBrainActivity({
     content = <UserPageBrainActivityHeatmapLoading />;
   } else if (activityQuery.status === "error") {
     content = (
-      <p className="tw-px-4 tw-text-sm tw-text-iron-400 md:tw-px-5">
+      <p className="tw-m-0 tw-px-4 tw-text-sm tw-text-iron-400 md:tw-px-5">
         Unable to load activity.
       </p>
     );
@@ -91,7 +91,7 @@ export default function UserPageBrainActivity({
     content = <UserPageBrainActivityHeatmap activity={activity} />;
   } else {
     content = (
-      <p className="tw-px-4 tw-text-sm tw-italic tw-text-iron-500 md:tw-px-5">
+      <p className="tw-m-0 tw-px-4 tw-text-sm tw-italic tw-text-iron-500 md:tw-px-5">
         No activity in last 12 months.
       </p>
     );
