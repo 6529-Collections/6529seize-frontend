@@ -8,6 +8,7 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
@@ -16,6 +17,7 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -89,7 +91,6 @@ function WaveConfigurationCurationRow({
         wave={wave}
         curation={curation}
         onDeleted={onDeleted}
-        isSetAsProfileCurationPending={isReordering}
         leadingItems={leadingItems}
         triggerAriaLabel={waveRightPanelText(
           "waves.sidebar.rightPanel.configuration.curations.configure",
@@ -101,11 +102,7 @@ function WaveConfigurationCurationRow({
   );
 }
 
-export default function WaveConfigurationCurations({
-  wave,
-}: {
-  readonly wave: ApiWave;
-}) {
+function WaveConfigurationCurationsAdmin({ wave }: { readonly wave: ApiWave }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -212,4 +209,23 @@ export default function WaveConfigurationCurations({
       )}
     </>
   );
+}
+
+export default function WaveConfigurationCurations({
+  wave,
+}: {
+  readonly wave: ApiWave;
+}) {
+  const { connectedProfile, activeProfileProxy } = useAuth();
+  const canConfigureWave = canEditWave({
+    connectedProfile,
+    activeProfileProxy,
+    wave,
+  });
+
+  if (!canConfigureWave) {
+    return null;
+  }
+
+  return <WaveConfigurationCurationsAdmin wave={wave} />;
 }

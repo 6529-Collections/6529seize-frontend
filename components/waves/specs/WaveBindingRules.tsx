@@ -33,7 +33,14 @@ function WaveBindingRulesEditor({
   const helperId = "wave-binding-rules-helper";
 
   return (
-    <form action={() => onSubmit()} className="tw-flex tw-flex-col tw-gap-3">
+    // react-doctor-disable-next-line react-doctor/no-prevent-default -- This client-authenticated editor needs native Enter-key submission without navigation.
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+      className="tw-flex tw-flex-col tw-gap-3"
+    >
       <label
         htmlFor="wave-binding-rules"
         className="tw-text-sm tw-font-medium tw-text-iron-100"

@@ -1,16 +1,25 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useAuth } from "@/components/auth/Auth";
 import WaveConfigurationCurations from "@/components/waves/groups/WaveConfigurationCurations";
+import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useQuery } from "@tanstack/react-query";
 
 const replace = jest.fn();
+let searchParams = new URLSearchParams();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-id",
   useRouter: () => ({ replace }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => searchParams,
+}));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
+}));
+jest.mock("@/helpers/waves/waves.helpers", () => ({
+  canEditWave: jest.fn(),
 }));
 jest.mock("@/hooks/waves/useWaveCurations", () => ({
   useWaveCurations: jest.fn(),
@@ -35,6 +44,7 @@ jest.mock(
     __esModule: true,
     default: ({
       leadingItems,
+      onDeleted,
       triggerAriaLabel,
       triggerVariant,
     }: {
@@ -44,12 +54,21 @@ jest.mock(
         readonly disabled?: boolean;
         readonly onSelect: () => void;
       }[];
+      readonly onDeleted?: () => void | Promise<void>;
       readonly triggerAriaLabel: string;
       readonly triggerVariant: string;
     }) => (
       <div data-trigger-variant={triggerVariant}>
         <button type="button" aria-label={triggerAriaLabel}>
           Configure
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            void onDeleted?.();
+          }}
+        >
+          Run delete callback
         </button>
         {leadingItems.map((item) => (
           <button
@@ -69,6 +88,8 @@ jest.mock(
 const mockUseWaveCurations = useWaveCurations as jest.MockedFunction<
   typeof useWaveCurations
 >;
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockCanEditWave = canEditWave as jest.MockedFunction<typeof canEditWave>;
 const mockUseWaveCurationReorderMutation =
   useWaveCurationReorderMutation as jest.MockedFunction<
     typeof useWaveCurationReorderMutation
@@ -94,11 +115,17 @@ const curations = [
 
 describe("WaveConfigurationCurations", () => {
   beforeEach(() => {
+    searchParams = new URLSearchParams();
     replace.mockReset();
     moveCuration.mockReset();
     mockUseWaveCurations.mockReset();
     mockUseWaveCurationReorderMutation.mockReset();
     mockUseQuery.mockReset();
+    mockUseAuth.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: null,
+    } as ReturnType<typeof useAuth>);
+    mockCanEditWave.mockReturnValue(true);
     mockUseWaveCurations.mockReturnValue({
       data: curations,
       isPending: false,
@@ -113,6 +140,17 @@ describe("WaveConfigurationCurations", () => {
       data: { name: queryKey[1] === "group-1" ? "Artists" : "Collectors" },
       isPending: false,
     }));
+  });
+
+  it("does not render or query curations without configuration permission", () => {
+    mockCanEditWave.mockReturnValue(false);
+
+    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+
+    expect(
+      screen.queryByRole("heading", { name: "Curations" })
+    ).not.toBeInTheDocument();
+    expect(mockUseWaveCurations).not.toHaveBeenCalled();
   });
 
   it("lists curation names and groups with gear-style management menus", () => {
@@ -148,5 +186,28 @@ describe("WaveConfigurationCurations", () => {
       direction: "next",
       curations,
     });
+  });
+
+  it("clears a deleted selected curation while preserving other query parameters", async () => {
+    searchParams = new URLSearchParams(
+      "curation=curation-1&view=compact&filter=active"
+    );
+    const user = userEvent.setup();
+    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+
+    const deleteCallbackButton = screen
+      .getAllByRole("button", { name: "Run delete callback" })
+      .at(0);
+    if (!deleteCallbackButton) {
+      throw new Error(
+        "Expected the first curation to expose its delete callback"
+      );
+    }
+    await user.click(deleteCallbackButton);
+
+    expect(replace).toHaveBeenCalledWith(
+      "/waves/wave-id?view=compact&filter=active",
+      { scroll: false }
+    );
   });
 });
