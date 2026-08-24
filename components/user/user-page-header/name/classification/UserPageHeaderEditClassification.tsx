@@ -156,8 +156,8 @@ export default function UserPageHeaderEditClassification({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
+      showHeaderDivider
       maxWidthClass="md:tw-max-w-xl"
-      headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
     >
       {form}
     </MobileWrapperDialog>

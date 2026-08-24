@@ -257,9 +257,9 @@ export default function UserPageHeaderEditPfp({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
+      showHeaderDivider
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"
-      headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
     >
       {form}
     </MobileWrapperDialog>

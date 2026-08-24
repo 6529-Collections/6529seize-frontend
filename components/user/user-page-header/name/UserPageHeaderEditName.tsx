@@ -165,7 +165,7 @@ export default function UserPageHeaderEditName({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
-      headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
+      showHeaderDivider
       maxWidthClass="md:tw-max-w-xl"
     >
       {form}
