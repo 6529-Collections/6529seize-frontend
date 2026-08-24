@@ -47,6 +47,18 @@ type AliasEditorSaveVariables = {
   readonly input: MentionAliasInput;
 };
 
+function getQuickTagsLabelledBy(
+  displayedView: QuickTagsView,
+  hasDeleteConfirmation: boolean
+) {
+  if (displayedView === "manage" && hasDeleteConfirmation) {
+    return "delete-mention-shortcut-title";
+  }
+  if (displayedView === "manage") return "quick-tags-manager-title";
+  if (displayedView === "editor") return "quick-tag-editor-title";
+  return "quick-tags-heading";
+}
+
 export default function UserPageMentionShortcuts({
   profile,
 }: {
@@ -236,15 +248,7 @@ export default function UserPageMentionShortcuts({
 
   const displayedView =
     view === "editor" && isMobileScreen ? editorReturnView : view;
-
-  let labelledBy = "quick-tags-heading";
-  if (displayedView === "manage" && aliasToDelete) {
-    labelledBy = "delete-mention-shortcut-title";
-  } else if (displayedView === "manage") {
-    labelledBy = "quick-tags-manager-title";
-  } else if (displayedView === "editor") {
-    labelledBy = "quick-tag-editor-title";
-  }
+  const labelledBy = getQuickTagsLabelledBy(displayedView, !!aliasToDelete);
 
   let content: ReactNode;
   if (displayedView === "manage" && aliasToDelete) {
