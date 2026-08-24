@@ -6,6 +6,8 @@ import UserPageProfileWaveMasonry, {
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
 import { resolveProfileCurationViewState } from "./userPageProfileWave.helpers";
@@ -20,6 +22,7 @@ export default function UserPageProfileWaveContent({
   canManageOwnOfficialWave,
   containerWidth,
   onCreateCuration,
+  onAddPost,
   profileIdentity,
   areCurationsError,
   areCurationsFetching,
@@ -32,6 +35,7 @@ export default function UserPageProfileWaveContent({
   readonly canManageOwnOfficialWave: boolean;
   readonly containerWidth: number;
   readonly onCreateCuration: () => void;
+  readonly onAddPost: () => void;
   readonly profileIdentity: ProfileIdentitySummary;
   readonly areCurationsError: boolean;
   readonly areCurationsFetching: boolean;
@@ -41,6 +45,7 @@ export default function UserPageProfileWaveContent({
   readonly profileCuration: ApiWaveCuration | null;
   readonly wave: ApiWave;
 }) {
+  const locale = useBrowserLocale();
   const {
     dataUpdatedAt,
     drops,
@@ -110,6 +115,14 @@ export default function UserPageProfileWaveContent({
         <CurationEmptyPanel
           title={state.emptyState.title}
           message={state.emptyState.message}
+          primaryAction={
+            canManageOwnOfficialWave ? (
+              <ProfileCurationActionButton
+                label={t(locale, "profileCuration.header.addFirstPost")}
+                onClick={onAddPost}
+              />
+            ) : undefined
+          }
         />
       );
     case "drops_error":
@@ -132,7 +145,6 @@ export default function UserPageProfileWaveContent({
         <div className="tw-overflow-hidden tw-rounded-2xl">
           <UserPageProfileWaveMasonry
             curationId={state.curation.id}
-            curationName={state.curation.name}
             containerWidth={containerWidth}
             drops={state.drops}
             fetchNextPage={state.fetchNextPage}
@@ -154,11 +166,7 @@ function ProfileCurationActionButton({
   readonly onClick: () => void;
 }) {
   return (
-    <Button
-      variant="primary"
-      size="md"
-      onClick={onClick}
-    >
+    <Button variant="primary" size="md" onClick={onClick}>
       <PlusIcon className="-tw-ml-0.5 tw-h-5 tw-w-5 tw-flex-shrink-0" />
       <span>{label}</span>
     </Button>

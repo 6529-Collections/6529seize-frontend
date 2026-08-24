@@ -29,7 +29,7 @@ describe("CreateWaveModal", () => {
       <CreateWaveModal
         isOpen={true}
         onClose={jest.fn()}
-        profile={{} as ApiIdentity}
+        profile={{ handle: "alice" } as ApiIdentity}
       />
     );
 

@@ -34,6 +34,7 @@ export interface CompactMenuProps {
   readonly onItemSelect?: ((id: string) => void) | undefined;
   readonly className?: string | undefined;
   readonly triggerClassName?: string | undefined;
+  readonly triggerAsChild?: boolean | undefined;
   readonly unstyledTrigger?: boolean | undefined;
   readonly menuClassName?: string | undefined;
   readonly unstyledMenu?: boolean | undefined;

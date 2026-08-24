@@ -4,14 +4,17 @@ import WavesIcon from "@/components/common/icons/WavesIcon";
 import Button from "@/components/utils/button/Button";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   ArrowTopRightOnSquareIcon,
   CheckCircleIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { getWaveHref } from "./userPageProfileWave.helpers";
 import type { resolveWavePickerViewState } from "./userPageProfileWave.helpers";
 
@@ -51,17 +54,17 @@ function CompactCandidateWaveRow({
       type="button"
       onClick={() => onSelect(wave.id)}
       disabled={isSubmitting || isSelected}
-      className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-xl tw-border-0 tw-text-left tw-font-medium tw-text-white tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-default ${
-        isMobileSheet ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2.5"
+      className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3 tw-rounded-xl tw-border-0 tw-text-left tw-font-medium tw-text-iron-100 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-default ${
+        isMobileSheet ? "tw-px-3 tw-py-3" : "tw-px-3 tw-py-2.5"
       } ${
         isSelected
-          ? "tw-bg-white/10"
+          ? "tw-bg-transparent"
           : "tw-bg-transparent desktop-hover:hover:tw-bg-white/5"
       }`}
     >
       <div className="tw-min-w-0 tw-flex-1 tw-space-y-0.5">
         <h3
-          className={`tw-mb-0 tw-truncate tw-font-semibold tw-tracking-tight ${
+          className={`tw-m-0 tw-truncate tw-font-semibold tw-tracking-tight ${
             isMobileSheet ? "tw-text-base" : "tw-text-sm"
           }`}
         >
@@ -99,18 +102,18 @@ function PanelCandidateWaveRow({
 
   return (
     <div
-      className={`tw-transition tw-duration-300 tw-ease-out tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-lg tw-px-3 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-gap-4 sm:tw-px-4 sm:tw-py-4 ${
+      className={`tw-relative tw-flex tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-transition tw-duration-300 tw-ease-out sm:tw-flex-row sm:tw-items-center sm:tw-justify-between ${
         isSelected
-          ? "tw-bg-emerald-500/5"
-          : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900"
+          ? "tw-border-emerald-500/20 tw-bg-emerald-500/5"
+          : "tw-border-white/5 tw-bg-iron-950 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900"
       }`}
     >
       {isSelected && (
-        <span className="tw-absolute tw-left-3 tw-top-1/2 tw-h-9 tw-w-1 -tw-translate-y-1/2 tw-rounded-full tw-bg-emerald-400 tw-shadow-sm sm:tw-left-0" />
+        <span className="tw-absolute tw-left-0 tw-top-1/2 tw-h-8 tw-w-1 -tw-translate-y-1/2 tw-rounded-full tw-bg-emerald-400 tw-shadow-sm" />
       )}
 
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
-        <div className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10 sm:tw-h-10 sm:tw-w-10">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-3">
+        <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
           {imageSrc ? (
             <Image
               src={imageSrc}
@@ -124,22 +127,22 @@ function PanelCandidateWaveRow({
           )}
         </div>
 
-        <div className="tw-min-w-0 tw-space-y-1">
-          <h3 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+        <div className="tw-min-w-0">
+          <h3 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
             {wave.name}
           </h3>
-          <p className="tw-mb-0 tw-truncate tw-text-xs tw-text-iron-500">
+          <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-xs tw-leading-4 tw-text-iron-500">
             {wave.metrics.drops_count} posts • {wave.metrics.subscribers_count}{" "}
             joined
           </p>
         </div>
       </div>
 
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 sm:tw-justify-end">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-pl-[52px] sm:tw-justify-end sm:tw-pl-0">
         <Link
           href={getWaveHref(wave)}
           prefetch={false}
-          className="tw-inline-flex tw-items-center tw-gap-2 tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-400 desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-no-underline"
+          className="tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-transparent tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-400 desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-no-underline"
         >
           <span>View</span>
           <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
@@ -205,6 +208,7 @@ export default function UserPageProfileWavePickerReady({
   title,
   selectedWaveId,
   submittingWaveId,
+  onCreateProfileCuration,
   onSelectWave,
   variant,
 }: {
@@ -212,9 +216,13 @@ export default function UserPageProfileWavePickerReady({
   readonly title: string | undefined;
   readonly selectedWaveId: string | null;
   readonly submittingWaveId: string | null;
+  readonly onCreateProfileCuration: () => void;
   readonly onSelectWave: (waveId: string) => void;
   readonly variant: WavePickerVariant;
 }) {
+  const locale = useBrowserLocale();
+  const [showExistingWaves, setShowExistingWaves] = useState(false);
+  const existingWavesId = useId();
   const renderCandidateWaveRow = (candidateWave: ApiWave) => (
     <CandidateWaveRow
       key={candidateWave.id}
@@ -253,18 +261,52 @@ export default function UserPageProfileWavePickerReady({
 
   return (
     <section className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-black sm:tw-rounded-3xl">
-      <div className="tw-space-y-4 tw-p-3.5 sm:tw-space-y-6 sm:tw-p-5 md:tw-p-6">
+      <div className="tw-p-5">
         <div className="tw-max-w-2xl">
-          <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100 md:tw-text-xl">
+          <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100 md:tw-text-xl">
             {title}
           </h2>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2">
-            Choose the wave you want to use as your featured wave.
+            {t(locale, "profileCuration.entry.noEligibleNone")}
           </p>
         </div>
 
-        <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-gap-3">
-          {state.waves.map(renderCandidateWaveRow)}
+        <div className="tw-mt-5">
+          <Button
+            variant="primary"
+            size="md"
+            onClick={onCreateProfileCuration}
+            className="tw-w-full sm:tw-w-auto"
+          >
+            {t(locale, "profileCuration.entry.create")}
+          </Button>
+        </div>
+
+        <div className="tw-mt-2">
+          <button
+            type="button"
+            aria-expanded={showExistingWaves}
+            aria-controls={existingWavesId}
+            onClick={() => setShowExistingWaves((isVisible) => !isVisible)}
+            className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-500 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
+          >
+            <span>{t(locale, "profileCuration.entry.existingWave")}</span>
+            <ChevronDownIcon
+              aria-hidden="true"
+              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 ${
+                showExistingWaves ? "tw-rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {showExistingWaves && (
+            <div
+              id={existingWavesId}
+              className="tw-mt-2 tw-flex tw-flex-col tw-gap-2"
+            >
+              {state.waves.map(renderCandidateWaveRow)}
+            </div>
+          )}
         </div>
       </div>
     </section>

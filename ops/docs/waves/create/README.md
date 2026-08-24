@@ -66,9 +66,10 @@ opens as `Needs attention` when a hidden field fails validation.
 
 ### Access and Availability
 
-- Create forms render only when a connected profile is available.
-- If profile context is missing, create entry points are hidden and create
-  forms do not render.
+- Create forms render only when the connected identity has a profile handle.
+- Without a profile handle, Create Wave entry points open a compact profile
+  setup dialog with `Go to Identity` and `Not now`; the multi-step form does not
+  render.
 
 ## Flows
 
