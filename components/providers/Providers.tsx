@@ -61,7 +61,6 @@ export default function Providers({
     <QueryClientSetup>
       <AppWalletsProvider>
         <WagmiSetup>
-          <CapacitorSetup />
           <IpfsImageSetup />
           <ReactQueryWrapper>
             <RefreshProvider>
@@ -112,10 +111,13 @@ export default function Providers({
   );
 
   return (
-    <EULAConsentProvider>
-      <EditingDropProvider>
-        <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
-      </EditingDropProvider>
-    </EULAConsentProvider>
+    <>
+      <CapacitorSetup />
+      <EULAConsentProvider>
+        <EditingDropProvider>
+          <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
+        </EditingDropProvider>
+      </EULAConsentProvider>
+    </>
   );
 }

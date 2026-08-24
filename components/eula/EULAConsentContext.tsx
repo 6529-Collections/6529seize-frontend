@@ -8,6 +8,8 @@ import {
   EULA_VALIDITY_MS,
 } from "@/constants/constants";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { Device } from "@capacitor/device";
 import Cookies from "js-cookie";
@@ -18,6 +20,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import EULAModal from "./EULAModal";
@@ -80,42 +83,51 @@ const EULABlockingScreen = ({
 }: {
   readonly state: "checking" | "error";
   readonly onRetry: () => void;
-}) => (
-  <main className="tailwind-scope tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-p-6 tw-text-iron-50">
-    <section className="tw-w-full tw-max-w-md tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-900 tw-p-6 tw-text-center tw-shadow-2xl">
-      {state === "checking" ? (
-        <p className="tw-m-0" role="status" aria-live="polite">
-          Checking EULA acceptance…
-        </p>
-      ) : (
-        <div role="alert">
-          <h1 className="tw-mb-3 tw-text-xl tw-font-semibold">
-            We couldn&apos;t verify your EULA acceptance
-          </h1>
-          <p className="tw-mb-5 tw-text-iron-300">
-            6529 Mobile can&apos;t open until the check succeeds. Check your
-            connection and try again.
+}) => {
+  const locale = useBrowserLocale();
+
+  return (
+    <main className="tailwind-scope tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-p-6 tw-text-iron-50">
+      <section className="tw-w-full tw-max-w-md tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-900 tw-p-6 tw-text-center tw-shadow-2xl">
+        {state === "checking" ? (
+          <p className="tw-m-0" role="status" aria-live="polite">
+            {t(locale, "eula.checking")}
           </p>
-          <Button onClick={onRetry} variant="primary" size="lg">
-            Retry
-          </Button>
-        </div>
-      )}
-    </section>
-  </main>
-);
+        ) : (
+          <div role="alert">
+            <h1 className="tw-mb-3 tw-text-xl tw-font-semibold">
+              {t(locale, "eula.verificationError.title")}
+            </h1>
+            <p className="tw-mb-5 tw-text-iron-300">
+              {t(locale, "eula.verificationError.description")}
+            </p>
+            <Button onClick={onRetry} variant="primary" size="lg">
+              {t(locale, "eula.retry")}
+            </Button>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+};
 
 export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
   children,
 }) => {
   const capacitor = useCapacitor();
-  const [consentState, setConsentState] = useState<EULAConsentState>(() =>
-    capacitor.isIos ? "checking" : "accepted"
-  );
+  const locale = useBrowserLocale();
+  const [consentState, setConsentState] = useState<EULAConsentState>(() => {
+    if (!capacitor.isIos) return "accepted";
+    return Cookies.get(CONSENT_EULA_COOKIE) === CURRENT_EULA_VERSION
+      ? "accepted"
+      : "checking";
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const consentCheckIdRef = useRef(0);
 
   const getEULAConsent = useCallback(async () => {
+    const consentCheckId = ++consentCheckIdRef.current;
     if (!capacitor.isIos) {
       setConsentState("accepted");
       return;
@@ -131,9 +143,13 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       }
 
       const deviceId = await Device.getId();
+      if (consentCheckId !== consentCheckIdRef.current) return;
+
       const response = await commonApiFetch<BackendEULAConsent>({
         endpoint: `policies/eula-consent/${deviceId.identifier}`,
       });
+      if (consentCheckId !== consentCheckIdRef.current) return;
+
       const expires = getBackendConsentExpiration(response);
       if (expires) {
         Cookies.set(CONSENT_EULA_COOKIE, CURRENT_EULA_VERSION, { expires });
@@ -143,6 +159,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
 
       setConsentState("acceptance-required");
     } catch (error) {
+      if (consentCheckId !== consentCheckIdRef.current) return;
       console.error("Failed to fetch EULA consent status", error);
       setConsentState("error");
     }
@@ -157,7 +174,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
         endpoint: "policies/eula-consent",
         body: {
           device_id: deviceId.identifier,
-          platform: capacitor.platform,
+          platform: "ios",
           eula_version: CURRENT_EULA_VERSION,
         },
       });
@@ -167,11 +184,11 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       setConsentState("accepted");
     } catch (error) {
       console.error("Failed to post EULA consent", error);
-      setSaveError("We couldn't save your acceptance. Please try again.");
+      setSaveError(t(locale, "eula.saveError"));
     } finally {
       setIsSaving(false);
     }
-  }, [capacitor.platform]);
+  }, [locale]);
 
   const value = useMemo(
     () => ({ consent, isSaving, saveError }),
@@ -183,7 +200,10 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       void getEULAConsent();
     }, 0);
 
-    return () => globalThis.clearTimeout(checkConsent);
+    return () => {
+      globalThis.clearTimeout(checkConsent);
+      consentCheckIdRef.current += 1;
+    };
   }, [getEULAConsent]);
 
   if (consentState === "checking" || consentState === "error") {

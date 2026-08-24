@@ -120,7 +120,7 @@ describe("EULAConsentContext", () => {
 
     renderProvider(<AppChild />);
 
-    expect(await screen.findByTestId("app-child")).toBeVisible();
+    expect(screen.getByTestId("app-child")).toBeVisible();
     expect(commonApiFetch).not.toHaveBeenCalled();
   });
 
@@ -206,6 +206,37 @@ describe("EULAConsentContext", () => {
     expect(await screen.findByRole("dialog", { name: "EULA" })).toBeVisible();
     expect(screen.queryByTestId("app-child")).not.toBeInTheDocument();
     expect(commonApiFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("ignores a stale consent check after the platform state changes", async () => {
+    let rejectCheck: (reason: Error) => void = () => undefined;
+    commonApiFetch.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectCheck = reject;
+      })
+    );
+
+    const result = renderProvider(<AppChild />);
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalledTimes(1));
+
+    mockCapacitor = {
+      isIos: false,
+      isAndroid: true,
+      isCapacitor: true,
+      platform: "android",
+    };
+    result.rerender(
+      <EULAConsentProvider>
+        <AppChild />
+      </EULAConsentProvider>
+    );
+    expect(await screen.findByTestId("app-child")).toBeVisible();
+
+    await act(async () => rejectCheck(new Error("stale request")));
+    expect(screen.getByTestId("app-child")).toBeVisible();
+    expect(
+      screen.queryByText("We couldn't verify your EULA acceptance")
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the EULA visible with a retryable error when saving fails", async () => {

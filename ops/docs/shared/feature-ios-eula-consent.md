@@ -50,6 +50,18 @@ available at `support@6529.io`.
 The agreement does not claim that every message undergoes AI analysis or broad
 abusiveness scanning.
 
+## Localization Fallback Debt
+
+The gate's operational status, error, control, and accessible-name strings are
+message-backed and fall back through `en-US`. The legal agreement clauses remain
+English-only because translating binding legal text requires a dedicated legal
+review workflow. The affected surface is `components/eula/EULAModal.tsx` and
+its `EULA*Sections.tsx` legal-copy components; the impact is that non-English
+iOS users read the agreement in English. The 6529 Legal/Product owners should
+establish reviewed locale-specific agreements before enabling translated legal
+copy. Remediation requires a version bump plus legal approval for every
+translated agreement.
+
 ## Related Pages
 
 - [Shared Index](README.md)

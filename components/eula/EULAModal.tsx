@@ -1,10 +1,11 @@
 "use client";
 
-/* eslint-disable max-lines -- The EULA remains a single ordered legal document. */
 /* eslint-disable react/no-unescaped-entities -- Preserve the agreement's exact legal punctuation. */
 
 import Button from "@/components/utils/button/Button";
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEULAConsent } from "./EULAConsentContext";
 import {
@@ -17,11 +18,13 @@ import {
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import EULAIntroSections from "./EULAIntroSections";
 import EULACommunicationsSection from "./EULACommunicationsSection";
+import EULALegalClosingSections from "./EULALegalClosingSections";
 import { FocusTrap } from "focus-trap-react";
 import { createPortal } from "react-dom";
 
 export default function EULAModal() {
   const { consent, isSaving, saveError } = useEULAConsent();
+  const locale = useBrowserLocale();
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const mounted = useSyncExternalStore(
     () => () => undefined,
@@ -138,22 +141,21 @@ export default function EULAModal() {
             className="tw-relative tw-max-h-full tw-w-full tw-max-w-lg tw-overflow-y-auto tw-rounded-xl tw-bg-iron-800 tw-px-6 tw-py-8 tw-shadow-lg focus:tw-outline-none sm:tw-w-3/4 sm:tw-max-w-4xl sm:tw-px-12 sm:tw-py-10"
           >
             <div className="tw-mb-10 tw-text-center">
-              <h2 id={titleId}>End User License Agreement</h2>
+              <h2 id={titleId}>{t(locale, "eula.modal.title")}</h2>
               <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-                Last Updated: {CURRENT_EULA_VERSION}
+                {t(locale, "eula.modal.lastUpdated", {
+                  version: CURRENT_EULA_VERSION,
+                })}
               </p>
             </div>
             <div className="tw-mb-10">
-              <p id={descriptionId}>
-                To use 6529 Mobile, you must agree to our Terms of Service and
-                EULA:
-              </p>
+              <p id={descriptionId}>{t(locale, "eula.modal.introduction")}</p>
               <div className="tw-relative">
                 <div
                   ref={scrollContainerRef}
                   onScroll={handleScroll}
                   tabIndex={0}
-                  aria-label="End User License Agreement text"
+                  aria-label={t(locale, "eula.modal.agreementLabel")}
                   className="tw-max-h-[50vh] tw-overflow-y-auto tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-900 tw-p-4 tw-shadow focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ol className="tw-list-decimal tw-space-y-2 tw-pl-6 tw-text-sm">
@@ -689,196 +691,14 @@ export default function EULAModal() {
                         </a>
                       </p>
                     </li>
-                    <li>
-                      <p>
-                        <strong>Indemnification</strong>
-                      </p>
-                      <p>
-                        You agree to indemnify us and our subsidiaries,
-                        affiliates, managers, members, officers, partners,
-                        service providers and employees (together "6529
-                        Parties") from losses, liabilities, claims, demands,
-                        damages, expenses or costs ("Claims") arising out of or
-                        related to:
-                      </p>
-                      <p>
-                        a. Your access to or use of Our Platform
-                        <br />
-                        b. Your access to or use of Not Our Platform
-                        <br />
-                        c. Your use of 6529 NFTs
-                        <br />
-                        d. Your Violation of Terms
-                        <br />
-                        e. Your Infringement of intellectual property, privacy,
-                        property rights of others
-                        <br />
-                        f. Your Conduct
-                        <br />
-                        g. Your Violation of Laws/Regulations
-                        <br />
-                        h. Your Feedback And Ideas
-                      </p>
-                      <p>
-                        You will cooperate with the 6529 Parties in defending
-                        any such third-party Claims and pay all fees, costs and
-                        expenses associated with defending such Claims
-                        (including, but not limited to, attorneys' fees). 6529
-                        Parties will have control of the defense or settlement,
-                        at 6529 Parties' sole option, of any third-party Claims.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Disclaimers</strong>
-                      </p>
-                      <p>
-                        Our Platform, the 6529 NFTs and any services relating to
-                        them are provided "As Is" and "As Available" without
-                        warranties of any kind, either express or implied,
-                        including warranties of merchantability, fitness for a
-                        particular purpose, title and non-infringement. We do
-                        not warrant that Our Platform, NFTs or communication and
-                        content relating to them is accurate, complete or
-                        error-free.
-                      </p>
-                      <p>
-                        We further reiterate the disclaimers, without
-                        limitation, in Clauses #10, #11, #13 to #28 and #30.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Disclaimer of Damages</strong>
-                      </p>
-                      <p>
-                        To the fullest extent permitted by applicable law, we
-                        will not be liable to you under any theory of liability
-                        - whether based in contract, tort, negligence, strict
-                        liability, warranty or otherwise - for any indirect,
-                        consequential, exemplary, incidental, punitive or
-                        special damages or lost profits, even if we have been
-                        advised of the possibility of such damages.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Limitation of Liability</strong>
-                      </p>
-                      <p>
-                        Our total liability for any claim arising from use of
-                        our Platform or 6529 NFTs or these Terms is limited to
-                        the greater of $100 or the amount paid by you to us.
-                      </p>
-                      <p>
-                        The limitations in #31 and #32 will not limit or exclude
-                        liability for our gross negligence, fraud, or
-                        intentional misconduct or for any other matters which
-                        cannot be excluded or limited under applicable law. Some
-                        jurisdictions do not allow the exclusion or limitation
-                        of incidental or consequential damages, so the above
-                        limitations or exclusions may not apply to you.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Release</strong>
-                      </p>
-                      <p>
-                        To the fullest extent permitted by applicable law, you
-                        release the 6529 Parties from responsibility, liability,
-                        claims, demands and/or damages (actual and
-                        consequential) of every kind and nature, known and
-                        unknown (including, but not limited to, claims of
-                        negligence), arising out of or related to disputes
-                        between users, acts or omissions of Third Parties or
-                        anything for which you have agreed that we will have no
-                        responsibility or liability pursuant to these terms.
-                      </p>
-                      <p>
-                        If you are a consumer who resides in California, you
-                        hereby waive your rights under California Civil Code §
-                        1542, which provides: "A general release does not extend
-                        to claims that the creditor or releasing party does not
-                        know or suspect to exist in his or her favor at the time
-                        of executing the release and that, if known by him or
-                        her, would have materially affected his or her
-                        settlement with the debtor or released party."
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Governing Law and Venue</strong>
-                      </p>
-                      <p>
-                        Any dispute arising from these Terms and your use of our
-                        Services will be governed by and construed and enforced
-                        in accordance with the laws of New York without regard
-                        to conflict of law rules or principles. Any dispute that
-                        is not subject to Arbitration will be resolved in the
-                        federal or state courts located in Wilmington, Delaware.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Failure To Enforce</strong>
-                      </p>
-                      <p>
-                        If we fail to enforce some of our rights under these
-                        Terms in the present or against certain parties, that
-                        does not mean they terminate or are waived. We reserve
-                        the right to enforce them in the future against any or
-                        all parties.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Section Titles</strong>
-                      </p>
-                      <p>
-                        Our section titles are for readability and have no legal
-                        or contractual effect.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Electronic Communication</strong>
-                      </p>
-                      <p>
-                        You consent to electronic communication and
-                        transactions.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Severability</strong>
-                      </p>
-                      <p>
-                        This means that if a certain section of these Terms is
-                        determined in some or all jurisdictions to be void,
-                        illegal or unenforceable, it will be severed from the
-                        rest of these Terms and the remainder of the contract
-                        will continue to be valid and binding.
-                      </p>
-                    </li>
-                    <li>
-                      <p>
-                        <strong>Transferability</strong>
-                      </p>
-                      <p>
-                        We can transfer, delegate or assign our rights under
-                        these Terms without your consent. You must obtain our
-                        written consent to transfer, assign or delegate your
-                        rights under these Terms.
-                      </p>
-                    </li>
+                    <EULALegalClosingSections />
                   </ol>
                 </div>
                 {!scrolledToBottom && (
                   <button
                     type="button"
                     onClick={scrollToBottom}
-                    aria-label="Scroll to end of agreement"
+                    aria-label={t(locale, "eula.modal.scrollToEnd")}
                     className="tw-absolute tw-bottom-2 tw-right-2 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-bg-opacity-50 tw-p-2 tw-text-gray-800 tw-transition tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-gray-200 desktop-hover:hover:tw-bg-opacity-80"
                   >
                     <FontAwesomeIcon
@@ -906,7 +726,9 @@ export default function EULAModal() {
                 variant="primary"
                 size="lg"
               >
-                {saveError ? "Try Again" : "Agree"}
+                {saveError
+                  ? t(locale, "eula.modal.tryAgain")
+                  : t(locale, "eula.modal.agree")}
               </Button>
             </div>
           </div>
