@@ -42,6 +42,7 @@ interface DropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly showStandaloneActionsButton?: boolean | undefined;
   readonly inlineAuthorOnDesktop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
@@ -77,6 +78,7 @@ export default function Drop({
   identityMode,
   timestampLayout,
   showInteractions = true,
+  showStandaloneActionsButton = false,
   inlineAuthorOnDesktop,
   mediaImageScale,
   fullWidthMedia,
@@ -177,6 +179,7 @@ export default function Drop({
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        showStandaloneActionsButton={showStandaloneActionsButton}
         inlineAuthorOnDesktop={inlineAuthorOnDesktop}
         mediaImageScale={mediaImageScale}
         fullWidthMedia={fullWidthMedia}

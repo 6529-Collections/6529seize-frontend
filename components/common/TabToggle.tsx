@@ -68,7 +68,7 @@ export const TabToggle: React.FC<TabToggleProps> = ({
 
   return (
     <div
-      className={`tw-flex tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}
+      className={`tw-flex tw-items-center tw-gap-x-1 ${fullWidth ? "tw-w-full" : "tw-w-auto"}`}
     >
       <div className="tw-contents" role="tablist">
         {options.map((option, index) =>

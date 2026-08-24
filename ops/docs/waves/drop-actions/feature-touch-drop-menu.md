@@ -28,6 +28,8 @@ Use the touch drop menu to run drop actions without leaving the thread.
   hover support.
 - Chat drops in compact mobile/tablet layouts can also expose `Open drop
 actions` in the drop header.
+- Posts shown in a Curation tab expose `Open drop actions` so removal does not
+  depend on discovering a long-press gesture.
 - Desktop-width layouts with hover support use desktop drop action controls
   instead of the touch sheet, even when web hardware reports a touchscreen.
 - The native mobile app keeps the touch action button and touch sheet at every
@@ -51,6 +53,11 @@ actions` in the drop header.
 - `Mark as unread`
 - vote controls (when voting is available)
 - `Edit Message` / `Delete` (when allowed)
+- `Add to {Curation name}` for an immediate add when there is one clear target
+- `Manage Curations` for adding or removing the post from named Curations the
+  current account can manage, or creating another Curation
+- `Remove from {Curation name}` when the post is shown in the active Curation
+  tab
 
 ## Availability Rules
 
@@ -100,6 +107,9 @@ actions` in the drop header.
   hold, so vertical swipes continue scrolling the thread instead of freezing it.
 - Some menu rows stay hidden when ownership, wallet, or voting requirements are
   not met.
+- `Manage Curations` can open a second sheet. Its add/remove buttons remain
+  explicit, its create action is separated below the list, and destructive
+  profile-card removal uses a separate confirmation.
 
 ## Failure and Recovery
 
@@ -127,5 +137,6 @@ actions` in the drop header.
 - [Wave Drop Reactions and Rating Actions](feature-reactions-and-ratings.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
 - [Wave Drop Boosting](feature-drop-boosting.md)
+- [Wave Drop Curation Actions](feature-drop-curation.md)
 - [Wave Drop Actions Index](README.md)
 - [Docs Home](../../README.md)
