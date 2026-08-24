@@ -351,8 +351,8 @@ export default function CreateCustomSnapshotForm() {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <div className="tw-flex tw-items-end tw-gap-x-4">
-          <div className="tw-w-80">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-start md:tw-grid-cols-[minmax(12rem,1fr)_13rem_13rem]">
+          <div className="tw-min-w-0">
             <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
               Name
             </label>
@@ -368,39 +368,36 @@ export default function CreateCustomSnapshotForm() {
               />
             </div>
           </div>
-          <div>
-            <div>
-              <button
-                onClick={() => setIsAddWalletsOpen(true)}
-                type="button"
-                className="tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-2 tw-border-solid tw-border-iron-700 tw-border-transparent tw-bg-transparent tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-underline tw-transition tw-duration-300 tw-ease-out hover:tw-border-[#232323] hover:tw-bg-[#232323]"
-              >
-                <FontAwesomeIcon
-                  icon={faPlus}
-                  className="-tw-ml-1 tw-mr-2 tw-h-5 tw-w-5"
-                />
-                <span>Add wallets</span>
-              </button>
-            </div>
+          <div className="tw-min-w-0 sm:tw-pt-7">
+            <button
+              onClick={() => setIsAddWalletsOpen(true)}
+              type="button"
+              className="tw-inline-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-2 tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto md:tw-w-52 desktop-hover:hover:tw-bg-iron-800/80"
+            >
+              <FontAwesomeIcon icon={faPlus} className="tw-size-5" />
+              <span>Add wallets</span>
+            </button>
           </div>
-          <div>
+          <div className="tw-w-full tw-min-w-0 sm:tw-col-span-2 sm:tw-w-60 md:tw-col-span-1 md:tw-w-52 md:tw-pt-7">
             <DistributionPlanAddOperationBtn loading={isLoading}>
               {chunkCount > 1
                 ? `Add ${chunkCount.toLocaleString()} custom snapshots`
                 : "Add custom snapshot"}
             </DistributionPlanAddOperationBtn>
             <div className="tw-mt-3 tw-space-y-2">
-              <p className="tw-text-xs tw-text-iron-300">
+              <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
                 Snapshots are limited to{" "}
                 {CUSTOM_SNAPSHOT_CHUNK_SIZE.toLocaleString()} wallets. We'll
                 split larger uploads automatically.
               </p>
               {snapshotSummary && (
-                <p className="tw-text-xs tw-text-iron-100">{snapshotSummary}</p>
+                <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-100">
+                  {snapshotSummary}
+                </p>
               )}
               {uploadState && uploadState.total > 0 && (
                 <div>
-                  <div className="tw-h-2 tw-w-60 tw-overflow-hidden tw-rounded-full tw-bg-iron-700">
+                  <div className="tw-h-2 tw-w-full tw-max-w-60 tw-overflow-hidden tw-rounded-full tw-bg-iron-700">
                     <div
                       className="tw-h-2 tw-rounded-full tw-bg-primary-500 tw-transition-all tw-duration-300"
                       style={{
@@ -434,6 +431,7 @@ export default function CreateCustomSnapshotForm() {
           title={`Add wallets`}
           modalSize={AllowlistToolModalSize.X_LARGE}
           showTitle={false}
+          showCloseButton
         >
           <CreateCustomSnapshotFormAddWalletsModal
             fileName={fileName}
@@ -445,7 +443,6 @@ export default function CreateCustomSnapshotForm() {
             setManualWallet={setManualWallet}
             addManualWallet={addManualWallet}
             onRemoveToken={onRemoveToken}
-            onClose={() => setIsAddWalletsOpen(false)}
           />
         </AllowlistToolCommonModalWrapper>
       )}

@@ -14,7 +14,6 @@ interface CreateCustomSnapshotFormAddWalletsModalProps {
   readonly setManualWallet: (manualWallet: string | null) => void;
   readonly addManualWallet: () => void;
   readonly onRemoveToken: (index: number) => void;
-  readonly onClose: () => void;
 }
 
 export default function CreateCustomSnapshotFormAddWalletsModal({
@@ -28,7 +27,6 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
   setManualWallet,
   addManualWallet,
   onRemoveToken,
-  onClose,
 }: CreateCustomSnapshotFormAddWalletsModalProps) {
   const totalWallets = tokens.length;
   const chunkCount =
@@ -36,18 +34,20 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
       ? Math.ceil(totalWallets / chunkSize)
       : 0;
   const walletLabel = totalWallets === 1 ? "wallet" : "wallets";
-  const snapshotLabel = chunkCount === 1 ? "custom snapshot" : "custom snapshots";
+  const snapshotLabel =
+    chunkCount === 1 ? "custom snapshot" : "custom snapshots";
 
   return (
-    <div className="tw-rounded-lg tw-overflow-hidden">
-      <div className="tw-max-h-[calc(100vh_+_-100px)] tw-overflow-y-auto tw-overflow-x-hidden">
-        <div className="tw-p-6 tw-rounded-lg">
-          <p className="tw-max-w-sm tw-text-lg tw-text-white tw-font-medium tw-mb-0">
+    <div className="tw-overflow-hidden tw-rounded-lg">
+      <div className="tw-max-h-[calc(100vh_+_-100px)] tw-overflow-x-hidden tw-overflow-y-auto">
+        <div className="tw-rounded-lg tw-p-6">
+          <h2 className="tw-m-0 tw-max-w-sm tw-pr-12 tw-text-lg tw-font-medium tw-text-white">
             Add wallets
-          </p>
+          </h2>
           <div className="tw-mt-2 tw-space-y-1">
             <p className="tw-text-xs tw-text-iron-300">
-              Each custom snapshot supports up to {chunkSize.toLocaleString()} wallets. Larger lists are split automatically.
+              Each custom snapshot supports up to {chunkSize.toLocaleString()}{" "}
+              wallets. Larger lists are split automatically.
             </p>
             <p className="tw-text-xs tw-text-iron-300">
               You can add up to {maxRows.toLocaleString()} wallets in one batch.
@@ -55,60 +55,62 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
             {totalWallets > 0 && (
               <>
                 <p className="tw-text-xs tw-text-iron-100">
-                  Currently added {totalWallets.toLocaleString()} {walletLabel}. This will create {chunkCount.toLocaleString()} {snapshotLabel}.
+                  Currently added {totalWallets.toLocaleString()} {walletLabel}.
+                  This will create {chunkCount.toLocaleString()} {snapshotLabel}.
                 </p>
                 {totalWallets > maxRows && (
                   <p className="tw-text-xs tw-text-yellow-400">
-                    Warning: Exceeds batch limit of {maxRows.toLocaleString()} wallets.
+                    Warning: Exceeds batch limit of {maxRows.toLocaleString()}{" "}
+                    wallets.
                   </p>
                 )}
               </>
             )}
           </div>
-          <div className="tw-mt-6 tw-flex tw-gap-x-4">
-            <div className="tw-flex tw-justify-between tw-w-full tw-gap-x-4">
-              <div className="tw-flex tw-gap-x-4">
-                <div className="tw-w-80 tw-relative">
-                  <div className="tw-flex tw-justify-between tw-items-center">
-                    <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-                      Wallet address.
-                    </label>
-                  </div>
-                  <div className="tw-mt-1.5">
-                    <input
-                      type="text"
-                      name="owner"
-                      autoComplete="off"
-                      onChange={(e) =>
-                        setManualWallet((e.target.value ?? "").trim())
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                        }
-                      }}
-                      className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-3 tw-pr-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40
-              hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-                    />
-                  </div>
-                </div>
-                <div className="tw-self-end">
-                  <button
-                    onClick={addManualWallet}
-                    type="button"
-                    className="tw-cursor-pointer tw-bg-transparent hover:tw-bg-iron-800/80 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border-2 tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+          <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-[minmax(0,1fr)_auto] md:tw-items-end">
+            <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end">
+              <div className="tw-relative tw-min-w-0">
+                <div className="tw-flex tw-items-center tw-justify-between">
+                  <label
+                    htmlFor="custom-snapshot-wallet-address"
+                    className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
                   >
-                    Add
-                  </button>
+                    Wallet address.
+                  </label>
+                </div>
+                <div className="tw-mt-1.5">
+                  <input
+                    id="custom-snapshot-wallet-address"
+                    type="text"
+                    name="owner"
+                    autoComplete="off"
+                    onChange={(e) => setManualWallet(e.target.value.trim())}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-pl-3 tw-pr-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40
+              hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+                  />
                 </div>
               </div>
-              <div className="tw-mt-10">
-                <CreateCustomSnapshotFormUpload
-                  fileName={fileName}
-                  setFileName={setFileName}
-                  setTokens={addUploadedTokens}
-                />
+              <div>
+                <button
+                  onClick={addManualWallet}
+                  type="button"
+                  className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border-2 tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto desktop-hover:hover:tw-bg-iron-800/80"
+                >
+                  Add
+                </button>
               </div>
+            </div>
+            <div className="md:tw-pb-3">
+              <CreateCustomSnapshotFormUpload
+                fileName={fileName}
+                setFileName={setFileName}
+                setTokens={addUploadedTokens}
+              />
             </div>
           </div>
 
@@ -117,16 +119,6 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
               tokens={tokens}
               onRemoveToken={onRemoveToken}
             />
-          </div>
-
-          <div className="tw-mt-8 tw-flex tw-justify-end">
-            <button
-              onClick={onClose}
-              type="button"
-              className="tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
-            >
-              Close
-            </button>
           </div>
         </div>
       </div>

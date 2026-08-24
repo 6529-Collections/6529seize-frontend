@@ -3,431 +3,60 @@
 import { AuthContext } from "@/components/auth/Auth";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  AliasEditor,
+  getAliasEditorDraft,
+  type AliasEditorDraft,
+} from "@/components/user/mention-shortcuts/UserPageMentionShortcutsEditor";
 import Button from "@/components/utils/button/Button";
 import {
   QuickTagsBackButton,
   QuickTagsDeleteConfirmation,
   QuickTagsLoadError,
 } from "@/components/user/mention-shortcuts/UserPageMentionShortcutsInlineViews";
-import { getAvailableMentionIdentities } from "@/components/user/mention-shortcuts/userPageMentionShortcuts.helpers";
-import type {
-  MentionAlias,
-  MentionAliasInput,
-  MentionAliasMember,
-} from "@/entities/IMentionAlias";
-import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import type { MentionAlias, MentionAliasInput } from "@/entities/IMentionAlias";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import {
-  isReservedMentionAlias,
-  normalizeMentionAlias,
-} from "@/helpers/mentions/mention-aliases.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMentionAliases } from "@/hooks/useMentionAliases";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { t } from "@/i18n/messages";
 import {
   createMentionAlias,
   deleteMentionAlias,
   updateMentionAlias,
 } from "@/services/api/mention-aliases-api";
-import { commonApiFetch } from "@/services/api/common-api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  MagnifyingGlassIcon,
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 
-const MAX_MEMBERS = 25;
-const MAX_SEARCH_RESULTS = 5;
-const MIN_SEARCH_LENGTH = 3;
 const VISIBLE_QUICK_TAGS = 3;
 const LOADING_MESSAGE_KEY = "user.mentionShortcuts.loading";
 
 type QuickTagsView = "summary" | "manage" | "editor";
 
-function getAliasErrorDescription(
-  reserved: boolean,
-  aliasIsValid: boolean,
-  hasAlias: boolean
-): string | undefined {
-  if (reserved) return "mention-shortcut-reserved-error";
-  if (!aliasIsValid && hasAlias) return "mention-shortcut-name-error";
-  return undefined;
-}
+type AliasEditorSaveVariables = {
+  readonly aliasId: string | null;
+  readonly input: MentionAliasInput;
+};
 
-function getSearchStatus({
-  isFetching,
-  locale,
-  searchIsReady,
-  visibleResultCount,
-}: {
-  readonly isFetching: boolean;
-  readonly locale: SupportedLocale;
-  readonly searchIsReady: boolean;
-  readonly visibleResultCount: number;
-}): string {
-  if (!searchIsReady) {
-    return t(locale, "user.mentionShortcuts.searchPrompt");
+function getQuickTagsLabelledBy(
+  displayedView: QuickTagsView,
+  hasDeleteConfirmation: boolean
+) {
+  if (displayedView === "manage" && hasDeleteConfirmation) {
+    return "delete-mention-shortcut-title";
   }
-  if (isFetching) return t(locale, LOADING_MESSAGE_KEY);
-  if (visibleResultCount === 1) {
-    return t(locale, "user.mentionShortcuts.searchResult");
-  }
-  return t(locale, "user.mentionShortcuts.searchResults", {
-    count: visibleResultCount,
-  });
-}
-
-function AliasEditor({
-  backLabel,
-  headingRef,
-  initialAlias,
-  onCancel,
-  onSaved,
-}: {
-  readonly backLabel: string;
-  readonly headingRef: RefObject<HTMLHeadingElement | null>;
-  readonly initialAlias: MentionAlias | null;
-  readonly onCancel: () => void;
-  readonly onSaved: () => void;
-}) {
-  const locale = useBrowserLocale();
-  const { connectedProfile, setToast } = useContext(AuthContext);
-  const ownerProfileId = connectedProfile?.id ?? null;
-  const queryClient = useQueryClient();
-  const [alias, setAlias] = useState(initialAlias?.alias ?? "");
-  const [members, setMembers] = useState<MentionAliasMember[]>(() =>
-    (initialAlias?.members ?? []).filter(
-      (member) => member.profile_id !== ownerProfileId
-    )
-  );
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebouncedValue(search, 200);
-  const profileSearchQuery = useQuery<CommunityMemberMinimal[]>({
-    queryKey: [
-      QueryKey.PROFILE_SEARCH,
-      { param: debouncedSearch, only_profile_owners: "true" },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<CommunityMemberMinimal[]>({
-        endpoint: "community-members",
-        params: {
-          param: debouncedSearch,
-          only_profile_owners: "true",
-        },
-      }),
-    enabled:
-      debouncedSearch.length >= MIN_SEARCH_LENGTH && debouncedSearch === search,
-  });
-  const identities = profileSearchQuery.data ?? [];
-  const normalizedAlias = normalizeMentionAlias(alias);
-  const aliasIsValid = /^\w{3,15}$/.test(normalizedAlias);
-  const reserved = isReservedMentionAlias(normalizedAlias);
-  const aliasHasError = alias.length > 0 && (!aliasIsValid || reserved);
-  const aliasErrorDescription = getAliasErrorDescription(
-    reserved,
-    aliasIsValid,
-    alias.length > 0
-  );
-  const canSave = aliasIsValid && !reserved && members.length > 0;
-
-  const mutation = useMutation({
-    mutationFn: async (input: MentionAliasInput) =>
-      initialAlias
-        ? updateMentionAlias(initialAlias.id, input)
-        : createMentionAlias(input),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: [QueryKey.MENTION_ALIASES],
-      });
-      setToast({
-        type: "success",
-        message: initialAlias
-          ? t(locale, "user.mentionShortcuts.updated")
-          : t(locale, "user.mentionShortcuts.created"),
-      });
-      onSaved();
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: t(locale, "user.mentionShortcuts.saveErrorTitle"),
-        details: getToastErrorDetails(
-          error,
-          t(locale, "user.mentionShortcuts.saveErrorDetails")
-        ),
-      });
-    },
-  });
-
-  const availableIdentities = getAvailableMentionIdentities(
-    identities,
-    members,
-    ownerProfileId
-  );
-  const visibleIdentities = availableIdentities.slice(0, MAX_SEARCH_RESULTS);
-  const searchIsReady =
-    members.length < MAX_MEMBERS &&
-    search.length >= MIN_SEARCH_LENGTH &&
-    debouncedSearch === search;
-  const searchStatus = getSearchStatus({
-    isFetching: profileSearchQuery.isFetching,
-    locale,
-    searchIsReady,
-    visibleResultCount: visibleIdentities.length,
-  });
-
-  const addMember = (identity: CommunityMemberMinimal) => {
-    const { profile_id: profileId, handle } = identity;
-    if (
-      !profileId ||
-      !handle ||
-      profileId === ownerProfileId ||
-      members.length >= MAX_MEMBERS
-    ) {
-      return;
-    }
-    setMembers((current) => [
-      ...current,
-      {
-        profile_id: profileId,
-        handle,
-        pfp: identity.pfp ?? null,
-      },
-    ]);
-    setSearch("");
-  };
-
-  const save = () => {
-    if (!canSave || mutation.isPending) return;
-    mutation.mutate({
-      alias: normalizedAlias,
-      member_profile_ids: [
-        ...new Set(
-          members
-            .map((member) => member.profile_id)
-            .filter((profileId) => profileId !== ownerProfileId)
-        ),
-      ],
-    });
-  };
-
-  const removeMember = (profileId: string) => {
-    setMembers((current) =>
-      current.filter((item) => item.profile_id !== profileId)
-    );
-  };
-
-  let searchResultsContent: ReactNode = (
-    <p className="tw-m-0 tw-px-3 tw-py-3 tw-text-sm tw-text-iron-400">
-      {t(locale, "user.mentionShortcuts.searchResults", { count: 0 })}
-    </p>
-  );
-  if (profileSearchQuery.isFetching) {
-    searchResultsContent = (
-      <p className="tw-m-0 tw-px-3 tw-py-3 tw-text-sm tw-text-iron-400">
-        {t(locale, LOADING_MESSAGE_KEY)}
-      </p>
-    );
-  } else if (visibleIdentities.length > 0) {
-    searchResultsContent = (
-      <ul className="tw-m-0 tw-list-none tw-p-0">
-        {visibleIdentities.map((identity) => (
-          <li key={identity.profile_id}>
-            <button
-              type="button"
-              onClick={() => addMember(identity)}
-              className="group tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white"
-            >
-              <span className="tw-min-w-0 tw-truncate">
-                @{identity.handle}
-                {identity.display && (
-                  <span className="tw-ml-2 tw-text-iron-500">
-                    {identity.display}
-                  </span>
-                )}
-              </span>
-              <PlusIcon
-                aria-hidden="true"
-                className="tw-size-4 tw-flex-none tw-text-iron-600 tw-transition-colors group-hover:tw-text-primary-300"
-              />
-            </button>
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
-  return (
-    <div aria-labelledby="quick-tag-editor-title">
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <QuickTagsBackButton
-          label={backLabel}
-          onClick={onCancel}
-          disabled={mutation.isPending}
-        />
-        <h3
-          ref={headingRef}
-          id="quick-tag-editor-title"
-          tabIndex={-1}
-          className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50 focus:tw-outline-none"
-        >
-          {initialAlias
-            ? t(locale, "user.mentionShortcuts.edit")
-            : t(locale, "user.mentionShortcuts.create")}
-        </h3>
-      </div>
-      <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400">
-        {t(locale, "user.mentionShortcuts.editorDescription")}
-      </p>
-
-      <div className="tw-mt-5 tw-space-y-5">
-        <div>
-          <label
-            htmlFor="mention-shortcut-name"
-            className="tw-block tw-text-xs tw-font-semibold tw-text-iron-400"
-          >
-            <span>{t(locale, "user.mentionShortcuts.name")}</span>
-            <div
-              className={`tw-mt-1 tw-flex tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-transition-colors focus-within:tw-border-primary-400 ${
-                aliasHasError ? "tw-border-error" : "tw-border-white/10"
-              }`}
-            >
-              <span
-                aria-hidden="true"
-                className="tw-text-sm tw-font-semibold tw-text-iron-500"
-              >
-                @
-              </span>
-              <input
-                id="mention-shortcut-name"
-                aria-label={t(locale, "user.mentionShortcuts.name")}
-                aria-invalid={aliasHasError}
-                aria-describedby={aliasErrorDescription}
-                value={alias}
-                onChange={(event) => setAlias(event.target.value)}
-                maxLength={15}
-                autoComplete="off"
-                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-2.5 tw-text-sm tw-font-medium tw-text-white tw-outline-none placeholder:tw-text-iron-600"
-              />
-            </div>
-          </label>
-          {!reserved && !aliasIsValid && alias.length > 0 && (
-            <p
-              id="mention-shortcut-name-error"
-              role="alert"
-              className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
-            >
-              {t(locale, "user.mentionShortcuts.nameError")}
-            </p>
-          )}
-          {reserved && (
-            <p
-              id="mention-shortcut-reserved-error"
-              role="alert"
-              className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
-            >
-              {t(locale, "user.mentionShortcuts.reservedError")}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor="mention-shortcut-profile-search"
-            className="tw-block tw-text-xs tw-font-semibold tw-text-iron-400"
-          >
-            {t(locale, "user.mentionShortcuts.addProfiles", {
-              count: members.length,
-              max: MAX_MEMBERS,
-            })}
-          </label>
-
-          <GroupCreateIdentitySelectedItems
-            selectedIdentities={members.map((member) => ({
-              wallet: member.profile_id,
-              handle: member.handle,
-              pfp: member.pfp,
-            }))}
-            onRemove={removeMember}
-            variant="quickTag"
-            handlePrefix="@"
-            getRemoveLabel={(identity) =>
-              t(locale, "user.mentionShortcuts.removeProfile", {
-                handle: identity.handle ?? "",
-              })
-            }
-          />
-
-          <div className="tw-relative tw-mt-2">
-            <div className="tw-flex tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-transition-colors focus-within:tw-border-primary-400">
-              <MagnifyingGlassIcon
-                aria-hidden="true"
-                className="tw-size-4 tw-flex-none tw-text-iron-600"
-              />
-              <input
-                id="mention-shortcut-profile-search"
-                aria-label={t(locale, "user.mentionShortcuts.searchLabel")}
-                aria-describedby="mention-shortcut-search-status"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={t(
-                  locale,
-                  "user.mentionShortcuts.searchPlaceholder"
-                )}
-                disabled={members.length >= MAX_MEMBERS}
-                autoComplete="off"
-                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-sm tw-text-white tw-outline-none placeholder:tw-text-iron-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-              />
-            </div>
-
-            {searchIsReady && (
-              <div className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-52 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-1.5 tw-shadow-2xl">
-                {searchResultsContent}
-              </div>
-            )}
-          </div>
-
-          <p
-            id="mention-shortcut-search-status"
-            aria-live="polite"
-            className="tw-sr-only"
-          >
-            {searchStatus}
-          </p>
-        </div>
-      </div>
-
-      <div className="tw-mt-5 tw-flex tw-flex-col-reverse tw-gap-2 sm:tw-flex-row sm:tw-justify-end">
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={mutation.isPending}
-          onClick={onCancel}
-        >
-          {t(locale, "user.mentionShortcuts.cancel")}
-        </Button>
-        <Button
-          variant="action"
-          size="sm"
-          disabled={!canSave}
-          loading={mutation.isPending}
-          onClick={save}
-        >
-          {mutation.isPending
-            ? t(locale, "user.mentionShortcuts.saving")
-            : t(locale, "user.mentionShortcuts.save")}
-        </Button>
-      </div>
-    </div>
-  );
+  if (displayedView === "manage") return "quick-tags-manager-title";
+  if (displayedView === "editor") return "quick-tag-editor-title";
+  return "quick-tags-heading";
 }
 
 export default function UserPageMentionShortcuts({
@@ -438,21 +67,23 @@ export default function UserPageMentionShortcuts({
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
+  const isMobileScreen = useIsMobileScreen();
+  const ownerProfileId = connectedProfile?.id ?? null;
   const isOwner =
-    !!profile.id &&
-    connectedProfile?.id === profile.id &&
-    !activeProfileProxy;
+    !!profile.id && ownerProfileId === profile.id && !activeProfileProxy;
   const queryClient = useQueryClient();
   const { aliases, isPending, isError, refetch } = useMentionAliases({
     enabled: isOwner,
   });
   const [view, setView] = useState<QuickTagsView>("summary");
   const [editorAlias, setEditorAlias] = useState<MentionAlias | null>(null);
+  const [editorDraft, setEditorDraft] = useState<AliasEditorDraft | null>(null);
   const [editorReturnView, setEditorReturnView] =
     useState<Exclude<QuickTagsView, "editor">>("manage");
   const [aliasToDelete, setAliasToDelete] = useState<MentionAlias | null>(null);
   const viewHeadingRef = useRef<HTMLHeadingElement>(null);
   const shouldFocusViewHeadingRef = useRef(false);
+  const shouldFocusAfterSheetLeaveRef = useRef(false);
 
   useEffect(() => {
     if (!shouldFocusViewHeadingRef.current) return;
@@ -480,6 +111,45 @@ export default function UserPageMentionShortcuts({
     setAliasToDelete(alias);
   };
 
+  const clearEditorState = () => {
+    setEditorAlias(null);
+    setEditorDraft(null);
+  };
+
+  const editorSaveMutation = useMutation({
+    mutationFn: async ({ aliasId, input }: AliasEditorSaveVariables) =>
+      aliasId ? updateMentionAlias(aliasId, input) : createMentionAlias(input),
+    onSuccess: async (_data, { aliasId }) => {
+      await queryClient.invalidateQueries({
+        queryKey: [QueryKey.MENTION_ALIASES],
+      });
+      setToast({
+        type: "success",
+        message: aliasId
+          ? t(locale, "user.mentionShortcuts.updated")
+          : t(locale, "user.mentionShortcuts.created"),
+      });
+
+      if (isMobileScreen) {
+        shouldFocusAfterSheetLeaveRef.current = true;
+      } else {
+        requestViewHeadingFocus();
+        clearEditorState();
+      }
+      setView("manage");
+    },
+    onError: (error) => {
+      setToast({
+        type: "error",
+        title: t(locale, "user.mentionShortcuts.saveErrorTitle"),
+        details: getToastErrorDetails(
+          error,
+          t(locale, "user.mentionShortcuts.saveErrorDetails")
+        ),
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: deleteMentionAlias,
     onSuccess: async (_data, deletedAliasId) => {
@@ -497,7 +167,7 @@ export default function UserPageMentionShortcuts({
         setView("summary");
       }
       setAliasToDelete(null);
-      setEditorAlias(null);
+      clearEditorState();
     },
     onError: (error) =>
       setToast({
@@ -526,14 +196,49 @@ export default function UserPageMentionShortcuts({
     alias: MentionAlias | null,
     returnView: Exclude<QuickTagsView, "editor">
   ) => {
+    shouldFocusAfterSheetLeaveRef.current = false;
     setEditorAlias(alias);
+    setEditorDraft(getAliasEditorDraft(alias, ownerProfileId));
     setEditorReturnView(returnView);
-    changeView("editor");
+    setAliasToDelete(null);
+    setView("editor");
+    if (!isMobileScreen) {
+      requestViewHeadingFocus();
+    }
+  };
+
+  const cancelEditing = () => {
+    if (editorSaveMutation.isPending) return;
+
+    shouldFocusAfterSheetLeaveRef.current = false;
+    setView(editorReturnView);
+    if (!isMobileScreen) {
+      requestViewHeadingFocus();
+      clearEditorState();
+    }
+  };
+
+  const saveEditor = (input: MentionAliasInput) => {
+    if (editorSaveMutation.isPending) return;
+    editorSaveMutation.mutate({
+      aliasId: editorAlias?.id ?? null,
+      input,
+    });
+  };
+
+  const handleEditorSheetAfterLeave = () => {
+    if (view === "editor") return;
+
+    clearEditorState();
+    if (shouldFocusAfterSheetLeaveRef.current) {
+      shouldFocusAfterSheetLeaveRef.current = false;
+      viewHeadingRef.current?.focus();
+    }
   };
 
   const showSummary = () => {
     setAliasToDelete(null);
-    setEditorAlias(null);
+    clearEditorState();
     changeView("summary");
   };
 
@@ -541,17 +246,12 @@ export default function UserPageMentionShortcuts({
     return null;
   }
 
-  let labelledBy = "quick-tags-heading";
-  if (view === "manage" && aliasToDelete) {
-    labelledBy = "delete-mention-shortcut-title";
-  } else if (view === "manage") {
-    labelledBy = "quick-tags-manager-title";
-  } else if (view === "editor") {
-    labelledBy = "quick-tag-editor-title";
-  }
+  const displayedView =
+    view === "editor" && isMobileScreen ? editorReturnView : view;
+  const labelledBy = getQuickTagsLabelledBy(displayedView, !!aliasToDelete);
 
   let content: ReactNode;
-  if (view === "manage" && aliasToDelete) {
+  if (displayedView === "manage" && aliasToDelete) {
     content = (
       <QuickTagsDeleteConfirmation
         alias={aliasToDelete}
@@ -561,7 +261,7 @@ export default function UserPageMentionShortcuts({
         onConfirm={() => deleteMutation.mutate(aliasToDelete.id)}
       />
     );
-  } else if (view === "summary") {
+  } else if (displayedView === "summary") {
     content = (
       <div>
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
@@ -606,10 +306,7 @@ export default function UserPageMentionShortcuts({
               onClick={() => startEditing(null, "summary")}
               className="tw-min-h-11 sm:tw-min-h-9"
             >
-              <PlusIcon
-                aria-hidden="true"
-                className="-tw-ml-0.5 tw-size-4"
-              />
+              <PlusIcon aria-hidden="true" className="-tw-ml-0.5 tw-size-4" />
               {t(locale, "user.mentionShortcuts.new")}
             </Button>
           )}
@@ -659,7 +356,7 @@ export default function UserPageMentionShortcuts({
         </div>
       </div>
     );
-  } else if (view === "manage") {
+  } else if (displayedView === "manage") {
     content = (
       <div data-testid="quick-tags-manager">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
@@ -767,31 +464,67 @@ export default function UserPageMentionShortcuts({
       </div>
     );
   } else {
-    content = (
+    content = editorDraft ? (
       <AliasEditor
         key={editorAlias?.id ?? "new"}
         backLabel={t(locale, "user.mentionShortcuts.back")}
+        draft={editorDraft}
         headingRef={viewHeadingRef}
-        initialAlias={editorAlias}
-        onCancel={() => {
-          setEditorAlias(null);
-          changeView(editorReturnView);
-        }}
-        onSaved={() => {
-          setEditorAlias(null);
-          changeView("manage");
-        }}
+        isEditing={editorAlias !== null}
+        isMobileSheet={false}
+        isSaving={editorSaveMutation.isPending}
+        onCancel={cancelEditing}
+        onDraftChange={setEditorDraft}
+        onSave={saveEditor}
+        ownerProfileId={ownerProfileId}
       />
-    );
+    ) : null;
   }
 
   return (
-    <section
-      aria-labelledby={labelledBy}
-      className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-px-4 tw-py-3 tw-shadow-2xl"
-      data-testid="quick-tags-section"
-    >
-      {content}
-    </section>
+    <>
+      <section
+        aria-labelledby={labelledBy}
+        className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-px-4 tw-py-3 tw-shadow-2xl"
+        data-testid="quick-tags-section"
+      >
+        {content}
+      </section>
+
+      <MobileWrapperDialog
+        title={
+          editorAlias
+            ? t(locale, "user.mentionShortcuts.edit")
+            : t(locale, "user.mentionShortcuts.create")
+        }
+        isOpen={isMobileScreen && view === "editor" && editorDraft !== null}
+        onClose={cancelEditing}
+        onBack={cancelEditing}
+        onAfterLeave={handleEditorSheetAfterLeave}
+        backLabel={t(locale, "user.mentionShortcuts.back")}
+        dismissible={!editorSaveMutation.isPending}
+        enableDragToClose
+        showScrollbar
+        tall
+        headerClassName="tw-pb-2"
+      >
+        {editorDraft && (
+          <div className="tw-px-4 sm:tw-px-6">
+            <AliasEditor
+              key={editorAlias?.id ?? "new"}
+              backLabel={t(locale, "user.mentionShortcuts.back")}
+              draft={editorDraft}
+              isEditing={editorAlias !== null}
+              isMobileSheet
+              isSaving={editorSaveMutation.isPending}
+              onCancel={cancelEditing}
+              onDraftChange={setEditorDraft}
+              onSave={saveEditor}
+              ownerProfileId={ownerProfileId}
+            />
+          </div>
+        )}
+      </MobileWrapperDialog>
+    </>
   );
 }

@@ -241,7 +241,7 @@ export default function SnapshotSelectTopHolders({
           setSelectedOption={(type) => setTopHolderType(type as TopHolderType)}
         />
 
-        <div className="tw-w-full tw-p-6">
+        <div className="tw-w-full tw-px-6 tw-pb-6 tw-pt-4">
           <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
           <DistributionPlanSecondaryText>
             Do you want to include only some members of this group?
