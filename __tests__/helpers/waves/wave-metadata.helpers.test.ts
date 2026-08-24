@@ -673,6 +673,32 @@ describe("wave-metadata.helpers", () => {
     });
   });
 
+  it("replaces existing custom labels", () => {
+    expect(
+      getApproveWaveDisplayMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+            data_value: "Candidates",
+          },
+        ],
+        display: {
+          approvalsTabLabel: "Nominees",
+          approvedTabLabel: "",
+        },
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+          data_value: "Nominees",
+        },
+      ],
+      deleteIds: [1],
+    });
+  });
+
   it("deletes all existing rows when labels reset to defaults", () => {
     expect(
       getApproveWaveDisplayMetadataUpdate({

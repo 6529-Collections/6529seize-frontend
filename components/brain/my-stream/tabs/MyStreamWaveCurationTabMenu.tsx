@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import {
+  Cog6ToothIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import { useAuth } from "@/components/auth/Auth";
@@ -28,6 +31,9 @@ interface MyStreamWaveCurationTabMenuProps {
   readonly onDeleted?: (() => Promise<void> | void) | undefined;
   readonly canSetAsProfileCuration?: boolean | undefined;
   readonly isSetAsProfileCurationPending?: boolean | undefined;
+  readonly leadingItems?: readonly CompactMenuItem[] | undefined;
+  readonly triggerAriaLabel?: string | undefined;
+  readonly triggerVariant?: "configuration" | "tabs" | undefined;
   readonly triggerLabel?: string | undefined;
   readonly permissionMode?: "standard" | "profile" | undefined;
   readonly canChooseAnotherCuration?: boolean | undefined;
@@ -37,10 +43,31 @@ interface MyStreamWaveCurationTabMenuProps {
   readonly isProfileActionPending?: boolean | undefined;
 }
 
+const EMPTY_MENU_ITEMS: readonly CompactMenuItem[] = [];
+const CONFIGURATION_TRIGGER_CLASS_NAME =
+  "tw-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 sm:tw-size-7";
+const DEFAULT_TRIGGER_CLASS_NAME =
+  "tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-bg-iron-800 hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40";
+
+const getTriggerClassName = ({
+  isConfiguration,
+  hasTriggerLabel,
+}: {
+  readonly isConfiguration: boolean;
+  readonly hasTriggerLabel: boolean;
+}): string | undefined => {
+  if (isConfiguration) {
+    return CONFIGURATION_TRIGGER_CLASS_NAME;
+  }
+
+  return hasTriggerLabel ? undefined : DEFAULT_TRIGGER_CLASS_NAME;
+};
+
 const getErrorMessage = (error: unknown, fallback: string): string =>
   error instanceof Error ? error.message : fallback;
 
 const getCurationMenuItems = ({
+  leadingItems,
   locale,
   hasProfileActions,
   canChooseAnotherCuration,
@@ -54,6 +81,7 @@ const getCurationMenuItems = ({
   onSetAsProfileCuration,
   onDelete,
 }: {
+  readonly leadingItems: readonly CompactMenuItem[];
   readonly locale: SupportedLocale;
   readonly hasProfileActions: boolean;
   readonly canChooseAnotherCuration: boolean;
@@ -67,7 +95,7 @@ const getCurationMenuItems = ({
   readonly onSetAsProfileCuration: () => void;
   readonly onDelete: () => void;
 }): CompactMenuItem[] => {
-  const items: CompactMenuItem[] = [];
+  const items: CompactMenuItem[] = [...leadingItems];
 
   if (hasProfileActions) {
     items.push({
@@ -141,6 +169,9 @@ export default function MyStreamWaveCurationTabMenu({
   onDeleted,
   canSetAsProfileCuration = false,
   isSetAsProfileCurationPending = false,
+  leadingItems = EMPTY_MENU_ITEMS,
+  triggerAriaLabel = "Curation options",
+  triggerVariant = "tabs",
   triggerLabel,
   permissionMode = "standard",
   canChooseAnotherCuration = false,
@@ -208,10 +239,7 @@ export default function MyStreamWaveCurationTabMenu({
       if (didProfileCleanupFail) {
         setToast({
           type: "error",
-          title: t(
-            locale,
-            "profileCuration.manage.profileCleanupErrorTitle"
-          ),
+          title: t(locale, "profileCuration.manage.profileCleanupErrorTitle"),
           description: t(
             locale,
             "profileCuration.manage.profileCleanupErrorDescription"
@@ -236,10 +264,7 @@ export default function MyStreamWaveCurationTabMenu({
       setToast({
         type: "error",
         title: t(locale, "profileCuration.manage.deleteErrorTitle"),
-        description: t(
-          locale,
-          "profileCuration.manage.deleteErrorDescription"
-        ),
+        description: t(locale, "profileCuration.manage.deleteErrorDescription"),
         details: getToastErrorDetails(
           error,
           getErrorMessage(
@@ -256,6 +281,7 @@ export default function MyStreamWaveCurationTabMenu({
     onChooseAnotherSourceWave !== undefined ||
     onHideFromProfile !== undefined;
   const menuItems = getCurationMenuItems({
+    leadingItems,
     locale,
     hasProfileActions,
     canChooseAnotherCuration,
@@ -277,7 +303,14 @@ export default function MyStreamWaveCurationTabMenu({
     deleteMutation.isPending ||
     isSettingProfileCuration ||
     isProfileActionPending;
-  const triggerContent = (
+  const isConfiguration = triggerVariant === "configuration";
+  const triggerClassName = getTriggerClassName({
+    isConfiguration,
+    hasTriggerLabel: Boolean(triggerLabel),
+  });
+  const triggerContent = isConfiguration ? (
+    <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
+  ) : (
     <>
       <EllipsisVerticalIcon className="-tw-ml-1 tw-block tw-size-4 tw-flex-shrink-0" />
       {triggerLabel && <span>{triggerLabel}</span>}
@@ -314,13 +347,9 @@ export default function MyStreamWaveCurationTabMenu({
         />
       ) : (
         <CompactMenu
-          triggerClassName={
-            triggerLabel
-              ? undefined
-              : "tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-bg-iron-800 hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
-          }
+          triggerClassName={triggerClassName}
           trigger={
-            triggerLabel ? (
+            triggerLabel && !isConfiguration ? (
               <Button variant="tertiary" size="sm">
                 {triggerContent}
               </Button>
@@ -328,11 +357,15 @@ export default function MyStreamWaveCurationTabMenu({
               triggerContent
             )
           }
-          triggerAsChild={!!triggerLabel}
-          aria-label={t(locale, "profileCuration.manage.menuAria")}
+          triggerAsChild={!!triggerLabel && !isConfiguration}
+          aria-label={
+            isConfiguration
+              ? triggerAriaLabel
+              : t(locale, "profileCuration.manage.menuAria")
+          }
           items={menuItems}
           itemsWrapperClassName={hasProfileActions ? "tw-pt-2" : undefined}
-          menuWidthClassName="tw-w-64"
+          menuWidthClassName={isConfiguration ? "tw-w-52" : "tw-w-64"}
           disabled={isMenuDisabled}
         />
       )}

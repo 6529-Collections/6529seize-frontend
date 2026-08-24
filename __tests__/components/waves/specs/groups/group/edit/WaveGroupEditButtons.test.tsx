@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import WaveGroupEditButtons from "@/components/waves/specs/groups/group/edit/WaveGroupEditButtons";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import { AuthContext } from "@/components/auth/Auth";
@@ -104,77 +110,37 @@ jest.mock(
     }
 );
 
-jest.mock(
-  "@/components/waves/specs/groups/group/edit/WaveGroupEditButton",
-  () => {
-    const React = require("react");
-
-    function MockWaveGroupEditTrigger({ open, renderTrigger }: any) {
-      if (renderTrigger === null) {
-        return null;
-      }
-
-      if (renderTrigger) {
-        const Trigger = renderTrigger;
-        return <Trigger open={open} />;
-      }
-
-      return <button onClick={open}>edit</button>;
-    }
-
-    return {
-      __esModule: true,
-      default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref) => {
-        const handleOpen = () => onWaveUpdate({});
-        React.useImperativeHandle(ref, () => ({ open: handleOpen }), [
-          handleOpen,
-        ]);
-        return (
-          <MockWaveGroupEditTrigger
-            open={handleOpen}
-            renderTrigger={renderTrigger}
-          />
-        );
-      }),
-    };
-  }
-);
-
-jest.mock(
-  "@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton",
-  () => {
-    const React = require("react");
-
-    function MockWaveGroupRemoveTrigger({ open, renderTrigger }: any) {
-      if (renderTrigger === null) {
-        return null;
-      }
-
-      if (renderTrigger) {
-        const Trigger = renderTrigger;
-        return <Trigger open={open} />;
-      }
-
-      return <button onClick={open}>remove</button>;
-    }
-
-    return {
-      __esModule: true,
-      default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref) => {
-        const handleOpen = () => onWaveUpdate({});
-        React.useImperativeHandle(ref, () => ({ open: handleOpen }), [
-          handleOpen,
-        ]);
-        return (
-          <MockWaveGroupRemoveTrigger
-            open={handleOpen}
-            renderTrigger={renderTrigger}
-          />
-        );
-      }),
-    };
-  }
-);
+jest.mock("@/components/waves/specs/groups/group/edit/WaveGroupRemove", () => ({
+  __esModule: true,
+  default: ({
+    isEditOpen,
+    onWaveUpdate,
+  }: {
+    readonly isEditOpen: boolean;
+    readonly onWaveUpdate: (body: Record<string, unknown>) => Promise<void>;
+  }) =>
+    isEditOpen ? (
+      <div role="dialog">
+        Remove group confirmation
+        <button
+          type="button"
+          onClick={() => {
+            void onWaveUpdate({
+              name: "Wave 1",
+              picture: null,
+              visibility: { scope: { group_id: null } },
+              participation: { scope: { group_id: "group-1" } },
+              voting: { scope: { group_id: "group-1" } },
+              chat: { scope: { group_id: "group-1" } },
+              wave: { admin_group: { group_id: "group-1" } },
+            });
+          }}
+        >
+          Confirm remove
+        </button>
+      </div>
+    ) : null,
+}));
 
 jest.mock(
   "@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal",
@@ -464,6 +430,40 @@ describe("WaveGroupEditButtons", () => {
     fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
     expect(screen.getByText("Change group")).toBeInTheDocument();
     expect(screen.queryByText("Remove group")).toBeNull();
+  });
+
+  it("opens the remove confirmation from the group menu", () => {
+    render(
+      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
+    fireEvent.click(screen.getByText("Remove group"));
+
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "Remove group confirmation"
+    );
+  });
+
+  it("keeps the remove confirmation open when the wave update rejects", async () => {
+    mutateAsync.mockRejectedValueOnce(new Error("Update failed"));
+    render(
+      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
+    fireEvent.click(screen.getByText("Remove group"));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm remove" }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    const mutationOptions = (useMutation as jest.Mock).mock.calls.at(-1)?.[0];
+    if (!mutationOptions) {
+      throw new Error("Expected wave mutation options");
+    }
+    act(() => mutationOptions.onSettled());
+    await waitFor(() => expect(screen.getByRole("dialog")).toBeVisible());
   });
 
   it("shows add label when no group is linked", async () => {
