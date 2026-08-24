@@ -33,6 +33,7 @@ import WaveSettingRow from "./WaveSettingRow";
 
 interface WaveApproveTabLabelsProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings" | undefined;
 }
 
 const EMPTY_DISPLAY: CreateWaveApproveDisplayConfig = {
@@ -98,8 +99,47 @@ const getApproveWaveDisplayMetadataFieldUpdate = ({
   };
 };
 
+interface WaveApproveTabLabelsFieldEditorProps {
+  readonly disabled: boolean;
+  readonly display: CreateWaveApproveDisplayConfig;
+  readonly errorMessage: string | null;
+  readonly field: ApproveTabLabelField;
+  readonly onDisplayChange: (display: CreateWaveApproveDisplayConfig) => void;
+  readonly onSave: () => void;
+  readonly onUseDefault: () => void;
+  readonly saveDisabled: boolean;
+  readonly closeEditor: () => void;
+}
+
+function WaveApproveTabLabelsFieldEditor({
+  closeEditor,
+  disabled,
+  display,
+  errorMessage,
+  field,
+  onDisplayChange,
+  onSave,
+  onUseDefault,
+  saveDisabled,
+}: WaveApproveTabLabelsFieldEditorProps) {
+  return (
+    <WaveApproveTabLabelsEditorForm
+      disabled={disabled}
+      display={display}
+      errorMessage={errorMessage}
+      field={field}
+      onCancel={closeEditor}
+      onDisplayChange={onDisplayChange}
+      onSave={onSave}
+      onUseDefault={onUseDefault}
+      saveDisabled={saveDisabled}
+    />
+  );
+}
+
 export default function WaveApproveTabLabels({
   wave,
+  display = "settings",
 }: WaveApproveTabLabelsProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -124,6 +164,7 @@ export default function WaveApproveTabLabels({
   const validationErrorMessage = getValidationErrorMessage(draft);
   const visibleErrorMessage =
     hasTouched || hasSubmitted ? validationErrorMessage : null;
+  const editIcon = display === "configuration" ? "gear" : "pencil";
 
   const resetEditor = useCallback(() => {
     setDraft(getApproveWaveDisplayMetadataDraft(metadata));
@@ -131,8 +172,8 @@ export default function WaveApproveTabLabels({
     setHasSubmitted(false);
   }, [metadata]);
 
-  const setTouchedDraft = (display: CreateWaveApproveDisplayConfig) => {
-    setDraft(display);
+  const setTouchedDraft = (nextDisplay: CreateWaveApproveDisplayConfig) => {
+    setDraft(nextDisplay);
     setHasTouched(true);
   };
 
@@ -210,58 +251,64 @@ export default function WaveApproveTabLabels({
     );
   };
 
-  const renderEditor = (field: ApproveTabLabelField) => {
-    function WaveApproveTabLabelsFieldEditor({
-      closeEditor,
-    }: {
-      readonly closeEditor: () => void;
-    }) {
-      return (
-        <WaveApproveTabLabelsEditorForm
-          disabled={isSaving}
-          display={draft}
-          errorMessage={visibleErrorMessage}
-          field={field}
-          onCancel={closeEditor}
-          onDisplayChange={setTouchedDraft}
-          onSave={() => {
-            setHasSubmitted(true);
-            if (validationErrorMessage) {
-              return;
-            }
-            saveLabels(closeEditor, field, { ...draft }, metadata);
-          }}
-          onUseDefault={() => {
-            setTouchedDraft(
-              field === "approvals"
-                ? { ...draft, approvalsTabLabel: "" }
-                : { ...draft, approvedTabLabel: "" }
-            );
-          }}
-          saveDisabled={getSaveDisabled(field)}
-        />
-      );
-    }
+  const renderFieldEditor = (
+    field: ApproveTabLabelField,
+    closeEditor: () => void
+  ) => (
+    <WaveApproveTabLabelsFieldEditor
+      closeEditor={closeEditor}
+      disabled={isSaving}
+      display={draft}
+      errorMessage={visibleErrorMessage}
+      field={field}
+      onDisplayChange={setTouchedDraft}
+      onSave={() => {
+        setHasSubmitted(true);
+        if (validationErrorMessage) {
+          return;
+        }
+        saveLabels(closeEditor, field, { ...draft }, metadata);
+      }}
+      onUseDefault={() => {
+        setTouchedDraft(
+          field === "approvals"
+            ? { ...draft, approvalsTabLabel: "" }
+            : { ...draft, approvedTabLabel: "" }
+        );
+      }}
+      saveDisabled={getSaveDisabled(field)}
+    />
+  );
 
-    return WaveApproveTabLabelsFieldEditor;
-  };
+  const renderApprovalsEditor = ({
+    closeEditor,
+  }: {
+    readonly closeEditor: () => void;
+  }) => renderFieldEditor("approvals", closeEditor);
+  const renderApprovedEditor = ({
+    closeEditor,
+  }: {
+    readonly closeEditor: () => void;
+  }) => renderFieldEditor("approved", closeEditor);
 
   return (
     <>
       <WaveSettingRow
         canEdit={canEdit}
+        editIcon={editIcon}
         editLabel="Edit approvals tab label"
         label="Approvals tab"
         onOpen={resetEditor}
-        renderEditor={renderEditor("approvals")}
+        renderEditor={renderApprovalsEditor}
         valueLabel={labels.approvals}
       />
       <WaveSettingRow
         canEdit={canEdit}
+        editIcon={editIcon}
         editLabel="Edit approved tab label"
         label="Approved tab"
         onOpen={resetEditor}
-        renderEditor={renderEditor("approved")}
+        renderEditor={renderApprovedEditor}
         valueLabel={labels.approved}
       />
     </>

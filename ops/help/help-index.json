@@ -2421,6 +2421,7 @@
         "rules",
         "rep",
         "settings",
+        "configuration",
         "voters",
         "top voters",
         "activity",
@@ -2428,11 +2429,11 @@
         "sidebar"
       ],
       "facts": [
-        "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
-        "For Rank and Approve waves, the desktop right sidebar exposes Voters and Activity from More after the four base sections.",
-        "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
+        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration.",
+        "Configuration is the consolidated rules and settings surface. It includes wave type, access, chat, display, schedules and other generated rules, guidelines, acceptance-required rules, admin-only shared controls, and personal display controls. Approve waves place Approve after, Hold time, Max approved drops, and Approval window directly after Schedule. Shared edits use gears, while read-only creation-time values have no edit control.",
+        "For Rank and Approve waves, the desktop right sidebar adds Voters and Activity after the three base sections; Activity moves into More at the fixed panel width.",
+        "In the native app, the main About view opens compact Overview, REP, and Configuration pills; Rank and Approve waves expose Voters and Activity from More.",
         "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
-        "In the native app, More contains Settings and, for Rank and Approve waves, Voters and Activity.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
@@ -2451,7 +2452,7 @@
       "title": "Wave rules",
       "aliases": [
         "wave rules",
-        "rules tab",
+        "configuration rules",
         "rules step",
         "wave guidelines",
         "guidelines",
@@ -2477,8 +2478,8 @@
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators can add Wave guidelines that are saved as wave metadata and shown under Guidelines in the wave rules panel.",
         "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
-        "Wave admins can edit Wave guidelines later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
-        "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
+        "Wave admins can edit Wave guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
+        "Participants can review rules in Configuration in the desktop wave right sidebar or from the mobile About information path."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
@@ -2704,11 +2705,11 @@
       ],
       "facts": [
         "Wave chat has two separate settings for Rank and Approve waves: chat.enabled controls whether chat is on, and chat.scope controls who can chat when chat is enabled.",
-        "Chat waves require chat to stay enabled, so their Settings and Rules panels do not show a Chat status enable/disable row.",
-        "Rank and Approve wave Settings show Chat status as Enabled or Disabled, and wave admins can edit that row to enable or disable chat.",
+        "Chat waves require chat to stay enabled, so Configuration does not show a Chat status enable/disable row for them.",
+        "Rank and Approve wave Configuration shows Chat status as Enabled or Disabled, and wave admins can edit that row with a gear to enable or disable chat.",
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
-        "The Rank and Approve Rules panels also show Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
-        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Rules and Settings to a filtered Network view that shows both the group criteria and current members; Rules display a live eligible-member count instead of the generated group name.",
+        "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
+        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",

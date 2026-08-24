@@ -10,6 +10,7 @@ import {
   getWaveOutcomeVisibilityMetadataUpdate,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
 import {
   createWaveMetadata,
@@ -22,6 +23,7 @@ import WaveSettingRow from "./WaveSettingRow";
 
 interface WaveOutcomesVisibilityProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings";
 }
 
 const isOutcomeVisibilityWave = (wave: ApiWave): boolean => {
@@ -36,8 +38,49 @@ const isOutcomeVisibilityWave = (wave: ApiWave): boolean => {
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+interface WaveOutcomesVisibilityEditorProps {
+  readonly closeEditor: () => void;
+  readonly draftVisible: boolean;
+  readonly isSaving: boolean;
+  readonly onDraftVisibleChange: (visible: boolean) => void;
+  readonly onSave: () => void;
+  readonly saveDisabled: boolean;
+}
+
+function WaveOutcomesVisibilityEditor({
+  closeEditor,
+  draftVisible,
+  isSaving,
+  onDraftVisibleChange,
+  onSave,
+  saveDisabled,
+}: WaveOutcomesVisibilityEditorProps) {
+  return (
+    <form action={() => onSave()} className="tw-flex tw-flex-col tw-gap-3">
+      <label className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-100">
+        <span>Show outcomes</span>
+        <input
+          autoFocus
+          checked={draftVisible}
+          className="tw-form-checkbox tw-size-5 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+          disabled={isSaving}
+          type="checkbox"
+          onChange={(event) => onDraftVisibleChange(event.target.checked)}
+        />
+      </label>
+
+      <WaveSettingEditorActions
+        disabled={isSaving}
+        onCancel={closeEditor}
+        submitDisabled={saveDisabled}
+      />
+    </form>
+  );
+}
+
 export default function WaveOutcomesVisibility({
   wave,
+  display = "settings",
 }: WaveOutcomesVisibilityProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -130,48 +173,51 @@ export default function WaveOutcomesVisibility({
     return null;
   }
 
-  function WaveOutcomesVisibilityEditor({
+  const renderEditor = ({
     closeEditor,
   }: {
     readonly closeEditor: () => void;
-  }) {
-    return (
-      <form
-        className="tw-flex tw-flex-col tw-gap-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          saveVisibility(closeEditor, metadata, draftVisible);
-        }}
-      >
-        <label className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-100">
-          <span>Show outcomes</span>
-          <input
-            autoFocus
-            checked={draftVisible}
-            className="tw-form-checkbox tw-size-5 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
-            disabled={isSaving}
-            type="checkbox"
-            onChange={(event) => setDraftVisible(event.target.checked)}
-          />
-        </label>
-
-        <WaveSettingEditorActions
-          disabled={isSaving}
-          onCancel={closeEditor}
-          submitDisabled={getSaveDisabled()}
-        />
-      </form>
+  }) => (
+    <WaveOutcomesVisibilityEditor
+      closeEditor={closeEditor}
+      draftVisible={draftVisible}
+      isSaving={isSaving}
+      onDraftVisibleChange={setDraftVisible}
+      onSave={() => saveVisibility(closeEditor, metadata, draftVisible)}
+      saveDisabled={getSaveDisabled()}
+    />
+  );
+  const isConfiguration = display === "configuration";
+  const editLabel = isConfiguration
+    ? waveRightPanelText(
+        "waves.sidebar.rightPanel.configuration.display.outcomes.edit"
+      )
+    : "Edit outcome visibility";
+  const label = isConfiguration
+    ? waveRightPanelText(
+        "waves.sidebar.rightPanel.configuration.display.outcomes.label"
+      )
+    : "Outcomes";
+  let valueLabel: string;
+  if (isConfiguration) {
+    valueLabel = waveRightPanelText(
+      outcomesVisible
+        ? "waves.sidebar.rightPanel.configuration.display.outcomes.shown"
+        : "waves.sidebar.rightPanel.configuration.display.outcomes.hidden"
     );
+  } else {
+    valueLabel = outcomesVisible ? "Shown" : "Hidden";
   }
 
   return (
     <WaveSettingRow
       canEdit={canEdit}
-      editLabel="Edit outcome visibility"
-      label="Outcomes"
+      editIcon={isConfiguration ? "gear" : "pencil"}
+      editLabel={editLabel}
+      label={label}
       onOpen={resetEditor}
-      renderEditor={WaveOutcomesVisibilityEditor}
-      valueLabel={outcomesVisible ? "Shown" : "Hidden"}
+      renderEditor={renderEditor}
+      valueLabel={valueLabel}
     />
   );
 }

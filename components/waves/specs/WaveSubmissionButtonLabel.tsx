@@ -31,6 +31,7 @@ import WaveSettingRow from "./WaveSettingRow";
 
 interface WaveSubmissionButtonLabelProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings";
 }
 
 const isSubmissionButtonLabelWave = (wave: ApiWave): boolean =>
@@ -71,13 +72,7 @@ function WaveSubmissionButtonLabelEditor({
     : counterId;
 
   return (
-    <form
-      className="tw-flex tw-flex-col tw-gap-3"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSave();
-      }}
-    >
+    <form action={() => onSave()} className="tw-flex tw-flex-col tw-gap-3">
       <label
         htmlFor="wave-submission-button-label"
         className="tw-text-sm tw-font-medium tw-text-iron-100"
@@ -134,6 +129,7 @@ function WaveSubmissionButtonLabelEditor({
 
 export default function WaveSubmissionButtonLabel({
   wave,
+  display = "settings",
 }: WaveSubmissionButtonLabelProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -349,6 +345,7 @@ export default function WaveSubmissionButtonLabel({
   return (
     <WaveSettingRow
       canEdit={canEdit}
+      editIcon={display === "configuration" ? "gear" : "pencil"}
       editLabel={t(DEFAULT_LOCALE, "waves.submissionButtonLabel.editLabel")}
       label={t(DEFAULT_LOCALE, "waves.submissionButtonLabel.rowLabel")}
       onOpen={resetEditor}

@@ -134,7 +134,7 @@ const mockWaveContentTabs = jest.fn((props: any) => (
   <button
     type="button"
     data-testid="about-sections-bar"
-    onClick={() => props.setActiveTab(SidebarTab.RULES)}
+    onClick={() => props.setActiveTab(SidebarTab.CONFIGURATION)}
   >
     {props.activeTab}
   </button>
@@ -449,7 +449,7 @@ describe("BrainMobile", () => {
     expect(aboutSectionsBar).toHaveTextContent(SidebarTab.ABOUT);
 
     fireEvent.click(aboutSectionsBar);
-    expect(aboutSectionsBar).toHaveTextContent(SidebarTab.RULES);
+    expect(aboutSectionsBar).toHaveTextContent(SidebarTab.CONFIGURATION);
 
     act(() => {
       latestTabsProps.onViewChange(BrainView.DEFAULT);
@@ -465,7 +465,7 @@ describe("BrainMobile", () => {
     });
 
     expect(await screen.findByTestId("about-sections-bar")).toHaveTextContent(
-      SidebarTab.RULES
+      SidebarTab.CONFIGURATION
     );
 
     mockSearchParams.set("wave", "2");
