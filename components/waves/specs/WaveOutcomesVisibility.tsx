@@ -65,7 +65,11 @@ function WaveOutcomesVisibilityEditor({
       className="tw-flex tw-flex-col tw-gap-3"
     >
       <label className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-100">
-        <span>Show outcomes</span>
+        <span>
+          {waveRightPanelText(
+            "waves.sidebar.rightPanel.configuration.display.outcomes.editorLabel"
+          )}
+        </span>
         <input
           autoFocus
           checked={draftVisible}

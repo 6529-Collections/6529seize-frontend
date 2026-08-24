@@ -42,6 +42,7 @@
   "waves.sidebar.rightPanel.configuration.chat.slowMode.off": "Off",
   "waves.sidebar.rightPanel.configuration.chat.slowMode.edit": "Edit slow mode",
   "waves.sidebar.rightPanel.configuration.display.outcomes.label": "Outcomes",
+  "waves.sidebar.rightPanel.configuration.display.outcomes.editorLabel": "Show outcomes",
   "waves.sidebar.rightPanel.configuration.display.outcomes.shown": "Shown",
   "waves.sidebar.rightPanel.configuration.display.outcomes.hidden": "Hidden",
   "waves.sidebar.rightPanel.configuration.display.outcomes.edit": "Edit outcome visibility",
