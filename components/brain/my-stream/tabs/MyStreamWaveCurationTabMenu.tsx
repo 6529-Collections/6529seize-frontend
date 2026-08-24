@@ -37,6 +37,99 @@ interface MyStreamWaveCurationTabMenuProps {
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : "Failed to delete curation.";
 
+const getCurationMenuItems = ({
+  hasProfileActions,
+  canChooseAnotherCuration,
+  canSetAsProfileCuration,
+  isProfileActionPending,
+  isSettingProfileCuration,
+  onChooseAnotherCuration,
+  onChooseAnotherSourceWave,
+  onHideFromProfile,
+  onEdit,
+  onSetAsProfileCuration,
+  onDelete,
+}: {
+  readonly hasProfileActions: boolean;
+  readonly canChooseAnotherCuration: boolean;
+  readonly canSetAsProfileCuration: boolean;
+  readonly isProfileActionPending: boolean;
+  readonly isSettingProfileCuration: boolean;
+  readonly onChooseAnotherCuration?: (() => void) | undefined;
+  readonly onChooseAnotherSourceWave?: (() => void) | undefined;
+  readonly onHideFromProfile?: (() => void) | undefined;
+  readonly onEdit: () => void;
+  readonly onSetAsProfileCuration: () => void;
+  readonly onDelete: () => void;
+}): CompactMenuItem[] => {
+  const items: CompactMenuItem[] = [];
+
+  if (hasProfileActions) {
+    items.push({
+      id: "profile-actions",
+      kind: "section",
+      label: "Shown on profile",
+    });
+
+    if (canChooseAnotherCuration && onChooseAnotherCuration) {
+      items.push({
+        id: "choose-curation",
+        label: "Choose another Curation",
+        onSelect: onChooseAnotherCuration,
+        disabled: isProfileActionPending,
+      });
+    }
+
+    if (onChooseAnotherSourceWave) {
+      items.push({
+        id: "choose-source-wave",
+        label: "Use another source Wave",
+        onSelect: onChooseAnotherSourceWave,
+        disabled: isProfileActionPending,
+      });
+    }
+
+    if (onHideFromProfile) {
+      items.push({
+        id: "hide-from-profile",
+        label: "Hide from profile",
+        onSelect: onHideFromProfile,
+        disabled: isProfileActionPending,
+      });
+    }
+
+    items.push({
+      id: "curation-actions",
+      kind: "section",
+      label: "This Curation",
+    });
+  }
+
+  items.push({
+    id: "edit",
+    label: "Edit Curation",
+    onSelect: onEdit,
+  });
+
+  if (canSetAsProfileCuration) {
+    items.push({
+      id: "set-profile-curation",
+      label: "Show on profile",
+      onSelect: onSetAsProfileCuration,
+      disabled: isSettingProfileCuration,
+    });
+  }
+
+  items.push({
+    id: "delete",
+    label: "Delete Curation",
+    onSelect: onDelete,
+    className: "tw-text-red desktop-hover:hover:tw-text-red",
+  });
+
+  return items;
+};
+
 export default function MyStreamWaveCurationTabMenu({
   wave,
   curation,
@@ -114,76 +207,21 @@ export default function MyStreamWaveCurationTabMenu({
     onChooseAnotherCuration !== undefined ||
     onChooseAnotherSourceWave !== undefined ||
     onHideFromProfile !== undefined;
-  const menuItems: CompactMenuItem[] = [
-    ...(hasProfileActions
-      ? [
-          {
-            id: "profile-actions",
-            kind: "section" as const,
-            label: "Shown on profile",
-          },
-          ...(canChooseAnotherCuration &&
-          onChooseAnotherCuration !== undefined
-            ? [
-                {
-                  id: "choose-curation",
-                  label: "Choose another Curation",
-                  onSelect: onChooseAnotherCuration,
-                  disabled: isProfileActionPending,
-                },
-              ]
-            : []),
-          ...(onChooseAnotherSourceWave !== undefined
-            ? [
-                {
-                  id: "choose-source-wave",
-                  label: "Use another source Wave",
-                  onSelect: onChooseAnotherSourceWave,
-                  disabled: isProfileActionPending,
-                },
-              ]
-            : []),
-          ...(onHideFromProfile !== undefined
-            ? [
-                {
-                  id: "hide-from-profile",
-                  label: "Hide from profile",
-                  onSelect: onHideFromProfile,
-                  disabled: isProfileActionPending,
-                },
-              ]
-            : []),
-          {
-            id: "curation-actions",
-            kind: "section" as const,
-            label: "This Curation",
-          },
-        ]
-      : []),
-    {
-      id: "edit",
-      label: "Edit Curation",
-      onSelect: () => setIsEditOpen(true),
+  const menuItems = getCurationMenuItems({
+    hasProfileActions,
+    canChooseAnotherCuration,
+    canSetAsProfileCuration,
+    isProfileActionPending,
+    isSettingProfileCuration,
+    onChooseAnotherCuration,
+    onChooseAnotherSourceWave,
+    onHideFromProfile,
+    onEdit: () => setIsEditOpen(true),
+    onSetAsProfileCuration: () => {
+      void updateProfileWave(wave.id, curation.id);
     },
-    ...(canSetAsProfileCuration
-      ? [
-          {
-            id: "set-profile-curation",
-            label: "Show on profile",
-            onSelect: () => {
-              void updateProfileWave(wave.id, curation.id);
-            },
-            disabled: isSettingProfileCuration,
-          },
-        ]
-      : []),
-    {
-      id: "delete",
-      label: "Delete Curation",
-      onSelect: () => setIsDeleteOpen(true),
-      className: "tw-text-red desktop-hover:hover:tw-text-red",
-    },
-  ];
+    onDelete: () => setIsDeleteOpen(true),
+  });
   const shouldUseMobileBottomSheet =
     hasProfileActions && isMobileLayoutViewport;
   const isMenuDisabled =

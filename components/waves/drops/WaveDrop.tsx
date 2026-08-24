@@ -18,7 +18,7 @@ import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
-import WaveDropActionsMore from "./WaveDropActionsMore";
+import { getWaveDropActionPresentation } from "./WaveDropActionPresentation";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
   useWaveDropMobileMenu,
@@ -57,7 +57,6 @@ import {
   shouldOffsetFooterRow,
   shouldShowAuthorInfo,
   shouldShowGroupedDropTimestamp,
-  shouldShowTouchActionsButton,
 } from "./WaveDrop.helpers";
 import type { WaveDropProps } from "./WaveDrop.types";
 
@@ -132,9 +131,6 @@ const WaveDropInner = ({
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const canUseMobileActionsSheet =
-    canUseTouchActionSheet ||
-    (showStandaloneActionsButton && isMobileLayoutViewport);
   const mobileMenu = useWaveDropMobileMenu();
   const allowLongPress = showInteractions && canUseTouchActionSheet;
   // Pointer-driven row hover: some browsers (capability-lying convertibles)
@@ -182,18 +178,21 @@ const WaveDropInner = ({
     isProfileView,
     location,
   });
-  const showActionsButton = showStandaloneActionsButton
-    ? showInteractions &&
-      isMobileLayoutViewport &&
-      !isEditing &&
-      identityMode === "default"
-    : shouldShowTouchActionsButton({
-        showInteractions,
-        hasTouch: canUseTouchActionSheet,
-        showReplyAndQuote,
-        isEditing,
-        identityMode,
-      });
+  const {
+    canUseMobileActionsSheet,
+    showActionsButton,
+    showActionsButtonOnMobile,
+    desktopActions,
+  } = getWaveDropActionPresentation({
+    drop,
+    showStandaloneActionsButton,
+    showInteractions,
+    showReplyAndQuote,
+    isMobileLayoutViewport,
+    canUseTouchActionSheet,
+    isEditing,
+    identityMode,
+  });
   const groupingClass = getGroupingClass({
     isProfileView,
     shouldGroupWithPreviousDrop,
@@ -477,12 +476,8 @@ const WaveDropInner = ({
     isStorm,
     activePartIndex,
     showActionsButton,
-    showActionsButtonOnMobile:
-      showStandaloneActionsButton && isMobileLayoutViewport,
-    desktopActions:
-      showStandaloneActionsButton && !isMobileLayoutViewport ? (
-        <WaveDropActionsMore drop={drop} showOnlyQuickRemove />
-      ) : undefined,
+    showActionsButtonOnMobile,
+    desktopActions,
     handleOpenTouchActions,
     timestampLayout,
   });
