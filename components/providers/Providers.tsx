@@ -83,21 +83,19 @@ export default function Providers({
                               disabled={!enableCookieConsent}
                             >
                               <MixpanelSetup />
-                              <EULAConsentProvider>
-                                <AppWebSocketProvider>
-                                  <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
-                                  </LayoutProvider>
-                                  {enableVersionCheck && <NewVersionToast />}
-                                </AppWebSocketProvider>
-                              </EULAConsentProvider>
+                              <AppWebSocketProvider>
+                                <LayoutProvider>
+                                  {enableMyStream ? (
+                                    <MyStreamProvider>
+                                      {sharedProviders}
+                                      <QuickDirectMessagesGate />
+                                    </MyStreamProvider>
+                                  ) : (
+                                    sharedProviders
+                                  )}
+                                </LayoutProvider>
+                                {enableVersionCheck && <NewVersionToast />}
+                              </AppWebSocketProvider>
                             </CookieConsentProvider>
                           </NotificationsProvider>
                         </WaveEligibilityProvider>
@@ -114,8 +112,10 @@ export default function Providers({
   );
 
   return (
-    <EditingDropProvider>
-      <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
-    </EditingDropProvider>
+    <EULAConsentProvider>
+      <EditingDropProvider>
+        <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
+      </EditingDropProvider>
+    </EULAConsentProvider>
   );
 }

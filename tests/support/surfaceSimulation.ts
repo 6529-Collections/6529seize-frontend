@@ -1,4 +1,5 @@
 import type { BrowserContext } from "@playwright/test";
+import { CURRENT_EULA_VERSION } from "../../constants/constants";
 
 const EULA_CONSENT_COOKIE = "eula-consent";
 const CAPACITOR_PROJECT_PLATFORMS: Record<string, "ios" | "android"> = {
@@ -232,7 +233,7 @@ async function seedIosEulaConsent(context: BrowserContext, baseURL?: string) {
   await context.addCookies([
     {
       name: EULA_CONSENT_COOKIE,
-      value: "true",
+      value: CURRENT_EULA_VERSION,
       url: baseURL ?? "http://localhost",
       expires: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60,
     },

@@ -6914,6 +6914,43 @@
       "source_refs": ["app/delegation-mapping-tool/page.tsx"]
     },
     {
+      "id": "shared.native-ios-eula-consent",
+      "kind": "workflow",
+      "title": "Native iOS EULA consent",
+      "canonical_path": "/about/terms-of-service",
+      "aliases": [
+        "mobile EULA",
+        "iOS EULA",
+        "EULA acceptance",
+        "EULA retry",
+        "mobile agreement"
+      ],
+      "keywords": [
+        "eula",
+        "ios",
+        "mobile",
+        "consent",
+        "agreement",
+        "version",
+        "retry"
+      ],
+      "facts": [
+        "The native iOS app requires acceptance of the current EULA before application content starts.",
+        "EULA acceptance is versioned and valid for 365 days; stale, unversioned, expired, or differently versioned consent requires acceptance again.",
+        "A current unexpired device acceptance can restore consent after an iOS reinstall.",
+        "If the consent check fails, the iOS app remains blocked and offers Retry. If saving fails, the agreement stays visible so the user can try again.",
+        "Users must scroll through the agreement before Agree becomes available, and the mandatory dialog cannot be dismissed without acceptance.",
+        "Android and ordinary web sessions are not affected by the native iOS EULA gate."
+      ],
+      "related_paths": ["/about/terms-of-service"],
+      "tags": ["mobile", "ios", "eula", "consent", "legal"],
+      "source_refs": [
+        "components/eula/EULAConsentContext.tsx",
+        "components/eula/EULAModal.tsx",
+        "ops/docs/shared/feature-ios-eula-consent.md"
+      ]
+    },
+    {
       "id": "access.overview",
       "kind": "route",
       "title": "Access page",
