@@ -12,10 +12,7 @@ import {
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
-import {
-  createWaveMetadata,
-  deleteWaveMetadata,
-} from "@/services/api/waves-v2-api";
+import { replaceWaveMetadata } from "@/services/api/wave-metadata-replacement";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import WaveSettingEditorActions from "./WaveSettingEditorActions";
@@ -157,14 +154,11 @@ export default function WaveOutcomesVisibility({
           return;
         }
 
-        await Promise.all([
-          ...update.deleteIds.map((metadataId) =>
-            deleteWaveMetadata({ waveId: wave.id, metadataId })
-          ),
-          ...update.create.map((body) =>
-            createWaveMetadata({ waveId: wave.id, body })
-          ),
-        ]);
+        await replaceWaveMetadata({
+          waveId: wave.id,
+          metadata: metadataSnapshot,
+          ...update,
+        });
         await queryClient.invalidateQueries({
           queryKey: [QueryKey.WAVE_METADATA, { wave_id: wave.id }],
         });
