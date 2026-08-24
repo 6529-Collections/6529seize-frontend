@@ -2,8 +2,8 @@
 
 import { useContext } from "react";
 import {
-    DistributionPlanToolContext,
-    DistributionPlanToolStep,
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 import DistributionPlanStep from "./DistributionPlanStep";
 
@@ -14,7 +14,7 @@ export interface DistributionPlanStepDescription {
   order: number;
 }
 
-export const DISTRIBUTION_PLAN_STEPS: Record<
+const DISTRIBUTION_PLAN_STEPS: Record<
   DistributionPlanToolStep,
   DistributionPlanStepDescription
 > = {
@@ -64,19 +64,69 @@ export const DISTRIBUTION_PLAN_STEPS: Record<
 
 export default function DistributionPlanToolSidebar() {
   const { step } = useContext(DistributionPlanToolContext);
+  const steps = Object.values(DISTRIBUTION_PLAN_STEPS).sort(
+    (firstStep, secondStep) => firstStep.order - secondStep.order
+  );
+  const activeStep = DISTRIBUTION_PLAN_STEPS[step];
+
   return (
-    <nav
-      aria-label="Progress"
-      className="tw-w-80 2xl:tw-w-96 tw-px-8 tw-pt-12 tw-min-h-screen tw-border-l tw-border-solid tw-border-r-0 tw-border-t-0 tw-border-b-0 tw-border-iron-600">
-      <ol role="list" className="tw-list-none tw-pl-0 tw-overflow-hidden">
-        {Object.values(DISTRIBUTION_PLAN_STEPS).map((stepItem) => (
-          <DistributionPlanStep
-            key={stepItem.key}
-            step={stepItem}
-            activeStepOrder={DISTRIBUTION_PLAN_STEPS[step].order}
-          />
-        ))}
-      </ol>
-    </nav>
+    <>
+      <nav
+        aria-label="Progress"
+        className="tw-w-full tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-px-4 tw-py-4 sm:tw-px-6 xl:tw-hidden"
+      >
+        <details className="tw-group">
+          <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-bg-iron-800 tw-px-4 tw-py-2 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+            <span className="tw-flex tw-min-w-0 tw-flex-col">
+              <span className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-400">
+                Step {activeStep.order + 1} of {steps.length}
+              </span>
+              <span className="tw-truncate tw-text-sm tw-font-medium tw-text-white">
+                {activeStep.label}
+              </span>
+            </span>
+            <svg
+              aria-hidden="true"
+              className="tw-h-5 tw-w-5 tw-shrink-0 tw-text-iron-300 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 7.5L10 12.5L15 7.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </summary>
+          <ol className="tw-mb-0 tw-mt-4 tw-list-none tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-2 tw-pb-0 tw-pt-5">
+            {steps.map((stepItem) => (
+              <DistributionPlanStep
+                key={stepItem.key}
+                step={stepItem}
+                activeStepOrder={activeStep.order}
+              />
+            ))}
+          </ol>
+        </details>
+      </nav>
+
+      <nav
+        aria-label="Progress"
+        className="tw-hidden tw-min-h-screen tw-w-80 tw-shrink-0 tw-border-0 tw-border-l tw-border-solid tw-border-iron-600 tw-px-8 tw-pt-12 xl:tw-block 2xl:tw-w-96"
+      >
+        <ol className="tw-mb-0 tw-list-none tw-overflow-hidden tw-p-0">
+          {steps.map((stepItem) => (
+            <DistributionPlanStep
+              key={stepItem.key}
+              step={stepItem}
+              activeStepOrder={activeStep.order}
+            />
+          ))}
+        </ol>
+      </nav>
+    </>
   );
 }

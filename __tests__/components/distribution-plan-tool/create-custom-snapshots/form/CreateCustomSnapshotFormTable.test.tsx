@@ -19,10 +19,10 @@ describe('CreateCustomSnapshotFormTable', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('calls onRemoveToken when delete clicked', async () => {
+  it('calls onRemoveToken when remove is clicked', async () => {
     const onRemoveToken = jest.fn();
     render(<CreateCustomSnapshotFormTable tokens={tokens} onRemoveToken={onRemoveToken} />);
-    const buttons = screen.getAllByRole('button', { name: /delete/i });
+    const buttons = screen.getAllByRole('button', { name: /remove wallet/i });
     await userEvent.click(buttons[1]);
     expect(onRemoveToken).toHaveBeenCalledWith(1);
   });
