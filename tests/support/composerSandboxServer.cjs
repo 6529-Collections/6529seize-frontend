@@ -1950,7 +1950,7 @@ function isExpectedCreatePerpetualRankWaveBody(body) {
 
 function isExpectedScheduledRankWaveConfig(wave) {
   // A scheduled rank wave must carry exactly one non-rolling decision point
-  // (the Dates step's default first announcement) and nothing else.
+  // (the Schedule step's default first announcement) and nothing else.
   return (
     hasOnlyKeys(wave, [
       "admin_drop_deletion_enabled",

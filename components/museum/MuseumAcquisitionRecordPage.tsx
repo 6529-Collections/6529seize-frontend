@@ -2,7 +2,10 @@ import { MuseumRelatedEntities } from "./MuseumRelatedEntities";
 import { MUSEUM_PROPOSAL_INTENT_VIEW_BYTES } from "./MuseumProposalImage";
 import type { AcquisitionWorkCard } from "./acquisition/MuseumAcquisitionExhibition";
 import { MuseumAcquisitionRecordDocuments } from "./acquisition/MuseumAcquisitionRecordDocuments";
-import { MuseumAcquisitionRecordHeader } from "./acquisition/MuseumAcquisitionRecordHeader";
+import {
+  MuseumAcquisitionRecordContext,
+  MuseumAcquisitionRecordHeader,
+} from "./acquisition/MuseumAcquisitionRecordHeader";
 import { MuseumAcquisitionRecordWorkSection } from "./acquisition/MuseumAcquisitionRecordWorkSection";
 import { isCuratorialDocument } from "./acquisition/MuseumAcquisitionRecordSections";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -41,7 +44,14 @@ function museumMediaToProgramMedia(media: MuseumMedia): MuseumProgramMedia {
     altText: media.altText ?? "",
     altTextStatus:
       media.altText === null ? "unavailable" : "governed_artwork_description",
-    variants: [],
+    variants: (media.variants ?? []).map((variant) => ({
+      url: variant.url,
+      width: variant.width,
+      height: variant.height,
+      mimeType: "image/webp" as const,
+      sha256: variant.sha256,
+      byteSize: variant.byteSize,
+    })),
   };
 }
 
@@ -304,14 +314,17 @@ export function MuseumAcquisitionRecordPage({
       <MuseumAcquisitionRecordHeader
         acquisition={acquisition}
         context={context}
-        artFirst={artFirst}
-        curatorialDocumentCount={curatorialDocuments.length}
-        workCount={workCards.length}
       />
       <MuseumAcquisitionRecordWorkSection
         workCards={displayedWorkCards}
         additionalPresentationMedia={additionalPresentationMedia}
         artFirst={artFirst}
+      />
+      <MuseumAcquisitionRecordContext
+        context={context}
+        artFirst={artFirst}
+        curatorialDocumentCount={curatorialDocuments.length}
+        workCount={workCards.length}
       />
       <MuseumAcquisitionRecordDocuments
         acquisition={acquisition}

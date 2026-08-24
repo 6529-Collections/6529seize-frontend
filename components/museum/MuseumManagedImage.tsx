@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
+import {
+  getMuseumMediaDeliverySrcSet,
+  getMuseumMediaDeliveryUrl,
+} from "@/lib/museum/runtime/mediaDelivery";
 
 export interface MuseumManagedImageProps {
   readonly src: string;
@@ -81,6 +85,8 @@ export function MuseumManagedImage({
   sourceLabel,
   onStatusChange,
 }: MuseumManagedImageProps) {
+  const deliveredSrc = getMuseumMediaDeliveryUrl(src);
+  const deliveredSrcSet = getMuseumMediaDeliverySrcSet(srcSet);
   const [failed, setFailed] = useState(alt.trim().length === 0);
   const [attempt, setAttempt] = useState(0);
   if (failed) {
@@ -104,17 +110,18 @@ export function MuseumManagedImage({
     );
   }
   return (
-    // Governed media must use the exact upstream URI; Next Image would create an unapproved derivative.
+    // The publication retains the exact governed URI. Approved accession bytes
+    // traverse the strict same-origin delivery route without re-derivation.
     <img
-      key={`${src}:${attempt}`}
-      src={src}
+      key={`${deliveredSrc}:${attempt}`}
+      src={deliveredSrc}
       alt={alt}
       width={width}
       height={height}
       loading={loading}
       fetchPriority={fetchPriority}
       decoding="async"
-      srcSet={srcSet}
+      srcSet={deliveredSrcSet}
       sizes={sizes}
       style={style}
       onError={() => {

@@ -150,6 +150,7 @@ export type CreateWaveGroupInlinePanelProps = {
   readonly collapseOnClickAway?: boolean;
   readonly startMode?: "actions" | "existing";
   readonly membersRoleLabel?: string | undefined;
+  readonly selectedGroupCriteriaStatus?: "loading" | "unavailable" | undefined;
   readonly defaultMembersPreviewTarget?: GroupMembersPreviewTarget | undefined;
   readonly defaultIncludedIdentity?: CommunityMemberMinimal | null | undefined;
   readonly onCriteriaReplacementChange?:
@@ -186,8 +187,9 @@ function useCreateWaveGroupInlinePanelViewState({
       getInlineGroupDraftSummary({
         draft: builder.draft,
         identityCount: builder.identities.length,
+        locale,
       }),
-    [builder.draft, builder.identities.length]
+    [builder.draft, builder.identities.length, locale]
   );
   const validation = validateGroupPayload(builder.draft);
   const canCreateDraft = validation.valid && !disabled && !isCreating;

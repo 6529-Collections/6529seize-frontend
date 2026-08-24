@@ -106,15 +106,12 @@ export default function CreateWaveRules({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
-      <CreateWaveStepHeader
-        title={t(locale, "waves.create.rules.title")}
-        description={t(locale, "waves.create.rules.description")}
-      />
+      <CreateWaveStepHeader title={t(locale, "waves.create.rules.title")} />
 
       <WaveRulesPanel
         rules={rules}
         showCustomRules={false}
-        title={t(locale, "waves.create.rules.automaticTitle")}
+        showTitle={false}
         variant="form"
         renderRowValue={renderRuleValue}
       />
@@ -136,15 +133,15 @@ export default function CreateWaveRules({
               <div>
                 <label
                   htmlFor="create-wave-custom-rules"
-                  className={`tw-block ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}
+                  className="tw-sr-only"
                 >
-                  {t(locale, "waves.create.rules.displayOnlyTitle")}
+                  {t(locale, "waves.create.rules.guidelinesFieldLabel")}
                 </label>
                 <p
                   id={customRulesHelpId}
-                  className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.supportingText}`}
+                  className={CREATE_WAVE_FORM_STYLES.supportingText}
                 >
-                  {t(locale, "waves.create.rules.displayOnlyDescription")}
+                  {t(locale, "waves.create.rules.guidelinesDescription")}
                 </p>
               </div>
               <textarea
@@ -157,17 +154,14 @@ export default function CreateWaveRules({
                 className="tw-form-textarea tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-4 tw-py-4 tw-text-base tw-font-medium tw-text-white tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 sm:tw-text-sm"
                 placeholder={t(
                   locale,
-                  "waves.create.rules.displayOnlyPlaceholder"
+                  "waves.create.rules.guidelinesPlaceholder"
                 )}
               />
               <div
                 id={customRulesCounterId}
                 aria-live="polite"
-                className={`tw-flex tw-justify-between tw-gap-3 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+                className={`tw-flex tw-justify-end ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
               >
-                <span>
-                  {t(locale, "waves.create.rules.displayOnlyEmptyHint")}
-                </span>
                 <span>
                   {customRules.length}/{WAVE_CUSTOM_RULES_MAX_LENGTH}
                 </span>

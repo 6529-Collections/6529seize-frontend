@@ -247,7 +247,7 @@ describe("WaveSettingsSections", () => {
     expect(screen.getByText("Chat")).toBeInTheDocument();
     expect(screen.getByText("Chat status")).toBeInTheDocument();
     expect(screen.getByText("Access")).toBeInTheDocument();
-    expect(screen.getByText("Custom rules")).toBeInTheDocument();
+    expect(screen.getByText("Guidelines")).toBeInTheDocument();
     expect(screen.getByText("Acceptance rules")).toBeInTheDocument();
     expect(screen.getByText("Approvals tab")).toBeInTheDocument();
     expect(screen.getByText("Approved tab")).toBeInTheDocument();
@@ -268,7 +268,7 @@ describe("WaveSettingsSections", () => {
 
     expect(screen.getByText("Display")).toBeInTheDocument();
     expect(screen.getByText("Rules")).toBeInTheDocument();
-    expect(screen.getByText("Custom rules")).toBeInTheDocument();
+    expect(screen.getByText("Guidelines")).toBeInTheDocument();
     expect(screen.getByText("Acceptance rules")).toBeInTheDocument();
     expect(screen.getByText("Chat status")).toBeInTheDocument();
     expect(screen.getByText("Outcomes")).toBeInTheDocument();
@@ -351,7 +351,7 @@ describe("WaveSettingsSections", () => {
     expect(screen.queryByText("Chat status")).not.toBeInTheDocument();
     expect(screen.getByText("Slow mode")).toBeInTheDocument();
     expect(screen.getByText("Disable links")).toBeInTheDocument();
-    expect(screen.getByText("Custom rules")).toBeInTheDocument();
+    expect(screen.getByText("Guidelines")).toBeInTheDocument();
     expect(screen.queryByText("Acceptance rules")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Edit acceptance rules" })
@@ -683,10 +683,10 @@ describe("WaveSettingsSections", () => {
     const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     await user.click(
-      await screen.findByRole("button", { name: "Edit custom rules" })
+      await screen.findByRole("button", { name: "Edit guidelines" })
     );
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "Keep submissions original."
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -724,8 +724,8 @@ describe("WaveSettingsSections", () => {
     });
 
     expect(await screen.findByText("Added")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Edit custom rules" }));
-    await user.clear(screen.getByLabelText("Display-only rules"));
+    await user.click(screen.getByRole("button", { name: "Edit guidelines" }));
+    await user.clear(screen.getByLabelText("Wave guidelines"));
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     await waitFor(() => {
@@ -770,10 +770,10 @@ describe("WaveSettingsSections", () => {
     });
 
     expect(await screen.findByText("Added")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Edit custom rules" }));
-    await user.clear(screen.getByLabelText("Display-only rules"));
+    await user.click(screen.getByRole("button", { name: "Edit guidelines" }));
+    await user.clear(screen.getByLabelText("Wave guidelines"));
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "New custom rule"
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -815,10 +815,10 @@ describe("WaveSettingsSections", () => {
     requestAuth.mockResolvedValueOnce({ success: false });
 
     await user.click(
-      await screen.findByRole("button", { name: "Edit custom rules" })
+      await screen.findByRole("button", { name: "Edit guidelines" })
     );
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "Keep submissions original."
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -841,7 +841,7 @@ describe("WaveSettingsSections", () => {
         queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
       });
     });
-    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+    expect(screen.getByLabelText("Wave guidelines")).toBeInTheDocument();
   });
 
   it("keeps custom rules editor open when metadata save fails", async () => {
@@ -856,10 +856,10 @@ describe("WaveSettingsSections", () => {
     const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     await user.click(
-      await screen.findByRole("button", { name: "Edit custom rules" })
+      await screen.findByRole("button", { name: "Edit guidelines" })
     );
     await user.type(
-      screen.getByLabelText("Display-only rules"),
+      screen.getByLabelText("Wave guidelines"),
       "Keep submissions original."
     );
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -867,20 +867,20 @@ describe("WaveSettingsSections", () => {
     await waitFor(() => {
       expect(setToast).toHaveBeenCalledWith({
         type: "error",
-        title: "Couldn't save these custom rules.",
+        title: "Couldn't save these guidelines.",
         description: "Please try again.",
         details: "metadata failed.",
       });
     });
     expect(
-      screen.getByText("Couldn't save these custom rules. Please try again.")
+      screen.getByText("Couldn't save these guidelines. Please try again.")
     ).toHaveAttribute("role", "alert");
     await waitFor(() => {
       expect(invalidateSpy).toHaveBeenCalledWith({
         queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
       });
     });
-    expect(screen.getByLabelText("Display-only rules")).toBeInTheDocument();
+    expect(screen.getByLabelText("Wave guidelines")).toBeInTheDocument();
   });
 
   it("saves acceptance rules through participation terms", async () => {
@@ -1002,7 +1002,7 @@ describe("WaveSettingsSections", () => {
       await screen.findByRole("button", { name: "Edit approvals tab label" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Edit custom rules" })
+      screen.getByRole("button", { name: "Edit guidelines" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Edit acceptance rules" })
@@ -1043,7 +1043,7 @@ describe("WaveSettingsSections", () => {
       screen.queryByRole("button", { name: "Edit hold time" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Edit custom rules" })
+      screen.queryByRole("button", { name: "Edit guidelines" })
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Edit acceptance rules" })

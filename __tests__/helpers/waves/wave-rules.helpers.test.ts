@@ -85,15 +85,22 @@ describe("wave-rules.helpers", () => {
       display: "No AI-only submissions.",
       signatureRequired: true,
     });
+    expect(rules.automatic).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "timing", title: "Schedule" }),
+      ])
+    );
     expect(
       rules.automatic
         .flatMap((section) => section.rows)
         .map((row) => [row.label, row.value])
     ).toEqual(
       expect.arrayContaining([
+        ["Visibility", "Public"],
         ["Who can drop", "Artists"],
+        ["Who can vote", "Public"],
         ["Chat status", "Enabled"],
-        ["Chat access", "Anyone"],
+        ["Chat access", "Public"],
         ["Required metadata", "artist (Text)"],
         ["Negative voting", "Blocked"],
         ["Approval threshold", "25 Rep"],
@@ -135,7 +142,7 @@ describe("wave-rules.helpers", () => {
       "Access",
     ]);
     expect(labels).toEqual(
-      expect.arrayContaining(["Who can view", "Chat access", "Who can admin"])
+      expect.arrayContaining(["Visibility", "Chat access", "Admins"])
     );
     expect(labels).not.toEqual(
       expect.arrayContaining([
@@ -202,8 +209,18 @@ describe("wave-rules.helpers", () => {
     });
 
     expect(rules.custom.display).toBe("Use current-season work.");
-    expect(rules.automatic.flatMap((section) => section.rows)).toEqual(
+    expect(rules.automatic).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({ id: "timing", title: "Schedule" }),
+      ])
+    );
+    const rows = rules.automatic.flatMap((section) => section.rows);
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Visibility", value: "Public" }),
+        expect.objectContaining({ label: "Who can drop", value: "Public" }),
+        expect.objectContaining({ label: "Who can vote", value: "Public" }),
+        expect.objectContaining({ label: "Chat access", value: "Public" }),
         expect.objectContaining({
           label: "Decision cadence",
           value: "Single decision",
@@ -324,7 +341,7 @@ describe("wave-rules.helpers", () => {
         }),
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone",
+          value: "Public",
         }),
       ])
     );
@@ -381,7 +398,7 @@ describe("wave-rules.helpers", () => {
         }),
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone",
+          value: "Public",
         }),
       ])
     );
@@ -443,7 +460,7 @@ describe("wave-rules.helpers", () => {
       expect.arrayContaining([
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone",
+          value: "Public",
         }),
         expect.objectContaining({ label: "Links", value: "Disabled" }),
         expect.objectContaining({ label: "Slow mode", value: "2m" }),

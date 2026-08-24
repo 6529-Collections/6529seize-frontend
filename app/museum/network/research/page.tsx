@@ -57,8 +57,7 @@ export default async function MuseumResearchPage() {
             "museum.network.research.acquisitionDescription"
           ),
           entries: cards.acquisitionCards,
-          columns: 3,
-          layout: "tablet-lead",
+          columns: 2,
         },
         {
           id: "artists",

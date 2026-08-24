@@ -39,6 +39,7 @@ export function displayCreditWithoutRepeatedLicense(
     ""
   );
   const candidates = [
+    `Licensed under ${unprefixedLabel}`,
     `Licensed ${unprefixedLabel}`,
     unprefixedLabel,
     labelWithoutTerminalPunctuation,

@@ -6,6 +6,7 @@ describe("CreateWaveInlineGroupHeader", () => {
     render(
       <CreateWaveInlineGroupHeader
         currentGroupLabel="Randomly generated group name"
+        showCurrentGroupTitle={true}
         unsavedGroupDescription={null}
         unsavedGroupSummary={null}
         membersPreview={<button type="button">View members</button>}
@@ -25,12 +26,14 @@ describe("CreateWaveInlineGroupHeader", () => {
   it("keeps the fallback label when there is no member preview", () => {
     render(
       <CreateWaveInlineGroupHeader
-        currentGroupLabel="Anyone"
+        currentGroupLabel="Public"
+        showCurrentGroupTitle={false}
         unsavedGroupDescription={null}
         unsavedGroupSummary={null}
       />
     );
 
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
   });
 });

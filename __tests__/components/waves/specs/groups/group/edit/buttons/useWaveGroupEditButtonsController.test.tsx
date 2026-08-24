@@ -9,6 +9,7 @@ import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.t
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createGroup as createGroupMutation,
+  hideGroup as hideGroupMutation,
   publishGroup as publishGroupMutation,
 } from "@/services/groups/groupMutations";
 
@@ -35,6 +36,7 @@ jest.mock("@/services/groups/groupMutations", () => {
   return {
     ...actual,
     createGroup: jest.fn(),
+    hideGroup: jest.fn(),
     publishGroup: jest.fn(),
   };
 });
@@ -59,6 +61,7 @@ const createQueryClientMock = () => ({
 let queryClientMock = createQueryClientMock();
 
 const mockCreateGroup = createGroupMutation as jest.Mock;
+const mockHideGroup = hideGroupMutation as jest.Mock;
 const mockPublishGroup = publishGroupMutation as jest.Mock;
 
 const connectedProfile = { id: "u1", handle: "alice" } as any;
@@ -161,6 +164,7 @@ beforeEach(() => {
   mockCommonApiFetch.mockReset();
   mockCommonApiPost.mockReset();
   mockCreateGroup.mockReset();
+  mockHideGroup.mockReset();
   mockPublishGroup.mockReset();
   requestAuth.mockResolvedValue({ success: true });
   mockCommonApiPost.mockResolvedValue({});
@@ -169,6 +173,7 @@ beforeEach(() => {
     ...baseGroupFull,
     id: "new-group-id",
   });
+  mockHideGroup.mockResolvedValue(undefined);
   mockPublishGroup.mockResolvedValue(undefined);
 });
 
@@ -239,7 +244,39 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
     );
   });
 
-  it("includes identity by recreating the existing group", async () => {
+  it("validates a scoped Chat group when Visibility is public", async () => {
+    const { result } = renderHook(() =>
+      useWaveGroupEditButtonsController({
+        haveGroup: false,
+        wave: buildWave(false),
+        type: WaveGroupType.CHAT,
+        connectedProfile,
+        requestAuth,
+        setToast,
+        onWaveCreated,
+      })
+    );
+
+    await act(async () => {
+      await result.current.updateWave({
+        visibility: { scope: { group_id: null } },
+        participation: { scope: { group_id: null } },
+        voting: { scope: { group_id: null } },
+        chat: { enabled: true, scope: { group_id: "chat-group" } },
+        wave: { type: "CHAT", admin_group: null },
+      } as never);
+    });
+
+    expect(mockValidateWaveGroups).toHaveBeenCalledWith({
+      visibility_group_id: null,
+      chat_group_id: "chat-group",
+    });
+    expect(mockCommonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: "waves/wave-1" })
+    );
+  });
+
+  it("includes identity by cloning only the selected access group", async () => {
     mockCommonApiFetch.mockImplementation(
       ({ endpoint }: { endpoint: string }) => {
         if (endpoint === `groups/${baseGroupFull.id}`) {
@@ -268,10 +305,16 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
       }
     );
 
+    const sharedGroupWave = buildWave(true);
+    sharedGroupWave.chat.scope.group = {
+      id: baseGroupFull.id,
+      author: { id: "u1", handle: "alice" },
+    };
+
     const { result } = renderHook(() =>
       useWaveGroupEditButtonsController({
         haveGroup: true,
-        wave: buildWave(true),
+        wave: sharedGroupWave,
         type: WaveGroupType.VIEW,
         connectedProfile,
         requestAuth,
@@ -295,11 +338,23 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
     expect(mockPublishGroup).toHaveBeenCalledWith(
       expect.objectContaining({
         id: "new-group-id",
-        oldVersionId: baseGroupFull.id,
+        oldVersionId: null,
       })
     );
-    expect(mockCommonApiPost).not.toHaveBeenCalled();
-    expect(mutateAsyncSpy).not.toHaveBeenCalled();
+    expect(mockCommonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "waves/wave-1",
+        body: expect.objectContaining({
+          visibility: expect.objectContaining({
+            scope: expect.objectContaining({ group_id: "new-group-id" }),
+          }),
+          chat: expect.objectContaining({
+            scope: expect.objectContaining({ group_id: baseGroupFull.id }),
+          }),
+        }),
+      })
+    );
+    expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
     expect(onWaveCreated).toHaveBeenCalledTimes(1);
     expect(setToast).toHaveBeenCalledWith({
       message: "Identity successfully included in the group.",
@@ -368,6 +423,147 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
     });
   });
 
+  it("hides a cloned group when it cannot be attached to the wave", async () => {
+    mockCommonApiFetch.mockImplementation(
+      ({ endpoint }: { endpoint: string }) => {
+        if (endpoint === "groups/new-group-id") {
+          return Promise.resolve({
+            ...baseGroupFull,
+            id: "new-group-id",
+            visible: true,
+          });
+        }
+        throw new Error(`Unexpected endpoint ${endpoint}`);
+      }
+    );
+    mockValidateWaveGroups.mockResolvedValue({
+      valid: false,
+      invalid_roles: ["CHAT"],
+    });
+
+    const { result } = renderHook(() =>
+      useWaveGroupEditButtonsController({
+        haveGroup: false,
+        wave: buildWave(true),
+        type: WaveGroupType.CHAT,
+        connectedProfile,
+        requestAuth,
+        setToast,
+        onWaveCreated,
+      })
+    );
+
+    await act(async () => {
+      await result.current.onIdentityConfirm({
+        identity: "0xFACE",
+        mode: WaveGroupIdentitiesModal.INCLUDE,
+      });
+    });
+
+    expect(mockHideGroup).toHaveBeenCalledWith({ id: "new-group-id" });
+    expect(mutateAsyncSpy).not.toHaveBeenCalled();
+    expect(onWaveCreated).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledTimes(1);
+    expect(setToast).toHaveBeenCalledWith({
+      type: "error",
+      message:
+        "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
+    });
+  });
+
+  it("keeps a cloned group when the wave update committed before response loss", async () => {
+    const committedWave = buildWave(false);
+    committedWave.visibility.scope.group = {
+      id: "new-group-id",
+      author: { id: "u1", handle: "alice" },
+    };
+    mockCommonApiFetch.mockImplementation(
+      ({ endpoint }: { endpoint: string }) => {
+        if (endpoint === "groups/new-group-id") {
+          return Promise.resolve({
+            ...baseGroupFull,
+            id: "new-group-id",
+            visible: true,
+          });
+        }
+        if (endpoint === "waves/wave-1") {
+          return Promise.resolve(committedWave);
+        }
+        throw new Error(`Unexpected endpoint ${endpoint}`);
+      }
+    );
+    mockCommonApiPost.mockRejectedValueOnce(new Error("Response lost"));
+
+    const { result } = renderHook(() =>
+      useWaveGroupEditButtonsController({
+        haveGroup: false,
+        wave: buildWave(false),
+        type: WaveGroupType.VIEW,
+        connectedProfile,
+        requestAuth,
+        setToast,
+        onWaveCreated,
+      })
+    );
+
+    await act(async () => {
+      await result.current.onIdentityConfirm({
+        identity: "0xFACE",
+        mode: WaveGroupIdentitiesModal.INCLUDE,
+      });
+    });
+
+    expect(mockHideGroup).not.toHaveBeenCalled();
+    expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
+    expect(onWaveCreated).toHaveBeenCalledTimes(1);
+    expect(setToast).toHaveBeenLastCalledWith({
+      message: "Identity successfully included in the group.",
+      type: "success",
+    });
+  });
+
+  it("hides a cloned group when the wave update fails", async () => {
+    mockCommonApiFetch.mockImplementation(
+      ({ endpoint }: { endpoint: string }) => {
+        if (endpoint === "groups/new-group-id") {
+          return Promise.resolve({
+            ...baseGroupFull,
+            id: "new-group-id",
+            visible: true,
+          });
+        }
+        if (endpoint === "waves/wave-1") {
+          return Promise.resolve(buildWave(false));
+        }
+        throw new Error(`Unexpected endpoint ${endpoint}`);
+      }
+    );
+    mockCommonApiPost.mockRejectedValueOnce(new Error("Wave update failed"));
+
+    const { result } = renderHook(() =>
+      useWaveGroupEditButtonsController({
+        haveGroup: false,
+        wave: buildWave(false),
+        type: WaveGroupType.VIEW,
+        connectedProfile,
+        requestAuth,
+        setToast,
+        onWaveCreated,
+      })
+    );
+
+    await act(async () => {
+      await result.current.onIdentityConfirm({
+        identity: "0xFACE",
+        mode: WaveGroupIdentitiesModal.INCLUDE,
+      });
+    });
+
+    expect(mockHideGroup).toHaveBeenCalledWith({ id: "new-group-id" });
+    expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
+    expect(onWaveCreated).not.toHaveBeenCalled();
+  });
+
   it("moves identity from include to exclude list", async () => {
     mockCommonApiFetch.mockImplementation(
       ({ endpoint }: { endpoint: string }) => {
@@ -419,8 +615,17 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
     const payloadArg = mockCreateGroup.mock.calls[0][0].payload;
     expect(payloadArg.group.identity_addresses).toEqual(["0xbbb"]);
     expect(payloadArg.group.excluded_identity_addresses).toContain("0xaaa");
-    expect(mockCommonApiPost).not.toHaveBeenCalled();
-    expect(mutateAsyncSpy).not.toHaveBeenCalled();
+    expect(mockCommonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "waves/wave-1",
+        body: expect.objectContaining({
+          visibility: expect.objectContaining({
+            scope: expect.objectContaining({ group_id: "new-group-id" }),
+          }),
+        }),
+      })
+    );
+    expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
     expect(onWaveCreated).toHaveBeenCalledTimes(1);
     expect(setToast).toHaveBeenCalledWith({
       message: "Identity successfully excluded from the group.",
@@ -467,8 +672,10 @@ describe("useWaveGroupEditButtonsController - identity management", () => {
     const payloadArg = mockCreateGroup.mock.calls[0][0].payload;
     expect(payloadArg.group.identity_addresses).toEqual(["0xf00"]);
     expect(payloadArg.group.excluded_identity_addresses).toBeNull();
-    expect(mockCommonApiPost).not.toHaveBeenCalled();
-    expect(mutateAsyncSpy).not.toHaveBeenCalled();
+    expect(mockCommonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: "waves/wave-1" })
+    );
+    expect(mutateAsyncSpy).toHaveBeenCalledTimes(1);
     expect(onWaveCreated).toHaveBeenCalledTimes(1);
   });
 });

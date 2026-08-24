@@ -153,7 +153,7 @@ const defaultIncludedIdentity = {
 };
 
 function renderInlinePanel({
-  suggestedName = "My Wave Who can view",
+  suggestedName = "My Wave Visibility",
   onChange = jest.fn(),
   onCreateGroup = jest.fn().mockResolvedValue(createdGroup),
   selectedGroup = null,
@@ -181,7 +181,7 @@ function renderInlinePanel({
     return (
       <CreateWaveGroupInlinePanel
         suggestedName={suggestedName}
-        defaultLabel="Anyone"
+        defaultLabel="Public"
         disabled={disabled}
         selectedGroup={currentGroup}
         allowGroupClear={allowGroupClear}
@@ -200,7 +200,7 @@ function renderInlinePanel({
 }
 
 function renderInlinePanelWithDisabledControls({
-  suggestedName = "My Wave Who can view",
+  suggestedName = "My Wave Visibility",
   onChange = jest.fn(),
   onCreateGroup = jest.fn().mockResolvedValue(createdGroup),
   selectedGroup = null,
@@ -234,7 +234,7 @@ function renderInlinePanelWithDisabledControls({
         </button>
         <CreateWaveGroupInlinePanel
           suggestedName={suggestedName}
-          defaultLabel="Anyone"
+          defaultLabel="Public"
           disabled={disabled}
           selectedGroup={currentGroup}
           allowGroupClear={allowGroupClear}
@@ -253,11 +253,11 @@ function renderInlinePanelWithDisabledControls({
 }
 
 describe("CreateWaveGroupInlinePanel", () => {
-  it("renders the current state and primary actions", () => {
+  it("renders the public state without a current group title", () => {
     renderInlinePanel();
 
-    expect(screen.getByText("Current group")).toBeInTheDocument();
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Add identity" })
     ).not.toBeInTheDocument();
@@ -428,7 +428,8 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "clear group" }));
 
     expect(onChange).toHaveBeenCalledWith(null);
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
   });
 
   it("keeps the selected group when clearing is disabled", async () => {
@@ -468,7 +469,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     await waitFor(() => {
       expect(onCreateGroup).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: "My Wave Who can view",
+          name: "My Wave Visibility",
         })
       );
     });
@@ -519,10 +520,10 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
 
-    expect(screen.getByText("Current group")).toBeInTheDocument();
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(screen.getByText("Create this new group")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
@@ -545,7 +546,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("button", { name: "Create and use new group" })
     ).toBeEnabled();
@@ -565,7 +566,9 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("1 identity").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("1 explicitly included user").length
+    ).toBeGreaterThan(0);
     expect(screen.getByText("Create this new group")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
     expect(
@@ -583,10 +586,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
-    expect(screen.getByText("Current group")).toBeInTheDocument();
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(screen.getByText("Create this new group")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Discard draft" })).toBeEnabled();
@@ -613,7 +616,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getByText("Existing Group")).toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(
       screen.queryByText("Based on Existing Group. Not applied yet.")
@@ -647,7 +650,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Current group")).toBeInTheDocument();
     expect(screen.getAllByText("Existing Group").length).toBeGreaterThan(0);
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
-    expect(screen.getAllByText("1 rule").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
     expect(screen.getByText("Not applied yet.")).toBeInTheDocument();
     expect(
       screen.queryByText("Based on Existing Group. Not applied yet.")
@@ -669,10 +672,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Choose group" }));
 
     expect(screen.getByTestId("group-search")).toBeInTheDocument();
-    expect(screen.getByText("Current group")).toBeInTheDocument();
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
     expect(screen.getAllByText("Unsaved group")).toHaveLength(2);
-    expect(screen.getByText("1 rule")).toBeInTheDocument();
+    expect(screen.getByText("REP at least 5")).toBeInTheDocument();
     expect(
       screen.getByText(
         "Choosing another group will discard this unsaved group."
@@ -804,7 +807,9 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
-    expect(screen.getAllByText("1 identity").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("1 explicitly included user").length
+    ).toBeGreaterThan(0);
     expect(
       screen.getByRole("button", { name: "Replace criteria" })
     ).toBeInTheDocument();

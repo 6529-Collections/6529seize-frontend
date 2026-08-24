@@ -1,8 +1,8 @@
-# Wave Creation Dates and Timeline
+# Wave Creation Schedule
 
 ## Overview
 
-The `Dates` step sets timing for `Rank` and `Approve` waves.
+The `Schedule` step sets timing for `Rank` and `Approve` waves.
 `Rank` waves set submission, voting, and winner announcement timing.
 `Approve` waves set when the wave opens and an optional end date.
 
@@ -14,23 +14,23 @@ in expandable sections named for those controls.
 
 - Full-page create route: `/waves/create`
 - Create-wave modal flows that reuse the same step sequence
-- Step label: `Dates`
+- Step label: `Schedule`
 - User-reachable in `Rank` and `Approve` wave creation
 
 ## Entry Points
 
 - Start a `Rank` or `Approve` create flow and continue
-  `Overview -> Groups -> Dates`.
+  `Overview -> Groups -> Schedule`.
 - Use `Back` from `Drops`, `Rules`, `Voting`, `Outcomes`, or `Description`.
-- On large screens, use the step rail to return to `Dates` after you have
+- On large screens, use the step rail to return to `Schedule` after you have
   moved past it.
 
 ## User Journey
 
 For scheduled `Rank` waves:
 
-1. Set `Drops Submission Opens`.
-2. Set `Drops Voting Begins` (must be at or after submission start).
+1. Set `Submissions Open`.
+2. Set `Voting Opens` (must be at or after submission start).
 3. Set `First Winners Announcement` date and time (must be at or after voting
    start).
 4. To extend the schedule, open `Winner schedule` and add optional
@@ -45,8 +45,8 @@ For scheduled `Rank` waves:
 
 For `Perpetual Ranking` waves:
 
-1. Set `Drops Submission Opens`.
-2. Set `Drops Voting Begins`.
+1. Set `Submissions Open`.
+2. Set `Voting Opens`.
 3. Continue to `Drops`. There are no winner announcements or end date. No
    optional-settings section is shown, including an empty one.
 
@@ -71,7 +71,7 @@ For `Approve` waves:
 
 ## Edge Cases
 
-- `Drops Submission Opens` cannot be set in the past; past picks are pushed to
+- `Submissions Open` cannot be set in the past; past picks are pushed to
   current time.
 - If voting start moves forward, first winners announcement can auto-shift so
   it stays at or after voting start.
@@ -100,7 +100,7 @@ For `Approve` waves:
 
 ## Limitations / Notes
 
-- `Chat` waves skip `Dates`.
+- `Chat` waves skip `Schedule`.
 - `Perpetual Ranking` has no winner announcements, outcomes, or end date.
 - Additional announcements are interval-based; there is no standalone timestamp
   list.

@@ -41,7 +41,7 @@ availability. Submission availability is exposed through the Chat tab
   `Disabled`. Wave admins can edit this row to re-enable disabled chat.
 - The Rules panel separates `Chat status` from `Chat access` for `Rank` and
   `Approve` waves. `Chat access` names the audience independently of chat
-  status; `Anyone` means no chat access group is attached.
+  status; `Public` means no chat access group is attached.
 - A private chat-access group that the viewer cannot inspect is shown as
   `Private group`, without a group link or identifying metadata.
 
