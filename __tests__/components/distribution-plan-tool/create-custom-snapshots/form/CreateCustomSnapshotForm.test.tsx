@@ -20,15 +20,10 @@ jest.mock(
 jest.mock(
   "@/components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormAddWalletsModal",
   () =>
-    ({ addUploadedTokens, onClose, tokens }: any) => (
+    ({ addUploadedTokens, tokens }: any) => (
       <div data-testid="modal">
         <span data-testid="count">{tokens.length}</span>
-        <button
-          onClick={() => {
-            addUploadedTokens(mockUploadedTokens);
-            onClose();
-          }}
-        >
+        <button onClick={() => addUploadedTokens(mockUploadedTokens)}>
           upload
         </button>
       </div>
@@ -39,7 +34,14 @@ jest.mock(
   () => ({
     __esModule: true,
     AllowlistToolModalSize: { X_LARGE: "X_LARGE" },
-    default: ({ children }: any) => <div data-testid="wrapper">{children}</div>,
+    default: ({ children, onClose }: any) => (
+      <div data-testid="wrapper">
+        <button aria-label="Close" onClick={onClose}>
+          Close
+        </button>
+        {children}
+      </div>
+    ),
   })
 );
 
@@ -93,7 +95,7 @@ describe("CreateCustomSnapshotForm", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "upload" }));
     await waitFor(() =>
-      expect(screen.queryByTestId("modal")).not.toBeInTheDocument()
+      expect(screen.getByTestId("count")).toHaveTextContent("1")
     );
     await waitFor(() =>
       expect(screen.getByTestId("table")).toHaveTextContent("1")
@@ -102,6 +104,10 @@ describe("CreateCustomSnapshotForm", () => {
       expect(
         screen.getByText(/will split .* into 1 custom snapshot/i)
       ).toBeInTheDocument()
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await waitFor(() =>
+      expect(screen.queryByTestId("modal")).not.toBeInTheDocument()
     );
 
     const input = screen.getByRole("textbox");
@@ -140,6 +146,9 @@ describe("CreateCustomSnapshotForm", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "upload" }));
     await waitFor(() =>
+      expect(screen.getByTestId("count")).toHaveTextContent("11000")
+    );
+    await waitFor(() =>
       expect(
         screen.getByText(/will split .* into 3 custom snapshots/i)
       ).toBeInTheDocument()
@@ -148,6 +157,10 @@ describe("CreateCustomSnapshotForm", () => {
       expect(
         screen.getByRole("button", { name: /add 3 custom snapshots/i })
       ).toBeInTheDocument()
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await waitFor(() =>
+      expect(screen.queryByTestId("modal")).not.toBeInTheDocument()
     );
 
     const input = screen.getByRole("textbox");
