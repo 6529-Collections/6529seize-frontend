@@ -14,7 +14,7 @@ export interface DistributionPlanStepDescription {
   order: number;
 }
 
-export const DISTRIBUTION_PLAN_STEPS: Record<
+const DISTRIBUTION_PLAN_STEPS: Record<
   DistributionPlanToolStep,
   DistributionPlanStepDescription
 > = {
