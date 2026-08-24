@@ -235,7 +235,7 @@ export default function SnapshotExcludeOtherSnapshots({
     });
   };
   return (
-    <div className="tw-relative tw-p-6">
+    <div className="tw-relative tw-px-6 tw-pb-6 tw-pt-4">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Exclude Other Snapshots Members.

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import DistributionPlanStepCurrent from '@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepCurrent';
+import { DistributionPlanToolStep } from '@/components/distribution-plan-tool/DistributionPlanToolContext';
 
 describe('DistributionPlanStepCurrent', () => {
   const baseStep = {
@@ -19,7 +20,7 @@ describe('DistributionPlanStepCurrent', () => {
   });
 
   it('omits connector line for last step', () => {
-    const lastStep = { ...baseStep, order: 6 };
+    const lastStep = { ...baseStep, key: DistributionPlanToolStep.REVIEW, order: 6 };
     render(<DistributionPlanStepCurrent step={lastStep} />);
     // line div should not be present
     expect(document.querySelector('div.tw-absolute')).toBeNull();

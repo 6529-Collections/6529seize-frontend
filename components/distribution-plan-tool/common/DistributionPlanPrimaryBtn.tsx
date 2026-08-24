@@ -24,17 +24,17 @@ export default function DistributionPlanPrimaryBtn({
   }, [isDisabled, loading]);
 
   const [buttonClasses, setButtonClasses] = useState(
-    "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+    "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
   );
 
   useEffect(() => {
     if (isDisabled) {
       setButtonClasses(
-        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-700 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-700 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
       );
     } else {
       setButtonClasses(
-        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+        "tw-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-4 tw-py-3 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
       );
     }
   }, [isDisabled]);

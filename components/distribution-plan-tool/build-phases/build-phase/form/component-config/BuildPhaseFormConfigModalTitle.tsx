@@ -8,7 +8,7 @@ export default function BuildPhaseFormConfigModalTitle({
   return (
     <>
       <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
-        <p className="tw-max-w-sm tw-text-lg tw-text-white tw-font-medium tw-mb-0">
+        <p className="tw-m-0 tw-max-w-sm tw-text-lg tw-font-medium tw-text-white">
           {title}
         </p>
         <button
