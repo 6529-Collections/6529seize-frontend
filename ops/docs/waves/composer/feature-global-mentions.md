@@ -47,11 +47,13 @@ Wave creators and admins can also use the broadcast mentions `@all` and
   suggestion menu. Wave creator or admin access is required for `@all` and
   `@contributors`; Chat access is the invocation requirement for `@admins` and
   `@devs6529`.
-- If a non-admin types `@all` or `@contributors` directly, the message is not
-  posted. They can remove the broadcast token or ask a Wave admin to post it.
+- Broadcast suggestions are unavailable to non-admins. If a non-admin types
+  `@all` or `@contributors` directly in a new message, the token is posted
+  as ordinary text without broadcast metadata or notifications.
 - A non-admin can retain `@contributors` while editing an existing message
   that already contained it. The edit does not rebroadcast the mention, and
-  they cannot add `@contributors` to a message that did not already contain it.
+  they cannot add `@contributors` as a broadcast mention to a message that did
+  not already contain it.
 - Global mention text inside links or inline/fenced code remains literal and
   does not notify a Wave audience.
 - A profile included by more than one mention is notified only once.
