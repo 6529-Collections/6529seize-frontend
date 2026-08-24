@@ -12,6 +12,12 @@ export type QuickCurationAction = Pick<
   "id" | "name"
 >;
 
+interface DropCurationActionsAvailability {
+  readonly showManageCurations: boolean;
+  readonly quickAddCuration: QuickCurationAction | null;
+  readonly quickRemoveCuration: QuickCurationAction | null;
+}
+
 export function useCanShowDropCurationsAction({
   dropId,
   waveId,
@@ -26,7 +32,7 @@ export function useCanShowDropCurationsAction({
   readonly isTemporaryDrop: boolean;
   readonly isWaveAdmin: boolean;
   readonly enabled?: boolean | undefined;
-}) {
+}): DropCurationActionsAvailability {
   const searchParams = useSearchParams();
   const { data: curations = [] } = useDropCurations({
     dropId,
