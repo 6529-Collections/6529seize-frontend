@@ -76,6 +76,13 @@ type EULAConsentProviderProps = {
   readonly initialConsentVersion?: string | undefined;
 };
 
+// The versioned cookie is the installed app's local acceptance receipt, not an
+// authentication boundary. The app writes it only after a successful consent
+// POST, and its expiry supplies the local 365-day validity limit. The backend
+// record is the durable reinstall-recovery copy when this receipt is absent.
+const hasCurrentLocalConsent = (version: string | undefined): boolean =>
+  version === CURRENT_EULA_VERSION;
+
 const EULABlockingScreen = ({
   state,
   onRetry,
@@ -119,7 +126,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
   const locale = useBrowserLocale();
   const [consentState, setConsentState] = useState<EULAConsentState>(() => {
     if (!initialIsIos && !capacitor.isIos) return "accepted";
-    return initialConsentVersion === CURRENT_EULA_VERSION
+    return hasCurrentLocalConsent(initialConsentVersion)
       ? "accepted"
       : "checking";
   });
@@ -138,7 +145,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
     setSaveError(null);
     try {
       const cookieVersion = Cookies.get(CONSENT_EULA_COOKIE);
-      if (cookieVersion === CURRENT_EULA_VERSION) {
+      if (hasCurrentLocalConsent(cookieVersion)) {
         if (consentCheckId !== consentCheckIdRef.current) return;
         setConsentState("accepted");
         return;

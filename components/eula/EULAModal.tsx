@@ -86,20 +86,8 @@ export default function EULAModal() {
       element.inert = true;
       element.setAttribute(ariaHiddenAttribute, "true");
     });
-    const keepFocusInDialog = (event: FocusEvent) => {
-      const dialog = dialogRef.current;
-      if (
-        dialog &&
-        event.target instanceof Node &&
-        !dialog.contains(event.target)
-      ) {
-        (scrollButtonRef.current ?? dialog).focus();
-      }
-    };
-    document.addEventListener("focusin", keepFocusInDialog);
 
     return () => {
-      document.removeEventListener("focusin", keepFocusInDialog);
       document.body.style.overflow = previousOverflow;
       backgroundElements.forEach(({ element, inert, ariaHidden }) => {
         element.inert = inert;
@@ -139,6 +127,7 @@ export default function EULAModal() {
           fallbackFocus: () => dialogRef.current ?? document.body,
           initialFocus: () => scrollButtonRef.current ?? dialogRef.current,
           onPostActivate: () => scrollButtonRef.current?.focus(),
+          preventScroll: true,
           returnFocusOnDeactivate: false,
           tabbableOptions: { displayCheck: "none" },
         }}

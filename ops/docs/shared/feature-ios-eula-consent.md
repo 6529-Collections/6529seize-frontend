@@ -28,6 +28,20 @@ Android and ordinary web sessions do not use this gate.
 Changing the current EULA version makes prior cookies and device records stale,
 so the agreement is shown again.
 
+## Consent Receipt Trust Model
+
+The current, unexpired versioned cookie is intentionally the installed app's
+local consent receipt. It allows an ordinary returning iOS session to open
+without a network round trip. The app creates that receipt only after the API
+successfully persists acceptance, and the cookie expiration enforces the local
+365-day validity period.
+
+The cookie is not an authentication or security boundary; like all client-side
+state, a device owner can modify it outside the normal app flow. The backend
+record provides the durable acceptance copy used to restore the receipt after
+reinstall. When no valid local receipt exists, missing, stale, expired, or
+differently versioned backend acceptance cannot unlock the app.
+
 ## Failure and Recovery
 
 - While the consent check is running, application content is not mounted.

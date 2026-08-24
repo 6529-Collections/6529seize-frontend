@@ -1,5 +1,6 @@
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 
 const mockConsent = jest.fn();
@@ -62,7 +63,8 @@ describe("EULAModal", () => {
     );
   });
 
-  it("traps focus inside the modal", async () => {
+  it("keeps keyboard tab focus inside the modal", async () => {
+    const user = userEvent.setup();
     render(
       <>
         <button type="button">Outside</button>
@@ -74,11 +76,10 @@ describe("EULAModal", () => {
       expect(dialog.contains(document.activeElement)).toBe(true)
     );
 
-    screen.getByText("Outside").focus();
+    await user.tab({ shift: true });
 
-    await waitFor(() =>
-      expect(dialog.contains(document.activeElement)).toBe(true)
-    );
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    expect(screen.getByText("Outside")).not.toHaveFocus();
   });
 
   it("makes the underlying application inert and restores it on unmount", () => {
