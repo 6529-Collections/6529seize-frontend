@@ -202,6 +202,23 @@ describe("WaveConfigurationCurations", () => {
     });
   });
 
+  it("disables every reorder action while a reorder is pending", () => {
+    mockUseWaveCurationReorderMutation.mockReturnValue({
+      moveCuration,
+      isPending: true,
+      pendingCurationId: "curation-1",
+    } as any);
+
+    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+
+    screen.getAllByRole("button", { name: "Move up" }).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
+    screen.getAllByRole("button", { name: "Move down" }).forEach((button) => {
+      expect(button).toBeDisabled();
+    });
+  });
+
   it("clears a deleted selected curation while preserving other query parameters", async () => {
     searchParams = new URLSearchParams(
       "curation=curation-1&view=compact&filter=active"
