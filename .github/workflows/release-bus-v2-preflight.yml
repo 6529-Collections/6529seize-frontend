@@ -526,7 +526,6 @@ jobs:
               export ALLOWLIST_API_ENDPOINT=https://allowlist-api.6529.io
               export BASE_ENDPOINT=https://6529.io
               export NEXTGEN_CHAIN_ID=1
-              export EMMA_MIN_TDH=1
               export ASSETS_FROM_S3=true
               export ANNOUNCED_VERSION_ENDPOINT=https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json
             else
@@ -536,7 +535,6 @@ jobs:
               export ALLOWLIST_API_ENDPOINT="$STAGING_ALLOWLIST_API_ENDPOINT"
               export BASE_ENDPOINT=https://staging.6529.io
               export NEXTGEN_CHAIN_ID="$STAGING_NEXTGEN_CHAIN_ID"
-              export EMMA_MIN_TDH=0
               export ASSETS_FROM_S3=false
               unset ANNOUNCED_VERSION_ENDPOINT
             fi

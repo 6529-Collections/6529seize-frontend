@@ -53,11 +53,7 @@
 
 ## Rate-Limit Policy Text on `/emma`
 
-- Production requires at least `1` TDH to create an allowlist.
-- Local and staging environments have no minimum TDH requirement, so QA
-  profiles with `0` TDH can test plan creation.
-- Users from the environment minimum through `25,000` TDH: up to `3`
-  allowlists per day.
+- Users with TDH `< 25,000` and at least `1`: up to `3` allowlists per day.
 - Users with TDH `> 25,000`: unlimited allowlists per day.
 - This is user-facing policy text and can change.
 

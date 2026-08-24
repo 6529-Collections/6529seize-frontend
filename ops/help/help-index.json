@@ -6552,8 +6552,7 @@
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
         "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
-        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
-        "Production requires at least 1 TDH to create an EMMA allowlist; local and staging environments allow 0-TDH QA profiles."
+        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation."
       ],
       "canonical_path": "/emma",
       "related_paths": ["/emma/plans"],
