@@ -5,6 +5,7 @@ import WaveChatStatus from "@/components/waves/specs/WaveChatStatus";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { Suspense } from "react";
 import WaveAccessGroups from "./WaveAccessGroups";
 import WaveConfigurationAdminSettings from "./WaveConfigurationAdminSettings";
 import WaveConfigurationDisplay from "./WaveConfigurationDisplay";
@@ -82,7 +83,9 @@ export default function WaveConfigurationSections({
       <WaveConfigurationRules wave={wave} />
       <WaveConfigurationAdminSettings wave={wave} />
       {showChatSettings && <WaveConfigurationPersonalDisplay />}
-      <WaveConfigurationPersonalCuration wave={wave} />
+      <Suspense fallback={null}>
+        <WaveConfigurationPersonalCuration wave={wave} />
+      </Suspense>
     </div>
   );
 }

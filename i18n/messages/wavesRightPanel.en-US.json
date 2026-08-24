@@ -59,7 +59,6 @@
   "waves.sidebar.rightPanel.configuration.personalCuration.title": "Your curation view",
   "waves.sidebar.rightPanel.configuration.personalCuration.label": "Curation",
   "waves.sidebar.rightPanel.configuration.personalCuration.default": "Default wave view",
-  "waves.sidebar.rightPanel.configuration.personalCuration.unavailable": "Selected curation",
   "waves.sidebar.rightPanel.configuration.personalCuration.tooltip": "This setting only changes which curation you see. It does not affect what other people see.",
   "waves.sidebar.rightPanel.configuration.personalCuration.tooltipAriaLabel": "About your curation view",
   "waves.sidebar.rightPanel.rules.title": "Rules",

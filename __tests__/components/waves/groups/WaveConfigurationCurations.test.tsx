@@ -43,11 +43,13 @@ jest.mock(
   () => ({
     __esModule: true,
     default: ({
+      isSetAsProfileCurationPending,
       leadingItems,
       onDeleted,
       triggerAriaLabel,
       triggerVariant,
     }: {
+      readonly isSetAsProfileCurationPending?: boolean;
       readonly leadingItems: readonly {
         readonly id: string;
         readonly label: string;
@@ -58,7 +60,12 @@ jest.mock(
       readonly triggerAriaLabel: string;
       readonly triggerVariant: string;
     }) => (
-      <div data-trigger-variant={triggerVariant}>
+      <div
+        data-profile-curation-pending={String(
+          Boolean(isSetAsProfileCurationPending)
+        )}
+        data-trigger-variant={triggerVariant}
+      >
         <button type="button" aria-label={triggerAriaLabel}>
           Configure
         </button>
@@ -161,10 +168,17 @@ describe("WaveConfigurationCurations", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("First curation")).toBeInTheDocument();
     expect(screen.getByText("Artists")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Configure First curation" })
-        .parentElement
-    ).toHaveAttribute("data-trigger-variant", "configuration");
+    const configurationMenu = screen.getByRole("button", {
+      name: "Configure First curation",
+    }).parentElement;
+    expect(configurationMenu).toHaveAttribute(
+      "data-trigger-variant",
+      "configuration"
+    );
+    expect(configurationMenu).toHaveAttribute(
+      "data-profile-curation-pending",
+      "false"
+    );
   });
 
   it("opens curation creation and exposes ordering actions", async () => {

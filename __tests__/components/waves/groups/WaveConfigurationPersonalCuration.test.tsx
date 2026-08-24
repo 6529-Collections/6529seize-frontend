@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveConfigurationPersonalCuration from "@/components/waves/groups/WaveConfigurationPersonalCuration";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
@@ -96,6 +96,28 @@ describe("WaveConfigurationPersonalCuration", () => {
     expect(replace).toHaveBeenCalledWith(
       "/waves/wave-id?view=chat&curation=curation-1",
       { scroll: false }
+    );
+  });
+
+  it("removes an unavailable selected curation while preserving other query parameters", async () => {
+    searchParams = new URLSearchParams(
+      "view=chat&curation=missing-curation&filter=active"
+    );
+    mockUseWaveCurations.mockReturnValue({
+      data: curations,
+      isPending: false,
+      isError: false,
+    } as any);
+
+    render(
+      <WaveConfigurationPersonalCuration wave={{ id: "wave-id" } as any} />
+    );
+
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith(
+        "/waves/wave-id?view=chat&filter=active",
+        { scroll: false }
+      )
     );
   });
 });

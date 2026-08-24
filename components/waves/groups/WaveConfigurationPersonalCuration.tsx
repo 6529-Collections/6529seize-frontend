@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
@@ -17,6 +17,7 @@ export default function WaveConfigurationPersonalCuration({
   const selectId = useId();
   const pathname = usePathname();
   const router = useRouter();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense -- Wrapped by WaveConfigurationSections Suspense boundary.
   const searchParams = useSearchParams();
   const curationsQuery = useWaveCurations({ waveId: wave.id });
   const curations = curationsQuery.data ?? [];
@@ -24,6 +25,33 @@ export default function WaveConfigurationPersonalCuration({
   const activeCurationIsAvailable = curations.some(
     (curation) => curation.id === activeCurationId
   );
+
+  useEffect(() => {
+    if (
+      curationsQuery.isPending ||
+      curationsQuery.isError ||
+      !activeCurationId ||
+      activeCurationIsAvailable
+    ) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("curation");
+    const query = params.toString();
+    // react-doctor-disable-next-line react-doctor/nextjs-no-client-side-redirect -- Reconcile stale viewer-owned URL state after the curation query resolves.
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
+  }, [
+    activeCurationId,
+    activeCurationIsAvailable,
+    curationsQuery.isError,
+    curationsQuery.isPending,
+    pathname,
+    router,
+    searchParams,
+  ]);
 
   if (curationsQuery.isPending || curationsQuery.isError || !curations.length) {
     return null;
@@ -82,13 +110,6 @@ export default function WaveConfigurationPersonalCuration({
               "waves.sidebar.rightPanel.configuration.personalCuration.default"
             )}
           </option>
-          {activeCurationId && !activeCurationIsAvailable && (
-            <option value={activeCurationId}>
-              {waveRightPanelText(
-                "waves.sidebar.rightPanel.configuration.personalCuration.unavailable"
-              )}
-            </option>
-          )}
           {curations.map((curation) => (
             <option key={curation.id} value={curation.id}>
               {curation.name}

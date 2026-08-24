@@ -7,6 +7,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { Suspense } from "react";
 import WaveConfigurationCurations from "./WaveConfigurationCurations";
 import WavePanelSection from "./WavePanelSection";
 
@@ -42,7 +43,9 @@ export default function WaveConfigurationAdminSettings({
         </WavePanelSection>
       )}
 
-      <WaveConfigurationCurations wave={wave} />
+      <Suspense fallback={null}>
+        <WaveConfigurationCurations wave={wave} />
+      </Suspense>
     </>
   );
 }

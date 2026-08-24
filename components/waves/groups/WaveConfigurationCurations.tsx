@@ -27,7 +27,7 @@ interface WaveConfigurationCurationRowProps {
   readonly curation: ApiWaveCuration;
   readonly curations: readonly ApiWaveCuration[];
   readonly index: number;
-  readonly isReordering: boolean;
+  readonly isMovePending: boolean;
   readonly onDeleted: () => void;
   readonly onMove: (direction: "previous" | "next") => void;
   readonly wave: ApiWave;
@@ -37,7 +37,7 @@ function WaveConfigurationCurationRow({
   curation,
   curations,
   index,
-  isReordering,
+  isMovePending,
   onDeleted,
   onMove,
   wave,
@@ -57,7 +57,7 @@ function WaveConfigurationCurationRow({
         "waves.sidebar.rightPanel.configuration.curations.moveUp"
       ),
       icon: <ArrowUpIcon aria-hidden="true" className="tw-size-4" />,
-      disabled: index === 0 || isReordering,
+      disabled: index === 0 || isMovePending,
       onSelect: () => onMove("previous"),
     },
     {
@@ -66,7 +66,7 @@ function WaveConfigurationCurationRow({
         "waves.sidebar.rightPanel.configuration.curations.moveDown"
       ),
       icon: <ArrowDownIcon aria-hidden="true" className="tw-size-4" />,
-      disabled: index === curations.length - 1 || isReordering,
+      disabled: index === curations.length - 1 || isMovePending,
       onSelect: () => onMove("next"),
     },
   ];
@@ -102,9 +102,14 @@ function WaveConfigurationCurationRow({
   );
 }
 
-function WaveConfigurationCurationsAdmin({ wave }: { readonly wave: ApiWave }) {
+function WaveConfigurationCurationsAuthorizedContent({
+  wave,
+}: {
+  readonly wave: ApiWave;
+}) {
   const pathname = usePathname();
   const router = useRouter();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense -- Wrapped by WaveConfigurationAdminSettings Suspense boundary.
   const searchParams = useSearchParams();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const curationsQuery = useWaveCurations({ waveId: wave.id });
@@ -162,7 +167,7 @@ function WaveConfigurationCurationsAdmin({ wave }: { readonly wave: ApiWave }) {
             curation={curation}
             curations={curations}
             index={index}
-            isReordering={isPending && pendingCurationId === curation.id}
+            isMovePending={isPending && pendingCurationId === curation.id}
             onDeleted={() => clearDeletedSelection(curation.id)}
             onMove={(direction) =>
               moveCuration({ curation, direction, curations })
@@ -227,5 +232,8 @@ export default function WaveConfigurationCurations({
     return null;
   }
 
-  return <WaveConfigurationCurationsAdmin wave={wave} />;
+  // Keep the authorization hook in this wrapper and the curation data hooks in
+  // the authorized child so hook order is stable and unauthorized viewers do
+  // not start curation queries or mutations.
+  return <WaveConfigurationCurationsAuthorizedContent wave={wave} />;
 }
