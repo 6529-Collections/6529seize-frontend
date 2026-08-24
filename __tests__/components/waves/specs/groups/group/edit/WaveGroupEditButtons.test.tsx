@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import WaveGroupEditButtons from "@/components/waves/specs/groups/group/edit/WaveGroupEditButtons";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import { AuthContext } from "@/components/auth/Auth";
@@ -106,8 +112,34 @@ jest.mock(
 
 jest.mock("@/components/waves/specs/groups/group/edit/WaveGroupRemove", () => ({
   __esModule: true,
-  default: ({ isEditOpen }: { readonly isEditOpen: boolean }) =>
-    isEditOpen ? <div role="dialog">Remove group confirmation</div> : null,
+  default: ({
+    isEditOpen,
+    onWaveUpdate,
+  }: {
+    readonly isEditOpen: boolean;
+    readonly onWaveUpdate: (body: Record<string, unknown>) => Promise<void>;
+  }) =>
+    isEditOpen ? (
+      <div role="dialog">
+        Remove group confirmation
+        <button
+          type="button"
+          onClick={() => {
+            void onWaveUpdate({
+              name: "Wave 1",
+              picture: null,
+              visibility: { scope: { group_id: null } },
+              participation: { scope: { group_id: "group-1" } },
+              voting: { scope: { group_id: "group-1" } },
+              chat: { scope: { group_id: "group-1" } },
+              wave: { admin_group: { group_id: "group-1" } },
+            });
+          }}
+        >
+          Confirm remove
+        </button>
+      </div>
+    ) : null,
 }));
 
 jest.mock(
@@ -412,6 +444,26 @@ describe("WaveGroupEditButtons", () => {
     expect(screen.getByRole("dialog")).toHaveTextContent(
       "Remove group confirmation"
     );
+  });
+
+  it("keeps the remove confirmation open when the wave update rejects", async () => {
+    mutateAsync.mockRejectedValueOnce(new Error("Update failed"));
+    render(
+      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
+    fireEvent.click(screen.getByText("Remove group"));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm remove" }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    const mutationOptions = (useMutation as jest.Mock).mock.calls.at(-1)?.[0];
+    if (!mutationOptions) {
+      throw new Error("Expected wave mutation options");
+    }
+    act(() => mutationOptions.onSettled());
+    await waitFor(() => expect(screen.getByRole("dialog")).toBeVisible());
   });
 
   it("shows add label when no group is linked", async () => {

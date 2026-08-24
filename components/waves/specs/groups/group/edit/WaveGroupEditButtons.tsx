@@ -126,8 +126,12 @@ export default function WaveGroupEditButtons({
 
   const handleGroupRemoveUpdate = useCallback(
     async (body: ApiUpdateWaveRequest) => {
-      await updateWave(body);
-      setIsGroupRemoveOpen(false);
+      try {
+        await updateWave(body);
+        setIsGroupRemoveOpen(false);
+      } catch {
+        // updateWave already surfaces mutation failures through the shared toast.
+      }
     },
     [updateWave]
   );
