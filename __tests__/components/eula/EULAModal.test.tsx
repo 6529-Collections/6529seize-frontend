@@ -42,6 +42,10 @@ describe("EULAModal", () => {
     };
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("is an accessible, labelled modal with initial focus in the agreement", async () => {
     render(<EULAModal />);
 
@@ -112,6 +116,21 @@ describe("EULAModal", () => {
     expect(mockConsent).toHaveBeenCalledTimes(1);
   });
 
+  it("enables Agree when the complete agreement fits without scrolling", async () => {
+    jest
+      .spyOn(HTMLElement.prototype, "clientHeight", "get")
+      .mockReturnValue(200);
+    jest
+      .spyOn(HTMLElement.prototype, "scrollHeight", "get")
+      .mockReturnValue(200);
+
+    render(<EULAModal />);
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Agree" })).toBeEnabled()
+    );
+  });
+
   it("scrolls to the bottom from the named scroll control", () => {
     render(<EULAModal />);
     const scrollContainer = screen.getByLabelText(
@@ -150,7 +169,8 @@ describe("EULAModal", () => {
       "We couldn't save your acceptance. Please try again."
     );
     expect(screen.getByRole("dialog")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Try Again" })).toBeDisabled();
+    scrollAgreementToBottom();
+    expect(screen.getByRole("button", { name: "Try Again" })).toBeEnabled();
   });
 
   it("states the narrow moderation controls and user remedies accurately", () => {

@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEULAConsent } from "./EULAConsentContext";
 import {
+  useCallback,
   useEffect,
   useId,
   useRef,
@@ -32,10 +33,23 @@ export default function EULAModal() {
     () => false
   );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
+
+  const updateScrolledToBottom = useCallback(() => {
+    const element = scrollContainerRef.current;
+    if (
+      element &&
+      element.clientHeight > 0 &&
+      element.scrollHeight > 0 &&
+      Math.ceil(element.scrollTop + element.clientHeight) >=
+        element.scrollHeight
+    ) {
+      setScrolledToBottom(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!mounted) {
@@ -43,6 +57,7 @@ export default function EULAModal() {
     }
 
     scrollContainerRef.current?.focus();
+    updateScrolledToBottom();
 
     const ariaHiddenAttribute = "aria-hidden";
     const previousOverflow = document.body.style.overflow;
@@ -82,17 +97,10 @@ export default function EULAModal() {
         }
       });
     };
-  }, [mounted]);
+  }, [mounted, updateScrolledToBottom]);
 
   const handleScroll = () => {
-    const el = scrollContainerRef.current;
-    if (el) {
-      const isAtBottom =
-        Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight;
-      if (isAtBottom) {
-        setScrolledToBottom(true);
-      }
-    }
+    updateScrolledToBottom();
   };
 
   const scrollToBottom = () => {
@@ -122,23 +130,16 @@ export default function EULAModal() {
           tabbableOptions: { displayCheck: "none" },
         }}
       >
-        <div
-          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[10000] tw-flex tw-items-center tw-justify-center tw-bg-black/60 tw-p-2 tw-backdrop-blur"
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-          }}
-        >
-          <div
+        <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[10000] tw-flex tw-items-center tw-justify-center tw-bg-black/60 tw-p-2 tw-backdrop-blur">
+          <dialog
             ref={dialogRef}
+            open
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
             tabIndex={-1}
-            className="tw-relative tw-max-h-full tw-w-full tw-max-w-lg tw-overflow-y-auto tw-rounded-xl tw-bg-iron-800 tw-px-6 tw-py-8 tw-shadow-lg focus:tw-outline-none sm:tw-w-3/4 sm:tw-max-w-4xl sm:tw-px-12 sm:tw-py-10"
+            className="tw-relative tw-m-0 tw-max-h-full tw-w-full tw-max-w-lg tw-overflow-y-auto tw-rounded-xl tw-border-0 tw-bg-iron-800 tw-px-6 tw-py-8 tw-text-inherit tw-shadow-lg focus:tw-outline-none sm:tw-w-3/4 sm:tw-max-w-4xl sm:tw-px-12 sm:tw-py-10"
           >
             <div className="tw-mb-10 tw-text-center">
               <h2 id={titleId}>{t(locale, "eula.modal.title")}</h2>
@@ -155,6 +156,7 @@ export default function EULAModal() {
                   ref={scrollContainerRef}
                   onScroll={handleScroll}
                   tabIndex={0}
+                  role="region"
                   aria-label={t(locale, "eula.modal.agreementLabel")}
                   className="tw-max-h-[50vh] tw-overflow-y-auto tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-900 tw-p-4 tw-shadow focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
@@ -731,7 +733,7 @@ export default function EULAModal() {
                   : t(locale, "eula.modal.agree")}
               </Button>
             </div>
-          </div>
+          </dialog>
         </div>
       </FocusTrap>
     </div>,

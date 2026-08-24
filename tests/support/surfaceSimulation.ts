@@ -1,7 +1,10 @@
 import type { BrowserContext } from "@playwright/test";
-import { CURRENT_EULA_VERSION } from "../../constants/constants";
+import {
+  CONSENT_EULA_COOKIE,
+  CURRENT_EULA_VERSION,
+  NATIVE_IOS_COOKIE,
+} from "../../constants/constants";
 
-const EULA_CONSENT_COOKIE = "eula-consent";
 const CAPACITOR_PROJECT_PLATFORMS: Record<string, "ios" | "android"> = {
   "capacitor-ios-sim": "ios",
   "capacitor-android-sim": "android",
@@ -232,7 +235,13 @@ export async function installSurfaceSimulation(
 async function seedIosEulaConsent(context: BrowserContext, baseURL?: string) {
   await context.addCookies([
     {
-      name: EULA_CONSENT_COOKIE,
+      name: NATIVE_IOS_COOKIE,
+      value: "true",
+      url: baseURL ?? "http://localhost",
+      expires: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60,
+    },
+    {
+      name: CONSENT_EULA_COOKIE,
       value: CURRENT_EULA_VERSION,
       url: baseURL ?? "http://localhost",
       expires: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60,

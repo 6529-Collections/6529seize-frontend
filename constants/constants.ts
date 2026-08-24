@@ -37,6 +37,7 @@ export const API_AUTH_COOKIE = "x-6529-auth";
 export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
 export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
 export const CONSENT_EULA_COOKIE = "eula-consent";
+export const NATIVE_IOS_COOKIE = "native-ios";
 export const CURRENT_EULA_VERSION = "2026-08-24";
 export const EULA_VALIDITY_DAYS = 365;
 export const EULA_VALIDITY_MS = EULA_VALIDITY_DAYS * 24 * 60 * 60 * 1000;

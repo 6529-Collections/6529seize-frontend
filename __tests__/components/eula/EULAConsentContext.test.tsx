@@ -65,7 +65,14 @@ const { commonApiFetch, commonApiPost } = require("@/services/api/common-api");
 const { Device } = require("@capacitor/device");
 
 function renderProvider(children: React.ReactNode) {
-  return render(<EULAConsentProvider>{children}</EULAConsentProvider>);
+  return render(
+    <EULAConsentProvider
+      initialIsIos={mockCapacitor.isIos}
+      initialConsentVersion={get()}
+    >
+      {children}
+    </EULAConsentProvider>
+  );
 }
 
 function AppChild({ onMount = jest.fn() }: { readonly onMount?: () => void }) {
@@ -144,24 +151,24 @@ describe("EULAConsentContext", () => {
   it.each([
     {
       name: "expired acceptance",
-      response: {
+      getResponse: () => ({
         accepted_at: Date.now() - EULA_VALIDITY_MS - 1,
         eula_version: CURRENT_EULA_VERSION,
-      },
+      }),
     },
     {
       name: "different EULA version",
-      response: {
+      getResponse: () => ({
         accepted_at: Date.now() - 1_000,
         eula_version: "2025-01-01",
-      },
+      }),
     },
     {
       name: "unversioned acceptance",
-      response: { accepted_at: Date.now() - 1_000 },
+      getResponse: () => ({ accepted_at: Date.now() - 1_000 }),
     },
-  ])("requires acceptance for a $name", async ({ response }) => {
-    commonApiFetch.mockResolvedValue(response);
+  ])("requires acceptance for a $name", async ({ getResponse }) => {
+    commonApiFetch.mockResolvedValue(getResponse());
 
     renderProvider(<AppChild />);
 
@@ -226,7 +233,7 @@ describe("EULAConsentContext", () => {
       platform: "android",
     };
     result.rerender(
-      <EULAConsentProvider>
+      <EULAConsentProvider initialIsIos={false}>
         <AppChild />
       </EULAConsentProvider>
     );

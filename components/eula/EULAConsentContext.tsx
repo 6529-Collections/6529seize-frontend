@@ -75,6 +75,8 @@ const getBackendConsentExpiration = (
 
 type EULAConsentProviderProps = {
   readonly children: ReactNode;
+  readonly initialIsIos: boolean;
+  readonly initialConsentVersion?: string | undefined;
 };
 
 const EULABlockingScreen = ({
@@ -113,12 +115,14 @@ const EULABlockingScreen = ({
 
 export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
   children,
+  initialIsIos,
+  initialConsentVersion,
 }) => {
   const capacitor = useCapacitor();
   const locale = useBrowserLocale();
   const [consentState, setConsentState] = useState<EULAConsentState>(() => {
-    if (!capacitor.isIos) return "accepted";
-    return Cookies.get(CONSENT_EULA_COOKIE) === CURRENT_EULA_VERSION
+    if (!initialIsIos && !capacitor.isIos) return "accepted";
+    return initialConsentVersion === CURRENT_EULA_VERSION
       ? "accepted"
       : "checking";
   });

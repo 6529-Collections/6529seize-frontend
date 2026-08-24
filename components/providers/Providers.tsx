@@ -37,6 +37,8 @@ export default function Providers({
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
+  initialIsIos = false,
+  initialEulaConsentVersion,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
@@ -44,6 +46,8 @@ export default function Providers({
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
+  readonly initialIsIos?: boolean;
+  readonly initialEulaConsentVersion?: string | undefined;
 }) {
   const sharedProviders = (
     <TitleProvider>
@@ -113,7 +117,10 @@ export default function Providers({
   return (
     <>
       <CapacitorSetup />
-      <EULAConsentProvider>
+      <EULAConsentProvider
+        initialIsIos={initialIsIos}
+        initialConsentVersion={initialEulaConsentVersion}
+      >
         <EditingDropProvider>
           <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
         </EditingDropProvider>
