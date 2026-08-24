@@ -163,7 +163,7 @@ export default function UserPageProfileWaveQuickPostDialog({
       tabletModal={true}
       tall={true}
       maxWidthClass="md:tw-max-w-2xl"
-      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-pb-4 tw-pt-6"
+      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-5 sm:tw-px-6">

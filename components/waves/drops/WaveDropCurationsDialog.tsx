@@ -1,13 +1,12 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import MyStreamWaveCurationCreateDialog from "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import Button from "@/components/utils/button/Button";
 import clsx from "clsx";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   type DropCurationMembership,
   useDropCurations,
@@ -44,8 +43,6 @@ const isPermissionErrorMessage = (message: string): boolean => {
     normalizedMessage.includes("not a member")
   );
 };
-
-const AUTO_CLOSE_DELAY_MS = 350;
 
 const getCreateAndAddErrorMessage = (
   locale: SupportedLocale,
@@ -186,15 +183,9 @@ export default function WaveDropCurationsDialog({
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
-  const router = useRouter();
   const locale = useBrowserLocale();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { setToast } = useAuth();
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
-  const autoCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
   const {
     data: curations = [],
     isLoading,
@@ -207,6 +198,7 @@ export default function WaveDropCurationsDialog({
   const { updateMembershipAsync, isPending, pendingCurationId } =
     useDropCurationMembershipMutation({
       dropId,
+      waveId: wave.id,
     });
 
   const sortedCurations = useMemo(
@@ -230,39 +222,7 @@ export default function WaveDropCurationsDialog({
     await refetch();
   };
 
-  const navigateToCuration = (curationId: string) => {
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.set("curation", curationId);
-    const nextQuery = params.toString();
-    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
-    router.replace(nextUrl, { scroll: false });
-  };
-
-  const clearAutoCloseTimeout = () => {
-    if (autoCloseTimeoutRef.current) {
-      clearTimeout(autoCloseTimeoutRef.current);
-      autoCloseTimeoutRef.current = null;
-    }
-  };
-
-  const scheduleAutoClose = () => {
-    clearAutoCloseTimeout();
-    autoCloseTimeoutRef.current = globalThis.setTimeout(() => {
-      autoCloseTimeoutRef.current = null;
-      setIsCreateCurationOpen(false);
-      onClose();
-    }, AUTO_CLOSE_DELAY_MS);
-  };
-
-  useEffect(
-    () => () => {
-      clearAutoCloseTimeout();
-    },
-    []
-  );
-
   const handleClose = () => {
-    clearAutoCloseTimeout();
     setIsCreateCurationOpen(false);
     onClose();
   };
@@ -273,9 +233,8 @@ export default function WaveDropCurationsDialog({
   ) => {
     try {
       await updateMembershipAsync(curationId, action);
-      scheduleAutoClose();
     } catch {
-      clearAutoCloseTimeout();
+      // The mutation owns the user-facing error toast.
     }
   };
 
@@ -302,7 +261,6 @@ export default function WaveDropCurationsDialog({
         message: t(locale, "profileCuration.membership.createdAndAdded"),
       });
       handleClose();
-      navigateToCuration(curation.id);
     } catch (error) {
       setToast({
         type: "error",
@@ -326,21 +284,10 @@ export default function WaveDropCurationsDialog({
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
           <div className="tw-flex tw-flex-col tw-gap-6 tw-px-4 tw-pb-6 sm:tw-px-6">
             {!isFirstCurationEmptyState && (
-              <div className="tw-flex tw-flex-col tw-gap-4 tw-pt-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-                <p className="tw-mb-0 tw-text-sm tw-text-iron-400 sm:tw-flex-1 sm:tw-pr-4">
+              <div>
+                <p className="tw-m-0 tw-text-sm tw-text-iron-400">
                   {t(locale, "profileCuration.membership.description")}
                 </p>
-                {hasVisibleCurations && (
-                  <div className="tw-flex tw-flex-shrink-0">
-                    <Button
-                      onClick={() => setIsCreateCurationOpen(true)}
-                      variant="secondary"
-                      size="xs"
-                    >
-                      Create and add curation
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
 
@@ -388,18 +335,29 @@ export default function WaveDropCurationsDialog({
             )}
 
             {!isLoading && !isError && sortedCurations.length > 0 && (
-              <div className="tw-flex tw-flex-col tw-gap-2">
-                {sortedCurations.map((curation) => (
-                  <CurationMembershipRow
-                    key={curation.id}
-                    curation={curation}
-                    disabled={isPending}
-                    loading={pendingCurationId === curation.id}
-                    onUpdateMembership={async (action) =>
-                      await handleUpdateMembership(curation.id, action)
-                    }
-                  />
-                ))}
+              <div className="tw-flex tw-flex-col tw-gap-4">
+                <div className="tw-flex tw-flex-col tw-gap-2">
+                  {sortedCurations.map((curation) => (
+                    <CurationMembershipRow
+                      key={curation.id}
+                      curation={curation}
+                      disabled={isPending}
+                      loading={pendingCurationId === curation.id}
+                      onUpdateMembership={async (action) =>
+                        await handleUpdateMembership(curation.id, action)
+                      }
+                    />
+                  ))}
+                </div>
+                <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-4">
+                  <Button
+                    onClick={() => setIsCreateCurationOpen(true)}
+                    variant="tertiary"
+                    size="xs"
+                  >
+                    {t(locale, "profileCuration.membership.createNew")}
+                  </Button>
+                </div>
               </div>
             )}
           </div>

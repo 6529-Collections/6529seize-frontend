@@ -1,7 +1,6 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -41,7 +40,7 @@ export default function CreateWaveProfileRequiredModal({
           {t(locale, "waves.create.dialog.profileRequiredDescription")}
         </p>
 
-        <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row-reverse sm:tw-justify-start">
+        <div className="tw-mt-6 tw-flex sm:tw-justify-end">
           <ButtonLink
             href={getIdentityHref(profile)}
             variant="primary"
@@ -51,16 +50,6 @@ export default function CreateWaveProfileRequiredModal({
           >
             {t(locale, "waves.create.dialog.profileRequiredConfirm")}
           </ButtonLink>
-          <Button
-            type="button"
-            onClick={onClose}
-            variant="secondary"
-            size="lg"
-            fullWidth
-            className="sm:tw-w-auto"
-          >
-            {t(locale, "waves.create.dialog.profileRequiredCancel")}
-          </Button>
         </div>
       </div>
     </MobileWrapperDialog>

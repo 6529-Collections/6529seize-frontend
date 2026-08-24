@@ -22,7 +22,7 @@ import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog
 interface MyStreamWaveCurationTabMenuProps {
   readonly wave: ApiWave;
   readonly curation: ApiWaveCuration;
-  readonly onDeleted?: (() => void) | undefined;
+  readonly onDeleted?: (() => Promise<void> | void) | undefined;
   readonly canSetAsProfileCuration?: boolean | undefined;
   readonly isSetAsProfileCurationPending?: boolean | undefined;
   readonly triggerLabel?: string | undefined;
@@ -73,6 +73,7 @@ export default function MyStreamWaveCurationTabMenu({
       });
     },
     onSuccess: async () => {
+      await onDeleted?.();
       queryClient.setQueryData<ApiWaveCuration[]>(
         getWaveCurationsQueryKey(wave.id),
         (current) => current?.filter((item) => item.id !== curation.id)
@@ -81,22 +82,23 @@ export default function MyStreamWaveCurationTabMenu({
         { queryKey: ["drop-curations"] },
         (current) => current?.filter((item) => item.id !== curation.id)
       );
-      await queryClient.invalidateQueries({
-        queryKey: getWaveCurationsQueryKey(wave.id),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["drop-curations"],
-      });
-      await invalidateProfileWaveQueries(queryClient, [
-        connectedProfile,
-        wave.author,
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: getWaveCurationsQueryKey(wave.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["drop-curations"],
+        }),
+        invalidateProfileWaveQueries(queryClient, [
+          connectedProfile,
+          wave.author,
+        ]),
       ]);
       setToast({
         type: "success",
         message: "Curation deleted. The source Wave remains.",
       });
       setIsDeleteOpen(false);
-      onDeleted?.();
     },
     onError: (error) => {
       setToast({
@@ -228,7 +230,7 @@ export default function MyStreamWaveCurationTabMenu({
           triggerClassName={
             triggerLabel
               ? undefined
-              : "tw-inline-flex tw-h-8 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+              : "tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-bg-iron-800 hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
           }
           trigger={
             triggerLabel ? (

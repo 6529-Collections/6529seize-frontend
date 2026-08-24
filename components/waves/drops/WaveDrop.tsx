@@ -9,6 +9,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -17,6 +18,7 @@ import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
+import WaveDropActionsMore from "./WaveDropActionsMore";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
   useWaveDropMobileMenu,
@@ -77,6 +79,7 @@ const WaveDropInner = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  showStandaloneActionsButton = false,
   inlineAuthorOnDesktop = false,
   mediaImageScale,
   fullWidthMedia = false,
@@ -128,6 +131,10 @@ const WaveDropInner = ({
 
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const canUseMobileActionsSheet =
+    canUseTouchActionSheet ||
+    (showStandaloneActionsButton && isMobileLayoutViewport);
   const mobileMenu = useWaveDropMobileMenu();
   const allowLongPress = showInteractions && canUseTouchActionSheet;
   // Pointer-driven row hover: some browsers (capability-lying convertibles)
@@ -175,13 +182,18 @@ const WaveDropInner = ({
     isProfileView,
     location,
   });
-  const showActionsButton = shouldShowTouchActionsButton({
-    showInteractions,
-    hasTouch: canUseTouchActionSheet,
-    showReplyAndQuote,
-    isEditing,
-    identityMode,
-  });
+  const showActionsButton = showStandaloneActionsButton
+    ? showInteractions &&
+      isMobileLayoutViewport &&
+      !isEditing &&
+      identityMode === "default"
+    : shouldShowTouchActionsButton({
+        showInteractions,
+        hasTouch: canUseTouchActionSheet,
+        showReplyAndQuote,
+        isEditing,
+        identityMode,
+      });
   const groupingClass = getGroupingClass({
     isProfileView,
     shouldGroupWithPreviousDrop,
@@ -465,6 +477,12 @@ const WaveDropInner = ({
     isStorm,
     activePartIndex,
     showActionsButton,
+    showActionsButtonOnMobile:
+      showStandaloneActionsButton && isMobileLayoutViewport,
+    desktopActions:
+      showStandaloneActionsButton && !isMobileLayoutViewport ? (
+        <WaveDropActionsMore drop={drop} showOnlyQuickRemove />
+      ) : undefined,
     handleOpenTouchActions,
     timestampLayout,
   });
@@ -587,7 +605,7 @@ const WaveDropInner = ({
   }, []);
 
   useEffect(() => {
-    if (canUseTouchActionSheet) {
+    if (canUseMobileActionsSheet) {
       return;
     }
 
@@ -599,7 +617,7 @@ const WaveDropInner = ({
     mobileMenu?.close();
     clearSuppression();
   }, [
-    canUseTouchActionSheet,
+    canUseMobileActionsSheet,
     clearSuppression,
     mobileMenu,
     resetTimestampSwipe,
@@ -614,7 +632,8 @@ const WaveDropInner = ({
   }, [resetTimestampSwipe, showGroupedTimestamp]);
 
   // Derive effective menu state - menu can't be open while editing
-  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
+  const effectiveIsSlideUp =
+    isSlideUp && !isEditing && canUseMobileActionsSheet;
 
   useWaveDropMobileMenuController({
     drop,
@@ -627,6 +646,7 @@ const WaveDropInner = ({
     onAddReaction: handleOnAddReaction,
     onEdit: handleOnEdit,
     onBoostAnimation: handleMobileBoostAnimation,
+    showOnlyQuickRemove: showStandaloneActionsButton,
   });
 
   const dropClasses = getDropClasses(
@@ -746,6 +766,7 @@ const WaveDropInner = ({
           {canUseDesktopHoverActions &&
             showInteractions &&
             showReplyAndQuote &&
+            !showStandaloneActionsButton &&
             !isEditing && (
               <WaveDropActions
                 drop={drop}

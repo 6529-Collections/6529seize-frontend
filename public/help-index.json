@@ -2596,10 +2596,14 @@
       ],
       "keywords": ["waves", "post", "curation", "add", "remove", "mobile"],
       "facts": [
-        "Use Manage curations from a standard post's desktop action menu or mobile touch action sheet.",
+        "Use Add to {Curation name} from a standard post's desktop action menu or mobile touch action sheet to add the post immediately when there is one clear preferred Curation.",
+        "While viewing a Curation tab, use Remove from {Curation name} in the same desktop action menu or mobile touch action sheet to remove the post from that active Curation.",
+        "Curation-tab posts expose Open drop actions on compact touch layouts, so the mobile action sheet does not require long-press discovery.",
+        "Use Manage Curations to choose from every manageable Curation in the source Wave, remove existing membership, or create another Curation.",
         "The dialog lists named Curations in the source Wave that the current account is allowed to manage, with existing memberships first.",
-        "Add and Remove update only Curation membership; removing a post does not delete its original Wave post.",
-        "If there is no manageable Curation, eligible users can create one and continue adding the same post.",
+        "Add and Remove update only Curation membership and keep the dialog open; removing a post does not delete its original Wave post.",
+        "Create new Curation is separated below the list. Creating from a post adds that post and keeps the user on the current page.",
+        "If there is no manageable Curation, eligible users can create the first one and continue adding the same post.",
         "If Curation creation succeeds but adding the post fails, the created Curation remains and the dialog reports the partial success."
       ],
       "canonical_path": "/waves",

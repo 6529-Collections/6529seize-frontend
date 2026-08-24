@@ -91,7 +91,7 @@ function ProfileCurationPicker({
     ? "tw-px-4 sm:tw-px-6"
     : "tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl";
   const contentInset = isMobileSheet ? "tw-px-0" : "tw-px-1.5";
-  const rowPadding = isMobileSheet ? "tw-px-0 tw-py-3" : "tw-px-3 tw-py-2.5";
+  const rowPadding = isMobileSheet ? "tw-px-3 tw-py-3" : "tw-px-3 tw-py-2.5";
   const messagePadding = isMobileSheet ? "tw-px-0" : "tw-px-3";
   const footerPadding = isMobileSheet ? "tw-px-0" : "tw-px-3";
   const isAnySubmitting = submittingCurationId !== null;
@@ -489,8 +489,10 @@ export default function UserPageProfileWave({
                 isProfileActionPending={
                   isPending || submittingCurationId !== null
                 }
-                onDeleted={() => {
-                  void clearSelectedProfileWave({ suppressSuccessToast: true });
+                onDeleted={async () => {
+                  await clearSelectedProfileWave({
+                    suppressSuccessToast: true,
+                  });
                 }}
               />
             ) : undefined

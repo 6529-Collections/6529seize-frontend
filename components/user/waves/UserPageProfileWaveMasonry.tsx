@@ -1,6 +1,5 @@
 "use client";
 
-import CurationEmptyState from "@/components/brain/my-stream/curations/CurationEmptyState";
 import { useAuth } from "@/components/auth/Auth";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
@@ -27,13 +26,12 @@ import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCuration
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Masonry } from "masonic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface UserPageProfileWaveMasonryProps {
   readonly curationId: string;
-  readonly curationName?: string | null | undefined;
   readonly containerWidth: number;
   readonly drops: readonly ExtendedDrop[];
   readonly fetchNextPage: () => Promise<void>;
@@ -186,7 +184,10 @@ function CurationMasonryActions({
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const navigateToDropWave = useNavigateToDropWave();
   const { updateMembershipAsync, isPending } =
-    useDropCurationMembershipMutation({ dropId: drop.id });
+    useDropCurationMembershipMutation({
+      dropId: drop.id,
+      waveId: drop.wave.id,
+    });
   const canEdit =
     !activeProfileProxy &&
     drop.drop_type !== ApiDropType.Participatory &&
@@ -217,7 +218,7 @@ function CurationMasonryActions({
   const triggerContent = isPending ? (
     <Spinner dimension={10} />
   ) : (
-    <EllipsisHorizontalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
+    <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
   );
 
   return (
@@ -425,7 +426,6 @@ function UserPageProfileWaveMasonryRenderItem({
 
 export default function UserPageProfileWaveMasonry({
   curationId,
-  curationName,
   containerWidth,
   drops,
   fetchNextPage,
@@ -439,7 +439,6 @@ export default function UserPageProfileWaveMasonry({
     curationId,
     probeDropId: permissionProbeDropId,
   });
-  const curationTitle = curationName?.trim() ?? "Curation";
   const masonryItems = useMemo(
     () =>
       drops.map((drop) => ({
@@ -471,10 +470,6 @@ export default function UserPageProfileWaveMasonry({
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage]
   );
-
-  if (drops.length === 0) {
-    return <CurationEmptyState curationTitle={curationTitle} />;
-  }
 
   return (
     <div className="tw-px-1 tw-pb-2">

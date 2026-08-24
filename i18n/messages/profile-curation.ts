@@ -37,10 +37,8 @@ export const PROFILE_CURATION_MESSAGES = {
     "Create a collection of posts for your profile, or use Advanced Wave setup for custom permissions.",
   "profileCuration.entry.noEligibleNone":
     "Create a collection of posts to feature on your profile.",
-  "profileCuration.entry.recommended":
-    "Recommended: the simplest way to get started.",
-  "profileCuration.entry.existingWave": "Or use an existing public Wave",
-  "profileCuration.entry.startTitle": "Start your profile Curation",
+  "profileCuration.entry.existingWave": "Use an existing Wave instead",
+  "profileCuration.entry.startTitle": "Create your profile Curation",
   "profileCuration.header.fallbackTitle": "Curation",
   "profileCuration.header.source": "Source Wave:",
   "profileCuration.header.openSourceAria": "Open source Wave {waveName}",
@@ -58,7 +56,9 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.actions.editPost": "Edit post",
   "profileCuration.actions.remove": "Remove from Curation",
   "profileCuration.actions.menuAria": "Post actions",
-  "profileCuration.actions.manage": "Manage curations",
+  "profileCuration.actions.quickAdd": "Add to {curationName}",
+  "profileCuration.actions.quickRemove": "Remove from {curationName}",
+  "profileCuration.actions.manage": "Manage Curations",
   "profileCuration.membership.permissionPartial":
     "Curation created, but you can't add posts with that Group.",
   "profileCuration.membership.fallbackPartial":
@@ -72,6 +72,9 @@ export const PROFILE_CURATION_MESSAGES = {
     "Create the first Curation for this Wave and add this post to it.",
   "profileCuration.membership.createdAndAdded":
     "Curation created and post added.",
+  "profileCuration.membership.addedTo": "Added to {curationName}.",
+  "profileCuration.membership.removedFrom": "Removed from {curationName}.",
+  "profileCuration.membership.createNew": "Create new Curation",
   "profileCuration.membership.description":
     "Add or remove this post from Curations in this Wave.",
   "profileCuration.membership.loadFailed":

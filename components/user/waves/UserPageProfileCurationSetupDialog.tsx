@@ -256,7 +256,7 @@ export default function UserPageProfileCurationSetupDialog({
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-6 sm:tw-px-6">
-          <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, "profileCuration.setup.intro")}
           </p>
 

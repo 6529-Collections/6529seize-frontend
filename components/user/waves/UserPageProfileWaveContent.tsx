@@ -145,7 +145,6 @@ export default function UserPageProfileWaveContent({
         <div className="tw-overflow-hidden tw-rounded-2xl">
           <UserPageProfileWaveMasonry
             curationId={state.curation.id}
-            curationName={state.curation.name}
             containerWidth={containerWidth}
             drops={state.drops}
             fetchNextPage={state.fetchNextPage}

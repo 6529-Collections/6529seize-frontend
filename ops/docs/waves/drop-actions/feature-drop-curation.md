@@ -26,20 +26,27 @@ Not shown on:
 
 - Open `/waves/{waveId}`.
 - Go to leaderboard or participation content.
-- On a standard Wave post, open its desktop or touch action menu and select
-  `Manage curations`.
+- On a standard Wave post, open its desktop or touch action menu. Use
+  `Add to {Curation name}` for the preferred Curation, or select
+  `Manage Curations` to choose, remove, or create.
+- While viewing a Curation tab, use `Remove from {Curation name}` in the same
+  post action menu to remove the post from the active Curation.
 - On specialized eligible leaderboard cards, use the separate `Curate` /
   `Curated` toggle.
 
 ## User Journey
 
 1. Open `/waves/{waveId}` and find a post.
-2. Open the post action menu and select `Manage curations`.
-3. The dialog lists named Curations in that source Wave that your account can
+2. Open the post action menu.
+3. If `Add to {Curation name}` is shown, select it to add the post immediately
+   and receive a confirmation.
+4. Select `Manage Curations` to open the complete membership dialog.
+5. The dialog lists named Curations in that source Wave that your account can
    manage. Curations already containing the post are listed first.
-4. Select `Add` or `Remove`. The membership action blocks repeat input while
-   pending and closes after success.
-5. If no manageable Curation exists, select `Create first curation`, choose a
+6. Select `Add` or `Remove`. The membership action blocks repeat input while
+   pending and the dialog stays open for further changes.
+7. Use the separated `Create new Curation` action below the list. If no
+   manageable Curation exists, select `Create first curation`, choose a
    name and management Group, and the site creates the Curation and adds the
    post in one continuation.
 
@@ -50,10 +57,17 @@ Not shown on:
 - Content-only leaderboard grid cards show curation in the hover/tap action
   cluster; touch users can use long-press and choose `Curate drop`.
 - Participation cards show curation near voting and reaction controls.
-- Standard desktop post menus and mobile action sheets use `Manage curations`
-  for named Curation membership.
-- Creating a Curation from a post keeps the user in the same Wave and opens the
-  new Curation after the post is added.
+- Standard desktop post menus and mobile action sheets offer a direct
+  `Add to {Curation name}` action when there is one clear preferred Curation.
+- The direct action targets the selected Curation tab, the profile Curation in
+  the current profile Wave, or the only manageable Curation when the choice is
+  unambiguous. It is hidden when that Curation already contains the post.
+- `Manage Curations` lists every manageable Curation for explicit add and
+  remove actions.
+- On an active Curation tab, `Remove from {Curation name}` replaces the
+  separate floating remove control and removes only that Curation membership.
+- Creating a Curation from a post adds the post and keeps the user on the
+  current page.
 - Profile Curation cards expose `Open original Wave`, author-only `Edit post`,
   and confirmed `Remove from Curation` actions.
 

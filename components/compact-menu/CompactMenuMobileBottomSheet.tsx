@@ -79,6 +79,7 @@ export default function CompactMenuMobileBottomSheet({
       )}
       <MobileWrapperDialog
         title={title}
+        titleClassName="tw-text-lg tw-font-semibold"
         isOpen={isOpen}
         onClose={close}
         onAfterLeave={runPendingAction}
@@ -102,7 +103,7 @@ export default function CompactMenuMobileBottomSheet({
                 disabled={item.disabled}
                 onClick={() => selectAction(item.onSelect)}
                 className={clsx(
-                  "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-semibold tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+                  "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
                   item.className
                 )}
               >
