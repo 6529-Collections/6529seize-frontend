@@ -1491,7 +1491,8 @@
       "facts": [
         "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
         "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
-        "Manage, a visible Quick Tag, and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
+        "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
+        "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
