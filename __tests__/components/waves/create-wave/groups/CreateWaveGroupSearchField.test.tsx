@@ -68,7 +68,7 @@ const groups: ApiGroupFull[] = [
 const mockCommonApiFetch = commonApiFetch as jest.Mock;
 
 function renderSearchField({
-  defaultLabel = "Anyone",
+  defaultLabel = "Public",
   disabled = false,
   selectedGroup = null,
   allowClear = true,
@@ -108,7 +108,7 @@ function renderSearchField({
 }
 
 function renderStatefulSearchField({
-  defaultLabel = "Anyone",
+  defaultLabel = "Public",
   disabled = false,
   selectedGroup = null,
   allowClear = true,
@@ -294,7 +294,7 @@ describe("CreateWaveGroupSearchField", () => {
       <QueryClientProvider client={queryClient}>
         <CreateWaveGroupSearchField
           label="Search groups..."
-          defaultLabel="Anyone"
+          defaultLabel="Public"
           disabled={false}
           selectedGroup={selectedGroup}
           onSelect={onSelect}
@@ -324,7 +324,8 @@ describe("CreateWaveGroupSearchField", () => {
     rerender(renderField(null));
 
     await waitFor(() => expect(input).toHaveValue(""));
-    expect(screen.getByText("Current group: Anyone")).toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
+    expect(screen.queryByText(/Current group:/)).not.toBeInTheDocument();
     await waitFor(() =>
       expect(mockCommonApiFetch).toHaveBeenCalledWith({
         endpoint: "groups",

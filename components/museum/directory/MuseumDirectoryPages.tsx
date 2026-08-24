@@ -53,7 +53,7 @@ function MuseumDirectoryIntro({
           value={model.acquisitionWorks.length}
           label={t(
             DEFAULT_LOCALE,
-            "museum.network.acquisitions.filterSelected"
+            "museum.network.acquisitions.metricSelectedWorks"
           )}
         />
         <MuseumDirectoryMetric

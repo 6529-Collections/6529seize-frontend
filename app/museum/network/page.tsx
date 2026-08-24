@@ -31,7 +31,12 @@ import type {
 } from "@/lib/museum/publication/types";
 import type { MuseumView } from "@/lib/museum/types";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  museumMediaResponsiveImage,
+  selectMuseumStillMedia,
+} from "@/lib/museum/publication/mediaSelection";
+import { formatMuseumCreatorCredit } from "@/lib/museum/presentation";
+import { VERA_MOLNAR_OBJECT_ID } from "@/lib/museum/publication/veraMolnarPublication";
 
 const PRIMARY_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-600 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-border-primary-400 hover:tw-bg-primary-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black";
@@ -99,6 +104,21 @@ function MuseumHomeHero({
   );
 }
 
+function museumTypedWorkArtistByline(
+  work: MuseumPublicWork,
+  publication: MuseumPublication
+): string {
+  const artistIds =
+    work.artistIds !== undefined && work.artistIds.length > 0
+      ? work.artistIds
+      : [work.artistId];
+  const names = [...new Set(artistIds)].flatMap((artistId) => {
+    const artist = publication.artists.find((item) => item.id === artistId);
+    return artist === undefined ? [] : [artist.preferredName];
+  });
+  return formatMuseumCreatorCredit(names);
+}
+
 function MuseumTypedWorkFigure({
   work,
   publication,
@@ -108,7 +128,6 @@ function MuseumTypedWorkFigure({
   readonly publication: MuseumPublication;
   readonly eager?: boolean;
 }) {
-  const artist = publication.artists.find((item) => item.id === work.artistId);
   const project =
     work.projectId === null
       ? null
@@ -117,17 +136,24 @@ function MuseumTypedWorkFigure({
   const displayTitle = /^6529NM[-.]/u.test(work.title.trim())
     ? t(DEFAULT_LOCALE, "museum.network.collection.untitledWork")
     : work.title;
-  const byline = [artist?.preferredName, project?.title]
+  const byline = [
+    museumTypedWorkArtistByline(work, publication),
+    project?.title,
+  ]
     .filter(
       (value): value is string => value !== undefined && value.trim().length > 0
     )
     .join(" · ");
   const media = selectMuseumStillMedia(work.media);
   if (media !== undefined) {
+    const responsive = museumMediaResponsiveImage(media);
     const mediaAltText = media.altText?.trim();
     return (
       <MuseumPublicMediaFigure
-        src={media.url}
+        src={responsive.src}
+        {...(responsive.srcSet === undefined
+          ? {}
+          : { srcSet: responsive.srcSet })}
         width={media.width}
         height={media.height}
         alt={
@@ -286,64 +312,6 @@ function MuseumTypedHomeHero({
   );
 }
 
-function MuseumTypedCollectionPresentation({
-  works,
-  publication,
-}: {
-  readonly works: readonly MuseumPublicWork[];
-  readonly publication: MuseumPublication;
-}) {
-  if (works.length === 0) return null;
-  const artist = publication.artists.find((item) =>
-    works.some(
-      (work) => work.artistId === item.id && item.slug === "casey-reas"
-    )
-  );
-  const title =
-    artist !== undefined
-      ? t(DEFAULT_LOCALE, "museum.network.home.caseyTitle")
-      : t(DEFAULT_LOCALE, "museum.network.collection.title");
-  return (
-    <section aria-labelledby="museum-casey-title">
-      <div className="tw-mb-8 tw-grid tw-gap-5 md:tw-grid-cols-[minmax(0,1fr)_minmax(17rem,0.55fr)] md:tw-items-end">
-        <div>
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            {t(DEFAULT_LOCALE, "museum.network.home.firstGift")}
-          </p>
-          <h2
-            id="museum-casey-title"
-            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
-          >
-            {title}
-          </h2>
-        </div>
-        <div>
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {artist !== undefined
-              ? t(DEFAULT_LOCALE, "museum.network.home.caseySummary")
-              : t(DEFAULT_LOCALE, "museum.network.collection.description")}
-          </p>
-          <Link
-            href="/museum/network/acquisitions/the-system-in-seven-states"
-            className={`${TEXT_LINK_CLASS} tw-mt-4`}
-          >
-            {t(DEFAULT_LOCALE, "museum.network.home.readGift")}
-          </Link>
-        </div>
-      </div>
-      <div className="tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-        {works.map((work) => (
-          <MuseumTypedWorkFigure
-            key={work.id}
-            work={work}
-            publication={publication}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function MuseumTypedNetworkHome({
   publication,
   view,
@@ -354,30 +322,15 @@ function MuseumTypedNetworkHome({
   const collectionWorks = (publication.works ?? []).filter(
     (work) => work.collectionMembership === true
   );
-  const featuredWork = collectionWorks[0];
+  const featuredWork =
+    collectionWorks.find((work) =>
+      work.sourceRecordIds?.includes(VERA_MOLNAR_OBJECT_ID)
+    ) ?? collectionWorks[0];
   if (featuredWork === undefined) return <MuseumPublicationUnavailable />;
-  const caseyWorks = collectionWorks.filter((work) =>
-    publication.artists.some(
-      (artist) => artist.id === work.artistId && artist.slug === "casey-reas"
-    )
-  );
-  const presentationWorks = (
-    caseyWorks.length > 0 ? caseyWorks : collectionWorks
-  )
-    .filter((work) => work.id !== featuredWork.id)
-    .slice(0, 6);
   return (
     <div className="tw-min-w-0 tw-space-y-20 sm:tw-space-y-28">
       <MuseumTypedHomeHero work={featuredWork} publication={publication} />
-      <MuseumTypedCollectionPresentation
-        works={presentationWorks}
-        publication={publication}
-      />
-      <MuseumAcquisitionStories
-        publication={publication}
-        view={view}
-        excludeWorkIds={[featuredWork.id]}
-      />
+      <MuseumAcquisitionStories publication={publication} view={view} />
       <MuseumNetworkHomeSecondarySections />
     </div>
   );
@@ -638,31 +591,49 @@ function MuseumAcquisitionStories({
   readonly view: MuseumView | null;
   readonly excludeWorkIds?: readonly string[];
 }) {
-  const acquisitions = buildMuseumAcquisitionIndex(publication, view);
+  const acquisitions = buildMuseumAcquisitionIndex(publication, view).filter(
+    (acquisition) =>
+      !acquisition.workIds.some((workId) => excludeWorkIds.includes(workId))
+  );
   if (acquisitions.length === 0) return null;
   return (
     <section
       aria-labelledby="museum-acquisition-stories-title"
       className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
     >
-      <div className="tw-max-w-3xl">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          {t(DEFAULT_LOCALE, "museum.network.home.acquisitionStoriesEyebrow")}
-        </p>
-        <h2
-          id="museum-acquisition-stories-title"
-          className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-4xl"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.home.acquisitionStoriesTitle")}
-        </h2>
-        <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
-          {t(
-            DEFAULT_LOCALE,
-            "museum.network.home.acquisitionStoriesDescription"
-          )}
-        </p>
+      <div className="tw-grid tw-gap-5 md:tw-grid-cols-[minmax(0,1fr)_minmax(17rem,0.75fr)] md:tw-items-end">
+        <div>
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+            {t(DEFAULT_LOCALE, "museum.network.home.acquisitionStoriesEyebrow")}
+          </p>
+          <h2
+            id="museum-acquisition-stories-title"
+            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-4xl"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.home.acquisitionStoriesTitle")}
+          </h2>
+        </div>
+        <div>
+          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.home.acquisitionStoriesDescription"
+            )}
+          </p>
+          <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-1">
+            <Link href="/museum/network/collection" className={TEXT_LINK_CLASS}>
+              {t(DEFAULT_LOCALE, "museum.network.home.collection.allWorks")}
+            </Link>
+            <Link
+              href="/museum/network/acquisitions"
+              className={TEXT_LINK_CLASS}
+            >
+              {t(DEFAULT_LOCALE, "museum.network.home.browseAcquisitions")}
+            </Link>
+          </div>
+        </div>
       </div>
-      <div className="tw-mt-8 tw-grid tw-gap-x-8 tw-gap-y-10 lg:tw-grid-cols-3">
+      <div className="tw-mt-8 tw-grid tw-gap-x-8 tw-gap-y-10 md:tw-grid-cols-2 xl:tw-grid-cols-4">
         {acquisitions.map((acquisition) => (
           <article key={acquisition.acquisitionId} className="tw-min-w-0">
             <MuseumAcquisitionStoryMedia

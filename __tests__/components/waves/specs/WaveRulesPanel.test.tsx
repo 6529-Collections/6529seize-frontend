@@ -28,7 +28,7 @@ const rules: WaveRules = {
         },
         {
           id: "admin",
-          label: "Who can admin",
+          label: "Admins",
           value: "Private group",
         },
       ],
@@ -63,16 +63,65 @@ describe("WaveRulesPanel", () => {
         showCustomRules={false}
         renderRowValue={(row) =>
           row.id === "chat-access" ? (
-            <button type="button">21 currently eligible</button>
+            <button type="button">21 users</button>
           ) : undefined
         }
       />
     );
 
-    expect(
-      screen.getByRole("button", { name: "21 currently eligible" })
-    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "21 users" })).toBeVisible();
     expect(screen.queryByText("Artists")).not.toBeInTheDocument();
     expect(screen.getByText("Private group")).toBeInTheDocument();
+  });
+
+  it("shows display guidelines without a display-only label", () => {
+    render(
+      <WaveRulesPanel
+        rules={{
+          ...rules,
+          custom: {
+            ...rules.custom,
+            display: "There are some guidelines",
+          },
+        }}
+        showTitle={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Guidelines" })
+    ).toBeVisible();
+    expect(screen.getByText("There are some guidelines")).toBeVisible();
+    expect(screen.queryByText("Display only")).not.toBeInTheDocument();
+    expect(screen.queryByText("Creator rules")).not.toBeInTheDocument();
+  });
+
+  it("keeps the requires-acceptance label for binding rules", () => {
+    render(
+      <WaveRulesPanel
+        rules={{
+          ...rules,
+          custom: {
+            binding: "I certify that I accept these rules.",
+            display: null,
+            signatureRequired: true,
+          },
+        }}
+        showTitle={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Guidelines" })
+    ).toBeVisible();
+    expect(screen.getByText("Requires acceptance")).toBeVisible();
+    expect(
+      screen.getByText("I certify that I accept these rules.")
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "Participants sign these rules with their wallet before submitting."
+      )
+    ).toBeVisible();
   });
 });

@@ -142,6 +142,14 @@ describe("CreateWaveGroup", () => {
     expect(screen.getByText("Who can drop")).toBeInTheDocument();
   });
 
+  it.each([
+    [CreateWaveGroupConfigType.CAN_VIEW, "Visibility"],
+    [CreateWaveGroupConfigType.ADMIN, "Admins"],
+  ])("shows the updated %s scope title", (groupType, label) => {
+    renderComponent({ groupType });
+    expect(screen.getByText(label)).toBeInTheDocument();
+  });
+
   it("passes the resolved selected group to the inline panel", () => {
     renderComponent({
       groups: {
@@ -186,6 +194,7 @@ describe("CreateWaveGroup", () => {
     renderComponent();
 
     expect(inlinePanelProps?.suggestedName).toBe("Test Wave Who can drop");
+    expect(inlinePanelProps?.defaultLabel).toBe("Public");
     inlinePanelProps?.onChange(exampleGroup);
     expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
     expect(mockOnGroupSelect).toHaveBeenCalledWith(exampleGroup);
@@ -237,6 +246,7 @@ describe("CreateWaveGroup", () => {
         identity_addresses: ["0xcreator"],
       },
     });
+    expect(inlinePanelProps?.defaultLabel).toBe("Only me");
   });
 
   it("passes disabled to the inline panel when chat is disabled", () => {

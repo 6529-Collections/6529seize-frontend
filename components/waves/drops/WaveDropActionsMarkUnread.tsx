@@ -10,6 +10,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiMarkDropUnreadResponse } from "@/generated/models/ApiMarkDropUnreadResponse";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
+import { useOptionalDmUnreadActions } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -31,6 +32,7 @@ export default function WaveDropActionsMarkUnread({
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [loading, setLoading] = useState(false);
   const unreadDividerContext = useUnreadDividerOptional();
+  const dmUnreadActions = useOptionalDmUnreadActions();
   const { waves, directMessages } = useMyStream();
 
   const isAuthor =
@@ -48,6 +50,10 @@ export default function WaveDropActionsMarkUnread({
         endpoint: `drops/${drop.id}/mark-unread`,
         body: {},
       });
+
+      if (response.dm_unread_state) {
+        dmUnreadActions?.applyServerState(response.dm_unread_state);
+      }
 
       waves.restoreWaveUnreadCount(
         drop.wave.id,
@@ -107,6 +113,7 @@ export default function WaveDropActionsMarkUnread({
     unreadDividerContext,
     waves,
     directMessages,
+    dmUnreadActions,
     onMarkUnread,
   ]);
 

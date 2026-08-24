@@ -294,6 +294,7 @@ describe("WaveGroupEditButtons", () => {
       "false"
     );
     expect(screen.getByText("Group 1")).toBeInTheDocument();
+    expect(mockInlinePanelProps.membersRoleLabel).toBe("Visibility");
     expect(mockInlinePanelProps.selectedGroup).toEqual(
       expect.objectContaining({
         id: "group-1",

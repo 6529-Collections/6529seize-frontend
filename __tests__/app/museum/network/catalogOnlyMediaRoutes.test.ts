@@ -100,4 +100,20 @@ describe("typed Museum routes keep media catalog-only", () => {
       source.indexOf("if (publicationState.publication.works !== undefined)")
     );
   });
+
+  it("presents the typed homepage collection through one acquisition section", () => {
+    const source = routeSource("app/museum/network/page.tsx");
+    const typedHomeStart = source.indexOf("function MuseumTypedNetworkHome(");
+    const typedHomeEnd = source.indexOf(
+      "function MuseumCaseyPresentation(",
+      typedHomeStart
+    );
+    const typedHome = source.slice(typedHomeStart, typedHomeEnd);
+
+    expect(typedHomeStart).toBeGreaterThanOrEqual(0);
+    expect(typedHomeEnd).toBeGreaterThan(typedHomeStart);
+    expect(typedHome).toContain("<MuseumTypedHomeHero");
+    expect(typedHome.match(/<MuseumAcquisitionStories\b/gu)).toHaveLength(1);
+    expect(source).not.toContain("MuseumTypedCollectionPresentation");
+  });
 });

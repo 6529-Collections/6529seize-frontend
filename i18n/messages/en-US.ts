@@ -1109,6 +1109,9 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   deleteErrorTitle: "Couldn't delete this wave.",
   deleteSuccess: "Wave deleted.",
   deleteTitle: "Delete wave",
+  nameEditLabel: "Edit wave name",
+  nameEditSave: "Save",
+  nameEditTitle: "Rename wave",
   ownerOptionsDelete: "Delete",
   ownerOptionsOpenLabel: "Open options",
   ownerOptionsTitle: "Wave options",
@@ -1171,16 +1174,22 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
   description: "Choose who can access, participate in, and manage this wave.",
-  viewGroupName: "Who can view",
-  adminGroupName: "Admin",
+  viewGroupName: "Visibility",
+  adminGroupName: "Admins",
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   selectedGroup: "Selected group",
   currentGroup: "Current group",
+  currentGroupWithName: "Current group: {name}",
   unsavedGroup: "Unsaved group",
   groupSource: "Group source",
   existingGroup: "Existing group",
   newGroup: "New group",
+  "dialog.addTitle": "Add group",
+  "dialog.changeTitle": "Change group",
+  "dialog.addDescription": "Create a new group or choose an existing group.",
+  "dialog.changeDescription":
+    "Create a new group or choose a different existing group.",
   addIdentity: "Add identity",
   addRule: "Add rule",
   done: "Done",
@@ -1197,9 +1206,6 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "draft.discard": "Discard draft",
   "draft.creating": "Creating group...",
   "draft.createAndUse": "Create and use new group",
-  limitedAccessTitle: "Warning: Limited Access",
-  limitedAccessDescription:
-    'This wave is restricted to the "{viewGroupName}" group. Every Drop, Vote, Chat, and "{adminGroupName}" group member must also belong to that group.',
   "validation.checking": "Checking group access…",
   "validation.unavailableTitle": "Couldn't verify group access.",
   "validation.unavailable":
@@ -1208,12 +1214,13 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     'The "{groupName}" group includes people who are not in "{viewGroupName}".',
   "validation.invalidTitle": "Some access groups need attention.",
   "validation.invalidDescription":
-    "Every Drop, Vote, Chat, and Admin group member must also belong to the View group.",
+    "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
   "inlineIdentities.emptyHelper":
     "Add identities one by one to build this access group.",
   "inlineIdentities.creatorExcludedWarning":
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
-  "members.currentCount": "{count} currently eligible",
+  "members.currentCount.one": "{count} user",
+  "members.currentCount.other": "{count} users",
   "members.countLoading": "Checking current audience…",
   "members.countUnavailable": "Current audience unavailable",
   "members.view": "View members",
@@ -1236,6 +1243,46 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "members.listLabel": "Current group members",
   "members.openProfile": "Open {identity}'s profile in a new tab",
   "members.noCriteria": "No criteria selected",
+  "members.criteria.loading": "Loading group criteria…",
+  "members.criteria.unavailable": "Group criteria unavailable",
+  "members.criteria.metric.tdh": "TDH",
+  "members.criteria.metric.xtdh": "xTDH",
+  "members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "members.criteria.metric.rep": "REP",
+  "members.criteria.metric.nic": "NIC",
+  "members.criteria.metric.level": "Level",
+  "members.criteria.range.atMost": "{metric} at most {max}",
+  "members.criteria.range.atLeast": "{metric} at least {min}",
+  "members.criteria.range.between": "{metric} between {min} and {max}",
+  "members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} at most {max}",
+  "members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} at least {min}",
+  "members.criteria.identityRange.between":
+    "{metric} {direction} {identity} between {min} and {max}",
+  "members.criteria.identity": "{metric} {direction} {identity}",
+  "members.criteria.categoryRange.atMost":
+    "{metric} in {category} at most {max}",
+  "members.criteria.categoryRange.atLeast":
+    "{metric} in {category} at least {min}",
+  "members.criteria.categoryRange.between":
+    "{metric} in {category} between {min} and {max}",
+  "members.criteria.category": "{metric} in {category}",
+  "members.criteria.categoryIdentityRange.atMost":
+    "{metric} in {category} {direction} {identity} at most {max}",
+  "members.criteria.categoryIdentityRange.atLeast":
+    "{metric} in {category} {direction} {identity} at least {min}",
+  "members.criteria.categoryIdentityRange.between":
+    "{metric} in {category} {direction} {identity} between {min} and {max}",
+  "members.criteria.categoryIdentity":
+    "{metric} in {category} {direction} {identity}",
+  "members.criteria.from": "from",
+  "members.criteria.to": "to",
+  "members.criteria.included.one": "{count} explicitly included user",
+  "members.criteria.included.other": "{count} explicitly included users",
+  "members.criteria.excluded.one": "{count} explicitly excluded user",
+  "members.criteria.excluded.other": "{count} explicitly excluded users",
+  "members.criteria.grant": "xTDH grant {grantId}",
   "restore.loading": "Restoring the selected group…",
   "restore.error":
     "This selected group could not be loaded. Retry, replace its criteria, or choose another group before continuing.",
@@ -1284,9 +1331,9 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
   "rank.scheduledSummary":
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
   "rank.advancedSummary": "Winner schedule",
-  "rank.timeline.title": "Wave Timeline",
-  "rank.timeline.submissionLabel": "Drops Submission Opens",
-  "rank.timeline.votingLabel": "Drops Voting Begins",
+  "rank.timeline.title": "Opening dates",
+  "rank.timeline.submissionLabel": "Submissions Open",
+  "rank.timeline.votingLabel": "Voting Opens",
   "rank.timeline.submissionDescription":
     "Creators begin submitting work to your wave",
   "rank.timeline.votingDescription":
@@ -1404,7 +1451,7 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
     legend: "Ranking mode",
     "announceWinners.title": "Announce Winners",
     "announceWinners.description":
-      "Winners are announced on a schedule you'll set on the Dates step — a fixed timeline that ends the wave, or repeating cycles.",
+      "Winners are announced on a schedule you'll set on the Schedule step — a fixed timeline that ends the wave, or repeating cycles.",
     "perpetualRanking.title": "Perpetual Ranking",
     "perpetualRanking.description":
       "Rankings update continuously with no winners and no end date — a live, always-on leaderboard.",
@@ -1453,17 +1500,20 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
 
 const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   title: "Rules",
-  description:
-    "Automatic rules are generated from the wave setup. Add creator rules only for wave-specific requirements that are not already covered.",
-  advancedSummary: "Creator rules and acceptance",
-  chatAdvancedSummary: "Creator rules",
-  automaticTitle: "Automatic rules",
-  displayOnlyTitle: "Display-only creator rules",
-  displayOnlyDescription:
-    "These rules are shown in the wave rules panel. They do not require a signature.",
-  displayOnlyPlaceholder: "Add optional display-only creator rules...",
-  displayOnlyEmptyHint:
-    "Leave blank when automatic rules already cover the wave.",
+  advancedSummary: "Wave guidelines and acceptance",
+  chatAdvancedSummary: "Wave guidelines",
+  guidelinesFieldLabel: "Wave guidelines",
+  guidelinesDescription: "These guidelines are shown in wave rules panel",
+  guidelinesPlaceholder: "Add optional wave guidelines...",
+  guidelinesSettingsLabel: "Guidelines",
+  guidelinesSettingsEditLabel: "Edit guidelines",
+  guidelinesSettingsAdded: "Added",
+  guidelinesSettingsNone: "None",
+  guidelinesAuthError:
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  guidelinesSaveError: "Couldn't save these guidelines. Please try again.",
+  guidelinesSaveErrorTitle: "Couldn't save these guidelines.",
+  guidelinesSaveErrorDescription: PLEASE_TRY_AGAIN,
   acceptanceTitle: "Rules that require acceptance",
   acceptanceToggle: "Require acceptance",
   acceptanceDescription:
@@ -1615,14 +1665,14 @@ const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
 } as const);
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
-  "access.anyone": "Anyone",
+  "access.public": "Public",
   "access.inspectGroup": "Inspect {groupName} group criteria and members",
   "access.label": "Chat access",
   "access.privateGroup": "Private group",
   "access.unavailableGroup": "Group unavailable",
-  "groups.admin": "Admin",
+  "groups.admin": "Admins",
   "groups.drop": "Drop",
-  "groups.view": "View",
+  "groups.view": "Visibility",
   "groups.vote": "Vote",
   "status.disabled": "Disabled",
   "status.editLabel": "Edit chat status",
@@ -1666,10 +1716,10 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "error.retry": "Try again",
     "error.retrying": "Trying again...",
     "idle.description":
-      "Type at least {minLength} characters to search this wave.",
+      "Type at least {minLength} characters or add a filter to search this wave.",
     "idle.title": "Ready to search",
     inputDescription:
-      "Type at least {minLength} characters to search messages in {waveName}.",
+      "Type at least {minLength} characters or add a filter to search messages in {waveName}.",
     inputLabel: "Search messages in {waveName}",
     loadMore: "Load more",
     loadingMore: "Loading...",
@@ -1677,15 +1727,35 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "loading.title": "Searching messages",
     placeholder: "Search messages",
     "result.open": "Open message {serialNo} by {author}",
+    "result.checked": "Checked task",
+    "result.imageFallback": "image",
     "result.mediaOnly": "Message with media or an attachment",
     "result.serial": "Message #{serialNo}",
     "result.unavailable": "Message by {author} cannot be opened",
+    "result.unchecked": "Unchecked task",
     "results.count.one": "{count} result",
     "results.count.other": "{count} results",
     "results.queryPrefix": "for",
     "results.status.one": '{count} result for "{query}"',
     "results.status.other": '{count} results for "{query}"',
     searchAll: "Search all 6529",
+    "filters.after": "After",
+    "filters.authorPlaceholder": "Search wave authors",
+    "filters.authorResults": "Wave authors",
+    "filters.before": "Before",
+    "filters.clear": "Clear filters",
+    "filters.clearAuthor": "Clear author",
+    "filters.close": "Close filters",
+    "filters.from": "From",
+    "filters.invalidRange": '"After" must be earlier than "Before".',
+    "filters.loadingAuthors": "Loading authors...",
+    "filters.noAuthors": "No matching authors in this wave.",
+    "filters.open": "Filters",
+    "filters.removeAfter": "Remove after date filter {date}",
+    "filters.removeAuthor": "Remove author filter {author}",
+    "filters.removeBefore": "Remove before date filter {date}",
+    "filters.title": "Search filters",
+    "results.filtersApplied": "Filters applied",
     title: "Search messages",
   } as const
 );

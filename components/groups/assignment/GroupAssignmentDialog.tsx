@@ -16,6 +16,8 @@ export default function GroupAssignmentDialog({
   suggestedName,
   defaultLabel,
   selectedGroup,
+  membersRoleLabel,
+  selectedGroupCriteriaStatus,
   disabled = false,
   allowGroupClear = true,
   onClose,
@@ -27,6 +29,8 @@ export default function GroupAssignmentDialog({
   readonly suggestedName: string;
   readonly defaultLabel: string;
   readonly selectedGroup: ApiGroupFull | null;
+  readonly membersRoleLabel?: string | undefined;
+  readonly selectedGroupCriteriaStatus?: "loading" | "unavailable" | undefined;
   readonly disabled?: boolean;
   readonly allowGroupClear?: boolean;
   readonly onClose: () => void;
@@ -113,6 +117,8 @@ export default function GroupAssignmentDialog({
                   defaultLabel={defaultLabel}
                   disabled={disabled}
                   selectedGroup={selectedGroup}
+                  membersRoleLabel={membersRoleLabel}
+                  selectedGroupCriteriaStatus={selectedGroupCriteriaStatus}
                   allowGroupClear={allowGroupClear}
                   collapseOnClickAway={false}
                   layout="dialog"

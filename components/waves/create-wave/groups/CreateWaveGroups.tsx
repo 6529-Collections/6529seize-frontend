@@ -11,7 +11,6 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import type { WaveGroupsConfig } from "@/types/waves.types";
-import CreateWaveWarning from "../utils/CreateWaveWarning";
 import CreateWaveGroup from "./CreateWaveGroup";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
@@ -74,7 +73,6 @@ export default function CreateWaveGroups({
   readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
 }) {
   const locale = useBrowserLocale();
-  const isRestrictedGroup = groups.canView !== null;
   const getErrorMessage = (
     groupType: CreateWaveGroupConfigType
   ): string | null => {
@@ -138,19 +136,6 @@ export default function CreateWaveGroups({
           errorMessage={getErrorMessage(groupType)}
         />
       ))}
-      {isRestrictedGroup && (
-        <CreateWaveWarning
-          title={t(locale, "waves.create.groups.limitedAccessTitle")}
-          description={t(
-            locale,
-            "waves.create.groups.limitedAccessDescription",
-            {
-              viewGroupName: t(locale, "waves.create.groups.viewGroupName"),
-              adminGroupName: t(locale, "waves.create.groups.adminGroupName"),
-            }
-          )}
-        />
-      )}
     </div>
   );
 }

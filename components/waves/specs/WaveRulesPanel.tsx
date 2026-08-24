@@ -31,13 +31,10 @@ function getSectionHeadingLevel({
   readonly showTitle: boolean;
   readonly variant: "default" | "form";
 }): "h2" | "h3" | "h4" {
-  if (!showTitle) {
-    return "h2";
-  }
   if (variant === "form") {
-    return "h4";
+    return showTitle ? "h4" : "h3";
   }
-  return "h3";
+  return showTitle ? "h3" : "h2";
 }
 
 function WaveRulesCustomSection({
@@ -53,10 +50,10 @@ function WaveRulesCustomSection({
     return (
       <section className="tw-px-4 tw-py-4">
         <Heading className="tw-m-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
-          {waveRightPanelText("waves.sidebar.rightPanel.rules.creatorTitle")}
+          {waveRightPanelText("waves.sidebar.rightPanel.rules.guidelinesTitle")}
         </Heading>
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-light tw-italic tw-leading-5 tw-text-iron-500">
-          {waveRightPanelText("waves.sidebar.rightPanel.rules.emptyCreator")}
+          {waveRightPanelText("waves.sidebar.rightPanel.rules.emptyGuidelines")}
         </p>
       </section>
     );
@@ -65,14 +62,11 @@ function WaveRulesCustomSection({
   return (
     <section className="tw-px-4 tw-py-4">
       <Heading className="tw-m-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
-        {waveRightPanelText("waves.sidebar.rightPanel.rules.creatorTitle")}
+        {waveRightPanelText("waves.sidebar.rightPanel.rules.guidelinesTitle")}
       </Heading>
       <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-3">
         {custom.display && (
           <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3">
-            <p className="tw-mb-2 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.08em]">
-              {waveRightPanelText("waves.sidebar.rightPanel.rules.displayOnly")}
-            </p>
             <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
               {custom.display}
             </p>

@@ -174,7 +174,7 @@ export function useWaveConfig() {
     {}
   );
   // Manual privilege choices stay sticky while editing the current Wave type,
-  // including an explicit "Anyone" selection represented by null.
+  // including an explicit "Public" selection represented by null.
   const manuallySelectedPrivilegeGroups = useRef<Set<PrivilegeGroupKey>>(
     new Set()
   );

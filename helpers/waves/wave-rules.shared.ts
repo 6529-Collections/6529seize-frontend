@@ -64,7 +64,7 @@ const REQUIRED_MEDIA_LABELS: Record<ApiWaveParticipationRequirement, string> = {
 const MINUTE_IN_MS = 60 * 1000;
 const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
-const ANYONE_LABEL = t(DEFAULT_LOCALE, "waves.chatSettings.access.anyone");
+const PUBLIC_LABEL = t(DEFAULT_LOCALE, "waves.chatSettings.access.public");
 const PRIVATE_GROUP_LABEL = t(
   DEFAULT_LOCALE,
   "waves.chatSettings.access.privateGroup"
@@ -279,7 +279,7 @@ export const getCreateChatAccessRow = ({
     value: getCreateGroupLabel({
       groupId,
       groupsCache,
-      fallback: ANYONE_LABEL,
+      fallback: PUBLIC_LABEL,
     }),
   });
 
@@ -291,7 +291,7 @@ export const getWaveChatAccessRow = ({
   getChatAccessRow(
     getScopeRuleValue({
       scope,
-      fallback: ANYONE_LABEL,
+      fallback: PUBLIC_LABEL,
     })
   );
 

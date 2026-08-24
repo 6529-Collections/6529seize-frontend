@@ -37,7 +37,7 @@ Use this area to create:
 - Step pages:
   1. [Wave Creation Overview Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
-  3. [Wave Creation Dates and Timeline](feature-dates-step.md) (`Rank` and
+  3. [Wave Creation Schedule](feature-dates-step.md) (`Rank` and
      `Approve`)
   4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
      `Approve`)
@@ -49,9 +49,9 @@ Use this area to create:
   8. [Wave Creation Description Step](feature-description-step.md)
 - Step path by wave type:
   - `Chat`: `Overview -> Groups -> Rules -> Description`
-  - Scheduled `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
-  - `Perpetual Ranking`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Description`
-  - `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - `Perpetual Ranking`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description`
+  - `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,

@@ -180,7 +180,7 @@ describe("Museum finished publication routes", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The 6529 Network Museum is the public art museum of the 6529 Network: a permanent collection of digital art, governed through TDH, held by the Network on Ethereum, and open to anyone."
+        "The 6529 Network Museum is the public art museum of the 6529 Network. Its permanent Collection brings together digital art and photography held by the Network on Ethereum."
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Held by the 6529 Network")).toBeInTheDocument();
@@ -203,7 +203,7 @@ describe("Museum finished publication routes", () => {
       "href",
       MUSEUM_SAFE_ETHERSCAN_URL
     );
-    expect(screen.getAllByTestId("museum-artwork-figure")).toHaveLength(8);
+    expect(screen.getAllByTestId("museum-artwork-figure")).toHaveLength(7);
   });
 
   it("uses the governed gift narrative as the gift-page publication", async () => {

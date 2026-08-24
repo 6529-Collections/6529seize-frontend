@@ -3163,7 +3163,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get authenticated user's unread direct-message drop count.
+      summary: Get authenticated user's direct-message unread count.
       operationId: getDmDropsUnread
       x-6529-router:
         enabled: true
@@ -3178,6 +3178,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDmDropsUnreadCount"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
+  /dm-drops/unread/snapshot:
+    get:
+      tags:
+        - Drops
+      summary: Get authenticated user's direct-message unread snapshot.
+      operationId: getDmUnreadSnapshot
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/dm-drops/dm-drops.handlers"
+          name: handleGetDmUnreadSnapshot
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDmUnreadSnapshot"
         "400":
           description: Bad request
         "401":
@@ -5551,9 +5576,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarkWaveReadRequest"
       responses:
         "200":
           description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarkWaveReadResponse"
   /notifications/wave-subscription/{wave_id}:
     get:
       tags:
@@ -12452,7 +12487,7 @@ paths:
     get:
       tags:
         - WavesV2
-      summary: Search for V2 drops in wave by content
+      summary: Search for V2 drops in a wave
       operationId: searchDropsInWaveV2
       x-6529-router:
         enabled: true
@@ -12468,9 +12503,34 @@ paths:
             type: string
         - name: term
           in: query
-          required: true
+          required: false
           schema:
             type: string
+            minLength: 3
+            maxLength: 200
+        - name: author_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: after
+          in: query
+          description: Inclusive lower created-at timestamp in milliseconds
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: before
+          in: query
+          description: Exclusive upper created-at timestamp in milliseconds
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
         - name: page
           in: query
           required: false
@@ -12495,8 +12555,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        "400":
+          description: >-
+            Invalid search criteria: at least one of term, author_id, after, or
+            before is required; term must contain 3 to 200 characters; and when
+            both dates are provided, after must be less than before
         "404":
           description: Wave not found
+  /v2/waves/{waveId}/search-authors:
+    get:
+      tags:
+        - WavesV2
+      summary: Search profiles that authored a drop in a wave
+      operationId: searchWaveAuthorsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleSearchWaveAuthorsV2
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: handle
+          in: query
+          description: >-
+            Case-insensitive handle prefix. Empty returns the first authors in
+            the readable wave.
+          required: false
+          schema:
+            type: string
+            maxLength: 15
+            pattern: ^\w{0,15}$
+            default: ""
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveSearchAuthor"
+        "404":
+          description: Wave not found or not visible to the caller
   /xtdh/stats:
     get:
       tags:
@@ -16387,6 +16500,53 @@ components:
         count:
           type: integer
           minimum: 0
+    ApiDmUnreadConversationState:
+      type: object
+      required:
+        - profile_id
+        - wave_id
+        - unread_count
+        - first_unread_drop_serial_no
+        - latest_drop_serial_no
+        - latest_read_serial_no
+        - version
+      properties:
+        profile_id:
+          type: string
+        wave_id:
+          type: string
+        unread_count:
+          type: integer
+          minimum: 0
+        first_unread_drop_serial_no:
+          type: integer
+          nullable: true
+          minimum: 1
+        latest_drop_serial_no:
+          type: integer
+          minimum: 0
+        latest_read_serial_no:
+          type: integer
+          minimum: 0
+        version:
+          type: integer
+          minimum: 0
+    ApiDmUnreadSnapshot:
+      type: object
+      required:
+        - profile_id
+        - count
+        - conversations
+      properties:
+        profile_id:
+          type: string
+        count:
+          type: integer
+          minimum: 0
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDmUnreadConversationState"
     ApiDrop:
       type: object
       required:
@@ -18338,6 +18498,27 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+        dm_unread_state:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDmUnreadConversationState"
+    ApiMarkWaveReadRequest:
+      type: object
+      properties:
+        read_through_serial_no:
+          type: integer
+          minimum: 0
+        request_dm_unread_state:
+          type: boolean
+    ApiMarkWaveReadResponse:
+      type: object
+      required:
+        - dm_unread_state
+      properties:
+        dm_unread_state:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDmUnreadConversationState"
     ApiMediaResolveRequest:
       type: object
       required:
@@ -24607,6 +24788,20 @@ components:
         gated_hotness_score:
           type: number
           format: double
+    ApiWaveSearchAuthor:
+      type: object
+      required:
+        - id
+        - handle
+        - pfp
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiWavesOverviewType:
       type: string
       enum:

@@ -97,6 +97,16 @@ interface MuseumResearchArtistAssignment {
 export const MUSEUM_RESEARCH_ARTIST_ASSIGNMENTS: readonly MuseumResearchArtistAssignment[] =
   [
     {
+      artistId: "6529NM-ART-0022",
+      workId: "6529NM-W-0029",
+      descriptionKey: "museum.network.research.artistVeraDescription",
+    },
+    {
+      artistId: "6529NM-ART-0023",
+      workId: "6529NM-W-0029",
+      descriptionKey: "museum.network.research.artistMartinDescription",
+    },
+    {
       artistId: "6529NM-ART-0001",
       workId: "6529NM-W-0007",
       descriptionKey: "museum.network.research.artistCaseyDescription",
@@ -135,6 +145,10 @@ interface MuseumResearchWorkAssignment {
 
 export const MUSEUM_RESEARCH_WORK_ASSIGNMENTS: readonly MuseumResearchWorkAssignment[] =
   [
+    {
+      workId: "6529NM-W-0029",
+      descriptionKey: "museum.network.research.workThemesDescription",
+    },
     {
       workId: "6529NM-W-0004",
       descriptionKey: "museum.network.research.workPreProcessDescription",
@@ -541,7 +555,10 @@ export function buildMuseumResearchIndex(
     .filter(
       (document) =>
         document.kind !== "founding_principles" &&
-        document.kind !== "open_museum_statement"
+        document.kind !== "open_museum_statement" &&
+        !document.sourcePath.startsWith(
+          "records/proposed-gifts/6529NM-PG-2026-002/public/"
+        )
     )
     .filter((document) => !representedDocumentIds.has(document.id))
     .map((document) => {

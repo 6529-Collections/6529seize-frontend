@@ -73,11 +73,10 @@ same context.
   CTA.
 - If no wave is selected on desktop list routes, the UI shows selection
   placeholders (`Select a Wave` or `Select a Conversation`).
-- `Rank` and `Approve` rules show two layers: automatic rules generated from
-  wave settings and optional creator rules. Creator rules that require
-  acceptance are enforced by the existing submit terms/signature modal.
-- `Chat` rules show automatic chat/access rules and optional display-only
-  creator rules.
+- `Rank` and `Approve` rules show generated rules from wave settings, optional
+  wave guidelines, and any rules that require acceptance. Acceptance-required
+  rules are enforced by the existing submit terms/signature modal.
+- `Chat` rules show generated chat/access rules and optional wave guidelines.
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example
   `Connect your wallet to participate in this wave`,

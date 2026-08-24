@@ -1,0 +1,1832 @@
+{
+  "generatedAt": "2026-08-23T16:21:09.308Z",
+  "results": [
+    {
+      "route": "/museum/network",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "6529 Network Museum",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 5438,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 910
+        },
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 910
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-home-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/home-1440-full.png"
+    },
+    {
+      "route": "/museum/network/collection",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "Collection",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 10055,
+      "mainImages": [
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Open rust and cream field with broad dark partitions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Grayscale field with black bands, gray planes, and intersecting white lines.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Rows of circular masses, repeated axes, and translucent sweeps and overlaps.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 1349
+        },
+        {
+          "alt": "Blue-gray central and lower knot with trajectories rising and dispersing.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Bright green and dark room-like perspectival field.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Black field with granular white lines and unstable polygonal and dodecahedral suggestions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 910
+        },
+        {
+          "alt": "Black-and-white photograph of two armed soldiers standing symmetrically inside a church beneath a large crucifix.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 405
+        },
+        {
+          "alt": "Black-and-white photograph of a person running through smoke at the Western Wall, with a canister in the air and a metal menorah barrier in the foreground.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 397
+        },
+        {
+          "alt": "Black-and-white photograph of an apparently young person standing with head lowered before a white wall marked by many dark spots, beneath a caged lamp.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 403
+        },
+        {
+          "alt": "Color photograph of a soldier holding a helmet to his face while seated among pale rubble and standing columns at Palmyra under a clear blue sky.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 483
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 604
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "An elevated view shows blurred buses and traffic around a sharply defined person seated in a small blue tub or boat on the roadway.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A rider on a rearing white horse rises above a herd of brown horses on a wide plain beneath hazy mountains.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "Two silhouetted figures walk toward daylight at the end of a rough stone passage.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 640
+        },
+        {
+          "alt": "A long weathered concrete barrier with faded graffiti divides a pale sky from a dark foreground.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 830
+        },
+        {
+          "alt": "A shirtless person opens a refrigerator covered in colorful magnets in a kitchen.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A turquoise mountain lake is bordered by evergreen forest and a jagged, snow-dusted mountain range.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 720
+        },
+        {
+          "alt": "A vertical aerial view shows dense residential roofs meeting an ordered palm plantation along a sharp boundary.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1686
+        },
+        {
+          "alt": "Black-and-white industrial buildings sit beneath a cloudy sky, with the words NOW IS OUR TIME painted on a wall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 851
+        },
+        {
+          "alt": "A bare torso emerges from folds of black fabric against a nearly black background.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "A nude figure reclines on an ornate gold chair, wearing bright sandals, with one hand lowering a small dark booklet or document toward the floor; no text is readable on it.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 427
+        },
+        {
+          "alt": "A person stands framed by successive arched doorways inside a heavily damaged building.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 904
+        },
+        {
+          "alt": "Black keyboard keys spell NO / WHERE / TU on a white surface, while the Esc key sits apart below beside a small ant.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1280
+        },
+        {
+          "alt": "The camera looks upward through a dark, fluted circular structure toward a small opening of sky.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 900
+        },
+        {
+          "alt": "Two people lean from the windows of a weathered teal train; one wears a bright orange head covering.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1829
+        },
+        {
+          "alt": "A small white house with a red roof stands on a hill beneath a starry sky, beyond a lit gate with a posted sign and a silhouetted figure.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1024
+        },
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 910
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 604
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/collection"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-collection-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/collection-1440-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "Artists",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 4446,
+      "mainImages": [
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 910
+        },
+        {
+          "alt": "Black-and-white photograph of two armed soldiers standing symmetrically inside a church beneath a large crucifix.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 405
+        },
+        {
+          "alt": "Black-and-white photograph of a person running through smoke at the Western Wall, with a canister in the air and a metal menorah barrier in the foreground.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 397
+        },
+        {
+          "alt": "Black-and-white photograph of an apparently young person standing with head lowered before a white wall marked by many dark spots, beneath a caged lamp.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 403
+        },
+        {
+          "alt": "Color photograph of a soldier holding a helmet to his face while seated among pale rubble and standing columns at Palmyra under a clear blue sky.",
+          "complete": true,
+          "naturalWidth": 604,
+          "naturalHeight": 483
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "An elevated view shows blurred buses and traffic around a sharply defined person seated in a small blue tub or boat on the roadway.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A rider on a rearing white horse rises above a herd of brown horses on a wide plain beneath hazy mountains.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "Two silhouetted figures walk toward daylight at the end of a rough stone passage.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 640
+        },
+        {
+          "alt": "A long weathered concrete barrier with faded graffiti divides a pale sky from a dark foreground.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 830
+        },
+        {
+          "alt": "A shirtless person opens a refrigerator covered in colorful magnets in a kitchen.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A turquoise mountain lake is bordered by evergreen forest and a jagged, snow-dusted mountain range.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 720
+        },
+        {
+          "alt": "A vertical aerial view shows dense residential roofs meeting an ordered palm plantation along a sharp boundary.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1686
+        },
+        {
+          "alt": "Black-and-white industrial buildings sit beneath a cloudy sky, with the words NOW IS OUR TIME painted on a wall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 851
+        },
+        {
+          "alt": "A bare torso emerges from folds of black fabric against a nearly black background.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "A person stands framed by successive arched doorways inside a heavily damaged building.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 904
+        },
+        {
+          "alt": "Black keyboard keys spell NO / WHERE / TU on a white surface, while the Esc key sits apart below beside a small ant.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1280
+        },
+        {
+          "alt": "The camera looks upward through a dark, fluted circular structure toward a small opening of sky.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 900
+        },
+        {
+          "alt": "Two people lean from the windows of a weathered teal train; one wears a bright orange head covering.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1829
+        },
+        {
+          "alt": "A small white house with a red roof stands on a hill beneath a starry sky, beyond a lit gate with a posted sign and a silhouetted figure.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1024
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/artists"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-artists-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/artists-1440-full.png"
+    },
+    {
+      "route": "/museum/network/artists/vera-molnar",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "Vera Molnár",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 5104,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/artists/vera-molnar"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-artist-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-artist-1440-full.png"
+    },
+    {
+      "route": "/museum/network/artists/martin-grasser",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "Martin Grasser",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 3700,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/artists/martin-grasser"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-martin-1440-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/martin-1440-full.png"
+    },
+    {
+      "route": "/museum/network/projects/themes-and-variations",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "Themes and Variations",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 5211,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/projects/themes-and-variations"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-project-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/project-1440-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "A Gift of Themes and Variations #210",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 9879,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/acquisitions/a-gift-of-themes-and-variations-210"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-acquisition-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/acquisition-1440-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0029",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "Themes and Variations #210",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 4253,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 720,
+          "naturalHeight": 720
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/works/6529NM-W-0029"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-work-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/work-1440-full.png"
+    },
+    {
+      "route": "/museum/network/research",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "httpStatus": 200,
+      "title": "Research",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "documentHeight": 12106,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "Bright green and dark room-like perspectival field.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 650
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "Black field with granular white lines and unstable polygonal and dodecahedral suggestions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Black-and-white photograph of two armed soldiers standing symmetrically inside a church beneath a large crucifix.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 289
+        },
+        {
+          "alt": "Black-and-white photograph of an apparently young person standing with head lowered before a white wall marked by many dark spots, beneath a caged lamp.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 288
+        },
+        {
+          "alt": "An elevated view shows blurred buses and traffic around a sharply defined person seated in a small blue tub or boat on the roadway.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A rider on a rearing white horse rises above a herd of brown horses on a wide plain beneath hazy mountains.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "Two people lean from the windows of a weathered teal train; one wears a bright orange head covering.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1829
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 432
+        },
+        {
+          "alt": "Rows of circular masses, repeated axes, and translucent sweeps and overlaps.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 1349
+        },
+        {
+          "alt": "Blue-gray central and lower knot with trajectories rising and dispersing.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Black-and-white photograph of a person running through smoke at the Western Wall, with a canister in the air and a metal menorah barrier in the foreground.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 284
+        },
+        {
+          "alt": "Color photograph of a soldier holding a helmet to his face while seated among pale rubble and standing columns at Palmyra under a clear blue sky.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 345
+        },
+        {
+          "alt": "Two silhouetted figures walk toward daylight at the end of a rough stone passage.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 640
+        },
+        {
+          "alt": "A turquoise mountain lake is bordered by evergreen forest and a jagged, snow-dusted mountain range.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 720
+        },
+        {
+          "alt": "A Museum diagram connecting an executable work's token, code, runtime, display, and care layers.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "A Museum diagram separating token title, copyright, display, reproduction, and preservation permissions.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "A Museum diagram connecting artists, works, projects, acquisitions, programs, rights, custody, and sources.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "A Museum diagram linking a cited source snapshot, an open analysis script, and a deterministic result set.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "Visitors in the Gallery of Art in the Smithsonian Institution Building in 1857.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 344
+        },
+        {
+          "alt": "Johannes Vermeer's Woman Reading a Letter, circa 1663.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 515
+        },
+        {
+          "alt": "The Great Hall of the Smithsonian Institution Building in 1857.",
+          "complete": true,
+          "naturalWidth": 432,
+          "naturalHeight": 330
+        },
+        {
+          "alt": "A Museum diagram distinguishing the open record, its cryptographic commitment, the future contract, and the public display.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/research"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-research-1440-final.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/research-1440-full.png"
+    },
+    {
+      "route": "/museum/network",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "6529 Network Museum",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 8885,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 586
+        },
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 586
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-home-390-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/home-390-full.png"
+    },
+    {
+      "route": "/museum/network/collection",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "Collection",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 16844,
+      "mainImages": [
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Open rust and cream field with broad dark partitions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Grayscale field with black bands, gray planes, and intersecting white lines.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Rows of circular masses, repeated axes, and translucent sweeps and overlaps.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 1349
+        },
+        {
+          "alt": "Blue-gray central and lower knot with trajectories rising and dispersing.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Bright green and dark room-like perspectival field.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Black field with granular white lines and unstable polygonal and dodecahedral suggestions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 586
+        },
+        {
+          "alt": "Black-and-white photograph of two armed soldiers standing symmetrically inside a church beneath a large crucifix.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 261
+        },
+        {
+          "alt": "Black-and-white photograph of a person running through smoke at the Western Wall, with a canister in the air and a metal menorah barrier in the foreground.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 256
+        },
+        {
+          "alt": "Black-and-white photograph of an apparently young person standing with head lowered before a white wall marked by many dark spots, beneath a caged lamp.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 260
+        },
+        {
+          "alt": "Color photograph of a soldier holding a helmet to his face while seated among pale rubble and standing columns at Palmyra under a clear blue sky.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 312
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "An elevated view shows blurred buses and traffic around a sharply defined person seated in a small blue tub or boat on the roadway.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A rider on a rearing white horse rises above a herd of brown horses on a wide plain beneath hazy mountains.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "Two silhouetted figures walk toward daylight at the end of a rough stone passage.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 640
+        },
+        {
+          "alt": "A long weathered concrete barrier with faded graffiti divides a pale sky from a dark foreground.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 830
+        },
+        {
+          "alt": "A shirtless person opens a refrigerator covered in colorful magnets in a kitchen.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A turquoise mountain lake is bordered by evergreen forest and a jagged, snow-dusted mountain range.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 720
+        },
+        {
+          "alt": "A vertical aerial view shows dense residential roofs meeting an ordered palm plantation along a sharp boundary.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1686
+        },
+        {
+          "alt": "Black-and-white industrial buildings sit beneath a cloudy sky, with the words NOW IS OUR TIME painted on a wall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 851
+        },
+        {
+          "alt": "A bare torso emerges from folds of black fabric against a nearly black background.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "A nude figure reclines on an ornate gold chair, wearing bright sandals, with one hand lowering a small dark booklet or document toward the floor; no text is readable on it.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 427
+        },
+        {
+          "alt": "A person stands framed by successive arched doorways inside a heavily damaged building.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 904
+        },
+        {
+          "alt": "Black keyboard keys spell NO / WHERE / TU on a white surface, while the Esc key sits apart below beside a small ant.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1280
+        },
+        {
+          "alt": "The camera looks upward through a dark, fluted circular structure toward a small opening of sky.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 900
+        },
+        {
+          "alt": "Two people lean from the windows of a weathered teal train; one wears a bright orange head covering.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1829
+        },
+        {
+          "alt": "A small white house with a red roof stands on a hill beneath a starry sky, beyond a lit gate with a posted sign and a silhouetted figure.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1024
+        },
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 586
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/collection",
+        "net::ERR_ABORTED https://cca-lite.coinbase.com/metrics"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-collection-390-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/collection-390-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "Artists",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 9972,
+      "mainImages": [
+        {
+          "alt": "Dark blue-charcoal circular field with cream semicircles, diagonal fragments, and conspicuous vertical slice divisions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 586
+        },
+        {
+          "alt": "Black-and-white photograph of two armed soldiers standing symmetrically inside a church beneath a large crucifix.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 261
+        },
+        {
+          "alt": "Black-and-white photograph of a person running through smoke at the Western Wall, with a canister in the air and a metal menorah barrier in the foreground.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 256
+        },
+        {
+          "alt": "Black-and-white photograph of an apparently young person standing with head lowered before a white wall marked by many dark spots, beneath a caged lamp.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 260
+        },
+        {
+          "alt": "Color photograph of a soldier holding a helmet to his face while seated among pale rubble and standing columns at Palmyra under a clear blue sky.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 312
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "An elevated view shows blurred buses and traffic around a sharply defined person seated in a small blue tub or boat on the roadway.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A rider on a rearing white horse rises above a herd of brown horses on a wide plain beneath hazy mountains.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "Two silhouetted figures walk toward daylight at the end of a rough stone passage.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 640
+        },
+        {
+          "alt": "A long weathered concrete barrier with faded graffiti divides a pale sky from a dark foreground.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 830
+        },
+        {
+          "alt": "A shirtless person opens a refrigerator covered in colorful magnets in a kitchen.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A turquoise mountain lake is bordered by evergreen forest and a jagged, snow-dusted mountain range.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 720
+        },
+        {
+          "alt": "A vertical aerial view shows dense residential roofs meeting an ordered palm plantation along a sharp boundary.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1686
+        },
+        {
+          "alt": "Black-and-white industrial buildings sit beneath a cloudy sky, with the words NOW IS OUR TIME painted on a wall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 851
+        },
+        {
+          "alt": "A bare torso emerges from folds of black fabric against a nearly black background.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "A person stands framed by successive arched doorways inside a heavily damaged building.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 904
+        },
+        {
+          "alt": "Black keyboard keys spell NO / WHERE / TU on a white surface, while the Esc key sits apart below beside a small ant.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1280
+        },
+        {
+          "alt": "The camera looks upward through a dark, fluted circular structure toward a small opening of sky.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 900
+        },
+        {
+          "alt": "Two people lean from the windows of a weathered teal train; one wears a bright orange head covering.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1829
+        },
+        {
+          "alt": "A small white house with a red roof stands on a hill beneath a starry sky, beyond a lit gate with a posted sign and a silhouetted figure.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1024
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/artists"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-artists-390.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/artists-390-full.png"
+    },
+    {
+      "route": "/museum/network/artists/vera-molnar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "Vera Molnár",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 8416,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/artists/vera-molnar"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-vera-artist-390-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/vera-artist-390-full.png"
+    },
+    {
+      "route": "/museum/network/artists/martin-grasser",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "Martin Grasser",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 5256,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/artists/martin-grasser"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-martin-artist-390.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/martin-390-full.png"
+    },
+    {
+      "route": "/museum/network/projects/themes-and-variations",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "Themes and Variations",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 8732,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/projects/themes-and-variations"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-vera-project-390-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/project-390-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "A Gift of Themes and Variations #210",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 19531,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+        "net::ERR_ABORTED https://cca-lite.coinbase.com/metrics"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-vera-acquisition-390-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/acquisition-390-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0029",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "Themes and Variations #210",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 6645,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/works/6529NM-W-0029"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-vera-work-390-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/work-390-full.png"
+    },
+    {
+      "route": "/museum/network/research",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "httpStatus": 200,
+      "title": "Research",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "documentHeight": 21674,
+      "mainImages": [
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "Bright green and dark room-like perspectival field.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Vertical black-and-white photograph of a back-facing armed figure and rifle overlooking a canvas shelter in a rocky desert valley.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 586
+        },
+        {
+          "alt": "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1920
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "Black field with granular white lines and unstable polygonal and dodecahedral suggestions.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Black-and-white photograph of two armed soldiers standing symmetrically inside a church beneath a large crucifix.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 261
+        },
+        {
+          "alt": "Black-and-white photograph of an apparently young person standing with head lowered before a white wall marked by many dark spots, beneath a caged lamp.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 260
+        },
+        {
+          "alt": "An elevated view shows blurred buses and traffic around a sharply defined person seated in a small blue tub or boat on the roadway.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "A rider on a rearing white horse rises above a herd of brown horses on a wide plain beneath hazy mountains.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 853
+        },
+        {
+          "alt": "Two people lean from the windows of a weathered teal train; one wears a bright orange head covering.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 1829
+        },
+        {
+          "alt": "A square generative composition in dark cobalt blue and warm white. Large blue fields occupy the upper right and lower left. White T forms descend through the lower-left field, with a small white F at the left edge. The lower-right area combines a thin horizontal rule, vertical lines, an offset blue block, and a dense rectangular pattern.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 390
+        },
+        {
+          "alt": "Rows of circular masses, repeated axes, and translucent sweeps and overlaps.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 1349
+        },
+        {
+          "alt": "Blue-gray central and lower knot with trajectories rising and dispersing.",
+          "complete": true,
+          "naturalWidth": 2400,
+          "naturalHeight": 2400
+        },
+        {
+          "alt": "Black-and-white photograph of a person running through smoke at the Western Wall, with a canister in the air and a metal menorah barrier in the foreground.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 256
+        },
+        {
+          "alt": "Color photograph of a soldier holding a helmet to his face while seated among pale rubble and standing columns at Palmyra under a clear blue sky.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 312
+        },
+        {
+          "alt": "Two silhouetted figures walk toward daylight at the end of a rough stone passage.",
+          "complete": true,
+          "naturalWidth": 640,
+          "naturalHeight": 640
+        },
+        {
+          "alt": "A turquoise mountain lake is bordered by evergreen forest and a jagged, snow-dusted mountain range.",
+          "complete": true,
+          "naturalWidth": 1280,
+          "naturalHeight": 720
+        },
+        {
+          "alt": "A Museum diagram connecting an executable work's token, code, runtime, display, and care layers.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "A Museum diagram separating token title, copyright, display, reproduction, and preservation permissions.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "A Museum diagram connecting artists, works, projects, acquisitions, programs, rights, custody, and sources.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "A Museum diagram linking a cited source snapshot, an open analysis script, and a deterministic result set.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "Visitors in the Gallery of Art in the Smithsonian Institution Building in 1857.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 311
+        },
+        {
+          "alt": "Johannes Vermeer's Woman Reading a Letter, circa 1663.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 465
+        },
+        {
+          "alt": "The Great Hall of the Smithsonian Institution Building in 1857.",
+          "complete": true,
+          "naturalWidth": 390,
+          "naturalHeight": 298
+        },
+        {
+          "alt": "A Museum diagram distinguishing the open record, its cryptographic commitment, the future contract, and the public display.",
+          "complete": true,
+          "naturalWidth": 1600,
+          "naturalHeight": 1000
+        },
+        {
+          "alt": "@punk6529",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "@6529Collections",
+          "complete": true,
+          "naturalWidth": 512,
+          "naturalHeight": 512
+        },
+        {
+          "alt": "6529-Collections",
+          "complete": true,
+          "naturalWidth": 230,
+          "naturalHeight": 225
+        }
+      ],
+      "consoleErrors": [],
+      "failedRequests": [
+        "net::ERR_ABORTED http://localhost:3139/museum/network/research",
+        "net::ERR_ABORTED https://cca-lite.coinbase.com/metrics"
+      ],
+      "screenshot": "ops/workstreams/vera-molnar-accession/evidence/local-research-390-v2.png",
+      "fullPageScreenshot": "ops/workstreams/vera-molnar-accession/evidence/research-390-full.png"
+    }
+  ]
+}

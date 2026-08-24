@@ -5,6 +5,7 @@ import type {
   MuseumExternalProposalPresentationMedia,
   MuseumMedia,
 } from "@/lib/museum/publication/types";
+import { museumMediaResponsiveImage } from "@/lib/museum/publication/mediaSelection";
 import { MuseumProposalImage } from "../MuseumProposalImage";
 import { MuseumPublicMediaFigure } from "../MuseumPublicMediaFigure";
 import { museumResearchMediaAspectRatio } from "./museumResearchMediaAspectRatio";
@@ -41,11 +42,19 @@ export function MuseumResearchProjectCard({
     presentationAspectRatio === undefined
       ? {}
       : { style: { aspectRatio: presentationAspectRatio } };
+  const responsiveImage = project.media
+    ? museumMediaResponsiveImage(project.media)
+    : undefined;
+  const responsiveSrcSetProps =
+    responsiveImage?.srcSet === undefined
+      ? {}
+      : { srcSet: responsiveImage.srcSet };
   return (
     <article className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4 sm:tw-p-5">
       {project.media === undefined ? null : (
         <MuseumPublicMediaFigure
-          src={project.media.url}
+          src={responsiveImage?.src ?? project.media.url}
+          {...responsiveSrcSetProps}
           width={project.media.width}
           height={project.media.height}
           alt={project.media.altText ?? project.title}

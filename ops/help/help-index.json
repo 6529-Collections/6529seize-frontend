@@ -1050,6 +1050,7 @@
       "facts": [
         "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
+        "In Search messages, open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
         "Arrow keys move through site results and Enter opens the selected result.",
         "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
@@ -2316,24 +2317,25 @@
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
         "The Overview step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
-        "The Groups step shows all access and moderation rows immediately, organized from Who can view through Admin without an Advanced settings disclosure.",
-        "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
+        "The Groups step shows all access and moderation rows immediately, organized from Visibility through Admins without an Advanced settings disclosure.",
+        "In Groups, Visibility controls wave access; followers who can view the wave may get a notification when it is created.",
         "Each Groups access row offers Replace criteria and Choose group; Replace criteria contains Add identity and the rule choices, Back to criteria returns from identity search, and Next stays disabled until the pending replacement is created, discarded, or replaced by a saved group.",
+        "An empty Visibility, drop, vote, or chat scope is labeled Public without a Current group heading; after a group is selected, the heading and its current eligible identity count are shown.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
         "A valid unsaved inline group offers Preview matches, which evaluates current membership without saving the group or applying it to the Wave.",
         "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",
         "If an older saved draft references a group whose criteria are unavailable, the member browser explains that limitation and continues showing any current members it can resolve instead of closing wave creation.",
-        "When Who can view is restricted, every active Drop, Vote, Chat, and Admin group member must also belong to the View group; incompatible rows are highlighted and block progress.",
-        "Wave creation verifies the final access groups again after authentication and before creating a personal Admin group or the Wave.",
+        "When Visibility is restricted, every active Drop, Vote, Chat, and Admins group member must also belong to the Visibility group; incompatible rows are highlighted and block progress.",
+        "Wave creation verifies the final access groups again after authentication and before creating a personal group for the Admins scope or the Wave.",
         "New inline groups include the connected creator by default, even when the group otherwise contains only rules; choosing a saved group preserves the saved group's membership instead.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
-        "All wave types include Rules; Rank and Approve also include Dates, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
-        "Dates keeps core start, voting, and applicable first-announcement controls visible. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Dates optional section.",
+        "All wave types include Rules; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
+        "Schedule keeps Submissions Open, Voting Opens, and applicable first-announcement controls visible under Opening dates. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Schedule optional section.",
         "Drops keeps submission type visible and puts optional controls under Submission requirements.",
-        "Rules keeps generated automatic rules visible and puts optional creator-written and applicable acceptance rules in a creator-rules section.",
+        "Rules keeps generated wave rules visible and puts optional Wave guidelines and applicable acceptance rules in a Wave guidelines section.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
         "Outcomes keeps outcome selection, reward configuration, and Show outcomes visible; Approve waves place the optional maximum winner count under Winner limits.",
-        "In Description, individual @ mention suggestions follow the draft wave's Who can view group; private drafts suggest only eligible profiles.",
+        "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
       ],
       "canonical_path": "/waves?create=wave",
@@ -2396,7 +2398,7 @@
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
         "On the Overview step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
-        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
+        "Rank wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
@@ -2425,7 +2427,7 @@
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "Approve wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, Outcomes, and Description.",
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
@@ -2490,6 +2492,8 @@
         "wave rules",
         "rules tab",
         "rules step",
+        "wave guidelines",
+        "guidelines",
         "creator rules",
         "custom rules",
         "participation terms",
@@ -2509,10 +2513,10 @@
       ],
       "facts": [
         "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
-        "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
-        "Creators can add display-only custom rules that are saved as wave metadata.",
+        "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
+        "Creators can add Wave guidelines that are saved as wave metadata and shown under Guidelines in the wave rules panel.",
         "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
-        "Wave admins can edit display-only custom rules later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
+        "Wave admins can edit Wave guidelines later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
         "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
       ],
       "canonical_path": "/waves/create",
@@ -2970,7 +2974,7 @@
         "For full-collection xTDH grants, group membership requires ownership of at least one collection token.",
         "Group creation requires the relevant connected profile permissions.",
         "Groups can be used later in workflows such as wave access or participation settings.",
-        "Publishing a replacement for a group used by a Wave is rejected if it would leave any active Drop, Vote, Chat, or Admin group member outside that Wave's View group."
+        "Publishing a replacement for a group used by a Wave is rejected if it would leave any active Drop, Vote, Chat, or Admins group member outside that Wave's Visibility group."
       ],
       "canonical_path": "/network/groups",
       "related_paths": ["/network/groups"],
@@ -4414,7 +4418,7 @@
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports a compact multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
         "The notification filter defaults to All and can combine Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
-        "The settings action beside the Notifications heading opens Profile Preferences.",
+        "An authenticated user can open Profile Preferences from the Preferences action in their own profile header.",
         "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
@@ -4459,13 +4463,14 @@
         "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation, hides the individual category controls, and preserves their choices.",
         "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
         "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push.",
-        "Profile Preferences is available from the app sidebar, the desktop profile menu, and the settings action beside the Notifications heading."
+        "Profile Preferences is available from the app sidebar, the desktop profile menu, and the Preferences action in the authenticated user's own profile header."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/messages", "/notifications"],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
         "components/header/ProfilePreferencesSettings.tsx",
+        "components/user/user-page-header/UserPageHeaderClient.tsx",
         "ops/docs/notifications/feature-profile-preferences.md",
         "ops/docs/waves/create/feature-direct-message-creation.md"
       ]
@@ -5155,8 +5160,8 @@
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
-        "The case-insensitive @contributors mention targets profiles with Chat access, while @admins targets the Wave creator and profiles with Admin access.",
-        "When Wave Chat access is Anyone, Wave followers are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "The case-insensitive @contributors mention targets profiles with Chat access, while @admins targets the Wave creator and profiles in the Admins scope.",
+        "When Wave Chat access is Public, Wave followers are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
         "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
         "Global mention text inside links or inline and fenced code remains literal and does not notify a Wave audience.",

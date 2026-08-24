@@ -502,9 +502,7 @@ describe("CreateWave", () => {
 
     renderCreateWave();
 
-    expect(
-      screen.getByLabelText("Display-only creator rules")
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Wave guidelines")).toBeInTheDocument();
     expect(
       screen.queryByText("Rules that require acceptance")
     ).not.toBeInTheDocument();

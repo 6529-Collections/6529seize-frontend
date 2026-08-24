@@ -182,8 +182,8 @@ function renderDialogPanel({
 
     return (
       <GroupAssignmentPanel
-        suggestedName="My Wave Who can view"
-        defaultLabel="Anyone"
+        suggestedName="My Wave Visibility"
+        defaultLabel="Public"
         selectedGroup={currentGroup}
         allowGroupClear={allowGroupClear}
         layout="dialog"
@@ -212,6 +212,8 @@ describe("GroupAssignmentPanel dialog layout", () => {
   it("starts on existing group search", () => {
     renderDialogPanel();
 
+    expect(screen.getByText("Public")).toBeInTheDocument();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Existing group" })).toHaveAttribute(
       "aria-selected",
       "true"
@@ -224,6 +226,18 @@ describe("GroupAssignmentPanel dialog layout", () => {
     expect(
       screen.queryByRole("button", { name: "Choose group" })
     ).not.toBeInTheDocument();
+  });
+
+  it("labels an actual selected group as the current group", () => {
+    renderDialogPanel({
+      selectedGroup: {
+        id: "group-1",
+        name: "Existing Group",
+      } as ApiGroupFull,
+    });
+
+    expect(screen.getByText("Current group")).toBeInTheDocument();
+    expect(screen.getAllByText("Existing Group").length).toBeGreaterThan(0);
   });
 
   it("switches to new group actions", async () => {
@@ -272,7 +286,9 @@ describe("GroupAssignmentPanel dialog layout", () => {
     await user.click(screen.getByRole("button", { name: "Add identity" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
-    expect(screen.getAllByText("1 identity").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("1 explicitly included user").length
+    ).toBeGreaterThan(0);
     expect(
       within(screen.getByRole("button", { name: "Add identity" })).getByText(
         "1"
@@ -283,7 +299,9 @@ describe("GroupAssignmentPanel dialog layout", () => {
 
     expect(screen.queryByTestId("identity-builder")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Rep" })).toBeInTheDocument();
-    expect(screen.getAllByText("1 identity").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("1 explicitly included user").length
+    ).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Done" })).toBeInTheDocument();
   });
 
@@ -340,7 +358,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
 
     await waitFor(() => {
       expect(onCreateGroup).toHaveBeenCalledWith(
-        expect.objectContaining({ name: "My Wave Who can view" })
+        expect.objectContaining({ name: "My Wave Visibility" })
       );
     });
     expect(onChange).toHaveBeenCalledWith(createdGroup);
@@ -348,7 +366,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
 
   it("opens a live preview for a valid unsaved group", async () => {
     const user = userEvent.setup();
-    renderDialogPanel({ membersRoleLabel: "Who can view" });
+    renderDialogPanel({ membersRoleLabel: "Visibility" });
 
     await user.click(screen.getByRole("tab", { name: "New group" }));
     await user.click(screen.getByRole("button", { name: "Add rule" }));
@@ -357,14 +375,14 @@ describe("GroupAssignmentPanel dialog layout", () => {
     await user.click(screen.getByRole("button", { name: "Preview matches" }));
 
     expect(screen.getByTestId("members-preview-dialog")).toHaveTextContent(
-      "draft:1 rule"
+      "draft:REP at least 5"
     );
   });
 
   it("offers member inspection for a selected saved group", async () => {
     const user = userEvent.setup();
     renderDialogPanel({
-      membersRoleLabel: "Who can view",
+      membersRoleLabel: "Visibility",
       selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
     });
 
@@ -388,7 +406,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
   it("offers the same member inspection for a default audience", async () => {
     const user = userEvent.setup();
     renderDialogPanel({
-      membersRoleLabel: "Admin",
+      membersRoleLabel: "Admins",
       defaultMembersPreviewTarget: {
         kind: "draft",
         group: {} as ApiCreateGroup["group"],
@@ -397,9 +415,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
       },
     });
 
-    const currentGroup = screen.getByText("Current group").parentElement;
-    expect(currentGroup).not.toBeNull();
-    expect(within(currentGroup!).queryByText("Only me")).toBeNull();
+    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "View members" }));
     expect(screen.getByTestId("members-preview-dialog")).toHaveTextContent(

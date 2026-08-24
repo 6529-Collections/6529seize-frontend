@@ -110,7 +110,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
   [ApiWaveType.Chat]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
     [CreateWaveStep.GROUPS]: "Groups",
-    [CreateWaveStep.DATES]: "Dates",
+    [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.RULES]: "Rules",
     [CreateWaveStep.VOTING]: "Rating",
@@ -121,7 +121,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
   [ApiWaveType.Rank]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
     [CreateWaveStep.GROUPS]: "Groups",
-    [CreateWaveStep.DATES]: "Dates",
+    [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.RULES]: "Rules",
     [CreateWaveStep.VOTING]: "Voting",
@@ -132,7 +132,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
   [ApiWaveType.Approve]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
     [CreateWaveStep.GROUPS]: "Groups",
-    [CreateWaveStep.DATES]: "Dates",
+    [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.RULES]: "Rules",
     [CreateWaveStep.VOTING]: "Voting",
@@ -147,25 +147,25 @@ export const CREATE_WAVE_SELECT_GROUP_LABELS: Record<
   Record<CreateWaveGroupConfigType, string>
 > = {
   [ApiWaveType.Chat]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Visibility",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can rate",
     [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
-    [CreateWaveGroupConfigType.ADMIN]: "Admin",
+    [CreateWaveGroupConfigType.ADMIN]: "Admins",
   },
   [ApiWaveType.Rank]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Visibility",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
     [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
-    [CreateWaveGroupConfigType.ADMIN]: "Admin",
+    [CreateWaveGroupConfigType.ADMIN]: "Admins",
   },
   [ApiWaveType.Approve]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can view",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Visibility",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
     [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
-    [CreateWaveGroupConfigType.ADMIN]: "Admin",
+    [CreateWaveGroupConfigType.ADMIN]: "Admins",
   },
 };
 
@@ -173,9 +173,9 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
   CreateWaveGroupConfigType,
   string
 > = {
-  [CreateWaveGroupConfigType.CAN_VIEW]: "Anyone",
-  [CreateWaveGroupConfigType.CAN_DROP]: "Anyone",
-  [CreateWaveGroupConfigType.CAN_VOTE]: "Anyone",
-  [CreateWaveGroupConfigType.CAN_CHAT]: "Anyone",
+  [CreateWaveGroupConfigType.CAN_VIEW]: "Public",
+  [CreateWaveGroupConfigType.CAN_DROP]: "Public",
+  [CreateWaveGroupConfigType.CAN_VOTE]: "Public",
+  [CreateWaveGroupConfigType.CAN_CHAT]: "Public",
   [CreateWaveGroupConfigType.ADMIN]: "Only me",
 };
