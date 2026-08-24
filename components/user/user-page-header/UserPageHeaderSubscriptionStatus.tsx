@@ -58,13 +58,14 @@ const STATUS_ICON_CLASSES: Record<SubscriptionCoverageTone, string> = {
 };
 
 const SUBSCRIPTIONS_TITLE_KEY = "subscriptions.coverage.header.title";
+const MUTED_TEXT_CLASS = "tw-text-iron-400";
 
 export default function UserPageHeaderSubscriptionStatus({
   profile,
-  compact = false,
+  layout = "card",
 }: Readonly<{
   profile: ApiIdentity;
-  compact?: boolean;
+  layout?: "card" | "subtle" | "wide-row";
 }>) {
   const locale = useBrowserLocale();
   const { country } = useCookieConsent();
@@ -76,27 +77,18 @@ export default function UserPageHeaderSubscriptionStatus({
   const profileKey = profile.consolidation_key.trim();
   const profileHref = getProfileSubscriptionsHref(profile);
   const coverageQuery = useSubscriptionCoverage({
-    enabled: !hideSubscriptions && !compact,
+    enabled: !hideSubscriptions,
     profileKey,
   });
+  const isSubtle = layout !== "card";
+  const isWideRow = layout === "wide-row";
+  const isCompactSubtle = layout === "subtle";
+  const subtleLayoutClass = isWideRow
+    ? "tw-min-h-14 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-2"
+    : "tw-min-h-10 tw-rounded-lg";
 
   if (hideSubscriptions || !profileKey || !profileHref) {
     return null;
-  }
-
-  if (compact) {
-    return (
-      <ButtonLink
-        href={profileHref}
-        variant="tertiary"
-        size="sm"
-        aria-label={t(locale, SUBSCRIPTIONS_TITLE_KEY)}
-        className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
-      >
-        <span>{t(locale, SUBSCRIPTIONS_TITLE_KEY)}</span>
-        <ArrowRightIcon className="tw-size-3.5" aria-hidden="true" />
-      </ButtonLink>
-    );
   }
 
   if (coverageQuery.isLoading) {
@@ -104,8 +96,12 @@ export default function UserPageHeaderSubscriptionStatus({
       <div
         aria-label={t(locale, "subscriptions.coverage.loading")}
         className={clsx(
-          "tw-min-h-14 tw-w-full tw-animate-pulse tw-rounded-xl tw-p-2.5 sm:tw-w-[22rem]",
-          USER_PAGE_HEADER_SURFACE_CLASS
+          "tw-w-full tw-animate-pulse",
+          isSubtle
+            ? subtleLayoutClass
+            : "tw-min-h-14 tw-rounded-xl tw-p-2.5 sm:tw-w-[22rem]",
+          isCompactSubtle && "tw-flex tw-flex-col tw-justify-center",
+          !isSubtle && USER_PAGE_HEADER_SURFACE_CLASS
         )}
       >
         <div className="tw-h-3.5 tw-w-40 tw-rounded tw-bg-iron-700/80" />
@@ -120,21 +116,46 @@ export default function UserPageHeaderSubscriptionStatus({
       <Link
         href={profileHref}
         className={clsx(
-          "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-p-2.5 tw-text-left tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-[22rem]",
-          USER_PAGE_HEADER_SURFACE_CLASS,
-          USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS
+          "tw-group tw-flex tw-items-center tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+          isCompactSubtle
+            ? "tw-w-fit tw-justify-end"
+            : "tw-w-full tw-justify-between",
+          isSubtle
+            ? `${subtleLayoutClass} desktop-hover:hover:tw-bg-white/[0.025]`
+            : "tw-min-h-14 tw-rounded-xl tw-p-2.5 sm:tw-w-[22rem]",
+          !isSubtle && USER_PAGE_HEADER_SURFACE_CLASS,
+          !isSubtle && USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS
         )}
       >
         <span className="tw-min-w-0">
-          <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-100">
+          <span
+            className={clsx(
+              "tw-block tw-font-medium",
+              isSubtle
+                ? "tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500"
+                : "tw-text-[13px] tw-text-iron-100"
+            )}
+          >
             {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
           </span>
-          <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-text-iron-400">
+          <span
+            className={clsx(
+              "tw-mt-0.5 tw-block tw-transition-colors",
+              isSubtle
+                ? "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+                : `tw-text-[11px] ${MUTED_TEXT_CLASS}`
+            )}
+          >
             {t(locale, "subscriptions.coverage.status.unknown")}
           </span>
         </span>
         <ArrowRightIcon
-          className="tw-size-4 tw-flex-none tw-text-iron-400"
+          className={clsx(
+            "tw-size-4 tw-flex-none tw-transition-colors",
+            isSubtle
+              ? "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+              : MUTED_TEXT_CLASS
+          )}
           aria-hidden="true"
         />
       </Link>
@@ -170,11 +191,56 @@ export default function UserPageHeaderSubscriptionStatus({
         status: presentation.label,
       });
 
+  if (!isSubtle) {
+    return (
+      <div
+        className={clsx(
+          "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-p-2.5 focus-within:tw-outline focus-within:tw-outline-2 focus-within:tw-outline-offset-2 focus-within:tw-outline-primary-400 sm:tw-w-[22rem]",
+          USER_PAGE_HEADER_SURFACE_CLASS
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={clsx(
+            "tw-inline-flex tw-size-6 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-ring-1",
+            STATUS_ICON_CLASSES[presentation.tone]
+          )}
+        >
+          <StatusIcon className="tw-size-3.5" />
+        </span>
+        <span className="tw-min-w-0 tw-flex-1">
+          <span className="tw-block tw-truncate tw-text-[13px] tw-font-medium tw-text-iron-100">
+            {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
+          </span>
+          <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-leading-4 tw-text-iron-400">
+            {secondaryLine}
+          </span>
+        </span>
+        <ButtonLink
+          href={href}
+          className={clsx(
+            "tw-inline-flex tw-min-h-10 tw-flex-none tw-items-center tw-gap-1.5 tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
+            isUrgentTopUp
+              ? "tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-400"
+              : "tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100"
+          )}
+        >
+          {actionLabel}
+          <ArrowRightIcon className="tw-size-3.5" aria-hidden="true" />
+        </ButtonLink>
+      </div>
+    );
+  }
+
   return (
-    <div
+    <Link
+      href={href}
       className={clsx(
-        "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-p-2.5 focus-within:tw-outline focus-within:tw-outline-2 focus-within:tw-outline-offset-2 focus-within:tw-outline-primary-400 sm:tw-w-[22rem]",
-        USER_PAGE_HEADER_SURFACE_CLASS
+        "tw-group tw-flex tw-items-center tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+        isCompactSubtle
+          ? "tw-w-fit tw-justify-end"
+          : "tw-w-full tw-justify-between",
+        `${subtleLayoutClass} desktop-hover:hover:tw-bg-white/[0.025]`
       )}
     >
       <span
@@ -186,26 +252,47 @@ export default function UserPageHeaderSubscriptionStatus({
       >
         <StatusIcon className="tw-size-3.5" />
       </span>
-      <span className="tw-min-w-0 tw-flex-1">
-        <span className="tw-block tw-truncate tw-text-[13px] tw-font-medium tw-text-iron-100">
-          {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
-        </span>
-        <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-leading-4 tw-text-iron-400">
-          {secondaryLine}
-        </span>
-      </span>
-      <Link
-        href={href}
+      <span
         className={clsx(
-          "tw-inline-flex tw-min-h-10 tw-flex-none tw-items-center tw-gap-1.5 tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
-          isUrgentTopUp
-            ? "tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-400"
-            : "tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100"
+          "tw-min-w-0",
+          isCompactSubtle ? "tw-max-w-40" : "tw-flex-1"
         )}
       >
-        {actionLabel}
-        <ArrowRightIcon className="tw-size-3.5" aria-hidden="true" />
-      </Link>
-    </div>
+        <span
+          className={clsx(
+            "tw-block tw-truncate tw-font-medium",
+            "tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500"
+          )}
+        >
+          {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
+        </span>
+        <span
+          className={clsx(
+            "tw-mt-0.5 tw-flex tw-min-w-0 tw-items-baseline tw-gap-2",
+            "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+          )}
+        >
+          <span
+            className={clsx(
+              "tw-min-w-0 tw-truncate tw-transition-colors",
+              "group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+            )}
+          >
+            {secondaryLine}
+          </span>
+          <span
+            className={clsx(
+              "tw-inline-flex tw-flex-none tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-transition-colors",
+              isUrgentTopUp
+                ? "group-focus-visible:tw-text-primary-200 desktop-hover:group-hover:tw-text-primary-200 tw-text-primary-300"
+                : "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+            )}
+          >
+            {actionLabel}
+            <ArrowRightIcon className="tw-size-3" aria-hidden="true" />
+          </span>
+        </span>
+      </span>
+    </Link>
   );
 }

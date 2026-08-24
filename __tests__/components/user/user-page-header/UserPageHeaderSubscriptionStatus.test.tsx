@@ -99,4 +99,34 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       "tw-bg-primary-500"
     );
   });
+
+  it("renders the wide-header presentation without card chrome", () => {
+    render(
+      <UserPageHeaderSubscriptionStatus
+        profile={
+          {
+            consolidation_key: "profile-key",
+            normalised_handle: "sesamenoodles",
+          } as ApiIdentity
+        }
+        layout="subtle"
+      />
+    );
+
+    const status = screen.getByText(
+      "Running low · through The Memes #560, Oct 12, 2026"
+    );
+    const statusLink = status.closest("a");
+
+    expect(statusLink).not.toHaveClass(
+      "!tw-border-white/10",
+      "!tw-bg-iron-950",
+      "tw-shadow-md"
+    );
+    expect(screen.getByText("Subscriptions")).toHaveClass("tw-text-iron-500");
+    expect(statusLink).toHaveAttribute(
+      "href",
+      "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
+    );
+  });
 });

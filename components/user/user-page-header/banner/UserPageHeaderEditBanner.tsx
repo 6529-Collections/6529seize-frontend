@@ -271,9 +271,9 @@ export default function UserPageHeaderEditBanner({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
+      showHeaderDivider
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"
-      headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
       headerActions={
         <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
           {getUserProfileHeaderMessage(
