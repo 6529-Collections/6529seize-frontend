@@ -100,7 +100,7 @@ describe("UserPageHeaderSubscriptionStatus", () => {
     );
   });
 
-  it("renders the wide-header presentation without card chrome", () => {
+  it("renders the subtle presentation without card chrome", () => {
     render(
       <UserPageHeaderSubscriptionStatus
         profile={
@@ -124,6 +124,30 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       "tw-shadow-md"
     );
     expect(screen.getByText("Subscriptions")).toHaveClass("tw-text-iron-500");
+    expect(statusLink).toHaveAttribute(
+      "href",
+      "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
+    );
+  });
+
+  it("renders the wide-row presentation at full width with a divider", () => {
+    render(
+      <UserPageHeaderSubscriptionStatus
+        profile={
+          {
+            consolidation_key: "profile-key",
+            normalised_handle: "sesamenoodles",
+          } as ApiIdentity
+        }
+        layout="wide-row"
+      />
+    );
+
+    const statusLink = screen
+      .getByText("Running low · through The Memes #560, Oct 12, 2026")
+      .closest("a");
+
+    expect(statusLink).toHaveClass("tw-w-full", "tw-border-t");
     expect(statusLink).toHaveAttribute(
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
