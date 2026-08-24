@@ -288,12 +288,12 @@ function CopyableValue({
   label,
   copied,
   onCopy,
-}: {
+}: Readonly<{
   displayValue: string;
   label: string;
   copied: boolean;
   onCopy: () => void;
-}) {
+}>) {
   return (
     <button
       type="button"

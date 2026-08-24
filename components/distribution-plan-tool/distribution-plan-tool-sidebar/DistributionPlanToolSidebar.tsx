@@ -101,10 +101,7 @@ export default function DistributionPlanToolSidebar() {
               />
             </svg>
           </summary>
-          <ol
-            role="list"
-            className="tw-mb-0 tw-mt-4 tw-list-none tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-2 tw-pb-0 tw-pt-5"
-          >
+          <ol className="tw-mb-0 tw-mt-4 tw-list-none tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-2 tw-pb-0 tw-pt-5">
             {steps.map((stepItem) => (
               <DistributionPlanStep
                 key={stepItem.key}
@@ -120,10 +117,7 @@ export default function DistributionPlanToolSidebar() {
         aria-label="Progress"
         className="tw-hidden tw-min-h-screen tw-w-80 tw-shrink-0 tw-border-0 tw-border-l tw-border-solid tw-border-iron-600 tw-px-8 tw-pt-12 xl:tw-block 2xl:tw-w-96"
       >
-        <ol
-          role="list"
-          className="tw-mb-0 tw-list-none tw-overflow-hidden tw-p-0"
-        >
+        <ol className="tw-mb-0 tw-list-none tw-overflow-hidden tw-p-0">
           {steps.map((stepItem) => (
             <DistributionPlanStep
               key={stepItem.key}
