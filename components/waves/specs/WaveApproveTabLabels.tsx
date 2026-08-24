@@ -19,10 +19,7 @@ import {
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
-import {
-  createWaveMetadata,
-  deleteWaveMetadata,
-} from "@/services/api/waves-v2-api";
+import { replaceWaveMetadata } from "@/services/api/wave-metadata-replacement";
 import type { CreateWaveApproveDisplayConfig } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
@@ -206,35 +203,11 @@ export default function WaveApproveTabLabels({
           return;
         }
 
-        const rollbackBody = getApproveWaveDisplayMetadataFieldUpdate({
-          metadata: null,
-          display: getApproveWaveDisplayMetadataDraft(metadataSnapshot),
-          field,
-        }).create[0];
-        let didDeleteExistingLabel = false;
-
-        try {
-          await Promise.all(
-            update.deleteIds.map((metadataId) =>
-              deleteWaveMetadata({ waveId: wave.id, metadataId })
-            )
-          );
-          didDeleteExistingLabel = update.deleteIds.length > 0;
-          await Promise.all(
-            update.create.map((body) =>
-              createWaveMetadata({ waveId: wave.id, body })
-            )
-          );
-        } catch (writeError) {
-          if (didDeleteExistingLabel && update.create.length && rollbackBody) {
-            try {
-              await createWaveMetadata({ waveId: wave.id, body: rollbackBody });
-            } catch {
-              // Preserve the original write failure when rollback also fails.
-            }
-          }
-          throw writeError;
-        }
+        await replaceWaveMetadata({
+          waveId: wave.id,
+          metadata: metadataSnapshot,
+          ...update,
+        });
         await queryClient.invalidateQueries({
           queryKey: [QueryKey.WAVE_METADATA, { wave_id: wave.id }],
         });

@@ -20,10 +20,7 @@ import { useWave } from "@/hooks/useWave";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  createWaveMetadata,
-  deleteWaveMetadata,
-} from "@/services/api/waves-v2-api";
+import { replaceWaveMetadata } from "@/services/api/wave-metadata-replacement";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import WaveSettingEditorActions from "./WaveSettingEditorActions";
@@ -250,40 +247,11 @@ export default function WaveSubmissionButtonLabel({
             return;
           }
 
-          const rollbackUpdate = getUpdate(
-            null,
-            getWaveSubmissionButtonLabelMetadataDraft(metadataSnapshot)
-          );
-          const rollbackBody = rollbackUpdate.create[0] ?? null;
-          let didDeleteExistingLabel = false;
-
-          try {
-            await Promise.all(
-              updateSnapshot.deleteIds.map((metadataId) =>
-                deleteWaveMetadata({ waveId: wave.id, metadataId })
-              )
-            );
-            didDeleteExistingLabel = updateSnapshot.deleteIds.length > 0;
-            await Promise.all(
-              updateSnapshot.create.map((body) =>
-                createWaveMetadata({ waveId: wave.id, body })
-              )
-            );
-          } catch (writeError) {
-            if (
-              didDeleteExistingLabel &&
-              updateSnapshot.create.length > 0 &&
-              rollbackBody
-            ) {
-              // The API stores one value per metadata key, so replacement must
-              // delete first. Restore the previous effective label if create fails.
-              await createWaveMetadata({ waveId: wave.id, body: rollbackBody });
-              await queryClient.invalidateQueries({
-                queryKey: [QueryKey.WAVE_METADATA, { wave_id: wave.id }],
-              });
-            }
-            throw writeError;
-          }
+          await replaceWaveMetadata({
+            waveId: wave.id,
+            metadata: metadataSnapshot,
+            ...updateSnapshot,
+          });
           await queryClient.invalidateQueries({
             queryKey: [QueryKey.WAVE_METADATA, { wave_id: wave.id }],
           });
@@ -306,7 +274,7 @@ export default function WaveSubmissionButtonLabel({
         }
       })();
     },
-    [getUpdate, queryClient, requestAuth, setToast, wave.id]
+    [queryClient, requestAuth, setToast, wave.id]
   );
 
   const renderEditor = useCallback(

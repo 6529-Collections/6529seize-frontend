@@ -16,10 +16,7 @@ import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  createWaveMetadata,
-  deleteWaveMetadata,
-} from "@/services/api/waves-v2-api";
+import { replaceWaveMetadata } from "@/services/api/wave-metadata-replacement";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
@@ -181,34 +178,11 @@ export default function WaveCustomRules({
           return;
         }
 
-        const rollbackBody = getUpdate(
-          null,
-          getWaveCustomRulesMetadataDraft(metadataSnapshot)
-        ).create[0];
-        let didDeleteExistingRules = false;
-
-        try {
-          await Promise.all(
-            update.deleteIds.map((metadataId) =>
-              deleteWaveMetadata({ waveId: wave.id, metadataId })
-            )
-          );
-          didDeleteExistingRules = update.deleteIds.length > 0;
-          await Promise.all(
-            update.create.map((body) =>
-              createWaveMetadata({ waveId: wave.id, body })
-            )
-          );
-        } catch (writeError) {
-          if (didDeleteExistingRules && update.create.length && rollbackBody) {
-            try {
-              await createWaveMetadata({ waveId: wave.id, body: rollbackBody });
-            } catch {
-              // Preserve the original write failure when rollback also fails.
-            }
-          }
-          throw writeError;
-        }
+        await replaceWaveMetadata({
+          waveId: wave.id,
+          metadata: metadataSnapshot,
+          ...update,
+        });
         closeEditor();
       } catch (error) {
         setSaveError(t(locale, "waves.create.rules.guidelinesSaveError"));
