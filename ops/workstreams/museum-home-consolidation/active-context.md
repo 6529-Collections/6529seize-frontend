@@ -1,7 +1,7 @@
 # Museum homepage consolidation
 
-Status: exact production build, deterministic captures, and three-lane visual
-acceptance complete; ready for PR and release
+Status: merged, deployed to staging and production, and qualified by hosted and
+retained browser evidence
 
 ## Release intent
 
@@ -41,3 +41,20 @@ statuses stated plainly.
 
 PR and exact-head bot/CI review, merge, staging deployment and browser E2E,
 then production deployment and live browser readback.
+
+## Release outcome
+
+- PR: `#3815`
+- Exact qualified PR head: `f6337475f96393e1a545d354cebe962b8173ee21`
+- Canonical merge/main: `06ec3e736ea5a8dc131656eef70045916ed5372c`
+- Exact staging composition: `5f3c47ae2b789848d83e6b910f87fbd697f92708`
+- Staging deploy: run `32676652457`, success
+- Automatic staging E2E: run `32677194697`, success
+- Production deploy: run `32678032156`, success
+- Automatic Production E2E: run `32678816271`, success, including the isolated
+  production-evidence verifier
+- Live production version: three consecutive reads returned exact
+  `06ec3e736ea5a8dc131656eef70045916ed5372c` with `stale: false`
+- Live visual readback: one `Acquisitions` section, four acquisition cards, no
+  superseded Collection preview, all nine homepage images decoded, no
+  horizontal overflow, and no browser errors on desktop or 390 px mobile
