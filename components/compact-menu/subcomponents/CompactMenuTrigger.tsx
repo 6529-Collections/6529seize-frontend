@@ -35,7 +35,11 @@ export function CompactMenuTrigger({
 
   if (triggerAsChild) {
     return (
-      <MenuButton as={Fragment} aria-label={ariaLabel} disabled={disabled}>
+      <MenuButton
+        as={Fragment}
+        aria-label={ariaLabel}
+        disabled={disabled}
+      >
         {renderTrigger()}
       </MenuButton>
     );

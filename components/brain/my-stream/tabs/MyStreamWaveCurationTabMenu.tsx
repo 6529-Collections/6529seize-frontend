@@ -208,7 +208,10 @@ export default function MyStreamWaveCurationTabMenu({
       if (didProfileCleanupFail) {
         setToast({
           type: "error",
-          title: t(locale, "profileCuration.manage.profileCleanupErrorTitle"),
+          title: t(
+            locale,
+            "profileCuration.manage.profileCleanupErrorTitle"
+          ),
           description: t(
             locale,
             "profileCuration.manage.profileCleanupErrorDescription"
@@ -233,7 +236,10 @@ export default function MyStreamWaveCurationTabMenu({
       setToast({
         type: "error",
         title: t(locale, "profileCuration.manage.deleteErrorTitle"),
-        description: t(locale, "profileCuration.manage.deleteErrorDescription"),
+        description: t(
+          locale,
+          "profileCuration.manage.deleteErrorDescription"
+        ),
         details: getToastErrorDetails(
           error,
           getErrorMessage(

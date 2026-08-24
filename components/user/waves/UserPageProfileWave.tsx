@@ -481,7 +481,9 @@ export default function UserPageProfileWave({
                 triggerLabel={t(locale, "profileCuration.header.manage")}
                 permissionMode="profile"
                 canChooseAnotherCuration={canSwitchOfficialCuration}
-                onChooseAnotherCuration={() => setIsChangeCurationOpen(true)}
+                onChooseAnotherCuration={() =>
+                  setIsChangeCurationOpen(true)
+                }
                 onChooseAnotherSourceWave={() => setIsChangeWaveOpen(true)}
                 onHideFromProfile={handleRemoveOfficialWave}
                 isProfileActionPending={

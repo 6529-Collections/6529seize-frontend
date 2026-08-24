@@ -30,7 +30,9 @@ describe("UserPageProfileWavePickerNonReady", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Create Curation" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Create Curation" })
+    );
 
     expect(onCreateProfileCuration).toHaveBeenCalledTimes(1);
     expect(

@@ -7,7 +7,10 @@ import {
   useDropCurations,
 } from "./useDropCurations";
 
-export type QuickCurationAction = Pick<DropCurationMembership, "id" | "name">;
+export type QuickCurationAction = Pick<
+  DropCurationMembership,
+  "id" | "name"
+>;
 
 interface DropCurationActionsAvailability {
   readonly showManageCurations: boolean;
@@ -52,7 +55,9 @@ export function useCanShowDropCurationsAction({
       : null;
   const preferredCuration =
     activeCuration ??
-    manageableCurations.find((curation) => curation.id === profileCurationId) ??
+    manageableCurations.find(
+      (curation) => curation.id === profileCurationId
+    ) ??
     (cachedProfileWave?.profile_wave_id === waveId ||
     manageableCurations.length === 1
       ? manageableCurations[0]
@@ -66,7 +71,8 @@ export function useCanShowDropCurationsAction({
 
   return {
     showManageCurations:
-      !isTemporaryDrop && (isWaveAdmin || manageableCurations.length > 0),
+      !isTemporaryDrop &&
+      (isWaveAdmin || manageableCurations.length > 0),
     quickAddCuration,
     quickRemoveCuration,
   };

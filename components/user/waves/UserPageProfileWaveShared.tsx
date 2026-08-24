@@ -179,7 +179,11 @@ export function OfficialWaveSummary({
         <div className="tw-flex tw-items-center tw-gap-2 md:tw-col-start-2 md:tw-row-span-2 md:tw-row-start-1 md:tw-justify-end">
           {manageCurationControl}
           {onAddPost !== undefined && (
-            <Button variant="primary" size="sm" onClick={onAddPost}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onAddPost}
+            >
               <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
               <span>Add post</span>
             </Button>

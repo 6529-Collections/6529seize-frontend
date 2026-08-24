@@ -1,6 +1,7 @@
 export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.setup.title": "Create a Curation",
-  "profileCuration.setup.intro": "Give your Curation a name to get started.",
+  "profileCuration.setup.intro":
+    "Give your Curation a name to get started.",
   "profileCuration.setup.nameLabel": "Curation name",
   "profileCuration.setup.nameHelp": "You can change this later.",
   "profileCuration.setup.progressAria": "Curation setup progress",
@@ -62,10 +63,13 @@ export const PROFILE_CURATION_MESSAGES = {
     "Delete “{curationName}”? The Curation will be deleted and removed from your profile. Its source Wave and posts will remain.",
   "profileCuration.manage.deleteSuccess":
     "Curation deleted. The source Wave remains.",
-  "profileCuration.manage.deleteErrorTitle": "Couldn't delete this Curation.",
+  "profileCuration.manage.deleteErrorTitle":
+    "Couldn't delete this Curation.",
   "profileCuration.manage.deleteErrorDescription": "Please try again.",
-  "profileCuration.manage.deleteErrorFallback": "Failed to delete Curation.",
-  "profileCuration.manage.deleteAuthCancelled": "Authentication was cancelled.",
+  "profileCuration.manage.deleteErrorFallback":
+    "Failed to delete Curation.",
+  "profileCuration.manage.deleteAuthCancelled":
+    "Authentication was cancelled.",
   "profileCuration.manage.profileCleanupErrorTitle":
     "Curation deleted, but the profile could not be updated.",
   "profileCuration.manage.profileCleanupErrorDescription":
@@ -118,7 +122,8 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.unavailable.title": "Curation source unavailable",
   "profileCuration.unavailable.message":
     "The source Wave for this profile Curation may have been removed or is no longer accessible. Hide it from your profile to choose or create another.",
-  "profileCuration.unavailable.disconnectTitle": "Hide unavailable source?",
+  "profileCuration.unavailable.disconnectTitle":
+    "Hide unavailable source?",
   "profileCuration.unavailable.disconnectMessage":
     "Hide this unavailable Curation source from your profile? No underlying data will be deleted.",
   "profileCuration.toast.updated": "Profile Curation updated.",
