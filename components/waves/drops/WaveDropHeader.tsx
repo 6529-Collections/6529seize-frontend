@@ -24,6 +24,8 @@ interface WaveDropHeaderProps {
   readonly showWaveInfo: boolean;
   readonly badge?: React.ReactNode | undefined;
   readonly showActionsButton?: boolean | undefined;
+  readonly showActionsButtonOnMobile?: boolean | undefined;
+  readonly desktopActions?: React.ReactNode | undefined;
   readonly onOpenActions?:
     | ((e: React.MouseEvent<HTMLButtonElement>) => void)
     | undefined;
@@ -38,6 +40,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   showWaveInfo,
   badge,
   showActionsButton = false,
+  showActionsButtonOnMobile = false,
+  desktopActions,
   onOpenActions,
   timestampLayout = "inline",
 }) => {
@@ -105,16 +109,21 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           </div>
           {Boolean(badge) && <div className="tw-ml-2">{badge}</div>}
         </div>
-        {showActionsButton && onOpenActions !== undefined && (
-          <button
-            type="button"
-            aria-label="Open drop actions"
-            onClick={onOpenActions}
-            className="tw-hidden tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-300 active:tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 md:tw-flex"
-          >
-            <EllipsisVerticalIcon className="tw-h-5 tw-w-5" />
-          </button>
-        )}
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center">
+          {desktopActions}
+          {showActionsButton && onOpenActions !== undefined && (
+            <button
+              type="button"
+              aria-label="Open drop actions"
+              onClick={onOpenActions}
+              className={`${
+                showActionsButtonOnMobile ? "tw-flex" : "tw-hidden md:tw-flex"
+              } tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 active:tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100`}
+            >
+              <EllipsisVerticalIcon className="tw-h-5 tw-w-5" />
+            </button>
+          )}
+        </div>
       </div>
       <div>
         {showWaveInfo &&

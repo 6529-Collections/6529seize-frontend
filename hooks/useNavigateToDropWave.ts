@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import useDeviceInfo from "./useDeviceInfo";
 
 type DropWaveNavigationTarget = {
+  readonly id?: string | null;
   readonly serial_no?: number | string | null;
   readonly wave?: {
     readonly id?: string | null;
@@ -20,13 +21,17 @@ type DropWaveNavigationTarget = {
 };
 
 export function useNavigateToDropWave(): (
-  drop: DropWaveNavigationTarget
+  drop: DropWaveNavigationTarget,
+  options?: { readonly edit?: boolean | undefined }
 ) => void {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
 
   return useCallback(
-    (drop: DropWaveNavigationTarget) => {
+    (
+      drop: DropWaveNavigationTarget,
+      options?: { readonly edit?: boolean | undefined }
+    ) => {
       const wave = drop.wave;
       const waveId = wave?.id?.trim();
       const serialNo = `${drop.serial_no ?? ""}`.trim();
@@ -38,6 +43,8 @@ export function useNavigateToDropWave(): (
       const href = getWaveRoute({
         waveId,
         serialNo,
+        extraParams:
+          options?.edit && drop.id ? { editPost: drop.id } : undefined,
         isDirectMessage: wave.chat?.scope?.group?.is_direct_message === true,
         isApp,
       });
