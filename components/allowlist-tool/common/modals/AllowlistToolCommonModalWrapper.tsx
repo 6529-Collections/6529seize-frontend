@@ -20,6 +20,7 @@ interface AllowlistToolCommonModalWrapperProps {
   readonly title: string;
   readonly modalSize?: AllowlistToolModalSize | undefined;
   readonly showTitle?: boolean | undefined;
+  readonly showCloseButton?: boolean | undefined;
 }
 
 export default function AllowlistToolCommonModalWrapper({
@@ -29,6 +30,7 @@ export default function AllowlistToolCommonModalWrapper({
   title,
   modalSize = AllowlistToolModalSize.SMALL,
   showTitle = true,
+  showCloseButton = false,
 }: AllowlistToolCommonModalWrapperProps) {
   const modalRef = useRef<HTMLDialogElement>(null);
   useClickAway(modalRef, () => onClose());
@@ -74,6 +76,7 @@ export default function AllowlistToolCommonModalWrapper({
                 open
                 aria-modal="true"
                 aria-labelledby={showTitle ? titleId : undefined}
+                aria-label={showTitle ? undefined : title}
                 className={`tw-relative tw-m-0 tw-w-full tw-max-w-full tw-transform tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-left tw-shadow-xl tw-transition-all tw-p-0 sm:tw-my-8 sm:tw-w-full ${modalSizeClass}`}>
                 {showTitle && (
                   <div className="tw-absolute tw-right-4 tw-top-6 tw-flex tw-justify-between tw-items-center">
@@ -93,6 +96,21 @@ export default function AllowlistToolCommonModalWrapper({
                       <XMarkIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" aria-hidden="true" />
                     </button>
                   </div>
+                )}
+                {!showTitle && showCloseButton && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose();
+                    }}
+                    type="button"
+                    aria-label="Close"
+                    className="tw-absolute tw-right-4 tw-top-4 tw-z-10 tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50">
+                    <XMarkIcon
+                      className="tw-size-6 tw-flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  </button>
                 )}
                 <div>{children}</div>
               </dialog>

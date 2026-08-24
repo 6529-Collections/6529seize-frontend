@@ -171,7 +171,7 @@
     "__tests__/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepCurrent.test.tsx": 1,
     "__tests__/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanStepDone.test.tsx": 1,
     "__tests__/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar.test.tsx": 1,
-    "__tests__/components/distribution-plan-tool/DistributionPlanStepUpcoming.test.tsx": 2,
+    "__tests__/components/distribution-plan-tool/DistributionPlanStepUpcoming.test.tsx": 1,
     "__tests__/components/distribution-plan-tool/DistributionPlanToolContext.test.tsx": 5,
     "__tests__/components/distribution-plan-tool/DistributionPlanToolPage.test.tsx": 1,
     "__tests__/components/distribution-plan-tool/FinalizeSnapshotsTable.test.tsx": 5,
