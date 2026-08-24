@@ -61,3 +61,39 @@
   dependency suppression as unnecessary. Removed that suppression and verified
   the file with the exact lint configuration on the current platform; the
   utility's behavior and retained visual evidence are unchanged.
+
+## 2026-08-24
+
+- Exact-head App PR CI run `32675241905` completed successfully across quality,
+  production build, and protected desktop/mobile Museum browser lanes. All
+  external review, security, policy, and analysis checks were green. The sole
+  CodeRabbit thread was resolved on the exact head.
+- PR `#3815` merged at canonical main
+  `06ec3e736ea5a8dc131656eef70045916ed5372c`.
+- Composed the merged main onto the current shared staging ref without a force
+  push. Immediately before the mutation, both the helper and versioned API
+  reported STAGING `OFF` and changeable, the staging lease was free, every
+  staging and production-qualification train was terminal, and the bounded
+  two-repository workflow scan found no staging blocker.
+- Exact staging composition
+  `5f3c47ae2b789848d83e6b910f87fbd697f92708` deployed successfully in run
+  `32676652457`; automatic staging E2E run `32677194697` succeeded against the
+  merged main.
+- Immediately before production dispatch, canonical main remained exact. Both
+  release-control sources reported PRODUCTION `OFF` and changeable, the
+  production lease was free, all production and qualification trains were
+  terminal, and the bounded workflow scan found no competing production actor.
+- Production run `32678032156` built, verified, uploaded, and deployed the exact
+  immutable artifact for main
+  `06ec3e736ea5a8dc131656eef70045916ed5372c`. Three consecutive `/api/version`
+  reads matched that SHA with `stale: false`.
+- Automatic Production E2E run `32678816271` completed successfully. Its
+  read-only pack, isolated production-evidence verifier, and validation
+  notification jobs all succeeded.
+- Retained live production inspection covered the desktop and mobile homepage.
+  The DOM contains exactly one Acquisitions heading and four acquisition
+  articles, with no `In the Collection` or `Current acquisitions` heading. All
+  nine images decoded after mobile lazy loading, document width remained within
+  the viewport, and the browser error log remained empty. The live mobile card
+  composition was also inspected visually at the Keys and Gates and Conflict at
+  Its Edges boundary.
