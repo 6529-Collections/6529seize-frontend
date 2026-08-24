@@ -6,9 +6,17 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
+import {
+  type QuickCurationAction,
+  useCanShowDropCurationsAction,
+} from "@/hooks/drops/useCanShowDropCurationsAction";
+import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
+import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { FC, PointerEvent } from "react";
 import {
   useCallback,
@@ -49,6 +57,7 @@ export interface WaveDropMobileMenuProps {
   readonly showOpenOption?: boolean | undefined;
   readonly showCopyOption?: boolean | undefined;
   readonly showVoting?: boolean | undefined;
+  readonly showOnlyQuickRemove?: boolean | undefined;
 }
 
 type TimeoutRef = {
@@ -90,7 +99,11 @@ function WaveDropMobileMenuAuthenticatedActions({
   onBoostAnimation,
   showOpenOption,
   showCopyOption,
-  showCurationsAction,
+  showManageCurations,
+  quickAddCuration,
+  quickRemoveCuration,
+  onQuickAdd,
+  onQuickRemove,
   onCurationsClick,
   isAuthor,
   showOptions,
@@ -100,6 +113,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   closeMenu,
   showVoting,
   onReport,
+  showOnlyQuickRemove,
 }: {
   readonly extendedDrop: ExtendedDrop;
   readonly drop: ApiDrop;
@@ -111,7 +125,11 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly onBoostAnimation?: (() => void) | undefined;
   readonly showOpenOption: boolean;
   readonly showCopyOption: boolean;
-  readonly showCurationsAction: boolean;
+  readonly showManageCurations: boolean;
+  readonly quickAddCuration: QuickCurationAction | null;
+  readonly quickRemoveCuration: QuickCurationAction | null;
+  readonly onQuickAdd: () => void;
+  readonly onQuickRemove: () => void;
   readonly onCurationsClick: () => void;
   readonly isAuthor: boolean;
   readonly showOptions: boolean;
@@ -121,7 +139,9 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
   readonly onReport: () => void;
+  readonly showOnlyQuickRemove: boolean;
 }) {
+  const locale = useBrowserLocale();
   const handledTouchReplyRef = useRef(false);
   const handledTouchReplyResetTimeoutRef = useRef<ReturnType<
     typeof setTimeout
@@ -161,6 +181,21 @@ function WaveDropMobileMenuAuthenticatedActions({
     closeMenu();
     onReply();
   };
+
+  if (showOnlyQuickRemove) {
+    return quickRemoveCuration ? (
+      <button
+        type="button"
+        onClick={onQuickRemove}
+        className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-transition-colors tw-duration-200 active:tw-bg-rose-500/10"
+      >
+        <XMarkIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-rose-400" />
+        <span className="tw-min-w-0 tw-break-words tw-text-base tw-font-semibold tw-text-rose-400">
+          {t(locale, "profileCuration.actions.removeConfirm")}
+        </span>
+      </button>
+    ) : null;
+  }
 
   return (
     <>
@@ -233,7 +268,22 @@ function WaveDropMobileMenuAuthenticatedActions({
         </>
       )}
 
-      {showCurationsAction && (
+      {quickAddCuration && (
+        <button
+          type="button"
+          onClick={onQuickAdd}
+          className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
+        >
+          <PlusIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300" />
+          <span className="tw-min-w-0 tw-break-words tw-text-base tw-font-semibold tw-text-iron-300">
+            {t(locale, "profileCuration.actions.quickAdd", {
+              curationName: quickAddCuration.name,
+            })}
+          </span>
+        </button>
+      )}
+
+      {showManageCurations && (
         <button
           type="button"
           onClick={onCurationsClick}
@@ -241,7 +291,22 @@ function WaveDropMobileMenuAuthenticatedActions({
         >
           <WaveDropCurationsActionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300" />
           <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-            Curate
+            {t(locale, "profileCuration.actions.manage")}
+          </span>
+        </button>
+      )}
+
+      {quickRemoveCuration && (
+        <button
+          type="button"
+          onClick={onQuickRemove}
+          className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-transition-colors tw-duration-200 active:tw-bg-rose-500/10"
+        >
+          <XMarkIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-rose-400" />
+          <span className="tw-min-w-0 tw-break-words tw-text-base tw-font-semibold tw-text-rose-400">
+            {t(locale, "profileCuration.actions.quickRemove", {
+              curationName: quickRemoveCuration.name,
+            })}
           </span>
         </button>
       )}
@@ -290,8 +355,10 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showOpenOption = true,
   showCopyOption = true,
   showVoting = true,
+  showOnlyQuickRemove = false,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
@@ -337,13 +404,54 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 
   const closeMenu = () => setOpen(false);
   const showGuestCopyOnly = connectedProfileHandle === null;
-  const showCurationsAction = useCanShowDropCurationsAction({
+  const { showManageCurations, quickAddCuration, quickRemoveCuration } =
+    useCanShowDropCurationsAction({
+      dropId: drop.id,
+      waveId: drop.wave.id,
+      profileIdentity: getProfileWaveIdentity(connectedProfile),
+      isTemporaryDrop,
+      isWaveAdmin: drop.wave.authenticated_user_admin === true,
+      enabled:
+        (isOpen || isCurationsDialogOpen) && connectedProfileHandle !== null,
+    });
+  const { updateMembershipAsync } = useDropCurationMembershipMutation({
     dropId: drop.id,
-    isTemporaryDrop,
-    isWaveAdmin: drop.wave.authenticated_user_admin === true,
-    enabled:
-      (isOpen || isCurationsDialogOpen) && connectedProfileHandle !== null,
+    waveId: drop.wave.id,
   });
+
+  const handleQuickAdd = async () => {
+    if (!quickAddCuration) {
+      return;
+    }
+
+    closeMenu();
+    try {
+      await updateMembershipAsync(quickAddCuration.id, "add", {
+        successMessage: t(locale, "profileCuration.membership.addedTo", {
+          curationName: quickAddCuration.name,
+        }),
+      });
+    } catch {
+      // The mutation owns the user-facing error toast.
+    }
+  };
+
+  const handleQuickRemove = async () => {
+    if (!quickRemoveCuration) {
+      return;
+    }
+
+    closeMenu();
+    try {
+      await updateMembershipAsync(quickRemoveCuration.id, "remove", {
+        successMessage: t(locale, "profileCuration.membership.removedFrom", {
+          curationName: quickRemoveCuration.name,
+        }),
+      });
+    } catch {
+      // The mutation owns the user-facing error toast.
+    }
+  };
 
   const handleCurationsClick = () =>
     openCurationsDialogAfterMenuClose({
@@ -359,6 +467,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
           isOpen={isOpen}
           setOpen={setOpen}
           hideOnDesktopHover={!isCapacitor}
+          compactContent={showOnlyQuickRemove}
           zIndexClassName={mobileMenuZIndexClassName}
         >
           <div
@@ -385,7 +494,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                 onBoostAnimation={onBoostAnimation}
                 showOpenOption={showOpenOption}
                 showCopyOption={showCopyOption}
-                showCurationsAction={showCurationsAction}
+                showManageCurations={showManageCurations}
+                quickAddCuration={quickAddCuration}
+                quickRemoveCuration={quickRemoveCuration}
+                onQuickAdd={() => void handleQuickAdd()}
+                onQuickRemove={() => void handleQuickRemove()}
                 onCurationsClick={handleCurationsClick}
                 isAuthor={isAuthor}
                 showOptions={showOptions}
@@ -398,13 +511,14 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
                   closeMenu();
                   setIsReportOpen(true);
                 }}
+                showOnlyQuickRemove={showOnlyQuickRemove}
               />
             )}
           </div>
         </CommonDropdownItemsMobileWrapper>,
         document.body
       )}
-      {showCurationsAction && (
+      {showManageCurations && (
         <WaveDropCurationsDialog
           dropId={drop.id}
           wave={drop.wave}

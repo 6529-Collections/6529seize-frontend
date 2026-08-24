@@ -529,6 +529,8 @@ const getAuthorHeader = ({
   isStorm,
   activePartIndex,
   showActionsButton,
+  showActionsButtonOnMobile,
+  desktopActions,
   handleOpenTouchActions,
   timestampLayout,
 }: {
@@ -539,6 +541,8 @@ const getAuthorHeader = ({
   readonly isStorm: boolean;
   readonly activePartIndex: number;
   readonly showActionsButton: boolean;
+  readonly showActionsButtonOnMobile: boolean;
+  readonly desktopActions?: React.ReactNode | undefined;
   readonly handleOpenTouchActions: (
     e: React.MouseEvent<HTMLButtonElement>
   ) => void;
@@ -557,6 +561,8 @@ const getAuthorHeader = ({
         currentPartIndex={activePartIndex}
         partsCount={drop.parts.length}
         showActionsButton={showActionsButton}
+        showActionsButtonOnMobile={showActionsButtonOnMobile}
+        desktopActions={desktopActions}
         onOpenActions={handleOpenTouchActions}
         timestampLayout={timestampLayout}
       />

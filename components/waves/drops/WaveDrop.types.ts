@@ -28,6 +28,7 @@ export interface WaveDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly showStandaloneActionsButton?: boolean | undefined;
   readonly inlineAuthorOnDesktop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
