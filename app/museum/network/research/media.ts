@@ -1,5 +1,8 @@
 import editorialMediaManifest from "@/public/museum/research/editorial/media-manifest.json";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  museumMediaResponsiveImage,
+  selectMuseumStillMedia,
+} from "@/lib/museum/publication/mediaSelection";
 import type {
   MuseumExternalProposalPresentationMedia,
   MuseumMedia,
@@ -204,9 +207,11 @@ export function resolveExactWorkMediaById(
 
   if (media !== undefined) {
     const stable = STABLE_RESEARCH_MEDIA_BY_WORK_ID[workId];
+    const responsive = museumMediaResponsiveImage(media);
+    const mediaSrcSet = stable?.srcSet ?? responsive.srcSet;
     return {
-      media,
-      ...(stable === undefined ? {} : { mediaSrcSet: stable.srcSet }),
+      media: { ...media, url: responsive.src },
+      ...(mediaSrcSet === undefined ? {} : { mediaSrcSet }),
     };
   }
 
@@ -221,9 +226,11 @@ export function resolveExactWorkMediaById(
   );
   if (legacyMedia === undefined) return {};
   const stable = STABLE_RESEARCH_MEDIA_BY_WORK_ID[workId];
+  const responsive = museumMediaResponsiveImage(legacyMedia);
+  const mediaSrcSet = stable?.srcSet ?? responsive.srcSet;
   return {
-    media: legacyMedia,
-    ...(stable === undefined ? {} : { mediaSrcSet: stable.srcSet }),
+    media: { ...legacyMedia, url: responsive.src },
+    ...(mediaSrcSet === undefined ? {} : { mediaSrcSet }),
   };
 }
 

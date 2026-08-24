@@ -1,3 +1,5 @@
+import { buildImmutableMuseumBlobUrl } from "./security";
+import type { MuseumAcquisitionMethod } from "./entities";
 import type {
   MuseumAcquisitionAlias,
   MuseumPublicEntityRecord,
@@ -5,8 +7,13 @@ import type {
   MuseumPublicRouteAlias,
   MuseumWorkAlias,
 } from "./types";
-import { MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH } from "./publicEntityGraphSchema";
 import {
+  ACQUISITION_METHODS,
+  ENTITY_ID_PATTERNS,
+  MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
+} from "./publicEntityGraphSchema";
+import {
+  isRecord,
   requiredRecord,
   requiredString,
   stringArray,
@@ -395,4 +402,94 @@ export function validateCanonicalRouteCoverage(
 
 function sameIdSet(left: readonly string[], right: readonly string[]): boolean {
   return left.length === right.length && left.every((id) => right.includes(id));
+}
+
+export function aliasesForWorks(
+  entities: readonly MuseumPublicEntityRecord[]
+): readonly MuseumWorkAlias[] {
+  const aliases = new Map<string, MuseumWorkAlias>();
+  const sharedReferences = new Set<string>();
+  for (const work of entities.filter(
+    (entity) => entity.entityType === "WORK"
+  )) {
+    const refs = sourceProfileReferences(
+      work.profile,
+      "manifestation_references",
+      "manifestation"
+    );
+    for (const alias of refs) {
+      if (sharedReferences.has(alias)) continue;
+      if (
+        alias === work.id ||
+        ENTITY_ID_PATTERNS["WORK"]?.test(alias) === true
+      ) {
+        continue;
+      }
+      const existing = aliases.get(alias);
+      if (existing !== undefined && existing.workId !== work.id) {
+        aliases.delete(alias);
+        sharedReferences.add(alias);
+        continue;
+      }
+      aliases.set(alias, {
+        kind: "work_source_alias",
+        sourceObjectId: alias,
+        workId: work.id,
+        sourcePath: work.sourcePath,
+      });
+    }
+  }
+  return [...aliases.values()].sort((left, right) =>
+    left.sourceObjectId.localeCompare(right.sourceObjectId)
+  );
+}
+
+function sourceProfileReferences(
+  profile: Readonly<Record<string, unknown>>,
+  key: string,
+  referenceType: string
+): string[] {
+  const values = profile[key];
+  if (!Array.isArray(values)) return [];
+  return values.flatMap((value) => {
+    if (!isRecord(value)) return [];
+    if (value["reference_type"] !== referenceType) return [];
+    const sourceRecordId = value["source_record_id"];
+    return typeof sourceRecordId === "string" &&
+      sourceRecordId.trim().length > 0
+      ? [sourceRecordId]
+      : [];
+  });
+}
+
+export function mergeWorkAliases(
+  aliases: readonly MuseumWorkAlias[]
+): readonly MuseumWorkAlias[] {
+  const byAlias = new Map<string, MuseumWorkAlias>();
+  for (const alias of aliases) {
+    const existing = byAlias.get(alias.sourceObjectId);
+    if (existing !== undefined && existing.workId !== alias.workId) {
+      throw new Error("public_entity_graph_alias_collision");
+    }
+    byAlias.set(alias.sourceObjectId, alias);
+  }
+  return [...byAlias.values()].sort((left, right) =>
+    left.sourceObjectId.localeCompare(right.sourceObjectId)
+  );
+}
+
+export function mapAcquisitionMethod(value: string): MuseumAcquisitionMethod {
+  if (!ACQUISITION_METHODS.has(value as MuseumAcquisitionMethod)) {
+    throw new Error("public_entity_graph_acquisition_method");
+  }
+  return value as MuseumAcquisitionMethod;
+}
+
+export function immutableDocumentSource(
+  sourceCommit: string,
+  path: string
+): string {
+  const url = buildImmutableMuseumBlobUrl(sourceCommit, path);
+  if (url === null) throw new Error("public_entity_graph_document_join");
+  return url;
 }

@@ -21,6 +21,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { ApiCommunityMembersPage } from "@/generated/models/ApiCommunityMembersPage";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { formatGroupMembersCount } from "@/helpers/groups/group-members-count";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -381,9 +382,7 @@ export default function GroupMembersPreviewDialog({
             className="tw-m-0 tw-mt-3 tw-text-xs tw-font-medium tw-text-iron-400"
           >
             {typeof data?.count === "number"
-              ? t(locale, "waves.create.groups.members.currentCount", {
-                  count: formatInteger(locale, data.count),
-                })
+              ? formatGroupMembersCount({ count: data.count, locale })
               : t(locale, "waves.create.groups.members.countLoading")}
           </p>
         </div>

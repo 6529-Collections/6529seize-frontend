@@ -26,7 +26,7 @@ simultaneous-submission limits are under `Submission requirements`.
 ## Entry Points
 
 - Follow the `Rank` or `Approve` path:
-  `Overview -> Groups -> Dates -> Drops`.
+  `Overview -> Groups -> Schedule -> Drops`.
 - Use `Back` from `Rules` to return in one step.
 - On large screens, use the step rail after you move past `Drops`.
 
@@ -55,7 +55,7 @@ simultaneous-submission limits are under `Submission requirements`.
   added`).
 - Add metadata rules for fields every participant must provide.
 - Leave submission-limit blank for unlimited simultaneous submissions.
-- Add creator rules and acceptance requirements in the next `Rules` step.
+- Add wave guidelines and acceptance requirements in the next `Rules` step.
 
 ## Edge Cases
 
@@ -81,7 +81,7 @@ simultaneous-submission limits are under `Submission requirements`.
 
 - `Chat` waves skip `Drops`.
 - Required metadata is optional.
-- Custom creator rules are configured in `Rules`, not `Drops`.
+- Wave guidelines are configured in `Rules`, not `Drops`.
 
 ## Related Pages
 
@@ -90,7 +90,7 @@ simultaneous-submission limits are under `Submission requirements`.
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Dates and Timeline](feature-dates-step.md)
+- [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Voting Configuration](feature-voting-step.md)
 - [Wave Drop Composer Metadata Submissions](../composer/feature-metadata-submissions.md)

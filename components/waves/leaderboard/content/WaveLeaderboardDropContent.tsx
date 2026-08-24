@@ -9,6 +9,7 @@ import type { DropContentPresentation } from "@/components/waves/drops/dropConte
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import ProposalCardContent from "@/components/waves/drops/proposal/ProposalCardContent";
+import { ProposalCardContextLabelVisibilityProvider } from "@/components/waves/drops/proposal/ProposalCardContextLabel";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
@@ -53,19 +54,25 @@ export const WaveLeaderboardDropContent: React.FC<
   }
 
   return (
-    <div className="-tw-mt-0.5 tw-flex tw-flex-col tw-gap-y-1">
-      <WaveDropContent
-        drop={drop}
-        activePartIndex={activePartIndex}
-        setActivePartIndex={setActivePartIndex}
-        onDropContentClick={onDropContentClick}
-        onLongPress={() => {}}
-        onQuoteClick={() => {}}
-        setLongPressTriggered={() => {}}
-        isCompetitionDrop={isCompetitionDrop}
-        mediaContainerHeightClassName={mediaContainerHeightClassName}
-        contentPresentation={contentPresentation}
-      />
+    <div
+      className={`${
+        contentPresentation === "quorumCompact" ? "" : "-tw-mt-0.5"
+      } tw-flex tw-flex-col tw-gap-y-1`}
+    >
+      <ProposalCardContextLabelVisibilityProvider visible={false}>
+        <WaveDropContent
+          drop={drop}
+          activePartIndex={activePartIndex}
+          setActivePartIndex={setActivePartIndex}
+          onDropContentClick={onDropContentClick}
+          onLongPress={() => {}}
+          onQuoteClick={() => {}}
+          setLongPressTriggered={() => {}}
+          isCompetitionDrop={isCompetitionDrop}
+          mediaContainerHeightClassName={mediaContainerHeightClassName}
+          contentPresentation={contentPresentation}
+        />
+      </ProposalCardContextLabelVisibilityProvider>
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         <WaveDropReactions drop={drop} />
       </div>

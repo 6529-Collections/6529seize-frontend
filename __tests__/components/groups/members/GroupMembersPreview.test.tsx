@@ -42,11 +42,6 @@ jest.mock("@/components/groups/page/list/card/GroupCardConfigs", () => ({
   default: () => <div>Saved criteria</div>,
 }));
 
-const group = {
-  id: "group-1",
-  name: "Collectors",
-} as ApiGroupFull;
-
 const draftGroup: ApiCreateGroupDescription = {
   tdh: {
     min: 10,
@@ -74,6 +69,23 @@ const draftGroup: ApiCreateGroupDescription = {
   is_beneficiary_of_grant_match_mode:
     ApiGroupBeneficiaryGrantMatchMode.AnyToken,
 };
+
+const group = {
+  id: "group-1",
+  name: "Collectors",
+  group: {
+    tdh: draftGroup.tdh,
+    rep: draftGroup.rep,
+    cic: draftGroup.cic,
+    level: draftGroup.level,
+    owns_nfts: draftGroup.owns_nfts,
+    identity_group_id: "included-group",
+    identity_group_identities_count: 4,
+    excluded_identity_group_id: "excluded-group",
+    excluded_identity_group_identities_count: 1,
+    is_beneficiary_of_grant: null,
+  },
+} as ApiGroupFull;
 
 const membersPage: ApiCommunityMembersPage = {
   count: 21,
@@ -117,14 +129,32 @@ describe("group member preview", () => {
       />
     );
 
-    expect(
-      await screen.findByText("21 currently eligible")
-    ).toBeInTheDocument();
+    expect(await screen.findByText("21 users")).toBeInTheDocument();
+    const criteria = screen.getByText(
+      "TDH + xTDH at least 10, 4 explicitly included users, and 1 explicitly excluded user"
+    );
+    expect(criteria).toHaveAttribute("aria-live", "polite");
     await user.click(screen.getByRole("button", { name: "View members" }));
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the eligible count itself as the summary action", async () => {
+  it("uses the singular user label for one member", async () => {
+    (fetchGroupMembersPage as jest.Mock).mockResolvedValueOnce({
+      ...membersPage,
+      count: 1,
+    });
+
+    renderWithQueryClient(
+      <GroupMembersPreviewTrigger
+        target={{ kind: "saved", group }}
+        onOpen={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByText("1 user")).toBeInTheDocument();
+  });
+
+  it("renders the user count itself as the summary action", async () => {
     const user = userEvent.setup();
     const onOpen = jest.fn();
     renderWithQueryClient(
@@ -136,9 +166,14 @@ describe("group member preview", () => {
     );
 
     const countButton = await screen.findByRole("button", {
-      name: "View members: 21 currently eligible",
+      name: "View members: 21 users",
     });
-    expect(countButton).toHaveTextContent("21 currently eligible");
+    expect(countButton).toHaveTextContent("21 users");
+    expect(
+      screen.getByText(
+        "TDH + xTDH at least 10, 4 explicitly included users, and 1 explicitly excluded user"
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByText("View members")).not.toBeInTheDocument();
     await user.click(countButton);
     expect(onOpen).toHaveBeenCalledTimes(1);
@@ -160,9 +195,10 @@ describe("group member preview", () => {
 
     expect(
       await screen.findByRole("button", {
-        name: "View members: 21 currently eligible",
+        name: "View members: 21 users",
       })
     ).toBeVisible();
+    expect(screen.getByText("Only me")).toBeInTheDocument();
     expect(fetchGroupMembersPage).toHaveBeenCalledWith(
       expect.objectContaining({
         target: expect.objectContaining({ kind: "draft", group: draftGroup }),
@@ -198,7 +234,7 @@ describe("group member preview", () => {
       "tw-min-h-0",
       "tw-flex-1"
     );
-    expect(screen.getByText("21 currently eligible")).toBeInTheDocument();
+    expect(screen.getByText("21 users")).toBeInTheDocument();
 
     await user.type(screen.getByLabelText("Find an identity"), "alice");
     await waitFor(
@@ -255,14 +291,14 @@ describe("group member preview", () => {
     renderWithQueryClient(
       <GroupMembersPreviewDialog
         target={{ kind: "saved", group: restoredLegacyGroup }}
-        roleLabel="Who can view"
+        roleLabel="Visibility"
         onClose={jest.fn()}
       />
     );
 
     expect(await screen.findByText("alpha")).toBeInTheDocument();
     expect(
-      screen.getByRole("dialog", { name: "Who can view: Selected group" })
+      screen.getByRole("dialog", { name: "Visibility: Selected group" })
     ).toBeInTheDocument();
     expect(
       screen.getByText(

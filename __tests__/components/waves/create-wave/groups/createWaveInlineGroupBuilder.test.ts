@@ -28,10 +28,10 @@ describe("createWaveInlineGroupBuilder", () => {
     expect(
       buildInlineGroupName({
         waveName: "My Wave",
-        groupLabel: "Who can view",
+        groupLabel: "Visibility",
         fallbackName: "Wave Group",
       })
-    ).toBe("My Wave Who can view");
+    ).toBe("My Wave Visibility");
   });
 
   it("uses the localized fallback when the name inputs are empty", () => {
@@ -74,7 +74,7 @@ describe("createWaveInlineGroupBuilder", () => {
     ]);
   });
 
-  it("builds a compact draft summary", () => {
+  it("builds a readable criteria summary", () => {
     const draft = createEmptyInlineGroupPayload();
     draft.group.rep = {
       ...draft.group.rep,
@@ -86,7 +86,7 @@ describe("createWaveInlineGroupBuilder", () => {
         draft,
         identityCount: 2,
       })
-    ).toBe("2 identities · 1 rule");
+    ).toBe("REP at least 5 and 2 explicitly included users");
   });
 
   it("dedupes and serializes inline identities by selected wallet", () => {

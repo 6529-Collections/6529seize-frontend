@@ -97,13 +97,13 @@ const getWaveDropAndVoteRows = ({
       id: "can-drop",
       label: "Who can drop",
       scope: wave.participation.scope,
-      fallback: "Anyone",
+      fallback: "Public",
     }),
     getWaveScopeRow({
       id: "can-vote",
       label: "Who can vote",
       scope: wave.voting.scope,
-      fallback: "Anyone",
+      fallback: "Public",
     }),
   ];
 };
@@ -127,15 +127,15 @@ const getWaveAccessSection = (context: WaveRulesContext): WaveRuleSection => ({
   rows: [
     getWaveScopeRow({
       id: "can-view",
-      label: "Who can view",
+      label: "Visibility",
       scope: context.wave.visibility.scope,
-      fallback: "Anyone",
+      fallback: "Public",
     }),
     ...getWaveDropAndVoteRows(context),
     ...getWaveChatRows(context),
     getWaveScopeRow({
       id: "admin",
-      label: "Who can admin",
+      label: "Admins",
       scope: context.wave.wave.admin_group,
       fallback: "Creator/admin group",
     }),
@@ -144,7 +144,7 @@ const getWaveAccessSection = (context: WaveRulesContext): WaveRuleSection => ({
 
 const getWaveTimingSection = ({ wave }: WaveRulesContext): WaveRuleSection => ({
   id: "timing",
-  title: "Timing",
+  title: "Schedule",
   rows: [
     {
       id: "submission-window",

@@ -36,6 +36,14 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebsocketStatus: jest.fn(() => "disconnected"),
 }));
 
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useDmUnreadConversations: jest.fn(() => ({})),
+}));
+
+jest.mock("@/hooks/useMarkWaveNotificationsRead", () => ({
+  useMarkWaveNotificationsRead: jest.fn(() => jest.fn()),
+}));
+
 jest.mock("@/hooks/useWaveById", () => ({
   useWaveById: jest.fn(() => ({
     wave: null,

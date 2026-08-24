@@ -30,7 +30,11 @@ import type {
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication/types";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  museumMediaResponsiveImage,
+  selectMuseumStillMedia,
+} from "@/lib/museum/publication/mediaSelection";
+import { formatMuseumCreatorCredit } from "@/lib/museum/presentation";
 import type { MuseumView } from "@/lib/museum/types";
 
 export const metadata: Metadata = {
@@ -71,17 +75,29 @@ function publicWorkItem(
   publication: MuseumPublication,
   view: MuseumView | null
 ): CollectionItem {
-  const artist = publication.artists.find(
-    (candidate) => candidate.id === work.artistId
-  );
+  const artistIds =
+    work.artistIds !== undefined && work.artistIds.length > 0
+      ? work.artistIds
+      : [work.artistId];
+  const artistNames = artistIds.flatMap((artistId) => {
+    const artist = publication.artists.find(
+      (candidate) => candidate.id === artistId
+    );
+    return artist === undefined ? [] : [artist.preferredName];
+  });
+  const artistCredit = formatMuseumCreatorCredit(artistNames);
   const media = selectMuseumStillMedia(work.media);
   const mediaMetadata = work.mediaMetadata?.[0];
   let presentation: Pick<CollectionItem, "media" | "metadata"> = {};
   if (media !== undefined) {
+    const responsive = museumMediaResponsiveImage(media);
     presentation = {
       media: {
         kind: "governed" as const,
-        src: media.url,
+        src: responsive.src,
+        ...(responsive.srcSet === undefined
+          ? {}
+          : { srcSet: responsive.srcSet }),
         width: media.width,
         height: media.height,
         alt: media.altText ?? work.title,
@@ -151,7 +167,7 @@ function publicWorkItem(
     id: work.id,
     title: workTitle(work.title),
     href: museumWorkHref(work.id),
-    subtitle: artist?.preferredName ?? work.artistId,
+    subtitle: artistCredit || work.artistId,
     ...presentation,
   };
 }

@@ -24,9 +24,9 @@ behavior tuning are in an expandable section named for those controls.
 
 ## Step Path
 
-- Scheduled `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
-- `Perpetual Ranking`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Description`
-- `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- `Perpetual Ranking`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description`
+- `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 ## Navigation Behavior
 
@@ -115,7 +115,7 @@ behavior tuning are in an expandable section named for those controls.
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Dates and Timeline](feature-dates-step.md)
+- [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Outcomes Step](feature-outcomes-step.md)

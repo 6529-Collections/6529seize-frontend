@@ -7,6 +7,7 @@ import {
   type MuseumResearchIndexEntry,
 } from "@/app/museum/network/research/catalog";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
+import { VERA_MOLNAR_PUBLIC_PATHS } from "@/lib/museum/publication/veraMolnarPublication";
 
 function landingFixture(): MuseumPublication {
   const artistAssignments = MUSEUM_RESEARCH_ARTIST_ASSIGNMENTS.map(
@@ -52,16 +53,26 @@ function landingFixture(): MuseumPublication {
   } as unknown as MuseumPublication;
 }
 
-const researchEntries: readonly MuseumResearchIndexEntry[] = Object.values(
-  MUSEUM_RESEARCH_ACQUISITION_ASSIGNMENTS
-).map((assignment) => ({
-  id: assignment.researchId,
-  slug: assignment.researchId.toLowerCase(),
-  title: assignment.researchId,
-  group: "collection",
-  sourcePath: `records/${assignment.researchId}.json`,
-  typed: true,
-}));
+const researchEntries: readonly MuseumResearchIndexEntry[] = [
+  ...Object.values(MUSEUM_RESEARCH_ACQUISITION_ASSIGNMENTS).map(
+    (assignment) => ({
+      id: assignment.researchId,
+      slug: assignment.researchId.toLowerCase(),
+      title: assignment.researchId,
+      group: "collection" as const,
+      sourcePath: `records/${assignment.researchId}.json`,
+      typed: true,
+    })
+  ),
+  {
+    id: "vera-gift-essay",
+    slug: "a-gift-of-themes-and-variations-210",
+    title: "A Gift of Themes and Variations #210",
+    group: "collection",
+    sourcePath: VERA_MOLNAR_PUBLIC_PATHS.acquisitionEssay,
+    typed: false,
+  },
+];
 
 describe("Museum research landing inventory", () => {
   it("keys artist studies to public artist profiles rather than agent records", () => {
@@ -71,6 +82,8 @@ describe("Museum research landing inventory", () => {
         assignment.artistId,
       ])
     ).toEqual([
+      ["6529NM-W-0029", "6529NM-ART-0022"],
+      ["6529NM-W-0029", "6529NM-ART-0023"],
       ["6529NM-W-0007", "6529NM-ART-0001"],
       ["6529NM-W-0025", "6529NM-ART-0018"],
       ["6529NM-W-0027", "6529NM-ART-0020"],
@@ -80,7 +93,7 @@ describe("Museum research landing inventory", () => {
     ]);
   });
 
-  it("keeps the authoritative 25-card section inventory", () => {
+  it("keeps the authoritative 29-card section inventory", () => {
     const cards = buildMuseumResearchLandingCards(
       landingFixture(),
       researchEntries
@@ -97,9 +110,9 @@ describe("Museum research landing inventory", () => {
         practice: cards.practiceCards.length,
       }
     ).toEqual({
-      acquisition: 3,
-      artists: 6,
-      works: 6,
+      acquisition: 4,
+      artists: 8,
+      works: 7,
       contexts: 2,
       stewardship: 4,
       practice: 4,

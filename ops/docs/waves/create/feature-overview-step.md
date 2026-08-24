@@ -18,9 +18,9 @@ Set the wave name, optional image, and wave type before moving to later steps.
 ## Step Paths
 
 - `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+- `Rank`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+- `Approve`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
 
 ## What You Can Set

@@ -592,7 +592,7 @@ export function MuseumAcquisitionLandingPage({
       <section aria-labelledby="acquisition-units-title">
         <div className="tw-max-w-3xl">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            {t(DEFAULT_LOCALE, "museum.network.acquisitions.eyebrow")}
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.statusEyebrow")}
           </p>
           <h2
             id="acquisition-units-title"

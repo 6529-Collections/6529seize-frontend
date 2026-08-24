@@ -30,6 +30,10 @@ describe("CreateWavesMainSteps", () => {
       }).length
     );
     expect(steps[0]).toHaveAttribute("data-step", CreateWaveStep.OVERVIEW);
+    expect(screen.getByText("Schedule")).toHaveAttribute(
+      "data-step",
+      CreateWaveStep.DATES
+    );
   });
 
   it("does not render approval as a separate approve wave step", () => {
