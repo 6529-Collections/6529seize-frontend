@@ -142,6 +142,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
     try {
       const cookieVersion = Cookies.get(CONSENT_EULA_COOKIE);
       if (cookieVersion === CURRENT_EULA_VERSION) {
+        if (consentCheckId !== consentCheckIdRef.current) return;
         setConsentState("accepted");
         return;
       }

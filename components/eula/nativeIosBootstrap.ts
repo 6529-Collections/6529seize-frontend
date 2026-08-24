@@ -22,6 +22,11 @@ export const NATIVE_IOS_BOOTSTRAP_SCRIPT = `(() => {
       marker + ${JSON.stringify(
         `; Path=/; Max-Age=${NATIVE_IOS_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`
       )};
+    const markerPersisted = document.cookie
+      .split(";")
+      .some((entry) => entry.trim() === marker);
+    if (!markerPersisted) return;
+
     globalThis.location.reload();
   } catch {
     // React's native detection remains the fail-closed fallback.
