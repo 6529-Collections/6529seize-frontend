@@ -3,8 +3,10 @@
 import { AuthContext } from "@/components/auth/Auth";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import {
   QuickTagsBackButton,
   QuickTagsDeleteConfirmation,
@@ -25,6 +27,7 @@ import {
 } from "@/helpers/mentions/mention-aliases.helpers";
 import { useMentionAliases } from "@/hooks/useMentionAliases";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import {
   createMentionAlias,
   deleteMentionAlias,
@@ -39,7 +42,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode, RefObject } from "react";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -51,6 +54,30 @@ const VISIBLE_QUICK_TAGS = 3;
 const LOADING_MESSAGE_KEY = "user.mentionShortcuts.loading";
 
 type QuickTagsView = "summary" | "manage" | "editor";
+
+type AliasEditorDraft = {
+  readonly alias: string;
+  readonly members: MentionAliasMember[];
+  readonly search: string;
+};
+
+type AliasEditorSaveVariables = {
+  readonly aliasId: string | null;
+  readonly input: MentionAliasInput;
+};
+
+function getAliasEditorDraft(
+  alias: MentionAlias | null,
+  ownerProfileId: string | null
+): AliasEditorDraft {
+  return {
+    alias: alias?.alias ?? "",
+    members: (alias?.members ?? []).filter(
+      (member) => member.profile_id !== ownerProfileId
+    ),
+    search: "",
+  };
+}
 
 function getAliasErrorDescription(
   reserved: boolean,
@@ -87,28 +114,31 @@ function getSearchStatus({
 
 function AliasEditor({
   backLabel,
+  draft,
   headingRef,
-  initialAlias,
+  isEditing,
+  isMobileSheet,
+  isSaving,
   onCancel,
-  onSaved,
+  onDraftChange,
+  onSave,
+  ownerProfileId,
 }: {
   readonly backLabel: string;
+  readonly draft: AliasEditorDraft;
   readonly headingRef: RefObject<HTMLHeadingElement | null>;
-  readonly initialAlias: MentionAlias | null;
+  readonly isEditing: boolean;
+  readonly isMobileSheet: boolean;
+  readonly isSaving: boolean;
   readonly onCancel: () => void;
-  readonly onSaved: () => void;
+  readonly onDraftChange: (draft: AliasEditorDraft) => void;
+  readonly onSave: (input: MentionAliasInput) => void;
+  readonly ownerProfileId: string | null;
 }) {
   const locale = useBrowserLocale();
-  const { connectedProfile, setToast } = useContext(AuthContext);
-  const ownerProfileId = connectedProfile?.id ?? null;
-  const queryClient = useQueryClient();
-  const [alias, setAlias] = useState(initialAlias?.alias ?? "");
-  const [members, setMembers] = useState<MentionAliasMember[]>(() =>
-    (initialAlias?.members ?? []).filter(
-      (member) => member.profile_id !== ownerProfileId
-    )
-  );
-  const [search, setSearch] = useState("");
+  const editorContentRef = useRef<HTMLDivElement>(null);
+  useKeyboardFocusScroll(editorContentRef);
+  const { alias, members, search } = draft;
   const debouncedSearch = useDebouncedValue(search, 200);
   const profileSearchQuery = useQuery<CommunityMemberMinimal[]>({
     queryKey: [
@@ -138,34 +168,18 @@ function AliasEditor({
   );
   const canSave = aliasIsValid && !reserved && members.length > 0;
 
-  const mutation = useMutation({
-    mutationFn: async (input: MentionAliasInput) =>
-      initialAlias
-        ? updateMentionAlias(initialAlias.id, input)
-        : createMentionAlias(input),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: [QueryKey.MENTION_ALIASES],
-      });
-      setToast({
-        type: "success",
-        message: initialAlias
-          ? t(locale, "user.mentionShortcuts.updated")
-          : t(locale, "user.mentionShortcuts.created"),
-      });
-      onSaved();
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: t(locale, "user.mentionShortcuts.saveErrorTitle"),
-        details: getToastErrorDetails(
-          error,
-          t(locale, "user.mentionShortcuts.saveErrorDetails")
-        ),
-      });
-    },
-  });
+  const fieldIdPrefix = isMobileSheet ? "quick-tag-sheet" : "mention-shortcut";
+  const nameInputId = `${fieldIdPrefix}-name`;
+  const nameErrorId = `${fieldIdPrefix}-name-error`;
+  const reservedErrorId = `${fieldIdPrefix}-reserved-error`;
+  const searchInputId = `${fieldIdPrefix}-profile-search`;
+  const searchStatusId = `${fieldIdPrefix}-search-status`;
+  let resolvedAliasErrorDescription: string | undefined;
+  if (aliasErrorDescription === "mention-shortcut-name-error") {
+    resolvedAliasErrorDescription = nameErrorId;
+  } else if (aliasErrorDescription === "mention-shortcut-reserved-error") {
+    resolvedAliasErrorDescription = reservedErrorId;
+  }
 
   const availableIdentities = getAvailableMentionIdentities(
     identities,
@@ -194,20 +208,23 @@ function AliasEditor({
     ) {
       return;
     }
-    setMembers((current) => [
-      ...current,
-      {
-        profile_id: profileId,
-        handle,
-        pfp: identity.pfp ?? null,
-      },
-    ]);
-    setSearch("");
+    onDraftChange({
+      ...draft,
+      members: [
+        ...members,
+        {
+          profile_id: profileId,
+          handle,
+          pfp: identity.pfp ?? null,
+        },
+      ],
+      search: "",
+    });
   };
 
   const save = () => {
-    if (!canSave || mutation.isPending) return;
-    mutation.mutate({
+    if (!canSave || isSaving) return;
+    onSave({
       alias: normalizedAlias,
       member_profile_ids: [
         ...new Set(
@@ -220,9 +237,10 @@ function AliasEditor({
   };
 
   const removeMember = (profileId: string) => {
-    setMembers((current) =>
-      current.filter((item) => item.profile_id !== profileId)
-    );
+    onDraftChange({
+      ...draft,
+      members: members.filter((item) => item.profile_id !== profileId),
+    });
   };
 
   let searchResultsContent: ReactNode = (
@@ -266,32 +284,37 @@ function AliasEditor({
   }
 
   return (
-    <div aria-labelledby="quick-tag-editor-title">
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <QuickTagsBackButton
-          label={backLabel}
-          onClick={onCancel}
-          disabled={mutation.isPending}
-        />
-        <h3
-          ref={headingRef}
-          id="quick-tag-editor-title"
-          tabIndex={-1}
-          className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50 focus:tw-outline-none"
-        >
-          {initialAlias
-            ? t(locale, "user.mentionShortcuts.edit")
-            : t(locale, "user.mentionShortcuts.create")}
-        </h3>
-      </div>
-      <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400">
+    <div
+      ref={editorContentRef}
+      aria-labelledby={isMobileSheet ? undefined : "quick-tag-editor-title"}
+    >
+      {!isMobileSheet && (
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <QuickTagsBackButton
+            label={backLabel}
+            onClick={onCancel}
+            disabled={isSaving}
+          />
+          <h3
+            ref={headingRef}
+            id="quick-tag-editor-title"
+            tabIndex={-1}
+            className="tw-m-0 tw-text-sm tw-font-bold tw-tracking-wide tw-text-iron-50 focus:tw-outline-none"
+          >
+            {isEditing
+              ? t(locale, "user.mentionShortcuts.edit")
+              : t(locale, "user.mentionShortcuts.create")}
+          </h3>
+        </div>
+      )}
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-lg tw-text-pretty tw-text-sm tw-leading-5 tw-text-iron-300">
         {t(locale, "user.mentionShortcuts.editorDescription")}
       </p>
 
       <div className="tw-mt-5 tw-space-y-5">
         <div>
           <label
-            htmlFor="mention-shortcut-name"
+            htmlFor={nameInputId}
             className="tw-block tw-text-xs tw-font-semibold tw-text-iron-400"
           >
             <span>{t(locale, "user.mentionShortcuts.name")}</span>
@@ -307,12 +330,14 @@ function AliasEditor({
                 @
               </span>
               <input
-                id="mention-shortcut-name"
+                id={nameInputId}
                 aria-label={t(locale, "user.mentionShortcuts.name")}
                 aria-invalid={aliasHasError}
-                aria-describedby={aliasErrorDescription}
+                aria-describedby={resolvedAliasErrorDescription}
                 value={alias}
-                onChange={(event) => setAlias(event.target.value)}
+                onChange={(event) =>
+                  onDraftChange({ ...draft, alias: event.target.value })
+                }
                 maxLength={15}
                 autoComplete="off"
                 className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-2.5 tw-text-sm tw-font-medium tw-text-white tw-outline-none placeholder:tw-text-iron-600"
@@ -321,7 +346,7 @@ function AliasEditor({
           </label>
           {!reserved && !aliasIsValid && alias.length > 0 && (
             <p
-              id="mention-shortcut-name-error"
+              id={nameErrorId}
               role="alert"
               className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
             >
@@ -330,7 +355,7 @@ function AliasEditor({
           )}
           {reserved && (
             <p
-              id="mention-shortcut-reserved-error"
+              id={reservedErrorId}
               role="alert"
               className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-error"
             >
@@ -341,7 +366,7 @@ function AliasEditor({
 
         <div>
           <label
-            htmlFor="mention-shortcut-profile-search"
+            htmlFor={searchInputId}
             className="tw-block tw-text-xs tw-font-semibold tw-text-iron-400"
           >
             {t(locale, "user.mentionShortcuts.addProfiles", {
@@ -373,11 +398,13 @@ function AliasEditor({
                 className="tw-size-4 tw-flex-none tw-text-iron-600"
               />
               <input
-                id="mention-shortcut-profile-search"
+                id={searchInputId}
                 aria-label={t(locale, "user.mentionShortcuts.searchLabel")}
-                aria-describedby="mention-shortcut-search-status"
+                aria-describedby={searchStatusId}
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) =>
+                  onDraftChange({ ...draft, search: event.target.value })
+                }
                 placeholder={t(
                   locale,
                   "user.mentionShortcuts.searchPlaceholder"
@@ -389,17 +416,19 @@ function AliasEditor({
             </div>
 
             {searchIsReady && (
-              <div className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-max-h-52 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-1.5 tw-shadow-2xl">
+              <div
+                className={`tw-z-20 tw-mt-2 tw-max-h-52 tw-overflow-y-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-1.5 tw-shadow-2xl ${
+                  isMobileSheet
+                    ? "tw-relative"
+                    : "tw-absolute tw-left-0 tw-right-0 tw-top-full"
+                }`}
+              >
                 {searchResultsContent}
               </div>
             )}
           </div>
 
-          <p
-            id="mention-shortcut-search-status"
-            aria-live="polite"
-            className="tw-sr-only"
-          >
+          <p id={searchStatusId} aria-live="polite" className="tw-sr-only">
             {searchStatus}
           </p>
         </div>
@@ -409,7 +438,7 @@ function AliasEditor({
         <Button
           variant="secondary"
           size="sm"
-          disabled={mutation.isPending}
+          disabled={isSaving}
           onClick={onCancel}
         >
           {t(locale, "user.mentionShortcuts.cancel")}
@@ -417,11 +446,11 @@ function AliasEditor({
         <Button
           variant="action"
           size="sm"
-          disabled={!canSave}
-          loading={mutation.isPending}
+          disabled={!canSave || isSaving}
+          loading={isSaving}
           onClick={save}
         >
-          {mutation.isPending
+          {isSaving
             ? t(locale, "user.mentionShortcuts.saving")
             : t(locale, "user.mentionShortcuts.save")}
         </Button>
@@ -438,30 +467,25 @@ export default function UserPageMentionShortcuts({
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
+  const isMobileScreen = useIsMobileScreen();
+  const ownerProfileId = connectedProfile?.id ?? null;
   const isOwner =
-    !!profile.id &&
-    connectedProfile?.id === profile.id &&
-    !activeProfileProxy;
+    !!profile.id && ownerProfileId === profile.id && !activeProfileProxy;
   const queryClient = useQueryClient();
   const { aliases, isPending, isError, refetch } = useMentionAliases({
     enabled: isOwner,
   });
   const [view, setView] = useState<QuickTagsView>("summary");
   const [editorAlias, setEditorAlias] = useState<MentionAlias | null>(null);
+  const [editorDraft, setEditorDraft] = useState<AliasEditorDraft | null>(null);
   const [editorReturnView, setEditorReturnView] =
     useState<Exclude<QuickTagsView, "editor">>("manage");
   const [aliasToDelete, setAliasToDelete] = useState<MentionAlias | null>(null);
   const viewHeadingRef = useRef<HTMLHeadingElement>(null);
-  const shouldFocusViewHeadingRef = useRef(false);
-
-  useEffect(() => {
-    if (!shouldFocusViewHeadingRef.current) return;
-    shouldFocusViewHeadingRef.current = false;
-    viewHeadingRef.current?.focus();
-  }, [aliasToDelete, view]);
+  const shouldFocusAfterSheetLeaveRef = useRef(false);
 
   const requestViewHeadingFocus = () => {
-    shouldFocusViewHeadingRef.current = true;
+    requestAnimationFrame(() => viewHeadingRef.current?.focus());
   };
 
   const changeView = (nextView: QuickTagsView) => {
@@ -480,6 +504,45 @@ export default function UserPageMentionShortcuts({
     setAliasToDelete(alias);
   };
 
+  const clearEditorState = () => {
+    setEditorAlias(null);
+    setEditorDraft(null);
+  };
+
+  const editorSaveMutation = useMutation({
+    mutationFn: async ({ aliasId, input }: AliasEditorSaveVariables) =>
+      aliasId ? updateMentionAlias(aliasId, input) : createMentionAlias(input),
+    onSuccess: async (_data, { aliasId }) => {
+      await queryClient.invalidateQueries({
+        queryKey: [QueryKey.MENTION_ALIASES],
+      });
+      setToast({
+        type: "success",
+        message: aliasId
+          ? t(locale, "user.mentionShortcuts.updated")
+          : t(locale, "user.mentionShortcuts.created"),
+      });
+
+      if (isMobileScreen) {
+        shouldFocusAfterSheetLeaveRef.current = true;
+      } else {
+        requestViewHeadingFocus();
+        clearEditorState();
+      }
+      setView("manage");
+    },
+    onError: (error) => {
+      setToast({
+        type: "error",
+        title: t(locale, "user.mentionShortcuts.saveErrorTitle"),
+        details: getToastErrorDetails(
+          error,
+          t(locale, "user.mentionShortcuts.saveErrorDetails")
+        ),
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: deleteMentionAlias,
     onSuccess: async (_data, deletedAliasId) => {
@@ -497,7 +560,7 @@ export default function UserPageMentionShortcuts({
         setView("summary");
       }
       setAliasToDelete(null);
-      setEditorAlias(null);
+      clearEditorState();
     },
     onError: (error) =>
       setToast({
@@ -526,14 +589,49 @@ export default function UserPageMentionShortcuts({
     alias: MentionAlias | null,
     returnView: Exclude<QuickTagsView, "editor">
   ) => {
+    shouldFocusAfterSheetLeaveRef.current = false;
     setEditorAlias(alias);
+    setEditorDraft(getAliasEditorDraft(alias, ownerProfileId));
     setEditorReturnView(returnView);
-    changeView("editor");
+    setAliasToDelete(null);
+    setView("editor");
+    if (!isMobileScreen) {
+      requestViewHeadingFocus();
+    }
+  };
+
+  const cancelEditing = () => {
+    if (editorSaveMutation.isPending) return;
+
+    shouldFocusAfterSheetLeaveRef.current = false;
+    setView(editorReturnView);
+    if (!isMobileScreen) {
+      requestViewHeadingFocus();
+      clearEditorState();
+    }
+  };
+
+  const saveEditor = (input: MentionAliasInput) => {
+    if (editorSaveMutation.isPending) return;
+    editorSaveMutation.mutate({
+      aliasId: editorAlias?.id ?? null,
+      input,
+    });
+  };
+
+  const handleEditorSheetAfterLeave = () => {
+    if (view === "editor") return;
+
+    clearEditorState();
+    if (shouldFocusAfterSheetLeaveRef.current) {
+      shouldFocusAfterSheetLeaveRef.current = false;
+      viewHeadingRef.current?.focus();
+    }
   };
 
   const showSummary = () => {
     setAliasToDelete(null);
-    setEditorAlias(null);
+    clearEditorState();
     changeView("summary");
   };
 
@@ -541,17 +639,20 @@ export default function UserPageMentionShortcuts({
     return null;
   }
 
+  const displayedView =
+    view === "editor" && isMobileScreen ? editorReturnView : view;
+
   let labelledBy = "quick-tags-heading";
-  if (view === "manage" && aliasToDelete) {
+  if (displayedView === "manage" && aliasToDelete) {
     labelledBy = "delete-mention-shortcut-title";
-  } else if (view === "manage") {
+  } else if (displayedView === "manage") {
     labelledBy = "quick-tags-manager-title";
-  } else if (view === "editor") {
+  } else if (displayedView === "editor") {
     labelledBy = "quick-tag-editor-title";
   }
 
   let content: ReactNode;
-  if (view === "manage" && aliasToDelete) {
+  if (displayedView === "manage" && aliasToDelete) {
     content = (
       <QuickTagsDeleteConfirmation
         alias={aliasToDelete}
@@ -561,7 +662,7 @@ export default function UserPageMentionShortcuts({
         onConfirm={() => deleteMutation.mutate(aliasToDelete.id)}
       />
     );
-  } else if (view === "summary") {
+  } else if (displayedView === "summary") {
     content = (
       <div>
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
@@ -606,10 +707,7 @@ export default function UserPageMentionShortcuts({
               onClick={() => startEditing(null, "summary")}
               className="tw-min-h-11 sm:tw-min-h-9"
             >
-              <PlusIcon
-                aria-hidden="true"
-                className="-tw-ml-0.5 tw-size-4"
-              />
+              <PlusIcon aria-hidden="true" className="-tw-ml-0.5 tw-size-4" />
               {t(locale, "user.mentionShortcuts.new")}
             </Button>
           )}
@@ -659,7 +757,7 @@ export default function UserPageMentionShortcuts({
         </div>
       </div>
     );
-  } else if (view === "manage") {
+  } else if (displayedView === "manage") {
     content = (
       <div data-testid="quick-tags-manager">
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
@@ -767,31 +865,68 @@ export default function UserPageMentionShortcuts({
       </div>
     );
   } else {
-    content = (
+    content = editorDraft ? (
       <AliasEditor
         key={editorAlias?.id ?? "new"}
         backLabel={t(locale, "user.mentionShortcuts.back")}
+        draft={editorDraft}
         headingRef={viewHeadingRef}
-        initialAlias={editorAlias}
-        onCancel={() => {
-          setEditorAlias(null);
-          changeView(editorReturnView);
-        }}
-        onSaved={() => {
-          setEditorAlias(null);
-          changeView("manage");
-        }}
+        isEditing={editorAlias !== null}
+        isMobileSheet={false}
+        isSaving={editorSaveMutation.isPending}
+        onCancel={cancelEditing}
+        onDraftChange={setEditorDraft}
+        onSave={saveEditor}
+        ownerProfileId={ownerProfileId}
       />
-    );
+    ) : null;
   }
 
   return (
-    <section
-      aria-labelledby={labelledBy}
-      className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-px-4 tw-py-3 tw-shadow-2xl"
-      data-testid="quick-tags-section"
-    >
-      {content}
-    </section>
+    <>
+      <section
+        aria-labelledby={labelledBy}
+        className="tw-relative tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-px-4 tw-py-3 tw-shadow-2xl"
+        data-testid="quick-tags-section"
+      >
+        {content}
+      </section>
+
+      <MobileWrapperDialog
+        title={
+          editorAlias
+            ? t(locale, "user.mentionShortcuts.edit")
+            : t(locale, "user.mentionShortcuts.create")
+        }
+        isOpen={isMobileScreen && view === "editor" && editorDraft !== null}
+        onClose={cancelEditing}
+        onBack={cancelEditing}
+        onAfterLeave={handleEditorSheetAfterLeave}
+        backLabel={t(locale, "user.mentionShortcuts.back")}
+        dismissible={!editorSaveMutation.isPending}
+        enableDragToClose
+        showScrollbar
+        tall
+        headerClassName="tw-pb-2"
+      >
+        {editorDraft && (
+          <div className="tw-px-4 sm:tw-px-6">
+            <AliasEditor
+              key={editorAlias?.id ?? "new"}
+              backLabel={t(locale, "user.mentionShortcuts.back")}
+              draft={editorDraft}
+              headingRef={viewHeadingRef}
+              isEditing={editorAlias !== null}
+              isMobileSheet
+              isSaving={editorSaveMutation.isPending}
+              onCancel={cancelEditing}
+              onDraftChange={setEditorDraft}
+              onSave={saveEditor}
+              ownerProfileId={ownerProfileId}
+            />
+          </div>
+        )}
+      </MobileWrapperDialog>
+    </>
   );
 }
