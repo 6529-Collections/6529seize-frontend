@@ -7,7 +7,7 @@ import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubs
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useMemo, useState } from "react";
 import {
-  ALL_GROUP_MENTION,
+  BROADCAST_MENTION_PREFERENCE,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
 import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
@@ -31,8 +31,9 @@ export function useWavePreferenceSettings(wave: ApiWave) {
 
   const subscribedToAllDrops = !!data?.subscribed;
   const allDropsEnabled = subscribedToAllDrops;
-  const allGroupNotificationsEnabled =
-    enabledGroupNotifications.includes(ALL_GROUP_MENTION);
+  const broadcastMentionsEnabled = enabledGroupNotifications.includes(
+    BROADCAST_MENTION_PREFERENCE
+  );
   const loading =
     loadingTarget !== null || preferencesPending || preferencesFetching;
   const preferencesUnavailable = !data && !preferencesPending;
@@ -75,25 +76,25 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     [wave.id, refetch, setToast]
   );
 
-  const toggleAllGroupNotifications = useCallback(async () => {
+  const toggleBroadcastMentions = useCallback(async () => {
     await updateNotificationPreferences({
-      target: "all-group",
+      target: "broadcast-mentions",
       body: {
         subscribed: subscribedToAllDrops,
-        enabled_group_notifications: allGroupNotificationsEnabled
+        enabled_group_notifications: broadcastMentionsEnabled
           ? []
-          : [ALL_GROUP_MENTION],
+          : [BROADCAST_MENTION_PREFERENCE],
       },
-      errorMessage: allGroupNotificationsEnabled
+      errorMessage: broadcastMentionsEnabled
         ? waveNotificationSettingsMessage(
-            "waves.notificationSettings.preferences.error.disableAllMentions"
+            "waves.notificationSettings.preferences.error.disableBroadcastMentions"
           )
         : waveNotificationSettingsMessage(
-            "waves.notificationSettings.preferences.error.enableAllMentions"
+            "waves.notificationSettings.preferences.error.enableBroadcastMentions"
           ),
     });
   }, [
-    allGroupNotificationsEnabled,
+    broadcastMentionsEnabled,
     subscribedToAllDrops,
     updateNotificationPreferences,
   ]);
@@ -119,9 +120,9 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     updateNotificationPreferences,
   ]);
 
-  const onAllGroupNotificationsClick = useCallback(() => {
-    void toggleAllGroupNotifications();
-  }, [toggleAllGroupNotifications]);
+  const onBroadcastMentionsClick = useCallback(() => {
+    void toggleBroadcastMentions();
+  }, [toggleBroadcastMentions]);
 
   const onAllDropsNotificationsClick = useCallback(() => {
     void toggleAllDropsNotifications();
@@ -133,11 +134,11 @@ export function useWavePreferenceSettings(wave: ApiWave) {
 
   return {
     allDropsEnabled,
-    allGroupNotificationsEnabled,
+    broadcastMentionsEnabled,
     loading,
     loadingTarget,
     onAllDropsNotificationsClick,
-    onAllGroupNotificationsClick,
+    onBroadcastMentionsClick,
     onRetryClick,
     preferencesFetching,
     preferencesUnavailable,

@@ -1132,8 +1132,11 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
   [
     ["trigger.tooltip", "Notification settings"],
     ["trigger.ariaLabel", "Open notification settings"],
-    ["allMentions.label", "ALL mentions"],
-    ["allMentions.ariaLabel", "Receive ALL mention notifications"],
+    ["broadcastMentions.label", "Broadcast mentions"],
+    [
+      "broadcastMentions.ariaLabel",
+      "Receive @all and @contributors notifications",
+    ],
     ["allMessages.label", "All messages"],
     ["allMessages.ariaLabel", "Receive notifications for all messages"],
     ["mute.label", "Mute"],
@@ -1150,12 +1153,12 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
     ["preferences.error.updateTitle", "Couldn't update notification settings."],
     ["preferences.error.description", PLEASE_TRY_AGAIN],
     [
-      "preferences.error.enableAllMentions",
-      "Unable to enable @ALL notifications",
+      "preferences.error.enableBroadcastMentions",
+      "Unable to enable broadcast mention notifications",
     ],
     [
-      "preferences.error.disableAllMentions",
-      "Unable to disable @ALL notifications",
+      "preferences.error.disableBroadcastMentions",
+      "Unable to disable broadcast mention notifications",
     ],
     [
       "preferences.error.enableAllMessages",
