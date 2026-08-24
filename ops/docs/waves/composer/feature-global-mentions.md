@@ -17,11 +17,12 @@ Global mentions are available in Wave message, reply, and edit composers.
 ## User Journey
 
 1. Open a Wave where you have Chat access.
-2. Type or select `@contributors`, `@admins`, or `@devs6529`.
+2. Type or select `@admins` or `@devs6529`.
 3. Send the message. The global token remains visible in the posted content.
 4. Eligible profiles are resolved when the message is posted.
 
-Wave creators and admins can also use `@all`.
+Wave creators and admins can also use the broadcast mentions `@all` and
+`@contributors`.
 
 ## Common Scenarios
 
@@ -39,8 +40,11 @@ Wave creators and admins can also use `@all`.
 
 - Global names work with any capitalization, such as `@Contributors`.
 - Typing a complete token directly has the same effect as choosing it from the
-  suggestion menu; Chat access is the invocation requirement for
-  `@contributors`, `@admins`, and `@devs6529`.
+  suggestion menu. Wave creator or admin access is required for `@all` and
+  `@contributors`; Chat access is the invocation requirement for `@admins` and
+  `@devs6529`.
+- If a non-admin types `@all` or `@contributors` directly, the message is not
+  posted. They can remove the broadcast token or ask a Wave admin to post it.
 - Global mention text inside links or inline/fenced code remains literal and
   does not notify a Wave audience.
 - A profile included by more than one mention is notified only once.
