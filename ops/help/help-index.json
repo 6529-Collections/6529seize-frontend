@@ -14,8 +14,7 @@
         "block an author",
         "unblock a profile",
         "content preferences",
-        "moderation queue",
-        "post rejected by safety check"
+        "moderation queue"
       ],
       "keywords": [
         "content moderation",
@@ -33,9 +32,8 @@
         "Reporting, hiding, and blocking are independent, and no action is selected by default.",
         "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
         "Notification, messaging, and blocked-profile settings are combined at /preferences. The Content tab is available at /preferences?tab=content, and /content-preferences redirects there.",
-        "New Wave posts receive a narrow server-side safety check; ambiguous content and profanity are not rejected merely for being objectionable.",
-        "A locally created post stays visible in its normal layout while submission is pending; when a high-confidence safety check rejects it, the composer removes the optimistic post, explains the rejection, and preserves the draft for editing and retrying.",
         "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
+        "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
         "Only server-authorized moderators see and can use the Moderation queue at /content-moderation, and every decision requires a reason."
       ],
       "canonical_path": "/preferences",
@@ -52,6 +50,84 @@
         "app/content-moderation/page.client.tsx",
         "components/content-moderation/ContentModerationDropActions.tsx",
         "components/content-moderation/ContentModerationDropGate.tsx"
+      ]
+    },
+    {
+      "id": "content-moderation.posting-safety",
+      "kind": "workflow",
+      "title": "Pre-publication safety check",
+      "aliases": [
+        "post rejected by safety check",
+        "why was my post rejected",
+        "content check before posting",
+        "AI moderation before posting",
+        "can I swear in a post",
+        "unsafe link rejection",
+        "post is being checked"
+      ],
+      "keywords": [
+        "posting",
+        "safety check",
+        "pre-publication",
+        "AI",
+        "profanity",
+        "unsafe link",
+        "rejected",
+        "draft",
+        "attachments"
+      ],
+      "facts": [
+        "New and edited Wave posts receive a narrow server-side safety check before the backend writes them; this includes chat messages, replies, and direct messages because they are stored as drops.",
+        "Most posts pass a lightweight deterministic screen without an AI call. Only a specific risk signal is escalated to a permissive AI check, and rejection requires a high-confidence prohibited-content result.",
+        "Profanity, unpopular opinions, and ordinary offensive speech are not rejected merely for being objectionable.",
+        "Configured known unsafe destinations can be rejected directly. Uncertain AI results and evaluator failures follow the permissive policy and allow the post.",
+        "A locally created post stays visible in its normal layout while submission is pending; it is not replaced by a prominent checking message.",
+        "When the backend rejects a post, the composer removes the optimistic post, explains the rejection, and preserves the draft for editing and retrying.",
+        "File attachments such as PDF and CSV files use a separate asynchronous validation pipeline rather than the synchronous text check."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Waves",
+      "related_paths": ["/discover", "/messages"],
+      "tags": ["waves", "posting", "safety", "moderation"],
+      "source_refs": [
+        "ops/docs/content-moderation.md",
+        "components/waves/CreateDrop.tsx"
+      ]
+    },
+    {
+      "id": "content-moderation.posting-suspension",
+      "kind": "workflow",
+      "title": "Posting suspension",
+      "aliases": [
+        "suspended from posting",
+        "profile suspended",
+        "why can't I post",
+        "why can't I edit my post",
+        "reinstate posting",
+        "posting ban"
+      ],
+      "keywords": [
+        "suspended",
+        "posting",
+        "editing",
+        "moderator",
+        "reinstate",
+        "support"
+      ],
+      "facts": [
+        "Posting suspension is applied manually by an authorized moderator; a report or AI result does not suspend a profile automatically.",
+        "A suspended profile cannot publish new or edited drop content, including chat messages, replies, and direct messages.",
+        "Posting suspension does not sign the user out, stop them reading the site, delete existing posts, or hide existing posts.",
+        "A posting suspension has no automatic expiry and remains in place until an authorized moderator reinstates the profile.",
+        "A rejected posting attempt directs the user to contact support if they believe the suspension is a mistake."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Waves",
+      "related_paths": ["/messages", "/content-moderation"],
+      "tags": ["waves", "posting", "suspension", "moderation"],
+      "source_refs": [
+        "ops/docs/content-moderation.md",
+        "components/waves/CreateDrop.tsx"
       ]
     },
     {

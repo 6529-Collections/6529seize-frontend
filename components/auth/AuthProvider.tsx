@@ -702,8 +702,7 @@ export default function Auth({
     showSignModal &&
     !isSigningOutAll &&
     !(
-      authLoadingState === "validating" &&
-      signModalReason !== "session-upgrade"
+      authLoadingState === "validating" && signModalReason !== "session-upgrade"
     ) &&
     (connectionState === "connected" || isDisconnectedWebSessionUpgradePrompt);
 

@@ -129,6 +129,20 @@ describe("WaveDropActionsMore", () => {
     expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
   });
 
+  it("does not bubble the menu trigger click to a parent card", async () => {
+    const onParentClick = jest.fn();
+
+    render(
+      <div onClick={onParentClick}>
+        <WaveDropActionsMore drop={drop} />
+      </div>
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(onParentClick).not.toHaveBeenCalled();
+  });
+
   it("shows restore link previews when the drop has hidden previews", async () => {
     mockedUseDropLinkPreviewToggleControl.mockReturnValue({
       canToggle: true,
@@ -262,5 +276,6 @@ describe("WaveDropActionsMore", () => {
     expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
     expect(screen.queryByTestId("copy-link")).toBeNull();
     expect(screen.queryByText("Manage Curations")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Flag Content" })).toBeNull();
   });
 });

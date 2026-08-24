@@ -776,7 +776,7 @@ import { ApiContentModerationDropDecisionRequest, ApiContentModerationDropDecisi
 import { ApiContentModerationDropDecisionResponse   } from '../models/ApiContentModerationDropDecisionResponse';
 import { ApiContentModerationProfileStatusRequest   } from '../models/ApiContentModerationProfileStatusRequest';
 import { ApiContentModerationProfileStatusResponse   } from '../models/ApiContentModerationProfileStatusResponse';
-import { ApiContentModerationQueueItem                        } from '../models/ApiContentModerationQueueItem';
+import { ApiContentModerationQueueItem                          } from '../models/ApiContentModerationQueueItem';
 import { ApiContentModerationRecommendation } from '../models/ApiContentModerationRecommendation';
 import { ApiContentModerationReportReason } from '../models/ApiContentModerationReportReason';
 import { ApiContentModerationReportRequest     } from '../models/ApiContentModerationReportRequest';

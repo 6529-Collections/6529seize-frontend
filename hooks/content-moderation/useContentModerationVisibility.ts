@@ -91,9 +91,7 @@ export const useContentModerationVisibility = (
     () => undefined
   );
   const authorBlocked =
-    authorBlockedOverride ??
-    drop.viewer_context?.author_blocked ??
-    false;
+    authorBlockedOverride ?? drop.viewer_context?.author_blocked ?? false;
   const dropHidden =
     dropHiddenOverride ?? drop.viewer_context?.drop_hidden ?? false;
   // A personal reveal belongs to the current hidden/block state and resets

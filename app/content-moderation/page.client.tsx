@@ -25,8 +25,16 @@ import {
   invalidateContentModerationPresentation,
   MODERATION_QUEUE_QUERY_KEY,
 } from "@/services/content-moderation/content-moderation-query";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import Image from "next/image";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+
+const MODERATION_QUEUE_PAGE_SIZE = 50;
 
 const getSnapshotContent = (snapshot: Record<string, unknown>): string => {
   const title = snapshot["title"];
@@ -160,6 +168,9 @@ function ModerationQueueCard({
   const parentContent = parentSnapshot
     ? getSnapshotContent(parentSnapshot)
     : "";
+  const reportedAt = formatTimestamp(item.created_at, locale);
+  const authorPfp = getSafeAssetUrl(item.author_pfp);
+  const authorLabel = item.author_handle ?? item.author_profile_id;
 
   const decisionMutation = useMutation({
     mutationFn: (
@@ -221,6 +232,35 @@ function ModerationQueueCard({
   return (
     <article className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-500">
+        <span className="tw-inline-flex tw-items-center tw-gap-2">
+          {authorPfp ? (
+            <Image
+              src={authorPfp}
+              alt=""
+              width={24}
+              height={24}
+              className="tw-size-6 tw-rounded-md tw-bg-iron-800 tw-object-cover"
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="tw-size-6 tw-rounded-md tw-bg-iron-800"
+            />
+          )}
+          {item.author_handle ? (
+            <Link
+              href={`/${item.author_handle}`}
+              className="tw-font-semibold tw-text-iron-300 tw-no-underline hover:tw-text-primary-300"
+            >
+              {authorLabel}
+            </Link>
+          ) : (
+            <span className="tw-font-semibold tw-text-iron-300">
+              {authorLabel}
+            </span>
+          )}
+        </span>
+        <span aria-hidden="true">·</span>
         <span>
           {t(
             locale,
@@ -236,12 +276,16 @@ function ModerationQueueCard({
             reason: formatContentModerationEnum(item.reason),
           })}
         </span>
-        <span aria-hidden="true">·</span>
-        <span>
-          {t(locale, "contentModeration.moderator.author", {
-            profileId: item.author_profile_id,
-          })}
-        </span>
+        {reportedAt && (
+          <>
+            <span aria-hidden="true">·</span>
+            <time dateTime={new Date(item.created_at).toISOString()}>
+              {t(locale, "contentModeration.moderator.reportedAt", {
+                date: reportedAt,
+              })}
+            </time>
+          </>
+        )}
         <span aria-hidden="true">·</span>
         <span>
           {t(locale, "contentModeration.moderator.currentState", {
@@ -475,12 +519,25 @@ export default function ContentModerationPageClient() {
   const hasModeratorIdentity =
     Boolean(connectedProfile?.id) && activeProfileProxy === null;
   const canModerate = accessQuery.data?.moderator === true;
-  const queueQuery = useQuery({
+  const queueQuery = useInfiniteQuery({
     queryKey: MODERATION_QUEUE_QUERY_KEY,
-    queryFn: () => fetchContentModerationQueue({ limit: 50 }),
+    queryFn: ({ pageParam }) =>
+      fetchContentModerationQueue({
+        limit: MODERATION_QUEUE_PAGE_SIZE,
+        ...(pageParam === undefined ? {} : { before: pageParam }),
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.length === MODERATION_QUEUE_PAGE_SIZE
+        ? lastPage.at(-1)?.cursor
+        : undefined,
     enabled: canModerate,
     retry: false,
   });
+  const queueItems = useMemo(
+    () => queueQuery.data?.pages.flat() ?? [],
+    [queueQuery.data]
+  );
 
   return (
     <main className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-4xl tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
@@ -510,16 +567,33 @@ export default function ContentModerationPageClient() {
           {t(locale, "contentModeration.moderator.loadError")}
         </p>
       )}
-      {canModerate && queueQuery.data?.length === 0 && (
+      {canModerate && queueItems.length === 0 && !queueQuery.isLoading && (
         <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
           {t(locale, "contentModeration.moderator.empty")}
         </p>
       )}
-      {(queueQuery.data?.length ?? 0) > 0 && (
+      {queueItems.length > 0 && (
         <div className="tw-mt-8 tw-space-y-5">
-          {(queueQuery.data ?? []).map((item) => (
+          {queueItems.map((item) => (
             <ModerationQueueCard key={item.id} item={item} />
           ))}
+          {queueQuery.hasNextPage && (
+            <div className="tw-flex tw-justify-center tw-pt-2">
+              <button
+                type="button"
+                disabled={queueQuery.isFetchingNextPage}
+                onClick={() => void queueQuery.fetchNextPage()}
+                className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50"
+              >
+                {t(
+                  locale,
+                  queueQuery.isFetchingNextPage
+                    ? "contentModeration.moderator.loadingMore"
+                    : "contentModeration.moderator.loadMore"
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </main>
