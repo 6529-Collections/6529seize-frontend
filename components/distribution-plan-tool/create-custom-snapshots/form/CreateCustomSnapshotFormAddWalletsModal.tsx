@@ -84,9 +84,7 @@ export default function CreateCustomSnapshotFormAddWalletsModal({
                     type="text"
                     name="owner"
                     autoComplete="off"
-                    onChange={(e) =>
-                      setManualWallet((e.target.value ?? "").trim())
-                    }
+                    onChange={(e) => setManualWallet(e.target.value.trim())}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();

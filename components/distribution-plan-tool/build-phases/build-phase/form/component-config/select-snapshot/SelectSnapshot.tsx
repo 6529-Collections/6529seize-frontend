@@ -48,7 +48,7 @@ export default function SelectSnapshot({
   };
 
   return (
-    <div className="tw-p-6">
+    <div className="tw-px-6 tw-pb-6 tw-pt-4">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         First, select a snapshot to include in this group.

@@ -6,7 +6,6 @@ import {
   DistributionPlanToolStep,
 } from "../DistributionPlanToolContext";
 import type { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
-import { DISTRIBUTION_PLAN_STEPS } from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepDone({
   step,
@@ -14,8 +13,7 @@ export default function DistributionPlanStepDone({
   step: DistributionPlanStepDescription;
 }) {
   const { setStep } = useContext(DistributionPlanToolContext);
-  const isLastStep =
-    step.order === Object.values(DISTRIBUTION_PLAN_STEPS).at(-1)!.order;
+  const isLastStep = step.key === DistributionPlanToolStep.REVIEW;
   const isNavigable = step.key !== DistributionPlanToolStep.CREATE_PLAN;
 
   const onStep = () => {
