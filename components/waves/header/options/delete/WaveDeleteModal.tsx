@@ -13,6 +13,20 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 
+type ApiErrorWithStatus = {
+  readonly status?: number | undefined;
+  readonly response?: { readonly status?: number | undefined } | undefined;
+};
+
+const isAlreadyDeletedWaveError = (error: unknown): boolean => {
+  if (error === null || typeof error !== "object") {
+    return false;
+  }
+
+  const apiError = error as ApiErrorWithStatus;
+  return apiError.status === 404 || apiError.response?.status === 404;
+};
+
 export default function WaveDeleteModal({
   wave,
   isOpen,
@@ -29,10 +43,18 @@ export default function WaveDeleteModal({
   const [mutating, setMutating] = useState(false);
 
   const waveDropMutation = useMutation({
-    mutationFn: async () =>
-      await commonApiDelete({
-        endpoint: `waves/${wave.id}`,
-      }),
+    mutationFn: async () => {
+      try {
+        await commonApiDelete({
+          endpoint: `waves/${wave.id}`,
+          errorMode: "structured",
+        });
+      } catch (error) {
+        if (!isAlreadyDeletedWaveError(error)) {
+          throw error;
+        }
+      }
+    },
     onSuccess: () => {
       setToast({
         message: t(locale, "waves.header.deleteSuccess"),
