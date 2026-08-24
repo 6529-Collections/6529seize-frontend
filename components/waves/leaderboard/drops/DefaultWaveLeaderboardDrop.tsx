@@ -169,10 +169,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 showAvatar={false}
                 winningThreshold={winningThreshold}
               />
-              <div
-                className="tw-hidden tw-h-8 tw-items-center lg:tw-flex"
-                onClick={(event) => event.stopPropagation()}
-              >
+              <div className="tw-hidden tw-h-8 tw-items-center lg:tw-flex">
                 <WaveDropActionsMore drop={drop} />
               </div>
             </div>

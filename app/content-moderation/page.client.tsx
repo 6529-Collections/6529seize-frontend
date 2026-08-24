@@ -535,7 +535,7 @@ export default function ContentModerationPageClient() {
     retry: false,
   });
   const queueItems = useMemo(
-    () => queueQuery.data?.pages.flatMap((page) => page) ?? [],
+    () => queueQuery.data?.pages.flat() ?? [],
     [queueQuery.data]
   );
 

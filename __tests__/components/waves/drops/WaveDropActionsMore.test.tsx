@@ -92,7 +92,9 @@ describe("WaveDropActionsMore", () => {
 
     render(<WaveDropActionsMore drop={drop} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "More actions" })
+    );
 
     expect(screen.getByTestId("set-pinned-drop")).toBeInTheDocument();
   });
@@ -103,6 +105,20 @@ describe("WaveDropActionsMore", () => {
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
     expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
+  });
+
+  it("does not bubble the menu trigger click to a parent card", async () => {
+    const onParentClick = jest.fn();
+
+    render(
+      <div onClick={onParentClick}>
+        <WaveDropActionsMore drop={drop} />
+      </div>
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(onParentClick).not.toHaveBeenCalled();
   });
 
   it("shows restore link previews when the drop has hidden previews", async () => {

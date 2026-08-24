@@ -1,5 +1,8 @@
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
+import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
+import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { fetchContentModerationQueue } from "@/services/api/content-moderation-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -45,7 +48,7 @@ const mockFetchContentModerationQueue =
     typeof fetchContentModerationQueue
   >;
 
-const createQueueItem = (index: number) => ({
+const createQueueItem = (index: number): ApiContentModerationQueueItem => ({
   id: `report-${index}`,
   drop_id: `drop-${index}`,
   reporter_profile_id: `reporter-${index}`,
@@ -54,11 +57,11 @@ const createQueueItem = (index: number) => ({
   author_pfp: null,
   reason: ApiContentModerationReportReason.Other,
   content_snapshot: { parts: [{ content: `content-${index}` }] },
-  status: "OPEN" as const,
+  status: ApiContentModerationReportStatus.Open,
   created_at: Date.UTC(2026, 7, 24, 10, index % 60),
   report_count: 1,
   cursor: `cursor-${index}`,
-  moderation: { status: "VISIBLE" as const, can_view: true },
+  moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
   history: [],
 });
 
