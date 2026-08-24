@@ -22,7 +22,7 @@ import React, {
 } from "react";
 import EULAModal from "./EULAModal";
 
-export type EULAConsentState =
+type EULAConsentState =
   | "checking"
   | "acceptance-required"
   | "accepted"
@@ -50,7 +50,7 @@ export const useEULAConsent = () => {
   return context;
 };
 
-export const getBackendConsentExpiration = (
+const getBackendConsentExpiration = (
   consent: BackendEULAConsent,
   now = Date.now()
 ): Date | null => {
