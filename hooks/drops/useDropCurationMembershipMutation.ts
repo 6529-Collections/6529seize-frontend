@@ -1,12 +1,21 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
+import type { ApiCurationDropsPage } from "@/generated/models/ApiCurationDropsPage";
 import type { ApiDropCurationRequest } from "@/generated/models/ApiDropCurationRequest";
 import { commonApiDeleteWithBody } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  type QueryKey as TanStackQueryKey,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useContext } from "react";
 import {
   getDropCurationsQueryKey,
@@ -17,6 +26,7 @@ type DropCurationMembershipAction = "add" | "remove";
 
 interface DropCurationMembershipMutationOptions {
   readonly suppressToast?: boolean | undefined;
+  readonly successMessage?: string | undefined;
 }
 
 interface DropCurationMembershipMutationVariables {
@@ -24,6 +34,39 @@ interface DropCurationMembershipMutationVariables {
   readonly action: DropCurationMembershipAction;
   readonly options?: DropCurationMembershipMutationOptions | undefined;
 }
+
+type DropCurationMembershipMutationContext = {
+  readonly previousCurations?: DropCurationMembership[] | undefined;
+  readonly previousCurationDrops?:
+    | [TanStackQueryKey, InfiniteData<ApiCurationDropsPage> | undefined][]
+    | undefined;
+};
+
+const isTargetCurationDropsQuery = ({
+  queryKey,
+  waveId,
+  curationId,
+}: {
+  readonly queryKey: TanStackQueryKey;
+  readonly waveId: string;
+  readonly curationId: string;
+}): boolean => {
+  const params = queryKey[1];
+  if (
+    queryKey[0] !== QueryKey.DROPS ||
+    params === null ||
+    typeof params !== "object"
+  ) {
+    return false;
+  }
+
+  const queryParams = params as Record<string, unknown>;
+  return (
+    queryParams["context"] === "wave-curation-drops" &&
+    queryParams["waveId"] === waveId &&
+    queryParams["curationId"] === curationId
+  );
+};
 
 const getDropCurationMembershipEndpoint = (dropId: string): string =>
   `${publicEnv.API_ENDPOINT}/api/drops/${dropId}/curations`;
@@ -133,8 +176,10 @@ const getCurationMembershipErrorMessage = (
 
 export function useDropCurationMembershipMutation({
   dropId,
+  waveId,
 }: {
   readonly dropId: string;
+  readonly waveId: string;
 }) {
   const queryClient = useQueryClient();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -144,7 +189,7 @@ export function useDropCurationMembershipMutation({
     void,
     Error,
     DropCurationMembershipMutationVariables,
-    { previousCurations?: DropCurationMembership[] | undefined }
+    DropCurationMembershipMutationContext
   >({
     mutationFn: async ({ curationId, action }) => {
       const body: ApiDropCurationRequest = {
@@ -165,13 +210,33 @@ export function useDropCurationMembershipMutation({
       });
     },
     onMutate: async ({ curationId, action }) => {
+      const curationDropsFilter =
+        action === "remove"
+          ? {
+              predicate: ({ queryKey }: { queryKey: TanStackQueryKey }) =>
+                isTargetCurationDropsQuery({
+                  queryKey,
+                  waveId,
+                  curationId,
+                }),
+            }
+          : null;
+
       await queryClient.cancelQueries({
         queryKey: getDropCurationsQueryKey(dropId),
       });
+      if (curationDropsFilter) {
+        await queryClient.cancelQueries(curationDropsFilter);
+      }
 
       const previousCurations = queryClient.getQueryData<
         DropCurationMembership[]
       >(getDropCurationsQueryKey(dropId));
+      const previousCurationDrops = curationDropsFilter
+        ? queryClient.getQueriesData<InfiniteData<ApiCurationDropsPage>>(
+            curationDropsFilter
+          )
+        : undefined;
 
       queryClient.setQueryData<DropCurationMembership[]>(
         getDropCurationsQueryKey(dropId),
@@ -186,16 +251,33 @@ export function useDropCurationMembershipMutation({
           ) ?? current
       );
 
-      return { previousCurations };
+      if (curationDropsFilter) {
+        queryClient.setQueriesData<InfiniteData<ApiCurationDropsPage>>(
+          curationDropsFilter,
+          (current) =>
+            current
+              ? {
+                  ...current,
+                  pages: current.pages.map((page) => ({
+                    ...page,
+                    data: page.data.filter((drop) => drop.id !== dropId),
+                  })),
+                }
+              : current
+        );
+      }
+
+      return { previousCurations, previousCurationDrops };
     },
     onSuccess: (_data, variables) => {
       if (!variables.options?.suppressToast) {
         setToast({
           type: "success",
           message:
-            variables.action === "add"
+            variables.options?.successMessage ??
+            (variables.action === "add"
               ? "Drop added to curation."
-              : "Drop removed from curation.",
+              : "Drop removed from curation."),
         });
       }
       invalidateDrops();
@@ -206,6 +288,9 @@ export function useDropCurationMembershipMutation({
           getDropCurationsQueryKey(dropId),
           context.previousCurations
         );
+      }
+      for (const [queryKey, data] of context?.previousCurationDrops ?? []) {
+        queryClient.setQueryData(queryKey, data);
       }
 
       if (!variables.options?.suppressToast) {

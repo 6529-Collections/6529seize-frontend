@@ -11,6 +11,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   getProfileWaveIdentity,
   setProfileWaveQueryData,
@@ -21,11 +23,16 @@ type ProfileWaveAction =
       readonly type: "set";
       readonly waveId: string;
       readonly profileCurationId?: string | null | undefined;
+      readonly suppressSuccessToast?: boolean | undefined;
     }
-  | { readonly type: "clear" };
+  | {
+      readonly type: "clear";
+      readonly suppressSuccessToast?: boolean | undefined;
+    };
 
 export function useProfileWaveMutation(profile: ApiIdentity | null) {
   const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
   const { requestAuth, setToast } = useAuth();
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
@@ -64,25 +71,27 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
         [profile, updatedProfile],
         profileWaveData
       );
-      setToast({
-        message:
-          action.type === "set"
-            ? "Profile wave updated."
-            : "Profile wave cleared.",
-        type: "success",
-      });
+      if (!action.suppressSuccessToast) {
+        setToast({
+          message:
+            action.type === "set"
+              ? t(locale, "profileCuration.toast.updated")
+              : t(locale, "profileCuration.toast.disconnected"),
+          type: "success",
+        });
+      }
     },
     onError: (error: unknown, action) => {
       const fallbackMessage =
         action.type === "set"
-          ? "Unable to update profile wave."
-          : "Unable to clear profile wave.";
+          ? t(locale, "profileCuration.toast.updateFailed")
+          : t(locale, "profileCuration.toast.disconnectFailed");
       setToast({
         type: "error",
         title:
           action.type === "set"
-            ? "Couldn't update the profile wave."
-            : "Couldn't clear the profile wave.",
+            ? t(locale, "profileCuration.toast.updateTitle")
+            : t(locale, "profileCuration.toast.disconnectTitle"),
         description: "Please try again.",
         details: getToastErrorDetails(error, fallbackMessage),
       });
@@ -110,21 +119,44 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
 
   const updateProfileWave = async (
     waveId: string,
-    profileCurationId?: string | null
+    profileCurationId?: string | null,
+    options?: { readonly suppressSuccessToast?: boolean | undefined }
   ) =>
     await runProfileWaveMutation({
       type: "set",
       waveId,
       profileCurationId,
+      suppressSuccessToast: options?.suppressSuccessToast,
     });
 
-  const clearSelectedProfileWave = async () =>
+  const updateProfileWaveOrThrow = async (
+    waveId: string,
+    profileCurationId?: string | null,
+    options?: { readonly suppressSuccessToast?: boolean | undefined }
+  ): Promise<ApiIdentity> => {
+    if (!(await ensureAuthenticated())) {
+      throw new Error("Authentication was cancelled.");
+    }
+
+    return await mutation.mutateAsync({
+      type: "set",
+      waveId,
+      profileCurationId,
+      suppressSuccessToast: options?.suppressSuccessToast,
+    });
+  };
+
+  const clearSelectedProfileWave = async (options?: {
+    readonly suppressSuccessToast?: boolean | undefined;
+  }) =>
     await runProfileWaveMutation({
       type: "clear",
+      suppressSuccessToast: options?.suppressSuccessToast,
     });
 
   return {
     updateProfileWave,
+    updateProfileWaveOrThrow,
     clearSelectedProfileWave,
     isPending: mutation.isPending,
     pendingAction: mutation.variables?.type ?? null,

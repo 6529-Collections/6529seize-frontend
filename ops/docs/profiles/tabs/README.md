@@ -15,6 +15,9 @@ owned by:
   behavior at `/{user}`.
 - [Profile Identity Statements](feature-identity-statements.md): consolidated
   addresses plus statement add/open/copy/delete behavior inside Identity.
+- [Profile Curation Tab](feature-curation-tab.md): guided setup, source and
+  Curation selection, post creation and management, viewer behavior, and
+  recoverable partial-success states at `/{user}/curations`.
 - [Profile Brain Tab](feature-brain-tab.md): profile feed behavior at
   `/{user}/brain`, including drop-open routing to Waves or Messages.
 - [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md):

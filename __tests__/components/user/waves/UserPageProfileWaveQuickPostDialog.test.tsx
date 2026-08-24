@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -169,5 +169,37 @@ describe("UserPageProfileWaveQuickPostDialog", () => {
       message: "Post created, but it could not be added to this curation.",
     });
     expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByText(/without posting again/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry add" })).toBeEnabled();
+  });
+
+  it("retries only the Curation membership after a partial success", async () => {
+    const setToast = jest.fn();
+    useAuthMock.mockReturnValue({ setToast });
+    addDropToCurationMock
+      .mockRejectedValueOnce(new Error("Temporary failure"))
+      .mockResolvedValueOnce(undefined);
+    const { onClose, invalidateDrops } = renderDialog();
+
+    await act(async () => {
+      await waveDropCreateProps.onServerDropCreated({ id: "drop-1" });
+    });
+    act(() => {
+      waveDropCreateProps.onSuccess();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Retry add" }));
+    });
+
+    expect(addDropToCurationMock).toHaveBeenNthCalledWith(2, {
+      dropId: "drop-1",
+      body: { curation_id: "curation-1" },
+    });
+    expect(invalidateDrops).toHaveBeenCalledTimes(1);
+    expect(setToast).toHaveBeenLastCalledWith({
+      type: "success",
+      message: "Post added to Curation.",
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

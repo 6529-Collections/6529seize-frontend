@@ -9,6 +9,8 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import Button from "@/components/utils/button/Button";
 import SelectGroupModalSearchName from "@/components/utils/select-group/SelectGroupModalSearchName";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
@@ -59,6 +61,7 @@ interface MyStreamWaveCurationCreateDialogProps {
   readonly showSuccessToast?: boolean | undefined;
   readonly curation?: ApiWaveCuration | null | undefined;
   readonly initialGroup?: ApiGroupFull | null | undefined;
+  readonly permissionMode?: "standard" | "profile" | undefined;
 }
 
 const getWaveAdminGroupId = (
@@ -251,7 +254,7 @@ function CurationGroupRow({
           )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mt-0 tw-mb-1 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
+          <p className="tw-mb-1 tw-mt-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
             {group.name}
           </p>
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px]">
@@ -484,8 +487,10 @@ export default function MyStreamWaveCurationCreateDialog({
   showSuccessToast = true,
   curation,
   initialGroup,
+  permissionMode = "standard",
 }: MyStreamWaveCurationCreateDialogProps) {
   const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
   const { requestAuth, setToast } = useAuth();
   const isEditMode = !!curation;
   const initialName = curation?.name ?? "";
@@ -740,6 +745,7 @@ export default function MyStreamWaveCurationCreateDialog({
                   type="text"
                   value={name}
                   onChange={handleNameChange}
+                  maxLength={50}
                   autoComplete="off"
                   placeholder="Create your own custom..."
                   className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
@@ -747,12 +753,26 @@ export default function MyStreamWaveCurationCreateDialog({
               </div>
             </div>
 
-            <div className="tw-space-y-4">
-              <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
-                Who can curate?
-              </span>
-              <div className="tw-space-y-3.5">{groupPickerContent}</div>
-            </div>
+            {permissionMode === "profile" ? (
+              <details className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-3">
+                <summary className="tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
+                  {t(locale, "profileCuration.permissions.advanced")}
+                </summary>
+                <div className="tw-mt-4 tw-space-y-4">
+                  <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-500">
+                    {t(locale, "profileCuration.permissions.description")}
+                  </p>
+                  <div className="tw-space-y-3.5">{groupPickerContent}</div>
+                </div>
+              </details>
+            ) : (
+              <div className="tw-space-y-4">
+                <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
+                  Who can curate?
+                </span>
+                <div className="tw-space-y-3.5">{groupPickerContent}</div>
+              </div>
+            )}
           </div>
         </div>
 
