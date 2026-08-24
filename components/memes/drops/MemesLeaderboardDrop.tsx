@@ -1,14 +1,15 @@
 "use client";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { DropLocation } from "@/components/waves/drops/Drop";
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
-import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
+import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -67,6 +68,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   const [isVotingModalOpen, setIsVotingModalOpen] = useState<boolean>(false);
   const [isResubmitModalOpen, setIsResubmitModalOpen] =
     useState<boolean>(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const openResubmitAfterMenuCloseRef = useRef<boolean>(false);
 
   // Get device info from useDeviceInfo hook
@@ -150,13 +152,12 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   <div className="tw-flex tw-gap-2 tw-text-iron-400">
                     {!hasTouchScreen && (
                       <>
-                        <WaveDropActionsOpen drop={drop} />
                         <MemesArtResubmitAction
                           drop={drop}
                           wave={wave}
                           onSourceDropDeleted={onSourceDropDeleted}
                         />
-                        {canDelete && <WaveDropActionsOptions drop={drop} />}
+                        <WaveDropActionsMore drop={drop} />
                       </>
                     )}
                   </div>
@@ -289,6 +290,14 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   drop={drop}
                   onCopy={() => setIsActive(false)}
                 />
+                <ContentModerationDropActions
+                  drop={drop}
+                  mobile
+                  onReport={() => {
+                    setIsActive(false);
+                    setIsReportOpen(true);
+                  }}
+                />
 
                 <MemesArtResubmitAction
                   drop={drop}
@@ -318,6 +327,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             onSourceDropDeleted={onSourceDropDeleted}
           />
         )}
+        <ReportDropModal
+          drop={drop}
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+        />
       </div>
     </div>
   );

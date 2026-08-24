@@ -1,6 +1,8 @@
 "use client";
 
 import ClientOnly from "@/components/client-only/ClientOnly";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import MainStageMemeCardLink, {
@@ -13,7 +15,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -79,11 +81,7 @@ const getMetadataValue = (
       ?.data_value
   );
 
-function MemesWinnerMintDate({
-  memeCardId,
-}: {
-  readonly memeCardId: number;
-}) {
+function MemesWinnerMintDate({ memeCardId }: { readonly memeCardId: number }) {
   const locale = useBrowserLocale();
   const mintDate = React.useMemo(() => {
     try {
@@ -123,6 +121,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const [isReportOpen, setIsReportOpen] = React.useState(false);
   const suppressNextClickRef = React.useRef(false);
 
   const handleInteractionStart = React.useCallback(() => {
@@ -276,7 +275,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               {!hasTouchScreen && (
                 <div className="tw-flex tw-flex-shrink-0 tw-items-center">
                   <div className="tw-h-8">
-                    <WaveDropActionsOpen drop={extendedDrop} />
+                    <WaveDropActionsMore drop={extendedDrop} />
                   </div>
                 </div>
               )}
@@ -434,10 +433,23 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     drop={extendedDrop}
                     onCopy={() => setIsActive(false)}
                   />
+                  <ContentModerationDropActions
+                    drop={extendedDrop}
+                    mobile
+                    onReport={() => {
+                      handleMobileMenuClose();
+                      setIsReportOpen(true);
+                    }}
+                  />
                 </div>
               </CommonDropdownItemsMobileWrapper>,
               document.body
             )}
+          <ReportDropModal
+            drop={extendedDrop}
+            isOpen={isReportOpen}
+            onClose={() => setIsReportOpen(false)}
+          />
         </div>
       </div>
     </div>

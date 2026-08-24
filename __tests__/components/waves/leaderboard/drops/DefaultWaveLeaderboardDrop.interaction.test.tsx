@@ -26,14 +26,16 @@ jest.mock("@/components/voting", () => ({
 jest.mock("@/components/voting/VotingModalButton", () => (p: any) => (
   <button data-testid="vote-btn" onClick={p.onClick} />
 ));
-jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => ({
+jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
   __esModule: true,
-  default: () => <div data-testid="options" />,
+  default: () => <div data-testid="more-actions" />,
 }));
-jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
-  __esModule: true,
-  default: () => <div />,
-}));
+jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
+  jest.fn(() => null)
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () =>
+  jest.fn(() => null)
+);
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => (p: any) => (
   <button
     type="button"
@@ -146,10 +148,10 @@ test("opens voting modal when button clicked", async () => {
   expect(screen.getByTestId("modal")).toHaveTextContent("false");
   await user.click(screen.getByTestId("vote-btn"));
   expect(screen.getByTestId("modal")).toHaveTextContent("true");
-  expect(screen.getByTestId("options")).toBeInTheDocument();
+  expect(screen.getByTestId("more-actions")).toBeInTheDocument();
 });
 
-test("uses mobile modal and hides options when cannot delete", () => {
+test("uses mobile modal and keeps the shared actions menu available", () => {
   useRules.mockReturnValue({ canShowVote: true, canDelete: false });
   useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
   useIsMobileScreen.mockReturnValue(true);
@@ -166,7 +168,7 @@ test("uses mobile modal and hides options when cannot delete", () => {
     />
   );
   expect(screen.getByTestId("mobile")).toHaveTextContent("false");
-  expect(screen.queryByTestId("options")).toBeNull();
+  expect(screen.getByTestId("more-actions")).toBeInTheDocument();
 });
 
 test("keeps native touch scrolling enabled for long-press handlers", () => {

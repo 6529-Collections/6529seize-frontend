@@ -2,6 +2,11 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { DefaultSingleWaveDrop } from "@/components/waves/drop/DefaultSingleWaveDrop";
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
+
 const mockApprovalStatus = jest.fn();
 let mockWrapperProps: any;
 let mockInfoPanelProps: any;

@@ -65,6 +65,8 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.description":
     "Review reported posts and record a reason for every decision.",
   "contentModeration.moderator.loading": "Loading reports…",
+  "contentModeration.moderator.loadingMore": "Loading more…",
+  "contentModeration.moderator.loadMore": "Load more",
   "contentModeration.moderator.empty": "There are no open reports.",
   "contentModeration.moderator.accessDenied":
     "You don't have access to content moderation.",
@@ -87,7 +89,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.reportCount.one": "{count} report",
   "contentModeration.moderator.reportCount.many": "{count} reports",
   "contentModeration.moderator.reportedFor": "Reported for {reason}",
-  "contentModeration.moderator.author": "Author: {profileId}",
+  "contentModeration.moderator.reportedAt": "Reported {date}",
   "contentModeration.moderator.currentState": "State: {state}",
   "contentModeration.moderator.parentContext": "Reply context",
   "contentModeration.moderator.reportedAssets": "Reported media and files",

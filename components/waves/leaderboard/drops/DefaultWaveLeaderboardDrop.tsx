@@ -1,11 +1,12 @@
 "use client";
 
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
-import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
+import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -67,6 +68,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   } = useVotingModalState(isVotingActionLocked);
   const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
+  const [isReportOpen, setIsReportOpen] = React.useState(false);
   const suppressNextClickRef = React.useRef(false);
   const isProposalCard = contentPresentation === "proposalCard";
 
@@ -167,13 +169,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 showAvatar={false}
                 winningThreshold={winningThreshold}
               />
-              <div className="tw-flex tw-items-center">
-                <div className="tw-hidden tw-h-8 lg:tw-block">
-                  {!isProposalCard && <WaveDropActionsOpen drop={drop} />}
-                </div>
-                <div className="tw-hidden tw-h-8 lg:tw-block">
-                  {canDelete && <WaveDropActionsOptions drop={drop} />}
-                </div>
+              <div
+                className="tw-hidden tw-h-8 tw-items-center lg:tw-flex"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <WaveDropActionsMore drop={drop} />
               </div>
             </div>
             <WaveLeaderboardDropContent
@@ -266,6 +266,14 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                   drop={drop}
                   onCopy={handleMobileMenuClose}
                 />
+                <ContentModerationDropActions
+                  drop={drop}
+                  mobile
+                  onReport={() => {
+                    handleMobileMenuClose();
+                    setIsReportOpen(true);
+                  }}
+                />
 
                 {/* Delete option - only if user can delete */}
                 {canDelete && (
@@ -279,6 +287,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           </div>,
           document.body
         )}
+      <ReportDropModal
+        drop={drop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </div>
   );
 };

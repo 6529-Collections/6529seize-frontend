@@ -7,6 +7,7 @@ import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
 import { useSingleWaveDropData } from "./useSingleWaveDropData";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface MemesSingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -45,14 +46,16 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
     >
-      <MemesSingleWaveDropInfoPanel
-        drop={extendedDrop}
-        wave={wave}
-        onClose={onClose}
-        isVotingClosed={isVotingClosed}
-        isVotingControlsLocked={isVotingControlsLocked}
-        outcomesVisible={outcomesVisible}
-      />
+      <ContentModerationDropGate drop={extendedDrop}>
+        <MemesSingleWaveDropInfoPanel
+          drop={extendedDrop}
+          wave={wave}
+          onClose={onClose}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
+          outcomesVisible={outcomesVisible}
+        />
+      </ContentModerationDropGate>
     </SingleWaveDropWrapper>
   );
 };

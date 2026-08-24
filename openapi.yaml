@@ -15833,6 +15833,8 @@ components:
         - drop_id
         - reporter_profile_id
         - author_profile_id
+        - author_handle
+        - author_pfp
         - reason
         - content_snapshot
         - status
@@ -15851,6 +15853,12 @@ components:
           type: string
         author_profile_id:
           type: string
+        author_handle:
+          type: string
+          nullable: true
+        author_pfp:
+          type: string
+          nullable: true
         reason:
           $ref: "#/components/schemas/ApiContentModerationReportReason"
         notes:

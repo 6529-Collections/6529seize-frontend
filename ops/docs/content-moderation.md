@@ -38,6 +38,9 @@ author updates all mounted posts by that author immediately. Personal hide,
 unhide, block, and unblock actions roll back if the API request fails and do
 not show success toasts. Reporting still confirms with **Report submitted.**
 
+The same visibility gate and **Flag Content** action apply to ordinary Wave
+posts, reply and quote presentations, and full or compact leaderboard variants.
+
 Notification, direct-message, and blocked-profile preferences are combined at
 `/preferences`. The **Content** tab is deep-linked at
 `/preferences?tab=content`; the former `/content-preferences` path redirects
@@ -51,10 +54,15 @@ Authorized occasional moderators can use `/content-moderation` to review open
 reports. Every allow, quarantine, removal, suspension, or reinstatement action
 requires a written reason and is recorded by the backend.
 
+The queue is cursor-paginated so older open reports remain reachable. Each
+item identifies the author, shows when the report was created, and includes the
+AI recommendation, confidence, rationale, evidence, and moderation history.
+
 Globally quarantined or moderator-removed posts are replaced by a redacted
 tombstone everywhere, including primary Wave views, replies, quotes,
 leaderboards, and notification-related drop data. Global tombstones cannot be
-temporarily revealed by viewers.
+temporarily revealed by ordinary viewers. Authors can still see their own
+globally moderated posts and moderation state.
 
 The moderation queue link is only shown in the app sidebars and profile menu to
 profiles whose server-enforced role allows access. Direct navigation is also

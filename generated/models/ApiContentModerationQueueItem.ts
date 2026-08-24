@@ -22,6 +22,8 @@ export class ApiContentModerationQueueItem {
     'drop_id': string;
     'reporter_profile_id': string;
     'author_profile_id': string;
+    'author_handle': string | null;
+    'author_pfp': string | null;
     'reason': ApiContentModerationReportReason;
     'notes'?: string | null;
     'content_snapshot': { [key: string]: any; };
@@ -71,6 +73,18 @@ export class ApiContentModerationQueueItem {
         {
             "name": "author_profile_id",
             "baseName": "author_profile_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "author_handle",
+            "baseName": "author_handle",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "author_pfp",
+            "baseName": "author_pfp",
             "type": "string",
             "format": ""
         },
