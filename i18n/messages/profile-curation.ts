@@ -49,6 +49,31 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.header.manage": "Manage",
   "profileCuration.header.createAnother": "Create another Curation",
   "profileCuration.header.addFirstPost": "Add your first post",
+  "profileCuration.manage.menuAria": "Curation options",
+  "profileCuration.manage.profileSection": "Shown on profile",
+  "profileCuration.manage.chooseCuration": "Choose another Curation",
+  "profileCuration.manage.chooseSourceWave": "Use another source Wave",
+  "profileCuration.manage.hideFromProfile": "Hide from profile",
+  "profileCuration.manage.curationSection": "This Curation",
+  "profileCuration.manage.edit": "Edit Curation",
+  "profileCuration.manage.showOnProfile": "Show on profile",
+  "profileCuration.manage.delete": "Delete Curation",
+  "profileCuration.manage.deleteTitle": "Delete Curation?",
+  "profileCuration.manage.deleteMessage":
+    "Delete “{curationName}”? The Curation will be deleted and removed from your profile. Its source Wave and posts will remain.",
+  "profileCuration.manage.deleteSuccess":
+    "Curation deleted. The source Wave remains.",
+  "profileCuration.manage.deleteErrorTitle":
+    "Couldn't delete this Curation.",
+  "profileCuration.manage.deleteErrorDescription": "Please try again.",
+  "profileCuration.manage.deleteErrorFallback":
+    "Failed to delete Curation.",
+  "profileCuration.manage.deleteAuthCancelled":
+    "Authentication was cancelled.",
+  "profileCuration.manage.profileCleanupErrorTitle":
+    "Curation deleted, but the profile could not be updated.",
+  "profileCuration.manage.profileCleanupErrorDescription":
+    "Refresh the page and try again.",
   "profileCuration.permissions.advanced": "Advanced permissions",
   "profileCuration.permissions.description":
     "Choose the Group whose members can manage this Curation.",

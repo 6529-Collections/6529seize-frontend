@@ -14,8 +14,11 @@ import type { DropCurationMembership } from "@/hooks/drops/useDropCurations";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { invalidateProfileWaveQueries } from "@/hooks/useProfileWave";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { commonApiDelete } from "@/services/api/common-api";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
 
@@ -34,10 +37,11 @@ interface MyStreamWaveCurationTabMenuProps {
   readonly isProfileActionPending?: boolean | undefined;
 }
 
-const getErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Failed to delete curation.";
+const getErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
 
 const getCurationMenuItems = ({
+  locale,
   hasProfileActions,
   canChooseAnotherCuration,
   canSetAsProfileCuration,
@@ -50,6 +54,7 @@ const getCurationMenuItems = ({
   onSetAsProfileCuration,
   onDelete,
 }: {
+  readonly locale: SupportedLocale;
   readonly hasProfileActions: boolean;
   readonly canChooseAnotherCuration: boolean;
   readonly canSetAsProfileCuration: boolean;
@@ -68,13 +73,13 @@ const getCurationMenuItems = ({
     items.push({
       id: "profile-actions",
       kind: "section",
-      label: "Shown on profile",
+      label: t(locale, "profileCuration.manage.profileSection"),
     });
 
     if (canChooseAnotherCuration && onChooseAnotherCuration) {
       items.push({
         id: "choose-curation",
-        label: "Choose another Curation",
+        label: t(locale, "profileCuration.manage.chooseCuration"),
         onSelect: onChooseAnotherCuration,
         disabled: isProfileActionPending,
       });
@@ -83,7 +88,7 @@ const getCurationMenuItems = ({
     if (onChooseAnotherSourceWave) {
       items.push({
         id: "choose-source-wave",
-        label: "Use another source Wave",
+        label: t(locale, "profileCuration.manage.chooseSourceWave"),
         onSelect: onChooseAnotherSourceWave,
         disabled: isProfileActionPending,
       });
@@ -92,7 +97,7 @@ const getCurationMenuItems = ({
     if (onHideFromProfile) {
       items.push({
         id: "hide-from-profile",
-        label: "Hide from profile",
+        label: t(locale, "profileCuration.manage.hideFromProfile"),
         onSelect: onHideFromProfile,
         disabled: isProfileActionPending,
       });
@@ -101,20 +106,20 @@ const getCurationMenuItems = ({
     items.push({
       id: "curation-actions",
       kind: "section",
-      label: "This Curation",
+      label: t(locale, "profileCuration.manage.curationSection"),
     });
   }
 
   items.push({
     id: "edit",
-    label: "Edit Curation",
+    label: t(locale, "profileCuration.manage.edit"),
     onSelect: onEdit,
   });
 
   if (canSetAsProfileCuration) {
     items.push({
       id: "set-profile-curation",
-      label: "Show on profile",
+      label: t(locale, "profileCuration.manage.showOnProfile"),
       onSelect: onSetAsProfileCuration,
       disabled: isSettingProfileCuration,
     });
@@ -122,7 +127,7 @@ const getCurationMenuItems = ({
 
   items.push({
     id: "delete",
-    label: "Delete Curation",
+    label: t(locale, "profileCuration.manage.delete"),
     onSelect: onDelete,
     className: "tw-text-red desktop-hover:hover:tw-text-red",
   });
@@ -146,6 +151,7 @@ export default function MyStreamWaveCurationTabMenu({
 }: MyStreamWaveCurationTabMenuProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, requestAuth, setToast } = useAuth();
+  const locale = useBrowserLocale();
   const { updateProfileWave, isPending: isProfileWavePending } =
     useProfileWaveMutation(connectedProfile);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -158,7 +164,9 @@ export default function MyStreamWaveCurationTabMenu({
     mutationFn: async () => {
       const auth = await requestAuth();
       if (!auth.success) {
-        throw new Error("Authentication was cancelled.");
+        throw new Error(
+          t(locale, "profileCuration.manage.deleteAuthCancelled")
+        );
       }
 
       await commonApiDelete({
@@ -166,7 +174,15 @@ export default function MyStreamWaveCurationTabMenu({
       });
     },
     onSuccess: async () => {
-      await onDeleted?.();
+      let didProfileCleanupFail = false;
+      let profileCleanupError: unknown;
+      try {
+        await onDeleted?.();
+      } catch (error) {
+        didProfileCleanupFail = true;
+        profileCleanupError = error;
+      }
+
       queryClient.setQueryData<ApiWaveCuration[]>(
         getWaveCurationsQueryKey(wave.id),
         (current) => current?.filter((item) => item.id !== curation.id)
@@ -187,18 +203,50 @@ export default function MyStreamWaveCurationTabMenu({
           wave.author,
         ]),
       ]);
+      setIsDeleteOpen(false);
+
+      if (didProfileCleanupFail) {
+        setToast({
+          type: "error",
+          title: t(
+            locale,
+            "profileCuration.manage.profileCleanupErrorTitle"
+          ),
+          description: t(
+            locale,
+            "profileCuration.manage.profileCleanupErrorDescription"
+          ),
+          details: getToastErrorDetails(
+            profileCleanupError,
+            getErrorMessage(
+              profileCleanupError,
+              t(locale, "profileCuration.toast.updateFailed")
+            )
+          ),
+        });
+        return;
+      }
+
       setToast({
         type: "success",
-        message: "Curation deleted. The source Wave remains.",
+        message: t(locale, "profileCuration.manage.deleteSuccess"),
       });
-      setIsDeleteOpen(false);
     },
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Couldn't delete this curation.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error, getErrorMessage(error)),
+        title: t(locale, "profileCuration.manage.deleteErrorTitle"),
+        description: t(
+          locale,
+          "profileCuration.manage.deleteErrorDescription"
+        ),
+        details: getToastErrorDetails(
+          error,
+          getErrorMessage(
+            error,
+            t(locale, "profileCuration.manage.deleteErrorFallback")
+          )
+        ),
       });
     },
   });
@@ -208,6 +256,7 @@ export default function MyStreamWaveCurationTabMenu({
     onChooseAnotherSourceWave !== undefined ||
     onHideFromProfile !== undefined;
   const menuItems = getCurationMenuItems({
+    locale,
     hasProfileActions,
     canChooseAnotherCuration,
     canSetAsProfileCuration,
@@ -239,8 +288,8 @@ export default function MyStreamWaveCurationTabMenu({
     <>
       {shouldUseMobileBottomSheet ? (
         <CompactMenuMobileBottomSheet
-          title={triggerLabel ?? "Manage"}
-          ariaLabel="Curation options"
+          title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
+          ariaLabel={t(locale, "profileCuration.manage.menuAria")}
           items={menuItems}
           trigger={triggerContent}
           renderTriggerButton={({
@@ -280,7 +329,7 @@ export default function MyStreamWaveCurationTabMenu({
             )
           }
           triggerAsChild={!!triggerLabel}
-          aria-label="Curation options"
+          aria-label={t(locale, "profileCuration.manage.menuAria")}
           items={menuItems}
           itemsWrapperClassName={hasProfileActions ? "tw-pt-2" : undefined}
           menuWidthClassName="tw-w-64"
@@ -303,9 +352,11 @@ export default function MyStreamWaveCurationTabMenu({
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
         onConfirm={() => deleteMutation.mutate()}
-        title="Delete Curation?"
-        message={`Delete “${curation.name}”? The Curation will be deleted and removed from your profile. Its source Wave and posts will remain.`}
-        confirmText="Delete Curation"
+        title={t(locale, "profileCuration.manage.deleteTitle")}
+        message={t(locale, "profileCuration.manage.deleteMessage", {
+          curationName: curation.name,
+        })}
+        confirmText={t(locale, "profileCuration.manage.delete")}
         confirmVariant="destructive"
         isConfirming={deleteMutation.isPending}
       />
