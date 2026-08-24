@@ -114,8 +114,9 @@ function WaveConfigurationCurationsAuthorizedContent({
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const curationsQuery = useWaveCurations({ waveId: wave.id });
   const curations = curationsQuery.data ?? [];
-  const { moveCuration, isPending, pendingCurationId } =
-    useWaveCurationReorderMutation({ waveId: wave.id });
+  const { moveCuration, isPending } = useWaveCurationReorderMutation({
+    waveId: wave.id,
+  });
 
   const clearDeletedSelection = (curationId: string) => {
     if (searchParams.get("curation") !== curationId) {
@@ -167,7 +168,7 @@ function WaveConfigurationCurationsAuthorizedContent({
             curation={curation}
             curations={curations}
             index={index}
-            isMovePending={isPending && pendingCurationId === curation.id}
+            isMovePending={isPending}
             onDeleted={() => clearDeletedSelection(curation.id)}
             onMove={(direction) =>
               moveCuration({ curation, direction, curations })
