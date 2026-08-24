@@ -42,7 +42,7 @@ export default function CurationDropFooter({
           />
         </div>
       </div>
-      <div className="tw-ml-2 tw-mt-1 tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-500 desktop-hover:hover:tw-text-iron-300">
+      <div className="-tw-mr-px tw-ml-2 tw-mt-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center">
         <WaveDropActionsCopyLink drop={drop} size="compact" />
       </div>
     </div>

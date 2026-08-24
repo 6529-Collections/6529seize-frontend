@@ -203,7 +203,7 @@ function IdentityGettingStartedCardContent({
             type="button"
             onClick={onDismiss}
             aria-label="Dismiss guidance"
-            className="tw-group/close tw-absolute tw-right-3.5 tw-top-3.5 tw-z-20 tw-hidden tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.03] tw-px-3 tw-py-1.5 tw-text-iron-400 tw-transition-all tw-duration-200 hover:tw-bg-white/[0.08] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-[0.97] md:tw-flex"
+            className="tw-group/close tw-absolute tw-right-3.5 tw-top-3.5 tw-z-20 tw-hidden tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-rose-500/20 tw-bg-rose-500/10 tw-px-3 tw-py-1.5 tw-text-rose-300 tw-transition-all tw-duration-200 hover:tw-border-rose-400/30 hover:tw-bg-rose-500/20 hover:tw-text-rose-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 active:tw-scale-[0.97] active:tw-bg-rose-500/25 md:tw-flex"
           >
             <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-transition-colors">
               Dismiss

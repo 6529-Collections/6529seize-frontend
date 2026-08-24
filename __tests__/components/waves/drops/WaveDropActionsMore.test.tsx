@@ -1,5 +1,7 @@
 import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
 import { useDropLinkPreviewToggleControl } from "@/components/waves/drops/useDropLinkPreviewToggleControl";
+import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
+import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -11,7 +13,10 @@ jest.mock("@/components/waves/drops/useDropLinkPreviewToggleControl", () => ({
   useDropLinkPreviewToggleControl: jest.fn(),
 }));
 jest.mock("@/hooks/drops/useCanShowDropCurationsAction", () => ({
-  useCanShowDropCurationsAction: jest.fn(() => false),
+  useCanShowDropCurationsAction: jest.fn(),
+}));
+jest.mock("@/hooks/drops/useDropCurationMembershipMutation", () => ({
+  useDropCurationMembershipMutation: jest.fn(),
 }));
 
 jest.mock(
@@ -55,6 +60,13 @@ const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
 const mockedUseDropLinkPreviewToggleControl = jest.mocked(
   useDropLinkPreviewToggleControl
 );
+const mockedUseCanShowDropCurationsAction = jest.mocked(
+  useCanShowDropCurationsAction
+);
+const mockedUseDropCurationMembershipMutation = jest.mocked(
+  useDropCurationMembershipMutation
+);
+const updateMembershipAsync = jest.fn().mockResolvedValue(undefined);
 
 const drop = {
   id: "drop-1",
@@ -65,6 +77,18 @@ const drop = {
 
 describe("WaveDropActionsMore", () => {
   beforeEach(() => {
+    updateMembershipAsync.mockClear();
+    mockedUseCanShowDropCurationsAction.mockReturnValue({
+      showManageCurations: false,
+      quickAddCuration: null,
+      quickRemoveCuration: null,
+    });
+    mockedUseDropCurationMembershipMutation.mockReturnValue({
+      updateMembership: jest.fn(),
+      updateMembershipAsync,
+      isPending: false,
+      pendingCurationId: null,
+    });
     mockedUseDropInteractionRules.mockReturnValue({
       canShowVote: true,
       canVote: true,
@@ -92,9 +116,7 @@ describe("WaveDropActionsMore", () => {
 
     render(<WaveDropActionsMore drop={drop} />);
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "More actions" })
-    );
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
     expect(screen.getByTestId("set-pinned-drop")).toBeInTheDocument();
   });
@@ -217,5 +239,43 @@ describe("WaveDropActionsMore", () => {
     expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
     expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();
+  });
+
+  it("adds directly to the preferred curation", async () => {
+    mockedUseCanShowDropCurationsAction.mockReturnValue({
+      showManageCurations: true,
+      quickAddCuration: { id: "curation-1", name: "Marketplace" },
+      quickRemoveCuration: null,
+    });
+
+    render(<WaveDropActionsMore drop={drop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Add to Marketplace" })
+    );
+
+    expect(updateMembershipAsync).toHaveBeenCalledWith(
+      "curation-1",
+      "add",
+      expect.objectContaining({ successMessage: "Added to Marketplace." })
+    );
+  });
+
+  it("shows only Remove for a post inside the active curation", async () => {
+    mockedUseCanShowDropCurationsAction.mockReturnValue({
+      showManageCurations: true,
+      quickAddCuration: null,
+      quickRemoveCuration: { id: "curation-1", name: "Marketplace" },
+    });
+
+    render(<WaveDropActionsMore drop={drop} showOnlyQuickRemove />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+    expect(screen.queryByTestId("copy-link")).toBeNull();
+    expect(screen.queryByText("Manage Curations")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Flag Content" })).toBeNull();
   });
 });
