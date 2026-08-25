@@ -1,7 +1,7 @@
 "use client";
 
 import { useUserPageTabIndicator } from "@/components/user/layout/useUserPageTabIndicator";
-import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
+import type { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import type { LabNFT } from "@/entities/INFT";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
