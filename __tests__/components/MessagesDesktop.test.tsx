@@ -1,4 +1,4 @@
-import MessagesDesktop from "@/components/messages/MessagesDesktop";
+import MessagesDesktopWithProvider from "@/components/messages/MessagesDesktop";
 import { useWaveDeleteFlow } from "@/components/waves/header/options/delete/WaveDeleteFlowContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { render, screen } from "@testing-library/react";
@@ -50,9 +50,9 @@ describe("MessagesDesktop", () => {
     const user = userEvent.setup();
 
     render(
-      <MessagesDesktop>
+      <MessagesDesktopWithProvider>
         <DeleteFlowConsumer />
-      </MessagesDesktop>
+      </MessagesDesktopWithProvider>
     );
 
     expect(screen.getByTestId("messages-wrapper")).toBeInTheDocument();
