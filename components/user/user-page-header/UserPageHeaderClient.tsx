@@ -54,6 +54,8 @@ type Props = {
   readonly cmsWebsiteHref?: string | null | undefined;
 };
 
+const PROFILE_PREFERENCES_BUTTON_KEY = "profilePreferences.button";
+
 export default function UserPageHeaderClient({
   profile: initialProfile,
   handleOrWallet,
@@ -151,7 +153,6 @@ export default function UserPageHeaderClient({
     () => aboutStatement !== null || canEdit,
     [aboutStatement, canEdit]
   );
-  const hasVisibleAbout = aboutStatement !== null || canInlineEdit;
 
   const websiteAction =
     cmsWebsiteHref && profile.handle
@@ -163,12 +164,6 @@ export default function UserPageHeaderClient({
       : null;
   const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
-  let subscriptionStatusVisibilityClass = "";
-  if (canEdit) {
-    subscriptionStatusVisibilityClass = hasTouchScreen
-      ? "tw-hidden"
-      : "tw-hidden sm:tw-block";
-  }
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -217,26 +212,46 @@ export default function UserPageHeaderClient({
             canEdit={canInlineEdit}
             profileLabel={profileLabel}
           />
-          {canEdit ? (
+          {canEdit || canManageProfilePreferences ? (
             <div
-              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${
+              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 tw-flex tw-items-center tw-gap-1 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${
                 hasTouchScreen ? "" : "sm:tw-hidden"
               }`}
             >
-              <UserPageHeaderEditProfile
-                profile={profile}
-                statement={aboutStatement}
-                defaultBanner1={banner1Color}
-                defaultBanner2={banner2Color}
-              />
+              {canEdit ? (
+                <UserPageHeaderEditProfile
+                  profile={profile}
+                  statement={aboutStatement}
+                  defaultBanner1={banner1Color}
+                  defaultBanner2={banner2Color}
+                />
+              ) : null}
+              {canManageProfilePreferences ? (
+                <ButtonLink
+                  variant="tertiary"
+                  size={null}
+                  href="/preferences"
+                  aria-label={t(locale, PROFILE_PREFERENCES_BUTTON_KEY)}
+                  title={t(locale, PROFILE_PREFERENCES_BUTTON_KEY)}
+                  className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5 min-[840px]:tw-hidden"
+                >
+                  <span className="tw-box-border tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/75 tw-text-iron-100 tw-shadow-[0_8px_24px_rgba(0,0,0,0.32)] tw-transition-[background-color,border-color,color,transform] tw-duration-200 tw-ease-out group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black group-active:tw-scale-95 group-active:tw-bg-black desktop-hover:group-hover:tw-border-white/25 desktop-hover:group-hover:tw-bg-black/90 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
+                    <FontAwesomeIcon
+                      icon={faSliders}
+                      className="tw-size-[1.125rem]"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </ButtonLink>
+              ) : null}
             </div>
           ) : null}
         </div>
 
         <div className="tw-relative tw-z-20 tw-bg-black md:tw-pointer-events-none md:-tw-mt-[164px] md:tw-bg-transparent">
           <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8">
-            <div className="tw-mb-4 tw-flex tw-flex-col tw-items-start tw-gap-5 md:tw-flex-row md:tw-items-end lg:tw-mb-8">
-              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:-tw-mt-[58px] md:tw-pointer-events-auto md:tw-mt-0">
+            <div className="tw-mb-6 tw-flex tw-flex-col tw-items-start tw-gap-5 md:tw-flex-row md:tw-items-end lg:tw-mb-8 lg:tw-mt-8">
+              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:-tw-mb-2 sm:-tw-mt-[58px] md:tw-pointer-events-auto md:tw-mb-0 md:tw-mt-0">
                 <UserPageHeaderPfpWrapper
                   profile={profile}
                   canEdit={canInlineEdit}
@@ -251,18 +266,8 @@ export default function UserPageHeaderClient({
                 </UserPageHeaderPfpWrapper>
               </div>
 
-              {canEdit ? (
-                <div
-                  className={`tw-absolute tw-right-4 tw-top-0 sm:tw-right-6 md:tw-pointer-events-auto md:tw-right-8 ${
-                    hasTouchScreen ? "" : "sm:tw-hidden"
-                  }`}
-                >
-                  <UserPageHeaderSubscriptionStatus profile={profile} compact />
-                </div>
-              ) : null}
-
-              <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-6 md:tw-flex-1 md:tw-flex-row md:tw-items-center md:tw-justify-between">
-                <div className="tw-min-w-0 md:tw-pointer-events-auto">
+              <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-6 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between md:tw-flex-1 min-[840px]:tw-gap-2 lg:tw-gap-6">
+                <div className="tw-flex tw-min-w-0 tw-flex-col md:tw-pointer-events-auto">
                   <UserPageHeaderName
                     profile={profile}
                     canEdit={canInlineEdit}
@@ -281,35 +286,59 @@ export default function UserPageHeaderClient({
                       variant="meta"
                     />
                   </div>
-                  {canManageProfilePreferences ? (
+                </div>
+
+                {canManageProfilePreferences && !hasTouchScreen ? (
+                  <div className="tw-hidden tw-flex-none sm:tw-block md:tw-pointer-events-auto min-[840px]:tw-hidden">
                     <ButtonLink
                       variant="tertiary"
                       size="sm"
                       href="/preferences"
-                      aria-label={t(locale, "profilePreferences.button")}
-                      className={`tw-mt-3 ${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
+                      aria-label={t(locale, PROFILE_PREFERENCES_BUTTON_KEY)}
+                      className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
                     >
                       <FontAwesomeIcon
                         icon={faSliders}
                         className="tw-size-4"
                         aria-hidden="true"
                       />
-                      <span>{t(locale, "profilePreferences.button")}</span>
+                      <span>{t(locale, PROFILE_PREFERENCES_BUTTON_KEY)}</span>
                     </ButtonLink>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
 
                 {websiteAction || followHandle || showSubscriptionStatus ? (
                   <div
                     className={`tw-w-full tw-flex-shrink-0 tw-flex-col tw-items-stretch tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center md:tw-pointer-events-auto ${
                       websiteAction || followHandle
                         ? "tw-flex"
-                        : "tw-hidden lg:tw-flex"
+                        : "tw-hidden min-[840px]:tw-flex"
                     }`}
                   >
-                    {showSubscriptionStatus && !(canEdit && hasTouchScreen) ? (
-                      <div className="tw-hidden lg:tw-block">
-                        <UserPageHeaderSubscriptionStatus profile={profile} />
+                    {canManageProfilePreferences ? (
+                      <div className="tw-hidden tw-flex-col tw-items-end tw-gap-4 min-[840px]:tw-flex min-[840px]:tw-w-auto lg:tw-w-[17rem]">
+                        <ButtonLink
+                          variant="tertiary"
+                          size="sm"
+                          href="/preferences"
+                          aria-label={t(locale, PROFILE_PREFERENCES_BUTTON_KEY)}
+                          className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
+                        >
+                          <FontAwesomeIcon
+                            icon={faSliders}
+                            className="tw-size-4"
+                            aria-hidden="true"
+                          />
+                          <span>
+                            {t(locale, PROFILE_PREFERENCES_BUTTON_KEY)}
+                          </span>
+                        </ButtonLink>
+                        <div className="tw-hidden min-[840px]:tw-block">
+                          <UserPageHeaderSubscriptionStatus
+                            profile={profile}
+                            layout="subtle"
+                          />
+                        </div>
                       </div>
                     ) : null}
                     {websiteAction ? (
@@ -343,6 +372,15 @@ export default function UserPageHeaderClient({
               </div>
             </div>
 
+            {showSubscriptionStatus ? (
+              <div className="md:tw-pointer-events-auto min-[840px]:tw-hidden">
+                <UserPageHeaderSubscriptionStatus
+                  profile={profile}
+                  layout="wide-row"
+                />
+              </div>
+            ) : null}
+
             {showAbout ? (
               <div className="md:tw-pointer-events-auto">
                 <UserPageHeaderAbout
@@ -353,17 +391,7 @@ export default function UserPageHeaderClient({
               </div>
             ) : null}
 
-            {showSubscriptionStatus ? (
-              <div
-                className={`md:tw-pointer-events-auto lg:tw-hidden ${
-                  hasVisibleAbout ? "tw-mt-4" : ""
-                } ${subscriptionStatusVisibilityClass}`}
-              >
-                <UserPageHeaderSubscriptionStatus profile={profile} />
-              </div>
-            ) : null}
-
-            <div className="tw-mt-4 tw-flex tw-items-center md:tw-pointer-events-auto md:tw-mt-6">
+            <div className="tw-mt-4 tw-flex tw-items-center md:tw-pointer-events-auto">
               <UserPageHeaderStats
                 profile={profile}
                 handleOrWallet={normalizedHandleOrWallet}

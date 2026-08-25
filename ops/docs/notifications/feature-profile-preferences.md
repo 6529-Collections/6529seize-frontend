@@ -3,9 +3,13 @@
 ## Overview
 
 Authenticated profiles can open `Profile Preferences` from the app sidebar,
-the desktop profile menu, or the `Preferences` action shown beneath their own
-profile classification to control who may start new direct-message
-conversations and which in-app notifications are created.
+the desktop profile menu, or the `Preferences` action in their own profile
+header to control who may start new direct-message conversations and which
+in-app notifications are created. The action sits in the far-right owner area
+on desktop layouts. Touch-first and phone layouts place an icon-only
+`Preferences` action beside `Edit profile`; smaller fine-pointer layouts place
+the labeled action to the right of the identity. It is hidden while an active
+profile proxy is in use.
 
 ## Direct Messages
 

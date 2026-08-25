@@ -10,9 +10,13 @@ import { useWaveSettingUpdater } from "./useWaveSettingUpdater";
 
 interface WaveChatStatusProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings" | undefined;
 }
 
-export default function WaveChatStatus({ wave }: WaveChatStatusProps) {
+export default function WaveChatStatus({
+  wave,
+  display = "settings",
+}: WaveChatStatusProps) {
   const { canEdit, mutating, saveChatUpdate } = useWaveSettingUpdater(wave);
   const chatEnabled = wave.chat.enabled === true;
   const isDirectMessage = wave.chat.scope.group?.is_direct_message === true;
@@ -52,6 +56,7 @@ export default function WaveChatStatus({ wave }: WaveChatStatusProps) {
   return (
     <WaveSettingRow
       canEdit={canEdit && !isDirectMessage}
+      editIcon={display === "configuration" ? "gear" : "pencil"}
       editLabel={t(DEFAULT_LOCALE, "waves.chatSettings.status.editLabel")}
       label={t(DEFAULT_LOCALE, "waves.chatSettings.status.label")}
       onOpen={resetEditor}

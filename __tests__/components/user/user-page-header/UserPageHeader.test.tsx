@@ -36,12 +36,11 @@ jest.mock(
 jest.mock(
   "@/components/user/user-page-header/UserPageHeaderSubscriptionStatus",
   () =>
-    ({ compact = false }: { readonly compact?: boolean }) => (
-      <div
-        data-testid="subscription-status"
-        data-compact={compact ? "true" : "false"}
-      />
-    )
+    ({
+      layout = "card",
+    }: {
+      readonly layout?: "card" | "subtle" | "wide-row";
+    }) => <div data-testid="subscription-status" data-layout={layout} />
 );
 jest.mock("@/components/user/utils/UserFollowBtn", () => ({
   __esModule: true,
@@ -141,21 +140,39 @@ describe("UserPageHeader", () => {
 
     expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
     const subscriptionStatuses = screen.getAllByTestId("subscription-status");
-    expect(subscriptionStatuses).toHaveLength(3);
+    expect(subscriptionStatuses).toHaveLength(2);
     expect(
       subscriptionStatuses.filter(
-        (subscriptionStatus) => subscriptionStatus.dataset["compact"] === "true"
+        (subscriptionStatus) =>
+          subscriptionStatus.dataset["layout"] === "subtle"
       )
     ).toHaveLength(1);
-    const preferencesButton = screen.getByRole("link", {
+    expect(
+      subscriptionStatuses.filter(
+        (subscriptionStatus) =>
+          subscriptionStatus.dataset["layout"] === "wide-row"
+      )
+    ).toHaveLength(1);
+    const preferencesButtons = screen.getAllByRole("link", {
       name: "Preferences",
     });
-    expect(preferencesButton).toHaveClass(
-      "!tw-border-white/10",
-      "!tw-bg-iron-950",
-      "tw-shadow-md",
-      "tw-shadow-black/40"
+    expect(preferencesButtons).toHaveLength(3);
+    expect(preferencesButtons[0]).toHaveClass(
+      "tw-size-11",
+      "!tw-bg-transparent",
+      "min-[840px]:tw-hidden"
     );
+    preferencesButtons.slice(1).forEach((preferencesButton) => {
+      expect(preferencesButton).toHaveClass(
+        "!tw-border-white/10",
+        "!tw-bg-iron-950",
+        "tw-shadow-md",
+        "tw-shadow-black/40"
+      );
+    });
+    preferencesButtons.forEach((preferencesButton) => {
+      expect(preferencesButton).toHaveAttribute("href", "/preferences");
+    });
   });
 
   it("links to preferences from your own profile", () => {
@@ -175,10 +192,11 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
-    expect(screen.getByRole("link", { name: "Preferences" })).toHaveAttribute(
-      "href",
-      "/preferences"
-    );
+    screen
+      .getAllByRole("link", { name: "Preferences" })
+      .forEach((preferencesLink) => {
+        expect(preferencesLink).toHaveAttribute("href", "/preferences");
+      });
   });
 
   it("does not show preferences when viewing another profile", () => {

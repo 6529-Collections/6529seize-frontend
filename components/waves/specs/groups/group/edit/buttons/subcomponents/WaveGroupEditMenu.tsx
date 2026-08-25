@@ -1,35 +1,22 @@
 "use client";
 
-import { useMemo, useRef } from "react";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
-import type { WaveGroupType } from "../../../WaveGroup.types";
-import WaveGroupEditButton, {
-  type WaveGroupEditButtonHandle,
-} from "../../WaveGroupEditButton";
-import WaveGroupRemoveButton, {
-  type WaveGroupRemoveButtonHandle,
-} from "../../WaveGroupRemoveButton";
-import { CompactMenu, CompactMenuItem } from "@/components/compact-menu";
+import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
-const GROUP_OPTIONS_LABEL = "Group options";
+const GROUP_OPTIONS_LABEL = waveRightPanelText(
+  "waves.sidebar.rightPanel.group.options"
+);
 
 interface WaveGroupEditMenuProps {
-  readonly wave: ApiWave;
-  readonly type: WaveGroupType;
-  readonly onWaveUpdate: (
-    body: ApiUpdateWaveRequest,
-    opts?: { readonly skipAuth?: boolean | undefined }
-  ) => Promise<void>;
   readonly hasGroup: boolean;
   readonly canIncludeIdentity: boolean;
   readonly canExcludeIdentity: boolean;
   readonly canRemoveGroup: boolean;
   readonly onIncludeIdentity: () => void;
   readonly onExcludeIdentity: () => void;
-  readonly onChangeGroup?: (() => void) | undefined;
-  readonly onRemoveGroup?: (() => void) | undefined;
+  readonly onChangeGroup: () => void;
+  readonly onRemoveGroup: () => void;
 }
 
 interface WaveGroupEditMenuTriggerProps {
@@ -46,9 +33,6 @@ function WaveGroupEditMenuTrigger({ label }: WaveGroupEditMenuTriggerProps) {
 }
 
 export default function WaveGroupEditMenu({
-  wave,
-  type,
-  onWaveUpdate,
   hasGroup,
   canIncludeIdentity,
   canExcludeIdentity,
@@ -58,67 +42,45 @@ export default function WaveGroupEditMenu({
   onChangeGroup,
   onRemoveGroup,
 }: WaveGroupEditMenuProps) {
-  const editButtonRef = useRef<WaveGroupEditButtonHandle | null>(null);
-  const removeButtonRef = useRef<WaveGroupRemoveButtonHandle | null>(null);
+  const menuItems: CompactMenuItem[] = [];
+  const changeGroupLabel = hasGroup
+    ? waveRightPanelText("waves.sidebar.rightPanel.group.change")
+    : waveRightPanelText("waves.sidebar.rightPanel.group.add");
 
-  const menuItems = useMemo<CompactMenuItem[]>(() => {
-    const items: CompactMenuItem[] = [];
-    const changeGroupLabel = hasGroup ? "Change group" : "Add group";
-
-    if (canIncludeIdentity) {
-      items.push({
-        id: "include",
-        label: "Include identity",
-        onSelect: onIncludeIdentity,
-      });
-    }
-
-    if (canExcludeIdentity) {
-      items.push({
-        id: "exclude",
-        label: "Exclude identity",
-        onSelect: onExcludeIdentity,
-      });
-    }
-
-    items.push({
-      id: "change",
-      label: changeGroupLabel,
-      onSelect: () => {
-        if (onChangeGroup) {
-          onChangeGroup();
-          return;
-        }
-        editButtonRef.current?.open();
-      },
+  if (canIncludeIdentity) {
+    menuItems.push({
+      id: "include",
+      label: waveRightPanelText(
+        "waves.sidebar.rightPanel.group.includeIdentity"
+      ),
+      onSelect: onIncludeIdentity,
     });
+  }
 
-    if (canRemoveGroup) {
-      items.push({
-        id: "remove",
-        label: "Remove group",
-        onSelect: () => {
-          if (onRemoveGroup) {
-            onRemoveGroup();
-            return;
-          }
-          removeButtonRef.current?.open();
-        },
-        className: "tw-text-red desktop-hover:hover:tw-text-red",
-      });
-    }
+  if (canExcludeIdentity) {
+    menuItems.push({
+      id: "exclude",
+      label: waveRightPanelText(
+        "waves.sidebar.rightPanel.group.excludeIdentity"
+      ),
+      onSelect: onExcludeIdentity,
+    });
+  }
 
-    return items;
-  }, [
-    canIncludeIdentity,
-    canExcludeIdentity,
-    onIncludeIdentity,
-    onExcludeIdentity,
-    onChangeGroup,
-    onRemoveGroup,
-    canRemoveGroup,
-    hasGroup,
-  ]);
+  menuItems.push({
+    id: "change",
+    label: changeGroupLabel,
+    onSelect: onChangeGroup,
+  });
+
+  if (canRemoveGroup) {
+    menuItems.push({
+      id: "remove",
+      label: waveRightPanelText("waves.sidebar.rightPanel.group.remove"),
+      onSelect: onRemoveGroup,
+      className: "tw-text-red desktop-hover:hover:tw-text-red",
+    });
+  }
 
   return (
     <div className="tw-relative">
@@ -128,22 +90,6 @@ export default function WaveGroupEditMenu({
         aria-label={GROUP_OPTIONS_LABEL}
         items={menuItems}
       />
-      <WaveGroupEditButton
-        ref={editButtonRef}
-        wave={wave}
-        type={type}
-        onWaveUpdate={onWaveUpdate}
-        renderTrigger={null}
-      />
-      {canRemoveGroup ? (
-        <WaveGroupRemoveButton
-          ref={removeButtonRef}
-          wave={wave}
-          type={type}
-          onWaveUpdate={onWaveUpdate}
-          renderTrigger={null}
-        />
-      ) : null}
     </div>
   );
 }
