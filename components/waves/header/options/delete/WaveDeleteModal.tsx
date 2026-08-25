@@ -6,6 +6,11 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import {
+  getMessagesBaseRoute,
+  getWavesBaseRoute,
+} from "@/helpers/navigation.helpers";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiDelete } from "@/services/api/common-api";
@@ -38,9 +43,14 @@ export default function WaveDeleteModal({
 }) {
   const locale = useBrowserLocale();
   const { requestAuth, setToast } = useContext(AuthContext);
-  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
+  const { invalidateDrops, onWaveCreated: invalidateWaves } = useContext(
+    ReactQueryWrapperContext
+  );
   const router = useRouter();
   const [mutating, setMutating] = useState(false);
+  const returnPath = isWaveDirectMessage(wave.id, wave)
+    ? getMessagesBaseRoute(false)
+    : getWavesBaseRoute(false);
 
   const waveDropMutation = useMutation({
     mutationFn: async () => {
@@ -61,7 +71,8 @@ export default function WaveDeleteModal({
         type: "warning",
       });
       invalidateDrops();
-      router.push("/waves");
+      invalidateWaves();
+      router.push(returnPath);
     },
     onError: (error) => {
       setToast({

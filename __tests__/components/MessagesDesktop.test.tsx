@@ -5,6 +5,7 @@ import MessagesDesktopWithProvider from "@/components/messages/MessagesDesktop";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ReactQueryWrapperContextType } from "@/components/react-query-wrapper/ReactQueryWrapperContext";
 import WaveHeaderOptions from "@/components/waves/header/options/WaveHeaderOptions";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiDelete } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -47,7 +48,12 @@ jest.mock("next/navigation", () => ({
 }));
 
 const commonApiDeleteMock = jest.mocked(commonApiDelete);
-const wave = createMockApiWave({ id: "dm-wave" });
+const wave = createMockApiWave({
+  id: "dm-wave",
+  chat: {
+    scope: { group: { is_direct_message: true } },
+  } as ApiWave["chat"],
+});
 
 describe("MessagesDesktop", () => {
   beforeEach(() => {
@@ -65,6 +71,7 @@ describe("MessagesDesktop", () => {
     });
     const reactQueryContext = {
       invalidateDrops: jest.fn(),
+      onWaveCreated: jest.fn(),
     } as unknown as ReactQueryWrapperContextType;
 
     render(
@@ -109,8 +116,18 @@ describe("MessagesDesktop", () => {
         endpoint: "waves/dm-wave",
         errorMode: "structured",
       });
+      expect(commonApiDeleteMock).toHaveBeenCalledTimes(1);
       expect(reactQueryContext.invalidateDrops).toHaveBeenCalled();
-      expect(mockRouter.push).toHaveBeenCalledWith("/waves");
+      expect(reactQueryContext.onWaveCreated).toHaveBeenCalled();
+      expect(mockRouter.push).toHaveBeenCalledWith("/messages");
     });
+
+    expect(
+      (reactQueryContext.invalidateDrops as jest.Mock).mock
+        .invocationCallOrder[0]
+    ).toBeLessThan(mockRouter.push.mock.invocationCallOrder[0]!);
+    expect(
+      (reactQueryContext.onWaveCreated as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan(mockRouter.push.mock.invocationCallOrder[0]!);
   });
 });
