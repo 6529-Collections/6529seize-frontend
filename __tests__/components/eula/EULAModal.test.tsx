@@ -1,5 +1,11 @@
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -15,6 +21,7 @@ jest.mock("@/components/eula/EULAConsentContext", () => ({
 }));
 
 const EULAModal = require("@/components/eula/EULAModal").default;
+const originalResizeObserver = global.ResizeObserver;
 
 function scrollAgreementToBottom() {
   const scrollContainer = screen.getByLabelText(
@@ -43,6 +50,7 @@ describe("EULAModal", () => {
   });
 
   afterEach(() => {
+    global.ResizeObserver = originalResizeObserver;
     jest.restoreAllMocks();
   });
 
@@ -60,6 +68,21 @@ describe("EULAModal", () => {
       expect(
         screen.getByRole("button", { name: "Scroll to end of agreement" })
       ).toHaveFocus()
+    );
+  });
+
+  it("uses the branded full-screen reading layout", () => {
+    render(<EULAModal />);
+
+    const dialog = screen.getByRole("dialog");
+    const agreement = screen.getByLabelText("End User License Agreement text");
+    const logo = dialog.querySelector('header span[aria-hidden="true"]');
+
+    expect(dialog).toHaveClass("tw-h-[100dvh]", "tw-max-w-none");
+    expect(agreement).toHaveClass("tw-h-full", "tw-overflow-y-auto");
+    expect(agreement).not.toHaveClass("tw-max-h-[50vh]");
+    expect(logo?.getAttribute("style")).toContain(
+      "mask-image: url('/6529.svg')"
     );
   });
 
@@ -131,6 +154,71 @@ describe("EULAModal", () => {
     );
   });
 
+  it("re-measures delayed agreement layout changes", async () => {
+    let resizeCallback: ResizeObserverCallback | undefined;
+    const observe = jest.fn();
+    const disconnect = jest.fn();
+    global.ResizeObserver = jest.fn().mockImplementation((callback) => {
+      resizeCallback = callback;
+      return { observe, disconnect };
+    }) as unknown as typeof ResizeObserver;
+    const clientHeight = jest
+      .spyOn(HTMLElement.prototype, "clientHeight", "get")
+      .mockReturnValue(0);
+    const scrollHeight = jest
+      .spyOn(HTMLElement.prototype, "scrollHeight", "get")
+      .mockReturnValue(0);
+
+    const { unmount } = render(<EULAModal />);
+    const agreement = screen.getByLabelText("End User License Agreement text");
+    expect(observe).toHaveBeenCalledWith(agreement);
+    expect(screen.getByRole("button", { name: "Agree" })).toBeDisabled();
+
+    clientHeight.mockReturnValue(200);
+    scrollHeight.mockReturnValue(200);
+    act(() => resizeCallback?.([], {} as ResizeObserver));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Agree" })).toBeEnabled()
+    );
+
+    unmount();
+    expect(disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it("requires scrolling through agreement content added after completion", () => {
+    let resizeCallback: ResizeObserverCallback | undefined;
+    const observe = jest.fn();
+    global.ResizeObserver = jest.fn().mockImplementation((callback) => {
+      resizeCallback = callback;
+      return { observe, disconnect: jest.fn() };
+    }) as unknown as typeof ResizeObserver;
+
+    render(<EULAModal />);
+    const agreement = screen.getByLabelText("End User License Agreement text");
+    const agreementContent = agreement.firstElementChild;
+    const agreeButton = screen.getByRole("button", { name: "Agree" });
+    expect(observe).toHaveBeenCalledWith(agreementContent);
+
+    scrollAgreementToBottom();
+    expect(agreeButton).toBeEnabled();
+
+    Object.defineProperty(agreement, "scrollHeight", {
+      value: 300,
+      configurable: true,
+    });
+    act(() => resizeCallback?.([], {} as ResizeObserver));
+
+    expect(agreeButton).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Scroll to end of agreement" })
+    ).toBeVisible();
+
+    agreement.scrollTop = 200;
+    fireEvent.scroll(agreement);
+    expect(agreeButton).toBeEnabled();
+  });
+
   it("scrolls to the bottom from the named scroll control", () => {
     render(<EULAModal />);
     const scrollContainer = screen.getByLabelText(
@@ -146,6 +234,29 @@ describe("EULAModal", () => {
       top: scrollContainer.scrollHeight,
       behavior: "smooth",
     });
+  });
+
+  it("shows the scroll control again after moving away from the bottom", () => {
+    render(<EULAModal />);
+    const scrollContainer = screen.getByLabelText(
+      "End User License Agreement text"
+    );
+    const agreeButton = screen.getByRole("button", { name: "Agree" });
+
+    scrollAgreementToBottom();
+
+    expect(
+      screen.queryByRole("button", { name: "Scroll to end of agreement" })
+    ).not.toBeInTheDocument();
+    expect(agreeButton).toBeEnabled();
+
+    scrollContainer.scrollTop = 70;
+    fireEvent.scroll(scrollContainer);
+
+    expect(
+      screen.getByRole("button", { name: "Scroll to end of agreement" })
+    ).toBeVisible();
+    expect(agreeButton).toBeEnabled();
   });
 
   it("locks and restores body scrolling on mount and unmount", () => {
