@@ -314,7 +314,7 @@ export default function UserPageHeaderClient({
                     }`}
                   >
                     {canManageProfilePreferences ? (
-                      <div className="tw-hidden tw-flex-col tw-items-end tw-gap-4 min-[840px]:tw-flex min-[840px]:tw-w-auto lg:tw-w-[17rem]">
+                      <div className="tw-hidden tw-flex-col tw-items-end tw-gap-4 min-[840px]:tw-flex min-[840px]:tw-w-auto">
                         <Button
                           variant="tertiary"
                           size="sm"
@@ -330,7 +330,7 @@ export default function UserPageHeaderClient({
                             {t(locale, PROFILE_PREFERENCES_BUTTON_KEY)}
                           </span>
                         </Button>
-                        <div className="tw-hidden min-[840px]:tw-block">
+                        <div className="tw-hidden lg:tw-block">
                           <UserPageHeaderSubscriptionStatus
                             profile={profile}
                             layout="subtle"
@@ -370,7 +370,7 @@ export default function UserPageHeaderClient({
             </div>
 
             {showSubscriptionStatus ? (
-              <div className="md:tw-pointer-events-auto min-[840px]:tw-hidden">
+              <div className="md:tw-pointer-events-auto lg:tw-hidden">
                 <UserPageHeaderSubscriptionStatus
                   profile={profile}
                   layout="wide-row"
