@@ -16,6 +16,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import LogoIcon from "@/components/common/icons/LogoIcon";
 import { Device } from "@capacitor/device";
 import Cookies from "js-cookie";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import React, {
   createContext,
@@ -84,6 +85,21 @@ type EULAConsentProviderProps = {
 const hasCurrentLocalConsent = (version: string | undefined): boolean =>
   version === CURRENT_EULA_VERSION;
 
+const getApiErrorStatus = (error: unknown): number | undefined => {
+  if (typeof error !== "object" || error === null || !("status" in error)) {
+    return undefined;
+  }
+
+  return typeof error.status === "number" ? error.status : undefined;
+};
+
+const getAccessControlRoute = (error: unknown): string | null => {
+  const status = getApiErrorStatus(error);
+  if (status === 401) return "/access";
+  if (status === 403) return "/restricted";
+  return null;
+};
+
 const EULACheckingScreen = ({ label }: { readonly label: string }) => {
   const [showLogo, setShowLogo] = useState(false);
 
@@ -148,6 +164,10 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
 }) => {
   const capacitor = useCapacitor();
   const locale = useBrowserLocale();
+  const pathname = usePathname();
+  const router = useRouter();
+  const isAccessControlRoute =
+    pathname.startsWith("/access") || pathname.startsWith("/restricted");
   const [consentState, setConsentState] = useState<EULAConsentState>(() => {
     if (!initialIsIos && !capacitor.isIos) return "accepted";
     return hasCurrentLocalConsent(initialConsentVersion)
@@ -180,6 +200,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
 
       const response = await commonApiFetch<ApiEulaConsent>({
         endpoint: `policies/eula-consent/${deviceId.identifier}`,
+        errorMode: "structured",
       });
       if (consentCheckId !== consentCheckIdRef.current) return;
 
@@ -193,10 +214,15 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       setConsentState("acceptance-required");
     } catch (error) {
       if (consentCheckId !== consentCheckIdRef.current) return;
+      const accessControlRoute = getAccessControlRoute(error);
+      if (accessControlRoute) {
+        router.replace(accessControlRoute);
+        return;
+      }
       console.error("Failed to fetch EULA consent status", error);
       setConsentState("error");
     }
-  }, [capacitor.isIos]);
+  }, [capacitor.isIos, router]);
 
   const consent = useCallback(async () => {
     setIsSaving(true);
@@ -211,18 +237,24 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       await commonApiPost({
         endpoint: "policies/eula-consent",
         body,
+        errorMode: "structured",
       });
       Cookies.set(CONSENT_EULA_COOKIE, CURRENT_EULA_VERSION, {
         expires: EULA_VALIDITY_DAYS,
       });
       setConsentState("accepted");
     } catch (error) {
+      const accessControlRoute = getAccessControlRoute(error);
+      if (accessControlRoute) {
+        router.replace(accessControlRoute);
+        return;
+      }
       console.error("Failed to post EULA consent", error);
       setSaveError(t(locale, "eula.saveError"));
     } finally {
       setIsSaving(false);
     }
-  }, [locale]);
+  }, [locale, router]);
 
   const value = useMemo(
     () => ({ consent, isSaving, saveError }),
@@ -230,6 +262,11 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
   );
 
   useEffect(() => {
+    if (isAccessControlRoute) {
+      consentCheckIdRef.current += 1;
+      return;
+    }
+
     const checkConsent = globalThis.setTimeout(() => {
       void getEULAConsent();
     }, 0);
@@ -238,7 +275,15 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
       globalThis.clearTimeout(checkConsent);
       consentCheckIdRef.current += 1;
     };
-  }, [getEULAConsent]);
+  }, [getEULAConsent, isAccessControlRoute]);
+
+  if (isAccessControlRoute) {
+    return (
+      <EULAConsentContext.Provider value={value}>
+        {children}
+      </EULAConsentContext.Provider>
+    );
+  }
 
   if (consentState === "checking" || consentState === "error") {
     return (
