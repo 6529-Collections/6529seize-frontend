@@ -36,8 +36,8 @@ import {
   getProfileCollectedReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 import { fetchUrl } from "@/services/6529api";
@@ -413,12 +413,23 @@ export default function GradientPageComponent({
 }) {
   const capacitor = useCapacitor();
   const locale = useBrowserLocale();
-  const searchParams = useMemo(
-    () => new URLSearchParams(searchParamsString),
+  const returnContext = useMemo(
+    () =>
+      getProfileCollectedReturnContext(
+        new URLSearchParams(searchParamsString).get(
+          PROFILE_COLLECTED_RETURN_PARAM
+        )
+      ),
     [searchParamsString]
   );
-  const returnContext = getProfileCollectedReturnContext(
-    searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+  const navigationParams = useMemo(
+    () =>
+      new URLSearchParams(
+        returnContext
+          ? { [PROFILE_COLLECTED_RETURN_PARAM]: returnContext.href }
+          : undefined
+      ),
+    [returnContext]
   );
   const { country } = useCookieConsent();
   const { address: connectedAddress } = useSeizeConnectContext();
@@ -611,7 +622,7 @@ export default function GradientPageComponent({
                     path="/6529-gradient"
                     startIndex={GRADIENT_COLLECTION_START_INDEX}
                     endIndex={GRADIENT_COLLECTION_END_INDEX}
-                    params={searchParams}
+                    params={navigationParams}
                   />
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">

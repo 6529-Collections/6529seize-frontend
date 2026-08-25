@@ -119,4 +119,33 @@ describe("NavigationHistoryContext", () => {
     rerender();
     expect(result.current.canGoBack).toBe(false);
   });
+
+  it("replaces the current history entry when the explicit route is not stacked", () => {
+    mockPathname = "/network";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+
+    mockPathname = "/meme-lab/65";
+    rerender();
+
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    act(() => {
+      result.current.goBackTo(returnTo);
+    });
+
+    expect(routerMock.replace).toHaveBeenCalledWith(returnTo);
+
+    mockPathname = "/Shelby/collected";
+    mockSearchParams = new URLSearchParams("collection=memelab");
+    rerender();
+    expect(result.current.canGoBack).toBe(true);
+
+    act(() => {
+      result.current.goBack();
+    });
+    expect(routerMock.push).toHaveBeenCalledWith("/network");
+  });
 });

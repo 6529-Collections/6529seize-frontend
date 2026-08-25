@@ -189,6 +189,10 @@ export const NavigationHistoryProvider: React.FC<{
 
         skipNext.current = true;
         if (targetIndex < 0) {
+          historyRef.current = [
+            ...historyRef.current.slice(0, prev),
+            { type: "route", path },
+          ];
           router.replace(path);
           return prev;
         }

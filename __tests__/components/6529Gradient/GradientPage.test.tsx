@@ -163,7 +163,10 @@ describe("GradientPage", () => {
   it("returns to the originating profile collected card", async () => {
     const returnTo =
       "/Shelby/collected?collection=gradients&page=2#collected-card-gradients-1";
-    const searchParams = new URLSearchParams({ returnTo });
+    const searchParams = new URLSearchParams({
+      returnTo,
+      untrusted: "do-not-forward",
+    });
 
     renderPage({ searchParamsString: searchParams.toString() });
 
@@ -175,7 +178,7 @@ describe("GradientPage", () => {
     ).toHaveClass("tw-hidden", "md:tw-flex");
     expect(await screen.findByTestId("nav")).toHaveAttribute(
       "data-query",
-      searchParams.toString()
+      new URLSearchParams({ returnTo }).toString()
     );
   });
 

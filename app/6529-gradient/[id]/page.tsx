@@ -5,6 +5,7 @@ import {
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
+import { PROFILE_COLLECTED_RETURN_PARAM } from "@/helpers/profile-collected-navigation";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import {
   buildNftPageJsonLd,
@@ -21,12 +22,10 @@ const serializeSearchParams = (
 ): string => {
   const serialized = new URLSearchParams();
 
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (Array.isArray(value)) {
-      value.forEach((item) => serialized.append(key, item));
-    } else if (value !== undefined) {
-      serialized.set(key, value);
-    }
+  const returnTo = searchParams[PROFILE_COLLECTED_RETURN_PARAM];
+  const returnToValue = Array.isArray(returnTo) ? returnTo[0] : returnTo;
+  if (returnToValue !== undefined) {
+    serialized.set(PROFILE_COLLECTED_RETURN_PARAM, returnToValue);
   }
 
   return serialized.toString();
