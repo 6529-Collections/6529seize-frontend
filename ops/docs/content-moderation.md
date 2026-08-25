@@ -36,8 +36,10 @@ flight. The UI does not replace it with a prominent "being checked" message.
 The backend response remains authoritative:
 
 - on success, the server result replaces the optimistic post;
-- on rejection, the optimistic post is removed, the reason is explained, and
-  the draft is preserved so the user can edit and try again; and
+- on rejection, the unsent optimistic post remains in the current Wave with a
+  subtle red treatment and **Not sent · Blocked by safety check** status; it is
+  removed when the user leaves or refreshes the Wave and is never persisted;
+  and
 - when the evaluator is unavailable or uncertain, the permissive server policy
   allows the post.
 
@@ -149,11 +151,13 @@ Open **Flag Content**, select only **Report this post**, choose a reason, add
 optional context, and submit. The report is sent without hiding the post or
 blocking its author.
 
-### Correct a rejected post
+### Understand a rejected post
 
-Edit the preserved draft to remove the identified safety issue, then submit it
-again. Contact support when a known-unsafe-link or safety rejection appears to
-be a mistake.
+The failed row is a temporary local delivery record, not a published post. It
+does not offer edit, retry, reaction, reply, or post-action controls. Submit a
+new post if desired. Leaving or refreshing the Wave clears the failed row.
+Contact support when a known-unsafe-link or safety rejection appears to be a
+mistake.
 
 ## Failure and recovery
 

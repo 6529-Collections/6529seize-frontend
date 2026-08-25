@@ -104,6 +104,8 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.stateChanged": "State changed",
   "contentModeration.postRejected":
     "This post couldn't be submitted because it was flagged by the safety check. Please review it and try again.",
+  "contentModeration.delivery.moderationRejected":
+    "Not sent · Blocked by safety check",
   "preferences.title": "Preferences",
   "preferences.metaDescription":
     "Manage notification, messaging, and content preferences.",

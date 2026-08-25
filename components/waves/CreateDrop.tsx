@@ -1,6 +1,13 @@
 "use client";
 
-import { useRef, useState, useCallback, useContext, useMemo } from "react";
+import {
+  useRef,
+  useState,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import CreateDropContent from "./CreateDropContent";
@@ -44,6 +51,10 @@ import {
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import {
+  DropClientDeliveryState,
+  DropSize,
+} from "@/helpers/waves/drop.helpers";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -147,7 +158,24 @@ export default function CreateDrop({
   } | null>(null);
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
-  const { processDropRemoved, processIncomingDrop } = useMyStream();
+  const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
+    useMyStream();
+  const activeWaveIdRef = useRef<string | null>(wave.id);
+  const moderationRejectedDropIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    activeWaveIdRef.current = wave.id;
+    const moderationRejectedDropIds = moderationRejectedDropIdsRef.current;
+
+    return () => {
+      activeWaveIdRef.current = null;
+      const rejectedDropIds = Array.from(moderationRejectedDropIds);
+      moderationRejectedDropIds.clear();
+      rejectedDropIds.forEach((rejectedDropId) => {
+        processDropRemoved(wave.id, rejectedDropId);
+      });
+    };
+  }, [processDropRemoved, wave.id]);
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -503,17 +531,44 @@ export default function CreateDrop({
     },
     onError: (error, body) => {
       clearSlowModeChatPending(body.slowModeChatReservation);
+      const isContentModerationRejection =
+        getStructuredApiErrorStatus(error) === 422 &&
+        getStructuredApiErrorCode(error) === "CONTENT_MODERATION_REJECTED";
       setTimeout(() => {
-        if (body.dropId) {
-          processDropRemoved(body.drop.wave_id, body.dropId);
+        if (!body.dropId) {
+          return;
         }
+
+        if (
+          isContentModerationRejection &&
+          activeWaveIdRef.current === body.drop.wave_id
+        ) {
+          const updateResult = applyOptimisticDropUpdate({
+            waveId: body.drop.wave_id,
+            dropId: body.dropId,
+            update: (optimisticDrop) => {
+              if (optimisticDrop.type !== DropSize.FULL) {
+                return optimisticDrop;
+              }
+
+              return {
+                ...optimisticDrop,
+                clientDeliveryState:
+                  DropClientDeliveryState.MODERATION_REJECTED,
+              };
+            },
+          });
+          if (updateResult !== null) {
+            moderationRejectedDropIdsRef.current.add(body.dropId);
+            return;
+          }
+        }
+
+        processDropRemoved(body.drop.wave_id, body.dropId);
       }, 0);
       const isHandled = body.onError?.(error) === true;
       if (!isHandled) {
         const errorDetails = getToastErrorDetails(error);
-        const isContentModerationRejection =
-          getStructuredApiErrorStatus(error) === 422 &&
-          getStructuredApiErrorCode(error) === "CONTENT_MODERATION_REJECTED";
         setToast({
           type: "error",
           title: t(locale, "contentModeration.dropSubmitErrorTitle"),

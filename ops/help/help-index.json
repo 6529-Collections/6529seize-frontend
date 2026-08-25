@@ -73,7 +73,7 @@
         "profanity",
         "unsafe link",
         "rejected",
-        "draft",
+        "not sent",
         "attachments"
       ],
       "facts": [
@@ -82,7 +82,8 @@
         "Profanity, unpopular opinions, and ordinary offensive speech are not rejected merely for being objectionable.",
         "Configured known unsafe destinations can be rejected directly. Uncertain AI results and evaluator failures follow the permissive policy and allow the post.",
         "A locally created post stays visible in its normal layout while submission is pending; it is not replaced by a prominent checking message.",
-        "When the backend rejects a post, the composer removes the optimistic post, explains the rejection, and preserves the draft for editing and retrying.",
+        "When the backend rejects a post, the unsent optimistic post remains temporarily in the current Wave with a subtle red treatment and a 'Not sent · Blocked by safety check' status; it is never persisted and disappears after leaving or refreshing the Wave.",
+        "A moderation-rejected local row does not offer edit, retry, reaction, reply, or post-action controls.",
         "File attachments such as PDF and CSV files use a separate asynchronous validation pipeline rather than the synchronous text check."
       ],
       "canonical_path": "/waves",
