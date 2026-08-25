@@ -346,7 +346,7 @@ const NewMentionsPlugin = forwardRef<
       {
         group: ApiDropGroupMention.Contributors,
         display: t(locale, "waves.composer.groupMentions.contributors"),
-        allowed: true,
+        allowed: canMentionAll,
       },
       {
         group: ApiDropGroupMention.Admins,

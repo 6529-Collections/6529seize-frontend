@@ -1,8 +1,10 @@
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
-export type NotificationLoadingTarget = "all-group" | "all-drops";
+export type NotificationLoadingTarget = "broadcast-mentions" | "all-drops";
 
-export const ALL_GROUP_MENTION = ApiDropGroupMention.All;
+// The persisted ALL value is the backward-compatible preference key for both
+// admin-only broadcast mentions: @all and @contributors.
+export const BROADCAST_MENTION_PREFERENCE = ApiDropGroupMention.All;
 
 export const getErrorMessage = (error: unknown, defaultMessage: string) => {
   if (error instanceof Error) {
