@@ -28,8 +28,8 @@ behavior across thread header controls and sidebar wave rows.
 ## Notification Modes
 
 - The bell button opens notification preferences.
-- The `ALL mentions` row, shown with the `@` icon, turns on notifications for
-  `@ALL` mentions.
+- The `Broadcast mentions` row, shown with the `@` icon, turns on notifications
+  for the admin-only `@all` and `@contributors` broadcasts.
 - The `All messages` row turns on notifications for every message.
 - If all-message notifications are unavailable by follower limit and not already
   enabled, the all-message row stays visible but disabled with an inline reason.
@@ -63,8 +63,8 @@ behavior across thread header controls and sidebar wave rows.
 
 - If mode or mute requests fail, the prior state stays and an error toast is
   shown.
-- If all-message notifications are unavailable due follower limit, use `@ALL`
-  mention notifications or mute the wave from the speaker control.
+- If all-message notifications are unavailable due follower limit, use
+  `Broadcast mentions` or mute the wave from the speaker control.
 - If header/list state looks stale after a toggle, reopen the wave thread or
   refresh.
 

@@ -77,7 +77,10 @@ import {
   exportDropMarkdown,
   normalizeDropMarkdown,
 } from "./normalizeDropMarkdown";
-import { areMentionedGroupsEqual } from "@/helpers/waves/drop-group-mentions";
+import {
+  areMentionedGroupsEqual,
+  isAdminOnlyGroupMention,
+} from "@/helpers/waves/drop-group-mentions";
 import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
@@ -391,10 +394,11 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     () => addBlankLinePlaceholders(normalizedInitialContent),
     [normalizedInitialContent]
   );
-  const hasInitialAllGroupMention = initialGroupMentions.includes(
-    ApiDropGroupMention.All
+  const hasInitialAdminOnlyGroupMention = initialGroupMentions.some(
+    isAdminOnlyGroupMention
   );
-  const canResolveAllGroupMention = canMentionAll || hasInitialAllGroupMention;
+  const canResolveAdminOnlyGroupMentions =
+    canMentionAll || hasInitialAdminOnlyGroupMention;
   const initialMentionProfileIdsByHandle = useMemo(
     () =>
       new Map(
@@ -496,7 +500,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       );
       const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
         latestEditorState,
-        canResolveAllGroupMention
+        canResolveAdminOnlyGroupMentions
       );
       const currentMentionedUsers = getMentionedUsersFromEditorState(
         latestEditorState,
@@ -528,7 +532,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   }, [
     editorState,
     mentionedWaves,
-    canResolveAllGroupMention,
+    canResolveAdminOnlyGroupMentions,
     initialGroupMentions,
     initialMentions,
     isSaving,

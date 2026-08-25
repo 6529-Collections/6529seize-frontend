@@ -130,7 +130,7 @@ describe("WaveNotificationSettings", () => {
     expect(trigger).toHaveClass("tw-w-full", "tw-border");
     expect(muteButton).toHaveClass("tw-w-full", "tw-border");
     expect(
-      screen.queryByLabelText("Receive ALL mention notifications")
+      screen.queryByLabelText("Receive @all and @contributors notifications")
     ).not.toBeInTheDocument();
 
     await openNotificationMenu();
@@ -139,30 +139,33 @@ describe("WaveNotificationSettings", () => {
     expect(menu).toHaveAttribute("aria-labelledby", trigger.id);
     expect(menu.querySelector("ul")).toHaveClass("tw-m-0");
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
+    const broadcastMentionsButton = screen.getByLabelText(
+      "Receive @all and @contributors notifications"
     );
     const allButton = screen.getByLabelText(
       "Receive notifications for all messages"
     );
-    expect(allMentionsButton).toBeInTheDocument();
+    expect(broadcastMentionsButton).toBeInTheDocument();
     expect(allButton).toBeInTheDocument();
-    expect(allMentionsButton).toHaveAttribute("role", "menuitemcheckbox");
+    expect(broadcastMentionsButton).toHaveAttribute("role", "menuitemcheckbox");
     expect(allButton).toHaveAttribute("role", "menuitemcheckbox");
-    expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
+    expect(broadcastMentionsButton).toHaveClass("tw-cursor-pointer");
     expect(allButton).toHaveClass("tw-cursor-pointer");
-    expect(allMentionsButton).not.toHaveAttribute("data-tooltip-content");
+    expect(broadcastMentionsButton).not.toHaveAttribute("data-tooltip-content");
     expect(allButton).not.toHaveAttribute("data-tooltip-content");
-    expect(allMentionsButton.parentElement).toHaveAttribute("role", "none");
+    expect(broadcastMentionsButton.parentElement).toHaveAttribute(
+      "role",
+      "none"
+    );
     expect(allButton.parentElement).toHaveAttribute("role", "none");
-    expect(screen.getByText("ALL mentions")).toBeInTheDocument();
+    expect(screen.getByText("Broadcast mentions")).toBeInTheDocument();
     expect(screen.queryByText("@ALL")).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive mentions-only notifications")
     ).not.toBeInTheDocument();
   });
 
-  it("shows ALL mention menu item as active when enabled", async () => {
+  it("shows broadcast mention menu item as active when enabled", async () => {
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: {
         subscribed: false,
@@ -181,10 +184,10 @@ describe("WaveNotificationSettings", () => {
 
     await openNotificationMenu();
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
+    const broadcastMentionsButton = screen.getByLabelText(
+      "Receive @all and @contributors notifications"
     );
-    expect(allMentionsButton).toHaveClass("tw-text-primary-400");
+    expect(broadcastMentionsButton).toHaveClass("tw-text-primary-400");
   });
 
   it("shows all-message menu item as active when all-message notifications enabled", async () => {
@@ -209,7 +212,7 @@ describe("WaveNotificationSettings", () => {
     expect(allButton).toHaveClass("tw-text-primary-400");
   });
 
-  it("can show ALL mention and all-message menu items active together", async () => {
+  it("can show broadcast mention and all-message menu items active together", async () => {
     mockUseWaveNotificationSubscription.mockReturnValue({
       data: {
         subscribed: true,
@@ -229,7 +232,7 @@ describe("WaveNotificationSettings", () => {
     await openNotificationMenu();
 
     expect(
-      screen.getByLabelText("Receive ALL mention notifications")
+      screen.getByLabelText("Receive @all and @contributors notifications")
     ).toHaveClass("tw-text-primary-400");
     expect(
       screen.getByLabelText("Receive notifications for all messages")
@@ -270,7 +273,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("enables ALL mention notifications while preserving all drop preference", async () => {
+  it("enables broadcast mention notifications while preserving all drop preference", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
 
@@ -285,10 +288,10 @@ describe("WaveNotificationSettings", () => {
 
     await openNotificationMenu();
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
+    const broadcastMentionsButton = screen.getByLabelText(
+      "Receive @all and @contributors notifications"
     );
-    await userEvent.click(allMentionsButton);
+    await userEvent.click(broadcastMentionsButton);
 
     await waitFor(() => {
       expect(commonApiPost).toHaveBeenCalledWith({
@@ -303,12 +306,12 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
     await waitFor(() => {
       expect(
-        screen.queryByLabelText("Receive ALL mention notifications")
+        screen.queryByLabelText("Receive @all and @contributors notifications")
       ).not.toBeInTheDocument();
     });
   });
 
-  it("disables ALL mention notifications", async () => {
+  it("disables broadcast mention notifications", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
 
@@ -326,10 +329,10 @@ describe("WaveNotificationSettings", () => {
 
     await openNotificationMenu();
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
+    const broadcastMentionsButton = screen.getByLabelText(
+      "Receive @all and @contributors notifications"
     );
-    await userEvent.click(allMentionsButton);
+    await userEvent.click(broadcastMentionsButton);
 
     await waitFor(() => {
       expect(commonApiPost).toHaveBeenCalledWith({
@@ -344,7 +347,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("enables all-message notifications while preserving ALL mention preference", async () => {
+  it("enables all-message notifications while preserving broadcast mention preference", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
 
@@ -380,7 +383,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("disables all-message notifications while preserving ALL mention preference", async () => {
+  it("disables all-message notifications while preserving broadcast mention preference", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
 
@@ -489,7 +492,7 @@ describe("WaveNotificationSettings", () => {
     await userEvent.click(trigger);
 
     expect(
-      screen.queryByLabelText("Receive ALL mention notifications")
+      screen.queryByLabelText("Receive @all and @contributors notifications")
     ).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive notifications for all messages")
@@ -519,7 +522,7 @@ describe("WaveNotificationSettings", () => {
       screen.queryByLabelText("Open notification settings")
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByLabelText("Receive ALL mention notifications")
+      screen.queryByLabelText("Receive @all and @contributors notifications")
     ).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive notifications for all messages")
@@ -560,7 +563,7 @@ describe("WaveNotificationSettings", () => {
     });
   });
 
-  it("handles API error when disabling ALL mention notifications", async () => {
+  it("handles API error when disabling broadcast mention notifications", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
 
     mockUseWaveNotificationSubscription.mockReturnValue({
@@ -577,10 +580,10 @@ describe("WaveNotificationSettings", () => {
 
     await openNotificationMenu();
 
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
+    const broadcastMentionsButton = screen.getByLabelText(
+      "Receive @all and @contributors notifications"
     );
-    await userEvent.click(allMentionsButton);
+    await userEvent.click(broadcastMentionsButton);
 
     await waitFor(() => {
       expect(mockAuthContext.setToast).toHaveBeenCalledWith({
@@ -653,7 +656,7 @@ describe("WaveNotificationSettings", () => {
       screen.queryByLabelText("Open notification settings")
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByLabelText("Receive ALL mention notifications")
+      screen.queryByLabelText("Receive @all and @contributors notifications")
     ).not.toBeInTheDocument();
     expect(
       screen.queryByLabelText("Receive notifications for all messages")

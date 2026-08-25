@@ -5292,11 +5292,14 @@
       ],
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
-        "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
-        "The case-insensitive @contributors mention targets profiles with Chat access, while @admins targets the Wave creator and profiles in the Admins scope.",
-        "When Wave Chat access is Public, Wave followers are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "The broadcast mentions @all and @contributors are available only to the Wave creator and profiles in the Admins scope.",
+        "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled Broadcast mentions, while @admins targets the Wave creator and profiles in the Admins scope.",
+        "When Wave Chat access is Public, joined Wave followers with Broadcast mentions enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "The Broadcast mentions notification preference controls both @all and @contributors, while All messages continues to notify a joined profile about every message.",
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
-        "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
+        "Any profile with Chat access can invoke @admins or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
+        "Broadcast suggestions are unavailable to non-admins; if a non-admin types @all or @contributors directly in a new message, the token is posted as ordinary text without broadcast metadata or notifications.",
+        "A non-admin can retain @contributors while editing an existing message that already contained it, but the edit does not rebroadcast the mention and they cannot add it as a broadcast mention to a message that did not already contain it.",
         "Global mention text inside links or inline and fenced code remains literal and does not notify a Wave audience.",
         "Editing stored global-mention tokens does not resend permission-group notifications; mentioned_groups describes tokens in the current displayed content, not historical notification delivery.",
         "Global mentions stay visible in posted content; personal Quick Tags expand into individual profile mentions before submission.",
@@ -5559,7 +5562,10 @@
         "bell button",
         "speaker muted",
         "speaker mute button",
-        "all message notifications"
+        "all message notifications",
+        "broadcast mentions",
+        "@all notifications",
+        "@contributors notifications"
       ],
       "keywords": [
         "waves",
@@ -5570,11 +5576,13 @@
         "speaker",
         "all",
         "messages",
-        "ALL"
+        "ALL",
+        "broadcast",
+        "contributors"
       ],
       "facts": [
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "The notification menu has an ALL mentions option with an @ icon for @ALL mention notifications.",
+        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
         "The notification menu has an All messages option for every-message notifications.",
         "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
         "The speaker control mutes waves before or after joining.",
