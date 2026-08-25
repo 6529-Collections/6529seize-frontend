@@ -125,12 +125,13 @@ Transfer mode is part of the Native collected view (not a separate route).
    - Native card results render as a labelled `Collected cards` list with one
      list item per card for assistive technologies.
    - In the native app, a token opened here uses the app-header Back chevron to
-     return from The Memes, Gradients, NextGen, and Meme Lab detail pages. A
-     mobile browser shows `Back to {profile}'s collected` in the detail header,
-     while desktop relies on browser Back. The native and mobile-web return
-     actions restore the originating Collected filters and page, then return
-     keyboard focus and scroll position to the opened card when it is still on
-     that page.
+     return from The Memes, Gradients, NextGen, and Meme Lab detail pages while
+     retaining each detail page's inline collection link. A mobile browser
+     shows `Back to {profile}'s collected` in the detail header, while desktop
+     retains the collection link and relies on browser Back for profile return.
+     The native and mobile-web profile-return actions restore the originating
+     Collected filters and page, then return keyboard focus and scroll position
+     to the opened card when it is still on that page.
 9. In network view, review xTDH token holdings:
    - Network card results render as a labelled `Collected network cards` list
      with one list item per token for assistive technologies.

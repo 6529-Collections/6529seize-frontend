@@ -599,7 +599,9 @@ export default function GradientPageComponent({
               />
               <div
                 className={`tw-mb-0 tw-items-center ${
-                  returnContext ? "tw-hidden md:tw-flex" : "tw-flex"
+                  returnContext && !capacitor.isCapacitor
+                    ? "tw-hidden md:tw-flex"
+                    : "tw-flex"
                 }`}
               >
                 <Link

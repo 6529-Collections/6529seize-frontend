@@ -5,6 +5,7 @@ import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import { formatAddress, isNullAddress } from "@/helpers/Helpers";
 import { getProfileCollectedReturnContext } from "@/helpers/profile-collected-navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,6 +25,7 @@ export default function NextGenTokenCollectionLinks({
   readonly returnTo?: string | null | undefined;
 }) {
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
   const returnContext = getProfileCollectedReturnContext(returnTo);
   const normalisedHandle = getTrimmedIdentity(token.normalised_handle);
   const handle = getTrimmedIdentity(token.handle);
@@ -67,7 +69,11 @@ export default function NextGenTokenCollectionLinks({
           </Link>
         )
       )}
-      <div className={returnContext ? "tw-hidden md:tw-block" : undefined}>
+      <div
+        className={
+          returnContext && !isCapacitor ? "tw-hidden md:tw-block" : undefined
+        }
+      >
         <NextGenBackToCollectionPageLink collection={collection} />
       </div>
     </div>

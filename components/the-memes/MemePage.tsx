@@ -30,6 +30,7 @@ import {
   getProfileCollectedReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
+import useCapacitor from "@/hooks/useCapacitor";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -237,6 +238,7 @@ export default function MemePage({
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { isCapacitor } = useCapacitor();
   const locale = normalizeLocale(searchParams.get("locale"));
   const returnContext = getProfileCollectedReturnContext(
     searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
@@ -667,7 +669,9 @@ export default function MemePage({
               />
               <div
                 className={`tw-mb-0 tw-items-center ${
-                  returnContext ? "tw-hidden md:tw-flex" : "tw-flex"
+                  returnContext && !isCapacitor
+                    ? "tw-hidden md:tw-flex"
+                    : "tw-flex"
                 }`}
               >
                 <Link
