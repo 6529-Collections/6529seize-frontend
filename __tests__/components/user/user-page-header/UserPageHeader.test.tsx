@@ -53,6 +53,14 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
+jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
+  useProfileBlockState: jest.fn(() => ({
+    isBlocked: false,
+    isLoading: false,
+    isUnblocking: false,
+    unblock: jest.fn(),
+  })),
+}));
 jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
