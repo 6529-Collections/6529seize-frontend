@@ -7,12 +7,15 @@ import WaveSettingRow from "./WaveSettingRow";
 
 interface WaveProposalCardSettingsProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings" | undefined;
 }
 
 export default function WaveProposalCardSettings({
   wave,
+  display = "settings",
 }: WaveProposalCardSettingsProps) {
   const settings = useWaveProposalCardSettings(wave);
+  const isConfiguration = display === "configuration";
 
   if (!settings.isSupported) {
     return null;
@@ -21,6 +24,7 @@ export default function WaveProposalCardSettings({
   return (
     <WaveSettingRow
       canEdit={settings.canEdit}
+      editIcon={isConfiguration ? "gear" : "pencil"}
       editLabel={settings.editLabel}
       label={settings.rowLabel}
       onOpen={settings.resetEditor}
@@ -37,6 +41,7 @@ export default function WaveProposalCardSettings({
           onSubmit={() => settings.saveSettings(closeEditor)}
         />
       )}
+      variant={isConfiguration ? "content" : "row"}
     />
   );
 }
