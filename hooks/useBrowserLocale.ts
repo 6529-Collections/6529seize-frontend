@@ -17,8 +17,7 @@ const getBrowserLocale = (): SupportedLocale => {
     "language"
   );
   const preferredLocale =
-    Array.isArray(browserLanguages) &&
-    typeof browserLanguages[0] === "string"
+    Array.isArray(browserLanguages) && typeof browserLanguages[0] === "string"
       ? browserLanguages[0]
       : undefined;
 
@@ -29,6 +28,8 @@ const getBrowserLocale = (): SupportedLocale => {
 };
 
 export const useBrowserLocale = (): SupportedLocale => {
+  // Keep SSR and the first hydration render identical. Browser preferences
+  // are applied by the effect only after hydration has completed.
   const [locale, setLocale] = useState<SupportedLocale>(DEFAULT_LOCALE);
 
   useEffect(() => {

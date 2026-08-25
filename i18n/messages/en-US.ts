@@ -28,6 +28,7 @@ import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.e
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 
 type MessageEntry = readonly [key: string, value: string];
@@ -1425,8 +1426,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
   profileRequiredConfirm: "Go to Identity",
-  profileRequiredDescription:
-    "Set up your profile before creating a Wave.",
+  profileRequiredDescription: "Set up your profile before creating a Wave.",
   profileRequiredTitle: "Create your profile first",
   subwaveTitle: "Create subwave",
   waveTitle: "Create Wave",
@@ -2236,8 +2236,6 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "recent.title": "Recent searches",
   scopeLabel: "Result type",
   "scope.allResults": "all results",
-  "status.keyboardHint":
-    "Use arrow keys to move through results and Enter to open.",
   viewAllCategory: "View all {category}",
 } as const);
 
@@ -3382,6 +3380,7 @@ export const EN_US_MESSAGES = {
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
   ...PUBLIC_REVIEW_MESSAGES,
+  ...EULA_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
