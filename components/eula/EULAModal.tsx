@@ -115,7 +115,7 @@ export default function EULAModal() {
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
             tabIndex={-1}
-            className="tw-m-0 tw-flex tw-h-[100dvh] tw-max-h-none tw-w-full tw-max-w-none tw-flex-col tw-overflow-hidden tw-border-0 tw-bg-iron-950 tw-p-0 tw-text-inherit focus:tw-outline-none"
+            className="tw-m-0 tw-flex tw-h-full tw-max-h-none tw-w-full tw-max-w-none tw-flex-col tw-overflow-hidden tw-border-0 tw-bg-iron-950 tw-p-0 tw-text-inherit focus:tw-outline-none"
           >
             <EULAHeader
               titleId={titleId}

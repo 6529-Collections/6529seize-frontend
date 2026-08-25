@@ -13,6 +13,7 @@ import { t } from "@/i18n/messages";
 import type { ApiEulaConsent } from "@/generated/models/ApiEulaConsent";
 import type { ApiSaveEulaConsentRequest } from "@/generated/models/ApiSaveEulaConsentRequest";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import LogoIcon from "@/components/common/icons/LogoIcon";
 import { Device } from "@capacitor/device";
 import Cookies from "js-cookie";
 import type { ReactNode } from "react";
@@ -83,6 +84,31 @@ type EULAConsentProviderProps = {
 const hasCurrentLocalConsent = (version: string | undefined): boolean =>
   version === CURRENT_EULA_VERSION;
 
+const EULACheckingScreen = ({ label }: { readonly label: string }) => {
+  const [showLogo, setShowLogo] = useState(false);
+
+  useEffect(() => {
+    const revealLogo = globalThis.setTimeout(() => setShowLogo(true), 250);
+    return () => globalThis.clearTimeout(revealLogo);
+  }, []);
+
+  return (
+    <main
+      aria-busy="true"
+      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-text-iron-50"
+    >
+      <LogoIcon
+        className={`tw-size-14 tw-text-iron-100 motion-safe:tw-transition-opacity motion-safe:tw-duration-150 ${
+          showLogo ? "tw-opacity-80" : "tw-opacity-0"
+        }`}
+      />
+      <p className="tw-sr-only" role="status" aria-live="polite">
+        {label}
+      </p>
+    </main>
+  );
+};
+
 const EULABlockingScreen = ({
   state,
   onRetry,
@@ -92,26 +118,24 @@ const EULABlockingScreen = ({
 }) => {
   const locale = useBrowserLocale();
 
+  if (state === "checking") {
+    return <EULACheckingScreen label={t(locale, "eula.checking")} />;
+  }
+
   return (
     <main className="tailwind-scope tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-p-6 tw-text-iron-50">
       <section className="tw-w-full tw-max-w-md tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-900 tw-p-6 tw-text-center tw-shadow-2xl">
-        {state === "checking" ? (
-          <p className="tw-m-0" role="status" aria-live="polite">
-            {t(locale, "eula.checking")}
+        <div role="alert">
+          <h1 className="tw-mb-3 tw-text-xl tw-font-semibold">
+            {t(locale, "eula.verificationError.title")}
+          </h1>
+          <p className="tw-mb-5 tw-text-iron-300">
+            {t(locale, "eula.verificationError.description")}
           </p>
-        ) : (
-          <div role="alert">
-            <h1 className="tw-mb-3 tw-text-xl tw-font-semibold">
-              {t(locale, "eula.verificationError.title")}
-            </h1>
-            <p className="tw-mb-5 tw-text-iron-300">
-              {t(locale, "eula.verificationError.description")}
-            </p>
-            <Button onClick={onRetry} variant="primary" size="lg">
-              {t(locale, "eula.retry")}
-            </Button>
-          </div>
-        )}
+          <Button onClick={onRetry} variant="primary" size="lg">
+            {t(locale, "eula.retry")}
+          </Button>
+        </div>
       </section>
     </main>
   );

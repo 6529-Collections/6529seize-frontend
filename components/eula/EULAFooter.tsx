@@ -19,7 +19,7 @@ export default function EULAFooter({
   readonly onAgree: () => void;
 }) {
   return (
-    <footer className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/50 tw-px-4 tw-pb-[max(1rem,env(safe-area-inset-bottom,0px))] tw-pt-3 tw-backdrop-blur-xl sm:tw-px-8 sm:tw-py-4">
+    <footer className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/50 tw-px-4 tw-pb-[clamp(0.75rem,env(safe-area-inset-bottom,0px),2.25rem)] tw-pt-4 tw-backdrop-blur-xl sm:tw-px-8 sm:tw-py-4">
       <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-4xl tw-flex-col tw-items-center tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
         {saveError && (
           <p
