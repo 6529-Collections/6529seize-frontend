@@ -76,7 +76,7 @@ describe("EULAModal", () => {
 
     const dialog = screen.getByRole("dialog");
     const agreement = screen.getByLabelText("End User License Agreement text");
-    const footer = dialog.querySelector("footer");
+    const footer = screen.getByTestId("eula-action-bar");
     const logo = dialog.querySelector('header span[aria-hidden="true"]');
 
     expect(dialog).toHaveClass("tw-h-full", "tw-max-w-none");
@@ -87,6 +87,7 @@ describe("EULAModal", () => {
       "tw-pt-4",
       "tw-pb-[clamp(0.75rem,env(safe-area-inset-bottom,0px),2.25rem)]"
     );
+    expect(dialog.querySelector("footer")).not.toBeInTheDocument();
     expect(logo?.getAttribute("style")).toContain(
       "mask-image: url('/6529.svg')"
     );
