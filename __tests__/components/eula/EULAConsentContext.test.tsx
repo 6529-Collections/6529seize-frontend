@@ -300,9 +300,14 @@ describe("EULAConsentContext", () => {
 
     renderProvider(<AppChild onMount={onMount} />);
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Checking EULA acceptance"
-    );
+    const status = screen.getByRole("status");
+    const checkingScreen = status.closest("main");
+    const logo = checkingScreen?.querySelector('span[aria-hidden="true"]');
+    expect(status).toHaveTextContent("Checking EULA acceptance");
+    expect(status).toHaveClass("tw-sr-only");
+    expect(checkingScreen).toHaveAttribute("aria-busy", "true");
+    expect(logo).toHaveClass("tw-opacity-0");
+    await waitFor(() => expect(logo).toHaveClass("tw-opacity-80"));
     expect(onMount).not.toHaveBeenCalled();
     expect(screen.queryByTestId("app-child")).not.toBeInTheDocument();
 
