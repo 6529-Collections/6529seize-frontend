@@ -1,11 +1,12 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
+import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 
 jest.mock("next/dynamic", () => () => () => <div />);
 jest.mock(
@@ -27,7 +28,10 @@ jest.mock(
 );
 jest.mock(
   "@/components/user/user-page-header/name/UserPageHeaderName",
-  () => () => <div data-testid="name" />
+  () =>
+    ({ titleAccessory }: { readonly titleAccessory?: React.ReactNode }) => (
+      <div data-testid="name">{titleAccessory}</div>
+    )
 );
 jest.mock(
   "@/components/user/user-page-header/stats/UserPageHeaderStats",
@@ -44,7 +48,21 @@ jest.mock(
 );
 jest.mock("@/components/user/utils/UserFollowBtn", () => ({
   __esModule: true,
-  default: () => <div data-testid="follow" />,
+  default: ({
+    onDirectMessage,
+    showFollowButton = true,
+    showMuteButton = true,
+  }: {
+    readonly onDirectMessage?: (() => void) | undefined;
+    readonly showFollowButton?: boolean | undefined;
+    readonly showMuteButton?: boolean | undefined;
+  }) => (
+    <div data-testid="profile-actions">
+      {onDirectMessage ? <button type="button">Direct Message</button> : null}
+      {showMuteButton ? <button type="button">Mute</button> : null}
+      {showFollowButton ? <div data-testid="follow" /> : null}
+    </div>
+  ),
 }));
 jest.mock("@/components/user/utils/level/UserLevel", () => () => (
   <div data-testid="level" />
@@ -92,6 +110,13 @@ const proxiedOwnProfileAuth = {
 
 describe("UserPageHeader", () => {
   beforeEach(() => {
+    (useIdentity as jest.Mock).mockReturnValue({ profile });
+    (useProfileBlockState as jest.Mock).mockReturnValue({
+      isBlocked: false,
+      isLoading: false,
+      isUnblocking: false,
+      unblock: jest.fn(),
+    });
     (useQuery as jest.Mock).mockReturnValue({
       isFetched: true,
       data: [{ statement_type: "BIO", statement_group: "GENERAL" }],
@@ -122,6 +147,54 @@ describe("UserPageHeader", () => {
     expect(screen.getByTestId("follow")).toBeInTheDocument();
     expect(screen.getByTestId("about")).toBeInTheDocument();
     expect(screen.queryByTestId("subscription-status")).not.toBeInTheDocument();
+  });
+
+  it("keeps DM available and replaces follow and mute with a compact block indicator", () => {
+    const unblock = jest.fn();
+    (useIdentity as jest.Mock).mockReturnValue({
+      profile: {
+        ...profile,
+        id: "profile-bob",
+        primary_wallet: "0xbob",
+      },
+    });
+    (useProfileBlockState as jest.Mock).mockReturnValue({
+      isBlocked: true,
+      isLoading: false,
+      isUnblocking: false,
+      unblock,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={{
+            ...profile,
+            id: "profile-bob",
+            primary_wallet: "0xbob",
+          }}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Direct Message" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Mute" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Blocked")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Unblock" }));
+    expect(unblock).toHaveBeenCalledTimes(1);
   });
 
   it("does not render follow or DM actions on your own profile", () => {

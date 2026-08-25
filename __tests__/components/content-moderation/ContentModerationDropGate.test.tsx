@@ -49,9 +49,20 @@ const renderGate = (element: ReactElement) => {
 };
 
 const createDrop = (
-  overrides: Partial<Pick<ApiDrop, "viewer_context" | "moderation">> = {}
-): Pick<ApiDrop, "id" | "author" | "viewer_context" | "moderation"> => ({
+  overrides: Partial<
+    Pick<ApiDrop, "viewer_context" | "moderation" | "wave" | "created_at">
+  > = {}
+): Pick<
+  ApiDrop,
+  "id" | "author" | "viewer_context" | "moderation" | "wave" | "created_at"
+> => ({
   id: "drop-1",
+  created_at: 1_700_000_000_000,
+  wave: {
+    id: "wave-1",
+    name: "Test wave",
+    picture: null,
+  } as ApiDrop["wave"],
   author: {
     id: "author-1",
     handle: "alice",
@@ -303,5 +314,38 @@ describe("ContentModerationDropGate", () => {
     await waitFor(() =>
       expect(unblockProfile).toHaveBeenCalledWith("author-1")
     );
+  });
+
+  it("uses a compact wave-aware row for blocked activity on a profile Brain page", () => {
+    setProfileBlockedOverride("viewer-1", "author-1", true);
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          moderation: {
+            status: ApiDropModerationStatus.Visible,
+            can_view: true,
+          },
+        })}
+        presentation="profile-activity"
+      >
+        <p>Compact blocked post content</p>
+      </ContentModerationDropGate>
+    );
+
+    expect(
+      screen.getByTestId("content-moderation-profile-activity-blocked")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Test wave")).toBeInTheDocument();
+    expect(screen.queryByText("@alice")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Unblock" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+
+    expect(screen.getByText("Compact blocked post content")).toBeVisible();
+    expect(
+      screen.queryByTestId("content-moderation-profile-activity-blocked")
+    ).not.toBeInTheDocument();
   });
 });

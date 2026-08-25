@@ -119,16 +119,25 @@ describe("ReportDropModal", () => {
     expect(
       screen.getByRole("heading", { name: "Flag Content" })
     ).toBeInTheDocument();
+    expect(screen.getByText("Choose one or more actions.")).toBeInTheDocument();
     expect(
-      screen.getByText("Report this post or change what you see.")
+      screen.getByText("Send this post to moderators for review.")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("checkbox", { name: "Report this post" })
+      screen.getByText("Hide only this post from your view.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Hide their content, mute their activity and unfollow them. They won’t be notified."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: "Report post" })
     ).not.toBeChecked();
     expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
+      screen.getByRole("checkbox", { name: "Report post" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
@@ -154,9 +163,7 @@ describe("ReportDropModal", () => {
     jest.mocked(hideDrop).mockReturnValue(deferred.promise);
     const { onClose } = renderModal();
 
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Hide this post for me" })
-    );
+    await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBe(true);
@@ -189,9 +196,7 @@ describe("ReportDropModal", () => {
       </QueryClientProvider>
     );
 
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Hide this post for me" })
-    );
+    await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     expect(
@@ -220,9 +225,7 @@ describe("ReportDropModal", () => {
       </QueryClientProvider>
     );
 
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Hide this post for me" })
-    );
+    await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalled());
@@ -244,11 +247,9 @@ describe("ReportDropModal", () => {
     renderModal();
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Report this post" })
+      screen.getByRole("checkbox", { name: "Report post" })
     );
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Hide this post for me" })
-    );
+    await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
     await waitFor(() =>
@@ -283,7 +284,7 @@ describe("ReportDropModal", () => {
     });
 
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Block this author" })
+      screen.getByRole("checkbox", { name: "Block author" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
@@ -309,11 +310,9 @@ describe("ReportDropModal", () => {
     jest.mocked(blockProfile).mockResolvedValue(undefined);
     const { onClose } = renderModal();
 
+    await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
     await userEvent.click(
-      screen.getByRole("checkbox", { name: "Hide this post for me" })
-    );
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: "Block this author" })
+      screen.getByRole("checkbox", { name: "Block author" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
 
@@ -327,11 +326,9 @@ describe("ReportDropModal", () => {
     );
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
     expect(getProfileBlockedOverride("viewer-1", "author-1")).toBe(true);
+    expect(screen.getByRole("checkbox", { name: "Hide post" })).toBeChecked();
     expect(
-      screen.getByRole("checkbox", { name: "Hide this post for me" })
-    ).toBeChecked();
-    expect(
-      screen.getByRole("checkbox", { name: "Block this author" })
+      screen.getByRole("checkbox", { name: "Block author" })
     ).not.toBeChecked();
     expect(onClose).not.toHaveBeenCalled();
   });

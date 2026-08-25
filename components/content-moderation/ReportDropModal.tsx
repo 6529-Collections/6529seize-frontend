@@ -30,9 +30,14 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import { FlagIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  EyeSlashIcon,
+  FlagIcon,
+  NoSymbolIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { type ReactNode, useId, useState } from "react";
 import { useContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 
 type PostAction = "report" | "hide" | "block";
@@ -106,6 +111,54 @@ const REASONS: ReadonlyArray<{
     label: "contentModeration.report.reason.other",
   },
 ];
+
+function PostActionOption({
+  checked,
+  description,
+  icon,
+  label,
+  onChange,
+}: {
+  readonly checked: boolean;
+  readonly description: string;
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label
+      className={`tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-px-2 tw-py-4 tw-transition-colors ${
+        checked ? "tw-bg-primary-500/5" : "hover:tw-bg-white/[0.025]"
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className={`tw-mt-0.5 tw-flex tw-size-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg ${
+          checked
+            ? "tw-bg-primary-500/10 tw-text-primary-300"
+            : "tw-bg-iron-900 tw-text-iron-400"
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="tw-min-w-0 tw-flex-1">
+        <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+          {label}
+        </span>
+        <span className="tw-mt-0.5 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
+          {description}
+        </span>
+      </span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        aria-label={label}
+        className="tw-mt-1 tw-size-4 tw-flex-none tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400"
+      />
+    </label>
+  );
+}
 
 export default function ReportDropModal({
   drop,
@@ -319,7 +372,7 @@ export default function ReportDropModal({
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80" />
       <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center sm:tw-items-center">
-          <DialogPanel className="tw-w-full tw-max-w-xl tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-shadow-2xl">
+          <DialogPanel className="tw-w-full tw-max-w-lg tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-shadow-2xl">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
               <div>
                 <DialogTitle className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -353,82 +406,87 @@ export default function ReportDropModal({
             >
               <fieldset
                 disabled={mutation.isPending}
-                className="tw-m-0 tw-space-y-4 tw-rounded-xl tw-border-0 tw-bg-iron-900/60 tw-p-4"
+                className="tw-m-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-border-0 tw-p-0"
               >
                 <legend className="tw-sr-only">
                   {t(locale, "contentModeration.report.actionsLegend")}
                 </legend>
-                <label className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
-                  <input
-                    type="checkbox"
+                <div>
+                  <PostActionOption
                     checked={reportPost}
-                    onChange={(event) => setReportPost(event.target.checked)}
-                    className="tw-size-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400"
+                    description={t(
+                      locale,
+                      "contentModeration.report.reportDescription"
+                    )}
+                    icon={<FlagIcon className="tw-size-4" />}
+                    label={t(locale, "contentModeration.report.reportLabel")}
+                    onChange={setReportPost}
                   />
-                  {t(locale, "contentModeration.report.reportLabel")}
-                </label>
 
-                {reportPost && (
-                  <div className="tw-space-y-4 tw-border-0 tw-border-l tw-border-solid tw-border-iron-700 tw-pl-7">
-                    <label className="tw-block">
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                        {t(locale, "contentModeration.report.reasonLabel")}
-                      </span>
-                      <select
-                        value={reason}
-                        onChange={(event) =>
-                          setReason(
-                            event.target
-                              .value as ApiContentModerationReportReason
-                          )
-                        }
-                        className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        {REASONS.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {t(locale, item.label)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                  {reportPost && (
+                    <div className="tw-mb-4 tw-space-y-4 tw-pl-12 tw-pr-2">
+                      <label className="tw-block">
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                          {t(locale, "contentModeration.report.reasonLabel")}
+                        </span>
+                        <select
+                          value={reason}
+                          onChange={(event) =>
+                            setReason(
+                              event.target
+                                .value as ApiContentModerationReportReason
+                            )
+                          }
+                          className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        >
+                          {REASONS.map((item) => (
+                            <option key={item.value} value={item.value}>
+                              {t(locale, item.label)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
 
-                    <label className="tw-block">
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                        {t(locale, "contentModeration.report.notesLabel")}
-                      </span>
-                      <textarea
-                        value={notes}
-                        onChange={(event) => setNotes(event.target.value)}
-                        maxLength={1000}
-                        rows={4}
-                        placeholder={t(
-                          locale,
-                          "contentModeration.report.notesPlaceholder"
-                        )}
-                        className="tw-mt-2 tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      />
-                    </label>
-                  </div>
-                )}
+                      <label className="tw-block">
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                          {t(locale, "contentModeration.report.notesLabel")}
+                        </span>
+                        <textarea
+                          value={notes}
+                          onChange={(event) => setNotes(event.target.value)}
+                          maxLength={1000}
+                          rows={4}
+                          placeholder={t(
+                            locale,
+                            "contentModeration.report.notesPlaceholder"
+                          )}
+                          className="tw-mt-2 tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
 
-                <label className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
-                  <input
-                    type="checkbox"
-                    checked={hidePost}
-                    onChange={(event) => setHidePost(event.target.checked)}
-                    className="tw-size-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400"
-                  />
-                  {t(locale, "contentModeration.report.hideLabel")}
-                </label>
-                <label className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
-                  <input
-                    type="checkbox"
-                    checked={blockAuthor}
-                    onChange={(event) => setBlockAuthor(event.target.checked)}
-                    className="tw-size-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400"
-                  />
-                  {t(locale, "contentModeration.report.blockLabel")}
-                </label>
+                <PostActionOption
+                  checked={hidePost}
+                  description={t(
+                    locale,
+                    "contentModeration.report.hideDescription"
+                  )}
+                  icon={<EyeSlashIcon className="tw-size-4" />}
+                  label={t(locale, "contentModeration.report.hideLabel")}
+                  onChange={setHidePost}
+                />
+                <PostActionOption
+                  checked={blockAuthor}
+                  description={t(
+                    locale,
+                    "contentModeration.report.blockDescription"
+                  )}
+                  icon={<NoSymbolIcon className="tw-size-4" />}
+                  label={t(locale, "contentModeration.report.blockLabel")}
+                  onChange={setBlockAuthor}
+                />
               </fieldset>
 
               <div className="tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">

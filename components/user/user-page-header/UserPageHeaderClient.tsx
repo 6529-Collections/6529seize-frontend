@@ -34,6 +34,7 @@ import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import UserPageHeaderSubscriptionStatus from "./UserPageHeaderSubscriptionStatus";
 import UserPageHeaderEditProfile from "./UserPageHeaderEditProfile";
+import BlockedProfileHeaderIndicator from "./BlockedProfileHeaderIndicator";
 import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
@@ -280,6 +281,14 @@ export default function UserPageHeaderClient({
                     level={profile.level}
                     profileEnabledAt={profileEnabledAt}
                     variant="title"
+                    titleAccessory={
+                      profileBlockState.isBlocked ? (
+                        <BlockedProfileHeaderIndicator
+                          isUnblocking={profileBlockState.isUnblocking}
+                          onUnblock={profileBlockState.unblock}
+                        />
+                      ) : undefined
+                    }
                   />
                   <div className="tw-mt-2 sm:tw-mt-1.5">
                     <UserPageHeaderName
@@ -363,8 +372,8 @@ export default function UserPageHeaderClient({
                         handle={followHandle}
                         blocked={profileBlockState.isBlocked}
                         blockStateLoading={profileBlockState.isLoading}
-                        unblockPending={profileBlockState.isUnblocking}
-                        onUnblock={profileBlockState.unblock}
+                        showFollowButton={!profileBlockState.isBlocked}
+                        showMuteButton={!profileBlockState.isBlocked}
                         onDirectMessage={
                           profile.primary_wallet
                             ? () =>
