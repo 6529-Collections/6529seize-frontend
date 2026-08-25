@@ -173,6 +173,9 @@ describe("UserPageHeader", () => {
         "tw-shadow-black/40"
       );
     });
+    preferencesButtons.forEach((preferencesButton) => {
+      expect(preferencesButton).toHaveAttribute("href", "/preferences");
+    });
   });
 
   it("links to preferences from your own profile", () => {
@@ -192,9 +195,11 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
-    screen.getAllByRole("link", { name: "Preferences" }).forEach((link) => {
-      expect(link).toHaveAttribute("href", "/preferences");
-    });
+    screen
+      .getAllByRole("link", { name: "Preferences" })
+      .forEach((preferencesLink) => {
+        expect(preferencesLink).toHaveAttribute("href", "/preferences");
+      });
   });
 
   it("does not show preferences when viewing another profile", () => {
