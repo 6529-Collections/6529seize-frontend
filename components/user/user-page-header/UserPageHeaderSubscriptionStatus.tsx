@@ -240,19 +240,32 @@ function SubscriptionSubtle({
       href={href}
       className={clsx(
         "tw-group tw-flex tw-items-center tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-        isCompact ? "tw-w-fit tw-justify-end" : "tw-w-full tw-justify-between",
+        isCompact ? "tw-w-max tw-justify-end" : "tw-w-full tw-justify-between",
         `${getSubtleLayoutClass(layout)} desktop-hover:hover:tw-bg-white/[0.025]`
       )}
     >
       <SubscriptionStatusIcon tone={tone} />
       <span
-        className={clsx("tw-min-w-0", isCompact ? "tw-max-w-40" : "tw-flex-1")}
+        className={clsx(
+          "tw-min-w-0",
+          isCompact ? "tw-whitespace-nowrap" : "tw-flex-1"
+        )}
       >
-        <span className="tw-block tw-truncate tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500">
+        <span
+          className={clsx(
+            "tw-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500",
+            !isCompact && "tw-truncate"
+          )}
+        >
           {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
         </span>
         <span className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-baseline tw-gap-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
-          <span className="tw-min-w-0 tw-truncate tw-transition-colors group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white">
+          <span
+            className={clsx(
+              "tw-min-w-0 tw-transition-colors group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white",
+              !isCompact && "tw-truncate"
+            )}
+          >
             {secondaryLine}
           </span>
           <span
