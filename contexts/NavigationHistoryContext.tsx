@@ -177,31 +177,29 @@ export const NavigationHistoryProvider: React.FC<{
 
   const goBackTo = useCallback(
     (path: string) => {
-      setIndex((prev) => {
-        let targetIndex = prev - 1;
-        while (targetIndex >= 0) {
-          const entry = historyRef.current[targetIndex];
-          if (entry?.type === "route" && sameMainPath(entry.path, path)) {
-            break;
-          }
-          targetIndex -= 1;
+      let targetIndex = index - 1;
+      while (targetIndex >= 0) {
+        const entry = historyRef.current[targetIndex];
+        if (entry?.type === "route" && sameMainPath(entry.path, path)) {
+          break;
         }
+        targetIndex -= 1;
+      }
 
-        skipNext.current = true;
-        if (targetIndex < 0) {
-          historyRef.current = [
-            ...historyRef.current.slice(0, prev),
-            { type: "route", path },
-          ];
-          router.replace(path);
-          return prev;
-        }
+      skipNext.current = true;
+      if (targetIndex < 0) {
+        historyRef.current = [
+          ...historyRef.current.slice(0, index),
+          { type: "route", path },
+        ];
+        router.replace(path);
+        return;
+      }
 
-        router.push(path);
-        return targetIndex;
-      });
+      router.push(path);
+      setIndex(targetIndex);
     },
-    [router]
+    [index, router]
   );
 
   const value = useMemo(

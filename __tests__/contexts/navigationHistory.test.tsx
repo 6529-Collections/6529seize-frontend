@@ -33,6 +33,11 @@ let mockSearchParams = new URLSearchParams();
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
 );
+const strictWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <React.StrictMode>
+    <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
+  </React.StrictMode>
+);
 
 describe("NavigationHistoryContext", () => {
   beforeEach(() => {
@@ -118,6 +123,24 @@ describe("NavigationHistoryContext", () => {
     mockSearchParams = new URLSearchParams("collection=memelab");
     rerender();
     expect(result.current.canGoBack).toBe(false);
+  });
+
+  it("navigates to an explicit stacked route once in Strict Mode", () => {
+    mockPathname = "/Shelby/collected";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper: strictWrapper }
+    );
+
+    mockPathname = "/meme-lab/65";
+    rerender();
+
+    act(() => {
+      result.current.goBackTo("/Shelby/collected");
+    });
+
+    expect(routerMock.push).toHaveBeenCalledTimes(1);
+    expect(routerMock.push).toHaveBeenCalledWith("/Shelby/collected");
   });
 
   it("replaces the current history entry when the explicit route is not stacked", () => {
