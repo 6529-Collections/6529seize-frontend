@@ -13,6 +13,6 @@ describe("content moderation query invalidation", () => {
       invalidateContentModerationPresentation(queryClient)
     ).resolves.toBeUndefined();
 
-    expect(invalidateSpy).toHaveBeenCalledTimes(6);
+    expect(invalidateSpy).toHaveBeenCalledTimes(9);
   });
 });

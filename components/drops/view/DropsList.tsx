@@ -61,6 +61,7 @@ interface DropsListProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -91,6 +92,7 @@ const DropsList = memo(
     winningThresholdMinDurationMs,
     isVotingClosed = false,
     isVotingControlsLocked = false,
+    moderationPresentation = "default",
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -300,6 +302,7 @@ const DropsList = memo(
               }
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
+              moderationPresentation={moderationPresentation}
             />
           ) : (
             <MemoizedLightDrop drop={drop} />
@@ -348,6 +351,7 @@ const DropsList = memo(
       renderUnreadDivider,
       suspendLightDropHydration,
       virtualScrollRootMargin,
+      moderationPresentation,
     ]);
 
     return (

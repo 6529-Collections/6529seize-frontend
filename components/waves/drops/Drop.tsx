@@ -58,6 +58,7 @@ interface DropProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
 
 export default function Drop({
@@ -94,6 +95,7 @@ export default function Drop({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  moderationPresentation = "default",
 }: DropProps) {
   const canOpenDrop =
     drop.drop_type !== ApiDropType.Chat || location !== DropLocation.WAVE;
@@ -200,7 +202,10 @@ export default function Drop({
 
   return (
     <DropContext.Provider value={memoizedValue}>
-      <ContentModerationDropGate drop={drop}>
+      <ContentModerationDropGate
+        drop={drop}
+        presentation={moderationPresentation}
+      >
         {components[drop.drop_type]}
       </ContentModerationDropGate>
     </DropContext.Provider>

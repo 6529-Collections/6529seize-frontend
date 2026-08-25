@@ -8,17 +8,23 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.actions.unhide": "Unhide",
   "contentModeration.actions.unblock": "Unblock",
   "contentModeration.actions.unblockProfile": "Unblock {profile}",
+  "contentModeration.profile.blocked": "Blocked",
   "contentModeration.report.title": "Flag Content",
-  "contentModeration.report.description":
-    "Report this post or change what you see.",
+  "contentModeration.report.description": "Choose one or more actions.",
   "contentModeration.report.actionsLegend": "Choose one or more actions",
-  "contentModeration.report.reportLabel": "Report this post",
+  "contentModeration.report.reportLabel": "Report post",
+  "contentModeration.report.reportDescription":
+    "Send this post to moderators for review.",
   "contentModeration.report.reasonLabel": "Reason",
   "contentModeration.report.notesLabel": "Additional details (optional)",
   "contentModeration.report.notesPlaceholder":
     "Add context that will help a moderator understand the report.",
-  "contentModeration.report.hideLabel": "Hide this post for me",
-  "contentModeration.report.blockLabel": "Block this author",
+  "contentModeration.report.hideLabel": "Hide post",
+  "contentModeration.report.hideDescription":
+    "Hide only this post from your view.",
+  "contentModeration.report.blockLabel": "Block author",
+  "contentModeration.report.blockDescription":
+    "Hide their content, mute their activity and unfollow them. They won’t be notified.",
   "contentModeration.report.submit": "Confirm",
   "contentModeration.report.cancel": "Cancel",
   "contentModeration.report.close": "Close post actions dialog",

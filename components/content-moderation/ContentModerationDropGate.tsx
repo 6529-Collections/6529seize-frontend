@@ -29,6 +29,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import WavePicture from "@/components/waves/WavePicture";
+import { getTimeAgoShort } from "@/helpers/Helpers";
 import {
   useCallback,
   useEffect,
@@ -42,10 +44,11 @@ import { ContentModerationDropGateContext } from "./ContentModerationDropGateCon
 interface ContentModerationDropGateProps {
   readonly drop: Pick<
     ApiDrop,
-    "id" | "author" | "viewer_context" | "moderation"
+    "id" | "author" | "viewer_context" | "moderation" | "wave" | "created_at"
   >;
   readonly children: ReactNode;
   readonly compact?: boolean | undefined;
+  readonly presentation?: "default" | "profile-activity" | undefined;
 }
 
 const AUTHENTICATION_CANCELLED_MESSAGE = "Authentication was cancelled";
@@ -121,6 +124,7 @@ export default function ContentModerationDropGate({
   drop,
   children,
   compact = false,
+  presentation = "default",
 }: ContentModerationDropGateProps) {
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth, setToast } = useAuth();
@@ -311,6 +315,39 @@ export default function ContentModerationDropGate({
   if (effectiveVisibility.kind === "blocked") {
     const handle = drop.author.handle;
     const profileLabel = handle ? `@${handle}` : "Blocked author";
+    if (presentation === "profile-activity") {
+      return (
+        <div
+          className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-iron-950/45 tw-px-3 tw-py-3 sm:tw-px-4"
+          data-testid="content-moderation-profile-activity-blocked"
+        >
+          <span className="tw-size-8 tw-flex-none tw-overflow-hidden tw-rounded-full tw-opacity-70 tw-grayscale">
+            <WavePicture
+              name={drop.wave.name}
+              picture={drop.wave.picture}
+              contributors={[]}
+            />
+          </span>
+          <span className="tw-min-w-0 tw-flex-1">
+            <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
+              {drop.wave.name}
+            </span>
+            <span className="tw-block tw-text-xs tw-text-iron-500">
+              {getTimeAgoShort(drop.created_at)}
+            </span>
+          </span>
+          <span className="tw-inline-flex tw-flex-none tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
+            <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
+            <span aria-hidden="true">·</span>
+            <PersonalModerationAction
+              label={t(locale, "contentModeration.actions.reveal")}
+              tooltip={t(locale, "contentModeration.tooltips.revealBlocked")}
+              onClick={reveal}
+            />
+          </span>
+        </div>
+      );
+    }
     return (
       <PersonalModerationOverlay
         compact={compact}

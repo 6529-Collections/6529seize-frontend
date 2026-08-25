@@ -124,6 +124,7 @@ export default function UserFollowBtn({
   onDirectMessage,
   directMessageLoading,
   showMuteButton = true,
+  showFollowButton = true,
   blocked = false,
   blockStateLoading = false,
   unblockPending = false,
@@ -134,6 +135,7 @@ export default function UserFollowBtn({
   readonly onDirectMessage?: (() => void | Promise<void>) | undefined;
   readonly directMessageLoading?: boolean | undefined;
   readonly showMuteButton?: boolean | undefined;
+  readonly showFollowButton?: boolean | undefined;
   readonly blocked?: boolean | undefined;
   readonly blockStateLoading?: boolean | undefined;
   readonly unblockPending?: boolean | undefined;
@@ -316,26 +318,28 @@ export default function UserFollowBtn({
           iconClassName={DIRECT_MESSAGE_ICON_CLASSES[size]}
         />
       )}
-      <Button
-        onClick={onFollow}
-        disabled={actionLoading || (blocked && !onUnblock)}
-        aria-busy={actionLoading || undefined}
-        aria-label={actionAriaLabel}
-        variant={
-          blocked || following || isInitialStatusLoading
-            ? "secondary"
-            : "primary"
-        }
-        size={FOLLOW_BUTTON_SIZES[size]}
-      >
-        <FollowStateIcon
-          loading={actionLoading}
-          blocked={blocked}
-          following={following}
-          size={size}
-        />
-        <span>{label}</span>
-      </Button>
+      {showFollowButton ? (
+        <Button
+          onClick={onFollow}
+          disabled={actionLoading || (blocked && !onUnblock)}
+          aria-busy={actionLoading || undefined}
+          aria-label={actionAriaLabel}
+          variant={
+            blocked || following || isInitialStatusLoading
+              ? "secondary"
+              : "primary"
+          }
+          size={FOLLOW_BUTTON_SIZES[size]}
+        >
+          <FollowStateIcon
+            loading={actionLoading}
+            blocked={blocked}
+            following={following}
+            size={size}
+          />
+          <span>{label}</span>
+        </Button>
+      ) : null}
     </div>
   );
 }

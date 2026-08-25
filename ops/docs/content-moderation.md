@@ -78,9 +78,11 @@ mistake.
 **Flag Content** opens one dialog with no option selected by default. The user
 can choose any one action or combine them:
 
-- **Report this post** with a reason and optional context;
-- **Hide this post for me**; or
-- **Block this author**.
+- **Report post** sends the post to moderators for review, with a reason and
+  optional context;
+- **Hide post** hides only that post from the viewer; or
+- **Block author** hides the author's content, mutes their activity, and
+  unfollows them without notifying them.
 
 These are independent. A user can hide or block without reporting, and a
 report does not automatically hide the post or block its author. A user cannot
@@ -117,15 +119,40 @@ profile picture, handle, and centered **Blocked · Reveal · Unblock** controls.
 
 Blocked profiles remain reachable through their public profile pages. They can
 also be unblocked from the Content tab under `/preferences`; the profile picture
-and handle in that list link to the public profile. On a blocked profile's page,
-**Unblock** replaces the Follow action for the blocker.
+and handle in that list link to the public profile. A blocked profile's header
+shows a compact **Blocked · Unblock** indicator beside the handle. Follow and
+notification-mute actions are hidden while the block is active because the
+block already provides those states. Direct message remains available.
+Unblocking restores the applicable actions immediately without changing the
+viewer's saved notification preference or refollowing the profile.
 
 Blocking automatically unfollows that profile and prevents following it again
 until it is unblocked. It does not remove the blocked profile as a follower of
 the blocker or tell that profile who blocked it. Public profile metadata,
 including Brain activity summaries and **Most Active In**, remains visible when
-the blocker deliberately opens the profile; authored post bodies remain blurred
-until individually revealed or the profile is unblocked.
+the blocker deliberately opens the profile. On that profile's Brain tab,
+blocked activity uses compact rows that retain the Wave identity and time with
+**Hidden · Reveal** instead of repeating full-size blurred posts and per-row
+Unblock controls. Mixed Wave feeds keep the standard blurred blocked-post
+presentation.
+
+## Blocking and direct messages
+
+Blocking is a directional, privacy-preserving mute rather than a delivery
+restriction. One-to-one direct messages remain available under the normal
+direct-message admission policy, including conversations created after the
+block. Messages continue to be delivered, so the blocked profile receives no
+error or explicit indication that a block exists.
+
+For the blocker, an existing or future one-to-one conversation is treated as
+muted and deprioritized without changing its saved manual mute setting.
+Messages from the blocked profile retain the standard blocked-post presentation
+and can be revealed individually. They do not create ordinary notifications,
+push notifications, or direct-message unread counts for the blocker.
+
+Group direct messages and shared Waves remain usable and are not muted as a
+whole. Only activity from the blocked profile is hidden and silent for the
+blocker; activity from other members behaves normally.
 
 ## Global moderation
 
@@ -152,19 +179,19 @@ the authorization boundary.
 
 ### Hide without reporting
 
-Open **Flag Content**, select only **Hide this post for me**, and submit. The
+Open **Flag Content**, select only **Hide post**, and submit. The
 post blurs immediately. Use Reveal for a temporary look or Unhide to remove the
 saved preference.
 
 ### Block without reporting
 
-Open **Flag Content**, select only **Block this author**, and submit. Mounted
+Open **Flag Content**, select only **Block author**, and submit. Mounted
 posts by that author blur immediately. Reveal affects one post temporarily;
 Unblock restores the author's mounted posts and removes the saved block.
 
 ### Report without changing the feed
 
-Open **Flag Content**, select only **Report this post**, choose a reason, add
+Open **Flag Content**, select only **Report post**, choose a reason, add
 optional context, and submit. The report is sent without hiding the post or
 blocking its author.
 

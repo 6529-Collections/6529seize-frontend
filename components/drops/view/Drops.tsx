@@ -27,7 +27,11 @@ type WaveWithChatScope = {
   } | null;
 };
 
-export default function Drops() {
+export default function Drops({
+  compactBlockedProfileActivity = false,
+}: {
+  readonly compactBlockedProfileActivity?: boolean;
+}) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const params = useParams();
@@ -198,6 +202,9 @@ export default function Drops() {
         onDropContentClick={onDropContentClick}
         dropViewDropId={null}
         location={DropLocation.PROFILE}
+        moderationPresentation={
+          compactBlockedProfileActivity ? "profile-activity" : "default"
+        }
       />
       <div ref={bottomRef} style={{ height: "1px" }} />
       {isFetchingNextPage && <SpinnerLoader text="Loading more drops..." />}
