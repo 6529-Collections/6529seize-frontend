@@ -277,10 +277,6 @@ body {
   overflow: auto;
 }
 
-body.capacitor-native footer {
-  padding-bottom: 100px !important;
-}
-
 .mobile-wrapper-dialog input,
 .mobile-wrapper-dialog textarea,
 .mobile-wrapper-dialog select {
