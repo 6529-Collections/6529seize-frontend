@@ -21,6 +21,7 @@ import {
 import {
   BLOCKED_PROFILES_QUERY_KEY,
   invalidateContentModerationPresentation,
+  reconcileIdentityFollowingAfterBlockChange,
 } from "@/services/content-moderation/content-moderation-query";
 import {
   ShieldExclamationIcon,
@@ -236,6 +237,10 @@ export default function ContentModerationDropGate({
       return { previousBlocked, viewerProfileId };
     },
     onSuccess: () => {
+      void reconcileIdentityFollowingAfterBlockChange(
+        queryClient,
+        drop.author.handle
+      );
       void queryClient.invalidateQueries({
         queryKey: BLOCKED_PROFILES_QUERY_KEY,
       });

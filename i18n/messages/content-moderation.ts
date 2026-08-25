@@ -56,6 +56,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.loading": "Loading blocked profiles…",
   "contentModeration.preferences.loadError":
     "Couldn't load your blocked profiles.",
+  "contentModeration.preferences.openProfile": "Open {profile}'s profile",
   "contentModeration.preferences.signIn":
     "Connect an authenticated profile to manage content preferences.",
   "contentModeration.moderator.menu": "Moderation queue",
@@ -104,6 +105,8 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.stateChanged": "State changed",
   "contentModeration.postRejected":
     "This post couldn't be submitted because it was flagged by the safety check. Please review it and try again.",
+  "contentModeration.delivery.moderationRejected":
+    "Not sent · Blocked by safety check",
   "preferences.title": "Preferences",
   "preferences.metaDescription":
     "Manage notification, messaging, and content preferences.",

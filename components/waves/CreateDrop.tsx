@@ -44,6 +44,7 @@ import {
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { useModerationRejectedDropDelivery } from "./useModerationRejectedDropDelivery";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -147,7 +148,13 @@ export default function CreateDrop({
   } | null>(null);
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
-  const { processDropRemoved, processIncomingDrop } = useMyStream();
+  const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
+    useMyStream();
+  const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
+    applyOptimisticDropUpdate,
+    processDropRemoved,
+    waveId: wave.id,
+  });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -503,17 +510,29 @@ export default function CreateDrop({
     },
     onError: (error, body) => {
       clearSlowModeChatPending(body.slowModeChatReservation);
+      const isContentModerationRejection =
+        getStructuredApiErrorStatus(error) === 422 &&
+        getStructuredApiErrorCode(error) === "CONTENT_MODERATION_REJECTED";
       setTimeout(() => {
-        if (body.dropId) {
-          processDropRemoved(body.drop.wave_id, body.dropId);
+        if (!body.dropId) {
+          return;
         }
+
+        if (
+          isContentModerationRejection &&
+          retainModerationRejectedDrop({
+            dropId: body.dropId,
+            rejectedWaveId: body.drop.wave_id,
+          })
+        ) {
+          return;
+        }
+
+        processDropRemoved(body.drop.wave_id, body.dropId);
       }, 0);
       const isHandled = body.onError?.(error) === true;
       if (!isHandled) {
         const errorDetails = getToastErrorDetails(error);
-        const isContentModerationRejection =
-          getStructuredApiErrorStatus(error) === 422 &&
-          getStructuredApiErrorCode(error) === "CONTENT_MODERATION_REJECTED";
         setToast({
           type: "error",
           title: t(locale, "contentModeration.dropSubmitErrorTitle"),

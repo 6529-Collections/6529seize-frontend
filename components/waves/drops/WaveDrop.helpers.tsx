@@ -119,15 +119,21 @@ const RANK_STYLES = {
 
 const getColorClasses = ({
   isActiveDrop,
+  isLocallyFailed,
   rank,
   isDrop,
   location,
 }: {
   isActiveDrop: boolean;
+  isLocallyFailed: boolean;
   rank: number | null;
   isDrop: boolean;
   location: DropLocation;
 }): string => {
+  if (isLocallyFailed) {
+    return "tw-bg-red-500/5";
+  }
+
   if (isActiveDrop) {
     return "tw-bg-[#3CCB7F]/10 tw-ring-1 tw-ring-inset tw-ring-[#3CCB7F]/55";
   }
@@ -155,7 +161,8 @@ const getDropClasses = (
   groupingClass: string,
   location: DropLocation,
   rank: number | null,
-  isDrop: boolean
+  isDrop: boolean,
+  isLocallyFailed: boolean
 ): string => {
   const baseClasses =
     "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-z-30 focus-within:tw-z-30";
@@ -164,7 +171,13 @@ const getDropClasses = (
 
   const chatDropClasses = isDrop ? "tw-rounded-lg tw-my-0.5" : "";
 
-  const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop, location });
+  const rankClasses = getColorClasses({
+    isActiveDrop,
+    isLocallyFailed,
+    rank,
+    isDrop,
+    location,
+  });
 
   const locationClasses =
     location === DropLocation.MY_STREAM || location === DropLocation.PROFILE
@@ -623,6 +636,7 @@ const getContentBlock = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  isLocallyFailed,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -660,6 +674,7 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly isLocallyFailed: boolean;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -706,11 +721,11 @@ const getContentBlock = ({
           authorHeader,
         })}
         <div
-          className={getDropContentClass({
+          className={`${getDropContentClass({
             showAuthorInfo,
             shouldGroupWithPreviousDrop,
             isProfileView,
-          })}
+          })} ${isLocallyFailed ? "tw-opacity-75" : ""}`.trim()}
         >
           <WaveDropContent
             drop={drop}

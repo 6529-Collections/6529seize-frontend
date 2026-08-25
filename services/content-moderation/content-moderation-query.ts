@@ -1,4 +1,5 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { QueryClient } from "@tanstack/react-query";
 
 export const MODERATION_QUEUE_QUERY_KEY = [
@@ -26,4 +27,27 @@ export const invalidateContentModerationPresentation = async (
       queryClient.invalidateQueries({ queryKey: [queryKey] })
     )
   );
+};
+
+export const reconcileIdentityFollowingAfterBlockChange = async (
+  queryClient: QueryClient,
+  profileHandle: string | null | undefined
+): Promise<void> => {
+  if (profileHandle) {
+    queryClient.setQueryData<ApiIdentitySubscriptionActions>(
+      [QueryKey.IDENTITY_FOLLOWING_ACTIONS, profileHandle],
+      { actions: [] }
+    );
+  }
+  await Promise.allSettled([
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
+    }),
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWERS],
+    }),
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+    }),
+  ]);
 };

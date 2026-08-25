@@ -85,6 +85,14 @@ describe("ContentPreferencesSettings", () => {
     await waitFor(() => expect(mockSetToast).not.toHaveBeenCalled());
   });
 
+  it("links a blocked profile identity to its public profile", async () => {
+    renderSettings();
+
+    expect(
+      await screen.findByRole("link", { name: "Open alice's profile" })
+    ).toHaveAttribute("href", "/alice");
+  });
+
   it("restores the profile and viewer state when unblocking fails", async () => {
     jest.mocked(unblockProfile).mockRejectedValueOnce(new Error("failed"));
     const user = userEvent.setup();

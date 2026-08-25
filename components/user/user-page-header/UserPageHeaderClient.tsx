@@ -16,6 +16,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
+import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -162,6 +163,10 @@ export default function UserPageHeaderClient({
     !isMyProfile && profile.handle && connectedProfile?.handle
       ? profile.handle
       : null;
+  const profileBlockState = useProfileBlockState({
+    profileId: profile.id,
+    profileHandle: profile.handle,
+  });
   const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
 
@@ -356,6 +361,10 @@ export default function UserPageHeaderClient({
                     {followHandle ? (
                       <UserFollowBtn
                         handle={followHandle}
+                        blocked={profileBlockState.isBlocked}
+                        blockStateLoading={profileBlockState.isLoading}
+                        unblockPending={profileBlockState.isUnblocking}
+                        onUnblock={profileBlockState.unblock}
                         onDirectMessage={
                           profile.primary_wallet
                             ? () =>

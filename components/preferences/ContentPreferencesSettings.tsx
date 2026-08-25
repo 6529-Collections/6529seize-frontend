@@ -17,9 +17,11 @@ import {
 import {
   BLOCKED_PROFILES_QUERY_KEY,
   invalidateContentModerationPresentation,
+  reconcileIdentityFollowingAfterBlockChange,
 } from "@/services/content-moderation/content-moderation-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import Link from "next/link";
 
 function BlockedProfileRow({
   profile,
@@ -52,6 +54,10 @@ function BlockedProfileRow({
       return { previousBlocked, previousProfiles };
     },
     onSuccess: () => {
+      void reconcileIdentityFollowingAfterBlockChange(
+        queryClient,
+        profile.handle
+      );
       void invalidateContentModerationPresentation(queryClient);
     },
     onError: (error, _variables, context) => {
@@ -77,22 +83,28 @@ function BlockedProfileRow({
 
   return (
     <li className="tw-flex tw-items-center tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0">
-      <div className="tw-relative tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
-        {profile.pfp && (
-          <Image
-            src={resolveIpfsUrlSync(profile.pfp)}
-            alt=""
-            fill
-            sizes="40px"
-            className="tw-object-cover"
-          />
-        )}
-      </div>
-      <div className="tw-min-w-0 tw-flex-1">
+      <Link
+        href={`/${encodeURIComponent(profile.handle ?? profile.profile_id)}`}
+        className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-4 tw-rounded-lg tw-text-inherit tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        aria-label={t(locale, "contentModeration.preferences.openProfile", {
+          profile: profile.handle ?? profile.profile_id,
+        })}
+      >
+        <span className="tw-relative tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+          {profile.pfp && (
+            <Image
+              src={resolveIpfsUrlSync(profile.pfp)}
+              alt=""
+              fill
+              sizes="40px"
+              className="tw-object-cover"
+            />
+          )}
+        </span>
         <p className="tw-m-0 tw-truncate tw-font-semibold tw-text-iron-100">
           {profile.handle ?? profile.profile_id}
         </p>
-      </div>
+      </Link>
       <button
         type="button"
         aria-label={t(locale, "contentModeration.actions.unblockProfile", {

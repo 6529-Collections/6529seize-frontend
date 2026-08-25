@@ -16,9 +16,16 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWave } from "@/hooks/useWave";
 import { commonApiPost } from "@/services/api/common-api";
+import {
+  DropClientDeliveryState,
+  DropSize,
+} from "@/helpers/waves/drop.helpers";
 
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
+const mockProcessDropRemoved = jest.fn();
+const mockProcessIncomingDrop = jest.fn();
+const mockApplyOptimisticDropUpdate = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({
@@ -59,8 +66,9 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
-    processDropRemoved: jest.fn(),
-    processIncomingDrop: jest.fn(),
+    applyOptimisticDropUpdate: mockApplyOptimisticDropUpdate,
+    processDropRemoved: mockProcessDropRemoved,
+    processIncomingDrop: mockProcessIncomingDrop,
   }),
 }));
 jest.mock("@/components/waves/CreateDropStormParts", () => () => (
@@ -88,6 +96,19 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
       }
     >
       submit current mode
+    </button>
+    <button
+      onClick={() =>
+        props.submitDrop({
+          drop: {
+            wave_id: props.wave.id,
+            drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
+          },
+          dropId: "temp-rejected-drop",
+        } as DropMutationBody)
+      }
+    >
+      submit optimistic drop
     </button>
     <button
       onClick={() =>
@@ -172,6 +193,7 @@ const mockPendingPosts = () => {
 describe("CreateDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockApplyOptimisticDropUpdate.mockReturnValue(null);
     useWaveMock.mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -207,6 +229,79 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+  });
+
+  it("keeps a moderation-rejected optimistic drop until the wave is left", async () => {
+    const setToast = jest.fn();
+    let locallyUpdatedDrop: Record<string, unknown> | undefined;
+    mockApplyOptimisticDropUpdate.mockImplementation(({ update }) => {
+      locallyUpdatedDrop = update({
+        id: "temp-rejected-drop",
+        type: DropSize.FULL,
+      });
+      return { rollback: jest.fn() };
+    });
+    commonApiPostMock.mockRejectedValue({
+      status: 422,
+      response: {
+        body: {
+          code: "CONTENT_MODERATION_REJECTED",
+          message: "Blocked by safety check",
+        },
+      },
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    const { unmount } = render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+
+    await waitFor(() => {
+      expect(mockApplyOptimisticDropUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          waveId: "1",
+          dropId: "temp-rejected-drop",
+        })
+      );
+    });
+    expect(locallyUpdatedDrop).toEqual(
+      expect.objectContaining({
+        clientDeliveryState: DropClientDeliveryState.MODERATION_REJECTED,
+      })
+    );
+    expect(mockProcessDropRemoved).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "error",
+        title: "Couldn't submit this drop.",
+      })
+    );
+
+    unmount();
+
+    expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+      "1",
+      "temp-rejected-drop"
+    );
+    consoleErrorSpy.mockRestore();
   });
 
   it("waits for onServerDropCreated before reporting all drops added", async () => {

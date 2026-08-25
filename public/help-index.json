@@ -32,6 +32,9 @@
         "Reporting, hiding, and blocking are independent, and no action is selected by default.",
         "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
         "Notification, messaging, and blocked-profile settings are combined at /preferences. The Content tab is available at /preferences?tab=content, and /content-preferences redirects there.",
+        "A blocked profile's avatar and handle in Preferences link to its public profile, where Unblock replaces Follow for the blocker.",
+        "Blocking automatically unfollows the profile and prevents following it again until it is unblocked. It does not notify the blocked profile or remove that profile's subscription to the blocker.",
+        "Blocked public profiles remain reachable. Public profile and Brain summary metadata stays visible, while authored post bodies remain blurred until revealed or unblocked.",
         "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
         "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
         "Only server-authorized moderators see and can use the Moderation queue at /content-moderation, and every decision requires a reason."
@@ -73,7 +76,7 @@
         "profanity",
         "unsafe link",
         "rejected",
-        "draft",
+        "not sent",
         "attachments"
       ],
       "facts": [
@@ -81,8 +84,10 @@
         "Most posts pass a lightweight deterministic screen without an AI call. Only a specific risk signal is escalated to a permissive AI check, and rejection requires a high-confidence prohibited-content result.",
         "Profanity, unpopular opinions, and ordinary offensive speech are not rejected merely for being objectionable.",
         "Configured known unsafe destinations can be rejected directly. Uncertain AI results and evaluator failures follow the permissive policy and allow the post.",
+        "Structured private-data patterns, including US Social Security number patterns and Luhn-valid payment-card candidates, are sent to the AI check. Clearly labelled fictitious, sandbox, test, example, redacted, or documentation data is allowed, while a genuine usable private identifier can be rejected whether it belongs to the author or another person; ownership claims and known test status are context rather than automatic allow rules.",
         "A locally created post stays visible in its normal layout while submission is pending; it is not replaced by a prominent checking message.",
-        "When the backend rejects a post, the composer removes the optimistic post, explains the rejection, and preserves the draft for editing and retrying.",
+        "When the backend rejects a post, the unsent optimistic post remains temporarily in the current Wave with a subtle red treatment and a 'Not sent · Blocked by safety check' status; it is never persisted and disappears after leaving or refreshing the Wave.",
+        "A moderation-rejected local row does not offer edit, retry, reaction, reply, or post-action controls.",
         "File attachments such as PDF and CSV files use a separate asynchronous validation pipeline rather than the synchronous text check."
       ],
       "canonical_path": "/waves",
