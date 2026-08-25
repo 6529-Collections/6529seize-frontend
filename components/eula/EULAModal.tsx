@@ -73,6 +73,15 @@ export default function EULAModal() {
     scrollButtonRef.current?.focus();
     updateScrollState();
 
+    const scrollElement = scrollContainerRef.current;
+    const resizeObserver =
+      scrollElement && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(updateScrollState)
+        : null;
+    if (scrollElement) {
+      resizeObserver?.observe(scrollElement);
+    }
+
     const ariaHiddenAttribute = "aria-hidden";
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -101,6 +110,7 @@ export default function EULAModal() {
     });
 
     return () => {
+      resizeObserver?.disconnect();
       document.body.style.overflow = previousOverflow;
       backgroundElements.forEach(({ element, inert, ariaHidden }) => {
         element.inert = inert;

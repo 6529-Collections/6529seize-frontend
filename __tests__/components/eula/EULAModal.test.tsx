@@ -1,5 +1,11 @@
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -15,6 +21,7 @@ jest.mock("@/components/eula/EULAConsentContext", () => ({
 }));
 
 const EULAModal = require("@/components/eula/EULAModal").default;
+const originalResizeObserver = global.ResizeObserver;
 
 function scrollAgreementToBottom() {
   const scrollContainer = screen.getByLabelText(
@@ -43,6 +50,7 @@ describe("EULAModal", () => {
   });
 
   afterEach(() => {
+    global.ResizeObserver = originalResizeObserver;
     jest.restoreAllMocks();
   });
 
@@ -144,6 +152,38 @@ describe("EULAModal", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Agree" })).toBeEnabled()
     );
+  });
+
+  it("re-measures delayed agreement layout changes", async () => {
+    let resizeCallback: ResizeObserverCallback | undefined;
+    const observe = jest.fn();
+    const disconnect = jest.fn();
+    global.ResizeObserver = jest.fn().mockImplementation((callback) => {
+      resizeCallback = callback;
+      return { observe, disconnect };
+    }) as unknown as typeof ResizeObserver;
+    const clientHeight = jest
+      .spyOn(HTMLElement.prototype, "clientHeight", "get")
+      .mockReturnValue(0);
+    const scrollHeight = jest
+      .spyOn(HTMLElement.prototype, "scrollHeight", "get")
+      .mockReturnValue(0);
+
+    const { unmount } = render(<EULAModal />);
+    const agreement = screen.getByLabelText("End User License Agreement text");
+    expect(observe).toHaveBeenCalledWith(agreement);
+    expect(screen.getByRole("button", { name: "Agree" })).toBeDisabled();
+
+    clientHeight.mockReturnValue(200);
+    scrollHeight.mockReturnValue(200);
+    act(() => resizeCallback?.([], {} as ResizeObserver));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Agree" })).toBeEnabled()
+    );
+
+    unmount();
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 
   it("scrolls to the bottom from the named scroll control", () => {
