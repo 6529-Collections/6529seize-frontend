@@ -56,6 +56,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.loading": "Loading blocked profiles…",
   "contentModeration.preferences.loadError":
     "Couldn't load your blocked profiles.",
+  "contentModeration.preferences.openProfile": "Open {profile}'s profile",
   "contentModeration.preferences.signIn":
     "Connect an authenticated profile to manage content preferences.",
   "contentModeration.moderator.menu": "Moderation queue",

@@ -32,6 +32,9 @@
         "Reporting, hiding, and blocking are independent, and no action is selected by default.",
         "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
         "Notification, messaging, and blocked-profile settings are combined at /preferences. The Content tab is available at /preferences?tab=content, and /content-preferences redirects there.",
+        "A blocked profile's avatar and handle in Preferences link to its public profile, where Unblock replaces Follow for the blocker.",
+        "Blocking automatically unfollows the profile and prevents following it again until it is unblocked. It does not notify the blocked profile or remove that profile's subscription to the blocker.",
+        "Blocked public profiles remain reachable. Public profile and Brain summary metadata stays visible, while authored post bodies remain blurred until revealed or unblocked.",
         "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
         "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
         "Only server-authorized moderators see and can use the Moderation queue at /content-moderation, and every decision requires a reason."

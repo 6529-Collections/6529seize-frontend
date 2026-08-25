@@ -20,7 +20,10 @@ import {
   setGlobalDropModerationOverride,
   setProfileBlockedOverride,
 } from "@/services/content-moderation/content-moderation-state";
-import { invalidateContentModerationPresentation } from "@/services/content-moderation/content-moderation-query";
+import {
+  invalidateContentModerationPresentation,
+  reconcileIdentityFollowingAfterBlockChange,
+} from "@/services/content-moderation/content-moderation-query";
 import {
   Dialog,
   DialogBackdrop,
@@ -241,6 +244,12 @@ export default function ReportDropModal({
           context.viewerProfileId,
           drop.author.id,
           context.previousBlocked
+        );
+      }
+      if (context?.blockAuthor && !blockFailed) {
+        void reconcileIdentityFollowingAfterBlockChange(
+          queryClient,
+          drop.author.handle
         );
       }
       const [firstFailure] = failures;

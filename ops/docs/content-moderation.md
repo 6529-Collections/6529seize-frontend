@@ -116,7 +116,16 @@ profile picture, handle, and centered **Blocked · Reveal · Unblock** controls.
   posts by that profile immediately.
 
 Blocked profiles remain reachable through their public profile pages. They can
-also be unblocked from the Content tab under `/preferences`.
+also be unblocked from the Content tab under `/preferences`; the profile picture
+and handle in that list link to the public profile. On a blocked profile's page,
+**Unblock** replaces the Follow action for the blocker.
+
+Blocking automatically unfollows that profile and prevents following it again
+until it is unblocked. It does not remove the blocked profile as a follower of
+the blocker or tell that profile who blocked it. Public profile metadata,
+including Brain activity summaries and **Most Active In**, remains visible when
+the blocker deliberately opens the profile; authored post bodies remain blurred
+until individually revealed or the profile is unblocked.
 
 ## Global moderation
 
