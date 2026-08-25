@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useRef,
-  useState,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-} from "react";
+import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import CreateDropContent from "./CreateDropContent";
@@ -51,10 +44,7 @@ import {
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  DropClientDeliveryState,
-  DropSize,
-} from "@/helpers/waves/drop.helpers";
+import { useModerationRejectedDropDelivery } from "./useModerationRejectedDropDelivery";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -160,22 +150,11 @@ export default function CreateDrop({
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
     useMyStream();
-  const activeWaveIdRef = useRef<string | null>(wave.id);
-  const moderationRejectedDropIdsRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    activeWaveIdRef.current = wave.id;
-    const moderationRejectedDropIds = moderationRejectedDropIdsRef.current;
-
-    return () => {
-      activeWaveIdRef.current = null;
-      const rejectedDropIds = Array.from(moderationRejectedDropIds);
-      moderationRejectedDropIds.clear();
-      rejectedDropIds.forEach((rejectedDropId) => {
-        processDropRemoved(wave.id, rejectedDropId);
-      });
-    };
-  }, [processDropRemoved, wave.id]);
+  const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
+    applyOptimisticDropUpdate,
+    processDropRemoved,
+    waveId: wave.id,
+  });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -541,27 +520,12 @@ export default function CreateDrop({
 
         if (
           isContentModerationRejection &&
-          activeWaveIdRef.current === body.drop.wave_id
-        ) {
-          const updateResult = applyOptimisticDropUpdate({
-            waveId: body.drop.wave_id,
+          retainModerationRejectedDrop({
             dropId: body.dropId,
-            update: (optimisticDrop) => {
-              if (optimisticDrop.type !== DropSize.FULL) {
-                return optimisticDrop;
-              }
-
-              return {
-                ...optimisticDrop,
-                clientDeliveryState:
-                  DropClientDeliveryState.MODERATION_REJECTED,
-              };
-            },
-          });
-          if (updateResult !== null) {
-            moderationRejectedDropIdsRef.current.add(body.dropId);
-            return;
-          }
+            rejectedWaveId: body.drop.wave_id,
+          })
+        ) {
+          return;
         }
 
         processDropRemoved(body.drop.wave_id, body.dropId);

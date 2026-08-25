@@ -13,7 +13,6 @@ import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-
 import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
@@ -60,31 +59,7 @@ import {
 } from "./WaveDrop.helpers";
 import type { WaveDropProps } from "./WaveDrop.types";
 import { DropClientDeliveryState } from "@/helpers/waves/drop.helpers";
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
-
-const ModerationRejectedDeliveryStatus = ({
-  contentOffsetClass,
-}: {
-  readonly contentOffsetClass: string;
-}) => {
-  const locale = useBrowserLocale();
-
-  return (
-    <div
-      className={`tw-text-red-300 tw-mt-1 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-font-medium tw-leading-5 ${contentOffsetClass}`}
-      data-testid="moderation-rejected-delivery-status"
-    >
-      <ExclamationCircleIcon
-        aria-hidden="true"
-        className="tw-h-4 tw-w-4 tw-flex-shrink-0"
-      />
-      <span>{t(locale, "contentModeration.delivery.moderationRejected")}</span>
-    </div>
-  );
-};
-
+import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
 const WaveDropInner = ({
   drop,
   previousDrop,
