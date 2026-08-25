@@ -1423,8 +1423,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
   profileRequiredConfirm: "Go to Identity",
-  profileRequiredDescription:
-    "Set up your profile before creating a Wave.",
+  profileRequiredDescription: "Set up your profile before creating a Wave.",
   profileRequiredTitle: "Create your profile first",
   subwaveTitle: "Create subwave",
   waveTitle: "Create Wave",

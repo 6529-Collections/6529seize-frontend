@@ -63,6 +63,21 @@ describe("EULAModal", () => {
     );
   });
 
+  it("uses the branded full-screen reading layout", () => {
+    render(<EULAModal />);
+
+    const dialog = screen.getByRole("dialog");
+    const agreement = screen.getByLabelText("End User License Agreement text");
+    const logo = dialog.querySelector('header span[aria-hidden="true"]');
+
+    expect(dialog).toHaveClass("tw-h-[100dvh]", "tw-max-w-none");
+    expect(agreement).toHaveClass("tw-h-full", "tw-overflow-y-auto");
+    expect(agreement).not.toHaveClass("tw-max-h-[50vh]");
+    expect(logo?.getAttribute("style")).toContain(
+      "mask-image: url('/6529.svg')"
+    );
+  });
+
   it("keeps keyboard tab focus inside the modal", async () => {
     const user = userEvent.setup();
     render(
@@ -146,6 +161,29 @@ describe("EULAModal", () => {
       top: scrollContainer.scrollHeight,
       behavior: "smooth",
     });
+  });
+
+  it("shows the scroll control again after moving away from the bottom", () => {
+    render(<EULAModal />);
+    const scrollContainer = screen.getByLabelText(
+      "End User License Agreement text"
+    );
+    const agreeButton = screen.getByRole("button", { name: "Agree" });
+
+    scrollAgreementToBottom();
+
+    expect(
+      screen.queryByRole("button", { name: "Scroll to end of agreement" })
+    ).not.toBeInTheDocument();
+    expect(agreeButton).toBeEnabled();
+
+    scrollContainer.scrollTop = 70;
+    fireEvent.scroll(scrollContainer);
+
+    expect(
+      screen.getByRole("button", { name: "Scroll to end of agreement" })
+    ).toBeVisible();
+    expect(agreeButton).toBeEnabled();
   });
 
   it("locks and restores body scrolling on mount and unmount", () => {

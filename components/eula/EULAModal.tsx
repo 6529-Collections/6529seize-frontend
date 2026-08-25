@@ -2,7 +2,6 @@
 
 /* eslint-disable react/no-unescaped-entities -- Preserve the agreement's exact legal punctuation. */
 
-import Button from "@/components/utils/button/Button";
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -19,14 +18,19 @@ import {
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import EULAIntroSections from "./EULAIntroSections";
 import EULACommunicationsSection from "./EULACommunicationsSection";
+import EULAFooter from "./EULAFooter";
+import EULAHeader from "./EULAHeader";
 import EULALegalClosingSections from "./EULALegalClosingSections";
 import { FocusTrap } from "focus-trap-react";
 import { createPortal } from "react-dom";
 
+const SCROLL_END_THRESHOLD_PX = 24;
+
 export default function EULAModal() {
   const { consent, isSaving, saveError } = useEULAConsent();
   const locale = useBrowserLocale();
-  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const [hasReachedBottom, setHasReachedBottom] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(false);
   const mounted = useSyncExternalStore(
     () => () => undefined,
     () => true,
@@ -34,21 +38,30 @@ export default function EULAModal() {
   );
   const scrollContainerRef = useRef<HTMLElement>(null);
   const scrollButtonRef = useRef<HTMLButtonElement>(null);
+  const agreeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
 
-  const updateScrolledToBottom = useCallback(() => {
+  const updateScrollState = useCallback(() => {
     const element = scrollContainerRef.current;
-    if (
-      element &&
-      element.clientHeight > 0 &&
-      element.scrollHeight > 0 &&
-      Math.ceil(element.scrollTop + element.clientHeight) >=
-        element.scrollHeight
-    ) {
-      setScrolledToBottom(true);
+    if (!element || element.clientHeight <= 0 || element.scrollHeight <= 0) {
+      return;
+    }
+
+    const remainingScrollDistance =
+      element.scrollHeight - element.scrollTop - element.clientHeight;
+    const nextIsNearBottom = remainingScrollDistance <= SCROLL_END_THRESHOLD_PX;
+
+    setIsNearBottom(nextIsNearBottom);
+    if (nextIsNearBottom) {
+      const shouldFocusAgree =
+        document.activeElement === scrollButtonRef.current;
+      setHasReachedBottom(true);
+      if (shouldFocusAgree) {
+        globalThis.setTimeout(() => agreeButtonRef.current?.focus(), 0);
+      }
     }
   }, []);
 
@@ -58,7 +71,7 @@ export default function EULAModal() {
     }
 
     scrollButtonRef.current?.focus();
-    updateScrolledToBottom();
+    updateScrollState();
 
     const ariaHiddenAttribute = "aria-hidden";
     const previousOverflow = document.body.style.overflow;
@@ -98,10 +111,10 @@ export default function EULAModal() {
         }
       });
     };
-  }, [mounted, updateScrolledToBottom]);
+  }, [mounted, updateScrollState]);
 
   const handleScroll = () => {
-    updateScrolledToBottom();
+    updateScrollState();
   };
 
   const scrollToBottom = () => {
@@ -132,7 +145,7 @@ export default function EULAModal() {
           tabbableOptions: { displayCheck: "none" },
         }}
       >
-        <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[10000] tw-flex tw-items-center tw-justify-center tw-bg-black/60 tw-p-2 tw-backdrop-blur">
+        <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[10000] tw-bg-iron-950 tw-text-iron-50">
           <dialog
             ref={dialogRef}
             open
@@ -140,26 +153,30 @@ export default function EULAModal() {
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
             tabIndex={-1}
-            className="tw-relative tw-m-0 tw-max-h-full tw-w-full tw-max-w-lg tw-overflow-y-auto tw-rounded-xl tw-border-0 tw-bg-iron-800 tw-px-6 tw-py-8 tw-text-inherit tw-shadow-lg focus:tw-outline-none sm:tw-w-3/4 sm:tw-max-w-4xl sm:tw-px-12 sm:tw-py-10"
+            className="tw-m-0 tw-flex tw-h-[100dvh] tw-max-h-none tw-w-full tw-max-w-none tw-flex-col tw-overflow-hidden tw-border-0 tw-bg-iron-950 tw-p-0 tw-text-inherit focus:tw-outline-none"
           >
-            <div className="tw-mb-10 tw-text-center">
-              <h2 id={titleId}>{t(locale, "eula.modal.title")}</h2>
-              <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-                {t(locale, "eula.modal.lastUpdated", {
-                  version: CURRENT_EULA_VERSION,
-                })}
-              </p>
-            </div>
-            <div className="tw-mb-10">
-              <p id={descriptionId}>{t(locale, "eula.modal.introduction")}</p>
-              <div className="tw-relative">
-                <section
-                  ref={scrollContainerRef}
-                  onScroll={handleScroll}
-                  aria-label={t(locale, "eula.modal.agreementLabel")}
-                  className="tw-max-h-[50vh] tw-overflow-y-auto tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-900 tw-p-4 tw-shadow"
-                >
-                  <ol className="tw-list-decimal tw-space-y-2 tw-pl-6 tw-text-sm">
+            <EULAHeader
+              titleId={titleId}
+              title={t(locale, "eula.modal.title")}
+              lastUpdated={t(locale, "eula.modal.lastUpdated", {
+                version: CURRENT_EULA_VERSION,
+              })}
+            />
+            <div className="tw-relative tw-min-h-0 tw-flex-1">
+              <section
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                aria-label={t(locale, "eula.modal.agreementLabel")}
+                className="tw-h-full tw-overflow-y-auto tw-overscroll-contain tw-px-4 tw-py-5 sm:tw-px-8 sm:tw-py-7"
+              >
+                <div className="tw-mx-auto tw-w-full tw-max-w-4xl">
+                  <p
+                    id={descriptionId}
+                    className="tw-mb-6 tw-mt-0 tw-text-base tw-leading-6 tw-text-iron-200"
+                  >
+                    {t(locale, "eula.modal.introduction")}
+                  </p>
+                  <ol className="tw-m-0 tw-list-decimal tw-space-y-3 tw-pl-6 tw-text-base tw-leading-7 tw-text-iron-100 sm:tw-pl-7">
                     <EULAIntroSections />
                     <EULACommunicationsSection />
                     <li>
@@ -694,45 +711,29 @@ export default function EULAModal() {
                     </li>
                     <EULALegalClosingSections />
                   </ol>
-                </section>
-                {!scrolledToBottom && (
-                  <button
-                    ref={scrollButtonRef}
-                    type="button"
-                    onClick={scrollToBottom}
-                    aria-label={t(locale, "eula.modal.scrollToEnd")}
-                    className="tw-absolute tw-bottom-2 tw-right-2 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-white tw-bg-opacity-50 tw-p-2 tw-text-gray-800 tw-transition tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-gray-200 desktop-hover:hover:tw-bg-opacity-80"
-                  >
-                    <FontAwesomeIcon
-                      icon={faArrowDown}
-                      height={16}
-                      width={16}
-                    />
-                  </button>
-                )}
-              </div>
+                </div>
+              </section>
+              {!isNearBottom && (
+                <button
+                  ref={scrollButtonRef}
+                  type="button"
+                  onClick={scrollToBottom}
+                  aria-label={t(locale, "eula.modal.scrollToEnd")}
+                  className="tw-absolute tw-bottom-4 tw-right-4 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-50 tw-p-2 tw-text-iron-950 tw-shadow-xl tw-transition tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white motion-reduce:tw-transition-none sm:tw-bottom-5 sm:tw-right-8"
+                >
+                  <FontAwesomeIcon icon={faArrowDown} height={16} width={16} />
+                </button>
+              )}
             </div>
-            {saveError && (
-              <p
-                className="tw-mb-4 tw-text-center tw-text-sm tw-text-error"
-                role="alert"
-              >
-                {saveError}
-              </p>
-            )}
-            <div className="tw-mt-6 tw-flex tw-justify-center">
-              <Button
-                onClick={() => void consent()}
-                disabled={!scrolledToBottom}
-                loading={isSaving}
-                variant="primary"
-                size="lg"
-              >
-                {saveError
-                  ? t(locale, "eula.modal.tryAgain")
-                  : t(locale, "eula.modal.agree")}
-              </Button>
-            </div>
+            <EULAFooter
+              agreeButtonRef={agreeButtonRef}
+              hasReachedBottom={hasReachedBottom}
+              isSaving={isSaving}
+              saveError={saveError}
+              agreeLabel={t(locale, "eula.modal.agree")}
+              retryLabel={t(locale, "eula.modal.tryAgain")}
+              onAgree={() => void consent()}
+            />
           </dialog>
         </div>
       </FocusTrap>
