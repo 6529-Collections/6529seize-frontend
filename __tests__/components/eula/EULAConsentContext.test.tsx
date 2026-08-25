@@ -16,6 +16,15 @@ import {
 } from "@testing-library/react";
 import React, { useEffect } from "react";
 
+let mockPathname = "/";
+const mockRouterReplace = jest.fn();
+const mockRouter = { replace: mockRouterReplace };
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => mockPathname,
+  useRouter: () => mockRouter,
+}));
+
 jest.mock("js-cookie", () => ({
   get: jest.fn(),
   set: jest.fn(),
@@ -85,6 +94,7 @@ function AppChild({ onMount = jest.fn() }: { readonly onMount?: () => void }) {
 describe("EULAConsentContext", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPathname = "/";
     mockCapacitor = {
       isIos: true,
       isAndroid: false,
@@ -119,8 +129,38 @@ describe("EULAConsentContext", () => {
     expect(screen.queryByTestId("app-child")).not.toBeInTheDocument();
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "policies/eula-consent/device-1",
+      errorMode: "structured",
     });
   });
+
+  it.each(["/access", "/restricted"])(
+    "allows the staging access-control route %s to mount before EULA verification",
+    (pathname) => {
+      mockPathname = pathname;
+
+      renderProvider(<AppChild />);
+
+      expect(screen.getByTestId("app-child")).toBeVisible();
+      expect(commonApiFetch).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    { status: 401, route: "/access" },
+    { status: 403, route: "/restricted" },
+  ])(
+    "routes a staging $status response to $route without unlocking the app",
+    async ({ status, route }) => {
+      commonApiFetch.mockRejectedValue({ status });
+
+      renderProvider(<AppChild />);
+
+      await waitFor(() =>
+        expect(mockRouterReplace).toHaveBeenCalledWith(route)
+      );
+      expect(screen.queryByTestId("app-child")).not.toBeInTheDocument();
+    }
+  );
 
   it("accepts a valid current-version cookie without a backend check", async () => {
     get.mockReturnValue(CURRENT_EULA_VERSION);
@@ -281,12 +321,28 @@ describe("EULAConsentContext", () => {
         platform: "ios",
         eula_version: CURRENT_EULA_VERSION,
       },
+      errorMode: "structured",
     });
     expect(set).toHaveBeenCalledWith(
       CONSENT_EULA_COOKIE,
       CURRENT_EULA_VERSION,
       { expires: 365 }
     );
+  });
+
+  it("routes an expired staging credential during acceptance back to the access screen", async () => {
+    commonApiFetch.mockResolvedValue({});
+    commonApiPost.mockRejectedValue({ status: 401 });
+
+    renderProvider(<AppChild />);
+    fireEvent.click(await screen.findByRole("button", { name: "Agree" }));
+
+    await waitFor(() =>
+      expect(mockRouterReplace).toHaveBeenCalledWith("/access")
+    );
+    expect(screen.getByRole("dialog", { name: "EULA" })).toBeVisible();
+    expect(screen.queryByTestId("app-child")).not.toBeInTheDocument();
+    expect(set).not.toHaveBeenCalled();
   });
 
   it("does not mount app children while the iOS check is pending", async () => {
