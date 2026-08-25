@@ -1,3 +1,4 @@
+import { ApiEulaVersion } from "@/generated/models/ApiEulaVersion";
 import { mainnet } from "wagmi/chains";
 
 export const CW_PROJECT_ID = "0ba285cc179045bec37f7c9b9e7f9fbf";
@@ -37,6 +38,10 @@ export const API_AUTH_COOKIE = "x-6529-auth";
 export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
 export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
 export const CONSENT_EULA_COOKIE = "eula-consent";
+export const NATIVE_IOS_COOKIE = "native-ios";
+export const CURRENT_EULA_VERSION = ApiEulaVersion._20260824;
+export const EULA_VALIDITY_DAYS = 365;
+export const EULA_VALIDITY_MS = EULA_VALIDITY_DAYS * 24 * 60 * 60 * 1000;
 export const PROFILE_PROXY_ACCEPTANCE_COOKIE = "profile-proxy-acceptance";
 export const NEVER_DATE = 64060588800;
 

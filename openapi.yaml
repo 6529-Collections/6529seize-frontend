@@ -6252,6 +6252,91 @@ paths:
                   $ref: "#/components/schemas/ApiOwnerBalanceMemes"
         "404":
           description: Memes Owner Balance for consolidation key not found
+  /policies/eula-consent:
+    post:
+      tags:
+        - Policies
+      summary: Save the current EULA acceptance for a device
+      operationId: saveEulaConsent
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/policies/eula-consent.handlers"
+          name: handleSaveEulaConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSaveEulaConsentRequest"
+      responses:
+        "200":
+          description: EULA acceptance saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSaveEulaConsentResponse"
+        "400":
+          description: Invalid EULA acceptance
+    delete:
+      tags:
+        - Policies
+      summary: Delete the EULA acceptance for a device
+      operationId: deleteEulaConsent
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/policies/eula-consent.handlers"
+          name: handleDeleteEulaConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDeleteEulaConsentRequest"
+      responses:
+        "200":
+          description: EULA acceptance deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeleteEulaConsentResponse"
+        "400":
+          description: Invalid device identifier
+  /policies/eula-consent/{deviceId}:
+    get:
+      tags:
+        - Policies
+      summary: Get the current EULA acceptance for a device
+      operationId: getEulaConsent
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/policies/eula-consent.handlers"
+          name: handleGetEulaConsent
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      responses:
+        "200":
+          description: Current EULA acceptance, or an empty object when absent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEulaConsent"
+        "400":
+          description: Invalid device identifier
   /profile-cms/agent/schema-bundle:
     get:
       tags:
@@ -16912,6 +16997,24 @@ components:
           type: array
           items:
             type: string
+    ApiDeleteEulaConsentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - device_id
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+    ApiDeleteEulaConsentResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -18132,6 +18235,27 @@ components:
     ApiEthereumAddress:
       type: string
       pattern: ^0x[a-fA-F0-9]{40}$
+    ApiEulaConsent:
+      type: object
+      additionalProperties: false
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        platform:
+          type: string
+          minLength: 1
+          maxLength: 32
+        accepted_at:
+          type: integer
+          format: int64
+        eula_version:
+          $ref: "#/components/schemas/ApiEulaVersion"
+    ApiEulaVersion:
+      type: string
+      enum:
+        - "2026-08-24"
     ApiFeedItem:
       type: object
       required:
@@ -22613,6 +22737,35 @@ components:
           type: string
         expected_current_package_hash:
           type: string
+    ApiSaveEulaConsentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - device_id
+        - platform
+        - eula_version
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        platform:
+          type: string
+          minLength: 1
+          maxLength: 32
+        eula_version:
+          $ref: "#/components/schemas/ApiEulaVersion"
+    ApiSaveEulaConsentResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - eula_version
+      properties:
+        message:
+          type: string
+        eula_version:
+          $ref: "#/components/schemas/ApiEulaVersion"
     ApiSaveProfileCmsPackageDraftRequest:
       type: object
       required:
