@@ -397,8 +397,9 @@ describe("MemeLabPageComponent", () => {
     expect(
       screen.getByRole("navigation", { name: "Meme Lab page sections" })
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Overview" })).toHaveClass(
-      "tw-border-primary-400"
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
     );
     expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
       "aria-pressed",
@@ -528,9 +529,9 @@ describe("MemeLabPageComponent", () => {
           expect.stringContaining("transactions_memelab?wallet=0xabc"),
           expectAbortSignalOptions
         );
-        expect(screen.getByRole("button", { name: "Overview" })).toHaveClass(
-          "tw-border-primary-400"
-        );
+        expect(
+          screen.getByRole("button", { name: "Overview" })
+        ).toHaveAttribute("aria-current", "page");
         expect(
           screen.queryByRole("button", { name: "Your Cards" })
         ).not.toBeInTheDocument();
