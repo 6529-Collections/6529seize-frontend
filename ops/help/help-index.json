@@ -81,6 +81,7 @@
         "Most posts pass a lightweight deterministic screen without an AI call. Only a specific risk signal is escalated to a permissive AI check, and rejection requires a high-confidence prohibited-content result.",
         "Profanity, unpopular opinions, and ordinary offensive speech are not rejected merely for being objectionable.",
         "Configured known unsafe destinations can be rejected directly. Uncertain AI results and evaluator failures follow the permissive policy and allow the post.",
+        "Luhn-valid payment-card candidates are sent to the AI check. Clearly labelled sandbox, test, example, or documentation card data is allowed, while a card number presented as genuine financial information can be rejected as sensitive private information even when the author claims ownership.",
         "A locally created post stays visible in its normal layout while submission is pending; it is not replaced by a prominent checking message.",
         "When the backend rejects a post, the unsent optimistic post remains temporarily in the current Wave with a subtle red treatment and a 'Not sent · Blocked by safety check' status; it is never persisted and disappears after leaving or refreshing the Wave.",
         "A moderation-rejected local row does not offer edit, retry, reaction, reply, or post-action controls.",

@@ -48,6 +48,13 @@ reviewed by the AI check and require high confidence before rejection. File
 attachments such as PDF and CSV files continue through their separate
 asynchronous validation pipeline rather than the synchronous text check.
 
+Luhn-valid payment-card candidates are one of the signals sent to the AI
+check. Clearly labelled sandbox, test, example, or documentation card data is
+allowed. A card number presented as genuine financial information can be
+rejected as sensitive private information even when the author says it belongs
+to them. The general fail-open rule still applies when the evaluator is
+unavailable.
+
 ## Posting suspension
 
 An authorized moderator can manually suspend a profile from publishing new or
