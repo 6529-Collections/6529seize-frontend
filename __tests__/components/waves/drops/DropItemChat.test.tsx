@@ -60,7 +60,9 @@ describe("DropItemChat", () => {
     render(<DropItemChat href="https://base.com/p" dropId="d1" />);
     const links = screen.getAllByRole("link");
     expect(links[0]).toHaveAttribute("href", "/p");
-    expect(screen.getByText("Title")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Title" })).toHaveClass(
+      "tw-m-0"
+    );
     expect(screen.getByTestId("position")).toHaveTextContent("2");
     expect(screen.getByTestId("media")).toHaveAttribute("media_url", "img");
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/p");
