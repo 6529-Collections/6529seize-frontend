@@ -724,7 +724,7 @@ export default function MemePage({
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-y-1 md:tw-flex-nowrap"
                     aria-label={t(locale, "theMemes.detail.heading.ariaLabel", {
                       tokenId: formatInteger(locale, nft.id),
                       name: nft.name,
@@ -737,7 +737,7 @@ export default function MemePage({
                     </span>
                     <span
                       aria-hidden="true"
-                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                      className="tw-mx-2.5 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6 md:tw-mx-3"
                     />
                     <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
                       {nft.name}

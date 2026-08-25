@@ -17,6 +17,7 @@ import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
+import { useUserPageTabIndicator } from "@/components/user/layout/useUserPageTabIndicator";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -88,6 +89,7 @@ export default function MemeLabPageComponent({
   );
   const routeTab = parseMemeLabFocus(focusParam) ?? MEME_FOCUS.LIVE;
   const activitySectionRef = useRef<HTMLElement | null>(null);
+  const memeLabTabsContentRef = useRef<HTMLDivElement>(null);
   const loadedActivityKeyRef = useRef<string | null>(null);
   const loadedHistoryNftIdRef = useRef<string | null>(null);
 
@@ -140,10 +142,51 @@ export default function MemeLabPageComponent({
   );
   const routeFocus = getMemeLabRouteFocus(activeTab, activeHistoryTab);
   const isLoadingNft = nftLoading && (!nft || !nftMeta);
+  const hasMemeLabTabs = Boolean(nftMeta && nft);
+  const {
+    activeIndicator: memeLabTabIndicator,
+    updateActiveIndicator: updateMemeLabTabIndicator,
+  } = useUserPageTabIndicator(memeLabTabsContentRef);
 
   useEffect(() => {
     setTitle(getMemeLabBrowserTitle({ nft, nftId, routeFocus, locale }));
   }, [locale, nft, nftId, routeFocus, setTitle]);
+
+  useEffect(() => {
+    const tabsContent = memeLabTabsContentRef.current;
+    if (!hasMemeLabTabs || !tabsContent) return;
+
+    const updateIndicator = () => updateMemeLabTabIndicator();
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateIndicator);
+    resizeObserver?.observe(tabsContent);
+
+    return () => {
+      window.removeEventListener("resize", updateIndicator);
+      resizeObserver?.disconnect();
+    };
+  }, [hasMemeLabTabs, updateMemeLabTabIndicator]);
+
+  useEffect(() => {
+    if (!hasMemeLabTabs) return;
+
+    let secondFrameId: number | undefined;
+    const firstFrameId = requestAnimationFrame(() => {
+      secondFrameId = requestAnimationFrame(updateMemeLabTabIndicator);
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrameId);
+      if (secondFrameId !== undefined) {
+        cancelAnimationFrame(secondFrameId);
+      }
+    };
+  }, [activeTab, hasMemeLabTabs, updateMemeLabTabIndicator]);
 
   function replaceRouteFocus(nextFocus: MEME_FOCUS) {
     const query = new URLSearchParams(searchParamsString);
@@ -624,7 +667,7 @@ export default function MemeLabPageComponent({
           <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
             <h3
               id="meme-lab-card-activity-heading"
-              className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
+              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg"
             >
               {t(locale, "memeLab.detail.tabs.cardActivity")}
             </h3>
@@ -705,7 +748,7 @@ export default function MemeLabPageComponent({
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-y-1 md:tw-flex-nowrap"
                     aria-label={t(locale, "memeLab.detail.heading.ariaLabel", {
                       tokenId: nft.id,
                       name: nft.name,
@@ -718,7 +761,7 @@ export default function MemeLabPageComponent({
                     </span>
                     <span
                       aria-hidden="true"
-                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                      className="tw-mx-2.5 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6 md:tw-mx-3"
                     />
                     <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
                       {nft.name}
@@ -762,7 +805,10 @@ export default function MemeLabPageComponent({
               className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
             >
               <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
-                <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
+                <div
+                  ref={memeLabTabsContentRef}
+                  className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
+                >
                   {visibleMemeLabTabs.map((tab) => (
                     <MemeLabPageTabButton
                       key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
@@ -771,6 +817,14 @@ export default function MemeLabPageComponent({
                       onClick={() => setActiveMemeLabTab(tab.focus)}
                     />
                   ))}
+                  <span
+                    aria-hidden="true"
+                    className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-h-0.5 tw-w-px tw-origin-left tw-bg-primary-400 tw-transition-[transform,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+                    style={{
+                      opacity: memeLabTabIndicator.visible ? 1 : 0,
+                      transform: `translate3d(${memeLabTabIndicator.left}px, 0, 0) scaleX(${memeLabTabIndicator.width})`,
+                    }}
+                  />
                 </div>
               </div>
             </nav>
