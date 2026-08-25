@@ -276,7 +276,7 @@ export function MemePageArt(props: {
         title={t(locale, "theMemes.detail.art.sections.tdhBreakdown")}
         icon={ChartBarSquareIcon}
       >
-        <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-6 sm:tw-gap-x-16">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-x-16">
           {tdhRows.map((row) => (
             <MetricBlock
               key={row.key}

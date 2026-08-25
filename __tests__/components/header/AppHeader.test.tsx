@@ -48,7 +48,9 @@ jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/hooks/useWaveViewMode", () => ({ useWaveViewMode: jest.fn() }));
 jest.mock("@/components/navigation/BackButton", () => ({
   __esModule: true,
-  default: () => <div data-testid="back" />,
+  default: ({ returnTo }: { readonly returnTo?: string }) => (
+    <div data-return-to={returnTo ?? ""} data-testid="back" />
+  ),
 }));
 jest.mock("@/components/utils/Spinner", () => ({
   __esModule: true,
@@ -420,6 +422,53 @@ describe("AppHeader", () => {
       params: { user: "johndoe" },
       canGoBack: false,
     });
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open menu" })
+    ).toBeInTheDocument();
+  });
+
+  it("uses the native back button for a collected token origin", () => {
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      query: { returnTo },
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.getByTestId("back")).toHaveAttribute(
+      "data-return-to",
+      returnTo
+    );
+  });
+
+  it("does not add the native back button to web token headers", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      query: {
+        returnTo:
+          "/Shelby/collected?collection=memelab#collected-card-memelab-65",
+      },
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+  });
+
+  it("keeps the native menu action on a direct token visit", () => {
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
     expect(screen.queryByTestId("back")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Open menu" })

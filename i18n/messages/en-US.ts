@@ -2373,7 +2373,6 @@ export const EN_US_MESSAGES = {
   "nextgen.navigation.about": "About",
   "nextgen.navigation.featuredAriaLabel": "NextGen featured",
   "nextgen.navigation.sectionsAriaLabel": "NextGen sections",
-  "nextgen.token.navigation.backToCollected": "Back to {profile}'s collected",
   "nextgen.token.navigation.viewOwnerCollected": "View {profile}'s collected",
   "nextgen.home.byArtist": "by {artist}",
   "nextgen.home.exploreCollection": "Explore Collection",
@@ -2945,6 +2944,7 @@ export const EN_US_MESSAGES = {
   "rememes.card.tokenAriaLabel": "Token #{tokenId}",
   "rememes.card.replicaCount": "(x{count})",
   "user.collected.cards.listLabel": "Collected cards",
+  "user.collected.navigation.backToCollected": "Back to {profile}'s collected",
   "user.collected.empty.noCards": "No cards to display",
   "user.collected.empty.fullSetter": "Congratulations, full setter!",
   "user.collected.empty.memesFullSetter":
