@@ -17,7 +17,6 @@ import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
-import { useUserPageTabIndicator } from "@/components/user/layout/useUserPageTabIndicator";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -41,18 +40,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ACTIVITY_PAGE_SIZE,
   getMemeLabBrowserTitle,
-  getMemeLabDetailTabLabel,
   getMemeLabHistoryTabForFocus,
   getMemeLabHistoryTabLabel,
   getMemeLabRouteFocus,
   isAbortError,
   MEME_LAB_HISTORY_TAB,
   MEME_LAB_HISTORY_TABS,
-  MEME_LAB_TABS,
-  MemeLabPageTabButton,
   parseMemeLabFocus,
   runAfterCriticalWork,
 } from "./MemeLabPage.utils";
+import { MemeLabPageTabs } from "./MemeLabPageTabs";
 import {
   MemeLabActivityContent,
   MemeLabCollectors,
@@ -89,7 +86,6 @@ export default function MemeLabPageComponent({
   );
   const routeTab = parseMemeLabFocus(focusParam) ?? MEME_FOCUS.LIVE;
   const activitySectionRef = useRef<HTMLElement | null>(null);
-  const memeLabTabsContentRef = useRef<HTMLDivElement>(null);
   const loadedActivityKeyRef = useRef<string | null>(null);
   const loadedHistoryNftIdRef = useRef<string | null>(null);
 
@@ -126,7 +122,6 @@ export default function MemeLabPageComponent({
     !hasUserTransactions
       ? MEME_LAB_HISTORY_TAB.ACTIVITY
       : requestedHistoryTab;
-  const visibleMemeLabTabs = MEME_LAB_TABS;
   const visibleHistoryTabItems = useMemo(
     () =>
       MEME_LAB_HISTORY_TABS.filter(
@@ -142,51 +137,10 @@ export default function MemeLabPageComponent({
   );
   const routeFocus = getMemeLabRouteFocus(activeTab, activeHistoryTab);
   const isLoadingNft = nftLoading && (!nft || !nftMeta);
-  const hasMemeLabTabs = Boolean(nftMeta && nft);
-  const {
-    activeIndicator: memeLabTabIndicator,
-    updateActiveIndicator: updateMemeLabTabIndicator,
-  } = useUserPageTabIndicator(memeLabTabsContentRef);
 
   useEffect(() => {
     setTitle(getMemeLabBrowserTitle({ nft, nftId, routeFocus, locale }));
   }, [locale, nft, nftId, routeFocus, setTitle]);
-
-  useEffect(() => {
-    const tabsContent = memeLabTabsContentRef.current;
-    if (!hasMemeLabTabs || !tabsContent) return;
-
-    const updateIndicator = () => updateMemeLabTabIndicator();
-    updateIndicator();
-    window.addEventListener("resize", updateIndicator);
-
-    const resizeObserver =
-      typeof ResizeObserver === "undefined"
-        ? null
-        : new ResizeObserver(updateIndicator);
-    resizeObserver?.observe(tabsContent);
-
-    return () => {
-      window.removeEventListener("resize", updateIndicator);
-      resizeObserver?.disconnect();
-    };
-  }, [hasMemeLabTabs, updateMemeLabTabIndicator]);
-
-  useEffect(() => {
-    if (!hasMemeLabTabs) return;
-
-    let secondFrameId: number | undefined;
-    const firstFrameId = requestAnimationFrame(() => {
-      secondFrameId = requestAnimationFrame(updateMemeLabTabIndicator);
-    });
-
-    return () => {
-      cancelAnimationFrame(firstFrameId);
-      if (secondFrameId !== undefined) {
-        cancelAnimationFrame(secondFrameId);
-      }
-    };
-  }, [activeTab, hasMemeLabTabs, updateMemeLabTabIndicator]);
 
   function replaceRouteFocus(nextFocus: MEME_FOCUS) {
     const query = new URLSearchParams(searchParamsString);
@@ -800,34 +754,12 @@ export default function MemeLabPageComponent({
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}
             />
-            <nav
-              aria-label={t(locale, "memeLab.detail.sections.tabs")}
-              className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
-            >
-              <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
-                <div
-                  ref={memeLabTabsContentRef}
-                  className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
-                >
-                  {visibleMemeLabTabs.map((tab) => (
-                    <MemeLabPageTabButton
-                      key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                      title={getMemeLabDetailTabLabel(tab.focus, locale)}
-                      isActive={activeTab === tab.focus}
-                      onClick={() => setActiveMemeLabTab(tab.focus)}
-                    />
-                  ))}
-                  <span
-                    aria-hidden="true"
-                    className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-h-0.5 tw-w-px tw-origin-left tw-bg-primary-400 tw-transition-[transform,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
-                    style={{
-                      opacity: memeLabTabIndicator.visible ? 1 : 0,
-                      transform: `translate3d(${memeLabTabIndicator.left}px, 0, 0) scaleX(${memeLabTabIndicator.width})`,
-                    }}
-                  />
-                </div>
-              </div>
-            </nav>
+            <MemeLabPageTabs
+              nft={nft}
+              activeTab={activeTab}
+              locale={locale}
+              onSelectTab={setActiveMemeLabTab}
+            />
             {printHistoryTabs()}
             {printContent()}
           </>
