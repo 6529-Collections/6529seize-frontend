@@ -7,84 +7,39 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEULAConsent } from "./EULAConsentContext";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useId, useRef, useSyncExternalStore } from "react";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import EULAIntroSections from "./EULAIntroSections";
 import EULACommunicationsSection from "./EULACommunicationsSection";
 import EULAFooter from "./EULAFooter";
 import EULAHeader from "./EULAHeader";
 import EULALegalClosingSections from "./EULALegalClosingSections";
+import { useEULAScrollGate } from "./useEULAScrollGate";
 import { FocusTrap } from "focus-trap-react";
 import { createPortal } from "react-dom";
-
-const SCROLL_END_THRESHOLD_PX = 24;
 
 export default function EULAModal() {
   const { consent, isSaving, saveError } = useEULAConsent();
   const locale = useBrowserLocale();
-  const [hasReachedBottom, setHasReachedBottom] = useState(false);
-  const [isNearBottom, setIsNearBottom] = useState(false);
   const mounted = useSyncExternalStore(
     () => () => undefined,
     () => true,
     () => false
   );
-  const scrollContainerRef = useRef<HTMLElement>(null);
-  const agreementContentRef = useRef<HTMLDivElement>(null);
-  const completedScrollHeightRef = useRef<number | null>(null);
-  const requiresScrollAfterContentGrowthRef = useRef(false);
   const scrollButtonRef = useRef<HTMLButtonElement>(null);
   const agreeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
-
-  const updateScrollState = useCallback((fromUserScroll = false) => {
-    const element = scrollContainerRef.current;
-    if (!element || element.clientHeight <= 0 || element.scrollHeight <= 0) {
-      return;
-    }
-
-    const contentExpandedAfterCompletion =
-      completedScrollHeightRef.current !== null &&
-      element.scrollHeight > completedScrollHeightRef.current;
-    if (contentExpandedAfterCompletion) {
-      completedScrollHeightRef.current = null;
-      requiresScrollAfterContentGrowthRef.current = true;
-      setHasReachedBottom(false);
-      setIsNearBottom(false);
-      return;
-    }
-
-    const remainingScrollDistance =
-      element.scrollHeight - element.scrollTop - element.clientHeight;
-    const nextIsNearBottom = remainingScrollDistance <= SCROLL_END_THRESHOLD_PX;
-
-    if (requiresScrollAfterContentGrowthRef.current && !fromUserScroll) {
-      setIsNearBottom(false);
-      return;
-    }
-
-    setIsNearBottom(nextIsNearBottom);
-    if (nextIsNearBottom) {
-      const shouldFocusAgree =
-        document.activeElement === scrollButtonRef.current;
-      completedScrollHeightRef.current = element.scrollHeight;
-      requiresScrollAfterContentGrowthRef.current = false;
-      setHasReachedBottom(true);
-      if (shouldFocusAgree) {
-        globalThis.setTimeout(() => agreeButtonRef.current?.focus(), 0);
-      }
-    }
-  }, []);
+  const {
+    agreementContentRef,
+    handleScroll,
+    hasReachedBottom,
+    isNearBottom,
+    scrollContainerRef,
+    scrollToBottom,
+  } = useEULAScrollGate({ mounted, scrollButtonRef, agreeButtonRef });
 
   useEffect(() => {
     if (!mounted) {
@@ -92,20 +47,6 @@ export default function EULAModal() {
     }
 
     scrollButtonRef.current?.focus();
-    updateScrollState();
-
-    const scrollElement = scrollContainerRef.current;
-    const contentElement = agreementContentRef.current;
-    const resizeObserver =
-      scrollElement && typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => updateScrollState())
-        : null;
-    if (scrollElement) {
-      resizeObserver?.observe(scrollElement);
-    }
-    if (contentElement) {
-      resizeObserver?.observe(contentElement);
-    }
 
     const ariaHiddenAttribute = "aria-hidden";
     const previousOverflow = document.body.style.overflow;
@@ -135,7 +76,6 @@ export default function EULAModal() {
     });
 
     return () => {
-      resizeObserver?.disconnect();
       document.body.style.overflow = previousOverflow;
       backgroundElements.forEach(({ element, inert, ariaHidden }) => {
         element.inert = inert;
@@ -146,20 +86,7 @@ export default function EULAModal() {
         }
       });
     };
-  }, [mounted, updateScrollState]);
-
-  const handleScroll = () => {
-    updateScrollState(true);
-  };
-
-  const scrollToBottom = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: scrollContainerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  };
+  }, [mounted]);
 
   if (!mounted) {
     return null;

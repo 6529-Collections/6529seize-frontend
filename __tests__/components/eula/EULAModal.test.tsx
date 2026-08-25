@@ -195,9 +195,7 @@ describe("EULAModal", () => {
     }) as unknown as typeof ResizeObserver;
 
     render(<EULAModal />);
-    const agreement = screen.getByLabelText(
-      "End User License Agreement text"
-    );
+    const agreement = screen.getByLabelText("End User License Agreement text");
     const agreementContent = agreement.firstElementChild;
     const agreeButton = screen.getByRole("button", { name: "Agree" });
     expect(observe).toHaveBeenCalledWith(agreementContent);
