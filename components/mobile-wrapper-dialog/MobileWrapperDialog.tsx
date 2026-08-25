@@ -69,6 +69,7 @@ type MobileWrapperDialogProps = {
    * intentional full-bleed surface that requires the shared floating control.
    */
   readonly showHeaderCloseButton?: boolean | undefined;
+  readonly showHeaderDivider?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
@@ -627,6 +628,7 @@ export default function MobileWrapperDialog({
   showDragHandle,
   enableDragToClose,
   showHeaderCloseButton = true,
+  showHeaderDivider,
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
@@ -752,6 +754,7 @@ export default function MobileWrapperDialog({
                           titleActions={titleActions}
                           headerActions={headerActions}
                           showHeaderCloseButton={showInlineHeaderCloseButton}
+                          showHeaderDivider={showHeaderDivider}
                           headerCloseButtonClassName={
                             headerCloseButtonClassName
                           }

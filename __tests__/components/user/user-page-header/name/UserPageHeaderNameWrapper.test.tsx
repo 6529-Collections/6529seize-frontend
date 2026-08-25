@@ -4,9 +4,11 @@ import userEvent from "@testing-library/user-event";
 import UserPageHeaderNameWrapper from "@/components/user/user-page-header/name/UserPageHeaderNameWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-jest.mock("@/components/utils/icons/PencilIcon", () => () => (
-  <span data-testid="pencil" />
-));
+jest.mock("@/components/utils/icons/PencilIcon", () => ({
+  __esModule: true,
+  default: () => <span data-testid="pencil" />,
+  PencilIconSize: { SMALL: "SMALL", MEDIUM: "MEDIUM" },
+}));
 jest.mock(
   "@/components/utils/animation/CommonAnimationWrapper",
   () =>

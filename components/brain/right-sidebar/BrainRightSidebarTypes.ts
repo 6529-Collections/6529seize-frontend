@@ -5,9 +5,8 @@ export enum Mode {
 
 export enum SidebarTab {
   ABOUT = "ABOUT",
-  RULES = "RULES",
   REP = "REP",
-  SETTINGS = "SETTINGS",
+  CONFIGURATION = "CONFIGURATION",
   TOP_VOTERS = "TOP_VOTERS",
   ACTIVITY_LOG = "ACTIVITY_LOG",
 }
