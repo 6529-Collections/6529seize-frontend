@@ -37,6 +37,9 @@ export default function EULAModal() {
     () => false
   );
   const scrollContainerRef = useRef<HTMLElement>(null);
+  const agreementContentRef = useRef<HTMLDivElement>(null);
+  const completedScrollHeightRef = useRef<number | null>(null);
+  const requiresScrollAfterContentGrowthRef = useRef(false);
   const scrollButtonRef = useRef<HTMLButtonElement>(null);
   const agreeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -44,9 +47,20 @@ export default function EULAModal() {
   const titleId = useId();
   const descriptionId = useId();
 
-  const updateScrollState = useCallback(() => {
+  const updateScrollState = useCallback((fromUserScroll = false) => {
     const element = scrollContainerRef.current;
     if (!element || element.clientHeight <= 0 || element.scrollHeight <= 0) {
+      return;
+    }
+
+    const contentExpandedAfterCompletion =
+      completedScrollHeightRef.current !== null &&
+      element.scrollHeight > completedScrollHeightRef.current;
+    if (contentExpandedAfterCompletion) {
+      completedScrollHeightRef.current = null;
+      requiresScrollAfterContentGrowthRef.current = true;
+      setHasReachedBottom(false);
+      setIsNearBottom(false);
       return;
     }
 
@@ -54,10 +68,17 @@ export default function EULAModal() {
       element.scrollHeight - element.scrollTop - element.clientHeight;
     const nextIsNearBottom = remainingScrollDistance <= SCROLL_END_THRESHOLD_PX;
 
+    if (requiresScrollAfterContentGrowthRef.current && !fromUserScroll) {
+      setIsNearBottom(false);
+      return;
+    }
+
     setIsNearBottom(nextIsNearBottom);
     if (nextIsNearBottom) {
       const shouldFocusAgree =
         document.activeElement === scrollButtonRef.current;
+      completedScrollHeightRef.current = element.scrollHeight;
+      requiresScrollAfterContentGrowthRef.current = false;
       setHasReachedBottom(true);
       if (shouldFocusAgree) {
         globalThis.setTimeout(() => agreeButtonRef.current?.focus(), 0);
@@ -74,12 +95,16 @@ export default function EULAModal() {
     updateScrollState();
 
     const scrollElement = scrollContainerRef.current;
+    const contentElement = agreementContentRef.current;
     const resizeObserver =
       scrollElement && typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(updateScrollState)
+        ? new ResizeObserver(() => updateScrollState())
         : null;
     if (scrollElement) {
       resizeObserver?.observe(scrollElement);
+    }
+    if (contentElement) {
+      resizeObserver?.observe(contentElement);
     }
 
     const ariaHiddenAttribute = "aria-hidden";
@@ -124,7 +149,7 @@ export default function EULAModal() {
   }, [mounted, updateScrollState]);
 
   const handleScroll = () => {
-    updateScrollState();
+    updateScrollState(true);
   };
 
   const scrollToBottom = () => {
@@ -179,7 +204,10 @@ export default function EULAModal() {
                 aria-label={t(locale, "eula.modal.agreementLabel")}
                 className="tw-h-full tw-overflow-y-auto tw-overscroll-contain tw-px-4 tw-py-5 sm:tw-px-8 sm:tw-py-7"
               >
-                <div className="tw-mx-auto tw-w-full tw-max-w-4xl">
+                <div
+                  ref={agreementContentRef}
+                  className="tw-mx-auto tw-w-full tw-max-w-4xl"
+                >
                   <p
                     id={descriptionId}
                     className="tw-mb-6 tw-mt-0 tw-text-base tw-leading-6 tw-text-iron-200"

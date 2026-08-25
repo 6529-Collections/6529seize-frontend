@@ -186,6 +186,41 @@ describe("EULAModal", () => {
     expect(disconnect).toHaveBeenCalledTimes(1);
   });
 
+  it("requires scrolling through agreement content added after completion", () => {
+    let resizeCallback: ResizeObserverCallback | undefined;
+    const observe = jest.fn();
+    global.ResizeObserver = jest.fn().mockImplementation((callback) => {
+      resizeCallback = callback;
+      return { observe, disconnect: jest.fn() };
+    }) as unknown as typeof ResizeObserver;
+
+    render(<EULAModal />);
+    const agreement = screen.getByLabelText(
+      "End User License Agreement text"
+    );
+    const agreementContent = agreement.firstElementChild;
+    const agreeButton = screen.getByRole("button", { name: "Agree" });
+    expect(observe).toHaveBeenCalledWith(agreementContent);
+
+    scrollAgreementToBottom();
+    expect(agreeButton).toBeEnabled();
+
+    Object.defineProperty(agreement, "scrollHeight", {
+      value: 300,
+      configurable: true,
+    });
+    act(() => resizeCallback?.([], {} as ResizeObserver));
+
+    expect(agreeButton).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Scroll to end of agreement" })
+    ).toBeVisible();
+
+    agreement.scrollTop = 200;
+    fireEvent.scroll(agreement);
+    expect(agreeButton).toBeEnabled();
+  });
+
   it("scrolls to the bottom from the named scroll control", () => {
     render(<EULAModal />);
     const scrollContainer = screen.getByLabelText(
