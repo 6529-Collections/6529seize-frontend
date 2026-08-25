@@ -23,7 +23,9 @@ being objectionable.
   or profile menu.
 
 The unified `/preferences` page contains Notification, Messages, and Content
-tabs and fills the available page height.
+tabs and fills the available page height. Preferences are saved to a profile.
+An authenticated wallet without a profile is offered the existing profile
+creation flow before the controls in either tab become available.
 
 ## Posting and the safety check
 

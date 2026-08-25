@@ -1,8 +1,10 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import ContentPreferencesSettings from "@/components/preferences/ContentPreferencesSettings";
+import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
@@ -34,7 +36,17 @@ export default function PreferencesPageClient({
   readonly activeTab: PreferencesTab;
 }) {
   const locale = useBrowserLocale();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, fetchingProfile } = useAuth();
+  const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
+  const isLoadingProfile =
+    fetchingProfile ||
+    connectionState === "initializing" ||
+    connectionState === "connecting";
+  const needsProfile =
+    !isLoadingProfile &&
+    hasValidWalletAuth === true &&
+    !connectedProfile?.handle;
+  const canManagePreferences = Boolean(connectedProfile?.handle);
 
   return (
     <main className="tailwind-scope tw-min-h-dvh tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
@@ -72,15 +84,39 @@ export default function PreferencesPageClient({
         </nav>
 
         <div className="tw-mt-6">
-          {activeTab === "content" ? (
+          {isLoadingProfile && (
+            <output
+              aria-label={t(locale, "profilePreferences.loading")}
+              className="tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+            >
+              <span className="tw-size-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
+            </output>
+          )}
+          {needsProfile && (
+            <section className="tw-flex tw-flex-col tw-items-center tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-text-center">
+              <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+                {t(locale, "preferences.createProfile")}
+              </p>
+              <UserSetUpProfileCta className="tw-mt-4" />
+            </section>
+          )}
+          {!isLoadingProfile && !needsProfile && !canManagePreferences && (
+            <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6">
+              <p className="tw-m-0 tw-text-center tw-text-sm tw-text-iron-400">
+                {t(locale, "preferences.signIn")}
+              </p>
+            </section>
+          )}
+          {canManagePreferences && activeTab === "content" ? (
             <ContentPreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}
             />
-          ) : (
+          ) : null}
+          {canManagePreferences && activeTab === "notifications" ? (
             <ProfilePreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}
             />
-          )}
+          ) : null}
         </div>
       </div>
     </main>
