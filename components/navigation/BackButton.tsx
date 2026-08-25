@@ -2,7 +2,7 @@
 
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Spinner from "../utils/Spinner";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -42,6 +42,14 @@ export default function BackButton({
     useClosingDropId(dropIdFromUrl);
 
   const isInMessagesContext = pathname.startsWith("/messages");
+
+  useEffect(() => {
+    if (!returnTo) {
+      return;
+    }
+
+    router.prefetch(returnTo);
+  }, [returnTo, router]);
 
   // Fetch wave to determine if it is DM
   const { data: wave } = useWaveData({
@@ -116,10 +124,12 @@ export default function BackButton({
     <button
       type="button"
       aria-label="Back"
+      aria-busy={loading}
+      disabled={loading}
       onClick={handleClick}
-      className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-border-none tw-bg-transparent"
+      className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-border-none tw-bg-transparent disabled:tw-cursor-default"
     >
-      {loading ? (
+      {loading && !returnTo ? (
         <Spinner />
       ) : (
         <ChevronLeftIcon
