@@ -16,7 +16,7 @@ import { useCreateDropDraftState } from "@/components/waves/create-drop-content/
 import { exportComposerMarkdown } from "@/components/waves/create-drop-content/exportComposerMarkdown";
 
 describe("mention alias submission", () => {
-  it("exports global mentions regardless of @all permission", () => {
+  it("exports restricted global mention nodes as visible text", () => {
     const editor = createEditor({
       namespace: "global-mention-export-test",
       nodes: [GroupMentionNode],

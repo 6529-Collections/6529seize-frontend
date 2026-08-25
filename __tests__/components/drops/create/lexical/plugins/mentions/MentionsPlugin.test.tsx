@@ -242,12 +242,44 @@ describe("MentionsPlugin", () => {
     expect(close).toHaveBeenCalled();
   });
 
+  it("adds @contributors option for admins and emits group mention", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    const onSelectGroupMention = jest.fn();
+    render(
+      <NewMentionsPlugin
+        waveId="w1"
+        onSelect={jest.fn()}
+        onSelectGroupMention={onSelectGroupMention}
+        canMentionAll={true}
+        ref={createRef()}
+      />
+    );
+
+    act(() => capturedProps.onQueryChange("CON"));
+    const option = capturedProps.options[0];
+    act(() => capturedProps.onSelectOption(option, null, jest.fn()));
+
+    expect(option.handle).toBe("@contributors");
+    expect($createGroupMentionNode).toHaveBeenCalledWith("@contributors");
+    expect(onSelectGroupMention).toHaveBeenCalledWith("CONTRIBUTORS");
+  });
+
+  it("does not offer @contributors to non-admin chat participants", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    act(() => capturedProps.onQueryChange("CON"));
+
+    expect(capturedProps.options).toEqual([]);
+  });
+
   it.each([
-    ["CON", "@contributors", "CONTRIBUTORS"],
     ["ADM", "@admins", "ADMINS"],
     ["DEV", "@devs6529", "DEVS_6529"],
   ])(
-    "offers %s global mentions to chat participants",
+    "offers %s escalation mentions to chat participants",
     (query, token, group) => {
       (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
       const onSelectGroupMention = jest.fn();
