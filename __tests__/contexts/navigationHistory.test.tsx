@@ -18,6 +18,7 @@ jest.mock("@/components/navigation/ViewContext", () => ({
 
 const routerMock = {
   push: jest.fn(),
+  replace: jest.fn(),
   back: jest.fn(),
   events: { on: jest.fn(), off: jest.fn() },
 };
@@ -36,6 +37,7 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 describe("NavigationHistoryContext", () => {
   beforeEach(() => {
     routerMock.push.mockClear();
+    routerMock.replace.mockClear();
     hardBack.mockClear();
     mockPathname = "/";
     mockSearchParams = new URLSearchParams();
@@ -87,5 +89,34 @@ describe("NavigationHistoryContext", () => {
     });
 
     expect(routerMock.push).toHaveBeenCalledWith("/messages/dm-wave");
+  });
+
+  it("pops navigation state while returning to an explicit route", () => {
+    mockPathname = "/Shelby/collected";
+    mockSearchParams = new URLSearchParams("collection=memelab");
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+
+    mockPathname = "/meme-lab/65";
+    mockSearchParams = new URLSearchParams();
+    rerender();
+
+    mockPathname = "/meme-lab/66";
+    rerender();
+
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    act(() => {
+      result.current.goBackTo(returnTo);
+    });
+
+    expect(routerMock.push).toHaveBeenCalledWith(returnTo);
+
+    mockPathname = "/Shelby/collected";
+    mockSearchParams = new URLSearchParams("collection=memelab");
+    rerender();
+    expect(result.current.canGoBack).toBe(false);
   });
 });

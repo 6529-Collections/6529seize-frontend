@@ -35,6 +35,7 @@ type StackEntry = StackRoute | StackView;
 interface NavigationHistoryContextValue {
   canGoBack: boolean;
   goBack: () => void;
+  goBackTo: (path: string) => void;
   pushView: (view: ViewKey) => void;
 }
 
@@ -174,9 +175,34 @@ export const NavigationHistoryProvider: React.FC<{
     });
   }, [canGoBack, router, hardBack]);
 
+  const goBackTo = useCallback(
+    (path: string) => {
+      setIndex((prev) => {
+        let targetIndex = prev - 1;
+        while (targetIndex >= 0) {
+          const entry = historyRef.current[targetIndex];
+          if (entry?.type === "route" && sameMainPath(entry.path, path)) {
+            break;
+          }
+          targetIndex -= 1;
+        }
+
+        skipNext.current = true;
+        if (targetIndex < 0) {
+          router.replace(path);
+          return prev;
+        }
+
+        router.push(path);
+        return targetIndex;
+      });
+    },
+    [router]
+  );
+
   const value = useMemo(
-    () => ({ canGoBack, goBack, pushView }),
-    [canGoBack, goBack, pushView]
+    () => ({ canGoBack, goBack, goBackTo, pushView }),
+    [canGoBack, goBack, goBackTo, pushView]
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

@@ -17,6 +17,7 @@ import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilter
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -25,6 +26,10 @@ import type { NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -233,6 +238,9 @@ export default function MemePage({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const locale = normalizeLocale(searchParams.get("locale"));
+  const returnContext = getProfileCollectedReturnContext(
+    searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+  );
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const connectedWallets = useMemo(
@@ -653,7 +661,15 @@ export default function MemePage({
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
-              <div className="tw-mb-0 tw-flex tw-items-center">
+              <ProfileCollectedReturnLink
+                locale={locale}
+                returnTo={returnContext?.href}
+              />
+              <div
+                className={`tw-mb-0 tw-items-center ${
+                  returnContext ? "tw-hidden md:tw-flex" : "tw-flex"
+                }`}
+              >
                 <Link
                   href={getTheMemesRouteHrefWithLocale({
                     href: "/the-memes",

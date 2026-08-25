@@ -38,9 +38,11 @@ jest.mock("@/components/navigation/ViewContext", () => ({
 }));
 
 const mockGoBack = jest.fn();
+const mockGoBackTo = jest.fn();
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
   useNavigationHistoryContext: () => ({
     goBack: mockGoBack,
+    goBackTo: mockGoBackTo,
   }),
 }));
 
@@ -51,7 +53,12 @@ const { useMyStreamOptional } = require("@/contexts/wave/MyStreamContext");
 
 function setup(
   query: Record<string, string> = {},
-  opts: { wave?: object | undefined; isDm?: boolean | undefined; activeWaveId?: string | null | undefined } = {}
+  opts: {
+    wave?: object | undefined;
+    isDm?: boolean | undefined;
+    activeWaveId?: string | null | undefined;
+    returnTo?: string | null | undefined;
+  } = {}
 ) {
   const replace = jest.fn();
   const back = jest.fn();
@@ -71,7 +78,7 @@ function setup(
     },
   });
 
-  const utils = render(<BackButton />);
+  const utils = render(<BackButton returnTo={opts.returnTo} />);
   return { ...utils, replace, back, setActiveWave };
 }
 
@@ -112,5 +119,16 @@ describe("BackButton", () => {
     setup({});
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(mockGoBack).toHaveBeenCalled();
+  });
+
+  it("uses the explicit collected return target when provided", async () => {
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    setup({}, { returnTo });
+
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(mockGoBackTo).toHaveBeenCalledWith(returnTo);
+    expect(mockGoBack).not.toHaveBeenCalled();
   });
 });

@@ -131,6 +131,7 @@ const mockReplaceState = jest
   });
 let currentFocus: string | null = null;
 let currentLocale: string | null = null;
+let currentReturnTo: string | null = null;
 const mockSearchParams = {
   get: jest.fn((key: string) => {
     if (key === "focus") {
@@ -138,6 +139,9 @@ const mockSearchParams = {
     }
     if (key === "locale") {
       return currentLocale;
+    }
+    if (key === "returnTo") {
+      return currentReturnTo;
     }
     return null;
   }),
@@ -148,6 +152,9 @@ const mockSearchParams = {
     }
     if (currentLocale) {
       params.set("locale", currentLocale);
+    }
+    if (currentReturnTo) {
+      params.set("returnTo", currentReturnTo);
     }
     return params.toString();
   }),
@@ -161,6 +168,7 @@ usePathnameMock.mockReturnValue("/the-memes/1");
 beforeEach(() => {
   currentFocus = null;
   currentLocale = null;
+  currentReturnTo = null;
   mockReplaceState.mockClear();
   mockSearchParams.get.mockClear();
   mockSearchParams.toString.mockClear();
@@ -381,6 +389,33 @@ describe("MemePage search params handling", () => {
     await waitFor(() => {
       expect(screen.getByTestId("live-right")).toBeInTheDocument();
     });
+  });
+
+  it("returns to the originating profile collected card", () => {
+    currentReturnTo =
+      "/Shelby/collected?collection=memes&page=3#collected-card-memes-1";
+    renderPage();
+
+    const collectedReturnLink = screen.getByRole("link", {
+      name: "Back to Shelby's collected",
+    });
+
+    expect(collectedReturnLink).toHaveAttribute("href", currentReturnTo);
+    expect(collectedReturnLink).toHaveClass("md:tw-hidden");
+    expect(
+      screen.getByRole("link", { name: "Back to The Memes" }).parentElement
+    ).toHaveClass("tw-hidden", "md:tw-flex");
+  });
+
+  it("does not show a collected return link on a direct visit", () => {
+    renderPage();
+
+    expect(
+      screen.queryByTestId("back-to-profile-collected")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Back to The Memes" }).parentElement
+    ).toHaveClass("tw-flex");
   });
 
   it("keeps card navigation logic before the title while using mobile-first visual ordering", async () => {
@@ -701,10 +736,12 @@ describe("MemePage wallet integration", () => {
 
     page.rerender(
       <AuthContext.Provider
-        value={{
-          ...mockAuthContext,
-          connectedProfile: replacementProfile,
-        } as any}
+        value={
+          {
+            ...mockAuthContext,
+            connectedProfile: replacementProfile,
+          } as any
+        }
       >
         <MemePage
           nftId="1"

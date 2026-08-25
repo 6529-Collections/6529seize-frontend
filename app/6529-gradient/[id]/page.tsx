@@ -14,6 +14,24 @@ import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 import { cache } from "react";
 
+type GradientDetailSearchParams = Record<string, string | string[] | undefined>;
+
+const serializeSearchParams = (
+  searchParams: GradientDetailSearchParams
+): string => {
+  const serialized = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (Array.isArray(value)) {
+      value.forEach((item) => serialized.append(key, item));
+    } else if (value !== undefined) {
+      serialized.set(key, value);
+    }
+  }
+
+  return serialized.toString();
+};
+
 const loadGradientNft = cache((id: string) =>
   fetchNftForStructuredData({
     contract: GRADIENT_CONTRACT,
@@ -23,10 +41,13 @@ const loadGradientNft = cache((id: string) =>
 
 export default async function GradientPage({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ id: string }>;
+  readonly searchParams?: Promise<GradientDetailSearchParams>;
 }) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const nft = await loadGradientNft(id);
 
   return (
@@ -41,7 +62,10 @@ export default async function GradientPage({
           license: null,
         })}
       />
-      <GradientPageComponent id={id} />
+      <GradientPageComponent
+        id={id}
+        searchParamsString={serializeSearchParams(resolvedSearchParams)}
+      />
     </main>
   );
 }

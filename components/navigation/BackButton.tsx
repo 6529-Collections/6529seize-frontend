@@ -2,7 +2,7 @@
 
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Spinner from "../utils/Spinner";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -18,7 +18,11 @@ import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
 
-export default function BackButton() {
+export default function BackButton({
+  returnTo,
+}: {
+  readonly returnTo?: string | null | undefined;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -27,7 +31,7 @@ export default function BackButton() {
   const { isApp } = useDeviceInfo();
   const myStream = useMyStreamOptional();
   const exitActiveWave = useExitActiveWave();
-  const { goBack } = useNavigationHistoryContext();
+  const { goBack, goBackTo } = useNavigationHistoryContext();
 
   const waveId =
     myStream?.activeWave.id ??
@@ -58,11 +62,6 @@ export default function BackButton() {
   });
 
   const { isDm } = useWave(wave);
-
-  // Reset loading when URL changes
-  useEffect(() => {
-    setLoading(false);
-  }, [pathname, searchParamsString]);
 
   const handleClick = () => {
     if (loading) return;
@@ -99,6 +98,12 @@ export default function BackButton() {
     // Inside a wave → go back to wave list
     if (waveId) {
       exitActiveWave(isDm);
+      return;
+    }
+
+    if (returnTo) {
+      setLoading(true);
+      goBackTo(returnTo);
       return;
     }
 

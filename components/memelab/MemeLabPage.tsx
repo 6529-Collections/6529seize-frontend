@@ -16,6 +16,7 @@ import {
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -23,6 +24,10 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
 import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -65,6 +70,9 @@ export default function MemeLabPageComponent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const returnContext = getProfileCollectedReturnContext(
+    searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+  );
   const pathname = usePathname();
   const capacitor = useCapacitor();
 
@@ -656,8 +664,16 @@ export default function MemeLabPageComponent({
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
-              <div className="tw-mb-0 tw-flex tw-items-center">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
+              <ProfileCollectedReturnLink
+                locale={locale}
+                returnTo={returnContext?.href}
+              />
+              <div
+                className={`tw-mb-0 tw-items-center ${
+                  returnContext ? "tw-hidden md:tw-flex" : "tw-flex"
+                }`}
+              >
                 <Link
                   href={getMemeLabRouteHrefWithLocale({
                     href: "/meme-lab",
