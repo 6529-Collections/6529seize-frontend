@@ -2236,8 +2236,6 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "recent.title": "Recent searches",
   scopeLabel: "Result type",
   "scope.allResults": "all results",
-  "status.keyboardHint":
-    "Use arrow keys to move through results and Enter to open.",
   viewAllCategory: "View all {category}",
 } as const);
 
