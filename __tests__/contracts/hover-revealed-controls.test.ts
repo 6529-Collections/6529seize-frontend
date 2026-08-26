@@ -165,7 +165,7 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
   },
   {
     file: "components/waves/winners/podium/WavePodiumItem.tsx",
-    marker: "tw-size-3 tw-opacity-0 tw-transition-opacity",
+    marker: "tw-top-1/2 tw-ml-2 -tw-translate-y-1/2",
     literalHash:
       "6c495c84006e65e1116ebdac27efe93d03ebbe99b90f05cea1479428974c4c14",
     reason:
@@ -173,7 +173,8 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
   },
   {
     file: "components/waves/winners/podium/WavePodiumItem.tsx",
-    marker: "tw-size-3 tw-opacity-0 tw-transition-opacity",
+    marker:
+      "tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100",
     literalHash:
       "45ab45ab8b895343e261065876d1639d6354954512fa4422ce412a662e945826",
     reason:

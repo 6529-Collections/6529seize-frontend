@@ -133,7 +133,7 @@ export function WaveDropsScrollControlsUnreadButton({
           onMouseMove={handlers.onMouseMove}
           onMouseUp={handlers.onMouseUp}
           onMouseLeave={handlers.onMouseLeave}
-          className={`tw-flex tw-h-10 tw-min-w-[2.75rem] tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-indigo-500 tw-px-4 tw-text-white tw-opacity-50 tw-transition-all tw-duration-300 hover:tw-opacity-100 lg:tw-h-8 ${roundedClassName} ${isCombined ? combinedWidthClassName : ""}`}
+          className={`tw-flex tw-h-10 tw-min-w-[2.75rem] tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-indigo-500 tw-px-4 tw-text-white tw-opacity-50 tw-transition-all tw-duration-300 desktop-hover:hover:tw-opacity-100 touch-only:tw-opacity-100 lg:tw-h-8 ${roundedClassName} ${isCombined ? combinedWidthClassName : ""}`}
           aria-label="Scroll to first unread message"
         >
           {unreadContent}
