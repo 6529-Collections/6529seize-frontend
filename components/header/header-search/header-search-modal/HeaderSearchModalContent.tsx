@@ -286,7 +286,6 @@ function ScopedHeaderSearchModal({
   const isQuerySettled = trimmedSearchValue === trimmedDebouncedValue;
   const isAwaitingDebouncedSearch = isLiveSearchEligible && !isQuerySettled;
   const formattedInputMinLength = formatInteger(locale, MIN_SEARCH_LENGTH);
-
   const { appWalletsSupported } = useAppWallets();
   const { country } = useCookieConsent();
   const capacitor = useCapacitor();
@@ -411,7 +410,7 @@ function ScopedHeaderSearchModal({
     queryFn: async () =>
       await commonApiFetch<CommunityMemberMinimal[]>({
         endpoint: "community-members",
-        params: { param: trimmedDebouncedValue },
+        params: { param: trimmedDebouncedValue, sort: "level" },
       }),
     enabled: shouldSearchDefault,
   });
@@ -441,6 +440,7 @@ function ScopedHeaderSearchModal({
     waveName: shouldSearchDefault ? trimmedDebouncedValue : null,
     limit: 20,
     enabled: shouldSearchDefault,
+    directMessage: false,
   });
 
   const pageResults = useMemo(
