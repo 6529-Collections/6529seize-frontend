@@ -2522,6 +2522,7 @@
         "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators can add Wave guidelines that are saved as wave metadata and shown under Guidelines in the wave rules panel.",
+        "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",
         "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
         "Wave admins can edit Wave guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
         "Participants can review rules in Configuration in the desktop wave right sidebar or from the mobile About information path."
@@ -2531,6 +2532,7 @@
       "tags": ["waves", "rules", "chat", "rank", "approve"],
       "source_refs": [
         "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/flow-wave-participation.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"
       ]
@@ -2583,6 +2585,8 @@
       ],
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
+        "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
+        "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
@@ -2592,6 +2596,7 @@
       "tags": ["waves", "composer", "drops"],
       "source_refs": [
         "ops/docs/waves/composer/README.md",
+        "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/chat/feature-chat-composer-availability.md"
       ]
     },

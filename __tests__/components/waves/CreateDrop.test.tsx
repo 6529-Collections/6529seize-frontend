@@ -16,6 +16,7 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWave } from "@/hooks/useWave";
 import { commonApiPost } from "@/services/api/common-api";
+import { fetchWaveMetadata } from "@/services/api/waves-v2-api";
 
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
@@ -40,6 +41,9 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
+jest.mock("@/services/api/waves-v2-api", () => ({
+  fetchWaveMetadata: jest.fn(),
+}));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     processDropRemoved: jest.fn(),
@@ -65,6 +69,13 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
           drop: {
             wave_id: props.wave.id,
             drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
+            parts: [
+              {
+                content: props.isDropMode ? "Participation drop" : "Chat message",
+                media: [],
+                quoted_drop: null,
+              },
+            ],
           },
           dropId: null,
         } as DropMutationBody)
@@ -126,6 +137,7 @@ jest.mock("@/components/waves/quorum/QuorumProposalDropModal", () => ({
 
 const useWaveMock = useWave as jest.MockedFunction<typeof useWave>;
 const commonApiPostMock = commonApiPost as jest.Mock;
+const fetchWaveMetadataMock = jest.mocked(fetchWaveMetadata);
 
 const wave = {
   id: "1",
@@ -133,6 +145,10 @@ const wave = {
   wave: { authenticated_user_eligible_for_admin: false },
   chat: { authenticated_user_eligible: true },
   participation: { authenticated_user_eligible: true },
+  metrics: {
+    your_drops_count: 0,
+    your_participation_drops_count: 0,
+  },
 } as any;
 
 type PendingPost = {
@@ -160,6 +176,7 @@ describe("CreateDrop", () => {
       isCurationWave: false,
     } as any);
     commonApiPostMock.mockResolvedValue({ id: "server-drop", wave_id: "1" });
+    fetchWaveMetadataMock.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -190,6 +207,72 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+  });
+
+  it("gates a first chat message on guidelines until the user agrees", async () => {
+    fetchWaveMetadataMock.mockResolvedValue([
+      {
+        id: 1,
+        data_key: "wave_display.rules.custom",
+        data_value: "Be thoughtful and stay on topic.",
+      },
+    ]);
+    const guidelinesWave = {
+      ...wave,
+      metrics: {
+        your_drops_count: 0,
+        your_participation_drops_count: 0,
+      },
+    } as any;
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-1" },
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={guidelinesWave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(
+      await screen.findByRole("dialog", { name: "Wave guidelines" })
+    ).toBeVisible();
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Decline" }));
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(
+      await screen.findByRole("dialog", { name: "Wave guidelines" })
+    ).toBeVisible();
+    await userEvent.click(screen.getByRole("button", { name: "Agree" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+    expect(
+      screen.queryByRole("dialog", { name: "Wave guidelines" })
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    expect(fetchWaveMetadataMock).toHaveBeenCalledTimes(2);
   });
 
   it("waits for onServerDropCreated before reporting all drops added", async () => {

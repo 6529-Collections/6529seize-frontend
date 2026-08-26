@@ -38,6 +38,10 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
+import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -97,6 +101,13 @@ interface SlowModeChatWaveState {
   cooldownMs: number | null;
 }
 
+const isTypedChatMessage = (drop: ApiCreateDropRequest): boolean =>
+  drop.drop_type === ApiDropType.Chat &&
+  drop.parts.some(
+    (part) =>
+      typeof part.content === "string" && part.content.trim().length > 0
+  );
+
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
@@ -124,6 +135,7 @@ export default function CreateDrop({
   initialMarkdownKey = null,
 }: CreateDropProps) {
   const { setToast, connectedProfile } = useAuth();
+  const locale = useBrowserLocale();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();
@@ -141,6 +153,16 @@ export default function CreateDrop({
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
   const { processDropRemoved, processIncomingDrop } = useMyStream();
+  const {
+    agreeToGuidelines,
+    declineGuidelines,
+    dialogGuidelines,
+    markChatSubmitted,
+    requestGuidelinesAgreement,
+  } = useWaveGuidelinesAgreement({
+    profileId: connectedProfile?.id ?? null,
+    wave,
+  });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -575,7 +597,7 @@ export default function CreateDrop({
     waitAndInvalidateDrops,
   ]);
 
-  const submitDrop = useCallback(
+  const enqueueDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
       const slowModeChatReservation = reserveSlowModeChatQueueSlot(
         dropRequest.drop
@@ -606,6 +628,10 @@ export default function CreateDrop({
       // Trigger UI updates
       onDropAddedToQueue();
 
+      if (dropRequest.drop.drop_type === ApiDropType.Chat) {
+        markChatSubmitted();
+      }
+
       // Explicitly blur any focused input to close keyboard for drop flows.
       if (
         dropRequest.drop.drop_type !== ApiDropType.Chat &&
@@ -617,11 +643,44 @@ export default function CreateDrop({
       return true;
     },
     [
+      markChatSubmitted,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
       unreadDividerContext,
     ]
+  );
+
+  const submitDrop = useCallback(
+    (dropRequest: DropMutationBody): boolean | Promise<boolean> => {
+      if (!isTypedChatMessage(dropRequest.drop)) {
+        return enqueueDrop(dropRequest);
+      }
+
+      return requestGuidelinesAgreement(dropRequest.drop.drop_type).then(
+        (guidelinesAgreement) => {
+          if (guidelinesAgreement !== "accepted") {
+            if (guidelinesAgreement === "unavailable") {
+              setToast({
+                type: "error",
+                title: t(
+                  locale,
+                  "waves.chat.guidelinesDialog.loadErrorTitle"
+                ),
+                description: t(
+                  locale,
+                  "waves.chat.guidelinesDialog.loadErrorDescription"
+                ),
+              });
+            }
+            return false;
+          }
+
+          return enqueueDrop(dropRequest);
+        }
+      );
+    },
+    [enqueueDrop, locale, requestGuidelinesAgreement, setToast]
   );
 
   const createDropContentProps = useMemo(() => {
@@ -737,5 +796,14 @@ export default function CreateDrop({
     );
   }
 
-  return dropComposerContent;
+  return (
+    <>
+      {dropComposerContent}
+      <WaveGuidelinesAgreementDialog
+        guidelines={dialogGuidelines}
+        onAgree={agreeToGuidelines}
+        onDecline={declineGuidelines}
+      />
+    </>
+  );
 }

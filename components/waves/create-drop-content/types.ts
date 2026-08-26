@@ -64,7 +64,9 @@ export interface CreateDropContentProps {
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
-  readonly submitDrop: (dropRequest: DropMutationBody) => boolean;
+  readonly submitDrop: (
+    dropRequest: DropMutationBody
+  ) => boolean | Promise<boolean>;
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
   readonly isChatBlockedBySlowMode: boolean;
