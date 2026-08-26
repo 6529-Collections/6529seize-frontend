@@ -12,11 +12,13 @@ jest.mock(
     function MockGroupCreateIdentitiesSearch(props: {
       readonly selectedWallets: string[];
       readonly resultsLayout?: string;
+      readonly sort?: string;
     }) {
       return (
         <div
           data-testid="identities-search"
           data-results-layout={props.resultsLayout}
+          data-sort={props.sort}
         >
           {props.selectedWallets.join(",")}
         </div>
@@ -138,6 +140,10 @@ describe("CreateWaveInlineGroupIdentities", () => {
     expect(screen.getByTestId("identities-search")).toHaveAttribute(
       "data-results-layout",
       "popover"
+    );
+    expect(screen.getByTestId("identities-search")).toHaveAttribute(
+      "data-sort",
+      "level"
     );
   });
 
