@@ -338,7 +338,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   );
 }
 
-const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
+const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   drop,
   isOpen,
   showReplyAndQuote,
@@ -549,5 +549,9 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     </>
   );
 };
+
+const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = (props) => (
+  <WaveDropMobileMenuContent key={props.drop.id} {...props} />
+);
 
 export default WaveDropMobileMenu;
