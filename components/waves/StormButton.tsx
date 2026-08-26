@@ -42,7 +42,7 @@ const StormButton: React.FC<StormButtonProps> = ({
         data-tooltip-id="storm-button-tooltip"
       >
         <svg
-          className={`tw-h-[1.1rem] tw-w-[1.1rem] tw-flex-shrink-0 lg:tw-size-4 ${
+          className={`tw-h-[1.1rem] tw-w-[1.1rem] tw-flex-shrink-0 md:tw-size-4 ${
             !canAddPart || submitting ? "tw-opacity-50" : ""
           }`}
           viewBox="0 0 24 24"

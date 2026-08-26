@@ -260,7 +260,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           data-tooltip-id="add-poll-tooltip"
         >
           <ChartBarIcon
-            className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
+            className="tw-size-4 tw-flex-shrink-0"
             aria-hidden="true"
           />
         </button>
@@ -444,7 +444,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                               viewBox="0 0 24 24"
                               strokeWidth="1.5"
                               stroke="currentColor"
-                              className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
+                              className="tw-size-4 tw-flex-shrink-0"
                               aria-hidden="true"
                             >
                               <path
@@ -515,7 +515,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           data-tooltip-id="add-gif-tooltip"
                         >
                           <svg
-                            className="tw-size-5 tw-flex-shrink-0"
+                            className="tw-size-4 tw-flex-shrink-0"
                             viewBox="0 0 24 24"
                             version="1.1"
                             xmlns="http://www.w3.org/2000/svg"
