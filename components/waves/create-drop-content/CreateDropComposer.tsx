@@ -104,29 +104,25 @@ export default function CreateDropComposer({
       submitLabel = t(locale, "waves.stormComposer.postStorm");
     }
   }
-  const isCompactPollOpen = isCompactLayout && pollDraft !== null;
-
   return (
     <>
-      {isStormModeActive &&
-        (drop?.parts.length ?? 0) > 0 &&
-        !isCompactPollOpen && (
-          <CreateDropStormParts
-            parts={drop?.parts ?? []}
-            mentionedUsers={drop?.mentioned_users ?? []}
-            mentionedGroups={drop?.mentioned_groups ?? []}
-            mentionedWaves={drop?.mentioned_waves ?? []}
-            referencedNfts={drop?.referenced_nfts ?? []}
-            editingPartIndex={editingPartIndex}
-            controlsDisabled={submitting}
-            canEditParts={!canAddPart && editingPartIndex === null}
-            onEditPart={onEditPart}
-            onCancelPartEdit={onCancelPartEdit}
-            onMovePart={onMovePart}
-            onRemovePart={onRemovePart}
-            onDiscardStorm={onDiscardStorm}
-          />
-        )}
+      {isStormModeActive && (drop?.parts.length ?? 0) > 0 && (
+        <CreateDropStormParts
+          parts={drop?.parts ?? []}
+          mentionedUsers={drop?.mentioned_users ?? []}
+          mentionedGroups={drop?.mentioned_groups ?? []}
+          mentionedWaves={drop?.mentioned_waves ?? []}
+          referencedNfts={drop?.referenced_nfts ?? []}
+          editingPartIndex={editingPartIndex}
+          controlsDisabled={submitting}
+          canEditParts={!canAddPart && editingPartIndex === null}
+          onEditPart={onEditPart}
+          onCancelPartEdit={onCancelPartEdit}
+          onMovePart={onMovePart}
+          onRemovePart={onRemovePart}
+          onDiscardStorm={onDiscardStorm}
+        />
+      )}
       <div
         ref={setActionsContainerRef}
         className="tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"

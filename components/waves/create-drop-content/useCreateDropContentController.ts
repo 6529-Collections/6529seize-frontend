@@ -460,7 +460,7 @@ export function useCreateDropContentController({
   }, [locale, setToast]);
 
   const {
-    breakIntoStorm,
+    breakIntoStorm: startStorm,
     finalizeResolvedDropPart,
     onCancelPartEdit,
     onDiscardStorm,
@@ -485,6 +485,13 @@ export function useCreateDropContentController({
     setIsStormMode,
     submitting,
   });
+  const breakIntoStorm = useCallback(() => {
+    if (!keepDesktopOptionsVisible && pollDraft !== null) {
+      return;
+    }
+
+    void startStorm();
+  }, [keepDesktopOptionsVisible, pollDraft, startStorm]);
 
   useCreateDropFocusBehavior({
     activeDrop,
@@ -659,11 +666,22 @@ export function useCreateDropContentController({
     });
   }, [dropModeSessionScopeKey]);
 
-  const { removePoll, togglePoll, updatePollDraft } = useCreateDropPollActions({
+  const {
+    removePoll,
+    togglePoll: togglePollDraft,
+    updatePollDraft,
+  } = useCreateDropPollActions({
     canCreatePoll,
     setPollDraftState,
     waveId: wave.id,
   });
+  const togglePoll = useCallback(() => {
+    if (!keepDesktopOptionsVisible && isStormMode && pollDraft === null) {
+      return;
+    }
+
+    togglePollDraft();
+  }, [isStormMode, keepDesktopOptionsVisible, pollDraft, togglePollDraft]);
 
   const { onChangeKey, onChangeValue, onAddMetadata, onRemoveMetadata } =
     createMetadataHandlers({

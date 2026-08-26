@@ -72,18 +72,18 @@ const CompactActionButton: React.FC<CompactActionButtonProps> = ({
     className={`tw-group tw-flex tw-w-11 tw-flex-none tw-flex-col tw-items-center tw-gap-1.5 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
       disabled
         ? "tw-cursor-default tw-text-iron-600"
-        : "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white"
+        : "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-text-white"
     }`}
   >
     <span
-      className={`tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-transition ${
-        disabled
-          ? "tw-border-white/5 tw-bg-iron-900 tw-text-iron-600"
-          : pressed
-            ? "tw-text-primary-200 tw-border-primary-400/40 tw-bg-primary-500/20"
+      className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition ${
+        pressed
+          ? "tw-bg-primary-500/15 tw-text-primary-200"
+          : disabled
+            ? "tw-bg-transparent tw-text-iron-600"
             : required
-              ? "tw-border-amber-300/30 tw-bg-amber-300/10 tw-text-amber-200"
-              : "tw-border-white/10 tw-bg-iron-800 tw-text-iron-200 group-hover:tw-border-white/15 group-hover:tw-bg-iron-700"
+              ? "tw-bg-amber-300/10 tw-text-amber-200"
+              : "tw-bg-transparent tw-text-iron-300 group-hover:tw-bg-white/5 group-hover:tw-text-white"
       }`}
       aria-hidden="true"
     >
@@ -364,39 +364,39 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         {canCreatePoll && (
                           <CompactActionButton
                             label={pollLabel}
+                            disabled={isStormMode}
                             pressed={isPollActive}
                             onClick={() => runCompactAction(onTogglePoll)}
                             icon={<ChartBarIcon className="tw-size-6" />}
                           />
                         )}
-                        {!isStormMode && (
-                          <CompactActionButton
-                            label={stormLabel}
-                            disabled={!canAddPart || submitting}
-                            describedBy={
-                              showStormHint && !submitting
-                                ? stormHintId
-                                : undefined
-                            }
-                            onClick={breakIntoStorm}
-                            icon={
-                              <svg
-                                className="tw-size-6"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            }
-                          />
-                        )}
+                        <CompactActionButton
+                          label={stormLabel}
+                          disabled={isStormMode || !canAddPart || submitting}
+                          pressed={isStormMode}
+                          describedBy={
+                            !isStormMode && showStormHint && !submitting
+                              ? stormHintId
+                              : undefined
+                          }
+                          onClick={() => runCompactAction(breakIntoStorm)}
+                          icon={
+                            <svg
+                              className="tw-size-6"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          }
+                        />
                       </div>
                       {!isStormMode && showStormHint && !submitting && (
                         <p

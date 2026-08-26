@@ -2592,7 +2592,7 @@
         "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
         "On narrow composer rows, the plus button opens a labeled action tray below the input for available Upload, GIF, Poll, Storm, and Metadata actions.",
-        "While Poll is open on a narrow composer row, the plus control becomes an X that closes Poll; other tools cannot be layered over it, and saved Storm parts remain preserved.",
+        "Poll and Storm are mutually exclusive on narrow composer rows: while Poll is open, the plus control becomes an X that closes Poll and the action tray stays unavailable; while Storm is active, Poll remains visible but unavailable until the Storm is finished or discarded.",
         "On mobile and in the app, the GIF picker uses the same drag handle and swipe-down dismissal as the emoji picker.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
