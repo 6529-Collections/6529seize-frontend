@@ -7,6 +7,7 @@ import { useContext, useMemo, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -35,6 +36,7 @@ import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import UserPageHeaderSubscriptionStatus from "./UserPageHeaderSubscriptionStatus";
 import UserPageHeaderEditProfile from "./UserPageHeaderEditProfile";
 import BlockedProfileHeaderIndicator from "./BlockedProfileHeaderIndicator";
+import ProfileBlockActionMenu from "./ProfileBlockActionMenu";
 import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
@@ -109,6 +111,9 @@ export default function UserPageHeaderClient({
 
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
+  const [profileBlockConfirmation, setProfileBlockConfirmation] = useState<
+    "block" | "unblock" | null
+  >(null);
 
   const isMyProfile = useMemo(
     () =>
@@ -167,6 +172,7 @@ export default function UserPageHeaderClient({
   const profileBlockState = useProfileBlockState({
     profileId: profile.id,
     profileHandle: profile.handle,
+    profilePfp: profile.pfp,
   });
   const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
@@ -203,6 +209,32 @@ export default function UserPageHeaderClient({
       setDirectMessageLoading(false);
     }
   };
+
+  const isProfileBlockMutationPending =
+    profileBlockState.isBlocking || profileBlockState.isUnblocking;
+  const closeProfileBlockConfirmation = () => {
+    if (!isProfileBlockMutationPending) {
+      setProfileBlockConfirmation(null);
+    }
+  };
+  const confirmProfileBlockChange = async () => {
+    if (!profileBlockConfirmation) {
+      return;
+    }
+    try {
+      if (profileBlockConfirmation === "block") {
+        await profileBlockState.block();
+      } else {
+        await profileBlockState.unblock();
+      }
+      setProfileBlockConfirmation(null);
+    } catch {
+      // The hook restores the previous state and reports the request failure.
+    }
+  };
+  const confirmationProfileLabel = profile.handle
+    ? `@${profile.handle}`
+    : profileLabel;
 
   return (
     <div className="tailwind-scope">
@@ -283,10 +315,7 @@ export default function UserPageHeaderClient({
                     variant="title"
                     titleAccessory={
                       profileBlockState.isBlocked ? (
-                        <BlockedProfileHeaderIndicator
-                          isUnblocking={profileBlockState.isUnblocking}
-                          onUnblock={profileBlockState.unblock}
-                        />
+                        <BlockedProfileHeaderIndicator />
                       ) : undefined
                     }
                   />
@@ -371,9 +400,16 @@ export default function UserPageHeaderClient({
                       <UserFollowBtn
                         handle={followHandle}
                         blocked={profileBlockState.isBlocked}
-                        blockStateLoading={profileBlockState.isLoading}
-                        showFollowButton={!profileBlockState.isBlocked}
+                        blockStateLoading={
+                          profileBlockState.isLoading ||
+                          profileBlockState.isBlocking
+                        }
+                        showFollowButton
                         showMuteButton={!profileBlockState.isBlocked}
+                        unblockPending={profileBlockState.isUnblocking}
+                        onUnblock={() =>
+                          setProfileBlockConfirmation("unblock")
+                        }
                         onDirectMessage={
                           profile.primary_wallet
                             ? () =>
@@ -383,6 +419,17 @@ export default function UserPageHeaderClient({
                             : undefined
                         }
                         directMessageLoading={directMessageLoading}
+                      />
+                    ) : null}
+                    {followHandle &&
+                    profileBlockState.canManage &&
+                    !profileBlockState.isBlocked ? (
+                      <ProfileBlockActionMenu
+                        disabled={
+                          profileBlockState.isLoading ||
+                          profileBlockState.isBlocking
+                        }
+                        onBlock={() => setProfileBlockConfirmation("block")}
                       />
                     ) : null}
                   </div>
@@ -419,6 +466,35 @@ export default function UserPageHeaderClient({
           </div>
         </div>
       </section>
+      <MobileWrapperConfirmationDialog
+        isOpen={profileBlockConfirmation !== null}
+        onClose={closeProfileBlockConfirmation}
+        onConfirm={() => void confirmProfileBlockChange()}
+        title={
+          profileBlockConfirmation === "block"
+            ? t(locale, "contentModeration.block.confirmTitle", {
+                profile: confirmationProfileLabel,
+              })
+            : t(locale, "contentModeration.unblock.confirmTitle", {
+                profile: confirmationProfileLabel,
+              })
+        }
+        message={
+          profileBlockConfirmation === "block"
+            ? t(locale, "contentModeration.report.blockDescription")
+            : t(locale, "contentModeration.unblock.confirmDescription")
+        }
+        confirmText={
+          profileBlockConfirmation === "block"
+            ? t(locale, "contentModeration.actions.blockProfile")
+            : t(locale, "contentModeration.actions.unblock")
+        }
+        cancelText={t(locale, "contentModeration.report.cancel")}
+        isConfirming={isProfileBlockMutationPending}
+        confirmVariant={
+          profileBlockConfirmation === "block" ? "destructive" : "primary"
+        }
+      />
     </div>
   );
 }

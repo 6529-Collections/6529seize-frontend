@@ -11,6 +11,11 @@ on desktop layouts. Touch-first and phone layouts place an icon-only
 the labeled action to the right of the identity. It is hidden while an active
 profile proxy is in use.
 
+Preferences are profile-scoped. When a wallet is authenticated but does not
+yet have a profile, `/preferences` offers **Create profile** instead of asking
+the user to connect again. The preference controls become available after the
+profile is created.
+
 ## Direct Messages
 
 `Who can start a direct message with me?` offers:

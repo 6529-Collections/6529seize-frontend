@@ -28,9 +28,9 @@ type WaveWithChatScope = {
 };
 
 export default function Drops({
-  compactBlockedProfileActivity = false,
+  blockedProfileActivity = false,
 }: {
-  readonly compactBlockedProfileActivity?: boolean;
+  readonly blockedProfileActivity?: boolean;
 }) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
@@ -203,7 +203,7 @@ export default function Drops({
         dropViewDropId={null}
         location={DropLocation.PROFILE}
         moderationPresentation={
-          compactBlockedProfileActivity ? "profile-activity" : "default"
+          blockedProfileActivity ? "profile-activity" : "default"
         }
       />
       <div ref={bottomRef} style={{ height: "1px" }} />

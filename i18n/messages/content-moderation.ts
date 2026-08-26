@@ -4,11 +4,18 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.actions.report": "Flag Content",
   "contentModeration.actions.hide": "Hide post",
   "contentModeration.actions.block": "Block author",
+  "contentModeration.actions.blockProfile": "Block profile",
   "contentModeration.actions.reveal": "Reveal",
+  "contentModeration.actions.hideAgain": "Hide again",
   "contentModeration.actions.unhide": "Unhide",
   "contentModeration.actions.unblock": "Unblock",
   "contentModeration.actions.unblockProfile": "Unblock {profile}",
   "contentModeration.profile.blocked": "Blocked",
+  "contentModeration.profile.actionsMenu": "Profile actions",
+  "contentModeration.block.confirmTitle": "Block {profile}?",
+  "contentModeration.unblock.confirmTitle": "Unblock {profile}?",
+  "contentModeration.unblock.confirmDescription":
+    "Their content and activity will be visible again. You won’t automatically follow them.",
   "contentModeration.report.title": "Flag Content",
   "contentModeration.report.description": "Choose one or more actions.",
   "contentModeration.report.actionsLegend": "Choose one or more actions",
@@ -53,6 +60,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.tombstone.hidden": "Hidden",
   "contentModeration.tooltips.revealHidden": "Show temporarily",
   "contentModeration.tooltips.revealBlocked": "Show this post temporarily",
+  "contentModeration.tooltips.hideAgain": "Hide this post again",
   "contentModeration.tooltips.unhide": "Remove from hidden posts",
   "contentModeration.tooltips.unblock": "Show posts from {profile} again",
   "contentModeration.preferences.description":
@@ -65,20 +73,21 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.openProfile": "Open {profile}'s profile",
   "contentModeration.preferences.signIn":
     "Connect an authenticated profile to manage content preferences.",
-  "contentModeration.moderator.menu": "Moderation queue",
-  "contentModeration.moderator.metaTitle": "Content moderation",
+  "contentModeration.moderator.menu": "WatchTower",
+  "contentModeration.moderator.metaTitle": "WatchTower",
   "contentModeration.moderator.metaDescription": "Review reported content.",
-  "contentModeration.moderator.title": "Content moderation",
+  "contentModeration.moderator.title": "WatchTower",
   "contentModeration.moderator.description":
     "Review reported posts and record a reason for every decision.",
   "contentModeration.moderator.loading": "Loading reports…",
   "contentModeration.moderator.loadingMore": "Loading more…",
   "contentModeration.moderator.loadMore": "Load more",
   "contentModeration.moderator.empty": "There are no open reports.",
-  "contentModeration.moderator.accessDenied":
-    "You don't have access to content moderation.",
-  "contentModeration.moderator.loadError":
-    "Couldn't load the moderation queue.",
+  "contentModeration.moderator.noPower": "You have no power here",
+  "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
+  "contentModeration.moderator.openReportsIndicator":
+    "Open reports need review",
+  "contentModeration.moderator.loadError": "Couldn't load WatchTower.",
   "contentModeration.moderator.reason": "Decision reason",
   "contentModeration.moderator.reasonPlaceholder":
     "Explain why this decision is appropriate.",
@@ -120,6 +129,7 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Manage notifications, messages, and the content you see.",
   "preferences.signIn":
     "Connect an authenticated profile to manage preferences.",
+  "preferences.createProfile": "Create a profile to manage preferences.",
   "preferences.tabs.ariaLabel": "Preference sections",
   "preferences.tabs.notifications": "Notifications & messages",
   "preferences.tabs.content": "Content",

@@ -316,7 +316,7 @@ describe("ContentModerationDropGate", () => {
     );
   });
 
-  it("uses a compact wave-aware row for blocked activity on a profile Brain page", () => {
+  it("keeps blocked Brain activity at full height and supports reveal then hide again", () => {
     setProfileBlockedOverride("viewer-1", "author-1", true);
     renderGate(
       <ContentModerationDropGate
@@ -338,14 +338,27 @@ describe("ContentModerationDropGate", () => {
     expect(screen.getByText("Test wave")).toBeInTheDocument();
     expect(screen.queryByText("@alice")).not.toBeInTheDocument();
     expect(
+      screen.getByTestId("content-moderation-hidden-content")
+    ).toHaveClass("tw-blur-[6px]");
+    expect(screen.getByText("Compact blocked post content")).toBeInTheDocument();
+    expect(
       screen.queryByRole("button", { name: "Unblock" })
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
 
+    expect(
+      screen.getByTestId("content-moderation-profile-activity-blocked")
+    ).toBeInTheDocument();
     expect(screen.getByText("Compact blocked post content")).toBeVisible();
     expect(
-      screen.queryByTestId("content-moderation-profile-activity-blocked")
-    ).not.toBeInTheDocument();
+      screen.getByTestId("content-moderation-revealed-content")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide again" }));
+
+    expect(
+      screen.getByTestId("content-moderation-hidden-content")
+    ).toHaveClass("tw-blur-[6px]");
   });
 });

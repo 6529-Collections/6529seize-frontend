@@ -19,11 +19,13 @@ being objectionable.
   the final **Flag Content** entry.
 - Open `/preferences?tab=content` to manage blocked profiles. The older
   `/content-preferences` path redirects to this tab.
-- Authorized moderators can open `/content-moderation` from the app navigation
-  or profile menu.
+- Authorized moderators can open **WatchTower** at `/content-moderation` from
+  the app navigation or profile menu.
 
 The unified `/preferences` page contains Notification, Messages, and Content
-tabs and fills the available page height.
+tabs and fills the available page height. Preferences are saved to a profile.
+An authenticated wallet without a profile is offered the existing profile
+creation flow before the controls in either tab become available.
 
 ## Posting and the safety check
 
@@ -120,21 +122,26 @@ profile picture, handle, and centered **Blocked · Reveal · Unblock** controls.
 Blocked profiles remain reachable through their public profile pages. They can
 also be unblocked from the Content tab under `/preferences`; the profile picture
 and handle in that list link to the public profile. A blocked profile's header
-shows a compact **Blocked · Unblock** indicator beside the handle. Follow and
+shows a red-tinted **Blocked** status beside the handle and a separate
+**Unblock** action where **Follow** normally appears. Follow and
 notification-mute actions are hidden while the block is active because the
-block already provides those states. Direct message remains available.
-Unblocking restores the applicable actions immediately without changing the
-viewer's saved notification preference or refollowing the profile.
+block already provides those states. Direct message remains available. Unblock
+opens a confirmation dialog; confirming restores the applicable actions
+immediately without changing the viewer's saved notification preference or
+refollowing the profile. An unblocked profile's header action menu includes
+**Block profile** with the same explanation used by the post action dialog.
 
 Blocking automatically unfollows that profile and prevents following it again
 until it is unblocked. It does not remove the blocked profile as a follower of
 the blocker or tell that profile who blocked it. Public profile metadata,
 including Brain activity summaries and **Most Active In**, remains visible when
 the blocker deliberately opens the profile. On that profile's Brain tab,
-blocked activity uses compact rows that retain the Wave identity and time with
-**Hidden · Reveal** instead of repeating full-size blurred posts and per-row
-Unblock controls. Mixed Wave feeds keep the standard blurred blocked-post
-presentation.
+blocked activity keeps each post's normal height under a non-interactive blur.
+A visible header retains the Wave identity and time with **Blocked · Reveal**.
+Reveal removes the blur locally without changing the saved block, keeps the
+card dimensions stable, and changes the action to **Blocked · Hide again**.
+There is no per-row Unblock control. Mixed Wave feeds keep the standard blurred
+blocked-post presentation.
 
 ## Blocking and direct messages
 
@@ -160,10 +167,12 @@ A high-confidence urgent report assessment may temporarily quarantine a post.
 Other assessments remain in the occasional moderator queue without changing
 the post's global visibility.
 
-Authorized moderators can review open reports at `/content-moderation`. Each
-queue item includes the reported content and context, author, report details,
-AI recommendation and evidence, current state, and audit history. Every allow,
-quarantine, removal, suspension, or reinstatement requires a written reason.
+Authorized moderators can review open reports in **WatchTower** at
+`/content-moderation`. The full-width queue fills the available page height.
+Each queue item includes the reported content and context, author, report
+details, AI recommendation and evidence, current state, and audit history.
+Every allow, quarantine, removal, suspension, or reinstatement requires a
+written reason.
 
 Globally quarantined or moderator-removed posts are replaced by a redacted
 tombstone across primary Wave views, replies, quotes, leaderboards, and related
@@ -171,9 +180,14 @@ notification data. Ordinary viewers cannot Reveal globally moderated content.
 The author can still see their own globally moderated post and its moderation
 state.
 
-The moderator link is shown only to profiles whose server-provided access state
-allows it. The backend checks every moderator request; hiding the link is not
-the authorization boundary.
+The WatchTower link is shown only to profiles whose server-provided access
+state allows it. A red indicator appears while the queue contains open reports;
+the client refreshes this lightweight state periodically while active, without
+a WebSocket. The backend checks every moderator request; hiding the link is not
+the authorization boundary. A user who opens `/content-moderation` without
+access sees the no-access countdown and is redirected home. A failed access
+request shows an error instead of incorrectly treating the user as
+unauthorized.
 
 ## Common scenarios
 

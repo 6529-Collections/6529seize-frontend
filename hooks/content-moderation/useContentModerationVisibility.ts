@@ -53,6 +53,7 @@ export const useContentModerationVisibility = (
 ): {
   readonly visibility: ContentModerationVisibility;
   readonly reveal: () => void;
+  readonly hideAgain: () => void;
   readonly isRevealed: boolean;
 } => {
   const { connectedProfile } = useAuth();
@@ -104,31 +105,33 @@ export const useContentModerationVisibility = (
     return {
       visibility: globalVisibility,
       reveal: () => undefined,
+      hideAgain: () => undefined,
       isRevealed: false,
     };
   }
 
-  if (!isRevealed) {
-    if (authorBlocked) {
-      return {
-        visibility: { kind: "blocked" },
-        reveal: () => setRevealedKey(revealKey),
-        isRevealed,
-      };
-    }
+  if (authorBlocked) {
+    return {
+      visibility: { kind: "blocked" },
+      reveal: () => setRevealedKey(revealKey),
+      hideAgain: () => setRevealedKey(null),
+      isRevealed,
+    };
+  }
 
-    if (dropHidden) {
-      return {
-        visibility: { kind: "hidden" },
-        reveal: () => setRevealedKey(revealKey),
-        isRevealed,
-      };
-    }
+  if (dropHidden) {
+    return {
+      visibility: { kind: "hidden" },
+      reveal: () => setRevealedKey(revealKey),
+      hideAgain: () => setRevealedKey(null),
+      isRevealed,
+    };
   }
 
   return {
     visibility: { kind: "visible" },
     reveal: () => setRevealedKey(revealKey),
+    hideAgain: () => setRevealedKey(null),
     isRevealed,
   };
 };

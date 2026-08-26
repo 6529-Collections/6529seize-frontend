@@ -21,6 +21,7 @@ import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import DevicesIcon from "@/components/common/icons/DevicesIcon";
+import WatchTowerIcon from "@/components/common/icons/WatchTowerIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
@@ -444,13 +445,22 @@ export default function HeaderUserMenuDropdown({
                       <Link
                         href="/content-moderation"
                         onClick={onClose}
+                        aria-label={
+                          moderatorAccess.data.has_open_reports === true
+                            ? `${t(HEADER_USER_MENU_LOCALE, "contentModeration.moderator.menu")}: ${t(HEADER_USER_MENU_LOCALE, "contentModeration.moderator.openReportsIndicator")}`
+                            : undefined
+                        }
                         className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
-                        <FontAwesomeIcon
-                          icon={faShieldHalved}
-                          height={20}
-                          width={20}
-                        />
+                        <span className="tw-relative tw-size-5">
+                          <WatchTowerIcon className="tw-size-5" />
+                          {moderatorAccess.data.has_open_reports === true && (
+                            <span
+                              aria-hidden="true"
+                              className="tw-absolute tw-right-0 tw-top-0 tw-size-2 tw-rounded-full tw-bg-red"
+                            />
+                          )}
+                        </span>
                         <span>
                           {t(
                             HEADER_USER_MENU_LOCALE,
