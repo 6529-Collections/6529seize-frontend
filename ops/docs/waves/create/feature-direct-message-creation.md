@@ -44,11 +44,15 @@ identities.
    opens `/messages/create`.
 4. Type in the `Identity` search input.
 5. Search starts at 3+ typed characters.
-6. While loading, the search list shows `Loading...`; when empty, it shows
+6. Exact handle matches appear first, followed by handles that start with the
+   search text, handles that contain it, and finally ENS or auto-wallet matches.
+   Results within each match group are ordered by profile level from highest to
+   lowest.
+7. While loading, the search list shows `Loading...`; when empty, it shows
    `No results`.
-7. Select one or more recipients; selected recipients appear as removable chips.
-8. Click `Create`; the button switches to `Creating...` while submit runs.
-9. On success, the app opens `/messages/{waveId}`.
+8. Select one or more recipients; selected recipients appear as removable chips.
+9. Click `Create`; the button switches to `Creating...` while submit runs.
+10. On success, the app opens `/messages/{waveId}`.
 
 ## Common Scenarios
 
@@ -88,6 +92,9 @@ identities.
 ## Limitations / Notes
 
 - Identity search returns profile-owner results only.
+- Recipient search ranks exact, prefix, and substring handle matches before ENS
+  or auto-wallet matches, then orders each match group from highest to lowest
+  profile level.
 - This page owns direct-message creation form behavior.
 - Route-shell behavior for `/messages/create` (header and back rules) is
   documented in Navigation docs.

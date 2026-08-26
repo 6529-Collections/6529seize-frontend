@@ -3,6 +3,7 @@ import GroupCreateIdentitiesSearch from "./GroupCreateIdentitiesSearch";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
 import type {
+  CommunityMemberSearchSort,
   GroupCreateIdentitiesSearchAppearance,
   GroupCreateIdentitiesSearchResultsLayout,
 } from "./GroupCreateIdentitiesSearchItems";
@@ -14,6 +15,7 @@ export default function GroupCreateIdentitiesSelect({
   onRemove,
   appearance = "default",
   resultsLayout = "popover",
+  sort,
 }: {
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
   readonly selectedIdentities: CommunityMemberMinimal[];
@@ -21,6 +23,7 @@ export default function GroupCreateIdentitiesSelect({
   readonly onRemove: (wallet: string) => void;
   readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout | undefined;
+  readonly sort?: CommunityMemberSearchSort | undefined;
 }) {
   const isModal = appearance === "modal";
 
@@ -46,6 +49,7 @@ export default function GroupCreateIdentitiesSelect({
             hideLabel={isModal}
             placeholder={isModal ? "Identity" : " "}
             resultsLayout={resultsLayout}
+            sort={sort}
           />
         </div>
         <GroupCreateIdentitySelectedItems
