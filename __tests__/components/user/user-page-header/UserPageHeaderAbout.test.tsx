@@ -103,7 +103,10 @@ describe("UserPageHeaderAbout", () => {
     expect(editButton).toHaveClass("tw-hidden", "sm:tw-block");
     expect(editButton).toHaveClass(
       "desktop-hover:group-hover:tw-pointer-events-auto",
-      "desktop-hover:group-hover:tw-opacity-100"
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-pointer-events-auto",
+      "touch-only:tw-size-11",
+      "touch-only:tw-opacity-100"
     );
   });
 

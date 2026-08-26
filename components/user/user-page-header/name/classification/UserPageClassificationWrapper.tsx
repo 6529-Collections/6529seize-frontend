@@ -39,7 +39,7 @@ export default function UserPageClassificationWrapper({
       >
         <span
           aria-hidden="true"
-          className="tw-absolute -tw-left-5 tw-top-1/2 tw-hidden tw-size-4 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-text-iron-400 group-focus-within:tw-flex group-hover:tw-flex"
+          className="tw-absolute -tw-left-5 tw-top-1/2 tw-hidden tw-size-4 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-text-iron-400 group-focus-within:tw-flex desktop-hover:group-hover:tw-flex touch-only:tw-flex"
         >
           <PencilIcon size={PencilIconSize.SMALL} />
         </span>
