@@ -2,7 +2,7 @@
 
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
-import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { DropMutationBody } from "./drop-submission.types";
 import type { CreateDropInputHandles } from "@/components/waves/CreateDropInput";
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
 import { getMissingRequirements } from "@/components/waves/utils/getMissingRequirements";
@@ -334,7 +334,9 @@ export const useCreateDropSubmission = ({
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: (toast: AppToastInput) => void;
   readonly signDrop: ReturnType<typeof useDropSignature>["signDrop"];
-  readonly submitDrop: (dropRequest: DropMutationBody) => boolean;
+  readonly submitDrop: (
+    dropRequest: DropMutationBody
+  ) => boolean | Promise<boolean>;
   readonly addOptimisticDrop: (params: {
     readonly drop: ApiDrop;
   }) => Promise<void>;
@@ -634,7 +636,7 @@ export const useCreateDropSubmission = ({
         handleDuplicateIdentitySubmissionError,
       });
 
-      const submitAccepted = submitDrop({
+      const submitResult = submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
         onSuccess: dropModeSubmitCallbacks.onSuccess,
@@ -645,6 +647,8 @@ export const useCreateDropSubmission = ({
           return dropModeSubmitCallbacks.onError?.(error);
         },
       });
+      const submitAccepted =
+        typeof submitResult === "boolean" ? submitResult : await submitResult;
       if (!submitAccepted) {
         return;
       }

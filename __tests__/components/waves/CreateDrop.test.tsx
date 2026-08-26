@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
 import CreateDrop from "@/components/waves/CreateDrop";
 import { AuthContext } from "@/components/auth/Auth";
 import {
@@ -20,6 +20,7 @@ import {
   DropClientDeliveryState,
   DropSize,
 } from "@/helpers/waves/drop.helpers";
+import { fetchWaveMetadata } from "@/services/api/waves-v2-api";
 
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
@@ -64,6 +65,9 @@ jest.mock("@/services/api/common-api", () => ({
       ? error.status
       : undefined,
 }));
+jest.mock("@/services/api/waves-v2-api", () => ({
+  fetchWaveMetadata: jest.fn(),
+}));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     applyOptimisticDropUpdate: mockApplyOptimisticDropUpdate,
@@ -90,6 +94,23 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
           drop: {
             wave_id: props.wave.id,
             drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
+            title: null,
+            parts: [
+              {
+                content: props.isDropMode
+                  ? "Participation drop"
+                  : "Chat message",
+                media: [],
+                quoted_drop: null,
+              },
+            ],
+            referenced_nfts: [],
+            mentioned_users: [],
+            mentioned_waves: [],
+            metadata: [],
+            signature: null,
+            is_safe_signature: false,
+            signer_address: "",
           },
           dropId: null,
         } as DropMutationBody)
@@ -103,6 +124,13 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
           drop: {
             wave_id: props.wave.id,
             drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
+            parts: [
+              {
+                content: "Moderation test message",
+                media: [],
+                quoted_drop: null,
+              },
+            ],
           },
           dropId: "temp-rejected-drop",
         } as DropMutationBody)
@@ -151,7 +179,25 @@ jest.mock("@/components/waves/quorum/QuorumProposalDropModal", () => ({
         <button
           onClick={() =>
             props.submitDrop({
-              drop: { wave_id: props.wave.id, drop_type: "PARTICIPATORY" },
+              drop: {
+                wave_id: props.wave.id,
+                drop_type: "PARTICIPATORY",
+                title: null,
+                parts: [
+                  {
+                    content: "Participation drop",
+                    media: [],
+                    quoted_drop: null,
+                  },
+                ],
+                referenced_nfts: [],
+                mentioned_users: [],
+                mentioned_waves: [],
+                metadata: [],
+                signature: null,
+                is_safe_signature: false,
+                signer_address: "",
+              },
               dropId: null,
             } as DropMutationBody)
           }
@@ -164,6 +210,7 @@ jest.mock("@/components/waves/quorum/QuorumProposalDropModal", () => ({
 
 const useWaveMock = useWave as jest.MockedFunction<typeof useWave>;
 const commonApiPostMock = commonApiPost as jest.Mock;
+const fetchWaveMetadataMock = jest.mocked(fetchWaveMetadata);
 
 const wave = {
   id: "1",
@@ -171,6 +218,10 @@ const wave = {
   wave: { authenticated_user_eligible_for_admin: false },
   chat: { authenticated_user_eligible: true },
   participation: { authenticated_user_eligible: true },
+  metrics: {
+    your_drops_count: 0,
+    your_participation_drops_count: 0,
+  },
 } as any;
 
 type PendingPost = {
@@ -199,6 +250,7 @@ describe("CreateDrop", () => {
       isCurationWave: false,
     } as any);
     commonApiPostMock.mockResolvedValue({ id: "server-drop", wave_id: "1" });
+    fetchWaveMetadataMock.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -302,6 +354,177 @@ describe("CreateDrop", () => {
       "temp-rejected-drop"
     );
     consoleErrorSpy.mockRestore();
+  });
+
+  it("gates a first chat message on guidelines until the user agrees", async () => {
+    fetchWaveMetadataMock.mockResolvedValue([
+      {
+        id: 1,
+        data_key: "wave_display.rules.custom",
+        data_value: "Be thoughtful and stay on topic.",
+      },
+    ]);
+    const guidelinesWave = {
+      ...wave,
+      metrics: {
+        your_drops_count: 0,
+        your_participation_drops_count: 0,
+      },
+    } as any;
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-1" },
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={guidelinesWave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByText("submit current mode"));
+    fireEvent.click(screen.getByText("submit current mode"));
+    expect(
+      await screen.findByRole("dialog", { name: "Wave guidelines" })
+    ).toBeVisible();
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Decline" }));
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(
+      await screen.findByRole("dialog", { name: "Wave guidelines" })
+    ).toBeVisible();
+    await userEvent.click(screen.getByRole("button", { name: "Agree" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+    expect(
+      screen.queryByRole("dialog", { name: "Wave guidelines" })
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    expect(fetchWaveMetadataMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps a first message when current guidelines cannot be loaded", async () => {
+    const setToast = jest.fn();
+    fetchWaveMetadataMock.mockRejectedValue(new Error("network unavailable"));
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-1" },
+            setToast,
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() =>
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        title: "Couldn't load the wave guidelines.",
+        description: "Please try again before sending your message.",
+      })
+    );
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("asks again when slow mode rejects the enqueue after agreement", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
+    const slowWave = {
+      ...wave,
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+    const renderComposer = (profileId: string, handle: string) => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: profileId, handle },
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={slowWave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const { rerender } = render(renderComposer("profile-a", "viewer-a"));
+    await userEvent.click(screen.getByText("submit current mode"));
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalledTimes(1));
+
+    fetchWaveMetadataMock.mockResolvedValue([
+      {
+        id: 1,
+        data_key: "wave_display.rules.custom",
+        data_value: "Be thoughtful and stay on topic.",
+      },
+    ]);
+    rerender(renderComposer("profile-b", "viewer-b"));
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(
+      await screen.findByRole("dialog", { name: "Wave guidelines" })
+    ).toBeVisible();
+    await userEvent.click(screen.getByRole("button", { name: "Agree" }));
+
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(
+      await screen.findByRole("dialog", { name: "Wave guidelines" })
+    ).toBeVisible();
+    expect(fetchWaveMetadataMock).toHaveBeenCalledTimes(3);
+    dateNowSpy.mockRestore();
   });
 
   it("waits for onServerDropCreated before reporting all drops added", async () => {
