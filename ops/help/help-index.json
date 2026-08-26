@@ -4976,11 +4976,16 @@
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
         "Wide tables in Details scroll horizontally on narrow screens while their first label column stays visible.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
-        "A NextGen token opened from a profile's Collected tab can return to the same profile filters, page, and opened card; direct token visits offer the current owner's NextGen holdings when available.",
+        "In the native app, The Memes, Gradients, NextGen, and Meme Lab tokens opened from a profile's Collected tab use the app-header Back chevron to restore the same profile filters, page, and opened card while retaining the detail page's collection link; mobile web shows an in-page return action, desktop uses browser Back, and direct token visits do not show a false return action, while NextGen can separately offer the current owner's holdings when available.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
       "canonical_path": "/{user}/collected",
-      "related_paths": ["/the-memes", "/meme-lab", "/nextgen"],
+      "related_paths": [
+        "/the-memes",
+        "/6529-gradient",
+        "/meme-lab",
+        "/nextgen"
+      ],
       "tags": ["profiles", "collected", "nfts"],
       "source_refs": [
         "app/[user]/collected/page.tsx",

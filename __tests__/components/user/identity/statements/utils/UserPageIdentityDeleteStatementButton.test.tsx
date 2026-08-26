@@ -71,4 +71,19 @@ describe("UserPageIdentityDeleteStatementButton", () => {
     const button = screen.getByRole("button", { name: "Delete" });
     expect(button.className).toContain("tw-opacity-100");
   });
+
+  it("includes the no-hover CSS fallback on the desktop-layout button", () => {
+    render(
+      <UserPageIdentityDeleteStatementButton
+        statement={statement}
+        profile={profile}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Delete" })).toHaveClass(
+      "tw-opacity-0",
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-opacity-100"
+    );
+  });
 });

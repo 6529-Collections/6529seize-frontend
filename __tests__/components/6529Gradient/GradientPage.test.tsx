@@ -36,7 +36,9 @@ jest.mock("@/components/you-own-nft-badge/YouOwnNftBadge", () => ({
 }));
 jest.mock("@/components/nft-navigation/NftNavigation", () => ({
   __esModule: true,
-  default: () => <div data-testid="nav" />,
+  default: ({ params }: { readonly params?: URLSearchParams }) => (
+    <div data-query={params?.toString()} data-testid="nav" />
+  ),
 }));
 jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
@@ -119,9 +121,11 @@ beforeEach(() => {
 function renderPage({
   wallet = "0x1",
   connectedAddress = wallet,
+  searchParamsString = "",
 }: {
   readonly wallet?: string;
   readonly connectedAddress?: string | undefined;
+  readonly searchParamsString?: string | undefined;
 } = {}) {
   mockConnectedAddress = connectedAddress;
 
@@ -132,7 +136,10 @@ function renderPage({
       >
         <CookieConsentProvider>
           <SeizeConnectProvider>
-            <GradientPageComponent id="1" />
+            <GradientPageComponent
+              id="1"
+              searchParamsString={searchParamsString}
+            />
           </SeizeConnectProvider>
         </CookieConsentProvider>
       </AuthContext.Provider>
@@ -151,6 +158,28 @@ describe("GradientPage", () => {
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
     );
     expect(screen.getByTestId("transfer-action")).toBeInTheDocument();
+  });
+
+  it("returns to the originating profile collected card", async () => {
+    const returnTo =
+      "/Shelby/collected?collection=gradients&page=2#collected-card-gradients-1";
+    const searchParams = new URLSearchParams({
+      returnTo,
+      untrusted: "do-not-forward",
+    });
+
+    renderPage({ searchParamsString: searchParams.toString() });
+
+    expect(
+      screen.getByRole("link", { name: "Back to Shelby's collected" })
+    ).toHaveAttribute("href", returnTo);
+    expect(
+      screen.getByRole("link", { name: "6529 Gradient" }).parentElement
+    ).toHaveClass("tw-hidden", "md:tw-flex");
+    expect(await screen.findByTestId("nav")).toHaveAttribute(
+      "data-query",
+      new URLSearchParams({ returnTo }).toString()
+    );
   });
 
   it("hides owner badge for non-owner", async () => {

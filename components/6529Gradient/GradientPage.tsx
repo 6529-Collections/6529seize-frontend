@@ -11,6 +11,7 @@ import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle";
+import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
 import {
@@ -31,6 +32,11 @@ import {
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -398,8 +404,33 @@ function GradientActivitySection({
   );
 }
 
-export default function GradientPageComponent({ id }: { readonly id: string }) {
+export default function GradientPageComponent({
+  id,
+  searchParamsString = "",
+}: {
+  readonly id: string;
+  readonly searchParamsString?: string | undefined;
+}) {
   const capacitor = useCapacitor();
+  const locale = useBrowserLocale();
+  const returnContext = useMemo(
+    () =>
+      getProfileCollectedReturnContext(
+        new URLSearchParams(searchParamsString).get(
+          PROFILE_COLLECTED_RETURN_PARAM
+        )
+      ),
+    [searchParamsString]
+  );
+  const navigationParams = useMemo(
+    () =>
+      new URLSearchParams(
+        returnContext
+          ? { [PROFILE_COLLECTED_RETURN_PARAM]: returnContext.href }
+          : undefined
+      ),
+    [returnContext]
+  );
   const { country } = useCookieConsent();
   const { address: connectedAddress } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
@@ -561,8 +592,18 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
-              <div className="tw-mb-0 tw-flex tw-items-center">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
+              <ProfileCollectedReturnLink
+                locale={locale}
+                returnTo={returnContext?.href}
+              />
+              <div
+                className={`tw-mb-0 tw-items-center ${
+                  returnContext && !capacitor.isCapacitor
+                    ? "tw-hidden md:tw-flex"
+                    : "tw-flex"
+                }`}
+              >
                 <Link
                   href="/6529-gradient"
                   className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
@@ -583,6 +624,7 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                     path="/6529-gradient"
                     startIndex={GRADIENT_COLLECTION_START_INDEX}
                     endIndex={GRADIENT_COLLECTION_END_INDEX}
+                    params={navigationParams}
                   />
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
