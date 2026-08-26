@@ -2,9 +2,10 @@
 
 import React from "react";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { Tooltip } from "react-tooltip";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { Tooltip } from "react-tooltip";
 import ProposalCardReadFullButton from "./proposal/ProposalCardReadFullButton";
 
 interface WaveDropActionsOpenProps {
@@ -104,21 +105,10 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
       </button>
       <Tooltip
         id={`open-${drop.id}`}
-        place="top-end"
+        place="top"
         offset={8}
         opacity={1}
-        positionStrategy="fixed"
-        style={{
-          padding: "4px 8px",
-          background: "#1F2937",
-          color: "white",
-          fontSize: "13px",
-          fontWeight: 500,
-          borderRadius: "6px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 10000,
-          pointerEvents: "none",
-        }}
+        style={TOOLTIP_STYLES}
       >
         <span className="tw-text-xs">Open</span>
       </Tooltip>

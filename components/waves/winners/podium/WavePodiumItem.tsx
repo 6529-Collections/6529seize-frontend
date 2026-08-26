@@ -50,7 +50,6 @@ const positionStyles = {
     ring: "tw-ring-[#fbbf24]",
     shadow: "tw-shadow-[0_0_20px_rgba(251,191,36,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base md:tw-text-xl",
-    ratingFontSize: "tw-text-sm sm:tw-text-base md:tw-text-2xl",
     positionText: "1st",
     bgGradient:
       "tw-bg-gradient-to-b tw-from-[#fbbf24]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
@@ -73,7 +72,6 @@ const positionStyles = {
     ring: "tw-ring-[#94a3b8]",
     shadow: "tw-shadow-[0_0_20px_rgba(148,163,184,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base",
-    ratingFontSize: "tw-text-sm sm:tw-text-base",
     positionText: "2nd",
     bgGradient:
       "tw-bg-gradient-to-b tw-from-[#94a3b8]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
@@ -96,7 +94,6 @@ const positionStyles = {
     ring: "tw-ring-[#CD7F32]",
     shadow: "tw-shadow-[0_0_20px_rgba(205,127,50,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base",
-    ratingFontSize: "tw-text-base",
     positionText: "3rd",
     bgGradient:
       "tw-bg-gradient-to-b tw-from-[#CD7F32]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
@@ -382,7 +379,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                           viewBox="0 0 24 24"
                           strokeWidth="1.5"
                           stroke="currentColor"
-                          className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-top-1/2 tw-ml-2 -tw-translate-y-1/2 desktop-hover:group-hover/link:tw-opacity-100`}
+                          className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-top-1/2 tw-ml-2 -tw-translate-y-1/2 group-focus-visible/link:tw-opacity-100 desktop-hover:group-hover/link:tw-opacity-100 touch-only:tw-opacity-100`}
                         >
                           <path
                             strokeLinecap="round"
@@ -449,7 +446,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
                       stroke="currentColor"
-                      className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100`}
+                      className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-top-1/2 tw-ml-2 -tw-translate-y-1/2 group-focus-visible/link:tw-opacity-100 desktop-hover:group-hover/link:tw-opacity-100 touch-only:tw-opacity-100`}
                     >
                       <path
                         strokeLinecap="round"
@@ -462,11 +459,11 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
               )}
 
               <div className="tw-relative tw-flex tw-flex-col tw-items-center tw-gap-y-2">
-                <div className="tw-flex tw-items-center tw-gap-x-1">
+                <div className="tw-flex tw-items-baseline tw-gap-x-1">
                   <span
                     className={`${
                       drop.rating >= 0 ? styles.textColor : "tw-text-[#ff4466]"
-                    } tw-font-semibold ${styles.ratingFontSize}`}
+                    } tw-text-sm tw-font-semibold sm:tw-text-base`}
                   >
                     {formatNumberWithCommas(drop.rating)}
                   </span>

@@ -217,13 +217,13 @@ function EndedParticipationDropInner({
             )}
 
             {!isStackedTimestamp && (
-              <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+              <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
                 {getTimeAgoShort(drop.created_at)}
               </p>
             )}
           </div>
           {isStackedTimestamp && (
-            <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+            <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
               {getTimeAgoShort(drop.created_at)}
             </p>
           )}
