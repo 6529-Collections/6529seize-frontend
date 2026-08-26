@@ -1,5 +1,8 @@
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import ContentModerationDropBody from "@/components/content-moderation/ContentModerationDropBody";
+import ContentModerationReportStatusButton from "@/components/content-moderation/ContentModerationReportStatusButton";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import {
   unblockProfile,
@@ -52,24 +55,22 @@ const createDrop = (
   overrides: Partial<
     Pick<ApiDrop, "viewer_context" | "moderation" | "wave" | "created_at">
   > = {}
-): Pick<
-  ApiDrop,
-  "id" | "author" | "viewer_context" | "moderation" | "wave" | "created_at"
-> => ({
-  id: "drop-1",
-  created_at: 1_700_000_000_000,
-  wave: {
-    id: "wave-1",
-    name: "Test wave",
-    picture: null,
-  } as ApiDrop["wave"],
-  author: {
-    id: "author-1",
-    handle: "alice",
-    pfp: null,
-  } as ApiDrop["author"],
-  ...overrides,
-});
+): ApiDrop =>
+  ({
+    id: "drop-1",
+    created_at: 1_700_000_000_000,
+    wave: {
+      id: "wave-1",
+      name: "Test wave",
+      picture: null,
+    } as ApiDrop["wave"],
+    author: {
+      id: "author-1",
+      handle: "alice",
+      pfp: null,
+    } as ApiDrop["author"],
+    ...overrides,
+  }) as ApiDrop;
 
 describe("ContentModerationDropGate", () => {
   beforeEach(() => {
@@ -94,11 +95,55 @@ describe("ContentModerationDropGate", () => {
 
     expect(screen.queryByText("Secret post content")).not.toBeInTheDocument();
     expect(
-      screen.getByText("This post was removed by a moderator.")
+      screen.getByText("Content removed by moderators")
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Show post" })
     ).not.toBeInTheDocument();
+  });
+
+  it("preserves the post shell while replacing a removed body for chat drops", () => {
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          viewer_context: {
+            author_blocked: false,
+            drop_hidden: false,
+            report_status: ApiContentModerationReportStatus.ResolvedRemoved,
+          },
+          moderation: {
+            status: ApiDropModerationStatus.ModeratorRemoved,
+            can_view: false,
+          },
+        })}
+        preserveGlobalContext
+      >
+        <div>
+          <p>Author and timestamp shell</p>
+          <ContentModerationReportStatusButton />
+          <ContentModerationDropBody>
+            <p>Removed secret body</p>
+          </ContentModerationDropBody>
+        </div>
+      </ContentModerationDropGate>
+    );
+
+    expect(screen.getByText("Author and timestamp shell")).toBeInTheDocument();
+    expect(screen.queryByText("Removed secret body")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Content removed by moderators")
+    ).toBeInTheDocument();
+    const reportStatus = screen.getByRole("button", {
+      name: "Reviewed · Content removed",
+    });
+    expect(reportStatus).toHaveAttribute("title", "Reviewed · Content removed");
+
+    fireEvent.click(reportStatus);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Flag Content" })
+    ).toBeInTheDocument();
   });
 
   it("fails closed when a drop has no moderation presentation", () => {
@@ -337,10 +382,12 @@ describe("ContentModerationDropGate", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Test wave")).toBeInTheDocument();
     expect(screen.queryByText("@alice")).not.toBeInTheDocument();
+    expect(screen.getByTestId("content-moderation-hidden-content")).toHaveClass(
+      "tw-blur-[6px]"
+    );
     expect(
-      screen.getByTestId("content-moderation-hidden-content")
-    ).toHaveClass("tw-blur-[6px]");
-    expect(screen.getByText("Compact blocked post content")).toBeInTheDocument();
+      screen.getByText("Compact blocked post content")
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Unblock" })
     ).not.toBeInTheDocument();
@@ -357,8 +404,8 @@ describe("ContentModerationDropGate", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Hide again" }));
 
-    expect(
-      screen.getByTestId("content-moderation-hidden-content")
-    ).toHaveClass("tw-blur-[6px]");
+    expect(screen.getByTestId("content-moderation-hidden-content")).toHaveClass(
+      "tw-blur-[6px]"
+    );
   });
 });

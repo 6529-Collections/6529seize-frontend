@@ -61,9 +61,7 @@ const useProfileBlockMutation = ({
       }
       queryClient.setQueryData<ApiBlockedProfile[]>(queryKey, (current) => {
         if (!blocked) {
-          return current?.filter(
-            (profile) => profile.profile_id !== profileId
-          );
+          return current?.filter((profile) => profile.profile_id !== profileId);
         }
         if (
           !profileId ||

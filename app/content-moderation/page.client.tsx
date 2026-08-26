@@ -74,6 +74,8 @@ function ModerationQueueCard({
   const reportedAt = formatTimestamp(item.created_at, locale);
   const authorPfp = getSafeAssetUrl(item.author_pfp);
   const authorLabel = item.author_handle ?? item.author_profile_id;
+  const reporterPfp = getSafeAssetUrl(item.reporter_pfp);
+  const reporterLabel = item.reporter_handle ?? item.reporter_profile_id;
 
   const decisionMutation = useMutation({
     mutationFn: (
@@ -144,7 +146,7 @@ function ModerationQueueCard({
 
   return (
     <article className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-300">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-200">
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           {authorPfp ? (
             <Image
@@ -163,13 +165,46 @@ function ModerationQueueCard({
           {item.author_handle ? (
             <Link
               href={`/${item.author_handle}`}
-              className="tw-font-semibold tw-text-iron-300 tw-no-underline hover:tw-text-primary-300"
+              className="tw-font-semibold tw-text-iron-100 tw-no-underline hover:tw-text-primary-300"
             >
               {authorLabel}
             </Link>
           ) : (
-            <span className="tw-font-semibold tw-text-iron-300">
+            <span className="tw-font-semibold tw-text-iron-100">
               {authorLabel}
+            </span>
+          )}
+        </span>
+        <span aria-hidden="true">·</span>
+        <span className="tw-inline-flex tw-items-center tw-gap-1.5">
+          {reporterPfp ? (
+            <Image
+              src={reporterPfp}
+              alt=""
+              width={20}
+              height={20}
+              className="tw-size-5 tw-rounded-full tw-bg-iron-800 tw-object-cover"
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="tw-size-5 tw-rounded-full tw-bg-iron-800"
+            />
+          )}
+          {item.reporter_handle ? (
+            <Link
+              href={`/${item.reporter_handle}`}
+              className="tw-font-semibold tw-text-iron-100 tw-no-underline hover:tw-text-primary-300"
+            >
+              {t(locale, "contentModeration.moderator.reportedBy", {
+                profile: `@${reporterLabel}`,
+              })}
+            </Link>
+          ) : (
+            <span>
+              {t(locale, "contentModeration.moderator.reportedBy", {
+                profile: reporterLabel,
+              })}
             </span>
           )}
         </span>

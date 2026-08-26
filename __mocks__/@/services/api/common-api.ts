@@ -17,6 +17,9 @@ export const commonApiPostWithoutBodyAndResponse = makeMock(
   actual.commonApiPostWithoutBodyAndResponse
 );
 export const commonApiDelete = makeMock(actual.commonApiDelete);
+export const commonApiDeleteWithResponse = makeMock(
+  actual.commonApiDeleteWithResponse
+);
 export const commonApiDeleteWithBody = makeMock(actual.commonApiDeleteWithBody);
 export const commonApiPut = makeMock(actual.commonApiPut);
 export const commonApiPostForm = makeMock(actual.commonApiPostForm);

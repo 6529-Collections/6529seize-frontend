@@ -20,8 +20,8 @@ being objectionable.
 - Open `/preferences?tab=content` to manage blocked profiles. The older
   `/content-preferences` path redirects to this tab.
 - Authorized moderators can open **WatchTower** at `/content-moderation` from
-  the app navigation or profile menu. The page heading is **WatchTower -
-  Content Moderation**.
+  the desktop, mobile-browser, and mobile-app side navigation. It is not shown
+  in the profile menu. The page heading is **WatchTower - Content Moderation**.
 
 The unified `/preferences` page contains Notification, Messages, and Content
 tabs and fills the available page height. Preferences are saved to a profile.
@@ -108,20 +108,23 @@ non-interactive blur. The centered control reads **Hidden · Reveal · Unhide**.
 Short tooltips explain the difference between temporary Reveal and persistent
 Unhide.
 
-An open reported post reads **Reported · Hidden · Reveal · Unhide**. Reveal is
-still temporary and Unhide removes only the personal hide; neither action
-withdraws the report. If the post is visible, it keeps a subtle report-state
-line. The viewer-facing states are **Reported · Awaiting review**, **Reported ·
-Under review** after quarantine, **Reviewed · No action taken**, and **Reviewed
-· Content removed**. Internal moderator notes, AI details, moderator identity,
-and other reporters are never exposed in these states.
+An open reported post keeps a compact **Reported** control with the hidden-post
+actions. Reveal is still temporary and Unhide removes only the personal hide;
+neither action withdraws the report. If the post is visible, the compact
+control appears inside that post rather than as an ambiguous line between
+posts. Hovering it shows the full state, and clicking or tapping it opens the
+report details. The full viewer-facing states are **Reported · Awaiting
+review**, **Reviewed · No action taken**, and **Reviewed · Content removed**.
+Only the reporter sees this personal report state. Internal moderator notes,
+AI details, moderator identity, and other reporters are never exposed.
 
 Opening **Flag Content** again while the viewer has an open report shows the
 existing report instead of permitting a duplicate. **Withdraw report** is
-available until a moderator resolves it, asks for confirmation, and leaves the
-post hidden. Withdrawal is auditable, does not affect other reporters, and
-does not become available again after resolution. An allowed resolution may be
-reported again later.
+available until a moderator resolves it and opens a separate confirmation
+state. A successful withdrawal closes the dialog and leaves the post hidden.
+Withdrawal is auditable, does not affect other reporters, and does not become
+available again after resolution. An allowed resolution may be reported again
+later.
 
 ## Posts from blocked profiles
 
@@ -190,10 +193,11 @@ the post's global visibility.
 Authorized moderators can review open reports in **WatchTower** at
 `/content-moderation`. The full-width queue fills the available page height.
 WatchTower separates **Open reports**, **Resolved reports**, and **Suspended
-profiles**, each with a current count. Each report makes the content primary,
-shows a compact AI summary with expandable detail, and keeps audit history
-available. For an open report the moderator first selects one explained content
-decision, may add an optional internal note, and then applies it once:
+profiles**, each with a current count. Each report identifies both the author
+and the profile that submitted it, makes the content primary, shows a compact
+AI summary with expandable detail, and keeps audit history available. For an
+open report the moderator first selects one explained content decision, may
+add an optional internal note, and then applies it once:
 
 - **Allow** keeps or restores the post to visible and closes its reports;
 - **Quarantine** hides it globally while its reports stay open; and
@@ -204,11 +208,12 @@ prevents future creates and edits without changing existing posts. Suspended
 profiles can be found and reinstated from the central Suspended profiles view,
 without first locating a report.
 
-Globally quarantined or moderator-removed posts are replaced by a redacted
-tombstone across primary Wave views, replies, quotes, leaderboards, and related
-notification data. Ordinary viewers cannot Reveal globally moderated content.
-The author can still see their own globally moderated post and its moderation
-state.
+In primary Wave chat views, globally quarantined or moderator-removed posts
+keep their author, time, and Wave context while only the post body is replaced
+by a stable unavailable or **Content removed by moderators** message. Compact
+secondary surfaces use a redacted tombstone. Ordinary viewers cannot Reveal
+globally moderated content. The author can still see their own globally
+moderated post and its moderation state.
 
 The WatchTower link is shown only to profiles whose server-provided access
 state allows it. A red indicator appears while the queue contains open reports;

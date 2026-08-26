@@ -1980,7 +1980,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiContentModerationReportWithdrawalResponse"
+                $ref: >-
+                  #/components/schemas/ApiContentModerationReportWithdrawalResponse
         "404":
           description: No open report exists for this profile and drop
   /content-moderation/drops/{drop_id}/decision:
@@ -15967,27 +15968,6 @@ components:
           type: string
         status:
           $ref: "#/components/schemas/ApiDropModerationStatus"
-    ApiContentModerationProfileStatusRequest:
-      type: object
-      required:
-        - status
-      properties:
-        status:
-          $ref: "#/components/schemas/ApiModeratedProfileStatus"
-        reason:
-          type: string
-          nullable: true
-          maxLength: 2000
-    ApiContentModerationProfileStatusResponse:
-      type: object
-      required:
-        - profile_id
-        - status
-      properties:
-        profile_id:
-          type: string
-        status:
-          $ref: "#/components/schemas/ApiModeratedProfileStatus"
     ApiContentModerationProfileListItem:
       type: object
       required:
@@ -16020,12 +16000,35 @@ components:
           format: int64
         cursor:
           type: string
+    ApiContentModerationProfileStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiModeratedProfileStatus"
+        reason:
+          type: string
+          nullable: true
+          maxLength: 2000
+    ApiContentModerationProfileStatusResponse:
+      type: object
+      required:
+        - profile_id
+        - status
+      properties:
+        profile_id:
+          type: string
+        status:
+          $ref: "#/components/schemas/ApiModeratedProfileStatus"
     ApiContentModerationQueueItem:
       type: object
       required:
         - id
         - drop_id
         - reporter_profile_id
+        - reporter_handle
+        - reporter_pfp
         - author_profile_id
         - author_handle
         - author_pfp
@@ -16046,6 +16049,12 @@ components:
           type: string
         reporter_profile_id:
           type: string
+        reporter_handle:
+          type: string
+          nullable: true
+        reporter_pfp:
+          type: string
+          nullable: true
         author_profile_id:
           type: string
         author_handle:
@@ -16164,6 +16173,13 @@ components:
           $ref: "#/components/schemas/ApiContentModerationReportStatus"
         drop_status:
           $ref: "#/components/schemas/ApiDropModerationStatus"
+    ApiContentModerationReportStatus:
+      type: string
+      enum:
+        - OPEN
+        - RESOLVED_ALLOWED
+        - RESOLVED_REMOVED
+        - WITHDRAWN
     ApiContentModerationReportWithdrawalResponse:
       type: object
       required:
@@ -16177,13 +16193,6 @@ components:
           $ref: "#/components/schemas/ApiContentModerationReportStatus"
         drop_status:
           $ref: "#/components/schemas/ApiDropModerationStatus"
-    ApiContentModerationReportStatus:
-      type: string
-      enum:
-        - OPEN
-        - RESOLVED_ALLOWED
-        - RESOLVED_REMOVED
-        - WITHDRAWN
     ApiContentModeratorAccess:
       type: object
       required:

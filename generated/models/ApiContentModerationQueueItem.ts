@@ -22,6 +22,8 @@ export class ApiContentModerationQueueItem {
     'id': string;
     'drop_id': string;
     'reporter_profile_id': string;
+    'reporter_handle': string | null;
+    'reporter_pfp': string | null;
     'author_profile_id': string;
     'author_handle': string | null;
     'author_pfp': string | null;
@@ -69,6 +71,18 @@ export class ApiContentModerationQueueItem {
         {
             "name": "reporter_profile_id",
             "baseName": "reporter_profile_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "reporter_handle",
+            "baseName": "reporter_handle",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "reporter_pfp",
+            "baseName": "reporter_pfp",
             "type": "string",
             "format": ""
         },

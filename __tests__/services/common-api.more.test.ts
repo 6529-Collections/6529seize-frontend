@@ -1,6 +1,7 @@
 import {
   commonApiDelete,
   commonApiDeleteWithBody,
+  commonApiDeleteWithResponse,
   commonApiPut,
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
@@ -91,6 +92,30 @@ describe("commonApi utility methods", () => {
           Authorization: "Bearer jwt",
         },
         body: JSON.stringify({ a: 1 }),
+      }
+    );
+  });
+
+  it("commonApiDeleteWithResponse parses a DELETE response without a body", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ status: "WITHDRAWN" }),
+      headers: new Headers({ "content-type": "application/json" }),
+    });
+
+    await expect(
+      commonApiDeleteWithResponse({ endpoint: "report" })
+    ).resolves.toEqual({ status: "WITHDRAWN" });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/report",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-6529-auth": "stage",
+          Authorization: "Bearer jwt",
+        },
       }
     );
   });
