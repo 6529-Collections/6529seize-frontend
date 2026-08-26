@@ -27,6 +27,7 @@ export default function UserPageHeaderAboutEdit({
   onValueChange: controlledOnValueChange,
   errorMsg: controlledErrorMsg,
   onErrorMsgChange: controlledOnErrorMsgChange,
+  autoFocus = false,
 }: {
   readonly profile: ApiIdentity;
   readonly statement: CicStatement | null;
@@ -35,6 +36,7 @@ export default function UserPageHeaderAboutEdit({
   readonly onValueChange?: ((value: string) => void) | undefined;
   readonly errorMsg?: string | null | undefined;
   readonly onErrorMsgChange?: ((errorMsg: string | null) => void) | undefined;
+  readonly autoFocus?: boolean | undefined;
 }) {
   const MAX_STATEMENT_LENGTH = 500;
 
@@ -58,12 +60,14 @@ export default function UserPageHeaderAboutEdit({
       .find((value) => value.length > 0) ?? "";
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-      const { value } = inputRef.current;
-      inputRef.current.setSelectionRange(value.length, value.length);
+    if (!autoFocus || !inputRef.current) {
+      return;
     }
-  }, []);
+
+    inputRef.current.focus();
+    const { value } = inputRef.current;
+    inputRef.current.setSelectionRange(value.length, value.length);
+  }, [autoFocus]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     onErrorMsgChange(null);

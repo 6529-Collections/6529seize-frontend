@@ -73,6 +73,7 @@ type MobileWrapperDialogProps = {
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly focusTitleOnOpen?: boolean | undefined;
   readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
@@ -216,7 +217,7 @@ function getSurfaceClassNames({
   readonly tabletModal?: boolean | undefined;
 }) {
   return clsx(
-    "tw-flex tw-flex-col tw-rounded-t-xl",
+    "tw-flex tw-flex-col tw-rounded-t-2xl",
     surfaceClassName ?? "tw-bg-iron-950",
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-surface tw-overflow-visible"
@@ -229,17 +230,27 @@ function getContentClassNames({
   allowOverflow,
   noPadding,
   showScrollbar,
+  hasDragHandle,
+  tabletModal,
 }: {
   readonly allowOverflow?: boolean | undefined;
   readonly noPadding?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
+  readonly hasDragHandle: boolean;
+  readonly tabletModal?: boolean | undefined;
 }) {
   return clsx(
     "tw-flex tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-flex-col",
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-content tw-overflow-visible"
       : "tw-overflow-y-auto",
-    noPadding ? "tw-py-0" : "tw-pb-6 tw-pt-4",
+    noPadding
+      ? "tw-py-0"
+      : clsx(
+          "tw-pb-6",
+          hasDragHandle ? "tw-pt-0" : "tw-pt-4",
+          hasDragHandle && tabletModal && "md:tw-pt-4"
+        ),
     showScrollbar &&
       !allowOverflow &&
       "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
@@ -288,12 +299,14 @@ function getSurfaceStyle({
 
 function FloatingCloseButton({
   show,
+  hideOnMobile,
   tabletModal,
   onClose,
   mobileCloseButtonClassName,
   closeLabel,
 }: {
   readonly show: boolean;
+  readonly hideOnMobile: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly mobileCloseButtonClassName?: string | undefined;
@@ -315,7 +328,9 @@ function FloatingCloseButton({
     >
       <div
         className={clsx(
-          "tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pr-2 tw-pt-4 md:tw-pr-0",
+          "tw-absolute -tw-top-16 tw-right-0 tw-pr-2 tw-pt-4 md:tw-pr-0",
+          hideOnMobile ? "tw-hidden" : "tw-flex",
+          hideOnMobile && !tabletModal && "md:tw-flex",
           tabletModal && "md:tw-hidden"
         )}
       >
@@ -346,7 +361,7 @@ function DragHandle({
     <div
       aria-hidden="true"
       className={clsx(
-        "tw-flex tw-justify-center tw-pt-3",
+        "tw-flex tw-justify-center tw-py-2",
         tabletModal && "md:tw-hidden"
       )}
     >
@@ -632,12 +647,14 @@ export default function MobileWrapperDialog({
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
+  focusTitleOnOpen = false,
   backLabel,
   closeLabel,
   dismissible = true,
 }: MobileWrapperDialogProps) {
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const titleRef = useRef<HTMLElement>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const {
@@ -668,6 +685,7 @@ export default function MobileWrapperDialog({
     maxWidthClass,
   });
   const dragPanelClassNames = getDragPanelClassNames(canDragToClose);
+  const hasDragHandle = showDragHandle ?? canDragToClose;
   const containerClassNames = getContainerClassNames(tabletModal);
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
@@ -684,6 +702,8 @@ export default function MobileWrapperDialog({
     allowOverflow,
     noPadding,
     showScrollbar,
+    hasDragHandle,
+    tabletModal,
   });
   const surfaceStyle = getSurfaceStyle({
     dialogHeight,
@@ -693,6 +713,7 @@ export default function MobileWrapperDialog({
     dismissible && !!tabletModal && !showHeaderCloseButton;
   const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
+  const hideMobileCloseButton = canDragToClose;
 
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -700,6 +721,7 @@ export default function MobileWrapperDialog({
         as="div"
         className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
+        {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
       >
         <MobileDialogOverlay
           onBeforeLeave={onBeforeLeave}
@@ -731,6 +753,7 @@ export default function MobileWrapperDialog({
                   >
                     <FloatingCloseButton
                       show={showFloatingCloseButton}
+                      hideOnMobile={hideMobileCloseButton}
                       tabletModal={tabletModal}
                       onClose={handleClose}
                       mobileCloseButtonClassName={mobileCloseButtonClassName}
@@ -742,7 +765,7 @@ export default function MobileWrapperDialog({
                         style={{ paddingBottom: bottomPadding }}
                       >
                         <DragHandle
-                          show={showDragHandle}
+                          show={hasDragHandle}
                           tabletModal={tabletModal}
                         />
                         <MobileWrapperDialogHeader
@@ -756,9 +779,14 @@ export default function MobileWrapperDialog({
                           showHeaderCloseButton={showInlineHeaderCloseButton}
                           showHeaderDivider={showHeaderDivider}
                           headerCloseButtonClassName={
-                            headerCloseButtonClassName
+                            clsx(
+                              hideMobileCloseButton &&
+                                "!tw-hidden md:!tw-inline-flex",
+                              headerCloseButtonClassName
+                            )
                           }
                           titleClassName={titleClassName}
+                          titleRef={titleRef}
                           backLabel={resolvedBackLabel}
                           closeLabel={resolvedCloseLabel}
                         />
