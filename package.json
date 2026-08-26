@@ -208,6 +208,7 @@
     "aws-rum-web": "1.25.0",
     "axios": "1.18.0",
     "capacitor-secure-storage-plugin": "0.13.0",
+    "cbw-sdk": "npm:@coinbase/wallet-sdk@3.9.3",
     "chart.js": "4.5.1",
     "cheerio": "1.2.0",
     "clsx": "2.1.1",
