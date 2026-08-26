@@ -59,9 +59,22 @@ describe("UserPageHeaderBanner", () => {
       />
     );
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Edit alice's profile banner" })
+    const editButton = screen.getByRole("button", {
+      name: "Edit alice's profile banner",
+    });
+    expect(editButton).toHaveClass("tw-hidden", "sm:tw-block");
+    expect(editButton.firstElementChild).toHaveClass(
+      "tw-opacity-0",
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-opacity-100",
+      "touch-only:tw-bg-transparent"
     );
+    expect(editButton.querySelector('[aria-hidden="true"]')).toHaveClass(
+      "touch-only:tw-size-9",
+      "touch-only:tw-bg-iron-950"
+    );
+
+    await userEvent.click(editButton);
     expect(screen.getByTestId("edit")).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId("edit"));

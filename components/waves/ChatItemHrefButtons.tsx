@@ -476,7 +476,7 @@ export default function ChatItemHrefButtons({
           className={`tw-transition-opacity tw-duration-200 ${
             showPersistentOverlayTrigger || isMenuOpen
               ? "tw-pointer-events-auto tw-opacity-100"
-              : "tw-pointer-events-none tw-opacity-0 group-focus-within/link-card:tw-pointer-events-auto group-focus-within/link-card:tw-opacity-100 desktop-hover:group-hover/link-card:tw-pointer-events-auto desktop-hover:group-hover/link-card:tw-opacity-100"
+              : "tw-pointer-events-none tw-opacity-0 group-focus-within/link-card:tw-pointer-events-auto group-focus-within/link-card:tw-opacity-100 desktop-hover:group-hover/link-card:tw-pointer-events-auto desktop-hover:group-hover/link-card:tw-opacity-100 touch-only:tw-pointer-events-auto touch-only:tw-opacity-100"
           }`}
         >
           <button
