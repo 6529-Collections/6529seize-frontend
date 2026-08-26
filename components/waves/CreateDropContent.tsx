@@ -29,14 +29,11 @@ import { getMentionedUsersFromEditorState } from "@/components/drops/create/lexi
 import { getMentionedWavesFromEditorState } from "@/components/drops/create/lexical/utils/waveMentionDetection";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
-import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useWebSocket } from "@/services/websocket";
-import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import {
@@ -64,6 +61,7 @@ import { useCreateDropFileHandlers } from "./create-drop-content/useCreateDropFi
 import { useCreateDropFocusBehavior } from "./create-drop-content/useCreateDropFocusBehavior";
 import { useCreateDropIdentityState } from "./create-drop-content/useCreateDropIdentityState";
 import { useCreateDropSubmission } from "./create-drop-content/useCreateDropSubmission";
+import { useCreateDropTyping } from "./create-drop-content/useCreateDropTyping";
 import { exportComposerMarkdown } from "./create-drop-content/exportComposerMarkdown";
 import { useCreateDropContainerWidth } from "./create-drop-content/useCreateDropContainerWidth";
 import { useCreateDropPollActions } from "./create-drop-content/useCreateDropPollActions";
@@ -108,7 +106,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   initialMarkdownKey = null,
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
-  const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
   const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
@@ -307,20 +304,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     [editorState]
   );
 
-  const sendTyping = React.useCallback(() => {
-    send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
-  }, [send, wave.id]);
-
-  const throttleHandle = useMemo(() => {
-    return throttle(sendTyping, 4000);
-  }, [sendTyping]);
-
-  useEffect(() => {
-    if (!getMarkdown?.length) {
-      return;
-    }
-    throttleHandle();
-  }, [getMarkdown, throttleHandle]);
+  useCreateDropTyping({ markdown: getMarkdown, waveId: wave.id });
 
   const hasPendingInlineImageUpload = useMemo(
     () =>
