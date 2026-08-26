@@ -4,6 +4,7 @@ import { type FocusEvent, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import GroupCreateIdentitiesSearchItems, {
   GROUP_IDENTITY_MIN_SEARCH_LENGTH,
+  type CommunityMemberSearchSort,
   type GroupCreateIdentitiesSearchAppearance,
   type GroupCreateIdentitiesSearchResultsLayout,
 } from "./GroupCreateIdentitiesSearchItems";
@@ -20,6 +21,7 @@ export default function GroupCreateIdentitiesSearch({
   iconClassName = "",
   resultsLayout = "popover",
   appearance = "default",
+  sort,
 }: {
   readonly selectedWallets: string[];
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
@@ -30,6 +32,7 @@ export default function GroupCreateIdentitiesSearch({
   readonly iconClassName?: string | undefined;
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout | undefined;
   readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
+  readonly sort?: CommunityMemberSearchSort | undefined;
 }) {
   const isModal = appearance === "modal";
   const [isOpen, setIsOpen] = useState(false);
@@ -117,6 +120,7 @@ export default function GroupCreateIdentitiesSearch({
         selectedWallets={selectedWallets}
         resultsLayout={resultsLayout}
         appearance={appearance}
+        sort={sort}
       />
     </div>
   );

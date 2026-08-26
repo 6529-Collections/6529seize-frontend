@@ -103,6 +103,7 @@ export default function CreateDirectMessage({
           onRemove={onRemove}
           appearance="modal"
           resultsLayout="inline"
+          sort="level"
         />
         <div className="tw-mt-3 tw-flex tw-justify-end">
           <Button

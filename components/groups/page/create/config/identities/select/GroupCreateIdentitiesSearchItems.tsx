@@ -7,6 +7,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export type GroupCreateIdentitiesSearchResultsLayout = "popover" | "inline";
 export type GroupCreateIdentitiesSearchAppearance = "default" | "modal";
+export type CommunityMemberSearchSort = "level";
 
 export const GROUP_IDENTITY_MIN_SEARCH_LENGTH = 3;
 
@@ -16,6 +17,7 @@ function GroupCreateIdentitiesSearchItems({
   selectedWallets,
   resultsLayout = "popover",
   appearance = "default",
+  sort,
   onSelect,
 }: {
   readonly open: boolean;
@@ -23,24 +25,21 @@ function GroupCreateIdentitiesSearchItems({
   readonly selectedWallets: string[];
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
   readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
+  readonly sort?: CommunityMemberSearchSort | undefined;
   readonly onSelect: (item: CommunityMemberMinimal) => void;
 }) {
   const normalizedSearchCriteria = searchCriteria?.trim() ?? "";
+  const queryParams = {
+    param: normalizedSearchCriteria,
+    only_profile_owners: "true",
+    ...(sort ? { sort } : {}),
+  };
   const { data, isFetching } = useQuery<CommunityMemberMinimal[]>({
-    queryKey: [
-      QueryKey.PROFILE_SEARCH,
-      {
-        param: normalizedSearchCriteria,
-        only_profile_owners: "true",
-      },
-    ],
+    queryKey: [QueryKey.PROFILE_SEARCH, queryParams],
     queryFn: async () =>
       await commonApiFetch<CommunityMemberMinimal[]>({
         endpoint: "community-members",
-        params: {
-          param: normalizedSearchCriteria,
-          only_profile_owners: "true",
-        },
+        params: queryParams,
       }),
     enabled:
       normalizedSearchCriteria.length >= GROUP_IDENTITY_MIN_SEARCH_LENGTH,
