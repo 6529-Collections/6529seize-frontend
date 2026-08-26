@@ -140,7 +140,8 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
       </span>
       <section
         aria-labelledby={headingId}
-        className="create-drop-storm-surface -tw-mt-2 tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-border-b tw-border-l-2 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-border-l-primary-500 tw-bg-iron-900 tw-pb-2 tw-pl-3.5 tw-pr-4"
+        className="create-drop-storm-surface -tw-mx-4 -tw-mt-2 tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-border-b tw-border-l-2 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pb-2 tw-pl-3.5 tw-pr-4"
+        style={{ borderLeftColor: "#406AFE" }}
       >
         <header className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-px-0 tw-py-2.5 sm:tw-items-center sm:tw-py-3">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
