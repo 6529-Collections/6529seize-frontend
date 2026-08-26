@@ -221,6 +221,9 @@ export default function CapacitorConnectDialog({
             icon={<GlobeAltIcon aria-hidden="true" className="tw-size-6" />}
             onClick={onOpenExternalWallets}
           />
+          <p className="tw-m-0 tw-px-2 tw-pb-1 tw-text-xs tw-leading-5 tw-text-iron-500">
+            {t(locale, "capacitorConnect.externalWallets.coinbaseUnsupported")}
+          </p>
           <ActionRow
             label={t(locale, "capacitorConnect.scanConnectionQr")}
             icon={<QrCodeIcon aria-hidden="true" className="tw-size-6" />}

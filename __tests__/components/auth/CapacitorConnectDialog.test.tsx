@@ -74,6 +74,11 @@ describe("CapacitorConnectDialog", () => {
       screen.getByRole("button", { name: "External Wallets" })
     ).toBeInTheDocument();
     expect(
+      screen.getByText(
+        "Coinbase Wallet isn't supported in the 6529 app. Open 6529.io in Safari or Chrome to connect with Coinbase."
+      )
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("button", { name: "Scan Connection QR" })
     ).toBeInTheDocument();
     expect(
