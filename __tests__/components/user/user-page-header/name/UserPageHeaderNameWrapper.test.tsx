@@ -43,6 +43,14 @@ describe("UserPageHeaderNameWrapper", () => {
       </UserPageHeaderNameWrapper>
     );
 
+    expect(
+      screen.getByTestId("pencil").parentElement?.parentElement
+    ).toHaveClass(
+      "group-focus-within:tw-block",
+      "desktop-hover:group-hover:tw-block",
+      "touch-only:tw-block"
+    );
+
     await userEvent.click(
       screen.getByRole("button", { name: "Edit Alice's profile name" })
     );
