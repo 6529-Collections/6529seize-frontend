@@ -4,19 +4,23 @@ import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
+import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import type { ApiContentModerationReportResponse } from "@/generated/models/ApiContentModerationReportResponse";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useContentModerationReportStatus } from "@/hooks/content-moderation/useContentModerationReportStatus";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
   blockProfile,
   hideDrop,
   reportDrop,
+  withdrawDropReport,
 } from "@/services/api/content-moderation-api";
 import {
   getDropHiddenOverride,
   getProfileBlockedOverride,
   setDropHiddenOverride,
+  setDropReportStatusOverride,
   setGlobalDropModerationOverride,
   setProfileBlockedOverride,
 } from "@/services/content-moderation/content-moderation-state";
@@ -58,6 +62,20 @@ type FailedPostActionResult = Extract<
   PostActionResult,
   { readonly success: false }
 >;
+
+const AUTHENTICATION_CANCELLED_ERROR = "Authentication was cancelled";
+
+const isAuthenticationCancelled = (error: unknown): boolean =>
+  error instanceof Error && error.message === AUTHENTICATION_CANCELLED_ERROR;
+
+const getPostActionOptionStateClass = (
+  checked: boolean,
+  disabled: boolean
+): string => {
+  if (checked) return "tw-bg-primary-500/5";
+  if (disabled) return "";
+  return "hover:tw-bg-white/[0.025]";
+};
 
 const runPostAction = async ({
   action,
@@ -115,21 +133,25 @@ const REASONS: ReadonlyArray<{
 function PostActionOption({
   checked,
   description,
+  disabled = false,
   icon,
   label,
   onChange,
+  status,
 }: {
   readonly checked: boolean;
   readonly description: string;
+  readonly disabled?: boolean;
   readonly icon: ReactNode;
   readonly label: string;
   readonly onChange: (checked: boolean) => void;
+  readonly status?: string | undefined;
 }) {
   return (
     <label
-      className={`tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-px-2 tw-py-4 tw-transition-colors ${
-        checked ? "tw-bg-primary-500/5" : "hover:tw-bg-white/[0.025]"
-      }`}
+      className={`tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-p-4 tw-transition-colors ${
+        disabled ? "tw-cursor-default tw-opacity-80" : "tw-cursor-pointer"
+      } ${getPostActionOptionStateClass(checked, disabled)}`}
     >
       <span
         aria-hidden="true"
@@ -145,6 +167,11 @@ function PostActionOption({
         <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
           {label}
         </span>
+        {status && (
+          <span className="tw-mt-0.5 tw-block tw-text-xs tw-font-semibold tw-text-primary-300">
+            {status}
+          </span>
+        )}
         <span className="tw-mt-0.5 tw-block tw-text-sm tw-leading-5 tw-text-iron-400">
           {description}
         </span>
@@ -152,6 +179,7 @@ function PostActionOption({
       <input
         type="checkbox"
         checked={checked}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
         aria-label={label}
         className="tw-mt-1 tw-size-4 tw-flex-none tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400"
@@ -173,6 +201,7 @@ export default function ReportDropModal({
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const queryClient = useQueryClient();
   const dropGateContext = useContentModerationDropGateContext();
+  const reportStatus = useContentModerationReportStatus(drop);
   const descriptionId = useId();
   const [reason, setReason] = useState<ApiContentModerationReportReason>(
     ApiContentModerationReportReason.ScamOrPhishing
@@ -181,7 +210,24 @@ export default function ReportDropModal({
   const [reportPost, setReportPost] = useState(false);
   const [hidePost, setHidePost] = useState(false);
   const [blockAuthor, setBlockAuthor] = useState(false);
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const reportIsOpen = reportStatus === ApiContentModerationReportStatus.Open;
+  const reportWasAllowed =
+    reportStatus === ApiContentModerationReportStatus.ResolvedAllowed;
+  const reportWasRemoved =
+    reportStatus === ApiContentModerationReportStatus.ResolvedRemoved;
+  const effectiveHide = reportPost || hidePost;
   const hasSelection = reportPost || hidePost || blockAuthor;
+  let reportOptionStatus: string | undefined;
+  if (!reportPost) {
+    if (reportIsOpen) {
+      reportOptionStatus = t(locale, "contentModeration.report.awaitingReview");
+    } else if (reportWasAllowed) {
+      reportOptionStatus = t(locale, "contentModeration.report.noActionTaken");
+    } else if (reportWasRemoved) {
+      reportOptionStatus = t(locale, "contentModeration.report.contentRemoved");
+    }
+  }
 
   const closeModal = () => {
     setReason(ApiContentModerationReportReason.ScamOrPhishing);
@@ -189,14 +235,30 @@ export default function ReportDropModal({
     setReportPost(false);
     setHidePost(false);
     setBlockAuthor(false);
+    setConfirmWithdraw(false);
     onClose();
+  };
+
+  const applySuccessfulReport = (
+    result: PostActionResult | undefined,
+    viewerProfileId: string | null | undefined
+  ) => {
+    if (result?.success !== true || result.reportResponse === undefined) return;
+    setGlobalDropModerationOverride(drop.id, result.reportResponse.drop_status);
+    if (typeof viewerProfileId === "string") {
+      setDropReportStatusOverride(
+        viewerProfileId,
+        drop.id,
+        ApiContentModerationReportStatus.Open
+      );
+    }
   };
 
   const mutation = useMutation({
     mutationFn: async () => {
       const { success } = await requestAuth();
       if (!success) {
-        throw new Error("Authentication was cancelled");
+        throw new Error(AUTHENTICATION_CANCELLED_ERROR);
       }
       const actions: Array<Promise<PostActionResult>> = [];
       if (reportPost) {
@@ -207,7 +269,7 @@ export default function ReportDropModal({
               reportDrop(drop.id, {
                 reason,
                 notes: notes.trim() || null,
-                hide_drop: hidePost,
+                hide_drop: true,
                 block_author: blockAuthor,
               }),
           })
@@ -233,22 +295,22 @@ export default function ReportDropModal({
       return Promise.all(actions);
     },
     onMutate: () => {
-      const rollbackLocalHidden = hidePost
+      const rollbackLocalHidden = effectiveHide
         ? dropGateContext?.setOptimisticHidden(true)
         : undefined;
       const viewerProfileId = connectedProfile?.id;
-      if (!hidePost && !blockAuthor) {
+      if (!effectiveHide && !blockAuthor) {
         return undefined;
       }
       const previousHidden =
-        hidePost && viewerProfileId
+        effectiveHide && viewerProfileId
           ? getDropHiddenOverride(viewerProfileId, drop.id)
           : undefined;
       const previousBlocked =
         blockAuthor && viewerProfileId
           ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
           : undefined;
-      if (hidePost && viewerProfileId) {
+      if (effectiveHide && viewerProfileId) {
         setDropHiddenOverride(viewerProfileId, drop.id, true);
       }
       if (blockAuthor && viewerProfileId) {
@@ -256,7 +318,7 @@ export default function ReportDropModal({
       }
       return {
         blockAuthor,
-        hidePost,
+        hidePost: effectiveHide,
         previousBlocked,
         previousHidden,
         rollbackLocalHidden,
@@ -276,12 +338,7 @@ export default function ReportDropModal({
         failedActions.has("hide") || (reportFailed && context?.hidePost);
       const blockFailed =
         failedActions.has("block") || (reportFailed && context?.blockAuthor);
-      if (reportResult?.success && reportResult.reportResponse) {
-        setGlobalDropModerationOverride(
-          drop.id,
-          reportResult.reportResponse.drop_status
-        );
-      }
+      applySuccessfulReport(reportResult, context?.viewerProfileId);
       if (hideFailed && context?.hidePost) {
         context.rollbackLocalHidden?.();
         if (context.viewerProfileId) {
@@ -342,10 +399,7 @@ export default function ReportDropModal({
           context.previousBlocked
         );
       }
-      if (
-        error instanceof Error &&
-        error.message === "Authentication was cancelled"
-      ) {
+      if (isAuthenticationCancelled(error)) {
         return;
       }
       setToast({
@@ -360,11 +414,42 @@ export default function ReportDropModal({
     },
   });
 
+  const withdrawMutation = useMutation({
+    mutationFn: async () => {
+      const { success } = await requestAuth();
+      if (!success) throw new Error(AUTHENTICATION_CANCELLED_ERROR);
+      return withdrawDropReport(drop.id);
+    },
+    onSuccess: (response) => {
+      if (connectedProfile?.id) {
+        setDropReportStatusOverride(connectedProfile.id, drop.id, null);
+      }
+      setGlobalDropModerationOverride(drop.id, response.drop_status);
+      setConfirmWithdraw(false);
+      void invalidateContentModerationPresentation(queryClient);
+      setToast({
+        message: t(locale, "contentModeration.report.withdrawSuccess"),
+        type: "success",
+      });
+    },
+    onError: (error) => {
+      if (isAuthenticationCancelled(error)) {
+        return;
+      }
+      setToast({
+        type: "error",
+        title: t(locale, "contentModeration.report.withdrawError"),
+        description: t(locale, "contentModeration.error.retry"),
+        details: getToastErrorDetails(error),
+      });
+    },
+  });
+
   return (
     <Dialog
       open={isOpen}
       onClose={() => {
-        if (!mutation.isPending) closeModal();
+        if (!mutation.isPending && !withdrawMutation.isPending) closeModal();
       }}
       className="tailwind-scope tw-relative tw-z-[1000]"
       aria-describedby={descriptionId}
@@ -372,7 +457,7 @@ export default function ReportDropModal({
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80" />
       <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center sm:tw-items-center">
-          <DialogPanel className="tw-w-full tw-max-w-lg tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-shadow-2xl">
+          <DialogPanel className="tw-w-full tw-max-w-3xl tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl sm:tw-p-7">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
               <div>
                 <DialogTitle className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-xl tw-font-semibold tw-text-iron-50">
@@ -389,7 +474,7 @@ export default function ReportDropModal({
               <button
                 type="button"
                 onClick={closeModal}
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || withdrawMutation.isPending}
                 aria-label={t(locale, "contentModeration.report.close")}
                 className="tw-flex tw-size-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
@@ -405,26 +490,28 @@ export default function ReportDropModal({
               }}
             >
               <fieldset
-                disabled={mutation.isPending}
-                className="tw-m-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-border-0 tw-p-0"
+                disabled={mutation.isPending || withdrawMutation.isPending}
+                className="tw-m-0 tw-space-y-2 tw-border-0 tw-p-0"
               >
                 <legend className="tw-sr-only">
                   {t(locale, "contentModeration.report.actionsLegend")}
                 </legend>
-                <div>
+                <div className="tw-rounded-xl tw-bg-iron-900/35">
                   <PostActionOption
-                    checked={reportPost}
+                    checked={reportIsOpen || reportPost}
                     description={t(
                       locale,
                       "contentModeration.report.reportDescription"
                     )}
+                    disabled={reportIsOpen}
                     icon={<FlagIcon className="tw-size-4" />}
                     label={t(locale, "contentModeration.report.reportLabel")}
                     onChange={setReportPost}
+                    status={reportOptionStatus}
                   />
 
                   {reportPost && (
-                    <div className="tw-mb-4 tw-space-y-4 tw-pl-12 tw-pr-2">
+                    <div className="tw-space-y-4 tw-pb-4 tw-pl-16 tw-pr-4">
                       <label className="tw-block">
                         <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
                           {t(locale, "contentModeration.report.reasonLabel")}
@@ -465,28 +552,77 @@ export default function ReportDropModal({
                       </label>
                     </div>
                   )}
+                  {reportIsOpen && (
+                    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-pb-4 tw-pl-16 tw-pr-4">
+                      {confirmWithdraw ? (
+                        <>
+                          <span className="tw-text-sm tw-text-iron-300">
+                            {t(
+                              locale,
+                              "contentModeration.report.withdrawConfirm"
+                            )}
+                          </span>
+                          <button
+                            type="button"
+                            className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-red/50 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-red hover:tw-bg-red/10"
+                            onClick={() => withdrawMutation.mutate()}
+                          >
+                            {t(locale, "contentModeration.report.withdraw")}
+                          </button>
+                          <button
+                            type="button"
+                            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white"
+                            onClick={() => setConfirmWithdraw(false)}
+                          >
+                            {t(locale, "contentModeration.report.keepReport")}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white"
+                          onClick={() => setConfirmWithdraw(true)}
+                        >
+                          {t(locale, "contentModeration.report.withdraw")}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                <PostActionOption
-                  checked={hidePost}
-                  description={t(
-                    locale,
-                    "contentModeration.report.hideDescription"
-                  )}
-                  icon={<EyeSlashIcon className="tw-size-4" />}
-                  label={t(locale, "contentModeration.report.hideLabel")}
-                  onChange={setHidePost}
-                />
-                <PostActionOption
-                  checked={blockAuthor}
-                  description={t(
-                    locale,
-                    "contentModeration.report.blockDescription"
-                  )}
-                  icon={<NoSymbolIcon className="tw-size-4" />}
-                  label={t(locale, "contentModeration.report.blockLabel")}
-                  onChange={setBlockAuthor}
-                />
+                <div className="tw-rounded-xl tw-bg-iron-900/35">
+                  <PostActionOption
+                    checked={effectiveHide}
+                    description={t(
+                      locale,
+                      "contentModeration.report.hideDescription"
+                    )}
+                    disabled={reportPost}
+                    icon={<EyeSlashIcon className="tw-size-4" />}
+                    label={t(locale, "contentModeration.report.hideLabel")}
+                    onChange={setHidePost}
+                    status={
+                      reportPost
+                        ? t(
+                            locale,
+                            "contentModeration.report.includedWithReport"
+                          )
+                        : undefined
+                    }
+                  />
+                </div>
+                <div className="tw-rounded-xl tw-bg-iron-900/35">
+                  <PostActionOption
+                    checked={blockAuthor}
+                    description={t(
+                      locale,
+                      "contentModeration.report.blockDescription"
+                    )}
+                    icon={<NoSymbolIcon className="tw-size-4" />}
+                    label={t(locale, "contentModeration.report.blockLabel")}
+                    onChange={setBlockAuthor}
+                  />
+                </div>
               </fieldset>
 
               <div className="tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
@@ -494,7 +630,7 @@ export default function ReportDropModal({
                   variant="secondary"
                   size="lg"
                   onClick={closeModal}
-                  disabled={mutation.isPending}
+                  disabled={mutation.isPending || withdrawMutation.isPending}
                 >
                   {t(locale, "contentModeration.report.cancel")}
                 </Button>
@@ -505,7 +641,12 @@ export default function ReportDropModal({
                   disabled={!hasSelection}
                   hideChildrenWhenLoading
                 >
-                  {t(locale, "contentModeration.report.submit")}
+                  {t(
+                    locale,
+                    reportPost
+                      ? "contentModeration.report.submitReport"
+                      : "contentModeration.report.submitActions"
+                  )}
                 </Button>
               </div>
             </form>

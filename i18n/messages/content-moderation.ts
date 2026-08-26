@@ -21,7 +21,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.actionsLegend": "Choose one or more actions",
   "contentModeration.report.reportLabel": "Report post",
   "contentModeration.report.reportDescription":
-    "Send this post to moderators for review.",
+    "Send this post to moderators for review and hide it from your view.",
   "contentModeration.report.reasonLabel": "Reason",
   "contentModeration.report.notesLabel": "Additional details (optional)",
   "contentModeration.report.notesPlaceholder":
@@ -33,6 +33,19 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.blockDescription":
     "Hide their content, mute their activity and unfollow them. They won’t be notified.",
   "contentModeration.report.submit": "Confirm",
+  "contentModeration.report.submitReport": "Report and hide",
+  "contentModeration.report.submitActions": "Apply actions",
+  "contentModeration.report.includedWithReport": "Included with report",
+  "contentModeration.report.awaitingReview": "Reported · Awaiting review",
+  "contentModeration.report.underReview": "Reported · Under review",
+  "contentModeration.report.noActionTaken": "Reviewed · No action taken",
+  "contentModeration.report.contentRemoved": "Reviewed · Content removed",
+  "contentModeration.report.withdraw": "Withdraw report",
+  "contentModeration.report.withdrawConfirm":
+    "Withdraw this report? The post will stay hidden.",
+  "contentModeration.report.keepReport": "Keep report",
+  "contentModeration.report.withdrawSuccess": "Report withdrawn.",
+  "contentModeration.report.withdrawError": "Couldn't withdraw this report.",
   "contentModeration.report.cancel": "Cancel",
   "contentModeration.report.close": "Close post actions dialog",
   "contentModeration.report.reason.scam": "Scam or phishing",
@@ -74,28 +87,51 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.signIn":
     "Connect an authenticated profile to manage content preferences.",
   "contentModeration.moderator.menu": "WatchTower",
-  "contentModeration.moderator.metaTitle": "WatchTower",
+  "contentModeration.moderator.metaTitle": "WatchTower - Content Moderation",
   "contentModeration.moderator.metaDescription": "Review reported content.",
-  "contentModeration.moderator.title": "WatchTower",
+  "contentModeration.moderator.title": "WatchTower - Content Moderation",
   "contentModeration.moderator.description":
-    "Review reported posts and record a reason for every decision.",
+    "Review reports, apply content decisions and manage suspended profiles.",
+  "contentModeration.moderator.checkingPermissions": "Checking permissions…",
   "contentModeration.moderator.loading": "Loading reports…",
   "contentModeration.moderator.loadingMore": "Loading more…",
   "contentModeration.moderator.loadMore": "Load more",
   "contentModeration.moderator.empty": "There are no open reports.",
+  "contentModeration.moderator.emptyResolved": "There are no resolved reports.",
+  "contentModeration.moderator.emptySuspended":
+    "There are no suspended profiles.",
+  "contentModeration.moderator.tabs.label": "Moderation views",
+  "contentModeration.moderator.tabs.open": "Open reports",
+  "contentModeration.moderator.tabs.resolved": "Resolved reports",
+  "contentModeration.moderator.tabs.suspended": "Suspended profiles",
   "contentModeration.moderator.noPower": "You have no power here",
   "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
   "contentModeration.moderator.openReportsIndicator":
     "Open reports need review",
   "contentModeration.moderator.loadError": "Couldn't load WatchTower.",
-  "contentModeration.moderator.reason": "Decision reason",
+  "contentModeration.moderator.reason": "Moderator note (optional)",
   "contentModeration.moderator.reasonPlaceholder":
-    "Explain why this decision is appropriate.",
+    "Add internal context for this decision.",
+  "contentModeration.moderator.chooseDecision": "Choose a content decision",
   "contentModeration.moderator.allow": "Allow",
+  "contentModeration.moderator.allowDescription":
+    "Keep the post visible and close its open reports.",
   "contentModeration.moderator.quarantine": "Quarantine",
+  "contentModeration.moderator.quarantineDescription":
+    "Hide the post globally while its reports remain open.",
   "contentModeration.moderator.remove": "Remove",
+  "contentModeration.moderator.removeDescription":
+    "Remove the post globally and close its open reports.",
+  "contentModeration.moderator.applyDecision": "Apply decision",
+  "contentModeration.moderator.resolvedAs": "Resolved: {decision}",
+  "contentModeration.moderator.authorStatus": "Author status",
   "contentModeration.moderator.suspend": "Suspend author",
   "contentModeration.moderator.reinstate": "Reinstate author",
+  "contentModeration.moderator.confirm": "Confirm",
+  "contentModeration.moderator.confirmSuspend":
+    "Suspend this author? They will be unable to create or edit posts. Existing posts are unchanged.",
+  "contentModeration.moderator.confirmReinstate":
+    "Reinstate this author and allow them to create and edit posts again?",
   "contentModeration.moderator.decisionSuccess": "Moderation decision saved.",
   "contentModeration.moderator.decisionError":
     "Couldn't save the moderation decision.",

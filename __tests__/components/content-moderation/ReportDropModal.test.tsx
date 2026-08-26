@@ -7,6 +7,7 @@ import {
   hideDrop,
   reportDrop,
   unhideDrop,
+  withdrawDropReport,
 } from "@/services/api/content-moderation-api";
 import {
   getDropHiddenOverride,
@@ -37,6 +38,7 @@ jest.mock("@/services/api/content-moderation-api", () => ({
   hideDrop: jest.fn(),
   reportDrop: jest.fn(),
   unhideDrop: jest.fn(),
+  withdrawDropReport: jest.fn(),
 }));
 
 jest.mock("@headlessui/react", () => ({
@@ -111,6 +113,11 @@ describe("ReportDropModal", () => {
     });
     jest.mocked(hideDrop).mockResolvedValue(undefined);
     jest.mocked(blockProfile).mockResolvedValue(undefined);
+    jest.mocked(withdrawDropReport).mockResolvedValue({
+      drop_id: "drop-1",
+      status: "WITHDRAWN" as never,
+      drop_status: ApiDropModerationStatus.Visible,
+    });
   });
 
   it("starts with no action selected and submits a report when selected", async () => {
@@ -121,7 +128,9 @@ describe("ReportDropModal", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Choose one or more actions.")).toBeInTheDocument();
     expect(
-      screen.getByText("Send this post to moderators for review.")
+      screen.getByText(
+        "Send this post to moderators for review and hide it from your view."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByText("Hide only this post from your view.")
@@ -134,23 +143,30 @@ describe("ReportDropModal", () => {
     expect(
       screen.getByRole("checkbox", { name: "Report post" })
     ).not.toBeChecked();
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Apply actions" })
+    ).toBeDisabled();
 
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Report post" })
     );
-    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(screen.getByRole("checkbox", { name: "Hide post" })).toBeChecked();
+    expect(screen.getByText("Included with report")).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Report and hide" })
+    );
 
     await waitFor(() =>
       expect(reportDrop).toHaveBeenCalledWith("drop-1", {
         reason: "SCAM_OR_PHISHING",
         notes: null,
-        hide_drop: false,
+        hide_drop: true,
         block_author: false,
       })
     );
     expect(hideDrop).not.toHaveBeenCalled();
     expect(blockProfile).not.toHaveBeenCalled();
+    expect(getDropHiddenOverride("viewer-1", "drop-1")).toBe(true);
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(mockSetToast).toHaveBeenCalledWith({
       message: "Report submitted.",
@@ -164,7 +180,9 @@ describe("ReportDropModal", () => {
     const { onClose } = renderModal();
 
     await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
-    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Apply actions" })
+    );
 
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBe(true);
     await waitFor(() => expect(hideDrop).toHaveBeenCalledWith("drop-1"));
@@ -197,7 +215,9 @@ describe("ReportDropModal", () => {
     );
 
     await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
-    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Apply actions" })
+    );
 
     expect(
       screen.getByTestId("content-moderation-tombstone-hidden")
@@ -226,7 +246,9 @@ describe("ReportDropModal", () => {
     );
 
     await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
-    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Apply actions" })
+    );
 
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(
@@ -249,8 +271,9 @@ describe("ReportDropModal", () => {
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Report post" })
     );
-    await userEvent.click(screen.getByRole("checkbox", { name: "Hide post" }));
-    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Report and hide" })
+    );
 
     await waitFor(() =>
       expect(reportDrop).toHaveBeenCalledWith("drop-1", {
@@ -286,7 +309,9 @@ describe("ReportDropModal", () => {
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Block author" })
     );
-    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Apply actions" })
+    );
 
     await waitFor(() =>
       expect(
@@ -314,7 +339,9 @@ describe("ReportDropModal", () => {
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Block author" })
     );
-    await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Apply actions" })
+    );
 
     await waitFor(() =>
       expect(mockSetToast).toHaveBeenCalledWith(
@@ -336,6 +363,41 @@ describe("ReportDropModal", () => {
   it("requires at least one selected action", async () => {
     renderModal();
 
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Apply actions" })
+    ).toBeDisabled();
+  });
+
+  it("withdraws an open report without unhiding the post", async () => {
+    const drop = createDrop("drop-1");
+    drop.viewer_context = {
+      author_blocked: false,
+      drop_hidden: true,
+      report_status: "OPEN",
+    };
+    renderModal({ drop });
+
+    expect(screen.getByText("Reported · Awaiting review")).toBeInTheDocument();
+    expect(
+      screen.getByRole("checkbox", { name: "Report post" })
+    ).toBeDisabled();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Withdraw report" })
+    );
+    expect(
+      screen.getByText("Withdraw this report? The post will stay hidden.")
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Withdraw report" })
+    );
+
+    await waitFor(() =>
+      expect(withdrawDropReport).toHaveBeenCalledWith("drop-1")
+    );
+    expect(unhideDrop).not.toHaveBeenCalled();
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: "Report withdrawn.",
+      type: "success",
+    });
   });
 });

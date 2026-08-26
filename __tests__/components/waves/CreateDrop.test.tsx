@@ -97,7 +97,9 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
             title: null,
             parts: [
               {
-                content: props.isDropMode ? "Participation drop" : "Chat message",
+                content: props.isDropMode
+                  ? "Participation drop"
+                  : "Chat message",
                 media: [],
                 quoted_drop: null,
               },
@@ -131,7 +133,7 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
             ],
           },
           dropId: "temp-rejected-drop",
-        } as DropMutationBody)
+        } as unknown as DropMutationBody)
       }
     >
       submit optimistic drop

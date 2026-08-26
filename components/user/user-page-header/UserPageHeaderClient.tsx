@@ -405,11 +405,9 @@ export default function UserPageHeaderClient({
                           profileBlockState.isBlocking
                         }
                         showFollowButton
-                        showMuteButton={!profileBlockState.isBlocked}
+                        showMuteButton={false}
                         unblockPending={profileBlockState.isUnblocking}
-                        onUnblock={() =>
-                          setProfileBlockConfirmation("unblock")
-                        }
+                        onUnblock={() => setProfileBlockConfirmation("unblock")}
                         onDirectMessage={
                           profile.primary_wallet
                             ? () =>
@@ -425,6 +423,7 @@ export default function UserPageHeaderClient({
                     profileBlockState.canManage &&
                     !profileBlockState.isBlocked ? (
                       <ProfileBlockActionMenu
+                        handle={followHandle}
                         disabled={
                           profileBlockState.isLoading ||
                           profileBlockState.isBlocking

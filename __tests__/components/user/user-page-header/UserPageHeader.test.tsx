@@ -1,5 +1,11 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
@@ -50,9 +56,12 @@ jest.mock(
   "@/components/user/user-page-header/ProfileBlockActionMenu",
   () =>
     ({ onBlock }: { readonly onBlock: () => void }) => (
-      <button type="button" onClick={onBlock}>
-        Block profile
-      </button>
+      <div data-testid="profile-actions-menu">
+        <button type="button">Mute notifications</button>
+        <button type="button" onClick={onBlock}>
+          Block profile
+        </button>
+      </div>
     )
 );
 jest.mock(
@@ -302,6 +311,14 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
+    expect(
+      within(screen.getByTestId("profile-actions")).queryByRole("button", {
+        name: "Mute",
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Mute notifications" })
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Block profile" }));
     const dialog = screen.getByRole("dialog", { name: "Block @bob?" });
     expect(dialog).toHaveTextContent(

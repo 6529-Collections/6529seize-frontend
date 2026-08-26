@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiContentModerationDropDecisionRequest {
     'decision': ApiContentModerationDropDecisionRequestDecisionEnum;
-    'reason': string;
+    'reason'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
