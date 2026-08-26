@@ -1,7 +1,6 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet } from "viem/chains";
 import { coinbaseWallet } from "wagmi/connectors";
-import { publicEnv } from "@/config/env";
 import { CW_PROJECT_ID } from "@/constants/constants";
 import {
   AdapterCacheError,
@@ -13,7 +12,6 @@ import {
   WalletValidationError,
 } from "@/errors/wallet-validation";
 import { validateWalletSafely } from "@/utils/wallet-validation.utils";
-import { createCapacitorCoinbaseMobileUiConstructor } from "@/utils/coinbase-capacitor-wallet-link.utils";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import type { AppWallet } from "../app-wallets/AppWalletsContext";
 import type { Chain } from "viem";
@@ -317,20 +315,12 @@ export class AppKitAdapterManager {
   }
 
   private buildCoinbaseV3MobileWallet(): CreateConnectorFn {
-    const configuredAppScheme = publicEnv.MOBILE_APP_SCHEME?.trim();
-    const appScheme =
-      configuredAppScheme !== undefined && configuredAppScheme.length > 0
-        ? configuredAppScheme
-        : "mobile6529";
-
     return coinbaseWallet({
       appName: "6529.io",
       appLogoUrl:
         "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
       enableMobileWalletLink: true,
       version: "3",
-      chainId: mainnet.id,
-      uiConstructor: createCapacitorCoinbaseMobileUiConstructor(appScheme),
     });
   }
 
