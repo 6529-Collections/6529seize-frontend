@@ -4,10 +4,12 @@ import { useAuth } from "@/components/auth/Auth";
 import { fetchContentModeratorAccess } from "@/services/api/content-moderation-api";
 import { useQuery } from "@tanstack/react-query";
 
-const CONTENT_MODERATOR_ACCESS_QUERY_KEY = [
+export const CONTENT_MODERATOR_ACCESS_QUERY_KEY = [
   "content-moderation",
   "moderator-access",
 ] as const;
+
+const MODERATOR_ACCESS_REFRESH_INTERVAL_MS = 60_000;
 
 export const useContentModeratorAccess = () => {
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -19,6 +21,11 @@ export const useContentModeratorAccess = () => {
     queryFn: fetchContentModeratorAccess,
     enabled: Boolean(connectedProfile?.id) && activeProfileProxy === null,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: (query) =>
+      query.state.data?.moderator === true
+        ? MODERATOR_ACCESS_REFRESH_INTERVAL_MS
+        : false,
+    refetchIntervalInBackground: false,
     retry: false,
   });
 };

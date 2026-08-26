@@ -52,6 +52,31 @@ describe("AppSidebarMenuItems", () => {
     expect(onNavigate).toHaveBeenCalled();
   });
 
+  it("announces and renders a top-level indicator", () => {
+    (useCtx as jest.Mock).mockReturnValue({ address: undefined });
+    (useId as jest.Mock).mockReturnValue({ profile: null });
+    const menu: MenuItem[] = [
+      {
+        label: "WatchTower",
+        path: "/content-moderation",
+        icon: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
+        hasIndicator: true,
+        indicatorLabel: "Open reports need review",
+      },
+    ];
+
+    const { container } = render(
+      <AppSidebarMenuItems menu={menu} onNavigate={jest.fn()} />
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "WatchTower: Open reports need review",
+      })
+    ).toHaveAttribute("href", "/content-moderation");
+    expect(container.querySelector(".tw-bg-red")).toBeInTheDocument();
+  });
+
   it("renders nested section children after group disclosure", async () => {
     (useCtx as jest.Mock).mockReturnValue({ address: "0xABC" });
     (useId as jest.Mock).mockReturnValue({ profile: { handle: "Alice" } });

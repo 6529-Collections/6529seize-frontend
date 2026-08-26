@@ -14,7 +14,8 @@
         "block an author",
         "unblock a profile",
         "content preferences",
-        "moderation queue"
+        "moderation queue",
+        "WatchTower"
       ],
       "keywords": [
         "content moderation",
@@ -41,7 +42,9 @@
         "Group direct messages and shared Waves remain usable and are not muted as a whole. Blocked-author posts stay hidden and do not create ordinary notifications, push notifications, or direct-message unread counts for the blocker; other members behave normally.",
         "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
         "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
-        "Only server-authorized moderators see and can use the Moderation queue at /content-moderation, and every decision requires a reason."
+        "Only server-authorized moderators see and can use WatchTower at /content-moderation, and every decision requires a reason.",
+        "WatchTower shows a red navigation indicator while open reports need review and refreshes that lightweight state periodically while the app is active.",
+        "Someone who opens /content-moderation without moderator access sees a countdown and is redirected home; a failed access check shows an error instead of being treated as a denial."
       ],
       "canonical_path": "/preferences",
       "link_label": "Preferences",

@@ -1,12 +1,16 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import ContentModerationNoAccess from "@/components/content-moderation/ContentModerationNoAccess";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 import { ApiContentModerationDropDecisionRequestDecisionEnum } from "@/generated/models/ApiContentModerationDropDecisionRequest";
 import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
+import {
+  CONTENT_MODERATOR_ACCESS_QUERY_KEY,
+  useContentModeratorAccess,
+} from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -181,6 +185,9 @@ function ModerationQueueCard({
       void queryClient.invalidateQueries({
         queryKey: MODERATION_QUEUE_QUERY_KEY,
       });
+      void queryClient.invalidateQueries({
+        queryKey: CONTENT_MODERATOR_ACCESS_QUERY_KEY,
+      });
       void invalidateContentModerationPresentation(queryClient);
       setToast({
         message: t(locale, "contentModeration.moderator.decisionSuccess"),
@@ -207,6 +214,9 @@ function ModerationQueueCard({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: MODERATION_QUEUE_QUERY_KEY,
+      });
+      void queryClient.invalidateQueries({
+        queryKey: CONTENT_MODERATOR_ACCESS_QUERY_KEY,
       });
       void invalidateContentModerationPresentation(queryClient);
       setToast({
@@ -540,7 +550,7 @@ export default function ContentModerationPageClient() {
   );
 
   return (
-    <main className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-4xl tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
+    <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
       <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
         {t(locale, "contentModeration.moderator.title")}
       </h1>
@@ -555,12 +565,7 @@ export default function ContentModerationPageClient() {
           </output>
         )}
       {(!hasModeratorIdentity || (accessQuery.isSuccess && !canModerate)) && (
-        <p
-          role="alert"
-          className="tw-mb-0 tw-mt-8 tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-300"
-        >
-          {t(locale, "contentModeration.moderator.accessDenied")}
-        </p>
+        <ContentModerationNoAccess locale={locale} />
       )}
       {(accessQuery.isError || queueQuery.isError) && (
         <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">

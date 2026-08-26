@@ -19,8 +19,8 @@ being objectionable.
   the final **Flag Content** entry.
 - Open `/preferences?tab=content` to manage blocked profiles. The older
   `/content-preferences` path redirects to this tab.
-- Authorized moderators can open `/content-moderation` from the app navigation
-  or profile menu.
+- Authorized moderators can open **WatchTower** at `/content-moderation` from
+  the app navigation or profile menu.
 
 The unified `/preferences` page contains Notification, Messages, and Content
 tabs and fills the available page height. Preferences are saved to a profile.
@@ -167,10 +167,12 @@ A high-confidence urgent report assessment may temporarily quarantine a post.
 Other assessments remain in the occasional moderator queue without changing
 the post's global visibility.
 
-Authorized moderators can review open reports at `/content-moderation`. Each
-queue item includes the reported content and context, author, report details,
-AI recommendation and evidence, current state, and audit history. Every allow,
-quarantine, removal, suspension, or reinstatement requires a written reason.
+Authorized moderators can review open reports in **WatchTower** at
+`/content-moderation`. The full-width queue fills the available page height.
+Each queue item includes the reported content and context, author, report
+details, AI recommendation and evidence, current state, and audit history.
+Every allow, quarantine, removal, suspension, or reinstatement requires a
+written reason.
 
 Globally quarantined or moderator-removed posts are replaced by a redacted
 tombstone across primary Wave views, replies, quotes, leaderboards, and related
@@ -178,9 +180,14 @@ notification data. Ordinary viewers cannot Reveal globally moderated content.
 The author can still see their own globally moderated post and its moderation
 state.
 
-The moderator link is shown only to profiles whose server-provided access state
-allows it. The backend checks every moderator request; hiding the link is not
-the authorization boundary.
+The WatchTower link is shown only to profiles whose server-provided access
+state allows it. A red indicator appears while the queue contains open reports;
+the client refreshes this lightweight state periodically while active, without
+a WebSocket. The backend checks every moderator request; hiding the link is not
+the authorization boundary. A user who opens `/content-moderation` without
+access sees the no-access countdown and is redirected home. A failed access
+request shows an error instead of incorrectly treating the user as
+unauthorized.
 
 ## Common scenarios
 

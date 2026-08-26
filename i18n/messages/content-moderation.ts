@@ -73,20 +73,21 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.openProfile": "Open {profile}'s profile",
   "contentModeration.preferences.signIn":
     "Connect an authenticated profile to manage content preferences.",
-  "contentModeration.moderator.menu": "Moderation queue",
-  "contentModeration.moderator.metaTitle": "Content moderation",
+  "contentModeration.moderator.menu": "WatchTower",
+  "contentModeration.moderator.metaTitle": "WatchTower",
   "contentModeration.moderator.metaDescription": "Review reported content.",
-  "contentModeration.moderator.title": "Content moderation",
+  "contentModeration.moderator.title": "WatchTower",
   "contentModeration.moderator.description":
     "Review reported posts and record a reason for every decision.",
   "contentModeration.moderator.loading": "Loading reports…",
   "contentModeration.moderator.loadingMore": "Loading more…",
   "contentModeration.moderator.loadMore": "Load more",
   "contentModeration.moderator.empty": "There are no open reports.",
-  "contentModeration.moderator.accessDenied":
-    "You don't have access to content moderation.",
-  "contentModeration.moderator.loadError":
-    "Couldn't load the moderation queue.",
+  "contentModeration.moderator.noPower": "You have no power here",
+  "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
+  "contentModeration.moderator.openReportsIndicator":
+    "Open reports need review",
+  "contentModeration.moderator.loadError": "Couldn't load WatchTower.",
   "contentModeration.moderator.reason": "Decision reason",
   "contentModeration.moderator.reasonPlaceholder":
     "Explain why this decision is appropriate.",

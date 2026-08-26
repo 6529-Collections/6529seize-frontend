@@ -16062,8 +16062,11 @@ components:
       type: object
       required:
         - moderator
+        - has_open_reports
       properties:
         moderator:
+          type: boolean
+        has_open_reports:
           type: boolean
     ApiCreateAttachmentMultipartUploadRequest:
       type: object

@@ -15,6 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiContentModeratorAccess {
     'moderator': boolean;
+    'has_open_reports': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,6 +25,12 @@ export class ApiContentModeratorAccess {
         {
             "name": "moderator",
             "baseName": "moderator",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "has_open_reports",
+            "baseName": "has_open_reports",
             "type": "boolean",
             "format": ""
         }    ];

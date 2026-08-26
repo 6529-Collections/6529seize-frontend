@@ -18,7 +18,7 @@ jest.mock("@/components/auth/Auth", () => ({
 
 jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
   useContentModeratorAccess: () => ({
-    data: { moderator: true },
+    data: { moderator: true, has_open_reports: true },
     isError: false,
     isLoading: false,
     isSuccess: true,
@@ -78,13 +78,16 @@ describe("ContentModerationPageClient pagination", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    render(
+    const { container } = render(
       <QueryClientProvider client={queryClient}>
         <ContentModerationPageClient />
       </QueryClientProvider>
     );
 
     expect(await screen.findByText("content-1")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "WatchTower" })).toBeVisible();
+    expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
+    expect(container.querySelector("main")).not.toHaveClass("tw-max-w-4xl");
     expect(screen.getByRole("link", { name: "author1" })).toHaveAttribute(
       "href",
       "/author1"
