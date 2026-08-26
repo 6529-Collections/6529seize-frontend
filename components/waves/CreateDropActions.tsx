@@ -488,7 +488,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             <FontAwesomeIcon
                               icon={faPlus}
                               aria-hidden="true"
-                              className={`tw-size-5 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out lg:tw-size-4 ${
+                              className={`tw-size-4 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out ${
                                 isUploadPickerOpen
                                   ? "tw-rotate-45"
                                   : "tw-rotate-0"
