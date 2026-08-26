@@ -1,4 +1,4 @@
-import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { DropMutationBody } from "./drop-submission.types";
 import type { useAuth } from "@/components/auth/Auth";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";

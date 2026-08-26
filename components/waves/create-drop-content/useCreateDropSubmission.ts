@@ -2,7 +2,7 @@
 
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
-import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { DropMutationBody } from "./drop-submission.types";
 import type { CreateDropInputHandles } from "@/components/waves/CreateDropInput";
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
 import { getMissingRequirements } from "@/components/waves/utils/getMissingRequirements";

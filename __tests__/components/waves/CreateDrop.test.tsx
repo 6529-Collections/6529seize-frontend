@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
 import CreateDrop from "@/components/waves/CreateDrop";
 import { AuthContext } from "@/components/auth/Auth";
 import {
@@ -78,7 +78,7 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
             ],
           },
           dropId: null,
-        } as DropMutationBody)
+        } as unknown as DropMutationBody)
       }
     >
       submit current mode

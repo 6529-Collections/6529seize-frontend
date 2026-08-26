@@ -42,6 +42,12 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
 import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
+import type {
+  DropMutationBody,
+  QueuedDropMutationBody,
+  SlowModeChatReservation,
+  SlowModeChatWaveState,
+} from "./create-drop-content/drop-submission.types";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -76,29 +82,6 @@ interface CreateDropProps {
   readonly focusOnInitialActiveDrop?: boolean | undefined;
   readonly initialMarkdown?: string | null | undefined;
   readonly initialMarkdownKey?: string | null | undefined;
-}
-
-export interface DropMutationBody {
-  readonly drop: ApiCreateDropRequest;
-  readonly dropId: string | null;
-  readonly onSuccess?: (() => void) | undefined;
-  readonly onError?: ((error: unknown) => boolean | void) | undefined;
-}
-
-interface SlowModeChatReservation {
-  readonly id: number;
-  readonly waveId: string;
-  readonly cooldownMs: number;
-}
-
-interface QueuedDropMutationBody extends DropMutationBody {
-  readonly slowModeChatReservation?: SlowModeChatReservation | undefined;
-}
-
-interface SlowModeChatWaveState {
-  pendingReservationId: number | null;
-  cooldownUntil: number | null;
-  cooldownMs: number | null;
 }
 
 const isTypedChatMessage = (drop: ApiCreateDropRequest): boolean =>
