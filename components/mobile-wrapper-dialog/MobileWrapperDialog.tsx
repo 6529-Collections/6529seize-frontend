@@ -1,4 +1,6 @@
 import useCapacitor from "@/hooks/useCapacitor";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -8,30 +10,12 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import clsx from "clsx";
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import type {
-  CSSProperties,
-  HTMLAttributes,
-  ReactNode,
-  TouchEvent,
-} from "react";
+import { Fragment, useEffect, useRef } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
+import { useMobileDialogDrag } from "./useMobileDialogDrag";
 
-const DISMISS_DRAG_DISTANCE_PX = 44;
-const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
-const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
-const DISMISS_DRAG_SETTLE_MS = 150;
-const DRAG_START_REGION_PX = 112;
-const MAX_DRAG_OFFSET_PX = 260;
-const TABLET_MODAL_DESKTOP_QUERY = "(min-width: 768px)";
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
@@ -44,6 +28,7 @@ const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
 
 type MobileWrapperDialogProps = {
   readonly title?: string | undefined;
+  readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onBack?: (() => void) | undefined;
@@ -73,23 +58,11 @@ type MobileWrapperDialogProps = {
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly focusTitleOnOpen?: boolean | undefined;
   readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
-};
-
-type DragTouchHandlers = Pick<
-  HTMLAttributes<HTMLDivElement>,
-  "onTouchStart" | "onTouchMove" | "onTouchEnd" | "onTouchCancel"
->;
-
-type MobileDialogDragOptions = {
-  readonly dismissible: boolean;
-  readonly showDragHandle?: boolean | undefined;
-  readonly enableDragToClose?: boolean | undefined;
-  readonly tabletModal?: boolean | undefined;
-  readonly onClose: () => void;
-  readonly onAfterLeave?: (() => void) | undefined;
+  readonly hideOnDesktopHover?: boolean | undefined;
 };
 
 function getSlideTransition(tabletModal?: boolean) {
@@ -216,7 +189,7 @@ function getSurfaceClassNames({
   readonly tabletModal?: boolean | undefined;
 }) {
   return clsx(
-    "tw-flex tw-flex-col tw-rounded-t-xl",
+    "tw-flex tw-flex-col tw-rounded-t-2xl",
     surfaceClassName ?? "tw-bg-iron-950",
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-surface tw-overflow-visible"
@@ -229,17 +202,30 @@ function getContentClassNames({
   allowOverflow,
   noPadding,
   showScrollbar,
+  hasDragHandle,
+  tabletModal,
 }: {
   readonly allowOverflow?: boolean | undefined;
   readonly noPadding?: boolean | undefined;
   readonly showScrollbar?: boolean | undefined;
+  readonly hasDragHandle: boolean;
+  readonly tabletModal?: boolean | undefined;
 }) {
+  let paddingClassName = "tw-py-0";
+  if (!noPadding) {
+    paddingClassName = clsx(
+      "tw-pb-6",
+      hasDragHandle ? "tw-pt-0" : "tw-pt-4",
+      hasDragHandle && tabletModal && "md:tw-pt-4"
+    );
+  }
+
   return clsx(
     "tw-flex tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-flex-col",
     allowOverflow
       ? "mobile-wrapper-dialog-overflow-content tw-overflow-visible"
       : "tw-overflow-y-auto",
-    noPadding ? "tw-py-0" : "tw-pb-6 tw-pt-4",
+    paddingClassName,
     showScrollbar &&
       !allowOverflow &&
       "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
@@ -288,12 +274,14 @@ function getSurfaceStyle({
 
 function FloatingCloseButton({
   show,
+  hideOnMobile,
   tabletModal,
   onClose,
   mobileCloseButtonClassName,
   closeLabel,
 }: {
   readonly show: boolean;
+  readonly hideOnMobile: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly mobileCloseButtonClassName?: string | undefined;
@@ -315,7 +303,9 @@ function FloatingCloseButton({
     >
       <div
         className={clsx(
-          "tw-absolute -tw-top-16 tw-right-0 tw-flex tw-pr-2 tw-pt-4 md:tw-pr-0",
+          "tw-absolute -tw-top-16 tw-right-0 tw-pr-2 tw-pt-4 md:tw-pr-0",
+          hideOnMobile ? "tw-hidden" : "tw-flex",
+          hideOnMobile && !tabletModal && "md:tw-flex",
           tabletModal && "md:tw-hidden"
         )}
       >
@@ -346,7 +336,7 @@ function DragHandle({
     <div
       aria-hidden="true"
       className={clsx(
-        "tw-flex tw-justify-center tw-pt-3",
+        "tw-flex tw-justify-center tw-py-2",
         tabletModal && "md:tw-hidden"
       )}
     >
@@ -355,258 +345,9 @@ function DragHandle({
   );
 }
 
-function getDragTouchHandlers({
-  canDragToClose,
-  handleDragStart,
-  handleDragMove,
-  handleDragEnd,
-  resetDrag,
-}: {
-  readonly canDragToClose: boolean;
-  readonly handleDragStart: (event: TouchEvent<HTMLDivElement>) => void;
-  readonly handleDragMove: (event: TouchEvent<HTMLDivElement>) => void;
-  readonly handleDragEnd: () => void;
-  readonly resetDrag: () => void;
-}): DragTouchHandlers {
-  if (!canDragToClose) {
-    return { onTouchCancel: resetDrag };
-  }
-
-  return {
-    onTouchStart: handleDragStart,
-    onTouchMove: handleDragMove,
-    onTouchEnd: handleDragEnd,
-    onTouchCancel: resetDrag,
-  };
-}
-
-function startsInDragRegion(event: TouchEvent<HTMLDivElement>): boolean {
-  const touch = event.touches[0];
-  if (!touch) {
-    return false;
-  }
-
-  return (
-    touch.clientY - event.currentTarget.getBoundingClientRect().top <=
-    DRAG_START_REGION_PX
-  );
-}
-
-function shouldDismissDrag(releasedOffset: number, startedAt: number): boolean {
-  const elapsed = Math.max(performance.now() - startedAt, 1);
-  const velocity = releasedOffset / elapsed;
-
-  return (
-    releasedOffset >= DISMISS_DRAG_DISTANCE_PX ||
-    (releasedOffset >= DISMISS_DRAG_FLICK_DISTANCE_PX &&
-      velocity >= DISMISS_DRAG_FLICK_VELOCITY_PX_MS)
-  );
-}
-
-function isCenteredTabletModal(tabletModal?: boolean): boolean {
-  return (
-    !!tabletModal &&
-    typeof globalThis.matchMedia === "function" &&
-    globalThis.matchMedia(TABLET_MODAL_DESKTOP_QUERY).matches
-  );
-}
-
-function getDismissDragOffset(): number {
-  return Math.max(
-    globalThis.visualViewport?.height ?? 0,
-    globalThis.innerHeight ?? 0,
-    MAX_DRAG_OFFSET_PX
-  );
-}
-
-function useMobileDialogDrag({
-  dismissible,
-  showDragHandle,
-  enableDragToClose,
-  tabletModal,
-  onClose,
-  onAfterLeave,
-}: MobileDialogDragOptions) {
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartYRef = useRef<number | null>(null);
-  const dragStartedAtRef = useRef(0);
-  const dragOffsetRef = useRef(0);
-  const dragFrameRef = useRef<number | null>(null);
-  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleClose = useCallback(() => {
-    if (dismissible) {
-      onClose();
-    }
-  }, [dismissible, onClose]);
-
-  const canDragToClose = dismissible && (enableDragToClose ?? !!showDragHandle);
-
-  const cancelScheduledDragFrame = useCallback(() => {
-    if (dragFrameRef.current === null) {
-      return;
-    }
-
-    if (typeof globalThis.cancelAnimationFrame === "function") {
-      globalThis.cancelAnimationFrame(dragFrameRef.current);
-    }
-
-    dragFrameRef.current = null;
-  }, []);
-
-  const cancelScheduledDismiss = useCallback(() => {
-    if (dismissTimerRef.current === null) {
-      return;
-    }
-
-    globalThis.clearTimeout(dismissTimerRef.current);
-    dismissTimerRef.current = null;
-  }, []);
-
-  const scheduleDragOffsetUpdate = useCallback(() => {
-    if (typeof globalThis.requestAnimationFrame !== "function") {
-      setDragOffset(dragOffsetRef.current);
-      return;
-    }
-
-    if (dragFrameRef.current !== null) {
-      return;
-    }
-
-    dragFrameRef.current = globalThis.requestAnimationFrame(() => {
-      dragFrameRef.current = null;
-      setDragOffset(dragOffsetRef.current);
-    });
-  }, []);
-
-  const setClampedDragOffset = useCallback(
-    (offset: number) => {
-      const clampedOffset = Math.min(Math.max(offset, 0), MAX_DRAG_OFFSET_PX);
-      if (dragOffsetRef.current === clampedOffset) {
-        return;
-      }
-
-      dragOffsetRef.current = clampedOffset;
-      scheduleDragOffsetUpdate();
-    },
-    [scheduleDragOffsetUpdate]
-  );
-
-  const resetDrag = useCallback(() => {
-    cancelScheduledDragFrame();
-    cancelScheduledDismiss();
-    dragStartYRef.current = null;
-    dragStartedAtRef.current = 0;
-    dragOffsetRef.current = 0;
-    setIsDragging(false);
-    setDragOffset(0);
-  }, [cancelScheduledDismiss, cancelScheduledDragFrame]);
-
-  useEffect(
-    () => () => {
-      cancelScheduledDragFrame();
-      cancelScheduledDismiss();
-    },
-    [cancelScheduledDismiss, cancelScheduledDragFrame]
-  );
-
-  const handleDragStart = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      const touch = event.touches[0];
-      if (
-        !touch ||
-        !canDragToClose ||
-        isCenteredTabletModal(tabletModal) ||
-        !startsInDragRegion(event)
-      ) {
-        return;
-      }
-
-      dragStartYRef.current = touch.clientY;
-      dragStartedAtRef.current = performance.now();
-      setIsDragging(true);
-      setClampedDragOffset(0);
-    },
-    [canDragToClose, setClampedDragOffset, tabletModal]
-  );
-
-  const handleDragMove = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      const touch = event.touches[0];
-      if (!touch || !canDragToClose || dragStartYRef.current === null) {
-        return;
-      }
-
-      const nextOffset = touch.clientY - dragStartYRef.current;
-      if (nextOffset <= 0) {
-        setClampedDragOffset(0);
-        return;
-      }
-
-      event.preventDefault();
-      setClampedDragOffset(nextOffset);
-    },
-    [canDragToClose, setClampedDragOffset]
-  );
-
-  const handleDragEnd = useCallback(() => {
-    if (!canDragToClose || dragStartYRef.current === null) {
-      resetDrag();
-      return;
-    }
-
-    const releasedOffset = dragOffsetRef.current;
-    const startedAt = dragStartedAtRef.current;
-    dragStartYRef.current = null;
-    dragStartedAtRef.current = 0;
-    cancelScheduledDragFrame();
-
-    if (shouldDismissDrag(releasedOffset, startedAt)) {
-      dragOffsetRef.current = getDismissDragOffset();
-      setIsDragging(false);
-      setDragOffset(dragOffsetRef.current);
-      dismissTimerRef.current = globalThis.setTimeout(() => {
-        dismissTimerRef.current = null;
-        handleClose();
-      }, DISMISS_DRAG_SETTLE_MS);
-      return;
-    }
-
-    dragOffsetRef.current = 0;
-    setIsDragging(false);
-    setDragOffset(0);
-  }, [canDragToClose, cancelScheduledDragFrame, handleClose, resetDrag]);
-
-  const handleAfterLeave = useCallback(() => {
-    resetDrag();
-    onAfterLeave?.();
-  }, [onAfterLeave, resetDrag]);
-
-  const dragTouchHandlers = useMemo(
-    () =>
-      getDragTouchHandlers({
-        canDragToClose,
-        handleDragStart,
-        handleDragMove,
-        handleDragEnd,
-        resetDrag,
-      }),
-    [canDragToClose, handleDragStart, handleDragMove, handleDragEnd, resetDrag]
-  );
-
-  return {
-    canDragToClose,
-    dragOffset,
-    dragTouchHandlers,
-    handleAfterLeave,
-    handleClose,
-    isDragging,
-  };
-}
-
 export default function MobileWrapperDialog({
   title,
+  ariaLabel,
   isOpen,
   onClose,
   onBack,
@@ -632,12 +373,17 @@ export default function MobileWrapperDialog({
   headerCloseButtonClassName,
   surfaceClassName,
   titleClassName,
+  focusTitleOnOpen = false,
   backLabel,
   closeLabel,
   dismissible = true,
+  hideOnDesktopHover = false,
 }: MobileWrapperDialogProps) {
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const isTouchDevice = useIsTouchDevice();
+  const titleRef = useRef<HTMLElement>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const {
@@ -668,6 +414,7 @@ export default function MobileWrapperDialog({
     maxWidthClass,
   });
   const dragPanelClassNames = getDragPanelClassNames(canDragToClose);
+  const hasDragHandle = showDragHandle ?? canDragToClose;
   const containerClassNames = getContainerClassNames(tabletModal);
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
@@ -684,6 +431,8 @@ export default function MobileWrapperDialog({
     allowOverflow,
     noPadding,
     showScrollbar,
+    hasDragHandle,
+    tabletModal,
   });
   const surfaceStyle = getSurfaceStyle({
     dialogHeight,
@@ -693,6 +442,25 @@ export default function MobileWrapperDialog({
     dismissible && !!tabletModal && !showHeaderCloseButton;
   const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
+  const hideMobileCloseButton = canDragToClose;
+  const shouldHideOnDesktopHover =
+    hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
+
+  useEffect(() => {
+    if (!isOpen || !focusTitleOnOpen) {
+      return;
+    }
+
+    const frame = globalThis.requestAnimationFrame(() => {
+      titleRef.current?.focus({ preventScroll: true });
+    });
+
+    return () => globalThis.cancelAnimationFrame(frame);
+  }, [focusTitleOnOpen, isOpen, title]);
+
+  if (shouldHideOnDesktopHover) {
+    return null;
+  }
 
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
@@ -700,6 +468,8 @@ export default function MobileWrapperDialog({
         as="div"
         className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
+        aria-label={ariaLabel}
+        {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
       >
         <MobileDialogOverlay
           onBeforeLeave={onBeforeLeave}
@@ -731,6 +501,7 @@ export default function MobileWrapperDialog({
                   >
                     <FloatingCloseButton
                       show={showFloatingCloseButton}
+                      hideOnMobile={hideMobileCloseButton}
                       tabletModal={tabletModal}
                       onClose={handleClose}
                       mobileCloseButtonClassName={mobileCloseButtonClassName}
@@ -742,7 +513,7 @@ export default function MobileWrapperDialog({
                         style={{ paddingBottom: bottomPadding }}
                       >
                         <DragHandle
-                          show={showDragHandle}
+                          show={hasDragHandle}
                           tabletModal={tabletModal}
                         />
                         <MobileWrapperDialogHeader
@@ -756,9 +527,14 @@ export default function MobileWrapperDialog({
                           showHeaderCloseButton={showInlineHeaderCloseButton}
                           showHeaderDivider={showHeaderDivider}
                           headerCloseButtonClassName={
-                            headerCloseButtonClassName
+                            clsx(
+                              hideMobileCloseButton &&
+                                "!tw-hidden md:!tw-inline-flex",
+                              headerCloseButtonClassName
+                            )
                           }
                           titleClassName={titleClassName}
+                          titleRef={titleRef}
                           backLabel={resolvedBackLabel}
                           closeLabel={resolvedCloseLabel}
                         />

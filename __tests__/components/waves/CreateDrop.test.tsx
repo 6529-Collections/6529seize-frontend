@@ -133,7 +133,7 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
             ],
           },
           dropId: "temp-rejected-drop",
-        } as DropMutationBody)
+        } as unknown as DropMutationBody)
       }
     >
       submit optimistic drop
