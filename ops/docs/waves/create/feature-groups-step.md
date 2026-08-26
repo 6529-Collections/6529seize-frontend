@@ -54,6 +54,9 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 criteria` opens the criteria editor, where `Add identity` appears alongside
   the rule choices instead of as a separate row-level action. The identity
   search uses `Back to criteria` to return to those choices.
+- Inline identity search shows exact, prefix, and substring profile-handle
+  matches in that order before ENS-only matches, and orders each match group by
+  profile level, highest first.
 - Opening `Replace criteria` starts a pending replacement for that row. `Next`
   remains disabled until the user applies it with `Create and use new group`,
   abandons it with `Discard draft`, or selects a saved group with `Choose

@@ -73,6 +73,7 @@ export default function CreateWaveInlineGroupIdentities({
               inputClassName="tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
               iconClassName="tw-text-iron-500"
               resultsLayout={resultsLayout}
+              sort="level"
             />
           </div>
           {onCancel && (
