@@ -1,0 +1,282 @@
+import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restriction.helpers";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
+import CreateDropActions from "../CreateDropActions";
+import { CreateDropContentFiles } from "../CreateDropContentFiles";
+import CreateDropContentRequirements from "../CreateDropContentRequirements";
+import CreateDropInput from "../CreateDropInput";
+import CreateDropMetadata from "../CreateDropMetadata";
+import CreateDropPoll from "../CreateDropPoll";
+import CreateDropStormParts from "../CreateDropStormParts";
+import { CreateDropSubmit } from "../CreateDropSubmit";
+import SlowModeChatNotice from "../SlowModeChatNotice";
+import type { CreateDropLayoutProps } from "./CreateDropLayout";
+import { exportComposerMarkdown } from "./exportComposerMarkdown";
+
+interface CreateDropComposerProps extends CreateDropLayoutProps {
+  readonly initialDraftJson: string | null;
+  readonly locale: SupportedLocale;
+  readonly submitWithResolvedAliases: () => Promise<void>;
+}
+
+export default function CreateDropComposer({
+  activeDrop,
+  submitting,
+  wave,
+  isDropMode,
+  isStormModeActive,
+  setActionsContainerRef,
+  isLinksSubmitBlocked,
+  canAddPart,
+  isCompactLayout,
+  showOptions,
+  animateOptions,
+  missingRequirements,
+  canCreatePoll,
+  hasPoll,
+  handleFileChange,
+  openMetadata,
+  togglePoll,
+  breakIntoStorm,
+  editingPartIndex,
+  onCancelPartEdit,
+  onEditPart,
+  onMovePart,
+  onRemovePart,
+  onDiscardStorm,
+  handleSetShowOptions,
+  onGifDrop,
+  dropEditorRefreshKey,
+  createDropInputRef,
+  editorState,
+  canMentionAll,
+  canSubmit,
+  handleEditorStateChange,
+  handleEditorBlur,
+  onReferencedNft,
+  onMentionedUser,
+  onMentionedWave,
+  canEditLastDropWithArrow,
+  handleRequestEditLastDrop,
+  initialMarkdown,
+  initialMarkdownKey,
+  pollDraft,
+  pollValidationError,
+  updatePollDraft,
+  removePoll,
+  showCurationDropModeWarning,
+  canSubmitCurationUrl,
+  curationUrlSubmitRestrictionMessage,
+  onSwitchToDropMode,
+  isMetadataOpen,
+  metadata,
+  metadataErrorById,
+  onChangeKey,
+  onChangeValue,
+  onAddMetadata,
+  onRemoveMetadata,
+  closeMetadata,
+  drop,
+  files,
+  uploadingFiles,
+  removeFile,
+  initialDraftJson,
+  locale,
+  submitWithResolvedAliases,
+}: CreateDropComposerProps) {
+  const displayedStormPartNumber =
+    editingPartIndex === null
+      ? (drop?.parts.length ?? 0) + 1
+      : editingPartIndex + 1;
+  const currentPartMarkdown = editorState
+    ? exportComposerMarkdown(editorState)
+    : initialMarkdown;
+  const showStormHint =
+    (currentPartMarkdown?.trim().length ?? 0) === 0 && files.length === 0;
+  let submitLabel: string | undefined;
+  if (isStormModeActive) {
+    if (editingPartIndex !== null) {
+      submitLabel = t(locale, "waves.stormComposer.saveChanges");
+    } else if (canAddPart) {
+      submitLabel = t(locale, "waves.stormComposer.addPart");
+    } else {
+      submitLabel = t(locale, "waves.stormComposer.postStorm");
+    }
+  }
+
+  return (
+    <>
+      {isStormModeActive && (drop?.parts.length ?? 0) > 0 && (
+        <CreateDropStormParts
+          parts={drop?.parts ?? []}
+          mentionedUsers={drop?.mentioned_users ?? []}
+          mentionedGroups={drop?.mentioned_groups ?? []}
+          mentionedWaves={drop?.mentioned_waves ?? []}
+          referencedNfts={drop?.referenced_nfts ?? []}
+          editingPartIndex={editingPartIndex}
+          controlsDisabled={submitting}
+          canEditParts={!canAddPart && editingPartIndex === null}
+          onEditPart={onEditPart}
+          onCancelPartEdit={onCancelPartEdit}
+          onMovePart={onMovePart}
+          onRemovePart={onRemovePart}
+          onDiscardStorm={onDiscardStorm}
+        />
+      )}
+      <div
+        ref={setActionsContainerRef}
+        className="tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+      >
+        <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
+          <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
+          {isLinksSubmitBlocked && (
+            <p
+              className="tw-mb-2 tw-mt-0 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
+              aria-live="polite"
+            >
+              {CHAT_LINK_RESTRICTION_MESSAGE}
+            </p>
+          )}
+        </div>
+        <CreateDropActions
+          isStormMode={isStormModeActive}
+          isDropMode={isDropMode}
+          canAddPart={canAddPart}
+          showStormHint={showStormHint}
+          submitting={submitting}
+          isCompactLayout={isCompactLayout}
+          showOptions={showOptions}
+          animateOptions={animateOptions}
+          isRequiredMetadataMissing={!!missingRequirements.metadata.length}
+          isRequiredMediaMissing={!!missingRequirements.media.length}
+          canCreatePoll={canCreatePoll}
+          isPollActive={hasPoll}
+          handleFileChange={handleFileChange}
+          onAddMetadataClick={openMetadata}
+          onTogglePoll={togglePoll}
+          breakIntoStorm={breakIntoStorm}
+          setShowOptions={handleSetShowOptions}
+          onGifDrop={onGifDrop}
+        />
+        <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
+          <CreateDropInput
+            waveId={wave.id}
+            key={dropEditorRefreshKey}
+            ref={createDropInputRef}
+            editorState={editorState}
+            initialEditorStateJson={initialDraftJson}
+            type={activeDrop?.action ?? null}
+            submitting={submitting}
+            isStormMode={isStormModeActive}
+            stormPartNumber={displayedStormPartNumber}
+            isDropMode={isDropMode}
+            canMentionAll={canMentionAll}
+            canSubmit={canSubmit}
+            onEditorState={handleEditorStateChange}
+            onEditorBlur={handleEditorBlur}
+            onReferencedNft={onReferencedNft}
+            onMentionedUser={onMentionedUser}
+            onMentionedWave={onMentionedWave}
+            onAttachmentFiles={handleFileChange}
+            canEditLastDropWithArrow={canEditLastDropWithArrow}
+            onRequestEditLastDrop={handleRequestEditLastDrop}
+            initialMarkdown={initialMarkdown}
+            initialMarkdownKey={initialMarkdownKey}
+            onDrop={submitWithResolvedAliases}
+          />
+        </div>
+        <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
+          <CreateDropSubmit
+            submitting={submitting}
+            canSubmit={canSubmit}
+            onDrop={submitWithResolvedAliases}
+            isDropMode={isDropMode}
+            label={submitLabel}
+            showLabelOnMobile={isStormModeActive}
+            disabledTooltip={
+              isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
+            }
+          />
+        </div>
+        {(pollDraft || showCurationDropModeWarning) && (
+          <div
+            className={`tw-col-span-3 tw-col-start-1 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2 ${
+              isCompactLayout ? "tw-row-start-4" : "tw-row-start-3"
+            }`}
+          >
+            {pollDraft && (
+              <CreateDropPoll
+                draft={pollDraft}
+                disabled={submitting}
+                validationError={pollValidationError}
+                onChange={updatePollDraft}
+                onRemove={removePoll}
+              />
+            )}
+            {showCurationDropModeWarning && (
+              <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
+                This looks like a curation URL.{" "}
+                {canSubmitCurationUrl ? (
+                  <button
+                    type="button"
+                    className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
+                    onClick={onSwitchToDropMode}
+                  >
+                    Submit it as a drop
+                  </button>
+                ) : (
+                  <span>{curationUrlSubmitRestrictionMessage}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      {isDropMode && (
+        <CreateDropContentRequirements
+          canSubmit={canSubmit}
+          wave={wave}
+          missingMedia={missingRequirements.media}
+          missingMetadata={missingRequirements.metadata}
+          onOpenMetadata={openMetadata}
+          setFiles={handleFileChange}
+          disabled={submitting}
+        />
+      )}
+      <LazyMotion features={domAnimation}>
+        <AnimatePresence>
+          {isDropMode && isMetadataOpen && (
+            <m.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CreateDropMetadata
+                disabled={submitting}
+                onRemoveMetadata={onRemoveMetadata}
+                closeMetadata={closeMetadata}
+                metadata={metadata}
+                missingRequiredMetadataKeys={missingRequirements.metadata}
+                metadataErrorById={metadataErrorById}
+                onChangeKey={onChangeKey}
+                onChangeValue={onChangeValue}
+                onAddMetadata={onAddMetadata}
+              />
+            </m.div>
+          )}
+        </AnimatePresence>
+      </LazyMotion>
+      <CreateDropContentFiles
+        parts={drop?.parts ?? []}
+        files={files}
+        uploadingFiles={uploadingFiles}
+        removeFile={removeFile}
+        disabled={submitting}
+        showPartFiles={!isStormModeActive}
+        currentPartNumber={isStormModeActive ? displayedStormPartNumber : null}
+      />
+    </>
+  );
+}
