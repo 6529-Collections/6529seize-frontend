@@ -34,7 +34,7 @@ describe("WaveHeaderPictureEditModal", () => {
       name: "Update wave picture",
     });
     const panel = dialog.querySelector(".mobile-wrapper-dialog");
-    const surface = dialog.querySelector(".tw-rounded-t-xl");
+    const surface = dialog.querySelector(".tw-rounded-t-2xl");
 
     expect(dialog).toHaveClass("tw-z-[9999]");
     expect(panel?.parentElement).toHaveClass(
@@ -42,7 +42,7 @@ describe("WaveHeaderPictureEditModal", () => {
       "md:tw-w-full",
       "md:tw-max-w-xl"
     );
-    expect(surface).toHaveClass("tw-rounded-t-xl", "md:tw-rounded-xl");
+    expect(surface).toHaveClass("tw-rounded-t-2xl", "md:tw-rounded-xl");
     expect(
       screen.getByText("Choose a new image up to 10 MB.")
     ).toBeInTheDocument();

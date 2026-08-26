@@ -17,9 +17,11 @@ const mockIsMemesWave = jest.fn();
 const mockIsQuorumWave = jest.fn();
 const writeText = jest.fn().mockResolvedValue(undefined);
 const addReactionMock = jest.fn((props: any) => (
-  <div
+  <button
+    type="button"
     data-testid="add-reaction"
     data-dialog-z-index={props.dialogZIndexClassName}
+    onClick={props.onMobilePickerOpen}
   />
 ));
 const mobileWrapperMock = jest.fn((props: any) =>
@@ -64,7 +66,11 @@ jest.mock("@/components/waves/drops/WaveDropActionsQuickReact", () => () => (
   <div data-testid="quick-react" />
 ));
 jest.mock(
-  "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
+  "@/components/waves/drops/WaveDropMobileMenuReactionPicker",
+  () => () => <div data-testid="reaction-picker" />
+);
+jest.mock(
+  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () => ({
     __esModule: true,
     default: (props: any) => mobileWrapperMock(props),
@@ -706,7 +712,7 @@ test("shows only copy link in the mobile menu for guests", () => {
   expect(screen.queryByTestId("delete")).toBeNull();
 });
 
-test("uses single-drop layer overrides when provided by context", () => {
+test("uses the single-drop mobile menu layer override", () => {
   const drop = {
     id: "1",
     serial_no: 1,
@@ -747,13 +753,9 @@ test("uses single-drop layer overrides when provided by context", () => {
     "data-z-index",
     "tw-z-[1020]"
   );
-  expect(screen.getByTestId("add-reaction")).toHaveAttribute(
-    "data-dialog-z-index",
-    "tw-z-[1030]"
-  );
 });
 
-test("preserves default layer values when context overrides are undefined", () => {
+test("preserves the default mobile menu layer when its override is undefined", () => {
   const drop = {
     id: "1",
     serial_no: 1,
@@ -794,8 +796,37 @@ test("preserves default layer values when context overrides are undefined", () =
     "data-z-index",
     "tw-z-[1000]"
   );
-  expect(screen.getByTestId("add-reaction")).toHaveAttribute(
-    "data-dialog-z-index",
-    "tw-z-[1030]"
+});
+
+test("resets the reaction view when the underlying drop changes", async () => {
+  const user = userEvent.setup();
+  const renderMenu = (drop: ApiDrop) => (
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as AuthProviderValue
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
   );
+  const { rerender } = render(renderMenu(dropFixture));
+
+  await user.click(screen.getByTestId("add-reaction"));
+  expect(screen.getByTestId("reaction-picker")).toBeInTheDocument();
+
+  rerender(renderMenu({ ...dropFixture, id: "2" }));
+
+  expect(screen.queryByTestId("reaction-picker")).not.toBeInTheDocument();
+  expect(screen.getByTestId("add-reaction")).toBeInTheDocument();
 });
