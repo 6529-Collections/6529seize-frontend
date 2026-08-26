@@ -597,6 +597,17 @@ paths:
           required: false
           schema:
             type: string
+        - name: sort
+          in: query
+          description: >-
+            Optional search-result ordering. Level ranks exact, prefix, and
+            substring handle matches before ENS and auto-wallet matches, then
+            orders by raw profile level within each match bucket.
+          required: false
+          schema:
+            type: string
+            enum:
+              - level
       responses:
         "200":
           description: successful operation

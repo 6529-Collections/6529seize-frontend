@@ -38,6 +38,7 @@ jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
 // Import after mocks
 import GroupCreateIdentitiesSearchItems from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiFetch } from "@/services/api/common-api";
 
 const communityData = [{ wallet: "0x1", handle: "alice", display: "Alice" }];
 
@@ -117,6 +118,43 @@ test("query disabled when searchCriteria too short", () => {
     },
     undefined
   );
+});
+
+test("requests level ordering when configured", async () => {
+  useQueryMock.mockReturnValue({ data: communityData, isFetching: false });
+  render(
+    <GroupCreateIdentitiesSearchItems
+      open={true}
+      searchCriteria="alice"
+      selectedWallets={[]}
+      sort="level"
+      onSelect={jest.fn()}
+    />
+  );
+
+  expect(useQueryMock).toHaveBeenCalledWith({
+    queryKey: [
+      QueryKey.PROFILE_SEARCH,
+      {
+        param: "alice",
+        only_profile_owners: "true",
+        sort: "level",
+      },
+    ],
+    queryFn: expect.any(Function),
+    enabled: true,
+  });
+
+  const queryOptions = useQueryMock.mock.calls[0]?.[0];
+  await queryOptions.queryFn();
+  expect(commonApiFetch).toHaveBeenCalledWith({
+    endpoint: "community-members",
+    params: {
+      param: "alice",
+      only_profile_owners: "true",
+      sort: "level",
+    },
+  });
 });
 
 test("inline layout renders results without absolute positioning", () => {
