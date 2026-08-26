@@ -4,6 +4,7 @@ import { WalletValidationError } from "@/errors/wallet-validation";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "viem/chains";
+import { coinbaseWallet } from "wagmi/connectors";
 
 const VALID_LEGACY_SECRET =
   "00112233445566778899aabbccddeeff:00112233445566778899aabbccddeeff:abcdef1234567890";
@@ -29,6 +30,12 @@ const fail = (message?: string): never => {
 
 // Mock dependencies
 jest.mock("@reown/appkit-adapter-wagmi");
+jest.mock("wagmi/connectors", () => ({
+  coinbaseWallet: jest.fn(() => jest.fn()),
+}));
+jest.mock("@/config/env", () => ({
+  publicEnv: { MOBILE_APP_SCHEME: "mobileStaging6529" },
+}));
 jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
   createAppWalletConnector: jest.fn(() => ({ id: "mock-connector" })),
 }));
@@ -429,6 +436,58 @@ describe("AppKitAdapterManager", () => {
     });
 
     describe("createAdapter", () => {
+      it("configures the Capacitor Coinbase connector for Ethereum Mainnet", () => {
+        manager.createAdapter([], true, [mainnet]);
+
+        expect(coinbaseWallet).toHaveBeenCalledWith(
+          expect.objectContaining({
+            chainId: mainnet.id,
+            enableMobileWalletLink: true,
+            uiConstructor: expect.any(Function),
+            version: "3",
+          })
+        );
+      });
+
+      it("does not install the Capacitor Coinbase connector on web", () => {
+        manager.createAdapter([], false, [mainnet]);
+
+        expect(coinbaseWallet).not.toHaveBeenCalled();
+      });
+
+      it("threads the configured mobile scheme into the Coinbase handoff", () => {
+        jest.useFakeTimers();
+        let clickedHref: string | undefined;
+        const click = jest
+          .spyOn(HTMLAnchorElement.prototype, "click")
+          .mockImplementation(function (this: HTMLAnchorElement) {
+            clickedHref = this.href;
+          });
+
+        try {
+          manager.createAdapter([], true, [mainnet]);
+          const connectorOptions = jest.mocked(coinbaseWallet).mock
+            .calls[0]![0] as unknown as {
+            uiConstructor: (options: Record<string, never>) => {
+              openCoinbaseWalletDeeplink: () => void;
+            };
+          };
+          const ui = connectorOptions.uiConstructor({});
+
+          ui.openCoinbaseWalletDeeplink();
+          jest.runOnlyPendingTimers();
+
+          expect(clickedHref).toBeDefined();
+          const handoffUrl = new URL(clickedHref!);
+          expect(handoffUrl.searchParams.get("redirect_url")).toBe(
+            "mobileStaging6529://coinbase-wallet-return"
+          );
+        } finally {
+          click.mockRestore();
+          jest.useRealTimers();
+        }
+      });
+
       it("should throw indexed AdapterError when appWallets is not an array", () => {
         expect(() => manager.createAdapter(null as any)).toThrow(AdapterError);
         expect(() => manager.createAdapter(null as any)).toThrow(

@@ -8,6 +8,7 @@ import useCapacitor from "./useCapacitor";
 export enum DeepLinkScope {
   NAVIGATE = "navigate",
   SHARE_CONNECTION = "share-connection",
+  COINBASE_WALLET_RETURN = "coinbase-wallet-return",
 }
 
 export const useDeepLinkNavigation = () => {
@@ -54,6 +55,9 @@ export const useDeepLinkNavigation = () => {
         case DeepLinkScope.SHARE_CONNECTION:
           doNavigation("/accept-connection-sharing", queryParams);
           break;
+        case DeepLinkScope.COINBASE_WALLET_RETURN:
+          window.dispatchEvent(new Event("focus"));
+          break;
         default:
           console.warn("Unknown Deep Link Scope", scope);
           break;
@@ -63,5 +67,5 @@ export const useDeepLinkNavigation = () => {
     return () => {
       listener.then((handle) => handle.remove());
     };
-  }, [doNavigation]);
+  }, [doNavigation, isCapacitor]);
 };
