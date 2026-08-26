@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -28,31 +27,6 @@ type MobileDialogDragOptions = {
   readonly onClose: () => void;
   readonly onAfterLeave?: (() => void) | undefined;
 };
-
-function getDragTouchHandlers({
-  canDragToClose,
-  handleDragStart,
-  handleDragMove,
-  handleDragEnd,
-  resetDrag,
-}: {
-  readonly canDragToClose: boolean;
-  readonly handleDragStart: (event: TouchEvent<HTMLDivElement>) => void;
-  readonly handleDragMove: (event: TouchEvent<HTMLDivElement>) => void;
-  readonly handleDragEnd: () => void;
-  readonly resetDrag: () => void;
-}): DragTouchHandlers {
-  if (!canDragToClose) {
-    return { onTouchCancel: resetDrag };
-  }
-
-  return {
-    onTouchStart: handleDragStart,
-    onTouchMove: handleDragMove,
-    onTouchEnd: handleDragEnd,
-    onTouchCancel: resetDrag,
-  };
-}
 
 function startsInDragRegion(event: TouchEvent<HTMLDivElement>): boolean {
   const touch = event.touches[0];
@@ -88,34 +62,15 @@ function isCenteredTabletModal(tabletModal?: boolean): boolean {
 function getDismissDragOffset(): number {
   return Math.max(
     globalThis.visualViewport?.height ?? 0,
-    globalThis.innerHeight ?? 0,
+    globalThis.innerHeight,
     MAX_DRAG_OFFSET_PX
   );
 }
 
-export function useMobileDialogDrag({
-  dismissible,
-  showDragHandle,
-  enableDragToClose,
-  tabletModal,
-  onClose,
-  onAfterLeave,
-}: MobileDialogDragOptions) {
+function useDragOffsetState() {
   const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartYRef = useRef<number | null>(null);
-  const dragStartedAtRef = useRef(0);
   const dragOffsetRef = useRef(0);
   const dragFrameRef = useRef<number | null>(null);
-  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleClose = useCallback(() => {
-    if (dismissible) {
-      onClose();
-    }
-  }, [dismissible, onClose]);
-
-  const canDragToClose = dismissible && (enableDragToClose ?? !!showDragHandle);
 
   const cancelScheduledDragFrame = useCallback(() => {
     if (dragFrameRef.current === null) {
@@ -127,15 +82,6 @@ export function useMobileDialogDrag({
     }
 
     dragFrameRef.current = null;
-  }, []);
-
-  const cancelScheduledDismiss = useCallback(() => {
-    if (dismissTimerRef.current === null) {
-      return;
-    }
-
-    globalThis.clearTimeout(dismissTimerRef.current);
-    dismissTimerRef.current = null;
   }, []);
 
   const scheduleDragOffsetUpdate = useCallback(() => {
@@ -167,15 +113,70 @@ export function useMobileDialogDrag({
     [scheduleDragOffsetUpdate]
   );
 
+  const setImmediateDragOffset = useCallback((offset: number) => {
+    dragOffsetRef.current = offset;
+    setDragOffset(offset);
+  }, []);
+  const getCurrentDragOffset = useCallback(() => dragOffsetRef.current, []);
+
+  return {
+    cancelScheduledDragFrame,
+    dragOffset,
+    getCurrentDragOffset,
+    setClampedDragOffset,
+    setImmediateDragOffset,
+  };
+}
+
+export function useMobileDialogDrag({
+  dismissible,
+  showDragHandle,
+  enableDragToClose,
+  tabletModal,
+  onClose,
+  onAfterLeave,
+}: MobileDialogDragOptions) {
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartYRef = useRef<number | null>(null);
+  const dragStartedAtRef = useRef(0);
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const {
+    cancelScheduledDragFrame,
+    dragOffset,
+    getCurrentDragOffset,
+    setClampedDragOffset,
+    setImmediateDragOffset,
+  } = useDragOffsetState();
+
+  const handleClose = useCallback(() => {
+    if (dismissible) {
+      onClose();
+    }
+  }, [dismissible, onClose]);
+
+  const canDragToClose = dismissible && (enableDragToClose ?? !!showDragHandle);
+
+  const cancelScheduledDismiss = useCallback(() => {
+    if (dismissTimerRef.current === null) {
+      return;
+    }
+
+    globalThis.clearTimeout(dismissTimerRef.current);
+    dismissTimerRef.current = null;
+  }, []);
+
   const resetDrag = useCallback(() => {
     cancelScheduledDragFrame();
     cancelScheduledDismiss();
     dragStartYRef.current = null;
     dragStartedAtRef.current = 0;
-    dragOffsetRef.current = 0;
+    setImmediateDragOffset(0);
     setIsDragging(false);
-    setDragOffset(0);
-  }, [cancelScheduledDismiss, cancelScheduledDragFrame]);
+  }, [
+    cancelScheduledDismiss,
+    cancelScheduledDragFrame,
+    setImmediateDragOffset,
+  ]);
 
   useEffect(
     () => () => {
@@ -230,16 +231,15 @@ export function useMobileDialogDrag({
       return;
     }
 
-    const releasedOffset = dragOffsetRef.current;
+    const releasedOffset = getCurrentDragOffset();
     const startedAt = dragStartedAtRef.current;
     dragStartYRef.current = null;
     dragStartedAtRef.current = 0;
     cancelScheduledDragFrame();
 
     if (shouldDismissDrag(releasedOffset, startedAt)) {
-      dragOffsetRef.current = getDismissDragOffset();
+      setImmediateDragOffset(getDismissDragOffset());
       setIsDragging(false);
-      setDragOffset(dragOffsetRef.current);
       dismissTimerRef.current = globalThis.setTimeout(() => {
         dismissTimerRef.current = null;
         handleClose();
@@ -247,27 +247,31 @@ export function useMobileDialogDrag({
       return;
     }
 
-    dragOffsetRef.current = 0;
+    setImmediateDragOffset(0);
     setIsDragging(false);
-    setDragOffset(0);
-  }, [canDragToClose, cancelScheduledDragFrame, handleClose, resetDrag]);
+  }, [
+    canDragToClose,
+    cancelScheduledDragFrame,
+    getCurrentDragOffset,
+    handleClose,
+    resetDrag,
+    setImmediateDragOffset,
+  ]);
 
   const handleAfterLeave = useCallback(() => {
     resetDrag();
     onAfterLeave?.();
   }, [onAfterLeave, resetDrag]);
 
-  const dragTouchHandlers = useMemo(
-    () =>
-      getDragTouchHandlers({
-        canDragToClose,
-        handleDragStart,
-        handleDragMove,
-        handleDragEnd,
-        resetDrag,
-      }),
-    [canDragToClose, handleDragStart, handleDragMove, handleDragEnd, resetDrag]
-  );
+  let dragTouchHandlers: DragTouchHandlers = { onTouchCancel: resetDrag };
+  if (canDragToClose) {
+    dragTouchHandlers = {
+      onTouchStart: handleDragStart,
+      onTouchMove: handleDragMove,
+      onTouchEnd: handleDragEnd,
+      onTouchCancel: resetDrag,
+    };
+  }
 
   return {
     canDragToClose,
