@@ -1,6 +1,6 @@
 import { DialogTitle } from "@headlessui/react";
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import MobileWrapperDialogBackButton from "./MobileWrapperDialogBackButton";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 
@@ -16,6 +16,7 @@ export default function MobileWrapperDialogHeader({
   showHeaderDivider,
   headerCloseButtonClassName,
   titleClassName,
+  titleRef,
   backLabel,
   closeLabel,
 }: {
@@ -30,6 +31,7 @@ export default function MobileWrapperDialogHeader({
   readonly showHeaderDivider?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
+  readonly titleRef: Ref<HTMLElement>;
   readonly backLabel: string;
   readonly closeLabel: string;
 }) {
@@ -57,8 +59,10 @@ export default function MobileWrapperDialogHeader({
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
             {title && (
               <DialogTitle
+                ref={titleRef}
+                tabIndex={-1}
                 className={clsx(
-                  "tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50",
+                  "tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 focus:tw-outline-none",
                   titleClassName
                 )}
               >

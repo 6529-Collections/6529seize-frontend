@@ -17,6 +17,8 @@ export const ES_ES_MESSAGES = {
   "waves.drop.actions.copyLink": "Copiar enlace",
   "waves.drop.actions.copied": "Copiado!",
   "waves.drop.actions.copyFailed": "No se pudo copiar",
+  "waves.drop.actions.menuLabel": "Acciones del drop",
+  "waves.drop.actions.reactionPickerLabel": "Añadir una reacción al drop",
   "media.video.captions": "Subtitulos",
   "media.video.download": "Descargar multimedia",
   "media.video.downloading": "Descargando multimedia",
@@ -408,6 +410,18 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
+  "waves.chat.guidelinesDialog.title": "Directrices de la wave",
+  "waves.chat.guidelinesDialog.description":
+    "Revisa las directrices de esta wave antes de enviar tu primer mensaje.",
+  "waves.chat.guidelinesDialog.guidelinesLabel": "Directrices",
+  "waves.chat.guidelinesDialog.actionHint":
+    "Aceptar envía tu mensaje. Rechazar lo conserva como borrador.",
+  "waves.chat.guidelinesDialog.agree": "Aceptar",
+  "waves.chat.guidelinesDialog.decline": "Rechazar",
+  "waves.chat.guidelinesDialog.loadErrorTitle":
+    "No se pudieron cargar las directrices de la wave.",
+  "waves.chat.guidelinesDialog.loadErrorDescription":
+    "Inténtalo de nuevo antes de enviar tu mensaje.",
   ...stormComposerEsMessages,
   "waves.loadingStatus": "Cargando waves",
   "waves.gifPicker.open": "Añadir GIF",

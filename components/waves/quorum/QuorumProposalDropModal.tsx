@@ -6,7 +6,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import Button from "@/components/utils/button/Button";
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import CreateDropReplyingWrapper from "@/components/waves/CreateDropReplyingWrapper";
-import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";

@@ -170,8 +170,8 @@ export default function UserProfileTooltip({
             <DropPfp pfpUrl={profile?.pfp} />
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span className="tw-max-w-[180px] tw-truncate tw-text-base tw-font-bold tw-text-iron-50">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              <span className="tw-min-w-0 tw-max-w-full tw-whitespace-normal tw-break-words tw-text-base tw-font-bold tw-leading-5 tw-text-iron-50">
                 {profile?.handle ?? profile?.display}
               </span>
               {profile && (

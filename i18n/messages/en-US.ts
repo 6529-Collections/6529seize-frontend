@@ -522,6 +522,8 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
+  menuLabel: "Drop actions",
+  reactionPickerLabel: "Add reaction to drop",
   copyText: "Copy text",
   copyLink: "Copy link",
   copied: "Copied!",
@@ -1619,6 +1621,17 @@ const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "guidelinesDialog.title": "Wave guidelines",
+  "guidelinesDialog.description":
+    "Review this wave's guidelines before sending your first message.",
+  "guidelinesDialog.guidelinesLabel": "Guidelines",
+  "guidelinesDialog.actionHint":
+    "Agree sends your message. Decline keeps it as a draft.",
+  "guidelinesDialog.agree": "Agree",
+  "guidelinesDialog.decline": "Decline",
+  "guidelinesDialog.loadErrorTitle": "Couldn't load the wave guidelines.",
+  "guidelinesDialog.loadErrorDescription":
+    "Please try again before sending your message.",
   "replyTargetDeletedToast.title": "Reply removed.",
   "replyTargetDeletedToast.description":
     "The message you were replying to was deleted. Your draft is still here.",
