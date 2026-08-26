@@ -17,6 +17,8 @@ export const FR_FR_MESSAGES = {
   "waves.drop.actions.copyLink": "Copier le lien",
   "waves.drop.actions.copied": "Copie !",
   "waves.drop.actions.copyFailed": "Echec de la copie",
+  "waves.drop.actions.menuLabel": "Actions du drop",
+  "waves.drop.actions.reactionPickerLabel": "Ajouter une réaction au drop",
   "media.video.captions": "Sous-titres",
   "media.video.download": "Telecharger le media",
   "media.video.downloading": "Telechargement du media",

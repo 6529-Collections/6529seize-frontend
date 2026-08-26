@@ -460,10 +460,17 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       closeMenu,
       setIsCurationsDialogOpen,
     });
+  const dialogLabel = t(
+    locale,
+    activeView === "reactions"
+      ? "waves.drop.actions.reactionPickerLabel"
+      : "waves.drop.actions.menuLabel"
+  );
 
   return (
     <>
       <MobileWrapperDialog
+        ariaLabel={dialogLabel}
         isOpen={isOpen}
         onClose={closeMenu}
         onBack={activeView === "reactions" ? backToActions : undefined}

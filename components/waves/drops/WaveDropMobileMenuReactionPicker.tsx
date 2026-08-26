@@ -21,8 +21,8 @@ export default function WaveDropMobileMenuReactionPicker({
   });
 
   const handleEmojiSelect = (emoji: EmojiPickerSelection) => {
-    onDismiss();
     void react(`:${emoji.id ?? ""}:`);
+    onDismiss();
   };
 
   return (
@@ -30,7 +30,7 @@ export default function WaveDropMobileMenuReactionPicker({
       className="tw-flex tw-size-full tw-items-center tw-justify-center"
       onTouchMove={(event) => event.stopPropagation()}
     >
-      <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} />
+      <LazyEmojiPicker onEmojiSelect={handleEmojiSelect} autoFocus />
     </div>
   );
 }

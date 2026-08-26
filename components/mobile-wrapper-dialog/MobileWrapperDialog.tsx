@@ -8,7 +8,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import clsx from "clsx";
-import { Fragment, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
@@ -26,6 +26,7 @@ const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
 
 type MobileWrapperDialogProps = {
   readonly title?: string | undefined;
+  readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onBack?: (() => void) | undefined;
@@ -343,6 +344,7 @@ function DragHandle({
 
 export default function MobileWrapperDialog({
   title,
+  ariaLabel,
   isOpen,
   onClose,
   onBack,
@@ -436,12 +438,25 @@ export default function MobileWrapperDialog({
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
   const hideMobileCloseButton = canDragToClose;
 
+  useEffect(() => {
+    if (!isOpen || !focusTitleOnOpen) {
+      return;
+    }
+
+    const frame = globalThis.requestAnimationFrame(() => {
+      titleRef.current?.focus({ preventScroll: true });
+    });
+
+    return () => globalThis.cancelAnimationFrame(frame);
+  }, [focusTitleOnOpen, isOpen, title]);
+
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
+        aria-label={ariaLabel}
         {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
       >
         <MobileDialogOverlay
