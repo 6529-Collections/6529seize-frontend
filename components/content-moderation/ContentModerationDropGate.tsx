@@ -120,6 +120,78 @@ function PersonalModerationOverlay({
   );
 }
 
+function BlockedProfileActivityPresentation({
+  children,
+  drop,
+  isRevealed,
+  onHideAgain,
+  onReveal,
+}: {
+  readonly children: ReactNode;
+  readonly drop: ContentModerationDropGateProps["drop"];
+  readonly isRevealed: boolean;
+  readonly onHideAgain: () => void;
+  readonly onReveal: () => void;
+}) {
+  const locale = useBrowserLocale();
+
+  return (
+    <div
+      className="tw-w-full tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-iron-950/45"
+      data-testid="content-moderation-profile-activity-blocked"
+    >
+      <div className="tw-flex tw-min-h-16 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-3 tw-py-3 sm:tw-px-4">
+        <span className="tw-size-9 tw-flex-none tw-overflow-hidden tw-rounded-full tw-opacity-80 tw-grayscale">
+          <WavePicture
+            name={drop.wave.name}
+            picture={drop.wave.picture}
+            contributors={[]}
+          />
+        </span>
+        <span className="tw-min-w-0 tw-flex-1">
+          <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+            {drop.wave.name}
+          </span>
+          <span className="tw-block tw-text-xs tw-text-iron-500">
+            {getTimeAgoShort(drop.created_at)}
+          </span>
+        </span>
+        <span className="tw-inline-flex tw-flex-none tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
+          <span>{t(locale, "contentModeration.tombstone.blockedShort")}</span>
+          <span aria-hidden="true">·</span>
+          <PersonalModerationAction
+            label={t(
+              locale,
+              isRevealed
+                ? "contentModeration.actions.hideAgain"
+                : "contentModeration.actions.reveal"
+            )}
+            tooltip={t(
+              locale,
+              isRevealed
+                ? "contentModeration.tooltips.hideAgain"
+                : "contentModeration.tooltips.revealBlocked"
+            )}
+            onClick={isRevealed ? onHideAgain : onReveal}
+          />
+        </span>
+      </div>
+      {isRevealed ? (
+        <div data-testid="content-moderation-revealed-content">{children}</div>
+      ) : (
+        <div
+          aria-hidden="true"
+          inert
+          className="tw-pointer-events-none tw-select-none tw-opacity-35 tw-blur-[6px]"
+          data-testid="content-moderation-hidden-content"
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ContentModerationDropGate({
   drop,
   children,
@@ -129,7 +201,7 @@ export default function ContentModerationDropGate({
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth, setToast } = useAuth();
   const queryClient = useQueryClient();
-  const { visibility, reveal, isRevealed } =
+  const { visibility, reveal, hideAgain, isRevealed } =
     useContentModerationVisibility(drop);
   const [optimisticHiddenState, setOptimisticHiddenState] = useState<
     boolean | undefined
@@ -273,6 +345,21 @@ export default function ContentModerationDropGate({
     },
   });
 
+  if (visibility.kind === "blocked" && presentation === "profile-activity") {
+    return (
+      <BlockedProfileActivityPresentation
+        drop={drop}
+        isRevealed={isRevealed}
+        onReveal={reveal}
+        onHideAgain={hideAgain}
+      >
+        <ContentModerationDropGateContext.Provider value={gateContext}>
+          {children}
+        </ContentModerationDropGateContext.Provider>
+      </BlockedProfileActivityPresentation>
+    );
+  }
+
   if (effectiveVisibility.kind === "visible") {
     return (
       <ContentModerationDropGateContext.Provider value={gateContext}>
@@ -315,39 +402,6 @@ export default function ContentModerationDropGate({
   if (effectiveVisibility.kind === "blocked") {
     const handle = drop.author.handle;
     const profileLabel = handle ? `@${handle}` : "Blocked author";
-    if (presentation === "profile-activity") {
-      return (
-        <div
-          className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-iron-950/45 tw-px-3 tw-py-3 sm:tw-px-4"
-          data-testid="content-moderation-profile-activity-blocked"
-        >
-          <span className="tw-size-8 tw-flex-none tw-overflow-hidden tw-rounded-full tw-opacity-70 tw-grayscale">
-            <WavePicture
-              name={drop.wave.name}
-              picture={drop.wave.picture}
-              contributors={[]}
-            />
-          </span>
-          <span className="tw-min-w-0 tw-flex-1">
-            <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-200">
-              {drop.wave.name}
-            </span>
-            <span className="tw-block tw-text-xs tw-text-iron-500">
-              {getTimeAgoShort(drop.created_at)}
-            </span>
-          </span>
-          <span className="tw-inline-flex tw-flex-none tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
-            <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
-            <span aria-hidden="true">·</span>
-            <PersonalModerationAction
-              label={t(locale, "contentModeration.actions.reveal")}
-              tooltip={t(locale, "contentModeration.tooltips.revealBlocked")}
-              onClick={reveal}
-            />
-          </span>
-        </div>
-      );
-    }
     return (
       <PersonalModerationOverlay
         compact={compact}

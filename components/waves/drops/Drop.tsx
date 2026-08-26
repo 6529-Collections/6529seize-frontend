@@ -100,12 +100,14 @@ export default function Drop({
   const canOpenDrop =
     drop.drop_type !== ApiDropType.Chat || location !== DropLocation.WAVE;
   const openDropContentClick = canOpenDrop ? onDropContentClick : undefined;
+  const effectiveShowWaveInfo =
+    moderationPresentation === "profile-activity" ? false : showWaveInfo;
 
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
       <ParticipationDrop
         drop={drop}
-        showWaveInfo={showWaveInfo}
+        showWaveInfo={effectiveShowWaveInfo}
         activeDrop={activeDrop}
         location={location}
         onReply={onReply}
@@ -136,7 +138,7 @@ export default function Drop({
         drop={drop}
         previousDrop={previousDrop}
         nextDrop={nextDrop}
-        showWaveInfo={showWaveInfo}
+        showWaveInfo={effectiveShowWaveInfo}
         activeDrop={activeDrop}
         location={location}
         dropViewDropId={dropViewDropId}
@@ -168,7 +170,7 @@ export default function Drop({
           previousDrop?.type === DropSize.FULL ? previousDrop : null
         }
         nextDrop={nextDrop?.type === DropSize.FULL ? nextDrop : null}
-        showWaveInfo={showWaveInfo}
+        showWaveInfo={effectiveShowWaveInfo}
         activeDrop={activeDrop}
         location={location}
         dropViewDropId={dropViewDropId}

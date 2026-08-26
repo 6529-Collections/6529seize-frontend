@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
@@ -46,21 +46,67 @@ jest.mock(
       readonly layout?: "card" | "subtle" | "wide-row";
     }) => <div data-testid="subscription-status" data-layout={layout} />
 );
+jest.mock(
+  "@/components/user/user-page-header/ProfileBlockActionMenu",
+  () =>
+    ({ onBlock }: { readonly onBlock: () => void }) => (
+      <button type="button" onClick={onBlock}>
+        Block profile
+      </button>
+    )
+);
+jest.mock(
+  "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog",
+  () =>
+    ({
+      confirmText,
+      isOpen,
+      message,
+      onConfirm,
+      title,
+    }: {
+      readonly confirmText: string;
+      readonly isOpen: boolean;
+      readonly message: string;
+      readonly onConfirm: () => void;
+      readonly title: string;
+    }) =>
+      isOpen ? (
+        <div role="dialog" aria-label={title}>
+          <p>{message}</p>
+          <button type="button" onClick={onConfirm}>
+            {confirmText}
+          </button>
+        </div>
+      ) : null
+);
 jest.mock("@/components/user/utils/UserFollowBtn", () => ({
   __esModule: true,
   default: ({
     onDirectMessage,
+    blocked = false,
+    onUnblock,
     showFollowButton = true,
     showMuteButton = true,
   }: {
     readonly onDirectMessage?: (() => void) | undefined;
+    readonly blocked?: boolean | undefined;
+    readonly onUnblock?: (() => void) | undefined;
     readonly showFollowButton?: boolean | undefined;
     readonly showMuteButton?: boolean | undefined;
   }) => (
     <div data-testid="profile-actions">
       {onDirectMessage ? <button type="button">Direct Message</button> : null}
       {showMuteButton ? <button type="button">Mute</button> : null}
-      {showFollowButton ? <div data-testid="follow" /> : null}
+      {showFollowButton ? (
+        <button
+          type="button"
+          data-testid="follow"
+          onClick={blocked ? onUnblock : undefined}
+        >
+          {blocked ? "Unblock" : "Follow"}
+        </button>
+      ) : null}
     </div>
   ),
 }));
@@ -74,8 +120,11 @@ jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
 jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
   useProfileBlockState: jest.fn(() => ({
     isBlocked: false,
+    canManage: true,
     isLoading: false,
+    isBlocking: false,
     isUnblocking: false,
+    block: jest.fn().mockResolvedValue(undefined),
     unblock: jest.fn(),
   })),
 }));
@@ -113,8 +162,11 @@ describe("UserPageHeader", () => {
     (useIdentity as jest.Mock).mockReturnValue({ profile });
     (useProfileBlockState as jest.Mock).mockReturnValue({
       isBlocked: false,
+      canManage: true,
       isLoading: false,
+      isBlocking: false,
       isUnblocking: false,
+      block: jest.fn().mockResolvedValue(undefined),
       unblock: jest.fn(),
     });
     (useQuery as jest.Mock).mockReturnValue({
@@ -149,8 +201,8 @@ describe("UserPageHeader", () => {
     expect(screen.queryByTestId("subscription-status")).not.toBeInTheDocument();
   });
 
-  it("keeps DM available and replaces follow and mute with a compact block indicator", () => {
-    const unblock = jest.fn();
+  it("keeps DM available, moves Unblock into the action row, and confirms it", async () => {
+    const unblock = jest.fn().mockResolvedValue(undefined);
     (useIdentity as jest.Mock).mockReturnValue({
       profile: {
         ...profile,
@@ -160,8 +212,11 @@ describe("UserPageHeader", () => {
     });
     (useProfileBlockState as jest.Mock).mockReturnValue({
       isBlocked: true,
+      canManage: true,
       isLoading: false,
+      isBlocking: false,
       isUnblocking: false,
+      block: jest.fn().mockResolvedValue(undefined),
       unblock,
     });
 
@@ -185,7 +240,7 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
-    expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
+    expect(screen.getByTestId("follow")).toHaveTextContent("Unblock");
     expect(
       screen.getByRole("button", { name: "Direct Message" })
     ).toBeInTheDocument();
@@ -193,8 +248,69 @@ describe("UserPageHeader", () => {
       screen.queryByRole("button", { name: "Mute" })
     ).not.toBeInTheDocument();
     expect(screen.getByText("Blocked")).toBeInTheDocument();
+    expect(screen.getByText("Blocked").parentElement).toHaveClass(
+      "tw-border-red/35",
+      "tw-bg-red/10",
+      "tw-text-red"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Unblock" }));
-    expect(unblock).toHaveBeenCalledTimes(1);
+    expect(unblock).not.toHaveBeenCalled();
+    const dialog = screen.getByRole("dialog", { name: "Unblock @bob?" });
+    expect(dialog).toHaveTextContent(
+      "Their content and activity will be visible again. You won’t automatically follow them."
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Unblock" }));
+    await waitFor(() => expect(unblock).toHaveBeenCalledTimes(1));
+  });
+
+  it("offers profile blocking from the action menu and confirms it", async () => {
+    const block = jest.fn().mockResolvedValue(undefined);
+    (useIdentity as jest.Mock).mockReturnValue({
+      profile: {
+        ...profile,
+        id: "profile-bob",
+        primary_wallet: "0xbob",
+      },
+    });
+    (useProfileBlockState as jest.Mock).mockReturnValue({
+      isBlocked: false,
+      canManage: true,
+      isLoading: false,
+      isBlocking: false,
+      isUnblocking: false,
+      block,
+      unblock: jest.fn().mockResolvedValue(undefined),
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={{
+            ...profile,
+            id: "profile-bob",
+            primary_wallet: "0xbob",
+          }}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Block profile" }));
+    const dialog = screen.getByRole("dialog", { name: "Block @bob?" });
+    expect(dialog).toHaveTextContent(
+      "Hide their content, mute their activity and unfollow them. They won’t be notified."
+    );
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Block profile" })
+    );
+    await waitFor(() => expect(block).toHaveBeenCalledTimes(1));
   });
 
   it("does not render follow or DM actions on your own profile", () => {

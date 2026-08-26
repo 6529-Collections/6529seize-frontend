@@ -1,5 +1,6 @@
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 import {
+  blockProfile,
   fetchBlockedProfiles,
   unblockProfile,
 } from "@/services/api/content-moderation-api";
@@ -21,6 +22,7 @@ jest.mock("@/components/auth/Auth", () => ({
   }),
 }));
 jest.mock("@/services/api/content-moderation-api", () => ({
+  blockProfile: jest.fn(),
   fetchBlockedProfiles: jest.fn(),
   unblockProfile: jest.fn(),
 }));
@@ -51,6 +53,7 @@ describe("useProfileBlockState", () => {
     jest.clearAllMocks();
     resetContentModerationStateForTests();
     jest.mocked(fetchBlockedProfiles).mockResolvedValue([blockedProfile]);
+    jest.mocked(blockProfile).mockResolvedValue(undefined);
     jest.mocked(unblockProfile).mockResolvedValue(undefined);
   });
 
@@ -67,9 +70,33 @@ describe("useProfileBlockState", () => {
 
     await waitFor(() => expect(result.current.isBlocked).toBe(true));
 
-    act(() => result.current.unblock());
+    await act(async () => {
+      await result.current.unblock();
+    });
 
     await waitFor(() => expect(result.current.isBlocked).toBe(false));
     expect(unblockProfile).toHaveBeenCalledWith("author-1");
+  });
+
+  it("blocks optimistically and exposes the profile in the shared state", async () => {
+    jest.mocked(fetchBlockedProfiles).mockResolvedValue([]);
+    const { result } = renderHook(
+      () =>
+        useProfileBlockState({
+          profileId: "author-1",
+          profileHandle: "alice",
+          profilePfp: "ipfs://alice",
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isBlocked).toBe(false));
+
+    await act(async () => {
+      await result.current.block();
+    });
+
+    await waitFor(() => expect(result.current.isBlocked).toBe(true));
+    expect(blockProfile).toHaveBeenCalledWith("author-1");
   });
 });

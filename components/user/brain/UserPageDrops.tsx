@@ -28,7 +28,7 @@ export default function UserPageDrops({
             <UserPageMentionShortcuts profile={profile} />
             {haveProfile && (
               <Drops
-                compactBlockedProfileActivity={profileBlockState.isBlocked}
+                blockedProfileActivity={profileBlockState.isBlocked}
               />
             )}
           </div>

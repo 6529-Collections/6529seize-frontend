@@ -122,21 +122,26 @@ profile picture, handle, and centered **Blocked · Reveal · Unblock** controls.
 Blocked profiles remain reachable through their public profile pages. They can
 also be unblocked from the Content tab under `/preferences`; the profile picture
 and handle in that list link to the public profile. A blocked profile's header
-shows a compact **Blocked · Unblock** indicator beside the handle. Follow and
+shows a red-tinted **Blocked** status beside the handle and a separate
+**Unblock** action where **Follow** normally appears. Follow and
 notification-mute actions are hidden while the block is active because the
-block already provides those states. Direct message remains available.
-Unblocking restores the applicable actions immediately without changing the
-viewer's saved notification preference or refollowing the profile.
+block already provides those states. Direct message remains available. Unblock
+opens a confirmation dialog; confirming restores the applicable actions
+immediately without changing the viewer's saved notification preference or
+refollowing the profile. An unblocked profile's header action menu includes
+**Block profile** with the same explanation used by the post action dialog.
 
 Blocking automatically unfollows that profile and prevents following it again
 until it is unblocked. It does not remove the blocked profile as a follower of
 the blocker or tell that profile who blocked it. Public profile metadata,
 including Brain activity summaries and **Most Active In**, remains visible when
 the blocker deliberately opens the profile. On that profile's Brain tab,
-blocked activity uses compact rows that retain the Wave identity and time with
-**Hidden · Reveal** instead of repeating full-size blurred posts and per-row
-Unblock controls. Mixed Wave feeds keep the standard blurred blocked-post
-presentation.
+blocked activity keeps each post's normal height under a non-interactive blur.
+A visible header retains the Wave identity and time with **Blocked · Reveal**.
+Reveal removes the blur locally without changing the saved block, keeps the
+card dimensions stable, and changes the action to **Blocked · Hide again**.
+There is no per-row Unblock control. Mixed Wave feeds keep the standard blurred
+blocked-post presentation.
 
 ## Blocking and direct messages
 
