@@ -561,7 +561,7 @@ export default function Auth({
       expireSessionUpgradeAuth,
       invalidateAll,
       isAddressAuthorized,
-      isActiveChainSupported: authChainGuard.isActiveChainSupportedNow,
+      isActiveChainSupported: authChainGuard.isLatestChainSupported,
       seizeDisconnect,
       resetSessionUpgradeExpiryDedupe,
       setActiveProfileProxy,

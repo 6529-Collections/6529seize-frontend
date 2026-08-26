@@ -230,6 +230,8 @@ export function createAuthRequestActions({
     failureToastShown: boolean;
   }> => {
     if (!isActiveChainSupported()) {
+      // AppKit already explains the unsupported-network state. Suppress the
+      // generic authentication failure toast without covering its UI.
       return {
         signature: null,
         userRejected: false,
@@ -584,6 +586,8 @@ export function createAuthRequestActions({
           );
       return { success };
     } finally {
+      // A chain change makes the request guard stale, but must still release
+      // the signing state so authentication can resume after switching back.
       if (authRequestGuard.isCurrent() || !isActiveChainSupported()) {
         setAuthLoadingState("idle");
       }
@@ -605,6 +609,7 @@ export function createAuthRequestActions({
     }
 
     if (canSignActiveWallet && !isActiveChainSupported()) {
+      // Leave AppKit's network-switch interface as the only active prompt.
       return { success: false };
     }
 
@@ -691,6 +696,11 @@ export function createAuthRequestActions({
 
     await removeAuthJwt();
     if (!authRequestGuard.isCurrent()) {
+      setToast({
+        message:
+          "Network changed. Switch to a supported network to continue signing in.",
+        type: "error",
+      });
       return;
     }
     try {

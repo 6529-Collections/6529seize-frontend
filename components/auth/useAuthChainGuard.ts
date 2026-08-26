@@ -28,11 +28,11 @@ const isSupportedChainId = (
 export function useAuthChainGuard() {
   const wagmiAccount = useAccount();
   const wagmiConfig = useConfig();
-  const isActiveChainSupported = isSupportedChainId(
+  const isReactiveChainSupported = isSupportedChainId(
     wagmiAccount.chainId,
     wagmiConfig.chains
   );
-  const isActiveChainSupportedNow = useCallback(
+  const isLatestChainSupported = useCallback(
     (): boolean =>
       isSupportedChainId(getAccount(wagmiConfig).chainId, wagmiConfig.chains),
     [wagmiConfig]
@@ -50,7 +50,7 @@ export function useAuthChainGuard() {
     const isNonSigningSessionUpgradePrompt =
       isConnectionShareUpgradePrompt || isDisconnectedWebSessionUpgradePrompt;
     const canShowForActiveChain =
-      isActiveChainSupported ||
+      isReactiveChainSupported ||
       (isNonSigningSessionUpgradePrompt && !wagmiAccount.isConnected);
 
     return (
@@ -66,5 +66,5 @@ export function useAuthChainGuard() {
     );
   };
 
-  return { isActiveChainSupportedNow, shouldShowSignModal };
+  return { isLatestChainSupported, shouldShowSignModal };
 }
