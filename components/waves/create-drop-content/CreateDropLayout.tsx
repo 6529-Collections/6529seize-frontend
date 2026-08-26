@@ -76,6 +76,7 @@ interface CreateDropLayoutProps {
   readonly setActionsContainerRef: (node: HTMLDivElement | null) => void;
   readonly isLinksSubmitBlocked: boolean;
   readonly canAddPart: boolean;
+  readonly isCompactLayout: boolean;
   readonly showOptions: boolean;
   readonly animateOptions: boolean;
   readonly missingRequirements: MissingRequirements;
@@ -166,6 +167,7 @@ export default function CreateDropLayout({
   setActionsContainerRef,
   isLinksSubmitBlocked,
   canAddPart,
+  isCompactLayout,
   showOptions,
   animateOptions,
   missingRequirements,
@@ -257,6 +259,11 @@ export default function CreateDropLayout({
     editingPartIndex === null
       ? (drop?.parts.length ?? 0) + 1
       : editingPartIndex + 1;
+  const currentPartMarkdown = editorState
+    ? exportComposerMarkdown(editorState)
+    : initialMarkdown;
+  const showStormHint =
+    (currentPartMarkdown?.trim().length ?? 0) === 0 && files.length === 0;
   let submitLabel: string | undefined;
   if (isStormModeActive) {
     if (editingPartIndex !== null) {
@@ -359,28 +366,26 @@ export default function CreateDropLayout({
                 </p>
               )}
             </div>
-            <div className="tw-col-start-1 tw-row-start-2 tw-mb-1 tw-self-end">
-              <CreateDropActions
-                isStormMode={isStormModeActive}
-                isDropMode={isDropMode}
-                canAddPart={canAddPart}
-                submitting={submitting}
-                showOptions={showOptions}
-                animateOptions={animateOptions}
-                isRequiredMetadataMissing={
-                  !!missingRequirements.metadata.length
-                }
-                isRequiredMediaMissing={!!missingRequirements.media.length}
-                canCreatePoll={canCreatePoll}
-                isPollActive={hasPoll}
-                handleFileChange={handleFileChange}
-                onAddMetadataClick={openMetadata}
-                onTogglePoll={togglePoll}
-                breakIntoStorm={breakIntoStorm}
-                setShowOptions={handleSetShowOptions}
-                onGifDrop={onGifDrop}
-              />
-            </div>
+            <CreateDropActions
+              isStormMode={isStormModeActive}
+              isDropMode={isDropMode}
+              canAddPart={canAddPart}
+              showStormHint={showStormHint}
+              submitting={submitting}
+              isCompactLayout={isCompactLayout}
+              showOptions={showOptions}
+              animateOptions={animateOptions}
+              isRequiredMetadataMissing={!!missingRequirements.metadata.length}
+              isRequiredMediaMissing={!!missingRequirements.media.length}
+              canCreatePoll={canCreatePoll}
+              isPollActive={hasPoll}
+              handleFileChange={handleFileChange}
+              onAddMetadataClick={openMetadata}
+              onTogglePoll={togglePoll}
+              breakIntoStorm={breakIntoStorm}
+              setShowOptions={handleSetShowOptions}
+              onGifDrop={onGifDrop}
+            />
             <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
               <CreateDropInput
                 waveId={wave.id}
@@ -422,7 +427,11 @@ export default function CreateDropLayout({
               />
             </div>
             {(pollDraft || showCurationDropModeWarning) && (
-              <div className="tw-col-span-3 tw-col-start-1 tw-row-start-3 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2">
+              <div
+                className={`tw-col-span-3 tw-col-start-1 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2 ${
+                  isCompactLayout ? "tw-row-start-4" : "tw-row-start-3"
+                }`}
+              >
                 {pollDraft && (
                   <CreateDropPoll
                     draft={pollDraft}

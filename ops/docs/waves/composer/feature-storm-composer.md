@@ -23,7 +23,17 @@ The primary action always describes the next result: `Add part`,
 
 `Break into storm` is available only when the current part has text or media
 and stays within the storm length limit. On mobile and in the app, the action
-uses a visible label instead of relying on the storm icon alone.
+uses the shorter visible label `Storm` in the compact action tray instead of
+relying on the storm icon alone. The action remains disabled until the current
+part has text or media. While the current part is empty, a small left-aligned
+hint below the compact actions explains that text or media can start a storm.
+The active Storm draft spans the composer width and
+uses a bottom divider to separate saved parts from the current input instead of
+nesting the draft inside another card. Blue is reserved for the Storm icon,
+left accent, and part-count badge; the section, title, saved-part rows, content,
+and controls use the app's neutral iron palette.
+In the main wave composer, the section background and dividers extend through
+the composer's outer padding while the draft content keeps the input alignment.
 
 ## User Journey
 

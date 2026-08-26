@@ -734,6 +734,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setActionsContainerRef={setActionsContainerRef}
       isLinksSubmitBlocked={isLinksSubmitBlocked}
       canAddPart={canAddPart}
+      isCompactLayout={!keepDesktopOptionsVisible}
       showOptions={showOptions}
       animateOptions={animateOptions}
       missingRequirements={missingRequirements}

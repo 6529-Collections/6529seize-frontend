@@ -123,6 +123,31 @@ describe("WaveChatSubmitDropModal", () => {
     expect(waveDropCreateProps.identityPickerPlacement).toBe("inline");
   });
 
+  it("uses a full-width bottom sheet on compact viewports", async () => {
+    render(
+      <WaveChatSubmitDropModal
+        isOpen={true}
+        wave={wave}
+        title="Submit drop"
+        onClose={jest.fn()}
+      />
+    );
+
+    const panel = await screen.findByTestId("chat-submit-drop-modal-panel");
+    const layout = panel.parentElement;
+
+    expect(layout).toHaveClass("tw-items-end");
+    expect(layout).not.toHaveClass("tw-px-4");
+    expect(layout).toHaveClass("sm:tw-items-center", "sm:tw-px-4");
+    expect(panel).toHaveClass(
+      "tw-w-full",
+      "tw-rounded-t-2xl",
+      "tw-border-b-0",
+      "sm:tw-rounded-xl",
+      "sm:tw-border-b"
+    );
+  });
+
   it("closes from backdrop, close button, and escape key", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

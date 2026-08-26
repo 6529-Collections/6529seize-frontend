@@ -140,11 +140,11 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
       </span>
       <section
         aria-labelledby={headingId}
-        className="tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/80 tw-shadow-lg tw-ring-1 tw-ring-white/[0.045] tw-transition-colors tw-duration-300 sm:tw-bg-iron-900/60 sm:tw-ring-white/[0.03]"
+        className="create-drop-storm-surface -tw-mt-2 tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-border-b tw-border-l-2 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-border-l-primary-500 tw-bg-iron-900 tw-pb-2 tw-pl-3.5 tw-pr-4"
       >
-        <header className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.035] tw-px-3 tw-py-2.5 sm:tw-items-center sm:tw-px-4 sm:tw-py-3">
-          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-            <span className="tw-flex tw-size-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.025] tw-text-iron-400">
+        <header className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-px-0 tw-py-2.5 sm:tw-items-center sm:tw-py-3">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+            <span className="tw-flex tw-h-8 tw-w-4 tw-flex-none tw-items-center tw-text-primary-300">
               <svg
                 className="tw-size-4"
                 viewBox="0 0 24 24"
@@ -163,11 +163,11 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
             <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
               <h2
                 id={headingId}
-                className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+                className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300"
               >
                 {t(locale, "waves.stormComposer.draftTitle")}
               </h2>
-              <span className="tw-rounded-full tw-bg-white/[0.045] tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-400">
+              <span className="tw-text-primary-200 tw-rounded-full tw-bg-primary-500/15 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-tabular-nums">
                 {partsLabel}
               </span>
             </div>
@@ -178,7 +178,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
               type="button"
               onClick={() => setIsConfirmingDiscard(true)}
               disabled={controlsDisabled}
-              className="tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-iron-200 sm:tw-h-auto sm:tw-py-1.5"
+              className="tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-error/[0.06] desktop-hover:hover:tw-text-error sm:tw-h-auto sm:tw-py-1.5"
             >
               {t(locale, "waves.stormComposer.discard")}
             </button>
@@ -224,7 +224,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
 
         <ol
           ref={partsListRef}
-          className="tw-m-0 tw-flex tw-max-h-[30dvh] tw-min-h-0 tw-flex-1 tw-list-none tw-flex-col tw-divide-y tw-divide-white/[0.045] tw-overflow-y-auto tw-px-2 tw-py-1 sm:tw-max-h-[40vh] sm:tw-divide-white/[0.035]"
+          className="tw-m-0 tw-flex tw-max-h-[30dvh] tw-min-h-0 tw-flex-1 tw-list-none tw-flex-col tw-gap-2 tw-overflow-y-auto tw-px-0 tw-py-1 sm:tw-max-h-[40vh]"
         >
           <AnimatePresence mode="popLayout" initial={false}>
             {parts.map((part, partIndex) => (

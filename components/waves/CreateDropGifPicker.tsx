@@ -16,6 +16,7 @@ import {
   type RefObject,
 } from "react";
 import Button from "@/components/utils/button/Button";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
@@ -259,6 +260,7 @@ function GifPickerDialog({
   readonly onSelect: (gif: string) => void;
   readonly onClose: () => void;
 }) {
+  const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
   const normalizedGiphyApiKey = giphyApiKey?.trim();
   const dialogTitle = t(locale, "waves.gifPicker.dialogTitle");
@@ -289,6 +291,7 @@ function GifPickerDialog({
         onClose={onClose}
         noPadding={true}
         showHeaderCloseButton={false}
+        enableDragToClose={isMobile}
         headerClassName="tw-sr-only"
       >
         <GifPickerUnavailable
@@ -308,6 +311,7 @@ function GifPickerDialog({
       onClose={onClose}
       noPadding={true}
       showHeaderCloseButton={false}
+      enableDragToClose={isMobile}
       headerClassName="tw-sr-only"
     >
       <div

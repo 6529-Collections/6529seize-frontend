@@ -2567,7 +2567,9 @@
         "post a drop",
         "write a drop",
         "drop composer",
-        "reply in wave"
+        "reply in wave",
+        "composer actions",
+        "plus button"
       ],
       "keywords": [
         "composer",
@@ -2577,13 +2579,19 @@
         "markdown",
         "mentions",
         "attachments",
-        "images"
+        "images",
+        "upload",
+        "gif",
+        "poll",
+        "storm"
       ],
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
         "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
         "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
+        "On narrow composer rows, the plus button opens a labeled action tray below the input for available Upload, GIF, Poll, Storm, and Metadata actions.",
+        "On mobile and in the app, the GIF picker uses the same drag handle and swipe-down dismissal as the emoji picker.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
@@ -5296,7 +5304,8 @@
         "post"
       ],
       "facts": [
-        "Write the first part and select Break into storm to open the private Storm draft workspace.",
+        "Write the first part and select Storm in the compact composer or Break into storm in the expanded composer to open the private Storm draft workspace.",
+        "When the current part is empty, the compact composer shows a small left-aligned hint below its actions explaining that text or media can start a storm.",
         "The primary action says Add part while writing a new part, Save changes while editing, and Post storm when the current editor is empty.",
         "Saved parts have visible controls to edit, move earlier or later, and remove; Discard clears the complete draft after confirmation.",
         "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed.",

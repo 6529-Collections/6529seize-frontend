@@ -9,9 +9,12 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 - Storm mode: when prior parts exist, `Enter` follows the visible primary
   action. It selects `Add part` or `Save changes` with current content and
   selects `Post storm` on an empty current editor.
-- Narrow composer rows show metadata/media/GIF/storm actions behind a chevron.
-  After opening, those actions collapse on the next edit or when focus leaves
-  the composer row.
+- Narrow composer rows show a plus button beside the input. It opens a labeled
+  action tray below the input for Upload, GIF, Poll, Storm, and Metadata when
+  available. The tray collapses after an action is selected, on the next edit,
+  or when focus leaves the composer row.
+- On mobile and in the app, the GIF picker uses the same bottom-sheet handle and
+  swipe-down dismissal as the emoji picker.
 
 ## Location in the Site
 
@@ -23,7 +26,7 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 
 - Focus the composer in a wave or DM thread.
 - Type content and press `Enter` or `Shift+Enter`.
-- On narrow rows, open the chevron to reveal composer actions.
+- On narrow rows, select the plus button to open the labeled composer actions.
 
 ## User Journey
 
@@ -33,7 +36,8 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 4. Press `Enter` to submit when the draft is submittable.
 5. In storm mode with existing parts, check the primary action and press
    `Enter` to add or save current content, or to post from an empty editor.
-6. On narrow rows, use the chevron to show actions, then continue typing.
+6. On narrow rows, use the plus button to show labeled actions, then choose an
+   action or continue typing.
 
 ## Common Scenarios
 
@@ -58,7 +62,7 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 
 - If submit is blocked in `Drop` mode, complete required metadata/media and
   retry `Enter` or use the submit button.
-- If actions collapse on a narrow row, open them again with the chevron.
+- If actions collapse on a narrow row, open them again with the plus button.
 - If auth/signature is canceled, the draft stays in place.
 - If upload or submit fails, the composer shows an error and keeps the draft for
   retry.
@@ -69,7 +73,7 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
   state.
 - Open typeahead menus take precedence over submit shortcuts.
 - `Shift+Enter` inserts paragraphs.
-- Wide rows keep composer actions visible without the chevron.
+- Wide rows keep composer actions visible without the expandable tray.
 - Wave creation `Description` uses a different editor flow in
   [Wave Creation Description Step](../create/feature-description-step.md).
 
