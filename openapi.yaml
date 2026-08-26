@@ -617,6 +617,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiCommunityMemberMinimal"
+        "400":
+          description: Unsupported community-member sort
   /community-members/top:
     get:
       tags:
