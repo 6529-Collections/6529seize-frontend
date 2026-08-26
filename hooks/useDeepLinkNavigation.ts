@@ -67,5 +67,5 @@ export const useDeepLinkNavigation = () => {
     return () => {
       listener.then((handle) => handle.remove());
     };
-  }, [doNavigation]);
+  }, [doNavigation, isCapacitor]);
 };

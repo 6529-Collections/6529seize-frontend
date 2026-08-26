@@ -107,4 +107,17 @@ describe("createCapacitorCoinbaseMobileUiConstructor", () => {
       dispatchEvent.mockRestore();
     }
   });
+
+  it("validates the handoff synchronously before scheduling the redirect", () => {
+    jest.useFakeTimers();
+    const createUi = createCapacitorCoinbaseMobileUiConstructor(
+      "https://staging.6529.io"
+    );
+    const ui = createUi({} as RelayUIOptions);
+
+    expect(() => ui.openCoinbaseWalletDeeplink()).toThrow(
+      "valid mobile app scheme"
+    );
+    expect(jest.getTimerCount()).toBe(0);
+  });
 });

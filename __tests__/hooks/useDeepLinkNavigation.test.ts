@@ -45,13 +45,28 @@ test("does not register when not capacitor", () => {
   expect(App.addListener).not.toHaveBeenCalled();
 });
 
+test("registers when the runtime becomes capacitor", () => {
+  capacitorMock.mockImplementation(() => ({ isCapacitor: false }));
+  const { rerender } = renderHook(() => useDeepLinkNavigation());
+
+  capacitorMock.mockImplementation(() => ({ isCapacitor: true }));
+  rerender();
+
+  expect(App.addListener).toHaveBeenCalledWith(
+    "appUrlOpen",
+    expect.any(Function)
+  );
+});
+
 test("resumes Coinbase WalletLink when the wallet returns to the app", async () => {
   const dispatchEvent = jest.spyOn(window, "dispatchEvent");
   try {
     renderHook(() => useDeepLinkNavigation());
 
     await act(async () => {
-      callback({ url: "mobileStaging6529://coinbase-wallet-return" });
+      callback({
+        url: "mobileStaging6529://coinbase-wallet-return?source=wallet",
+      });
     });
 
     expect(dispatchEvent).toHaveBeenCalledWith(

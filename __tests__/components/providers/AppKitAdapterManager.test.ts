@@ -449,6 +449,45 @@ describe("AppKitAdapterManager", () => {
         );
       });
 
+      it("does not install the Capacitor Coinbase connector on web", () => {
+        manager.createAdapter([], false, [mainnet]);
+
+        expect(coinbaseWallet).not.toHaveBeenCalled();
+      });
+
+      it("threads the configured mobile scheme into the Coinbase handoff", () => {
+        jest.useFakeTimers();
+        let clickedHref: string | undefined;
+        const click = jest
+          .spyOn(HTMLAnchorElement.prototype, "click")
+          .mockImplementation(function (this: HTMLAnchorElement) {
+            clickedHref = this.href;
+          });
+
+        try {
+          manager.createAdapter([], true, [mainnet]);
+          const connectorOptions = jest.mocked(coinbaseWallet).mock
+            .calls[0]![0] as unknown as {
+            uiConstructor: (options: Record<string, never>) => {
+              openCoinbaseWalletDeeplink: () => void;
+            };
+          };
+          const ui = connectorOptions.uiConstructor({});
+
+          ui.openCoinbaseWalletDeeplink();
+          jest.runOnlyPendingTimers();
+
+          expect(clickedHref).toBeDefined();
+          const handoffUrl = new URL(clickedHref!);
+          expect(handoffUrl.searchParams.get("redirect_url")).toBe(
+            "mobileStaging6529://coinbase-wallet-return"
+          );
+        } finally {
+          click.mockRestore();
+          jest.useRealTimers();
+        }
+      });
+
       it("should throw indexed AdapterError when appWallets is not an array", () => {
         expect(() => manager.createAdapter(null as any)).toThrow(AdapterError);
         expect(() => manager.createAdapter(null as any)).toThrow(

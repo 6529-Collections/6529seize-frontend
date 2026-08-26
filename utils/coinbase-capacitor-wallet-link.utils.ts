@@ -1,3 +1,6 @@
+// Wallet SDK v3 does not export its mobile relay UI publicly. This import is
+// intentionally coupled to the exact-pinned cbw-sdk 3.9.3 alias in package.json;
+// re-check the subpath and lifecycle behavior before changing that version.
 import { MobileRelayUI } from "cbw-sdk/dist/relay/mobile/MobileRelayUI";
 import type { RelayUIOptions } from "cbw-sdk/dist/relay/RelayUI";
 
@@ -78,13 +81,14 @@ class CapacitorCoinbaseMobileRelayUI extends MobileRelayUI {
       walletLinkUrl,
     });
 
-    // MobileRelay installs its blur/focus response listener immediately after
-    // this method returns. Keep the SDK's small delay so the listener exists
-    // before Capacitor leaves the WebView, then emit deterministic lifecycle
-    // events for WebViews that do not forward browser blur/focus themselves.
+    // MobileRelay 3.9.3 installs its blur/focus response listener immediately
+    // after this void method returns. Keep its 99 ms delay so the listener
+    // exists before Capacitor leaves the WebView, then emit deterministic
+    // lifecycle events for WebViews that do not forward them themselves.
     setTimeout(() => {
       window.dispatchEvent(new Event("blur"));
 
+      // Match the pinned SDK's detached-anchor handoff behavior.
       const anchor = document.createElement("a");
       anchor.target = "cbw-opener";
       anchor.href = handoffUrl;
