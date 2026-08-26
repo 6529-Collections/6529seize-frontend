@@ -20,7 +20,8 @@ being objectionable.
 - Open `/preferences?tab=content` to manage blocked profiles. The older
   `/content-preferences` path redirects to this tab.
 - Authorized moderators can open **WatchTower** at `/content-moderation` from
-  the app navigation or profile menu.
+  the app navigation or profile menu. The page heading is **WatchTower -
+  Content Moderation**.
 
 The unified `/preferences` page contains Notification, Messages, and Content
 tabs and fills the available page height. Preferences are saved to a profile.
@@ -128,8 +129,12 @@ notification-mute actions are hidden while the block is active because the
 block already provides those states. Direct message remains available. Unblock
 opens a confirmation dialog; confirming restores the applicable actions
 immediately without changing the viewer's saved notification preference or
-refollowing the profile. An unblocked profile's header action menu includes
+refollowing the profile. On an unblocked profile, the standalone notification
+button is replaced by one responsive profile-actions menu containing
+icon-labelled **Mute notifications** or **Unmute notifications**, followed by
 **Block profile** with the same explanation used by the post action dialog.
+Desktop uses an overflow menu; mobile browsers and the mobile app use the same
+actions in a bottom sheet.
 
 Blocking automatically unfollows that profile and prevents following it again
 until it is unblocked. It does not remove the blocked profile as a follower of

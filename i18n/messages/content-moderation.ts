@@ -74,9 +74,9 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.signIn":
     "Connect an authenticated profile to manage content preferences.",
   "contentModeration.moderator.menu": "WatchTower",
-  "contentModeration.moderator.metaTitle": "WatchTower",
+  "contentModeration.moderator.metaTitle": "WatchTower - Content Moderation",
   "contentModeration.moderator.metaDescription": "Review reported content.",
-  "contentModeration.moderator.title": "WatchTower",
+  "contentModeration.moderator.title": "WatchTower - Content Moderation",
   "contentModeration.moderator.description":
     "Review reported posts and record a reason for every decision.",
   "contentModeration.moderator.loading": "Loading reports…",

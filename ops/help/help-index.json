@@ -15,7 +15,8 @@
         "unblock a profile",
         "content preferences",
         "moderation queue",
-        "WatchTower"
+        "WatchTower",
+        "WatchTower - Content Moderation"
       ],
       "keywords": [
         "content moderation",
@@ -36,13 +37,13 @@
         "Preferences are profile-scoped. An authenticated wallet without a profile sees a Create profile action instead of a connection prompt, and the controls become available after profile creation.",
         "A blocked profile's avatar and handle in Preferences link to its public profile. Its profile header shows a red-tinted Blocked status beside the handle, keeps Direct Message available, and puts a separate confirmation-backed Unblock action where Follow normally appears.",
         "Blocking hides the profile's content, treats its activity as muted, automatically unfollows it, and prevents following again until it is unblocked. It does not notify the blocked profile or remove that profile's subscription to the blocker.",
-        "Unblocked profile headers offer Block profile from the profile actions menu. The confirmation explains that blocking hides content, mutes activity, unfollows the profile, and does not notify it.",
+        "Unblocked profile headers place icon-labelled Mute notifications or Unmute notifications and Block profile in one responsive profile-actions menu instead of showing a standalone mute button. Desktop uses an overflow menu, while mobile browsers and the mobile app use a bottom sheet. Blocking still requires confirmation.",
         "Blocked public profiles remain reachable. Public profile and Brain summary metadata stays visible, while each Brain activity post keeps its normal height under a blur with visible Wave information. Reveal is temporary and changes to Hide again without resizing the card.",
         "Blocking does not prevent one-to-one direct-message creation or delivery. The blocker's existing and future conversation is instead treated as muted and deprioritized, blocked-author messages stay hidden until individually revealed, and the other profile receives no block disclosure.",
         "Group direct messages and shared Waves remain usable and are not muted as a whole. Blocked-author posts stay hidden and do not create ordinary notifications, push notifications, or direct-message unread counts for the blocker; other members behave normally.",
         "Globally quarantined or moderator-removed posts show a non-revealable redacted tombstone across drop surfaces.",
         "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
-        "Only server-authorized moderators see and can use WatchTower at /content-moderation, and every decision requires a reason.",
+        "Only server-authorized moderators see and can use the WatchTower navigation item at /content-moderation. The page heading is WatchTower - Content Moderation, and every decision requires a reason.",
         "WatchTower shows a red navigation indicator while open reports need review and refreshes that lightweight state periodically while the app is active.",
         "Someone who opens /content-moderation without moderator access sees a countdown and is redirected home; a failed access check shows an error instead of being treated as a denial."
       ],
@@ -61,6 +62,7 @@
         "components/content-moderation/ContentModerationDropActions.tsx",
         "components/content-moderation/ContentModerationDropGate.tsx",
         "components/user/user-page-header/BlockedProfileHeaderIndicator.tsx",
+        "components/user/user-page-header/ProfileBlockActionMenu.tsx",
         "services/content-moderation/content-moderation-query.ts"
       ]
     },

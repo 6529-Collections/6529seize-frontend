@@ -85,7 +85,11 @@ describe("ContentModerationPageClient pagination", () => {
     );
 
     expect(await screen.findByText("content-1")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "WatchTower" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", {
+        name: "WatchTower - Content Moderation",
+      })
+    ).toBeVisible();
     expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
     expect(container.querySelector("main")).not.toHaveClass("tw-max-w-4xl");
     expect(screen.getByRole("link", { name: "author1" })).toHaveAttribute(
