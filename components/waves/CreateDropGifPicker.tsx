@@ -289,10 +289,11 @@ function GifPickerDialog({
         title={dialogTitle}
         isOpen={true}
         onClose={onClose}
+        onBack={isMobile ? onClose : undefined}
         noPadding={true}
         showHeaderCloseButton={false}
         enableDragToClose={isMobile}
-        headerClassName="tw-sr-only"
+        headerClassName={isMobile ? undefined : "tw-sr-only"}
       >
         <GifPickerUnavailable
           title={t(locale, "waves.gifPicker.unavailable.title")}
@@ -309,10 +310,19 @@ function GifPickerDialog({
       title={dialogTitle}
       isOpen={true}
       onClose={onClose}
+      onBack={isMobile ? onClose : undefined}
       noPadding={true}
       showHeaderCloseButton={false}
       enableDragToClose={isMobile}
-      headerClassName="tw-sr-only"
+      headerClassName={isMobile ? undefined : "tw-sr-only"}
+      titleActions={
+        isMobile ? (
+          <GiphyAttributionMark
+            ariaLabel={poweredByLabel}
+            prefixLabel={t(locale, "waves.gifPicker.poweredByPrefix")}
+          />
+        ) : undefined
+      }
     >
       <div
         role="status"
@@ -336,7 +346,13 @@ function GifPickerDialog({
       >
         <div className="tw-flex tw-h-[min(78vh,720px)] tw-min-h-[420px] tw-flex-col tw-overflow-hidden tw-bg-iron-950">
           <div className="tw-flex tw-flex-col tw-gap-3 tw-border-b tw-border-white/10 tw-bg-iron-950 tw-p-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+            <div
+              className={
+                isMobile
+                  ? "tw-hidden"
+                  : "tw-flex tw-items-center tw-justify-between tw-gap-4"
+              }
+            >
               <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
                 {dialogTitle}
               </p>
