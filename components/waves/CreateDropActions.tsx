@@ -129,6 +129,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const uploadLabel = t(locale, "waves.composer.actions.upload");
     const gifLabel = t(locale, "waves.composer.actions.gif");
     const pollLabel = t(locale, "waves.composer.actions.poll");
+    const closePollLabel = t(locale, "waves.composer.actions.closePoll");
     const stormLabel = t(locale, "waves.composer.actions.storm");
     const stormHint = t(locale, "waves.stormComposer.startHint");
     const gifPickerKey = publicEnv.GIPHY_API_KEY;
@@ -289,22 +290,28 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 <motion.button
                   data-testid="drop-actions-toggle-motion"
                   type="button"
-                  onClick={onSetShowIconsClick}
-                  aria-label={showOptions ? hideActionsLabel : showActionsLabel}
-                  aria-expanded={showOptions}
-                  aria-controls={actionTrayId}
-                  animate={{ rotate: showOptions ? 45 : 0 }}
+                  onClick={isPollActive ? onTogglePoll : onSetShowIconsClick}
+                  disabled={isPollActive && submitting}
+                  aria-label={
+                    isPollActive
+                      ? closePollLabel
+                      : showOptions
+                        ? hideActionsLabel
+                        : showActionsLabel
+                  }
+                  aria-expanded={isPollActive ? undefined : showOptions}
+                  aria-controls={isPollActive ? undefined : actionTrayId}
+                  animate={{ rotate: showOptions || isPollActive ? 45 : 0 }}
                   transition={
                     shouldAnimateOptions
                       ? optionMotionTransition
                       : { duration: 0 }
                   }
                   className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
-                    showOptions
+                    showOptions || isPollActive
                       ? "tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300"
                       : (isDropMode && isRequiredMetadataMissing) ||
-                          isRequiredMediaMissing ||
-                          isPollActive
+                          isRequiredMediaMissing
                         ? "tw-border-amber-300/25 tw-bg-amber-300/10 tw-text-amber-200"
                         : "tw-border-white/10 tw-bg-iron-800 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white"
                   }`}
@@ -317,7 +324,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 </motion.button>
               </div>
               <AnimatePresence initial={false}>
-                {showOptions && (
+                {showOptions && !isPollActive && (
                   <motion.div
                     id={actionTrayId}
                     key="compact-action-tray"

@@ -1655,6 +1655,7 @@ const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {
   upload: "Upload",
   gif: "GIF",
   poll: "Poll",
+  closePoll: "Close poll",
   storm: "Storm",
 } as const);
 

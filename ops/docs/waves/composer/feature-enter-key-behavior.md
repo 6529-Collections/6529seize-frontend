@@ -15,6 +15,9 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
   or when focus leaves the composer row.
 - On mobile and in the app, the GIF picker uses the same bottom-sheet handle and
   swipe-down dismissal as the emoji picker.
+- While a Poll editor is open on a narrow row, the plus control becomes an X
+  that closes Poll. Other composer tools stay unavailable until Poll is closed,
+  and any saved Storm parts remain preserved but temporarily hidden.
 
 ## Location in the Site
 
@@ -57,6 +60,8 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 - Mobile web and Capacitor disable Enter-key submit shortcuts.
 - On narrow rows, expanded actions collapse after the next edit, on blur, and
   when switching waves.
+- Poll and GIF cannot be layered on narrow rows. Close the active Poll editor
+  before opening another composer tool.
 
 ## Failure and Recovery
 
