@@ -72,7 +72,7 @@ describe("UserPageIdentityDeleteStatementButton", () => {
     expect(button.className).toContain("tw-opacity-100");
   });
 
-  it("shows the desktop-layout button when the CSS hover query is unavailable", () => {
+  it("includes the no-hover CSS fallback on the desktop-layout button", () => {
     render(
       <UserPageIdentityDeleteStatementButton
         statement={statement}

@@ -69,7 +69,7 @@ describe("UserPageHeaderBanner", () => {
       "touch-only:tw-opacity-100",
       "touch-only:tw-bg-transparent"
     );
-    expect(screen.getByTestId("pencil").parentElement).toHaveClass(
+    expect(editButton.querySelector('[aria-hidden="true"]')).toHaveClass(
       "touch-only:tw-size-9",
       "touch-only:tw-bg-iron-950"
     );

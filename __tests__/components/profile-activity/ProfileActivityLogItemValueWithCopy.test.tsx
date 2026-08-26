@@ -25,6 +25,7 @@ describe("ProfileActivityLogItemValueWithCopy", () => {
       "focus-visible:tw-opacity-100",
       "touch-only:tw-opacity-100"
     );
+    expect(copyButton).not.toHaveClass("group-hover:tw-opacity-100");
 
     await fireEvent.click(copyButton);
     expect(copy).toHaveBeenCalledWith("0x1");

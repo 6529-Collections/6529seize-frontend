@@ -13,6 +13,7 @@
  * gates, and collapsed dimensions. Narrow exemptions below are audited UI
  * that is decorative or has a separate always-available interaction path.
  */
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import postcss from "postcss";
@@ -48,107 +49,149 @@ interface GatedLiteral {
 interface AuditedRevealExemption {
   readonly file: string;
   readonly marker: string;
+  readonly literalHash: string;
   readonly reason: string;
 }
 
 /**
- * These are literal-level exemptions, not file-wide suppressions. Each marker
- * must continue matching a real gated class list or the contract fails.
+ * These are literal-level exemptions, not file-wide suppressions. The marker
+ * keeps reviews readable while the hash pins the entire normalized class
+ * literal; changing or extending that literal invalidates the exemption.
  */
 const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
   {
     file: "components/home/boosted/BoostedDropCompactChatItem.tsx",
     marker: "tw-items-center tw-overflow-hidden tw-opacity-0",
+    literalHash:
+      "0f587c25522815d66da60260f1d14df5ea0ad8aadcb8717cde6088300f528df8",
     reason:
       "This pointer-events-none preview replaces already visible summary text as decoration; without hover the original summary remains visible.",
   },
   {
     file: "components/home/now-minting/MemeSubscriptionAwarenessRow.tsx",
     marker: "tw-bg-primary-400/[0.045] tw-opacity-0",
+    literalHash:
+      "0bc7f096adb69984e6ebd6ba6e6dd42070148782c663d14af10ed4401778e31d",
     reason:
       "This aria-hidden, pointer-events-none surface tint is decorative; the row content and actions are always visible.",
   },
   {
     file: "components/profile-cms/CmsArtLightbox.tsx",
     marker: "tw-uppercase tw-text-white tw-opacity-0",
+    literalHash:
+      "4b031231747e41907541a19e6b9515d96c7a9fe1a6bc4e5dc20918134f049cfb",
     reason:
       "The Inspect label supplements an already visible and keyboard-focusable artwork control; it is not a separate action.",
   },
   {
     file: "components/drops/view/item/content/media/MediaActionToolbar.tsx",
     marker: "desktop-hover:group-hover/media:tw-pointer-events-auto",
+    literalHash:
+      "8cdecad1fd55f627ff69f6ef7619a5b3d7ef03bd5a1db6d57408e64563afb848",
     reason:
       "The inline media toolbar is an enhancement; clicking the visible media opens the expanded viewer with the same actions, and keyboard focus also reveals it.",
   },
   {
     file: "components/user/brain/UserPageBrainSidebarWaveItem.tsx",
     marker: "-tw-translate-x-1 tw-text-iron-600 tw-opacity-0",
+    literalHash:
+      "84c3f14d428c46d315170c5f07e9d8378b9181c690a3bdcb800197561aac948e",
     reason:
       "The faded chevron is decorative; the wave link and label remain visible and operable.",
   },
   {
     file: "components/utils/NewVersionToast.tsx",
     marker: "before:tw-bg-[radial-gradient(circle_at_82%_50%",
+    literalHash:
+      "05fb46b70c92b159eb60ee7c479153c5c075347054e0fafb70dc484c4765092e",
     reason:
       "This pointer-events-none pseudo-element is a decorative glow on an always visible refresh button.",
   },
   {
     file: "components/waves/drops/ArtistActiveSubmissionContent.tsx",
     marker: "tw-right-3 tw-top-3 tw-opacity-0",
+    literalHash:
+      "81b51aea26c6c7a7fc1b7df296946a836777339b158ffab0a7d36c051feb5397",
     reason:
       "The eye glyph is decorative feedback on an already visible, fully clickable artwork card.",
   },
   {
     file: "components/waves/drops/ArtistWinningArtworksContent.tsx",
     marker: "tw-right-3 tw-top-3 tw-opacity-0",
+    literalHash:
+      "81b51aea26c6c7a7fc1b7df296946a836777339b158ffab0a7d36c051feb5397",
     reason:
       "The eye glyph is decorative feedback on an already visible, fully clickable artwork card.",
   },
   {
     file: "components/waves/drops/WaveDropActions.tsx",
     marker: "desktop-hover:group-hover:tw-pointer-events-auto",
+    literalHash:
+      "cba6ffbd8f3f64aba6310f2306f8d6e0458f8bbe503330f763f99e1e15bf87a7",
     reason:
       "WaveDrop tracks pointerover/out without a hover capability query and passes forceVisible; the CSS hover rule is its no-JS enhancement.",
   },
   {
     file: "components/waves/drops/WaveDrop.helpers.tsx",
     marker: "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100",
+    literalHash:
+      "dc415d6ed3f1074154a978fff7bea616f299625cfe95d3b0ab2197cefb2768df",
     reason:
       "This is a pointer-events-none timestamp, not a control, and WaveDrop's forceVisible pointer path also drives its opacity.",
   },
   {
     file: "components/waves/FilePreview.tsx",
     marker: "tw-bg-iron-950 tw-opacity-0",
+    literalHash:
+      "bdd312eefbb552edbd175dea4ef9ec973f12695c3397cfa3af018a5c83b0e0b6",
     reason:
       "This empty overlay is a decorative shade on a file preview; the preview content and interaction remain visible.",
   },
   {
     file: "components/waves/gallery/WaveGalleryItem.tsx",
     marker: "tw-bg-gradient-to-t tw-from-black/80",
+    literalHash:
+      "f52aeaa5f9b8f281ec5bea860dbbbc783efbcb5982d965ae6ad1f37ac2f047a0",
     reason:
       "The gradient is a pointer-events-none visual treatment; the gallery card remains visible and operable.",
   },
   {
     file: "components/waves/gallery/WaveGalleryItem.tsx",
     marker: "tw-bottom-0 tw-left-0 tw-right-0 tw-translate-y-2",
+    literalHash:
+      "b635b3b46283c6bb2173c83b6b40e222ba9592626f9cd89b565a21dc6ea57ae1",
     reason:
       "The title and metadata overlay is pointer-events-none supplementary content; the card and author control have independent visible targets.",
   },
   {
     file: "components/waves/winners/podium/WavePodiumItem.tsx",
     marker: "tw-size-3 tw-opacity-0 tw-transition-opacity",
+    literalHash:
+      "6c495c84006e65e1116ebdac27efe93d03ebbe99b90f05cea1479428974c4c14",
+    reason:
+      "The external-link arrow is decorative feedback beside an already visible and fully operable profile link.",
+  },
+  {
+    file: "components/waves/winners/podium/WavePodiumItem.tsx",
+    marker: "tw-size-3 tw-opacity-0 tw-transition-opacity",
+    literalHash:
+      "45ab45ab8b895343e261065876d1639d6354954512fa4422ce412a662e945826",
     reason:
       "The external-link arrow is decorative feedback beside an already visible and fully operable profile link.",
   },
   {
     file: "app/join/FocusSections.tsx",
     marker: "tw-bg-[linear-gradient(90deg,transparent_0%",
+    literalHash:
+      "39d0c8e903fcfd521af6b28b73f571b6666e26e784e31af233a7fddf5f5d6fdb",
     reason:
       "This aria-hidden, pointer-events-none gradient is decorative; the section content remains visible and operable.",
   },
   {
     file: "app/join/JourneyTimelineSection.tsx",
     marker: "tw-bg-[radial-gradient(circle,rgba(132,173,255",
+    literalHash:
+      "8c3c9fa30ca9f143dbf2c6be91ba35659e2099745f7c019e9a09b4be8d6c052b",
     reason:
       "This empty radial glow is decorative; the timeline icon, copy, and controls remain visible without it.",
   },
@@ -196,13 +239,24 @@ function classStringLiterals(source: string): string[] {
   return literals;
 }
 
-function classTokens(literal: string): ClassToken[] {
+function literalContent(literal: string): string {
   const quote = literal.at(0);
-  const content =
+  return (
     (quote === '"' || quote === "'" || quote === "`") &&
     literal.at(-1) === quote
       ? literal.slice(1, -1)
-      : literal;
+      : literal
+  );
+}
+
+const normalizeLiteral = (literal: string): string =>
+  literalContent(literal).trim().split(/\s+/).join(" ");
+
+const literalHash = (literal: string): string =>
+  createHash("sha256").update(normalizeLiteral(literal)).digest("hex");
+
+function classTokens(literal: string): ClassToken[] {
+  const content = literalContent(literal);
 
   return content
     .split(/\s+/)
@@ -344,7 +398,9 @@ function gatedLiterals(): GatedLiteral[] {
 const exemptionFor = (hit: GatedLiteral): AuditedRevealExemption | undefined =>
   AUDITED_REVEAL_EXEMPTIONS.find(
     (exemption) =>
-      exemption.file === hit.file && hit.literal.includes(exemption.marker)
+      exemption.file === hit.file &&
+      hit.literal.includes(exemption.marker) &&
+      literalHash(hit.literal) === exemption.literalHash
   );
 
 describe("hover-revealed controls stay visible without hover", () => {
@@ -364,16 +420,33 @@ describe("hover-revealed controls stay visible without hover", () => {
       expect(fs.existsSync(path.join(projectRoot, exemption.file))).toBe(true);
     }
 
-    const detached = AUDITED_REVEAL_EXEMPTIONS.filter(
-      (exemption) =>
-        !hits.some(
-          (hit) =>
-            hit.file === exemption.file &&
-            hit.literal.includes(exemption.marker)
-        )
-    ).map(({ file, marker }) => ({ file, marker }));
+    const detached = AUDITED_REVEAL_EXEMPTIONS.filter((exemption) => {
+      const matchingHits = hits.filter(
+        (hit) => exemptionFor(hit) === exemption
+      );
+      return matchingHits.length !== 1;
+    }).map(({ file, marker }) => ({ file, marker }));
 
     expect(detached).toEqual([]);
+  });
+
+  it("does not exempt a longer literal that merely contains the marker", () => {
+    const exemption = AUDITED_REVEAL_EXEMPTIONS[0];
+    const auditedHit = hits.find((hit) => exemptionFor(hit) === exemption);
+
+    expect(auditedHit).toBeDefined();
+    if (!auditedHit) {
+      throw new Error("Expected the audited gate to be present");
+    }
+    const closingQuote = auditedHit.literal.at(-1) ?? '"';
+    const longerLiteral = `${auditedHit.literal.slice(0, -1)} tw-sr-only${closingQuote}`;
+
+    expect(
+      exemptionFor({
+        ...auditedHit,
+        literal: longerLiteral,
+      })
+    ).toBeUndefined();
   });
 });
 
@@ -421,6 +494,18 @@ describe("gate detection", () => {
     expect(missingTouchFallbacks("tw-opacity-80 hover:tw-opacity-100")).toEqual(
       []
     );
+  });
+
+  it("detects a gate split around a template interpolation", () => {
+    const [literal] = classStringLiterals(
+      'const classes = `tw-opacity-0 ${variant} desktop-hover:group-hover:tw-opacity-100`;'
+    );
+
+    expect(literal).toBeDefined();
+    if (!literal) {
+      throw new Error("Expected the template class literal to be extracted");
+    }
+    expect(missingTouchFallbacks(literal)).toEqual(["opacity"]);
   });
 });
 

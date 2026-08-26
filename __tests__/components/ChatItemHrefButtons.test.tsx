@@ -463,20 +463,23 @@ describe("ChatItemHrefButtons", () => {
     expect(screen.getByRole("button", { name: "Link actions" })).toBeVisible();
   });
 
-  it("keeps the overlay trigger visible when the CSS hover query is unavailable", () => {
+  it("keeps the overlay trigger operable when the CSS hover query is unavailable", async () => {
+    const user = userEvent.setup();
     render(
       <div className="tw-group/link-card tw-relative">
         <ChatItemHrefButtons href="https://a" layout="overlay" />
       </div>
     );
 
-    expect(
-      screen.getByRole("button", { name: "Link actions" }).parentElement
-    ).toHaveClass(
+    const trigger = screen.getByRole("button", { name: "Link actions" });
+    expect(trigger.parentElement).toHaveClass(
       "tw-pointer-events-none",
       "tw-opacity-0",
       "touch-only:tw-pointer-events-auto",
       "touch-only:tw-opacity-100"
     );
+
+    await user.click(trigger);
+    expect(screen.getByRole("button", { name: "Copy link" })).toBeVisible();
   });
 });
