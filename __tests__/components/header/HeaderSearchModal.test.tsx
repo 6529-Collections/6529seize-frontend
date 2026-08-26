@@ -438,6 +438,11 @@ describe("HeaderSearchModal", () => {
       screen.getByRole("tabpanel", { name: "All results" })
     ).toBeInTheDocument();
     expect(screen.getByRole("status")).not.toHaveAttribute("aria-label");
+    expect(
+      screen.queryByText(
+        "Use arrow keys to move through results and Enter to open."
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the modal header stable when results load", () => {

@@ -28,6 +28,7 @@ import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.e
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 
 type MessageEntry = readonly [key: string, value: string];
@@ -1427,8 +1428,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
   profileRequiredConfirm: "Go to Identity",
-  profileRequiredDescription:
-    "Set up your profile before creating a Wave.",
+  profileRequiredDescription: "Set up your profile before creating a Wave.",
   profileRequiredTitle: "Create your profile first",
   subwaveTitle: "Create subwave",
   waveTitle: "Create Wave",
@@ -1621,6 +1621,17 @@ const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "guidelinesDialog.title": "Wave guidelines",
+  "guidelinesDialog.description":
+    "Review this wave's guidelines before sending your first message.",
+  "guidelinesDialog.guidelinesLabel": "Guidelines",
+  "guidelinesDialog.actionHint":
+    "Agree sends your message. Decline keeps it as a draft.",
+  "guidelinesDialog.agree": "Agree",
+  "guidelinesDialog.decline": "Decline",
+  "guidelinesDialog.loadErrorTitle": "Couldn't load the wave guidelines.",
+  "guidelinesDialog.loadErrorDescription":
+    "Please try again before sending your message.",
   "replyTargetDeletedToast.title": "Reply removed.",
   "replyTargetDeletedToast.description":
     "The message you were replying to was deleted. Your draft is still here.",
@@ -2238,8 +2249,6 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "recent.title": "Recent searches",
   scopeLabel: "Result type",
   "scope.allResults": "all results",
-  "status.keyboardHint":
-    "Use arrow keys to move through results and Enter to open.",
   viewAllCategory: "View all {category}",
 } as const);
 
@@ -2377,7 +2386,6 @@ export const EN_US_MESSAGES = {
   "nextgen.navigation.about": "About",
   "nextgen.navigation.featuredAriaLabel": "NextGen featured",
   "nextgen.navigation.sectionsAriaLabel": "NextGen sections",
-  "nextgen.token.navigation.backToCollected": "Back to {profile}'s collected",
   "nextgen.token.navigation.viewOwnerCollected": "View {profile}'s collected",
   "nextgen.home.byArtist": "by {artist}",
   "nextgen.home.exploreCollection": "Explore Collection",
@@ -2949,6 +2957,7 @@ export const EN_US_MESSAGES = {
   "rememes.card.tokenAriaLabel": "Token #{tokenId}",
   "rememes.card.replicaCount": "(x{count})",
   "user.collected.cards.listLabel": "Collected cards",
+  "user.collected.navigation.backToCollected": "Back to {profile}'s collected",
   "user.collected.empty.noCards": "No cards to display",
   "user.collected.empty.fullSetter": "Congratulations, full setter!",
   "user.collected.empty.memesFullSetter":
@@ -3384,6 +3393,7 @@ export const EN_US_MESSAGES = {
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
   ...PUBLIC_REVIEW_MESSAGES,
+  ...EULA_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,

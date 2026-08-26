@@ -2518,6 +2518,7 @@
         "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators can add Wave guidelines that are saved as wave metadata and shown under Guidelines in the wave rules panel.",
+        "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",
         "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
         "Wave admins can edit Wave guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
         "Participants can review rules in Configuration in the desktop wave right sidebar or from the mobile About information path."
@@ -2527,6 +2528,7 @@
       "tags": ["waves", "rules", "chat", "rank", "approve"],
       "source_refs": [
         "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/flow-wave-participation.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"
       ]
@@ -2579,6 +2581,8 @@
       ],
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
+        "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
+        "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
@@ -2588,6 +2592,7 @@
       "tags": ["waves", "composer", "drops"],
       "source_refs": [
         "ops/docs/waves/composer/README.md",
+        "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/chat/feature-chat-composer-availability.md"
       ]
     },
@@ -4837,11 +4842,16 @@
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
         "Wide tables in Details scroll horizontally on narrow screens while their first label column stays visible.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
-        "A NextGen token opened from a profile's Collected tab can return to the same profile filters, page, and opened card; direct token visits offer the current owner's NextGen holdings when available.",
+        "In the native app, The Memes, Gradients, NextGen, and Meme Lab tokens opened from a profile's Collected tab use the app-header Back chevron to restore the same profile filters, page, and opened card while retaining the detail page's collection link; mobile web shows an in-page return action, desktop uses browser Back, and direct token visits do not show a false return action, while NextGen can separately offer the current owner's holdings when available.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
       "canonical_path": "/{user}/collected",
-      "related_paths": ["/the-memes", "/meme-lab", "/nextgen"],
+      "related_paths": [
+        "/the-memes",
+        "/6529-gradient",
+        "/meme-lab",
+        "/nextgen"
+      ],
       "tags": ["profiles", "collected", "nfts"],
       "source_refs": [
         "app/[user]/collected/page.tsx",
@@ -6999,6 +7009,43 @@
       ],
       "tags": ["delegation", "tools"],
       "source_refs": ["app/delegation-mapping-tool/page.tsx"]
+    },
+    {
+      "id": "shared.native-ios-eula-consent",
+      "kind": "workflow",
+      "title": "Native iOS EULA consent",
+      "canonical_path": "/about/terms-of-service",
+      "aliases": [
+        "mobile EULA",
+        "iOS EULA",
+        "EULA acceptance",
+        "EULA retry",
+        "mobile agreement"
+      ],
+      "keywords": [
+        "eula",
+        "ios",
+        "mobile",
+        "consent",
+        "agreement",
+        "version",
+        "retry"
+      ],
+      "facts": [
+        "The native iOS app requires acceptance of the current EULA before application content starts.",
+        "EULA acceptance is versioned and valid for 365 days; stale, unversioned, expired, or differently versioned consent requires acceptance again.",
+        "A current unexpired device acceptance can restore consent after an iOS reinstall.",
+        "If the consent check fails, the iOS app remains blocked and offers Retry. If saving fails, the agreement stays visible so the user can try again.",
+        "Users must scroll through the agreement before Agree becomes available, and the mandatory dialog cannot be dismissed without acceptance.",
+        "Android and ordinary web sessions are not affected by the native iOS EULA gate."
+      ],
+      "related_paths": ["/about/terms-of-service"],
+      "tags": ["mobile", "ios", "eula", "consent", "legal"],
+      "source_refs": [
+        "components/eula/EULAConsentContext.tsx",
+        "components/eula/EULAModal.tsx",
+        "ops/docs/shared/feature-ios-eula-consent.md"
+      ]
     },
     {
       "id": "access.overview",

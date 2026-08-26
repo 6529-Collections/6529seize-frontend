@@ -508,9 +508,6 @@ export function HeaderSearchSiteResults({
           >
             {renderSuccessContent()}
           </div>
-          <p className="tw-mb-0 tw-mt-4 tw-text-center tw-text-[11px] tw-text-iron-600">
-            {t(locale, "headerSearch.status.keyboardHint")}
-          </p>
         </>
       );
     }

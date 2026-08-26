@@ -416,6 +416,18 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Zone d'envoi de fichiers du chat de wave",
+  "waves.chat.guidelinesDialog.title": "Directives de la wave",
+  "waves.chat.guidelinesDialog.description":
+    "Consultez les directives de cette wave avant d’envoyer votre premier message.",
+  "waves.chat.guidelinesDialog.guidelinesLabel": "Directives",
+  "waves.chat.guidelinesDialog.actionHint":
+    "Accepter envoie votre message. Refuser le conserve comme brouillon.",
+  "waves.chat.guidelinesDialog.agree": "Accepter",
+  "waves.chat.guidelinesDialog.decline": "Refuser",
+  "waves.chat.guidelinesDialog.loadErrorTitle":
+    "Impossible de charger les directives de la wave.",
+  "waves.chat.guidelinesDialog.loadErrorDescription":
+    "Réessayez avant d’envoyer votre message.",
   ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
   "waves.gifPicker.open": "Ajouter un GIF",

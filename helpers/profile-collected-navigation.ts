@@ -50,11 +50,24 @@ const buildRelativeUrl = ({
   readonly hash?: string | undefined;
 }): string => pathname + (search ? "?" + search : "") + hash;
 
-const isNextGenTokenPath = (pathname: string): boolean => {
+const hasNumericTokenId = (value: string | undefined): boolean =>
+  value !== undefined && /^\d+$/.test(value);
+
+const isCollectedTokenPath = (pathname: string): boolean => {
   const segments = pathname.split("/").filter(Boolean);
+
+  if (
+    segments.length === 2 &&
+    hasNumericTokenId(segments[1]) &&
+    ["the-memes", "6529-gradient", "meme-lab"].includes(segments[0] ?? "")
+  ) {
+    return true;
+  }
+
   return (
     segments[0] === "nextgen" &&
     segments[1] === "token" &&
+    hasNumericTokenId(segments[2]) &&
     (segments.length === 3 || segments.length === 4)
   );
 };
@@ -113,8 +126,7 @@ export const getCollectedCardAnchorId = ({
 export const isCollectedCardAnchorId = (value: string): boolean => {
   const match = /^collected-card-([a-z]+)-\d+$/.exec(value);
   return (
-    match?.[1] !== undefined &&
-    COLLECTED_COLLECTION_ANCHOR_VALUES.has(match[1])
+    match?.[1] !== undefined && COLLECTED_COLLECTION_ANCHOR_VALUES.has(match[1])
   );
 };
 
@@ -170,6 +182,20 @@ export function getProfileCollectedReturnContext(
   }
 }
 
+export function getProfileCollectedTokenReturnContext({
+  pathname,
+  returnTo,
+}: {
+  readonly pathname: string;
+  readonly returnTo: string | null | undefined;
+}): ProfileCollectedReturnContext | null {
+  if (!isCollectedTokenPath(pathname)) {
+    return null;
+  }
+
+  return getProfileCollectedReturnContext(returnTo);
+}
+
 export function buildProfileCollectedReturnPath({
   pathname,
   searchParams,
@@ -192,7 +218,7 @@ export function buildCollectedCardHref({
   readonly tokenId: number;
   readonly returnTo?: string | null | undefined;
 }): string {
-  if (collection !== CollectedCollectionType.NEXTGEN || !returnTo) {
+  if (!returnTo || collection === CollectedCollectionType.NETWORK) {
     return tokenPath;
   }
 
@@ -217,7 +243,7 @@ export function buildCollectedCardHref({
 export function stripCollectedReturnFromTokenRoute(route: string): string {
   try {
     const url = new URL(route, SAFE_URL_BASE);
-    if (!isNextGenTokenPath(url.pathname)) {
+    if (!isCollectedTokenPath(url.pathname)) {
       return buildRelativeUrl({
         pathname: url.pathname,
         search: url.search.slice(1),

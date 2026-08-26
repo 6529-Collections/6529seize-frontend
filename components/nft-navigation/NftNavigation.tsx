@@ -3,8 +3,11 @@ import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useMemo } from "react";
+
+interface SearchParamsSource {
+  toString(): string;
+}
 
 export default function NftNavigation(
   props: Readonly<{
@@ -13,7 +16,7 @@ export default function NftNavigation(
     startIndex: number;
     endIndex: number;
     fullscreenElementId?: string | undefined;
-    params?: ReadonlyURLSearchParams | undefined;
+    params?: SearchParamsSource | undefined;
   }>
 ) {
   const isFirst = props.nftId === props.startIndex;

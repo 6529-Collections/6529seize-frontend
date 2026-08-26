@@ -131,6 +131,7 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(button).toHaveClass("tw-w-0");
     expect(button).toHaveClass("desktop-hover:group-hover:tw-w-7");
     expect(button).toHaveClass("focus-visible:tw-w-7");
+    expect(button).toHaveClass("touch-only:tw-w-7");
     expect(button).not.toHaveClass("group-focus-within:tw-w-7");
     expect(button).not.toHaveClass("focus:tw-w-7");
     expect(button.querySelector("svg")).toHaveClass("tw-size-3.5");
@@ -143,6 +144,7 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(button).toHaveClass("tw-opacity-0");
     expect(button).toHaveClass("desktop-hover:group-hover:tw-opacity-100");
     expect(button).toHaveClass("focus-visible:tw-opacity-100");
+    expect(button).toHaveClass("touch-only:tw-opacity-100");
     expect(button).not.toHaveClass("group-focus-within:tw-opacity-100");
     expect(button).not.toHaveClass("focus:tw-opacity-100");
   });

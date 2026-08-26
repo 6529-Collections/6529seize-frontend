@@ -70,9 +70,12 @@ function UserPageHeaderAboutContent({
                 type="button"
                 onClick={onEditClick}
                 aria-label={editActionLabel}
-                className="tw-pointer-events-none tw-hidden tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-iron-200 sm:tw-block sm:group-focus-within:tw-pointer-events-auto sm:group-focus-within:tw-opacity-100"
+                className="tw-pointer-events-none tw-hidden tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-iron-200 touch-only:tw-pointer-events-auto touch-only:tw-size-11 touch-only:tw-opacity-100 sm:tw-block sm:group-focus-within:tw-pointer-events-auto sm:group-focus-within:tw-opacity-100"
               >
-                <span aria-hidden="true">
+                <span
+                  aria-hidden="true"
+                  className="tw-flex tw-size-full tw-items-center tw-justify-center"
+                >
                   <PencilIcon size={PencilIconSize.SMALL} />
                 </span>
               </button>

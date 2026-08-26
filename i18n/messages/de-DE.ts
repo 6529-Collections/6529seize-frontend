@@ -410,6 +410,18 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Datei-Upload-Bereich für den Wave-Chat",
+  "waves.chat.guidelinesDialog.title": "Wave-Richtlinien",
+  "waves.chat.guidelinesDialog.description":
+    "Sieh dir die Richtlinien dieser Wave an, bevor du deine erste Nachricht sendest.",
+  "waves.chat.guidelinesDialog.guidelinesLabel": "Richtlinien",
+  "waves.chat.guidelinesDialog.actionHint":
+    "Mit „Zustimmen“ wird deine Nachricht gesendet. Mit „Ablehnen“ bleibt sie als Entwurf erhalten.",
+  "waves.chat.guidelinesDialog.agree": "Zustimmen",
+  "waves.chat.guidelinesDialog.decline": "Ablehnen",
+  "waves.chat.guidelinesDialog.loadErrorTitle":
+    "Wave-Richtlinien konnten nicht geladen werden.",
+  "waves.chat.guidelinesDialog.loadErrorDescription":
+    "Versuche es erneut, bevor du deine Nachricht sendest.",
   ...stormComposerDeMessages,
   "waves.loadingStatus": "Waves werden geladen",
   "waves.gifPicker.open": "GIF hinzufügen",

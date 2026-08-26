@@ -611,6 +611,7 @@ export default function UserPageCollected({
           filters.accountForConsolidations ? null : filters.handleOrWallet
         }
         initialStatsData={initialStatsData}
+        autoScrollDetailsOnOpen={isMobile}
         locale={locale}
         activeCollection={filters.collection}
         activeSeasonNumber={effectiveSeasonId}

@@ -193,7 +193,7 @@ function MemeLabAdditionalDetailsAccordion({
           >
             <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           </span>
-          <span className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
+          <span className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg">
             Additional details
           </span>
         </span>
@@ -242,7 +242,7 @@ function MemeLabAdditionalDetailsContent({ nft }: { readonly nft: LabNFT }) {
   const attributes = getMemeLabMetadataAttributes(nft.metadata);
 
   return (
-    <div className="tw-space-y-14 tw-pb-8 tw-pt-8">
+    <div className="tw-space-y-[34px] tw-pb-8 tw-pt-8 sm:tw-space-y-14">
       {arweaveRows.length > 0 && (
         <AdditionalDetailsSection title="Arweave links" icon={LinkIcon}>
           <div>

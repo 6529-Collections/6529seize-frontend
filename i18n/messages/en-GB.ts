@@ -393,6 +393,18 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_QR_SCANNER_MESSAGES,
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
+  "waves.chat.guidelinesDialog.title": "Wave guidelines",
+  "waves.chat.guidelinesDialog.description":
+    "Review this wave's guidelines before sending your first message.",
+  "waves.chat.guidelinesDialog.guidelinesLabel": "Guidelines",
+  "waves.chat.guidelinesDialog.actionHint":
+    "Agree sends your message. Decline keeps it as a draft.",
+  "waves.chat.guidelinesDialog.agree": "Agree",
+  "waves.chat.guidelinesDialog.decline": "Decline",
+  "waves.chat.guidelinesDialog.loadErrorTitle":
+    "Couldn't load the wave guidelines.",
+  "waves.chat.guidelinesDialog.loadErrorDescription":
+    "Please try again before sending your message.",
   "waves.loadingStatus": "Loading waves",
   "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",

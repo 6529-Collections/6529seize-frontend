@@ -5,6 +5,7 @@ import {
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
+import { PROFILE_COLLECTED_RETURN_PARAM } from "@/helpers/profile-collected-navigation";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import {
   buildNftPageJsonLd,
@@ -13,6 +14,22 @@ import {
 import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
 import { cache } from "react";
+
+type GradientDetailSearchParams = Record<string, string | string[] | undefined>;
+
+const serializeSearchParams = (
+  searchParams: GradientDetailSearchParams
+): string => {
+  const serialized = new URLSearchParams();
+
+  const returnTo = searchParams[PROFILE_COLLECTED_RETURN_PARAM];
+  const returnToValue = Array.isArray(returnTo) ? returnTo[0] : returnTo;
+  if (returnToValue !== undefined) {
+    serialized.set(PROFILE_COLLECTED_RETURN_PARAM, returnToValue);
+  }
+
+  return serialized.toString();
+};
 
 const loadGradientNft = cache((id: string) =>
   fetchNftForStructuredData({
@@ -23,10 +40,13 @@ const loadGradientNft = cache((id: string) =>
 
 export default async function GradientPage({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ id: string }>;
+  readonly searchParams?: Promise<GradientDetailSearchParams>;
 }) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const nft = await loadGradientNft(id);
 
   return (
@@ -41,7 +61,10 @@ export default async function GradientPage({
           license: null,
         })}
       />
-      <GradientPageComponent id={id} />
+      <GradientPageComponent
+        id={id}
+        searchParamsString={serializeSearchParams(resolvedSearchParams)}
+      />
     </main>
   );
 }
