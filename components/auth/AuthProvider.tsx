@@ -1,6 +1,5 @@
 "use client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAccount } from "@wagmi/core";
 import { usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
@@ -11,7 +10,6 @@ import {
   useState,
 } from "react";
 import type { MouseEvent } from "react";
-import { useAccount, useConfig } from "wagmi";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import {
   AppToastContainer,
@@ -77,6 +75,7 @@ import {
   runImmediateAuthValidation,
 } from "./authValidation";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
+import { useAuthChainGuard } from "./useAuthChainGuard";
 
 export default function Auth({
   children,
@@ -92,19 +91,7 @@ export default function Auth({
   const pathname = usePathname();
   const router = useRouter();
   const seizeSettingsContext = useSeizeSettingsOptional();
-  const wagmiAccount = useAccount();
-  const wagmiConfig = useConfig();
-  const isActiveChainSupported =
-    typeof wagmiAccount.chainId === "number" &&
-    wagmiConfig.chains.some((chain) => chain.id === wagmiAccount.chainId);
-  const isActiveChainSupportedNow = useCallback((): boolean => {
-    const activeChainId = getAccount(wagmiConfig).chainId;
-    return (
-      typeof activeChainId === "number" &&
-      wagmiConfig.chains.some((chain) => chain.id === activeChainId)
-    );
-  }, [wagmiConfig]);
-
+  const authChainGuard = useAuthChainGuard();
   const {
     address,
     hasValidWalletAuth: isAddressAuthorized,
@@ -118,7 +105,6 @@ export default function Auth({
     isSafeWallet,
     connectionState,
   } = useSeizeConnectContext();
-
   const {
     signMessage,
     isSigningPending,
@@ -575,7 +561,7 @@ export default function Auth({
       expireSessionUpgradeAuth,
       invalidateAll,
       isAddressAuthorized,
-      isActiveChainSupported: isActiveChainSupportedNow,
+      isActiveChainSupported: authChainGuard.isActiveChainSupportedNow,
       seizeDisconnect,
       resetSessionUpgradeExpiryDedupe,
       setActiveProfileProxy,
@@ -701,7 +687,6 @@ export default function Auth({
     sessionUpgradeCanDismiss,
     signModalReason,
   ]);
-
   const isSignRequestInProgress =
     isSigningPending || authLoadingState === "signing";
   const isSessionUpgradePrompt = signModalReason === "session-upgrade";
@@ -712,21 +697,15 @@ export default function Auth({
     sessionUpgradePromptMode === "sign" &&
     !canSignActiveWallet &&
     getSessionClientType() === "web";
-  const isNonSigningSessionUpgradePrompt =
-    isConnectionShareUpgradePrompt || isDisconnectedWebSessionUpgradePrompt;
-  const canShowSignModalForActiveChain =
-    isActiveChainSupported ||
-    (isNonSigningSessionUpgradePrompt && !wagmiAccount.isConnected);
-
-  const shouldShowSignModal =
-    showSignModal &&
-    !isSigningOutAll &&
-    !(
-      authLoadingState === "validating" && signModalReason !== "session-upgrade"
-    ) &&
-    (connectionState === "connected" ||
-      isDisconnectedWebSessionUpgradePrompt) &&
-    canShowSignModalForActiveChain;
+  const shouldShowSignModal = authChainGuard.shouldShowSignModal({
+    authLoadingState,
+    connectionState,
+    isConnectionShareUpgradePrompt,
+    isDisconnectedWebSessionUpgradePrompt,
+    isSigningOutAll,
+    showSignModal,
+    signModalReason,
+  });
 
   useEffect(() => {
     syncVisibleAuthPromptTracking({
