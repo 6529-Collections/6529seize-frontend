@@ -6,6 +6,7 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import styles from "@/styles/Home.module.css";
+import clsx from "clsx";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -62,7 +63,10 @@ export default function AccessPage() {
     <main className={styles["login"]}>
       {image && <LoginImage image={image} alt="access" />}
       <div
-        className={`${styles["loginPrompt"]} ${styles["loginPromptKeyboardAware"]}`}
+        className={clsx(
+          styles["loginPrompt"],
+          styles["loginPromptKeyboardAware"]
+        )}
       >
         <input
           disabled={inputDisabled}

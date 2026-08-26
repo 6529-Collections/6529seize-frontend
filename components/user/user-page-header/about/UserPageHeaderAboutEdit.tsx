@@ -65,8 +65,8 @@ export default function UserPageHeaderAboutEdit({
     }
 
     inputRef.current.focus();
-    const { value } = inputRef.current;
-    inputRef.current.setSelectionRange(value.length, value.length);
+    const { value: inputValue } = inputRef.current;
+    inputRef.current.setSelectionRange(inputValue.length, inputValue.length);
   }, [autoFocus]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -377,10 +377,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   > | null>(null);
 
   useEffect(() => {
-    setActiveView("actions");
-  }, [drop.id]);
-
-  useEffect(() => {
     return () => {
       clearCurationsDialogTimeout(curationsDialogTimeoutRef);
     };
