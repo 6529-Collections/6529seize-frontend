@@ -38,6 +38,15 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import Button from "@/components/utils/button/Button";
+import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
+import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
+import { useWaveGuidelinesSubmission } from "./create-drop-content/useWaveGuidelinesSubmission";
+import type {
+  DropMutationBody,
+  QueuedDropMutationBody,
+  SlowModeChatReservation,
+  SlowModeChatWaveState,
+} from "./create-drop-content/drop-submission.types";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -72,29 +81,6 @@ interface CreateDropProps {
   readonly focusOnInitialActiveDrop?: boolean | undefined;
   readonly initialMarkdown?: string | null | undefined;
   readonly initialMarkdownKey?: string | null | undefined;
-}
-
-export interface DropMutationBody {
-  readonly drop: ApiCreateDropRequest;
-  readonly dropId: string | null;
-  readonly onSuccess?: (() => void) | undefined;
-  readonly onError?: ((error: unknown) => boolean | void) | undefined;
-}
-
-interface SlowModeChatReservation {
-  readonly id: number;
-  readonly waveId: string;
-  readonly cooldownMs: number;
-}
-
-interface QueuedDropMutationBody extends DropMutationBody {
-  readonly slowModeChatReservation?: SlowModeChatReservation | undefined;
-}
-
-interface SlowModeChatWaveState {
-  pendingReservationId: number | null;
-  cooldownUntil: number | null;
-  cooldownMs: number | null;
 }
 
 export default function CreateDrop({
@@ -141,6 +127,16 @@ export default function CreateDrop({
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
   const { processDropRemoved, processIncomingDrop } = useMyStream();
+  const {
+    agreeToGuidelines,
+    declineGuidelines,
+    dialogGuidelines,
+    markChatSubmitted,
+    requestGuidelinesAgreement,
+  } = useWaveGuidelinesAgreement({
+    profileId: connectedProfile?.id ?? null,
+    wave,
+  });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -575,7 +571,7 @@ export default function CreateDrop({
     waitAndInvalidateDrops,
   ]);
 
-  const submitDrop = useCallback(
+  const enqueueDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
       const slowModeChatReservation = reserveSlowModeChatQueueSlot(
         dropRequest.drop
@@ -606,6 +602,10 @@ export default function CreateDrop({
       // Trigger UI updates
       onDropAddedToQueue();
 
+      if (dropRequest.drop.drop_type === ApiDropType.Chat) {
+        markChatSubmitted();
+      }
+
       // Explicitly blur any focused input to close keyboard for drop flows.
       if (
         dropRequest.drop.drop_type !== ApiDropType.Chat &&
@@ -617,12 +617,19 @@ export default function CreateDrop({
       return true;
     },
     [
+      markChatSubmitted,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
       unreadDividerContext,
     ]
   );
+
+  const submitDrop = useWaveGuidelinesSubmission({
+    enqueueDrop,
+    requestGuidelinesAgreement,
+    setToast,
+  });
 
   const createDropContentProps = useMemo(() => {
     const hasExitFixedDropMode = onExitFixedDropMode !== undefined;
@@ -737,5 +744,14 @@ export default function CreateDrop({
     );
   }
 
-  return dropComposerContent;
+  return (
+    <>
+      {dropComposerContent}
+      <WaveGuidelinesAgreementDialog
+        guidelines={dialogGuidelines}
+        onAgree={agreeToGuidelines}
+        onDecline={declineGuidelines}
+      />
+    </>
+  );
 }
