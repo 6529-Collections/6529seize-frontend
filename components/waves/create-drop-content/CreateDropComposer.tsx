@@ -12,7 +12,6 @@ import CreateDropStormParts from "../CreateDropStormParts";
 import { CreateDropSubmit } from "../CreateDropSubmit";
 import SlowModeChatNotice from "../SlowModeChatNotice";
 import type { CreateDropLayoutProps } from "./CreateDropLayout";
-import { exportComposerMarkdown } from "./exportComposerMarkdown";
 
 interface CreateDropComposerProps extends CreateDropLayoutProps {
   readonly initialDraftJson: string | null;
@@ -29,6 +28,7 @@ export default function CreateDropComposer({
   setActionsContainerRef,
   isLinksSubmitBlocked,
   canAddPart,
+  showStormHint,
   isCompactLayout,
   showOptions,
   animateOptions,
@@ -89,11 +89,6 @@ export default function CreateDropComposer({
     editingPartIndex === null
       ? (drop?.parts.length ?? 0) + 1
       : editingPartIndex + 1;
-  const currentPartMarkdown = editorState
-    ? exportComposerMarkdown(editorState)
-    : initialMarkdown;
-  const showStormHint =
-    (currentPartMarkdown?.trim().length ?? 0) === 0 && files.length === 0;
   let submitLabel: string | undefined;
   if (isStormModeActive) {
     if (editingPartIndex !== null) {

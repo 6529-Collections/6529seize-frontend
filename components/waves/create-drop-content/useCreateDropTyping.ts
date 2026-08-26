@@ -20,8 +20,16 @@ export function useCreateDropTyping({
   );
 
   useEffect(() => {
-    if (markdown?.length) {
-      throttledSendTyping();
+    if (markdown === null || markdown.length === 0) {
+      throttledSendTyping.cancel();
+      return;
     }
+
+    throttledSendTyping();
   }, [markdown, throttledSendTyping]);
+
+  useEffect(
+    () => () => throttledSendTyping.cancel(),
+    [throttledSendTyping]
+  );
 }

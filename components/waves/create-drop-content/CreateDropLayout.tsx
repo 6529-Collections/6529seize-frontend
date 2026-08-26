@@ -67,6 +67,7 @@ export interface CreateDropLayoutProps {
   readonly setActionsContainerRef: (node: HTMLDivElement | null) => void;
   readonly isLinksSubmitBlocked: boolean;
   readonly canAddPart: boolean;
+  readonly showStormHint: boolean;
   readonly isCompactLayout: boolean;
   readonly showOptions: boolean;
   readonly animateOptions: boolean;

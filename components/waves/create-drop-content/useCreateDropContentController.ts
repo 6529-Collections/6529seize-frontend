@@ -130,13 +130,16 @@ export function useCreateDropContentController({
   const shouldCollapseOptionsAfterMarkdownSyncRef = useRef(false);
   const prevIsDropModeRef = useRef(isDropMode);
   const [dropModeSessionEpoch, setDropModeSessionEpoch] = useState(0);
-  const isWaveChanged = prevWaveIdRef.current !== wave.id;
-  if (isWaveChanged) {
+  useLayoutEffect(() => {
+    if (prevWaveIdRef.current === wave.id) {
+      return;
+    }
+
     prevWaveIdRef.current = wave.id;
     shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
     shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
-  }
+  }, [wave.id]);
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const keepDesktopOptionsVisible = !isMobile && isWideContainer;
   // Keep the scoped collapse state live so resizing back to a narrow layout
@@ -252,6 +255,9 @@ export function useCreateDropContentController({
     () => (editorState ? exportComposerMarkdown(editorState) : null),
     [editorState]
   );
+  const showStormHint =
+    ((editorState ? getMarkdown : initialMarkdown)?.trim().length ?? 0) === 0 &&
+    files.length === 0;
   const collapseOptions = useCallback(() => {
     shouldAnimateOptionsRef.current = true;
     setShowOptionsState((current) =>
@@ -729,6 +735,7 @@ export function useCreateDropContentController({
     setActionsContainerRef,
     isLinksSubmitBlocked,
     canAddPart,
+    showStormHint,
     isCompactLayout: !keepDesktopOptionsVisible,
     showOptions,
     animateOptions,
