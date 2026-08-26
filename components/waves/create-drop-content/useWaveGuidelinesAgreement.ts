@@ -22,6 +22,7 @@ interface GuidelinesDialogState {
 }
 
 const hasPostedInWave = (wave: ApiWave): boolean =>
+  // Backend dropper metrics count CHAT and PARTICIPATORY drops separately.
   (wave.metrics.your_drops_count ?? 0) > 0 ||
   wave.metrics.your_participation_drops_count > 0;
 
@@ -43,6 +44,9 @@ export function useWaveGuidelinesAgreement({
   const [dialogState, setDialogState] = useState<GuidelinesDialogState | null>(
     null
   );
+  if (dialogState !== null && dialogState.scopeKey !== scopeKey) {
+    setDialogState(null);
+  }
 
   const settlePendingDecision = useCallback(
     (result: WaveGuidelinesAgreementResult) => {
@@ -137,10 +141,6 @@ export function useWaveGuidelinesAgreement({
   );
 
   const agreeToGuidelines = useCallback(() => {
-    const pendingScopeKey = pendingDecisionRef.current?.scopeKey;
-    if (pendingScopeKey) {
-      satisfiedScopeKeysRef.current.add(pendingScopeKey);
-    }
     settlePendingDecision("accepted");
   }, [settlePendingDecision]);
 

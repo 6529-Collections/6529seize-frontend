@@ -50,8 +50,8 @@ participation drop in the wave.
 
 - Pressing Escape or dismissing the dialog has the same result as
   **Decline**: the message is not sent and the draft remains available.
-- Declining does not record agreement. Submitting the draft again opens the
-  guidelines again while the profile still has no posts in the wave.
+- Declining does not record agreement. If the profile still has no posts in the
+  wave, submitting the draft opens the guidelines again.
 - The dialog keeps its header and actions visible while long guidelines scroll
   inside the available height. Its mobile layout respects the viewport and
   device safe areas.

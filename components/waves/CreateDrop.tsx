@@ -38,10 +38,9 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import Button from "@/components/utils/button/Button";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
 import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
+import { useWaveGuidelinesSubmission } from "./create-drop-content/useWaveGuidelinesSubmission";
 import type {
   DropMutationBody,
   QueuedDropMutationBody,
@@ -84,13 +83,6 @@ interface CreateDropProps {
   readonly initialMarkdownKey?: string | null | undefined;
 }
 
-const isTypedChatMessage = (drop: ApiCreateDropRequest): boolean =>
-  drop.drop_type === ApiDropType.Chat &&
-  drop.parts.some(
-    (part) =>
-      typeof part.content === "string" && part.content.trim().length > 0
-  );
-
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
@@ -118,7 +110,6 @@ export default function CreateDrop({
   initialMarkdownKey = null,
 }: CreateDropProps) {
   const { setToast, connectedProfile } = useAuth();
-  const locale = useBrowserLocale();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();
@@ -634,37 +625,11 @@ export default function CreateDrop({
     ]
   );
 
-  const submitDrop = useCallback(
-    (dropRequest: DropMutationBody): boolean | Promise<boolean> => {
-      if (!isTypedChatMessage(dropRequest.drop)) {
-        return enqueueDrop(dropRequest);
-      }
-
-      return requestGuidelinesAgreement(dropRequest.drop.drop_type).then(
-        (guidelinesAgreement) => {
-          if (guidelinesAgreement !== "accepted") {
-            if (guidelinesAgreement === "unavailable") {
-              setToast({
-                type: "error",
-                title: t(
-                  locale,
-                  "waves.chat.guidelinesDialog.loadErrorTitle"
-                ),
-                description: t(
-                  locale,
-                  "waves.chat.guidelinesDialog.loadErrorDescription"
-                ),
-              });
-            }
-            return false;
-          }
-
-          return enqueueDrop(dropRequest);
-        }
-      );
-    },
-    [enqueueDrop, locale, requestGuidelinesAgreement, setToast]
-  );
+  const submitDrop = useWaveGuidelinesSubmission({
+    enqueueDrop,
+    requestGuidelinesAgreement,
+    setToast,
+  });
 
   const createDropContentProps = useMemo(() => {
     const hasExitFixedDropMode = onExitFixedDropMode !== undefined;

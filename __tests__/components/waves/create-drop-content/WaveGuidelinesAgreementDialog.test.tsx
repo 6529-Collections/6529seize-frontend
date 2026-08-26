@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveGuidelinesAgreementDialog from "@/components/waves/create-drop-content/WaveGuidelinesAgreementDialog";
 
@@ -19,9 +19,11 @@ describe("WaveGuidelinesAgreementDialog", () => {
       />
     );
 
-    expect(
-      screen.getByRole("dialog", { name: "Wave guidelines" })
-    ).toBeVisible();
+    const dialog = screen.getByRole("dialog", { name: "Wave guidelines" });
+    expect(dialog).toBeVisible();
+    expect(dialog).toHaveAccessibleDescription(
+      "Review this wave's guidelines before sending your first message."
+    );
     const guidelines = screen.getByText(
       (_content, element) =>
         element?.tagName === "P" &&
@@ -32,10 +34,16 @@ describe("WaveGuidelinesAgreementDialog", () => {
     expect(screen.getByText(/Decline keeps it as a draft/)).toBeVisible();
     expect(container).toBeEmptyDOMElement();
 
-    const guidelinesScroller = guidelines.closest("section")?.parentElement;
+    const guidelinesScroller = screen.getByRole("region", {
+      name: "Guidelines",
+    });
     expect(guidelinesScroller).toHaveClass("tw-overflow-y-auto");
+    expect(guidelinesScroller).toHaveAttribute("tabindex", "0");
 
-    await user.click(screen.getByRole("button", { name: "Agree" }));
+    const agreeButton = screen.getByRole("button", { name: "Agree" });
+    await waitFor(() => expect(agreeButton).toHaveFocus());
+
+    await user.click(agreeButton);
     expect(onAgree).toHaveBeenCalledTimes(1);
     expect(onDecline).not.toHaveBeenCalled();
   });

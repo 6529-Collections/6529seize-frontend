@@ -124,6 +124,43 @@ describe("useWaveGuidelinesAgreement", () => {
 
     act(() => result.current.agreeToGuidelines());
     await expect(secondRequest).resolves.toBe("accepted");
+    act(() => result.current.markChatSubmitted());
+    await expect(
+      result.current.requestGuidelinesAgreement(ApiDropType.Chat)
+    ).resolves.toBe("accepted");
+    expect(fetchWaveMetadataMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not remember agreement until the chat is submitted", async () => {
+    fetchWaveMetadataMock.mockResolvedValue(guidelinesMetadata);
+    const { result } = renderHook(() =>
+      useWaveGuidelinesAgreement({
+        profileId: "profile-1",
+        wave: createWave(),
+      })
+    );
+
+    let firstRequest!: Promise<string>;
+    act(() => {
+      firstRequest = result.current.requestGuidelinesAgreement(
+        ApiDropType.Chat
+      );
+    });
+    await waitFor(() => expect(result.current.dialogGuidelines).not.toBeNull());
+    act(() => result.current.agreeToGuidelines());
+    await expect(firstRequest).resolves.toBe("accepted");
+
+    let retryRequest!: Promise<string>;
+    act(() => {
+      retryRequest = result.current.requestGuidelinesAgreement(
+        ApiDropType.Chat
+      );
+    });
+    await waitFor(() => expect(result.current.dialogGuidelines).not.toBeNull());
+    act(() => result.current.declineGuidelines());
+    await expect(retryRequest).resolves.toBe("declined");
+
+    act(() => result.current.markChatSubmitted());
     await expect(
       result.current.requestGuidelinesAgreement(ApiDropType.Chat)
     ).resolves.toBe("accepted");
@@ -165,6 +202,9 @@ describe("useWaveGuidelinesAgreement", () => {
     rerender({ profileId: "profile-2" });
 
     await expect(pendingRequest).resolves.toBe("declined");
+    expect(result.current.dialogGuidelines).toBeNull();
+
+    rerender({ profileId: "profile-1" });
     expect(result.current.dialogGuidelines).toBeNull();
   });
 });
