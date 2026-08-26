@@ -117,12 +117,6 @@ export default function UserPageHeaderEditProfile({
       if (view.parentElement) {
         view.parentElement.scrollTop = 0;
       }
-
-      view
-        .querySelector<HTMLElement>(
-          "button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex='-1'])"
-        )
-        ?.focus({ preventScroll: true });
     });
 
     return () => globalThis.cancelAnimationFrame(frame);
@@ -167,6 +161,7 @@ export default function UserPageHeaderEditProfile({
         enableDragToClose
         showScrollbar={showScrollbar}
         maxWidthClass={maxWidthClass}
+        focusTitleOnOpen
         surfaceClassName="tw-bg-iron-950 md:tw-shadow-2xl"
         headerActions={
           activeTarget === "banner" ? (
@@ -182,15 +177,15 @@ export default function UserPageHeaderEditProfile({
         <div ref={viewRef}>
           {activeTarget === null && (
             <div className="tw-px-4 sm:tw-px-6">
-              <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
+              <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
                 {options.map(({ target, label, Icon }) => (
                   <li key={target}>
                     <button
                       type="button"
                       onClick={() => selectTarget(target)}
-                      className="tw-group/option tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-[background-color,color,transform] tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-[0.99] active:tw-bg-white/[0.07] desktop-hover:hover:tw-bg-white/[0.045] desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                      className="tw-group/option tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-left tw-text-base tw-font-medium tw-text-iron-100 tw-transition-[background-color,color,transform] tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-[0.99] active:tw-bg-white/[0.07] desktop-hover:hover:tw-bg-white/[0.045] desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                     >
-                      <span className="tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.035] tw-text-iron-400 tw-transition-colors tw-duration-200 group-focus-visible/option:tw-border-primary-400/20 group-focus-visible/option:tw-bg-primary-500/10 group-focus-visible/option:tw-text-primary-300 group-active/option:tw-border-primary-400/20 group-active/option:tw-bg-primary-500/10 group-active/option:tw-text-primary-300 desktop-hover:group-hover/option:tw-border-primary-400/20 desktop-hover:group-hover/option:tw-bg-primary-500/10 desktop-hover:group-hover/option:tw-text-primary-300 motion-reduce:tw-transition-none">
+                      <span className="tw-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.035] tw-text-iron-400 tw-transition-colors tw-duration-200 group-focus-visible/option:tw-border-primary-400/20 group-focus-visible/option:tw-bg-primary-500/10 group-focus-visible/option:tw-text-primary-300 group-active/option:tw-border-primary-400/20 group-active/option:tw-bg-primary-500/10 group-active/option:tw-text-primary-300 desktop-hover:group-hover/option:tw-border-primary-400/20 desktop-hover:group-hover/option:tw-bg-primary-500/10 desktop-hover:group-hover/option:tw-text-primary-300 motion-reduce:tw-transition-none">
                         <Icon className="tw-size-5" aria-hidden="true" />
                       </span>
                       <span className="tw-min-w-0 tw-flex-1 tw-leading-5">

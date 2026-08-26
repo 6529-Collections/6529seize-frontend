@@ -522,6 +522,8 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
+  menuLabel: "Drop actions",
+  reactionPickerLabel: "Add reaction to drop",
   copyText: "Copy text",
   copyLink: "Copy link",
   copied: "Copied!",
