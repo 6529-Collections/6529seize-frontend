@@ -1,4 +1,5 @@
 import useCapacitor from "@/hooks/useCapacitor";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -60,6 +61,7 @@ type MobileWrapperDialogProps = {
   readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
+  readonly hideOnDesktopHover?: boolean | undefined;
 };
 
 function getSlideTransition(tabletModal?: boolean) {
@@ -374,9 +376,11 @@ export default function MobileWrapperDialog({
   backLabel,
   closeLabel,
   dismissible = true,
+  hideOnDesktopHover = false,
 }: MobileWrapperDialogProps) {
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const isTouchDevice = useIsTouchDevice();
   const titleRef = useRef<HTMLElement>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
@@ -437,6 +441,7 @@ export default function MobileWrapperDialog({
   const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
   const hideMobileCloseButton = canDragToClose;
+  const shouldHideOnDesktopHover = hideOnDesktopHover && !isTouchDevice;
 
   useEffect(() => {
     if (!isOpen || !focusTitleOnOpen) {
@@ -454,7 +459,11 @@ export default function MobileWrapperDialog({
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
+        className={clsx(
+          "tailwind-scope tw-absolute",
+          zIndexClassName,
+          shouldHideOnDesktopHover && "lg:desktop-hover:tw-hidden"
+        )}
         onClose={handleClose}
         aria-label={ariaLabel}
         {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}

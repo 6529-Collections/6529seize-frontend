@@ -15,6 +15,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import useCapacitor from "@/hooks/useCapacitor";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { FC, PointerEvent, Ref } from "react";
 import {
@@ -355,6 +356,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
   const { mobileMenuZIndexClassName } = useWaveDropLayers();
@@ -479,6 +481,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
         showHeaderDivider={activeView === "reactions"}
         showScrollbar={activeView === "actions"}
         enableDragToClose
+        hideOnDesktopHover={!isCapacitor}
       >
         {activeView === "actions" ? (
           <div className="tw-px-4 sm:tw-px-6">

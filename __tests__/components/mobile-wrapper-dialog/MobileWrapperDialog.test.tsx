@@ -1,6 +1,11 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock("@/hooks/useIsTouchDevice");
+
+const mockedUseIsTouchDevice = jest.mocked(useIsTouchDevice);
 
 describe("MobileWrapperDialog", () => {
   const defaultProps = {
@@ -11,6 +16,7 @@ describe("MobileWrapperDialog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseIsTouchDevice.mockReturnValue(false);
   });
 
   const fireTouch = (
@@ -49,6 +55,36 @@ describe("MobileWrapperDialog", () => {
 
       expect(content).toHaveClass("tw-pt-4", "tw-pb-6");
       expect(content).not.toHaveClass("tw-py-6");
+    });
+
+    it("hides desktop-hover-only surfaces when requested", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          hideOnDesktopHover
+        />
+      );
+
+      expect(screen.getByRole("dialog")).toHaveClass(
+        "lg:desktop-hover:tw-hidden"
+      );
+    });
+
+    it("keeps requested surfaces visible on touch-first devices", () => {
+      mockedUseIsTouchDevice.mockReturnValue(true);
+
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          hideOnDesktopHover
+        />
+      );
+
+      expect(screen.getByRole("dialog")).not.toHaveClass(
+        "lg:desktop-hover:tw-hidden"
+      );
     });
 
     it("renders title when provided", () => {
@@ -138,7 +174,7 @@ describe("MobileWrapperDialog", () => {
 
       expect(
         document.querySelector(
-          ".tw-rounded-t-xl.mobile-wrapper-dialog-overflow-surface.tw-overflow-visible"
+          ".tw-rounded-t-2xl.mobile-wrapper-dialog-overflow-surface.tw-overflow-visible"
         )
       ).toBeInTheDocument();
       expect(
@@ -154,7 +190,7 @@ describe("MobileWrapperDialog", () => {
       const container = document.querySelector<HTMLElement>(
         ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
       );
-      const surface = document.querySelector<HTMLElement>(".tw-rounded-t-xl");
+      const surface = document.querySelector<HTMLElement>(".tw-rounded-t-2xl");
 
       expect(container).toHaveClass(
         "[--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]"
@@ -183,7 +219,7 @@ describe("MobileWrapperDialog", () => {
         />
       );
 
-      const surface = document.querySelector<HTMLElement>(".tw-rounded-t-xl");
+      const surface = document.querySelector<HTMLElement>(".tw-rounded-t-2xl");
 
       expect(surface?.style.height).toContain(
         "var(--mobile-wrapper-dialog-keyboard-inset, 0px)"
@@ -213,10 +249,10 @@ describe("MobileWrapperDialog", () => {
 
     it.each([
       {
-        name: "enables dragging without rendering a handle",
+        name: "enables dragging with the standard handle",
         props: { enableDragToClose: true },
         canDrag: true,
-        showsHandle: false,
+        showsHandle: true,
       },
       {
         name: "lets an explicit false override the handle fallback",
@@ -240,7 +276,7 @@ describe("MobileWrapperDialog", () => {
         name: "enables mobile dragging for responsive tablet modals",
         props: { enableDragToClose: true, tabletModal: true },
         canDrag: true,
-        showsHandle: false,
+        showsHandle: true,
       },
     ])("$name", ({ props, canDrag, showsHandle }) => {
       render(
