@@ -114,7 +114,7 @@ const MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME =
 function getMemeLabTabButtonClassName(isActive: boolean) {
   return `${MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME} ${
     isActive
-      ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
+      ? "tw-pointer-events-none tw-border-transparent tw-text-iron-100"
       : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
   }`;
 }
@@ -131,6 +131,7 @@ export function MemeLabPageTabButton({
   return (
     <button
       type="button"
+      aria-current={isActive ? "page" : undefined}
       aria-pressed={isActive}
       className={getMemeLabTabButtonClassName(isActive)}
       onClick={onClick}

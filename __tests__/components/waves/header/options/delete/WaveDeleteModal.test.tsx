@@ -26,6 +26,7 @@ describe("WaveDeleteModal", () => {
   });
   const rq = {
     invalidateDrops: jest.fn(),
+    onWaveCreated: jest.fn(),
   } as unknown as ReactQueryWrapperContextType;
   const push = jest.fn();
   const mutate = jest.fn();
@@ -70,6 +71,7 @@ describe("WaveDeleteModal", () => {
         type: "warning",
       });
       expect(rq.invalidateDrops).toHaveBeenCalled();
+      expect(rq.onWaveCreated).toHaveBeenCalled();
       expect(push).toHaveBeenCalledWith("/waves");
     });
     expect(commonApiDeleteMock).toHaveBeenCalledWith({
@@ -100,6 +102,56 @@ describe("WaveDeleteModal", () => {
       });
       expect(push).toHaveBeenCalledWith("/waves");
     });
+  });
+
+  it("keeps the dialog usable when deletion fails", async () => {
+    const user = userEvent.setup();
+    const wave = { id: "w1" } as ApiWave;
+    commonApiDeleteMock.mockRejectedValue(new Error("delete failed"));
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <WaveDeleteModal wave={wave} isOpen closeModal={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const deleteButton = screen.getByRole("button", { name: "Delete" });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(auth.setToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
+      expect(deleteButton).toBeEnabled();
+    });
+    expect(screen.getByRole("dialog", { name: "Delete wave" })).toBeVisible();
+    expect(push).not.toHaveBeenCalled();
+    expect(rq.invalidateDrops).not.toHaveBeenCalled();
+    expect(rq.onWaveCreated).not.toHaveBeenCalled();
+  });
+
+  it("restores the dialog controls when authentication is not completed", async () => {
+    const user = userEvent.setup();
+    const wave = { id: "w1" } as ApiWave;
+    (auth.requestAuth as jest.Mock).mockResolvedValueOnce({ success: false });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <WaveDeleteModal wave={wave} isOpen closeModal={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const deleteButton = screen.getByRole("button", { name: "Delete" });
+    await user.click(deleteButton);
+
+    await waitFor(() => expect(deleteButton).toBeEnabled());
+    expect(mutate).not.toHaveBeenCalled();
+    expect(commonApiDeleteMock).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("contains focus and restores it to the opener", async () => {

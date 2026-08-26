@@ -7,7 +7,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useSearchParams } from "next/navigation";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
 import { CollectedStatsDetailsPanel } from "./stats/subcomponents/CollectedStatsDetailsPanel";
 import { CollectedStatsHeader } from "./stats/subcomponents/CollectedStatsHeader";
@@ -54,6 +54,7 @@ interface UserPageCollectedStatsProps {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
   readonly initialStatsData: UserPageStatsInitialData;
+  readonly autoScrollDetailsOnOpen?: boolean | undefined;
   readonly locale?: SupportedLocale | undefined;
   readonly activeCollection?: CollectedCollectionType | null | undefined;
   readonly activeSeasonNumber?: number | null | undefined;
@@ -72,6 +73,7 @@ export default function UserPageCollectedStats({
   profile,
   activeAddress,
   initialStatsData,
+  autoScrollDetailsOnOpen = false,
   locale = DEFAULT_LOCALE,
   activeCollection = null,
   activeSeasonNumber = null,
@@ -89,6 +91,29 @@ export default function UserPageCollectedStats({
   const [isDesktopSeasonListExpanded, setIsDesktopSeasonListExpanded] =
     useState(false);
   const detailsId = useId();
+  const detailsScrollTargetRef = useRef<HTMLDivElement>(null);
+
+  const handleToggleDetails = () => {
+    if (isDetailsOpen) {
+      setIsDetailsOpen(false);
+      return;
+    }
+
+    setIsDetailsOpen(true);
+    if (!autoScrollDetailsOnOpen) {
+      return;
+    }
+
+    globalThis.requestAnimationFrame(() => {
+      const prefersReducedMotion =
+        typeof globalThis.matchMedia === "function" &&
+        globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      detailsScrollTargetRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  };
 
   const {
     statsPath,
@@ -164,7 +189,7 @@ export default function UserPageCollectedStats({
           isDetailsOpen={isDetailsOpen}
           detailsId={detailsId}
           locale={locale}
-          onToggleDetails={() => setIsDetailsOpen((current) => !current)}
+          onToggleDetails={handleToggleDetails}
           onCollectionShortcut={onCollectionShortcut}
         />
       </div>
@@ -194,18 +219,20 @@ export default function UserPageCollectedStats({
         }
       />
 
-      <CollectedStatsDetailsPanel
-        isOpen={isDetailsOpen}
-        detailsId={detailsId}
-        statsPath={statsPath}
-        profile={profile}
-        activeAddress={activeAddress}
-        seasons={seasons}
-        tdh={tdh}
-        ownerBalance={ownerBalance}
-        balanceMemes={balanceMemes}
-        locale={locale}
-      />
+      <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
+        <CollectedStatsDetailsPanel
+          isOpen={isDetailsOpen}
+          detailsId={detailsId}
+          statsPath={statsPath}
+          profile={profile}
+          activeAddress={activeAddress}
+          seasons={seasons}
+          tdh={tdh}
+          ownerBalance={ownerBalance}
+          balanceMemes={balanceMemes}
+          locale={locale}
+        />
+      </div>
     </section>
   );
 }

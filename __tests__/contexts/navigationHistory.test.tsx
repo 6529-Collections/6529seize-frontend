@@ -18,6 +18,7 @@ jest.mock("@/components/navigation/ViewContext", () => ({
 
 const routerMock = {
   push: jest.fn(),
+  replace: jest.fn(),
   back: jest.fn(),
   events: { on: jest.fn(), off: jest.fn() },
 };
@@ -32,10 +33,16 @@ let mockSearchParams = new URLSearchParams();
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
 );
+const strictWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <React.StrictMode>
+    <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
+  </React.StrictMode>
+);
 
 describe("NavigationHistoryContext", () => {
   beforeEach(() => {
     routerMock.push.mockClear();
+    routerMock.replace.mockClear();
     hardBack.mockClear();
     mockPathname = "/";
     mockSearchParams = new URLSearchParams();
@@ -87,5 +94,81 @@ describe("NavigationHistoryContext", () => {
     });
 
     expect(routerMock.push).toHaveBeenCalledWith("/messages/dm-wave");
+  });
+
+  it("pops navigation state while returning to an explicit route", () => {
+    mockPathname = "/Shelby/collected";
+    mockSearchParams = new URLSearchParams("collection=memelab");
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+
+    mockPathname = "/meme-lab/65";
+    mockSearchParams = new URLSearchParams();
+    rerender();
+
+    mockPathname = "/meme-lab/66";
+    rerender();
+
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    act(() => {
+      result.current.goBackTo(returnTo);
+    });
+
+    expect(routerMock.push).toHaveBeenCalledWith(returnTo);
+
+    mockPathname = "/Shelby/collected";
+    mockSearchParams = new URLSearchParams("collection=memelab");
+    rerender();
+    expect(result.current.canGoBack).toBe(false);
+  });
+
+  it("navigates to an explicit stacked route once in Strict Mode", () => {
+    mockPathname = "/Shelby/collected";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper: strictWrapper }
+    );
+
+    mockPathname = "/meme-lab/65";
+    rerender();
+
+    act(() => {
+      result.current.goBackTo("/Shelby/collected");
+    });
+
+    expect(routerMock.push).toHaveBeenCalledTimes(1);
+    expect(routerMock.push).toHaveBeenCalledWith("/Shelby/collected");
+  });
+
+  it("replaces the current history entry when the explicit route is not stacked", () => {
+    mockPathname = "/network";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+
+    mockPathname = "/meme-lab/65";
+    rerender();
+
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    act(() => {
+      result.current.goBackTo(returnTo);
+    });
+
+    expect(routerMock.replace).toHaveBeenCalledWith(returnTo);
+
+    mockPathname = "/Shelby/collected";
+    mockSearchParams = new URLSearchParams("collection=memelab");
+    rerender();
+    expect(result.current.canGoBack).toBe(true);
+
+    act(() => {
+      result.current.goBack();
+    });
+    expect(routerMock.push).toHaveBeenCalledWith("/network");
   });
 });

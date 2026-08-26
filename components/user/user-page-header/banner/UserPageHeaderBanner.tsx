@@ -52,7 +52,7 @@ export default function UserPageHeaderBanner({
         />
       )}
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5 md:tw-hidden" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-transparent md:tw-via-black/40" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-black/30 tw-to-transparent md:tw-from-black md:tw-via-black/40" />
       <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-hidden tw-h-32 tw-bg-gradient-to-b tw-from-black/20 tw-to-transparent md:tw-block" />
 
       {canEdit && (

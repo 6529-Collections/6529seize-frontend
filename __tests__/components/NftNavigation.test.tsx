@@ -2,10 +2,8 @@ import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReadonlyURLSearchParams } from "next/navigation";
 
-const makeParams = (query: string = "") =>
-  new URLSearchParams(query) as unknown as ReadonlyURLSearchParams;
+const makeParams = (query: string = "") => new URLSearchParams(query);
 
 jest.mock("next/link", () => ({
   __esModule: true,

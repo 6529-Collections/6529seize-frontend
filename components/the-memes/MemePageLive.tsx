@@ -133,7 +133,7 @@ function MemePageAdditionalDetailsAccordion({
           >
             <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           </span>
-          <span className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
+          <span className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg">
             {t(locale, "theMemes.detail.live.additionalDetails")}
           </span>
         </span>
