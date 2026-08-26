@@ -2692,6 +2692,7 @@
       "facts": [
         "Direct-message waves live under /messages and individual message threads use /messages/{waveId}.",
         "A direct-message creation flow is available at /messages/create.",
+        "Direct-message recipient search ranks exact, prefix, and substring handle matches before ENS or auto-wallet matches, then orders each match group from highest to lowest profile level.",
         "Direct messages use wave mechanics but are surfaced separately from standard public wave routes.",
         "Direct-message content stays gated until wallet and profile prerequisites are resolved."
       ],
