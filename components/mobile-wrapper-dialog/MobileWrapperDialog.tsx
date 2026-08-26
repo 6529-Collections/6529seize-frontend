@@ -1,4 +1,5 @@
 import useCapacitor from "@/hooks/useCapacitor";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -380,6 +381,7 @@ export default function MobileWrapperDialog({
 }: MobileWrapperDialogProps) {
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isTouchDevice = useIsTouchDevice();
   const titleRef = useRef<HTMLElement>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
@@ -441,7 +443,8 @@ export default function MobileWrapperDialog({
   const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
   const hideMobileCloseButton = canDragToClose;
-  const shouldHideOnDesktopHover = hideOnDesktopHover && !isTouchDevice;
+  const shouldHideOnDesktopHover =
+    hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
 
   useEffect(() => {
     if (!isOpen || !focusTitleOnOpen) {
@@ -455,15 +458,15 @@ export default function MobileWrapperDialog({
     return () => globalThis.cancelAnimationFrame(frame);
   }, [focusTitleOnOpen, isOpen, title]);
 
+  if (shouldHideOnDesktopHover) {
+    return null;
+  }
+
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className={clsx(
-          "tailwind-scope tw-absolute",
-          zIndexClassName,
-          shouldHideOnDesktopHover && "lg:desktop-hover:tw-hidden"
-        )}
+        className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
         aria-label={ariaLabel}
         {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}

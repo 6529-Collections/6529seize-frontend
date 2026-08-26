@@ -1,10 +1,15 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock("@/hooks/useIsMobileLayoutViewport");
 jest.mock("@/hooks/useIsTouchDevice");
 
+const mockedUseIsMobileLayoutViewport = jest.mocked(
+  useIsMobileLayoutViewport
+);
 const mockedUseIsTouchDevice = jest.mocked(useIsTouchDevice);
 
 describe("MobileWrapperDialog", () => {
@@ -16,6 +21,7 @@ describe("MobileWrapperDialog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseIsMobileLayoutViewport.mockReturnValue(false);
     mockedUseIsTouchDevice.mockReturnValue(false);
   });
 
@@ -57,7 +63,7 @@ describe("MobileWrapperDialog", () => {
       expect(content).not.toHaveClass("tw-py-6");
     });
 
-    it("hides desktop-hover-only surfaces when requested", () => {
+    it("does not mount desktop-hover-only surfaces when requested", () => {
       render(
         <MobileWrapperDialog
           {...defaultProps}
@@ -66,9 +72,21 @@ describe("MobileWrapperDialog", () => {
         />
       );
 
-      expect(screen.getByRole("dialog")).toHaveClass(
-        "lg:desktop-hover:tw-hidden"
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("keeps requested surfaces visible in the mobile layout", () => {
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
+
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          hideOnDesktopHover
+        />
       );
+
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
 
     it("keeps requested surfaces visible on touch-first devices", () => {
@@ -82,9 +100,7 @@ describe("MobileWrapperDialog", () => {
         />
       );
 
-      expect(screen.getByRole("dialog")).not.toHaveClass(
-        "lg:desktop-hover:tw-hidden"
-      );
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
 
     it("renders title when provided", () => {
