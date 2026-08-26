@@ -105,6 +105,7 @@ export * from '../models/ApiConsolidatedTdhMetricsSort';
 export * from '../models/ApiConsolidatedTdhView';
 export * from '../models/ApiContentModerationDropDecisionRequest';
 export * from '../models/ApiContentModerationDropDecisionResponse';
+export * from '../models/ApiContentModerationProfileListItem';
 export * from '../models/ApiContentModerationProfileStatusRequest';
 export * from '../models/ApiContentModerationProfileStatusResponse';
 export * from '../models/ApiContentModerationQueueItem';
@@ -113,6 +114,7 @@ export * from '../models/ApiContentModerationReportReason';
 export * from '../models/ApiContentModerationReportRequest';
 export * from '../models/ApiContentModerationReportResponse';
 export * from '../models/ApiContentModerationReportStatus';
+export * from '../models/ApiContentModerationReportWithdrawalResponse';
 export * from '../models/ApiContentModeratorAccess';
 export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
 export * from '../models/ApiCreateAttachmentMultipartUploadResponse';
@@ -780,14 +782,16 @@ import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetri
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
 import { ApiContentModerationDropDecisionRequest, ApiContentModerationDropDecisionRequestDecisionEnum    } from '../models/ApiContentModerationDropDecisionRequest';
 import { ApiContentModerationDropDecisionResponse   } from '../models/ApiContentModerationDropDecisionResponse';
+import { ApiContentModerationProfileListItem         } from '../models/ApiContentModerationProfileListItem';
 import { ApiContentModerationProfileStatusRequest   } from '../models/ApiContentModerationProfileStatusRequest';
 import { ApiContentModerationProfileStatusResponse   } from '../models/ApiContentModerationProfileStatusResponse';
-import { ApiContentModerationQueueItem                          } from '../models/ApiContentModerationQueueItem';
+import { ApiContentModerationQueueItem                           } from '../models/ApiContentModerationQueueItem';
 import { ApiContentModerationRecommendation } from '../models/ApiContentModerationRecommendation';
 import { ApiContentModerationReportReason } from '../models/ApiContentModerationReportReason';
 import { ApiContentModerationReportRequest     } from '../models/ApiContentModerationReportRequest';
 import { ApiContentModerationReportResponse    } from '../models/ApiContentModerationReportResponse';
 import { ApiContentModerationReportStatus } from '../models/ApiContentModerationReportStatus';
+import { ApiContentModerationReportWithdrawalResponse    } from '../models/ApiContentModerationReportWithdrawalResponse';
 import { ApiContentModeratorAccess } from '../models/ApiContentModeratorAccess';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
@@ -1670,11 +1674,13 @@ let typeMap: {[index: string]: any} = {
     "ApiConsolidatedTdhMetricsPage": ApiConsolidatedTdhMetricsPage,
     "ApiContentModerationDropDecisionRequest": ApiContentModerationDropDecisionRequest,
     "ApiContentModerationDropDecisionResponse": ApiContentModerationDropDecisionResponse,
+    "ApiContentModerationProfileListItem": ApiContentModerationProfileListItem,
     "ApiContentModerationProfileStatusRequest": ApiContentModerationProfileStatusRequest,
     "ApiContentModerationProfileStatusResponse": ApiContentModerationProfileStatusResponse,
     "ApiContentModerationQueueItem": ApiContentModerationQueueItem,
     "ApiContentModerationReportRequest": ApiContentModerationReportRequest,
     "ApiContentModerationReportResponse": ApiContentModerationReportResponse,
+    "ApiContentModerationReportWithdrawalResponse": ApiContentModerationReportWithdrawalResponse,
     "ApiContentModeratorAccess": ApiContentModeratorAccess,
     "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
     "ApiCreateAttachmentMultipartUploadResponse": ApiCreateAttachmentMultipartUploadResponse,

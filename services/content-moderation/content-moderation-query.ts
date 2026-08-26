@@ -6,6 +6,11 @@ export const MODERATION_QUEUE_QUERY_KEY = [
   QueryKey.CONTENT_MODERATION_REPORTS,
 ] as const;
 
+export const SUSPENDED_MODERATION_PROFILES_QUERY_KEY = [
+  QueryKey.CONTENT_MODERATION_REPORTS,
+  "suspended-profiles",
+] as const;
+
 export const BLOCKED_PROFILES_QUERY_KEY = [
   QueryKey.CONTENT_MODERATION_BLOCKED_PROFILES,
 ] as const;

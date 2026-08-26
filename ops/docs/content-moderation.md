@@ -79,16 +79,16 @@ mistake.
 ## Flag Content
 
 **Flag Content** opens one dialog with no option selected by default. The user
-can choose any one action or combine them:
+can choose an action or combine reporting with blocking:
 
 - **Report post** sends the post to moderators for review, with a reason and
-  optional context;
+  optional context, and automatically hides it for the reporter;
 - **Hide post** hides only that post from the viewer; or
 - **Block author** hides the author's content, mutes their activity, and
   unfollows them without notifying them.
 
-These are independent. A user can hide or block without reporting, and a
-report does not automatically hide the post or block its author. A user cannot
+Hide-only and block-only remain available without reporting. Selecting Report
+marks Hide as included, while Block author remains optional. A user cannot
 report their own post.
 
 Reporting confirms with **Report submitted.** Personal hide, unhide, block,
@@ -107,6 +107,21 @@ non-interactive blur. The centered control reads **Hidden · Reveal · Unhide**.
 
 Short tooltips explain the difference between temporary Reveal and persistent
 Unhide.
+
+An open reported post reads **Reported · Hidden · Reveal · Unhide**. Reveal is
+still temporary and Unhide removes only the personal hide; neither action
+withdraws the report. If the post is visible, it keeps a subtle report-state
+line. The viewer-facing states are **Reported · Awaiting review**, **Reported ·
+Under review** after quarantine, **Reviewed · No action taken**, and **Reviewed
+· Content removed**. Internal moderator notes, AI details, moderator identity,
+and other reporters are never exposed in these states.
+
+Opening **Flag Content** again while the viewer has an open report shows the
+existing report instead of permitting a duplicate. **Withdraw report** is
+available until a moderator resolves it, asks for confirmation, and leaves the
+post hidden. Withdrawal is auditable, does not affect other reporters, and
+does not become available again after resolution. An allowed resolution may be
+reported again later.
 
 ## Posts from blocked profiles
 
@@ -174,10 +189,20 @@ the post's global visibility.
 
 Authorized moderators can review open reports in **WatchTower** at
 `/content-moderation`. The full-width queue fills the available page height.
-Each queue item includes the reported content and context, author, report
-details, AI recommendation and evidence, current state, and audit history.
-Every allow, quarantine, removal, suspension, or reinstatement requires a
-written reason.
+WatchTower separates **Open reports**, **Resolved reports**, and **Suspended
+profiles**, each with a current count. Each report makes the content primary,
+shows a compact AI summary with expandable detail, and keeps audit history
+available. For an open report the moderator first selects one explained content
+decision, may add an optional internal note, and then applies it once:
+
+- **Allow** keeps or restores the post to visible and closes its reports;
+- **Quarantine** hides it globally while its reports stay open; and
+- **Remove** hides it globally and closes its reports as removed.
+
+Author suspension is a separate, confirmation-backed action. **Suspend author**
+prevents future creates and edits without changing existing posts. Suspended
+profiles can be found and reinstated from the central Suspended profiles view,
+without first locating a report.
 
 Globally quarantined or moderator-removed posts are replaced by a redacted
 tombstone across primary Wave views, replies, quotes, leaderboards, and related
@@ -208,11 +233,11 @@ Open **Flag Content**, select only **Block author**, and submit. Mounted
 posts by that author blur immediately. Reveal affects one post temporarily;
 Unblock restores the author's mounted posts and removes the saved block.
 
-### Report without changing the feed
+### Report and hide
 
-Open **Flag Content**, select only **Report post**, choose a reason, add
-optional context, and submit. The report is sent without hiding the post or
-blocking its author.
+Open **Flag Content**, select **Report post**, choose a reason, add optional
+context, and submit with **Report and hide**. The report is sent and the post
+blurs immediately. Blocking the author remains optional.
 
 ### Understand a rejected post
 
@@ -242,8 +267,8 @@ mistake.
 - Attachment safety is asynchronous and separate from the text gate.
 - There is no continuous hold-before-publish review queue and no requirement
   for a full-time moderator.
-- Report history and "unreport" controls are not exposed to users in this
-  version.
+- Reporters see only their report status and public outcome. Open reports can
+  be withdrawn; resolved report history is available only in WatchTower.
 
 ## Related pages
 

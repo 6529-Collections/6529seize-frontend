@@ -6,6 +6,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useContentModerationVisibility } from "@/hooks/content-moderation/useContentModerationVisibility";
+import { useContentModerationReportStatus } from "@/hooks/content-moderation/useContentModerationReportStatus";
+import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -203,6 +205,19 @@ export default function ContentModerationDropGate({
   const queryClient = useQueryClient();
   const { visibility, reveal, hideAgain, isRevealed } =
     useContentModerationVisibility(drop);
+  const reportStatus = useContentModerationReportStatus(drop);
+  const reportLabel = (() => {
+    if (reportStatus === ApiContentModerationReportStatus.Open) {
+      return t(locale, "contentModeration.report.awaitingReview");
+    }
+    if (reportStatus === ApiContentModerationReportStatus.ResolvedAllowed) {
+      return t(locale, "contentModeration.report.noActionTaken");
+    }
+    if (reportStatus === ApiContentModerationReportStatus.ResolvedRemoved) {
+      return t(locale, "contentModeration.report.contentRemoved");
+    }
+    return null;
+  })();
   const [optimisticHiddenState, setOptimisticHiddenState] = useState<
     boolean | undefined
   >(undefined);
@@ -363,7 +378,16 @@ export default function ContentModerationDropGate({
   if (effectiveVisibility.kind === "visible") {
     return (
       <ContentModerationDropGateContext.Provider value={gateContext}>
-        {children}
+        {reportLabel ? (
+          <div className="tw-w-full">
+            <p className="tw-mb-0 tw-px-3 tw-pb-0 tw-pt-1 tw-text-xs tw-font-medium tw-text-iron-500">
+              {reportLabel}
+            </p>
+            {children}
+          </div>
+        ) : (
+          children
+        )}
       </ContentModerationDropGateContext.Provider>
     );
   }
@@ -375,6 +399,12 @@ export default function ContentModerationDropGate({
         testId="content-moderation-tombstone-hidden"
         controls={
           <>
+            {reportLabel && (
+              <>
+                <span>{reportLabel}</span>
+                <span aria-hidden="true">·</span>
+              </>
+            )}
             <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
             <span aria-hidden="true">·</span>
             <PersonalModerationAction
@@ -455,6 +485,12 @@ export default function ContentModerationDropGate({
   }
 
   const message = (() => {
+    if (reportStatus === ApiContentModerationReportStatus.ResolvedRemoved) {
+      return t(locale, "contentModeration.report.contentRemoved");
+    }
+    if (reportStatus === ApiContentModerationReportStatus.Open) {
+      return t(locale, "contentModeration.report.underReview");
+    }
     if (
       effectiveVisibility.status === ApiDropModerationStatus.ModeratorRemoved
     ) {

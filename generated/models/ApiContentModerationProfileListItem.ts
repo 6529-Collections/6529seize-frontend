@@ -14,9 +14,15 @@
 import { ApiModeratedProfileStatus } from '../models/ApiModeratedProfileStatus';
 import { HttpFile } from '../http/http';
 
-export class ApiContentModerationProfileStatusRequest {
+export class ApiContentModerationProfileListItem {
+    'profile_id': string;
+    'handle': string | null;
+    'pfp': string | null;
     'status': ApiModeratedProfileStatus;
-    'reason'?: string | null;
+    'updated_by_profile_id': string;
+    'reason': string | null;
+    'updated_at': number;
+    'cursor': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,9 +30,33 @@ export class ApiContentModerationProfileStatusRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
+            "name": "profile_id",
+            "baseName": "profile_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "handle",
+            "baseName": "handle",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "pfp",
+            "baseName": "pfp",
+            "type": "string",
+            "format": ""
+        },
+        {
             "name": "status",
             "baseName": "status",
             "type": "ApiModeratedProfileStatus",
+            "format": ""
+        },
+        {
+            "name": "updated_by_profile_id",
+            "baseName": "updated_by_profile_id",
+            "type": "string",
             "format": ""
         },
         {
@@ -34,10 +64,22 @@ export class ApiContentModerationProfileStatusRequest {
             "baseName": "reason",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "updated_at",
+            "baseName": "updated_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "cursor",
+            "baseName": "cursor",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiContentModerationProfileStatusRequest.attributeTypeMap;
+        return ApiContentModerationProfileListItem.attributeTypeMap;
     }
 
     public constructor() {

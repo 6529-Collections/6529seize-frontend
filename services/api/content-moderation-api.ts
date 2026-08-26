@@ -2,13 +2,16 @@ import type { ApiBlockedProfile } from "@/generated/models/ApiBlockedProfile";
 import type { ApiContentModerationDropDecisionRequest } from "@/generated/models/ApiContentModerationDropDecisionRequest";
 import type { ApiContentModerationDropDecisionResponse } from "@/generated/models/ApiContentModerationDropDecisionResponse";
 import type { ApiContentModerationProfileStatusRequest } from "@/generated/models/ApiContentModerationProfileStatusRequest";
+import type { ApiContentModerationProfileListItem } from "@/generated/models/ApiContentModerationProfileListItem";
 import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 import type { ApiContentModerationReportRequest } from "@/generated/models/ApiContentModerationReportRequest";
 import type { ApiContentModerationReportResponse } from "@/generated/models/ApiContentModerationReportResponse";
+import type { ApiContentModerationReportWithdrawalResponse } from "@/generated/models/ApiContentModerationReportWithdrawalResponse";
 import type { ApiContentModeratorAccess } from "@/generated/models/ApiContentModeratorAccess";
 import {
   commonApiDelete,
+  commonApiDeleteWithBody,
   commonApiFetch,
   commonApiPost,
   commonApiPut,
@@ -57,6 +60,17 @@ export const reportDrop = (
     errorMode: "structured",
   });
 
+export const withdrawDropReport = (
+  dropId: string
+): Promise<ApiContentModerationReportWithdrawalResponse> =>
+  commonApiDeleteWithBody<
+    Record<string, never>,
+    ApiContentModerationReportWithdrawalResponse
+  >({
+    endpoint: `content-moderation/drops/${dropId}/reports/mine`,
+    body: {},
+  });
+
 export const fetchContentModeratorAccess =
   (): Promise<ApiContentModeratorAccess> =>
     commonApiFetch<ApiContentModeratorAccess>({
@@ -67,18 +81,39 @@ export const fetchContentModeratorAccess =
 export const fetchContentModerationQueue = ({
   limit = 50,
   before,
+  view = "OPEN",
 }: {
   readonly limit?: number | undefined;
   readonly before?: string | undefined;
+  readonly view?: "OPEN" | "RESOLVED" | undefined;
 } = {}): Promise<ApiContentModerationQueueItem[]> =>
   commonApiFetch<ApiContentModerationQueueItem[], Record<string, string>>({
     endpoint: "content-moderation/reports",
     params: {
       limit: String(limit),
+      view,
       ...(before === undefined ? {} : { before: String(before) }),
     },
     errorMode: "structured",
   });
+
+export const fetchSuspendedModerationProfiles = ({
+  limit = 50,
+  before,
+}: {
+  readonly limit?: number | undefined;
+  readonly before?: string | undefined;
+} = {}): Promise<ApiContentModerationProfileListItem[]> =>
+  commonApiFetch<ApiContentModerationProfileListItem[], Record<string, string>>(
+    {
+      endpoint: "content-moderation/profiles/suspended",
+      params: {
+        limit: String(limit),
+        ...(before === undefined ? {} : { before: String(before) }),
+      },
+      errorMode: "structured",
+    }
+  );
 
 export const decideModeratedDrop = (
   dropId: string,

@@ -11,14 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiContentModerationReportStatus } from '../models/ApiContentModerationReportStatus';
+import { ApiDropModerationStatus } from '../models/ApiDropModerationStatus';
 import { HttpFile } from '../http/http';
 
-export class ApiContentModeratorAccess {
-    'moderator': boolean;
-    'has_open_reports': boolean;
-    'open_report_count': number;
-    'resolved_report_count': number;
-    'suspended_profile_count': number;
+export class ApiContentModerationReportWithdrawalResponse {
+    'drop_id': string;
+    'status': ApiContentModerationReportStatus;
+    'drop_status': ApiDropModerationStatus;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,40 +26,30 @@ export class ApiContentModeratorAccess {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "moderator",
-            "baseName": "moderator",
-            "type": "boolean",
+            "name": "drop_id",
+            "baseName": "drop_id",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "has_open_reports",
-            "baseName": "has_open_reports",
-            "type": "boolean",
+            "name": "status",
+            "baseName": "status",
+            "type": "ApiContentModerationReportStatus",
             "format": ""
         },
         {
-            "name": "open_report_count",
-            "baseName": "open_report_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "resolved_report_count",
-            "baseName": "resolved_report_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "suspended_profile_count",
-            "baseName": "suspended_profile_count",
-            "type": "number",
-            "format": "int64"
+            "name": "drop_status",
+            "baseName": "drop_status",
+            "type": "ApiDropModerationStatus",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiContentModeratorAccess.attributeTypeMap;
+        return ApiContentModerationReportWithdrawalResponse.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+

@@ -1,3 +1,4 @@
+import type { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 
 type Listener = () => void;
@@ -6,6 +7,10 @@ const listeners = new Set<Listener>();
 const hiddenDropOverrides = new Map<string, boolean>();
 const blockedProfileOverrides = new Map<string, boolean>();
 const globalDropOverrides = new Map<string, ApiDropModerationStatus>();
+const reportStatusOverrides = new Map<
+  string,
+  ApiContentModerationReportStatus | null
+>();
 
 const publish = () => {
   listeners.forEach((listener) => listener());
@@ -77,14 +82,31 @@ export const getGlobalDropModerationOverride = (
   dropId: string
 ): ApiDropModerationStatus | undefined => globalDropOverrides.get(dropId);
 
+export const setDropReportStatusOverride = (
+  viewerProfileId: string,
+  dropId: string,
+  status: ApiContentModerationReportStatus | null
+) => {
+  reportStatusOverrides.set(viewerKey(viewerProfileId, dropId), status);
+  publish();
+};
+
+export const getDropReportStatusOverride = (
+  viewerProfileId: string,
+  dropId: string
+): ApiContentModerationReportStatus | null | undefined =>
+  reportStatusOverrides.get(viewerKey(viewerProfileId, dropId));
+
 const clearContentModerationOverrides = (): boolean => {
   const hadOverrides =
     hiddenDropOverrides.size > 0 ||
     blockedProfileOverrides.size > 0 ||
-    globalDropOverrides.size > 0;
+    globalDropOverrides.size > 0 ||
+    reportStatusOverrides.size > 0;
   hiddenDropOverrides.clear();
   blockedProfileOverrides.clear();
   globalDropOverrides.clear();
+  reportStatusOverrides.clear();
   return hadOverrides;
 };
 

@@ -1,12 +1,15 @@
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import {
   clearContentModerationState,
   getDropHiddenOverride,
   getGlobalDropModerationOverride,
+  getDropReportStatusOverride,
   getProfileBlockedOverride,
   resetContentModerationStateForTests,
   setDropHiddenOverride,
   setGlobalDropModerationOverride,
+  setDropReportStatusOverride,
   setProfileBlockedOverride,
 } from "@/services/content-moderation/content-moderation-state";
 
@@ -34,10 +37,31 @@ describe("content moderation presentation overrides", () => {
     );
   });
 
+  it("keeps report lifecycle overrides viewer-scoped", () => {
+    setDropReportStatusOverride(
+      "viewer-1",
+      "drop-1",
+      ApiContentModerationReportStatus.Open
+    );
+
+    expect(getDropReportStatusOverride("viewer-1", "drop-1")).toBe(
+      ApiContentModerationReportStatus.Open
+    );
+    expect(getDropReportStatusOverride("viewer-2", "drop-1")).toBeUndefined();
+
+    setDropReportStatusOverride("viewer-1", "drop-1", null);
+    expect(getDropReportStatusOverride("viewer-1", "drop-1")).toBeNull();
+  });
+
   it("removes a restrictive override when content is restored", () => {
     setGlobalDropModerationOverride(
       "drop-1",
       ApiDropModerationStatus.ModeratorRemoved
+    );
+    setDropReportStatusOverride(
+      "viewer-1",
+      "drop-2",
+      ApiContentModerationReportStatus.Open
     );
     setGlobalDropModerationOverride("drop-1", ApiDropModerationStatus.Visible);
 
@@ -68,5 +92,6 @@ describe("content moderation presentation overrides", () => {
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
     expect(getProfileBlockedOverride("viewer-1", "author-1")).toBeUndefined();
     expect(getGlobalDropModerationOverride("drop-2")).toBeUndefined();
+    expect(getDropReportStatusOverride("viewer-1", "drop-2")).toBeUndefined();
   });
 });

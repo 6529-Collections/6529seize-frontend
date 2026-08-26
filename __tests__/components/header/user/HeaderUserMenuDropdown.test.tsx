@@ -403,6 +403,18 @@ describe("HeaderUserMenuDropdown", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("keeps WatchTower out of the user menu", () => {
+    renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+    });
+
+    expect(
+      screen.queryByRole("link", { name: /WatchTower/i })
+    ).not.toBeInTheDocument();
+  });
+
   it("links to Preferences from the desktop account menu", () => {
     renderWebSidebar({
       profile: profileBase,
