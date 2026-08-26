@@ -63,6 +63,7 @@ interface CreateAuthRequestActionsParams {
   readonly enableWalletAuthentication: boolean;
   readonly expireSessionUpgradeAuth: (walletAddress: string) => Promise<void>;
   readonly invalidateAll: () => void;
+  readonly isActiveChainSupported: () => boolean;
   readonly isAddressAuthorized: boolean;
   readonly seizeDisconnect: () => Promise<void>;
   readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
@@ -145,6 +146,7 @@ export function createAuthRequestActions({
   enableWalletAuthentication,
   expireSessionUpgradeAuth,
   invalidateAll,
+  isActiveChainSupported,
   isAddressAuthorized,
   seizeDisconnect,
   resetSessionUpgradeExpiryDedupe,
@@ -227,6 +229,14 @@ export function createAuthRequestActions({
     userRejected: boolean;
     failureToastShown: boolean;
   }> => {
+    if (!isActiveChainSupported()) {
+      return {
+        signature: null,
+        userRejected: false,
+        failureToastShown: true,
+      };
+    }
+
     try {
       const result = await signMessage(message);
       let failureToastShown = false;
@@ -538,13 +548,20 @@ export function createAuthRequestActions({
   const requestAuth = async (
     options?: RequestAuthOptions
   ): Promise<{ success: boolean }> => {
-    const authRequestGuard = createAuthRequestGuard(options ?? {});
-    if (!authRequestGuard.isCurrent()) {
+    const connectedAddress = ensureConnectedWalletAddress();
+    if (!connectedAddress) {
       return { success: false };
     }
 
-    const connectedAddress = ensureConnectedWalletAddress();
-    if (!connectedAddress) {
+    if (!isActiveChainSupported()) {
+      return { success: false };
+    }
+
+    const authRequestGuard = createAuthRequestGuard(
+      options ?? {},
+      isActiveChainSupported
+    );
+    if (!authRequestGuard.isCurrent()) {
       return { success: false };
     }
 
@@ -567,7 +584,7 @@ export function createAuthRequestActions({
           );
       return { success };
     } finally {
-      if (authRequestGuard.isCurrent()) {
+      if (authRequestGuard.isCurrent() || !isActiveChainSupported()) {
         setAuthLoadingState("idle");
       }
     }
@@ -585,6 +602,10 @@ export function createAuthRequestActions({
 
     if (!enableWalletAuthentication) {
       return { success: true };
+    }
+
+    if (canSignActiveWallet && !isActiveChainSupported()) {
+      return { success: false };
     }
 
     setAuthLoadingState("signing");
@@ -608,13 +629,26 @@ export function createAuthRequestActions({
         return { success: false };
       }
 
+      const authRequestGuard = createAuthRequestGuard(
+        {},
+        isActiveChainSupported
+      );
+      if (!authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
+
       const role = activeProfileProxy
         ? validateRoleForAuthentication(activeProfileProxy)
         : null;
       const { success } = await requestSignIn({
         signerAddress: upgradeAddress,
         role,
+        authRequestGuard,
       });
+
+      if (!authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
 
       if (!success) {
         return { success: await handleAuthorizedWalletSignInFailure(true) };
@@ -649,13 +683,23 @@ export function createAuthRequestActions({
       return;
     }
 
+    if (!isActiveChainSupported()) {
+      return;
+    }
+
+    const authRequestGuard = createAuthRequestGuard({}, isActiveChainSupported);
+
     await removeAuthJwt();
+    if (!authRequestGuard.isCurrent()) {
+      return;
+    }
     try {
       const { success } = await requestSignIn({
         signerAddress: address,
         role: profileProxy ? validateRoleForAuthentication(profileProxy) : null,
+        authRequestGuard,
       });
-      if (success) {
+      if (success && authRequestGuard.isCurrent()) {
         setActiveProfileProxy(profileProxy);
         dispatchProfileSwitchedEvent(profileProxy);
       }
