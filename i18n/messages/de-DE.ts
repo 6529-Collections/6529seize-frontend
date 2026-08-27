@@ -498,6 +498,7 @@ export const DE_DE_MESSAGES = {
     "Keine Allowlist hinzugefügt.",
   "waves.create.groups.inlineIdentities.sources.emma.loading":
     "Allowlist-Identitäten werden hinzugefügt...",
+  "waves.create.groups.inlineIdentities.sources.emma.load": "Allowlist laden",
   "waves.create.groups.inlineIdentities.sources.emma.error":
     "Diese Allowlist konnte nicht geladen werden. Versuche es erneut.",
   "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
@@ -539,7 +540,7 @@ export const DE_DE_MESSAGES = {
     "Eine Gruppe kann höchstens {limit} Identitäten einschließen.",
   "waves.create.groups.inlineIdentities.sources.excludeLimit":
     "Eine Gruppe kann höchstens {limit} Identitäten ausschließen.",
-  "waves.create.groups.inlineIdentities.sources.retry": "Erneut versuchen",
+  "waves.create.groups.inlineIdentities.sources.retry": RETRY_LABEL,
   "waves.create.groups.members.currentCount.one": "{count} Benutzer",
   "waves.create.groups.members.currentCount.other": "{count} Benutzer",
   "waves.create.groups.members.countLoading":

@@ -152,6 +152,29 @@ describe("CreateWaveInlineGroupWalletSources", () => {
     await waitFor(() => expect(requestAuth).toHaveBeenCalledTimes(1));
   });
 
+  it("offers to load a restored allowlist while signed in", async () => {
+    distributionPlanApiFetchMock.mockResolvedValue({
+      success: true,
+      data: [{ wallet: "0x1111111111111111111111111111111111111111" }],
+    } as any);
+    const user = userEvent.setup();
+
+    renderSources("included", {
+      ...createEmptyInlineGroupWalletSources(),
+      selectedAllowlist: {
+        id: "allowlist-1",
+        name: "Core contributors",
+        description: "Core contributors",
+        createdAt: 1,
+      },
+    });
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Load allowlist" }));
+    expect(await screen.findByText("1 identity added")).toBeInTheDocument();
+    expect(requestAuth).toHaveBeenCalledTimes(1);
+  });
+
   it("imports wallets from the file picker and keeps the file name", async () => {
     const user = userEvent.setup();
     renderSources();

@@ -20,4 +20,16 @@ describe("parseGroupWalletCsv", () => {
       )
     ).toEqual([]);
   });
+
+  it("normalizes BOM-prefixed, quoted, and mixed-case addresses", () => {
+    expect(
+      parseGroupWalletCsv(
+        '\uFEFF"0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa",' +
+          '"0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"'
+      )
+    ).toEqual([
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]);
+  });
 });

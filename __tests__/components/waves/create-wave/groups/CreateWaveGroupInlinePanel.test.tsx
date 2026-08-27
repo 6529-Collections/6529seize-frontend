@@ -732,6 +732,28 @@ describe("CreateWaveGroupInlinePanel", () => {
     });
   });
 
+  it("preserves unsaved edits when toggling criteria for a saved group", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel({
+      selectedGroup: {
+        id: "group-saved",
+        name: "Saved visibility",
+        created_by: { handle: "builder" },
+        is_private: false,
+        group: savedGroupCriteria,
+      } as ApiGroupFull,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+
+    expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
+    expect(screen.getAllByText("REP at least 5").length).toBeGreaterThan(0);
+  });
+
   it("keeps the selected group when clearing is disabled", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();

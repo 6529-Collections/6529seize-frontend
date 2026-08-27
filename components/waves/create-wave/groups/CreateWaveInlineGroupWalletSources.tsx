@@ -143,7 +143,12 @@ function EmmaWalletSource({
     selectedId !== null &&
     sources.emmaWallets === null &&
     !!connectedProfile?.handle &&
-    loadState !== "loading";
+    loadState === "error";
+  const isLoadPending =
+    selectedId !== null &&
+    sources.emmaWallets === null &&
+    !!connectedProfile?.handle &&
+    loadState === "idle";
   const isLoading =
     selectedId !== null &&
     sources.emmaWallets === null &&
@@ -197,6 +202,22 @@ function EmmaWalletSource({
               "waves.create.groups.inlineIdentities.sources.emma.loading"
             )}
           </p>
+        ) : null}
+        {isLoadPending ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (sources.selectedAllowlist) {
+                void loadAllowlist(sources.selectedAllowlist);
+              }
+            }}
+            className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {t(
+              locale,
+              "waves.create.groups.inlineIdentities.sources.emma.load"
+            )}
+          </button>
         ) : null}
         {authenticationRequired || hasLoadError ? (
           <div role="alert" className="tw-min-w-0">

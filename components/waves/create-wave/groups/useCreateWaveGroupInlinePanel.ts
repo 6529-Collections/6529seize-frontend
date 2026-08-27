@@ -543,6 +543,15 @@ function useCreateWaveGroupInlinePanelController({
   };
 
   const onReplaceCriteria = () => {
+    if (builder.criteriaReplacementActive) {
+      if (builder.panel === PANEL_ACTIONS) {
+        setBuilder((current) =>
+          openInlineGroupPanel({ current, panel: PANEL_RULE_LIST })
+        );
+      }
+      return;
+    }
+
     if (selectedGroup) {
       if (
         selectedGroupIncludedWallets === undefined ||

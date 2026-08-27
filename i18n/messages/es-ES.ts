@@ -498,6 +498,7 @@ export const ES_ES_MESSAGES = {
     "No se ha añadido ninguna lista.",
   "waves.create.groups.inlineIdentities.sources.emma.loading":
     "Añadiendo identidades de la lista...",
+  "waves.create.groups.inlineIdentities.sources.emma.load": "Cargar lista",
   "waves.create.groups.inlineIdentities.sources.emma.error":
     "No se pudo cargar esta lista. Inténtalo de nuevo.",
   "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":

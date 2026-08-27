@@ -503,6 +503,8 @@ export const FR_FR_MESSAGES = {
     "Aucune allowlist ajoutée.",
   "waves.create.groups.inlineIdentities.sources.emma.loading":
     "Ajout des identités de l’allowlist...",
+  "waves.create.groups.inlineIdentities.sources.emma.load":
+    "Charger l’allowlist",
   "waves.create.groups.inlineIdentities.sources.emma.error":
     "Impossible de charger cette allowlist. Réessayez.",
   "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":

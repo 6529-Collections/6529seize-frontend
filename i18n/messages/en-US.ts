@@ -1246,6 +1246,7 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "inlineIdentities.sources.emma.searchEmpty": "No allowlists found",
   "inlineIdentities.sources.emma.empty": "No allowlist added.",
   "inlineIdentities.sources.emma.loading": "Adding allowlist identities...",
+  "inlineIdentities.sources.emma.load": "Load allowlist",
   "inlineIdentities.sources.emma.error":
     "Couldn't load this allowlist. Try again.",
   "inlineIdentities.sources.emma.authenticationRequired":

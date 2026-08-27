@@ -25,6 +25,59 @@ import CreateWaveInlineGroupWalletSources from "./CreateWaveInlineGroupWalletSou
 
 type InlineIdentityMode = "included" | "excluded";
 
+interface CreateWaveInlineGroupIdentitiesProps {
+  readonly includedIdentities: readonly CommunityMemberMinimal[];
+  readonly excludedIdentities: readonly CommunityMemberMinimal[];
+  readonly includedWalletSources: InlineGroupWalletSources;
+  readonly excludedWalletSources: InlineGroupWalletSources;
+  readonly onIncludedIdentitySelect: (identity: CommunityMemberMinimal) => void;
+  readonly onIncludedIdentityRemove: (wallet: string) => void;
+  readonly onExcludedIdentitySelect: (identity: CommunityMemberMinimal) => void;
+  readonly onExcludedIdentityRemove: (wallet: string) => void;
+  readonly onIncludedWalletSourcesChange: (
+    update: Partial<InlineGroupWalletSources>
+  ) => void;
+  readonly onExcludedWalletSourcesChange: (
+    update: Partial<InlineGroupWalletSources>
+  ) => void;
+  readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
+}
+
+function getModeConfig(
+  mode: InlineIdentityMode,
+  props: CreateWaveInlineGroupIdentitiesProps
+) {
+  if (mode === "included") {
+    return {
+      activeIdentities: props.includedIdentities,
+      activeWalletSources: props.includedWalletSources,
+      onWalletSourcesChange: props.onIncludedWalletSourcesChange,
+      onIdentitySelect: props.onIncludedIdentitySelect,
+      onRemove: props.onIncludedIdentityRemove,
+      identityLimit: GROUP_INCLUDE_LIMIT,
+      emptyHelperKey:
+        "waves.create.groups.inlineIdentities.included.emptyHelper",
+      searchLabelKey:
+        "waves.create.groups.inlineIdentities.included.searchLabel",
+      searchPlaceholderKey:
+        "waves.create.groups.inlineIdentities.included.searchPlaceholder",
+    } as const;
+  }
+
+  return {
+    activeIdentities: props.excludedIdentities,
+    activeWalletSources: props.excludedWalletSources,
+    onWalletSourcesChange: props.onExcludedWalletSourcesChange,
+    onIdentitySelect: props.onExcludedIdentitySelect,
+    onRemove: props.onExcludedIdentityRemove,
+    identityLimit: GROUP_EXCLUDE_LIMIT,
+    emptyHelperKey: "waves.create.groups.inlineIdentities.excluded.emptyHelper",
+    searchLabelKey: "waves.create.groups.inlineIdentities.excluded.searchLabel",
+    searchPlaceholderKey:
+      "waves.create.groups.inlineIdentities.excluded.searchPlaceholder",
+  } as const;
+}
+
 function getIdentityTotalMessageKey({
   mode,
   count,
@@ -43,48 +96,33 @@ function getIdentityTotalMessageKey({
     : "waves.create.groups.inlineIdentities.sources.total.excluded.other";
 }
 
-export default function CreateWaveInlineGroupIdentities({
-  includedIdentities,
-  excludedIdentities,
-  includedWalletSources,
-  excludedWalletSources,
-  onIncludedIdentitySelect,
-  onIncludedIdentityRemove,
-  onExcludedIdentitySelect,
-  onExcludedIdentityRemove,
-  onIncludedWalletSourcesChange,
-  onExcludedWalletSourcesChange,
-  resultsLayout = "popover",
-}: {
-  readonly includedIdentities: readonly CommunityMemberMinimal[];
-  readonly excludedIdentities: readonly CommunityMemberMinimal[];
-  readonly includedWalletSources: InlineGroupWalletSources;
-  readonly excludedWalletSources: InlineGroupWalletSources;
-  readonly onIncludedIdentitySelect: (identity: CommunityMemberMinimal) => void;
-  readonly onIncludedIdentityRemove: (wallet: string) => void;
-  readonly onExcludedIdentitySelect: (identity: CommunityMemberMinimal) => void;
-  readonly onExcludedIdentityRemove: (wallet: string) => void;
-  readonly onIncludedWalletSourcesChange: (
-    update: Partial<InlineGroupWalletSources>
-  ) => void;
-  readonly onExcludedWalletSourcesChange: (
-    update: Partial<InlineGroupWalletSources>
-  ) => void;
-  readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
-}) {
+export default function CreateWaveInlineGroupIdentities(
+  props: CreateWaveInlineGroupIdentitiesProps
+) {
+  const {
+    includedIdentities,
+    excludedIdentities,
+    includedWalletSources,
+    excludedWalletSources,
+    onIncludedIdentitySelect,
+    onIncludedIdentityRemove,
+    resultsLayout = "popover",
+  } = props;
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
   const [mode, setMode] = useState<InlineIdentityMode>("included");
   const isIncludedMode = mode === "included";
-  const activeIdentities = isIncludedMode
-    ? includedIdentities
-    : excludedIdentities;
-  const activeWalletSources = isIncludedMode
-    ? includedWalletSources
-    : excludedWalletSources;
-  const onWalletSourcesChange = isIncludedMode
-    ? onIncludedWalletSourcesChange
-    : onExcludedWalletSourcesChange;
+  const {
+    activeIdentities,
+    activeWalletSources,
+    onWalletSourcesChange,
+    onIdentitySelect,
+    onRemove,
+    identityLimit,
+    emptyHelperKey,
+    searchLabelKey,
+    searchPlaceholderKey,
+  } = getModeConfig(mode, props);
   const selectedWallets =
     getInlineIdentityAddresses(activeIdentities, activeWalletSources) ?? [];
   const currentUserIdentity =
@@ -101,33 +139,9 @@ export default function CreateWaveInlineGroupIdentities({
       getInlineIdentityAddresses(excludedIdentities, excludedWalletSources) ??
       []
     ).some((wallet) => areEqualAddresses(wallet, currentUserIdentity.wallet));
-  const identitiesHelperText = t(
-    locale,
-    isIncludedMode
-      ? "waves.create.groups.inlineIdentities.included.emptyHelper"
-      : "waves.create.groups.inlineIdentities.excluded.emptyHelper"
-  );
-  const searchLabel = t(
-    locale,
-    isIncludedMode
-      ? "waves.create.groups.inlineIdentities.included.searchLabel"
-      : "waves.create.groups.inlineIdentities.excluded.searchLabel"
-  );
-  const searchPlaceholder = t(
-    locale,
-    isIncludedMode
-      ? "waves.create.groups.inlineIdentities.included.searchPlaceholder"
-      : "waves.create.groups.inlineIdentities.excluded.searchPlaceholder"
-  );
-  const onIdentitySelect = isIncludedMode
-    ? onIncludedIdentitySelect
-    : onExcludedIdentitySelect;
-  const onRemove = isIncludedMode
-    ? onIncludedIdentityRemove
-    : onExcludedIdentityRemove;
-  const identityLimit = isIncludedMode
-    ? GROUP_INCLUDE_LIMIT
-    : GROUP_EXCLUDE_LIMIT;
+  const identitiesHelperText = t(locale, emptyHelperKey);
+  const searchLabel = t(locale, searchLabelKey);
+  const searchPlaceholder = t(locale, searchPlaceholderKey);
   const isOverIdentityLimit = selectedWallets.length > identityLimit;
   const totalKey = getIdentityTotalMessageKey({
     mode,
@@ -200,13 +214,7 @@ export default function CreateWaveInlineGroupIdentities({
           sort="level"
         />
         {showIdentityControlsRow && (
-          <div
-            className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 ${
-              selectedWallets.length > 0 || identitiesHelperText
-                ? "tw-justify-between"
-                : "tw-justify-end"
-            }`}
-          >
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
             {activeIdentities.length > 0 && (
               <GroupCreateIdentitySelectedItems
                 selectedIdentities={[...activeIdentities]}
