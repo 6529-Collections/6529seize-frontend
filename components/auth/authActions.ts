@@ -48,6 +48,7 @@ import {
   createAuthRequestGuard,
   type AuthRequestGuard,
 } from "./authRequestGuard";
+import { createTimedAbortSignal } from "./authRequestAbortSignal";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
 
 type SignMessage = (message: string) => Promise<{
@@ -116,27 +117,6 @@ const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
       detail: { profileProxy },
     })
   );
-};
-
-const createTimedAbortSignal = ({
-  timeoutMs,
-}: {
-  readonly timeoutMs: number;
-}): {
-  readonly signal: AbortSignal;
-  readonly cleanup: () => void;
-} => {
-  const controller = new AbortController();
-  const timeoutId = globalThis.setTimeout(() => {
-    controller.abort();
-  }, timeoutMs);
-
-  return {
-    signal: controller.signal,
-    cleanup: () => {
-      globalThis.clearTimeout(timeoutId);
-    },
-  };
 };
 
 export function createAuthRequestActions({
