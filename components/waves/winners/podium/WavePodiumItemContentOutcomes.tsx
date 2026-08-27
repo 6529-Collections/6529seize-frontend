@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
@@ -13,9 +14,19 @@ interface WavePodiumItemContentOutcomesProps {
   readonly outcomesVisible?: boolean | undefined;
 }
 
+const subscribeToClientRender = () => () => undefined;
+const getClientRenderSnapshot = () => true;
+const getServerRenderSnapshot = () => false;
+
 export const WavePodiumItemContentOutcomes: React.FC<
   WavePodiumItemContentOutcomesProps
 > = ({ winner, outcomesVisible = true }) => {
+  const canRenderTooltip = useSyncExternalStore(
+    subscribeToClientRender,
+    getClientRenderSnapshot,
+    getServerRenderSnapshot
+  );
+
   // Transform awards into the same format that useDropOutcomes provided
   const { nicOutcomes, repOutcomes, manualOutcomes, haveOutcomes } =
     useMemo(() => {
@@ -140,16 +151,24 @@ export const WavePodiumItemContentOutcomes: React.FC<
           Outcome
         </span>
       </button>
-      <Tooltip
-        id={tooltipId}
-        place="top"
-        offset={8}
-        opacity={1}
-        positionStrategy="fixed"
-        style={TOOLTIP_STYLES}
-      >
-        {tooltipContent}
-      </Tooltip>
+      {canRenderTooltip &&
+        createPortal(
+          <Tooltip
+            id={tooltipId}
+            place="top"
+            offset={8}
+            opacity={1}
+            positionStrategy="fixed"
+            style={{
+              ...TOOLTIP_STYLES,
+              maxWidth: "min(360px, calc(100vw - 32px))",
+              whiteSpace: "normal",
+            }}
+          >
+            <div className="tailwind-scope">{tooltipContent}</div>
+          </Tooltip>,
+          document.body
+        )}
     </>
   );
 };
