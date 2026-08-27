@@ -19,8 +19,8 @@ const mockSelectedGrant = {
 } as ApiXTdhGrant;
 
 jest.mock("@/hooks/useXtdhGrantQuery", () => ({
-  useXtdhGrantQuery: () => ({
-    grant: undefined,
+  useXtdhGrantQuery: ({ grantId }: { readonly grantId: string | null }) => ({
+    grant: grantId ? mockSelectedGrant : undefined,
     isFetching: false,
     isError: false,
     errorMessage: undefined,
@@ -54,17 +54,21 @@ jest.mock(
   () =>
     function MockGrantRow({
       grant,
+      interactive,
       onSelect,
     }: {
       readonly grant: ApiXTdhGrant;
-      readonly onSelect: (grant: ApiXTdhGrant) => void;
+      readonly interactive?: boolean | undefined;
+      readonly onSelect?: ((grant: ApiXTdhGrant) => void) | undefined;
     }) {
-      return (
+      return interactive ? (
         <li>
-          <button type="button" onClick={() => onSelect(grant)}>
+          <button type="button" onClick={() => onSelect?.(grant)}>
             Select {grant.id}
           </button>
         </li>
+      ) : (
+        <div>Selected grant {grant.id}</div>
       );
     }
 );
@@ -100,21 +104,54 @@ function TestEditor() {
 }
 
 describe("CreateWaveInlineGroupXtdhGrant", () => {
-  it("keeps the selected grant and its compatible match mode in the inline draft", async () => {
+  it("searches first, then shows controls for the selected grant", async () => {
     const user = userEvent.setup();
     render(<TestEditor />);
 
-    await user.click(screen.getByRole("button", { name: "Find grant" }));
+    expect(
+      screen.queryByRole("textbox", { name: "Grant ID" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Find grant" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Grantor search")).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Select grant-1" }));
 
-    expect(screen.getByRole("textbox", { name: "Grant ID" })).toHaveValue(
-      "grant-1"
-    );
     expect(
       screen.getByRole("status", { name: "Selected grant" })
     ).toHaveTextContent("grant-1");
     expect(
       screen.getByRole("status", { name: "Grant match mode" })
     ).toHaveTextContent(ApiGroupBeneficiaryGrantMatchMode.AnyToken);
+    expect(screen.getByText("Selected grant grant-1")).toBeInTheDocument();
+    expect(screen.queryByText("Grantor search")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Change grant" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Remove grant" })
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Change grant" }));
+
+    expect(screen.getByText("Grantor search")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Cancel change" })
+    ).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(screen.getByRole("button", { name: "Cancel change" }));
+
+    expect(screen.queryByText("Grantor search")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Remove grant" }));
+
+    expect(
+      screen.getByRole("status", { name: "Selected grant" })
+    ).toHaveTextContent("none");
+    expect(screen.getByText("Grantor search")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Selected grant grant-1")
+    ).not.toBeInTheDocument();
   });
 });

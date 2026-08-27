@@ -8,12 +8,14 @@ import { ActionButton } from "./CreateWaveInlineGroupButtons";
 
 export default function CreateWaveInlineGroupActions({
   disabled,
+  criteriaDisabled = false,
   criteriaActive,
   searchActive,
   onReplaceCriteria,
   onUseExistingGroup,
 }: {
   readonly disabled: boolean;
+  readonly criteriaDisabled?: boolean | undefined;
   readonly criteriaActive: boolean;
   readonly searchActive: boolean;
   readonly onReplaceCriteria: () => void;
@@ -29,8 +31,8 @@ export default function CreateWaveInlineGroupActions({
             className="tw-size-3.5 tw-flex-shrink-0"
           />
         }
-        label={t(locale, "waves.create.groups.actions.replaceCriteria")}
-        disabled={disabled}
+        label={t(locale, "waves.create.groups.actions.editCriteria")}
+        disabled={disabled || criteriaDisabled}
         active={criteriaActive}
         isToggle={true}
         onClick={onReplaceCriteria}

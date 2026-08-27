@@ -2,6 +2,7 @@
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
 import { t } from "@/i18n/messages";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary";
@@ -56,6 +57,7 @@ export default function WaveRulesGroupMembersLink({
     enabled: groupId.length > 0,
     staleTime: 60_000,
   });
+  const identityLabels = useGroupCriteriaIdentityLabels(group?.group);
 
   let countLabel = t(locale, "waves.create.groups.members.countLoading");
   if (typeof members?.count === "number") {
@@ -64,7 +66,11 @@ export default function WaveRulesGroupMembersLink({
     countLabel = t(locale, "waves.create.groups.members.countUnavailable");
   }
 
-  const criteria = getGroupCriteriaSummary({ group: group?.group, locale });
+  const criteria = getGroupCriteriaSummary({
+    group: group?.group,
+    identityLabels,
+    locale,
+  });
   let criteriaLabel =
     criteria.text ?? t(locale, "waves.create.groups.members.noCriteria");
   if (isGroupLoading) {

@@ -57,6 +57,7 @@ export default function CreateGroupWalletsEmma({
       <div className="tw-mb-3 tw-mt-2 sm:tw-mt-3">
         <EmmaListSearch
           selectedId={selected?.id ?? null}
+          selectedName={selected?.name ?? null}
           onSelect={setSelected}
         />
       </div>

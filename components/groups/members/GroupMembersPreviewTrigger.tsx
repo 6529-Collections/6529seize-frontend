@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { UsersIcon } from "@heroicons/react/24/outline";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
 import { t } from "@/i18n/messages";
 import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary";
 import { formatGroupMembersCount } from "@/helpers/groups/group-members-count";
@@ -27,6 +28,9 @@ export default function GroupMembersPreviewTrigger({
   readonly onOpen: () => void;
 }) {
   const locale = useBrowserLocale();
+  const savedGroupCriteria =
+    target.kind === "saved" ? target.group.group : null;
+  const identityLabels = useGroupCriteriaIdentityLabels(savedGroupCriteria);
   const { data, isLoading, isError } = useQuery({
     queryKey: [
       QueryKey.COMMUNITY_MEMBERS_TOP,
@@ -52,7 +56,11 @@ export default function GroupMembersPreviewTrigger({
 
   const savedCriteria =
     target.kind === "saved"
-      ? getGroupCriteriaSummary({ group: target.group.group, locale })
+      ? getGroupCriteriaSummary({
+          group: target.group.group,
+          identityLabels,
+          locale,
+        })
       : null;
   let criteriaLabel =
     target.kind === "draft"

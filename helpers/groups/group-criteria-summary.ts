@@ -9,6 +9,8 @@ import { t, type MessageKey } from "@/i18n/messages";
 
 type GroupCriteria = ApiCreateGroupDescription | ApiGroupDescription;
 
+export type GroupCriteriaIdentityLabels = Readonly<Record<string, string>>;
+
 type FormattedRange =
   | { readonly kind: "atMost"; readonly max: string }
   | { readonly kind: "atLeast"; readonly min: string }
@@ -213,6 +215,23 @@ const formatIdentityRule = ({
     : null;
 };
 
+export const getGroupCriteriaIdentityLabel = ({
+  identity,
+  identityLabels,
+}: {
+  readonly identity: string | null;
+  readonly identityLabels?: GroupCriteriaIdentityLabels | undefined;
+}): string | null => {
+  const normalizedIdentity = identity?.trim() ?? "";
+  if (!normalizedIdentity) {
+    return null;
+  }
+
+  return (
+    identityLabels?.[normalizedIdentity.toLowerCase()] ?? normalizedIdentity
+  );
+};
+
 const getTdhMetric = (
   inclusionStrategy: ApiGroupTdhInclusionStrategy,
   locale: SupportedLocale
@@ -268,10 +287,14 @@ export const getGroupCriteriaSummary = ({
   group,
   locale,
   includedCountOverride,
+  grantCriterionOverride,
+  identityLabels,
 }: {
   readonly group: GroupCriteria | null | undefined;
   readonly locale: SupportedLocale;
   readonly includedCountOverride?: number | undefined;
+  readonly grantCriterionOverride?: string | undefined;
+  readonly identityLabels?: GroupCriteriaIdentityLabels | undefined;
 }): GroupCriteriaSummary => {
   if (!hasReadableCriteria(group)) {
     return { status: "unavailable", text: null };
@@ -302,7 +325,10 @@ export const getGroupCriteriaSummary = ({
     min: group.rep.min,
     max: group.rep.max,
     direction: group.rep.direction,
-    identity: group.rep.user_identity,
+    identity: getGroupCriteriaIdentityLabel({
+      identity: group.rep.user_identity,
+      identityLabels,
+    }),
     category: group.rep.category,
   });
   if (rep) {
@@ -315,7 +341,10 @@ export const getGroupCriteriaSummary = ({
     min: group.cic.min,
     max: group.cic.max,
     direction: group.cic.direction,
-    identity: group.cic.user_identity,
+    identity: getGroupCriteriaIdentityLabel({
+      identity: group.cic.user_identity,
+      identityLabels,
+    }),
   });
   if (nic) {
     parts.push(nic);
@@ -349,10 +378,20 @@ export const getGroupCriteriaSummary = ({
   );
 
   if (group.is_beneficiary_of_grant_id?.trim()) {
+    const embeddedGrantCollectionName =
+      "is_beneficiary_of_grant" in group
+        ? group.is_beneficiary_of_grant?.target_collection_name?.trim()
+        : null;
     parts.push(
-      t(locale, "waves.create.groups.members.criteria.grant", {
-        grantId: group.is_beneficiary_of_grant_id.trim(),
-      })
+      grantCriterionOverride ??
+        t(locale, "waves.create.groups.members.criteria.grant", {
+          grantId:
+            embeddedGrantCollectionName !== null &&
+            embeddedGrantCollectionName !== undefined &&
+            embeddedGrantCollectionName.length > 0
+              ? embeddedGrantCollectionName
+              : group.is_beneficiary_of_grant_id.trim(),
+        })
     );
   }
 

@@ -173,7 +173,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await nextStepButton(page).press("Enter");
 
     let accessGroup = page.getByRole("group", { name: "Visibility" });
-    await accessGroup.getByRole("button", { name: "Replace criteria" }).click();
+    await accessGroup.getByRole("button", { name: "Edit criteria" }).click();
     await accessGroup
       .getByRole("button", { name: "Level", exact: true })
       .click();
