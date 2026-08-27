@@ -128,6 +128,7 @@ export function useCreateDropContentController({
   const [showOptionsState, setShowOptionsState] =
     useState<ScopedValueState<boolean> | null>(null);
   const closeOnNextInputRef = useRef(false);
+  const shouldCollapseOptionsAfterMarkdownSyncRef = useRef(false);
   const prevIsDropModeRef = useRef(isDropMode);
   const [dropModeSessionEpoch, setDropModeSessionEpoch] = useState(0);
   useLayoutEffect(() => {
@@ -137,6 +138,7 @@ export function useCreateDropContentController({
 
     prevWaveIdRef.current = wave.id;
     closeOnNextInputRef.current = false;
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     setIsStormMode(false);
   }, [setIsStormMode, wave.id]);
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
@@ -262,6 +264,16 @@ export function useCreateDropContentController({
     );
     closeOnNextInputRef.current = false;
   }, [wave.id]);
+  useLayoutEffect(() => {
+    if (!shouldCollapseOptionsAfterMarkdownSyncRef.current) {
+      return;
+    }
+
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
+    if ((getMarkdown?.trim().length ?? 0) > 0) {
+      collapseOptions();
+    }
+  }, [collapseOptions, getMarkdown]);
   const currentPartMentionedGroups = useMemo(
     () =>
       editorState
@@ -609,13 +621,9 @@ export function useCreateDropContentController({
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
       setEditorState(newEditorState);
-      const nextMarkdown = exportComposerMarkdown(newEditorState);
-      const hasContent = nextMarkdown.trim().length > 0;
+      shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
 
-      if (
-        hasContent ||
-        (!keepDesktopOptionsVisible && closeOnNextInputRef.current)
-      ) {
+      if (!keepDesktopOptionsVisible && closeOnNextInputRef.current) {
         collapseOptions();
       }
     },
