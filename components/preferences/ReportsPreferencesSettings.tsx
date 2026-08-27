@@ -169,10 +169,7 @@ export default function ReportsPreferencesSettings() {
       page.length === PAGE_SIZE ? page.at(-1)?.cursor : undefined,
     retry: false,
   });
-  const reports = useMemo(
-    () => query.data?.pages.flatMap((page) => page) ?? [],
-    [query.data]
-  );
+  const reports = useMemo(() => query.data?.pages.flat() ?? [], [query.data]);
 
   return (
     <section
