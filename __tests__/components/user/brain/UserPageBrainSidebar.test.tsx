@@ -292,7 +292,8 @@ describe("UserPageBrainSidebar", () => {
       await Promise.resolve();
     });
 
-    const completion = within(recentSection).getByText("All waves loaded.");
+    const completion = within(recentSection).getByRole("status");
+    expect(completion).toHaveTextContent("All waves loaded.");
     expect(globalThis.document.activeElement).toBe(completion);
     expect(
       within(recentSection).queryByRole("button", { name: "Load more" })
@@ -300,5 +301,89 @@ describe("UserPageBrainSidebar", () => {
     expect(
       within(recentSection).getByText("Final Recent Wave")
     ).toBeInTheDocument();
+
+    const finalWaveLink = within(recentSection).getByRole("link", {
+      name: /Final Recent Wave/,
+    });
+    finalWaveLink.focus();
+    recentState = makeState({
+      waves: [
+        makeWave({ id: "wave-2", name: "Recent Wave" }),
+        makeWave({ id: "wave-3", name: "Final Recent Wave" }),
+      ],
+      isFetchNextPageError: true,
+      fetchNextPage,
+    });
+    rerender(<UserPageBrainSidebar profile={baseProfile} />);
+    recentState = makeState({
+      waves: [
+        makeWave({ id: "wave-2", name: "Recent Wave" }),
+        makeWave({ id: "wave-3", name: "Final Recent Wave" }),
+      ],
+      fetchNextPage,
+    });
+    rerender(<UserPageBrainSidebar profile={baseProfile} />);
+
+    expect(globalThis.document.activeElement).toBe(finalWaveLink);
+    expect(within(recentSection).getByRole("status")).toHaveTextContent(
+      "All waves loaded."
+    );
+  });
+
+  it("does not move focus when the user leaves a final-page control", async () => {
+    let resolveNextPage:
+      | ((result: { readonly isComplete: boolean }) => void)
+      | undefined;
+    const fetchNextPage = jest.fn(
+      async () =>
+        await new Promise<{ readonly isComplete: boolean }>((resolve) => {
+          resolveNextPage = resolve;
+        })
+    );
+    recentState = makeState({
+      waves: [makeWave({ id: "wave-2", name: "Recent Wave" })],
+      hasNextPage: true,
+      fetchNextPage,
+    });
+
+    const renderSidebar = () => (
+      <>
+        <button type="button">Outside control</button>
+        <UserPageBrainSidebar profile={baseProfile} />
+      </>
+    );
+    const { rerender } = render(renderSidebar());
+    const recentSection = screen.getByRole("region", {
+      name: "Recently Active In",
+    });
+    const loadMore = within(recentSection).getByRole("button", {
+      name: "Load more",
+    });
+    loadMore.focus();
+    fireEvent.click(loadMore);
+
+    const outsideControl = screen.getByRole("button", {
+      name: "Outside control",
+    });
+    outsideControl.focus();
+
+    recentState = makeState({
+      waves: [
+        makeWave({ id: "wave-2", name: "Recent Wave" }),
+        makeWave({ id: "wave-3", name: "Final Recent Wave" }),
+      ],
+      fetchNextPage,
+    });
+    rerender(renderSidebar());
+
+    await act(async () => {
+      resolveNextPage?.({ isComplete: true });
+      await Promise.resolve();
+    });
+
+    expect(within(recentSection).getByRole("status")).toHaveTextContent(
+      "All waves loaded."
+    );
+    expect(globalThis.document.activeElement).toBe(outsideControl);
   });
 });

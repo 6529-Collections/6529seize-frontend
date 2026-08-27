@@ -24,13 +24,18 @@ export default function UserPageBrainSidebarLoadMore({
 }: UserPageBrainSidebarLoadMoreProps) {
   const locale = useBrowserLocale();
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const pendingCompletionFocusRef = useRef(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const shouldShowCompletion =
     showCompletion && !state.hasNextPage && !state.isFetchNextPageError;
 
   const focusCompletion = useCallback(
     (element: HTMLParagraphElement | null) => {
-      element?.focus();
+      if (!element || !pendingCompletionFocusRef.current) {
+        return;
+      }
+      pendingCompletionFocusRef.current = false;
+      element.focus();
     },
     []
   );
@@ -62,18 +67,25 @@ export default function UserPageBrainSidebarLoadMore({
         <button
           ref={buttonRef}
           type="button"
+          onBlur={() => {
+            pendingCompletionFocusRef.current = false;
+          }}
           onClick={() => {
-            const shouldFocusCompletion =
+            pendingCompletionFocusRef.current =
               globalThis.document.activeElement === buttonRef.current;
             setShowCompletion(false);
             state
               .fetchNextPage()
               .then(({ isComplete }) => {
-                if (isComplete && shouldFocusCompletion) {
+                if (isComplete) {
                   setShowCompletion(true);
+                } else {
+                  pendingCompletionFocusRef.current = false;
                 }
               })
-              .catch(() => undefined);
+              .catch(() => {
+                pendingCompletionFocusRef.current = false;
+              });
           }}
           disabled={state.isFetchingNextPage}
           className={buttonClassName}
@@ -83,7 +95,12 @@ export default function UserPageBrainSidebarLoadMore({
       )}
 
       {shouldShowCompletion && (
-        <p ref={focusCompletion} tabIndex={-1} className={completionClassName}>
+        <p
+          ref={focusCompletion}
+          role="status"
+          tabIndex={-1}
+          className={completionClassName}
+        >
           {getUserPageBrainSidebarMessage(
             locale,
             "user.brain.sidebar.allWavesLoaded"
