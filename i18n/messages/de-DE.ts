@@ -43,7 +43,7 @@ export const DE_DE_MESSAGES = {
   "user.brain.sidebar.showLess": "Weniger anzeigen",
   "user.brain.sidebar.showMore": "Mehr anzeigen",
   "user.brain.sidebar.viewMoreCreatedWaves": "Weitere erstellte Waves anzeigen",
-  "user.brain.sidebar.createdModalTitle": "Waves von {profile}",
+  "user.brain.sidebar.createdModalTitle": "Erstellte Waves von {profile}",
   "user.brain.sidebar.loadedCreatedCount.one":
     "{count} geladene Wave wird angezeigt",
   "user.brain.sidebar.loadedCreatedCount.other":

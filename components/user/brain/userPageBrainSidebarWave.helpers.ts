@@ -47,7 +47,7 @@ export const formatSidebarWaveActivityTime = (
 
   return formatRelativeTime(
     locale,
-    Math.round(difference / matchingUnit.milliseconds),
+    Math.trunc(difference / matchingUnit.milliseconds),
     matchingUnit.unit,
     { numeric: "auto", style: "narrow" }
   );

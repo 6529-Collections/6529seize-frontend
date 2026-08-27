@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import UserPageBrainSidebarWaveItem from "@/components/user/brain/UserPageBrainSidebarWaveItem";
+import { formatSidebarWaveActivityTime } from "@/components/user/brain/userPageBrainSidebarWave.helpers";
 import type { ProfileWaveActivitySidebarItem } from "@/types/profile-wave-activity.types";
 
 jest.mock("next/link", () => ({
@@ -96,5 +97,17 @@ describe("UserPageBrainSidebarWaveItem", () => {
 
     expect(screen.getByText(/^Last post /)).toBeInTheDocument();
     expect(screen.queryByText("12 total wave posts")).toBeNull();
+  });
+
+  it("keeps relative-time values inside the selected unit", () => {
+    const referenceTime = Date.UTC(2026, 7, 27, 12);
+
+    expect(
+      formatSidebarWaveActivityTime(
+        "en-US",
+        referenceTime - 59.6 * 60 * 1000,
+        referenceTime
+      )
+    ).toBe("59m ago");
   });
 });
