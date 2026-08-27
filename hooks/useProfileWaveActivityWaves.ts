@@ -123,8 +123,7 @@ export function useProfileWaveActivityWaves({
       : async () => {
           const result = await query.fetchNextPage();
           return {
-            isComplete:
-              !result.isFetchNextPageError && !Boolean(result.hasNextPage),
+            isComplete: !result.isFetchNextPageError && !result.hasNextPage,
           };
         },
     refetch: shouldMaskData

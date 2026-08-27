@@ -29,16 +29,13 @@ export default function UserPageBrainSidebarLoadMore({
   const shouldShowCompletion =
     showCompletion && !state.hasNextPage && !state.isFetchNextPageError;
 
-  const focusCompletion = useCallback(
-    (element: HTMLParagraphElement | null) => {
-      if (!element || !pendingCompletionFocusRef.current) {
-        return;
-      }
-      pendingCompletionFocusRef.current = false;
-      element.focus();
-    },
-    []
-  );
+  const focusCompletion = useCallback((element: HTMLOutputElement | null) => {
+    if (!element || !pendingCompletionFocusRef.current) {
+      return;
+    }
+    pendingCompletionFocusRef.current = false;
+    element.focus();
+  }, []);
 
   let buttonMessageKey:
     | "user.brain.sidebar.loadMore"
@@ -95,9 +92,8 @@ export default function UserPageBrainSidebarLoadMore({
       )}
 
       {shouldShowCompletion && (
-        <p
+        <output
           ref={focusCompletion}
-          role="status"
           tabIndex={-1}
           className={completionClassName}
         >
@@ -105,7 +101,7 @@ export default function UserPageBrainSidebarLoadMore({
             locale,
             "user.brain.sidebar.allWavesLoaded"
           )}
-        </p>
+        </output>
       )}
     </div>
   );
