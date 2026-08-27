@@ -11,6 +11,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.actions.unblock": "Unblock",
   "contentModeration.actions.unblockProfile": "Unblock {profile}",
   "contentModeration.profile.blocked": "Blocked",
+  "contentModeration.profile.suspended": "Suspended",
   "contentModeration.profile.actionsMenu": "Profile actions",
   "contentModeration.block.confirmTitle": "Block {profile}?",
   "contentModeration.unblock.confirmTitle": "Unblock {profile}?",
@@ -34,7 +35,9 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Hide their content, mute their activity and unfollow them. They won’t be notified.",
   "contentModeration.report.submit": "Confirm",
   "contentModeration.report.submitReport": "Report and hide",
+  "contentModeration.report.submittingReport": "Reporting…",
   "contentModeration.report.submitActions": "Apply actions",
+  "contentModeration.report.submittingActions": "Applying…",
   "contentModeration.report.includedWithReport": "Included with report",
   "contentModeration.report.awaitingReview": "Reported · Awaiting review",
   "contentModeration.report.reportedShort": "Reported",
@@ -157,6 +160,8 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.history": "State history ({count})",
   "contentModeration.moderator.noHistory": "No state changes recorded yet.",
   "contentModeration.moderator.stateChanged": "State changed",
+  "contentModeration.moderator.systemActor": "System",
+  "contentModeration.moderator.unknownActor": "Unknown profile",
   "contentModeration.postRejected":
     "This post couldn't be submitted because it was flagged by the safety check. Please review it and try again.",
   "contentModeration.delivery.moderationRejected":

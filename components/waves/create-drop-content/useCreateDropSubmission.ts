@@ -541,18 +541,16 @@ export const useCreateDropSubmission = ({
     const submittedDraftState = getDraftStateSnapshot();
 
     setSubmitting(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setSubmitting(false);
-      return;
-    }
-
-    if (!dropRequest.parts.length) {
-      setSubmitting(false);
-      return;
-    }
-
     try {
+      const { success } = await requestAuth();
+      if (!success) {
+        return;
+      }
+
+      if (!dropRequest.parts.length) {
+        return;
+      }
+
       const generatedParts = await generateParts(
         dropRequest.parts,
         setUploadingFiles

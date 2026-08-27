@@ -137,3 +137,11 @@ export const setModeratedProfileStatus = (
     body: request,
     errorMode: "structured",
   });
+
+export const fetchPublicModeratedProfileStatus = (
+  profileId: string
+): Promise<ApiContentModerationProfileStatusResponse> =>
+  commonApiFetch<ApiContentModerationProfileStatusResponse>({
+    endpoint: `content-moderation/profiles/${profileId}/status`,
+    errorMode: "structured",
+  });

@@ -398,14 +398,17 @@ export default function ContentModerationDropGate({
         testId="content-moderation-tombstone-hidden"
         controls={
           <>
-            {reportStatus !== null && (
+            {reportStatus !== null ? (
               <>
                 <ContentModerationReportStatusButton compact />
                 <span aria-hidden="true">·</span>
               </>
+            ) : (
+              <>
+                <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
+                <span aria-hidden="true">·</span>
+              </>
             )}
-            <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
-            <span aria-hidden="true">·</span>
             <PersonalModerationAction
               label={t(locale, "contentModeration.actions.reveal")}
               tooltip={t(locale, "contentModeration.tooltips.revealHidden")}

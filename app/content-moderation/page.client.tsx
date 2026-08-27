@@ -330,42 +330,67 @@ function ModerationQueueCard({
           </p>
         ) : (
           <ol className="tw-mb-0 tw-mt-3 tw-space-y-3 tw-pl-5">
-            {item.history.map((entry: unknown, index) => {
-              const entryRecord = getRecord(entry);
-              if (entryRecord === null) return null;
+            {item.history.map((entry, index) => {
               const action = formatEvidence(
-                entryRecord["action"] ??
+                entry.action ??
                   t(locale, "contentModeration.moderator.stateChanged")
               );
-              const previous = entryRecord["previous_state"];
-              const next = entryRecord["new_state"];
-              const entryReason = entryRecord["reason"];
-              const actor = entryRecord["actor_profile_id"];
-              const timestamp = formatTimestamp(
-                entryRecord["created_at"],
-                locale
+              const actorPfp = getSafeAssetUrl(entry.actor_pfp);
+              const actorLabel = entry.actor_handle
+                ? `@${entry.actor_handle}`
+                : entry.actor_profile_id
+                  ? t(locale, "contentModeration.moderator.unknownActor")
+                  : t(locale, "contentModeration.moderator.systemActor");
+              const actorContent = (
+                <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-font-semibold tw-text-iron-200">
+                  {actorPfp && (
+                    <Image
+                      src={actorPfp}
+                      alt=""
+                      width={18}
+                      height={18}
+                      className="tw-size-[18px] tw-rounded-full tw-object-cover"
+                    />
+                  )}
+                  <span>{actorLabel}</span>
+                </span>
               );
+              const timestamp = formatTimestamp(entry.created_at, locale);
               return (
                 <li
-                  key={`${item.id}-history-${index}`}
+                  key={entry.id || `${item.id}-history-${index}`}
                   className="tw-text-sm tw-text-iron-400"
                 >
-                  <span className="tw-font-semibold tw-text-iron-300">
-                    {formatContentModerationEnum(action)}
-                  </span>
-                  {typeof previous === "string" && typeof next === "string" && (
-                    <span>{` — ${formatContentModerationEnum(previous)} → ${formatContentModerationEnum(next)}`}</span>
-                  )}
-                  {typeof entryReason === "string" && entryReason && (
+                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                    <span className="tw-font-semibold tw-text-iron-300">
+                      {formatContentModerationEnum(action)}
+                    </span>
+                    <span aria-hidden="true">—</span>
+                    {entry.actor_handle ? (
+                      <Link
+                        href={`/${entry.actor_handle}`}
+                        className="tw-no-underline hover:tw-text-white"
+                      >
+                        {actorContent}
+                      </Link>
+                    ) : (
+                      actorContent
+                    )}
+                    {entry.previous_state && entry.new_state && (
+                      <>
+                        <span aria-hidden="true">—</span>
+                        <span>{`${formatContentModerationEnum(entry.previous_state)} → ${formatContentModerationEnum(entry.new_state)}`}</span>
+                      </>
+                    )}
+                  </div>
+                  {entry.reason && (
                     <p className="tw-mb-0 tw-mt-1 tw-text-iron-500">
-                      {entryReason}
+                      {entry.reason}
                     </p>
                   )}
-                  {(timestamp !== null || typeof actor === "string") && (
+                  {timestamp !== null && (
                     <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-600">
-                      {[timestamp, typeof actor === "string" ? actor : null]
-                        .filter(Boolean)
-                        .join(" · ")}
+                      {timestamp}
                     </p>
                   )}
                 </li>

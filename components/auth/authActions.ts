@@ -432,6 +432,46 @@ export function createAuthRequestActions({
     return isSuccess;
   };
 
+  const reauthenticateAfterExpiredSessionUpgrade = async ({
+    authRequestGuard,
+    role,
+    walletAddress,
+  }: {
+    readonly authRequestGuard: AuthRequestGuard;
+    readonly role: string | null;
+    readonly walletAddress: string;
+  }): Promise<boolean> => {
+    await expireSessionUpgradeAuth(walletAddress);
+    if (!authRequestGuard.acceptCurrentState(walletAddress)) {
+      return false;
+    }
+    if (!canSignActiveWallet) {
+      setToast({
+        message: "Reconnect the wallet for this profile and try again.",
+        type: "error",
+      });
+      return false;
+    }
+
+    setSignModalReason("auth");
+    setSessionUpgradeRequired(false);
+    const { success } = await requestSignIn({
+      signerAddress: walletAddress,
+      role,
+      authRequestGuard,
+    });
+    if (!authRequestGuard.isCurrent()) {
+      return false;
+    }
+    if (!success) {
+      setShowSignModal(false);
+      return false;
+    }
+
+    invalidateAll();
+    return finishAuthorizedWalletAuthentication();
+  };
+
   const reauthenticateAuthorizedWallet = async ({
     authRequestGuard,
     role,
@@ -516,8 +556,11 @@ export function createAuthRequestActions({
         authRolloutSettings
       );
       if (promptStatus.timeLeftMs <= 0) {
-        await expireSessionUpgradeAuth(walletAddress);
-        return false;
+        return await reauthenticateAfterExpiredSessionUpgrade({
+          authRequestGuard,
+          role,
+          walletAddress,
+        });
       }
       return finishAuthorizedWalletAuthentication();
     }
@@ -566,6 +609,15 @@ export function createAuthRequestActions({
             authRequestGuard
           );
       return { success };
+    } catch (error) {
+      logErrorSecurely("requestAuth", error);
+      setToast({
+        type: "error",
+        title: "Couldn't verify your session.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
+      });
+      return { success: false };
     } finally {
       if (authRequestGuard.isCurrent()) {
         setAuthLoadingState("idle");

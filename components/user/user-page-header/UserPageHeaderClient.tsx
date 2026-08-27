@@ -18,6 +18,7 @@ import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
+import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -37,6 +38,7 @@ import UserPageHeaderSubscriptionStatus from "./UserPageHeaderSubscriptionStatus
 import UserPageHeaderEditProfile from "./UserPageHeaderEditProfile";
 import BlockedProfileHeaderIndicator from "./BlockedProfileHeaderIndicator";
 import ProfileBlockActionMenu from "./ProfileBlockActionMenu";
+import SuspendedProfileHeaderIndicator from "./SuspendedProfileHeaderIndicator";
 import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
@@ -174,6 +176,7 @@ export default function UserPageHeaderClient({
     profileHandle: profile.handle,
     profilePfp: profile.pfp,
   });
+  const profileModerationStatus = usePublicProfileModerationStatus(profile.id);
   const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
 
@@ -314,8 +317,16 @@ export default function UserPageHeaderClient({
                     profileEnabledAt={profileEnabledAt}
                     variant="title"
                     titleAccessory={
+                      profileModerationStatus.isSuspended ||
                       profileBlockState.isBlocked ? (
-                        <BlockedProfileHeaderIndicator />
+                        <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-2">
+                          {profileModerationStatus.isSuspended && (
+                            <SuspendedProfileHeaderIndicator />
+                          )}
+                          {profileBlockState.isBlocked && (
+                            <BlockedProfileHeaderIndicator />
+                          )}
+                        </span>
                       ) : undefined
                     }
                   />

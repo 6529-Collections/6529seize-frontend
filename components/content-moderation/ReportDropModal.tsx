@@ -295,7 +295,9 @@ export default function ReportDropModal({
       return Promise.all(actions);
     },
     onMutate: () => {
-      const rollbackLocalHidden = effectiveHide
+      const optimisticallyHide = effectiveHide && !reportPost;
+      const optimisticallyBlock = blockAuthor && !reportPost;
+      const rollbackLocalHidden = optimisticallyHide
         ? dropGateContext?.setOptimisticHidden(true)
         : undefined;
       const viewerProfileId = connectedProfile?.id;
@@ -310,10 +312,10 @@ export default function ReportDropModal({
         blockAuthor && viewerProfileId
           ? getProfileBlockedOverride(viewerProfileId, drop.author.id)
           : undefined;
-      if (effectiveHide && viewerProfileId) {
+      if (optimisticallyHide && viewerProfileId) {
         setDropHiddenOverride(viewerProfileId, drop.id, true);
       }
-      if (blockAuthor && viewerProfileId) {
+      if (optimisticallyBlock && viewerProfileId) {
         setProfileBlockedOverride(viewerProfileId, drop.author.id, true);
       }
       return {
@@ -339,6 +341,23 @@ export default function ReportDropModal({
       const blockFailed =
         failedActions.has("block") || (reportFailed && context?.blockAuthor);
       applySuccessfulReport(reportResult, context?.viewerProfileId);
+      if (reportResult?.success && context?.hidePost) {
+        dropGateContext?.setOptimisticHidden(true);
+        if (context.viewerProfileId) {
+          setDropHiddenOverride(context.viewerProfileId, drop.id, true);
+        }
+      }
+      if (
+        reportResult?.success &&
+        context?.blockAuthor &&
+        context.viewerProfileId
+      ) {
+        setProfileBlockedOverride(
+          context.viewerProfileId,
+          drop.author.id,
+          true
+        );
+      }
       if (hideFailed && context?.hidePost) {
         context.rollbackLocalHidden?.();
         if (context.viewerProfileId) {
@@ -643,13 +662,16 @@ export default function ReportDropModal({
                     size="lg"
                     loading={mutation.isPending}
                     disabled={!hasSelection}
-                    hideChildrenWhenLoading
                   >
                     {t(
                       locale,
-                      reportPost
-                        ? "contentModeration.report.submitReport"
-                        : "contentModeration.report.submitActions"
+                      mutation.isPending
+                        ? reportPost
+                          ? "contentModeration.report.submittingReport"
+                          : "contentModeration.report.submittingActions"
+                        : reportPost
+                          ? "contentModeration.report.submitReport"
+                          : "contentModeration.report.submitActions"
                     )}
                   </Button>
                 </div>
