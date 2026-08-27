@@ -54,6 +54,62 @@ interface CompactActionButtonProps {
   readonly describedBy?: string | undefined;
 }
 
+const getCompactActionSurfaceStyles = ({
+  pressed,
+  disabled,
+  required,
+}: {
+  readonly pressed: boolean | undefined;
+  readonly disabled: boolean;
+  readonly required: boolean;
+}) => {
+  if (pressed) {
+    return "tw-bg-primary-500/15 tw-text-primary-200";
+  }
+  if (disabled) {
+    return "tw-bg-iron-900 tw-text-iron-600";
+  }
+  if (required) {
+    return "tw-bg-amber-300/10 tw-text-amber-200";
+  }
+  return "tw-bg-iron-800 tw-text-iron-300 group-hover:tw-bg-iron-700 group-hover:tw-text-white";
+};
+
+const getCompactToggleLabel = ({
+  isPollActive,
+  showOptions,
+  closePollLabel,
+  hideActionsLabel,
+  showActionsLabel,
+}: {
+  readonly isPollActive: boolean;
+  readonly showOptions: boolean;
+  readonly closePollLabel: string;
+  readonly hideActionsLabel: string;
+  readonly showActionsLabel: string;
+}) => {
+  if (isPollActive) {
+    return closePollLabel;
+  }
+  return showOptions ? hideActionsLabel : showActionsLabel;
+};
+
+const getCompactToggleStyles = ({
+  isActive,
+  isRequired,
+}: {
+  readonly isActive: boolean;
+  readonly isRequired: boolean;
+}) => {
+  if (isActive) {
+    return "tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300";
+  }
+  if (isRequired) {
+    return "tw-border-amber-300/25 tw-bg-amber-300/10 tw-text-amber-200";
+  }
+  return "tw-border-white/10 tw-bg-iron-800 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
+};
+
 const CompactActionButton: React.FC<CompactActionButtonProps> = ({
   label,
   icon,
@@ -76,15 +132,9 @@ const CompactActionButton: React.FC<CompactActionButtonProps> = ({
     }`}
   >
     <span
-      className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition ${
-        pressed
-          ? "tw-bg-primary-500/15 tw-text-primary-200"
-          : disabled
-            ? "tw-bg-iron-900 tw-text-iron-600"
-            : required
-              ? "tw-bg-amber-300/10 tw-text-amber-200"
-              : "tw-bg-iron-800 tw-text-iron-300 group-hover:tw-bg-iron-700 group-hover:tw-text-white"
-      }`}
+      className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition ${getCompactActionSurfaceStyles(
+        { pressed, disabled, required }
+      )}`}
       aria-hidden="true"
     >
       {icon}
@@ -245,6 +295,21 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           transition: { duration: 0 },
         };
 
+    const isCompactToggleActive = showOptions || isPollActive;
+    const isCompactToggleRequired =
+      (isDropMode && isRequiredMetadataMissing) || isRequiredMediaMissing;
+    const compactToggleLabel = getCompactToggleLabel({
+      isPollActive,
+      showOptions,
+      closePollLabel,
+      hideActionsLabel,
+      showActionsLabel,
+    });
+    const compactToggleStyles = getCompactToggleStyles({
+      isActive: isCompactToggleActive,
+      isRequired: isCompactToggleRequired,
+    });
+
     const pollAction = canCreatePoll ? (
       <>
         <button
@@ -292,13 +357,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   type="button"
                   onClick={isPollActive ? onTogglePoll : onSetShowIconsClick}
                   disabled={isPollActive && submitting}
-                  aria-label={
-                    isPollActive
-                      ? closePollLabel
-                      : showOptions
-                        ? hideActionsLabel
-                        : showActionsLabel
-                  }
+                  aria-label={compactToggleLabel}
                   aria-expanded={isPollActive ? undefined : showOptions}
                   aria-controls={isPollActive ? undefined : actionTrayId}
                   animate={{ rotate: showOptions || isPollActive ? 45 : 0 }}
@@ -307,14 +366,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       ? optionMotionTransition
                       : { duration: 0 }
                   }
-                  className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
-                    showOptions || isPollActive
-                      ? "tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300"
-                      : (isDropMode && isRequiredMetadataMissing) ||
-                          isRequiredMediaMissing
-                        ? "tw-border-amber-300/25 tw-bg-amber-300/10 tw-text-amber-200"
-                        : "tw-border-white/10 tw-bg-iron-800 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white"
-                  }`}
+                  className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${compactToggleStyles}`}
                 >
                   <FontAwesomeIcon
                     icon={faPlus}

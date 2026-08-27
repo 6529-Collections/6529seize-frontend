@@ -199,19 +199,16 @@ const updateFocusAfterAcceptedSubmit = ({
   getMarkdown,
   shouldKeepChatFocused,
   isApp,
-  shouldCollapseOptionsAfterMarkdownSyncRef,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
 }: {
   readonly getMarkdown: string | null;
   readonly shouldKeepChatFocused: boolean;
   readonly isApp: boolean;
-  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
   if (getMarkdown?.length) {
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     createDropInputRef.current?.clearEditorState();
   }
 
@@ -306,7 +303,6 @@ export const useCreateDropSubmission = ({
   setMetadataOpenState,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
-  shouldCollapseOptionsAfterMarkdownSyncRef,
 }: {
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
@@ -363,7 +359,6 @@ export const useCreateDropSubmission = ({
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
-  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
   const {
     locale,
@@ -666,7 +661,6 @@ export const useCreateDropSubmission = ({
         getMarkdown,
         shouldKeepChatFocused,
         isApp,
-        shouldCollapseOptionsAfterMarkdownSyncRef,
         createDropInputRef,
         shouldRefocusAfterChatSubmitRef,
       });

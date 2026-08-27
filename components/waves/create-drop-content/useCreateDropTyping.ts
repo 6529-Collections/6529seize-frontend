@@ -3,6 +3,9 @@ import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useCallback, useEffect, useMemo } from "react";
 
+// Typing notifications synchronize editor state with the WebSocket; they do
+// not pass derived data back into a React parent.
+/* eslint-disable react-you-might-not-need-an-effect/no-pass-data-to-parent */
 export function useCreateDropTyping({
   markdown,
   waveId,

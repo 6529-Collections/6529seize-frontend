@@ -193,7 +193,7 @@ export default function CreateDropComposer({
             }
           />
         </div>
-        {(pollDraft || showCurationDropModeWarning) && (
+        {(pollDraft !== null || showCurationDropModeWarning) && (
           <div
             className={`tw-col-span-3 tw-col-start-1 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2 ${
               isCompactLayout ? "tw-row-start-4" : "tw-row-start-3"

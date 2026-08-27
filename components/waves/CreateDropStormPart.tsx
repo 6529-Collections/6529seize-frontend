@@ -30,6 +30,9 @@ interface CreateDropStormPartProps {
   readonly onRemovePart: (partIndex: number) => void;
 }
 
+const getTooltipTargetProps = (show: boolean, id: string) =>
+  show ? { "data-tooltip-id": id } : {};
+
 const StormPartMedia: React.FC<{
   readonly files: File[];
   readonly showDesktopTooltips: boolean;
@@ -79,9 +82,10 @@ const StormPartMedia: React.FC<{
               </svg>
             )}
             <span
-              data-tooltip-id={
-                showDesktopTooltips ? filenameTooltipId : undefined
-              }
+              {...getTooltipTargetProps(
+                showDesktopTooltips,
+                filenameTooltipId
+              )}
               className="tw-min-w-0 tw-truncate tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300"
             >
               {file.name}
@@ -200,9 +204,10 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
             }}
             aria-disabled={editDisabled}
             aria-label={editTitle}
-            data-tooltip-id={
-              !isMobileScreen && !canEdit ? editTooltipId : undefined
-            }
+            {...getTooltipTargetProps(
+              !isMobileScreen && !canEdit,
+              editTooltipId
+            )}
             className="tw-mr-auto tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors aria-disabled:tw-cursor-not-allowed aria-disabled:tw-opacity-35 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.04] sm:tw-mr-0 sm:tw-h-auto sm:tw-px-2.5 sm:tw-py-1.5"
           >
             <svg
@@ -241,9 +246,10 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
               aria-label={t(locale, "waves.stormComposer.movePartEarlier", {
                 number: partNumber,
               })}
-              data-tooltip-id={
-                !isMobileScreen ? moveEarlierTooltipId : undefined
-              }
+              {...getTooltipTargetProps(
+                !isMobileScreen,
+                moveEarlierTooltipId
+              )}
               className={moveIconButtonClass}
             >
               <svg
@@ -280,9 +286,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
               aria-label={t(locale, "waves.stormComposer.movePartLater", {
                 number: partNumber,
               })}
-              data-tooltip-id={
-                !isMobileScreen ? moveLaterTooltipId : undefined
-              }
+              {...getTooltipTargetProps(!isMobileScreen, moveLaterTooltipId)}
               className={moveIconButtonClass}
             >
               <svg
@@ -320,7 +324,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
             aria-label={t(locale, "waves.stormComposer.removePart", {
               number: partNumber,
             })}
-            data-tooltip-id={!isMobileScreen ? removeTooltipId : undefined}
+            {...getTooltipTargetProps(!isMobileScreen, removeTooltipId)}
             className={removeIconButtonClass}
           >
             <svg

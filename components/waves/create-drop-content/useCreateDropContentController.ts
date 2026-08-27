@@ -5,7 +5,8 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { EditorState } from "lexical";
-import React, {
+import {
+  type FocusEvent,
   useCallback,
   useContext,
   useEffect,
@@ -71,6 +72,7 @@ import type {
   UploadingFile,
 } from "./types";
 
+// eslint-disable-next-line max-lines-per-function -- This controller intentionally composes the focused composer hooks into one stable layout contract.
 export function useCreateDropContentController({
   activeDrop,
   onCancelReplyQuote,
@@ -105,7 +107,6 @@ export function useCreateDropContentController({
   const locale = useBrowserLocale();
   const { actionsContainerRef, isWideContainer, setActionsContainerRef } =
     useCreateDropContainerWidth();
-  const shouldAnimateOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
   const { editingDropId, setEditingDropId } = useEditingDrop();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -127,7 +128,6 @@ export function useCreateDropContentController({
   const [showOptionsState, setShowOptionsState] =
     useState<ScopedValueState<boolean> | null>(null);
   const closeOnNextInputRef = useRef(false);
-  const shouldCollapseOptionsAfterMarkdownSyncRef = useRef(false);
   const prevIsDropModeRef = useRef(isDropMode);
   const [dropModeSessionEpoch, setDropModeSessionEpoch] = useState(0);
   useLayoutEffect(() => {
@@ -136,9 +136,7 @@ export function useCreateDropContentController({
     }
 
     prevWaveIdRef.current = wave.id;
-    shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
   }, [wave.id]);
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const keepDesktopOptionsVisible = !isMobile && isWideContainer;
@@ -259,7 +257,6 @@ export function useCreateDropContentController({
     ((editorState ? getMarkdown : initialMarkdown)?.trim().length ?? 0) === 0 &&
     files.length === 0;
   const collapseOptions = useCallback(() => {
-    shouldAnimateOptionsRef.current = true;
     setShowOptionsState((current) =>
       current?.scopeKey === wave.id && current.value === false
         ? current
@@ -267,19 +264,6 @@ export function useCreateDropContentController({
     );
     closeOnNextInputRef.current = false;
   }, [wave.id]);
-  useLayoutEffect(() => {
-    if (!shouldCollapseOptionsAfterMarkdownSyncRef.current) {
-      return;
-    }
-
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
-
-    if ((getMarkdown?.trim().length ?? 0) === 0) {
-      return;
-    }
-
-    collapseOptions();
-  }, [collapseOptions, getMarkdown]);
   const currentPartMentionedGroups = useMemo(
     () =>
       editorState
@@ -370,7 +354,7 @@ export function useCreateDropContentController({
     connectedProfile,
     isProxyMode: Boolean(activeProfileProxy),
   });
-  const canEditLastDropWithArrow =
+  const isComposerReadyForArrowEdit =
     !isDropMode &&
     !isStormMode &&
     !submitting &&
@@ -378,10 +362,14 @@ export function useCreateDropContentController({
     activeDrop === null &&
     (getMarkdown?.trim().length ?? 0) === 0 &&
     files.length === 0 &&
-    (drop?.parts.length ?? 0) === 0 &&
-    latestEditableChatDropTarget !== null;
+    (drop?.parts.length ?? 0) === 0;
+  const canEditLastDropWithArrow =
+    isComposerReadyForArrowEdit && latestEditableChatDropTarget !== null;
   const handleRequestEditLastDrop = useCallback((): boolean => {
-    if (!canEditLastDropWithArrow || !latestEditableChatDropTarget) {
+    if (
+      !isComposerReadyForArrowEdit ||
+      latestEditableChatDropTarget === null
+    ) {
       return false;
     }
 
@@ -392,7 +380,7 @@ export function useCreateDropContentController({
     });
     return true;
   }, [
-    canEditLastDropWithArrow,
+    isComposerReadyForArrowEdit,
     setEditingDropId,
     latestEditableChatDropTarget,
     wave.id,
@@ -406,7 +394,7 @@ export function useCreateDropContentController({
   }, [getMarkdown, isCurationSubmissionExperience, isDropMode]);
   const showCurationDropModeWarning =
     !isDropMode &&
-    !!normalizedCurationDropUrl &&
+    normalizedCurationDropUrl !== null &&
     isCurationSubmissionExperience &&
     (canSubmitCurationUrl || !!curationUrlSubmitRestrictionMessage);
 
@@ -452,9 +440,7 @@ export function useCreateDropContentController({
     setMetadataOpenState,
     setShowOptionsState,
     resetIdentitySubmissionState,
-    shouldAnimateOptionsRef,
     closeOnNextInputRef,
-    shouldCollapseOptionsAfterMarkdownSyncRef,
   });
 
   const showMentionAliasExpansionError = useCallback(() => {
@@ -584,7 +570,6 @@ export function useCreateDropContentController({
     setMetadataOpenState,
     createDropInputRef,
     shouldRefocusAfterChatSubmitRef,
-    shouldCollapseOptionsAfterMarkdownSyncRef,
   });
 
   const onSwitchToDropMode = useCallback(() => {
@@ -605,13 +590,11 @@ export function useCreateDropContentController({
     setFiles,
     setDrop,
     setShowOptionsState,
-    shouldAnimateOptionsRef,
     closeOnNextInputRef,
   });
 
   const handleSetShowOptions = useCallback(
     (next: boolean) => {
-      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: next });
       if (keepDesktopOptionsVisible) {
         closeOnNextInputRef.current = false;
@@ -625,13 +608,13 @@ export function useCreateDropContentController({
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
       setEditorState(newEditorState);
-      shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
+      const nextMarkdown = exportComposerMarkdown(newEditorState);
+      const hasContent = nextMarkdown.trim().length > 0;
 
-      if (keepDesktopOptionsVisible) {
-        return;
-      }
-
-      if (closeOnNextInputRef.current) {
+      if (
+        hasContent ||
+        (!keepDesktopOptionsVisible && closeOnNextInputRef.current)
+      ) {
         collapseOptions();
       }
     },
@@ -639,7 +622,7 @@ export function useCreateDropContentController({
   );
 
   const handleEditorBlur = useCallback(
-    (event: React.FocusEvent<HTMLDivElement>) => {
+    (event: FocusEvent<HTMLDivElement>) => {
       if (keepDesktopOptionsVisible) {
         return;
       }
@@ -647,11 +630,10 @@ export function useCreateDropContentController({
       if (nextTarget && actionsContainerRef.current?.contains(nextTarget)) {
         return;
       }
-      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
-    [keepDesktopOptionsVisible, wave.id]
+    [actionsContainerRef, keepDesktopOptionsVisible, wave.id]
   );
 
   useEffect(() => {
@@ -703,8 +685,7 @@ export function useCreateDropContentController({
     }
   }, [isApp, editingDropId, activeDrop, onCancelReplyQuote]);
 
-  const animateOptions =
-    shouldAnimateOptionsRef.current && showOptionsState?.scopeKey === wave.id;
+  const animateOptions = showOptionsState?.scopeKey === wave.id;
 
   return {
     activeDrop,
