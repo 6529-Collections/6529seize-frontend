@@ -16,7 +16,6 @@ import {
   createInitialInlineGroupBuilderState,
   dedupeInlineIdentities,
   getInlineGroupDraftSummary,
-  getInlineIdentityAddresses,
   getInlineGroupRuleCount,
 } from "./createWaveInlineGroupBuilder";
 import type {
@@ -25,141 +24,21 @@ import type {
   CreateWaveInlineGroupRuleType,
   CreateWaveInlineGroupWalletSources,
 } from "./createWaveInlineGroupBuilder";
-
-const PANEL_ACTIONS: CreateWaveInlineGroupPanel = "actions";
-const PANEL_IDENTITY: CreateWaveInlineGroupPanel = "identity";
-const PANEL_RULE_LIST: CreateWaveInlineGroupPanel = "rule-list";
-const PANEL_RULE_EDITOR: CreateWaveInlineGroupPanel = "rule-editor";
-const PANEL_SEARCH: CreateWaveInlineGroupPanel = "search";
-
-function getDisplayedBuilder({
-  builder,
-  disabled,
-}: {
-  readonly builder: CreateWaveInlineGroupBuilderState;
-  readonly disabled: boolean;
-}): CreateWaveInlineGroupBuilderState {
-  if (!disabled) {
-    return builder;
-  }
-
-  return {
-    ...builder,
-    panel: PANEL_ACTIONS,
-    activeRule: null,
-  };
-}
-
-function buildIdentityDraftState({
-  current,
-  identities,
-  excludedIdentities,
-  includedWalletSources = current.includedWalletSources,
-  excludedWalletSources = current.excludedWalletSources,
-}: {
-  readonly current: CreateWaveInlineGroupBuilderState;
-  readonly identities: readonly CommunityMemberMinimal[];
-  readonly excludedIdentities: readonly CommunityMemberMinimal[];
-  readonly includedWalletSources?: CreateWaveInlineGroupWalletSources;
-  readonly excludedWalletSources?: CreateWaveInlineGroupWalletSources;
-}): CreateWaveInlineGroupBuilderState {
-  return {
-    ...current,
-    identities,
-    excludedIdentities,
-    includedWalletSources,
-    excludedWalletSources,
-    draft: {
-      ...current.draft,
-      group: {
-        ...current.draft.group,
-        identity_addresses: getInlineIdentityAddresses(
-          identities,
-          includedWalletSources
-        ),
-        excluded_identity_addresses: getInlineIdentityAddresses(
-          excludedIdentities,
-          excludedWalletSources
-        ),
-      },
-    },
-  };
-}
-
-function collapseInlineGroupBuilder(
-  current: CreateWaveInlineGroupBuilderState
-): CreateWaveInlineGroupBuilderState {
-  return {
-    ...current,
-    panel: PANEL_ACTIONS,
-    activeRule: null,
-  };
-}
-
-function openInlineGroupPanel({
-  current,
-  panel,
-}: {
-  readonly current: CreateWaveInlineGroupBuilderState;
-  readonly panel: CreateWaveInlineGroupPanel;
-}): CreateWaveInlineGroupBuilderState {
-  return {
-    ...current,
-    panel,
-    activeRule: null,
-  };
-}
-
-function startCriteriaReplacement(
-  current: CreateWaveInlineGroupBuilderState
-): CreateWaveInlineGroupBuilderState {
-  return {
-    ...current,
-    panel: PANEL_RULE_LIST,
-    activeRule: null,
-    criteriaReplacementActive: true,
-  };
-}
-
-function openInlineGroupRule({
-  current,
-  rule,
-}: {
-  readonly current: CreateWaveInlineGroupBuilderState;
-  readonly rule: CreateWaveInlineGroupRuleType;
-}): CreateWaveInlineGroupBuilderState {
-  return {
-    ...current,
-    activeRule: rule,
-    panel: PANEL_RULE_EDITOR,
-  };
-}
-
-function toggleInlineGroupRule({
-  current,
-  rule,
-}: {
-  readonly current: CreateWaveInlineGroupBuilderState;
-  readonly rule: CreateWaveInlineGroupRuleType;
-}): CreateWaveInlineGroupBuilderState {
-  if (current.panel === PANEL_RULE_EDITOR && current.activeRule === rule) {
-    return {
-      ...current,
-      activeRule: null,
-      panel: PANEL_RULE_LIST,
-    };
-  }
-
-  return openInlineGroupRule({ current, rule });
-}
-
-function clearInlineGroupDraft(
-  defaultIncludedIdentity: CommunityMemberMinimal | null
-): CreateWaveInlineGroupBuilderState {
-  return createInitialInlineGroupBuilderState(
-    defaultIncludedIdentity ? [defaultIncludedIdentity] : []
-  );
-}
+import {
+  buildIdentityDraftState,
+  clearInlineGroupDraft,
+  collapseInlineGroupBuilder,
+  getDisplayedBuilder,
+  openInlineGroupPanel,
+  openInlineGroupRule,
+  PANEL_ACTIONS,
+  PANEL_IDENTITY,
+  PANEL_RULE_EDITOR,
+  PANEL_RULE_LIST,
+  PANEL_SEARCH,
+  startCriteriaReplacement,
+  toggleInlineGroupRule,
+} from "./createWaveInlineGroupPanelState";
 
 export type CreateWaveGroupInlinePanelProps = {
   readonly suggestedName: string;
