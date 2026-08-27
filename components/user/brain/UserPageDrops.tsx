@@ -27,9 +27,7 @@ export default function UserPageDrops({
             <UserPageBrainActivity profile={profile} />
             <UserPageMentionShortcuts profile={profile} />
             {haveProfile && (
-              <Drops
-                blockedProfileActivity={profileBlockState.isBlocked}
-              />
+              <Drops blockedProfileActivity={profileBlockState.isBlocked} />
             )}
           </div>
           <UserPageBrainSidebar profile={profile} />

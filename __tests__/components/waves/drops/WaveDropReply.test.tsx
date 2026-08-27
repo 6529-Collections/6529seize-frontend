@@ -106,7 +106,7 @@ describe("WaveDropReply", () => {
     render(<WaveDropReply {...baseProps} />);
 
     expect(
-      screen.getByText("This post was removed by a moderator.")
+      screen.getByText("Content removed by moderators")
     ).toBeInTheDocument();
     expect(
       screen.queryByTestId("wave-drop-reply-fixed-container")

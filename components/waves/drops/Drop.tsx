@@ -1,5 +1,6 @@
 "use client";
 
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type {
@@ -20,7 +21,6 @@ import type {
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
-import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 export type { DropInteractionParams } from "./drop.types";
 export { DropLocation } from "./drop.types";
 
@@ -207,6 +207,7 @@ export default function Drop({
       <ContentModerationDropGate
         drop={drop}
         presentation={moderationPresentation}
+        preserveGlobalContext={drop.drop_type === ApiDropType.Chat}
       >
         {components[drop.drop_type]}
       </ContentModerationDropGate>

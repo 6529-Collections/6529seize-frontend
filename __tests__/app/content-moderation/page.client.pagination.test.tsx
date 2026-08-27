@@ -63,6 +63,8 @@ const createQueueItem = (index: number): ApiContentModerationQueueItem => ({
   id: `report-${index}`,
   drop_id: `drop-${index}`,
   reporter_profile_id: `reporter-${index}`,
+  reporter_handle: `reporter${index}`,
+  reporter_pfp: null,
   author_profile_id: `author-${index}`,
   author_handle: `author${index}`,
   author_pfp: null,
@@ -81,6 +83,21 @@ describe("ContentModerationPageClient pagination", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetchingProfile = false;
+  });
+
+  it("identifies the profile that submitted each report", async () => {
+    mockFetchContentModerationQueue.mockResolvedValue([createQueueItem(1)]);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Reported by @reporter1")).toBeVisible();
   });
 
   it("shows a neutral permission check while profile state is hydrating", () => {

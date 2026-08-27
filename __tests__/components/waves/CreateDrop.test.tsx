@@ -356,6 +356,65 @@ describe("CreateDrop", () => {
     consoleErrorSpy.mockRestore();
   });
 
+  it("accepts the next post after a moderation rejection", async () => {
+    const setToast = jest.fn();
+    commonApiPostMock
+      .mockRejectedValueOnce({
+        status: 422,
+        response: {
+          body: {
+            code: "CONTENT_MODERATION_REJECTED",
+            message: "Blocked by safety check",
+          },
+        },
+      })
+      .mockResolvedValueOnce({ id: "server-drop", wave_id: "1" });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              metrics: { ...wave.metrics, your_drops_count: 1 },
+            }}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: "Couldn't submit this drop.",
+        })
+      )
+    );
+
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    expect(commonApiPostMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: "drops",
+      })
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
   it("gates a first chat message on guidelines until the user agrees", async () => {
     fetchWaveMetadataMock.mockResolvedValue([
       {

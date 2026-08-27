@@ -609,6 +609,23 @@ export const commonApiDelete = async (param: {
   });
 };
 
+export const commonApiDeleteWithResponse = async <T>(param: {
+  endpoint: string;
+  headers?: Record<string, string> | undefined;
+  signal?: AbortSignal | undefined;
+  errorMode?: ApiErrorMode | undefined;
+}): Promise<T> => {
+  const url = buildUrl(param.endpoint);
+
+  return executeApiRequest<T>({
+    url,
+    method: "DELETE",
+    headers: getHeaders(param.headers),
+    signal: param.signal,
+    errorMode: param.errorMode ?? "legacy-string",
+  });
+};
+
 export const commonApiDeleteWithBody = async <
   T,
   U,

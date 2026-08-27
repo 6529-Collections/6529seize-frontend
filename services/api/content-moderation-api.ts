@@ -11,7 +11,7 @@ import type { ApiContentModerationReportWithdrawalResponse } from "@/generated/m
 import type { ApiContentModeratorAccess } from "@/generated/models/ApiContentModeratorAccess";
 import {
   commonApiDelete,
-  commonApiDeleteWithBody,
+  commonApiDeleteWithResponse,
   commonApiFetch,
   commonApiPost,
   commonApiPut,
@@ -63,12 +63,9 @@ export const reportDrop = (
 export const withdrawDropReport = (
   dropId: string
 ): Promise<ApiContentModerationReportWithdrawalResponse> =>
-  commonApiDeleteWithBody<
-    Record<string, never>,
-    ApiContentModerationReportWithdrawalResponse
-  >({
+  commonApiDeleteWithResponse<ApiContentModerationReportWithdrawalResponse>({
     endpoint: `content-moderation/drops/${dropId}/reports/mine`,
-    body: {},
+    errorMode: "structured",
   });
 
 export const fetchContentModeratorAccess =

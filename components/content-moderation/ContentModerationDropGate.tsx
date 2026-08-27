@@ -7,7 +7,6 @@ import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationSta
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useContentModerationVisibility } from "@/hooks/content-moderation/useContentModerationVisibility";
 import { useContentModerationReportStatus } from "@/hooks/content-moderation/useContentModerationReportStatus";
-import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -42,15 +41,15 @@ import {
   type ReactNode,
 } from "react";
 import { ContentModerationDropGateContext } from "./ContentModerationDropGateContext";
+import ContentModerationReportStatusButton from "./ContentModerationReportStatusButton";
+import ReportDropModal from "./ReportDropModal";
 
 interface ContentModerationDropGateProps {
-  readonly drop: Pick<
-    ApiDrop,
-    "id" | "author" | "viewer_context" | "moderation" | "wave" | "created_at"
-  >;
+  readonly drop: ApiDrop;
   readonly children: ReactNode;
   readonly compact?: boolean | undefined;
   readonly presentation?: "default" | "profile-activity" | undefined;
+  readonly preserveGlobalContext?: boolean | undefined;
 }
 
 const AUTHENTICATION_CANCELLED_MESSAGE = "Authentication was cancelled";
@@ -199,6 +198,7 @@ export default function ContentModerationDropGate({
   children,
   compact = false,
   presentation = "default",
+  preserveGlobalContext = false,
 }: ContentModerationDropGateProps) {
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth, setToast } = useAuth();
@@ -206,18 +206,7 @@ export default function ContentModerationDropGate({
   const { visibility, reveal, hideAgain, isRevealed } =
     useContentModerationVisibility(drop);
   const reportStatus = useContentModerationReportStatus(drop);
-  const reportLabel = (() => {
-    if (reportStatus === ApiContentModerationReportStatus.Open) {
-      return t(locale, "contentModeration.report.awaitingReview");
-    }
-    if (reportStatus === ApiContentModerationReportStatus.ResolvedAllowed) {
-      return t(locale, "contentModeration.report.noActionTaken");
-    }
-    if (reportStatus === ApiContentModerationReportStatus.ResolvedRemoved) {
-      return t(locale, "contentModeration.report.contentRemoved");
-    }
-    return null;
-  })();
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [optimisticHiddenState, setOptimisticHiddenState] = useState<
     boolean | undefined
   >(undefined);
@@ -246,10 +235,6 @@ export default function ContentModerationDropGate({
       setOptimisticHiddenState(previous);
     };
   }, []);
-  const gateContext = useMemo(
-    () => ({ setOptimisticHidden }),
-    [setOptimisticHidden]
-  );
   const effectiveVisibility = (() => {
     if (visibility.kind === "global") {
       return visibility;
@@ -268,6 +253,35 @@ export default function ContentModerationDropGate({
     }
     return visibility;
   })();
+  const globalModerationStatus =
+    effectiveVisibility.kind === "global" ? effectiveVisibility.status : null;
+  const openReportDetails = useCallback(() => setIsReportModalOpen(true), []);
+  const gateContext = useMemo(
+    () => ({
+      globalModerationStatus,
+      openReportDetails,
+      reportStatus,
+      setOptimisticHidden,
+    }),
+    [
+      globalModerationStatus,
+      openReportDetails,
+      reportStatus,
+      setOptimisticHidden,
+    ]
+  );
+  const withGateContext = (content: ReactNode) => (
+    <ContentModerationDropGateContext.Provider value={gateContext}>
+      {content}
+      {isReportModalOpen && (
+        <ReportDropModal
+          drop={drop}
+          isOpen
+          onClose={() => setIsReportModalOpen(false)}
+        />
+      )}
+    </ContentModerationDropGateContext.Provider>
+  );
   const unhideMutation = useMutation({
     mutationFn: async () => {
       const { success } = await requestAuth();
@@ -361,47 +375,32 @@ export default function ContentModerationDropGate({
   });
 
   if (visibility.kind === "blocked" && presentation === "profile-activity") {
-    return (
+    return withGateContext(
       <BlockedProfileActivityPresentation
         drop={drop}
         isRevealed={isRevealed}
         onReveal={reveal}
         onHideAgain={hideAgain}
       >
-        <ContentModerationDropGateContext.Provider value={gateContext}>
-          {children}
-        </ContentModerationDropGateContext.Provider>
+        {children}
       </BlockedProfileActivityPresentation>
     );
   }
 
   if (effectiveVisibility.kind === "visible") {
-    return (
-      <ContentModerationDropGateContext.Provider value={gateContext}>
-        {reportLabel ? (
-          <div className="tw-w-full">
-            <p className="tw-mb-0 tw-px-3 tw-pb-0 tw-pt-1 tw-text-xs tw-font-medium tw-text-iron-500">
-              {reportLabel}
-            </p>
-            {children}
-          </div>
-        ) : (
-          children
-        )}
-      </ContentModerationDropGateContext.Provider>
-    );
+    return withGateContext(children);
   }
 
   if (effectiveVisibility.kind === "hidden") {
-    return (
+    return withGateContext(
       <PersonalModerationOverlay
         compact={compact}
         testId="content-moderation-tombstone-hidden"
         controls={
           <>
-            {reportLabel && (
+            {reportStatus !== null && (
               <>
-                <span>{reportLabel}</span>
+                <ContentModerationReportStatusButton compact />
                 <span aria-hidden="true">·</span>
               </>
             )}
@@ -422,9 +421,7 @@ export default function ContentModerationDropGate({
           </>
         }
       >
-        <ContentModerationDropGateContext.Provider value={gateContext}>
-          {children}
-        </ContentModerationDropGateContext.Provider>
+        {children}
       </PersonalModerationOverlay>
     );
   }
@@ -432,7 +429,7 @@ export default function ContentModerationDropGate({
   if (effectiveVisibility.kind === "blocked") {
     const handle = drop.author.handle;
     const profileLabel = handle ? `@${handle}` : "Blocked author";
-    return (
+    return withGateContext(
       <PersonalModerationOverlay
         compact={compact}
         testId="content-moderation-tombstone-blocked"
@@ -477,29 +474,21 @@ export default function ContentModerationDropGate({
           </>
         }
       >
-        <ContentModerationDropGateContext.Provider value={gateContext}>
-          {children}
-        </ContentModerationDropGateContext.Provider>
+        {children}
       </PersonalModerationOverlay>
     );
   }
 
-  const message = (() => {
-    if (reportStatus === ApiContentModerationReportStatus.ResolvedRemoved) {
-      return t(locale, "contentModeration.report.contentRemoved");
-    }
-    if (reportStatus === ApiContentModerationReportStatus.Open) {
-      return t(locale, "contentModeration.report.underReview");
-    }
-    if (
-      effectiveVisibility.status === ApiDropModerationStatus.ModeratorRemoved
-    ) {
-      return t(locale, "contentModeration.tombstone.removed");
-    }
-    return t(locale, "contentModeration.tombstone.quarantined");
-  })();
+  if (preserveGlobalContext) {
+    return withGateContext(children);
+  }
 
-  return (
+  const message =
+    effectiveVisibility.status === ApiDropModerationStatus.ModeratorRemoved
+      ? t(locale, "contentModeration.tombstone.removed")
+      : t(locale, "contentModeration.tombstone.quarantined");
+
+  return withGateContext(
     <div
       className={`tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/80 ${
         compact ? "tw-px-3 tw-py-2" : "tw-my-1 tw-px-4 tw-py-4"

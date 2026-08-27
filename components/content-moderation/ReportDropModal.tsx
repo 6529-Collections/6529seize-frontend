@@ -72,7 +72,7 @@ const getPostActionOptionStateClass = (
   checked: boolean,
   disabled: boolean
 ): string => {
-  if (checked) return "tw-bg-primary-500/5";
+  if (checked) return "tw-bg-primary-500/[0.07]";
   if (disabled) return "";
   return "hover:tw-bg-white/[0.025]";
 };
@@ -149,13 +149,13 @@ function PostActionOption({
 }) {
   return (
     <label
-      className={`tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-p-4 tw-transition-colors ${
+      className={`tw-flex tw-items-start tw-gap-3 tw-rounded-lg tw-p-3 tw-transition-colors ${
         disabled ? "tw-cursor-default tw-opacity-80" : "tw-cursor-pointer"
       } ${getPostActionOptionStateClass(checked, disabled)}`}
     >
       <span
         aria-hidden="true"
-        className={`tw-mt-0.5 tw-flex tw-size-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg ${
+        className={`tw-mt-0.5 tw-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-md ${
           checked
             ? "tw-bg-primary-500/10 tw-text-primary-300"
             : "tw-bg-iron-900 tw-text-iron-400"
@@ -425,12 +425,12 @@ export default function ReportDropModal({
         setDropReportStatusOverride(connectedProfile.id, drop.id, null);
       }
       setGlobalDropModerationOverride(drop.id, response.drop_status);
-      setConfirmWithdraw(false);
       void invalidateContentModerationPresentation(queryClient);
       setToast({
         message: t(locale, "contentModeration.report.withdrawSuccess"),
         type: "success",
       });
+      closeModal();
     },
     onError: (error) => {
       if (isAuthenticationCancelled(error)) {
@@ -457,18 +457,27 @@ export default function ReportDropModal({
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80" />
       <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center sm:tw-items-center">
-          <DialogPanel className="tw-w-full tw-max-w-3xl tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl sm:tw-p-7">
+          <DialogPanel className="tw-w-full tw-max-w-4xl tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl sm:tw-p-7">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
               <div>
                 <DialogTitle className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-xl tw-font-semibold tw-text-iron-50">
                   <FlagIcon aria-hidden="true" className="tw-size-5" />
-                  <span>{t(locale, "contentModeration.report.title")}</span>
+                  <span>
+                    {confirmWithdraw
+                      ? t(locale, "contentModeration.report.withdraw")
+                      : t(locale, "contentModeration.report.title")}
+                  </span>
                 </DialogTitle>
                 <p
                   id={descriptionId}
                   className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400"
                 >
-                  {t(locale, "contentModeration.report.description")}
+                  {t(
+                    locale,
+                    confirmWithdraw
+                      ? "contentModeration.report.withdrawConfirm"
+                      : "contentModeration.report.description"
+                  )}
                 </p>
               </div>
               <button
@@ -482,174 +491,170 @@ export default function ReportDropModal({
               </button>
             </div>
 
-            <form
-              className="tw-mt-6 tw-space-y-5"
-              onSubmit={(event) => {
-                event.preventDefault();
-                mutation.mutate();
-              }}
-            >
-              <fieldset
-                disabled={mutation.isPending || withdrawMutation.isPending}
-                className="tw-m-0 tw-space-y-2 tw-border-0 tw-p-0"
-              >
-                <legend className="tw-sr-only">
-                  {t(locale, "contentModeration.report.actionsLegend")}
-                </legend>
-                <div className="tw-rounded-xl tw-bg-iron-900/35">
-                  <PostActionOption
-                    checked={reportIsOpen || reportPost}
-                    description={t(
-                      locale,
-                      "contentModeration.report.reportDescription"
-                    )}
-                    disabled={reportIsOpen}
-                    icon={<FlagIcon className="tw-size-4" />}
-                    label={t(locale, "contentModeration.report.reportLabel")}
-                    onChange={setReportPost}
-                    status={reportOptionStatus}
-                  />
-
-                  {reportPost && (
-                    <div className="tw-space-y-4 tw-pb-4 tw-pl-16 tw-pr-4">
-                      <label className="tw-block">
-                        <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                          {t(locale, "contentModeration.report.reasonLabel")}
-                        </span>
-                        <select
-                          value={reason}
-                          onChange={(event) =>
-                            setReason(
-                              event.target
-                                .value as ApiContentModerationReportReason
-                            )
-                          }
-                          className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                        >
-                          {REASONS.map((item) => (
-                            <option key={item.value} value={item.value}>
-                              {t(locale, item.label)}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-
-                      <label className="tw-block">
-                        <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                          {t(locale, "contentModeration.report.notesLabel")}
-                        </span>
-                        <textarea
-                          value={notes}
-                          onChange={(event) => setNotes(event.target.value)}
-                          maxLength={1000}
-                          rows={4}
-                          placeholder={t(
-                            locale,
-                            "contentModeration.report.notesPlaceholder"
-                          )}
-                          className="tw-mt-2 tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                        />
-                      </label>
-                    </div>
+            {confirmWithdraw ? (
+              <div className="tw-mt-7 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setConfirmWithdraw(false)}
+                  disabled={withdrawMutation.isPending}
+                >
+                  {t(locale, "contentModeration.report.cancel")}
+                </Button>
+                <button
+                  type="button"
+                  disabled={withdrawMutation.isPending}
+                  onClick={() => withdrawMutation.mutate()}
+                  className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-red/50 tw-bg-red/10 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-red hover:tw-bg-red/15 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-red disabled:tw-cursor-default disabled:tw-opacity-50"
+                >
+                  {t(
+                    locale,
+                    withdrawMutation.isPending
+                      ? "contentModeration.report.withdrawing"
+                      : "contentModeration.report.withdraw"
                   )}
-                  {reportIsOpen && (
-                    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-pb-4 tw-pl-16 tw-pr-4">
-                      {confirmWithdraw ? (
-                        <>
-                          <span className="tw-text-sm tw-text-iron-300">
-                            {t(
-                              locale,
-                              "contentModeration.report.withdrawConfirm"
-                            )}
+                </button>
+              </div>
+            ) : (
+              <form
+                className="tw-mt-6 tw-space-y-5"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  mutation.mutate();
+                }}
+              >
+                <fieldset
+                  disabled={mutation.isPending || withdrawMutation.isPending}
+                  className="tw-m-0 tw-space-y-2 tw-border-0 tw-p-0"
+                >
+                  <legend className="tw-sr-only">
+                    {t(locale, "contentModeration.report.actionsLegend")}
+                  </legend>
+                  <div className="tw-space-y-1">
+                    <PostActionOption
+                      checked={reportIsOpen || reportPost}
+                      description={t(
+                        locale,
+                        "contentModeration.report.reportDescription"
+                      )}
+                      disabled={reportIsOpen}
+                      icon={<FlagIcon className="tw-size-4" />}
+                      label={t(locale, "contentModeration.report.reportLabel")}
+                      onChange={setReportPost}
+                      status={reportOptionStatus}
+                    />
+
+                    {reportPost && (
+                      <div className="tw-space-y-4 tw-pb-4 tw-pl-16 tw-pr-4">
+                        <label className="tw-block">
+                          <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                            {t(locale, "contentModeration.report.reasonLabel")}
                           </span>
-                          <button
-                            type="button"
-                            className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-red/50 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-red hover:tw-bg-red/10"
-                            onClick={() => withdrawMutation.mutate()}
+                          <select
+                            value={reason}
+                            onChange={(event) =>
+                              setReason(
+                                event.target
+                                  .value as ApiContentModerationReportReason
+                              )
+                            }
+                            className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                           >
-                            {t(locale, "contentModeration.report.withdraw")}
-                          </button>
-                          <button
-                            type="button"
-                            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white"
-                            onClick={() => setConfirmWithdraw(false)}
-                          >
-                            {t(locale, "contentModeration.report.keepReport")}
-                          </button>
-                        </>
-                      ) : (
+                            {REASONS.map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {t(locale, item.label)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <label className="tw-block">
+                          <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
+                            {t(locale, "contentModeration.report.notesLabel")}
+                          </span>
+                          <textarea
+                            value={notes}
+                            onChange={(event) => setNotes(event.target.value)}
+                            maxLength={1000}
+                            rows={4}
+                            placeholder={t(
+                              locale,
+                              "contentModeration.report.notesPlaceholder"
+                            )}
+                            className="tw-mt-2 tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                          />
+                        </label>
+                      </div>
+                    )}
+                    {reportIsOpen && (
+                      <div className="tw-pb-2 tw-pl-14 tw-pr-3">
                         <button
                           type="button"
-                          className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white"
+                          className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-red hover:tw-text-red/80 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-red"
                           onClick={() => setConfirmWithdraw(true)}
                         >
                           {t(locale, "contentModeration.report.withdraw")}
                         </button>
+                      </div>
+                    )}
+                    <PostActionOption
+                      checked={effectiveHide}
+                      description={t(
+                        locale,
+                        "contentModeration.report.hideDescription"
                       )}
-                    </div>
-                  )}
-                </div>
+                      disabled={reportPost}
+                      icon={<EyeSlashIcon className="tw-size-4" />}
+                      label={t(locale, "contentModeration.report.hideLabel")}
+                      onChange={setHidePost}
+                      status={
+                        reportPost
+                          ? t(
+                              locale,
+                              "contentModeration.report.includedWithReport"
+                            )
+                          : undefined
+                      }
+                    />
+                    <PostActionOption
+                      checked={blockAuthor}
+                      description={t(
+                        locale,
+                        "contentModeration.report.blockDescription"
+                      )}
+                      icon={<NoSymbolIcon className="tw-size-4" />}
+                      label={t(locale, "contentModeration.report.blockLabel")}
+                      onChange={setBlockAuthor}
+                    />
+                  </div>
+                </fieldset>
 
-                <div className="tw-rounded-xl tw-bg-iron-900/35">
-                  <PostActionOption
-                    checked={effectiveHide}
-                    description={t(
+                <div className="tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    onClick={closeModal}
+                    disabled={mutation.isPending || withdrawMutation.isPending}
+                  >
+                    {t(locale, "contentModeration.report.cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    loading={mutation.isPending}
+                    disabled={!hasSelection}
+                    hideChildrenWhenLoading
+                  >
+                    {t(
                       locale,
-                      "contentModeration.report.hideDescription"
-                    )}
-                    disabled={reportPost}
-                    icon={<EyeSlashIcon className="tw-size-4" />}
-                    label={t(locale, "contentModeration.report.hideLabel")}
-                    onChange={setHidePost}
-                    status={
                       reportPost
-                        ? t(
-                            locale,
-                            "contentModeration.report.includedWithReport"
-                          )
-                        : undefined
-                    }
-                  />
-                </div>
-                <div className="tw-rounded-xl tw-bg-iron-900/35">
-                  <PostActionOption
-                    checked={blockAuthor}
-                    description={t(
-                      locale,
-                      "contentModeration.report.blockDescription"
+                        ? "contentModeration.report.submitReport"
+                        : "contentModeration.report.submitActions"
                     )}
-                    icon={<NoSymbolIcon className="tw-size-4" />}
-                    label={t(locale, "contentModeration.report.blockLabel")}
-                    onChange={setBlockAuthor}
-                  />
+                  </Button>
                 </div>
-              </fieldset>
-
-              <div className="tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={closeModal}
-                  disabled={mutation.isPending || withdrawMutation.isPending}
-                >
-                  {t(locale, "contentModeration.report.cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  size="lg"
-                  loading={mutation.isPending}
-                  disabled={!hasSelection}
-                  hideChildrenWhenLoading
-                >
-                  {t(
-                    locale,
-                    reportPost
-                      ? "contentModeration.report.submitReport"
-                      : "contentModeration.report.submitActions"
-                  )}
-                </Button>
-              </div>
-            </form>
+              </form>
+            )}
           </DialogPanel>
         </div>
       </div>

@@ -69,13 +69,10 @@ jest.mock(
   "@/components/waves/drops/WaveDropMobileMenuReactionPicker",
   () => () => <div data-testid="reaction-picker" />
 );
-jest.mock(
-  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
-  () => ({
-    __esModule: true,
-    default: (props: any) => mobileWrapperMock(props),
-  })
-);
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
+  __esModule: true,
+  default: (props: any) => mobileWrapperMock(props),
+}));
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({

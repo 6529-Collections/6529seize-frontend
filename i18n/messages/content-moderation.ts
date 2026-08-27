@@ -37,12 +37,15 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.submitActions": "Apply actions",
   "contentModeration.report.includedWithReport": "Included with report",
   "contentModeration.report.awaitingReview": "Reported · Awaiting review",
+  "contentModeration.report.reportedShort": "Reported",
+  "contentModeration.report.reviewedShort": "Reviewed",
   "contentModeration.report.underReview": "Reported · Under review",
   "contentModeration.report.noActionTaken": "Reviewed · No action taken",
   "contentModeration.report.contentRemoved": "Reviewed · Content removed",
   "contentModeration.report.withdraw": "Withdraw report",
   "contentModeration.report.withdrawConfirm":
     "Withdraw this report? The post will stay hidden.",
+  "contentModeration.report.withdrawing": "Withdrawing…",
   "contentModeration.report.keepReport": "Keep report",
   "contentModeration.report.withdrawSuccess": "Report withdrawn.",
   "contentModeration.report.withdrawError": "Couldn't withdraw this report.",
@@ -67,8 +70,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.unblock.error": "Couldn't unblock this profile.",
   "contentModeration.tombstone.quarantined":
     "This post is unavailable while it is being checked.",
-  "contentModeration.tombstone.removed":
-    "This post was removed by a moderator.",
+  "contentModeration.tombstone.removed": "Content removed by moderators",
   "contentModeration.tombstone.blockedShort": "Blocked",
   "contentModeration.tombstone.hidden": "Hidden",
   "contentModeration.tooltips.revealHidden": "Show temporarily",
@@ -141,6 +143,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.reportCount.one": "{count} report",
   "contentModeration.moderator.reportCount.many": "{count} reports",
   "contentModeration.moderator.reportedFor": "Reported for {reason}",
+  "contentModeration.moderator.reportedBy": "Reported by {profile}",
   "contentModeration.moderator.reportedAt": "Reported {date}",
   "contentModeration.moderator.currentState": "State: {state}",
   "contentModeration.moderator.parentContext": "Reply context",

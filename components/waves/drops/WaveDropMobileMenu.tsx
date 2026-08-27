@@ -492,7 +492,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
         {activeView === "actions" ? (
           <div className="tw-px-4 sm:tw-px-6">
             <div
-              className={`tw-grid tw-grid-cols-1 tw-gap-y-1 [&>button]:tw-min-h-12 [&>button]:tw-gap-x-3 [&>button]:tw-rounded-lg [&>button]:tw-px-3.5 [&>button]:tw-py-2.5 [&>button>span]:tw-text-base [&>button>span]:tw-font-medium ${
+              className={`tw-grid tw-grid-cols-1 tw-gap-y-1 [&>button>span]:tw-text-base [&>button>span]:tw-font-medium [&>button]:tw-min-h-12 [&>button]:tw-gap-x-3 [&>button]:tw-rounded-lg [&>button]:tw-px-3.5 [&>button]:tw-py-2.5 ${
                 longPressTriggered && "tw-select-none"
               }`}
             >

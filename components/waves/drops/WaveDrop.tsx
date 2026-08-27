@@ -1,6 +1,7 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -11,7 +12,6 @@ import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
-import { useEditingDrop } from "@/contexts/EditingDropContext";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
@@ -58,8 +58,9 @@ import {
   shouldShowGroupedDropTimestamp,
 } from "./WaveDrop.helpers";
 import type { WaveDropProps } from "./WaveDrop.types";
-import { DropClientDeliveryState } from "@/helpers/waves/drop.helpers";
 import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
+import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
+
 const WaveDropInner = ({
   drop,
   previousDrop,
@@ -115,9 +116,8 @@ const WaveDropInner = ({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
-  const isModerationRejected =
-    drop.clientDeliveryState === DropClientDeliveryState.MODERATION_REJECTED;
-  const effectiveShowInteractions = showInteractions && !isModerationRejected;
+  const { isModerationRejected, effectiveShowInteractions } =
+    useWaveDropModerationPresentation(drop, showInteractions);
 
   const shouldGroupWithPreviousDrop = shouldGroupCurrentDrop({
     isDrop,

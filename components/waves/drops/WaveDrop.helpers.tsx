@@ -1,5 +1,7 @@
 "use client";
 
+import ContentModerationDropBody from "@/components/content-moderation/ContentModerationDropBody";
+import ContentModerationReportStatusButton from "@/components/content-moderation/ContentModerationReportStatusButton";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -727,28 +729,31 @@ const getContentBlock = ({
             isProfileView,
           })} ${isLocallyFailed ? "tw-opacity-75" : ""}`.trim()}
         >
-          <WaveDropContent
-            drop={drop}
-            activePartIndex={activePartIndex}
-            setActivePartIndex={setActivePartIndex}
-            onLongPress={handleLongPress}
-            onDropContentClick={onDropContentClick}
-            onQuoteClick={onQuoteClick}
-            setLongPressTriggered={setLongPressTriggered}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={handleEditSave}
-            onCancel={handleEditCancel}
-            hasTouch={allowLongPress}
-            onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
-            mediaImageScale={mediaImageScale}
-            fullWidthMedia={fullWidthMedia}
-            fullWidthLinkPreviews={fullWidthLinkPreviews}
-            embedPath={embedPath}
-            quotePath={quotePath}
-            embedDepth={embedDepth}
-            maxEmbedDepth={maxEmbedDepth}
-          />
+          <ContentModerationReportStatusButton />
+          <ContentModerationDropBody>
+            <WaveDropContent
+              drop={drop}
+              activePartIndex={activePartIndex}
+              setActivePartIndex={setActivePartIndex}
+              onLongPress={handleLongPress}
+              onDropContentClick={onDropContentClick}
+              onQuoteClick={onQuoteClick}
+              setLongPressTriggered={setLongPressTriggered}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={handleEditSave}
+              onCancel={handleEditCancel}
+              hasTouch={allowLongPress}
+              onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+              mediaImageScale={mediaImageScale}
+              fullWidthMedia={fullWidthMedia}
+              fullWidthLinkPreviews={fullWidthLinkPreviews}
+              embedPath={embedPath}
+              quotePath={quotePath}
+              embedDepth={embedDepth}
+              maxEmbedDepth={maxEmbedDepth}
+            />
+          </ContentModerationDropBody>
         </div>
       </div>
     </div>
