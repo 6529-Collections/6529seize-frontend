@@ -73,9 +73,7 @@ describe("mention alias submission", () => {
         setMetadataOpenState: jest.fn(),
         setShowOptionsState: jest.fn(),
         resetIdentitySubmissionState: jest.fn(),
-        shouldAnimateOptionsRef: { current: false },
         closeOnNextInputRef: { current: false },
-        shouldCollapseOptionsAfterMarkdownSyncRef: { current: false },
       })
     );
     const editor = createEditor({

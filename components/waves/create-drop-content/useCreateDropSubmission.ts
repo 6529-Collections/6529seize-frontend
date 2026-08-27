@@ -199,19 +199,16 @@ const updateFocusAfterAcceptedSubmit = ({
   getMarkdown,
   shouldKeepChatFocused,
   isApp,
-  shouldCollapseOptionsAfterMarkdownSyncRef,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
 }: {
   readonly getMarkdown: string | null;
   readonly shouldKeepChatFocused: boolean;
   readonly isApp: boolean;
-  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
   if (getMarkdown?.length) {
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     createDropInputRef.current?.clearEditorState();
   }
 
@@ -264,6 +261,7 @@ export const useCreateDropSubmission = ({
   activeDrop,
   wave,
   isDropMode,
+  isStormMode,
   canExitDropMode,
   isChatBlockedBySlowMode,
   isChatLinksRestrictionActive,
@@ -306,11 +304,11 @@ export const useCreateDropSubmission = ({
   setMetadataOpenState,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
-  shouldCollapseOptionsAfterMarkdownSyncRef,
 }: {
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
   readonly isDropMode: boolean;
+  readonly isStormMode: boolean;
   readonly canExitDropMode: boolean;
   readonly isChatBlockedBySlowMode: boolean;
   readonly isChatLinksRestrictionActive: boolean;
@@ -363,7 +361,6 @@ export const useCreateDropSubmission = ({
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
-  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
   const {
     locale,
@@ -664,7 +661,6 @@ export const useCreateDropSubmission = ({
         getMarkdown,
         shouldKeepChatFocused,
         isApp,
-        shouldCollapseOptionsAfterMarkdownSyncRef,
         createDropInputRef,
         shouldRefocusAfterChatSubmitRef,
       });
@@ -672,6 +668,7 @@ export const useCreateDropSubmission = ({
       if (isIdentityPickerAllowed) {
         disableIdentityPickerAutoOpen();
       }
+      setIsStormMode(false);
       refreshState();
     } catch (error) {
       setToast({
@@ -742,7 +739,7 @@ export const useCreateDropSubmission = ({
     const hasCurrentContent =
       (submissionMarkdown?.trim().length ?? 0) > 0 || files.length > 0;
 
-    if (hasPartsInDrop && hasCurrentContent) {
+    if ((isStormMode || hasPartsInDrop) && hasCurrentContent) {
       finalizeAndAddDropPart(submissionMarkdown);
       return;
     }

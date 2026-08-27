@@ -1,5 +1,7 @@
 {
   "waves.stormComposer.draftTitle": "Storm-Entwurf",
+  "waves.stormComposer.emptyDraft": "Deine Storm-Teile werden hier angezeigt.",
+  "waves.stormComposer.closeDraft": "Schließen",
   "waves.stormComposer.privateDraftHint": "Nur du kannst ihn bis zur Veröffentlichung sehen.",
   "waves.stormComposer.partsCountOne": "{count} Teil",
   "waves.stormComposer.partsCountOther": "{count} Teile",
